@@ -1,6 +1,6 @@
 # the wallet's three grammars: register-difference matrix (written before any code)
 
-date 2026-09-26 · seat Claude Code (Opus 5.5) · branch `claude-LoVis/wallet-three-grammars-2026-09-26` off `origin/main@8dfb68d81`
+date 2026-09-26 · seat Claude Code · branch `claude-LoVis/wallet-three-grammars-2026-09-26` off `origin/main@8dfb68d81`
 
 founder, 2026-09-26, on the #232 wallet: "made all three same exact UX with just changes in the color of the button. terrible."
 mission as relayed: restore three genuinely distinct registers. Shared data, state and accessibility contract, with a different presentation grammar for each. The matrix comes before the code.

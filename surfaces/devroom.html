@@ -98,9 +98,276 @@ footer{line-height:1.9}
 body:is([data-reg="bee"],[data-reg="raver"]) :is(.law,.art .meta,.art .chips span,summary,.art-body,.art-body h4,.finder .who,.finder .what,table,.never,footer,header p,.art .sym,.art h3,section h2){font-size:14px}
 body:is([data-reg="bee"],[data-reg="raver"]) .badge{font-size:13px}
 html body[data-reg="bee"] :is(.law,.finder .what,.art-body,.never,.art .sym){font-size:16px;line-height:1.75}
+/* ── ETERNAL FRONT (docs/design/eternal) — three separate products in one surface. Every value is a
+   skaists token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex,
+   size or corner; sizes carry a token fallback for servers that never deliver the sheet. Measured
+   by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{display:block;max-width:640px;margin:0 auto var(--sk-s2,12px);padding:0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;overflow-wrap:break-word}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+body[data-reg="bee"] #eternal{color-scheme:light}
+body[data-reg="raver"] #eternal,body[data-reg="cypherpunk"] #eternal{color-scheme:dark}
+#eternal :where(div,span,p,h2,h3,b,i,small,code,pre,ol,ul,li,table,thead,tbody,tr,th,td,label,input,textarea,button,a){margin:0;padding:0;box-sizing:border-box;letter-spacing:normal;text-transform:none;text-shadow:none}
+#eternal :where(button){background:none;border:0;border-radius:0;font:inherit;color:inherit;cursor:pointer;min-height:0;box-shadow:none;transition:none;opacity:1}
+#eternal :where(a){color:var(--sk-link)}
+#eternal :where(i){font-style:normal}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-archive-h{max-width:640px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:left;text-transform:none}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+
+/* NEW BEE — a calm room: one question at a time, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:first-child{border-top-left-radius:var(--sk-radius-xl,18px);border-top-right-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-rows>:last-child{border-bottom:0;border-bottom-left-radius:var(--sk-radius-xl,18px);border-bottom-right-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:48%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-pressed="true"],#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] small,#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-disc{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);flex:none}
+#eternal .et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)}
+#eternal .et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);padding:var(--sk-s3,18px)}
+#eternal .et-b-card h3{margin-bottom:var(--sk-s1,6px);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2,12px) auto 0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-center{text-align:center}
+#eternal .et-b-check{display:flex;align-items:flex-start;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);cursor:pointer;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-check input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);flex:none;accent-color:var(--sk-primary)}
+#eternal .et-b-check small{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:block;width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal textarea.et-b-field{min-height:96px;resize:vertical}
+
+/* RAVER — the data is the art; the gesture is physical; motion is slow, pausable, still when asked */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3,18px) auto var(--sk-s1,6px);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:var(--sk-s1,6px) 0 var(--sk-s2,12px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm,6px)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card .sub{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:72px;padding:var(--sk-s2,12px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 14px/1.25 var(--sk-font-raver-display);text-align:center;opacity:.78}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-hold{position:absolute;inset:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-hold b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-hold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-hold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin-top:var(--sk-s2,12px);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-out{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s2,12px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);color:var(--sk-biomass);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);margin:var(--sk-s1,6px) auto 0;padding:0 var(--sk-s2,12px);color:var(--sk-link);font:600 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;text-align:center}
+@media (prefers-reduced-motion:reduce){#eternal *{animation:none!important;transition:none!important}}
+body[data-motion-paused] #eternal *{animation-play-state:paused!important}
+
+/* CYPHERPUNK — the instrument, complete at first paint: every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips .on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips .ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips .ai{border-color:var(--sk-ai);color:var(--sk-ai)}
+#eternal .et-c-guard{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:left;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td,#eternal .et-c-tab tr[aria-pressed="true"] td,#eternal .et-c-tab tr[aria-expanded="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.sub td{height:auto;padding-top:0;color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab .st-ok{color:var(--sk-verified)}
+#eternal .et-c-tab .st-g{color:var(--sk-guard)}
+#eternal .et-c-tab .st-i{color:var(--sk-info)}
+#eternal .et-c-tab .st-ai{color:var(--sk-ai)}
+#eternal .et-c-tab .st-m{color:var(--sk-ink-mut)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:96px;padding:var(--sk-s2,12px);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv .no{color:var(--sk-info)}
+#eternal .et-c-kv .yes{color:var(--sk-verified)}
+#eternal .et-c-kv .sig{color:var(--sk-you)}
+#eternal .et-c-kv .g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;min-width:var(--sk-control-min,44px);padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-note{margin-top:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{display:block;width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.45 var(--sk-font-mono)}
+
+/* the dev room's own front pieces: the symptom card (bee), the honey river of findings (raver) */
+#eternal .et-b-row.et-b-sym{align-items:flex-start;padding-top:var(--sk-s2,12px);padding-bottom:var(--sk-s2,12px)}
+#eternal .et-b-sym span em{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-bee-sans);font-style:normal;color:var(--sk-ink-mut)}
+#eternal .et-b-sym small{padding-top:2px}
+#eternal .et-b-card .by{margin-top:var(--sk-s1,6px);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .rv-lane{fill:none;stroke:var(--sk-line);stroke-width:1;stroke-dasharray:3 5}
+#eternal .rv-l{fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .rv-n{fill:var(--sk-ink-soft);font:400 14px/1.25 var(--sk-font-raver-body)}
+#eternal .rv-slot{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:1.2;stroke-dasharray:4 4}
+#eternal .rv-find .rv-c{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}
+#eternal .rv-draft .rv-c{fill:var(--sk-ai);stroke:var(--sk-ai)}
+#eternal .rv-cite .rv-c{fill:var(--sk-biomass);stroke:var(--sk-biomass)}
+#eternal .rv-t{fill:var(--sk-bg);font:700 14px/1.25 var(--sk-font-raver-display);pointer-events:none}
+#eternal [data-et-cell].sel .rv-c{stroke:var(--sk-you);stroke-width:3}
+#eternal .rv-gate{fill:var(--sk-guard-wash);stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:5 4}
+#eternal .rv-gt{fill:var(--sk-guard);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .rv-drop{fill:var(--sk-sovereign-strong);opacity:.9;animation:et-drip 5s ease-in-out infinite}
+@keyframes et-drip{0%{cy:84px;opacity:0}20%{opacity:.9}80%{opacity:.9}100%{cy:116px;opacity:0}}
+#eternal .lg-find{background:var(--sk-sovereign)}
+#eternal .lg-draft{background:var(--sk-ai)}
+#eternal .lg-empty{border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .lg-gate{background:var(--sk-guard-wash);border:1.5px dashed var(--sk-guard)}
+#eternal .et-c-cmd{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);white-space:pre-wrap;overflow-wrap:anywhere;font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+
+/* ── THE WHOLE DEV ROOM, dressed per register: the page's own variables and its semantic five
+   (harm solution value system science) mapped onto skaists. The hero caption keeps its uppercase
+   and size (e2e/design-acceptance.mjs D4 asserts them), and the headline stays gradient-clipped. ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--cyan:var(--sk-ai);--gold:var(--sk-you);--violet:var(--sk-sovereign);--leaf:var(--sk-verified);--amber:var(--sk-guard);--sem-harm:var(--sk-guard);--sem-solution:var(--sk-verified);--sem-value:var(--sk-you);--sem-system:var(--sk-ai);--sem-science:var(--sk-sovereign);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-ai);--gold:var(--sk-you);--violet:var(--sk-sovereign-soft);--leaf:var(--sk-verified);--amber:var(--sk-guard);--sem-harm:var(--sk-guard);--sem-solution:var(--sk-verified);--sem-value:var(--sk-you);--sem-system:var(--sk-ai);--sem-science:var(--sk-sovereign-soft);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-ai);--gold:var(--sk-ai);--violet:var(--sk-guard);--leaf:var(--sk-verified);--amber:var(--sk-guard);--sem-harm:var(--sk-guard);--sem-solution:var(--sk-verified);--sem-value:var(--sk-ai);--sem-system:var(--sk-ai);--sem-science:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg] section:not(#eternal){background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="cypherpunk"] section:not(#eternal){border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] :is(.art,.pstat,.finder){background:var(--sk-bg);border-color:var(--sk-line);border-radius:var(--sk-radius,12px)}
+body[data-reg] .pstat.hero{background:var(--sk-verified-wash);border-color:var(--sk-verified)}
+body[data-reg] .art-body pre{background:var(--sk-bg-well);border-color:var(--sk-line);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .never{background:var(--sk-guard-wash);border-color:var(--sk-guard);border-radius:var(--sk-radius,12px)}
+body[data-reg] :is(.badge.leaf){border-color:var(--sk-verified)}
+body[data-reg] :is(.badge.amber,.art .chips span){border-color:var(--sk-guard)}
+body[data-reg] .badge{border-radius:4px}
+body[data-reg="bee"] #pipe{background:var(--sk-ink);border-color:var(--sk-line);border-radius:var(--sk-radius,12px)}
+body[data-reg]:not([data-reg="bee"]) #pipe{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius,12px)}
+body[data-reg="bee"] h1{font-family:var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg="raver"] h1{font-family:var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] h1{font-family:var(--sk-font-mono);letter-spacing:normal}
+/* the stat row on the scale; the hero caption alone keeps its 10 px capitals (D4, a pending founder decision) */
+body[data-reg="bee"] .pstat .n{font:400 28px/1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .pstat.hero .n{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .pstat .n{font:700 30px/1 var(--sk-font-raver-display)}
+body[data-reg="raver"] .pstat.hero .n{font:700 60px/.95 var(--sk-font-raver-display)}
+body[data-reg="cypherpunk"] .pstat .n{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .pstat.hero .n{font:400 28px/1.1 var(--sk-font-mono)}
+body[data-reg]:not([data-reg="cypherpunk"]) .pstat:not(.hero) .l{font-size:14px}
+body[data-reg="cypherpunk"] .pstat:not(.hero) .l{font-size:12px}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the room's own articles, finders ledger, NEEDS chips, procedures and its
+     hand-synced counts #s-find #s-draft #s-cite #s-sub, read from the page's own DOM) drives all
+     three. The one action is reading: every "open" unfolds the article's own <details> below. The
+     room never queries a network and nothing is submitted; no front claims otherwise. -->
+<section id="eternal" aria-label="builders' findings, written for strangers">
+
+  <!-- NEW BEE — a calm room: the three walls in the words you would search for, one card, one action -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark">the builders' room</div>
+      <h2 class="et-b-h" data-etk="et.devroom.b.h">someone hit this wall before you</h2>
+      <p class="et-b-lede" data-etk="et.devroom.b.lede">problems people ran into while running storage software, written up so the next person can fix them. each one starts with what you would notice.</p>
+      <div class="et-b-guard"><svg class="et-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6c3-1.5 6-1.5 9 0v13c-3-1.5-6-1.5-9 0z"/><path d="M21 6c-3-1.5-6-1.5-9 0v13c3-1.5 6-1.5 9 0z"/></svg><span data-etk="et.devroom.b.guard">nothing here is sent anywhere. it is a reading room.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-more" data-etk="et.devroom.b.reading">opening the room…</div></div>
+      <div class="et-b-card" id="etBeeCard" aria-live="polite"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.devroom.b.go">read the full write-up</button>
+        <button type="button" class="et-b-link" id="etBeeWho" data-etk="et.devroom.b.who">who found these</button>
+        <p class="et-b-foot" id="etBeeFoot"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the honey river: findings drip into write-ups; the cited row and the gate still wait -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.devroom.r.h">the honey river</h2><span class="et-r-hint" id="etRaverHint"></span></div>
+    <svg class="et-r-art" id="etArt" viewBox="0 0 360 380" role="group" aria-label="findings flowing into write-ups, citations and the gate"></svg>
+    <div class="et-r-legend"><span><i class="lg-find"></i><span data-etk="et.devroom.r.lgFind">a finder</span></span><span><i class="lg-draft"></i><span data-etk="et.devroom.r.lgDraft">a write-up</span></span><span><i class="lg-empty"></i><span data-etk="et.devroom.r.lgEmpty">not yet</span></span><span><i class="lg-gate"></i><span data-etk="et.devroom.r.lgGate">the gate</span></span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo" data-etk="et.devroom.r.go">open the write-up</button>
+    <button type="button" class="et-r-ghost" id="etMotion" data-etk="et.devroom.r.pause">pause the motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the pipeline, the articles, the procedure you can run, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etCyPath">bnr://devroom/docs/wiki</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-etk="et.devroom.c.guard">named gap: raw thread outputs not in the repo yet</span><b data-etk="et.devroom.c.guardB">articles rest on landed thresholds + credit</b></div>
+    <h3 class="et-c-h" data-etk="et.devroom.c.pipeH">pipeline · findings → the gate</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-etk="et.devroom.c.artH">articles · symptom first</h3>
+    <table class="et-c-tab"><colgroup><col style="width:11%"><col><col style="width:32%"><col style="width:13%"></colgroup><thead><tr><th>#</th><th>symptom</th><th>finder</th><th>needs</th></tr></thead><tbody id="etArts"></tbody></table>
+    <h3 class="et-c-h" id="etCyProcH">procedure</h3>
+    <ol class="et-c-pipe" id="etProc"></ol>
+    <div class="et-c-cmd" id="etCmd"></div>
+    <button type="button" class="et-c-primary" id="etCyGo">open the article</button>
+    <h3 class="et-c-h" data-etk="et.devroom.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.devroom.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li data-etk="et.devroom.c.v1">docs/wiki/ in the repo is the source of record; this page is a dated snapshot</li><li data-etk="et.devroom.c.v2">run the procedure above on your own machine; every threshold carries its date</li><li data-etk="et.devroom.c.v3">devtools · network · this page makes no request of its own</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/docs/wiki" target="_blank" rel="noopener noreferrer" aria-label="docs/wiki in the repo (opens in a new tab)" data-etk="et.devroom.c.wiki">docs/wiki/ ↗</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/devroom.html" target="_blank" rel="noopener noreferrer" aria-label="fork the template (opens in a new tab)" data-etk="et.devroom.c.fork">fork the template ↗</a>
+    </div>
+    <p class="et-c-note" data-etk="et.devroom.c.note">↗ opens a new tab · credit is not a citation</p>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.devroom.archive">the whole dev room</h2>
+
 <header>
   <h1>🛠 the Autonomi builders dev room</h1>
   <p>the pre-wiki stage — where the community's diagnostic findings (a crawling node, an
@@ -355,7 +622,8 @@ from the Beehive Nature Relay community diagnostics of 2026-08 (AntTP findings b
 var cv=document.getElementById('pipe'), ctx=cv.getContext('2d');
 var REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function fit(){ var w=cv.clientWidth||860; cv.width=w; cv.height=190; }
-fit(); window.addEventListener('resize',fit);
+/* a resize clears the canvas: the still frame is redrawn for reduced-motion visitors (it used to vanish) */
+fit(); window.addEventListener('resize',function(){ fit(); if(REDUCED) draw(0); });
 var STAGES=[{x:.06,l:'FINDINGS',c:'#FFD700'},{x:.34,l:'DRAFTED',c:'#00E5FF'},{x:.62,l:'CITED',c:'#7ddf8f'},{x:.90,l:'SOPHIA GATE',c:'#c9a0ff'}];
 function hex(x,y,r){ ctx.beginPath(); for(var i=0;i<6;i++){ var a=Math.PI/3*i-Math.PI/6; var px=x+r*Math.cos(a), py=y+r*Math.sin(a); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.closePath(); }
 function draw(t){
@@ -380,7 +648,8 @@ function draw(t){
        crosses the gate — the animation must not claim more progress than the
        counters above it do */
     var prog=(t*c.v)%1;
-    var px=(STAGES[0].p+(STAGES[2].p-STAGES[0].p)*prog)*W;
+    /* stages carry .x (a .p read gave NaN, so no cell was ever drawn); the travel ends at DRAFTED */
+    var px=(STAGES[0].x+(STAGES[1].x-STAGES[0].x)*prog)*W;
     var y=H*.72+Math.sin(t/700+c.r)*6;
     var pulse=.55+.45*Math.sin(t/500+c.r);
     hex(px,y,c.r); ctx.strokeStyle='rgba(0,229,255,'+(0.35+0.4*pulse)+')'; ctx.lineWidth=1; ctx.stroke();
@@ -391,6 +660,140 @@ function draw(t){
 }
 if(REDUCED){ draw(0); }
 else{ (function loop(t){ draw(t||0); requestAnimationFrame(loop); })(0); }
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the room's
+   own DOM: its hand-synced counts (#s-find #s-draft #s-cite #s-sub), its articles (.art: symptom,
+   meta, NEEDS chips, procedure headings and commands), its findings ledger (.finder) and its
+   snapshot date. The one action is reading: every "open" unfolds the article's own <details>.
+   Nothing here fetches or submits. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return k in o?o[k]:m;});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var D={counts:{},articles:[],finders:[],snapshot:'',citationsNeeded:0,reframes:0,threshold:'',vaBits:''};
+  var R={sel:{kind:'art',i:0}};
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  /* the one data layer: the room, read as it stands */
+  function read(){
+    var n=function(id){var e=$(id);return e?+e.textContent:0;};
+    D.counts={found:n('s-find'),drafted:n('s-draft'),cited:n('s-cite'),submitted:n('s-sub')};
+    D.finders=[].map.call(document.querySelectorAll('main .finder'),function(f){return {who:txt(f.querySelector('.who')),what:txt(f.querySelector('.what b')).replace(/[\s.↗]+$/,'')};});
+    D.articles=[].map.call(document.querySelectorAll('main .art'),function(a,i){
+      var sym=txt(a.querySelector('.sym')), q=/^"([^"]+)"\s*[—-]?\s*/.exec(sym), meta=txt(a.querySelector('.meta'));
+      var needs=[].map.call(a.querySelectorAll('.chips span'),function(s){return txt(s).replace(/^NEEDS:\s*/,'');});
+      return {id:a.id,n:i+1,title:txt(a.querySelector('h3')).replace(/^[①-⑳]\s*/,''),symptom:q?q[1]:sym,more:q?sym.slice(q[0].length):'',
+        finders:D.finders.filter(function(f){return meta.indexOf(f.who)>=0;}).map(function(f){return f.who;}),needs:needs,
+        steps:[].map.call(a.querySelectorAll('.art-body h4'),txt),cmds:[].map.call(a.querySelectorAll('.art-body pre'),function(p){return p.textContent.trim();})};});
+    D.citationsNeeded=D.articles.reduce(function(t,a){return t+a.needs.filter(function(x){return /citation/.test(x);}).length;},0);
+    D.reframes=D.articles.reduce(function(t,a){return t+a.needs.filter(function(x){return !/citation/.test(x);}).length;},0);
+    var body=document.querySelector('main')?document.querySelector('main').textContent.replace(/\s+/g,' '):'';
+    var m=/snapshot of ([\d-]+)/.exec(body); D.snapshot=m?m[1]:'';
+    m=/boundary sits exactly at ([\d\s ]+KiB) \((\d+) passes, (\d+) fails\)/.exec(body); D.threshold=m?'read_ahead_kb '+m[2]+' passes · '+m[3]+' fails':'';
+    m=/CONFIG_ARM64_VA_BITS=39 → user address space is ([^·]+?) · =48 → ([^·]+?) · =52 → ([\d.]+ \w+)/.exec(body); D.vaBits=m?'VA_BITS 39 → '+m[1]+' · 48 → '+m[2]+' · 52 → '+m[3]:'';
+  }
+  function current(){var s=R.sel;if(s.kind==='art')return D.articles[s.i];var f=D.finders[s.i];return D.articles.filter(function(a){return f&&a.finders.indexOf(f.who)>=0;})[0]||D.articles[0];}
+
+  /* ── the hand-off: the article's own <details> unfolds; reading is the action ── */
+  function openArt(a){if(!a)return;var el=$(a.id);if(!el)return;var d=el.querySelector('details');if(d)d.open=true;el.scrollIntoView({block:'start'});}
+
+  /* ── NEW BEE ── */
+  function renderBee(){
+    var box=$('etBeeRows'); if(!box)return;
+    box.innerHTML=D.articles.map(function(a,i){var on=R.sel.kind==='art'&&R.sel.i===i;
+      return '<button type="button" class="et-b-row et-b-sym" data-et-art="'+i+'" aria-pressed="'+on+'"><span>'+esc(a.symptom)+'<em>'+esc(fill(T('et.devroom.b.foundBy','found by {who}'),{who:a.finders.join(' and ')}))+'</em></span><small>'+CHEV+'</small></button>';}).join('');
+    var a=current(); $('etBeeCard').hidden=!a;
+    if(a)$('etBeeCard').innerHTML='<h3>'+esc(fill(T('et.devroom.b.cardH','what you would notice'),{}))+'</h3><p>'+esc(a.more||a.symptom)+'</p><p class="by">'+esc(fill(T('et.devroom.b.by','found by {who}. their finding, the room\'s write-up.'),{who:a.finders.join(' and ')}))+'</p>';
+    $('etBeeFoot').textContent=fill(T('et.devroom.b.foot','none of this has been sent to any encyclopedia yet. {n} submitted.'),{n:D.counts.submitted});
+  }
+
+  /* ── RAVER: the honey river ── */
+  function hex(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/3*k-Math.PI/2;p.push((r*Math.cos(a)).toFixed(1)+','+(r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function art(){
+    var svg=$('etArt'); if(!svg)return;
+    /* each row has exactly its own places: 4 finders fed 3 write-ups, and each write-up waits for its citations */
+    var X=function(k){return 150+k*60;}, cell=hex(26), h='';
+    var rows=[
+      {y:58,cls:'rv-find',l:T('et.devroom.r.found','found'),n:fill(T('et.devroom.r.nFound','{n} credited'),{n:D.counts.found}),items:D.finders.map(function(f,i){return {kind:'finder',i:i,t:f.who.slice(0,2),label:f.who+' · '+f.what};})},
+      {y:142,cls:'rv-draft',l:T('et.devroom.r.drafted','drafted'),n:fill(T('et.devroom.r.nDraft','{n} written up'),{n:D.counts.drafted}),items:D.articles.map(function(a,i){return {kind:'art',i:i,t:String(a.n),label:a.symptom};})},
+      {y:226,cls:'rv-cite',l:T('et.devroom.r.cited','cited'),n:fill(T('et.devroom.r.nCite','{n} of {d} ready'),{n:D.counts.cited,d:D.counts.drafted}),items:[],slots:D.counts.drafted}
+    ];
+    h+='<line class="rv-lane" x1="150" y1="58" x2="150" y2="318"/>';
+    rows.forEach(function(r){
+      h+='<text class="rv-l" x="4" y="'+(r.y-4)+'">'+esc(r.l)+'</text><text class="rv-n" x="4" y="'+(r.y+16)+'">'+esc(r.n)+'</text>';
+      var slots=r.slots!=null?r.slots:r.items.length;
+      for(var k=0;k<slots;k++){var it=r.items[k],sel=it&&R.sel.kind===it.kind&&R.sel.i===it.i;
+        if(it)h+='<g role="button" tabindex="0" data-et-cell="'+it.kind+':'+it.i+'" class="'+r.cls+(sel?' sel':'')+'" aria-pressed="'+sel+'" aria-label="'+esc(it.label)+'" transform="translate('+X(k)+' '+r.y+')"><polygon class="rv-c" points="'+cell+'"/><text class="rv-t" y="5" text-anchor="middle">'+esc(it.t)+'</text></g>';
+        else h+='<polygon class="rv-slot" transform="translate('+X(k)+' '+r.y+')" points="'+cell+'"/>';}
+    });
+    h+='<circle class="rv-drop" cx="150" cy="84" r="5"/>';
+    h+='<text class="rv-l" x="4" y="314">'+esc(T('et.devroom.r.gate','the gate'))+'</text><text class="rv-n" x="4" y="334">'+esc(fill(T('et.devroom.r.nSent','{n} submitted'),{n:D.counts.submitted}))+'</text>';
+    h+='<rect class="rv-gate" x="124" y="292" width="232" height="52" rx="18"/><text class="rv-gt" x="240" y="323" text-anchor="middle">'+esc(T('et.devroom.r.human','a human pastes · no seat sends'))+'</text>';
+    svg.innerHTML=h;
+  }
+  function renderRaver(){
+    var hint=$('etRaverHint'); if(!hint)return;
+    hint.textContent=fill(T('et.devroom.r.hint','{f} found · {d} drafted · {c} cited · {s} sent'),{f:D.counts.found,d:D.counts.drafted,c:D.counts.cited,s:D.counts.submitted});
+    art();
+    var c=$('etRaverCard'), s=R.sel;
+    if(s.kind==='finder'&&D.finders[s.i]){var f=D.finders[s.i];c.innerHTML='<span class="rk">'+esc(f.who.slice(0,2))+'</span><div><b>'+esc(f.who)+'</b><span class="sub">'+esc(f.what+' · '+T('et.devroom.r.credit','their finding, the room\'s write-up'))+'</span></div>';}
+    else{var a=current();c.innerHTML=a?'<span class="rk">'+a.n+'</span><div><b>'+esc(a.symptom)+'</b><span class="sub">'+esc(fill(T('et.devroom.r.needs','found by {who} · still needs {n}'),{who:a.finders.join(' + '),n:a.needs.join(' · ')}))+'</span></div>':'';}
+    $('etMotion').textContent=document.body.hasAttribute('data-motion-paused')?T('et.devroom.r.play','let it move'):T('et.devroom.r.pause','pause the motion');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etArts'); if(!tb)return;
+    $('etCyPath').textContent='bnr://devroom/docs/wiki@'+D.snapshot;
+    $('etChips').innerHTML='<span class="on">submitted: '+D.counts.submitted+'</span><span>network: none of its own</span><span class="ai">gate: founder-hands</span>';
+    var c=D.counts, st=[
+      ['findings · credited',c.found+' · the ledger holds '+D.finders.length+' finders','done'],
+      ['drafted · symptom → procedure → fix',c.drafted+' articles · '+D.articles.length+' in this snapshot','done'],
+      ['cited · iq.wiki-grade',c.cited+' · still needs '+D.citationsNeeded+' citations + '+D.reframes+' scope reframe',c.cited>=c.drafted&&c.drafted?'done':'todo'],
+      ['the sophia gate · a human pastes',c.submitted+' submitted · the founder\'s word picks the lane','you']
+    ];
+    var now=st.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=st.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    tb.innerHTML=D.articles.map(function(a,i){var on=current()===a;
+      return '<tr class="pick" tabindex="0" role="button" data-et-art="'+i+'" aria-pressed="'+on+'"><td>0'+a.n+'</td><td>'+esc(a.symptom)+'</td><td>'+esc(a.finders.join(' · '))+'</td><td><span class="st-g">'+a.needs.length+'</span></td></tr><tr class="sub"><td colspan="4">'+esc(a.title+' · needs: '+a.needs.join(' · '))+'</td></tr>';}).join('');
+    var a=current();
+    $('etCyProcH').textContent=a?fill(T('et.devroom.c.procH','procedure · article 0{n} · {k} sections'),{n:a.n,k:a.steps.length}):'procedure';
+    $('etProc').innerHTML=a?a.steps.map(function(s){return '<li><b>'+esc(s)+'</b></li>';}).join(''):'';
+    var cmd=$('etCmd'); cmd.textContent=a&&a.cmds.length?a.cmds.join('\n\n'):T('et.devroom.c.noCmd','this article is a design law, not a command: read it below.');
+    $('etCyGo').textContent=a?'open article 0'+a.n+' → the full procedure':'open the article';
+    $('etReceipt').innerHTML=[
+      ['source','docs/wiki/ · snapshot '+esc(D.snapshot||'not dated')],
+      ['counts',c.found+' found · '+c.drafted+' drafted · '+c.cited+' cited · '+c.submitted+' submitted'],
+      ['articles',D.articles.length+' · '+D.articles.map(function(x){return x.id;}).join(' ')],
+      ['finders',esc(D.finders.map(function(f){return f.who;}).join(' · '))],
+      ['a1 threshold',D.threshold?esc(D.threshold)+' · bmesh-hwfit 2026-08-23':'<span class="no">not read from the article</span>'],
+      ['a2 ceiling',D.vaBits?esc(D.vaBits):'<span class="no">not read from the article</span>'],
+      ['raw outputs','<span class="g">not in this repo yet · a named gap</span>'],
+      ['submitted','<span class="sig">'+c.submitted+'</span> · no seat transmits']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  function refresh(){read();renderBee();renderRaver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var a=e.target.closest('[data-et-art]'); if(a){R.sel={kind:'art',i:+a.getAttribute('data-et-art')};refresh();return;}
+      var c=e.target.closest('[data-et-cell]'); if(c){var p=c.getAttribute('data-et-cell').split(':');R.sel={kind:p[0],i:+p[1]};refresh();}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('[data-et-cell],tr[data-et-art]');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    ['etBeeGo','etRaverGo','etCyGo'].forEach(function(id){$(id).addEventListener('click',function(){openArt(current());});});
+    $('etBeeWho').addEventListener('click',function(){var f=document.querySelector('main .finder');if(f)f.closest('section').scrollIntoView({block:'start'});});
+    $('etMotion').addEventListener('click',function(){var b=document.body;if(b.hasAttribute('data-motion-paused'))b.removeAttribute('data-motion-paused');else b.setAttribute('data-motion-paused','');renderRaver();});
+    document.addEventListener('blang',function(){keyed();refresh();});
+  }
+  try{if(localStorage.getItem('bnr.motion.paused')==='1')document.body.setAttribute('data-motion-paused','');}catch(e){}
+  keyed(); wire(); refresh();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 </body>

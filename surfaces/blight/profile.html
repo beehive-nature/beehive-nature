@@ -179,9 +179,320 @@ body[data-reg="cypherpunk"] .scope,body[data-reg="cypherpunk"] .foot{font-family
 body:not([data-reg="cypherpunk"]) .gaps dt{font-size:15px}
 body:not([data-reg="cypherpunk"]) .gaps dd{font-size:14px}
 .scope{margin-top:18px}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner (sizes carry a fallback for servers that never deliver the stylesheet). Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class
+   is et- prefixed and every rule is scoped to #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;position:relative;z-index:6;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s3,18px) var(--sk-s3,18px) 0;text-align:left;letter-spacing:normal;text-transform:none;background:none;border:0;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;box-shadow:none;-webkit-tap-highlight-color:transparent}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;text-shadow:none}
+#eternal table{border-collapse:separate;border-spacing:0;width:100%}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;background:none;width:auto;text-align:left}
+#etArchive.et-archive-h{position:relative;z-index:6;box-sizing:border-box;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) var(--sk-s3,18px) 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;background:none;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal button.et-b-row:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1,6px);flex:none;max-width:52%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open div b{font-weight:600}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important;filter:none}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius,12px);background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-no{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card.et-fam{border:1px solid var(--sk-line);background:var(--sk-sovereign-tint)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card.et-no div,#eternal .et-b-card.et-ok div,#eternal .et-b-card.et-fam div{color:var(--sk-ink)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card .et-rk.et-no{background:var(--sk-guard-wash);color:var(--sk-guard);border:1.5px dashed var(--sk-guard)}
+#eternal .et-r-card .et-rk.et-ok{background:var(--sk-biomass);color:var(--sk-bg)}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-chip{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border-radius:var(--sk-radius-pill,999px);border:1px solid var(--sk-line);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-chip:hover{background:var(--sk-bg-card);color:var(--sk-ink)!important}
+#eternal .et-r-chip[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-chip i{width:12px;height:12px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-biomass)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer;text-align:center}
+#eternal .et-r-ghost:hover{background:transparent;color:var(--sk-ink)!important}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none;filter:none}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:22px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-holdbtn:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;white-space:nowrap;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;white-space:normal;width:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small,#eternal .et-c-kv small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)!important}
+#eternal .et-st-no{color:var(--sk-info)!important}
+#eternal .et-st-wait{color:var(--sk-ai)!important}
+#eternal .et-st-guard{color:var(--sk-guard)!important}
+#eternal .et-st-you{color:var(--sk-you)!important}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;border:0;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-ghost:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-c-well{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-well);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);white-space:pre-wrap;word-break:break-all}
+#eternal .et-c-field{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:48px;margin-top:var(--sk-s2,12px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);cursor:text}
+#eternal .et-c-field span{flex:none;font:600 13px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+#eternal .et-c-field input{flex:1 1 auto;min-width:0;min-height:var(--sk-control-min,44px);border:0;outline:0;background:transparent;color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);padding:0}
+
+/* holder front specifics: the body already carries a 12 px gutter */
+#eternal,#etArchive.et-archive-h{padding-left:0;padding-right:0}
+#eternal .et-ho-art{max-width:360px}
+#eternal .et-cell{cursor:pointer}
+#eternal .et-cell:focus{outline:none}
+#eternal .et-cell:focus-visible polygon{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-ho-l{position:absolute;transform:translate(-50%,-50%);pointer-events:none;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);white-space:nowrap}
+#eternal .et-ho-hold{position:absolute;left:50%;top:50%;width:64px;height:74px;margin:-37px 0 0 -32px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-ho-hold:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-ho-hold b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-ho-hold span{font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-ho-hold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;cursor:default}
+#eternal .et-ho-ladder{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s2,12px)}
+#eternal .et-ho-rung{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px) 0 var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card)}
+#eternal .et-ho-rung i{width:32px;height:32px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);font-style:normal}
+#eternal .et-ho-rung:first-child i{background:var(--sk-you);color:var(--sk-on-primary)}
+#eternal .et-ho-rung b{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-ho-rung span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+
+/* ── THE WHOLE HOLDER, dressed per register: the page's own entity tokens mapped onto skaists per
+   register (its purple rim, its honey chip and its guard stay what they mean). The book, the rails and
+   the read are unchanged. ── */
+html:has(body[data-reg="bee"]){background:var(--sk-bg)}
+body[data-reg]{--ai:var(--sk-ai);--biomass:var(--sk-biomass);--sovereign:var(--sk-sovereign);--sovereign-soft:var(--sk-sovereign-soft);--you:var(--sk-you);--info:var(--sk-info);--guard:var(--sk-guard);
+  --sem-solution:var(--sk-verified);--sem-science:var(--sk-ai);--sem-system:var(--sk-info);--sem-harm:var(--sk-guard);
+  --bg:var(--sk-bg);--bg-card:var(--sk-bg-card);--bg-well:var(--sk-bg-well);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-mut);--line:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] a{color:var(--sk-link)}
+body[data-reg] .panel,body[data-reg] .stat,body[data-reg] .piece,body[data-reg] .gaps{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .well,body[data-reg] .cap,body[data-reg] .entry,body[data-reg] .book .empty,body[data-reg] .record{border-radius:var(--sk-radius,12px)}
+body[data-reg] .bar input,body[data-reg] .book input,body[data-reg] .book select{min-height:var(--sk-control-min,44px);background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-dim);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] button.do{min-height:var(--sk-control-min,44px);background:var(--sk-primary);color:var(--sk-on-primary);border-radius:var(--sk-radius-lg,16px)}
+body[data-reg] .book .add,body[data-reg] .book .take button{min-height:var(--sk-control-min,44px);border-radius:var(--sk-radius-md,14px);color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] .book .add:hover,body[data-reg] .book .take button:hover{background:var(--sk-bg-well);color:var(--sk-ink)}
+body[data-reg] .entry .acts button{min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+body[data-reg] .hint code{color:var(--sk-link);border-bottom-color:var(--sk-link)}
+body[data-reg] #chip-founder{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);border-bottom:0;text-decoration:underline dashed;text-underline-offset:4px}
+body[data-reg] .pfptag{background:var(--sk-bg-card);color:var(--sk-sovereign-soft)}
+body[data-reg] .chip .amt{background:var(--sk-b-chip);color:var(--sk-b-value);padding:0 4px;border-radius:4px}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1.grad{font:400 40px/1.05 var(--sk-font-bee-serif);background:none;color:var(--sk-ink);-webkit-text-fill-color:currentColor;letter-spacing:0}
+body[data-reg="bee"] .msg,body[data-reg="bee"] .hint,body[data-reg="bee"] .book label,body[data-reg="bee"] .chip,body[data-reg="bee"] .subline,body[data-reg="bee"] .stat .l,body[data-reg="bee"] .piece .lab,body[data-reg="bee"] .entry .ev,body[data-reg="bee"] .entry .en,body[data-reg="bee"] .entry .res,body[data-reg="bee"] .cap .tag,body[data-reg="bee"] .cap .honest,body[data-reg="bee"] nav#fleetnav,body[data-reg="bee"] .book .empty,body[data-reg="bee"] .book .take{font:400 14px/1.5 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .law,body[data-reg="bee"] .caps .capintro,body[data-reg="bee"] .cap p,body[data-reg="bee"] .entry .el,body[data-reg="bee"] .gaps dd,body[data-reg="bee"] .record,body[data-reg="bee"] .scope,body[data-reg="bee"] .foot{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .panel h2,body[data-reg="bee"] .caps h2,body[data-reg="bee"] .gaps h2{font:400 28px/1.1 var(--sk-font-bee-serif)!important;color:var(--sk-ink)!important}
+body[data-reg="bee"] .cap h3,body[data-reg="bee"] .gaps dt,body[data-reg="bee"] .book .add,body[data-reg="bee"] .book .take button,body[data-reg="bee"] .entry .acts button{font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] button.do{font:600 17px/1.2 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .short,body[data-reg="bee"] .bar input,body[data-reg="bee"] .book input,body[data-reg="bee"] .book select,body[data-reg="bee"] .hint code,body[data-reg="bee"] .chip .amt{font:400 15px/1.4 var(--sk-font-mono)}
+body[data-reg="bee"] .stat b{font:400 32px/1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1.grad{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .law,body[data-reg="raver"] .msg,body[data-reg="raver"] .hint,body[data-reg="raver"] .book label,body[data-reg="raver"] .chip,body[data-reg="raver"] .subline,body[data-reg="raver"] .stat .l,body[data-reg="raver"] .piece .lab,body[data-reg="raver"] .entry .ev,body[data-reg="raver"] .entry .en,body[data-reg="raver"] .entry .res,body[data-reg="raver"] .cap .tag,body[data-reg="raver"] .cap .honest,body[data-reg="raver"] nav#fleetnav,body[data-reg="raver"] .book .empty,body[data-reg="raver"] .book .take,body[data-reg="raver"] .caps .capintro,body[data-reg="raver"] .cap p,body[data-reg="raver"] .entry .el,body[data-reg="raver"] .gaps dd,body[data-reg="raver"] .gaps p,body[data-reg="raver"] .record,body[data-reg="raver"] .scope,body[data-reg="raver"] .foot,body[data-reg="raver"] .cap h3,body[data-reg="raver"] .gaps dt,body[data-reg="raver"] .book .add,body[data-reg="raver"] .book .take button,body[data-reg="raver"] .entry .acts button{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] .panel h2,body[data-reg="raver"] .caps h2,body[data-reg="raver"] .gaps h2,body[data-reg="raver"] button.do{font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em}
+body[data-reg="raver"] button.do,body[data-reg="raver"] .book .add,body[data-reg="raver"] .book .take button{border-radius:var(--sk-radius-pill,999px)}
+body[data-reg="raver"] .short,body[data-reg="raver"] .bar input,body[data-reg="raver"] .book input,body[data-reg="raver"] .book select,body[data-reg="raver"] .hint code,body[data-reg="raver"] .chip .amt{font:400 14px/1.4 var(--sk-font-mono)}
+body[data-reg="raver"] .stat b{font:700 30px/1 var(--sk-font-raver-display)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1.grad{font:600 15px/1.45 var(--sk-font-mono);background:none;color:var(--sk-ai);-webkit-text-fill-color:currentColor}
+body[data-reg="cypherpunk"] .law,body[data-reg="cypherpunk"] .msg,body[data-reg="cypherpunk"] .caps .capintro,body[data-reg="cypherpunk"] .cap p,body[data-reg="cypherpunk"] .entry .el,body[data-reg="cypherpunk"] .gaps dd,body[data-reg="cypherpunk"] .gaps p,body[data-reg="cypherpunk"] .record,body[data-reg="cypherpunk"] .short,body[data-reg="cypherpunk"] .bar input,body[data-reg="cypherpunk"] .book input,body[data-reg="cypherpunk"] .book select,body[data-reg="cypherpunk"] .hint code,body[data-reg="cypherpunk"] .gaps dt{font:400 13px/1.55 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .hint,body[data-reg="cypherpunk"] .book label,body[data-reg="cypherpunk"] .chip,body[data-reg="cypherpunk"] .chip .amt,body[data-reg="cypherpunk"] .subline,body[data-reg="cypherpunk"] .stat .l,body[data-reg="cypherpunk"] .piece .lab,body[data-reg="cypherpunk"] .entry .ev,body[data-reg="cypherpunk"] .entry .en,body[data-reg="cypherpunk"] .entry .res,body[data-reg="cypherpunk"] .cap .tag,body[data-reg="cypherpunk"] .cap .honest,body[data-reg="cypherpunk"] nav#fleetnav,body[data-reg="cypherpunk"] .book .empty,body[data-reg="cypherpunk"] .book .take,body[data-reg="cypherpunk"] .scope,body[data-reg="cypherpunk"] .foot{font:500 12px/1.55 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .panel h2,body[data-reg="cypherpunk"] .caps h2,body[data-reg="cypherpunk"] .gaps h2,body[data-reg="cypherpunk"] .cap h3{font:600 15px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] button.do,body[data-reg="cypherpunk"] .book .add,body[data-reg="cypherpunk"] .book .take button,body[data-reg="cypherpunk"] .entry .acts button{font:600 14px/1.2 var(--sk-font-mono);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] button.do{background:var(--sk-primary)}
+body[data-reg="cypherpunk"] .stat b{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .panel,body[data-reg="cypherpunk"] .stat,body[data-reg="cypherpunk"] .piece,body[data-reg="cypherpunk"] .gaps{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+/* the book's captions and the rails' inline links at a phone's touch size; the coming-soon card's
+   lilac words at 4.5:1 on paper */
+body[data-reg] .book label{display:flex;align-items:flex-end;min-height:var(--sk-control-min,44px);margin-bottom:0}
+body[data-reg] .cap p a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px)}
+body[data-reg] nav#fleetnav a{min-width:var(--sk-control-min,44px);justify-content:center}
+body[data-reg="bee"] .cap.soon .tag,body[data-reg="bee"] .cap.soon .word{color:var(--sk-sovereign)}
+body[data-reg="bee"] .cap.soon .tag{border-color:var(--sk-sovereign)}
+
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the holder's own COLS and their level ladders, the rails in #caps, and the
+     read read back from #msg, #short, #chips, #wall, the stats and the address book's own list) drives
+     all three, so the facts cannot drift. Nothing here reads the chain, signs or stores on arrival:
+     every read goes through the page's own #addr + #go, or its own founder's-garden example, and the
+     fronts show only what the chain answered. The book stays where the page keeps it; the fronts only
+     count it. -->
+<section id="eternal" aria-label="the holder">
+
+  <!-- NEW BEE — a calm room: who, what they hold, one button -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT holder</div>
+    <h2 class="et-b-h" data-etk="et.holder.beeH">see what someone holds</h2>
+    <p class="et-b-lede" data-etk="et.holder.beeLede">type a name or an address, and the art it holds comes straight from the chain. no account, no sign-in.</p>
+    <div class="et-b-guard"><svg class="et-b-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.holder.beeGuard">reading only. no wallet is connected and nothing is signed.</span></div>
+    <div class="et-b-rows" id="etHoBeeRows"></div>
+    <div class="et-b-card" id="etHoBeeSaid" hidden></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etHoBeeGo" data-etk="et.holder.beeGo">show the founder’s garden</button>
+      <button type="button" class="et-b-link" id="etHoBeeOwn" data-etk="et.holder.beeOwn">type any name or address</button>
+      <p class="et-b-foot" data-etk="et.holder.beeFoot">your address book stays on this device. a name ending .eth or .base.eth is looked up on the chain.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the data is the art: the hive of eight families around one cell you hold. tap a cell for
+       its ladder, from the first level to the crown; after a read, what is held lights up. -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.holder.raverH">the hive</h2><span class="et-r-hint" id="etHoHint"></span></div>
+    <div class="et-r-art et-ho-art" id="etHoArt"><svg id="etHoComb" viewBox="-200 -120 400 240" role="group" aria-label="the eight families as a hive"></svg><button type="button" class="et-ho-hold" id="etHoHold"><b id="etHoHoldB">hold</b><span id="etHoHoldS">to read</span></button></div>
+    <div class="et-r-card" id="etHoCard" aria-live="polite"></div>
+    <div class="et-ho-ladder" id="etHoLadder"></div>
+    <p class="et-r-note" id="etHoNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the address, the read path, the families, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etHoPath"></div>
+    <div class="et-c-chips" id="etHoChips"></div>
+    <div class="et-c-guard"><span data-etk="et.holder.cyGuard">read-only · no wallet connect · no signing · no keys</span><b id="etHoGuardN"></b></div>
+    <label class="et-c-field"><span>addr&gt;</span><input id="etHoAddr" type="text" spellcheck="false" autocomplete="off" aria-label="a name or 0x address to read"></label>
+    <button type="button" class="et-c-primary" id="etHoCyGo">read the chain</button>
+    <h3 class="et-c-h" data-etk="et.holder.cyPipeH">read path · visit()</h3>
+    <ol class="et-c-pipe" id="etHoPipe"></ol>
+    <h3 class="et-c-h" data-etk="et.holder.cyColsH">families · COLS on Base</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>family · contract · ladder</th></tr></thead><tbody id="etHoTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.holder.cyRcptH">receipt · this read</h3>
+    <table class="et-c-kv" id="etHoReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.holder.verifyH">verify · no trust in this page needed</div>
+      <ol id="etHoVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etHoCyGarden" data-etk="et.holder.cyGarden">the founder's garden</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/profile.html" target="_blank" rel="noopener noreferrer" data-etk="et.holder.cyFork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.holder.archive">the whole holder</h2>
 <h1 class="grad">holder</h1>
 <p class="law">the half of a profile that needs <b>no server</b> — identity and art read
 straight from the chain. this is a HUMAN surface: the purple rim is the person,
@@ -461,6 +772,7 @@ async function scanPerson(a,onProg){
   let cache=null; try{cache=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
   const found=new Set(cache?cache.contracts:[]);
   const nb=await scanRpc({jsonrpc:'2.0',id:1,method:'eth_blockNumber'});
+  if(!nb||!nb.result)throw new Error('no chain answer'); /* every host refused: say so, never read a null */
   const latest=parseInt(nb.result,16);
   const floor=cache?cache.floorBlock:Math.max(0,latest-SCAN_RECENT);
   const from0=cache?cache.lastBlock+1:floor;
@@ -647,9 +959,9 @@ async function visit(v){
   /* THE PERSON SCAN: discovery by the wallet's own transfer history, then
      one Multicall3 round trip for every balance + interface probe */
   msg.textContent='scanning the wallet\u2019s history — every token it ever received\u2026';
-  const scan=await scanPerson(a,(from,to,latest,nTok)=>{
+  let scan;try{scan=await scanPerson(a,(from,to,latest,nTok)=>{
     msg.textContent='person scan · block '+to.toLocaleString()+' of '+latest.toLocaleString()+' ('+Math.round(to/latest*100)+'%) · '+nTok+' token'+(nTok===1?'':'s')+' seen so far';
-  });
+  });}catch(e){msg.style.color='var(--guard)';msg.textContent='the chain did not answer from here — nothing was read, so nothing is shown';return}
   if(scan.refused)console.warn('person scan: '+scan.refused+' window(s) refused by every host at floor size — skipped, cached forward-only');
   msg.textContent='probing '+scan.contracts.length+' contract'+(scan.contracts.length===1?'':'s')+' — one Multicall3 round trip\u2026';
   const probeCalls=[];
@@ -1045,6 +1357,185 @@ $('fleetnav').innerHTML=(window.FLEET_NAV||[
      self + the public RPC + the estate's own rail. If a stricter two-origin
      claim is wanted, that needs a founder-ruled rider variant — not a
      per-surface opt-out of a shared law. -->
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the holder's own:
+   COLS (eight families on Base, each with its contract and, where the page knows it, its level ladder
+   and level names), the five rails in #caps, the founder's-garden example, the book's own rendered
+   list, and every read read back from #msg, #short, #chips, #wall and the three stats. Nothing here
+   reads the chain, signs or stores on arrival: every read goes through the page's own #addr + #go or
+   its own example, and the fronts show only what came back. The book is counted, never written. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.holder.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var num=function(n){return Number(n).toLocaleString('en-US');};
+  var SRC=typeof COLS!=='undefined'?COLS:[];
+  var GARDEN='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+
+  /* ── the data layer ── */
+  var D={cols:SRC.map(function(c,i){
+      /* level k is reached at lv[k] (lvlOf counts the thresholds met; its base offset cancels out) */
+      var names=c.names||null, lv=c.lv||null;
+      var ladder=lv?lv.map(function(v,k){return {min:v,name:names&&names[k]?names[k]:'level '+k};}):null;
+      return {i:i,sym:c.sym,c:c.c,ladder:ladder,levels:ladder?ladder.length-1:null};}),
+    rails:[].map.call(document.querySelectorAll('#caps .cap'),function(c){var h=c.querySelector('h3 .word'),t=c.querySelector('.tag');return {word:h?h.textContent.trim():'',tag:t?t.textContent.trim():''};}),
+    example:(($('chip-founder')||{}).textContent||'').trim(),
+    state:'idle',msg:'',addr:'',short:'',reads:0,tokens:0,pieces:null,held:[],wall:[],book:0,host:''};
+  var R={sel:0,hold:0};
+  function read(){
+    var m=$('msg'), t=m?m.textContent.trim():'';
+    D.msg=t;
+    D.state=/^the chain is the record/.test(t)?'idle':/^rendered from chain|^this address holds nothing readable/.test(t)?'done':/^that did not resolve/.test(t)?'unresolved':/^the chain did not answer/.test(t)?'failed':'reading';
+    var idn=$('identity'); D.short=idn&&!idn.hidden?$('short').textContent.trim():'';
+    D.reads=+(($('st-reads')||{}).textContent||0)||0;
+    D.tokens=+(($('st-tokens')||{}).textContent||0)||0;
+    var pc=(($('st-pieces')||{}).textContent||'').trim(); D.pieces=/^\d+$/.test(pc)?+pc:null;
+    D.held=[].map.call(document.querySelectorAll('#chips .chip'),function(c){var b=c.querySelector('b'),a=c.querySelector('.amt');return a&&b?{sym:b.textContent.trim(),amt:a.textContent.trim()}:null;}).filter(Boolean);
+    D.wall=[].map.call(document.querySelectorAll('#wall .piece .lab'),function(l){var b=l.querySelector('b'),s=l.textContent.match(/seed ([\d,]+)/);return {sym:b?b.textContent.trim():'',seed:s?s[1]:'',crown:!!l.querySelector('.crownword')};});
+    D.book=document.querySelectorAll('#b-list .entry').length;
+    D.host=typeof lastHost!=='undefined'?lastHost:'';
+  }
+  function readAddr(v){var a=$('addr'),g=$('go');if(!a||!g||!String(v||'').trim())return;a.value=String(v).trim();g.click();D.addr=a.value;all();}
+  function garden(){var c=$('chip-founder');if(c){c.click();D.addr=($('addr')||{}).value||GARDEN;all();}}
+  function heldOf(sym){return D.held.filter(function(h){return h.sym===sym;})[0]||null;}
+  function onWall(sym){return D.wall.filter(function(w){return w.sym===sym;}).length;}
+  var SAY={idle:'not read yet',reading:'reading the chain…',done:'read',unresolved:'that name did not resolve',failed:'the chain did not answer here'};
+  function say(){return K('st.'+D.state,SAY[D.state]);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var done=D.state==='done';
+    var rows=[
+      [K('b.who','whose'),D.short||K('b.noOne','no one yet'),''],
+      [K('b.now','right now'),say(),D.state==='failed'||D.state==='unresolved'?'et-out':done?'et-ok':''],
+      [K('b.art','art they hold'),done?(D.pieces?num(D.pieces)+' '+K('b.pieces','pieces'):K('b.none','none readable')):K('b.notYet','not read yet'),''],
+      [K('b.fams','families with a balance'),done?String(D.tokens):K('b.notYet','not read yet'),''],
+      [K('b.book','your address book'),D.book?D.book+' '+(D.book===1?K('b.entry','entry'):K('b.entries','entries'))+' · '+K('b.device','this device'):K('b.empty','empty · this device only'),'']
+    ];
+    $('etHoBeeRows').innerHTML=rows.map(function(r){return '<div class="et-b-row"><span>'+esc(r[0])+'</span><small class="'+r[2]+'">'+esc(r[1])+'</small></div>';}).join('');
+    var said=$('etHoBeeSaid'); said.hidden=D.state==='idle';
+    said.className='et-b-card '+(D.state==='failed'||D.state==='unresolved'?'et-no':'et-fam');
+    said.innerHTML='<h3>'+esc(say())+'</h3><div>'+esc(D.msg)+'</div>';
+    var go=$('etHoBeeGo'); go.disabled=D.state==='reading';
+    go.textContent=D.state==='reading'?K('b.reading','reading the chain…'):K('beeGo','show the founder’s garden');
+  }
+
+  /* ── RAVER ── the hive: a centre cell you hold (the read), eight family cells around it; a family with
+     a balance lights green, the one you tapped rims in magenta, and its ladder climbs below */
+  var HR=44, HW=Math.sqrt(3)*HR, POS=[[-0.5,-1],[0.5,-1],[-2,0],[-1,0],[1,0],[2,0],[-0.5,1],[0.5,1]];
+  function hex(cx,cy,r){var p=[];for(var k=0;k<6;k++){var a=(60*k-90)*Math.PI/180;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function comb(){
+    var svg=$('etHoComb'), art=$('etHoArt'); if(!svg)return;
+    var h='', labels='';
+    h+='<polygon points="'+hex(0,0,HR-2)+'" fill="none" stroke="'+tok('line')+'" stroke-width="5"/>';
+    h+='<polygon points="'+hex(0,0,HR-2)+'" fill="none" stroke="'+tok('biomass')+'" stroke-width="5" stroke-dasharray="'+(6*(HR-2)).toFixed(1)+'" stroke-dashoffset="'+(6*(HR-2)*(1-R.hold)).toFixed(1)+'" pathLength="'+(6*(HR-2)).toFixed(1)+'" class="et-ho-prog"/>';
+    D.cols.slice(0,POS.length).forEach(function(c,i){
+      var x=POS[i][0]*HW, y=POS[i][1]*1.5*HR, held=heldOf(c.sym), sel=R.sel===i;
+      h+='<g class="et-cell" data-i="'+i+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(c.sym+(c.ladder?' · '+c.levels+' levels':' · no ladder in the page')+(held?' · held '+held.amt:''))+'">';
+      h+='<polygon points="'+hex(x,y,HR-3)+'" fill="'+(held?tok('verified-wash'):tok('sovereign-wash'))+'" stroke="'+(sel?tok('you'):held?tok('biomass'):c.ladder?tok('sovereign'):tok('ink-dim'))+'" stroke-width="'+(sel||held?3:1.5)+'"'+(c.ladder?'':' stroke-dasharray="4 4"')+'/>';
+      h+='</g>';
+      labels+='<span class="et-ho-l'+(held?' et-ho-held':'')+'" style="left:'+((x+200)/4).toFixed(2)+'%;top:'+((y+120)/2.4).toFixed(2)+'%">'+esc(c.sym)+'</span>';
+    });
+    svg.innerHTML=h;
+    [].forEach.call(art.querySelectorAll('.et-ho-l'),function(e){e.remove();});
+    art.insertAdjacentHTML('beforeend',labels);
+  }
+  function progress(){var p=$('etHoComb').querySelector('.et-ho-prog'),L=6*(HR-2);if(p)p.setAttribute('stroke-dashoffset',(L*(1-R.hold)).toFixed(1));}
+  function raver(){
+    comb();
+    var c=D.cols[R.sel], held=c?heldOf(c.sym):null;
+    $('etHoHint').textContent=D.cols.length+' '+K('r.fams','families')+' · '+(D.state==='done'?D.held.length+' '+K('r.held','held'):say());
+    var hb=$('etHoHold'); hb.disabled=D.state==='reading';
+    $('etHoHoldB').textContent=D.state==='reading'?'…':K('r.hold','hold');
+    $('etHoHoldS').textContent=D.state==='reading'?K('r.reading','reading'):K('r.toRead','to read');
+    $('etHoCard').innerHTML=c?'<span class="et-rk'+(held?' et-ok':'')+'">'+esc(c.levels!=null?c.levels:'?')+'</span><div><b>'+esc(c.sym+(held?' · '+K('r.holds','held')+' '+held.amt:''))+'</b><span>'+esc(c.ladder?c.levels+' '+K('r.levels','levels above the first')+' · '+K('r.crown','the top needs')+' '+num(c.ladder[c.ladder.length-1].min):K('r.noLadder','no ladder in this page: its art is balance-derived or read as it comes'))+'</span><span>'+esc(D.state==='done'?(onWall(c.sym)?onWall(c.sym)+' '+K('r.onWall','on the wall below'):K('r.notOnWall','nothing of it on the wall')):D.short?say():K('r.tapHold','hold the centre to read the founder’s garden'))+'</span></div>':'';
+    $('etHoLadder').innerHTML=c&&c.ladder?c.ladder.map(function(r,k){return '<div class="et-ho-rung"><i>'+k+'</i><b>'+esc(r.name)+'</b><span>'+esc(num(r.min)+'+')+'</span></div>';}).reverse().join(''):'';
+    $('etHoNote').textContent=D.state==='failed'?K('r.noteFail','the chain did not answer here, so no cell lights up. nothing is made up.'):K('r.note','green cells are families the chain says are held. the ladder is each family’s own, from the first level up to the crown.');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var a=D.addr||(($('addr')||{}).value||'');
+    $('etHoPath').textContent='holder://'+(D.short||'none')+' · base';
+    $('etHoChips').innerHTML='<span class="et-on">'+esc(D.state)+'</span><span>reads '+D.reads+'</span><span>tokens '+D.tokens+'</span><span>pieces '+(D.pieces==null?'not read':D.pieces)+'</span><span>book '+D.book+' · device</span>';
+    $('etHoGuardN').textContent=D.rails.filter(function(r){return /live/.test(r.tag);}).length+' rails live · '+D.rails.filter(function(r){return /soon/.test(r.tag);}).length+' coming soon';
+    var go=$('etHoCyGo'), v=$('etHoAddr').value.trim(); go.disabled=!v||D.state==='reading';
+    go.textContent=D.state==='reading'?'reading · wait for the chain':'read the chain'+(v?' · '+(v.length>14?v.slice(0,8)+'…'+v.slice(-4):v):'');
+    var st=D.state, m=D.msg;
+    var steps=[
+      ['resolve · 0x or name','0x… passes · .eth / .base.eth → namehash + registry eth_call · .b / .a live in the book',st==='idle'?'et-todo':st==='unresolved'?'et-guard':'et-done'],
+      ['person scan · eth_getLogs','Transfer(to = the address) · the recent 1,000,000 blocks in 10k windows · the rest walks in the background',st==='idle'||st==='unresolved'?'et-todo':st==='failed'?'et-guard':/^person scan|^scanning/.test(m)?'et-now':'et-done'],
+      ['balances + probes · Multicall3','aggregate3, one round trip · art only for a non-zero balance',st==='done'?'et-done':/^probing/.test(m)?'et-now':st==='failed'?'et-guard':'et-todo'],
+      ['records · degree + enumerate','each family’s own dialect · the record’s own words fed to getSvg verbatim',st==='done'?'et-done':'et-todo'],
+      ['render · the wall',st==='done'?(D.pieces||0)+' pieces · '+D.tokens+' tokens · '+D.reads+' reads':st==='failed'?'the chain did not answer · nothing drawn':'art decoded from chain bytes on this machine',st==='done'?'et-done':st==='failed'?'et-guard':'et-todo']
+    ];
+    $('etHoPipe').innerHTML=steps.map(function(x){return '<li class="'+x[2]+'"><b>'+esc(x[0])+'</b><div>'+esc(x[1])+'</div></li>';}).join('');
+    $('etHoTab').innerHTML=D.cols.map(function(c){var held=heldOf(c.sym);return '<tr class="et-pick" data-i="'+c.i+'" tabindex="0" aria-selected="'+(R.sel===c.i)+'"><td>'+String(c.i+1).padStart(2,'0')+'</td><td><span class="et-nw">'+esc(c.sym)+'</span>'+(held?' <span class="et-st-ok">· held '+esc(held.amt)+'</span>':'')+'<small>'+esc(c.c)+'</small><small>'+esc(c.ladder?c.ladder.map(function(r){return r.name+' '+num(r.min);}).join(' · '):'no ladder in COLS')+'</small></td></tr>';}).join('');
+    var sp=function(c,t){return '<span class="'+c+'">'+esc(t)+'</span>';};
+    $('etHoReceipt').innerHTML=[
+      ['address',D.short?esc(D.short)+'<small>'+esc(a)+'</small>':sp('et-st-no','none · nothing read')],
+      ['state',sp(st==='done'?'et-st-ok':st==='failed'||st==='unresolved'?'et-st-guard':st==='reading'?'et-st-wait':'et-st-no',st)+'<small>'+esc(m)+'</small>'],
+      ['reads',esc(D.reads+' eth_call'+(D.host?' · '+D.host:''))],
+      ['held',D.held.length?esc(D.held.map(function(h){return h.sym+' '+h.amt;}).join(' · ')):sp('et-st-no',st==='done'?'no balances':'not read')],
+      ['wall',D.pieces==null?sp('et-st-no','not read'):esc(D.pieces+' pieces'+(D.wall.length?' · '+D.wall.map(function(w){return w.sym+' '+w.seed;}).join(' · '):''))],
+      ['book',esc(D.book+' '+(D.book===1?'entry':'entries')+' · this device only · never sent')],
+      ['rails',esc(D.rails.map(function(r){return r.word+' '+r.tag;}).join(' · '))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var c0=D.cols[0];
+    $('etHoVerify').innerHTML=[
+      c0&&typeof AD==='function'?'curl -s https://base-rpc.publicnode.com -H "content-type: application/json" -d \'{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"'+c0.c+'","data":"0x70a08231'+AD(a&&/^0x[0-9a-f]{40}$/i.test(a)?a:GARDEN)+'"},"latest"]}\' → the '+c0.sym+' balance':'',
+      'balance / 1e9 = the seed · the ladder above says its level',
+      'view-source → const COLS · async function visit(v) · the whole read, keyless'
+    ].filter(Boolean).map(function(x){return '<li><code>'+esc(x)+'</code></li>';}).join('');
+  }
+
+  function keyed(){[].forEach.call(document.querySelectorAll('#eternal [data-etk],#etArchive[data-etk]'),function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){read();bee();raver();cy();}
+  var sched=0;function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etHoHold').disabled||hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1000);R.hold=f;progress();
+      if(f>=1){hold.raf=0;R.hold=0;progress();garden();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;R.hold=0;progress();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var c=e.target.closest('.et-cell,.et-c-tab tr.et-pick'); if(c){R.sel=+c.getAttribute('data-i');all();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-cell,.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etHoBeeGo').addEventListener('click',garden);
+    $('etHoBeeOwn').addEventListener('click',function(){var a=$('addr');if(a){a.scrollIntoView({block:'center'});a.focus({preventScroll:true});}});
+    $('etHoCyGo').addEventListener('click',function(){readAddr($('etHoAddr').value);});
+    $('etHoCyGarden').addEventListener('click',garden);
+    $('etHoAddr').addEventListener('input',cy);
+    $('etHoAddr').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('etHoCyGo').click();}});
+    var hb=$('etHoHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    var mo=new MutationObserver(soon);
+    ['msg','identity','chips','wall','b-list','st-reads','st-tokens','st-pieces'].forEach(function(id){var el=$(id);if(el)mo.observe(el,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']});});
+    var go=$('go'); if(go)go.addEventListener('click',function(){D.addr=($('addr')||{}).value||'';});
+    document.addEventListener('blang',function(){keyed();all();});
+  }
+
+  keyed(); wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

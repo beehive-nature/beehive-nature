@@ -42,8 +42,264 @@ footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm a
    and raver, so no register ever draws reading text a phone cannot hold. */
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
+<style id="eternal-css">
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   is scoped under #eternal so the page's own bare h2/a/button/section rules never reach in. ── */
+#eternal{display:block;max-width:40rem;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);padding:0;border:0;border-radius:0;background:transparent;text-align:start;color:var(--sk-ink)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul{margin:0;padding:0;letter-spacing:normal;text-transform:none}
+#eternal button,#eternal a{margin:0;text-transform:none;letter-spacing:normal}
+#eternal button{font:inherit;color:inherit;background:none;border:0;border-radius:0;padding:0;min-height:0;box-shadow:none;cursor:pointer}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start;letter-spacing:normal;text-transform:none}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg,#eternal .et-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-rows>.et-b-row:nth-last-child(2):has(+ .et-b-open[hidden]){border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:grid;gap:0;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:first-child{border-top:0}
+#eternal .et-b-person>i{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-person>div{min-width:0;flex:1}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-person a{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-person a:hover{color:var(--sk-link-hover)}
+#eternal .et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-card{padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-b-card b{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-now{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:center}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:none;cursor:pointer}
+#eternal .et-r-art:focus{outline:none}
+#eternal .et-r-art:focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s2,12px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft);overflow-wrap:anywhere}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);justify-content:center;margin:var(--sk-s2,12px) 0}
+#eternal .et-r-chips button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);margin:var(--sk-s2,12px) auto 0;padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:hover{color:var(--sk-link-hover)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+@keyframes et-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#eternal .breathe,#eternal .spin{animation:none!important}#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:bottom;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);letter-spacing:normal}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td.k{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.v{white-space:nowrap;text-align:end}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.more td{height:auto;padding:var(--sk-s1,6px) var(--sk-s2,12px) var(--sk-s2,12px);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .t-ok{color:var(--sk-verified)}#eternal .t-part{color:var(--sk-info)}#eternal .t-guard{color:var(--sk-guard)}#eternal .t-you{color:var(--sk-you)}#eternal .t-ai{color:var(--sk-ai)}#eternal .t-mut{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:120px;padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);letter-spacing:normal}
+#eternal .et-c-kv td{padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-inline-start:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:transparent;overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-seg button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)}
+
+/* btranslated — choose a tongue (bee), the six-petal name (raver), the pointer instrument (cypherpunk) */
+#eternal .et-b-row[role="radio"] .tick{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-checked="true"] .tick{visibility:visible}
+#eternal .et-b-row .nat{display:block;font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-row .en{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-path{display:grid;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-path b{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-path p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-path p.to{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-sovereign-strong)}
+#eternal .et-b-path .draft{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-guard)}
+#eternal .et-r-sun .petal path{fill:var(--sk-sovereign);stroke:var(--sk-sovereign);stroke-width:1.5;transition:opacity var(--dur,.26s)}
+#eternal .et-r-sun .petal.hard path{stroke:var(--sk-guard);stroke-dasharray:5 4}
+#eternal .et-r-sun.picked .petal{opacity:.6}
+#eternal .et-r-sun .petal.on{opacity:1}
+#eternal .et-r-sun .petal.on path{fill:var(--sk-sovereign-strong);stroke:var(--sk-you);stroke-width:2.5;stroke-dasharray:none}
+#eternal .et-r-sun text{fill:var(--sk-ink);color:var(--sk-ink)}
+#eternal .et-r-sun text.tn{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink-soft);color:var(--sk-ink-soft)}
+#eternal .et-r-sun .petal.on text.tn{fill:var(--sk-sovereign-strong);color:var(--sk-sovereign-strong);font-weight:700}
+#eternal .et-r-sun text.cn{font:400 28px/1.1 var(--sk-font-house);fill:var(--sk-sovereign-strong);color:var(--sk-sovereign-strong)}
+#eternal .et-r-sun text.cl{font:400 12px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft);color:var(--sk-ink-soft)}
+#eternal .et-r-sun .heart{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-r-sun .breathe{animation:et-breathe 5s ease-in-out infinite}
+#eternal .et-r.paused .breathe{animation-play-state:paused}
+#eternal .et-r-legend .lg-petal{background:var(--sk-sovereign)}
+#eternal .et-r-legend .lg-hard{border:1.5px dashed var(--sk-guard)}
+#eternal .et-r-legend .lg-on{background:var(--sk-sovereign-strong)}
+#eternal .et-r-card .rk{min-width:52px}
+#eternal .et-r-hold-pill{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-hold-pill .fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:0;background:var(--sk-sovereign-strong);opacity:.45;pointer-events:none}
+#eternal .et-r-hold-pill .lbl{position:relative}
+#eternal .et-c-tab.tight th,#eternal .et-c-tab.tight td{padding-inline:var(--sk-s1,6px)}
+#eternal .et-c-tab tr.pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.pick[aria-pressed="true"] td.k{color:var(--sk-ai)}
+#eternal .et-c-tab td.sp{white-space:normal;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li p[dir="rtl"]{text-align:right}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists.
+   The four state chips keep the estate's validated chart set (the cat-* tokens). ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--dim:var(--sk-ink-mut);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-you);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] header h1{font-family:var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+body[data-reg="bee"] main>section{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] :is(select,input,.chip,.fnode){background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-ink-mut);border-radius:var(--sk-radius)}
+body[data-reg="bee"] .withdrawn{border-color:var(--sk-guard);border-radius:var(--sk-radius)}
+body[data-reg="bee"] :is(.badge,.machine){border-radius:var(--sk-radius-sm)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-sovereign-soft);--violet:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);--line:var(--sk-line);--leaf:var(--sk-biomass);--amber:var(--sk-you);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] header h1{font-family:var(--sk-font-raver-display);font-weight:700;color:var(--sk-ink);letter-spacing:-.01em}
+body[data-reg="raver"] main>section{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] :is(select,input,.chip,.fnode){background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-sovereign);border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .fnode{border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] .withdrawn{border-color:var(--sk-guard);border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] :is(.badge,.machine){border-radius:var(--sk-radius-pill)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-ai);--gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main>section{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] :is(select,input,.chip,.fnode,.withdrawn){background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .withdrawn{border-color:var(--sk-guard)}
+body[data-reg="cypherpunk"] :is(.badge,.machine){border-radius:4px}
+</style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer: the page's own renderings (window.__btranslated: the canonical
+     name and the machine-draft strings), its father-tongue picker and its father-set table drive
+     all three, so the tongues, the counts and the path cannot drift. Choosing only previews; the
+     one "keep" hands the choice to the page's own picker, whose save() writes this browser's
+     btranslated_pref and nothing else. Right-to-left tongues are drawn right to left. -->
+<section id="eternal" aria-label="your name in your tongue">
+
+  <!-- NEW BEE — a calm room: pick the tongue you think in, see your name in it, keep it here -->
+  <div class="et-b">
+    <div class="et-b-mark">bTranslated</div>
+    <h2 class="et-b-h" data-t="et.btranslated.b.title">your name in your tongue</h2>
+    <p class="et-b-lede" data-t="et.btranslated.b.lede">choose the language you think in. your name is shown in it, and it still leads to the one real name underneath.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.btranslated.b.guard">your choice stays on this device. it never changes who owns your name.</span></div>
+    <div class="et-b-rows" id="etBeeRows" role="radiogroup" aria-label="the language you think in"></div>
+    <div class="et-b-path" id="etBeePath" aria-live="polite"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeKeep">keep this language</button>
+      <p class="et-b-now" id="etBeeNow" aria-live="polite"></p>
+      <a class="et-b-link" href="#flow" data-t="et.btranslated.b.walk">see the path, walked below</a>
+      <p class="et-b-foot" data-t="et.btranslated.b.foot">languages other than english are machine drafts until a community checks them.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — one name, six tongues: a flower whose petals are as long as each tongue is spoken -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.btranslated.r.title">one name, six tongues</h2><span class="et-r-hint" data-t="et.btranslated.r.hint">tap a petal</span></div>
+    <svg class="et-r-art et-r-sun" id="etSun" viewBox="-200 -200 400 400" tabindex="0" role="slider" aria-label="six tongues around one name; a petal's length is how many people speak it" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill et-r-hold-pill" id="etRaverKeep" aria-describedby="etRaverHoldHint"><span class="fill" id="etRaverFill"></span><span class="lbl" id="etRaverKeepL">hold to keep it</span></button>
+    <p class="et-r-note" id="etRaverHoldHint">hold 1.2 s · kept on this device only</p>
+    <button type="button" class="et-r-ghost" id="etSway" aria-pressed="false">pause the glow</button>
+  </div>
+
+  <!-- CYPHERPUNK — the pointer as an instrument: alias → skeleton → canonical, the set, the stored bytes -->
+  <div class="et-c">
+    <p class="et-c-path" id="etPath">btranslated://…</p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-t="et.btranslated.c.guard">a community controls its rendering</span> <b data-t="et.btranslated.c.guardB">never a key, a value or a fund</b></div>
+    <h3 class="et-c-h" data-t="et.btranslated.c.setH">father set · candidate · tap a row to pick</h3>
+    <table class="et-c-tab tight"><thead><tr><th>code</th><th>native · script · dir</th><th>speakers ≈</th></tr></thead><tbody id="etSet"></tbody></table>
+    <h3 class="et-c-h" data-t="et.btranslated.c.pipeH">resolution · every path ends at one leaf</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyWrite">write pref</button>
+    <h3 class="et-c-h" data-t="et.btranslated.c.receiptH">receipt · this browser only</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.btranslated.c.verifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md" target="_blank" rel="noopener noreferrer"><span data-t="et.btranslated.c.register">the register ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/btranslated.html" target="_blank" rel="noopener noreferrer"><span data-t="et.btranslated.c.fork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.btranslated.archive">the whole doctrine</h2>
 <header>
   <h1>🌐 bTranslated</h1>
   <p>your name, rendered in your tongue — while resolution always terminates at the one
@@ -161,6 +417,7 @@ var STR={
   skel:   {en:'confusable skeleton', es:'esqueleto anti-confusión', hi:'भ्रम-रोधी कंकाल', cmn:'防混淆骨架', ru:'антиомоглифный скелет', ar:'هيكل مضاد للالتباس'},
   canon:  {en:'canonical leaf + Merkle proof', es:'hoja canónica + prueba Merkle', hi:'विहित पत्ता + मर्कल प्रमाण', cmn:'规范叶节点 + 默克尔证明', ru:'канонический лист + доказательство Меркла', ar:'ورقة أساسية + برهان ميركل'}
 };
+var NAME='lovis.b'; /* the one canonical name every path below terminates at */
 var VER=[{k:'works',c:'#3f9c55'},{k:'idea',c:'#a476ec'},{k:'bug',c:'#c07f1c'},{k:'gap',c:'#0092a6'}];
 var GLY={works:'✅',idea:'💡',bug:'🐛',gap:'🕳'};
 function pref(){ try{ return JSON.parse(localStorage.getItem('btranslated_pref')||'{}'); }catch(e){ return {}; } }
@@ -175,11 +432,11 @@ function render(){
   // pointer flow
   var a=t('alias'), s=t('skel'), c=t('canon');
   $('flow').innerHTML =
-    '<div class="fnode"><div class="fk">'+a.txt+(a.machine?'<span class="machine">⚙ machine draft</span>':'')+'</div><div>lovis.b · rendered for you</div></div>'
+    '<div class="fnode"><div class="fk">'+a.txt+(a.machine?'<span class="machine">⚙ machine draft</span>':'')+'</div><div>'+NAME+' · rendered for you</div></div>'
     +'<div class="farrow">→</div>'
     +'<div class="fnode"><div class="fk">'+s.txt+(s.machine?'<span class="machine">⚙</span>':'')+'</div><div>ONE tree, cross-script — no parallel namespace</div></div>'
     +'<div class="farrow">→</div>'
-    +'<div class="fnode" style="border-color:var(--leaf)"><div class="fk">'+c.txt+(c.machine?'<span class="machine">⚙</span>':'')+'</div><div>lovis.b @ the canonical registry — <a href="blight/vaulta-reader.html">read it live</a></div></div>';
+    +'<div class="fnode" style="border-color:var(--leaf)"><div class="fk">'+c.txt+(c.machine?'<span class="machine">⚙</span>':'')+'</div><div>'+NAME+' @ the canonical registry — <a href="blight/vaulta-reader.html">read it live</a></div></div>';
   // chips
   var ch=$('chips'); ch.innerHTML='';
   VER.forEach(function(v){
@@ -196,7 +453,148 @@ if(Array.isArray(p.students)&&p.students.length) $('students').value=p.students.
 $('father').addEventListener('change',save);
 $('mother').addEventListener('change',save);
 $('students').addEventListener('change',save);
+/* the ETERNAL fronts above read these (one data layer); their "keep" goes through save() via the select */
+window.__btranslated={NAME:NAME,STR:STR,VER:VER,GLY:GLY,pref:pref};
 render();
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The tongues come from the
+   page's own father-tongue picker and its father-set table (native name, speakers, script, and RTL
+   read from that table); the renderings are the page's own STR drafts; the canonical name is the
+   page's NAME. Tapping only previews. The one keep sets the page's picker and fires its change, so
+   the page's save() is the only writer of btranslated_pref. The front never writes storage itself. */
+(function(){
+  if(!document.getElementById('eternal')||!window.__btranslated||!document.getElementById('father')) return;
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var B=window.__btranslated, SEL=$('father');
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var rows={}; [].forEach.call(document.querySelectorAll('main section table tbody tr'),function(tr){var c=tr.cells;if(c.length<4)return;rows[c[1].textContent.trim()]={en:c[0].childNodes[0].textContent.trim(),speakers:c[2].textContent.trim(),script:c[3].textContent.trim()};});
+  function num(s){var m=String(s).match(/(\d+(?:\.\d+)?)(?:\s*[–-]\s*(\d+(?:\.\d+)?))?\s*M/);return m?(m[2]?(+m[1]+ +m[2])/2:+m[1]):0;}
+  /* the ONE data layer */
+  var D={name:B.NAME,tongues:[].map.call(SEL.options,function(o){var r=rows[o.value]||{},lbl=o.textContent;return {code:o.value,native:lbl.replace(/\s*\(.*$/,'').trim(),en:r.en||o.value,hard:/founder-hardwired/.test(lbl),
+      speakers:r.speakers||'',n:num(r.speakers),script:(r.script||'').split(' · ')[0],dir:/\bRTL\b/.test(r.script||'')?'rtl':'ltr'};}),kept:null,stored:null};
+  D.max=Math.max.apply(null,D.tongues.map(function(t){return t.n;}).concat([1]));
+  var P={pick:SEL.value}, R={paused:false}, hold={t0:0,raf:0};
+  function tongue(c){return D.tongues.filter(function(t){return t.code===c;})[0]||D.tongues[0];}
+  function said(key,c){var s=B.STR[key]||{};return s[c]||s.en||'';}
+  function read(){var raw=null;try{raw=localStorage.getItem('btranslated_pref');}catch(e){}D.stored=raw;var p=B.pref();D.kept=raw&&p.father?p.father:null;D.mother=p.mother||'';D.students=Array.isArray(p.students)?p.students:[];}
+  function labels(){document.querySelectorAll('[data-t^="et.btranslated."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function attrs(t){return ' lang="'+esc(t.code)+'" dir="'+t.dir+'"';}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var t=tongue(P.pick), tick='<svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+    $('etBeeRows').innerHTML=D.tongues.map(function(x){var on=x.code===P.pick;
+      return '<button type="button" class="et-b-row" role="radio" aria-checked="'+on+'" data-code="'+esc(x.code)+'"><span><span class="nat"><bdi'+attrs(x)+'>'+esc(x.native)+'</bdi></span><span class="en">'+esc(x.en)+' · '+esc(T('et.btranslated.b.speakers','{n} people').replace('{n}',x.speakers))+'</span></span><small>'+(x.code===D.kept?esc(T('et.btranslated.b.keptHere','kept here')):'')+tick+'</small></button>';}).join('');
+    var draft=t.code!=='en';
+    $('etBeePath').innerHTML='<b>'+esc(T('et.btranslated.b.inTongue','your name, in {t}').replace('{t}',t.native))+'</b><div'+attrs(t)+'><p>'+esc(said('alias',t.code))+'</p><p>↓ '+esc(said('skel',t.code))+'</p><p>↓ '+esc(said('canon',t.code))+'</p></div><p class="to" dir="ltr"><bdi>'+esc(D.name)+'</bdi></p>'+(draft?'<span class="draft">⚙ '+esc(T('et.btranslated.b.draft','machine draft · a community has not checked it yet'))+'</span>':'');
+    var k=$('etBeeKeep'); k.textContent=T('et.btranslated.b.keep','keep {t} on this device').replace('{t}',t.native);
+    $('etBeeNow').textContent=D.kept===t.code?T('et.btranslated.b.isKept','kept on this device: {t}.').replace('{t}',t.native):(D.kept?T('et.btranslated.b.keptOther','this device keeps {k}. nothing changes until you press keep.').replace('{k}',tongue(D.kept).native):T('et.btranslated.b.none','nothing is kept yet. nothing is stored until you press keep.'));
+  }
+
+  /* ── RAVER: a petal per tongue, as long as the tongue is spoken ── */
+  function sun(){
+    var svg=$('etSun'), h='', r0=58;
+    D.tongues.forEach(function(x,i){
+      var a=-90+i*360/D.tongues.length, L=40+60*(x.n/D.max), w=30, on=x.code===P.pick;
+      var d='M'+r0+' 0C'+(r0+L*.3)+' '+(-w)+' '+(r0+L*.75)+' '+(-w*.9)+' '+(r0+L)+' 0C'+(r0+L*.75)+' '+(w*.9)+' '+(r0+L*.3)+' '+w+' '+r0+' 0Z';
+      var rad=a*Math.PI/180, c=Math.cos(rad), s=Math.sin(rad), lr=r0+L+14, cx=lr*c, cy=lr*s+5+(s>.9?8:0);
+      var anchor=c>.3?'start':c<-.3?'end':'middle';
+      h+='<g class="petal'+(x.hard?' hard':'')+(on?' on breathe':'')+'" data-code="'+esc(x.code)+'"><path transform="rotate('+a+')" d="'+d+'"/><text class="tn" x="'+cx.toFixed(1)+'" y="'+cy.toFixed(1)+'" text-anchor="'+anchor+'" direction="ltr"><tspan'+attrs(x)+'>'+esc(x.native)+'</tspan></text></g>';
+    });
+    h+='<circle class="heart" r="54"/><text class="cn" y="6" text-anchor="middle" dir="ltr">'+esc(D.name)+'</text><text class="cl" y="28" text-anchor="middle">'+esc(T('et.btranslated.r.canonical','canonical'))+'</text>';
+    svg.innerHTML=h; svg.classList.add('picked');
+    var i=D.tongues.indexOf(tongue(P.pick)); svg.setAttribute('aria-valuemax',String(D.tongues.length)); svg.setAttribute('aria-valuenow',String(i+1));
+    svg.setAttribute('aria-valuetext',tongue(P.pick).native+' · '+tongue(P.pick).en);
+  }
+  function raver(){
+    var t=tongue(P.pick);
+    $('etLegend').innerHTML='<span><i class="lg-petal"></i>'+esc(T('et.btranslated.r.lgPetal','longer = more speakers'))+'</span><span><i class="lg-hard"></i>'+esc(T('et.btranslated.r.lgHard','founder-hardwired'))+'</span><span><i class="lg-on"></i>'+esc(T('et.btranslated.r.lgOn','your pick'))+'</span>';
+    $('etRaverCard').innerHTML='<span class="rk">'+esc(t.code)+'</span><div><b'+attrs(t)+'>'+esc(said('alias',t.code))+'</b><span'+attrs(t)+'>→ '+esc(said('skel',t.code))+' → <bdi dir="ltr">'+esc(D.name)+'</bdi></span></div>';
+    $('etRaverKeepL').textContent=D.kept===t.code?T('et.btranslated.r.kept','kept here · {t}').replace('{t}',t.native):T('et.btranslated.r.hold','hold to keep {t}').replace('{t}',t.native);
+    $('etRaverHoldHint').textContent=T('et.btranslated.r.holdHint','hold 1.2 s · kept on this device only · {n} ≈ {s}').replace('{n}',t.en).replace('{s}',t.speakers);
+    $('etSway').textContent=R.paused?T('et.btranslated.r.resume','let it glow'):T('et.btranslated.r.pause','pause the glow'); $('etSway').setAttribute('aria-pressed',R.paused?'true':'false');
+    document.querySelector('#eternal .et-r').classList.toggle('paused',R.paused);
+    sun();
+  }
+  function holdStart(ev){
+    if(hold.raf) return; if(ev&&ev.preventDefault) ev.preventDefault(); hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);$('etRaverFill').style.width=(f*100)+'%';
+      if(f>=1){hold.raf=0;$('etRaverFill').style.width='0';keep();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etRaverFill').style.width='0';}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var t=tongue(P.pick), draft=t.code!=='en';
+    $('etPath').textContent='btranslated://'+D.name+' → canonical';
+    $('etChips').innerHTML='<span class="on">local-first</span><span>'+esc(T('et.btranslated.c.noId','never identity data'))+'</span><span>'+D.tongues.length+' '+esc(T('et.btranslated.c.tongues','tongues'))+'</span><span class="'+(draft?'':'ok')+'">'+(draft?'⚙ '+esc(T('et.btranslated.c.draft','machine draft · unattested')):esc(T('et.btranslated.c.source','english source')))+'</span>';
+    $('etSet').innerHTML=D.tongues.map(function(x){return '<tr class="pick" tabindex="0" data-code="'+esc(x.code)+'" aria-pressed="'+(x.code===P.pick)+'"><td class="k">'+esc(x.code)+'</td><td><span'+attrs(x)+'>'+esc(x.native)+'</span><small>'+esc(x.script)+' · '+x.dir+(x.hard?' · hardwired':'')+'</small></td><td class="sp">'+esc(x.speakers)+'</td></tr>';}).join('');
+    $('etPipe').innerHTML=[
+      ['alias · '+t.code,said('alias',t.code),'',true],
+      ['skeleton',said('skel',t.code),'',true],
+      ['canonical · '+D.name,said('canon',t.code),'done',true],
+      ['withdrawn → refuse',T('et.btranslated.c.p4','a lapsed or withdrawn alias refuses; it never guesses (rule 10)'),'guard',false]
+    ].map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p'+(s[3]?attrs(t):'')+'>'+esc(s[1])+'</p></li>';}).join('');
+    $('etCyWrite').textContent='write pref · father='+t.code;
+    $('etReceipt').innerHTML=[
+      ['key','btranslated_pref'],
+      ['stored',D.stored?'<code dir="ltr">'+esc(D.stored)+'</code>':'<span class="t-mut">'+esc(T('et.btranslated.c.nothing','nothing stored yet'))+'</span>'],
+      ['father',D.kept?esc(D.kept)+' · '+esc(tongue(D.kept).native):'<span class="t-mut">'+esc(T('et.btranslated.c.notKept','not kept'))+'</span>'],
+      ['pick',esc(t.code)+(t.code===D.kept?' · <span class="t-ok">✓ '+esc(T('et.btranslated.c.same','stored'))+'</span>':' · <span class="t-part">'+esc(T('et.btranslated.c.preview','preview, not stored'))+'</span>')],
+      ['mother',D.mother?esc(D.mother):'<span class="t-mut">'+esc(T('et.btranslated.c.unset','not set'))+'</span>'],
+      ['students',D.students.length?esc(D.students.join(', ')):'<span class="t-mut">'+esc(T('et.btranslated.c.unset','not set'))+'</span>'],
+      ['dir',t.dir+(t.dir==='rtl'?' · '+esc(T('et.btranslated.c.rtl','drawn right to left')):'')],
+      ['counts',esc(T('et.btranslated.c.candidate','candidate · pending the T-1 number and the T-5 ruler'))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etVerify').innerHTML=['<li><code>localStorage.getItem("btranslated_pref")</code> → '+esc(T('et.btranslated.c.v1','the stored row above'))+'</li>',
+      '<li>'+esc(T('et.btranslated.c.v2','every path ends at'))+' <code>'+esc(D.name)+'</code> · '+esc(T('et.btranslated.c.v2b','the canonical registry'))+'</li>',
+      '<li><code>docs/register/FATHER-SET-1.md</code> → '+esc(T('et.btranslated.c.v3','the register of record for the set'))+'</li>'].join('');
+  }
+
+  /* the one hand-off: the page's own picker and its save() */
+  function keep(){ SEL.value=P.pick; SEL.dispatchEvent(new Event('change',{bubbles:true})); read(); all(); }
+  function pick(c){ if(!c||c===P.pick) return; P.pick=c; all(); }
+  function all(){labels();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var r=e.target.closest('.et-b-row[role="radio"]'); if(r){pick(r.getAttribute('data-code'));return;}
+      var tr=e.target.closest('.et-c-tab tr.pick'); if(tr){pick(tr.getAttribute('data-code'));return;}
+    });
+    ev.addEventListener('keydown',function(e){var tr=e.target.closest('.et-c-tab tr.pick');if(tr&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(tr.getAttribute('data-code'));}});
+    $('etBeeRows').addEventListener('keydown',function(e){
+      var i=D.tongues.indexOf(tongue(P.pick)),n=D.tongues.length;
+      if(e.key==='ArrowDown'||e.key==='ArrowRight')i=(i+1)%n;else if(e.key==='ArrowUp'||e.key==='ArrowLeft')i=(i+n-1)%n;else return;
+      e.preventDefault();pick(D.tongues[i].code);var b=$('etBeeRows').querySelector('[aria-checked="true"]');if(b)b.focus();
+    });
+    var s=$('etSun'), down=false;
+    function at(e){var b=s.getBoundingClientRect(),a=Math.atan2(e.clientY-(b.top+b.height/2),e.clientX-(b.left+b.width/2))*180/Math.PI+90,n=D.tongues.length;
+      var i=((Math.round(a/(360/n))%n)+n)%n; pick(D.tongues[i].code);}
+    s.addEventListener('pointerdown',function(e){down=true;try{s.setPointerCapture(e.pointerId);}catch(x){}at(e);});
+    s.addEventListener('pointermove',function(e){if(down)at(e);});
+    ['pointerup','pointercancel'].forEach(function(t){s.addEventListener(t,function(){down=false;});});
+    s.addEventListener('keydown',function(e){var i=D.tongues.indexOf(tongue(P.pick)),n=D.tongues.length;
+      if(e.key==='ArrowRight'||e.key==='ArrowDown')i=(i+1)%n;else if(e.key==='ArrowLeft'||e.key==='ArrowUp')i=(i+n-1)%n;else return;
+      e.preventDefault();pick(D.tongues[i].code);});
+    var hb=$('etRaverKeep');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etBeeKeep').addEventListener('click',keep);
+    $('etCyWrite').addEventListener('click',keep);
+    $('etSway').addEventListener('click',function(){R.paused=!R.paused;raver();});
+    /* a choice made in the page's own picker below is the same fact up here */
+    ['father','mother','students'].forEach(function(id){$(id).addEventListener('change',function(){P.pick=SEL.value;read();all();});});
+    addEventListener('storage',function(e){if(e.key==='btranslated_pref'){read();all();}});
+    document.addEventListener('blang',all);
+  }
+  read(); if(D.kept) P.pick=D.kept; wire(); all();
+  window.__eternal={data:D,pick:P,raver:R,refresh:all};
 })();
 </script>
 </body>
