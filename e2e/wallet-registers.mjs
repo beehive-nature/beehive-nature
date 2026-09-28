@@ -67,8 +67,8 @@ const seen = await assertRegisterContract(page, {
 
 // ── wallet-specific dress rulings (the surface's own contribution) ─────────
 await page.click('#breg-bee'); await page.waitForTimeout(300);
-ok('bee reads in SERIF titles over SANS body', /Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-ok('bee corners are SOFT (20px cards, 12px controls)', seen.bee.cardRadius === '20px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
+ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
+ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
 ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
 await page.click('#breg-raver'); await page.waitForTimeout(300);
 ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
@@ -77,7 +77,7 @@ ok('raver carries glow-sovereign — the ONE glow — and the purples-as-light w
 ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
 await page.click('#breg-cypherpunk'); await page.waitForTimeout(300);
 ok('cypherpunk is MONO top to bottom', /mono/i.test(seen.cypherpunk.bodyFont) && /mono/i.test(seen.cypherpunk.h1Font), seen.cypherpunk.bodyFont.split(',')[0]);
-ok('cypherpunk corners are CUT (4px cards, 4px controls)', seen.cypherpunk.cardRadius === '4px' && seen.cypherpunk.btnRadius === '4px', seen.cypherpunk.cardRadius);
+ok('cypherpunk corners are CUT (6px radius-sm — the sheet; its pills drop to 5px, tags to 4px, page-level)', seen.cypherpunk.cardRadius === '6px' && seen.cypherpunk.btnRadius === '6px', seen.cypherpunk.cardRadius);
 ok('cypherpunk action is ai teal (rgb(69, 194, 220))', seen.cypherpunk.btnColor === 'rgb(69, 194, 220)', seen.cypherpunk.btnColor);
 
 await browser.close();
