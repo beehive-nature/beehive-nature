@@ -78,7 +78,8 @@ const px = v => Math.round(parseFloat(v));
   ok('u2: the lede is 16px (was the 11px wall)', px(await style('header p', 'fontSize')) >= 16);
   ok('u2: law lines are 14px (was 10)', px(await style('.law', 'fontSize')) >= 14);
   ok('u2: the status line is 14px (was 10.5)', px(await style('#now', 'fontSize')) >= 14);
-  ok('u2: the provenance table is 14px (was 10.5)', px(await style('table', 'fontSize')) >= 14);
+  // the ETERNAL front (2026-09-26) put its own tables above the room; the claim is about the provenance table
+  ok('u2: the provenance table is 14px (was 10.5)', px(await style('details[data-reg-disclose] table', 'fontSize')) >= 14);
   const pb = await box(page, '#play');
   ok('u2: play is a 44px target', pb && pb.height >= 44, pb ? `height ${pb.height}` : 'no box');
   const sb = await box(page, '#seed');
@@ -100,7 +101,13 @@ const px = v => Math.round(parseFloat(v));
   for (const [name, reg] of regs) {
     const { context, page } = await fresh(reg);
     const ih = await page.evaluate(() => window.innerHeight);
-    const pb = await box(page, '#play');
+    // ETERNAL (2026-09-26): each register's front leads with its own play gesture, which clicks the
+    // room's real #play (proved in e2e/listening-eternal.test.mjs); "play stays first" now means that
+    // gesture, in the register's own front, sits above the fold. #play itself stays in section 1.
+    const pb = await page.evaluate(() => {
+      const el = ['#etBeePlay', '#etRing .heart', '#etCyRun'].map(s => document.querySelector(s)).find(e => e && e.getBoundingClientRect().height > 0);
+      if (!el) return null; const r = el.getBoundingClientRect(); return { y: r.y };
+    });
     ok(`u1: play sits above the fold (${name})`, pb && pb.y < ih, pb ? `y ${Math.round(pb.y)}` : 'no box');
     const details = page.locator('details[data-reg-disclose]');
     ok(`u1: provenance and doctrine ride the estate disclosure (two blocks, ${name})`, await details.count() === 2);

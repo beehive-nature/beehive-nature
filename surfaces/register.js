@@ -47,7 +47,7 @@
     /* tech-note disclosures (founder comprehension order 2026-09-16): dense
        technical blocks collapse to a 44px tappable summary row; +/− marker,
        inherit-only colors — no page palette is imposed */
-    details[data-reg-disclose]>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;list-style:none;font-size:12.5px;opacity:.92}
+    details[data-reg-disclose]>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;list-style:none;font-size:14px;opacity:.92}
     details[data-reg-disclose]>summary::-webkit-details-marker{display:none}
     details[data-reg-disclose]>summary:before{content:"+";font-family:ui-monospace,monospace;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border:1px solid currentColor;border-radius:5px;opacity:.6;flex:none;font-size:13px}
     details[data-reg-disclose][open]>summary:before{content:"−"}

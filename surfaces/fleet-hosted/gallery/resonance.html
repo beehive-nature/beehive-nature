@@ -44,8 +44,271 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif;overflow-x:hidde
 .stat-card .v{font-size:20px;font-weight:bold}.stat-card .l{font-size:8px;color:#666;text-transform:uppercase;margin-top:2px}
 .disclaimer{font-size:9px;color:#444;text-align:center;padding:8px;margin-top:8px;line-height:1.4}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the page's own bare rules never reach in; sizes that matter carry a
+   fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit}
+#eternal input{font:inherit;color:inherit}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-step-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-step-row>div{flex:1 1 auto;text-align:center}
+#eternal .et-b-step-row small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-ring-focus{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:34%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab .et-nw{white-space:nowrap;overflow-wrap:normal}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+
+/* the spiral (raver): seventeen states from enlightenment at the heart to shame at the rim; the
+   model's collective level is a glowing tide ring on the same path. Every mark is a token. */
+#etSpiral .et-path{fill:none;stroke:var(--sk-line);stroke-width:2}
+#etSpiral .et-st .et-node{stroke-width:2;transition:fill var(--dur,.3s)}
+#etSpiral .et-st .et-node{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign)}
+#etSpiral .et-st.et-under .et-node{fill:var(--sk-sovereign-strong);stroke:var(--sk-sovereign-soft)}
+#etSpiral .et-st[aria-pressed="true"] .et-node{stroke:var(--sk-you);stroke-width:4}
+#etSpiral .et-st:focus-visible .et-node{stroke:var(--sk-ink);stroke-width:4}
+#etSpiral .et-turn{fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-dasharray:4 4}
+#etSpiral .et-lbl{fill:var(--sk-ink-soft);font:600 18px/1 var(--sk-font-raver-body);pointer-events:none}
+#etSpiral .et-tide{fill:none;stroke:var(--sk-you);stroke-width:3}
+#etSpiral .et-tide-dot{fill:var(--sk-you)}
+#eternal .et-lg-up{background:var(--sk-sovereign-strong)}
+#eternal .et-lg-down{background:var(--sk-sovereign-wash);border:2px solid var(--sk-sovereign)}
+#eternal .et-lg-turn{background:transparent;border:2px dashed var(--sk-guard)}
+#eternal .et-lg-tide{background:transparent;border:3px solid var(--sk-you)}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's piece, which stays below exactly as hosted (fleet-hosted ruling: the art, its Schumann
+     canvas and its two charts keep working). ONE data layer reads the piece itself (HAWKINS, its
+     global statistics, its disclaimer) and runs its OWN model: every state a front opens calls the
+     piece's selectLevel(), every "what if" moves the piece's real sliders and reads doSim()'s outputs
+     back. The model is a correlation the piece itself calls a projection, and every front says so. -->
+<section id="eternal" aria-label="resonance, the frequency argument">
+
+  <!-- NEW BEE — a calm reading: the scale, the earth's tone, then one gentle what-if -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="read">
+      <div class="et-b-mark" data-et-t="et.resonance.b.mark">resonance</div>
+      <h2 class="et-b-h" data-et-t="et.resonance.b.h">the frequency argument</h2>
+      <p class="et-b-lede" id="etBeeLede">this piece sets a scale of human states beside the earth's own tone, and asks what might change if more people used cannabinoids.</p>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span id="etBeeGuard">modelled projections, not proven causation.</span></div>
+      <div class="et-b-rows" id="etBeeRows"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" data-go="what" data-et-t="et.resonance.b.go">try the what-if</button>
+        <button type="button" class="et-b-link" id="etBeeRead" data-et-t="et.resonance.b.read">read the whole argument</button>
+        <p class="et-b-foot" data-et-t="et.resonance.b.foot">the piece is below, unchanged by this page.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="what" hidden>
+      <button type="button" class="et-b-back" data-go="read" data-et-t="et.resonance.b.back">‹ the frequency argument</button>
+      <h2 class="et-b-h" data-et-t="et.resonance.b.whatH">what if more people…</h2>
+      <p class="et-b-lede" data-et-t="et.resonance.b.whatP">change the two numbers. the piece's own model answers, in your browser.</p>
+      <div class="et-b-step-row">
+        <button type="button" class="et-b-btn" data-d="c:-100" aria-label="100 million fewer people">−</button>
+        <div><div class="et-b-fig" id="etBeeC">600M</div><small data-et-t="et.resonance.b.cNote">people using cannabinoids</small></div>
+        <button type="button" class="et-b-btn" data-d="c:100" aria-label="100 million more people">+</button>
+      </div>
+      <div class="et-b-step-row">
+        <button type="button" class="et-b-btn" data-d="i:-5" aria-label="5 mg less a day">−</button>
+        <div><div class="et-b-fig" id="etBeeI">25mg</div><small data-et-t="et.resonance.b.iNote">each, a day</small></div>
+        <button type="button" class="et-b-btn" data-d="i:5" aria-label="5 mg more a day">+</button>
+      </div>
+      <div class="et-b-rows" id="etBeeOut" aria-live="polite"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeFull" data-et-t="et.resonance.b.full">see it in the full piece</button>
+        <p class="et-b-foot" data-et-t="et.resonance.b.whatFoot">projections from the piece's model, not proof of a cause.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the scale is the art: a spiral of seventeen states, and a tide you raise by holding -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.resonance.r.h">the spiral</h2><span class="et-r-hint" id="etSpHint">tap a state · hold to raise the tide</span></div>
+    <div class="et-r-art">
+      <svg id="etSpiral" viewBox="-210 -210 420 420" role="group" aria-label="the scale of states as a spiral, the model's collective level as a glowing ring"></svg>
+      <div class="et-r-mid"><b id="etSpBig">285</b><span id="etSpSmall">modelled</span></div>
+    </div>
+    <div class="et-r-legend"><span><i class="et-lg-up"></i><span data-et-t="et.resonance.r.lgUp">the tide has passed</span></span><span><i class="et-lg-down"></i><span data-et-t="et.resonance.r.lgDown">still above it</span></span><span><i class="et-lg-turn"></i><span data-et-t="et.resonance.r.lgTurn">200, where it turns</span></span><span><i class="et-lg-tide"></i><span data-et-t="et.resonance.r.lgTide">the tide, modelled</span></span></div>
+    <div class="et-r-card" id="etSpCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etSpHold">hold to raise the tide</button>
+    <div class="et-r-row">
+      <button type="button" class="et-r-ghost" id="etSpLess" data-et-t="et.resonance.r.less">−100M</button>
+      <button type="button" class="et-r-ghost" id="etSpReset">back to 600M</button>
+    </div>
+    <p class="et-r-note" id="etSpNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the model's source and constants, outputs recomputed, the scale -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/gallery/resonance.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <h3 class="et-c-h" data-et-t="et.resonance.c.modelH">the model · doSim(), read from the page</h3>
+    <div class="et-c-in"><label for="etcC">consumers · M</label><input type="number" id="etcC" min="0" max="2000" step="10" inputmode="numeric"><label for="etcI">intake · mg</label><input type="number" id="etcI" min="1" max="100" step="1" inputmode="numeric"></div>
+    <button type="button" class="et-c-primary" id="etcRun" data-et-t="et.resonance.c.run">run the page's model</button>
+    <table class="et-c-tab" id="etcOut"><thead><tr><th>output</th><th>page</th><th>recomputed</th></tr></thead><tbody></tbody></table>
+    <p class="et-c-note" id="etcModel"></p>
+    <h3 class="et-c-h" data-et-t="et.resonance.c.scaleH">the scale · HAWKINS as the page lists it</h3>
+    <table class="et-c-tab" id="etcScale"><thead><tr><th>level</th><th>state · tap to open</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.resonance.c.statsH">global statistics · as stated</h3>
+    <table class="et-c-kv" id="etcStats"></table>
+    <h3 class="et-c-h" data-et-t="et.resonance.c.receiptH">receipt · the piece's own terms</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-quote" id="etcQuote"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.resonance.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>doSim.toString()</code></li><li><code>HAWKINS.filter(h =&gt; !h.div).length</code></li><li><code>diff surfaces/fleet/resonance.html surfaces/fleet-hosted/gallery/resonance.html</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="../../fleet/resonance.html" data-et-t="et.resonance.c.orig">the original</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/gallery/resonance.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.resonance.c.src">view the source ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.resonance.archive">the whole argument</h2>
 <div class="hdr">
 <h1>BN Resonance</h1>
 <p>Collective Consciousness, Schumann Frequency & Plant Medicine Correlation — bnature.social v1.0</p>
@@ -286,6 +549,191 @@ document.getElementById('sr_shift').textContent='+'+schumann;
 }
 doSim();
 selectLevel(8); // Default to Courage (200)
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from the
+   piece below: HAWKINS (the scale), its global statistics, its Schumann note and its disclaimer. Every
+   state a front opens calls the piece's own selectLevel(); every "what if" moves the piece's own
+   sliders and reads doSim()'s outputs back, so the fronts can never show a number the piece does not.
+   Cypherpunk recomputes those outputs from the constants in doSim's source. Nothing fetches or stores. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var txt=function(el){return el?el.textContent.replace(/\s+/g,' ').trim():'';};
+  var OUT=[['sim_consc','consc'],['sim_shift','shift'],['sim_anxiety','anxiety'],['sim_creative','creative'],['sim_schumann','schumann'],['sim_meditators','meditators'],['sim_total','total']];
+  var D={title:'',levels:[],sel:-1,sim:{},labels:{},model:{},stats:[],base:'',schumannNote:'',status:{}};
+  var R={sel:-1,timer:0,beeOpen:false,beeLv:null};
+
+  /* ── the one data layer ── */
+  function read(){
+    var art=function(sel){return [].filter.call(document.querySelectorAll(sel),function(e){return !e.closest('#eternal');});};
+    D.title=txt(document.querySelector('.hdr h1'));
+    var H=Array.isArray(window.HAWKINS)?window.HAWKINS:[];
+    D.levels=[];H.forEach(function(h,i){if(!h.div)D.levels.push({idx:i,level:h.level,name:h.name,desc:h.desc,can:h.can,up:h.level>=200});});
+    var dv=H.filter(function(h){return h.div;})[0];D.divider=dv?dv.label.replace(/^[-\s]+|[-\s]+$/g,''):'';
+    art('.sim-results .sim-row').forEach(function(r){var v=r.querySelector('.val');if(v&&v.id)D.labels[v.id]=txt(r.querySelector('.label')).replace(/:$/,'');});
+    D.stats=art('.stats-grid .stat-card').map(function(c){return {v:txt(c.querySelector('.v')),l:txt(c.querySelector('.l'))};});
+    D.base=txt($('sr_base'));
+    var sp=art('.schumann-canvas')[0],nt=sp&&sp.parentNode.querySelector('div[style*="font-size:9px"]');D.schumannNote=txt(nt);
+    var src=typeof window.doSim==='function'?String(window.doSim):'';
+    var m=function(re){var x=re.exec(src);return x?parseFloat(x[1]):NaN;};
+    var cm=/\/\/\s*Model:\s*([^\n]+)/.exec(src);
+    D.model={comment:cm?cm[1].trim():'',base:m(/Math\.round\(([\d.]+)\+\(consumers\*/),k:m(/\(consumers\*([\d.]+)\*\(intake\/\d+\)\)\)/),ref:m(/intake\/(\d+)\)\)\);\s*var shift/),
+      anx:m(/anxiety=Math\.round\(consumers\*([\d.]+)\*/),cre:m(/creative=Math\.round\(consumers\*([\d.]+)\*/),sch:m(/schumann=\(consumers\*([\d.]+)\*/),
+      med:m(/meditators=\(\(consumers\*([\d.]+)\)/),anxCap:m(/Math\.min\(anxiety,(\d+)\)/),creCap:m(/Math\.min\(creative,(\d+)\)/)};
+    if(isNaN(D.model.ref))D.model.ref=m(/intake\/(\d+)\)/);
+    var dis=txt(art('.disclaimer')[0]),g=function(re){var x=re.exec(dis);return x?x[1].trim():'';};
+    D.status={text:dis,projection:g(/(Correlations are modeled projections, not proven causation\.)/),explores:g(/(This visualization explores[^.]*\.)/),tracks:g(/(The BN Fleet BiGen framework tracks[^.]*\.)/),consent:g(/(All data is[^.]*\.)/)};
+    readSim();
+  }
+  function sl(id){return document.getElementById(id);}
+  function readSim(){
+    var o={c:+(sl('consumerSlider')||{}).value,i:+(sl('intakeSlider')||{}).value,cShown:txt($('sim_consumers')),iShown:txt($('sim_intake'))};
+    OUT.forEach(function(p){o[p[1]]=txt($(p[0]));});
+    o.level=parseFloat(o.consc);D.sim=o;
+    var a=document.querySelector('.h-level.active'),am=a&&/^hl_(\d+)$/.exec(a.id);D.sel=am?+am[1]:-1;
+    D.selName=txt($('hl_name'));
+  }
+  /* the piece's own what-if: every register calls this */
+  function setSim(c,i){
+    var cs=sl('consumerSlider'),is=sl('intakeSlider');if(!cs||!is||typeof window.doSim!=='function')return;
+    var clamp=function(el,v){var lo=+el.min,hi=+el.max,st=+el.step||1;return Math.max(lo,Math.min(hi,Math.round(v/st)*st));};
+    if(c!=null)cs.value=String(clamp(cs,c));if(i!=null)is.value=String(clamp(is,i));
+    window.doSim();readSim();render();
+  }
+  function pick(idx){if(typeof window.selectLevel==='function'&&idx>=0){window.selectLevel(idx);readSim();}}
+  function recompute(c,i){
+    var M=D.model;if(isNaN(M.base)||isNaN(M.k)||isNaN(M.ref))return null;
+    var f=i/M.ref,consc=Math.round(M.base+(c*M.k*f));
+    return {consc:String(consc),shift:'+'+(consc-M.base),anxiety:'-'+Math.min(Math.round(c*M.anx*f),M.anxCap)+'%',creative:'+'+Math.min(Math.round(c*M.cre*f),M.creCap)+'%',
+      schumann:'+'+(c*M.sch*f).toFixed(2)+' Hz',meditators:((c*M.med)*f).toFixed(1)+'M',total:Math.round(c*i).toLocaleString()+' kg'};
+  }
+  var lvl=function(L){return L&&L.name+' · '+L.level;};
+  var byIdx=function(idx){return D.levels.filter(function(l){return l.idx===idx;})[0];};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var S=D.status,sim=D.sim,turn=D.levels.filter(function(l){return l.level===200;})[0];
+    $('etBeeLede').textContent=fill(T('et.resonance.b.lede','this piece sets a scale of {n} human states beside the earth\'s own {hz} tone, and asks what might change if more people used cannabinoids. it models a correlation; it does not prove a cause.'),{n:D.levels.length,hz:D.base});
+    $('etBeeGuard').textContent=S.projection?T('et.resonance.b.guard','modelled projections, not proven causation.'):T('et.resonance.b.noGuard','the piece\'s own caution could not be read here; read it below.');
+    var chev='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    var h='<button type="button" class="et-b-row" id="etBeeScale" aria-expanded="'+R.beeOpen+'"><span>'+esc(T('et.resonance.b.scale','the scale'))+'</span><small>'+esc(fill(T('et.resonance.b.states','{n} states'),{n:D.levels.length}))+chev+'</small></button>';
+    if(R.beeOpen){D.levels.forEach(function(L){var on=R.beeLv===L.idx;
+      h+='<button type="button" class="et-b-row" data-lv="'+L.idx+'" aria-expanded="'+on+'"><span>'+esc(L.name)+'</span><small'+(L.up?'':' class="et-out"')+'>'+esc(L.level)+'</small></button>';
+      if(on)h+='<div class="et-b-open">'+esc(L.desc)+'<br><br>'+esc(fill(T('et.resonance.b.can','the piece\'s cannabinoid note: {c}'),{c:L.can}))+'</div>';});}
+    h+='<div class="et-b-row"><span>'+esc(T('et.resonance.b.turn','where it turns'))+'</span><small>'+esc(turn?turn.name.toLowerCase()+', '+turn.level:'')+'</small></div>';
+    h+='<div class="et-b-row"><span>'+esc(T('et.resonance.b.tone','the earth\'s tone'))+'</span><small>'+esc(D.base)+'</small></div>';
+    $('etBeeRows').innerHTML=h;
+    $('etBeeC').textContent=sim.cShown;$('etBeeI').textContent=sim.iShown;
+    var row=function(l,v,c){return '<div class="et-b-row"><span>'+esc(l)+'</span><small'+(c?' class="'+c+'"':'')+'>'+esc(v)+'</small></div>';};
+    $('etBeeOut').innerHTML=row(T('et.resonance.b.level','the collective level, modelled'),sim.consc)+row(T('et.resonance.b.shift','the shift, modelled'),sim.shift)+row(T('et.resonance.b.anx','anxiety, modelled'),sim.anxiety)+row(T('et.resonance.b.cre','creativity, modelled'),sim.creative);
+  }
+  function beeStep(s){[].forEach.call(document.querySelectorAll('#eternal .et-b-step'),function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+
+  /* ── RAVER: the spiral ── */
+  function spiralPts(){
+    var sorted=D.levels.slice().sort(function(a,b){return b.level-a.level;}),th=-Math.PI/2,out=[];
+    sorted.forEach(function(L,i){var r=64+i*7;out.push({L:L,r:r,th:th,x:r*Math.cos(th),y:r*Math.sin(th)});th+=54/r;});
+    return out;
+  }
+  function tidePos(P,level){
+    if(!P.length||isNaN(level))return null;
+    if(level>=P[0].L.level)return {x:P[0].x,y:P[0].y,beyond:level>P[0].L.level};
+    for(var i=0;i+1<P.length;i++){var a=P[i],b=P[i+1];if(level<=a.L.level&&level>=b.L.level){var t=(a.L.level-level)/(a.L.level-b.L.level),r=a.r+(b.r-a.r)*t,th=a.th+(b.th-a.th)*t;return {x:r*Math.cos(th),y:r*Math.sin(th)};}}
+    var z=P[P.length-1];return {x:z.x,y:z.y};
+  }
+  function spiral(){
+    var svg=$('etSpiral');if(!svg)return;var P=spiralPts(),h='',lv=D.sim.level;
+    if(P.length){h+='<path class="et-path" d="M'+P.map(function(p){return p.x.toFixed(1)+' '+p.y.toFixed(1);}).join('L')+'"/>';}
+    P.forEach(function(p){var L=p.L,cls=L.up?'et-up':'et-down';if(L.level<=lv)cls+=' et-under';
+      if(L.level===200)h+='<circle class="et-turn" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="19"/>';
+      h+='<g class="et-st '+cls+'" role="button" tabindex="0" data-lv="'+L.idx+'" aria-pressed="'+(R.sel===L.idx)+'" aria-label="'+esc(L.name+', '+L.level)+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')"><circle class="et-hit" r="28"/><circle class="et-node" r="'+(R.sel===L.idx?13:10)+'"/></g>';});
+    var t=tidePos(P,lv);if(t)h+='<circle class="et-tide" cx="'+t.x.toFixed(1)+'" cy="'+t.y.toFixed(1)+'" r="17"/><circle class="et-tide-dot" cx="'+t.x.toFixed(1)+'" cy="'+t.y.toFixed(1)+'" r="4"/>';
+    var turn=P.filter(function(p){return p.L.level===200;})[0];if(turn){var ox=turn.x>0?26:-26;h+='<text class="et-lbl" x="'+(turn.x+ox).toFixed(1)+'" y="'+(turn.y+6).toFixed(1)+'" text-anchor="'+(turn.x>0?'start':'end')+'">200</text>';}
+    svg.innerHTML=h;
+    /* fit the drawing: the viewBox hugs the spiral, and the centre words sit on its heart */
+    if(P.length){var xs=P.map(function(p){return p.x;}),ys=P.map(function(p){return p.y;}),pad=34;if(turn)xs.push(turn.x+(turn.x>0?84:-84));
+      var x0=Math.min.apply(null,xs.concat([-60]))-pad,x1=Math.max.apply(null,xs.concat([60]))+pad,y0=Math.min.apply(null,ys.concat([-60]))-pad,y1=Math.max.apply(null,ys.concat([60]))+pad;
+      svg.setAttribute('viewBox',x0.toFixed(0)+' '+y0.toFixed(0)+' '+(x1-x0).toFixed(0)+' '+(y1-y0).toFixed(0));
+      var mid=svg.parentNode.querySelector('.et-r-mid');if(mid){mid.style.left=((0-x0)/(x1-x0)*100).toFixed(2)+'%';mid.style.top=((0-y0)/(y1-y0)*100).toFixed(2)+'%';}}
+  }
+  function raver(){
+    var sim=D.sim,S=D.status,L=byIdx(R.sel),cs=sl('consumerSlider');
+    $('etSpHint').textContent=R.timer?T('et.resonance.r.hHold','the tide rises while you hold'):T('et.resonance.r.hint','tap a state · hold to raise the tide');
+    $('etSpBig').textContent=sim.consc;$('etSpSmall').textContent=T('et.resonance.r.small','modelled');
+    var card=$('etSpCard');
+    if(L)card.innerHTML='<span class="et-rk">'+esc(L.level)+'</span><div><b>'+esc(L.name.toLowerCase())+'</b><span>'+esc(L.desc)+'</span><span>'+esc(fill(T('et.resonance.r.can','the piece\'s cannabinoid note: {c}'),{c:L.can}))+'</span></div>';
+    else card.innerHTML='<span class="et-rk">'+esc(sim.consc)+'</span><div><b>'+esc(fill(T('et.resonance.r.cardH','the model\'s collective level at {c} people, {i} a day'),{c:sim.cShown,i:sim.iShown}))+'</b><span>'+esc(fill(T('et.resonance.r.cardS','shift {s} · earth\'s tone {hz} {sch} · tap a state to read it'),{s:sim.shift,hz:D.base,sch:sim.schumann}))+'</span></div>';
+    var hi=cs?+cs.max:2000;$('etSpHold').disabled=sim.c>=hi;
+    $('etSpHold').textContent=sim.c>=hi?fill(T('et.resonance.r.top','the model\'s top · {c}'),{c:sim.cShown}):fill(T('et.resonance.r.hold','hold to raise the tide · {c}'),{c:sim.cShown});
+    var def=cs?+cs.defaultValue:600;$('etSpReset').textContent=fill(T('et.resonance.r.reset','back to {d}M'),{d:def});$('etSpLess').disabled=sim.c<=(cs?+cs.min:0);
+    $('etSpNote').textContent=S.projection?T('et.resonance.r.note','a correlation the piece models · not proven causation'):'';
+    spiral();
+  }
+  function holdStep(){var cs=sl('consumerSlider');if(!cs)return stopHold();var v=+cs.value+50;if(v>+cs.max){stopHold();return;}setSim(v,null);if(+cs.value>=+cs.max)stopHold();}
+  function stopHold(){if(R.timer){clearInterval(R.timer);R.timer=0;raver();}}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var S=D.status,sim=D.sim,re=recompute(sim.c,sim.i),M=D.model;
+    $('etcPath').textContent='fleet-hosted/gallery/resonance.html · '+D.title;
+    $('etcChips').innerHTML='<span class="et-on">correlation · modelled</span><span class="et-no">'+esc(S.projection?'not proven causation':'caution unread')+'</span><span>model · doSim()</span><span>'+esc('states · '+D.levels.length)+'</span>';
+    var ae=document.activeElement;if(ae!==$('etcC'))$('etcC').value=sim.c;if(ae!==$('etcI'))$('etcI').value=sim.i;
+    var rows=[['consumers',sim.cShown,sim.c+'M'],['intake',sim.iShown,sim.i+'mg']].concat(OUT.map(function(p){return [D.labels[p[0]]||p[0],sim[p[1]],re?re[p[1]]:''];}));
+    $('etcOut').querySelector('tbody').innerHTML=rows.map(function(r){var ok=r[1]===r[2];return '<tr><td class="et-wrap">'+esc(String(r[0]).toLowerCase())+'</td><td class="et-num">'+esc(r[1])+'</td><td class="et-num '+(r[2]?(ok?'et-st-ok':'et-st-wait'):'et-st-no')+'">'+esc(r[2]||T('et.resonance.c.unread','not read'))+(r[2]?(ok?' ✓':' ≠'):'')+'</td></tr>';}).join('');
+    $('etcModel').textContent=isNaN(M.base)?T('et.resonance.c.noModel','the model\'s source could not be read here.'):fill(T('et.resonance.c.model','the source says: "{c}". constants read: base {b} · +{k} a million people at {r} mg · anxiety ×{a} (cap {ac}%) · creativity ×{e} (cap {ec}%) · schumann ×{s} Hz · meditators ×{m}. "recomputed" runs the same formula again here.'),{c:M.comment,b:M.base,k:M.k,r:M.ref,a:M.anx,ac:M.anxCap,e:M.cre,ec:M.creCap,s:M.sch,m:M.med});
+    var sorted=D.levels.slice().sort(function(a,b){return b.level-a.level;});
+    $('etcScale').querySelector('tbody').innerHTML=sorted.map(function(L){var on=D.sel===L.idx;
+      return '<tr class="et-pick" tabindex="0" data-lv="'+L.idx+'" aria-expanded="'+on+'"><td class="'+(L.up?'':'et-st-guard')+'">'+esc(L.level)+'</td><td class="et-wrap">'+esc(L.name)+(on?' · '+esc(T('et.resonance.c.open','open in the piece')):'')+'</td></tr>'+
+        (on?'<tr class="et-more"><td colspan="2" class="et-wrap">'+esc(L.desc)+'<small>'+esc('can: '+L.can)+'</small></td></tr>':'');}).join('')+
+      (D.divider?'<tr class="et-more"><td colspan="2" class="et-wrap">'+esc(fill(T('et.resonance.c.divider','the piece draws a line at 200: "{d}"'),{d:D.divider.toLowerCase()}))+'</td></tr>':'');
+    $('etcStats').innerHTML=D.stats.map(function(s){return '<tr><th>'+esc(s.l.toLowerCase())+'</th><td>'+esc(s.v)+'</td></tr>';}).join('');
+    $('etcReceipt').innerHTML=[
+      ['piece',D.title],['explores',S.explores],['status',S.projection],['tracking',S.tracks],['data',S.consent+' (as stated)'],['schumann',D.base+' · '+D.schumannNote],
+      ['scale',fill('Hawkins, {n} states · named on the page, no citation',{n:D.levels.length})],
+      ['charts',['corrChart','impactChart'].map(function(id){var c=window.Chart&&Chart.getChart&&Chart.getChart(id);return id+(c?' · '+c.config.type+' · '+c.data.datasets.length+' series':' · not drawn');}).join(' · ')],
+      ['original','surfaces/fleet/resonance.html · untouched']
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    $('etcQuote').innerHTML='<b>'+esc(T('et.resonance.c.quote','the piece\'s own words'))+'</b> · '+esc(S.text);
+  }
+
+  function toEl(el,focus){if(!el)return;var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:still?'auto':'smooth',block:'start'});try{(focus||el).focus({preventScroll:true});}catch(e){}}
+  var EN={};
+  function tr(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function render(){bee();raver();cy();}
+  function all(){tr();render();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go]');if(go){beeStep(go.getAttribute('data-go'));return;}
+      if(e.target.closest('#etBeeScale')){R.beeOpen=!R.beeOpen;bee();var b=$('etBeeScale');if(b)b.focus({preventScroll:true});return;}
+      var d=e.target.closest('[data-d]');if(d){var p=d.getAttribute('data-d').split(':'),v=+p[1];if(p[0]==='c')setSim(D.sim.c+v,null);else setSim(null,D.sim.i+v);return;}
+      var lv=e.target.closest('[data-lv]');if(lv){var idx=+lv.getAttribute('data-lv');
+        if(lv.closest('#etSpiral')){R.sel=R.sel===idx?-1:idx;pick(idx);render();return;}
+        if(lv.closest('.et-b')){if(R.beeLv===idx){R.beeLv=null;bee();}else{R.beeLv=idx;pick(idx);render();}var f=ev.querySelector('.et-b-row[data-lv="'+idx+'"]');if(f)f.focus({preventScroll:true});return;}
+        pick(idx);render();}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etSpiral [role="button"],.et-c-tab tr.et-pick');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    var hb=$('etSpHold');
+    hb.addEventListener('pointerdown',function(e){if(hb.disabled)return;e.preventDefault();try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStep();if(!R.timer)R.timer=setInterval(holdStep,400);raver();}); /* one step each 400 ms: 2.5 Hz */
+    ['pointerup','pointercancel','lostpointercapture'].forEach(function(t){hb.addEventListener(t,stopHold);});
+    hb.addEventListener('click',function(e){if(e.detail===0)holdStep();stopHold();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etSpLess').addEventListener('click',function(){setSim(D.sim.c-100,null);});
+    $('etSpReset').addEventListener('click',function(){var cs=sl('consumerSlider'),is=sl('intakeSlider');setSim(cs?+cs.defaultValue:600,is?+is.defaultValue:25);});
+    $('etcRun').addEventListener('click',function(){var c=parseFloat($('etcC').value),i=parseFloat($('etcI').value);setSim(isNaN(c)?null:c,isNaN(i)?null:i);});
+    ['etcC','etcI'].forEach(function(id){$(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('etcRun').click();}});});
+    $('etBeeRead').addEventListener('click',function(){toEl($('etArchive'));});
+    $('etBeeFull').addEventListener('click',function(){var cs=sl('consumerSlider');toEl(cs&&cs.closest('.panel'),cs);});
+    ['consumerSlider','intakeSlider'].forEach(function(id){var s=sl(id);if(s)s.addEventListener('input',function(){readSim();render();});});
+    document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('.h-level')&&!e.target.closest('#eternal')){readSim();render();}});
+    document.addEventListener('blang',all);
+  }
+  read();wire();all();
+  window.__eternal={data:D,raver:R,setSim:setSim,recompute:recompute};
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>

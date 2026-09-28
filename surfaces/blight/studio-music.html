@@ -12,12 +12,279 @@ body[data-reg=raver]{--bg:#111018;--panel:#201a2b;--well:#16121f;--line:#544362}
 body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f5260;--accent:#80cddd;--font:ui-monospace,'Cascadia Mono',Consolas,monospace}body[data-reg=cypherpunk] .studio{max-width:1600px}body[data-reg=cypherpunk] .workspace{grid-template-columns:minmax(0,1fr) 340px}body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}body[data-reg=cypherpunk] :is(.grid-panel,.transport,.tool-panel,button,input,select,textarea){border-radius:3px}body[data-reg=cypherpunk] h1{font-size:clamp(1.6rem,3vw,2.25rem);letter-spacing:-.03em}body[data-reg=cypherpunk] .transport{padding:12px}
 @media(max-width:1000px){body[data-reg=raver] .workspace,body[data-reg=cypherpunk] .workspace{grid-template-columns:1fr}body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.studio{padding:20px 12px 70px}.studio-head{display:block}.panels,body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}.transport{gap:10px;padding:12px}.transport output{margin-inline-start:0;flex-basis:100%}.transport label{flex:1}.grid-panel,body[data-reg=bee] .grid-panel{padding:10px}.fields{grid-template-columns:1fr}.transport button{flex:1}.source-facts{overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}@media(forced-colors:active){.cell.on{border:3px solid Highlight}.cell.now{outline:3px dashed CanvasText}}
 [data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every rule is scoped under #eternal so the page's own bare element rules never reach in. ── */
+#eternal{display:block;margin:0 0 var(--sk-s2);padding:0;border:0;background:transparent;font-size:16px;line-height:1.45;color:var(--sk-ink);text-align:left}
+#eternal>div{max-width:560px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box;text-transform:none}
+#eternal :is(button,input,select){appearance:none;-webkit-appearance:none;flex:0 1 auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:normal;min-height:0;min-width:0;box-shadow:none;text-shadow:none;transition:none}
+#eternal :is(p,h2,h3,ol,ul,table){margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal a{text-decoration:none}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);background:none;text-shadow:none;letter-spacing:normal;text-transform:none;-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row,52px);width:100%;padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:0 1 auto;min-width:0}
+#eternal .et-b-row>span:first-of-type{flex:0 0 auto;max-width:60%}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1);min-width:0;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right;overflow-wrap:anywhere}
+#eternal .et-b-row .chev{flex:none;width:16px;height:16px}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-field{min-height:var(--sk-control-min,44px);width:9.5em;max-width:55%;padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);text-align:right}
+#eternal select.et-b-field{text-align:left;cursor:pointer}
+#eternal .et-b-now{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:transparent;color:var(--sk-link);font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: one touchable graphic, a physical gesture, short literal words */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art text{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink);pointer-events:none}
+#eternal .et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1);text-align:center}
+#eternal .et-r-legend i{display:block;width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+#eternal .et-r-pill .lbl{position:relative}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-duo{display:flex;justify-content:center;gap:var(--sk-s2);flex-wrap:wrap;margin-top:var(--sk-s1)}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:44px;padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:disabled{color:var(--sk-ink-mut);text-decoration:none;cursor:default}
+#eternal .et-spin{transform-box:view-box;transform-origin:0 0;animation:etSpin var(--du,120s) linear infinite}
+@keyframes etSpin{to{transform:rotate(360deg)}}
+body.et-still #eternal .et-spin{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-spin{animation:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);border-style:dashed;color:var(--sk-guard)}
+#eternal .et-c-knobs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-c-knobs label{display:flex;flex-direction:column;gap:2px;min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;word-break:break-word;color:var(--sk-ink)}
+#eternal .et-c .no{color:var(--sk-info)}#eternal .et-c .yes{color:var(--sk-verified)}#eternal .et-c .sig{color:var(--sk-you)}#eternal .et-c .grd{color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-tab{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-tab td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.on{color:var(--sk-verified)}
+#eternal .et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.fail b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost:disabled{border-color:var(--sk-ink-mut);color:var(--sk-ink-mut);cursor:not-allowed}
+
+#eternal button:disabled{opacity:1}
+#eternal{margin-top:var(--sk-s2)}
+
+/* RAVER art — the loop is a wheel: sixteen spokes are the sixteen steps (left to right becomes once
+   round), eight rings on each spoke are the eight pitches. Tap a spoke, then light its pitches on the
+   pad below; the heart plays. While the loop plays one hand sweeps once per bar (under 1 Hz at the
+   studio's fastest 200 bpm); it pauses on the motion switch and never moves under reduced motion. */
+#eternal .et-s-spoke .hit{fill:transparent}
+#eternal .et-s-spoke .axis{fill:none;stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-s-spoke .dot{fill:var(--sk-bg-card);stroke:var(--sk-ink-dim);stroke-width:1}
+#eternal .et-s-spoke .dot.on{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}
+#eternal .et-s-spoke.sel .axis{stroke:var(--sk-you);stroke-width:2.5}
+#eternal .et-s-spoke.sel .dot.on{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-s-spoke.sel .hit{fill:var(--sk-sovereign-tint)}
+#eternal .et-s-spoke:focus-visible .axis{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-s-spoke text{fill:var(--sk-ink-soft)}
+#eternal .et-s-hand{fill:none;stroke:var(--sk-you);stroke-width:3;stroke-linecap:round;opacity:0}
+#eternal .et-s-sweep{transform-box:view-box;transform-origin:0 0}
+#eternal .et-s-sweep.go .et-s-hand{opacity:.9}
+#eternal .et-s-sweep.go{animation:etSpin var(--du,2s) linear infinite}
+body.et-still #eternal .et-s-sweep.go{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-s-sweep.go{animation:none}#eternal .et-s-sweep.go .et-s-hand{opacity:0}}
+#eternal .et-s-heart .hit{fill:transparent}
+#eternal .et-s-heart .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:2}
+#eternal .et-s-heart text{fill:var(--sk-sovereign-strong)}
+#eternal .et-s-heart.on .hex{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-s-heart.on text{fill:var(--sk-on-primary)}
+#eternal .et-s-heart:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-pad{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+#eternal .et-r-pad button{min-height:48px;border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-pad button[aria-pressed="true"]{background:var(--sk-you);border-color:var(--sk-you);color:var(--sk-on-primary)}
+#eternal .lg-on{background:var(--sk-sovereign)}#eternal .lg-sel{background:var(--sk-you)}#eternal .lg-off{background:var(--sk-bg-card);border:1px solid var(--sk-line)}#eternal .lg-hand{border-top:3px solid var(--sk-you);height:3px!important}
+#eternal .et-c-knobs.four{grid-template-columns:1fr 1fr}
+#eternal .et-c-bits td{font:400 12px/1.45 var(--sk-font-mono);letter-spacing:.08em;color:var(--sk-ink-soft)}
+#eternal .et-c-bits td b{font-weight:600;color:var(--sk-verified)}
+
+/* ── THE WHOLE STUDIO, dressed per register: the studio's own variables mapped onto skaists tokens (its
+   own new bee was already paper and ink; raver and cypherpunk now wear the estate's black-green). The
+   grid's squares grow to the 44 px touch floor; the grid scrolls sideways inside its own panel. ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--accent:var(--sk-sovereign);--active:var(--sk-ink);--on-ink:var(--sk-bg);--info:var(--sk-link);--harm:var(--sk-you);--font:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--accent:var(--sk-sovereign-soft);--active:var(--sk-biomass);--on-ink:var(--sk-bg);--info:var(--sk-ai);--harm:var(--sk-you);--font:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--accent:var(--sk-ai);--active:var(--sk-verified);--on-ink:var(--sk-bg);--info:var(--sk-ai);--harm:var(--sk-you);--font:var(--sk-font-mono)}
+body[data-reg]{background:var(--sk-bg);color:var(--sk-ink)}
+@media(max-width:600px){body[data-reg] .studio{padding-left:var(--sk-s3);padding-right:var(--sk-s3)}}
+body[data-reg] :is(button,input,select,textarea):not(#eternal *){border-color:var(--sk-ink-mut)}
+body[data-reg] :is(button,input,select,textarea,summary){min-height:44px}
+body[data-reg] #grid{grid-template-columns:60px repeat(16,minmax(44px,1fr));min-width:820px}
+body[data-reg] #grid .cell{min-height:44px;min-width:44px;border-radius:var(--sk-radius-sm)}
+body[data-reg] .studio :is(.transport,.grid-panel){border-radius:var(--sk-radius-xl)}
+body[data-reg] details.tool-panel{border-radius:var(--sk-radius-xl)}
+body[data-reg] .studio :is(button,input,select,textarea){border-radius:var(--sk-radius)}
+body[data-reg] #import-palette span{border-radius:4px}
+body[data-reg] [data-experience-nav] a{border-radius:var(--sk-radius)}
+body[data-reg="bee"] .studio h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .studio :is(.eyebrow,.grid-caption,.small-note,.pitch,.step-label,.transport output,.fields label,.source-facts){font-size:14px}
+body[data-reg="bee"] .studio :is(button,input,select,textarea){font-size:16px}
+body[data-reg="bee"] .transport button{font-size:17px}
+body[data-reg="raver"] .studio h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .studio :is(p,label,output,summary,.pitch,.step-label,.grid-caption,.small-note,.source-facts,button,input,select,textarea){font-size:14px}
+body[data-reg="raver"] .transport .primary{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .studio :is(button,input,select){border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .studio #grid .cell{border-radius:var(--sk-radius-sm)}
+body[data-reg="raver"] .grid-panel{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] [data-experience-nav]{font:600 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"] .studio h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .studio :is(p,label,output,summary,button,input,select,textarea,.source-facts){font-size:13px}
+body[data-reg="cypherpunk"] .studio :is(.pitch,.step-label,.grid-caption,.small-note){font-size:12px}
+body[data-reg="cypherpunk"] :is(.grid-panel,.transport,.tool-panel,.studio button,.studio input,.studio select,.studio textarea,[data-experience-nav] a){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] [data-experience-nav]{font-size:13px}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-experience="music">
 <nav data-experience-nav aria-label="Explore skaists"><a href="../index.html" data-i18n="social.arrival.home">Home</a><a href="../blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="../blight/studio-music.html" data-i18n="experience.music" aria-current="page">Music studio</a><a href="../buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="../profile.html" data-i18n="experience.profile">People and names</a></nav>
 <noscript><p>Enable JavaScript to compose and play music in this browser.</p></noscript>
 <main class="studio">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the studio's own composition: pattern, score(), pitch(), tempo(), the
+     transport's playing flag and step, the undo state and the status line) drives all three, so the
+     facts cannot drift; each register has its own layout, graphic, gesture and voice. Nothing here
+     composes, plays or saves on its own: every gesture clicks the studio's real control below (a grid
+     square, #play, #stop, #dice, #undo, #export, #link, the sound selects) and the fronts read it back.
+     The script carries data-et-front so the engine-only unit rig (e2e/first-click.test.mjs) runs the
+     studio's own engine exactly as before. -->
+<section id="eternal" aria-label="the music studio">
+
+  <!-- NEW BEE — a calm room: how many notes, how it sounds, one plain step at a time -->
+  <div class="et-b">
+    <div class="et-b-mark">Music studio</div>
+    <h2 class="et-b-h" data-t="et.studiomusic.b.title">make a little music</h2>
+    <p class="et-b-lede" data-t="et.studiomusic.b.lede">each square is a note. rows go from low to high, and left to right is time. place a few, or let the studio surprise you, then press play.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.studiomusic.b.guard">sound starts only when you press play. nothing is published.</span></div>
+    <div class="et-b-rows">
+      <div class="et-b-row"><span data-t="et.studiomusic.b.notes">your notes</span><small data-et="beeNotes">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.studiomusic.b.sound">the sound</span><small data-et="beeSound">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.studiomusic.b.speed">the speed</span><small data-et="beeSpeed">reading…</small></div>
+      <button type="button" class="et-b-row" id="etBeePlace"><span data-t="et.studiomusic.b.place">place notes yourself</span><small><span data-t="et.studiomusic.b.grid">the grid</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>
+      <button type="button" class="et-b-row" id="etBeeKeep"><span data-t="et.studiomusic.b.keep">keep it</span><small><span data-t="et.studiomusic.b.keepV">download or copy a link</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">reading…</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo">play</button>
+      <button type="button" class="et-b-link" id="etBeeAlt">surprise me with a tune</button>
+      <p class="et-b-foot" data-t="et.studiomusic.b.foot">a link keeps the notes, not a recording.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the loop is a wheel: tap a spoke (a step), light its pitches on the pad, tap the heart to play -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the loop wheel</h2><span class="et-r-hint" id="etRaverHint">reading the loop…</span></div>
+    <svg class="et-r-art" id="etWheel" viewBox="-180 -180 360 360" role="group" aria-label="the loop as a wheel: sixteen steps round, eight pitches out"></svg>
+    <div class="et-r-legend" aria-label="what the marks mean">
+      <span><i class="lg-on"></i><em data-t="et.studiomusic.r.on">a note</em></span><span><i class="lg-sel"></i><em data-t="et.studiomusic.r.sel">your step</em></span><span><i class="lg-off"></i><em data-t="et.studiomusic.r.off">silent</em></span><span><i class="lg-hand"></i><em data-t="et.studiomusic.r.hand">the hand</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-pad" id="etPad" role="group" aria-label="the pitches of your step"></div>
+    <div class="et-r-duo">
+      <button type="button" class="et-r-ghost" id="etRaverDice" data-t="et.studiomusic.r.dice">surprise me</button>
+      <button type="button" class="et-r-ghost" id="etRaverUndo" data-t="et.studiomusic.r.undo">undo</button>
+      <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+    </div>
+  </div>
+
+  <!-- CYPHERPUNK — the score as an instrument: knobs, the pitch map, the bit rows, the transport pipeline -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">score://v1</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-knobs four">
+      <label for="etCyScale">scale<select class="et-c-field" id="etCyScale"></select></label>
+      <label for="etCyRoot">key<select class="et-c-field" id="etCyRoot"></select></label>
+      <label for="etCyWave">wave<select class="et-c-field" id="etCyWave"></select></label>
+      <label for="etCyBpm">bpm · 60 to 200<input class="et-c-field" id="etCyBpm" type="number" min="60" max="200" step="1" inputmode="numeric"></label>
+    </div>
+    <button type="button" class="et-c-primary" id="etCyRun">run transport</button>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.mapH">pitch map · row d → note</h3>
+    <table class="et-c-tab" id="etMap"></table>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.bitsH">steps · score().steps, row by row</h3>
+    <table class="et-c-tab et-c-bits" id="etBits"></table>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.pipeH">transport pipeline · in this browser</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.studiomusic.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li>a song link is #score= base64 of the utf-8 JSON score</li><li>JSON.parse(atob(link)) → validateScore(): v 1, a known scale, key, wave, bpm 60 to 200, steps = 8 rows of 16 bits</li><li>pitch(d) = 48 + key + scale[d mod n] + 12 × ⌊d / n⌋ · compare the map above</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyExport">download score.json</button>
+      <button type="button" class="et-c-ghost" id="etCyLink">copy song link</button>
+      <button type="button" class="et-c-ghost" id="etCyUndo">undo</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/studio-music.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.studiomusic.archive">the whole studio</h2>
 <header class="studio-head"><div><p class="eyebrow" data-i18n="experience.music">Music studio</p><h1><span data-view="bee" data-i18n="experience.music.bee">Make a little music.</span><span data-view="raver" data-i18n="experience.music.raver">Build your loop.</span><span data-view="cypherpunk" data-i18n="experience.music.cypher">16-step score workstation</span></h1><p class="sub" data-i18n="experience.compose">Choose squares, then press Play. Save your work before leaving this page.</p></div></header>
 <div class="transport" aria-label="Playback">
  <button type="button" id="play" class="primary" aria-pressed="false"><span aria-hidden="true">▶ </span><span data-i18n="experience.play">Play</span></button>
@@ -181,6 +448,163 @@ function presentStudio(event){const view=event?.detail?.reg||document.body.datas
  const open=panelChoices.get(view)||panelDefaults[view]||panelDefaults.bee;document.querySelectorAll('.tool-panel').forEach(p=>p.open=open.includes(p.id));lastView=view;restoreVisibleFocus(focus);}
 document.addEventListener('bregister',presentStudio);presentStudio();
 
+</script>
+<script data-et-front>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the studio's
+   own composition engine: pattern, score(), pitch(d), noteName(d), tempo(), the playing flag, the undo
+   state, the imported metadata and the #status line. Nothing here composes, plays or saves on its own:
+   every gesture clicks the studio's real control (a #grid square, #play, #stop, #dice, #undo, #export,
+   #link) or sets its real select and fires its own change event; the fronts read the engine back. The
+   step counter is never mirrored (it ticks up to 13 times a second): "playing" is read from #play. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var D={pattern:[],notes:0,scale:'',intervals:[],root:'',wave:'',bpm:0,stepMs:0,loopS:0,playing:false,undo:false,status:'',tone:'normal',pitches:[],steps:'',linkChars:0,imported:null};
+  var R={sel:0};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){[].forEach.call(document.querySelectorAll('#eternal [data-et]'),function(e){if(e.getAttribute('data-et')===sel)e.textContent=txt;});}
+  function read(){
+    D.pattern=pattern.map(function(r){return r.slice();});
+    D.notes=D.pattern.reduce(function(a,r){return a+r.filter(Boolean).length;},0);
+    D.scale=$('scale').value; D.intervals=(SCALES[D.scale]||[]).slice(); D.root=NOTES[Number($('root').value)]; D.wave=$('wave').value;
+    D.bpm=tempo(); D.stepMs=Math.round(60000/D.bpm/4*10)/10; D.loopS=Math.round(16*60/D.bpm/4*100)/100;
+    D.playing=$('play').getAttribute('aria-pressed')==='true'||$('play').disabled&&!$('stop').disabled;
+    D.undo=!$('undo').disabled; D.status=($('status').textContent||'').trim(); D.tone=$('status').dataset.tone||'normal';
+    D.pitches=[];for(var d=0;d<DEGREES;d++){var m=pitch(d);D.pitches.push({d:d,midi:m,name:noteName(d),hz:Math.round(440*Math.pow(2,(m-69)/12)*10)/10,count:D.pattern[d].filter(Boolean).length});}
+    var sc=score(); D.steps=sc.steps; D.linkChars=encodeScore(sc).length;
+    D.imported=imported&&imported.meta?imported.meta:null;
+  }
+  function soundLine(){return D.root+' '+D.scale+', '+D.wave;}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    set('beeNotes',D.notes?D.notes+' '+(D.notes===1?T('et.studiomusic.b.note1','note placed'):T('et.studiomusic.b.noteN','notes placed')):T('et.studiomusic.b.none','no notes yet'));
+    set('beeSound',soundLine()); set('beeSpeed',D.bpm+' '+T('et.studiomusic.b.bpm','beats a minute'));
+    $('etBeeNow').textContent=D.tone==='error'?D.status
+      :D.playing?T('et.studiomusic.b.playing','playing your loop, round and round. press stop to rest.')
+      :!D.notes?T('et.studiomusic.b.empty','no notes yet. let the studio surprise you, or place a few yourself.')
+      :T('et.studiomusic.b.ready','ready. press play when you are.');
+    $('etBeeGo').textContent=D.playing?T('et.studiomusic.b.stop','stop'):!D.notes?T('et.studiomusic.b.surprise','surprise me with a tune'):T('et.studiomusic.b.play','play');
+    $('etBeeAlt').textContent=!D.notes?T('et.studiomusic.b.placeLink','place notes yourself'):T('et.studiomusic.b.other','try a different tune');
+  }
+
+  /* ── RAVER ── */
+  var HEX=function(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);p.push((r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';};
+  var P=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+  function wheel(){
+    var svg=$('etWheel'); if(!svg)return;
+    if(!svg.firstChild){
+      var h='';
+      for(var s=0;s<STEPS;s++){var a=-Math.PI/2+s*2*Math.PI/STEPS,w=Math.PI/STEPS*0.9;
+        h+='<g class="et-s-spoke" data-s="'+s+'" role="button" tabindex="0"><path class="hit" d="M'+P(44,a-w)+'L'+P(172,a-w)+'A172 172 0 0 1 '+P(172,a+w)+'L'+P(44,a+w)+'A44 44 0 0 0 '+P(44,a-w)+'Z"/><line class="axis" x1="'+(52*Math.cos(a)).toFixed(1)+'" y1="'+(52*Math.sin(a)).toFixed(1)+'" x2="'+(168*Math.cos(a)).toFixed(1)+'" y2="'+(168*Math.sin(a)).toFixed(1)+'"/>';
+        for(var d=0;d<DEGREES;d++){var r=60+d*15;h+='<circle class="dot" data-d="'+d+'" cx="'+(r*Math.cos(a)).toFixed(1)+'" cy="'+(r*Math.sin(a)).toFixed(1)+'" r="5"/>';}
+        h+='</g>';}
+      h+='<g class="et-s-sweep" id="etSweep"><line class="et-s-hand" x1="0" y1="-40" x2="0" y2="-174"/></g>';
+      h+='<g class="et-s-heart" role="button" tabindex="0"><circle class="hit" r="38"/><path class="hex" d="'+HEX(38)+'"/><text id="etHeartT" y="-2" text-anchor="middle"></text><text id="etHeartS" y="17" text-anchor="middle"></text></g>';
+      svg.innerHTML=h;
+    }
+    [].forEach.call(svg.querySelectorAll('.et-s-spoke'),function(g){var s=+g.getAttribute('data-s'),on=0;
+      [].forEach.call(g.querySelectorAll('.dot'),function(c){var d=+c.getAttribute('data-d'),v=D.pattern[d][s];if(v)on++;c.setAttribute('class','dot'+(v?' on':''));c.setAttribute('r',v?'6.5':'4');});
+      g.setAttribute('class','et-s-spoke'+(R.sel===s?' sel':''));
+      g.setAttribute('aria-label',T('et.studiomusic.r.stepA','step')+' '+(s+1)+', '+on+' '+(on===1?T('et.studiomusic.r.noteA','note'):T('et.studiomusic.r.notesA','notes')));
+      g.setAttribute('aria-pressed',String(R.sel===s));});
+    var sw=$('etSweep'); sw.style.setProperty('--du',D.loopS+'s'); sw.classList.toggle('go',D.playing);
+    var hr=svg.querySelector('.et-s-heart'); hr.setAttribute('class','et-s-heart'+(D.playing?' on':''));
+    hr.setAttribute('aria-label',D.playing?T('et.studiomusic.r.stopA','stop the loop'):T('et.studiomusic.r.playA','play the loop'));
+    $('etHeartT').textContent=D.playing?T('et.studiomusic.r.stop','stop'):T('et.studiomusic.r.play','play');
+    $('etHeartS').textContent=D.bpm+' bpm';
+  }
+  function pad(){
+    var box=$('etPad');
+    if(box.children.length!==DEGREES)box.innerHTML=D.pitches.slice().reverse().map(function(p){return '<button type="button" data-d="'+p.d+'" aria-pressed="false"></button>';}).join('');
+    [].forEach.call(box.children,function(b){var d=+b.getAttribute('data-d');b.textContent=D.pitches[d].name;b.setAttribute('aria-pressed',String(!!D.pattern[d][R.sel]));
+      b.setAttribute('aria-label',D.pitches[d].name+', '+T('et.studiomusic.r.stepA','step')+' '+(R.sel+1));});
+  }
+  function raver(){
+    $('etRaverTitle').textContent=D.playing?T('et.studiomusic.r.turnsH','it turns'):T('et.studiomusic.r.h','the loop wheel');
+    $('etRaverHint').textContent=D.notes+' '+T('et.studiomusic.r.notes','notes')+' · '+D.bpm+' bpm · '+T('et.studiomusic.r.tap','tap a spoke');
+    wheel(); pad();
+    var on=D.pitches.filter(function(p){return D.pattern[p.d][R.sel];}).map(function(p){return p.name;});
+    $('etRaverCard').innerHTML='<span class="rk">'+(R.sel+1)+'</span><div><b>'+esc(T('et.studiomusic.r.step','step')+' '+(R.sel+1)+' '+T('et.studiomusic.r.of16','of 16')+' · '+(on.length?on.join(' '):T('et.studiomusic.r.rest','a rest')))+'</b><span>'+esc(T('et.studiomusic.r.light','light a pitch below · the heart plays'))+'</span></div>';
+    var u=$('etRaverUndo'); u.disabled=!D.undo;
+  }
+
+  /* ── CYPHERPUNK ── */
+  function kv(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+  function mirror(id,src){var sel=$(id),o=$(src);if(sel.options.length!==o.options.length)sel.innerHTML=o.innerHTML;if(document.activeElement!==sel)sel.value=o.value;}
+  function cy(){
+    set('path','score://v1 · 8 × 16 · '+D.root+' '+D.scale+' · '+D.wave);
+    $('etChips').innerHTML='<span class="'+(D.playing?'ok':'')+'">'+(D.playing?'playing':'stopped')+'</span><span>'+D.bpm+' bpm</span><span class="on">notes '+D.notes+'</span><span>'+(D.undo?'undo ready':'no undo')+'</span>';
+    mirror('etCyScale','scale'); mirror('etCyRoot','root'); mirror('etCyWave','wave');
+    var b=$('etCyBpm'); if(document.activeElement!==b)b.value=String(D.bpm);
+    $('etMap').innerHTML='<tr><th>d</th><th>midi</th><th>note</th><th>hz</th><th>on</th></tr>'+D.pitches.slice().reverse().map(function(p){return '<tr><td>'+p.d+'</td><td>'+p.midi+'</td><td>'+esc(p.name)+'</td><td>'+p.hz+'</td><td class="'+(p.count?'on':'')+'">'+p.count+'</td></tr>';}).join('');
+    var rows=D.steps.split('|');
+    $('etBits').innerHTML='<tr><th>d</th><th>steps 1 to 16</th></tr>'+rows.map(function(r,d){return {d:d,r:r};}).reverse().map(function(x){return '<tr><td>'+x.d+'</td><td>'+x.r.split('').map(function(c){return c==='1'?'<b>1</b>':'0';}).join('')+'</td></tr>';}).join('');
+    var steps=[
+      ['compose','pattern 8 × 16 · '+D.notes+' notes',D.notes?'done':'now'],
+      ['pitch',D.scale+' ['+D.intervals.join(',')+'] · key '+D.root+' → midi '+D.pitches[0].midi+' to '+D.pitches[7].midi,'done'],
+      ['tempo',D.bpm+' bpm, clamped 60 to 200 → a step every '+D.stepMs+' ms · '+D.loopS+' s a bar','done'],
+      ['transport',D.playing?'setTimeout loop · running':'stopped · starts only on a press',D.playing?'done':'now'],
+      ['web audio',D.wave+' osc · gain 0.12 · 10 ms attack · exp decay',D.playing?'done':'todo'],
+      ['keep','JSON download or #score= link · '+D.linkChars.toLocaleString()+' of 48,000 chars · no write','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=kv([['writes','<span class="yes">none</span> · no chain write, no signature, no send'],['link',esc(D.linkChars.toLocaleString()+' chars · the score, not a recording')],
+      ['imported',D.imported?esc(String(D.imported.scale||'metadata')+' · kept beside the controls'):'<span class="no">none</span>'],['status',esc(D.status)]]);
+    $('etCyRun').textContent=D.playing?'stop transport':'run transport';
+    $('etCyUndo').disabled=!D.undo;
+  }
+
+  function labels(){[].forEach.call(document.querySelectorAll('#eternal [data-t]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the studio's own controls own every real step ── */
+  function click(el){if(el&&!el.disabled)el.click();}
+  function run(){read();click($(D.playing?'stop':'play'));setTimeout(all,0);}
+  function dice(){click($('dice'));all();}
+  function toggle(d,s){click(document.querySelector('#grid .cell[data-d="'+d+'"][data-s="'+s+'"]'));all();}
+  function setKnob(id,v){var el=$(id);el.value=v;el.dispatchEvent(new Event('change'));all();}
+  function panel(id){var p=$(id);if(p&&p.tagName==='DETAILS'){p.open=true;}var t=p&&(p.querySelector('summary')||p);if(t){t.scrollIntoView({block:'start'});t.focus({preventScroll:true});}}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.studiomusic.r.stillOs','still · your device asks for less motion'):still?T('et.studiomusic.r.resume','resume motion'):T('et.studiomusic.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeGo').addEventListener('click',function(){read();if(!D.notes&&!D.playing)dice();else run();});
+    $('etBeeAlt').addEventListener('click',function(){read();if(!D.notes){var g=document.querySelector('#grid .cell[tabindex="0"]');if(g){g.scrollIntoView({block:'center'});g.focus({preventScroll:true});}}else dice();});
+    $('etBeePlace').addEventListener('click',function(){var g=document.querySelector('#grid .cell[tabindex="0"]');if(g){g.scrollIntoView({block:'center'});g.focus({preventScroll:true});}});
+    $('etBeeKeep').addEventListener('click',function(){panel('save-panel');});
+    $('etRaverDice').addEventListener('click',dice);
+    $('etRaverUndo').addEventListener('click',function(){click($('undo'));all();});
+    $('etCyRun').addEventListener('click',run);
+    $('etCyExport').addEventListener('click',function(){click($('export'));all();});
+    $('etCyLink').addEventListener('click',function(){click($('link'));setTimeout(all,50);});
+    $('etCyUndo').addEventListener('click',function(){click($('undo'));all();});
+    [['etCyScale','scale'],['etCyRoot','root'],['etCyWave','wave'],['etCyBpm','bpm']].forEach(function(k){$(k[0]).addEventListener('change',function(){setKnob(k[1],this.value);this.value=$(k[1]).value;});});
+    $('etPad').addEventListener('click',function(e){var b=e.target.closest('button[data-d]');if(b)toggle(+b.getAttribute('data-d'),R.sel);});
+    ev.addEventListener('click',function(e){
+      var sp=e.target.closest('#etWheel .et-s-spoke'); if(sp){R.sel=+sp.getAttribute('data-s');raver();return;}
+      if(e.target.closest('#etWheel .et-s-heart'))run();
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest&&e.target.closest('#etWheel [role="button"]');if(!t)return;
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));return;}
+      var sp=t.closest('.et-s-spoke'); if(sp&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();var s=(+sp.getAttribute('data-s')+(e.key==='ArrowRight'?1:15))%STEPS;R.sel=s;raver();var n=$('etWheel').querySelector('.et-s-spoke[data-s="'+s+'"]');if(n)n.focus();}});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the studio speaks through its grid (aria-pressed, never the per-step highlight), its buttons and its status line */
+    new MutationObserver(function(){all();}).observe($('grid'),{childList:true,subtree:true,attributes:true,attributeFilter:['aria-pressed']});
+    var mo=new MutationObserver(function(){all();});
+    ['play','stop','undo'].forEach(function(id){mo.observe($(id),{attributes:true,attributeFilter:['disabled','aria-pressed']});});
+    mo.observe($('status'),{childList:true,characterData:true,subtree:true});
+    ['scale','root','wave','bpm'].forEach(function(id){$(id).addEventListener('change',function(){setTimeout(all,0);});});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
 </script>
 <script src="../tour.js?v=42"></script>
 </body>
