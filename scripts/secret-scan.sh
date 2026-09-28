@@ -172,9 +172,15 @@ selftest|--selftest)
       # allowed (the exemption, hex-only); the names arm must stay live there.
       M2=$(keyshape mint cmp)
       PIN=$(printf kickstart | sha256sum | cut -d ' ' -f 1)
+      # PEM header assembled at runtime (KE""Y): a literal here made THIS file
+      # match its own PEM_RE in every tree scan of a repo carrying it — same
+      # law as the [Y] bracket trick on the PEM_RE line itself, proven the
+      # hard way when the literal red-lined CI scan + push-preflight P11 at
+      # 3d4e39e6e (both scan this committed file back).
+      PEMHDR="-----BEGIN FIXTURE PRIVATE KE""Y-----"
       mkdir -p ops/nixos/buzz-hostinger
       printf 'fixture: kit WIFs\n%s\n%s\n' "$M" "$M2" > ops/nixos/buzz-hostinger/fx-kit.txt
-      printf 'fixture: kit pem\n-----BEGIN FIXTURE PRIVATE KEY-----\n' > ops/nixos/buzz-hostinger/fx-kit2.txt
+      printf 'fixture: kit pem\n%s\n' "$PEMHDR" > ops/nixos/buzz-hostinger/fx-kit2.txt
       printf 'fixture: kit pin\n%s\n' "$PIN" > ops/nixos/buzz-hostinger/fx-pin.txt
       printf 'innocent content\n' > ops/nixos/buzz-hostinger/fx-name.key
       git add ops/nixos 2>/dev/null
