@@ -54,9 +54,13 @@
 #     IDs, database/volume/executable sha256s — never key material, and
 #     Dockerfiles cannot carry a same-line marker (Docker syntax has no
 #     inline comments, and the digests are load-bearing FROM verification,
-#     not removable into prose). HEX-rule exclusion only (diff + tree hex
-#     lines); the filename, PEM and WIF/keyshape arms stay LIVE over this
-#     path — the kit was verified keyshape-clean at banking (2026-09-26).
+#     not removable into prose). HEX-rule exclusion only, via a hex-dedicated
+#     stream in diff mode and the hex pipeline's own pathspec in tree mode
+#     (independent review 2026-09-26 P1: placing the exclusion on diff mode's
+#     SHARED added stream silenced the PEM and WIF/keyshape arms with it —
+#     repaired same day, pinned by selftest rows S5-S9); the filename, PEM
+#     and WIF/keyshape arms stay LIVE over this path in BOTH modes — the kit
+#     was verified keyshape-clean at banking (2026-09-26).
 #     On the voucher-escrow/fixtures basis, 2026-09-26.
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
@@ -158,6 +162,38 @@ selftest|--selftest)
       rm -f fx-unmarked.txt
       git add fx-marked.txt fx-noise.txt fx-npub.txt 2>/dev/null
       sh scripts/secret-scan.sh tree > "$T/t3" 2>&1; echo "$?" > "$T/r3"
+      # S5-S9 (independent review 2026-09-26, P1 — REQUEST CHANGES on b80f304c7):
+      # the ops/nixos/ hex-only exemption had been placed on diff mode's SHARED
+      # `added` stream, silencing the PEM and WIF/keyshape arms over that
+      # directory in the pre-commit path while the packet claimed "hex arms
+      # only". These rows pin EVERY arm to its own input, in both modes, from
+      # ordinary filenames inside the exempt directory: WIF (both checksum
+      # forms) and PEM must block everywhere; the public hex pin must stay
+      # allowed (the exemption, hex-only); the names arm must stay live there.
+      M2=$(keyshape mint cmp)
+      PIN=$(printf kickstart | sha256sum | cut -d ' ' -f 1)
+      mkdir -p ops/nixos/buzz-hostinger
+      printf 'fixture: kit WIFs\n%s\n%s\n' "$M" "$M2" > ops/nixos/buzz-hostinger/fx-kit.txt
+      printf 'fixture: kit pem\n-----BEGIN FIXTURE PRIVATE KEY-----\n' > ops/nixos/buzz-hostinger/fx-kit2.txt
+      printf 'fixture: kit pin\n%s\n' "$PIN" > ops/nixos/buzz-hostinger/fx-pin.txt
+      printf 'innocent content\n' > ops/nixos/buzz-hostinger/fx-name.key
+      git add ops/nixos 2>/dev/null
+      sh scripts/secret-scan.sh tree > "$T/t5" 2>&1; echo "$?" > "$T/r5"
+      git rm -q --cached -r ops/nixos 2>/dev/null
+      git add ops/nixos/buzz-hostinger/fx-kit.txt 2>/dev/null
+      sh scripts/secret-scan.sh diff > "$T/t6" 2>&1; echo "$?" > "$T/r6"
+      git rm -q --cached ops/nixos/buzz-hostinger/fx-kit.txt 2>/dev/null
+      git add ops/nixos/buzz-hostinger/fx-kit2.txt 2>/dev/null
+      sh scripts/secret-scan.sh diff > "$T/t7" 2>&1; echo "$?" > "$T/r7"
+      git rm -q --cached ops/nixos/buzz-hostinger/fx-kit2.txt 2>/dev/null
+      git add ops/nixos/buzz-hostinger/fx-pin.txt 2>/dev/null
+      sh scripts/secret-scan.sh diff > "$T/t8" 2>&1; echo "$?" > "$T/r8"
+      sh scripts/secret-scan.sh tree > "$T/t8t" 2>&1; echo "$?" > "$T/r8t"
+      git rm -q --cached ops/nixos/buzz-hostinger/fx-pin.txt 2>/dev/null
+      git add ops/nixos/buzz-hostinger/fx-name.key 2>/dev/null
+      sh scripts/secret-scan.sh diff > "$T/t9" 2>&1; echo "$?" > "$T/r9"
+      sh scripts/secret-scan.sh tree > "$T/t9t" 2>&1; echo "$?" > "$T/r9t"
+      git rm -q --cached ops/nixos/buzz-hostinger/fx-name.key 2>/dev/null
     )
     r1=$(cat "$T/r1" 2>/dev/null || echo 99)
     r2=$(cat "$T/r2" 2>/dev/null || echo 99)
@@ -175,6 +211,28 @@ selftest|--selftest)
     if [ "$r4" -eq 0 ] && grep -q "clean" "$T/t4"; then
       echo "  S4 known-GOOD shape-only noise ALONE staged, diff mode -> clean (correct)"
     else echo "  S4 known-GOOD  false positive on the noise class in DIFF mode (rc=$r4)"; st=1; fi
+    r5=$(cat "$T/r5" 2>/dev/null || echo 99)
+    r6=$(cat "$T/r6" 2>/dev/null || echo 99)
+    r7=$(cat "$T/r7" 2>/dev/null || echo 99)
+    r8=$(cat "$T/r8" 2>/dev/null || echo 99)
+    r8t=$(cat "$T/r8t" 2>/dev/null || echo 99)
+    r9=$(cat "$T/r9" 2>/dev/null || echo 99)
+    r9t=$(cat "$T/r9t" 2>/dev/null || echo 99)
+    if [ "$r5" -eq 1 ] && grep -qF "fx-kit.txt" "$T/t5" && ! grep -qF "fx-pin.txt" "$T/t5"; then
+      echo "  S5 known-BAD  kit WIF+PEM+keyname staged together, tree mode -> BLOCKED by content/name arms; the HEX-exempt pin stays silent (correct)"
+    else echo "  S5 known-BAD  ops/nixos tree wiring broken (rc=$r5)"; st=1; fi
+    if [ "$r6" -eq 1 ] && grep -q "key-shaped" "$T/t6"; then
+      echo "  S6 known-BAD  kit VALID WIF both forms ALONE staged, diff mode (the pre-commit path) -> BLOCKED (correct)"
+    else echo "  S6 known-BAD  ops/nixos WIF passes pre-commit - the P1 regression (rc=$r6)"; st=1; fi
+    if [ "$r7" -eq 1 ] && grep -q "PEM private-key" "$T/t7"; then
+      echo "  S7 known-BAD  kit PEM header ALONE staged, diff mode -> BLOCKED (correct)"
+    else echo "  S7 known-BAD  ops/nixos PEM passes pre-commit - the P1 regression (rc=$r7)"; st=1; fi
+    if [ "$r8" -eq 0 ] && grep -q "clean" "$T/t8" && [ "$r8t" -eq 0 ] && grep -q "clean" "$T/t8t"; then
+      echo "  S8 known-GOOD unmarked public hex pin inside ops/nixos ALONE, diff AND tree -> clean (the exemption, hex-only) (correct)"
+    else echo "  S8 known-GOOD  ops/nixos hex exemption lost (rc=$r8/$r8t)"; st=1; fi
+    if [ "$r9" -eq 1 ] && [ "$r9t" -eq 1 ]; then
+      echo "  S9 known-BAD  secret-bearing FILENAME inside ops/nixos, diff AND tree -> BLOCKED (names arm live) (correct)"
+    else echo "  S9 known-BAD  ops/nixos filename arm silenced (rc=$r9/$r9t)"; st=1; fi
     rm -rf "$T"
     [ "$st" -eq 0 ] && echo "secret-scan selftest ok - the blocker blocks, the marked pass, the noise collapses." \
                       || echo "secret-scan selftest FAIL - see above."
@@ -202,9 +260,18 @@ diff)
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
     names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)ops/nixos/' |
+    # TWO content streams, one boundary (independent review 2026-09-26, P1):
+    # `added` is the FULL staged diff and feeds PEM and WIF/keyshape; the hex
+    # rule alone reads hex_added, which additionally drops ops/nixos/ (public
+    # build pins — header bullet above). The regressed shape excluded the
+    # dir while building `added`, silencing pem+wif over it in this mode.
+    # Keep the two pathspec lists in sync; the hex line adds exactly
+    # ops/nixos/. Selftest rows S5-S9 pin every arm to its own input.
+    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
         grep '^+' | grep -v '^+++')
-    hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
+    hex_added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)ops/nixos/' |
+        grep '^+' | grep -v '^+++')
+    hex=$(printf '%s\n' "$hex_added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     wif=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$WIF_RE" | while IFS= read -r lh; do
         aln=${lh%%:*}; acontent=${lh#*:}
