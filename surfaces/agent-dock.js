@@ -132,7 +132,7 @@
     var s=sessions[current.id];if(!s)return;foot.hidden=helpOpen||current.id==='baigents';$('adSend').disabled=!!current.src&&!s.ready;$('adSend').textContent=current.id==='bloverai'?'Build handoff':'Send';
     prompt.setAttribute('aria-label',current.id==='bloverai'?'Question for your handoff':'Message '+current.name);prompt.placeholder=current.id==='bloverai'?'What would you like to ask your AI?':'Ask '+current.name+'…';
     $('adNote').textContent=current.note;$('adOpenPage').hidden=!current.src;$('adOpenPage').href=current.src||R+'bmeshasi.html';
-    notice(s.status||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
+    notice(s.status||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':s.staged||'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
   }
   function showCurrent(){
     session(current);Object.keys(sessions).forEach(function(id){var s=sessions[id];s.panel.hidden=helpOpen||id!==current.id;suspend(s,s.panel.hidden||!win.classList.contains('on'));});
@@ -142,9 +142,9 @@
     b.onclick=function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;current=a;helpOpen=false;showCurrent();prompt.value=sessions[a.id].draft;
       $('adAgents').querySelectorAll('.adAg').forEach(function(chip){chip.setAttribute('aria-pressed',String(chip.getAttribute('data-agent')===a.id));});};$('adAgents').appendChild(b);
   });
-  function setOpen(open){
+  function setOpen(open,quiet){
     win.classList.toggle('on',open);orb.setAttribute('aria-expanded',String(open));orb.setAttribute('aria-label',open?'Close the agent dock':'Open the agent dock');
-    if(open){showCurrent();if(!foot.hidden)prompt.focus();else $('adClose').focus();}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
+    if(open){showCurrent();if(!quiet){if(!foot.hidden)prompt.focus();else $('adClose').focus();}}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
   }
   orb.onclick=function(){setOpen(!win.classList.contains('on'));};$('adClose').onclick=function(){setOpen(false);};$('adHelpButton').onclick=function(){helpOpen=!helpOpen;showCurrent();};
   $('adExpand').onclick=function(){expanded=!expanded;this.textContent=expanded?'Restore':'Expand';win.classList.toggle('is-expanded',expanded);this.setAttribute('aria-pressed',String(expanded));this.setAttribute('aria-label',expanded?'Restore the agent dock size':'Expand the agent dock');fitDock();};
@@ -169,9 +169,9 @@
       try{f.document.getElementById('q').value=v;f.window.ask();}catch(e){s.status='The agent could not accept your message. Your draft is kept; check the conversation before trying again.';s.error=true;updateComposer();return;}
       s.status='Message received by '+current.name+'.';
     }else{buildHandoff(s,v);s.status='Handoff prepared here. Copy it when you are ready.';}
-    s.error=false;prompt.value='';s.draft='';updateComposer();prompt.focus();
+    s.error=false;s.staged='';prompt.value='';s.draft='';updateComposer();prompt.focus();
   }
-  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;});
+  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){var s=sessions[current.id];if(s){s.draft=prompt.value;if(s.staged){s.staged='';updateComposer();}}});
   prompt.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();send();}});
   function shortcut(e){if(e.isComposing)return;if(e.key==='Escape'&&win.classList.contains('on')){e.preventDefault();setOpen(false);return;}if(!e.altKey)return;var k=e.key.toLowerCase();
     if(k==='/'||k==='m'){e.preventDefault();setOpen(!win.classList.contains('on'));}else if(k==='h'){e.preventDefault();setOpen(true);}else if(/^[1-4]$/.test(k)){e.preventDefault();$('adAgents').querySelectorAll('.adAg')[Number(k)-1].click();setOpen(true);}
@@ -253,7 +253,8 @@
   /* WebMCP (W3C Web Machine Learning CG draft, document.modelContext): the dock describes itself
      to a browser agent. Progressive only: with no API, nothing registers and nothing changes.
      No tool sends, copies or leaves the page. Staging places words in the composer and the
-     person reads them and presses Send; a person's unsent draft is kept, never replaced. */
+     person reads them and presses Send; a person's unsent draft is kept, never replaced, and the
+     dock opens without taking focus, so a keystroke meant elsewhere cannot send the draft. */
   var mc=document.modelContext;
   if(mc&&typeof mc.registerTool==='function'){
     var reply=function(t){return {content:[{type:'text',text:t}]};};
@@ -267,15 +268,17 @@
       description:'Open the BNR agent dock on one agent and place a draft in its composer. This does not send. The person reads the draft and presses Send.',
       inputSchema:{type:'object',properties:{
         agent:{type:'string',enum:['queen','hearth','bloverai'],description:'queen answers from BNR’s written knowledge; hearth routes creative ideas; bloverai builds a handoff for an AI the person chooses.'},
-        message:{type:'string',maxLength:4000,description:'The draft to place. It is appended after any unsent draft already there.'}},required:['agent','message']},
+        message:{type:'string',maxLength:4000,description:'The draft to place. It is appended after any unsent draft already there; the composer holds 4000 characters in all.'}},required:['agent','message']},
       execute:function(input){
         var id=input&&input.agent,v=String((input&&input.message)||'').trim(),a=agents.filter(function(x){return x.id===id&&x.id!=='baigents';})[0];
         if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
         if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
-        Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true);
-        var s=sessions[a.id],kept=prompt.value.trim()?prompt.value.replace(/\s+$/,'')+'\n\n':'';
-        prompt.value=(kept+v).slice(0,4000);s.draft=prompt.value;
-        notice('A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.');
+        var had=String((sessions[a.id]&&sessions[a.id].draft)||'').replace(/\s+$/,''),kept=had.trim()?had+'\n\n':'';
+        if(had.slice(-v.length)===v)return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
+        if(kept.length+v.length>4000)return Promise.resolve(reply('Not staged. The person’s unsent draft leaves room for '+Math.max(0,4000-kept.length)+' characters; this message has '+v.length+'.'));
+        Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
+        var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;
+        s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
         return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
       }});
   }

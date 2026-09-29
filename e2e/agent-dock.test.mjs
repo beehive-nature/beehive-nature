@@ -417,3 +417,32 @@ test('staging refuses bAigents, unknown agents and empty text without opening th
 test('a registry that throws or rejects never breaks the dock',async()=>{
   for(const fail of ['throw','reject']){const d=dock({modelContext:modelContext({fail})});await nextTick();d.open();const q=d.load(frameFor(d,'queen'));d.submit('fine');assert.deepEqual(q.calls,['fine']);}
 });
+
+/* Review findings on fc096d959, each pinned: focus, a notice that survives the frame, room, repeats. */
+test('staging opens the dock without taking focus, so a stray Enter cannot send',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc}),field=d.document.createElement('input');d.body.appendChild(field);field.focus();
+  await mc.tools[1].execute({agent:'queen',message:'read me first'});
+  assert.equal(d.win.classList.contains('on'),true);assert.equal(d.document.activeElement,field);
+});
+
+test('the staged-by-an-agent notice survives the frame loading and clears when the person types',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'queen',message:'before load'});
+  const queen=d.load(frameFor(d,'queen'));assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  d.choose('hearth');d.choose('queen');assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  d.type('before load, edited');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+  assert.deepEqual(queen.calls,[]);
+});
+
+test('staging refuses rather than truncating when the person’s draft leaves no room',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const mine='x'.repeat(3990);d.type(mine);
+  const r=toolText(await mc.tools[1].execute({agent:'queen',message:'this will not fit'}));
+  assert.match(r,/^Not staged\. .*room for 8 characters; this message has 17/);assert.equal(d.$('adPrompt').value,mine);
+});
+
+test('repeating the same stage does not pile text up',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'});
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Not staged again/);
+  assert.equal(d.$('adPrompt').value,'grow a mushroom');
+});
