@@ -9,15 +9,19 @@
 // from that open handle, and the body is bounded to that size, so the headers and the body come
 // from one snapshot; a failure after the headers destroys the socket (a browser reports a failed
 // load, never a good 200). A missing path is 404; any other fault (EACCES, EMFILE, EIO) is 500 and
-// written to stderr, so a harness never mistakes a server fault for a missing file. Only GET and
-// HEAD are served: anything else is 405 and written to stderr. Used by myspace-stranger.mjs and myspace-seam.mjs. The other harnesses
+// written to stderr, so a harness never mistakes a server fault for a missing file; a read fault
+// after the headers, or a body that comes up short of the promised length (the file shrank under
+// the read), destroys the socket and is written to stderr too, a client that went away is not.
+// Only GET and HEAD are served: anything else is 405 and written to stderr. offBox(url, base) is
+// the one rule for "a request that left this server" (the URL's origin is not the base; an
+// unparseable URL counts as left), shared by the gates so they cannot disagree. Used by myspace-stranger.mjs and myspace-seam.mjs. The other harnesses
 // under e2e/ that open their own server (184 files on 2026-09-29, `grep -l createServer
 // e2e/*.mjs | wc -l`), myspace-eternal.test.mjs (CI-gated) among them, still carry their own
 // copies; each can move here when its owner chooses.
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
-import { pipeline } from 'node:stream';
+import { pipeline, Transform } from 'node:stream';
 import { realpath, open } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 
@@ -34,10 +38,15 @@ export const MIME = {
 const notFound = res => { if (!res.headersSent) { res.writeHead(404); res.end('nf'); } else res.destroy(); };
 const serverError = (res, e) => { process.stderr.write(`serve: ${e?.code || e?.message || e}\n`); if (!res.headersSent) { res.writeHead(500); res.end('err'); } else res.destroy(); };
 const missing = e => e?.code === 'ENOENT' || e?.code === 'ENOTDIR' || e instanceof URIError; // a path the tree does not have (or one that does not decode)
+export const offBox = (url, base) => { try { return new URL(url).origin !== base; } catch { return true; } };
 // a directory: its index when the slash is there (the caller appended index.html, so reaching here means no index), else a redirect to the slash form
 const directory = (res, path, rawPath, query) => { if (path.endsWith('/')) notFound(res); else { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : ''), 'Cache-Control': 'no-store' }); res.end(); } };
-// the stream owns the file handle and closes it; a client that goes away mid-body destroys the stream too
-const send = (stream, res) => pipeline(stream, res, () => {});
+// the stream owns the file handle and closes it; a client that goes away mid-body destroys the stream too.
+// The body is counted against the length the headers promised: a short one (the file shrank between the stat
+// and the read) is an error, so the socket is destroyed rather than left open for the client to wait on.
+const bounded = n => { let seen = 0; return new Transform({ transform(c, _, cb) { seen += c.length; cb(null, c); }, flush(cb) { cb(seen === n ? null : Object.assign(new Error(`short body: ${seen} of ${n} bytes`), { code: 'ESHORT' })); } }); };
+const gone = e => e?.code === 'ERR_STREAM_PREMATURE_CLOSE' || e?.code === 'ECONNRESET' || e?.code === 'EPIPE'; // the client left; not a fault of the server
+const send = (stream, res, n) => pipeline(stream, bounded(n), res, e => { if (e && !gone(e)) process.stderr.write(`serve: ${e.code || e.message} after the headers\n`); });
 
 export async function serveTree(root) {
   const top = await realpath(resolve(root));
@@ -49,6 +58,7 @@ export async function serveTree(root) {
       const [rawPathIn, query] = req.url.split(/\?(.*)/s);
       const rawPath = rawPathIn.replace(/^\/+/, '/'); // "//dir" would otherwise redirect off the origin (protocol-relative)
       const path = decodeURIComponent(rawPath);
+      if (path.includes('\0')) return notFound(res); // no path in the tree has a NUL in it (realpath would throw ERR_INVALID_ARG_VALUE: a fault it is not)
       let file = resolve(join(top, path));
       if (!inside(file)) return notFound(res);
       if (path.endsWith('/')) file = join(file, 'index.html');
@@ -64,11 +74,11 @@ export async function serveTree(root) {
         const start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
         if (start > end || start >= st.size) { await fh.close(); fh = null; res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
         res.writeHead(206, { 'Content-Type': type, 'Content-Length': end - start + 1, 'Content-Range': `bytes ${start}-${end}/${st.size}`, 'Accept-Ranges': 'bytes' });
-        const s = fh.createReadStream({ start, end }); fh = null; return send(s, res); // the stream owns the handle from here
+        const s = fh.createReadStream({ start, end }); fh = null; return send(s, res, end - start + 1); // the stream owns the handle from here
       }
       res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' });
       if (st.size === 0) { await fh.close(); fh = null; res.end(); return; } // an empty file: no stream (a bound of [0, -1] would read one byte if the file grew)
-      const s = fh.createReadStream({ start: 0, end: st.size - 1 }); fh = null; send(s, res); // bounded to the size the header promised
+      const s = fh.createReadStream({ start: 0, end: st.size - 1 }); fh = null; send(s, res, st.size); // bounded to the size the header promised
     } catch (e) { if (fh) fh.close().catch(() => {}); if (missing(e)) notFound(res); else serverError(res, e); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });

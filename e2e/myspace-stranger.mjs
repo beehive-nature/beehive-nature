@@ -48,7 +48,7 @@ import { writeFile } from 'node:fs/promises';
 import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { serveTree } from './lib/serve.mjs';
+import { serveTree, offBox as leftBox } from './lib/serve.mjs';
 import { argReader, UsageError } from './lib/args.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -107,12 +107,11 @@ function pickByWords(intent, options) {
   if (top <= 0 || leaders.length > 1) return { none: true, score: top, tied: leaders.length > 1 ? leaders.map(l => l.purpose) : null };
   return leaders[0];
 }
-// implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp" is not "gas".
-// The four rail names the page can print (temp, local, blossom, ant) are all in, so the count does not depend on
-// which rail a row happened to land on; so are the networks it names (autonomi, arbitrum). Some of these are also
-// plain English (local, temp, token, scheme, gas): they are counted wherever they appear, and the receipts print
-// every word with its count so a reader can see whether a hit is a rail name or ordinary prose. On this page today
-// they appear only as rail and network names.
+// the fixed implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp"
+// is not "gas". Rail and network names are NOT here: they come from the page's own declarations at run time
+// (R.railWords, read from __eternal.data.rails), so a page that declares no rails counts none. Some of these are
+// also plain English (token, scheme, gas): they are counted wherever they appear, and the receipts print every word
+// with its count so a reader can see whether a hit is a rail name or ordinary prose.
 const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
 // …plus the rail schemes and networks the page itself declares at run time (temp, local, blossom, ant; autonomi,
 // arbitrum-one, skaists.buzz today), each as one whole phrase: one source of truth for the rail names, so a renamed
@@ -199,7 +198,7 @@ async function pressControl(page, reg, purpose) {
 const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
 const errText = e => String(e && e.message ? e.message : e).split('\n')[0]; // a page can throw a bare string
 const cut = (s, n) => { if (s.length <= n) return s; const i = s.slice(0, n + 1).search(/\s\S*$/); return s.slice(0, i > 0 ? i : n) + ' …'; }; // cut at a word boundary, marked
-const line = s => String(s ?? '').replace(/\n/g, ' / '); // a line break inside quoted text (one element ending, the next beginning) prints as " / " in the receipts // never mid-word, and marked
+const line = s => String(s ?? '').replace(/\n/g, ' / '); // a line break inside quoted text (one element ending, the next beginning) prints as " / " in the receipts
 async function stranger(reg) {
   // the record is built before anything can fail, so a run that dies keeps what it had gathered
   const R = { reg, revision: REVISION, unsound: [], wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, failedTaps: 0, railWords: [], choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { frontBeforeTaps: {}, cardsRead: {}, archive: {}, archiveWithRow: null }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
@@ -215,9 +214,10 @@ async function stranger(reg) {
     // requests are never paused, so the page's own timings are not stretched by the interception
     // the route only aborts; the context's request event is the one logger (it fires for routed requests and for a
     // worker's own requests alike). WebSockets are not requests: logged apart, and a socket cannot be aborted from here
-    await page.route(u => u.origin !== base, route => route.abort());
-    ctx.on('request', req => { try { const u = new URL(req.url()); if (u.origin !== base) wire[phase].add(u.host + u.pathname); } catch {} });
-    page.on('websocket', ws => { try { const u = new URL(ws.url()); if (u.origin !== base) wire[phase].add('ws ' + u.host + u.pathname); } catch {} });
+    await page.route(u => leftBox(u.href, base), route => route.abort());
+    const where = url => { try { const u = new URL(url); return u.host + u.pathname; } catch { return String(url); } };
+    ctx.on('request', req => { if (leftBox(req.url(), base)) wire[phase].add(where(req.url())); });
+    page.on('websocket', ws => { if (leftBox(ws.url(), base)) wire[phase].add('ws ' + where(ws.url())); });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
@@ -256,12 +256,11 @@ async function stranger(reg) {
     R.railWords = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return []; const w = new Set(); for (const r of d.rails || []) { if (r.scheme) w.add(String(r.scheme).toLowerCase()); for (const n of r.networks || []) if (String(n).trim()) w.add(String(n).toLowerCase().trim()); } return [...w]; });
     const leak = t => countLeak(t, R.railWords);
     R.leakage.frontBeforeTaps = leak(front); R.leakage.archive = leak(archive); // .front is set once the cards are known
-    // the purpose controls: their own visible words, and separately what they tell a screen reader
-    // the controls' own words under the one visibility rule (an SVG ring has no text of its own; a <title> inside it is not shown)
+    // the purpose controls' own words under the one visibility rule (an SVG ring has no text of its own; a <title>
+    // inside it is not shown, and its aria-label is not read: words no sighted visitor sees are not scored)
     const options = await page.evaluate(new Function('sel', SEEN_TEXT + ` return [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
-      visible: typeof el.innerText === 'string' ? wordsIn(el, null) : '',
-      aria: el.getAttribute('aria-label') || '',
+      visible: wordsIn(el, null),
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
     }));`), CONTROLS[reg]);
     R.offered = options.map(o => o.purpose);

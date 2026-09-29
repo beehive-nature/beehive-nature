@@ -43,7 +43,7 @@ import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { serveTree } from './lib/serve.mjs';
+import { serveTree, offBox as leftBox } from './lib/serve.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -87,7 +87,7 @@ function eventId(ev) {
 // at, and a code path that "is not entered" is a weaker claim than a wire that
 // stayed silent.
 function offBox(ctx, bag) {
-  ctx.on('request', req => { if (!req.url().startsWith(BASE + "/")) bag.push(req.method() + ' ' + req.url()); });
+  ctx.on('request', req => { if (leftBox(req.url(), BASE)) bag.push(req.method() + ' ' + req.url()); }); // the shared server's one rule for "left the box"
 }
 
 async function mockHive(ctx) {
