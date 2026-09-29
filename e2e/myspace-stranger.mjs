@@ -48,11 +48,12 @@ import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serveTree } from './lib/serve.mjs';
-import { argReader } from './lib/args.mjs';
+import { argReader, UsageError } from './lib/args.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]'); // --k v or --k=v; a missing value exits 2
+const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]'); // --k v or --k=v; a missing value is a UsageError
+process.on('uncaughtException', e => { if (e instanceof UsageError) { process.stderr.write(e.message + '\n'); process.exit(2); } throw e; }); // nothing is open yet when the flags are read
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
    controls carry no words of their own) the card that answers a tap */
@@ -145,16 +146,12 @@ const OWN = /your wallet|you pay|own wallet/i;
 const SEEN_TEXT = `
   const seen = el => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); if (!(r.width > 1 && r.height > 1)) return false; const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none') return false; for (let d = el.closest('details'); d; d = d.parentElement?.closest('details')) if (!d.open && !el.closest('summary')) return false; return true; };
   const wordsIn = (root, skipSel) => { const parts = []; const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const p = n.parentElement; if (!p || (skipSel && p.closest(skipSel)) || !seen(p)) continue; parts.push(n.nodeValue); } return parts.join(' ').replace(/\\s+/g, ' ').trim(); };`;
-async function visibleText(page, sel) {
-  return page.evaluate(new Function('s', SEEN_TEXT + ` const el = document.querySelector(s); return el ? wordsIn(el, null) : '';`), sel);
-}
-async function visibleTextAll(page, sel) {
-  return page.evaluate(new Function('s', SEEN_TEXT + ` return [...document.querySelectorAll(s)].map(el => wordsIn(el, null)).filter(Boolean).join('\\n');`), sel);
-}
-// the same rule, skipping everything inside the given selector (a sentence on a control is not counted twice)
-async function visibleTextOutside(page, rootSel, skipSel) {
-  return page.evaluate(new Function('a', SEEN_TEXT + ` const root = document.querySelector(a[0]); return root ? wordsIn(root, a[1]) : '';`), [rootSel, skipSel]);
-}
+// one page-side reader for all three shapes: the first match, every match joined, or one root with a selector
+// skipped inside it (so a sentence on a control is not counted twice); reused by the card-changed wait too
+const VISIBLE_WORDS = new Function('a', SEEN_TEXT + ` const [sel, all, skip] = a; if (all) return [...document.querySelectorAll(sel)].map(el => wordsIn(el, null)).filter(Boolean).join('\\n'); const el = document.querySelector(sel); return el ? wordsIn(el, skip || null) : '';`);
+const visibleText = (page, sel) => page.evaluate(VISIBLE_WORDS, [sel, false, null]);
+const visibleTextAll = (page, sel) => page.evaluate(VISIBLE_WORDS, [sel, true, null]);
+const visibleTextOutside = (page, rootSel, skipSel) => page.evaluate(VISIBLE_WORDS, [rootSel, false, skipSel]);
 
 // the purpose the archive shows pressed (the page's own truth); the fronts' mirror only when the archive has no pressed mode
 async function pressedMode(page) {
@@ -178,7 +175,9 @@ async function pressControl(page, reg, purpose) {
   } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
   // the page's own truth (the archive's pressed mode button, or the control's own pressed state) or its
   // data mirror, whichever answers first: the mirror is debounced and can miss a change
-  await page.waitForFunction(([p, sel]) => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`) || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-pressed') === 'true' || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-selected') === 'true', [purpose, CONTROLS[reg]], { timeout: 5000 }); // the page's own pressed state only; the mirror could still hold a stale equal value
+  // the archive's pressed mode button is the page's own state (the fronts' aria-pressed is rendered from the
+  // debounced mirror, which can hold a stale equal value, so it is not enough on its own)
+  await page.waitForFunction(p => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`), purpose, { timeout: 5000 });
 }
 
 const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
@@ -265,7 +264,7 @@ async function stranger(reg) {
       o.learnedByTap = true;
       try { await pressControl(page, reg, o.purpose); } catch (e) { R.notes.push(`tapping the ${o.purpose} ring failed (${errText(e)}): that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
       // the card's words under the same rule as "before", so only a real change counts
-      const changed = await page.waitForFunction(new Function('a', SEEN_TEXT + ` const el = document.querySelector(a[0]); const t = el ? wordsIn(el, null) : ''; return !!t && t !== a[1];`), [CARD[reg], before], { timeout: 3000 }).then(() => true, () => false);
+      const changed = await page.waitForFunction(new Function('a', `const t = (${VISIBLE_WORDS.toString()})([a[0], false, null]); return !!t && t !== a[1];`), [CARD[reg], before], { timeout: 3000 }).then(() => true, () => false);
       if (!changed) { R.notes.push(`the card did not change within 3 s after tapping ${o.purpose}: that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
       o.text = await visibleText(page, CARD[reg]);
       R.learnTaps++; // a learning tap is one that revealed a card
@@ -343,6 +342,7 @@ async function stranger(reg) {
         // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up)
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         if (!stored.length) throw new Error('the page showed a stored row but the index has none');
+        if (!stored.some(x => x.purpose === keep.purpose)) throw new Error(`the file was stored under "${stored.map(x => x.purpose).join('/')}", not the pressed "${keep.purpose}"`); // a wrong purpose is never recorded silently
         const archivePressed = await pressedMode(page);
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = leak(await visibleTextAll(page, 'main > :not(#eternal)'));
@@ -414,8 +414,11 @@ async function stranger(reg) {
         const a = [...document.querySelectorAll('#tbar a')].find(a => /recover/i.test(a.innerText || ''));
         if (!a) return { present: false, onScreen: false, visibleFraction: 0 };
         const b = a.getBoundingClientRect();
-        const strip = a.closest('#tlinks')?.getBoundingClientRect() || { left: 0, right: innerWidth, top: 0, bottom: innerHeight };
-        const L = Math.max(b.left, strip.left, 0), R = Math.min(b.right, strip.right, innerWidth), T = Math.max(b.top, strip.top, 0), B = Math.min(b.bottom, strip.bottom, innerHeight);
+        const stripEl = a.closest('#tlinks'); const strip = stripEl?.getBoundingClientRect() || { left: 0, right: innerWidth, top: 0, bottom: innerHeight };
+        // the strip fades its last pixels to transparent with a mask (hit-testing ignores masks): that fade is not readable
+        const mask = stripEl ? (getComputedStyle(stripEl).maskImage || getComputedStyle(stripEl).webkitMaskImage || '') : '';
+        const fadePx = /calc\(100% - (\d+)px\)/.exec(mask) ? +/calc\(100% - (\d+)px\)/.exec(mask)[1] : 0;
+        const L = Math.max(b.left, strip.left, 0), R = Math.min(b.right, strip.right - fadePx, innerWidth), T = Math.max(b.top, strip.top, 0), B = Math.min(b.bottom, strip.bottom, innerHeight);
         const frac = b.width > 0 && R > L && B > T ? (R - L) / b.width : 0;
         const hit = frac >= 0.5 && (() => { const e = document.elementFromPoint((L + R) / 2, (T + B) / 2); return !!e && (e === a || a.contains(e)); })();
         return { present: true, onScreen: hit, visibleFraction: Math.round(frac * 100) / 100 };
@@ -452,7 +455,7 @@ for (const reg of REGS) {
   const r = await stranger(reg);
   results.push(r);
   const s = summarize(r);
-  process.stderr.write(`${reg.padEnd(11)} ${unsound(r) ? 'UNSOUND | ' : ''}offered ${r.offered.join(',') || 'none'}${r.offered.length !== s.offered ? ' (' + r.offered.length + ' rendered, ' + s.offered + ' declared)' : ''} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
+  process.stderr.write(`${reg.padEnd(11)} ${unsound(r) ? 'UNSOUND | ' : ''}offered ${r.offered.join(',') || 'none'}${r.offered.length !== s.offered ? ' (' + r.offered.length + ' rendered, ' + s.offered + ' declared)' : ''} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : (r.firstFile?.measured ? 'no file: ' : 'FAILED (instrument): ') + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
 }
 } finally { await browser.close().catch(() => {}); await closeServer(); } // nothing is left running whatever threw above
 
@@ -467,7 +470,7 @@ for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? ['lifetimeStated', 'readersStated', 'payerStated'].map(k => r.terms[id][k] ? 'y' : 'n').join('·') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg}${unsound(r) ? ' **(unsound, see notes)**' : ''} | ${r.offered.join(', ') || 'none'}${r.offered.length !== s.offered ? ` (${r.offered.length} rendered, ${s.offered} declared offered)` : ''} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg}${unsound(r) ? ' **(unsound, see notes)**' : ''} | ${r.offered.join(', ') || 'none'}${r.offered.length !== s.offered ? ` (${r.offered.length} rendered, ${s.offered} declared offered)` : ''} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : r.firstFile?.measured ? `no file: ${r.firstFile.error}` : 'FAILED (instrument)'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');

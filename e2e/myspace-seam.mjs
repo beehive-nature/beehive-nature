@@ -87,7 +87,7 @@ function eventId(ev) {
 // at, and a code path that "is not entered" is a weaker claim than a wire that
 // stayed silent.
 function offBox(ctx, bag) {
-  ctx.on('request', req => { if (!req.url().startsWith(BASE)) bag.push(req.method() + ' ' + req.url()); });
+  ctx.on('request', req => { if (!req.url().startsWith(BASE + "/")) bag.push(req.method() + ' ' + req.url()); });
 }
 
 async function mockHive(ctx) {

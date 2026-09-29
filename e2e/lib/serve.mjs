@@ -13,6 +13,7 @@
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
+import { pipeline } from 'node:stream';
 import { realpath, stat } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 
@@ -27,8 +28,9 @@ export const MIME = {
 };
 
 // a stream that fails after the headers went out (a file rewritten or removed under the server by another
-// seat, an unreadable entry) ends the response instead of killing the harness process
-const send = (stream, res) => { stream.on('error', () => { if (!res.headersSent) { res.writeHead(404); res.end('nf'); } else res.destroy(); }); stream.pipe(res); };
+// seat, an unreadable entry) ends the response instead of killing the harness process; a client that goes
+// away mid-body destroys the file stream too, so no descriptor is left open (pipeline, not pipe)
+const send = (stream, res) => { pipeline(stream, res, err => { if (err && !res.headersSent) { res.writeHead(404); res.end('nf'); } }); };
 
 export async function serveTree(root) {
   const top = await realpath(resolve(root));
