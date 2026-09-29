@@ -9,10 +9,13 @@
 # point. Re-run on 2026-09-29 with a control, the SAME canned capability set
 #   250-Requested mail action okay, completed / 250-SIZE 20000000 / 250-8BITMIME
 # came back from gmail-smtp-in:25 AND smtp.gmail.com:587. That set lacks
-# STARTTLS and carries SIZE 20000000, while Gmail's servers normally advertise
-# STARTTLS and SIZE 157286400 (not re-measured from a clean path in this lane).
-# An intercepting SMTP path on the prober's line was answering for everyone. Outlook's MX passed through clean,
-# which is what proved the probe itself could see STARTTLS when it was real.
+# STARTTLS and carries SIZE 20000000. (Gmail's servers are expected to advertise
+# STARTTLS and SIZE 157286400 — UNVERIFIED baseline: not re-measured from a
+# clean path in this lane.) The withdrawal does not rest on that baseline: the
+# same canned set came back from every tested destination, while Outlook's MX
+# passed through and did show STARTTLS, so an intercepting SMTP path on the
+# prober's line was answering for everyone and the probe could see STARTTLS
+# when it was really there.
 #
 # The lesson, and the reason this file is a script and not a paragraph: a
 # measurement taken through a middlebox is not a measurement of the target.
@@ -66,7 +69,7 @@ egress_verdict() {
   probe_tcp "$1" "$2"
   _rc=$?
   case $_rc in
-    0)   say "  OPEN  $1:$2" ;;
+    0)   say "  TCP CONNECTED  $1:$2  (unauthenticated — not proof the named host answered)" ;;
     124) say "  NO ANSWER (timeout — consistent with an egress filter, not proof)  $1:$2" ;;
     *)   say "  REFUSED/ERROR (exit $_rc)  $1:$2" ;;
   esac
@@ -162,7 +165,7 @@ if [ -z "$FOUND" ] && command -v lsof >/dev/null 2>&1; then
   fi
 fi
 if [ -z "$FOUND" ] && [ -z "$RAN" ]; then
-  say "INCONCLUSIVE: no listener tool available (ss/lsof missing) — cannot tell"
+  say "INCONCLUSIVE: no listener tool available (ss/lsof missing or failed) — cannot tell"
   say "whether the service is up."
   exit 3
 fi
@@ -312,6 +315,34 @@ elif [ -e "$KEY" ]; then
   say "  key/cert pair: not checked — key not readable by $(id -un); rerun with sudo."
 fi
 
+# the sink's own call is the authority: openssl x509 above reads only the
+# first cert in the PEM, while load_cert_chain reads the whole file. Only the
+# exception CLASS name is printed, never its message (it can carry a path or
+# key detail).
+LCCW="  load_cert_chain (the sink's own call):"
+if ! command -v python3 >/dev/null 2>&1; then
+  say "$LCCW not checked — python3 not installed"
+elif [ ! -e "$CERT" ] || [ ! -e "$KEY" ]; then
+  say "$LCCW not checked — cert or key missing (see above)"
+elif [ ! -r "$CERT" ] || [ ! -r "$KEY" ]; then
+  say "$LCCW not checked — cert or key not readable by $(id -un); rerun with sudo"
+else
+  LCC=$(timeout 15 python3 -c 'import ssl, sys
+try:
+    ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER).load_cert_chain(sys.argv[1], sys.argv[2])
+    print("OK")
+except Exception as e:
+    print(type(e).__name__)' "$CERT" "$KEY" </dev/null 2>/dev/null)
+  case $LCC in
+    OK)
+      say "$LCCW OK" ;;
+    ''|*[!A-Za-z0-9_]*)
+      say "$LCCW not checked — python3 gave no usable result (timeout or error)" ;;
+    *)
+      say "$LCCW FAILS — the next restart will fail at load_cert_chain ($LCC)" ;;
+  esac
+fi
+
 # the cert the listener SERVES against the deployed file. Both are re-encoded
 # by openssl x509 (same canonical PEM for the same cert), tested non-empty, and
 # compared here. Only SAME / DIFFERENT / not compared is printed — no digests.
@@ -378,7 +409,7 @@ for hp in "gmail-smtp-in.l.google.com 25" "smtp.gmail.com 587"; do
     say "  UNKNOWN $h:$p"
   elif probe_tcp 192.0.2.1 "$p"; then
     say "  NEGATIVE CONTROL OPEN: 192.0.2.1:$p connected — port $p is intercepted on"
-    say "  this path, so OPEN means nothing for it."
+    say "  this path, so a connect means nothing for it."
     say "  UNKNOWN (port $p intercepted)  $h:$p"
   else
     say "  not OPEN 192.0.2.1:$p  (negative control for :$p, TEST-NET-1 — must not read OPEN)"
@@ -388,6 +419,8 @@ done
 say ""
 say "  (:25 blocked + :587 open is the documented OCI shape. A NO ANSWER on :25 is"
 say "   consistent with that shape but is not proof of a block: a timeout has other"
-say "   causes. Each line is a fact for the relay decision — it does not decide it.)"
+say "   causes. A TCP CONNECTED is an unauthenticated connect, not proof the named"
+say "   host answered: a destination-selective proxy would read the same. Each line"
+say "   is a fact for the relay decision — it does not decide it.)"
 rule
 say "done. Nothing was changed."

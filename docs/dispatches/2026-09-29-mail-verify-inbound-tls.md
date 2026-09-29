@@ -13,11 +13,13 @@ On 2026-08-31 this seat reported that `agents.skaists.buzz` did not advertise
 STARTTLS. Re-run on 2026-09-29 with a control, the same canned capability set
 (`250-Requested mail action okay, completed` / `250-SIZE 20000000` /
 `250-8BITMIME`) came back from `gmail-smtp-in.l.google.com:25` and from
-`smtp.gmail.com:587`. That set lacks STARTTLS and carries SIZE 20000000, while
-Gmail's servers normally advertise STARTTLS and SIZE 157286400 (not
-re-measured from a clean path in this lane; round 5 corrected an earlier
-wording that said both "require" STARTTLS, which Gmail's inbound MX does not
-of senders). `outlook-com.olc.protection.outlook.com:25` passed through and did show
+`smtp.gmail.com:587`. That set lacks STARTTLS and carries SIZE 20000000.
+(Gmail's servers are expected to advertise STARTTLS and SIZE 157286400 —
+UNVERIFIED baseline: not re-measured from a clean path in this lane. Round 5
+corrected an earlier wording that said both "require" STARTTLS, which Gmail's
+inbound MX does not of senders.) The withdrawal does not rest on that
+baseline: the same canned set came back from every tested destination, while
+`outlook-com.olc.protection.outlook.com:25` passed through and did show
 STARTTLS. So an intercepting SMTP path on this seat's own line was answering
 for every destination, and the 08-31 probe measured that path, not the box.
 The finding is void. That does not prove STARTTLS works on the box; it means
@@ -55,7 +57,8 @@ the same gap and now has a dated withdrawal note after it (history kept).
   encrypted key fail rather than wait on a prompt.
 - **G** §4: after the control passes, each target is resolved with
   `getent ahosts` (forward only, accepts IP literals) and then probed:
-  `UNKNOWN (DNS)`, `OPEN`, `NO ANSWER (timeout — consistent with an egress
+  `UNKNOWN (DNS)`, `OPEN` (relabelled `TCP CONNECTED ... (unauthenticated)`
+  in round 6), `NO ANSWER (timeout — consistent with an egress
   filter, not proof)` on exit 124, or `REFUSED/ERROR (exit N)`. BLOCKED is gone.
 - **H** the WALLET-LEDGER note above.
 
@@ -219,8 +222,8 @@ Five Codex items on `d69925711`, triaged valid by the reviewer.
 - **O** §4: the negative control is now PER TARGET PORT. Before a target on
   port P is judged, `192.0.2.1 P` must not connect; if it does, that target
   reads `UNKNOWN (port P intercepted)`. A port-587 interceptor can no longer
-  yield OPEN for smtp.gmail.com:587. (This replaces the single 192.0.2.1:25
-  gate from round 3.)
+  yield a connect verdict for smtp.gmail.com:587. (This replaces the single
+  192.0.2.1:25 gate from round 3.)
 - **P** the "both require STARTTLS" claim is withdrawn from the script header,
   this dispatch, and the PR body: Gmail's inbound MX offers STARTTLS but does
   not require it of senders. The evidence is the SIZE and missing STARTTLS in
@@ -272,8 +275,70 @@ T  cert valid now                                -> no notBefore line
    STUB date() that fails                        -> notBefore not checked (date unparseable)
 ```
 
+These round-5 receipts show the labels as they were then: the target outcome
+OPEN is `TCP CONNECTED ... (unauthenticated)` since round 6, and the Q message
+gained "or failed".
+
 Script sha256 after the first round-5 commit (`2989db565`): `ccf2fef2…9a87f2ca77`,
-superseded by the T commit: `3398de8b…1d0fca26`.
+superseded by the T commit: `3398de8b…1d0fca26`, superseded by round 6 below.
+
+## review, round 6: U to X
+
+Round 5 passed the reviewer's dash recheck:
+<https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883041109>.
+Three Codex items on `94bad057d`, triaged valid, plus the reviewer's Q nit.
+
+- **U** §4: a successful probe is only an unauthenticated TCP connect; a
+  destination-selective proxy could answer for Google while 192.0.2.1 stays
+  closed. The target outcome now reads "TCP CONNECTED  host:port
+  (unauthenticated — not proof the named host answered)" instead of OPEN, and
+  the trailing OCI-shape note says the same. The positive control keeps its
+  wording: it only proves the probe works.
+- **V** the Gmail baseline (STARTTLS and SIZE 157286400) has no source in this
+  lane and is labelled UNVERIFIED in the script header, this dispatch and the
+  PR body. The withdrawal does not rest on it: the same canned set came back
+  from every tested destination, while Outlook's MX passed through showing
+  STARTTLS.
+- **W** §3: `openssl x509 -noout` reads only the first cert in the PEM, while
+  sink.py's `load_cert_chain` reads the whole file. The sink's own call is now
+  run through python3 (timeout 15) as the authority: "load_cert_chain (the
+  sink's own call): OK", or "FAILS — the next restart will fail at
+  load_cert_chain (<exception class name>)"; only the class name is printed.
+  No python3, a missing file, an unreadable file, or no usable result each
+  say "not checked" and why. The openssl checks stay as finer detail.
+- **X** §1: the Q message reads "(ss/lsof missing or failed)".
+
+### round-6 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+```
+
+Slices cut unchanged; stubs as in round 5 (branching only):
+
+```
+U  192.0.2.1 connects only on 587   -> TCP CONNECTED  gmail-smtp-in.l.google.com:25  (unauthenticated — ...)
+                                       UNKNOWN (port 587 intercepted)  smtp.gmail.com:587
+   clean path                       -> NO ANSWER gmail-smtp-in:25 · TCP CONNECTED smtp.gmail.com:587 (unauthenticated — ...)
+X  no ss, no lsof                   -> INCONCLUSIVE: no listener tool available (ss/lsof missing or failed) ... [exit 3]
+W  no python3 on PATH               -> load_cert_chain (the sink's own call): not checked — python3 not installed
+   key missing                      -> ... not checked — cert or key missing (see above)
+   python3 = Microsoft Store alias  -> ... not checked — python3 gave no usable result (timeout or error)
+```
+
+This box has no real python3 (the `python3` on PATH is the Microsoft Store
+alias, which exits 49), so W's OK and FAILS branches were not run here; they
+are left for the reviewer.
+
+Script sha256 at round 6: `d6f95a0d…15000825`.
 
 ## status: reviewer rechecks and what is pending
 
@@ -284,6 +349,9 @@ superseded by the T commit: `3398de8b…1d0fca26`.
 - Rounds 3 and 4 (`d69925711`, `2587d8b13`) rechecked by the reviewer
   in-session under dash, with a real STARTTLS listener and on the real network
   path, where the negative control fired.
-- **Pending:** the reviewer's recheck of round 5 (N to T), and the on-host run by an
-  authorized operator. **Current TLS state on the box: UNVERIFIED.** No CI
-  claim is made here.
+- Round 5 (`2989db565`, `94bad057d`), items N to T, rechecked under dash:
+  <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883041109>
+- **Pending:** the reviewer's recheck of round 6 (U to X, including W's OK and
+  FAILS branches with a real python3), and the on-host run by an authorized
+  operator. **Current TLS state on the box: UNVERIFIED.** No CI claim is made
+  here.
