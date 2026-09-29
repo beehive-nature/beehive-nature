@@ -36,7 +36,7 @@ date 2026-09-27 · seat Claude · founder order: "write the docket for the three
     allowed in the interim. No such service exists yet (docket §3 status
     note). Because E4 tier standing needs scheduled re-attestation through our
     verifier (T3 §2), the handset holds no E4 standing until that lane lands,
-    even with the second phone. What stands in before then is open for the
-    founder;
+    even with the second phone. The founder recorded this on 2026-09-29 as a
+    future dependency on the verifier lane, not an open decision;
   - Profile 3 gets no sandboxed Play initially;
   - the T4 day-one apps are the §4a allowlist.

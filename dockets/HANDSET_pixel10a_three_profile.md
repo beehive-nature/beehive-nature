@@ -64,8 +64,9 @@ the bootloader wipes it.
    - **attestation.app:** the owner's own monitoring only, never Beehive tier
      evidence.
 
-   Until the verifier lane lands, the handset holds no E4 standing. What, if
-   anything, stands in before then is a founder decision, open here. Each
+   Until the verifier lane lands, the handset holds no E4 standing. This is a
+   **recorded future dependency** (founder, 2026-09-29), not an open decision:
+   the handset's E4 standing waits on the Beehive verifier lane. Each
    verifier pins the auditee's persistent
    attestation key on first use (TOFU), and each keeps its own pin:
    - **Auditor phone:** scanning the QR code pins the key on that phone. Keep
