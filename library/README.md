@@ -48,7 +48,7 @@ never truth judgments.
 5. subject classification — folder taxonomy is authoritative; `sort-blibrary.mjs` (corpus-root, estate tool) proposes/execute moves. Cross-lane rule: files owned by another lane's manifest (e.g. `SCRIBD-MANIFEST.json` `library_path`) are NOT moved by this lane — the owning lane reconciles manifest+files together.
 6. provenance — same enrich pass: SESSION-LOG receipts (run ts, phase, topic), OA- convention, filename-pattern inference (labelled, never authority)
 7. search/indexing — `scripts/library/search.mjs <root> [--q --subject --source --year --hash --state --dupes-only --unprovenanced --json --limit]`
-8. research-priority routing — OPEN (routing labels only)
+8. research-priority routing — `scripts/library/route.mjs <root>`: additive `routing` block (domain, evidence_type, research_value, why, evidence[], confidence); `decisive` never auto-assigned; current-phase aware (reads harvest-state.json); labels = retrieval priority, never truth
 9. preservation receipts — `docs/dispatches/` per run
 
 All outputs land in `<corpusRoot>/library-records/` (out of git: hex law; data, not source). Each run overwrites only this lane's same-day outputs; corpus files are only ever opened read-only.
