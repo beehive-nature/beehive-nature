@@ -22,6 +22,9 @@
 
 set -u
 PORT=25
+# the deployed sink. Overridable only so the staleness check can be exercised
+# against a throwaway file; on the box, leave it unset.
+SINK_PY=${SINK_PY:-/opt/buzz-mail/sink.py}
 say() { printf '%s\n' "$*"; }
 rule() { say "------------------------------------------------------------"; }
 
@@ -44,19 +47,106 @@ probe_tcp() {
   timeout 8 bash -c 'echo > "/dev/tcp/$1/$2"' probe "$1" "$2" 2>/dev/null
 }
 
+# one egress target, host $1 port $2, judged only after the control passed.
+# Four outcomes, and only one of them is a positive fact: a timeout is
+# consistent with a filter but has other causes, so it is never called BLOCKED.
+# getent ahosts is a forward lookup only: an IP literal passes without the
+# reverse lookup that `getent hosts` would demand of it.
+egress_verdict() {
+  if ! getent ahosts "$1" >/dev/null 2>&1; then
+    say "  UNKNOWN (DNS)  $1:$2"
+    return
+  fi
+  probe_tcp "$1" "$2"
+  _rc=$?
+  case $_rc in
+    0)   say "  OPEN  $1:$2" ;;
+    124) say "  NO ANSWER (timeout — consistent with an egress filter, not proof)  $1:$2" ;;
+    *)   say "  REFUSED/ERROR (exit $_rc)  $1:$2" ;;
+  esac
+}
+
+is_uint() { case $1 in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+
+# start of pid $1 in epoch seconds, from /proc/$1/stat field 22 (clock ticks
+# after boot) plus btime from /proc/stat. The comm field can hold spaces and
+# parens, so everything through the LAST ') ' is cut first; field 22 is then
+# the 20th remaining field. Prints nothing when any input is unreadable.
+proc_start_epoch() {
+  _st=$(sed 's/^.*) //' "/proc/$1/stat" 2>/dev/null | cut -d' ' -f20)
+  _bt=$(sed -n 's/^btime //p' /proc/stat 2>/dev/null)
+  _hz=$(getconf CLK_TCK 2>/dev/null)
+  if is_uint "$_st" && is_uint "$_bt" && is_uint "$_hz" && [ "$_hz" -gt 0 ]; then
+    echo $((_bt + _st / _hz))
+  fi
+}
+
+# the deployed file: mtime (epoch s) and sha256, or an explicit reason why not.
+# Sets SINK_MTIME for sink_vs_pid.
+SINK_MTIME=""
+sink_file_report() {
+  say "  deployed file $SINK_PY"
+  if [ ! -e "$SINK_PY" ]; then
+    say "    MISSING — no mtime or sha256, so no running process can be compared with it"
+    return
+  fi
+  SINK_MTIME=$(stat -c %Y "$SINK_PY" 2>/dev/null)
+  if is_uint "$SINK_MTIME"; then
+    say "    mtime  $SINK_MTIME  ($(date -u -d "@$SINK_MTIME" '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null))"
+  else
+    SINK_MTIME=""
+    say "    mtime  not readable — no comparison can be made"
+  fi
+  if [ -r "$SINK_PY" ]; then
+    say "    sha256 $(sha256sum "$SINK_PY" 2>/dev/null | cut -d' ' -f1)"
+  else
+    say "    sha256 not readable by $(id -un) — rerun with sudo"
+  fi
+}
+
+# pid $1: its executable name and start, then the start compared with the
+# deployed file's mtime. Never prints the command line (args can carry secrets).
+sink_vs_pid() {
+  say "    pid $1  comm $(ps -o comm= -p "$1" 2>/dev/null)  started $(ps -o lstart= -p "$1" 2>/dev/null | tr -s ' ')"
+  _ps=$(proc_start_epoch "$1")
+  if [ -z "$_ps" ]; then
+    say "    process start not readable from /proc/$1/stat — no comparison made"
+  elif [ -z "$SINK_MTIME" ]; then
+    say "    process start $_ps (epoch s) — no deployed-file mtime, no comparison made"
+  else
+    say "    process start $_ps (epoch s)  vs  file mtime $SINK_MTIME"
+    if [ "$SINK_MTIME" -gt "$_ps" ]; then
+      say "    *** STALE: $SINK_PY is newer than pid $1 — the running process has NOT loaded the deployed file ***"
+    elif [ "$SINK_MTIME" -eq "$_ps" ]; then
+      say "    same second — the order cannot be determined"
+    else
+      say "    file is older than the process (consistent with it being loaded; not proof)"
+    fi
+  fi
+}
+
 say "tls-diag — $(date -u '+%Y-%m-%dT%H:%M:%SZ') on $(hostname)"
 rule
 
 # 1 · WHO IS ACTUALLY ON :25 ------------------------------------------------
 say "1 · the process serving :${PORT}"
 FOUND=""
+PIDS=""
 if command -v ss >/dev/null 2>&1; then
   OUT=$(ss -lptn "sport = :${PORT}" 2>/dev/null | sed 1d)
-  [ -n "$OUT" ] && { say "$OUT"; FOUND=1; }
+  if [ -n "$OUT" ]; then
+    say "$OUT"
+    FOUND=ss
+    PIDS=$(printf '%s\n' "$OUT" | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u)
+  fi
 fi
 if [ -z "$FOUND" ] && command -v lsof >/dev/null 2>&1; then
   OUT=$(lsof -nP -iTCP:${PORT} -sTCP:LISTEN 2>/dev/null)
-  [ -n "$OUT" ] && { say "$OUT"; FOUND=1; }
+  if [ -n "$OUT" ]; then
+    say "$OUT"
+    FOUND=lsof
+    PIDS=$(lsof -t -nP -iTCP:${PORT} -sTCP:LISTEN 2>/dev/null | sort -u)
+  fi
 fi
 if [ -z "$FOUND" ]; then
   say "REFUSING TO GUESS: nothing reported a listener on :${PORT}."
@@ -70,14 +160,14 @@ fi
 # 'the config says X but the wire says Y'
 say ""
 say "  start time of the listener (config edited AFTER this is NOT loaded):"
-PIDS=$(ss -lptn "sport = :${PORT}" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u)
+sink_file_report
 for p in $PIDS; do
-  say "    pid $p  started $(ps -o lstart= -p "$p" 2>/dev/null | tr -s ' ')"
-  say "    cmd   $(ps -o args= -p "$p" 2>/dev/null | cut -c1-100)"
+  sink_vs_pid "$p"
 done
 if [ -z "$PIDS" ]; then
   say "    start time not visible — rerun with sudo"
-  say "    (ss without root prints no users: field, or the listener was found via lsof)"
+  say "    ($FOUND found the listener but showed no pid; without root it hides"
+  say "     other users' processes. No comparison with $SINK_PY was made.)"
 fi
 rule
 
@@ -125,18 +215,46 @@ for f in "$CERT" "$KEY"; do
   elif [ -e "$f" ]; then
     say "  $f  EXISTS BUT NOT READABLE BY $(id -un) — run with sudo to judge this"
   else
-    say "  $f  MISSING  <-- sink.py load_cert_chain raises on a missing file,"
-    say "      so the service cannot have started with it"
+    say "  $f  MISSING  <-- the next restart will fail (sink.py load_cert_chain"
+    say "      raises). A running process may still hold a context loaded before"
+    say "      the file went missing."
   fi
 done
+CERT_OK=""
 if [ -r "$CERT" ] && command -v openssl >/dev/null 2>&1; then
-  say "  subject : $(openssl x509 -in "$CERT" -noout -subject 2>/dev/null)"
-  say "  validity: $(openssl x509 -in "$CERT" -noout -dates 2>/dev/null | tr '\n' ' ')"
-  if ! openssl x509 -in "$CERT" -noout -checkend 0 >/dev/null 2>&1; then
-    say "  *** THE CERT HAS EXPIRED ***"
-    say "  load_cert_chain does not check expiry: the sink still loads it and still"
-    say "  offers STARTTLS. The risk is sending servers rejecting the handshake."
+  if openssl x509 -in "$CERT" -noout >/dev/null 2>&1; then
+    CERT_OK=1
+    say "  subject : $(openssl x509 -in "$CERT" -noout -subject 2>/dev/null)"
+    say "  validity: $(openssl x509 -in "$CERT" -noout -dates 2>/dev/null | tr '\n' ' ')"
+    if ! openssl x509 -in "$CERT" -noout -checkend 0 >/dev/null 2>&1; then
+      say "  *** THE CERT HAS EXPIRED ***"
+      say "  load_cert_chain does not check expiry: the sink still loads it and still"
+      say "  offers STARTTLS. The risk is sending servers rejecting the handshake."
+    fi
+  else
+    say "  *** CERT DOES NOT PARSE (not a readable X.509 PEM) *** — expiry not checked;"
+    say "  the next restart will fail at load_cert_chain."
   fi
+fi
+# the key, judged as a pair with the cert. Only MATCH / MISMATCH is printed —
+# never key material. -passin pass: makes an encrypted key fail instead of
+# waiting on a passphrase prompt (sink.py passes no password either).
+if [ -r "$KEY" ] && command -v openssl >/dev/null 2>&1; then
+  if ! openssl pkey -in "$KEY" -passin pass: -noout >/dev/null 2>&1; then
+    say "  *** KEY DOES NOT PARSE *** — the next restart will fail at load_cert_chain."
+  elif [ -z "$CERT_OK" ]; then
+    say "  key/cert pair: not compared — no parseable cert to compare against."
+  else
+    KPUB=$(openssl pkey -in "$KEY" -passin pass: -pubout 2>/dev/null | sha256sum | cut -d' ' -f1)
+    CPUB=$(openssl x509 -in "$CERT" -noout -pubkey 2>/dev/null | sha256sum | cut -d' ' -f1)
+    if [ -n "$KPUB" ] && [ "$KPUB" = "$CPUB" ]; then
+      say "  key/cert pair: MATCH"
+    else
+      say "  key/cert pair: MISMATCH — the next restart will fail at load_cert_chain."
+    fi
+  fi
+elif [ -e "$KEY" ]; then
+  say "  key/cert pair: not checked — key not readable by $(id -un); rerun with sudo."
 fi
 rule
 
@@ -156,14 +274,13 @@ for hp in "gmail-smtp-in.l.google.com 25" "smtp.gmail.com 587"; do
   h=$(echo "$hp" | cut -d' ' -f1); p=$(echo "$hp" | cut -d' ' -f2)
   if [ -z "$PROBE_OK" ]; then
     say "  UNKNOWN $h:$p"
-  elif probe_tcp "$h" "$p"; then
-    say "  OPEN    $h:$p"
   else
-    say "  BLOCKED $h:$p"
+    egress_verdict "$h" "$p"
   fi
 done
 say ""
-say "  (:25 blocked + :587 open is the documented OCI shape. Either result is a"
-say "   fact for the relay decision — it does not decide it.)"
+say "  (:25 blocked + :587 open is the documented OCI shape. A NO ANSWER on :25 is"
+say "   consistent with that shape but is not proof of a block: a timeout has other"
+say "   causes. Each line is a fact for the relay decision — it does not decide it.)"
 rule
 say "done. Nothing was changed."
