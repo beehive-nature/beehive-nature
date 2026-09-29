@@ -4,7 +4,9 @@
 //        [--provenance P] [--year Y] [--hash H] [--state CLEAN|CORRUPT|PARTIAL]
 //        [--dupes-only] [--unprovenanced] [--value V] [--domain D] [--etype T]
 //        [--why] [--limit N] [--json]
-// Prefers routed-*.jsonl (enriched + routing labels) when present.
+// Prefers routed-*.jsonl (enriched + routing labels) when present, but NEVER
+// an older routed snapshot over a newer enriched one — a stale routed index
+// would silently hide every document enriched after the last route pass.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -19,8 +21,20 @@ const all = fs.existsSync(REC) ? fs.readdirSync(REC) : [];
 const routed = all.filter((f) => /^routed-\d{4}-\d{2}-\d{2}\.jsonl$/.test(f)).sort();
 const enr = all.filter((f) => /^enriched-\d{4}-\d{2}-\d{2}\.jsonl$/.test(f)).sort();
 if (!routed.length && !enr.length) { console.error("no enriched/routed jsonl — run enrich.mjs (and route.mjs) first"); process.exit(2); }
-const useRouted = routed.length > 0;
-const file = useRouted ? routed[routed.length - 1] : enr[enr.length - 1];
+// Day-granularity guard: filenames carry only YYYY-MM-DD, so a same-day
+// re-enrich after routing is indistinguishable — the guard catches the real
+// cross-day case (acquisition between sessions). Serving the newer enriched
+// snapshot is the cure for hiding; routing labels stay absent until route.mjs
+// re-runs, and routing filters then honestly return nothing.
+const day = (f) => f.match(/\d{4}-\d{2}-\d{2}/)[0];
+const lastRouted = routed[routed.length - 1] ?? null;
+const lastEnr = enr[enr.length - 1] ?? null;
+let useRouted = !!lastRouted;
+if (lastRouted && lastEnr && day(lastEnr) > day(lastRouted)) {
+  useRouted = false;
+  console.error(`STALE ROUTED INDEX: newest routed ${lastRouted} (${day(lastRouted)}) predates newest enriched ${lastEnr} (${day(lastEnr)}) — serving the enriched snapshot so no newer document is hidden; routing labels (--value/--domain/--etype) are absent until route.mjs re-runs`);
+}
+const file = useRouted ? lastRouted : lastEnr;
 const records = fs.readFileSync(path.join(REC, file), "utf8").trim().split("\n").map(JSON.parse);
 
 const q = get("q")?.toLowerCase();
