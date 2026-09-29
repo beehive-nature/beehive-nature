@@ -20,7 +20,9 @@ wording — the ANT tier stays outstanding.
     MERGEABLE, mergeStateStatus CLEAN, not draft; no other seat moved: no
     competing genealogy PR, no newer genealogy dispatch).
 
-(b) **Privacy result:** battery at the exact head — **9/9 effective**.
+(b) **Privacy result:** battery at the exact head — **8 PASS + 1 TRIAGED
+    (C), zero unresolved** (per the 09-28 readback law the battery is
+    never flattened to "9/9").
     - PASS: image-bytes 0 (no binary magic in any of 12,334 diff files) ·
       session/JWT/cookie/auth material 0 · living-names **5 armed, 0 hits**
       (recomputed from the private walk, 4 attested-deceased overrides) ·
