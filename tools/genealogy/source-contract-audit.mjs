@@ -91,8 +91,10 @@ const NOT_HARVESTED = /\b(?:not\s+yet\s+harvested|until\s+(?:sources\s+are\s+)?h
 /* fields a correction's patch writes that the build then RECOMPUTES: the era
  * and class of `evidence` are derived from the corrected dates, on purpose,
  * after the patch is spread. They are the only exception to "the published
- * person carries the patch's content". */
-const RECOMPUTED_AFTER_PATCH = { evidence: new Set(['era', 'class']) };
+ * person carries the patch's content". A Map, because the lookup key is the
+ * patch's own key: on a plain object `constructor`/`toString`/`__proto__`
+ * read a value inherited from Object.prototype and the audit threw. */
+const RECOMPUTED_AFTER_PATCH = new Map([['evidence', new Set(['era', 'class'])]]);
 
 const CLAUSES = [
   ['SRC-PACK-UNDECLARED', '[OVL] every overlay person MUST reference an evidence pack'],
@@ -135,6 +137,14 @@ export const CLAUSE_CODES = CLAUSES.map(([code]) => code);
 
 function nonEmpty(s) {
   return typeof s === 'string' && s.trim().length > 0;
+}
+
+/* every string VALUE inside a parsed-JSON value; keys are never included */
+function stringValues(v) {
+  if (typeof v === 'string') return [v];
+  if (Array.isArray(v)) return v.flatMap(stringValues);
+  if (v && typeof v === 'object') return Object.values(v).flatMap(stringValues);
+  return [];
 }
 
 /* A value's CONTENT as one string: object keys sorted, so two objects equal
@@ -411,8 +421,11 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
       /* by CONTENT: a patch field is usually an object, and `!==` compares
        * objects by identity, so an applied birth/death/sources read as
        * unapplied while the detail printed both sides identical. */
-      const skip = RECOMPUTED_AFTER_PATCH[k];
-      if (canonical(target[k], skip) !== canonical(v, skip)) problems.push(`${k} reads ${JSON.stringify(target[k])}, the correction says ${JSON.stringify(v)}`);
+      /* OWN fields only: target['__proto__'] is Object.prototype, which
+       * canonicalises to {} and would read as carrying a {} patch. */
+      const skip = RECOMPUTED_AFTER_PATCH.get(k);
+      const got = Object.hasOwn(target, k) ? target[k] : undefined;
+      if (canonical(got, skip) !== canonical(v, skip)) problems.push(`${k} reads ${JSON.stringify(got)}, the correction says ${JSON.stringify(v)}`);
     }
     if (problems.length) add('LNK-CORRECTION-NOT-APPLIED', `${providerId}->${internal}`, problems.join('; '));
   }
@@ -501,13 +514,16 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
        * corpus. It does not account for parent REFERENCES the published corpus
        * still carries into that excluded population — a reader following one
        * lands nowhere and the corpus never said it would. */
-      /* main publishes its disclosure as meta.incompleteFrontier
-       * ({ law, unresolvedParentRefs }). Stringified UNDER ITS KEY, because
-       * the key is the word "frontier"; an absent field serialises to {} and
-       * discloses nothing. */
-      const declaredAnywhere = JSON.stringify(meta.reconciliation || {}) + String(meta.privacy || '')
-        + JSON.stringify({ incompleteFrontier: meta.incompleteFrontier });
-      const disclosed = /frontier|unresolved parent|parent reference/i.test(declaredAnywhere);
+      /* Judged by VALUE, never by a key name: a key spelled "frontier" whose
+       * value is null or {} discloses nothing. main publishes the disclosure as
+       * meta.incompleteFrontier ({ law, unresolvedParentRefs }), and it counts
+       * only when law is a non-empty string AND the count is a finite number.
+       * Anywhere else, only prose (a string value) can disclose. */
+      const inf = meta.incompleteFrontier;
+      const structured = !!inf && typeof inf === 'object'
+        && nonEmpty(inf.law) && Number.isFinite(inf.unresolvedParentRefs);
+      const prose = [...stringValues(meta.reconciliation), ...stringValues(meta.privacy)];
+      const disclosed = structured || prose.some((s) => /frontier|unresolved parent|parent reference/i.test(s));
       if (!disclosed) {
         add('LNK-FRONTIER-UNDISCLOSED', 'meta.reconciliation',
           `${unresolvedParents.length} staged parent reference(s) point outside the published corpus and meta declares no frontier`);

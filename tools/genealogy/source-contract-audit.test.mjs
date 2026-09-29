@@ -577,7 +577,7 @@ test('M-REMEDY LNK-FRONTIER-UNDISCLOSED: declaring the frontier clears it — th
   assert.deepEqual([...new Set(withGhost.findings.map((f) => f.code))], ['LNK-FRONTIER-UNDISCLOSED']);
   const disclosed = runFixture((s) => {
     s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
-    s.corpus.meta.reconciliation.frontier = { unresolvedParentReferences: 1, note: 'the line stops here and the corpus says so' };
+    s.corpus.meta.reconciliation.frontier = { unresolvedParentReferences: 1, note: '1 unresolved parent reference: the line stops here and the corpus says so' };
   });
   assert.deepEqual(disclosed.findings.map(findingKey), [],
     'the clause must accept a stated frontier, or it is a ban on the archive having edges rather than a disclosure law');
@@ -589,6 +589,31 @@ test('M-REMEDY LNK-FRONTIER-UNDISCLOSED: declaring the frontier clears it — th
   });
   assert.deepEqual(mainShape.findings.map(findingKey), [],
     'meta.incompleteFrontier is a stated frontier and must clear the row');
+});
+
+test('M-REMEDY LNK-FRONTIER-UNDISCLOSED: an empty disclosure discloses nothing — the row reads the VALUE, never the key name', () => {
+  const ghost = (s) => s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
+  const LAW = 'INCOMPLETE: a parent named in the provider tree but not fetched; the tree stops where the archive stops.';
+  const empties = [
+    ['incompleteFrontier null', (m) => { m.incompleteFrontier = null; }],
+    ['incompleteFrontier {}', (m) => { m.incompleteFrontier = {}; }],
+    ['incompleteFrontier false', (m) => { m.incompleteFrontier = false; }],
+    ['an empty law', (m) => { m.incompleteFrontier = { law: '', unresolvedParentRefs: 1 }; }],
+    ['a blank law', (m) => { m.incompleteFrontier = { law: '   ', unresolvedParentRefs: 1 }; }],
+    ['a missing count', (m) => { m.incompleteFrontier = { law: LAW }; }],
+    ['a string count', (m) => { m.incompleteFrontier = { law: LAW, unresolvedParentRefs: '1' }; }],
+    ['a NaN count', (m) => { m.incompleteFrontier = { law: LAW, unresolvedParentRefs: NaN }; }],
+    ['reconciliation.frontier null', (m) => { m.reconciliation.frontier = null; }],
+    ['reconciliation.frontier {}', (m) => { m.reconciliation.frontier = {}; }],
+  ];
+  for (const [what, set] of empties) {
+    const r = runFixture((s) => { ghost(s); set(s.corpus.meta); });
+    assert.deepEqual(r.findings.map(findingKey), ['LNK-FRONTIER-UNDISCLOSED :: meta.reconciliation'], `${what} was read as a disclosure`);
+  }
+  /* the well-formed control, and the precondition that the ghost was seen */
+  const control = runFixture((s) => { ghost(s); s.corpus.meta.incompleteFrontier = { law: LAW, unresolvedParentRefs: 0 }; });
+  assert.deepEqual(control.findings.map(findingKey), [], 'a well-formed incompleteFrontier must stay silent');
+  assert.ok(control.inspected['LNK-FRONTIER-UNDISCLOSED'] > 0, 'the clause never ran, so its silence means nothing');
 });
 
 test('M-REMEDY SRC-EDGE-OVERSTATED: the honest tag clears it, and a missing row is not silently a pass', () => {
@@ -744,4 +769,31 @@ test('M-REMEDY LNK-CORRECTION-NOT-APPLIED: a real content difference still fails
   const eraOnly = runFixture((st) => { objectCorrection(st); st.corpus.persons.pDad.evidence.era = 'colonial'; st.corpus.persons.pDad.evidence.class = 'colonial'; });
   assert.deepEqual(eraOnly.findings.filter((f) => f.code === 'LNK-CORRECTION-NOT-APPLIED').map(findingKey), [],
     'evidence era/class are recomputed after the patch; comparing them reports every era change as an unapplied correction');
+});
+
+/* defineProperty, never assignment: `o.__proto__ = x` runs the setter and
+ * stores no key, so the fixture would carry nothing to judge. */
+function addOwn(o, k, v) {
+  Object.defineProperty(o, k, { value: v, enumerable: true, writable: true, configurable: true });
+  assert.ok(Object.hasOwn(o, k), `${k}: not stored as an own key`);
+}
+
+test('M-REMEDY LNK-CORRECTION-NOT-APPLIED: a prototype-named patch key is a named finding, never a throw', () => {
+  /* JSON.parse, so `__proto__` is an OWN key of the patch exactly as a
+   * parsed archive would carry it; the target does not carry these fields. */
+  for (const key of ['constructor', 'toString', '__proto__']) {
+    const patch = JSON.parse(`{${JSON.stringify(key)}:{"era":"recorded"}}`);
+    assert.ok(Object.hasOwn(patch, key), `${key}: the fixture patch does not carry it as an own key`);
+    let r;
+    assert.doesNotThrow(() => { r = runFixture((s) => { objectCorrection(s); addOwn(s.overlay.corrections['AAA-222'].patch, key, patch[key]); }); }, `${key} crashed the audit`);
+    assert.deepEqual(r.findings.map(findingKey), ['LNK-CORRECTION-NOT-APPLIED :: AAA-222->pDad'], `${key} was not reported`);
+    assert.match(r.findings[0].detail, new RegExp(`(^|; )${key} reads undefined`), `${key}: the finding does not name the unapplied field`);
+  }
+  /* an EMPTY object under __proto__: the inherited Object.prototype would
+   * canonicalise to {} and silently read as applied. */
+  const empty = runFixture((s) => { objectCorrection(s); addOwn(s.overlay.corrections['AAA-222'].patch, '__proto__', {}); });
+  assert.deepEqual(empty.findings.map(findingKey), ['LNK-CORRECTION-NOT-APPLIED :: AAA-222->pDad'], 'an inherited __proto__ was read as the applied field');
+  /* and the exception still holds beside them */
+  const eraOnly = runFixture((s) => { objectCorrection(s); s.corpus.persons.pDad.evidence.era = 'colonial'; });
+  assert.deepEqual(eraOnly.findings.map(findingKey), [], 'the evidence era/class exception stopped working');
 });
