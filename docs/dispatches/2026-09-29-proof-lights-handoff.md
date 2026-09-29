@@ -6,15 +6,15 @@ Outgoing seat: Claude Code, `session_015NgLKhQoUyK4kxFMpWKbaz` ("Badge verificat
 
 | Item | State at handoff | Next action |
 |---|---|---|
-| **#250**: build-time badge renderer plus the first badge (base `main`) | Ready for review. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). | Independent review, then merge. |
+| **#250**: build-time badge renderer plus the first badge (base `main`) | Ready for review. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). Codex's review at `ba35019` raised two findings, both fixed (the gate now refuses forged `renderer`/`law`; probes 14/14). Aikido's two file-read flags were verified false positives and dismissed with reasons. | Independent review, then merge. |
 | **#253**: gate repair (base: #250's branch) | Folded into #250 and closed by that merge. Its dispatch and STATUS line travel with #250. | None. Review it as part of #250. |
-| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Ready for review. Merges cleanly into `main` on its own. Codex's review at `cf3887a` raised five findings; all five were fixed in `6849dab` and their threads resolved (dispatch `2026-09-29-codex-review-247.md`). | Independent review, then merge. |
+| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Ready for review. Merges cleanly into `main` on its own. Codex raised nine findings over two rounds (`cf3887a`, `6849dab`). All were fixed, in `6849dab` and `a0eeafd`, and their threads resolved (dispatch `2026-09-29-codex-review-247.md`). A later Codex round may add more; handle them the same way. | Independent review, then merge. |
 | **CI-signing card** | **Not started.** Owner, scope and done-when are in `2026-09-27-proof-lights-gate-repair.md`, section "The CI-signing card". | Starts after #250 is on `main`. Needs the founder to generate the key pair and store the private key in a protected environment. |
 
 ## Landing order and the one known conflict
 
 - #250 and #247 are independent. Either can land first.
-- Both add a STATUS.md ledger line at the same anchor. Whichever lands second gets a text conflict in STATUS.md only. Resolve it with a **merge commit** that keeps both lines, newest first. No other file conflicts (simulated on 2026-09-29: main ← #250+#253 ← #247).
+- Both add a STATUS.md ledger line at the same anchor. Whichever lands second gets a text conflict in STATUS.md only. Resolve it with a **merge commit** that keeps both lines, newest first. No other file conflicts (simulated on 2026-09-29: main ← #250+#253 ← #247 at `a0eeafd`).
 
 ## Independent review is required before `main`
 

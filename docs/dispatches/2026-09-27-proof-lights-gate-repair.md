@@ -26,13 +26,13 @@ A source-hash mismatch did exit nonzero, but its per-badge line still printed PA
 
 `e2e/render-badges.mjs --check` runs nine steps per document. It collects every failure, and prints PASS only when there are none.
 
-1. **Schema.** The document must have exactly the `proof-lights/status/2` fields, and its name must match a known derivation.
+1. **Schema.** The document must have exactly the `proof-lights/status/2` fields, and its name must match a known derivation. The fixed fields `renderer` and `law` must equal exactly what derive writes: the installed `badge-maker` version and the fixed statement (added 2026-09-29, Codex review).
 2. **Revision.** A full SHA that is a commit object in this repository. The check fetches it at depth 1 when the clone is shallow.
 3. **Manifest.** The meter's `--only` page list, read from `.github/workflows/tests.yml` *at the measured revision*, never from today's tree.
 4. **Evidence.**
    - The file must exist; a missing file fails.
    - Its git blob id must equal `source_blob`, which serves as the repository locator.
-   - Its sha3-256 must equal `source_digest`, which serves as the integrity commitment. NIST advises against using SHA-1 for security purposes.
+   - Its sha3-256 must equal `source_digest`, which serves as the integrity commitment. It is computed by `sha3()` in `e2e/render-badges.mjs`, which uses Node's `createHash('sha3-256')`. The gate does not rely on the SHA-1 blob id for integrity. The reason is that SHA-1 is deprecated for security use; that is cited from NIST guidance and is UNVERIFIED by this seat.
    - It must parse, and every row must pass the schema: six kinds, each 0..100; `total` between the extremes of its kinds; no findings exactly when the row is at 100.
 5. **Coverage.** Rows must cover manifest pages × {bee, raver, cypherpunk} exactly once each. A duplicated row cannot stand in for a missing one.
 6. **Derivation.** Every derived field (counts, minima, message, colour) is recomputed from the evidence and compared with the document.
@@ -51,6 +51,17 @@ The digest is public data, and the secret scan blocks unmarked runs of 48 or mor
   - Run against the old gate, with only a `--dir` override added, all 10 forgery probes fail. The probes can therefore catch the gap they name.
   - CI runs them in a new step in the meter job, "Proof lights — the gate refuses every known forgery" (`if: always()`). `scripts/lint-ci-shape.mjs` passes 92/92.
 - `sh scripts/secret-scan.sh tree` is clean.
+
+## Codex review of #250 at `ba35019` (2026-09-29)
+
+Codex raised two findings on this PR. Both were correct.
+
+- **P2: the gate accepted forged fixed metadata.** `renderer` and `law` were only required to be present, so a document claiming "live, signed" passed.
+  - The gate now compares both fields with the constants derive writes (`RENDERER`, `LAW` in `e2e/render-badges.mjs`).
+  - A new probe, "forged fixed metadata fails", covers a forged renderer, a forged law string and a non-string law.
+  - `node --test e2e/render-badges.test.mjs` → 14/14. The new probe fails against the previous gate (0 pass, 1 fail) and passes against this one.
+  - `render-badges.mjs --check` → 1/1. `lint-ci-shape.mjs` → 92/92.
+- **P1: the SHA-1 remark named NIST with no citation.** Step 4 now names the function that computes the digest, `sha3()` via Node's `createHash('sha3-256')`. The SHA-1 deprecation is marked as cited guidance, UNVERIFIED by this seat.
 
 ## What it still does not prove
 

@@ -111,6 +111,12 @@ test('a CI-origin claim fails until something binds run id + attempt to the revi
   refused(await probe(({ doc, put }) => put({ ...doc, measurement: { origin: 'ci', run_id: 1, run_attempt: 1 } })), /origin ci .* not verifiable yet/);
 });
 
+test('forged fixed metadata fails: the renderer and the law are exactly what derive writes', async () => {
+  refused(await probe(({ doc, put }) => put({ ...doc, renderer: 'badge-maker 9.9.9 (live, signed)' })), /renderer is .* the installed renderer is badge-maker/);
+  refused(await probe(({ doc, put }) => put({ ...doc, law: 'live status, signed by the founder' })), /law is not the fixed statement/);
+  refused(await probe(({ doc, put }) => put({ ...doc, law: { live: true } })), /law is not the fixed statement/);
+});
+
 test('an SVG-only edit fails', async () => {
   refused(await probe(async ({ dir }) => {
     const s = await readFile(join(dir, SVG), 'utf8');

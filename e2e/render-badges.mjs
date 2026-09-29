@@ -149,6 +149,9 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const DOC_KEYS = ['schema', 'name', 'label', 'instrument', 'ci_step', 'revision', 'measurement', 'measured_at',
   'surfaces', 'fronts', 'fronts_at_100', 'min_score', 'kind_min', 'message', 'color',
   'source_blob', 'source_digest', 'renderer', 'signature', 'law'];
+// fixed fields: derive writes exactly these, and the gate refuses anything else
+const RENDERER = `badge-maker ${JSON.parse(await readFile(join(ROOT, 'e2e', 'node_modules', 'badge-maker', 'package.json'), 'utf8')).version}`;
+const LAW = 'derived from committed evidence and re-derived in CI; bound to the revision measured; a historical measurement, not live status; unsigned until signed';
 const serialise = doc => JSON.stringify({ ...doc, source_digest: '\0SD\0' }, null, 1)
   .replace('"\\u0000SD\\u0000"', JSON.stringify(doc.source_digest)) + '\n';
 
@@ -164,6 +167,8 @@ async function verify(doc, evidencePath, svgPath) {
   const B = BADGES[doc.name];
   if (!B) return [...f, `no derivation for badge ${JSON.stringify(doc.name)}`];
   for (const k of ['label', 'instrument', 'ci_step']) if (doc[k] !== B[k]) f.push(`${k} is not the derivation's`);
+  if (doc.renderer !== RENDERER) f.push(`renderer is ${JSON.stringify(doc.renderer)}, the installed renderer is ${RENDERER}`);
+  if (doc.law !== LAW) f.push('law is not the fixed statement the renderer writes');
   // 2 REVISION
   const revOk = typeof doc.revision === 'string' && SHA.test(doc.revision) && isCommit(doc.revision);
   if (!revOk) f.push(`revision ${JSON.stringify(doc.revision)} is not a commit in this repository`);
@@ -245,9 +250,9 @@ const doc = {
   ...B.derive(JSON.parse(source.toString('utf8')), revision),
   source_blob: blobId(source),   // git hash-object of the instrument's JSON: where it lives
   source_digest: { alg: 'sha3-256', value: sha3(source), note: DIGEST_NOTE },   // what it is
-  renderer: `badge-maker ${JSON.parse(await readFile(join(ROOT, 'e2e', 'node_modules', 'badge-maker', 'package.json'), 'utf8')).version}`,
+  renderer: RENDERER,
   signature: null,   // unsigned, stated; a CI-attestation key signs this document when that card lands
-  law: 'derived from committed evidence and re-derived in CI; bound to the revision measured; a historical measurement, not live status; unsigned until signed',
+  law: LAW,
 };
 const jsonPath = join(STATUS_DIR, `${doc.name}.json`);
 const svgPath = join(STATUS_DIR, `${doc.name}.svg`);

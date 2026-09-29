@@ -32,6 +32,12 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-29` — **#250: Codex review reconciled.** The gate now refuses forged `renderer`
+  and `law` values; before, they were only required to be present. A new probe fails
+  against the old gate. `node --test e2e/render-badges.test.mjs` → 14/14. The SHA-1 remark
+  in the gate-repair dispatch is marked UNVERIFIED. Aikido's two file-read flags are
+  verified false positives: every path comes from `readdir` of the operator's `--dir`.
+  Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
 - `2026-09-29` — **Proof lights handed off: #250 (with #253 folded in), #247
   and the unstarted CI-signing card.** Both PRs need independent review
   before `main`. The only landing conflict is this file. Carried forward from
