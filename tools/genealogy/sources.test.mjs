@@ -6,7 +6,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseEntityRefs, parseSourceDescriptions, publicSourceRecord, importSourceWalk } from "./fs-adapter.mjs";
+import { parseEntityRefs, parseSourceDescriptions, publicSourceRecord, importSourceWalk, harvestRecord, researchBasis } from "./fs-adapter.mjs";
 import { createModel, addPerson } from "./model.mjs";
 
 const FSID = /^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/;
@@ -130,4 +130,43 @@ test("importSourceWalk upgrades unsourced→sourced, never downgrades attested, 
   assert.equal(model.persons[pAt].evidence.support, "attested"); // never downgraded
   assert.match(model.persons[pAt].evidence.basis, /founder word; 1 FamilySearch source/);
   assert.equal(model.persons[pNoSrc].evidence.support, "unsourced-entry"); // no sources → no upgrade, honest default stands
+});
+
+test("harvestRecord reads only the record importSourceWalk writes — a correction's cited-source ARRAY is not one", () => {
+  const model = createModel({ root: fakePid("root") });
+  const pH = fakePid("harvested");
+  const pC = fakePid("corrected");
+  addPerson(model, { id: pH, name: "H", lifespan: "1800–1850", source: "familysearch", sourceId: pH });
+  addPerson(model, { id: pC, name: "C", lifespan: "1900–1990", source: "familysearch", sourceId: pC });
+  /* the correction layer spreads its patch first: its sources are documents */
+  model.persons[pC].sources = [{ title: "an obituary", read: "2026-09-22" }];
+  const raw = { refs: {
+    [pH]: { sources: [{ id: fakePid("s1") }, { id: fakePid("s2") }, { id: fakePid("s3") }] },
+    [pC]: { sources: [] }, /* nothing attached on the provider: the harvest leaves pC alone */
+  } };
+  importSourceWalk(model, raw, { date: "2026-09-18" });
+
+  /* PRECONDITION: the collision is really in the fixture — pC still carries the
+   * array, so a truthiness test on p.sources would take the harvest branch. */
+  assert.ok(Array.isArray(model.persons[pC].sources) && model.persons[pC].sources.length === 1);
+
+  assert.deepEqual(harvestRecord(model.persons[pH]), { count: 3, harvested: "2026-09-18", provider: "familysearch" });
+  assert.equal(researchBasis(model.persons[pH]), "3 attached FamilySearch sources (harvested 2026-09-18)");
+
+  assert.equal(harvestRecord(model.persons[pC]), null);
+  const basis = researchBasis(model.persons[pC]);
+  assert.doesNotMatch(basis, /undefined/, "a missing count was templated into the sentence");
+  assert.doesNotMatch(basis, /\battached FamilySearch source/, "the sentence claims a FamilySearch count nobody recorded");
+  assert.equal(basis, "no FamilySearch harvest count recorded; 1 source cited on this record");
+
+  /* no sources of any kind: the standing default */
+  assert.equal(researchBasis({}), "no attached sources harvested for this person; era-heuristic only");
+});
+
+test("harvestRecord refuses a half-formed record by shape, not by truthiness", () => {
+  for (const bad of [{}, { count: "3", harvested: "2026-09-18" }, { count: 3 }, { count: 3, harvested: null }, []]) {
+    assert.equal(harvestRecord({ sources: bad }), null, `accepted ${JSON.stringify(bad)}`);
+  }
+  /* control: the well-formed record is accepted, singular form included */
+  assert.equal(researchBasis({ sources: { count: 1, harvested: "2026-09-18" } }), "1 attached FamilySearch source (harvested 2026-09-18)");
 });

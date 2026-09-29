@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { existsSync, readdirSync } from "node:fs";
 import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
-import { importWalk, importSourceWalk } from "./fs-adapter.mjs";
+import { importWalk, importSourceWalk, harvestRecord, researchBasis } from "./fs-adapter.mjs";
 import { publish } from "./publish.mjs";
 import { joinLine, emptyPart } from "./lines.mjs";
 
@@ -187,7 +187,7 @@ for (const [id, p] of Object.entries(pub.persons)) {
   entry.refs = p.living ? [] : (/^ovl-/.test(id) ? [{ provider: "attested-overlay", id }] : [{ provider: "familysearch", id }]);
   if (!p.living && !/^ovl-/.test(id)) refsIndex[id] = iid;
   // research status (what we know) — tracked separately from publication
-  entry.research = { status: p.corrected ? "corrected-attested" : packIndex[id] ? "tradition-entered" : /^ovl-/.test(id) ? "attested" : "incomplete", basis: p.sources ? `${p.sources.count} attached FamilySearch source${p.sources.count === 1 ? "" : "s"} (harvested ${p.sources.harvested})` : "no attached sources harvested for this person; era-heuristic only" };
+  entry.research = { status: p.corrected ? "corrected-attested" : packIndex[id] ? "tradition-entered" : /^ovl-/.test(id) ? "attested" : "incomplete", basis: researchBasis(p) };
   if (p.corrected) entry.research.note = p.corrected.note;
   // publication status (what we show) — 'private'/'incomplete'/'disputed' are
   // never silently missing: the stub says why it is a stub
@@ -361,7 +361,7 @@ function personObject(iid) {
             provider: "familysearch",
             recordUrl: "https://www.familysearch.org/tree/person/details/" + p.refs.find((r) => r.provider === "familysearch").id,
             retrieved: pub.meta.retrieved,
-            ...(p.sources ? { sources: { count: p.sources.count, harvested: p.sources.harvested } } : {}),
+            ...(harvestRecord(p) ? { sources: { count: p.sources.count, harvested: p.sources.harvested } } : {}),
           }
         : null,
       tradition: packIndex[iid] ? { pack: packIndex[iid] } : null,
