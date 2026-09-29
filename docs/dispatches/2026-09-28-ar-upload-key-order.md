@@ -22,13 +22,17 @@ The library, with a throwaway in-memory key (output as printed):
 
 ```
 LIB seed|pub: owner==public true · owner==SEED false · item verifies true
-LIB pub|seed (ar-upload.cjs): owner==public false · owner==SEED true · item verifies false
+LIB pub|seed: owner==public false · owner==SEED true · item verifies false
 ```
 
-A seed-owned item fails its own signature check, so the upload door refuses it
-(`Invalid Data Item`). **The exposure is transmission, not publication.** A run of the
-defective script sends the seed to the upload door inside a refused item. Nothing
-becomes public on Arweave.
+(The committed script actually packed `seed ‖ seed`, because defect 1 made its "public
+key" the seed. The outcome is the same: owner = seed, and the signature fails.)
+
+A seed-owned item fails its own signature check, so an upload door that verifies it
+refuses it (`Invalid Data Item`). None is on Arweave among the audited items below.
+**Any seed ever passed through the defective script was sent to upload.ardrive.io and
+is to be treated as disclosed and never reused.** The receipts name only throwaway
+TESTNET keys for this door.
 
 The 2026-09-01 receipt and SPEC-VENDING-2 both stated the order backwards. They called
 `pub ‖ seed` correct, and said the probe item `F8f2GF_ToN4…` "carries its own seed as
@@ -66,26 +70,30 @@ F8f2GF_ToN ownerLen 32 · owner==Member-Key true · sig valid under owner true �
 - the copy of the script on the oracle box (`~/vending-probe/`).
 
 `mint.mjs` calls `ar-upload-rsa.cjs` on the box, not this file. The box copy of
-`ar-upload.cjs` may still be the defective version. Every key the receipts name for this
-door is a throwaway TESTNET key.
+`ar-upload.cjs` may still be the defective version and can still be run. It is tracked as
+its own GitHub issue (beehive-nature/beehive-nature#261): redeploy or delete it on the box. Every key the receipts name for
+this door is a throwaway TESTNET key.
 
 ## The fix
 
 - `ar-upload.cjs` derives the public key from the private key and packs
-  `seed ‖ public`. `memberSigner()` then **refuses before any network call** unless the
-  signer's owner is exactly the public key and not the seed. That guard holds
-  whatever a future library version does.
+  `seed ‖ public`. `memberSigner()` then **refuses before any network call** unless:
+  - the signer's owner is exactly the public key and not the seed; and
+  - a probe signed by the signer verifies under that public key.
+
+  Both checks hold whatever a future library version does.
 - The upload now runs only when the file is executed as a script
   (`require.main === module`), so tests can load `memberSigner()` without uploading.
 - `e2e/ar-upload-signer.test.mjs` runs offline, with throwaway keys and no printing:
   - a stand-in built like arbundles' constructor yields owner = public key;
-  - a reversed stand-in is refused;
+  - a reversed stand-in is refused, and so is one that publishes the right owner but
+    signs with another key;
   - a static check confirms the SPKI seed wrapper is gone;
   - where the library is installed (a `--no-save` dev install), a live check confirms
     the real `SolanaSigner` agrees and the item verifies.
 - The test is wired into CI (`static` job).
 
-Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 4/4 locally, including the
+Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 5/5 locally, including the
 live library check.
 
 ## Does it block #230?

@@ -25,14 +25,23 @@ function memberSigner(seed, { SolanaSigner, bs58 } = {}) {
   const signer = new SolanaSigner(bs58.encode(Buffer.concat([seed, pubRaw])));
   const owner = Buffer.from(signer.publicKey);
   if (!owner.equals(pubRaw) || owner.equals(seed)) throw new Error("the signer's owner is not the member public key; refusing before any upload");
-  return { signer, pubRaw };
+  /* and the half that signs must be the member key too: sign a probe with the
+     signer and verify it under pubRaw, so a library that moved the signing
+     half is refused as well */
+  const probe = crypto.randomBytes(32);
+  const sig = Promise.resolve(signer.sign(probe)).then((s) => {
+    const spki = crypto.createPublicKey({ key: Buffer.concat([Buffer.from("302a300506032b6570032100", "hex"), pubRaw]), format: "der", type: "spki" });
+    if (!crypto.verify(null, probe, spki, Buffer.from(s))) throw new Error("the signer does not sign with the member key; refusing before any upload");
+  });
+  return { signer, pubRaw, ready: sig };
 }
 module.exports = { memberSigner };
 
 if (require.main === module) {
   (async () => {
     const inp = JSON.parse(require("fs").readFileSync(0, "utf8"));
-    const { signer } = memberSigner(Buffer.from(inp.seedB64url || "", "base64url"));
+    const { signer, ready } = memberSigner(Buffer.from(inp.seedB64url || "", "base64url"));
+    await ready;
     const { TurboFactory } = (() => { try { return require("@ardrive/turbo-sdk/node"); } catch { return require("@ardrive/turbo-sdk"); } })();
     const turbo = TurboFactory.authenticated({ signer, token: "solana" });
     const data = Buffer.from(inp.dataB64, "base64");

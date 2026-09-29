@@ -114,7 +114,9 @@ Autonomi write remains gated on the ANT custody review
   target shape): receipted working at 06:0xZ (`F8f2GF_ToN4oRZbohhHGiaIo7MXZ-RdVPOje3jAZ7U4`, winc 0),
   then refused with `Invalid Data Item`/503 after a morning of probe uploads
   from the box IP. Both doors documented in SPEC-VENDING-2 §ar-doors.
-  (Corrected 2026-09-28: `Invalid Data Item` is also exactly what an item
+  (Corrected 2026-09-28: `F8f2GF…` is a valid item, so it was not built by the
+  committed ar-upload.cjs, which could only produce seed-owned items that fail
+  verification; its builder is not in the tree. `Invalid Data Item` is also exactly what an item
   built in the reversed key order returns, because its owner cannot verify its
   signature; "throttling" was never proven.)
 - **Turbo upload key order** (corrected 2026-09-28; the line written here on
