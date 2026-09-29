@@ -46,4 +46,13 @@ The 4,654-entry search-wire map (`record-image-map-partial.json`) joins to the 1
 
 **The one founder gesture that unblocks the delta:** sign in to FamilySearch inside the in-app browser pane (it is parked on the FS sign-in page), then say "try now" — everything downstream is staged in `fs-adapter.mjs` + this dispatch.
 
+---
+
+## CORRECTION RIDER (2026-09-28, founder readback — claim → dispute → corrected formulation; nothing above silently rewritten)
+
+1. **"405-image queue" was a miscount.** Dispute: 404 mapped records vs a "405 queue" may count different things. Corrected by measurement: the 404 record→ark pairs target **371 distinct image arks** (30 arks serve multiple records); 12 of 13 attempted manifest arks sit inside the 371; 5 downloaded ⇒ **queue = 366 distinct arks covering 399 mapped records**. The 7 retry states are inside the 371 — adding them on top (the "398+7=405") double-counted. Records and arks are different universes; the queue is ark-denominated.
+2. **"Fast path DEAD" overstated an unauthenticated probe.** Dispute: a signed-out 404/empty-shell proves only the signed-out tier. Corrected: the fetch+parse path is **unproven, not dead** — the authed `useSLS` probe on 2-3 records remains first-order business the moment auth lands (a 200 unlocks the fetch walker at hours vs navigation at multi-day).
+3. **Sign-in implies images — overstated.** Corrected: auth authorizes the **attempt**; per-record accessibility still varies (our own 2026-09-19 manifest: 6/13 attempted arks downloaded, 3 viewer data-stalls, 3 errors; plan-inventory names partner-held/no-image classes). Expected yield from any queue is below 100% by receipt, not pessimism.
+4. **Standing disposition (founder, same readback):** the image work is **already authorized** — after authentication lands in the pane, resume from the checkpoint with NO repeated "try now" and no renewed permission ceremony; harvest stays complete/frozen (no repeat); ANT stays deferred. This session is the single image-continuation owner; the #244 merge session is archived.
+
 — zCode seat, branch `zcode/zblood-order7-image-gate` (rider on origin/main).

@@ -461,22 +461,31 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 //     never renders (skeleton forever) — a stuck record page in the IAB is
 //     a session symptom, not a record dud.
 //   · Raw fetch of /ark:/61903/1:1:{id} returns a ~20KB SPA shell with ZERO
-//     3:1: arks (fast-path mapping via fetch+parse is dead; only the
-//     rendered DOM carries "View Original Document").
+//     3:1: arks WHEN SIGNED OUT — this kills the fetch+parse fast path only
+//     at the unauthenticated tier; an authed page context may fetch the
+//     data wire differently, so the fast path is UNPROVEN, not dead (the
+//     authed useSLS probe stays first-order business next session).
 //   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona when
 //     signed out; whether an authed session changes this is UNTESTED — the
 //     next authed session must try it on 2-3 records FIRST because a 200
 //     unlocks a fetch-based mapping walker (hours) instead of the
 //     navigation walker (~30-60s/record ⇒ multi-day at 12,845 records).
 //
-// ── IMAGE-SWEEP QUEUE (staged 2026-09-28, executes only under a live authed
-//    founder session; bytes private-tier per the preserve discipline) ──
-// Ready now: the 404 preMapped record→ark pairs
-// (images-harvest/plan + image-map-input.json preMapped, all in the citation
-// set) minus the 6 downloaded, plus 7 retry states (3 error, 3
-// no-deepzoom-traffic, 1 unknown) ⇒ 405 images queued. Walker shape:
-// per-image = goto viewer URL → read apid from the viewer's own performance
-// log → park on sg30p0 → PAGE_IMAGE_STITCHER_SOURCE → manifest checkpoint
+// ── IMAGE-SWEEP QUEUE (reconciled 2026-09-28 founder readback; executes
+//    only under a live authed founder session; bytes private-tier per the
+//    preserve discipline) ──
+// The 404 preMapped RECORD→ARK pairs target only 371 DISTINCT image arks
+// (30 arks serve multiple records — census pages shared by household
+// members). 12 of the 13 attempted manifest arks sit inside the 371 (the
+// 13th, 3QS7-89MB-BJ3L, is downloaded outside preMapped); 5 arks are
+// downloaded ⇒ QUEUE = 366 distinct arks covering 399 mapped records (the
+// 7 retry states are inside the 371, never added on top). YIELD CAVEAT
+// (receipted 2026-09-19): only 6/13 attempted arks downloaded — 3 hit
+// viewer data-stalls (no-deepzoom-traffic) and 3 errored — so signing in
+// authorizes the ATTEMPT; per-record image accessibility still varies
+// (no-online-image / partner-held / restricted). Walker shape: per-image =
+// goto viewer URL → read apid from the viewer's own performance log → park
+// on sg30p0 → PAGE_IMAGE_STITCHER_SOURCE → manifest checkpoint
 // (images-manifest.json schema unchanged).
 export const PAGE_IMAGE_STITCHER_SOURCE = String.raw`
 (async function stitchImage(apid, targetWidth){
