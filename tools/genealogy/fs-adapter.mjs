@@ -467,27 +467,46 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 //     authed useSLS probe stays first-order business next session).
 //   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona BOTH TIERS
 //     (signed out 2026-09-28 AND authed 2026-09-29, tested on two
-//     known-mapped ground truths) — the fetch-based mapping fast path is
-//     DEAD, receipted; per-record rendered-DOM remains the only mapping
-//     path beyond the 404 preMapped pairs.
+//     known-mapped ground truths) — THIS ENDPOINT is dead, receipted. That
+//     does NOT establish every faster-than-navigation mapping method is
+//     impossible (other wires the SPA/search pages use remain unprobed);
+//     per-record rendered-DOM is the only method PROVEN so far, not the
+//     only possible one (founder readback 2026-09-29 #2).
 //
-// ── SWEEP WIRE LAWS (executed 2026-09-29 continuation: 12 images, 18 total,
-//    all sha256-audited; the 9/19 "error" arks HEALED) ──
-//   · SETTLE LAW: the viewer needs 15-18s+ in this webview before its
-//     deepzoom calls appear; the 2026-09-19 "error" states were 4-12s
-//     settles, not broken arks (2 of 3 healed at 18-20s).
-//   · FILMSTRIP LAW: the viewer's perf log carries deepzoom URLs for
-//     NEIGHBORING film pages too — collect ALL distinct apids, order by
-//     proximity to THIS ark's orchestration/sls/image/3:1:{ark} entry,
-//     iterate candidates until an image.xml 200s.
-//   · NEGATIVE STATES (terminal-honest, per-ark in the manifest):
-//     xml-403-all = viewer resolves apids but EVERY candidate's image.xml
-//     403s to the session (storage-restricted; the 939Z NUMIDENT class);
-//     no-deepzoom-traffic = zero deepzoom URLs in a rendered viewer
-//     (image-less/index-only or partner-held records).
+// ── SWEEP WIRE LAWS (v2, 2026-09-29 founder readback #2 — BINDING IS THE
+//    LAW; the earlier "iterate candidates until a 200" was a VALIDITY HOLE:
+//    a filmstrip neighbor's 200 would stitch the WRONG image while the
+//    sha256 still verifies the saved bytes — hashes verify bytes, never
+//    record identity) ──
+//   · BINDING LAW: the apid for an ark comes ONLY from the authoritative
+//     same-origin binding  sg30p0…/dascloud/das/v2/3:1:{ark}/name?namespace=apid
+//     (returns the bare apid, 200) — never from perf-log candidate picking.
+//     RETRO-AUDIT 2026-09-29: all 18 downloaded images re-checked against
+//     the binding — 18/18 MATCH (the proximity-first heuristic happened to
+//     pick correctly every time; the hole existed but was never exercised).
+//     Manifest entries now carry bindingVerified.
+//   · VIEWER-FREE PATH (proven 2026-09-29): from a tab parked on sg30p0,
+//     binding → image.xml → tiles ALL fetch same-origin with NO viewer
+//     visit (no 15s settles) — per image ≈15-25s. Viewer warm-up is only
+//     the fallback: direct xml 403 → one viewer visit (15-18s settle) →
+//     retry xml once → still 403 = xml-403 negative.
+//   · SETTLE LAW (fallback path): the viewer needs 15-18s+ in this webview
+//     before its deepzoom calls appear; the 2026-09-19 "error" states were
+//     4-12s settles, not broken arks (2 of 3 healed at 18-20s).
+//   · NEGATIVE STATES — OBSERVATIONS, NOT DIAGNOSES (readback #2): missing
+//     traffic in MY viewer session does NOT prove a record has no image.
+//     xml-403 = image.xml denied to this session after binding+warm-up
+//     (storage-restricted for THIS account tier — the 939Z NUMIDENT class
+//     behaves so); no-deepzoom-traffic = zero deepzoom URLs observed in a
+//     rendered viewer this session (image MIGHT still exist via other
+//     paths/tiers). Both are per-ark session-scoped facts with timestamps,
+//     honestly re-openable — never claims about the record's nature.
 //   · Queue: skaists.sweep-queue/1 (private, images-harvest/sweep-queue.json)
-//     — 366 arks / 397 records, depth-ordered, Lowry-Rockwood flagged;
-//     manifest checkpoint after EVERY image; resume = next queue order.
+//     — 366 arks / 397 records, depth-ordered, Lowry-Rockwood flagged.
+//     MANIFEST-TRUE COUNTS (readback #2 reconciliation): 25 resolved
+//     (12 downloaded + 13 negatives — the dispatch's "23" under-counted by
+//     the two 9/19 no-deepzoom queue members), REMAINING = 341 (not 343,
+//     not ~335); manifest checkpoint after EVERY image.
 //
 // ── IMAGE-SWEEP QUEUE (reconciled 2026-09-28 founder readback; executes
 //    only under a live authed founder session; bytes private-tier per the
