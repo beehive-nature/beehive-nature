@@ -74,7 +74,10 @@ export async function audit(log = console.log) {
     let sig = 'n/a (not ed25519)';
     if (owner.length === 32) {
       try {
-        const data = new Uint8Array(await (await fetch('https://arweave.net/raw/' + n.id, { signal: AbortSignal.timeout(30000) })).arrayBuffer());
+        /* a gateway error page is not the item's data: say unchecked, never "false" */
+        const res = await fetch('https://arweave.net/raw/' + n.id, { signal: AbortSignal.timeout(30000) });
+        if (!res.ok) throw new Error('gateway HTTP ' + res.status);
+        const data = new Uint8Array(await res.arrayBuffer());
         sig = String(verifyEd25519Item({ owner, signature: b64(n.signature), target: b64(n.recipient), anchor: b64(n.anchor), tags: n.tags.map(({ name, value }) => ({ name, value })), data }));
       } catch (e) { sig = 'unchecked: ' + String(e.message).slice(0, 40); }
     }

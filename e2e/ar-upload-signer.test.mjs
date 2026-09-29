@@ -90,3 +90,8 @@ test('the audit\'s verifier agrees with arbundles on an item arbundles signed', 
   const item = arbundles.createData('{"record":"probe"}', signer, { tags }); await item.sign(signer);
   assert.equal(AUD.verifyEd25519Item({ owner: new Uint8Array(item.rawOwner), signature: new Uint8Array(item.rawSignature), tags, data: new Uint8Array(item.rawData) }), true);
 });
+test('the audit never judges a gateway error page: a non-OK raw response is reported unchecked, not false', () => {
+  const src = readFileSync(ROOT + '/contracts/vending/tool/arweave-owner-audit.mjs', 'utf8');
+  const at = src.indexOf("fetch('https://arweave.net/raw/'");
+  assert.ok(at > 0 && src.indexOf("if (!res.ok) throw new Error('gateway HTTP '", at) > at && src.indexOf("if (!res.ok) throw", at) < src.indexOf('verifyEd25519Item({', at), 'the status is checked before the body is verified');
+});
