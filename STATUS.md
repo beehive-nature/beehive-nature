@@ -35,8 +35,8 @@ it. The current count is the newest ledger entry that states one — at present
 2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
-- `2026-09-29` — **#247: Codex review reconciled.** Twenty-five findings over seven rounds
-  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`, `26707d9`), all correct. Rounds 1–4, 6 and 7 are documentation
+- `2026-09-29` — **#247: Codex review reconciled.** Twenty-six findings over eight rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`, `26707d9`, `1d58dac`), all correct. Rounds 1–4 and 6–8 are documentation
   and accuracy fixes. Round 5 changes runtime behaviour and the public API (below):
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
@@ -49,6 +49,7 @@ predates it and is superseded.
   - round 5 (**behaviour and API change**): `seal` and `SealKey::generate` return `SealError::Rng` instead of panicking when the OS RNG fails. `SealError` goes from a unit struct to an enum (`Rng`, `Encrypt`), and `SealKey::generate` now returns `Result<SealKey, SealError>`. The original proof-lights milestone is marked superseded.
   - round 6: the ledger separates the round-5 API change; the handset facts are marked founder-verified except the AI-storage reclaim; OEM unlocking is recommended setup, not an E4 condition (the ladder defines E4); the `open`/`Authentication` wording is capped and cited.
   - round 7: the nonce-soundness argument is marked UNVERIFIED, domain separation states its assumption (a `SealKey` is for bnr-seal only), and the AEAD error cites upstream. The independent review's non-blocking points are also carried: the `4 ignored` count, and the interim verifier marked as not yet existing.
+  - round 8: E4 tier standing needs scheduled re-attestation through our verifier (T3 §2). A second phone alone gives local assurance only, so the handset holds no E4 standing until the verifier lane lands.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch

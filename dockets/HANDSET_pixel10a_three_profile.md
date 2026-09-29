@@ -52,11 +52,21 @@ the bootloader wipes it.
    verifier service may stand in, so deployment is not blocked (founder
    amendment, same day). **Status (2026-09-29):** no such verifier service
    exists yet. The Beehive verifier is a separate, later lane (§5, §6.1), and
-   this docket builds none. Until the second phone or that verifier exists,
-   the interim path has nothing to pair with, so E4 via Auditor pairing is not
-   yet available. attestation.app can serve the owner's own monitoring, but it
-   is not Beehive tier evidence. What stands in is a founder decision, open
-   here. Each verifier pins the auditee's persistent
+   this docket builds none. E4 *tier standing* needs more than a pairing: it
+   needs the scheduled re-attestation that T3 §2 routes through *our*
+   verifier (TOFU to our verifier, rolling attestations; T3 §2 cadence is
+   "scheduled, e.g. daily, and on sensitive ops"). So:
+   - **Second phone only:** the owner gets local Auditor assurance. Beehive
+     receives no re-attestation it can count, so no E4 tier standing.
+   - **Beehive verifier (whenever it lands):** the only path to E4 tier
+     standing in this docket. The second phone stays the founder-ruled
+     permanent auditor alongside it.
+   - **attestation.app:** the owner's own monitoring only, never Beehive tier
+     evidence.
+
+   Until the verifier lane lands, the handset holds no E4 standing. What, if
+   anything, stands in before then is a founder decision, open here. Each
+   verifier pins the auditee's persistent
    attestation key on first use (TOFU), and each keeps its own pin:
    - **Auditor phone:** scanning the QR code pins the key on that phone. Keep
      the phone physically separate from the handset. Losing it means
