@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p76ec188b53",
+ "bnr": "bnr://skaists.dev/blood/p76ec188b53",
+ "identity": {
+  "name": "Susannah Clarke",
+  "lifespan": "1711–1768",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKT6-LL8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "6 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "6 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfc9a3de17f",
+    "name": "William Clarke Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p841b07cc42",
+    "name": "Joan Bliven",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3addb25006",
+    "name": "Amy Susan Burdick"
+   },
+   {
+    "id": "p25ff5791df",
+    "name": "Barbara Susan Burdick"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKT6-LL8",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 6,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

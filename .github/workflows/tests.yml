@@ -97,7 +97,7 @@ jobs:
         run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/ans104.test.mjs
       # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
       # run one of them. That is why a real regression sat on an open, mergeable
       # PR for three days with nothing red naming it: the gate was not weak, it
@@ -764,6 +764,49 @@ jobs:
   # (≈200 browser cases + the meter at 3 registers × 31 pages) behind the gate, which pushed the node
   # job past its 20-min hang cap (run 36234571171: every step green, cancelled at the cap mid-battery).
   # The cap stays the cap; the batteries split instead, so each job keeps its own bound.
+  wallet:
+    # THE WALLET, IN ALL THREE REGISTERS (2026-09-27). Until this job, none of
+    # the wallet's browser suites ran in CI: the six pipeline batteries and the
+    # three-grammars gate were green only where a seat ran them by hand. A
+    # register never changes what a person may do, so every battery runs once
+    # per register (WALLET_REG, e2e/wallet-register-pin.mjs): cypherpunk with
+    # the pipeline open at once, new bee and raver in the reader's own
+    # "everything" view. Each step runs all six and fails at the end, so one red
+    # battery never hides the others.
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
+        if: always()
+        run: node e2e/wallet-registers.mjs
   eternal:
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -832,3 +875,19 @@ jobs:
         if: always()
         working-directory: e2e
         run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html,doors/index.html,doors/beehivenature.html,doors/skaists.html,doors/plur.html,doors/bnature-social.html,doors/bnature-bio.html,doors/beehivebiomass.html,doors/beehivenature-buzz.html,doors/skaists-buzz.html,ant-door.html,forge/index.html,forge/hexfield.html,forge/huddle.html,forge/room.html,comb.html,recover.html,keys/addresses.html,royalguard.html,privacy-lens.html,attest.html,fleet-hosted/lab/blend-lab.html,fleet-hosted/lab/edible-tracker.html,fleet-hosted/lab/flower-lab.html,fleet-hosted/lab/intake-tracker.html,fleet-hosted/lab/spliff-lab.html,dock.html,fieldnotes.html,law-of-the-sea.html,design-system.html,blight/c1-aid.html,blight/coop.html,blight/farmers.html,blight/hearth.html,blight/profile.html,blight/pulse.html,biq.html,bqueenbee-live.html,local-agent/index.html,or-board.html,devroom.html,bset.html,bsymposium.html,btranslated.html,buzz-studio.html,record.html,blight/demo.html,blight/qrroses.html,blight/qrroses-smil.html,blight/qrtree.html,blight/vaulta-reader.html,blight/workbench.html,b4b.html,bantfarm.html,bfactory.html,bmeshasi.html,dao-dashboard/index.html --min 100
+      # PROOF LIGHTS (founder go, 2026-09-27): a badge is a projection of a status document a check
+      # already produced, rendered OFFLINE by Shields' own badge-maker and committed as a static SVG
+      # under docs/status/. Same-origin, so design-acceptance I1 holds and a page saying TELEMETRY NONE
+      # does not phone a badge CDN to say so. This step re-renders every docs/status/*.json and fails if
+      # the committed SVG differs: derived, not typed. Unsigned documents say so in their own field.
+      - name: Proof lights — every badge is exactly what its status document renders
+        if: always()
+        working-directory: e2e
+        run: node render-badges.mjs --check
+      # The gate's own negative probes (review of #250, 2026-09-27): deleted evidence, inflated counts
+      # with a matching SVG, a forty-zero revision, a bogus signature, non-JSON evidence, a SHA-1-only
+      # rebind, a duplicated row, a CI-origin claim — each passed the first gate and must now FAIL.
+      - name: Proof lights — the gate refuses every known forgery
+        if: always()
+        working-directory: e2e
+        run: node --test render-badges.test.mjs

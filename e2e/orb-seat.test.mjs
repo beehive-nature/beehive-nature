@@ -48,6 +48,10 @@ test('mobile: the orb floats above the bar, on screen, and the ANT card is not c
   assert.equal(orb.pos, 'fixed', 'the orb floats');
   assert.ok(onScreen(orb, 390, 844), 'fully on screen ' + JSON.stringify(orb));
   assert.ok(orb.b <= bar.t + 1, `never on the bar (orb bottom ${orb.b}, bar top ${bar.t})`);
+  // new bee opens on its home list (the three grammars, 2026-09-26): the ANT
+  // card lives in "see what i have", one row away, which is the reader's path
+  await p.locator('#wl-bee [data-wl-go="have"]').click();
+  await p.waitForTimeout(400);
   await p.waitForSelector('#ch-autonomi', { timeout: 15000 }); /* the chain matrix renders from adapter reads */
   await p.locator('#ch-autonomi').evaluate(n => n.scrollIntoView({ block: 'center' }));
   await p.waitForTimeout(300);

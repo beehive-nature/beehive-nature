@@ -10,6 +10,7 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { chromium } from 'playwright';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -94,6 +95,8 @@ const assertUrl = (href, host, asset) => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 try {
   /* ── A · key UNSET (file as committed) ─────────────────────────────── */
   console.log('A · key unset (as committed):');
@@ -110,7 +113,11 @@ try {
     ok('launch href=#', (await go.getAttribute('href')) === '#');
     const banner = await page.locator('#fund-stat').innerText();
     ok('unconfigured banner visible', banner.includes('funding not configured'));
-    ok('banner names environment (SANDBOX default)', banner.includes('sandbox'));
+    // bee and raver fold the engineering (key names, environment, host) one tap
+    // away, behind the section's own toggle: the reader's tap, then the same text
+    if (REG !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); }
+    const bannerFull = await page.locator('#fund-stat').innerText();
+    ok('banner names environment (SANDBOX default)' + (REG === 'cypherpunk' ? '' : ', one tap away in ' + REG), bannerFull.includes('sandbox'));
     ok('panel body revealed', !(await page.locator('#fund-js').evaluate(el => el.hidden)));
     ok('asset options USDC_BASE + USDC_ETHEREUM',
       JSON.stringify(await page.locator('#fund-asset option').evaluateAll(os => os.map(o => o.value))) ===
@@ -257,7 +264,10 @@ try {
   /* ── F · design acceptance (mobile viewport first, per standing order) ── */
   console.log('F · design acceptance (390px phone):');
   {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    // the dress checks below are new bee's, and the fold law after them is
+    // cypherpunk's: each context names its own register, whatever WALLET_REG is
+    const ctx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
@@ -277,8 +287,25 @@ try {
     // honey is the colour of b and ONLY of b — never a heading; bee sets the
     // argument in ink-dim with no gradient at all
     ok('headline argument: bee solid ink-dim, no gradient, no gold in a heading', !/linear-gradient/.test(head.img) && head.color === 'rgb(74, 95, 85)', JSON.stringify(head).slice(0, 90));
+    // new bee's own fold: its home says "here is what this is" (the home-chain
+    // figure) and asks one question, before any field asks to be filled
+    const beeFold = await page.evaluate(() => {
+      const card = document.querySelector('#wl-bee .wlb-card'), q = document.querySelector('#wl-bee .wlb-q');
+      const inputs = [...document.querySelectorAll('main input, main select, main textarea')].filter(el => el.getClientRects().length);
+      return { card: Math.round(card.getBoundingClientRect().bottom), q: Math.round(q.getBoundingClientRect().top), fold: window.innerHeight, visibleInputs: inputs.length };
+    });
+    ok('bee fold: the home-chain figure and the one question sit in the fold, no field to fill', beeFold.card <= beeFold.fold && beeFold.q < beeFold.fold && beeFold.visibleInputs === 0, JSON.stringify(beeFold));
+    // the pipeline fold law now lives where the whole pipeline is open at once
+    await page.evaluate(() => { localStorage.setItem('bregister', 'cypherpunk'); });
+    await ctx.clearCookies();
+    await page.close();
+    const cyCtx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
+    await cyCtx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
+    const cyPage = await cyCtx.newPage();
+    await cyPage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await cyPage.waitForTimeout(600);
     // the fold, on a phone: hero balance + ring ABOVE connect (form-kill law)
-    const fold = await page.evaluate(() => {
+    const fold = await cyPage.evaluate(() => {
       const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);
       const bal = document.getElementById('chains').closest('section');
       const kc = document.getElementById('kc-sec');
@@ -301,6 +328,7 @@ try {
     });
     ok('desktop order unchanged (CONNECT stays above BALANCES)', dOrder.connect < dOrder.bal, JSON.stringify(dOrder));
     await desk.close();
+    await cyCtx.close();
     await ctx.close();
   }
 } finally {

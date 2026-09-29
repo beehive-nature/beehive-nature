@@ -226,7 +226,7 @@ test("atlas honesty: the page derives the three published-corpus counts", () => 
   assert.ok(page.includes("S.atlas={"));
 });
 
-test("atlas honesty: the numbers hold on the actual corpus (10,259 / 10,097 / 1,959)", () => {
+test("atlas honesty: the numbers hold on the actual corpus (11,041 / 10,878 / 1,696)", () => {
   const c = JSON.parse(readFileSync(join(here, "../../assets/profile-archive/lineage/remington-bloodline.json"), "utf8"));
   const published = Object.keys(c.persons || {}).length;
   const seen = new Set([c.root]); const st = [c.root];
@@ -237,10 +237,10 @@ test("atlas honesty: the numbers hold on the actual corpus (10,259 / 10,097 / 1,
   let bloodline = 0; seen.forEach((id) => { if (c.persons[id]) bloodline++; });
   let frontier = 0;
   for (const k in (c.edges || {})) for (const p of c.edges[k]) if (!c.persons[p]) frontier++;
-  assert.equal(published, 10259);
-  assert.equal(bloodline, 10097);
+  assert.equal(published, 11041);
+  assert.equal(bloodline, 10878);
   assert.equal(bloodline, c.meta.stats.bloodlinePersons); // derivation agrees with the corpus's own receipt
-  assert.equal(frontier, 1959);
+  assert.equal(frontier, 1696);
 });
 
 /* ---------- the relationship mount (one resolver, two environments — Archive 1.1) ---------- */
@@ -361,15 +361,15 @@ test("wiring: the mount renders — relationship-to-root panel, three-shape rela
 
 /* ---------- ghost frontier: coverage, never an empty family ---------- */
 
-test("corpus: ghost-parent counts sum to the 1,959 frontier across all persons", () => {
+test("corpus: ghost-parent counts sum to the 1,696 frontier across all persons", () => {
   let total = 0; let personsWithGhosts = 0;
   for (const k in (corpus.edges || {})) {
     let n = 0;
     for (const p of corpus.edges[k]) if (!corpus.persons[p]) n++;
     if (n) { total += n; personsWithGhosts++; }
   }
-  assert.equal(total, 1959);
-  assert.ok(personsWithGhosts > 1000, "the frontier is distributed, not one broken branch");
+  assert.equal(total, 1696);
+  assert.ok(personsWithGhosts > 800, "the frontier is distributed, not one broken branch"); /* 1000+ → 897 holders: the 2026-09-19 walk-merge dangler repair PUBLISHED 263 holders’ parents (1,959 → 1,696 ghosts) */
 });
 
 test("wiring: ghost slots + the frontier affordance render honestly", () => {

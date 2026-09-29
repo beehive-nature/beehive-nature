@@ -166,6 +166,9 @@ test('cypherpunk: the dataset is complete at first paint; filters re-derive; cop
   assert.equal(d.kv, 9); assert.equal(d.recs, 10); assert.equal(d.pipe, 6);
   assert.equal(d.path, 'bset://for the wOlf · 100 records');
   assert.deepEqual(d.fork, ['_blank', 'noopener noreferrer', 'https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bset.html']);
+  // every record link leaves for YouTube in a new tab, and says so to a reader moving by links (AGENTS.md new-tab law)
+  const recLinks = await p.$$eval('#etRecords a', as => as.map(a => [a.target, a.querySelector('.et-sr') ? a.querySelector('.et-sr').textContent : '']));
+  assert.ok(recLinks.length === 10 && recLinks.every(l => l[0] === '_blank' && /opens in a new tab/.test(l[1])), 'each record link announces its new tab: ' + JSON.stringify(recLinks.slice(0, 2)));
   await p.click('#etSeg button[data-f="ru"]');
   assert.deepEqual(await p.$$eval('#etRecords tr', r => [...new Set(r.map(x => x.cells[1].textContent))]), ['ru']);
   await p.click('#etMore');

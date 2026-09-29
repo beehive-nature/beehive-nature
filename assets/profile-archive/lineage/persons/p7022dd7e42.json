@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7022dd7e42",
+ "bnr": "bnr://skaists.dev/blood/p7022dd7e42",
+ "identity": {
+  "name": "John Emms",
+  "lifespan": "1702–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH27-J1Z"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "12 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "12 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p298c48938e",
+    "name": "Johanes Ems",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4d108e25b0",
+    "name": "Alice Freeman",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcfe9cdb9e9",
+    "name": "John Emms"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH27-J1Z",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 12,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

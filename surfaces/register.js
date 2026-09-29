@@ -77,10 +77,10 @@
       --reg-ai:#0f6f82;--reg-info:#4d759b;--reg-biomass:#527c46;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
       --reg-rose:#a3122b;--reg-rose-deep:#6e0c1f;
       --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
-      --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-      --reg-font-title:Georgia,'Times New Roman',serif;
-      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-      --reg-radius-card:20px;--reg-radius-btn:12px;--reg-radius-cut:4px;
+      --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+      --reg-font-title:'Instrument Serif',Georgia,serif;
+      --reg-font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+      --reg-radius-card:18px;--reg-radius-btn:12px;--reg-radius-cut:6px;
       --reg-bg-wash:#fbf7f0;--reg-glow:none;
       --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
     }
@@ -95,12 +95,12 @@
       --reg-ai:#45c2dc;--reg-info:#6fa9e0;--reg-biomass:#86cc72;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
       --reg-rose:#c41e3a;--reg-rose-deep:#8e1230;
       --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
-      --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-      --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
-      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-      --reg-radius-card:28px;--reg-radius-btn:999px;--reg-radius-cut:4px;
+      --reg-font-body:'Sora',system-ui,-apple-system,'Segoe UI',sans-serif;
+      --reg-font-title:'Unbounded',system-ui,sans-serif;
+      --reg-font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+      --reg-radius-card:18px;--reg-radius-btn:999px;--reg-radius-cut:6px;
       --reg-bg-wash:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
-      --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow */
+      --reg-glow:0 0 14px rgba(156,111,214,0.45); /* glow-sovereign — the sheet's own value */
       --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
     }
     body[data-reg="cypherpunk"][data-reg-dress="contract"]{
@@ -114,13 +114,23 @@
       --reg-ai:#45c2dc;--reg-info:#6fa9e0;--reg-biomass:#86cc72;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
       --reg-rose:#c41e3a;--reg-rose-deep:#8e1230;
       --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
-      --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-      --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-      --reg-radius-card:4px;--reg-radius-btn:4px;--reg-radius-cut:4px;
+      --reg-font-body:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+      --reg-font-title:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+      --reg-font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+      --reg-radius-card:6px;--reg-radius-btn:6px;--reg-radius-cut:6px; /* radius-sm; cypherpunk's pills drop to 5px, tags to 4px, page-level */
       --reg-bg-wash:#06110c;--reg-glow:none;
       --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
     }
+    /* the sheet's register-independent law: senary spacing, control heights,
+       the ONE gradient (skaists' mandala, rim to centre), and direction —
+       right-to-left flips the two angles once, at the token. */
+    body[data-reg-dress="contract"]{
+      --reg-s1:6px;--reg-s2:12px;--reg-s3:18px;--reg-s4:24px;--reg-s5:36px;--reg-s6:48px;
+      --reg-control-min:44px;--reg-control-row:52px;--reg-control-primary:54px;--reg-control-person:60px;--reg-control-check:24px;
+      --reg-rainbow:linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6);
+      --reg-flow:90deg;--reg-hatch:45deg;
+    }
+    body[dir="rtl"][data-reg-dress="contract"]{--reg-flow:270deg;--reg-hatch:135deg}
     #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#857d70;--reg-active:#0c1412;--reg-on:#fbf7f0;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
     body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-track:#15241f;--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
     body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-track:#0c1412;--reg-radius:4px;--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#45c2dc;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}

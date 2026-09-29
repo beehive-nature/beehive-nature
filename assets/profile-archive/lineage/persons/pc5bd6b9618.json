@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5bd6b9618",
+ "bnr": "bnr://skaists.dev/blood/pc5bd6b9618",
+ "identity": {
+  "name": "Olof Markusson",
+  "lifespan": "1705–1773",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KN44-Q82"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "2 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "2 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc434f4112d",
+    "name": "Markus Olofsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p503aab619a",
+    "name": "Gertrud Persson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p01fe1e7f27",
+    "name": "Gertrud Olofsdr"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KN44-Q82",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 2,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
