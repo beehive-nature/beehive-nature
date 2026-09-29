@@ -47,10 +47,16 @@ the bootloader wipes it.
    is the permanent, mature configuration (founder ruling, 2026-09-27).
    **Interim:** until that second physical GrapheneOS device is provisioned, a
    verifier service may stand in, so deployment is not blocked (founder
-   amendment, same day). Scanning the QR code pins the auditee's persistent
-   attestation key on first use (TOFU). The auditor phone holds the only record
-   of that pinned key, so keep it physically separate from the handset, and
-   treat its loss as a re-pairing event.
+   amendment, same day). Each verifier pins the auditee's persistent
+   attestation key on first use (TOFU), and each keeps its own pin:
+   - **Auditor phone:** scanning the QR code pins the key on that phone. Keep
+     the phone physically separate from the handset. Losing it means
+     re-pairing that phone only.
+   - **Beehive verifier** (the interim stand-in, and scheduled remote
+     verification per T3 enrollment §2): pairing pins the key in the
+     verifier's own trust state. Losing the auditor phone does not touch it.
+   - **Both:** when both are paired, each pin is independent. A mismatch
+     reported by either one is a failed attestation.
 3. Turn on scheduled remote verification, the same shape as attestation.app,
    and re-attest before sensitive operations (T3 §2 cadence).
 4. The Beehive verifier treats the GrapheneOS verified-boot key as a
@@ -63,7 +69,7 @@ the device's standing tier. That is ladder behaviour and needs no change.
 
 | Profile | Name | Holds | Never holds |
 |---|---|---|---|
-| **Owner** | Sovereign core | Only the day-one T4 allowlist (§4a) | Sandboxed Google Play; experimental Buzz builds; development tooling; fund-moving private keys (root keys stay on the signer) |
+| **Owner** | Sovereign core | Only the day-one T4 allowlist (§4a) | Sandboxed Google Play; experimental Buzz builds; development tooling; root keys or any unbounded fund-moving key (root keys stay on the signer). The one exception is the device's own non-exportable key and its tier-bounded delegation (T3 enrollment §0 and §2), which T4 `wallet/send-limited` needs |
 | **Profile 2** | Normal world | Sandboxed Google Play and the proprietary apps that need it (maps, ride-hailing and similar) | Wallet, identity or signer tooling |
 | **Profile 3** | Beehive/Buzz lab | Our own debug APKs, W@tch/bViEw builds, experimental wallet adapters, Nostr/Buzz clients, developer utilities | Sandboxed Google Play (initially); production keys; any key that can move funds; Auditor |
 

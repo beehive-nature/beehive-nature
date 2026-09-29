@@ -35,13 +35,14 @@ it. The current count is the newest ledger entry that states one — at present
 2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
-- `2026-09-29` — **#247: Codex review reconciled.** Five findings at `cf3887a`, all
-  correct and all accuracy fixes:
+- `2026-09-29` — **#247: Codex review reconciled.** Nine findings over two rounds
+  (`cf3887a`, `6849dab`), all correct and all accuracy fixes:
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
   - the handset dispatch records the §6 rulings;
   - the count header is reconciled;
-  - the Shields remote-fetch wording is corrected.
+  - the Shields remote-fetch wording is corrected;
+  - the handset docket keeps the bounded E4 device key and gives each verifier its own TOFU pin.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch

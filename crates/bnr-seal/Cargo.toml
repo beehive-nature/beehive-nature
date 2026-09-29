@@ -6,7 +6,9 @@ license.workspace = true
 description = "Private storage envelope for already-signed receipt bytes: one allowlisted AEAD suite (XChaCha20-Poly1305), versioned header, opaque scope bound as associated data"
 
 [dependencies]
-# The same AEAD crate and major version x0x uses for encrypted KV
-# (x0x/src/kv/encrypted.rs) — one construction across the estate, not a new one.
+# The same AEAD crate, major version and primitive (XChaCha20-Poly1305, random
+# 24-byte nonces) x0x uses for encrypted KV records: x0x a42b5d9,
+# src/groups/kv_context.rs, GssKvSecureContext::seal_snapshot and its open.
+# Key derivation and AAD format were not compared: UNVERIFIED as equivalent.
 chacha20poly1305 = { version = "0.10", default-features = false, features = ["alloc", "getrandom"] }
 zeroize = { workspace = true, features = ["alloc"] }

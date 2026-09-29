@@ -10,9 +10,10 @@
 //!
 //! ## What an opened envelope does and does not establish
 //!
-//! A successful [`open`] proves only that someone holding the same
+//! A successful [`open`] authenticates only that someone holding the same
 //! symmetric [`SealKey`] produced these bytes for this scope, and that
-//! nothing was altered since. It does **not** establish who issued the
+//! nothing was altered since. That is sound by construction relative to the
+//! shared key, and no stronger. It does **not** establish who issued the
 //! receipt, whether their delegation is valid, whether the work happened, or
 //! whether this is a replay. AEAD authentication is relative to a shared key
 //! by construction. Callers verify the issuer's signature on the opened bytes
