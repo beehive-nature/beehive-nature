@@ -32,6 +32,16 @@ const claim = await fetch(new URL('/api/invites/claim', base), { method: 'POST',
 });
 assert.equal(claim.status, 200, `Clone invite claim failed (${claim.status})`);
 console.log('PASS invite claim in private clone');
+// Route-fence assertions (2026-09-28 hardening follow-through): the
+// auxiliary routes must REFUSE on this private rig (503 per the stage
+// Caddyfile) and /pair must be ROUTED, not refused — a future accidental
+// enablement or a routing slip fails the smoke instead of shipping.
+const auxiliary = await fetch(new URL('/compute/models', base));
+assert.equal(auxiliary.status, 503, `Auxiliary route must refuse on the private rig (got ${auxiliary.status})`);
+console.log('PASS auxiliary route refusal (/compute/models -> 503)');
+const pairProbe = await fetch(new URL('/pair', base));
+assert.notEqual(pairProbe.status, 503, '/pair must be routed to the pair relay, not refused as auxiliary');
+console.log('PASS /pair routed (not auxiliary-refused)');
 // Optional isolated desktop canary identity. Caller supplies a restricted local
 // directory; never print the secret or overwrite an existing identity file.
 if (process.env.BUZZ_CANARY_KEY_FILE) {

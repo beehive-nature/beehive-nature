@@ -24,6 +24,11 @@ in {
   systemd.services.hive-board = {
     description = "Export skaists public board";
     after = [ "buzz-stack.service" ];
+    # 2026-09-28: requires, not just after — the exporters must not run
+    # against a failed stack mid-window (ordering alone let them fire while
+    # buzz-stack was down; the scripts failed loudly, this makes the unit
+    # semantics say it).
+    requires = [ "buzz-stack.service" ];
     unitConfig.ConditionPathExists = "${directory}/.production-enabled";
     path = with pkgs; [ docker bash coreutils ];
     serviceConfig = {
@@ -38,6 +43,7 @@ in {
   systemd.services.hive-public = {
     description = "Export only explicitly public skaists channels";
     after = [ "buzz-stack.service" ];
+    requires = [ "buzz-stack.service" ];
     unitConfig.ConditionPathExists = "${directory}/.production-enabled";
     path = with pkgs; [ docker bash coreutils python3 ];
     serviceConfig = {
