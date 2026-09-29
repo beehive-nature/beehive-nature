@@ -79,6 +79,20 @@ const ERA_WORDS = new Set(['recorded', 'colonial', 'medieval', 'saga', 'unrecord
 const VERIFICATION_ASSERTION = /\b(independently\s+verified|verified|proven|proves|authenticated|certified)\b/i;
 /* support values that claim a harvest happened. */
 const SOURCED_SUPPORT = new Set(['sourced', 'verified', 'documented', 'record-backed']);
+/* the sentences that say a harvest has NOT happened. The bare word is not the
+ * test: a basis reading "9 FamilySearch sources (harvested 2026-09-18)" says
+ * the harvest DID happen, and a /harvested/ match refused 756 honest persons
+ * the day main published them. Three wordings are live — evidence.basis
+ * "until sources are harvested", research.basis "not yet harvested" (before
+ * the 09-18 harvest) and "no attached sources harvested" (after it).
+ * RESIDUAL, named: a fourth negative wording nobody has written yet is not
+ * matched, so this clause fails OPEN on it. */
+const NOT_HARVESTED = /\b(?:not\s+yet\s+harvested|until\s+(?:sources\s+are\s+)?harvested|no\s+(?:attached\s+)?sources\s+harvested)\b/i;
+/* fields a correction's patch writes that the build then RECOMPUTES: the era
+ * and class of `evidence` are derived from the corrected dates, on purpose,
+ * after the patch is spread. They are the only exception to "the published
+ * person carries the patch's content". */
+const RECOMPUTED_AFTER_PATCH = { evidence: new Set(['era', 'class']) };
 
 const CLAUSES = [
   ['SRC-PACK-UNDECLARED', '[OVL] every overlay person MUST reference an evidence pack'],
@@ -121,6 +135,22 @@ export const CLAUSE_CODES = CLAUSES.map(([code]) => code);
 
 function nonEmpty(s) {
   return typeof s === 'string' && s.trim().length > 0;
+}
+
+/* A value's CONTENT as one string: object keys sorted, so two objects equal
+ * field-for-field compare equal whatever their identity or key order.
+ * `skip` names top-level keys of an object left out of the comparison. The
+ * archive is parsed JSON, so an undefined inside an object is not a shape it
+ * can carry; one at the top level is spelled out rather than serialised to
+ * nothing. */
+function canonical(v, skip) {
+  if (v === undefined) return 'undefined';
+  if (Array.isArray(v)) return `[${v.map((x) => canonical(x)).join(',')}]`;
+  if (v && typeof v === 'object') {
+    const keys = Object.keys(v).filter((k) => !(skip && skip.has(k))).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(v);
 }
 
 /* Read the class vocabulary out of [META] confidenceTiers rather than hard-coding
@@ -289,13 +319,12 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
     if (nonEmpty(ev.support) && ERA_WORDS.has(ev.support)) {
       add('CLM-ERA-AS-SUPPORT', id, `evidence.support reads ${JSON.stringify(ev.support)} — an era label, not an assessment`);
     }
-    /* The harvest status is written in two places and in two wordings —
-     * evidence.basis "support unsourced until sources are harvested" and
-     * research.basis "per-person source counts not yet harvested". Read BOTH;
-     * a pattern anchored on one of the two phrasings would be silent on the
+    /* The harvest status is written in two places — evidence.basis and
+     * research.basis — and in the three wordings NOT_HARVESTED names. Read
+     * BOTH fields; a pattern anchored on one of them would be silent on the
      * other, which is where the defect would actually live. */
     const harvestSentence = `${ev.basis || ''} ${((p && p.research) || {}).basis || ''}`;
-    if (SOURCED_SUPPORT.has(ev.support) && /harvested/i.test(harvestSentence)) {
+    if (SOURCED_SUPPORT.has(ev.support) && NOT_HARVESTED.test(harvestSentence)) {
       add('CLM-SUPPORT-OVERSTATED', id, `support ${JSON.stringify(ev.support)} while its own basis says sources are not harvested`);
     }
   }
@@ -379,7 +408,11 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
     const problems = [];
     if (!target.corrected) problems.push('the published person carries no `corrected` mark');
     for (const [k, v] of Object.entries(patch)) {
-      if (target[k] !== v) problems.push(`${k} reads ${JSON.stringify(target[k])}, the correction says ${JSON.stringify(v)}`);
+      /* by CONTENT: a patch field is usually an object, and `!==` compares
+       * objects by identity, so an applied birth/death/sources read as
+       * unapplied while the detail printed both sides identical. */
+      const skip = RECOMPUTED_AFTER_PATCH[k];
+      if (canonical(target[k], skip) !== canonical(v, skip)) problems.push(`${k} reads ${JSON.stringify(target[k])}, the correction says ${JSON.stringify(v)}`);
     }
     if (problems.length) add('LNK-CORRECTION-NOT-APPLIED', `${providerId}->${internal}`, problems.join('; '));
   }
@@ -468,7 +501,12 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
        * corpus. It does not account for parent REFERENCES the published corpus
        * still carries into that excluded population — a reader following one
        * lands nowhere and the corpus never said it would. */
-      const declaredAnywhere = JSON.stringify(meta.reconciliation || {}) + String(meta.privacy || '');
+      /* main publishes its disclosure as meta.incompleteFrontier
+       * ({ law, unresolvedParentRefs }). Stringified UNDER ITS KEY, because
+       * the key is the word "frontier"; an absent field serialises to {} and
+       * discloses nothing. */
+      const declaredAnywhere = JSON.stringify(meta.reconciliation || {}) + String(meta.privacy || '')
+        + JSON.stringify({ incompleteFrontier: meta.incompleteFrontier });
       const disclosed = /frontier|unresolved parent|parent reference/i.test(declaredAnywhere);
       if (!disclosed) {
         add('LNK-FRONTIER-UNDISCLOSED', 'meta.reconciliation',

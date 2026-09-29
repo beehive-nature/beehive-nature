@@ -49,7 +49,7 @@ const BASELINE = [
   ['SRC-EDGE-OVERSTATED :: ovl-harthacnut-i->ovl-blaeja-of-northumbria',
     'OPEN. Sharper than the other two: the overlay\'s own relationshipEvidence disputes the claim "Harthacnut is the son of Sigurd AND Blaeja", and the Sigurd half is staged "disputed — inspect in the comb" while the Blaeja half of the SAME disputed claim is staged "walked provider link". One claim, two provenance labels.'],
   ['CLM-TIER-UNDECLARED :: unrecorded',
-    'OPEN, and narrower than it reads. "unrecorded" is a real sixth tier — surfaces/blood.html, surfaces/profile.html, surfaces/person-panel-corpus.mjs and the GUX-01 frontier dispatch all name it. What is missing is the CORPUS\'S OWN sentence: meta.confidenceTiers declares four classes and the corpus publishes 1,800 persons in a fifth. The defect is the declaration, not the data.', [1800]],
+    'OPEN, and narrower than it reads. "unrecorded" is a real sixth tier — surfaces/blood.html, surfaces/profile.html, surfaces/person-panel-corpus.mjs and the GUX-01 frontier dispatch all name it. What is missing is the CORPUS\'S OWN sentence: meta.confidenceTiers declares four classes and the corpus publishes 1,398 persons in a fifth (1,800 until the 09-19 zBlood regen on main reclassified the cohort). The defect is the declaration, not the data.', [1398]],
   ['LNK-COUPLE-AND-EDGE :: p0b2a91a835|p59ca207357', 'OPEN — Probus Ferreolus di Roma / Syagria Papianilla, 4th c. Gaul.'],
   ['LNK-COUPLE-AND-EDGE :: p59ca207357|p7b4ce90388', 'OPEN — Syagria Papianilla / Flavius Afranius Syagrius II. Syagria stands in two of the seven.'],
   ['LNK-COUPLE-AND-EDGE :: p13f145e0f0|p41e853380c', 'OPEN — Menkare / Netikereti, 7th dynasty.'],
@@ -57,28 +57,26 @@ const BASELINE = [
   ['LNK-COUPLE-AND-EDGE :: p321780663d|pe58481281a', 'OPEN — Cleopatra V Tryphaena / Ptolemy XII Auletes.'],
   ['LNK-COUPLE-AND-EDGE :: p7c4314f0bf|p854fa8143e', 'OPEN — Eglon ben Balak / Orfa bat Eglon.'],
   ['LNK-COUPLE-AND-EDGE :: p48d02fc52a|pebab1efcae', 'OPEN — "Mrs Aksumay Ramissu of Ethiopia" / "Aksumay Ramissu of ETHIOPIA": two provider records that read like one person, which is the OTHER way into this class. Whether each of the seven is a faithful marriage or a duplicate record is unresolved here and the row does not claim it.'],
-  ['LNK-FRONTIER-UNDISCLOSED :: meta.reconciliation',
-    'OPEN. 1,959 staged parent references point at persons the corpus did not publish. meta.reconciliation accounts for the raw walk minus the published corpus and says nothing about references the published corpus still carries INTO that excluded population. PR #222 adds the disclosure; this lane is ordered not to touch #222\'s changes, so the row is reported and left standing.', [1959]],
 ];
 const BASELINE_KEYS = new Set(BASELINE.map(([k]) => k));
 
 /* ------------------------------------------------------------- magnitudes
  * A baseline row pins a NAME (`code :: where`). R2 and R3 never read
  * `f.detail`, so a row the baseline ALREADY names can change what it says by
- * any amount and both directions stay green. Measured rather than feared:
+ * any amount and both directions stay green. Measured rather than feared, at b21f3367:
  * planting 3,000 unpublished parent refs into one staged person moves the
  * frontier row from 1,959 to 4,959 and the whole shipped suite stays 46/46.
- * The baseline's own note for that row reads "1,959 staged parent
+ * The baseline's own note for that row then read "1,959 staged parent
  * references", so the artifact would be carrying a false sentence with
  * nothing red — the class this file exists to refuse, one layer up.
  *
  * The obvious gate is wrong, and it was measured wrong before it was written:
- * a digit sweep over the NOTES returns five rows and only two of them are
+ * at b21f3367 a digit sweep over the NOTES returned five rows and only two were
  * magnitudes the archive produces — "217" is a line anchor, "4" and "7" are
  * centuries, "222" is a PR number. Three false reds out of five.
  *
  * So the census reads the READER'S OUTPUT and never the prose: a live finding
- * whose DETAIL publishes a number owes a pin. Today exactly 2 of the 12 do,
+ * whose DETAIL publishes a number owes a pin. At the e063fb00 merge exactly 1 of the 11 does,
  * and the other 10 are what proves the extractor can say no.
  */
 const MAGNITUDE = /\d[\d,]*/g;
@@ -583,6 +581,14 @@ test('M-REMEDY LNK-FRONTIER-UNDISCLOSED: declaring the frontier clears it — th
   });
   assert.deepEqual(disclosed.findings.map(findingKey), [],
     'the clause must accept a stated frontier, or it is a ban on the archive having edges rather than a disclosure law');
+  /* the shape main actually publishes (meta.incompleteFrontier, since the
+   * 09-27 zBlood rider). Reading only reconciliation reported it undisclosed. */
+  const mainShape = runFixture((s) => {
+    s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
+    s.corpus.meta.incompleteFrontier = { law: 'INCOMPLETE: a parent named in the provider tree but not fetched; the tree stops where the archive stops.', unresolvedParentRefs: 1 };
+  });
+  assert.deepEqual(mainShape.findings.map(findingKey), [],
+    'meta.incompleteFrontier is a stated frontier and must clear the row');
 });
 
 test('M-REMEDY SRC-EDGE-OVERSTATED: the honest tag clears it, and a missing row is not silently a pass', () => {
@@ -638,4 +644,104 @@ test('M-REMEDY META-COUNT-DIVERGE: an absent census over an EMPTY field is silen
     'an absent census over a field nobody publishes must not be reported — that would be a ban on the field being unused');
   /* non-vacuity: the clause still ran. */
   assert.ok(r.inspected['META-COUNT-DIVERGE'] > 0, 'the clause never executed, so its silence means nothing');
+});
+
+/* A person the 09-18 harvest actually sourced. Its basis says the harvest
+ * HAPPENED, in the exact shape main publishes for 754 persons. */
+function harvested(s, id = 'pRoot') {
+  const p = s.corpus.persons[id];
+  p.evidence.support = 'sourced';
+  p.evidence.basis = '9 FamilySearch sources (harvested 2026-09-18)';
+  p.research.basis = '9 attached FamilySearch sources (harvested 2026-09-18)';
+}
+
+test('M-REMEDY CLM-SUPPORT-OVERSTATED: a basis saying the harvest HAPPENED is not an overstatement', () => {
+  /* PRECONDITION: the fixture really is a sourced person whose basis carries
+   * the word, or the silence below would be asserting the fixture. */
+  const s = cleanFixture();
+  harvested(s);
+  assert.equal(s.corpus.persons.pRoot.evidence.support, 'sourced');
+  assert.match(`${s.corpus.persons.pRoot.evidence.basis} ${s.corpus.persons.pRoot.research.basis}`, /harvested/i);
+
+  const r = runFixture((st) => harvested(st));
+  assert.deepEqual(r.findings.map((f) => `${findingKey(f)} — ${f.detail}`), [],
+    '"(harvested 2026-09-18)" says sources were harvested; refusing it refused 756 honest persons on main');
+  assert.ok(r.inspected['CLM-SUPPORT-OVERSTATED'] > 0, 'the clause never ran, so its silence means nothing');
+});
+
+test('M-REMEDY CLM-SUPPORT-OVERSTATED: every NOT-harvested wording still fires, from either field, next to an honest one', () => {
+  /* The narrowed pattern must still catch the real case. Each wording is
+   * planted in ONE field while the other field says the harvest happened, so
+   * a pattern reading only one field, or missing one wording, falls here. */
+  const wordings = [
+    ['evidence', 'era label from dates; support unsourced until sources are harvested'],
+    ['research', 'per-person source counts not yet harvested'],
+    ['research', 'no attached sources harvested for this person; era-heuristic only'],
+  ];
+  for (const [field, basis] of wordings) {
+    const r = runFixture((st) => {
+      harvested(st);
+      st.corpus.persons.pRoot[field].basis = basis;
+    });
+    assert.deepEqual(r.findings.map(findingKey), ['CLM-SUPPORT-OVERSTATED :: pRoot'],
+      `a sourced person whose ${field}.basis reads ${JSON.stringify(basis)} must be reported`);
+  }
+});
+
+/* A correction whose patch carries OBJECT fields, applied faithfully: the
+ * published person holds equal copies, never the patch's own objects, and its
+ * evidence carries the era/class the build recomputes. The shape of
+ * LNQ5-BSG / LNQ5-BSF on main. */
+function objectCorrection(s) {
+  const patch = {
+    living: false,
+    birth: { date: '1 January 1900', place: null, basis: 'record: obituary' },
+    evidence: { support: 'sourced', basis: 'obituary harvested 2026-09-22: born 1 January 1900' },
+    sources: [{ title: 'an obituary', read: '2026-09-22', supports: ['birth 1 January 1900'] }],
+  };
+  s.overlay.corrections['AAA-222'].patch = patch;
+  const dad = s.corpus.persons.pDad;
+  const copy = JSON.parse(JSON.stringify(patch));
+  Object.assign(dad, copy);
+  dad.evidence = { era: 'recorded', ...copy.evidence, class: 'recorded' };
+  dad.research.basis = '1 attached FamilySearch source (harvested 2026-09-22)';
+}
+
+test('M-REMEDY LNK-CORRECTION-NOT-APPLIED: an applied object-valued correction is compared by content, not identity', () => {
+  /* PRECONDITION: the fields really are distinct objects with equal content,
+   * and evidence really does differ by the recomputed keys — otherwise the
+   * silence below proves nothing about either half of the repair. */
+  const s = cleanFixture();
+  objectCorrection(s);
+  const patch = s.overlay.corrections['AAA-222'].patch;
+  const dad = s.corpus.persons.pDad;
+  for (const k of ['birth', 'evidence', 'sources']) assert.notEqual(dad[k], patch[k], `${k} is the SAME object, so identity would pass`);
+  assert.deepEqual(dad.birth, patch.birth);
+  assert.deepEqual(dad.sources, patch.sources);
+  assert.notDeepEqual(dad.evidence, patch.evidence);
+
+  const r = runFixture((st) => objectCorrection(st));
+  assert.deepEqual(r.findings.map((f) => `${findingKey(f)} — ${f.detail}`), [],
+    'an applied correction was reported unapplied');
+  assert.ok(r.inspected['LNK-CORRECTION-NOT-APPLIED'] > 0, 'the clause never ran, so its silence means nothing');
+});
+
+test('M-REMEDY LNK-CORRECTION-NOT-APPLIED: a real content difference still fails, and the exception is evidence era/class ONLY', () => {
+  const cases = [
+    ['a different birth date', (dad) => { dad.birth.date = '2 January 1900'; }, 'birth'],
+    ['a dropped source', (dad) => { dad.sources = []; }, 'sources'],
+    ['a different evidence basis', (dad) => { dad.evidence.basis = 'era label from dates'; }, 'evidence'],
+    /* era/class are exempt on `evidence` alone — the same key on another
+     * field is content like any other. */
+    ['an extra `class` on birth', (dad) => { dad.birth.class = 'recorded'; }, 'birth'],
+  ];
+  for (const [what, breakIt, field] of cases) {
+    const r = runFixture((st) => { objectCorrection(st); breakIt(st.corpus.persons.pDad); });
+    assert.deepEqual(r.findings.map(findingKey), ['LNK-CORRECTION-NOT-APPLIED :: AAA-222->pDad'], `${what} was not reported`);
+    assert.match(r.findings[0].detail, new RegExp(`(^|; )${field} reads `), `${what}: the finding does not name ${field}`);
+  }
+  /* and the exception itself: a differing recomputed era/class is silent. */
+  const eraOnly = runFixture((st) => { objectCorrection(st); st.corpus.persons.pDad.evidence.era = 'colonial'; st.corpus.persons.pDad.evidence.class = 'colonial'; });
+  assert.deepEqual(eraOnly.findings.filter((f) => f.code === 'LNK-CORRECTION-NOT-APPLIED').map(findingKey), [],
+    'evidence era/class are recomputed after the patch; comparing them reports every era change as an unapplied correction');
 });
