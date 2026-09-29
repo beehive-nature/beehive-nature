@@ -116,15 +116,20 @@ Autonomi write remains gated on the ANT custody review
   from the box IP. Both doors documented in SPEC-VENDING-2 §ar-doors.
   (Corrected 2026-09-28: `F8f2GF…` is a valid item, so it was not built by the
   committed ar-upload.cjs, which could only produce seed-owned items that fail
-  verification; its builder is not in the tree. `Invalid Data Item` is also exactly what an item
+  verification (its pre-fix lines 15-19: the public key taken from an SPKI wrap of
+  the seed, then packed public-first; see docs/dispatches/2026-09-28-ar-upload-key-order.md); its builder is not in the tree. `Invalid Data Item` is also exactly what an item
   built in the reversed key order returns, because its owner cannot verify its
   signature; "throttling" was never proven.)
 - **Turbo upload key order** (corrected 2026-09-28; the line written here on
   2026-09-01 had it backwards and is deleted): arbundles `SolanaSigner` reads
   its 64-byte secret as **seed(32) ‖ public(32)**; the first half signs, the
   second half is the owner. Built public-first, the SEED goes in the owner
-  field and the item fails its own signature. Measured on @dha-team/arbundles
-  1.0.4 and held by `e2e/ar-upload-signer.test.mjs`.
+  field and the item fails its own signature (source: @dha-team/arbundles 1.0.4 `build/node/cjs/src/signing/chains/SolanaSigner.js`, the
+  constructor: first 32 bytes become `_key`, which `keys/curve25519.js` `sign()` signs
+  with; last 32 become `pk`, which the `publicKey` getter returns as the owner.
+  The guard is `contracts/vending/tool/ar-upload.cjs` `memberSigner()`; the failed-
+  signature claim is checked by `contracts/vending/tool/arweave-owner-audit.mjs`
+  `verifyEd25519Item()`; both held by `e2e/ar-upload-signer.test.mjs`).
 - **Jungle4 A-paralysis** (probed exhaustively): Greymass Fuel carries
   ordinary actions INCLUDING setcode/setabi (reached the RAM check — the
   deploy would fly) but blocks every resource action (delegatebw, buyram*).
