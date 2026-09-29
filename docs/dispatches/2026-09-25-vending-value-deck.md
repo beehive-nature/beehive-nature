@@ -227,3 +227,31 @@ vending-cert ans104`); `vending-eternal` + `local-agent-eternal` 11/11;
 100% in all three registers; `estate-source` 11/0; `x402-engine-parity` ok;
 `polish-i18n` 25/0; headless load of the three pages with every outside request
 aborted: zero page errors.
+
+## Review round 2 — 2026-09-28: APPROVE, then its follow-ups
+
+The same read-only reviewer read `6265de4a4..00122748d`: **APPROVE**. B1-B3 and
+4, 5, 6, 8, 9, 10, 11 FIXED; 7 PARTIAL. No new false signal. Its follow-ups, done:
+
+- **SF1** the resurrection check on a fresh in-page mint says *waits* when the
+  gateway has not seeded it or the index has not listed it, and the summary stops
+  claiming "found from your key alone" until it is.
+- **SF2** a failure after the upload is recognised by a flag set when the upload
+  returns, not by a step label.
+- **nit 1** a name minted in this tab is not minted again under a second key;
+  approve rests for it and the plan says why.
+- **nit 3** `e2e/fixtures/ans104-arbundles.gen.mjs` re-derives the pinned fixture
+  from arbundles (and refuses if the owner is not the public key).
+- **nit 4** the agent's system turn says Arweave confirms the key that signed
+  *the item at the id*, and that the copy read here hashes true.
+- Left as named: `vaulta_account: bnrapolltest` is the rehearsal stand-in
+  (mint.mjs convention); blob URLs are not revoked; `@ardrive/turbo-sdk` and
+  `bs58` stay because `ar-upload.cjs` still uses them; the 100-row certs read
+  falls back to the contract's own "name already minted" refusal.
+
+**Behavioural receipt:** a headless mint of `smoke bee` with every outside door
+mocked (jungle4, Turbo, gateway 404, empty index; nothing left the machine):
+0 page errors, 1 upload; the key link was in the door when the upload arrived;
+approve was disabled and Escape left the plan open mid-mint; the row read "not
+written yet"; the check read waits / ok / waits with "0 failed so far"; reopening
+the plan for the same name kept approve disabled and said why.

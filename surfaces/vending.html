@@ -855,7 +855,8 @@ const verifyCert = async r => (!r || r.record !== 'agent-birth-certificate')
 /* the 11 gates of contracts/vending/tool/resurrect.mjs, client-side, live */
 async function resurrect() {
   const list = $('vres-list'); list.innerHTML = ''; $('vres-sum').textContent = 'running…';
-  let pass = 0, fail = 0, ways = 'three ways';
+  const KEY_WAITS = 'The key road waits on Arweave\'s index. ';
+  let pass = 0, fail = 0, ways = 'three ways', keyRoad = 'Found from your key alone. ';
   const li = (name, ok, detail) => {
     const el = document.createElement('li');
     el.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? 'ok' : 'FAIL'}</span> ${esc(name)}` +
@@ -864,9 +865,19 @@ async function resurrect() {
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
     ok ? pass++ : fail++;
     $('vres-sum').innerHTML = fail === 0
-      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> Found from your key alone. Fingerprint matched ${ways}. A forged copy was refused.`
+      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> ${keyRoad}Fingerprint matched ${ways}. A forged copy was refused.`
       : `<span class="fail">${fail} failed</span> — the record did not prove itself; look at the lines above.`;
   };
+  /* a fresh in-page mint the gateways or the index have not caught up with
+     is waiting, not failing: said as such, and the check stops there */
+  const waits = (name, detail) => {
+    const el = document.createElement('li');
+    el.innerHTML = `<span class="m">waits</span> ${esc(name)}` + (detail ? ` <span class="m">— ${esc(detail)}</span>` : '');
+    list.appendChild(el); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  };
+  const seeding = why => { waits('gateway: ' + why, 'a fresh certificate seeds to the gateways within minutes; press rebuild to check again');
+    if (fail === 0) $('vres-sum').innerHTML = `<span class="m">waiting</span> — ${pass} checks passed, 0 failed so far; the gateways have not caught up with this certificate yet.`;
+    state.resurrected = { pass, fail, waiting: true }; };
   const name = state.cert?.agent_name; if (!name) { li('a certificate to test', false, 'no ledger row visible'); return; }
   /* 1 · the name road. A certificate minted in this page has no chain row
      until the machine seat writes it: that is said as waiting, not failure,
@@ -875,9 +886,7 @@ async function resurrect() {
   if (onChain) li('name road: name → chain row → ar id (jungle4, public state)', true, 'row ' + onChain.id);
   else if (state.cert.ar_id) {
     ways = 'two ways (the chain row is not written yet)';
-    const el = document.createElement('li');
-    el.innerHTML = `<span class="m">waits</span> name road: the chain row is not written yet <span class="m">— the machine seat writes it; checking by the certificate's id and key instead</span>`;
-    list.appendChild(el); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+    waits('name road: the chain row is not written yet', 'the machine seat writes it; checking by the certificate\'s id and key instead');
   } else { li('name road: name → chain row → ar id (jungle4, public state)', false, 'not found'); return; }
   const row = onChain || state.cert;
   /* 2 · shape */
@@ -885,9 +894,10 @@ async function resurrect() {
   /* 3 · fetch */
   let text = '';
   try { const res = await fetch(`${AR}/${row.ar_id}`, { signal: AbortSignal.timeout(30000) });
+    if (!res.ok && !onChain) { seeding('not seeded yet (HTTP ' + res.status + ')'); return; }
     li('gateway returned the bytes over public HTTPS', res.ok, 'HTTP ' + res.status);
     text = await res.text();
-  } catch (e) { li('gateway returned the bytes over public HTTPS', false, String(e).slice(0, 60)); return; }
+  } catch (e) { if (!onChain) { seeding('not reachable yet'); return; } li('gateway returned the bytes over public HTTPS', false, String(e).slice(0, 60)); return; }
   /* 4 · json */
   let cert; try { cert = JSON.parse(text); } catch { }
   li('certificate is JSON', !!cert); if (!cert) return;
@@ -917,11 +927,14 @@ async function resurrect() {
       body: JSON.stringify({ query: `query{transactions(tags:[{name:"Member-Key",values:["${mk}"]}]){edges{node{id owner{address}}}}}` }),
       signal: AbortSignal.timeout(30000) });
     const edges = g.ok ? ((await g.json())?.data?.transactions?.edges || []) : [];
+    if (!onChain && !edges.some(e => e.node.id === row.ar_id)) { keyRoad = KEY_WAITS; waits('key road: Arweave\'s index has not listed this certificate yet', 'the tag search catches up within minutes; press rebuild to check again'); }
+    else {
     li('key road: your key alone finds it on Arweave (tag search)',
       edges.some(e => e.node.id === row.ar_id), edges.length + ' hit(s) — your whole mint history');
     li('record discoverable · owner recorded', edges.length > 0,
       edges[0]?.node?.owner?.address ? 'owner ' + edges[0].node.owner.address.slice(0, 10) + '…' : '');
-  } catch (e) { li('key road reachable', false, String(e).slice(0, 60)); }
+    }
+  } catch (e) { if (!onChain) { keyRoad = KEY_WAITS; waits('key road: Arweave\'s index not reachable yet', 'press rebuild to check again'); } else li('key road reachable', false, String(e).slice(0, 60)); }
   /* 10 · the negative proof, run live on the fetched record */
   const forged = structuredClone(cert);
   forged.answers.who_owns_it.vaulta_account = 'attacker';
@@ -953,6 +966,8 @@ function openPlan() {
   $('p-tithe-v').innerHTML = p != null ? `${fmt$(L.basisA * L.titheBp / 10000 * p)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>` : 'n/m';
   $('p-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
   $('doorstate').classList.remove('show');
+  $('papprove').disabled = mintedHere.has(n);
+  if (mintedHere.has(n)) { $('doorstate').innerHTML = `<span class="held">${esc(n)}.a was minted in this tab already</span> as <a href="${AR}/${esc(mintedHere.get(n))}" target="_blank" rel="noopener">ar://${esc(mintedHere.get(n))}</a>. keep your key and wake it below; approving again would make a second key and a second certificate, so approve rests for this name.`; $('doorstate').classList.add('show'); }
   plan.classList.add('open');
   document.body.style.overflow = 'hidden';
   plan.querySelector('.refuse').focus();
@@ -962,8 +977,10 @@ const closePlan = msg => { plan.classList.remove('open'); document.body.style.ov
     el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 8000); } };
 $('vmintbtn').addEventListener('click', openPlan);
 $('prefuse').addEventListener('click', () => closePlan('refused — nothing moved, nothing was ever built'));
-/* while a mint runs the plan stays open: closing it would not stop the upload */
+/* while a mint runs the plan stays open: closing it would not stop the upload.
+   a name minted in this tab is not minted again under a second key */
 let minting = false;
+const mintState = { uploaded: false }, mintedHere = new Map();
 plan.addEventListener('click', e => { if (e.target === plan && !minting) closePlan('dismissed — nothing moved'); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open') && !minting) closePlan('dismissed — nothing moved'); });
 
@@ -989,17 +1006,17 @@ $('papprove').addEventListener('click', async () => {
        road (owner = member key, Member-Key tag) finds the certificate
        without it. The agent is handed over at the end: a mind in your tab,
        wearing this certificate. */
-    if (minting) return;
-    minting = true; $('papprove').disabled = true; $('prefuse').disabled = true;
-    try { await mintInPage(door); }
+    if (minting || mintedHere.has(state.canonName)) return;
+    minting = true; mintState.uploaded = false; $('papprove').disabled = true; $('prefuse').disabled = true;
+    try { await mintInPage(door); mintedHere.set(state.canonName, state.cert.ar_id); }
     catch (e) {
       /* once the upload was attempted the item may already be permanent; the
          key offered above is its owner, so say that instead of "nothing kept" */
-      const after = e.step === 'arweave';
+      const after = e.step === 'arweave' || mintState.uploaded;
       door.innerHTML = (e.step === 'name' ? '' : door.innerHTML + '<br>') + `<span class="held">the mint stopped at <b>${esc(String(e.step || 'unknown'))}</b></span> — <i>${esc(String(e.message || e).slice(0, 160))}</i>. ` +
         (after ? 'the certificate may have reached the permaweb anyway; the key offered above is its owner, keep it.' : 'nothing was uploaded and nothing partial was kept.');
     }
-    finally { minting = false; $('papprove').disabled = false; $('prefuse').disabled = false; }
+    finally { minting = false; $('papprove').disabled = mintedHere.has(state.canonName); $('prefuse').disabled = false; }
     return;
   }
   /* every other door is bPay, held until the founder names the seat (founder
@@ -1039,6 +1056,7 @@ async function mintInPage(door) {
   try { item = await A.sign(key, bytes, C.certTags({ agentName: name, memberKeyHex: key.publicHex, spec: 'SPEC-VENDING-1' })); }
   catch (e) { throw step('sign', e); }
   try { up = await A.upload(item); } catch (e) { throw step('arweave', e); }
+  mintState.uploaded = true;
   say(door.innerHTML + ` ✓<br>3 · on the permaweb · <a href="${AR}/${esc(up.id)}" target="_blank" rel="noopener">ar://${esc(up.id)}</a>`);
   cells(null, 'permaweb id ' + up.id.slice(0, 8) + '…', 'reading it back…'); $('c-honey').classList.add('past');
   /* 4 · the door's own status (CORS-open), then a gateway read-back with the

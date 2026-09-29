@@ -43,7 +43,8 @@ test('the signature verifies under WebCrypto over the same deepHash, and the id 
    SolanaSigner (secret = seed ‖ public, the order it reads) signed this item
    from the seed below (ed25519 is deterministic),
    so CI holds the page's signer to the library with no install. The seed is a
-   public test constant, derived from a phrase; it guards nothing. */
+   public test constant, derived from a phrase; it guards nothing.
+   Re-derive it: node e2e/fixtures/ans104-arbundles.gen.mjs */
 const FIXTURE = { phrase: 'skaists ans104 fixture seed · public, test-only', data: JSON.stringify({ record: 'ans104-fixture', n: 1 }),
   id: '9rtakX7KQvAFPwKE2bBjNuo-Y9oCAmgE9046fv5-qAg', length: 312,
   sha256: 'e4c5dc832f3bd7e178ce6b43ef64420f5c6767032f477ce5e6e62df096963838' }; // PUBLIC-CONSTANT: sha256 of the arbundles-signed fixture item
