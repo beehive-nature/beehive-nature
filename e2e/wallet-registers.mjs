@@ -118,15 +118,15 @@ const arrival = page => page.evaluate(() => {
       return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
     },
   });
-  ok('bee reads in SERIF titles over SANS body', /Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-  ok('bee corners are SOFT (20px cards, 12px controls)', seen.bee.cardRadius === '20px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
+  ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
+  ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
   ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
   ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
   ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
   ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
   ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
   ok('cypherpunk is MONO top to bottom', /mono/i.test(seen.cypherpunk.bodyFont) && /mono/i.test(seen.cypherpunk.h1Font), seen.cypherpunk.bodyFont.split(',')[0]);
-  ok('cypherpunk corners are CUT (4px cards, 4px controls)', seen.cypherpunk.cardRadius === '4px' && seen.cypherpunk.btnRadius === '4px', seen.cypherpunk.cardRadius);
+  ok('cypherpunk corners are CUT (6px radius-sm — the sheet)', seen.cypherpunk.cardRadius === '6px' && seen.cypherpunk.btnRadius === '6px', seen.cypherpunk.cardRadius);
   ok('cypherpunk action is ai teal (rgb(69, 194, 220))', seen.cypherpunk.btnColor === 'rgb(69, 194, 220)', seen.cypherpunk.btnColor);
   await ctx.close();
 }

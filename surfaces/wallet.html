@@ -191,9 +191,9 @@ body[data-reg="bee"]{
   --sem-harm:#4a3aa8;--sem-solution:#2e6b1e;--sem-system:#4d759b;--sem-science:#0f6f82;
   --sem-value:#7a5209; /* honey stepped darker INSIDE its own ramp for paper — honey never sits raw on a light ground (1.88:1) */
   --reg-primary:#a8238c;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
-  --reg-radius-card:20px;--reg-radius-btn:12px;--reg-glow:none;
-  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:Georgia,'Times New Roman',serif;
+  --reg-radius-card:18px;--reg-radius-btn:12px;--reg-glow:none;
+  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:'Instrument Serif',Georgia,serif;
   background:#fbf7f0;color:#0c1412;color-scheme:light;
   font:16px/1.65 var(--reg-font-body);
 }
@@ -203,10 +203,10 @@ body[data-reg="raver"]{
   --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
   --sem-value:#e8b54b;
   --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
-  --reg-radius-card:28px;--reg-radius-btn:999px;
-  --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow, sovereign-edged */
-  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-radius-card:18px;--reg-radius-btn:999px;
+  --reg-glow:0 0 14px rgba(156,111,214,0.45); /* glow-sovereign — the sheet's own value */
+  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:'Unbounded',system-ui,sans-serif;
   /* the purples as light: a sovereign wash rises behind the fold and melts
      into the black ground — light behind the page, never on the words */
   background:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
@@ -219,9 +219,9 @@ body[data-reg="cypherpunk"]{
   --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
   --sem-value:#e8b54b;
   --reg-primary:#45c2dc;--reg-on-primary:#06110c;--reg-link:#45c2dc;--reg-link-hover:#8eddee;
-  --reg-radius-card:4px;--reg-radius-btn:4px;--reg-glow:none;
-  --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-  --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  --reg-radius-card:6px;--reg-radius-btn:6px;--reg-glow:none;
+  --reg-font-body:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --reg-font-title:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
   background:#06110c;color:#e9f2ec;color-scheme:dark;
   font:13px/1.5 var(--reg-font-body);
 }
@@ -251,7 +251,7 @@ body[data-reg="bee"] footer{font-size:14px}
 body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
 body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
 /* raver: display titles, you magenta as light, pills everywhere, the one glow */
-body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
+body[data-reg="raver"] h1{font-weight:700;letter-spacing:-.02em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
  background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
 body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
