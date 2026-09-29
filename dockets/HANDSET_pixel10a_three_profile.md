@@ -50,7 +50,13 @@ the bootloader wipes it.
    is the permanent, mature configuration (founder ruling, 2026-09-27).
    **Interim:** until that second physical GrapheneOS device is provisioned, a
    verifier service may stand in, so deployment is not blocked (founder
-   amendment, same day). Each verifier pins the auditee's persistent
+   amendment, same day). **Status (2026-09-29):** no such verifier service
+   exists yet. The Beehive verifier is a separate, later lane (§5, §6.1), and
+   this docket builds none. Until the second phone or that verifier exists,
+   the interim path has nothing to pair with, so E4 via Auditor pairing is not
+   yet available. attestation.app can serve the owner's own monitoring, but it
+   is not Beehive tier evidence. What stands in is a founder decision, open
+   here. Each verifier pins the auditee's persistent
    attestation key on first use (TOFU), and each keeps its own pin:
    - **Auditor phone:** scanning the QR code pins the key on that phone. Keep
      the phone physically separate from the handset. Losing it means

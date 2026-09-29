@@ -42,9 +42,14 @@
 //! (`OsRng.try_fill_bytes` in [`seal`]; an RNG failure is [`SealError::Rng`],
 //! never a panic). There is no
 //! counter, so no state has to survive restarts or be shared between
-//! concurrent jobs. The extended nonce is the reason for this suite: random
-//! nonces are sound for it by design, where a 96-bit nonce would need
-//! coordination. Key rotation and key custody are the caller's concern.
+//! concurrent jobs. The extended nonce is why this suite was chosen. The
+//! argument that random 192-bit nonces keep collisions negligible for any
+//! practical message count under one key, where random 96-bit nonces would need
+//! coordination, is the standard birthday-bound argument. It is cited from the
+//! XChaCha20 construction's design and is UNVERIFIED by this seat: upstream
+//! `chacha20poly1305` 0.10 documents only a "192-bits; unique per message"
+//! nonce (`src/lib.rs`, module docs). Key rotation and key custody are the
+//! caller's concern.
 
 #![forbid(unsafe_code)]
 
@@ -56,8 +61,11 @@ use zeroize::{Zeroize, Zeroizing};
 /// The only envelope version this crate reads or writes.
 pub const ENVELOPE_VERSION: u8 = 1;
 
-/// Domain separation for the associated data, so an envelope header can never
-/// authenticate as some other protocol's AAD under the same key.
+/// Domain prefix for the associated data. It keeps this crate's AAD distinct
+/// from any other protocol that prefixes its *own* distinct domain. It cannot
+/// stop a protocol that accepts arbitrary AAD, so it is not a licence for key
+/// reuse: a [`SealKey`] is for bnr-seal only and must never be shared with
+/// another protocol.
 const DOMAIN: &[u8] = b"bnr-seal/receipt/v1\0";
 
 const SCOPE_LEN: usize = 32;
@@ -96,7 +104,9 @@ impl Suite {
     }
 }
 
-/// 256-bit symmetric key. Zeroized on drop; its bytes are never printed.
+/// 256-bit symmetric key. Zeroized on drop; its bytes are never printed. Use it
+/// for bnr-seal only: never share it with another protocol (see the domain note
+/// on the associated data).
 pub struct SealKey([u8; 32]);
 
 impl SealKey {
@@ -178,8 +188,9 @@ pub enum SealError {
     /// The OS RNG could not supply a nonce or key, for example during early
     /// boot or in a restricted sandbox. Returned instead of panicking.
     Rng,
-    /// Encryption failed inside the AEAD. With a well-formed key this
-    /// happens only for plaintexts beyond the cipher's length limit.
+    /// Encryption failed inside the AEAD. In `chacha20poly1305` 0.10.1
+    /// (`src/cipher.rs`, `Cipher::encrypt_in_place_detached`) the only error
+    /// is a plaintext of `u32::MAX` blocks or more.
     Encrypt,
 }
 

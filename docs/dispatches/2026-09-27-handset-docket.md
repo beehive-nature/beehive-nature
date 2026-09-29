@@ -33,6 +33,7 @@ date 2026-09-27 · seat Claude · founder order: "write the docket for the three
   reclaim, which stays UNVERIFIED.
 - The docket's §6 questions are all ruled (2026-09-27), none open:
   - the permanent auditor is a second physical phone, with a verifier service
-    allowed in the interim;
+    allowed in the interim. No such service exists yet (docket §3 status
+    note), so the interim path is open until the founder names what stands in;
   - Profile 3 gets no sandboxed Play initially;
   - the T4 day-one apps are the §4a allowlist.
