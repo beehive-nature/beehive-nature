@@ -8,7 +8,9 @@
 // leave the tree both get a 404. Every file is opened before it is answered and its size read
 // from that open handle, and the body is bounded to that size, so the headers and the body come
 // from one snapshot; a failure after the headers destroys the socket (a browser reports a failed
-// load, never a good 200). Used by myspace-stranger.mjs and myspace-seam.mjs. The other harnesses
+// load, never a good 200). A missing path is 404; any other fault (EACCES, EMFILE, EIO) is 500 and
+// written to stderr, so a harness never mistakes a server fault for a missing file. Only GET and
+// HEAD are served: anything else is 405 and written to stderr. Used by myspace-stranger.mjs and myspace-seam.mjs. The other harnesses
 // under e2e/ that open their own server (184 files on 2026-09-29, `grep -l createServer
 // e2e/*.mjs | wc -l`), myspace-eternal.test.mjs (CI-gated) among them, still carry their own
 // copies; each can move here when its owner chooses.
@@ -30,6 +32,8 @@ export const MIME = {
 };
 
 const notFound = res => { if (!res.headersSent) { res.writeHead(404); res.end('nf'); } else res.destroy(); };
+const serverError = (res, e) => { process.stderr.write(`serve: ${e?.code || e?.message || e}\n`); if (!res.headersSent) { res.writeHead(500); res.end('err'); } else res.destroy(); };
+const missing = e => e?.code === 'ENOENT' || e?.code === 'ENOTDIR' || e instanceof URIError; // a path the tree does not have (or one that does not decode)
 // a directory: its index when the slash is there (the caller appended index.html, so reaching here means no index), else a redirect to the slash form
 const directory = (res, path, rawPath, query) => { if (path.endsWith('/')) notFound(res); else { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : ''), 'Cache-Control': 'no-store' }); res.end(); } };
 // the stream owns the file handle and closes it; a client that goes away mid-body destroys the stream too
@@ -41,6 +45,7 @@ export async function serveTree(root) {
   const server = createServer(async (req, res) => {
     let fh = null; // the open file handle, closed on every path that does not hand it to a stream
     try {
+      if (req.method !== 'GET' && req.method !== 'HEAD') { process.stderr.write(`serve: ${req.method} ${req.url} refused (405)\n`); res.writeHead(405, { Allow: 'GET, HEAD' }); res.end(); return; }
       const [rawPathIn, query] = req.url.split(/\?(.*)/s);
       const rawPath = rawPathIn.replace(/^\/+/, '/'); // "//dir" would otherwise redirect off the origin (protocol-relative)
       const path = decodeURIComponent(rawPath);
@@ -62,8 +67,9 @@ export async function serveTree(root) {
         const s = fh.createReadStream({ start, end }); fh = null; return send(s, res); // the stream owns the handle from here
       }
       res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' });
-      const s = fh.createReadStream({ start: 0, end: Math.max(0, st.size - 1) }); fh = null; send(s, res); // bounded to the size the header promised
-    } catch { if (fh) fh.close().catch(() => {}); notFound(res); }
+      if (st.size === 0) { await fh.close(); fh = null; res.end(); return; } // an empty file: no stream (a bound of [0, -1] would read one byte if the file grew)
+      const s = fh.createReadStream({ start: 0, end: st.size - 1 }); fh = null; send(s, res); // bounded to the size the header promised
+    } catch (e) { if (fh) fh.close().catch(() => {}); if (missing(e)) notFound(res); else serverError(res, e); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
   return { base, close: () => new Promise(r => server.close(() => r())) };

@@ -1632,7 +1632,7 @@ try {
   fail++;
   console.log('  FAIL harness — ' + (e && e.stack || e));
 } finally {
-  await browser.close();
+  await browser.close().catch(() => {}); // a browser already gone must not skip the server's close, or the gate never exits
   await closeServer();
 }
 
