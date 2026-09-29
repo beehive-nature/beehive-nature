@@ -180,7 +180,9 @@ M §3 (PORT=1, nothing listening)
                   nothing connects -> CONTROL FAILED, both targets UNKNOWN
 ```
 
-Not exercised here: the served-cert SAME and DIFFERENT branches (Git Bash
+Not exercised by this seat in Git Bash (the reviewer's round-3/4 recheck
+later ran M against a real STARTTLS listener; see status below): the
+served-cert SAME and DIFFERENT branches (Git Bash
 openssl `s_server` has no `-starttls`, and this box has no Python to stand in
 a STARTTLS listener); "public key extraction failed"; the cert/key "not
 modified after" branch.
@@ -229,6 +231,11 @@ Five Codex items on `d69925711`, triaged valid by the reviewer.
   "ran, nothing matched".
 - **R** §1: the full sink.py sha256 line ends ` PUBLIC-CONSTANT` (sink.py is
   in this public repo), so an operator can paste it past the hex hook.
+- **T** §3 (Codex item on `2587d8b13`, second round-5 commit): `-checkend 0`
+  tests only the upper bound. After a good parse, notBefore is read with
+  `-startdate`, converted with `date -d`, and compared with now: a future
+  notBefore prints "THE CERT IS NOT YET VALID (notBefore in the future)"; an
+  unparseable date prints "notBefore not checked (date unparseable)".
 
 ### round-5 receipts (Git Bash, NOT dash)
 
@@ -259,9 +266,14 @@ O  192.0.2.1 connects only on 587                -> gmail-smtp-in:25 judged (OPE
    clean path                                    -> NO ANSWER gmail-smtp-in:25 · OPEN smtp.gmail.com:587
    positive control fails                        -> CONTROL FAILED, both UNKNOWN
 R  sink_file_report on the repo's own sink.py    -> the sha256 line ends " PUBLIC-CONSTANT"
+T  cert valid now                                -> no notBefore line
+   cert with -not_before 20300101000000Z         -> THE CERT IS NOT YET VALID (notBefore in the future)
+   cert valid 2020-01-01..02                     -> THE CERT HAS EXPIRED, no NOT YET VALID line
+   STUB date() that fails                        -> notBefore not checked (date unparseable)
 ```
 
-Script sha256 at round 5: `ccf2fef2…9a87f2ca77`.
+Script sha256 after the first round-5 commit (`2989db565`): `ccf2fef2…9a87f2ca77`,
+superseded by the T commit: `3398de8b…1d0fca26`.
 
 ## status: reviewer rechecks and what is pending
 
@@ -272,6 +284,6 @@ Script sha256 at round 5: `ccf2fef2…9a87f2ca77`.
 - Rounds 3 and 4 (`d69925711`, `2587d8b13`) rechecked by the reviewer
   in-session under dash, with a real STARTTLS listener and on the real network
   path, where the negative control fired.
-- **Pending:** the reviewer's recheck of round 5, and the on-host run by an
+- **Pending:** the reviewer's recheck of round 5 (N to T), and the on-host run by an
   authorized operator. **Current TLS state on the box: UNVERIFIED.** No CI
   claim is made here.

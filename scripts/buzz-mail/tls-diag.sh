@@ -269,6 +269,16 @@ elif [ -r "$CERT" ]; then
       say "  load_cert_chain does not check expiry: the sink still loads it and still"
       say "  offers STARTTLS. The risk is sending servers rejecting the handshake."
     fi
+    # -checkend tests only the upper bound; a notBefore in the future (clock
+    # skew, a misissued renewal) would otherwise pass silently
+    _nb=$(openssl x509 -in "$CERT" -noout -startdate 2>/dev/null | sed 's/^notBefore=//')
+    _nbs=$(date -d "$_nb" +%s 2>/dev/null)
+    if [ -z "$_nb" ] || ! is_uint "$_nbs"; then
+      say "  notBefore not checked (date unparseable)"
+    elif [ "$_nbs" -gt "$(date +%s)" ]; then
+      say "  *** THE CERT IS NOT YET VALID (notBefore in the future) *** — validating"
+      say "  senders may reject the handshake."
+    fi
   else
     say "  *** CERT DOES NOT PARSE (not a readable X.509 PEM) *** — expiry not checked;"
     say "  the next restart will fail at load_cert_chain."
