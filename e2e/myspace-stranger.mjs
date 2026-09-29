@@ -116,7 +116,8 @@ const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const countLeak = (text, extra = []) => {
   const t = text.toLowerCase(); const hits = {};
   const terms = [...LEAK.map(k => ({ key: k.startsWith('sha') ? 'sha' : k, src: k })), ...extra.filter(p => !LEAK.includes(p)).map(p => ({ key: p, src: esc(p) }))];
-  for (const { key, src } of terms) { const n = (t.match(new RegExp('\\b' + src + 's?\\b', 'g')) || []).length; if (n) hits[key] = (hits[key] || 0) + n; }
+  // edges are "not a word character", so a phrase that ends in "/" or ":" still matches whole
+  for (const { key, src } of terms) { const n = (t.match(new RegExp('(?<!\\w)' + src + 's?(?!\\w)', 'g')) || []).length; if (n) hits[key] = (hits[key] || 0) + n; }
   return hits;
 };
 const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
@@ -204,14 +205,15 @@ async function stranger(reg) {
     // (polled from this side; the instrument writes nothing into the page it measures)
     const tSettle = Date.now(); let sig = null, since = tSettle;
     for (;;) {
-      const now = await page.evaluate(() => { const d = window.__eternal?.data; return d ? document.body.dataset.reg + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(',') + '|' + d.pick : null; });
+      // the signature is the page's own state (register, the archive's mode buttons and which is pressed) plus the mirror's offered set
+      const now = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); });
       if (now !== sig) { sig = now; since = Date.now(); }
       else if (now !== null && Date.now() - since >= 250) break;
       if (Date.now() - tSettle > 5000) { R.notes.push('the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
       await page.waitForTimeout(50);
     }
     R.settleMs = Date.now() - tSettle; // instrument time, counted inside "ms from open" and printed beside it
-    R.pickAtRead = await page.evaluate(() => window.__eternal?.data?.pick ?? null);
+    R.pickAtRead = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null); // the page's pressed mode first, the mirror only if there is none
 
     phase = 'read'; const tRead = Date.now();
     // what the stranger can see: the register's front (without its card, whose words belong to
@@ -228,7 +230,7 @@ async function stranger(reg) {
     const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
       // the same rendered rule as every other read: a control that has no box shows no words
-      visible: !el.hidden && el.getClientRects().length > 0 ? (el.innerText ?? el.textContent ?? '').replace(/\s+/g, ' ').trim() : '',
+      visible: !el.hidden && el.getClientRects().length > 0 ? (el.innerText ?? '').replace(/\s+/g, ' ').trim() : '', // innerText only: an SVG control has none, and a <title> inside it is not shown
       aria: el.getAttribute('aria-label') || '',
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
     })), CONTROLS[reg]);
@@ -281,7 +283,7 @@ async function stranger(reg) {
       const p = pickByWords(intent, options); // an empty option list scores as "led nowhere"
       picks[intent.id] = p;
       const pick = p.none ? null : p;
-      const wanted = declared.find(p => p.id === intent.id);
+      const wanted = declared.find(dp => dp.id === intent.id);
       const own = options.find(o => o.purpose === intent.id);
       R.choices.push({
         ask: intent.ask, means: intent.id,
@@ -315,7 +317,7 @@ async function stranger(reg) {
         // (page.click checks that the control receives the pointer at the action point, so the press is known to
         // have landed even though it changes nothing; the raver tap is never a confirming one, the learning taps
         // having moved the pick)
-        confirmingPress = (await page.evaluate(() => window.__eternal?.data?.pick ?? null)) === keep.purpose;
+        confirmingPress = (await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null)) === keep.purpose; // the page's pressed mode, not the mirror
         await pressControl(page, reg, keep.purpose);
         steps++;
         const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK).then(() => { steps++; })]);
@@ -332,7 +334,7 @@ async function stranger(reg) {
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = leak(await visibleTextAll(page, 'main > :not(#eternal)'));
         phase = 'after-add'; // the add's own wire is copied only after its phase has ended, so nothing lands after the copy
-        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, confirmingPress, picker: true, ms: tStored - t0, addMs: tStored - tAdd, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
+        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, confirmingPress, picker: true, ms: tStored - t0, addMs: tStored - tAdd, pageMs: R.loadMs + (tStored - tAdd), statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
       } catch (e) {
         phase = 'after-add';
         R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, confirmingPress, ms: Date.now() - t0, error: errText(e), networkDuringAdd: [...wire.add].sort() };
@@ -437,13 +439,13 @@ L.push(`# MY SPACE — the stranger instrument, ${results.length} registers at $
 L.push('');
 L.push('Machine-measured. CHOICE, FIRST FILE, REMOVE, RECOVER, LEAKAGE and FUNDING are observed behaviour and visible wording. TERMS is a proxy (the sentence is on the control, or on its card after a tap, before the choice), not comprehension. Task completion rate and comprehension of temporary vs forever are not measured here: they need people.');
 L.push('');
-L.push('| register | purposes offered | controls readable without a tap | wrong choice (of offered) | led nowhere | first file: page presses (+ the file picker) · ms | wire during keep-here add | wire during remove | terms on control (now / forever): lifetime·readers·payer | remove | outcome stated | finality stated (before confirm / after) | recover offered | leak words in front (incl. cards read) | leak words in archive (empty / with the stored row) | own-wallet wording visible | forever payer (declared) |');
+L.push('| register | purposes offered | controls readable without a tap | wrong choice (of offered) | led nowhere | first file: page presses (+ the file picker) · page ms (load + add) · whole run ms | wire during keep-here add | wire during remove | terms on control (now / forever): lifetime·readers·payer | remove | outcome stated | finality stated (before confirm / after) | recover offered | leak words in front (incl. cards read) | leak words in archive (empty / with the stored row) | own-wallet wording visible | forever payer (declared) |');
 L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
 for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? ['lifetimeStated', 'readersStated', 'payerStated'].map(k => r.terms[id][k] ? 'y' : 'n').join('·') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · ${r.firstFile.ms} (load ${r.loadMs} · instrument ${r.settleMs} settle + ${r.readMs} reading · the add itself ${r.firstFile.addMs})` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');
@@ -464,3 +466,5 @@ for (const r of results) {
 }
 process.stdout.write(L.join('\n') + '\n');
 if (OUT) await writeFile(OUT, JSON.stringify({ revision: REVISION, results }, null, 1));
+// a register that did not get its first file, or whose run aborted, is a failed measurement: say so in the exit code
+if (results.some(r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted')))) process.exitCode = 1;

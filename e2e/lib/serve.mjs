@@ -10,7 +10,7 @@
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
-import { readFile, realpath, stat } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 
 export const MIME = {
@@ -29,10 +29,11 @@ export async function serveTree(root) {
       let file = resolve(join(top, path));
       if (!inside(file)) { res.writeHead(404); res.end('nf'); return; }
       if (path.endsWith('/')) file = join(file, 'index.html');
-      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); return; } // the still-encoded path, query kept; 302, never cached
       const real = await realpath(file); // a symlink pointing out of the tree is not served either
       if (!inside(real)) { res.writeHead(404); res.end('nf'); return; }
-      const body = await readFile(real);
+      let body;
+      try { body = await readFile(real); }
+      catch (e) { if (e.code === 'EISDIR' && !path.endsWith('/')) { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); return; } throw e; } // a directory without its slash: the still-encoded path, query kept; 302, never cached
       res.writeHead(200, { 'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream' }); res.end(body);
     } catch { res.writeHead(404); res.end('nf'); }
   });
