@@ -72,6 +72,8 @@ const CARD = { bee: null, raver: '#etRaverCard', cypherpunk: null };
 const REGS = FLAGS.regs.split(',').map(s => s.trim()).filter(Boolean);
 const unknown = REGS.filter(r => !Object.hasOwn(FRONT, r)); // hasOwn: "constructor" is not a register
 if (!REGS.length || unknown.length) { process.stderr.write(`--reg: unknown register(s) ${unknown.join(', ') || '(none given)'}; known: ${Object.keys(FRONT).join(', ')}\n`); process.exit(2); }
+const repeated = REGS.filter((r, i) => REGS.indexOf(r) !== i); // a register twice would print two rows for one page: a mistake, not a request
+if (repeated.length) { process.stderr.write(`--reg: repeated register(s) ${[...new Set(repeated)].join(', ')}\n`); process.exit(2); }
 const OUT = FLAGS.out;
 const REVISION = (() => { try { return execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim(); } catch { return 'unknown'; } })();
 const VIEW = { width: 390, height: 844 };
@@ -161,7 +163,7 @@ const SEEN_TEXT = `
   // text from different blocks (or across a <br>) is joined by a line break, not a space, so a sentence never runs
   // from one element into its neighbour (a "no" in a sibling <small> is not a negation of the button's "you pay")
   const block = (el, root) => { for (let e = el; e && e !== root; e = e.parentElement) { const d = getComputedStyle(e).display; if (d !== 'inline' && d !== 'contents') return e; } return root; };
-  const wordsIn = (root, skipSel) => { const parts = []; let last = null; const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n; while ((n = walk.nextNode())) { if (n.nodeType === 1) { if (n.tagName === 'BR' && seen(n.parentElement)) parts.push('\\n'); continue; } const p = n.parentElement; if (!p || (skipSel && p.closest(skipSel)) || !seen(p)) continue; const b = block(p, root); if (last && b !== last) parts.push('\\n'); last = b; parts.push(n.nodeValue); } return parts.join(' ').replace(/[^\\S\\n]+/g, ' ').replace(/ *\\n */g, '\\n').trim(); };`;
+  const wordsIn = (root, skipSel) => { const parts = []; let last = null; const memo = new Map(); const shown = el => { if (!memo.has(el)) memo.set(el, seen(el)); return memo.get(el); }; const blocks = new Map(); const blockOf = el => { if (!blocks.has(el)) blocks.set(el, block(el, root)); return blocks.get(el); }; const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n; while ((n = walk.nextNode())) { if (n.nodeType === 1) { if (n.tagName === 'BR' && shown(n.parentElement)) parts.push('\\n'); continue; } const p = n.parentElement; if (!p || (skipSel && p.closest(skipSel)) || !shown(p)) continue; const b = blockOf(p); if (last && b !== last) parts.push('\\n'); last = b; parts.push(n.nodeValue); } return parts.join(' ').replace(/[^\\S\\n]+/g, ' ').replace(/ *\\n */g, '\\n').trim(); };`;
 // one page-side reader for all three shapes: the first match, every match joined, or one root with a selector
 // skipped inside it (so a sentence on a control is not counted twice); reused by the card-changed wait too
 const VISIBLE_WORDS = new Function('a', SEEN_TEXT + ` const [sel, all, skip] = a; if (all) return [...document.querySelectorAll(sel)].map(el => wordsIn(el, null)).filter(Boolean).join('\\n'); const el = document.querySelector(sel); return el ? wordsIn(el, skip || null) : '';`);
@@ -298,10 +300,13 @@ async function stranger(reg) {
     R.leakage.cardsRead = leak(cardsRead); // the front figure is the sum of frontBeforeTaps and cardsRead, computed where it is printed
     R.readMs = Date.now() - tRead; // instrument time spent reading and learning, printed beside the first-file figure
     const declared = await page.evaluate(() => (window.__eternal?.data?.purposes || []).map(p => ({ id: p.id, offered: p.offered, rail: p.rail, terms: p.terms })));
-    // own-wallet wording is looked for everywhere the visitor can read it, without counting a sentence twice
+    // own-wallet wording is looked for everywhere the visitor can read it, without counting a sentence twice; the
+    // controls' hit is labelled by how the visitor reached THAT control's words (a tap, the card already showing, the
+    // control itself), not by whether any control needed a tap
+    const ctrlHit = options.map(o => ({ o, s: o.text ? ownWalletSentence(o.text) : null })).find(x => x.s) || null;
     const ownWhere = {
       'front outside the controls': ownWalletSentence(frontOutside),
-      [options.some(o => o.learnedByTap) ? 'controls (after a tap)' : 'controls']: ownWalletSentence(options.map(o => o.text).join(' · ')),
+      [ctrlHit?.o.learnedByTap ? 'controls (after a tap)' : ctrlHit?.o.readOnCard ? 'controls (on the card already showing)' : 'controls']: ctrlHit ? ctrlHit.s : null,
       archive: ownWalletSentence(archive),
     };
     R.funding = {
@@ -443,7 +448,7 @@ async function stranger(reg) {
         const stripEl = a.closest('#tlinks'); const strip = stripEl?.getBoundingClientRect() || { left: 0, right: innerWidth, top: 0, bottom: innerHeight };
         // the strip fades its last pixels to transparent with a mask (hit-testing ignores masks): that fade is not readable
         const mask = stripEl ? (getComputedStyle(stripEl).maskImage || getComputedStyle(stripEl).webkitMaskImage || '') : '';
-        const fadePx = /calc\(100% - (\d+)px\)/.exec(mask) ? +/calc\(100% - (\d+)px\)/.exec(mask)[1] : 0;
+        const fade = /calc\(100% - (\d+)px\)/.exec(mask); const fadePx = fade ? +fade[1] : 0;
         const L = Math.max(b.left, strip.left, 0), R = Math.min(b.right, strip.right - fadePx, innerWidth), T = Math.max(b.top, strip.top, 0), B = Math.min(b.bottom, strip.bottom, innerHeight);
         const frac = b.width > 0 && R > L && B > T ? (R - L) / b.width : 0;
         const hit = frac >= 0.5 && (() => { const e = document.elementFromPoint((L + R) / 2, (T + B) / 2); return !!e && (e === a || a.contains(e)); })();

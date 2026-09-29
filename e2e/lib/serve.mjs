@@ -82,5 +82,7 @@ export async function serveTree(root) {
     } catch (e) { if (fh) fh.close().catch(() => {}); if (missing(e)) notFound(res); else serverError(res, e); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
-  return { base, close: () => new Promise(r => server.close(() => r())) };
+  // close() resolves once the listener is gone: connections still open (a body a client left paused) are cut, so a
+  // caller that awaits it never waits on a client
+  return { base, close: () => new Promise(r => { server.close(() => r()); server.closeAllConnections(); }) };
 }

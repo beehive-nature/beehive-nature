@@ -159,8 +159,9 @@ async function mockHive(ctx) {
     return route.fulfill({ status: 404, headers: cors, body: 'nf' });
   });
 
-  // hermetic: nothing else leaves this machine
-  await ctx.route(/^https?:\/\/(?!127\.0\.0\.1|skaists\.buzz)/, route => route.abort('blockedbyclient'));
+  // hermetic: nothing else leaves the box. The same rule the off-box logger uses (the shared server's), less the
+  // mocked hive above, so the abort and the count cannot disagree (another port on 127.0.0.1 is off the box too)
+  await ctx.route(u => leftBox(u.href, BASE) && u.hostname !== 'skaists.buzz', route => route.abort('blockedbyclient'));
 }
 
 // served-file surgery. The anchor is asserted present AND unique, so a mutation
