@@ -42,15 +42,17 @@
 //   node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]
 //   PW_CHROMIUM_PATH=/path/to/chrome for a box without a playwright-managed browser.
 import { chromium } from 'playwright';
-import { createServer } from 'node:http';
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { execSync } from 'node:child_process';
-import { join, extname, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { serveTree } from './lib/serve.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); const v = i > 0 ? process.argv[i + 1] : undefined; return v === undefined || v.startsWith('--') ? d : v; };
+const USAGE = 'usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]';
+// a flag given without a value is a mistake, not a request for the default
+const arg = (k, d) => { const i = process.argv.indexOf('--' + k); if (i < 0) return d; const v = process.argv[i + 1]; if (v === undefined || v.startsWith('--')) { process.stderr.write(`--${k} needs a value\n${USAGE}\n`); process.exit(2); } return v; };
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
    controls carry no words of their own) the card that answers a tap */
@@ -70,15 +72,7 @@ const OUT = arg('json', '');
 const REVISION = (() => { try { return execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim(); } catch { return 'unknown'; } })();
 const VIEW = { width: 390, height: 844 };
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.wasm': 'application/wasm' };
-const server = createServer(async (req, res) => {
-  try {
-    let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
-    const body = await readFile(join(ROOT, p));
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream' }); res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-const base = await new Promise(r => server.listen(0, '127.0.0.1', () => r(`http://127.0.0.1:${server.address().port}`)));
+const { base, close: closeServer } = await serveTree(ROOT);
 const browser = await chromium.launch(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {});
 
 /* the stranger's vocabulary: plain words an intent is made of, and the words that mean a DIFFERENT intent */
@@ -111,9 +105,13 @@ function pickByWords(intent, options) {
 const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'blossom', 'ant', 'autonomi', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
 const countLeak = text => { const t = text.toLowerCase(); const hits = {}; for (const k of LEAK) { const n = (t.match(new RegExp('\\b' + k + 's?\\b', 'g')) || []).length; if (n) hits[k.startsWith('sha') ? 'sha' : k] = n; } return hits; };
 const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
-// finality: the words that say a removed file is not coming back. "gone" and "permanent" also occur in
-// lifetime clauses, so the matched word is printed and a reader judges it.
-const FINAL = /gone|cannot|can't|no way back|for good|permanent|not .*undo|nowhere else|anywhere else|no longer|will not exist|won't exist/i;
+// finality: the words that say a removed file is not coming back. A bare "gone" is not enough: the page's
+// own non-final outcome begins "Gone from this phone. The copy out there stays where it is." So "gone"
+// counts only when nothing in the sentence says a copy stays; "permanent" also occurs in lifetime
+// clauses; the matched word is printed and a reader judges it.
+const FINAL = /cannot|can't|no way back|for good|permanent|not .*undo|nowhere else|anywhere else|existed nowhere|no longer|will not exist|won't exist|gone/i;
+const STAYS = /copy .* stays|stays where it is|still (there|out there|exists)/i;
+const finalWord = t => STAYS.test(t) ? null : (t.match(FINAL) || [null])[0];
 const OWN = /your wallet|you pay|own wallet/i;
 
 // text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
@@ -167,7 +165,7 @@ async function stranger(reg) {
     await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
-    await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => R.notes.push('load: ' + e.message.split('\n')[0]));
+    await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => R.notes.push('load: ' + errText(e)));
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
     } catch { R.notes.push('the fronts never became ready with an offered purpose (no rail attached offline?)'); }
@@ -206,7 +204,7 @@ async function stranger(reg) {
     // a control with no words of its own is learned by tapping it and reading the card that answers.
     // The ring that is pressed when the visitor arrives already has its card on the page: those
     // words are read for free, before any tap moves the card on.
-    const initialPick = await page.evaluate(() => window.__eternal?.data?.pick ?? null);
+    const initialPick = R.pickAtRead; // the one pressed purpose the front was read under
     const initialCard = CARD[reg] ? (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim() : '';
     for (const o of options) {
       if (o.visible) { o.text = o.visible; o.learnedByTap = false; continue; }
@@ -253,11 +251,13 @@ async function stranger(reg) {
       });
       // TERMS proxy: is a lifetime / readers sentence on the control (or its card) before the choice?
       if (pick && pick.purpose === intent.id) {
+        // matched on the VALUES a term can take, never on the label words "lifetime / readers / payer"
+        // that cypherpunk's rows print for every purpose (a label with an empty value states nothing)
         const t = pick.text.toLowerCase();
         R.terms[intent.id] = {
-          lifetimeStated: /\b(lifetime|gone|closes|session|stays|while|until|forever|permanent|lasts|drop|remove)\b/.test(t), // "lifetime …" and "stays while …" state a lifetime too
-          readersStated: /only this phone|this phone only|this device|\b(link|anyone|everyone|readers)\b/.test(t),
-          payerStated: /\b(pay|pays|paid|payer|paying|wallet)\b/.test(t), // not "nobody"/"hive": those also occur in the deletable and lifetime clauses
+          lifetimeStated: /\b(gone|closes|session|stays|while|until|forever|permanent|lasts|drop|remove)\b/.test(t),
+          readersStated: /only this phone|this phone only|this[ -]device|\b(link|link-holders|anyone|everyone)\b/.test(t),
+          payerStated: /\b(pay|pays|paid|paying|wallet)\b|payer (nobody|the-hive|you)\b/.test(t), // bare "nobody"/"hive" also occur in the deletable and lifetime clauses
         };
       }
     }
@@ -265,25 +265,29 @@ async function stranger(reg) {
     // FIRST FILE: the stranger wants to keep a photo on this phone. Chooses by words, presses add, picks a file.
     const keepPick = picks.keep;
     const keep = keepPick && !keepPick.none ? keepPick : null;
-    let steps = 0;
+    let steps = 0, confirmingPress = false;
     if (keep && !keep.disabled) {
       phase = 'add';
       try {
+        // if the chosen purpose is already the pressed one on arrival, this press only confirms it: counted, and said so
+        confirmingPress = (await page.evaluate(() => window.__eternal?.data?.pick ?? null)) === keep.purpose;
         await pressControl(page, reg, keep.purpose);
         steps++;
-        const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK)]);
-        steps++;
+        const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK).then(() => { steps++; })]);
         // the file picker is the device's dialog, not a press on the page: it is counted apart from the presses
         await chooser.setFiles({ name: 'stranger-note.txt', mimeType: 'text/plain', buffer: Buffer.from('a note from a stranger', 'utf8') });
-        await page.waitForFunction(() => window.__eternal.data.count >= 1, null, { timeout: 15000 });
+        // the page's own truth, not only its data mirror: a rendered row control in the archive, the body's
+        // file state, or the mirror's count — whichever the page shows first
+        await page.waitForFunction(() => document.querySelector('#list button, #list a, #list [role=button]') || document.body.dataset.state === 'file' || window.__eternal.data.count >= 1, null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
+        await page.waitForFunction(() => window.__eternal.data.count >= 1, null, { timeout: 15000 }); // the mirror follows; the receipt reads from it
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         const archivePressed = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') || null);
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = countLeak(await visibleTextAll(page, 'main > :not(#eternal)'));
-        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, picker: true, ms: tStored - t0, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
+        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, confirmingPress, picker: true, ms: tStored - t0, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
       } catch (e) {
-        R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, ms: Date.now() - t0, error: errText(e), networkDuringAdd: [...wire.add].sort() };
+        R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, confirmingPress, ms: Date.now() - t0, error: errText(e), networkDuringAdd: [...wire.add].sort() };
       }
       phase = 'after-add';
       await page.waitForTimeout(250); // a follow-up request to the add belongs here, not to the remove
@@ -318,8 +322,7 @@ async function stranger(reg) {
           const removeWire = [...wire.remove].sort();
           phase = 'after-remove';
           await page.waitForTimeout(250); // let the post-delete render and any adapter follow-up reach the after-remove log
-          const fin = t => (t.match(FINAL) || [null])[0];
-          R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: fin(sentence), finalityAfter: fin(after), networkDuringRemove: removeWire };
+          R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: finalWord(sentence), finalityAfter: finalWord(after), networkDuringRemove: removeWire };
         } catch (e) { R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: errText(e), networkDuringRemove: [...wire.remove].sort() }; phase = 'after-remove'; }
       }
       // RECOVER: does anything rendered on the page offer to bring it back? (rendered = has a box; the page is
@@ -370,7 +373,7 @@ for (const reg of REGS) {
   const s = summarize(r);
   process.stderr.write(`${reg.padEnd(11)} offered ${r.offered.join(',') || 'none'} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
 }
-await browser.close(); server.close();
+await browser.close(); await closeServer();
 
 const L = [];
 L.push(`# MY SPACE — the stranger instrument, ${results.length} registers at ${VIEW.width}×${VIEW.height}, revision ${REVISION}`);
@@ -383,7 +386,7 @@ for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? ['lifetimeStated', 'readersStated', 'payerStated'].map(k => r.terms[id][k] ? 'y' : 'n').join('·') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps} (+ picker) · ${r.firstFile.ms} (${r.settleMs} of it instrument settle)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · ${r.firstFile.ms} (${r.settleMs} of it instrument settle)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');
@@ -393,7 +396,7 @@ for (const r of results) {
   L.push(`- controls readable without a tap: ${r.controlsReadableWithoutTap ?? '—'} of ${r.offered.length}${r.learnTaps ? ` (the pressed ring's card was already on the page); the other ${r.learnTaps} carry no words of their own and were learned by tapping each and reading the card` : ''}`);
   for (const [id, t] of Object.entries(r.terms)) L.push(`- terms on the ${id} control before the choice: lifetime ${t.lifetimeStated ? 'stated' : 'not stated'}, readers ${t.readersStated ? 'stated' : 'not stated'}, payer ${t.payerStated ? 'stated' : 'not stated'}`);
   for (const c of r.choices) L.push(`- "${c.ask}" → ${c.offered ? (c.chose ? `chose **${c.chose}**${c.wrong ? ' (WRONG, meant ' + c.means + ')' : ''} (score ${c.score}) via "${c.control}"${c.learnedByTap ? ' (read on the card after tapping the ring)' : ''}` : `the words led nowhere (top score ${c.score}${c.tied ? ', tied between ' + c.tied.join(' / ') : ''})`) : 'not offered on this page'}`);
-  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored (of which ${r.settleMs} ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading; ${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
+  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored (of which ${r.settleMs} ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading; ${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
   if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.learnTaps ? `; on the cards read during the learning taps: ${JSON.stringify(r.leakage.cardsRead)}; front including those cards: ${JSON.stringify(r.leakage.front)}` : ''}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
