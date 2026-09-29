@@ -13,20 +13,24 @@ On 2026-08-31 this seat reported that `agents.skaists.buzz` did not advertise
 STARTTLS. Re-run on 2026-09-29 with a control, the same canned capability set
 (`250-Requested mail action okay, completed` / `250-SIZE 20000000` /
 `250-8BITMIME`) came back from `gmail-smtp-in.l.google.com:25` and from
-`smtp.gmail.com:587`. That set lacks STARTTLS and carries SIZE 20000000.
-(Gmail's servers are expected to advertise STARTTLS and SIZE 157286400 —
-UNVERIFIED baseline: not re-measured from a clean path in this lane. Round 5
-corrected an earlier wording that said both "require" STARTTLS, which Gmail's
-inbound MX does not of senders.) The withdrawal does not rest on that
-baseline: the same canned set came back from BOTH Google destinations
-(`gmail-smtp-in.l.google.com:25` and `smtp.gmail.com:587`), while
-`outlook-com.olc.protection.outlook.com:25` passed through and did show
-STARTTLS. So an intercepting SMTP path on this seat's own line was answering
-for (at least) those destinations, the prober could see STARTTLS when a
-destination was not intercepted, and the 08-31 probe measured that path, not
-the box.
-The finding is void. That does not prove STARTTLS works on the box; it means
-that probe cannot say either way. `docs/agents/WALLET-LEDGER.md:46` carried
+`smtp.gmail.com:587`. The 08-31 finding is withdrawn because the probe
+returned an identical, atypical capability set (no STARTTLS, SIZE 20000000)
+from two different Google endpoints, so it cannot be trusted as a measurement
+of the box. (Gmail's servers are expected to advertise STARTTLS and SIZE
+157286400 — UNVERIFIED baseline: not re-measured from a clean path in this
+lane. Round 5 corrected an earlier wording that said both "require" STARTTLS,
+which Gmail's inbound MX does not of senders.)
+
+Interception of SMTP on this seat's own line is the leading explanation, but
+it is UNVERIFIED: no clean-path or authenticated measurement confirms it.
+`outlook-com.olc.protection.outlook.com:25` did show STARTTLS through the same
+line, which only shows the prober was not uniformly blind. The inconsistent
+probes invalidate the original finding; they do not prove interception was
+the cause. (Round 8 withdrew earlier wording here that stated interception,
+and "the 08-31 probe measured that path, not the box", as fact.)
+
+The box's actual STARTTLS state is UNVERIFIED until the on-host run; the
+withdrawal does not prove STARTTLS works on the box. `docs/agents/WALLET-LEDGER.md:46` carried
 the same gap and now has a dated withdrawal note after it (history kept).
 
 ## review, round 1
@@ -390,7 +394,8 @@ Three Codex items on `ebea480a5`, triaged valid, folded into the same commit:
   destination / everyone" are replaced in the script header, this dispatch and
   the PR body with what was observed: the same canned set from BOTH Google
   destinations, Outlook passing through with STARTTLS, so the interceptor was
-  answering for (at least) those destinations.
+  answering for (at least) those destinations. (Round 8: interception is the
+  leading hypothesis only, UNVERIFIED; see "what was withdrawn, and why".)
 
 ### round-7 receipts (Git Bash, NOT dash)
 
@@ -425,7 +430,56 @@ Z2 start == mtime                  -> same second as pid 4242's start — order 
 
 No real python3 on this box, so Y itself was not re-run here.
 
-Script sha256 at round 7: `7d9403b7…fbdebcd30`.
+Script sha256 at round 7 (`e3f3cf254`): `7d9403b7…fbdebcd30`, superseded by
+round 8 below.
+
+## review, round 8: AA, AB (text only)
+
+Round 7 passed the reviewer's dash recheck:
+<https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883368931>.
+Two Codex items on `e3f3cf254`, triaged valid.
+
+- **AA** interception is no longer stated as established, in the script
+  header, this dispatch's "what was withdrawn, and why", the PR body and the
+  ledger note (`docs/agents/WALLET-LEDGER.md:46`, which said this seat's SMTP
+  path "is intercepted"). The founder's standing qualification for this lane:
+  the inconsistent probes invalidate the original finding, but they do not
+  prove interception was the cause. The finding is withdrawn because the probe
+  returned an identical, atypical set from two different Google endpoints;
+  interception is the leading explanation, UNVERIFIED; the Outlook result only
+  shows the prober was not uniformly blind; the box's STARTTLS state is
+  UNVERIFIED until the on-host run. The §2 "the external report was the
+  artifact" lines stay, as conditional consequences of a loopback ADVERTISED
+  result ("if it is the sink, ...").
+- **AB** §3 expiry: "expiry by itself does not stop load_cert_chain (see the
+  load_cert_chain line below for whether it loads); the risk is validating
+  senders rejecting the handshake." The old "the sink still loads it and still
+  offers STARTTLS" could contradict the authoritative load_cert_chain line
+  when the key or chain is bad.
+
+### round-8 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+$ grep -n -i 'intercepting SMTP path\|was answering\|measured that path' \
+    <script> <dispatch> <ledger> <new PR body>
+docs/dispatches/2026-09-29-mail-verify-inbound-tls.md:30:and "the 08-31 probe measured that path, not the box", as fact.)
+```
+
+The one remaining hit is the sentence recording that round 8 withdrew that
+wording. The round-7 Z3 bullet below the round-7 heading still quotes "the
+interceptor was answering" as what round 7 wrote, with a round-8 note that it
+is a hypothesis only.
+
+Script sha256 at round 8: `569afa04…fa40051e`.
 
 ## status: reviewer rechecks and what is pending
 
@@ -441,6 +495,9 @@ Script sha256 at round 7: `7d9403b7…fbdebcd30`.
 - Round 6 (`ebea480a5`), items U to X, rechecked by the reviewer under dash in
   WSL with a real python3, all passing except W with an encrypted key, which
   became round 7's Y.
-- **Pending:** the reviewer's recheck of round 7 (Y, Z1 to Z3), and the on-host run by an
-  authorized operator. **Current TLS state on the box: UNVERIFIED.** No CI
-  claim is made here.
+- Round 7 (`e3f3cf254`), items Y and Z1 to Z3, rechecked under dash:
+  <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883368931>
+- **Pending:** the reviewer's recheck of round 8 (AA, AB), and the on-host run
+  by an authorized operator. **Current TLS state on the box: UNVERIFIED.** The
+  cause of the 08-31 result is UNVERIFIED too (interception suspected, not
+  shown). No CI claim is made here.

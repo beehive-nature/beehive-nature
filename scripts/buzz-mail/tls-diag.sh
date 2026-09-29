@@ -5,21 +5,25 @@
 #
 # WHY THIS EXISTS. On 2026-08-31 an external EHLO probe reported that
 # agents.skaists.buzz did not advertise STARTTLS, contradicting the
-# MAILROOM_DESK receipt. That probe was WRONG — and the way it was wrong is the
-# point. Re-run on 2026-09-29 with a control, the SAME canned capability set
+# MAILROOM_DESK receipt. That finding is WITHDRAWN — and why it cannot be
+# trusted is the point. Re-run on 2026-09-29 with a control, the SAME canned
+# capability set
 #   250-Requested mail action okay, completed / 250-SIZE 20000000 / 250-8BITMIME
-# came back from gmail-smtp-in:25 AND smtp.gmail.com:587. That set lacks
-# STARTTLS and carries SIZE 20000000. (Gmail's servers are expected to advertise
-# STARTTLS and SIZE 157286400 — UNVERIFIED baseline: not re-measured from a
-# clean path in this lane.) The withdrawal does not rest on that baseline: the
-# same canned set came back from BOTH Google destinations, while Outlook's MX
-# passed through and did show STARTTLS, so an intercepting SMTP path on the
-# prober's line was answering for (at least) those destinations, and the probe
-# could see STARTTLS when a destination was not intercepted.
+# came back from gmail-smtp-in:25 AND smtp.gmail.com:587. An identical,
+# atypical set (no STARTTLS, SIZE 20000000) from two different Google
+# endpoints means the probe cannot be trusted as a measurement of the box.
+# (Gmail's servers are expected to advertise STARTTLS and SIZE 157286400 —
+# UNVERIFIED baseline: not re-measured from a clean path in this lane.)
+# Interception on the prober's line is the leading explanation, but it is
+# UNVERIFIED: no clean-path or authenticated measurement confirms it, and
+# Outlook's MX showing STARTTLS only shows the prober was not uniformly blind.
+# The inconsistent probes invalidate the finding; they do not prove the cause.
+# The box's actual STARTTLS state is UNVERIFIED until this script runs on it.
 #
 # The lesson, and the reason this file is a script and not a paragraph: a
-# measurement taken through a middlebox is not a measurement of the target.
-# Loopback has no middlebox. Run it here.
+# measurement taken through a middlebox is not a measurement of the target (a
+# middlebox is the suspected cause here, not an established one). Loopback has
+# no middlebox. Run it here.
 #
 # Usage, on the box:   sh scripts/buzz-mail/tls-diag.sh
 # Nothing is changed. Nothing is restarted. No secret is printed.
@@ -276,8 +280,9 @@ elif [ -r "$CERT" ]; then
     say "  validity: $(openssl x509 -in "$CERT" -noout -dates 2>/dev/null | tr '\n' ' ')"
     if ! openssl x509 -in "$CERT" -noout -checkend 0 >/dev/null 2>&1; then
       say "  *** THE CERT HAS EXPIRED ***"
-      say "  load_cert_chain does not check expiry: the sink still loads it and still"
-      say "  offers STARTTLS. The risk is sending servers rejecting the handshake."
+      say "  expiry by itself does not stop load_cert_chain (see the load_cert_chain"
+      say "  line below for whether it loads); the risk is validating senders"
+      say "  rejecting the handshake."
     fi
     # -checkend tests only the upper bound; a notBefore in the future (clock
     # skew, a misissued renewal) would otherwise pass silently
