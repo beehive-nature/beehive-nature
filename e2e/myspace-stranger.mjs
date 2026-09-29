@@ -109,9 +109,10 @@ function pickByWords(intent, options) {
 // plain English (local, temp, token, scheme, gas): they are counted wherever they appear, and the receipts print
 // every word with its count so a reader can see whether a hit is a rail name or ordinary prose. On this page today
 // they appear only as rail and network names.
-const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'temp', 'local', 'blossom', 'ant', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
-// …plus whatever rail schemes and networks the page declares at run time (autonomi, arbitrum-one, skaists.buzz today),
-// each as one whole phrase, so a fifth rail is counted the day it attaches and a phrase is never counted twice
+const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
+// …plus the rail schemes and networks the page itself declares at run time (temp, local, blossom, ant; autonomi,
+// arbitrum-one, skaists.buzz today), each as one whole phrase: one source of truth for the rail names, so a renamed
+// or fifth rail is counted the day it attaches and a phrase is never counted twice
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const countLeak = (text, extra = []) => {
   let t = text.toLowerCase(); const hits = {};
@@ -137,23 +138,22 @@ const OWN = /your wallet|you pay|own wallet/i;
 // text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
 // "rendered" is not "in view without scrolling": the page is taller than the viewport.
 // (getClientRects, not offsetParent — the confirmation sheet is position:fixed and has no offsetParent)
-// innerText only: it already honours rendering, and a textContent fallback would hand back words under
-// visibility:hidden or inside a closed details that no visitor read
+// ONE rule for "words a visitor can read", used by every read in this file: a text node counts when
+// its element is rendered (has a box), is not hidden or visibility:hidden, is not a screen-reader-only
+// sliver (a box under 2 px, the clip-path / clip sr-only idiom), and is not inside a closed <details>
+// body. innerText alone would keep the sr-only words; a bare tree walk would keep visibility:hidden.
+const SEEN_TEXT = `
+  const seen = el => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); if (!(r.width > 1 && r.height > 1)) return false; const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none') return false; for (let d = el.closest('details'); d; d = d.parentElement?.closest('details')) if (!d.open && !el.closest('summary')) return false; return true; };
+  const wordsIn = (root, skipSel) => { const parts = []; const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const p = n.parentElement; if (!p || (skipSel && p.closest(skipSel)) || !seen(p)) continue; parts.push(n.nodeValue); } return parts.join(' ').replace(/\\s+/g, ' ').trim(); };`;
 async function visibleText(page, sel) {
-  return page.evaluate(s => { const el = document.querySelector(s); return el && !el.hidden && el.getClientRects().length > 0 ? (el.innerText ?? '') : ''; }, sel);
+  return page.evaluate(new Function('s', SEEN_TEXT + ` const el = document.querySelector(s); return el ? wordsIn(el, null) : '';`), sel);
 }
 async function visibleTextAll(page, sel) {
-  return page.evaluate(s => [...document.querySelectorAll(s)].filter(el => !el.hidden && el.getClientRects().length > 0).map(el => el.innerText ?? '').join('\n'), sel);
+  return page.evaluate(new Function('s', SEEN_TEXT + ` return [...document.querySelectorAll(s)].map(el => wordsIn(el, null)).filter(Boolean).join('\\n');`), sel);
 }
-// the front's visible words OUTSIDE its purpose controls, so a sentence on a control is not counted twice
+// the same rule, skipping everything inside the given selector (a sentence on a control is not counted twice)
 async function visibleTextOutside(page, rootSel, skipSel) {
-  return page.evaluate(([rs, ss]) => {
-    const root = document.querySelector(rs); if (!root) return '';
-    const vis = el => el && !el.hidden && el.getClientRects().length > 0;
-    const parts = []; const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
-    while ((n = walk.nextNode())) { const p = n.parentElement; if (!p || p.closest(ss) || !vis(p)) continue; parts.push(n.nodeValue); }
-    return parts.join(' ').replace(/\s+/g, ' ').trim();
-  }, [rootSel, skipSel]);
+  return page.evaluate(new Function('a', SEEN_TEXT + ` const root = document.querySelector(a[0]); return root ? wordsIn(root, a[1]) : '';`), [rootSel, skipSel]);
 }
 
 // the purpose the archive shows pressed (the page's own truth); the fronts' mirror only when the archive has no pressed mode
@@ -239,7 +239,7 @@ async function stranger(reg) {
     const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
       // the same rendered rule as every other read: a control that has no box shows no words
-      visible: !el.hidden && el.getClientRects().length > 0 ? (el.innerText ?? '').replace(/\s+/g, ' ').trim() : '', // innerText only: an SVG control has none, and a <title> inside it is not shown
+      visible: (typeof el.innerText === 'string' && !el.hidden && el.getClientRects().length > 0) ? el.innerText.replace(/\s+/g, ' ').trim() : '', // an SVG control has no innerText: no words of its own (a <title> inside it is not shown)
       aria: el.getAttribute('aria-label') || '',
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
     })), CONTROLS[reg]);
@@ -407,15 +407,19 @@ async function stranger(reg) {
       });
       // the tour bar's "recover" link: present in the DOM, and actually on screen at this width? The bar's
       // link strip scrolls and is masked at 390 px, so presence alone would overstate what a visitor sees.
+      // "on screen" = at least half of the link's width lies inside both the viewport and its scrolling strip,
+      // and the centre of that visible part hits the link itself (not the bar's overflow button or a mask edge)
       const tourBar = await page.evaluate(() => {
         const a = [...document.querySelectorAll('#tbar a')].find(a => /recover/i.test(a.innerText || ''));
-        if (!a) return { present: false, onScreen: false };
+        if (!a) return { present: false, onScreen: false, visibleFraction: 0 };
         const b = a.getBoundingClientRect();
-        const inView = b.width > 0 && b.height > 0 && b.right > 0 && b.left < innerWidth && b.bottom > 0 && b.top < innerHeight;
-        const atPoint = inView && (() => { const e = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, b.left + b.width / 2)), Math.min(innerHeight - 1, Math.max(0, b.top + b.height / 2))); return !!e && (e === a || a.contains(e)); })();
-        return { present: true, onScreen: atPoint };
+        const strip = a.closest('#tlinks')?.getBoundingClientRect() || { left: 0, right: innerWidth, top: 0, bottom: innerHeight };
+        const L = Math.max(b.left, strip.left, 0), R = Math.min(b.right, strip.right, innerWidth), T = Math.max(b.top, strip.top, 0), B = Math.min(b.bottom, strip.bottom, innerHeight);
+        const frac = b.width > 0 && R > L && B > T ? (R - L) / b.width : 0;
+        const hit = frac >= 0.5 && (() => { const e = document.elementFromPoint((L + R) / 2, (T + B) / 2); return !!e && (e === a || a.contains(e)); })();
+        return { present: true, onScreen: hit, visibleFraction: Math.round(frac * 100) / 100 };
       });
-      R.recover = { control: rec, offered: !!rec, tourBarKeyRecoveryLinkPresent: tourBar.present, tourBarKeyRecoveryLinkOnScreen: tourBar.onScreen };
+      R.recover = { control: rec, offered: !!rec, tourBarKeyRecoveryLinkPresent: tourBar.present, tourBarKeyRecoveryLinkOnScreen: tourBar.onScreen, tourBarKeyRecoveryLinkVisibleFraction: tourBar.visibleFraction };
     }
   } catch (e) {
     // the run died: keep everything gathered so far and say where it stopped
@@ -430,6 +434,10 @@ async function stranger(reg) {
   return R;
 }
 
+// a failed or unreliable measurement: no first file, an aborted run, a remove that errored, a ring that could not be
+// learned, a page that never became ready or never took the register, an offered set still changing at the cap.
+// One predicate, used by the table's row marker and the exit code alike.
+const unsound = r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
 // one summary per result, used by the stderr line and the table alike
 const summarize = r => {
   const offered = r.choices.filter(c => c.offered);
@@ -442,7 +450,7 @@ for (const reg of REGS) {
   const r = await stranger(reg);
   results.push(r);
   const s = summarize(r);
-  process.stderr.write(`${reg.padEnd(11)} offered ${r.offered.join(',') || 'none'} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
+  process.stderr.write(`${reg.padEnd(11)} ${unsound(r) ? 'UNSOUND | ' : ''}offered ${r.offered.join(',') || 'none'}${r.offered.length !== s.offered ? ' (' + r.offered.length + ' rendered, ' + s.offered + ' declared)' : ''} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
 }
 } finally { await browser.close().catch(() => {}); await closeServer(); } // nothing is left running whatever threw above
 
@@ -457,7 +465,7 @@ for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? ['lifetimeStated', 'readersStated', 'payerStated'].map(k => r.terms[id][k] ? 'y' : 'n').join('·') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg}${r.notes.some(n => n.startsWith('unreliable:') || n.startsWith('run aborted')) ? ' **(unreliable, see notes)**' : ''} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg}${unsound(r) ? ' **(unsound, see notes)**' : ''} | ${r.offered.join(', ') || 'none'}${r.offered.length !== s.offered ? ` (${r.offered.length} rendered, ${s.offered} declared offered)` : ''} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');
@@ -469,7 +477,7 @@ for (const r of results) {
   for (const c of r.choices) L.push(`- "${c.ask}" → ${c.offered ? (c.chose ? `chose **${c.chose}**${c.wrong ? ' (WRONG, meant ' + c.means + ')' : ''} (score ${c.score}) via "${c.control}"${c.learnedByTap ? ' (read on the card after tapping the ring)' : c.readOnCard ? ' (read on the card the pressed ring already showed)' : ''}` : `the words led nowhere (top score ${c.score}${c.tied ? ', tied between ' + c.tied.join(' / ') : ''})`) : 'not offered on this page'}${c.offered && c.usable === false ? ' — the control for this purpose is disabled or unreadable, so it could not be chosen' : ''}`);
   if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored: ${r.loadMs} ms until the fronts were ready in this register, ${r.settleMs} ms of the instrument waiting for the offered purposes and the pressed one to hold still, ${r.readMs} ms of the instrument reading the page and learning the controls, ${r.firstFile.addMs} ms for the add itself from the purpose press to the row (the press, the add press, the picker and their round-trips through the harness are inside it), and the rest between those (${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
-  if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
+  if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'}; ${Math.round(r.recover.tourBarKeyRecoveryLinkVisibleFraction * 100)}% of its width inside the viewport and the strip)` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.pressedCardReadFree || r.learnTaps ? `; on the cards the visitor read (the pressed ring's and the ones reached by a tap): ${JSON.stringify(r.leakage.cardsRead)}` : ''}; rail and network words the page declared and that joined the vocabulary: ${r.railWords.join(', ') || 'none'}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
   L.push(`- funding: own-wallet wording visible ${r.funding.visibleOwnWalletWording}${r.funding.visibleOwnWalletWording ? ' (in: ' + r.funding.ownWalletWordingWhere.join('; ') + ')' : ''}; the forever rail declares payer = ${r.funding.foreverDeclaredPayer ?? 'none (not offered)'}`);
   for (const [ph, hosts] of Object.entries(r.wire)) L.push(`- cross-origin attempted during ${ph} (aborted): ${hosts.join(', ')}`); // every phase, nothing dropped
@@ -480,5 +488,4 @@ process.stdout.write(L.join('\n') + '\n');
 if (OUT) await writeFile(OUT, JSON.stringify({ revision: REVISION, results }, null, 1));
 // a failed or unreliable measurement — no first file, an aborted run, a remove that errored, a ring that could not be
 // learned, a page that never became ready or never took the register, an offered set still changing at the cap — exits 1
-const unsound = r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
 if (results.some(unsound)) process.exitCode = 1;

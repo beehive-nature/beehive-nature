@@ -1,4 +1,5 @@
-// args.mjs — one argv reader for the hand-run e2e instruments.
+// args.mjs — an argv reader for the hand-run e2e instruments (used by myspace-stranger.mjs; the
+// other harnesses keep their own inline readers, with their own rules, until their owners move).
 //
 //   const arg = argReader('usage: node x.mjs [--json out.json] [--reg a,b]');
 //   const OUT = arg('json', '');          // --json out.json  or  --json=out.json
