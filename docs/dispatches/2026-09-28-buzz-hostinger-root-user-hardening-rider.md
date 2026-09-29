@@ -44,3 +44,13 @@ Two honest stumbles on the way, both mine, both cured in-session: (a) the first 
 ## 5 · OPEN (named, next)
 
 The five operational script findings from the independent re-review (restore input hash checks; MinIO stop ordering before volume replacement; extraction-directory reuse; staging TLS isolation; smoke-test assertions) — investigation underway in this lane, next commit carries the evidence and the fixes that survive it. Also open: Aikido Deep Review remains skipped (credits = a separate purchase decision, not blocking this lane).
+
+## 6 · VALIDATION CLOSEOUT (2026-09-29, lane renamed "Container hardening — finish validation — KEEP")
+
+The three open validations from §5's honest-limits list are closed:
+
+1. **nix EVALUATED, on the NixOS host itself** (kit archived to /tmp, eval-only — nothing activated, /etc/nixos untouched): the full module closure (configuration.nix → buzz-services.nix with the `requires` additions) evaluates green under the flake's pinned nixpkgs, and `nix eval` answers `["buzz-stack.service"]` for BOTH `hive-board.requires` and `hive-public.requires`. /tmp cleaned after.
+2. **The two new smoke route-fence assertions EXERCISED LIVE**: minimal stage rig on the host (stage `Caddyfile.stage` + a real `ghcr.io/block/buzz:0.2.1` pair-relay, one compose network, loopback-only `127.0.0.1:3400`, prod door/join mounted **read-only**); seat-side loopback SSH tunnel; the **exact assertion code** from the revised `staging-smoke.mjs` ran under node — `PASS auxiliary route refusal (/compute/models -> 503)` and `PASS /pair routed (not auxiliary-refused)` (the live pair answer is 502: the backend refusing a plain GET — routing proven, which is what the assertion asserts). Rig torn down, zero residue, production untouched (same six containers, unchanged uptimes, `skaists.buzz/info` 200).
+3. **#258 RECONCILED** (no further go needed, per founder order): the re-reviewer's hook-test repair — green ×2 in its own PR runs, authored by the independent reviewer — marked ready and **merged into this branch at `3c42d9696a`**. The false-pass hook test no longer rides separately.
+
+Final CI at the lane head: scan/static/test green; eternal/meter/node are content-identical reruns in flight. **Lane state: validation COMPLETE; the deployment proposal (the HARDENING-2026-09-28.md runbook) stands founder-gated and undispositioned; archiving deferred until that disposition, per founder order — not on this receipt alone.**
