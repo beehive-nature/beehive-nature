@@ -4,27 +4,43 @@
 // Signs the Arweave data item ED25519 (ANS-104 sig type 2) so the item OWNER
 // equals the member's ed25519 public key — the key road of POINTER LAW.
 // Prints { id, owner, winc } on stdout. The seed never touches disk here.
-const { TurboFactory } = (() => { try { return require("@ardrive/turbo-sdk/node"); } catch { return require("@ardrive/turbo-sdk"); } })();
-const { SolanaSigner } = require("@dha-team/arbundles");
-const bs58 = require("bs58");
+//
+// Corrected 2026-09-28. Two defects, each enough to put the SEED in the item's
+// owner field (which is sent to the upload door, and published if accepted):
+//   1. the public key was "derived" by wrapping the seed in an SPKI public-key
+//      container, so pubRaw WAS the seed; it is now derived from the private key;
+//   2. arbundles' SolanaSigner reads its 64-byte secret as seed(32) ‖ public(32)
+//      (constructor: _key = first 32 signs, pk = last 32 is the owner); the
+//      order was reversed.
+// memberSigner() now refuses, before any network call, unless the signer's
+// owner is exactly the member's public key and not the seed.
+const crypto = require("crypto");
 
-(async () => {
-  const inp = JSON.parse(require("fs").readFileSync(0, "utf8"));
-  const seed = Buffer.from(inp.seedB64url, "base64url");
-  if (seed.length !== 32) { console.error("seed must be 32 bytes"); process.exit(1); }
-  const publicKey = require("crypto").createPublicKey({
-    key: Buffer.concat([Buffer.from("302a300506032b6570032100", "hex"), seed]),
-    format: "der", type: "spki" });
-  const pubRaw = publicKey.export({ type: "spki", format: "der" }).subarray(-32);
-  const secret64 = Buffer.concat([pubRaw, seed]); // Solana layout: pub(32) ‖ seed(32) —
-  // owner field = pubRaw (the member key), signing key = seed (Curve25519 signs with _key = last 32)
-  const signer = new SolanaSigner(bs58.encode(secret64));
-  const turbo = TurboFactory.authenticated({ signer, token: "solana" });
-  const data = Buffer.from(inp.dataB64, "base64");
-  const res = await turbo.uploadFile({
-    fileStreamFactory: () => data,
-    fileSizeFactory: () => data.length,
-    dataItemOpts: { tags: inp.tags.map(([name, value]) => ({ name, value })) },
-  });
-  console.log(JSON.stringify({ id: res.id, owner: res.owner, winc: res.winc }));
-})().catch(e => { console.error("UPLOAD-ERR:", e.message); process.exit(1); });
+function memberSigner(seed, { SolanaSigner, bs58 } = {}) {
+  if (!Buffer.isBuffer(seed) || seed.length !== 32) throw new Error("seed must be 32 bytes");
+  SolanaSigner = SolanaSigner || require("@dha-team/arbundles").SolanaSigner;
+  bs58 = bs58 || require("bs58"); bs58 = bs58.default || bs58;
+  const priv = crypto.createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), seed]), format: "der", type: "pkcs8" });
+  const pubRaw = Buffer.from(crypto.createPublicKey(priv).export({ format: "jwk" }).x, "base64url");
+  const signer = new SolanaSigner(bs58.encode(Buffer.concat([seed, pubRaw])));
+  const owner = Buffer.from(signer.publicKey);
+  if (!owner.equals(pubRaw) || owner.equals(seed)) throw new Error("the signer's owner is not the member public key; refusing before any upload");
+  return { signer, pubRaw };
+}
+module.exports = { memberSigner };
+
+if (require.main === module) {
+  (async () => {
+    const inp = JSON.parse(require("fs").readFileSync(0, "utf8"));
+    const { signer } = memberSigner(Buffer.from(inp.seedB64url || "", "base64url"));
+    const { TurboFactory } = (() => { try { return require("@ardrive/turbo-sdk/node"); } catch { return require("@ardrive/turbo-sdk"); } })();
+    const turbo = TurboFactory.authenticated({ signer, token: "solana" });
+    const data = Buffer.from(inp.dataB64, "base64");
+    const res = await turbo.uploadFile({
+      fileStreamFactory: () => data,
+      fileSizeFactory: () => data.length,
+      dataItemOpts: { tags: inp.tags.map(([name, value]) => ({ name, value })) },
+    });
+    console.log(JSON.stringify({ id: res.id, owner: res.owner, winc: res.winc }));
+  })().catch(e => { console.error("UPLOAD-ERR:", e.message); process.exit(1); });
+}

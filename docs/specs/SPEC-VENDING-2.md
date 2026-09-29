@@ -53,11 +53,14 @@ is not the mechanism.
   key per mint, `winc: 0` measured repeatedly. This minted the receipted
   certificate.
 - **Ed25519 door (the target shape)**: `SolanaSigner`, 64-byte secret =
-  **pub(32) ‖ seed(32)** (Solana layout — the arbundles class signs with the
-  LAST 32 and publishes the FIRST 32 as owner; built wrong it silently puts
-  the SEED in the owner field — trap receipted). Worked at 06:0xZ, then the
-  door began refusing with `Invalid Data Item`/503 (free-tier throttling
-  per-IP across many probe uploads). Both doors re-read at build time; the
+  **seed(32) ‖ public(32)** (the arbundles class signs with the FIRST 32 and
+  publishes the LAST 32 as owner; built public-first it puts the SEED in the
+  owner field and the item fails its own signature. Corrected 2026-09-28:
+  this line had the order backwards; ar-upload.cjs now refuses before any
+  upload unless the owner is the public key). Worked at 06:0xZ, then the
+  door began refusing with `Invalid Data Item`/503 (read then as free-tier
+  throttling; a reversed-order item returns the same refusal, so the cause is
+  unproven). Both doors re-read at build time; the
   mint takes whichever is open, the certificate records which one signed.
 
 ## §contract — `vending` (contracts/vending/src/vending.cpp, CDT 4.x)

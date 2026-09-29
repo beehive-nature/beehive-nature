@@ -112,11 +112,17 @@ Autonomi write remains gated on the ANT custody review
 - **Arweave free tier, RSA door** (operational): throwaway RSA-4096 per mint,
   `winc: 0` receipted repeatedly. **Ed25519 door** (owner = member key, the
   target shape): receipted working at 06:0xZ (`F8f2GF_ToN4oRZbohhHGiaIo7MXZ-RdVPOje3jAZ7U4`, winc 0),
-  then throttled (`Invalid Data Item`/503) after a morning of probe uploads
+  then refused with `Invalid Data Item`/503 after a morning of probe uploads
   from the box IP. Both doors documented in SPEC-VENDING-2 §ar-doors.
-- **Turbo upload layout trap** (receipted so no future seat trips it):
-  arbundles `SolanaSigner` 64-byte secret is **pub(32) ‖ seed(32)** — built
-  seed-first, the class silently publishes the SEED as the item owner.
+  (Corrected 2026-09-28: `Invalid Data Item` is also exactly what an item
+  built in the reversed key order returns, because its owner cannot verify its
+  signature; "throttling" was never proven.)
+- **Turbo upload key order** (corrected 2026-09-28; the line written here on
+  2026-09-01 had it backwards and is deleted): arbundles `SolanaSigner` reads
+  its 64-byte secret as **seed(32) ‖ public(32)**; the first half signs, the
+  second half is the owner. Built public-first, the SEED goes in the owner
+  field and the item fails its own signature. Measured on @dha-team/arbundles
+  1.0.4 and held by `e2e/ar-upload-signer.test.mjs`.
 - **Jungle4 A-paralysis** (probed exhaustively): Greymass Fuel carries
   ordinary actions INCLUDING setcode/setabi (reached the RAM check — the
   deploy would fly) but blocks every resource action (delegatebw, buyram*).
@@ -143,9 +149,10 @@ Probe uploads from door-testing, all throwaway keys, all free tier:
 `HnATcTfkdS…` (RSA probe), `Xf2lwOsUJY…` (RSA door check), `1Fg2arClLo…`
 (first mint's cert — its chain row never landed; superseded by the re-mint),
 `3Hcqk6wv13…` (placeholder-genesis cert, superseded in-place by
-`vending::update`). The `F8f2GF_ToN4…` ed25519 probe item carries its own
-seed as owner (the trap above) — throwaway in-memory key, harmless, kept as
-the trap's receipt.
+`vending::update`). The `F8f2GF_ToN4…` ed25519 probe item has its PUBLIC key as
+owner: re-checked on Arweave 2026-09-28, owner = its Member-Key tag and the
+signature verifies under that owner. (The line here said it "carries its own
+seed as owner"; that was false and is deleted.)
 
 ## The one-line
 
