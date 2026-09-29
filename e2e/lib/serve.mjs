@@ -7,7 +7,7 @@
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, sep } from 'node:path';
 
 export const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
@@ -16,10 +16,13 @@ export const MIME = {
 };
 
 export async function serveTree(root) {
+  const top = resolve(root);
   const server = createServer(async (req, res) => {
     try {
       let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
-      const body = await readFile(join(root, p));
+      const file = resolve(join(top, p));
+      if (file !== top && !file.startsWith(top + sep)) { res.writeHead(404); res.end('nf'); return; } // nothing outside the tree, encoded dots included
+      const body = await readFile(file);
       res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream' }); res.end(body);
     } catch { res.writeHead(404); res.end('nf'); }
   });
