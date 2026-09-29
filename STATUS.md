@@ -32,12 +32,13 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
-- `2026-09-29` — **#250: Codex review reconciled (two rounds).** The gate now refuses:
+- `2026-09-29` — **#250: Codex review reconciled (three rounds).** The gate now refuses:
   - forged `renderer` and `law` values (before, they were only required to be present);
   - inherited property names as badge names (`constructor` crashed the checker);
   - non-canonical `measured_at` (`Date.parse` accepted `0`, and `2026-02-31` rolled into March).
   The probe assertions are scoped to the forged badge. Each new probe fails against the
-  previous gate. `node --test e2e/render-badges.test.mjs` → 16/16. The SHA-1 remark
+  previous gate. A malformed or throwing document is now its own FAIL, and the check
+  continues past it. `node --test e2e/render-badges.test.mjs` → 17/17. The SHA-1 remark
   in the gate-repair dispatch is marked UNVERIFIED. Aikido's two file-read flags are
   verified false positives: every path comes from `readdir` of the operator's `--dir`.
   Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.

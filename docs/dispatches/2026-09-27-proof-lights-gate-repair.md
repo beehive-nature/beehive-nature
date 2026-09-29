@@ -75,6 +75,18 @@ Receipts:
 - `node --test e2e/render-badges.test.mjs` → 16/16. The two new probes fail against the previous gate (0 pass, 2 fail).
 - `render-badges.mjs --check` → 1/1.
 
+## Codex review of #250 at `8303dd7` (2026-09-29)
+
+One P2 finding, which was correct. A shaped but invalid timestamp, `2026-99-01T00:00:00.000Z`, passed the regex, and `toISOString()` then threw, aborting the whole check. This was the second crash finding in a row, so the root cause is fixed as well:
+- `canonicalTime` rejects an invalid date before calling `toISOString`.
+- The sweep found that a status document of `null` skipped `verify` and crashed on the PASS line. A document that is not a JSON object is now its own FAIL.
+- Any unexpected exception inside `verify` becomes that badge's FAIL (`checker error (fails closed)`), and the check moves on to the next document.
+- A new probe writes a malformed document beside the real one and requires its FAIL, a PASS for `skaists-meter.json`, and `1/2 badges`.
+
+Receipts:
+- `node --test e2e/render-badges.test.mjs` → 17/17. The new probe and the extended timestamp probe fail against the previous gate (0 pass, 2 fail).
+- `render-badges.mjs --check` → 1/1.
+
 ## What it still does not prove
 
 - **A local measurement's revision is asserted, not attested.** If a forger relabels evidence from an older revision as a newer commit, and rewrites the message and SVG to match, the check still passes whenever the page list did not change in between. The check prints "revision asserted by the measurer, not attested" on every PASS. Closing this gap needs origin `ci`, with the run id and attempt bound to the revision, signed by the CI attestation key.

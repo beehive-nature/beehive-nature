@@ -146,7 +146,11 @@ function render(doc) {
 const blobId = buf => createHash('sha1').update(`blob ${buf.length}\0`).update(buf).digest('hex');
 const sha3 = buf => createHash('sha3-256').update(buf).digest('hex');
 // canonical ISO-8601 UTC that round-trips unchanged: Date.parse alone accepts '0' and rolls 2026-02-31 into March
-const canonicalTime = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s) && new Date(s).toISOString() === s;
+const canonicalTime = s => {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s)) return false;
+  const d = new Date(s);   // 2026-99-01 fits the shape but is an invalid date; toISOString would throw
+  return !Number.isNaN(d.getTime()) && d.toISOString() === s;
+};
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const DOC_KEYS = ['schema', 'name', 'label', 'instrument', 'ci_step', 'revision', 'measurement', 'measured_at',
   'surfaces', 'fronts', 'fronts_at_100', 'min_score', 'kind_min', 'message', 'color',
@@ -227,7 +231,12 @@ if (mode === '--check') {
     n++;
     let doc = null, why = [];
     try { doc = JSON.parse(await readFile(join(STATUS_DIR, f), 'utf8')); } catch { why = ['document is not JSON']; }
-    if (doc !== null) why = await verify(doc, join(STATUS_DIR, f.replace(/\.json$/, '.source.json')), join(STATUS_DIR, f.replace(/\.json$/, '.svg')));
+    if (!why.length && (doc === null || typeof doc !== 'object' || Array.isArray(doc))) { why = ['document is not a JSON object']; doc = null; }
+    // one malformed document must never abort the check of the rest: an unexpected throw is that badge's FAIL
+    if (doc !== null) {
+      try { why = await verify(doc, join(STATUS_DIR, f.replace(/\.json$/, '.source.json')), join(STATUS_DIR, f.replace(/\.json$/, '.svg'))); }
+      catch (e) { why = [`checker error (fails closed): ${e.message}`]; }
+    }
     const head = doc && typeof doc === 'object' ? `"${doc.label} | ${doc.message}"` : '';
     if (why.length) { fail++; console.log(`FAIL ${f}: ${head}\n  - ${why.join('\n  - ')}`); }
     else console.log(`PASS ${f}: ${head} · re-derived from ${doc.fronts} evidence rows at ${doc.revision.slice(0, 7)} · source blob + sha3-256 match · svg == render(json) · origin ${doc.measurement.origin} (revision asserted by the measurer, not attested) · unsigned (stated)`);

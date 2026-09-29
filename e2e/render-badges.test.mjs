@@ -128,8 +128,18 @@ test('an inherited property name is not a badge: the check reports it, it does n
 });
 
 test('measured_at must be a canonical UTC timestamp: Date.parse leniency is refused', async () => {
-  for (const t of ['0', '2026-02-31T00:00:00.000Z', '2026-09-27', 'Sep 27 2026']) {
+  for (const t of ['0', '2026-02-31T00:00:00.000Z', '2026-99-01T00:00:00.000Z', '2026-09-27T25:00:00.000Z', '2026-09-27', 'Sep 27 2026']) {
     refused(await probe(({ doc, put }) => put({ ...doc, measured_at: t })), /measured_at .* is not a canonical ISO-8601 UTC timestamp/);
+  }
+});
+
+test('a malformed document fails alone: the check continues and the good badge still passes', async () => {
+  for (const body of ['null', '[]', '42', '"text"']) {
+    const r = await probe(({ dir }) => writeFile(join(dir, 'aa-malformed.json'), body + '\n'));
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, /^FAIL aa-malformed\.json: \n  - document is not a JSON object/m, r.out);
+    assert.match(r.out, /^PASS skaists-meter\.json/m, `the check stopped at the malformed document:\n${r.out}`);
+    assert.match(r.out, /1\/2 badges/, r.out);
   }
 });
 
