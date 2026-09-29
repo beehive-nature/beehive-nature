@@ -101,7 +101,7 @@ this door is a throwaway TESTNET key.
     the real `SolanaSigner` agrees and the item verifies.
 - The test is wired into CI (`static` job).
 
-Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 7/7 locally, including the
+Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 8/8 locally with `CI=true` (CI installs the pinned library for that step, so the live checks run there and cannot skip), including the
 live library check.
 
 ## Does it block #230?

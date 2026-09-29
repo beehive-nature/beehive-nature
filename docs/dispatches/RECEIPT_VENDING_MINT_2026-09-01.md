@@ -153,7 +153,9 @@ Probe uploads from door-testing, all throwaway keys, all free tier:
 `3Hcqk6wv13…` (placeholder-genesis cert, superseded in-place by
 `vending::update`). The `F8f2GF_ToN4…` ed25519 probe item has its PUBLIC key as
 owner: re-checked on Arweave 2026-09-28, owner = its Member-Key tag and the
-signature verifies under that owner. (The line here said it "carries its own
+signature verifies under that owner (source: `contracts/vending/tool/arweave-owner-audit.mjs`,
+`audit()` / `verifyEd25519Item()`; reproduce with `node contracts/vending/tool/arweave-owner-audit.mjs`,
+receipt in `docs/dispatches/2026-09-28-ar-upload-key-order.md`). (The line here said it "carries its own
 seed as owner"; that was false and is deleted.)
 
 ## The one-line

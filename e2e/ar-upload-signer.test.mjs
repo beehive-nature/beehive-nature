@@ -55,6 +55,8 @@ test('the script no longer wraps the seed as a public key, and requires no uploa
 });
 
 let arbundles = null, bs58 = null; try { arbundles = req('@dha-team/arbundles'); bs58 = req('bs58'); } catch {}
+/* CI installs the pinned library for this step; there the live tests must run, never skip */
+test('in CI the reference library is present, so the live checks below run', { skip: process.env.CI ? false : 'not CI' }, () => { assert.ok(arbundles && bs58, '@dha-team/arbundles and bs58 must be installed in CI (see the workflow step)'); });
 test('the real arbundles SolanaSigner agrees with the stand-in, and the item verifies', { skip: arbundles ? false : 'the reference library is not installed here (npm install --prefix contracts/vending/tool --no-save @dha-team/arbundles bs58)' }, async () => {
   const { seed, pub } = fresh();
   const { signer, ready } = memberSigner(seed);
