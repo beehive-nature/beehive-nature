@@ -107,6 +107,8 @@ const BADGES = {
         if (!pct(r.total) || r.total < lo - 0.1 || r.total > hi + 0.1) bad(`total ${r.total} outside its kinds [${lo}, ${hi}]`);
         if (!Array.isArray(r.bad) || !r.bad.every(s => typeof s === 'string')) bad('bad is not a list of strings');
         else if ((r.bad.length === 0) !== (r.total === 100)) bad(`total ${r.total} with ${r.bad.length} findings`);
+        // no findings means every check passed (skaists-conformance.mjs ticks every failure into bad), so every kind is 100
+        else if (r.bad.length === 0 && !KINDS.every(k => r.score[k] === 100)) bad(`all-clear row with a kind below 100 (${KINDS.filter(k => r.score[k] !== 100).join(',')})`);
       });
       return e;
     },
@@ -236,6 +238,8 @@ if (mode === '--check') {
     if (doc !== null) {
       try { why = await verify(doc, join(STATUS_DIR, f.replace(/\.json$/, '.source.json')), join(STATUS_DIR, f.replace(/\.json$/, '.svg'))); }
       catch (e) { why = [`checker error (fails closed): ${e.message}`]; }
+      // the published paths are the badge's identity: <name>.json/.source.json/.svg, never a renamed or swapped trio
+      if (f !== `${doc.name}.json`) why.unshift(`file ${f} does not carry the document's name ${JSON.stringify(doc.name)}`);
     }
     const head = doc && typeof doc === 'object' ? `"${doc.label} | ${doc.message}"` : '';
     if (why.length) { fail++; console.log(`FAIL ${f}: ${head}\n  - ${why.join('\n  - ')}`); }

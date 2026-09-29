@@ -143,6 +143,26 @@ test('a malformed document fails alone: the check continues and the good badge s
   }
 });
 
+test('an all-clear row cannot hide a failed kind: no findings means every kind is 100', async () => {
+  refused(await probe(async ({ dir, doc, put, reseal }) => {
+    const rows = JSON.parse(await readFile(join(dir, EV), 'utf8'));
+    const i = rows.findIndex(r => r.total === 100 && r.bad.length === 0);
+    rows[i].score.COLOUR = 0;   // total 100 still sits between the kind extremes [0, 100]
+    await reseal(Buffer.from(JSON.stringify(rows, null, 1) + '\n'));
+    await put({ ...doc, kind_min: { ...doc.kind_min, COLOUR: 0 } });   // the derivation agrees, so only the row law can catch it
+  }), /all-clear row with a kind below 100 \(COLOUR\)/);
+});
+
+test('a renamed status trio fails: the file name is the badge name', async () => {
+  const r = await probe(async ({ dir }) => {
+    for (const x of ['.json', '.source.json', '.svg']) await cp(join(dir, 'skaists-meter' + x), join(dir, 'other' + x));
+    for (const x of ['.json', '.source.json', '.svg']) await rm(join(dir, 'skaists-meter' + x));
+  });
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /^FAIL other\.json: .*\n  - file other\.json does not carry the document's name "skaists-meter"/m, r.out);
+  assert.doesNotMatch(r.out, /^PASS /m, r.out);
+});
+
 test('an SVG-only edit fails', async () => {
   refused(await probe(async ({ dir }) => {
     const s = await readFile(join(dir, SVG), 'utf8');

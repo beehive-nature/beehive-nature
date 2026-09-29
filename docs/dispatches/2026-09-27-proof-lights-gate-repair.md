@@ -87,6 +87,16 @@ Receipts:
 - `node --test e2e/render-badges.test.mjs` → 17/17. The new probe and the extended timestamp probe fail against the previous gate (0 pass, 2 fail).
 - `render-badges.mjs --check` → 1/1.
 
+## Codex review of #250 at `048f98c` (2026-09-29)
+
+Two P2 findings, both correct.
+- **An all-clear row could hide a failed kind.** A row with `total: 100` and `bad: []` accepted a kind at 0, because 100 still sits between the kind extremes. With `kind_min` updated to match, the badge still passed. `skaists-conformance.mjs` records every failed check in `bad`, so no findings means every kind is 100; the row law now requires exactly that.
+- **A renamed trio passed.** The derivation was chosen by `doc.name`, but the evidence and SVG were located by file name. `other.{json,source.json,svg}` passed and left the README link broken. The JSON file name must now equal `<doc.name>.json`.
+
+Receipts:
+- `node --test e2e/render-badges.test.mjs` → 19/19. The two new probes fail against the previous gate (0 pass, 2 fail).
+- `render-badges.mjs --check` → 1/1.
+
 ## What it still does not prove
 
 - **A local measurement's revision is asserted, not attested.** If a forger relabels evidence from an older revision as a newer commit, and rewrites the message and SVG to match, the check still passes whenever the page list did not change in between. The check prints "revision asserted by the measurer, not attested" on every PASS. Closing this gap needs origin `ci`, with the run id and attempt bound to the revision, signed by the CI attestation key.
