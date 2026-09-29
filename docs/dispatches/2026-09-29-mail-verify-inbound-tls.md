@@ -100,7 +100,89 @@ CASE 6-missing-cert    MISSING  <-- the next restart will fail (sink.py load_cer
                        the file went missing.
 ```
 
-Script sha256 at this commit: `f8000a4a…79921dc2`.
+Script sha256 at round 2 (`c412905f8`): `f8000a4a…79921dc2`, superseded by
+round 3 below.
+
+## review, round 3: the negative control, and J to M
+
+Reviewer recheck of `c412905f8`:
+<https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5882748673>.
+A to I verified under dash there. From the reviewer's line, `probe_tcp` read
+OPEN for the unroutable 10.255.255.1 on :25, :9 and :443: something on that
+path completes every handshake, and the 1.1.1.1:443 control cannot catch it.
+
+- **Negative control (blocking)** §4: after the positive control reads OPEN,
+  `probe_tcp 192.0.2.1 25` (TEST-NET-1, RFC 5737, no DNS step) must NOT read
+  OPEN. If it does, the script prints NEGATIVE CONTROL OPEN and every target
+  is UNKNOWN. Targets reach `egress_verdict` only when both controls pass.
+- **F guard** §3: the public-key PEMs are captured raw and tested non-empty
+  before comparing ("not compared — public key extraction failed"), since a
+  digest of empty input is still a digest.
+- **STALE wording** §1: "was modified after pid N started — the running code
+  may not match it". A newer mtime shows a change, not a difference.
+- **J** §2: a completed openssl STARTTLS negotiation decides the verdict
+  ("STARTTLS advertised AND negotiated on loopback"); if the plain transcript
+  disagrees, both are printed and the handshake is named conclusive.
+- **K** `plain_verdict`: a transcript without the EHLO reply's final `250 `
+  line is INCONCLUSIVE, never NOT_ADVERTISED.
+- **L** §3: a readable cert or key with no openssl says "not validated —
+  openssl not installed"; only an unreadable key gets the sudo line.
+- **M** §3: the cert the listener serves over loopback STARTTLS is compared
+  with the deployed file inside the script (both re-encoded by `openssl x509`,
+  tested non-empty). Only SAME / DIFFERENT / not compared is printed, never a
+  digest. The cert and key mtimes are compared with the first listener pid's
+  start, or "no pid, not compared".
+
+### round-3 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+```
+
+Slices cut unchanged with sed; the harness supplies only the inputs a section
+reads from earlier sections. Verdict lines:
+
+```
+K plain_verdict   empty -> INCONCLUSIVE · greeting only (220 x) -> INCONCLUSIVE
+                  truncated (220 x / 250-a) -> INCONCLUSIVE
+                  complete, no STARTTLS (the 08-31 set) -> NOT_ADVERTISED
+                  complete, 250-STARTTLS -> ADVERTISED · final 250 STARTTLS -> ADVERTISED
+                  complete, bare final 250 -> NOT_ADVERTISED
+J §2 verdict      TLS_OK + empty or truncated plain -> "advertised AND negotiated"
+                    + NOTE "plain transcript reads INCONCLUSIVE ... handshake is conclusive"
+                  TLS_OK + plain with STARTTLS -> "advertised AND negotiated", no NOTE
+                  no TLS_OK + empty -> INCONCLUSIVE · + complete, no STARTTLS -> NOT advertised
+F §3              matching pair -> MATCH · second key -> MISMATCH · garbage key -> KEY DOES NOT PARSE
+L §3 (PATH with no openssl, built from copies of the needed /usr/bin tools)
+                  cert not validated — openssl not installed
+                  key/cert pair: cert/key not validated — openssl not installed
+                  served cert: not compared — openssl not installed
+M §3 (PORT=1, nothing listening)
+                  served cert: not compared — no cert served over loopback (...)
+                  PIDS empty -> "no pid, not compared"
+                  PIDS = the harness's own pid, files made after it ->
+                  "modified after pid N started — the loaded copy may differ"
+§4 controls, probe_tcp STUBBED (logic only, not a network test)
+                  every connect succeeds -> NEGATIVE CONTROL OPEN, both targets UNKNOWN
+                  only 1.1.1.1 connects -> both controls pass, targets judged
+                    (Git Bash has no getent, so they read UNKNOWN (DNS))
+                  nothing connects -> CONTROL FAILED, both targets UNKNOWN
+```
+
+Not exercised here: the served-cert SAME and DIFFERENT branches (Git Bash
+openssl `s_server` has no `-starttls`, and this box has no Python to stand in
+a STARTTLS listener); "public key extraction failed"; the cert/key "not
+modified after" branch.
+
+Script sha256 at round 3: `ca95ef28…ae89a86c`.
 
 ## pending: reviewer recheck
 
@@ -109,5 +191,7 @@ under **dash**, the §4 functional cases (OPEN against 1.1.1.1:443, REFUSED/ERRO
 on 127.0.0.1:1, UNKNOWN (DNS) on `nonexistent.invalid`, NO ANSWER on
 10.255.255.1:25), the §1 functional cases (ss `pid=` parse, the lsof fallback,
 the STALE comparison against a fake `SINK_PY` older and newer than a running
-process), and the full script under dash. **Reviewer recheck pending.** No CI
-claim is made here.
+process), and the full script under dash. Round 2's §1 and §4 cases were
+rechecked by the reviewer (link above); round 3's negative control on a real
+network path, J to M under dash, and M against a real STARTTLS listener are
+**reviewer recheck pending.** No CI claim is made here.

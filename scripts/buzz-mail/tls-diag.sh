@@ -29,14 +29,19 @@ say() { printf '%s\n' "$*"; }
 rule() { say "------------------------------------------------------------"; }
 
 # verdict on a plain EHLO transcript ($1). Three outcomes, never two: an empty
-# transcript is no measurement, so it is INCONCLUSIVE, never a finding.
+# or incomplete transcript is no measurement, so it is INCONCLUSIVE, never a
+# finding. Complete means the EHLO reply's final line arrived: 250 followed by
+# a space or by the end of the line (CRs are stripped first).
 plain_verdict() {
-  if [ -z "$1" ]; then
+  _t=$(printf '%s\n' "$1" | tr -d '\r')
+  if [ -z "$_t" ]; then
     echo INCONCLUSIVE
-  elif printf '%s\n' "$1" | grep -qi '^250[- ]STARTTLS'; then
+  elif printf '%s\n' "$_t" | grep -qi '^250[- ]STARTTLS'; then
     echo ADVERTISED
-  else
+  elif printf '%s\n' "$_t" | grep -Eq '^250( |$)'; then
     echo NOT_ADVERTISED
+  else
+    echo INCONCLUSIVE
   fi
 }
 
@@ -116,7 +121,7 @@ sink_vs_pid() {
   else
     say "    process start $_ps (epoch s)  vs  file mtime $SINK_MTIME"
     if [ "$SINK_MTIME" -gt "$_ps" ]; then
-      say "    *** STALE: $SINK_PY is newer than pid $1 — the running process has NOT loaded the deployed file ***"
+      say "    *** STALE: $SINK_PY was modified after pid $1 started — the running code may not match it ***"
     elif [ "$SINK_MTIME" -eq "$_ps" ]; then
       say "    same second — the order cannot be determined"
     else
@@ -173,9 +178,11 @@ rule
 
 # 2 · WHAT THE WIRE SAYS, FROM HERE ----------------------------------------
 say "2 · EHLO over loopback (no middlebox can touch this)"
+TLS_OK=""
 if command -v openssl >/dev/null 2>&1; then
   RESP=$(printf 'EHLO diag.localhost\r\nQUIT\r\n' | timeout 15 openssl s_client -quiet -starttls smtp -connect 127.0.0.1:${PORT} 2>/dev/null | head -20)
   if [ -n "$RESP" ]; then
+    TLS_OK=1
     say "  STARTTLS NEGOTIATED — the sink does offer it. Capabilities after upgrade:"
     say "$RESP" | sed 's/^/    /'
   else
@@ -193,16 +200,27 @@ say ""
 say "  plain EHLO transcript:"
 say "${PLAIN:-$NOPLAIN}" | sed 's/^/    /'
 say ""
-case $(plain_verdict "$PLAIN") in
-  ADVERTISED)
-    say "  VERDICT: STARTTLS IS advertised on loopback."
-    say "  => the deployment receipt stands; the external report was the artifact." ;;
-  NOT_ADVERTISED)
-    say "  VERDICT: STARTTLS is NOT advertised on loopback."
-    say "  => this is a REAL gap, not a network artifact." ;;
-  *)
-    say "  VERDICT: INCONCLUSIVE — no transcript, so no finding either way." ;;
-esac
+PV=$(plain_verdict "$PLAIN")
+if [ -n "$TLS_OK" ]; then
+  # a completed handshake outranks any plain transcript
+  say "  VERDICT: STARTTLS advertised AND negotiated on loopback."
+  say "  => the deployment receipt stands; the external report was the artifact."
+  if [ "$PV" != ADVERTISED ]; then
+    say "  NOTE: the plain transcript reads $PV, which disagrees with the negotiation"
+    say "  above. The completed handshake is the conclusive measurement."
+  fi
+else
+  case $PV in
+    ADVERTISED)
+      say "  VERDICT: STARTTLS IS advertised on loopback."
+      say "  => the deployment receipt stands; the external report was the artifact." ;;
+    NOT_ADVERTISED)
+      say "  VERDICT: STARTTLS is NOT advertised on loopback."
+      say "  => this is a REAL gap, not a network artifact." ;;
+    *)
+      say "  VERDICT: INCONCLUSIVE — no complete EHLO reply, so no finding either way." ;;
+  esac
+fi
 rule
 
 # 3 · DOES THE CERT THE CONFIG NAMES ACTUALLY EXIST AND PARSE? -------------
@@ -220,8 +238,12 @@ for f in "$CERT" "$KEY"; do
     say "      the file went missing."
   fi
 done
+HAVE_OPENSSL=""
+if command -v openssl >/dev/null 2>&1; then HAVE_OPENSSL=1; fi
 CERT_OK=""
-if [ -r "$CERT" ] && command -v openssl >/dev/null 2>&1; then
+if [ -r "$CERT" ] && [ -z "$HAVE_OPENSSL" ]; then
+  say "  cert not validated — openssl not installed"
+elif [ -r "$CERT" ]; then
   if openssl x509 -in "$CERT" -noout >/dev/null 2>&1; then
     CERT_OK=1
     say "  subject : $(openssl x509 -in "$CERT" -noout -subject 2>/dev/null)"
@@ -237,17 +259,24 @@ if [ -r "$CERT" ] && command -v openssl >/dev/null 2>&1; then
   fi
 fi
 # the key, judged as a pair with the cert. Only MATCH / MISMATCH is printed —
-# never key material. -passin pass: makes an encrypted key fail instead of
-# waiting on a passphrase prompt (sink.py passes no password either).
-if [ -r "$KEY" ] && command -v openssl >/dev/null 2>&1; then
+# never key material, and never the public-key PEM either: it is captured raw
+# and tested non-empty FIRST, because a digest of empty input is still a digest
+# and two failed extractions must not compare equal. -passin pass: makes an
+# encrypted key fail instead of waiting on a passphrase prompt (sink.py passes
+# no password either).
+if [ -r "$KEY" ] && [ -z "$HAVE_OPENSSL" ]; then
+  say "  key/cert pair: cert/key not validated — openssl not installed"
+elif [ -r "$KEY" ]; then
   if ! openssl pkey -in "$KEY" -passin pass: -noout >/dev/null 2>&1; then
     say "  *** KEY DOES NOT PARSE *** — the next restart will fail at load_cert_chain."
   elif [ -z "$CERT_OK" ]; then
     say "  key/cert pair: not compared — no parseable cert to compare against."
   else
-    KPUB=$(openssl pkey -in "$KEY" -passin pass: -pubout 2>/dev/null | sha256sum | cut -d' ' -f1)
-    CPUB=$(openssl x509 -in "$CERT" -noout -pubkey 2>/dev/null | sha256sum | cut -d' ' -f1)
-    if [ -n "$KPUB" ] && [ "$KPUB" = "$CPUB" ]; then
+    KPEM=$(openssl pkey -in "$KEY" -passin pass: -pubout 2>/dev/null)
+    CPEM=$(openssl x509 -in "$CERT" -noout -pubkey 2>/dev/null)
+    if [ -z "$KPEM" ] || [ -z "$CPEM" ]; then
+      say "  key/cert pair: not compared — public key extraction failed"
+    elif [ "$KPEM" = "$CPEM" ]; then
       say "  key/cert pair: MATCH"
     else
       say "  key/cert pair: MISMATCH — the next restart will fail at load_cert_chain."
@@ -255,6 +284,49 @@ if [ -r "$KEY" ] && command -v openssl >/dev/null 2>&1; then
   fi
 elif [ -e "$KEY" ]; then
   say "  key/cert pair: not checked — key not readable by $(id -un); rerun with sudo."
+fi
+
+# the cert the listener SERVES against the deployed file. Both are re-encoded
+# by openssl x509 (same canonical PEM for the same cert), tested non-empty, and
+# compared here. Only SAME / DIFFERENT / not compared is printed — no digests.
+if [ -z "$HAVE_OPENSSL" ]; then
+  say "  served cert: not compared — openssl not installed"
+elif [ -z "$CERT_OK" ]; then
+  say "  served cert: not compared — no readable, parseable deployed cert"
+else
+  SERVED=$(timeout 15 openssl s_client -starttls smtp -connect "127.0.0.1:${PORT}" </dev/null 2>/dev/null | openssl x509 2>/dev/null)
+  DEPLOYED=$(openssl x509 -in "$CERT" 2>/dev/null)
+  if [ -z "$SERVED" ]; then
+    say "  served cert: not compared — no cert served over loopback (the STARTTLS handshake did not complete)"
+  elif [ -z "$DEPLOYED" ]; then
+    say "  served cert: not compared — the deployed cert could not be re-encoded"
+  elif [ "$SERVED" = "$DEPLOYED" ]; then
+    say "  served cert: SAME as deployed"
+  else
+    say "  served cert: DIFFERENT — the listener is serving a cert loaded before the file changed; a restart would switch to the deployed one"
+  fi
+fi
+
+# cert/key files modified after the listener started (first pid from §1)
+FIRSTPID=$(printf '%s\n' "$PIDS" | sed -n 1p)
+if [ -z "$FIRSTPID" ]; then
+  say "  cert/key mtime vs listener start: no pid, not compared"
+else
+  _ls=$(proc_start_epoch "$FIRSTPID")
+  if [ -z "$_ls" ]; then
+    say "  cert/key mtime vs listener start: start of pid $FIRSTPID not readable, not compared"
+  else
+    for f in "$CERT" "$KEY"; do
+      _m=$(stat -c %Y "$f" 2>/dev/null)
+      if ! is_uint "$_m"; then
+        say "  $f: mtime not readable, not compared"
+      elif [ "$_m" -gt "$_ls" ]; then
+        say "  $f: modified after pid $FIRSTPID started — the loaded copy may differ"
+      else
+        say "  $f: not modified after pid $FIRSTPID started"
+      fi
+    done
+  fi
 fi
 rule
 
@@ -264,8 +336,17 @@ PROBE_OK=""
 if ! command -v bash >/dev/null 2>&1; then
   say "  bash not found — the /dev/tcp probe cannot run; targets are UNKNOWN."
 elif probe_tcp 1.1.1.1 443; then
-  say "  OPEN    1.1.1.1:443  (control — must read OPEN)"
-  PROBE_OK=1
+  say "  OPEN    1.1.1.1:443  (positive control — must read OPEN)"
+  # the negative control: TEST-NET-1 (RFC 5737) is never routed, so a connect
+  # there means something on the path completes every handshake itself, and
+  # then OPEN carries no information about any target.
+  if probe_tcp 192.0.2.1 25; then
+    say "  NEGATIVE CONTROL OPEN: 192.0.2.1:25 connected — this path accepts every"
+    say "  connection, so OPEN means nothing here; targets are UNKNOWN."
+  else
+    say "  not OPEN 192.0.2.1:25  (negative control, TEST-NET-1 — must not read OPEN)"
+    PROBE_OK=1
+  fi
 else
   say "  CONTROL FAILED: 1.1.1.1:443 did not read OPEN."
   say "  The probe itself is broken; targets are UNKNOWN, not BLOCKED."
