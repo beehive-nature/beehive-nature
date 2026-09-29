@@ -727,7 +727,7 @@ async function ask() {
     addStat('path', 'local · 0 requests to answer');
     if (S.agent) { S.agent.memory.push({ rev: S.agent.memory.length + 1, q, a: text, ts: new Date().toISOString() }); try { localStorage.setItem(S.agent.memKey, JSON.stringify(S.agent.memory)); } catch {} addStat('memory', S.agent.memory.length + ' rows'); }
   } catch (e) {
-    out.innerHTML = '<span style="color:var(--amber)">the local mind refused: ' + esc(String(e && e.message || e)).slice(0, 200) + '</span>';
+    out.innerHTML = '<span style="color:var(--amber)">the local mind refused: ' + esc(String(e && e.message || e).slice(0, 200)) + '</span>';
   }
 }
 function addStat(k, v) {
@@ -756,7 +756,7 @@ $('p1ask').addEventListener('click', async () => {
     addStat('path', 'P1 sidecar · estate door');
     addStat('round-trip', dt + ' s');
   } catch (e) {
-    out.innerHTML = '<span style="color:var(--amber)">the sidecar was unreachable: ' + esc(String(e && e.message || e)).slice(0, 160) + '</span>';
+    out.innerHTML = '<span style="color:var(--amber)">the sidecar was unreachable: ' + esc(String(e && e.message || e).slice(0, 160)) + '</span>';
   }
 });
 </script>

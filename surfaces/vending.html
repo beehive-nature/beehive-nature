@@ -698,8 +698,8 @@ function renderPrice() {
   const titU  = mintU != null ? mintU * L.titheBp / 10000 : null;
   const totU  = mintU != null ? mintU + ramU + titU : null;
   $('l-mint-sub').classList.remove('dotted'); $('l-tithe-sub').classList.remove('dotted');
-  $('l-mint-sub').textContent = `rate ${L.basisTxt} A · Vaulta · read live ${L.updated.slice(0, 10)}`;
-  $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${L.basisTxt} A</span>`;
+  $('l-mint-sub').textContent = `rate ${L.basisTxt} · Vaulta · read live ${L.updated.slice(0, 10)}`;
+  $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${esc(L.basisTxt)}</span>`;
   $('l-ram-sub').textContent = '≈ 462 B row · refundable if released · basis SPEC-VENDING-2 §sizing';
   $('v-ram').innerHTML = ramU == null ? 'n/m' : `${fmt$(ramU)} <span class="a">0.16 A</span>`;
   $('l-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · keeps the machine running · read live`;
@@ -959,8 +959,8 @@ function openPlan() {
   $('p-canonform').textContent = n;
   $('p-tongue').textContent = TONGUES.find(t => t[0] === $('vtongue').value)?.[1] || $('vtongue').value;
   $('p-line').textContent = $('vline').selectedOptions[0].textContent;
-  $('p-mint-sub').textContent = `rate ${L.basisTxt} A · read live`;
-  $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${L.basisTxt} A</span>` : 'n/m';
+  $('p-mint-sub').textContent = `rate ${L.basisTxt} · read live`;
+  $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${esc(L.basisTxt)}</span>` : 'n/m';
   $('p-ram').innerHTML = p != null ? `${fmt$(RAM_BASIS_A * p)} <span class="a">0.16 A</span>` : 'n/m';
   $('p-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · shown, never buried`;
   $('p-tithe-v').innerHTML = p != null ? `${fmt$(L.basisA * L.titheBp / 10000 * p)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>` : 'n/m';
@@ -1269,7 +1269,7 @@ async function mintInPage(door) {
     ].map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join('');
     var nr = '<span class="no">' + esc2(T('et.vend.notRead', 'not read yet')) + '</span>';
     $e('etLawKv').innerHTML = [
-      ['rate', d.lawRead ? esc2(d.basisTxt) + ' A · vaulta · ' + esc2(d.updated) : nr],
+      ['rate', d.lawRead ? esc2(d.basisTxt) + ' · vaulta · ' + esc2(d.updated) : nr],
       ['room', '0.16 A · ≈ 462 B row · refundable · SPEC-VENDING-2 §sizing'],
       ['tithe', d.lawRead ? (d.titheBp / 100).toFixed(2) + '% → ' + esc2(d.titheDest) + ' · ' + d.titheA.toFixed(4) + ' A' : nr],
       ['cert', '$0.00 · Arweave · Turbo free tier'],

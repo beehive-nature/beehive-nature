@@ -246,7 +246,7 @@ The same read-only reviewer read `6265de4a4..00122748d`: **APPROVE**. B1-B3 and
   *the item at the id*, and that the copy read here hashes true.
 - Left as named: `vaulta_account: bnrapolltest` is the rehearsal stand-in
   (mint.mjs convention); blob URLs are not revoked; `@ardrive/turbo-sdk` and
-  `bs58` stay because `ar-upload.cjs` still uses them; the 100-row certs read
+  `bs58` stay because `ar-upload.cjs` still uses them (superseded by the Aikido round below: all three are dropped from this PR); the 100-row certs read
   falls back to the contract's own "name already minted" refusal.
 
 **Behavioural receipt:** a headless mint of `smoke bee` with every outside door
@@ -267,6 +267,6 @@ Aikido raised 15 findings on `0cca2d804`. Each was read at its line.
 
   The manifest and the lockfile are restored to main's versions, so this PR now adds no dependencies. The reference library becomes a `--no-save` dev install, named in `e2e/fixtures/ans104-arbundles.gen.mjs` and in the skip reason of the live test. `ar-upload.cjs` on main keeps its own undeclared requirements, as it did before.
 - **The 14 `innerHTML` sites are unchanged, and none carries outside data unescaped.** Sites in vending.html, local-agent and the deck were read line by line:
-  - Every name, id, error message and record field passes through `esc()` (it escapes `& < > "`), and every attribute it feeds is double-quoted.
+  - Every name, id, error message and record field passes through `esc()` (it escapes `& < > "`), and every attribute it feeds is double-quoted. One exception was missed here and caught by review at `750ee2384`: the chain's rate string `L.basisTxt` reached `innerHTML` unescaped at two sites (and printed its unit twice, "0.6000 A A"). It is escaped now, the doubled unit is gone, and a test holds both.
   - The remaining values are constants, counts, hashes the page computed itself, or `blob:` URLs the browser minted.
   - The deck line builds its nodes with `textContent`; the flag there is the selector string.

@@ -85,3 +85,11 @@ test('the page tells the truth about the rehearsal mint', () => {
   assert.match(res, /keyRoad = KEY_WAITS; waits\('key road: Arweave\\'s index has not listed/, 'an unindexed key road waits, and the summary stops claiming it was found');
   assert.match(res, /\$\{keyRoad\}Fingerprint matched \$\{ways\}/);
 });
+
+test('the chain\'s rate string is escaped before markup, and carries its own unit once', () => {
+  const html = read('surfaces/vending.html');
+  /* basis is the jungle4 asset string ("0.6000 A"), read from a third-party host */
+  assert.doesNotMatch(html, /innerHTML[^;\n]*\$\{L\.basisTxt\}/, 'the rate never reaches innerHTML unescaped');
+  assert.equal((html.match(/\$\{esc\(L\.basisTxt\)\}/g) || []).length, 2);
+  assert.doesNotMatch(html, /basisTxt\}? A\b|basisTxt\) \+ ' A /, 'no second " A" after a string that already ends in its unit');
+});
