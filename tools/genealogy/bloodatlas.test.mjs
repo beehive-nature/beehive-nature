@@ -472,16 +472,17 @@ test("search: substring, case-insensitive, capped, overlay persons included", ()
 
 // ─── the real corpus at the integration pin (97f18945) ─────────────────────
 
-test("REAL corpus: ingest locks — 10,259 published, 4,854 couples, 1,959 ghost refs", () => {
+test("REAL corpus: ingest locks — 11,041 published, 4,857 couples, 1,696 ghost refs", () => {
   const corpus = readJson(CORPUS_PATH);
   const before = JSON.stringify(corpus);
   const model = ingest(corpus);
-  assert.equal(Object.keys(model.persons).length, 10259);
-  assert.equal(model.ghostTotal, 1959, "the ghost frontier total matches the corpus at the pin");
-  assert.equal(model.coupleCount, 4854);
+  assert.equal(Object.keys(model.persons).length, 11041);
+  assert.equal(model.ghostTotal, 1696, "the ghost frontier total matches the corpus at the pin");
+  assert.equal(model.coupleCount, 4857);
   assert.equal(model.spineLength, 42);
   assert.equal(model.root, "founder");
-  assert.equal(model.ghostCount("pbdd007b536"), 2, "Martha Steward carries exactly two unpublished parent refs");
+  assert.equal(model.ghostCount("pbdd007b536"), 0, "her two parent refs were PUBLISHED by the 2026-09-19 walk-merge dangler repair");
+  assert.equal(model.ghostCount("p7d61490d86"), 2, "Mary Victoria Howe still carries exactly two unpublished parent refs");
   assert.equal(JSON.stringify(corpus), before, "the archive-return corpus object is byte-identical after ingest (L10)");
 });
 
@@ -489,9 +490,9 @@ test("REAL corpus: the ovl-* persons are ALREADY baked in; overlay merge is idem
   // fourth-wave corpus law: overlay persons merged INTO the corpus (one address
   // space) — ingest(corpus, overlay) must neither duplicate nor drop anyone
   const model = ingest(readJson(CORPUS_PATH), readJson(OVERLAY_PATH));
-  assert.equal(Object.keys(model.persons).length, 10259, "3 ovl-* keys re-assigned to the same values — count unchanged");
+  assert.equal(Object.keys(model.persons).length, 11041, "3 ovl-* keys re-assigned to the same values — count unchanged");
   assert.ok(model.person("ovl-sigurd-snake-eye"));
-  assert.equal(model.ghostTotal, 1959);
+  assert.equal(model.ghostTotal, 1696);
   assert.deepEqual(model.parentOf("founder"), ["liv-1", "liv-2"]);
 });
 
@@ -521,7 +522,7 @@ test("REAL corpus: Donna evidence verbatim; living stubs stay anonymous (L9 + pr
   const model = ingest(readJson(CORPUS_PATH));
   const d = model.person("p7b1078c886");
   assert.equal(d.evidence.era, "recorded");
-  assert.equal(d.evidence.support, "unsourced-entry");
+  assert.equal(d.evidence.support, "sourced"); /* harvest 2026-09-18: her person carries harvested FamilySearch sources (support axis only; era untouched) */
   assert.equal(model.person("liv-1").name, "Living");
   assert.equal(model.person("liv-1").living, true);
 });
@@ -620,7 +621,7 @@ test("discoveries: five derived kinds, no hardcoded names, on the real corpus", 
   const branch = cards.filter((c) => c.kind === "branch");
   assert.equal(branch.length, 4, "the grandparent law as discovery surfaces");
   const jackCard = branch.find((c) => /Jack Benedum Sutphen/.test(c.title));
-  assert.equal(jackCard.count, 896, "the bounded, reproducible number");
+  assert.equal(jackCard.count, 910, "the bounded, reproducible number");
   assert.match(jackCard.depthNote, /within 10 generations/);
   assert.ok(jackCard.familyNames.length >= 3, "derived family-name clusters ride the card");
   assert.ok(!jackCard.familyNames.includes("Sr") && !jackCard.familyNames.includes("II"), "generational suffixes are not family names");

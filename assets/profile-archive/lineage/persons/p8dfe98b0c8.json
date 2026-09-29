@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "12 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "12 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "LVKR-NJK",
+    "id": "p72a50e994e",
+    "name": "William Hill",
     "evidence": "walked provider link"
    },
    {
-    "id": "KWJD-5J4",
+    "id": "p96555337b0",
+    "name": "Janet Taylor Campbell",
     "evidence": "walked provider link"
    }
   ],
@@ -56,7 +58,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/LDKK-P2Z",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 12,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

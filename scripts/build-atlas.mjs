@@ -187,6 +187,17 @@ const page = `<!doctype html>
    biomass green = living systems; guard violet = limits; information blue =
    system evidence; honey is reserved for b value, not navigation. */
 ${bandCss}
+/* Page end at 390 px: every link a finger can find (44 px), without
+   changing the rhythm of the rows. The row-trace path link grows its hit
+   area with padding and gives the space back with a negative margin. */
+.org-source{display:inline-flex;align-items:center;min-block-size:44px}
+.row-trace dd a{display:inline-block;padding-block:12px;margin-block:-12px}
+/* Secondary labels read at 14 px in new bee and raver (the register canon);
+   cypherpunk keeps its dense 12 px mono. */
+.org-source,.footer p,.address{font-size:.875rem}
+body:not([data-reg=cypherpunk]) :is(.row-meta,.domain-details),body[data-reg=raver] .row-trace{font-size:.875rem}
+/* footer links are 44 px tall already; a wrapped row needs no extra gutter */
+.footer-links{row-gap:0}
 </style>
 </head>
 <body data-reg="bee" data-experience="home" data-state-root="${stateRoot}" data-state-root-src="estate.json v${E.v}"> <!-- PUBLIC-CONSTANT: sha256(estate.json) baked at build - recomputed every build, estate-check-asserted -->

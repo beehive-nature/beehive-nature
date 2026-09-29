@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"

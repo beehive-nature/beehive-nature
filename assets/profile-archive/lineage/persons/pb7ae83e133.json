@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb7ae83e133",
+ "bnr": "bnr://skaists.dev/blood/pb7ae83e133",
+ "identity": {
+  "name": "Joseph Remington",
+  "lifespan": "1675–1768",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHWQ-9QN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "20 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "20 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6554f58ee1",
+    "name": "Thomas Remington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0e311222f7",
+    "name": "Mehitable Walker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p89918f19fb",
+    "name": "Joseph Remington"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHWQ-9QN",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 20,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -38,8 +38,328 @@ input,select,textarea{width:100%;background:#0d1117;border:1px solid #333;color:
 .m-dist{background:#8E44AD;color:#fff}.m-spliff{background:#f0a500;color:#000}.m-edible{background:#3498DB;color:#fff}
 .empty{color:#555;text-align:center;padding:20px;font-size:12px}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the lab's own bare rules (label, input, select, .btn, .card) never
+   reach in; sizes that matter carry a fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit;width:auto;padding:0;text-align:inherit}
+#eternal input,#eternal select{display:block;margin:0;font:inherit;color:inherit;text-transform:none;letter-spacing:normal;opacity:1}
+#eternal label{display:block;margin:0;padding:0;background:none;text-transform:none;letter-spacing:normal;width:auto}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+#eternal strong{font-weight:600}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-sum{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-sum small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);color:var(--sk-ink);font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper:last-child{border-bottom:0}
+#eternal .et-b-stepper>span{flex:1 1 auto;min-width:0;font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper>b{min-width:64px;text-align:center;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-field{flex:none;width:148px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-check{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-check:last-child{border-bottom:0}
+#eternal .et-b-check input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);flex:none;accent-color:var(--sk-you)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2,12px) auto 0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-done{text-align:center;font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-said{text-align:center;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stars{display:flex;justify-content:space-between;gap:var(--sk-s1,6px);padding:var(--sk-s1,6px) var(--sk-s3,18px)}
+#eternal .et-b-stars button{flex:1 1 0;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink-mut)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-stars button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-lgb{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)!important;border:1.5px solid var(--sk-line)!important;border-radius:var(--sk-radius-pill,999px);font:600 14px/1.25 var(--sk-font-raver-body)!important;color:var(--sk-ink-soft)!important;cursor:pointer}
+#eternal .et-r-lgb[aria-pressed="true"]{border-color:var(--sk-you)!important;color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-lgb:disabled{cursor:default}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-wash);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-ghost:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) 0}
+#eternal .et-r-tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:88px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 14px/1.2 var(--sk-font-raver-display)!important;letter-spacing:normal;text-align:center;cursor:pointer;opacity:.72;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft);letter-spacing:normal}
+#eternal .et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-chip{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) auto;padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);width:max-content;max-width:100%;min-height:var(--sk-control-min,44px);text-align:center}
+#eternal .et-r-chip b{font:700 15px/1.2 var(--sk-font-raver-display);color:var(--sk-ink)}
+#eternal .et-r-chip span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-verified)}
+#eternal .et-r-chip span.et-off{color:var(--sk-guard)}
+#eternal .et-r-hold{position:relative;width:216px;height:216px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;text-align:center}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab input{width:72px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);text-align:right}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input,#eternal .et-c-in select{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-in select{width:auto;min-width:132px}
+#eternal .et-c-in .et-c-ghost{min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)}
+
+/* the orb (raver): the dashed ring is your target; morning, afternoon and evening fill it from the
+   centre out, each band's area in proportion to its milligrams. */
+#etOrb .et-target{fill:none;stroke:var(--sk-ink);stroke-width:2.5;stroke-dasharray:6 8}
+#etOrb .et-target-under{fill:none;stroke:var(--sk-bg);stroke-width:6;stroke-opacity:.7}
+#etOrb .et-shell{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#etOrb .et-band{stroke:var(--sk-bg);stroke-width:2;transition:r var(--dur,.4s)}
+#etOrb .et-band-morn{fill:var(--sk-biomass)}#etOrb .et-band-aft{fill:var(--sk-ai)}#etOrb .et-band-eve{fill:var(--sk-sovereign)}
+#etOrb .et-band-g[aria-pressed="true"] .et-band{stroke:var(--sk-ink);stroke-width:3}
+#etOrb .et-core{fill:var(--sk-bg);stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-lg-morn{background:var(--sk-biomass)}#eternal .et-lg-aft{background:var(--sk-ai)}#eternal .et-lg-eve{background:var(--sk-sovereign)}
+#eternal .et-lg-target{border:2px dashed var(--sk-ink-soft);background:transparent}
+#eternal .et-r-chip .et-r-ghost{margin:0;padding:0 var(--sk-s2,12px)}
+#eternal #etcTime{width:132px}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's intake tracker, which stays below exactly as hosted (fleet-hosted ruling: preserve dress,
+     0 lines removed; e2e/intake-daybucket.mjs, fleet-bus.mjs and fleet-pixels.mjs stay green). ONE data
+     layer reads the tracker's own live model (entries, rdi, todayKey, DAY_START, calcMg) and the numbers it
+     renders. Every write goes through the tracker's own controls: the front sets its form fields and
+     presses its own "+ Add to Daily Log" button, or moves its own target slider. Nothing is sent. -->
+<section id="eternal" aria-label="the daily intake tracker, today">
+
+  <!-- NEW BEE — a calm room: today in plain rows, one way to add something -->
+  <div class="et-b">
+    <div class="et-b-step" id="etBeeToday">
+      <div class="et-b-mark" data-et-t="et.intake.b.mark">daily intake tracker</div>
+      <h2 class="et-b-h" data-et-t="et.intake.b.h">today, so far</h2>
+      <p class="et-b-lede" id="etBeeLede"></p>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-et-t="et.intake.b.guard">your log stays in this browser. nothing is sent.</span></div>
+      <div class="et-b-rows" id="etBeeTotals"></div>
+      <div class="et-b-rows" id="etBeeDay"></div>
+      <div class="et-b-rows" id="etBeeList" hidden></div>
+      <div class="et-b-card" id="etBeeEmpty" hidden>
+        <h3 data-et-t="et.intake.b.emptyH">nothing logged today</h3>
+        <p data-et-t="et.intake.b.emptyP">each thing you add appears here and in the tracker's own log below.</p>
+      </div>
+      <div class="et-b-rows"><div class="et-b-stepper"><span><span data-et-t="et.intake.b.target">your daily target</span><small data-et-t="et.intake.b.targetS">you set it; the tracker compares today with it</small></span><button type="button" class="et-b-btn" id="etBeeRdiLess" aria-label="lower the target by 5 mg">−</button><b id="etBeeRdi"></b><button type="button" class="et-b-btn" id="etBeeRdiMore" aria-label="raise the target by 5 mg">+</button></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeAdd" data-et-t="et.intake.b.add">add something to today</button>
+        <button type="button" class="et-b-link" id="etBeeToLog" data-et-t="et.intake.b.toLog">change or remove an entry in the log below</button>
+        <p class="et-b-foot" id="etBeeFoot"></p>
+      </div>
+    </div>
+
+    <div class="et-b-step" id="etBeeForm" hidden>
+      <button type="button" class="et-b-back" id="etBeeBack"><svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span data-et-t="et.intake.b.back">today</span></button>
+      <h2 class="et-b-h" data-et-t="et.intake.b.formH">what did you have?</h2>
+      <div class="et-b-rows" id="etBeeMethods" role="group" aria-label="method"></div>
+      <div class="et-b-rows" id="etBeeFields">
+        <div class="et-b-stepper"><span id="etBeeAmtL">amount</span><button type="button" class="et-b-btn" id="etBeeAmtLess" aria-label="less">−</button><b id="etBeeAmt"></b><button type="button" class="et-b-btn" id="etBeeAmtMore" aria-label="more">+</button></div>
+        <div class="et-b-stepper" id="etBeePotRow"><span><span data-et-t="et.intake.b.pot">potency</span><small data-et-t="et.intake.b.potS">thca or thc, per cent</small></span><button type="button" class="et-b-btn" id="etBeePotLess" aria-label="less">−</button><b id="etBeePot"></b><button type="button" class="et-b-btn" id="etBeePotMore" aria-label="more">+</button></div>
+        <div class="et-b-stepper" id="etBeeHitsRow"><span data-et-t="et.intake.b.hits">hits</span><button type="button" class="et-b-btn" id="etBeeHitsLess" aria-label="fewer">−</button><b id="etBeeHits"></b><button type="button" class="et-b-btn" id="etBeeHitsMore" aria-label="more">+</button></div>
+        <label class="et-b-stepper"><span data-et-t="et.intake.b.time">time</span><input type="time" class="et-b-field" id="etBeeTime"></label>
+        <label class="et-b-stepper"><span><span data-et-t="et.intake.b.strain">strain or product</span><small data-et-t="et.intake.b.optional">optional</small></span><input type="text" class="et-b-field" id="etBeeStrain" autocomplete="off"></label>
+      </div>
+      <div class="et-b-sum" aria-live="polite"><small data-et-t="et.intake.b.adds">this adds</small><div class="et-b-fig" id="etBeePreview"></div><small id="etBeeAfter"></small></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeLog" data-et-t="et.intake.b.log">add to today's log</button>
+        <p class="et-b-foot" data-et-t="et.intake.b.est">the tracker works out the milligrams from what you enter. it is an estimate, not a measurement.</p>
+      </div>
+    </div>
+
+    <div class="et-b-step" id="etBeeDone" hidden>
+      <div class="et-b-tick" aria-hidden="true">✓</div>
+      <div class="et-b-done" data-et-t="et.intake.b.done">added.</div>
+      <p class="et-b-said" id="etBeeSaid"></p>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeAgain" data-et-t="et.intake.b.again">back to today</button>
+        <button type="button" class="et-b-link" id="etBeeSee" data-et-t="et.intake.b.see">see it in the tracker's log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the day is an orb that fills toward your target; hold the hexagon to add -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.intake.r.h">your orb</h2><span class="et-r-hint" id="etOrbHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etOrb" viewBox="-200 -200 400 400" role="group" aria-label="today as an orb: morning, afternoon and evening fill it; the dashed ring is your target"></svg>
+      <div class="et-r-mid"><b id="etOrbBig">0</b><span id="etOrbSmall"></span></div>
+    </div>
+    <div class="et-r-legend" id="etOrbLegend"></div>
+    <div class="et-r-card" id="etOrbCard" aria-live="polite"></div>
+    <div class="et-r-tiles" id="etOrbMethods" role="group" aria-label="method"></div>
+    <div class="et-r-chip"><button type="button" class="et-r-ghost" id="etOrbAmtLess" aria-label="less">−</button><b id="etOrbAmt"></b><button type="button" class="et-r-ghost" id="etOrbAmtMore" aria-label="more">+</button></div>
+    <div class="et-r-hold">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="et-hold-track"/><circle cx="100" cy="100" r="92" class="et-hold-prog" id="etOrbProg"/></svg>
+      <button type="button" class="et-r-holdbtn" id="etOrbHold" aria-describedby="etOrbHoldNote"><b data-et-t="et.intake.r.hold">hold</b><span data-et-t="et.intake.r.holdS">to add</span></button>
+    </div>
+    <p class="et-r-note" id="etOrbHoldNote"></p>
+    <div class="et-r-row"><button type="button" class="et-r-ghost" id="etOrbLess" aria-label="target minus 5 mg">target − 5</button><button type="button" class="et-r-ghost" id="etOrbMore" aria-label="target plus 5 mg">target + 5</button></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the form logEntry() reads, the bucket, the arithmetic, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/lab/intake-tracker.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <h3 class="et-c-h" data-et-t="et.intake.c.formH">the form · what logEntry() reads</h3>
+    <div class="et-c-in" id="etcForm">
+      <label><span>method</span><select id="etcMethod"></select></label>
+      <label><span id="etcAmtL">amount</span><input id="etcAmount" type="number" step="0.1" min="0.1" inputmode="decimal"></label>
+      <label><span>potency %</span><input id="etcPotency" type="number" step="0.1" inputmode="decimal"></label>
+      <label><span>hits</span><input id="etcHits" type="number" step="1" min="1" inputmode="numeric"></label>
+      <label><span>time</span><input id="etcTime" type="time"></label>
+    </div>
+    <p class="et-c-note" id="etcPreview"></p>
+    <button type="button" class="et-c-primary" id="etcLog"></button>
+    <p class="et-c-note" id="etcLogged" aria-live="polite"></p>
+    <h3 class="et-c-h" id="etcBucketH"></h3>
+    <table class="et-c-tab" id="etcBucket"><thead><tr><th>#</th><th>entry</th><th class="et-num">mg</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.intake.c.pipeH">the arithmetic · as render() does it</h3>
+    <ol class="et-c-pipe" id="etcPipe"></ol>
+    <h3 class="et-c-h" data-et-t="et.intake.c.receiptH">receipt · recomputed against the page</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-in">
+      <label><span>rdi mg</span><input id="etcRdi" type="number" min="10" max="500" step="5" inputmode="numeric"></label>
+      <button type="button" class="et-c-ghost" id="etcRdiSet">setRDI()</button>
+    </div>
+    <div class="et-c-quote" id="etcHazard"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.intake.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>JSON.parse(localStorage.getItem('bnIntake_'+todayKey))</code></li><li><code>node e2e/intake-daybucket.mjs</code> · <code>node e2e/fleet-bus.mjs</code></li><li><code>diff surfaces/fleet/intake-tracker.html surfaces/fleet-hosted/lab/intake-tracker.html</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etcExport" data-et-t="et.intake.c.export">exportData()</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/lab/intake-tracker.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.intake.c.src">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.intake.archive">the whole intake tracker</h2>
 <div class="hdr"><h1>BN Daily Intake Tracker</h1><div class="sub">bnature.social - Cannabinoid Consumption vs RDI v1.0</div></div>
 <div class="wrap">
 <div class="card">
@@ -189,6 +509,224 @@ var ta=a.timestamp?new Date(a.timestamp).getTime():0,tb=b.timestamp?new Date(b.t
 
 migrateUtcDayKeys();
 load();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The tracker's own live model is
+   the source: entries, rdi, todayKey and DAY_START (its globals), calcMg (its formula) and the numbers its
+   render() prints. Every write goes through the tracker's own controls: a front sets the tracker's form
+   fields and presses its own "+ Add to Daily Log" button (logEntry), or moves its own target slider
+   (setRDI). "added" is said only when bnIntake_<day> in this browser really grew. Nothing is sent. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var p2=function(n){return (n<10?'0':'')+n;};
+  var pl=function(n,one,many){return n+' '+(n===1?one:many);};
+  var r1=function(x){return Math.round(x*10)/10;};
+  var BANDS=['morn','aft','eve'];
+  var D={ok:false,why:'',today:'',dayStart:4,dayStartSet:false,rdi:100,entries:[],total:0,count:0,avg:0,pct:0,band:{morn:0,aft:0,eve:0},bandN:{morn:0,aft:0,eve:0},page:{},agree:false,stored:null,form:{},methods:[],last:null};
+  var R={sel:'',hold:0,t0:0,msg:''};
+  var B={step:'today'};
+
+  /* ── the one data layer: the tracker's own model, read where it lives ── */
+  function field(id){return document.getElementById(id);}
+  function read(){
+    try{
+      var E=Array.isArray(window.entries)?window.entries:[];
+      D.today=String(window.todayKey||'');D.dayStart=typeof window.DAY_START==='number'?window.DAY_START:4;D.rdi=typeof window.rdi==='number'?window.rdi:100;
+      var ds=null;try{ds=localStorage.getItem('bnDayStart');}catch(e){}
+      D.dayStartSet=ds!=null&&!isNaN(parseFloat(ds));D.rawDayStart=ds;
+      D.entries=E.map(function(e,i){return {i:i,method:e.method||'',strain:e.strain||'',amount:e.amount,potency:e.potency,hits:e.hits,time:e.time||'',mg:e.mg||0,timestamp:e.timestamp||''};});
+      D.total=0;D.band={morn:0,aft:0,eve:0};D.bandN={morn:0,aft:0,eve:0};
+      E.forEach(function(e){D.total+=e.mg;var h=parseInt((e.time||'').split(':')[0])||0,b=h<12?'morn':h<17?'aft':'eve';D.band[b]+=e.mg;D.bandN[b]++;});
+      D.count=E.length;D.avg=D.count>0?Math.round(D.total/D.count):0;D.pct=D.rdi>0?Math.round(D.total/D.rdi*100):0;
+      D.ok=true;
+    }catch(e){D.ok=false;D.why=String(e&&e.message||e);}
+    var t=function(id){var e=$(id);return e?e.textContent.trim():'';};
+    D.page={total:t('totalMg'),entries:t('entries'),pct:t('rdiPct'),avg:t('avgMg'),morn:t('tlMorn'),aft:t('tlAft'),eve:t('tlEve'),bar:t('rdiBar')};
+    D.want={total:String(Math.round(D.total)),entries:String(D.count),pct:D.pct+'%',avg:String(D.avg),morn:'Morning '+D.band.morn+'mg',aft:'Afternoon '+D.band.aft+'mg',eve:'Evening '+D.band.eve+'mg'};
+    D.agree=D.ok&&Object.keys(D.want).every(function(k){return D.page[k]===D.want[k];});
+    D.stored=storedCount();
+    var sel=field('method');
+    D.methods=sel?[].map.call(sel.options,function(o){return {v:o.value,label:o.textContent.trim().toLowerCase()};}):[];
+    var f={method:sel?sel.value:'',amount:parseFloat((field('amount')||{}).value)||0,potency:parseFloat((field('potency')||{}).value)||0,hits:parseInt((field('hits')||{}).value)||1,time:(field('time')||{}).value||'',strain:(field('strain')||{}).value||'',amtLabel:((field('amtLabel')||{}).textContent||'').trim().toLowerCase()};
+    f.raw=typeof window.calcMg==='function'?window.calcMg(f):NaN;f.mg=isNaN(f.raw)?NaN:Math.round(f.raw);
+    f.label=(D.methods.filter(function(m){return m.v===f.method;})[0]||{}).label||f.method;
+    D.form=f;
+  }
+  function storedCount(){try{var r=localStorage.getItem('bnIntake_'+D.today);if(r==null)return null;var a=JSON.parse(r);return Array.isArray(a)?a.length:null;}catch(e){return null;}}
+  var startHM=function(){var h=Math.floor(D.dayStart),m=Math.round((D.dayStart-h)*60);return p2(h)+':'+p2(m);};
+  var usesPotency=function(m){return m!=='vape'&&m!=='edible';};
+  var unit=function(m){return m==='vape'?T('et.intake.u.hit','mg a hit'):m==='edible'?'mg':'g';};
+  var mWord=function(v){return (D.methods.filter(function(m){return m.v===v;})[0]||{}).label||v;};
+  var BAND_WORD=function(b){return b==='morn'?T('et.intake.morn','morning'):b==='aft'?T('et.intake.aft','afternoon'):T('et.intake.eve','evening');};
+
+  /* ── the tracker's own controls: every write goes through them ── */
+  function setMethod(v){var s=field('method');if(!s||s.value===v)return;s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));}
+  function setVal(id,v){var e=field(id);if(!e)return;e.value=String(v);}
+  function stepAmount(d){var f=D.form,st=(f.method==='vape'||f.method==='edible')?1:0.1,v=Math.max(0.1,r1((f.amount||0)+d*st));setVal('amount',v);update();}
+  function setTarget(v){var s=field('rdiSlider');if(!s)return;var lo=+s.min||10,hi=+s.max||500,st=+s.step||5;v=Math.max(lo,Math.min(hi,Math.round(v/st)*st));s.value=String(v);s.dispatchEvent(new Event('input',{bubbles:true}));update();}
+  function labButton(fn){return [].filter.call(document.querySelectorAll('button'),function(b){return !b.closest('#eternal')&&b.getAttribute('onclick')===fn;})[0]||null;}
+  function add(){
+    read();var before=D.stored==null?0:D.stored,f=D.form,btn=labButton('logEntry()');
+    if(!btn)return {ok:false};
+    btn.click();read();
+    var after=D.stored==null?0:D.stored,e=D.entries[D.entries.length-1];
+    var res=after===before+1&&e?{ok:true,before:before,after:after,mg:e.mg,method:e.method,time:e.time}:{ok:false,before:before,after:after};
+    D.last=res;render();return res;
+  }
+  function toLab(el,focus){if(!el)return;var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:still?'auto':'smooth',block:'start'});if(focus)try{focus.focus({preventScroll:true});}catch(e){}}
+
+  /* ── NEW BEE ── */
+  function row(l,v,c,sub){return '<div class="et-b-row"><span>'+esc(l)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><small'+(c?' class="'+c+'"':'')+'>'+esc(v)+'</small></div>';}
+  function bee(){
+    ['today','form','done'].forEach(function(s){$('etBee'+s.charAt(0).toUpperCase()+s.slice(1)).hidden=B.step!==s;});
+    $('etBeeLede').textContent=fill(T('et.intake.b.lede','what you have logged since {s} today, against the daily target you set.'),{s:startHM()});
+    if(!D.ok){$('etBeeTotals').innerHTML=row(T('et.intake.b.unread','your log could not be read here'),D.why);return;}
+    $('etBeeTotals').innerHTML=row(T('et.intake.b.total','total'),Math.round(D.total)+' mg')+row(T('et.intake.b.entries','entries'),D.count)+row(T('et.intake.b.pct','of your daily target'),fill(T('et.intake.b.pctV','{p}% of {r} mg'),{p:D.pct,r:D.rdi}))+row(T('et.intake.b.avg','average per entry'),D.avg+' mg');
+    $('etBeeDay').innerHTML='<div class="et-b-group">'+esc(T('et.intake.b.across','across the day'))+'</div>'+row(BAND_WORD('morn'),D.band.morn+' mg','',T('et.intake.b.mornS','before 12:00'))+row(BAND_WORD('aft'),D.band.aft+' mg','',T('et.intake.b.aftS','12:00 to 16:59'))+row(BAND_WORD('eve'),D.band.eve+' mg','',T('et.intake.b.eveS','from 17:00'));
+    var list=D.entries.slice(-6).reverse();
+    $('etBeeList').innerHTML=list.length?'<div class="et-b-group">'+esc(T('et.intake.b.latest','the latest, newest first'))+'</div>'+list.map(function(e){return row(mWord(e.method)+' · '+(e.strain||T('et.intake.b.nostrain','no strain named')),e.mg+' mg','',e.time?fill(T('et.intake.b.at','at {t}'),{t:e.time}):T('et.intake.b.notime','no time given'));}).join(''):'';
+    $('etBeeList').hidden=!list.length;$('etBeeEmpty').hidden=!!list.length;
+    var s=field('rdiSlider');$('etBeeRdi').textContent=D.rdi+' mg';$('etBeeRdiLess').disabled=!s||D.rdi<=(+s.min||10);$('etBeeRdiMore').disabled=!s||D.rdi>=(+s.max||500);
+    $('etBeeFoot').textContent=fill(T('et.intake.b.foot','the day runs from {s} to {s}, the way the tracker counts it.'),{s:startHM()});
+    var f=D.form;
+    $('etBeeMethods').innerHTML=D.methods.map(function(m){var on=m.v===f.method;return '<button type="button" class="et-b-row" data-m="'+esc(m.v)+'" aria-pressed="'+on+'"><span>'+esc(m.label)+'</span><small>'+(on?'✓':'')+'</small></button>';}).join('');
+    $('etBeeAmtL').textContent=f.amtLabel||T('et.intake.b.amount','amount');$('etBeeAmt').textContent=r1(f.amount)+' '+unit(f.method);$('etBeeAmtLess').disabled=f.amount<=0.1;
+    $('etBeePotRow').hidden=!usesPotency(f.method);$('etBeePot').textContent=r1(f.potency)+'%';$('etBeePotLess').disabled=f.potency<=0;
+    $('etBeeHitsRow').hidden=f.method!=='vape';$('etBeeHits').textContent=f.hits;$('etBeeHitsLess').disabled=f.hits<=1;
+    if(document.activeElement!==$('etBeeTime'))$('etBeeTime').value=f.time;
+    if(document.activeElement!==$('etBeeStrain'))$('etBeeStrain').value=f.strain;
+    $('etBeePreview').textContent=isNaN(f.mg)?T('et.intake.b.noCalc','not worked out yet'):f.mg+' mg';
+    $('etBeeAfter').textContent=B.fail?T('et.intake.b.fail','not added: the tracker did not save it. nothing changed.'):isNaN(f.mg)?'':fill(T('et.intake.b.after','today would be {t} mg, {p}% of your {r} mg target.'),{t:Math.round(D.total)+f.mg,p:D.rdi>0?Math.round((D.total+f.mg)/D.rdi*100):0,r:D.rdi});
+    if(D.last&&D.last.ok)$('etBeeSaid').textContent=fill(T('et.intake.b.said','{mg} mg of {m} at {t} is in today\'s log. today: {total} mg, {p}% of your target.'),{mg:D.last.mg,m:mWord(D.last.method),t:D.last.time||T('et.intake.b.notimeShort','no time'),total:Math.round(D.total),p:D.pct});
+  }
+
+  /* ── RAVER: the orb ── */
+  var R0=64,RT=132,RMAX=186;
+  var rad=function(frac){return Math.min(RMAX,Math.sqrt(R0*R0+Math.max(0,frac)*(RT*RT-R0*R0)));};
+  function orb(){
+    var svg=$('etOrb');if(!svg)return;var h='',cum=0,rdi=D.rdi>0?D.rdi:1;
+    h+='<circle class="et-shell" r="'+RMAX+'"/>';
+    var rs={};BANDS.forEach(function(b){cum+=D.band[b];rs[b]=rad(cum/rdi);});
+    ['eve','aft','morn'].forEach(function(b){if(!D.band[b])return;h+='<g class="et-band-g" role="button" tabindex="0" data-band="'+b+'" aria-pressed="'+(R.sel===b)+'" aria-label="'+esc(BAND_WORD(b)+', '+D.band[b]+' mg')+'"><circle class="et-hit" r="'+Math.max(26,rs[b])+'"/><circle class="et-band et-band-'+b+'" r="'+rs[b].toFixed(1)+'"/></g>';});
+    h+='<circle class="et-core" r="'+R0+'" pointer-events="none"/>';
+    h+='<circle class="et-target-under" r="'+RT+'" pointer-events="none"/><circle class="et-target" r="'+RT+'" pointer-events="none"/>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var f=D.form;
+    $('etOrbHint').textContent=D.count?fill(T('et.intake.r.hint','{n} today · tap a band'),{n:D.count}):T('et.intake.r.hEmpty','empty until you add');
+    $('etOrbBig').textContent=String(Math.round(D.total));$('etOrbSmall').textContent=fill(T('et.intake.r.small','mg · {p}% of {r}'),{p:D.pct,r:D.rdi});
+    $('etOrbLegend').innerHTML=BANDS.map(function(b){return '<button type="button" class="et-r-lgb" data-band="'+b+'" aria-pressed="'+(R.sel===b)+'"'+(D.band[b]?'':' disabled')+'><i class="et-lg-'+b+'"></i>'+esc(BAND_WORD(b)+' · '+D.band[b]+' mg')+'</button>';}).join('')+'<span><i class="et-lg-target"></i>'+esc(fill(T('et.intake.r.lgTarget','your target · {r} mg'),{r:D.rdi}))+'</span>';
+    var card=$('etOrbCard'),b=R.sel&&D.band[R.sel]?R.sel:'';
+    if(R.msg)card.innerHTML=R.msg;
+    else if(b){var es=D.entries.filter(function(e){var h=parseInt((e.time||'').split(':')[0])||0;return (h<12?'morn':h<17?'aft':'eve')===b;});card.innerHTML='<span class="et-rk">'+esc(D.band[b])+'</span><div><b>'+esc(fill(T('et.intake.r.bandH','{b} · {mg} mg'),{b:BAND_WORD(b),mg:D.band[b]}))+'</b><span>'+esc(es.map(function(e){return mWord(e.method)+' '+e.mg+' mg'+(e.time?' at '+e.time:'');}).join(' · '))+'</span></div>';}
+    else if(!D.count)card.innerHTML='<span class="et-rk">0</span><div><b>'+esc(T('et.intake.r.emptyH','an empty orb, honestly'))+'</b><span>'+esc(T('et.intake.r.emptyS','nothing is logged today in this browser. pick what you had, then hold the hexagon.'))+'</span></div>';
+    else{var l=D.entries[D.entries.length-1];card.innerHTML='<span class="et-rk">'+esc(D.count)+'</span><div><b>'+esc(fill(T('et.intake.r.cardH','{n} today · {mg} mg'),{n:pl(D.count,'entry','entries'),mg:Math.round(D.total)}))+'</b><span>'+esc(fill(T('et.intake.r.cardS','the latest: {m} {mg} mg{t}'),{m:mWord(l.method),mg:l.mg,t:l.time?' at '+l.time:''}))+'</span></div>';}
+    var G={flower:'<path d="M12 21V11"/><path d="M12 11C12 6 8 4 5 4c0 4 2 7 7 7z"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/>',vape:'<rect x="9" y="3" width="6" height="18" rx="2"/><path d="M9 8h6"/>',distillate:'<path d="M12 3c3 5 6 8 6 12a6 6 0 0 1-12 0c0-4 3-7 6-12z"/>',spliff:'<path d="M4 18L18 6"/><path d="M17 3l4 4"/><path d="M3 15l6 6"/>',edible:'<rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 9h.01M15 11h.01M11 15h.01"/>'};
+    $('etOrbMethods').innerHTML=D.methods.map(function(m){return '<button type="button" data-m="'+esc(m.v)+'" aria-pressed="'+(m.v===f.method)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+(G[m.v]||'<circle cx="12" cy="12" r="6"/>')+'</svg>'+esc(m.label)+'</button>';}).join('');
+    $('etOrbAmt').textContent=isNaN(f.mg)?T('et.intake.r.noCalc','not worked out yet'):(f.method==='vape'?fill('{a} mg × {h} → {mg} mg',{a:r1(f.amount),h:f.hits,mg:f.mg}):f.method==='edible'?fill('{a} mg',{a:r1(f.amount)}):fill('{a} g · {p}% → {mg} mg',{a:r1(f.amount),p:r1(f.potency),mg:f.mg}));
+    $('etOrbAmtLess').disabled=f.amount<=0.1;
+    $('etOrbHoldNote').textContent=fill(T('et.intake.r.note','one hold adds one {m} entry · the tracker\'s own button does the saving · starts empty at {s}'),{m:f.label,s:startHM()});
+    var s=field('rdiSlider');$('etOrbLess').disabled=!s||D.rdi<=(+s.min||10);$('etOrbMore').disabled=!s||D.rdi>=(+s.max||500);
+    orb();
+  }
+  function holdStart(e){
+    var btn=$('etOrbHold');if(btn.disabled||R.hold)return;if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etOrbProg');R.t0=performance.now();R.msg='';
+    (function tick(now){var f=Math.min(1,(now-R.t0)/1400);prog.style.strokeDashoffset=String(578*(1-f));
+      if(f>=1){R.hold=0;prog.style.strokeDashoffset='578';var res=add();R.sel='';
+        R.msg=res.ok?'<span class="et-rk">+'+esc(res.mg)+'</span><div><b>'+esc(fill(T('et.intake.r.added','added · {mg} mg of {m}'),{mg:res.mg,m:mWord(res.method)}))+'</b><span>'+esc(fill(T('et.intake.r.addedS','bnIntake_{d} now holds {n} · the orb grew'),{d:D.today,n:pl(res.after,'entry','entries')}))+'</span></div>':'<span class="et-rk">0</span><div><b>'+esc(T('et.intake.r.failH','not added'))+'</b><span>'+esc(T('et.intake.r.failS','the tracker did not save it. nothing changed.'))+'</span></div>';
+        raver();return;}
+      R.hold=requestAnimationFrame(tick);})(R.t0);
+  }
+  function holdStop(){if(!R.hold)return;cancelAnimationFrame(R.hold);R.hold=0;$('etOrbProg').style.strokeDashoffset='578';}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var host=location.host||'this origin',f=D.form;
+    $('etcPath').textContent='fleet-hosted/lab/intake-tracker.html · localStorage@'+host;
+    $('etcChips').innerHTML='<span class="et-on">writes only through the tracker\'s controls</span><span>'+esc('day '+D.today)+'</span><span>'+esc('day start '+startHM()+(D.dayStartSet?'':' · default'))+'</span><span class="'+(D.agree?'et-ok':'et-no')+'">'+esc(D.agree?'agrees with the page ✓':'differs from the page')+'</span>';
+    var ms=$('etcMethod');if(ms.options.length!==D.methods.length)ms.innerHTML=D.methods.map(function(m){return '<option value="'+esc(m.v)+'">'+esc(m.v)+'</option>';}).join('');
+    var put=function(id,v){var e=$(id);if(document.activeElement!==e)e.value=v;};
+    put('etcMethod',f.method);put('etcAmount',f.amount);put('etcPotency',f.potency);put('etcHits',f.hits);put('etcTime',f.time);put('etcRdi',D.rdi);
+    $('etcAmtL').textContent=f.amtLabel||'amount';
+    var formula=f.method==='vape'?'amount × hits = '+r1(f.amount)+' × '+f.hits:f.method==='edible'?'amount = '+r1(f.amount):'amount × potency / 100 × 1000 × 0.877 = '+r1(f.amount)+' × '+r1(f.potency)+' / 100 × 1000 × 0.877';
+    $('etcPreview').textContent=isNaN(f.raw)?'calcMg() could not be read here':'calcMg · '+f.method+' · '+formula+' = '+r1(f.raw)+' → Math.round → '+f.mg+' mg';
+    $('etcLog').textContent='logEntry() · append to bnIntake_'+D.today;
+    $('etcLogged').textContent=D.last?(D.last.ok?'bnIntake_'+D.today+' · '+D.last.before+' → '+D.last.after+' entries ✓ · +'+D.last.mg+' mg':'bnIntake_'+D.today+' · '+D.last.before+' → '+D.last.after+' ≠ nothing was saved'):'';
+    $('etcBucketH').textContent='the bucket · bnIntake_'+D.today+' · '+(D.stored==null?'absent, read as []':pl(D.stored,'entry','entries'));
+    $('etcBucket').querySelector('tbody').innerHTML=D.entries.length?D.entries.map(function(e){var how=e.method==='vape'?r1(e.amount)+' mg × '+e.hits+' hits':e.method==='edible'?r1(e.amount)+' mg':r1(e.amount)+' g @ '+r1(e.potency)+'%';return '<tr><td>'+(e.i+1)+'</td><td class="et-wrap">'+esc(e.method+' · '+how)+'<small>'+esc((e.time||'no time')+' · '+(e.timestamp||'no timestamp'))+'</small></td><td class="et-num">'+esc(e.mg)+'</td></tr>';}).join(''):'<tr><td>0</td><td class="et-wrap">'+esc(T('et.intake.c.none','no entries in today\'s bucket'))+'</td><td class="et-num">0</td></tr>';
+    $('etcPipe').innerHTML=[
+      ['day key',fill('now − {h} h → local date {d} → bnIntake_{d}',{h:D.dayStart,d:D.today})],
+      ['calcMg, per entry','vape = amount × hits · edible = amount · else amount × potency / 100 × 1000 × 0.877 · then Math.round'],
+      ['total',fill('Σ mg = {t} over {n}',{t:D.total,n:pl(D.count,'entry','entries')})],
+      ['of rdi',fill('round({t} / {r} × 100) = {p}%',{t:D.total,r:D.rdi,p:D.pct})],
+      ['avg per entry',D.count?fill('round({t} / {n}) = {a}',{t:D.total,n:D.count,a:D.avg}):'no entries → 0'],
+      ['buckets',fill('hour typed < 12 → morning {a} · < 17 → afternoon {b} · else evening {c} · a blank time reads as hour 0',{a:D.band.morn,b:D.band.aft,c:D.band.eve})]
+    ].map(function(s){return '<li class="et-done"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var num=function(v){return String(v).replace(/^[^\d]+/,'');};
+    var yn=function(a,b){return esc(a)+' · '+esc(b)+(String(a)===String(b)?' <span class="et-st-ok">✓</span>':' <span class="et-st-wait">≠</span>');};
+    $('etcReceipt').innerHTML=[
+      ['total mg',yn(D.page.total,D.want.total)],['entries',yn(D.page.entries,D.want.entries)],['of rdi',yn(D.page.pct,D.want.pct)],['avg/entry',yn(D.page.avg,D.want.avg)],
+      ['morning',yn(num(D.page.morn),num(D.want.morn))],['afternoon',yn(num(D.page.aft),num(D.want.aft))],['evening',yn(num(D.page.eve),num(D.want.eve))],
+      ['bnRDI',esc(D.rdi+(function(){try{return localStorage.getItem('bnRDI')==null?' · absent, 100 by default':' · stored';}catch(e){return '';}})())],
+      ['writes',esc('logEntry → bnIntake_'+D.today+' · setRDI → bnRDI · delEntry → bnIntake_'+D.today+' · this front only presses those controls')],
+      ['requests',esc('none · exportData() prints into the page')]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etcHazard').innerHTML='<b>'+esc(T('et.intake.c.hazardH','two meanings of mg'))+'</b> · '+esc(T('et.intake.c.hazard','this tracker counts flower as grams × potency × 1000 × 0.877: thc after decarboxylation, before absorption. spliff lab counts absorbed thc, × 0.30 more. the same joint reads about 3.3 times higher here. both are the labs\' estimates, not measurements.'));
+  }
+
+  function update(){read();render();}
+  var EN={};
+  function tr(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function render(){bee();raver();cy();}
+  function all(){tr();render();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    /* bee */
+    $('etBeeAdd').addEventListener('click',function(){B.step='form';B.fail=false;update();$('etBeeForm').scrollIntoView({block:'start'});});
+    $('etBeeBack').addEventListener('click',function(){B.step='today';update();});
+    $('etBeeAgain').addEventListener('click',function(){B.step='today';update();$('etBeeToday').scrollIntoView({block:'start'});});
+    $('etBeeToLog').addEventListener('click',function(){toLab($('logList'));});
+    $('etBeeSee').addEventListener('click',function(){toLab($('logList'));});
+    $('etBeeMethods').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(b){setMethod(b.getAttribute('data-m'));update();}});
+    $('etBeeAmtLess').addEventListener('click',function(){stepAmount(-1);});$('etBeeAmtMore').addEventListener('click',function(){stepAmount(1);});
+    $('etBeePotLess').addEventListener('click',function(){setVal('potency',Math.max(0,r1(D.form.potency-1)));update();});$('etBeePotMore').addEventListener('click',function(){setVal('potency',r1(D.form.potency+1));update();});
+    $('etBeeHitsLess').addEventListener('click',function(){setVal('hits',Math.max(1,D.form.hits-1));update();});$('etBeeHitsMore').addEventListener('click',function(){setVal('hits',D.form.hits+1);update();});
+    $('etBeeTime').addEventListener('input',function(){setVal('time',this.value);update();});
+    $('etBeeStrain').addEventListener('input',function(){setVal('strain',this.value);update();});
+    $('etBeeRdiLess').addEventListener('click',function(){setTarget(D.rdi-5);});$('etBeeRdiMore').addEventListener('click',function(){setTarget(D.rdi+5);});
+    $('etBeeLog').addEventListener('click',function(){var r=add();if(r.ok){B.step='done';B.fail=false;}else B.fail=true;render();if(r.ok)$('etBeeDone').scrollIntoView({block:'start'});});
+    /* raver */
+    $('etOrbMethods').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(b){R.msg='';setMethod(b.getAttribute('data-m'));update();}});
+    $('etOrbAmtLess').addEventListener('click',function(){R.msg='';stepAmount(-1);});$('etOrbAmtMore').addEventListener('click',function(){R.msg='';stepAmount(1);});
+    $('etOrbLess').addEventListener('click',function(){setTarget(D.rdi-5);});$('etOrbMore').addEventListener('click',function(){setTarget(D.rdi+5);});
+    $('etOrbLegend').addEventListener('click',function(e){var g=e.target.closest('.et-r-lgb');if(!g||g.disabled)return;var b=g.getAttribute('data-band');R.msg='';R.sel=R.sel===b?'':b;raver();});
+    $('etOrb').addEventListener('click',function(e){var g=e.target.closest('.et-band-g');if(!g)return;var b=g.getAttribute('data-band');R.msg='';R.sel=R.sel===b?'':b;raver();});
+    $('etOrb').addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var g=e.target.closest('.et-band-g');if(!g)return;e.preventDefault();g.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    var hb=$('etOrbHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    /* cypherpunk */
+    $('etcMethod').addEventListener('change',function(){setMethod(this.value);update();});
+    [['etcAmount','amount'],['etcPotency','potency'],['etcHits','hits'],['etcTime','time']].forEach(function(p){$(p[0]).addEventListener('input',function(){setVal(p[1],this.value);read();bee();raver();cy();});});
+    $('etcLog').addEventListener('click',function(){add();});
+    $('etcRdiSet').addEventListener('click',function(){var v=parseFloat($('etcRdi').value);if(!isNaN(v))setTarget(v);});
+    $('etcRdi').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('etcRdiSet').click();}});
+    $('etcExport').addEventListener('click',function(){var b=labButton('exportData()');if(b){b.click();toLab($('exportOut'));}});
+    /* the tracker's own controls move the fronts too */
+    ['input','change','click'].forEach(function(t){document.addEventListener(t,function(e){if(e.target&&e.target.closest&&!e.target.closest('#eternal'))update();});});
+    document.addEventListener('blang',all);
+  }
+  function boot(){read();wire();all();window.__eternal={data:D,raver:R,bee:B,add:add};}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>

@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "2 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "2 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "MKBS-JBR",
+    "id": "p6633de3034",
+    "name": "Hans Nielsen",
     "evidence": "walked provider link"
    },
    {
-    "id": "4KV1-WF5",
+    "id": "p4937b596c5",
+    "name": "Mrs. Hans Nielsen",
     "evidence": "walked provider link"
    }
   ],
@@ -56,7 +58,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/M7F8-P2R",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 2,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

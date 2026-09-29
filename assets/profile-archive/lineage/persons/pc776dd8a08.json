@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/pc776dd8a08",
  "identity": {
   "name": "Princesse ainée de Galatie",
-  "lifespan": "0034BC–0060BC",
+  "lifespan": "0060BC–0034BC",
   "gender": "FEMALE",
   "living": false
  },
@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"

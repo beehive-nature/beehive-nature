@@ -1,0 +1,728 @@
+{
+ "page": "surfaces/bview.html",
+ "bytes": 31735975,
+ "dur": 30,
+ "rateBps": 528933,
+ "samples": [
+  {
+   "s": 1,
+   "fed": 0.2,
+   "got": "0.2 MB · 0.2 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 2,
+   "fed": 0.7,
+   "got": "0.7 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 3,
+   "fed": 1.2,
+   "got": "1.2 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 4,
+   "fed": 1.7,
+   "got": "1.7 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~33 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 5,
+   "fed": 2.2,
+   "got": "2.2 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~32 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 6,
+   "fed": 2.7,
+   "got": "2.7 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~31 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 7,
+   "fed": 3.2,
+   "got": "3.2 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~30 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 8,
+   "fed": 3.8,
+   "got": "3.8 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~29 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 9,
+   "fed": 4.3,
+   "got": "4.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~28 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 10,
+   "fed": 4.8,
+   "got": "4.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~27 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 11,
+   "fed": 5.3,
+   "got": "5.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~26 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 12,
+   "fed": 5.8,
+   "got": "5.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~25 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 13,
+   "fed": 6.3,
+   "got": "6.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~24 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 14,
+   "fed": 6.8,
+   "got": "6.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~23 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 15,
+   "fed": 7.3,
+   "got": "7.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~22 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 16,
+   "fed": 7.8,
+   "got": "7.8 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~21 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 17,
+   "fed": 8.3,
+   "got": "8.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~20 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 18,
+   "fed": 8.8,
+   "got": "8.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~19 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 19,
+   "fed": 9.3,
+   "got": "9.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~18 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 20,
+   "fed": 9.8,
+   "got": "9.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~17 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 21,
+   "fed": 10.3,
+   "got": "10 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~16 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 22,
+   "fed": 10.8,
+   "got": "11 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~15 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 23,
+   "fed": 11.3,
+   "got": "11 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~14 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 24,
+   "fed": 11.8,
+   "got": "12 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~13 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 25,
+   "fed": 12.3,
+   "got": "12 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~12 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 26,
+   "fed": 12.8,
+   "got": "13 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~11 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 27,
+   "fed": 13.3,
+   "got": "13 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~10 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 28,
+   "fed": 13.8,
+   "got": "14 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~9 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 29,
+   "fed": 14.3,
+   "got": "14 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~8 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 30,
+   "fed": 14.8,
+   "got": "15 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~7 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 31,
+   "fed": 15.3,
+   "got": "15 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~6 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 32,
+   "fed": 15.8,
+   "got": "16 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~5 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 33,
+   "fed": 16.3,
+   "got": "16 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~4 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 34,
+   "fed": 16.8,
+   "got": "17 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~3 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 35,
+   "fed": 17.3,
+   "got": "17 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~2 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 36,
+   "fed": 17.8,
+   "got": "18 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-wait: Ready to play in ~1 s. The network sends this video slower than it plays, so a head start loads first."
+   ]
+  },
+  {
+   "s": 37,
+   "fed": 18.3,
+   "got": "18 MB",
+   "t": 0.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 38,
+   "fed": 18.8,
+   "got": "19 MB · 0.5 MB/s",
+   "t": 1.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 39,
+   "fed": 19.3,
+   "got": "19 MB · 0.5 MB/s",
+   "t": 2.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 40,
+   "fed": 19.8,
+   "got": "20 MB · 0.5 MB/s",
+   "t": 3.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 41,
+   "fed": 20.3,
+   "got": "20 MB · 0.5 MB/s",
+   "t": 4.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 42,
+   "fed": 20.8,
+   "got": "21 MB",
+   "t": 5.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 43,
+   "fed": 21.3,
+   "got": "21 MB · 0.5 MB/s",
+   "t": 6.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 44,
+   "fed": 21.8,
+   "got": "22 MB · 0.5 MB/s",
+   "t": 7.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 45,
+   "fed": 22.3,
+   "got": "22 MB · 0.5 MB/s",
+   "t": 8.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 46,
+   "fed": 22.8,
+   "got": "23 MB · 0.5 MB/s",
+   "t": 9.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 47,
+   "fed": 23.3,
+   "got": "23 MB · 0.5 MB/s",
+   "t": 10.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 48,
+   "fed": 23.8,
+   "got": "24 MB · 0.5 MB/s",
+   "t": 11.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 49,
+   "fed": 24.3,
+   "got": "24 MB · 0.5 MB/s",
+   "t": 12.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 50,
+   "fed": 24.8,
+   "got": "25 MB",
+   "t": 13.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 51,
+   "fed": 25.4,
+   "got": "25 MB · 0.5 MB/s",
+   "t": 14.35,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 52,
+   "fed": 25.8,
+   "got": "26 MB · 0.5 MB/s",
+   "t": 15.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 53,
+   "fed": 26.4,
+   "got": "26 MB",
+   "t": 16.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 54,
+   "fed": 26.9,
+   "got": "27 MB · 0.5 MB/s",
+   "t": 17.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 55,
+   "fed": 27.4,
+   "got": "27 MB · 0.5 MB/s",
+   "t": 18.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 56,
+   "fed": 27.9,
+   "got": "28 MB · 0.5 MB/s",
+   "t": 19.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 57,
+   "fed": 28.4,
+   "got": "28 MB · 0.5 MB/s",
+   "t": 20.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 58,
+   "fed": 28.9,
+   "got": "29 MB",
+   "t": 21.05,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 59,
+   "fed": 29.4,
+   "got": "29 MB · 0.5 MB/s",
+   "t": 21.77,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 60,
+   "fed": 29.9,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 22.77,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 61,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 62,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 24.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 63,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 25.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 64,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 26.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 65,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 27.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 66,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 28.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 67,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 29.2,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 68,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 69,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 70,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 71,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 72,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  }
+ ]
+}

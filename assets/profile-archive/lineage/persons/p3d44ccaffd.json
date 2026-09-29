@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "recorded",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "9 FamilySearch sources (harvested 2026-09-18)",
   "class": "recorded"
  },
  "research": {
   "status": "corrected-attested",
-  "basis": "per-person source counts not yet harvested",
+  "basis": "9 attached FamilySearch sources (harvested 2026-09-18)",
   "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather."
  },
  "publication": {
@@ -63,7 +63,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/KWCL-VJ6",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 9,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

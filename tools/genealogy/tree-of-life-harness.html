@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-reg="bee">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>austras koks — tree of life prototype</title>
+<!-- Dev harness, NOT an estate surface: it lives outside surfaces/ on purpose.
+     Every person on this page is SYNTHETIC (tools/genealogy/synthetic-lines.mjs).
+     The raw model is built in the page, privatized, and validated as public
+     before anything is drawn — the same law a real spouse line will pass. -->
+<link rel="stylesheet" href="../../surfaces/tree-of-life.css">
+<link rel="stylesheet" href="../../surfaces/person-panel.css">
+<style>
+  body { margin: 0; background: var(--tol-bg); color: var(--tol-ink); font: 16px/1.45 var(--tol-face); }
+  main { max-width: 1180px; margin: 0 auto; padding: 18px 18px 48px; }
+  h1 { font-size: 28px; line-height: 1.1; margin: 0 0 6px; font-weight: 600; }
+  .lede { color: var(--tol-mut); margin: 0 0 18px; max-width: 60ch; }
+  .synthetic { display: flex; gap: 12px; align-items: center; min-height: 44px; padding: 6px 18px; margin: 0 0 18px;
+    border: 1.5px dashed var(--tol-guard); border-radius: 16px; background: var(--tol-guard-wash); color: var(--tol-guard); font-weight: 600; font-size: 14px; }
+  .regs { display: inline-flex; gap: 6px; padding: 6px; background: var(--tol-well); border-radius: 999px; margin: 0 0 18px; }
+  .regs button { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: none; color: var(--tol-mut); font: inherit; font-size: 14px; cursor: pointer; }
+  .regs button[aria-pressed="true"] { background: var(--tol-ink); color: var(--tol-bg); font-weight: 600; }
+  :root[data-reg="raver"] .regs button[aria-pressed="true"] { background: var(--tol-primary); color: var(--tol-on-primary); }
+  :root[data-reg="cypherpunk"] .regs button[aria-pressed="true"] { background: var(--tol-ai); color: var(--tol-bg); }
+  .grid { display: grid; gap: 24px; }
+  @media (min-width: 980px) { .grid { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; } }
+  .receipt { display: none; font: 13px/1.5 var(--tol-mono); color: var(--tol-mut); white-space: pre-wrap; border-top: 1px dashed var(--tol-line); padding-top: 12px; margin-top: 18px; }
+  :root[data-reg="cypherpunk"] .receipt { display: block; }
+  /* the person panel's own variables, mapped onto skaists (no gold: honey is b only) */
+  #panel { --bg: var(--tol-bg); --panel: var(--tol-card); --well: var(--tol-well); --ink: var(--tol-ink); --dim: var(--tol-mut);
+    --faint: var(--tol-dim); --line: var(--tol-line); --cyan: var(--tol-sov); --gold: var(--tol-sov-strong); --violet: var(--tol-sov);
+    --rose: var(--tol-guard); --info: var(--tol-ai); --verified: var(--tol-life);
+    background: var(--tol-card); border: 1px solid var(--tol-line); border-radius: 18px; padding: 12px; font-size: 14px; }
+  #panel:empty { display: none; }
+</style>
+</head>
+<body>
+<main class="tol">
+  <h1>austras koks</h1>
+  <p class="lede">the tree of life for the family archive. choose a line, touch a branch to climb it, touch a person to read their story. back takes you to exactly where you were.</p>
+  <div class="synthetic" role="note"><span class="tol-lock" aria-hidden="true"></span><span>a made up family for trying the tree. every name on this page is invented.</span></div>
+  <div class="regs" role="group" aria-label="reading">
+    <button type="button" data-reg="bee" aria-pressed="true">new bee</button>
+    <button type="button" data-reg="raver" aria-pressed="false">raver</button>
+    <button type="button" data-reg="cypherpunk" aria-pressed="false">cypherpunk</button>
+  </div>
+  <div class="grid">
+    <div id="tree"></div>
+    <div id="panel"></div>
+  </div>
+  <div class="receipt" id="receipt"></div>
+</main>
+<script type="module">
+import { privatize, validate } from './model.mjs';
+import { syntheticLines } from './synthetic-lines.mjs';
+import { buildArchive } from '../../surfaces/person-panel-corpus.mjs';
+import { mountPersonPanel } from '../../surfaces/person-panel.mjs';
+import { mountTreeOfLife } from '../../surfaces/tree-of-life.mjs';
+
+const raw = syntheticLines();
+const corpus = privatize(raw);
+const problems = validate(corpus, { public: true });
+const receipt = document.getElementById('receipt');
+if (problems.length) {
+  // refuse to draw a corpus that fails the public law
+  document.getElementById('tree').textContent = 'this corpus failed the public check, so nothing is drawn.';
+  receipt.textContent = problems.join('\n');
+  throw new Error('public validation failed');
+}
+receipt.textContent = [
+  'validate(privatize(raw), {public:true}) → [] (0 problems)',
+  'raw roots (private, not shipped): ' + Object.keys(raw.roots).join(', '),
+  ...corpus.lines.map((l) => `lines.${l.key}: label "${l.label}" · root ${l.root} (stub) · bridge ${l.bridge} · entries ${l.entries.join(', ')}`),
+  `living stubs ${corpus.meta.livingStubs} · living dropped ${corpus.meta.livingRedacted}`,
+].join('\n');
+
+const archive = buildArchive({ corpus });
+let panel = null, tree = null;
+tree = mountTreeOfLife(document.getElementById('tree'), corpus, {
+  openPerson(id) {
+    const key = tree ? tree.state().l : new URLSearchParams(location.hash.slice(1)).get("l");
+    const line = corpus.lines.find((l) => l.key === key) || corpus.lines[0];
+    if (!panel) panel = mountPersonPanel(document.getElementById('panel'), archive, { root: line.root });
+    else panel.setRoot(line.root);
+    document.getElementById('panel').hidden = false;
+    panel.openPerson(id);
+  },
+  closePerson() { document.getElementById('panel').hidden = true; },
+});
+
+for (const b of document.querySelectorAll('.regs button'))
+  b.addEventListener('click', () => {
+    document.documentElement.dataset.reg = b.dataset.reg;
+    for (const o of document.querySelectorAll('.regs button')) o.setAttribute('aria-pressed', String(o === b));
+  });
+window.__tree = tree;
+</script>
+</body>
+</html>

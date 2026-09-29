@@ -1,0 +1,56 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped91306457",
+ "bnr": "bnr://skaists.dev/blood/ped91306457",
+ "identity": {
+  "name": "Sarah Polycate",
+  "lifespan": "–1764",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MSRK-7KL"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "sourced",
+  "basis": "6 FamilySearch sources (harvested 2026-09-18)",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "6 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p806dfa5bd4",
+    "name": "Hannah Brandley"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MSRK-7KL",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 6,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

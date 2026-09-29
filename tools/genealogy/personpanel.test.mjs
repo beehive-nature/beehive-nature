@@ -252,14 +252,14 @@ test('C4 married cousins: Samuel ⚭ Miriam — blood AND affinity coexist via J
 });
 
 test('C5 ghost frontier: counts only, total locked at the published number, no raw ghost ids in views', () => {
-  assert.equal(archive.frontierTotal(), 1959);
+  assert.equal(archive.frontierTotal(), 1696);
   /* someone demonstrably on the founder line holds ghost parents */
   const ghostHolders = [];
   for (const id of Object.keys(corpus.persons)) {
     const v = archive.getPerson(id);
     if (v && v.ghostParents > 0) ghostHolders.push(id);
   }
-  assert.ok(ghostHolders.length > 1000, 'the frontier is distributed coverage, not one broken branch');
+  assert.ok(ghostHolders.length > 800, 'the frontier is distributed coverage, not one broken branch'); /* 897 holders after the dangler repair published 263 holders’ parents */
   /* the raw unpublished parent-ref strings never enter any view */
   const ghostIds = new Set();
   for (const [c, ps] of Object.entries(corpus.edges)) {
@@ -347,7 +347,7 @@ test('E3 the panel module itself adds no URLs or ids of its own (contract law)',
 test('F1 era and support travel as separate fields and neither derives the other', () => {
   const v = archive.getPerson(APR);
   assert.equal(v.era, 'colonial');
-  assert.equal(v.support, 'unsourced-entry'); /* era≠support: a dated record with no harvested sources */
+  assert.equal(v.support, 'sourced'); /* era≠support holds: his era stays colonial while the 2026-09-18 harvest attaches 108 sources — support is earned by citations, era by dates */
   const sig = archive.getPerson('ovl-sigurd-snake-eye');
   assert.ok(sig.era !== sig.support);
 });
@@ -500,24 +500,27 @@ test('H7 hopArrow maps directions to arrows', () => {
 test('I1 discoveries() — every hook computed, locked to the pin corpus (founder root)', () => {
   const D = archive.discoveries(FOUNDER);
   assert.ok(Object.isFrozen(D));
-  assert.equal(D.personsCount, 10259);
+  assert.equal(D.personsCount, 11041);
   assert.deepEqual(D.spine, { gens: 42, terminus: 'p980ac0fa0b' });
   assert.equal(archive.getPerson(D.spine.terminus).name, 'Randver Radbardson');
-  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'medieval', 'colonial', 'recorded', 'unrecorded', 'recorded', 'unrecorded', 'recorded'] });
+  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'recorded', 'unrecorded', 'saga', 'unrecorded', 'recorded'] });
+  /* descent re-pinned 2026-09-22: the archive regenerated under bfb2867c7's
+   * signed BC/short-year reading, so BC lifespans once labelled recorded/
+   * medieval/colonial now read saga. Same person, same depth 143. */
   assert.equal(archive.getPerson(D.deepest.id).name, 'E Anna Tum DE LAGASH');
-  assert.deepEqual(D.collapse, { gens: 12, repeaters: 50, top: { id: 'p240410e903', n: 3 } });
+  assert.deepEqual(D.collapse, { gens: 12, repeaters: 93, top: { id: 'p240410e903', n: 3 } });
   assert.equal(archive.getPerson(D.collapse.top.id).name, 'Tacy Cooper');
   /* the first cousin couple in corpus order whose members are BOTH ancestors
    * of the standing root — the founder's own grandparents */
   assert.deepEqual(D.cousins.exemplar, { a: 'p3d44ccaffd', b: 'p7b1078c886' });
   assert.equal(archive.getPerson(D.cousins.exemplar.a).name, 'Jack Benedum Sutphen');
-  assert.equal(D.cousins.count, 593);
+  assert.equal(D.cousins.count, 595); /* 593 → 595: two more cousin couples publishable from the walk-merge persons */
   assert.equal(D.cousins.bound, 16, 'the cousin count states its generation bound honestly');
   assert.equal(D.cycles.count, 44);
   assert.equal(archive.getPerson(D.cycles.exemplar).name, 'Lucius Munatius Plancus De Rome');
-  assert.equal(D.frontier.total, 1959);
+  assert.equal(D.frontier.total, 1696);
   assert.deepEqual(D.frontier.entrance, { stopId: 'pbcdbe03844', steps: 13, atFrontier: false }); /* the founder's father-line simply ends at depth 13 — no parents at all */
-  assert.deepEqual(D.ambiguousNames, { count: 281, topName: { name: 'margaret', holders: 16 } });
+  assert.deepEqual(D.ambiguousNames, { count: 337, topName: { name: 'margaret', holders: 16 } }); /* 281 → 337: the walk-merge persons add namesakes; margaret stays on top */
 });
 
 test('I2 pedigreeOccurrences — collapse measured, bounded, frozen', () => {
@@ -525,12 +528,12 @@ test('I2 pedigreeOccurrences — collapse measured, bounded, frozen', () => {
   assert.ok(Object.isFrozen(ped));
   let rep = 0;
   for (const k of Object.keys(ped.occurrences)) if (ped.occurrences[k] > 1) rep++;
-  assert.equal(rep, 50, '50 ancestors repeat in the founder-root 12-generation pedigree');
+  assert.equal(rep, 93, '93 ancestors repeat in the founder-root 12-generation pedigree'); /* 50 → 93: the walk-merge persons deepen known ancestry within 12 generations */
   assert.equal(ped.occurrences[JH[8]], 3, 'the 1700–1744 Joseph Hadlock occupies three slots');
   const apr = archive.pedigreeOccurrences(APR, 8);
   let repA = 0;
   for (const k of Object.keys(apr.occurrences)) if (apr.occurrences[k] > 1) repA++;
-  assert.equal(repA, 0, 'the Rockwood entrance pedigree holds no collapse within 8 generations');
+  assert.equal(repA, 6, 'the Rockwood entrance pedigree holds 6 repeaters within 8 generations'); /* 0 → 6: the walk-merge dangler repair PUBLISHED APR’s deeper ancestors, so his entrance pedigree now reaches collapse */
 });
 
 test('I3 nameShares / nameHolders — the shared-name discovery law', () => {
@@ -655,17 +658,17 @@ test('J4 discoveries are CONTEXTUAL — the same archive tells a different story
   const Da = archive.discoveries(APR);
   /* founder root: the whole medieval web */
   assert.equal(Df.deepest.depth, 143);
-  assert.equal(Df.tiers.total, 10097);
-  assert.deepEqual(Df.tiers.order, ['saga', 'medieval', 'colonial', 'unrecorded', 'recorded', 'living']);
-  assert.equal(Df.tiers.counts.saga, 3153, 'more saga-tier than recorded-tier — the thinning is countable');
+  assert.equal(Df.tiers.total, 10878);
+  assert.deepEqual(Df.tiers.order, ['saga', 'colonial', 'medieval', 'unrecorded', 'recorded', 'living']); /* colonial (2,645) overtook medieval (2,509) when the walk-merge persons published */
+  assert.equal(Df.tiers.counts.saga, 4327, 'more saga-tier than recorded-tier — the thinning is countable'); /* 3153 → 4325 on 2026-09-22: 1,172 BC/short-year lifespans relabelled under bfb2867c7; → 4327: two #218-repaired records whose restored dates read saga once the era is recomputed */
   /* Rockwood root: a small colonial world with its own frontier story */
-  assert.equal(Da.deepest.depth, 3);
-  assert.equal(Da.deepest.id, 'p92dc6be4f8');
-  assert.equal(archive.getPerson(Da.deepest.id).name, 'Samuel Rockwood I');
-  assert.deepEqual(Da.tiers, { total: 15, counts: { colonial: 15 }, order: ['colonial'] });
-  assert.equal(Da.cousins.exemplar, null, 'no cousin couple lives inside the Rockwood root’s family — the hook honestly hides');
-  assert.equal(Da.collapse.repeaters, 0);
-  assert.deepEqual(Da.frontier.entrance, { stopId: 'p92dc6be4f8', steps: 3, atFrontier: true });
+  assert.equal(Da.deepest.depth, 5); /* 3 → 5: the dangler repair published APR’s great-great-grandparent generation */
+  assert.equal(Da.deepest.id, 'p724450b41a');
+  assert.equal(archive.getPerson(Da.deepest.id).name, 'Benjamin Twitchell');
+  assert.deepEqual(Da.tiers, { total: 51, counts: { colonial: 51 }, order: ['colonial'] }); /* 15 → 51 colonial persons reachable from the Rockwood root */
+  assert.notEqual(Da.cousins.exemplar, null, 'cousin couples now live inside the Rockwood root’s family — the hook shows them'); /* the published deeper ancestry creates the first Rockwood-root cousin couples */
+  assert.equal(Da.collapse.repeaters, 6);
+  assert.deepEqual(Da.frontier.entrance, { stopId: 'p829996819f', steps: 5, atFrontier: false });
 });
 
 test('J5 descendant-side frontier — broader family renders ONLY from attributed archive data', () => {
