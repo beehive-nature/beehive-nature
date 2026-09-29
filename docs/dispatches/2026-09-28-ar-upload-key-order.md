@@ -106,9 +106,15 @@ live library check.
 
 ## Does it block #230?
 
-No. #230 does not ship this path. Its only upload is the in-page signer
-(`surfaces/ans104.js`), and two checks cover it:
-- it matches arbundles byte for byte, on a pinned fixture;
-- its three live items above verify with owner = Member-Key.
+No. #230 does not ship this path. Its only upload is the in-page signer,
+`surfaces/ans104.js` `sign()`. Those files arrive with #230 (branch
+`claude-LoVis/baigentic-vending-value-deck-d5885e`), not in this PR's tree. Two checks
+cover it:
+- it matches arbundles byte for byte on a pinned fixture: `e2e/ans104.test.mjs`, the
+  test "the page signer reproduces the reference library's item byte for byte"
+  compares `sign()` output with `FIXTURE` (id, length, sha256), which
+  `e2e/fixtures/ans104-arbundles.gen.mjs` re-derives from `createData` + `SolanaSigner`;
+- its three live items above verify with owner = Member-Key, by this PR's
+  `contracts/vending/tool/arweave-owner-audit.mjs` `verifyEd25519Item()`.
 
 #230 also deleted its own CLI copy of the defective upload.
