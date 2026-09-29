@@ -163,6 +163,22 @@ test('a renamed status trio fails: the file name is the badge name', async () =>
   assert.doesNotMatch(r.out, /^PASS /m, r.out);
 });
 
+test('evidence that parses to null cannot skip the derivation (independent review, 048f98c)', async () => {
+  refused(await probe(async ({ dir, doc, put, reseal }) => {
+    await reseal(Buffer.from('null\n'));
+    Object.assign(doc, { fronts: 9999, fronts_at_100: 9999, surfaces: 9999, message: '9999/9999 fronts 100% @7d6808d' });
+    await put(doc);
+    const { makeBadge } = createRequire(import.meta.url)('badge-maker');
+    await writeFile(join(dir, SVG), makeBadge({ label: doc.label, message: doc.message, color: doc.color, style: 'flat' }));
+  }), /evidence is not an array of rows[\s\S]*not re-derived from its evidence/);
+});
+
+test('an SVG with no status document beside it is refused, not ignored', async () => {
+  const r = await probe(({ dir }) => writeFile(join(dir, 'telemetry.svg'), '<svg>telemetry | none</svg>\n'));
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /^FAIL telemetry\.svg: no status document telemetry\.json beside it/m, r.out);
+});
+
 test('an SVG-only edit fails', async () => {
   refused(await probe(async ({ dir }) => {
     const s = await readFile(join(dir, SVG), 'utf8');

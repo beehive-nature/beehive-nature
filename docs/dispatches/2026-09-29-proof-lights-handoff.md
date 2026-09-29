@@ -6,15 +6,15 @@ Outgoing seat: Claude Code, `session_015NgLKhQoUyK4kxFMpWKbaz` ("Badge verificat
 
 | Item | State at handoff | Next action |
 |---|---|---|
-| **#250**: build-time badge renderer plus the first badge (base `main`) | Ready for review. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). Codex raised eight findings over four rounds (`ba35019`, `802b973`, `8303dd7`, `048f98c`), all fixed. The gate now refuses forged `renderer`/`law`, inherited badge names, non-canonical `measured_at`, all-clear rows with a failed kind, and renamed status files. A malformed document fails alone and never aborts the check. The probes pass 19/19. Aikido's two file-read flags were verified false positives and dismissed with reasons. | Independent review, then merge. |
+| **#250**: build-time badge renderer plus the first badge (base `main`) | Ready for review. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). Codex raised eight findings over four rounds, all fixed. Independent review: REQUEST_CHANGES at `048f98c`, because `null` evidence skipped the derivation. That is fixed at the root: a PASS requires the derivation to have run, and orphan files fail. The probes pass 21/21. | Independent review, then merge. |
 | **#253**: gate repair (base: #250's branch) | Folded into #250 and closed by that merge. Its dispatch and STATUS line travel with #250. | None. Review it as part of #250. |
-| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Ready for review. Merges cleanly into `main` on its own. Codex raised thirteen findings over three rounds (`cf3887a`, `6849dab`, `a0eeafd`). All were fixed, in `6849dab`, `a0eeafd` and `856a528`, and their threads resolved (dispatch `2026-09-29-codex-review-247.md`). A later Codex round may add more; handle them the same way. | Independent review, then merge. |
+| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Ready for review. Merges cleanly into `main` on its own. Codex raised 23 findings over six rounds, all fixed (last head `26707d9`); see `2026-09-29-codex-review-247.md`. Independent review: APPROVE at `2b0675e`. The two non-blocking points it raised are already fixed in `0fcc524`/`26707d9`. | Independent review, then merge. |
 | **CI-signing card** | **Not started.** Owner, scope and done-when are in `2026-09-27-proof-lights-gate-repair.md`, section "The CI-signing card". | Starts after #250 is on `main`. Needs the founder to generate the key pair and store the private key in a protected environment. |
 
 ## Landing order and the one known conflict
 
 - #250 and #247 are independent. Either can land first.
-- Both add a STATUS.md ledger line at the same anchor. Whichever lands second gets a text conflict in STATUS.md only. Resolve it with a **merge commit** that keeps both lines, newest first. No other file conflicts (simulated on 2026-09-29: main ← #250+#253 ← #247 at `2b0675e`).
+- Both add a STATUS.md ledger line at the same anchor. Whichever lands second gets a text conflict in STATUS.md only. Resolve it with a **merge commit** that keeps both lines, newest first. No other file conflicts (simulated on 2026-09-29: main ← #250+#253 ← #247 at `26707d9`).
 
 ## Independent review is required before `main`
 
@@ -22,6 +22,7 @@ Outgoing seat: Claude Code, `session_015NgLKhQoUyK4kxFMpWKbaz` ("Badge verificat
 - The authoring seat must not approve its own work.
 - Another agent may provide the review, but it must not be the seat that wrote the change.
 - The review should be recorded at a specific head sha. Merge only after the review approves, with CI green on that same head.
+- **Caveat (2026-09-29).** The first review was done by a fresh agent that wrote none of the code, but it ran under the authoring session's attribution (`session_015NgLKhQoUyK4kxFMpWKbaz`). It flagged this itself. The founder had directed that an agent may review and called this review independent, so it is used, and the caveat is recorded rather than hidden. Any follow-up review of later heads says the same.
 
 ## Lessons carried forward (founder correction, 2026-09-29)
 

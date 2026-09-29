@@ -3,10 +3,11 @@
 // The badge is a projection of a status document that a check already produced;
 // nothing here measures anything. Shields' own renderer (the `badge-maker`
 // package, the same code behind img.shields.io) runs offline in CI and writes
-// a static SVG next to the status document. Surfaces and the README load that
-// SVG same-origin, so the estate's rider law (design-acceptance I1: a
-// cross-origin load at page-open is a FAIL) holds, and a page that says
-// TELEMETRY NONE does not phone Cloudflare to say so.
+// a static SVG next to the status document. Today only the README shows it,
+// from the repository itself; a surface that shows it later loads it
+// same-origin, so the estate's rider law (design-acceptance I1: a cross-origin
+// load at page-open is a FAIL) holds, and a page that says TELEMETRY NONE does
+// not phone Cloudflare to say so.
 //
 // THE GATE (`--check`) re-derives, it does not re-read. Per document, in order,
 // every failure collected and printed — a per-badge PASS means zero failures:
@@ -184,7 +185,7 @@ async function verify(doc, evidencePath, svgPath) {
   let pages = null;
   if (revOk) { try { pages = manifestAt(doc.revision, B.ci_step); } catch (e) { f.push(`manifest: ${e.message}`); } }
   // 4 EVIDENCE
-  let rows = null;
+  let rows = null, parsed = false, derived = false;
   let bytes = null;
   try { bytes = await readFile(evidencePath); } catch { f.push(`evidence ${relative(ROOT, evidencePath)} is missing or unreadable`); }
   if (bytes) {
@@ -193,13 +194,16 @@ async function verify(doc, evidencePath, svgPath) {
     const sd = doc.source_digest;
     if (!sd || sd.alg !== 'sha3-256' || !SHA3.test(sd.value || '') || sd.note !== DIGEST_NOTE || Object.keys(sd).length !== 3) f.push('source_digest is not {alg:"sha3-256", value, note}');
     else if (sd.value !== d) f.push(`source digest mismatch (sha3-256 ${d.slice(0, 7)} != ${sd.value.slice(0, 7)})`);
-    try { rows = JSON.parse(bytes.toString('utf8')); } catch { f.push('evidence is not JSON'); }
-    if (rows !== null) { const e = B.rowErrors(rows); if (e.length) { f.push(...e.slice(0, 6).map(x => 'evidence ' + x)); rows = null; } else if (!rows.length) { f.push('evidence has no rows'); rows = null; } }
+    try { rows = JSON.parse(bytes.toString('utf8')); parsed = true; } catch { f.push('evidence is not JSON'); }
+    // every parsed value goes through the row law, JSON null included: null is not "no evidence to check"
+    if (parsed) { const e = B.rowErrors(rows); if (e.length) { f.push(...e.slice(0, 6).map(x => 'evidence ' + x)); rows = null; } else if (!rows.length) { f.push('evidence has no rows'); rows = null; } }
   }
   // 5 COVERAGE
   if (rows && pages) f.push(...B.coverageErrors(rows, pages).map(x => 'coverage: ' + x));
   // 6 DERIVATION
-  if (rows && revOk) for (const [k, v] of Object.entries(B.derive(rows, doc.revision))) if (!same(doc[k], v)) f.push(`${k} is ${JSON.stringify(doc[k])}, evidence derives ${JSON.stringify(v)}`);
+  if (rows && revOk) { derived = true; for (const [k, v] of Object.entries(B.derive(rows, doc.revision))) if (!same(doc[k], v)) f.push(`${k} is ${JSON.stringify(doc[k])}, evidence derives ${JSON.stringify(v)}`); }
+  // fail closed: a PASS requires that coverage and derivation actually ran, whatever path skipped them
+  if (!derived || !pages) f.push('the document was not re-derived from its evidence (fails closed)');
   // 7 PROVENANCE
   const m = doc.measurement;
   if (!m || typeof m !== 'object') f.push('measurement provenance missing');
@@ -224,6 +228,10 @@ if (mode === '--check') {
   let fail = 0, n = 0;
   let files = [];
   try { files = (await readdir(STATUS_DIR)).filter(f => f.endsWith('.json') && !f.endsWith('.source.json')).sort(); } catch {}   // *.source.json is evidence, not a document
+  // an SVG or evidence file with no status document beside it is an unchecked badge: refuse it
+  let all = [];
+  try { all = await readdir(STATUS_DIR); } catch {}
+  const orphans = all.filter(x => (x.endsWith('.svg') || x.endsWith('.source.json')) && !files.includes(x.replace(/(\.source\.json|\.svg)$/, '.json')));
   if (!files.length) {
     // fail closed: a check that found nothing to check is not a pass (estate law, cf. secret-scan tree mode)
     console.error(`proof lights: REFUSING — no status documents under ${relative(ROOT, STATUS_DIR) || STATUS_DIR}. A check over zero badges is not a pass.`);
@@ -245,8 +253,9 @@ if (mode === '--check') {
     if (why.length) { fail++; console.log(`FAIL ${f}: ${head}\n  - ${why.join('\n  - ')}`); }
     else console.log(`PASS ${f}: ${head} · re-derived from ${doc.fronts} evidence rows at ${doc.revision.slice(0, 7)} · source blob + sha3-256 match · svg == render(json) · origin ${doc.measurement.origin} (revision asserted by the measurer, not attested) · unsigned (stated)`);
   }
-  console.log(`proof lights: ${n - fail}/${n} badges re-derive from their evidence and render exactly`);
-  process.exit(fail ? 1 : 0);
+  for (const o of orphans) console.log(`FAIL ${o}: no status document ${o.replace(/(\.source\.json|\.svg)$/, '.json')} beside it — an unchecked badge`);
+  console.log(`proof lights: ${n - fail}/${n} badges re-derive from their evidence and render exactly${orphans.length ? `; ${orphans.length} orphan file(s) refused` : ''}`);
+  process.exit(fail || orphans.length ? 1 : 0);
 }
 
 const B = mode === 'meter' ? BADGES['skaists-meter'] : undefined;

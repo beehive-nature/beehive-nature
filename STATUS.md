@@ -39,7 +39,9 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   The probe assertions are scoped to the forged badge. Each new probe fails against the
   previous gate. A malformed or throwing document is now its own FAIL, and the check
   continues past it. An all-clear row must have every kind at 100, and a status file
-  must carry its document's name. `node --test e2e/render-badges.test.mjs` → 19/19. The SHA-1 remark
+  must carry its document's name. The independent review at `048f98c` found that `null`
+  evidence skipped the derivation. A PASS now requires the derivation to have run, and
+  orphan SVG and evidence files fail. `node --test e2e/render-badges.test.mjs` → 21/21. The SHA-1 remark
   in the gate-repair dispatch is marked UNVERIFIED. Aikido's two file-read flags are
   verified false positives: every path comes from `readdir` of the operator's `--dir`.
   Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.

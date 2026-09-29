@@ -97,9 +97,31 @@ Receipts:
 - `node --test e2e/render-badges.test.mjs` → 19/19. The two new probes fail against the previous gate (0 pass, 2 fail).
 - `render-badges.mjs --check` → 1/1.
 
+## Independent review at `048f98c` (2026-09-29): REQUEST_CHANGES, fixed
+
+A fresh agent that wrote none of this reviewed #250 at `048f98c`. It runs under the authoring session's attribution, so its independence is recorded here as a caveat, not claimed outright.
+
+**Blocking finding: evidence that parses to `null` skipped every derivation check.**
+- `rows = JSON.parse('null')` left `rows === null`, so `rowErrors`, coverage and derivation all silently skipped.
+- The reviewer resealed `null` evidence with 9999/9999 counts and a re-rendered SVG, and got a PASS.
+- **Root fix:**
+  - Every parsed value now goes through the row law, `null` included.
+  - A PASS now requires that coverage and derivation actually ran. Any path that skips them fails with "not re-derived from its evidence (fails closed)".
+  - Because a PASS now implies the derivation compared `fronts`, the PASS line's row count equals the derived count.
+
+**Non-blocking findings taken:**
+- An SVG or evidence file with no status document beside it is now a FAIL. Before, a stray `telemetry.svg` went unchecked.
+- The header comment no longer says surfaces load the SVG. Today only the README shows it; `docs/dispatches/2026-09-27-proof-lights.md` law 3 is corrected the same way.
+- The limits below now state that fabricated evidence for a real revision still passes.
+
+**Receipts:**
+- `node --test e2e/render-badges.test.mjs` → 21/21. The two new probes, `null` evidence and an orphan SVG, fail against the previous gate (0 pass, 2 fail).
+- `render-badges.mjs --check` → 1/1. `lint-ci-shape.mjs` → 92/92.
+
 ## What it still does not prove
 
 - **A local measurement's revision is asserted, not attested.** If a forger relabels evidence from an older revision as a newer commit, and rewrites the message and SVG to match, the check still passes whenever the page list did not change in between. The check prints "revision asserted by the measurer, not attested" on every PASS. Closing this gap needs origin `ci`, with the run id and attempt bound to the revision, signed by the CI attestation key.
+- **The evidence content is the measurer's assertion.** Nothing re-measures it. Fully fabricated but well-formed evidence for a real revision, with the document derived from it, passes. The gate proves only that the badge follows from the committed evidence.
 - **Not live status.** The badge is a historical measurement at its revision. A static SVG cannot turn grey on its own; a badge that claims current health needs a freshness evaluator.
 - **No signature yet.** Dedicated CI signing is the next card. It uses a CI-attestation key (never a wallet or personal key), and its public key is pinned by reviewed trust configuration. The signing step never runs untrusted PR content with the key available.
 
