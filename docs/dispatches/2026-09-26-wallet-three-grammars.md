@@ -277,3 +277,111 @@ The founder's bar: `F1 PASS · F2 PASS · color-free audit PASS · wallet gates 
 - Dashes and capitals in keyed runtime copy reached only after an action: the voucher panel's `wl.vc.*` ("the memo IS the binding —", "A · Vaulta — gasless").
 - The keyed headings' casing in the corpus. Bee no longer shows those headings at rest; cypherpunk still does.
 - The stale "Phase A" label in 28 tongues.
+
+## 13 · follow-up 1: the wallet's suites run in CI, in all three registers (2026-09-27)
+
+**The finding was larger than the follow-up said.** The merge review of #237 noted that the six pipeline batteries were pinned to cypherpunk, so CI "no longer" exercised the vault, signer and fund flows in bee or raver. In fact CI had never run any of them. `tests.yml` named none of the six batteries, nor `e2e/wallet-registers.mjs`, and no glob picked them up. Every wallet receipt in this dispatch was a hand run, and so was the "CI 12/12" on #237's merge head: that covered the other suites, not these. Nothing in the wallet was ever gated remotely.
+
+**What changed:**
+- **The pin.** `e2e/wallet-register-pin.mjs` is one shared pin, replacing five copies (and adding the matrix battery, which had no pin and silently ran in bee). `WALLET_REG` selects the register, and cypherpunk is the default, so a plain run behaves as before. `bee` and `raver` open the reader's own "everything" view: the bee row or raver glyph that the page remembers in `sessionStorage['wl.view']`. Notes stay folded, as a reader has them.
+- **The fund battery, two register-aware fixes.** Neither is loosened.
+  - "banner names environment": in bee and raver the environment is engineering, folded one tap away (§12b). The check now taps the section's toggle, then requires the same text.
+  - Section F's dress and fold laws are about one register each (bee's home fold, cypherpunk's pipeline fold). Their contexts now open through `newContextOwnRegister` and set that register explicitly, so the pin no longer overrides them.
+- **CI.** A new `wallet` job (30-minute cap, beside `node`, which already runs close to its 20-minute cap) runs the six batteries once per register, then the three-grammars gate. Each step runs all six and fails at the end.
+
+**Receipts (local, each read on its own line):**
+
+| battery | cypherpunk | new bee | raver |
+|---|---|---|---|
+| fund | 94/94 | 94/94 | 94/94 |
+| vault | 35/35 | 35/35 | 35/35 |
+| matrix | 11/11 | 11/11 | 11/11 |
+| arweave | 22/22 | 22/22 | 22/22 |
+| signer | 105/105 | 105/105 | 105/105 |
+| adapter | 28/28 | 28/28 | 28/28 |
+
+`lint-ci-shape`: 95/95 suite steps guarded.
+
+## 14 · follow-up 2: the voucher panel reads as words (2026-09-27)
+
+This is the copy a voucher lookup opens: the `wl.vc.*` keys and the runtime strings the voucher panel writes. It had dashes used as punctuation and capitals used as shouting ("with this EXACT memo (the memo IS the binding —", "A · Vaulta — gasless", "itemized — every receipt, every line", "no metered charges yet — top up…", "the oracle is unreachable — try again").
+
+- **Keys, 5 × 29 cells.** `memo1`, `usdc.nomemo`, `itemized`, `label.a` and `label.usdc`.
+  - A dash becomes a colon (`：` in zh and ja, French's spaced ` : `), or `·` in the two rail labels.
+  - A shouted word is lowercased in every tongue: ЭТОЙ ТОЧНОЙ, GENAUEN, IST, EXACTE, EKSAKTE, ÄR and so on.
+  - The memo warning keeps its weight through the bold "no memo, no credit, money lost", not through capitals.
+  - Four cells were rewritten by hand: tt (its "is" dash, rephrased), cs and fi (their grammar was broken), and hu (a typo, "memóMaga").
+  - Cells that were untranslated English follow the new English.
+- **Runtime strings in `wallet.html`.** The rate line, the empty receipts line, both "unreachable" messages, and the meter-key placeholder.
+- **Left as data:** a lone "—" that page logic sets for an empty value, and the "—" number placeholder in `wl.vc.usdc.rate`, which the oracle's rate replaces before the panel is ever shown.
+- **The gate (§4e).** After a real lookup against the fixture oracle, the panel's visible text must carry no dash and no capital-as-shout, in all three registers at 390 and 1280. A lone "—" empty value and the oracle's own values (addresses, memo, rate reference, source) are excepted.
+  - Run against main's old copy, the check fails on exactly the strings above, so it is not vacuous.
+  - On this branch it passes: wallet-registers 111/111.
+
+**Still open and named:**
+- The voucher's heading and cypherpunk intro (`wl.vh2` "THE VOUCHER", "DERIVED") belong to the next follow-up, heading capitals.
+- These cells are still untranslated English: `wl.vc.memo1` in fr, zh, th, lv, hi and tr; `wl.vc.itemized` in gd, tt and sa; `wl.vc.label.a` in gd, tt and sa; `wl.vc.usdc.nomemo` in gd, lv, tt and sa.
+- Translation defects outside punctuation remain: th nomemo "เคครดิต", tr "balı adresiniz", fi nomemo "tällää", hu nomemo "jóváírást jóváír".
+
+## 15 · follow-up 3: the keyed headings read as words (2026-09-27)
+
+The four keyed wallet headings still shouted in capitals, in English and in almost every tongue: `wl.vh2` ("THE VOUCHER: …"), `wl.insc.h2` ("INSCRIPTIONS: …"), `wl.h.summary` ("SUMMARY") and `wl.h.outbox` ("…persist here BEFORE they submit"). New bee has read its own plain headings since §12c. These keyed ones are what cypherpunk, and bee's engineering one tap deep, still show.
+
+- **4 keys, 73 cells changed.** Every shouted word is lowercased. Scripts without letter case needed nothing.
+  - German keeps its noun capitals: der Gutschein, Inschriften, Zusammenfassung, Bytes.
+  - Turkish gets its dotless ı (yazıtlar).
+  - The HTML fallbacks follow the English.
+- **Gate §4g (new).** No visible section heading shouts, in cypherpunk (every keyed heading open) or in bee's "everything" view. Tickers are excepted, and so are `SPEC-…` identifiers, which are the canonical names of spec documents (peer's `SPEC-PEER-FUNNEL-1`).
+  - Run against main, it fails on all four headings (`INSCRIPTIONS`, `THE VOUCHER`, `BEFORE`, `SUMMARY`), so it is not vacuous. (Corrected in §16: this line first said "exactly `INSCRIPTIONS` and `THE VOUCHER`".)
+  - On this branch: wallet-registers 112/112.
+- **Left as they are, and why:** the receipt ladder's stage labels (`wl.ld.*`: BUILD, SIGN, PERSIST, SUBMIT, CONFIRM, SUBMITTED, CONFIRMED) and cypherpunk's own intro paragraphs (`wl.reg.voucher.cypher` "DERIVED", `wl.reg.connect.cypher` "AND"). In cypherpunk, capitals are a signal channel (a state, a verb of the pipeline). They are not decoration and not headings, so this follow-up does not touch them.
+
+**Carried from the #252 review (non-blocking, open and named):**
+- Three more translation defects in voucher copy: he "הממוא"/"הממואר" (memo misspelt, inconsistently), nb "denne eksakte memoet" (should be "dette"), de "auf dieser Rails".
+- §14's untranslated list should also name `wl.vc.label.usdc` in gd, tt and sa.
+- §4e's "fails on exactly those strings" holds for the strings visible in the panel. The empty-receipts line (inside a closed note), both "unreachable" messages and the placeholder are correct by inspection, not measured.
+- fr uses a plain space before ":", not a narrow no-break space. This is cosmetic.
+
+## 16 · follow-up 4: the bPay law line follows its English (2026-09-27)
+
+The English of `wl.bpay.law` changed to "the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend". All 28 other tongues still opened with "Phase A:" (Фаза A, Fase A, 阶段 A, A fázis …), a label the page no longer shows. A reader in any tongue but English was told about a phase, not about the chooser.
+
+- **28 cells redrafted** to follow the current English: the choice (who can get this) comes first, the figures come from a live keyless quote, and the panel cannot spend.
+- **Defects fixed in the same cells:**
+  - fi had a stray underscore ("verkko_tarjouksesta").
+  - nb had the wrong gender ("en … nettverkstilbud") and the spelling "nøkkeløs".
+  - tt rendered "live" as a word that does not mean live, and put "only" in the wrong place.
+  - gd used "panuel"; it now uses "panail", the corpus's most common form.
+  - th rendered "live" as จริง ("real"); it now says เรียลไทม์.
+  - Smaller improvements in the same cells: ur spelling (لائیو), ru/uk now name the price quote (цены/ціни), zh 显示 instead of 渲染 ("render" in the graphics sense), de "zeigt nur an".
+- **Gate §4h (new).** It is a corpus check in `wallet-registers`. No `wl.bpay.law` cell may carry a standalone capital A, Latin or Cyrillic (the phase letter, in every script), and no cell may fall back to the English. Run against main it fails in all 28 tongues, so it is not vacuous.
+- **Corpus cache key** `lang-corpus.json?v=28 → v=29` in `surfaces/lang.js`. #252 and #254 changed the corpus without bumping it, so this bump also carries their cells to returning readers.
+
+**Carried from the #254 review (non-blocking, open and named):**
+- §15 misreported the main run as failing on "exactly" two headings. Measured, it fails on all four; §15 is corrected above. #254's commit message carries the same understatement and stays as history.
+- §4g only sees ASCII capitals, and only in English. A Cyrillic or accented shout in another tongue would pass it; the reviewer's corpus scan covers that gap for now.
+- lv `wl.h.summary` "kopsavējums" may be a mistranslation. The usual Latvian word is "kopsavilkums". It was unchanged apart from casing, and it wants a native check.
+- fr still uses a plain space before ":" (cosmetic, already named in §15).
+
+**Named by the #255 review (non-blocking, open):**
+- An unrelated cs cell elsewhere reads "Pole z živého ABI registru"; Czech wants "ze živého". This follow-up does not touch it.
+- da "levende" and fi "elävä" read as "living" rather than "live". The same choice runs through the rest of the corpus.
+- hi चुनाव, fa انتخاب, tr seçim, tt сайлау and hu választás can also mean "election". In context they are fine.
+- §4h catches a Latin or Cyrillic capital A and an exact English fallback. It would miss a phase label written another way (阶段一, a bare "Phase").
+
+## 17 · follow-up 5: three ETERNAL fixes from the #248 review (2026-09-27)
+
+The Codex review of #248 found three defects in ETERNAL code that #241 shipped. They were outside #248's scope and were queued here. Each fix comes with a test that fails on main and passes on this branch.
+
+- **`surfaces/blight/profile.html`: a failed second scan no longer shows the first address's holdings.** `visit()` set the new shorthand and then returned early when every RPC host refused. That left the previous address's chips, wall, picture and counters under the new name, and the three fronts read all of these. The page now resets them to its first-paint state before every scan.
+  - Test: `blight-profile-eternal`, "a second address whose scan fails never inherits…".
+- **`surfaces/bqueenbee-live.html`: each reply is paired with its own question.** A non-ASCII question answers asynchronously, once the tongue corpus is read. If a newer question was asked before that answer landed, the fronts took "the last reply after the last question", which was the late one, and showed it as the newer question's answer.
+  - Every reply now carries its question's id (`data-qid`), and the fronts look it up by that id.
+  - Test: `bqueenbee-live-eternal`, "a reply is paired with its own question…". On main the card showed the Russian hemp answer under "Who are you?".
+  - Left as is: the chat itself still appends a late reply at the bottom. Only the fronts' pairing was wrong.
+- **`surfaces/bset.html`: every cypherpunk record link announces its new tab.** These are the YouTube links. They now use the same screen-reader notice (`et.bset.newtab`) as the rest of the page's external links.
+  - Test: `bset-eternal`, cypherpunk.
+
+**Carried from the #255 review (non-blocking, open and named):**
+- The `_meta.drafted` note for the bPay law line says "four cells had their own defects fixed". With the th sense fix, it is five.
+- §16 does not name nb "kun" → "bare" among the smaller improvements.

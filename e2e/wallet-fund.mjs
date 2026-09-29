@@ -10,6 +10,7 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { chromium } from 'playwright';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -94,19 +95,8 @@ const assertUrl = (href, host, asset) => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
-// THE THREE GRAMMARS (2026-09-26): new bee and raver open the wallet one task
-// at a time; this battery drives the PIPELINE, so its readers sit in
-// cypherpunk, where every section is open at once. A register never changes
-// what a person may do: e2e/wallet-registers.mjs proves every section is one
-// tap away in bee and raver, and the controls under test are the same nodes.
-{
-  const newContext = browser.newContext.bind(browser);
-  browser.newContext = async (opts) => {
-    const c = await newContext(opts);
-    await c.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
-    return c;
-  };
-}
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 try {
   /* ── A · key UNSET (file as committed) ─────────────────────────────── */
   console.log('A · key unset (as committed):');
@@ -123,7 +113,11 @@ try {
     ok('launch href=#', (await go.getAttribute('href')) === '#');
     const banner = await page.locator('#fund-stat').innerText();
     ok('unconfigured banner visible', banner.includes('funding not configured'));
-    ok('banner names environment (SANDBOX default)', banner.includes('sandbox'));
+    // bee and raver fold the engineering (key names, environment, host) one tap
+    // away, behind the section's own toggle: the reader's tap, then the same text
+    if (REG !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); }
+    const bannerFull = await page.locator('#fund-stat').innerText();
+    ok('banner names environment (SANDBOX default)' + (REG === 'cypherpunk' ? '' : ', one tap away in ' + REG), bannerFull.includes('sandbox'));
     ok('panel body revealed', !(await page.locator('#fund-js').evaluate(el => el.hidden)));
     ok('asset options USDC_BASE + USDC_ETHEREUM',
       JSON.stringify(await page.locator('#fund-asset option').evaluateAll(os => os.map(o => o.value))) ===
@@ -270,9 +264,9 @@ try {
   /* ── F · design acceptance (mobile viewport first, per standing order) ── */
   console.log('F · design acceptance (390px phone):');
   {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    // the dress checks below are new bee's (the pin above set cypherpunk; this
-    // later init script wins)
+    // the dress checks below are new bee's, and the fold law after them is
+    // cypherpunk's: each context names its own register, whatever WALLET_REG is
+    const ctx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
     await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
@@ -305,7 +299,8 @@ try {
     await page.evaluate(() => { localStorage.setItem('bregister', 'cypherpunk'); });
     await ctx.clearCookies();
     await page.close();
-    const cyCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const cyCtx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
+    await cyCtx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
     const cyPage = await cyCtx.newPage();
     await cyPage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await cyPage.waitForTimeout(600);

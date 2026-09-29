@@ -118,15 +118,15 @@ const arrival = page => page.evaluate(() => {
       return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
     },
   });
-  ok('bee reads in SERIF titles over SANS body', /Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-  ok('bee corners are SOFT (20px cards, 12px controls)', seen.bee.cardRadius === '20px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
+  ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
+  ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
   ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
   ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
   ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
   ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
   ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
   ok('cypherpunk is MONO top to bottom', /mono/i.test(seen.cypherpunk.bodyFont) && /mono/i.test(seen.cypherpunk.h1Font), seen.cypherpunk.bodyFont.split(',')[0]);
-  ok('cypherpunk corners are CUT (4px cards, 4px controls)', seen.cypherpunk.cardRadius === '4px' && seen.cypherpunk.btnRadius === '4px', seen.cypherpunk.cardRadius);
+  ok('cypherpunk corners are CUT (6px radius-sm — the sheet)', seen.cypherpunk.cardRadius === '6px' && seen.cypherpunk.btnRadius === '6px', seen.cypherpunk.cardRadius);
   ok('cypherpunk action is ai teal (rgb(69, 194, 220))', seen.cypherpunk.btnColor === 'rgb(69, 194, 220)', seen.cypherpunk.btnColor);
   await ctx.close();
 }
@@ -768,6 +768,15 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
       if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
       r[part] = await seen(page, '#' + id);
+      // the voucher panel a lookup opens, read as words: no dash, no capitals-as-shout
+      // (its heading is the keyed-heading casing follow-up, measured elsewhere)
+      // (a lone "—" is the page's empty-value placeholder, which is data, not punctuation)
+      if (part === 'voucher') r.voucherCopy = await page.evaluate(() => {
+        const ORACLE = '#vc-u-ref,#vc-a-dest,#vc-a-memo,#vc-u-dest,#vc-src,#vc-balance';   // values the oracle returns: data, not the wallet's copy
+        const s = document.getElementById('vc-panel'), w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); const out = []; let n;
+        while ((n = w.nextNode())) { const p = n.parentElement, t = n.textContent.trim(); if (!t || t === '—' || !p.getClientRects().length || p.closest('details:not([open])') || p.closest(ORACLE)) continue; out.push(t); }
+        return out;
+      });
       if (reg !== 'cypherpunk') { await page.click(`#${id} .wl-more`); await page.waitForTimeout(150); r[part + 'Tap'] = await seen(page, '#' + id); await page.click(`#${id} .wl-more`); await page.waitForTimeout(100); }
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
@@ -792,6 +801,15 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
+  // tickers and names are words, not shouting
+  const VC_TICKERS = new Set(['USDC', 'ETH', 'ANT', 'HIVE', 'HBD', 'BTC', 'BNR', 'EVM', 'HTTP', 'A']);
+  const vcBad = [];
+  for (const W of [390, 1280]) for (const reg of REGS) for (const t of resW[W][reg].voucherCopy || []) {
+    const shout = (t.match(/\b[A-Z]{2,}\b/g) || []).filter(x => !VC_TICKERS.has(x));
+    if (/[—–]/.test(t) || shout.length) vcBad.push(`${W} ${reg}: ‹${t.slice(0, 50)}›`);
+  }
+  ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
+    vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }
@@ -837,6 +855,35 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('new bee\'s opening copy, dress stripped at 390 and 1280: every section a task opens reads with no capitals-as-shout, no dash and none of the machine words (heading and the intro under it)',
     found.length === 0 && seenOpen.length >= 2 * 18, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
+}
+
+// 4g · THE HEADINGS READ AS WORDS: no visible section heading shouts in capitals, in
+// cypherpunk (every keyed heading open) and in new bee's "everything" view (its own
+// headings). Tickers and names a reader meets on any exchange are words, not shouting,
+// and so is a SPEC-… identifier: the canonical name of a spec document (docs/specs/).
+{
+  const TICKERS = new Set(['USDC', 'ETH', 'ANT', 'HIVE', 'HBD', 'HP', 'AR', 'BTC', 'BCH', 'ZEC', 'XMR', 'BNR', 'EVM', 'QR', 'A', 'RAM']);
+  const shouted = {};
+  for (const reg of ['cypherpunk', 'bee']) {
+    const { ctx, page } = await open(reg);
+    if (reg === 'bee') { await page.click('#wl-bee [data-wl-go="all"]'); await page.waitForTimeout(350); }
+    shouted[reg] = await page.evaluate(T => [...document.querySelectorAll('main>section[data-wl-task] h2')].filter(h => h.getClientRects().length)
+      .map(h => h.innerText.replace(/\s+/g, ' ').trim()).filter(t => (t.replace(/\bSPEC-[A-Z0-9-]+/g, '').match(/\b[A-Z]{2,}\b/g) || []).some(w => !T.includes(w))), [...TICKERS]);
+    await ctx.close();
+  }
+  ok('no visible section heading shouts in capitals, in cypherpunk (every keyed heading) or in new bee\'s everything view (tickers and SPEC-… document identifiers excepted)',
+    shouted.cypherpunk.length === 0 && shouted.bee.length === 0, `cypherpunk ${shouted.cypherpunk.join(' · ') || 'none'} · bee ${shouted.bee.join(' · ') || 'none'}`);
+}
+
+// 4h · THE bPAY LAW LINE FOLLOWS ITS ENGLISH: the English says "the chooser comes first";
+// every tongue once still said "Phase A", a label the page no longer carries. No cell may
+// keep a standalone capital A, Latin or Cyrillic (the phase letter in every script), and none may fall back
+// to the English.
+{
+  const corpus = JSON.parse(await readFile(join(SURFACES, 'lang-corpus.json'), 'utf8'));
+  const row = corpus.strings['wl.bpay.law'];
+  const stale = Object.entries(row).filter(([l, v]) => l !== 'en' && (/(^|[^\p{L}])[AА]([^\p{L}]|$)/u.test(v) || v === row.en)).map(([l]) => l);
+  ok('the bPay law line follows its English in every tongue: no stale "Phase A" label, no English fallback', Object.keys(row).length === 29 && stale.length === 0, stale.join(' ') || `${Object.keys(row).length} cells`);
 }
 
 // 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work

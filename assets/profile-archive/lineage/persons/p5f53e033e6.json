@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5f53e033e6",
+ "bnr": "bnr://skaists.dev/blood/p5f53e033e6",
+ "identity": {
+  "name": "Pehr Classon",
+  "lifespan": "1715–1771",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KNNX-5HC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "2 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "2 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7ce972beff",
+    "name": "Claes Person",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5b2b9e9c3b",
+    "name": "Catharina Jacobsdotter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8f525058f3",
+    "name": "Clas Persson"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KNNX-5HC",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 2,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

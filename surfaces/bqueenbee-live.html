@@ -551,7 +551,8 @@ function speak(btn,text){
  btn.setAttribute('aria-pressed','true');
  speechSynthesis.speak(u);
 }
-function bee(text){var d=document.createElement('div');d.className='msg bee';
+function bee(text,qid){var d=document.createElement('div');d.className='msg bee';
+ if(qid)d.dataset.qid=qid; /* the question this reply answers (a translated reply can land after a newer question) */
  d.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span>'
   +'<button class="vb" aria-pressed="false" title="Play or stop this reply using your browser voice">🔊 voice</button>'
   +'<span class="vnote" data-reg="cypherpunk"> speechSynthesis · browser voice · on your tap</span></div>'+md(text);
@@ -828,11 +829,11 @@ var LAST={q:'',lane:'',n:0};
 window.ask=function(){
  var q=$('q').value.trim(); if(!q)return;
  you(q); $('q').value='';
- LAST.q=q; LAST.n++;
+ LAST.q=q; LAST.n++; var qid=LAST.n;
  var hl=heartLane(q);
- if(hl){LAST.lane='heart';bee(hl);return;}
+ if(hl){LAST.lane='heart';bee(hl,qid);return;}
  var pa=tryRoster(q);
- if(pa){LAST.lane='roster';bee(pa);return;}
+ if(pa){LAST.lane='roster';bee(pa,qid);return;}
  var hit=KB.find(function(k){return k.re.test(q);});
  var xTopic=null;
  LAST.lane=hit?'kb':'absence';
@@ -844,11 +845,11 @@ window.ask=function(){
      ensureA18N().then(function(j){
        var lang=attrLang(q);
        var tr=j&&lang&&j.answers[lang]&&topic&&j.answers[lang][topic];
-       bee(tr||enA); if(tr)speakLang(tr,lang); else if(VOICE.auto)speakLang(enA,'en');
+       bee(tr||enA,qid); if(tr)speakLang(tr,lang); else if(VOICE.auto)speakLang(enA,'en');
      });
-   } else { bee(hit.a); speakLang(hit.a,'en'); }
+   } else { bee(hit.a,qid); speakLang(hit.a,'en'); }
  }
- else{bee('*I don\'t know that by name — and I won\'t guess.* here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.');}
+ else{bee('*I don\'t know that by name — and I won\'t guess.* here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.',qid);}
 };
 window.compose=function(){
  var el=$('handoff'); el.style.display='block';
@@ -942,8 +943,9 @@ bee('the queen is in. ask me anything about the hive — every answer carries it
     D.asked=D.quick.map(function(q){return asked.indexOf(q)>=0;});
     var L=Q.last;
     if(L&&L.n&&you.length){
-      var lastYou=you[you.length-1], ans=null, n=lastYou.nextElementSibling;
-      while(n){if(n.classList.contains('bee'))ans=n;n=n.nextElementSibling;}
+      /* the reply is found by its question's id, never by position: an earlier question's
+         translated reply can arrive after a newer question was asked */
+      var ans=document.querySelector('#chat .msg.bee[data-qid="'+L.n+'"]');
       var tg=L.lane==='heart'?Q.tongues.filter(function(t){return t.love.test(L.q)||t.hi.test(L.q.trim());})[0]:null;
       D.last={q:L.q,lane:L.lane,pending:!ans,answer:ans?plain(ans):'',links:ans?links(ans):[],absence:L.lane==='absence',tongue:tg?tg.l:'',tongueAt:tg?Q.tongues.indexOf(tg):-1,quick:D.quick.indexOf(L.q)};
     } else D.last=null;

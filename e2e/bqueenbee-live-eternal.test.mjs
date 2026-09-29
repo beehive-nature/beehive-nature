@@ -116,6 +116,24 @@ test('bee: a row asks through the page\'s own ask(); the card mirrors her answer
   await ctx.close();
 });
 
+test('a reply is paired with its own question: a translated answer landing after a newer question is not shown as that question\'s answer', async () => {
+  const { ctx, p, errs } = await open('bee');
+  await p.waitForFunction(() => document.querySelectorAll('#tongues .vb').length > 3, null, { timeout: 15000 });
+  const d = await p.evaluate(async () => {
+    const chip = [...document.querySelectorAll('#tongues .vb')].map(b => b.textContent).find(t => t.startsWith('ru '));
+    const q = document.getElementById('q');
+    q.value = chip.split(' · ')[1]; window.ask();   // a Russian question: its answer waits on the tongue corpus
+    q.value = 'Who are you?'; window.ask();         // asked before that answer lands
+    await new Promise(r => setTimeout(r, 600));
+    return { bees: [...document.querySelectorAll('#chat .msg.bee')].length, last: window.__eternal.data.last };
+  });
+  assert.equal(d.last.q, 'Who are you?');
+  assert.match(d.last.answer, /^I am bQueenBee/, 'the card shows the answer to the question it names, not the late Russian one');
+  assert.doesNotMatch(d.last.answer, /[Ѐ-ӿ]/);
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
+});
+
 test('raver: a cell is a question; the comb lights what was asked; the rim lights the tongue that spoke', async () => {
   const { ctx, p, errs } = await open('raver');
   const i = await p.evaluate(() => window.__queen.quick.indexOf('Frozen seeds?'));

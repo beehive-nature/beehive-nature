@@ -191,9 +191,9 @@ body[data-reg="bee"]{
   --sem-harm:#4a3aa8;--sem-solution:#2e6b1e;--sem-system:#4d759b;--sem-science:#0f6f82;
   --sem-value:#7a5209; /* honey stepped darker INSIDE its own ramp for paper — honey never sits raw on a light ground (1.88:1) */
   --reg-primary:#a8238c;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
-  --reg-radius-card:20px;--reg-radius-btn:12px;--reg-glow:none;
-  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:Georgia,'Times New Roman',serif;
+  --reg-radius-card:18px;--reg-radius-btn:12px;--reg-glow:none;
+  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:'Instrument Serif',Georgia,serif;
   background:#fbf7f0;color:#0c1412;color-scheme:light;
   font:16px/1.65 var(--reg-font-body);
 }
@@ -203,10 +203,10 @@ body[data-reg="raver"]{
   --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
   --sem-value:#e8b54b;
   --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
-  --reg-radius-card:28px;--reg-radius-btn:999px;
-  --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow, sovereign-edged */
-  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-radius-card:18px;--reg-radius-btn:999px;
+  --reg-glow:0 0 14px rgba(156,111,214,0.45); /* glow-sovereign — the sheet's own value */
+  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:'Unbounded',system-ui,sans-serif;
   /* the purples as light: a sovereign wash rises behind the fold and melts
      into the black ground — light behind the page, never on the words */
   background:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
@@ -219,9 +219,9 @@ body[data-reg="cypherpunk"]{
   --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
   --sem-value:#e8b54b;
   --reg-primary:#45c2dc;--reg-on-primary:#06110c;--reg-link:#45c2dc;--reg-link-hover:#8eddee;
-  --reg-radius-card:4px;--reg-radius-btn:4px;--reg-glow:none;
-  --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
-  --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  --reg-radius-card:6px;--reg-radius-btn:6px;--reg-glow:none;
+  --reg-font-body:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --reg-font-title:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
   background:#06110c;color:#e9f2ec;color-scheme:dark;
   font:13px/1.5 var(--reg-font-body);
 }
@@ -251,7 +251,7 @@ body[data-reg="bee"] footer{font-size:14px}
 body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
 body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
 /* raver: display titles, you magenta as light, pills everywhere, the one glow */
-body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
+body[data-reg="raver"] h1{font-weight:700;letter-spacing:-.02em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
  background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
 body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
@@ -1308,7 +1308,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      the collection's own contract at read time; nothing is cached, stored, or
      redrawn by this page. ══ -->
 <section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
-  <h2 data-wl-tech>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS: your garden, drawn on-chain</span></h2>
+  <h2 data-wl-tech>🎨 <span data-i18n="wl.insc.h2">inscriptions: your garden, drawn on-chain</span></h2>
   <h2 data-reg="bee">🎨 <span data-i18n="wl.bee.h.insc">your garden, drawn on the chain</span></h2>
   <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
   <b>true tier</b> through the estate's one level-truth module, the same one the market and the museum
@@ -1326,7 +1326,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
-  <h2 data-wl-tech>🎟 <span data-i18n="wl.vh2">THE VOUCHER: prepay compute, metered fair</span></h2>
+  <h2 data-wl-tech>🎟 <span data-i18n="wl.vh2">the voucher: prepay compute, metered fair</span></h2>
   <h2 data-reg="bee">🎟 <span data-i18n="wl.bee.h.voucher">prepay for compute</span></h2>
   <p data-reg="bee" data-wl-tech data-i18n="wl.reg.voucher.bee">Prepay for compute work (models, vRAM, whatever the estate meters)
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
@@ -1341,7 +1341,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   that ledger via the estate oracle; the box owns the writes.</p>
 
   <div class="row" style="align-items:center;flex-wrap:wrap">
-    <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <input id="vc-key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
@@ -1356,23 +1356,23 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <!-- 2 · TOP UP, told exactly how -->
     <div class="row" style="margin-top:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta — gasless</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta · gasless</div>
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.a.send">send any amount of A to:</div>
         <div class="row" style="gap:6px"><code id="vc-a-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" id="vc-memo-law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
+        <div class="law" id="vc-memo-law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this exact memo (the memo is the binding:</span>
         <b style="color:var(--amber)"><span data-i18n="wl.vc.memo2">no memo, no credit, money lost</span></b><span data-i18n="wl.vc.memo3">):</span></div>
         <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--ink)">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
       </div>
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.usdc">USDC · Base — tiny gas</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.usdc">USDC · Base · tiny gas</div>
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.usdc.send">send USDC (Base) to:</div>
         <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
         <div class="law" id="vc-u-rate" style="margin-top:6px" data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</div>
         <div class="law" id="vc-u-ref" style="color:var(--faint)" data-wl-tech>rate: —</div>
-        <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail — your bound address credits you</div>
+        <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail: your bound address credits you</div>
       </div>
     </div>
     <!-- 3 · SEE WHAT I SPENT — aggregate first, itemized one click down -->
@@ -1383,7 +1383,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <span>tithe in there: <b id="vc-tithe" style="color:var(--ink)">0.0000 A</b> <span data-i18n="wl.vc.tithe.note">(the estate's 10%, shown never buried)</span></span>
       </div>
       <details style="margin-top:8px">
-        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized — every receipt, every line</summary>
+        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized: every receipt, every line</summary>
         <div id="vc-receipts" class="law" style="margin-top:6px">—</div>
       </details>
     </div>
@@ -2080,7 +2080,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="outbox-sec" data-wl-task="move">
-  <h2 data-wl-tech>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
+  <h2 data-wl-tech>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here before they submit</span></h2>
   <h2 data-reg="bee">📤 <span data-i18n="wl.bee.h.outbox">waiting to be sent</span></h2>
   <div class="law" data-wl-tech>The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes. It never re-signs, never rebuilds.
@@ -2102,7 +2102,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="summary-sec" data-wl-task="have">
-  <h2 data-wl-tech>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
+  <h2 data-wl-tech>📊 <span data-i18n="wl.h.summary">summary</span></h2>
   <h2 data-reg="bee">📊 <span data-i18n="wl.bee.h.summary">at a glance</span></h2>
   <div class="readout">
     <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px">not connected yet</div></div>
@@ -4528,7 +4528,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $v('vc-a-dest').textContent = a.send_to || '—';
         $v('vc-a-memo').textContent = a.memo || key;
         $v('vc-u-dest').textContent = u.send_to || '—';
-        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC — stated before you send';
+        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC, stated before you send';
         $v('vc-u-ref').textContent = 'rate: ' + u.rate_ref;
         $v('vc-spent').textContent = d.spent_total + ' A';
         $v('vc-dep').textContent = d.deposited_total + ' A';
@@ -4545,13 +4545,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 '<td style="padding:3px 0;text-align:right;color:var(--ink)"><b>' + esc(li.charged) + ' A</b>' +
                 (t ? ' (the tithe)' : '') + '</td></tr>';
             }).join('') + '</table></div>';
-        }).join('') : '<div style="color:var(--faint)">no metered charges yet — top up and the first receipt lands here</div>';
+        }).join('') : '<div style="color:var(--faint)">no metered charges yet: top up and the first receipt lands here</div>';
         $v('vc-panel').style.display = 'block';
         $v('vc-src').textContent = 'source: ' + d.source;
         try { localStorage.setItem('bnr-vc-key', key) } catch(e) {}
       } catch(e) {
         $v('vc-src').textContent = '';
-        err('the estate oracle is unreachable right now — nothing is wrong with your voucher, try again in a moment');
+        err('the estate oracle is unreachable right now: nothing is wrong with your voucher, try again in a moment');
       }
     }
     $v('vc-go').onclick = function(){ var k = $v('vc-key').value.trim();
@@ -4578,7 +4578,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var d = await r.json();
         out.textContent = d.message || '—';
         out.style.color = d.ok ? 'var(--leaf)' : 'var(--amber)';
-      } catch(e) { out.textContent = 'the oracle is unreachable — try again in a moment'; out.style.color = 'var(--amber)' }
+      } catch(e) { out.textContent = 'the oracle is unreachable right now, try again in a moment'; out.style.color = 'var(--amber)' }
     };
     try { var saved = localStorage.getItem('bnr-vc-key');
       if (saved) { $v('vc-key').value = saved; load(saved) } } catch(e) {}

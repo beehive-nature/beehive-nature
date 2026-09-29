@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "2 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "2 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "L5JY-GN3",
+    "id": "p1235894770",
+    "name": "James Clarke",
     "evidence": "walked provider link"
    },
    {
-    "id": "GSBL-F73",
+    "id": "pc1cf410989",
+    "name": "Elizabeth McVey",
     "evidence": "walked provider link"
    }
   ],
@@ -56,7 +58,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/9CDV-SRQ",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 2,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

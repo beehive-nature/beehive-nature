@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa0eb07a6d8",
+ "bnr": "bnr://skaists.dev/blood/pa0eb07a6d8",
+ "identity": {
+  "name": "Abiah Elliott",
+  "lifespan": "1711–1789",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZLW-3JV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "10 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "10 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5df67f7707",
+    "name": "Thomas Bell Elliott",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8a06fb3199",
+    "name": "Mercy Walker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p99de6b83f6",
+    "name": "Zephaniah Richmond"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZLW-3JV",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 10,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
