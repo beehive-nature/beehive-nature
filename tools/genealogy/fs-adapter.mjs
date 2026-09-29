@@ -442,8 +442,42 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 // OPEN FRONTIER (named honestly): record→image-ark mapping at 13k scale — the
 // person-keyed hr/v2 search wire (entry.id IS the 1:1 ark suffix; entry
 // gedcomx sourceDescriptions carry the 3:1 Persistent ark) joins to our
-// citations at only ~2% (search surfaces different records); the reliable
-// per-record mapping is the record SPA page's own DOM (one load per record).
+// citations at 0% (measured 2026-09-28: all 4,654 search-wire keys fall
+// outside the 13,249-record citation set; the 2026-09-19 "~2%" was optimistic);
+// the reliable per-record mapping is the record SPA page's own DOM (one load
+// per record).
+//
+// ── SESSION-ORACLE LAW (executed 2026-09-28, order #7 attempt) ──
+// A present `fssessionid` cookie on www.familysearch.org does NOT prove a
+// signed-in session. Executed receipts (all under the founder's "try now"):
+//   · /service/ident/session/sessions/CURRENT → 406 from a robots.txt page
+//     context (the wire is page-context dependent; not a portable oracle).
+//   · NAVIGATING any image-viewer URL (/ark:/61903/3:1:{ark}?view=index):
+//     signed-in bounces through ident.familysearch.org back to the viewer;
+//     signed-out LANDS on the ident login form (username/password visible).
+//     This is the one cheap oracle that cannot false-positive.
+//   · Signed-out record SPA: the page loads its JS chunks and permission
+//     calls (FtNormalUserContext appears in traffic) but the record body
+//     never renders (skeleton forever) — a stuck record page in the IAB is
+//     a session symptom, not a record dud.
+//   · Raw fetch of /ark:/61903/1:1:{id} returns a ~20KB SPA shell with ZERO
+//     3:1: arks (fast-path mapping via fetch+parse is dead; only the
+//     rendered DOM carries "View Original Document").
+//   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona when
+//     signed out; whether an authed session changes this is UNTESTED — the
+//     next authed session must try it on 2-3 records FIRST because a 200
+//     unlocks a fetch-based mapping walker (hours) instead of the
+//     navigation walker (~30-60s/record ⇒ multi-day at 12,845 records).
+//
+// ── IMAGE-SWEEP QUEUE (staged 2026-09-28, executes only under a live authed
+//    founder session; bytes private-tier per the preserve discipline) ──
+// Ready now: the 404 preMapped record→ark pairs
+// (images-harvest/plan + image-map-input.json preMapped, all in the citation
+// set) minus the 6 downloaded, plus 7 retry states (3 error, 3
+// no-deepzoom-traffic, 1 unknown) ⇒ 405 images queued. Walker shape:
+// per-image = goto viewer URL → read apid from the viewer's own performance
+// log → park on sg30p0 → PAGE_IMAGE_STITCHER_SOURCE → manifest checkpoint
+// (images-manifest.json schema unchanged).
 export const PAGE_IMAGE_STITCHER_SOURCE = String.raw`
 (async function stitchImage(apid, targetWidth){
   const target=targetWidth||2400;
