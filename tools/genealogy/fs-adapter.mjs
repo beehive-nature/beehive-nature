@@ -465,11 +465,29 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 //     at the unauthenticated tier; an authed page context may fetch the
 //     data wire differently, so the fast path is UNPROVEN, not dead (the
 //     authed useSLS probe stays first-order business next session).
-//   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona when
-//     signed out; whether an authed session changes this is UNTESTED — the
-//     next authed session must try it on 2-3 records FIRST because a 200
-//     unlocks a fetch-based mapping walker (hours) instead of the
-//     navigation walker (~30-60s/record ⇒ multi-day at 12,845 records).
+//   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona BOTH TIERS
+//     (signed out 2026-09-28 AND authed 2026-09-29, tested on two
+//     known-mapped ground truths) — the fetch-based mapping fast path is
+//     DEAD, receipted; per-record rendered-DOM remains the only mapping
+//     path beyond the 404 preMapped pairs.
+//
+// ── SWEEP WIRE LAWS (executed 2026-09-29 continuation: 12 images, 18 total,
+//    all sha256-audited; the 9/19 "error" arks HEALED) ──
+//   · SETTLE LAW: the viewer needs 15-18s+ in this webview before its
+//     deepzoom calls appear; the 2026-09-19 "error" states were 4-12s
+//     settles, not broken arks (2 of 3 healed at 18-20s).
+//   · FILMSTRIP LAW: the viewer's perf log carries deepzoom URLs for
+//     NEIGHBORING film pages too — collect ALL distinct apids, order by
+//     proximity to THIS ark's orchestration/sls/image/3:1:{ark} entry,
+//     iterate candidates until an image.xml 200s.
+//   · NEGATIVE STATES (terminal-honest, per-ark in the manifest):
+//     xml-403-all = viewer resolves apids but EVERY candidate's image.xml
+//     403s to the session (storage-restricted; the 939Z NUMIDENT class);
+//     no-deepzoom-traffic = zero deepzoom URLs in a rendered viewer
+//     (image-less/index-only or partner-held records).
+//   · Queue: skaists.sweep-queue/1 (private, images-harvest/sweep-queue.json)
+//     — 366 arks / 397 records, depth-ordered, Lowry-Rockwood flagged;
+//     manifest checkpoint after EVERY image; resume = next queue order.
 //
 // ── IMAGE-SWEEP QUEUE (reconciled 2026-09-28 founder readback; executes
 //    only under a live authed founder session; bytes private-tier per the
