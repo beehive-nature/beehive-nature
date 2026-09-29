@@ -6,9 +6,9 @@ Outgoing seat: Claude Code, `session_015NgLKhQoUyK4kxFMpWKbaz` ("Badge verificat
 
 | Item | State at handoff | Next action |
 |---|---|---|
-| **#250**: build-time badge renderer plus the first badge (base `main`) | Draft. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). | Independent review, then merge. |
+| **#250**: build-time badge renderer plus the first badge (base `main`) | Ready for review. #253 is folded into it with a merge commit, so #250 now carries the repaired gate. Merges cleanly into `main` (checked 2026-09-29). | Independent review, then merge. |
 | **#253**: gate repair (base: #250's branch) | Folded into #250 and closed by that merge. Its dispatch and STATUS line travel with #250. | None. Review it as part of #250. |
-| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Draft. Merges cleanly into `main` on its own. | Independent review, then merge. |
+| **#247**: `bnr-seal` crate, handset docket, proof-lights docket and its amendment (base `main`) | Ready for review. Merges cleanly into `main` on its own. Codex's review at `cf3887a` raised five findings; all five were fixed in `6849dab` and their threads resolved (dispatch `2026-09-29-codex-review-247.md`). | Independent review, then merge. |
 | **CI-signing card** | **Not started.** Owner, scope and done-when are in `2026-09-27-proof-lights-gate-repair.md`, section "The CI-signing card". | Starts after #250 is on `main`. Needs the founder to generate the key pair and store the private key in a protected environment. |
 
 ## Landing order and the one known conflict
