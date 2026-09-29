@@ -446,3 +446,23 @@ test('repeating the same stage does not pile text up',async()=>{
   assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Not staged again/);
   assert.equal(d.$('adPrompt').value,'grow a mushroom');
 });
+
+/* Re-review findings on 6338711e7: the repeat check was a bare tail match, and the notice hid behind "Opening". */
+test('only a repeat of the agent’s own last stage is refused, never a match with the person’s words',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.type('book');
+  assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'ok'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'book\n\nok');
+  d.choose('hearth');d.type('grow a mushroom');
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'grow a mushroom\n\ngrow a mushroom');
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Not staged again/);
+});
+
+test('the staged notice shows while the agent is still opening, and sending clears it',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'queen',message:'first stage'});
+  assert.equal(d.$('adSend').disabled,true);assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  const queen=d.load(frameFor(d,'queen'));d.$('adSend').click();
+  assert.deepEqual(queen.calls,['first stage']);assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+  d.choose('hearth');d.choose('queen');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+});

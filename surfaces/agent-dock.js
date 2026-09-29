@@ -132,7 +132,7 @@
     var s=sessions[current.id];if(!s)return;foot.hidden=helpOpen||current.id==='baigents';$('adSend').disabled=!!current.src&&!s.ready;$('adSend').textContent=current.id==='bloverai'?'Build handoff':'Send';
     prompt.setAttribute('aria-label',current.id==='bloverai'?'Question for your handoff':'Message '+current.name);prompt.placeholder=current.id==='bloverai'?'What would you like to ask your AI?':'Ask '+current.name+'…';
     $('adNote').textContent=current.note;$('adOpenPage').hidden=!current.src;$('adOpenPage').href=current.src||R+'bmeshasi.html';
-    notice(s.status||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':s.staged||'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
+    notice(s.status||s.staged||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
   }
   function showCurrent(){
     session(current);Object.keys(sessions).forEach(function(id){var s=sessions[id];s.panel.hidden=helpOpen||id!==current.id;suspend(s,s.panel.hidden||!win.classList.contains('on'));});
@@ -274,10 +274,10 @@
         if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
         if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
         var had=String((sessions[a.id]&&sessions[a.id].draft)||'').replace(/\s+$/,''),kept=had.trim()?had+'\n\n':'';
-        if(had.slice(-v.length)===v)return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
+        if(sessions[a.id]&&sessions[a.id].lastStaged===v&&(had===v||had.slice(-v.length-2)==='\n\n'+v))return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
         if(kept.length+v.length>4000)return Promise.resolve(reply('Not staged. The person’s unsent draft leaves room for '+Math.max(0,4000-kept.length)+' characters; this message has '+v.length+'.'));
         Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
-        var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;
+        var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;s.lastStaged=v;
         s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
         return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
       }});
