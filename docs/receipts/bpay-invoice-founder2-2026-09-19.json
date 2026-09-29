@@ -1,0 +1,328 @@
+{
+ "schema": "bpay.invoice-generic/1",
+ "invoiceId": "inv-bux-try-autonomi-2026-09-17",
+ "issuedAt": "2026-09-19T01:16:58.000Z",
+ "lines": [
+  {
+  "kind": "storage",
+  "asset": "ANT",
+  "amountAtto": "4066258110351562500",
+  "quotes": [
+   {
+   "quote_hash": "0x0550036efb04fd16b0012a17e063ef0556d13753db694ed3178e83908bcfe6f5", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "78014791992187500"
+  },
+   {
+   "quote_hash": "0x0b46427f703d9e694fa73cc1dca547aab00c59e0da14415f1e07d9257efa6f82", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "89330885742187500"
+  },
+   {
+   "quote_hash": "0x14398186ecc4417c923023c4840ce90c71c77b4ed9ef1439fec97ca84abfc34e", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "116100471679687500"
+  },
+   {
+   "quote_hash": "0x23a88b8519510d4414572135c7bcc688fb76bbae0717f8c809e5026e20f868c3", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "51264480468750000"
+  },
+   {
+   "quote_hash": "0x24df1dffb5ba80c627a29d1ee3af960847a0c139e1774a6a8a9bf179f6dc2aa9", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "35699182617187500"
+  },
+   {
+   "quote_hash": "0x2c809b7a558a4768f7242fb5ba8ef90b3ad05323560428fff0f6c61fe64112c6", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "38138698242187500"
+  },
+   {
+   "quote_hash": "0x2cb55f9eafebedd8c545e06fa4b06a44e0f6acae99fdc8b898bf51785e0475d5", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "46954171875000000"
+  },
+   {
+   "quote_hash": "0x357b4f53173429bd631d2015c973d0a62fbae38684741a0cb8af428558c4da04", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "86966671875000000"
+  },
+   {
+   "quote_hash": "0x363463e41c2b8c30ca35ff98158b3d9dc0511f4281bac977fa54b55ff0b6a4b5", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "43584386718750000"
+  },
+   {
+   "quote_hash": "0x36bc4f07c45e6617dc2996474d7dbbd5a5028af97d51b1df29ce1851f3dcc16d", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "92683737304687500"
+  },
+   {
+   "quote_hash": "0x3aae123830f53eea8ef033bb8898a88651d59bb2c1a0f8524a28abe659b9903c", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "32745237304687500"
+  },
+   {
+   "quote_hash": "0x3b4ee2e1bd8ff386b3285c3f7f24faab8a3589cecdd41c0e65387bafcb1cb713", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "93270046875000000"
+  },
+   {
+   "quote_hash": "0x3cd8ea68dd13f4f56d06f8da34adf6cd89d6cbdbbf3cb852cc08a231d440dcbe", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "90967971679687500"
+  },
+   {
+   "quote_hash": "0x43256d93dc7ce7bc60ecf9bd86a6abb7f518d249235287d060e7cdbed75ef672", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "120303937500000000"
+  },
+   {
+   "quote_hash": "0x4497c4dd55826f557809ed0c7dc2fbef305f655a9993dff101bf4345c26af5cb", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "67104796875000000"
+  },
+   {
+   "quote_hash": "0x55a03bfbe706a3a9d1137c845c380f8a08917c127030220027a35638f736219e", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "67155761718750000"
+  },
+   {
+   "quote_hash": "0x5659a0c14caa228d3a8ec9df7f64b1b36d27dee538779a369f29deac5f50f5dd", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "121054338867187500"
+  },
+   {
+   "quote_hash": "0x5c05cbf1999f573d57e67e51124330c938205062227c838389dc2c2c1692c397", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "46751261718750000"
+  },
+   {
+   "quote_hash": "0x5c9360e8f97bbf89b5e8b57db7ef4ab9dc53a8bb5117c2b0e2ae5bde3e8470e0", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "47137291992187500"
+  },
+   {
+   "quote_hash": "0x5da1ed2bebd83389e5c979ea76b73f4117a62e496506781be80835bf7d390123", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "81258937500000000"
+  },
+   {
+   "quote_hash": "0x5dddd06f3049b393ac0aa2a404f1720c79eba49c8b5e6179370e2f454c72fa15", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "89240437500000000"
+  },
+   {
+   "quote_hash": "0x6228c2e038b71fb7a7f03cea1bcbe874c0048b1c07d94de102e746f79e6c236a", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "135879199218750000"
+  },
+   {
+   "quote_hash": "0x626d969b51b0e9a51092dc8c02f9bf8ccc8716b3fbb49c14ca5403d49cb6df61", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "65260620117187500"
+  },
+   {
+   "quote_hash": "0x638c951b96d1ca0b71e5db8f7cf5570d5890426e70cc3564c500118279f4719d", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "57823502929687500"
+  },
+   {
+   "quote_hash": "0x63dbe234ad9c3cf1615c7df5c0cbb4d47d4560030fc09ceaad74eea9371a9a81", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "152579167968750000"
+  },
+   {
+   "quote_hash": "0x646732aa408bdd825d4090d99d5a6eac099b7f83dcfd94e0c28f3f187a12fe1b", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "79022018554687500"
+  },
+   {
+   "quote_hash": "0x649cb37a218a35d30a5c723ec059e9ebb6d35ac8e836c62d3304d7fff7b84fbf", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "70204171875000000"
+  },
+   {
+   "quote_hash": "0x685d7cfe113408ce5682ecefcbbabb66e2c7b6cbaa20ce51c73e7ad0fca57650", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "85195500000000000"
+  },
+   {
+   "quote_hash": "0x6a2a6ce0348d759c01023f467e058822bf7b60bc3c70c6572ea0e68679bd6a98", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "47423088867187500"
+  },
+   {
+   "quote_hash": "0x81468012a0a3082b3d4e79f0e403877bb4d39aaff1c40733813bac93771594c3", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "77236643554687500"
+  },
+   {
+   "quote_hash": "0x83c3c66108a66e87e4dbcb1276207c28d18db917494af26ea63f3a4366df987f", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "138988127929687500"
+  },
+   {
+   "quote_hash": "0x8f4e4b4b8fd6fd64728367ae1dfcea949792d1135b24823d1f564f47be9166c0", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "67104796875000000"
+  },
+   {
+   "quote_hash": "0x90ceca6f7f25c8f59021358269db748f6ab94cfc36e5a65d21b33034e71e4e64", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "57823502929687500"
+  },
+   {
+   "quote_hash": "0x919184c8dee37b7efdd5b69664ef10e821281b1fa471e164b1601ab4d2055556", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "79980260742187500"
+  },
+   {
+   "quote_hash": "0x9679753d87b6b8e805ad7d993846cdf8cc947671fe1f9dd58d8615eeaec5f252", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "85078171875000000"
+  },
+   {
+   "quote_hash": "0x971b5d05cf319b90dc92e05d704af9f87b2353c18bdf4381b87b95e99f15d301", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "52785750000000000"
+  },
+   {
+   "quote_hash": "0x97b010005931e130bd9aa4917028772152ae129c1dac59e7ef10bf07bc2db28f", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "46367346679687500"
+  },
+   {
+   "quote_hash": "0xa3fbb55c8938925c514434f241d99a2e1458d7d76ea433440be5268657ce04b4", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "47566417968750000"
+  },
+   {
+   "quote_hash": "0xac061f5ccc4dee4d2b345b0e9882f15b3232227a990e069339cfa3d30c6c4391", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "43584386718750000"
+  },
+   {
+   "quote_hash": "0xb4cbe416f32a911db4cd7ab99b2ad03848ef1118c3f2d5ed791701c7a8bf5e11", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "94324511718750000"
+  },
+   {
+   "quote_hash": "0xb8e578a9b50e7edff414629b9f7a19dde69a088ad2422692aa3bd234397ed9b0", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "48515437500000000"
+  },
+   {
+   "quote_hash": "0xbb744d33b127e3393056e377ca513808ce9512bebc073938fba16b5875a64d00", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "65611877929687500"
+  },
+   {
+   "quote_hash": "0xc02ad4bd582dd36bcda7efbe3c7e67a0c507e3ca594a0481738d0d0dc0c14c9c", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "79218750000000000"
+  },
+   {
+   "quote_hash": "0xc28a3817392a6b648ddc873e7c80400002deb028c446877fecd08ba1ef3ba19a", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "92683737304687500"
+  },
+   {
+   "quote_hash": "0xc2a4b4ea63459f53a874f10444d856a5b72ae1e9d06219580a6f0cc2d488b55a", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "47178049804687500"
+  },
+   {
+   "quote_hash": "0xcc4128cd86cececbadff59a1338b8c08a7eb87fbb0c9fc7d44ed9e06cc631bb1", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "40825500000000000"
+  },
+   {
+   "quote_hash": "0xcf3647e7fc17bda6faadce5dca40703c777bc8120d277b9fe9bc63e194d3d3f7", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "93579480468750000"
+  },
+   {
+   "quote_hash": "0xd9ddc6b13108cd42a64d850523e95950c844e2927d4d4f7b5b87fdd4ee6cbd9c", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "40438948242187500"
+  },
+   {
+   "quote_hash": "0xdea12fbf7fd5b97155020bf4475ba68eda8ec3f5b9d35ad8737e7e2618e050dd", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "93270046875000000"
+  },
+   {
+   "quote_hash": "0xe3e5fe975ecbe776ad08c2ecb2f626192300fba5d372954b5fe9c60c626b3fc0", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "27028699218750000"
+  },
+   {
+   "quote_hash": "0xeaf7211c59c23f87ce1842d4bdb154399682e85738d283eddfcb3fcd57d150e8", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "39963940429687500"
+  },
+   {
+   "quote_hash": "0xee08c35d49c37f874340d2113ab1ed8c3395c535cc7e5a98998921b36560baa6", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "68695605468750000"
+  },
+   {
+   "quote_hash": "0xf6b32bf1776838e60f3c0ae3aadc961f6ee21795bd57979e42268869b68d0850", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "65611877929687500"
+  },
+   {
+   "quote_hash": "0xf8c315925e45244f395b8073a7bde35b03c463a3d1f1d07730cd14b6696ddcfe", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "68643937500000000"
+  },
+   {
+   "quote_hash": "0xf985a670e460e8ab6d258031d13c652f933ba207c09c2fc826d8ec9a66b81fc9", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "109425659179687500"
+  },
+   {
+   "quote_hash": "0xfea14f83008fdd1afba4e688c55b0556ea15748c80d0cff61a11d93e2ad9d7b7", "scan": "PUBLIC-CONSTANT: public on-chain payment quote id",
+   "amount_atto": "65611877929687500"
+  }
+  ],
+  "ceilingAtto": "4066258110351562500"
+ }
+ ],
+ "commitment": {
+  "kind": "carried-quote-set",
+  "digest": "sha256:ef803a7d1935add00bfdb17a50ed240a282791b7b3bbb664d58843aa19f68ce5", "scan": "PUBLIC-CONSTANT: public commitment digest over the carried quote set"
+ },
+ "authorization": {
+  "ceilings": {
+   "ANT": "4066258110351562500"
+  },
+  "authorizedBy": "founder — through the product surface only (Founder Gesture UX Law)",
+  "stopConditions": [
+   "quote set superseded or consumed (single-use)",
+   "artifact sha256/bytes mismatch at upload time",
+   "payment shape change (wave↔merkle re-quote)"
+  ]
+ },
+ "expiration": {
+  "model": "quote-single-use",
+  "note": "network quotes are single-use and short-lived; this exact set is persisted on the keyless bridge for this upload (crash-recovery law — re-prepare of the same artifact returns the SAME quote hashes)"
+ },
+ "domain": {
+  "network": "autonomi-mainnet",
+  "artifact": {
+   "name": "try_autonomi.mp4",
+   "sha256": "338b486874f6a8f86afe6537143548fb99594038b9ee7de918794db9e744207e", "scan": "PUBLIC-CONSTANT: public content sha256 pin",
+   "bytes": 214091829
+  },
+  "media": {
+   "title": "Autonomi — WebRTC Direct in-browser demo",
+   "creator": "Bux · Autonomi community update, 2026-09-17"
+  },
+  "payment_type": "wave_batch",
+  "chunks": {
+   "total": 56,
+   "already_stored": 0
+  },
+  "quote": {
+   "obtained_at": "2026-09-19T01:16:58.000Z",
+   "provider": "antd-bridge (keyless prepare; ant-core git HEAD)",
+   "confidence": "measured-live-network",
+   "upload_id": "up-1789780618488",
+   "durable_reload": true
+  },
+  "gas": {
+   "asset": "ETH",
+   "estimated_wei": null,
+   "source": "wallet-side",
+   "note": "Arbitrum One native gas for approve + payForQuotes, paid from the founder's wallet at signing — SEPARATE from the ANT storage obligation; never collapsed (assets-separate law)"
+  },
+  "data_map_address": "0x7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78", "scan": "PUBLIC-CONSTANT: public self-encrypted data-map address",
+  "policy": {
+   "object": "one-policy-object",
+   "audience": {
+    "selected": "public",
+    "selected_by": "founder product gesture → bridge binding founder-selected:public",
+    "available": ["public"],
+    "unavailable": [
+     {
+     "id": "only-me",
+     "reason": "private-DataMap custody path not yet wired or tested through this bridge"
+    },
+     {
+     "id": "selected-people",
+     "reason": "recipient-key granting not yet wired or tested through this bridge"
+    }
+    ]
+   },
+   "inspection": {
+    "advanced": "opens inspection depth over this same policy object — never alters policy by itself"
+   },
+   "access": "anyone who obtains the Autonomi address can retrieve the artifact",
+   "encryption": "network self-encryption at rest is storage mechanics, not owner-controlled privacy; in public mode the address itself is the capability",
+   "forgettability": "immutable once stored — deletion cannot honestly be promised"
+  },
+  "trezor_ux": {
+   "shape": "wave_batch",
+   "quote_obligations": 56,
+   "expected_confirmations": null
+  }
+ },
+ "states": {
+  "invoice": "issued",
+  "settlement": "not-yet"
+ },
+ "state": "issued",
+ "identity": {
+  "jobId": "bux-try-autonomi-2026-09-17",
+  "priorDigest": "sha256:85f095f7c0b5c1f261253702852d489d7b51ca6b51b9fc4e34228ec2a97d2d3e", "scan_prior": "PUBLIC-CONSTANT: public prior-version content digest (successor lineage — history superseded, never rewritten)",
+  "contentDigest": "sha256:8bdf7e50c5fd360a80d930a5c9c2211429ca6e0b7f085483150d486b4b0d93fd", "scan": "PUBLIC-CONSTANT: public content-addressed identity digest"
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p220d3bd5f3",
+ "bnr": "bnr://skaists.dev/blood/p220d3bd5f3",
+ "identity": {
+  "name": "Elisha Sawyer",
+  "lifespan": "1716–1786",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LLCJ-J84"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "40 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "40 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60d4706561",
+    "name": "Elias Sawyer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2e8af1b3bb",
+    "name": "Beatrix Pope",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9d9aee17f7",
+    "name": "Elias Sawyer"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LLCJ-J84",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 40,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

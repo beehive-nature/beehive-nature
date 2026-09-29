@@ -1,0 +1,19 @@
+{
+  "802ee0ebd00757bd": "x0x.identity.announce.v2",
+  "9087591cb1460b0c": "x0x.machine.announce.v2",
+  "0fe8dab9818469c5": "x0x.machine.announce.v3",
+  "2f144a8e4595c85f": "x0x.user.announce.v2",
+  "bd56420e10cce2c8": "x0x.revocation.v1",
+  "2041a15425a97c03": "x0x.revocation.v2",
+  "1c024f5cc8369f71": "x0x.move.activation.v1",
+  "a746d680e31732d1": "x0x/dm/v1/bus",
+  "dc7b2786c9d47788": "x0x/caps/v1",
+  "72e595c2a0f13284": "x0x/caps/v2/digest",
+  "143d90e8ad14052e": "x0x/caps/v1/request/targeted-v2",
+  "48c7b5c7b6b981ca": "x0x/caps/v1/response/targeted-v2",
+  "c7770a8688e4f8e8": "x0x/announce/v2/blob",
+  "8404a8731fd56b98": "x0x.discovery.groups",
+  "76c8448d415e21a8": "x0x.groups.public.v1",
+  "29f3042b0b96bc05": "x0x/announce/v3/blob",
+  "378a3991c784ddc5": "x0x/release"
+}

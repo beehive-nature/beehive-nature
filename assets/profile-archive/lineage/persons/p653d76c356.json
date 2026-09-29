@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p653d76c356",
+ "bnr": "bnr://skaists.dev/blood/p653d76c356",
+ "identity": {
+  "name": "Sarah Jane Spotts",
+  "lifespan": "1842–1935",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LN5J-5W3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "6 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "6 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3c062736fd",
+    "name": "Peter Spotz",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p093dd7ab0c",
+    "name": "Maria Catharina Drumheller",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb8dd9fa95b",
+    "name": "Florence  M Eder"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1e5e0b3f6d",
+    "name": "John Eder",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LN5J-5W3",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 6,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

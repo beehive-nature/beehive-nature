@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p920d98f65a",
+ "bnr": "bnr://skaists.dev/blood/p920d98f65a",
+ "identity": {
+  "name": "Abraham Gray",
+  "lifespan": "1698–1782",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MXWW-RYP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "4 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "4 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p846ed64c7d",
+    "name": "Isaac Gray",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4141708105",
+    "name": "Susanna Symonsen Simons",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb65a430e9d",
+    "name": "Mary Gray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd234eca926",
+    "name": "Ariaantje Jane Aartsen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MXWW-RYP",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 4,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

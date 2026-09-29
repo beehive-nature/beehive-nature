@@ -1,0 +1,72 @@
+{
+ "schema": "antd-bridge.p1-recovery-proof/1",
+ "executedAt": "2026-09-17T06:45:10.326Z",
+ "artifact": {
+  "path": "C:/Users/travi/family-lineage/pkg3.tar",
+  "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+  "bytes": 80998400
+ },
+ "law": "same content ≠ same authorization — the persisted PaymentIntent IS the authorization; recovery swaps it back in exactly",
+ "steps": [
+  {
+   "step": "P1 prepare (live network)",
+   "upload_id": "up-1789627309556",
+   "total_atto": "1910261455078125000",
+   "chunks": 24,
+   "data_map": "0x5250aa2f8279656ae571caab0fba2f89b5cedddddfe9938aa07c07bbcbcacf81", "hexLawNote": "PUBLIC-CONSTANT public chain data"
+  },
+  {
+   "step": "kill bridge (taskkill /F)",
+   "result": "process terminated; persisted job intact on disk (24 payments + 24 chunk states incl. peer_quotes, sidecars, PUT targets)"
+  },
+  {
+   "step": "fresh bridge, re-prepare",
+   "upload_id": "up-1789627309556",
+   "recovered_from": {
+    "original_upload_id": "up-1789627309556",
+    "original_created_at_unix_secs": 1789627309,
+    "recovery_count": 1,
+    "fresh_quotes_discarded": 24
+   },
+   "total_atto": "1910261455078125000"
+  },
+  {
+   "step": "force_fresh re-quote",
+   "upload_id": "up-1789627481303",
+   "total_atto": "1979733840820312500"
+  }
+ ],
+ "comparisons": {
+  "quote_hash_overlap_recovered_vs_p1": "24/24",
+  "total_identical_recovered_vs_p1": true,
+  "upload_id_identical_recovered_vs_p1": true,
+  "data_map_identical_all": true,
+  "quote_hash_overlap_forcefresh_vs_p1": "0/24"
+ },
+ "jobsIndexAtEnd": [
+  {
+   "upload_id": "up-1789627309556",
+   "status": "abandoned",
+   "artifact_sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "artifact_bytes": 80998400,
+   "payment_type": "wave_batch",
+   "total_amount_atto": "1910261455078125000",
+   "data_map_address": "0x5250aa2f8279656ae571caab0fba2f89b5cedddddfe9938aa07c07bbcbcacf81", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "created_at_unix_secs": 1789627309,
+   "recovery_count": 1
+  },
+  {
+   "upload_id": "up-1789627481303",
+   "status": "open",
+   "artifact_sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "artifact_bytes": 80998400,
+   "payment_type": "wave_batch",
+   "total_amount_atto": "1979733840820312500",
+   "data_map_address": "0x5250aa2f8279656ae571caab0fba2f89b5cedddddfe9938aa07c07bbcbcacf81", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "created_at_unix_secs": 1789627481,
+   "recovery_count": 0
+  }
+ ],
+ "priorEvidence": "p1.json vs p2.json in-tree (2026-09-17): 0/24 overlap WITHOUT persistence — the gap this proof closes",
+ "verdict": "P1 GATE SATISFIED FOR THE PLAN-SURVIVAL HALF — the exact prepared payment plan survives bridge death and is handed back verbatim; finalize consumes the recovered PreparedUpload via ant-core finalize_upload. Full end-to-end finalization still requires real settlement (Trezor lane) and is claimed nowhere here."
+}

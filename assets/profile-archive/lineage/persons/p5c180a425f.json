@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5c180a425f",
+ "bnr": "bnr://skaists.dev/blood/p5c180a425f",
+ "identity": {
+  "name": "Anders Lauritsen",
+  "lifespan": "1698–1768",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2XV-DN4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "10 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "10 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe35bd265cb",
+    "name": "Laurits Andersen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p237bd7201a",
+    "name": "Inger Andersdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0dfde97972",
+    "name": "Inger Andersdatter"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2XV-DN4",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 10,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

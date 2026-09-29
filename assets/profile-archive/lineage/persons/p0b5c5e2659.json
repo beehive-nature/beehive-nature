@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b5c5e2659",
+ "bnr": "bnr://skaists.dev/blood/p0b5c5e2659",
+ "identity": {
+  "name": "Lucy Darby",
+  "lifespan": "1736–1822",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MKJW-G4T"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "23 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "23 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29edb5bc83",
+    "name": "John Darby",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2831f2de78",
+    "name": "Susanna Jones",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3ef37ce66d",
+    "name": "Jonas Chaffin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe18fd47e9d",
+    "name": "Samuel Chaffin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MKJW-G4T",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 23,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

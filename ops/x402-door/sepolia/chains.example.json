@@ -1,0 +1,12 @@
+{
+  "eip155": {
+    "chain_reference": 84532,
+    "inner": {
+      "rpc": [{ "http": "https://sepolia.base.org" }],
+      "signers": ["$X402_OPS_WALLET_KEY"],
+      "eip1559": true,
+      "flashblocks": false,
+      "receipt_timeout_secs": 60
+    }
+  }
+}

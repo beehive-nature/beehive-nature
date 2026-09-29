@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3561ad70fc",
+ "bnr": "bnr://skaists.dev/blood/p3561ad70fc",
+ "identity": {
+  "name": "Catherine White",
+  "lifespan": "1749–1829",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LQRT-6WW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "7 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "7 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdf827e11ab",
+    "name": "Isaac White",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb4138413ac",
+    "name": "Eleanor Helena Magdalena Rhyndress",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0cbbed3463",
+    "name": "Harmon Sawyer"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LQRT-6WW",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 7,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

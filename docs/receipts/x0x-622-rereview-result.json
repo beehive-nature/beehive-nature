@@ -1,0 +1,14 @@
+{
+  "pin": "9b5df485",
+  "public_mesh": false,
+  "shipped_fast_suite": {"total": 11, "failed": 0},
+  "results": [
+    {"case": "healthy-control", "runner_exit": 0, "attempt_status": "accepted", "node_stop_marker": true},
+    {"case": "sampler-exit22", "runner_exit": 0, "attempt_status": "accepted", "node_stop_marker": true},
+    {"case": "sampler-exit21", "runner_exit": 0, "attempt_status": "accepted", "node_stop_marker": true},
+    {"case": "logger-exit9", "runner_exit": 0, "attempt_status": "accepted", "node_stop_marker": true},
+    {"case": "receipt-write-failure", "runner_exit": 0, "attempt_status": "unwritable-receipt", "node_stop_marker": true},
+    {"case": "node-stop-failure", "runner_exit": 0, "attempt_status": "accepted", "node_stop_marker": false},
+    {"case": "term-during-blocked-start", "still_running_after_2s": true}
+  ]
+}

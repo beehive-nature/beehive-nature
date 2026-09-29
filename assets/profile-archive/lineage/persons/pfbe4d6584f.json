@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfbe4d6584f",
+ "bnr": "bnr://skaists.dev/blood/pfbe4d6584f",
+ "identity": {
+  "name": "Ebenezer Moon II",
+  "lifespan": "1680–1757",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ1V-7JY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p0c7ee84ac5",
+    "name": "Robert B. Moon"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ1V-7JY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

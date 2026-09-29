@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa022511737",
+ "bnr": "bnr://skaists.dev/blood/pa022511737",
+ "identity": {
+  "name": "Harriet Phylena Fuller",
+  "lifespan": "1844–1899",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K236-YQ7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "7 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "7 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8e660d784f",
+    "name": "Edwin Fuller",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p799319273f",
+    "name": "Eunice L. Maxson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd1b6a3210b",
+    "name": "Rufus Elijah Lawton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd3c11bace1",
+    "name": "Loyal Hiram Lawton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K236-YQ7",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 7,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

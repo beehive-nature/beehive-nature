@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1a7f29c355",
+ "bnr": "bnr://skaists.dev/blood/p1a7f29c355",
+ "identity": {
+  "name": "Frances Neville",
+  "lifespan": "1722–1770",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV6L-RL4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "19 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "19 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pffe30193c0",
+    "name": "John Neville",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p69c6c793f2",
+    "name": "Sarah Dodgson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde86e16567",
+    "name": "Johanna Lucus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbcebc87524",
+    "name": "Mary Brown"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8b5774bad5",
+    "name": "Daniel Brown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV6L-RL4",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 19,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

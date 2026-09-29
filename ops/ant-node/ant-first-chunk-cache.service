@@ -1,0 +1,22 @@
+[Unit]
+Description=ANT public /stream first-chunk disk cache (Caddy → this → antd)
+Documentation=ops/ant-node/README-first-chunk-cache.md
+After=network-online.target antd.service
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+# Listen on docker-bridge IP so Caddy can reach it; antd stays on :8082
+Environment=ANT_LISTEN=172.18.0.1:8084
+Environment=ANT_UPSTREAM=http://172.18.0.1:8082
+Environment=ANT_FIRST_CHUNK_DIR=/var/cache/ant-first-chunk
+Environment=ANT_FIRST_CHUNK_BYTES=2097152
+Environment=ANT_ALLOWED_ORIGIN=https://skaists.dev
+ExecStartPre=/usr/bin/mkdir -p /var/cache/ant-first-chunk
+ExecStart=/usr/bin/node /home/ubuntu/beehive-nature/ops/ant-node/first-chunk-cache.mjs
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

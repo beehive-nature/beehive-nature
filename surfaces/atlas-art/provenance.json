@@ -1,0 +1,46 @@
+{
+  "description": "On-chain ERC20i artwork snapshots. Rendered from collection contracts using the gallery’s existing read path; these images are not a live balance or an appraisal.",
+  "capturedAt": "2026-09-07T03:06:51.486Z",
+  "items": [
+    {
+      "name": "FUNGi",
+      "path": "atlas-art/fungi.svg",
+      "contract": "0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f",
+      "chain": 8453,
+      "block": 50979954,
+      "source": "https://basescan.org/address/0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f",
+      "method": "a775188a",
+      "renderer": "422b9e23",
+      "snapshot": true,
+      "PUBLIC-CONSTANT-source-sha256": "01d93a2a20cf69f142b64aaefb92fa30ff381e1b4b63ea1239cdf8f7150a9a21",
+      "PUBLIC-CONSTANT-served-sha256": "01d93a2a20cf69f142b64aaefb92fa30ff381e1b4b63ea1239cdf8f7150a9a21"
+    },
+    {
+      "name": "FROGGi",
+      "path": "atlas-art/froggi.svg",
+      "contract": "0x88a78c5035bdc8c9a8bb5c029e6cfcdd14b822fe",
+      "chain": 8453,
+      "block": 50979954,
+      "source": "https://basescan.org/address/0x88a78c5035bdc8c9a8bb5c029e6cfcdd14b822fe",
+      "method": "2bd1a011",
+      "renderer": "422b9e23",
+      "snapshot": true,
+      "PUBLIC-CONSTANT-source-sha256": "a4f3a0c2aaaf22715417353819f5092ac853d1f96318ac21c48206e53020e3a5",
+      "accessibility": "Added a prefers-reduced-motion rule to suppress CSS animation and a non-rendering public-data provenance comment.",
+      "PUBLIC-CONSTANT-served-sha256": "741f17f52995d2ef2f6b1622b6d48b3a47175bac21e011db2d57907836fe06d2"
+    },
+    {
+      "name": "PEPi",
+      "path": "atlas-art/pepi.svg",
+      "contract": "0x28a5e71bfc02723eac17e39c84c5190415c0de9f",
+      "chain": 8453,
+      "block": 50979954,
+      "source": "https://basescan.org/address/0x28a5e71bfc02723eac17e39c84c5190415c0de9f",
+      "method": "a775188a",
+      "renderer": "a435130b",
+      "snapshot": true,
+      "PUBLIC-CONSTANT-source-sha256": "4e426d2344f3df0171595ae161a91fb3c9c8bc96b431a48d50227ed56f8c087f",
+      "PUBLIC-CONSTANT-served-sha256": "4e426d2344f3df0171595ae161a91fb3c9c8bc96b431a48d50227ed56f8c087f"
+    }
+  ]
+}

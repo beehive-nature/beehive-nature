@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pca0eb92e50",
+ "bnr": "bnr://skaists.dev/blood/pca0eb92e50",
+ "identity": {
+  "name": "Mary Ann Clemens",
+  "lifespan": "1841–1903",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJT-YN5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "15 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "15 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p87feaeea6d",
+    "name": "William Clemens",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7d4ba9a27",
+    "name": "Ann Wiles",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p19112ceebb",
+    "name": "Minnie LaDell Taylor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb0115492ae",
+    "name": "Martin Van Buren Taylor Sr.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJT-YN5",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 15,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

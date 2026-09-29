@@ -32,6 +32,93 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-29` — **#250: Codex review reconciled (four rounds).** The gate now refuses:
+  - forged `renderer` and `law` values (before, they were only required to be present);
+  - inherited property names as badge names (`constructor` crashed the checker);
+  - non-canonical `measured_at` (`Date.parse` accepted `0`, and `2026-02-31` rolled into March).
+  The probe assertions are scoped to the forged badge. Each new probe fails against the
+  previous gate. A malformed or throwing document is now its own FAIL, and the check
+  continues past it. An all-clear row must have every kind at 100, and a status file
+  must carry its document's name. The independent review at `048f98c` found that `null`
+  evidence skipped the derivation. A PASS now requires the derivation to have run, and
+  orphan SVG and evidence files fail. `node --test e2e/render-badges.test.mjs` → 21/21. The SHA-1 remark
+  in the gate-repair dispatch is marked UNVERIFIED. Aikido's two file-read flags are
+  verified false positives: every path comes from `readdir` of the operator's `--dir`.
+  Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
+- `2026-09-29` — **Proof lights handed off: #250 (with #253 folded in), #247
+  and the unstarted CI-signing card.** Both PRs need independent review
+  before `main`. The only landing conflict is this file. Carried forward from
+  the founder's correction: never force-push, not even with a lease; repairs
+  are new commits. Dispatch: `docs/dispatches/2026-09-29-proof-lights-handoff.md`.
+- `2026-09-27` — **Proof lights: the badge gate re-derives, it no longer re-reads.**
+  Review of #250 found `render-badges.mjs --check` passed forged documents:
+  deleted evidence, 999/999 counts with a matching SVG, a forty-zero
+  revision, a bogus signature, non-JSON evidence. `--check` now requires
+  readable, schema-valid evidence (git blob id plus sha3-256), a revision
+  that is a commit, coverage of the meter's page list at that revision, and
+  every derived field recomputed. A supplied signature or a CI-origin claim
+  fails as unverifiable until the CI-signing card (owner and scope recorded
+  in the dispatch, 2026-09-29). The badge is unchanged.
+  `node --test e2e/render-badges.test.mjs` → 13/13; 10 of them fail against
+  the old gate. Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
+- `2026-09-06` — **Founder promotes Astra to lead; zCode review reconciled.**
+  The ten-minute leash was delegated to Bash, not removed; review found the
+  override ceiling too permissive and reduced both entry points to 600 seconds.
+  `bash e2e/box-tunnel.test.sh` → 5 PASS cases; installed default access and
+  Windows rejection above ten minutes checked. Prior/current/installed
+  nostr-tools versions all read 2.25.2. All 13 governance Rust diffs equal
+  rustfmt(base). Source and rollback:
+  `docs/dispatches/2026-09-06-astra-zcode-reconciliation.md`.
+  zCode owns the gated integration handoff and the next capacity/recovery lane;
+  model, effort, session type and acceptance criteria are in
+  `docs/dispatches/2026-09-06-zcode-task-docket.md`. Ready-to-claim does not mean
+  execution has started; main parity and recovery stay open until receipted.
+- `2026-09-06` — **Astra PR identity check repaired after CI reproduced the
+  false rejection.** The PR job checked GitHub's synthetic merge author; push
+  static CI passed on the same contribution. The workflow now supplies actual
+  PR base/head refs to the existing fail-closed identity checker. Real author
+  violations and missing refs still refuse. Repro:
+  `bash e2e/identity-pr-range.test.sh` → 3 PASS cases. This changes range
+  selection, not founder authorship or co-author rules. Receipt:
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`.
+- `2026-09-06` — **Astra continuity audit: seven primitives mapped; archive
+  receiving seam added without changing v1 bytes.** `cargo test -p bnr-archive
+  --locked` → 14 passed, 0 failed on Windows. Offline verification checks the
+  complete manifest/batch set, integrity, framing, order and admission budgets;
+  tests recover from serialized artifacts after deleting the temporary source,
+  and refuse corrupt/incomplete inputs. Manifest authority, freshness, independent
+  retrieval, durable event replay and billion-user capacity remain OPEN. No
+  constitutional parameter or policy changed. Dispatch:
+  `docs/dispatches/2026-09-06-astra-kernel-continuity.md`.
+- `2026-09-06` — **Astra laptop network repair installed.** Existing helper
+  silently started a local mesh daemon; replacement uses one scoped SSH
+  transport with loopback forwards and renewable automatic expiry. Four offline
+  lifecycle tests pass; actual Windows access and WSL expiry observed. Helper
+  left down. Router failure mechanism and direct local-node safety UNVERIFIED.
+  Repro: `bash e2e/box-tunnel.test.sh`. Dispatch and rollback:
+  `docs/dispatches/2026-09-06-astra-change-receipt.md`.
+- `2026-09-06` — **Astra voice worker repair deployed to bnr.** Serialized,
+  bounded processing; failure-safe queue release; child deadlines and bounded
+  output; DynamicUser/private spool/read-only system/3G memory cap. `npm test`
+  in `ops/voice-scribe` → 6 passed. Live signed synthetic audio returned 200
+  and deletion confirmation; spool empty, public health 200. Existing key-
+  possession admission policy remains limited. No customer audio inspected.
+  Dispatch: `docs/dispatches/2026-09-06-astra-change-receipt.md`.
+- `2026-09-06` — **Astra CI and secret-log repair.** Tests/secret-scan workflow
+  tokens explicitly read-only; actions pinned. Scanner refuses matching content
+  while logging locations, not bytes. Repro: `bash e2e/secret-scan-output.test.sh`.
+  Hooks/push CI remain detection, not protected-branch enforcement. Dispatch:
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`.
+- `2026-09-06` — **Astra estate and production baseline recorded.** Paginated
+  inventory: 86 scoped repos, including 47 personal study forks; 39 selected
+  originals/org repos, one empty mirror. `skaists.dev` resolves to Pages, host
+  8080 is wallet-relay. Root disk 93% used and bitcoind failed; full recovery,
+  deployment provenance, live OCI evidence and license/readiness gates OPEN.
+  Invite rotation intentionally remains dry-run. Commands and captured refs:
+  `docs/dispatches/2026-09-06-astra-repository-inventory.md` and
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`. This is a bounded audit,
+  not blanket cryptographic or production certification.
+
 - `2026-07-25` — **DISPATCH-B executed: offline-or-fail is atmirror's
   default; v0.2 conformance proven; canonical manifest tracked; CC-4
   escalated on law.** CC-1 (`85dbc7f`): verify/restore no longer silently

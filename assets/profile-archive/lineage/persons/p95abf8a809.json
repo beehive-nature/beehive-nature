@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p95abf8a809",
+ "bnr": "bnr://skaists.dev/blood/p95abf8a809",
+ "identity": {
+  "name": "Anna Brown",
+  "lifespan": "1766–1822",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KLYB-LHX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "8 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "8 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc33a32db3b",
+    "name": "Israel Brown",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf78c90fa73",
+    "name": "Lydia Smith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe7f8934051",
+    "name": "Manning Humes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3e5d27365d",
+    "name": "Moses Humes Sr.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KLYB-LHX",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 8,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

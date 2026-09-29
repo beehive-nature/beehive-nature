@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbe61ca2cea",
+ "bnr": "bnr://skaists.dev/blood/pbe61ca2cea",
+ "identity": {
+  "name": "Mary Snallum",
+  "lifespan": "1703–1783",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LWJY-DMJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "30 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "30 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0b7e5fae1f",
+    "name": "William Snallum",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2d000622ca",
+    "name": "Mrs. Sarah Snallum",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p08d4a8ae67",
+    "name": "Rachel Babbitt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbf43ee7df4",
+    "name": "Nathanial Babbitt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LWJY-DMJ",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 30,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

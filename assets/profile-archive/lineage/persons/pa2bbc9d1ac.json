@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa2bbc9d1ac",
+ "bnr": "bnr://skaists.dev/blood/pa2bbc9d1ac",
+ "identity": {
+  "name": "Ann Simpson",
+  "lifespan": "1753–1835",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7FN-WGH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "27 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "27 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbf31144122",
+    "name": "Christopher Simpson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf4ef0da0e9",
+    "name": "Elizabeth Lovell Rousby",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paecc76ef71",
+    "name": "Elizabeth Welburn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p54bacd6b65",
+    "name": "William Wellburn",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7FN-WGH",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 27,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

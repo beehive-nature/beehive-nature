@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # stream-laptop.sh — THE FOUNDER'S LINE to the watch room (POC 2026-09-04).
-# Laptop → x0x tailnet forward → box RTMP inlet → ffmpeg ×2 renditions →
+# Laptop → scoped SSH forward → box RTMP inlet → ffmpeg ×2 renditions →
 # Caddy same-origin HLS. Nothing third-party; nothing leaves the estate.
 #
 # usage: ./stream-laptop.sh up   [key]   # forwards + push a testcard stream
@@ -23,12 +23,8 @@ need_key() { [ -n "$KEY" ] || { echo 'stream key required (arg 2 or WATCH_STREAM
 case "${1:-}" in
 up)
   need_key
-  # 1. the tailnet: daemon (lean profile) + the direct machine session
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(cygpath -w "$X0X_DIR/x0x-tunnel.ps1")" up
-  X0X="$X0X_DIR/x0x.exe"
-  # 2. arm this lane's forwards (idempotent: port busy = already armed)
-  "$X0X" forward add --local "$RTMP_LOCAL" --peer "$BOX_AGENT" --target-port 1935 2>/dev/null || true
-  "$X0X" forward add --local "$DOOR_LOCAL" --peer "$BOX_AGENT" --target-port 8094 2>/dev/null || true
+  # One SSH transport owns all four forwards; no local mesh joins.
+  powershell.exe -NoProfile -File "$(cygpath -w "$X0X_DIR/x0x-tunnel.ps1")" up -Media
   # 3. the push: a testcard with a wall-clock overlay (the human latency
   #    receipt — compare the burned-in clock on the phone to the wall).
   #    The founder's OBS uses the same road: rtmp://127.0.0.1:19350/live
@@ -48,8 +44,8 @@ obs)
   cat <<EOF
 OBS → Settings → Stream:
   Server    rtmp://127.0.0.1:19350/live
-  Stream Key $ROOM?s=$KEY
-(the tailnet must be up: x0x-tunnel.ps1 up + the two forwards — run 'up' once first)
+  Stream Key $ROOM?s=<your locally stored stream key; never printed here>
+(the SSH tunnel must be up: x0x-tunnel.ps1 up -Media)
 EOF
   ;;
 ticker)
@@ -61,9 +57,8 @@ ticker)
   ;;
 down)
   pkill -f 'rtmp://127.0.0.1:19350' 2>/dev/null || true
-  "$X0X_DIR/x0x.exe" forward remove --local "$RTMP_LOCAL" 2>/dev/null || true
-  "$X0X_DIR/x0x.exe" forward remove --local "$DOOR_LOCAL" 2>/dev/null || true
-  echo 'stream down; forwards freed (daemon still lean-up — x0x-tunnel.ps1 down stops it)'
+  powershell.exe -NoProfile -File "$(cygpath -w "$X0X_DIR/x0x-tunnel.ps1")" down
+  echo 'stream down; scoped SSH forwards closed'
   ;;
 *)
   echo 'usage: stream-laptop.sh up|obs|ticker|down'; exit 2 ;;

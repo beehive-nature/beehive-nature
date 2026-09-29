@@ -6,6 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf7f0">
 <title>BNR · Get started</title>
 <!--
   BNR ONBOARDING WIZARD — beta-test preview.
@@ -159,10 +160,462 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .stage>*{animation:rise .22s ease both}
 @media (prefers-reduced-motion:reduce){.qr,.spin,.stage>*{animation:none}}
-</style>
-</head>
-<body>
 
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / Symposium #46 / Hexagon #47 / bLongevity #48 /
+   Review #49 / BiGen #50 / University #51. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:var(--bg-card);color:var(--ink);
+ font:inherit;font-weight:650;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--primary);color:#150512;border-color:transparent}
+.door:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7;color:var(--ink)}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--ink);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--ink-mut);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--ink-mut);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+.vivid{max-width:40rem;margin:16px auto 0;font-size:1.08rem;line-height:1.75;color:var(--ink-mut)}
+.honest{max-width:40rem;margin:14px auto 0;font-size:.95rem;line-height:1.65;color:var(--ink-mut)}
+#first-bee,#first-raver,#layer-choice,#layer-figure,#instrument{display:none}
+body[data-reg="bee"][data-onb-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-onb-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-onb-beat="choice"] #layer-choice{display:block}
+body[data-onb-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:flex;flex-direction:column;align-items:center;width:100%}
+body[data-reg="raver"][data-onb-beat="arrival"] #first-raver{display:flex}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#fbf7f0;--bg-card:#fff;--ink:#0c1412;--ink-mut:#4a5f55;--ink-dim:#5a645e;
+  --line:#e6dfd2;--primary:#a8238c;--info:#176879;--verified:#326b39;--guard:#65509a;
+  --you:#a8238c;--biomass:#326b39;--sovereign:#65509a;--b-value:#855b0b;
+  color-scheme:light;background:#fbf7f0;color:#0c1412;
+}
+body[data-reg="bee"] .take{color:#6e3fb8}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--font-ui);border-radius:16px;min-width:11rem;background:#fff;border-color:#857d70;color:#0c1412}
+body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
+body[data-reg="bee"] #tbar a{color:#0c1412!important}
+
+/* Raver — quiet threshold; the floor already said accept you. */
+body[data-reg="raver"]{--bg:#0c1412;--bg-card:#101916;--ink:#e9f2ec;--ink-mut:#b7c9be;--ink-dim:#8aa396;
+ --line:#2a3a34;--primary:#c9a0ff;--you:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-onb-beat="arrival"]{padding:0 0 90px;align-items:stretch}
+#first-raver{position:relative;min-height:calc(100svh - 90px - 3.2rem);flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(10vh + 24px);text-align:center;overflow:hidden;width:100%}
+body[data-reg="raver"][data-onb-beat="arrival"] #foot-quiet{
+  position:relative;z-index:2;margin:0;max-width:none;padding:0 22px 10px;border-top:0;color:#8aa396}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+#threshold-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--font-ui);border-radius:99px;padding:12px 26px}
+@keyframes floor-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes slip-glow{0%,100%{opacity:.35}50%{opacity:.8}}
+#threshold-scene .living{animation:floor-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#threshold-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+#threshold-scene .glow{animation:slip-glow 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #threshold-scene .living,#threshold-scene .wash,#threshold-scene .glow{animation:none}
+}
+
+/* Cypherpunk keeps today's full ceremony instrument. */
+body[data-reg="cypherpunk"]{font-family:var(--font-mono);padding-bottom:110px}
+body[data-reg="cypherpunk"] #instrument-map{display:flex}
+body[data-reg="cypherpunk"] #instrument>.foot{margin-block-start:0;margin-block-end:var(--s3)}
+
+/* Page-owned language+view chrome. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.onb-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.onb-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.onb-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--bg-card,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.onb-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--ink-mut))!important;font:.75rem/1.4 inherit!important}
+#bregbar{width:100%;max-width:none;box-sizing:border-box}
+#onboarding-room{width:100%}
+#first-bee,#layer-choice,#layer-figure{width:100%;max-width:40rem;margin:0 auto;padding:8px var(--s3) 24px;text-align:center}
+#instrument-map{display:none;flex-wrap:wrap;gap:6px;width:100%;max-width:29rem;margin:0 0 var(--s3)}
+#instrument-map button{appearance:none;font:inherit;font-size:.72rem;min-height:44px;padding:6px 10px;
+  border:1px dashed var(--line);border-radius:8px;background:transparent;color:var(--ink-mut);cursor:pointer}
+#instrument-map button:focus-visible{outline:2px solid var(--verified);outline-offset:2px}
+#foot-quiet{display:block}
+body[data-reg="cypherpunk"] #foot-quiet,
+body[data-onb-beat="deeper"] #foot-quiet{display:none}
+
+/* the page end at 390 px (2026-09-26 lower-half pass): the quiet foot line
+   reads at 14 px; on a light-scheme device the cypherpunk primary action wears
+   new bee's deeper magenta with a white label, so it keeps 4.5:1. Badges, tags and gauge
+   states read as written (casing law) at 13 px. */
+.foot{font-size:.875rem;line-height:1.6}
+@media (prefers-color-scheme:light){body[data-reg="cypherpunk"] .btn.primary{background:#a8238c;color:#fff}}
+.badge,.tag,.gauge .s{text-transform:none;letter-spacing:.02em;font-size:.8125rem}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;padding:0 var(--sk-s3);box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-center{text-align:center}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding:var(--sk-s4) var(--sk-s3) 0;border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+.et-bchip{display:inline-flex;align-items:baseline;gap:var(--sk-s1);padding:0 var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-b-chip);color:var(--sk-b-value)!important;font-weight:600;white-space:nowrap}
+
+/* NEW BEE — one question at a time */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-q{margin:0;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-term i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);border-radius:0}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row{cursor:pointer}
+.et-b-row>span{display:flex;flex-direction:column;min-width:0}
+.et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small.free{color:var(--sk-verified)}
+.et-b-row[aria-pressed="true"],.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-pressed="true"] :is(small,em),.et-b-row[aria-expanded="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+.et-b-row[aria-pressed="true"] .dot{border-color:var(--sk-sovereign-strong)}
+.et-b-row[aria-pressed="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;text-align:center}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-back{align-self:flex-start;min-height:var(--sk-control-min);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;padding:0}
+.et-b-term{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+.et-b-term:last-child{border-bottom:0}
+.et-b-term i{width:36px;height:36px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font-style:normal}
+.et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-term span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+.et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+.et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+.et-b-card p{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — everything through art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
+.et-r-tiles button{min-height:108px;padding:var(--sk-s2);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);font:700 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s);text-align:center}
+.et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-hold{position:relative;width:216px;height:216px;margin:0 auto}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.et-r-hold .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+.et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:0}
+.et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+.et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.et-r-art .seg,.et-r-tiles button,.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the pipeline is the interface; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab tr.pick{cursor:pointer}
+.et-c-tab tr.pick:hover td,.et-c-tab tr[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr[aria-selected="true"] td:first-child{color:var(--sk-you)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .gd{color:var(--sk-guard)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .gd{color:var(--sk-guard)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+/* onboarding's own raver legend: free rungs are life-green, paid rungs violet, yours lit */
+.et-r-legend .lg-free{background:var(--sk-biomass)}.et-r-legend .lg-cost{background:var(--sk-sovereign)}.et-r-legend .lg-sel{background:var(--sk-sovereign-strong)}
+.et-b-rowt{flex:1}
+body[data-reading-room] #eternal{max-width:30rem}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--s1:var(--sk-s1);--s2:var(--sk-s2);--s3:var(--sk-s3);--s4:var(--sk-s4);--s5:var(--sk-s5);--s6:var(--sk-s6);--radius:var(--sk-radius);--radius-pill:var(--sk-radius-pill);
+ --bg:var(--sk-bg);--bg-card:var(--sk-bg-card);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-mut);--line:var(--sk-line);
+ --primary:var(--sk-primary);--info:var(--sk-info);--verified:var(--sk-verified);--guard:var(--sk-guard);--you:var(--sk-you);--biomass:var(--sk-biomass);
+ --sovereign:var(--sk-sovereign);--sovereign-soft:var(--sk-sovereign-soft);--ai:var(--sk-ai);--ai-deep:var(--sk-ai);--b-value:var(--sk-b-value);--rainbow:var(--sk-rainbow)}
+html body[data-reg="bee"]{background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+html body[data-reading-room][data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+html body[data-reg="bee"] :is(.take,#layer-choice h2){font-family:var(--sk-font-bee-serif);font-weight:400;letter-spacing:0;color:var(--sk-ink)}
+html body[data-reading-room][data-reg="bee"] #first-bee .take{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+html body[data-reading-room][data-reg="bee"] #first-bee .calm{color:var(--sk-ink-mut)}
+html body[data-reading-room][data-reg="bee"] #first-bee .support{color:var(--sk-ink-mut)}
+html body[data-reg="bee"] .door{border-color:var(--sk-ink);color:var(--sk-ink);background:var(--sk-bg-card);border-radius:var(--sk-radius-md)}
+html body[data-reading-room][data-reg="bee"] .door:not(.primary){border-color:var(--sk-ink);color:var(--sk-ink);background:transparent}
+html body[data-reg="bee"] .door.primary,html body[data-reading-room][data-reg="bee"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary);border-radius:var(--sk-radius-lg)}
+html body[data-reg="raver"],html body[data-reading-room][data-reg="raver"]{--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--dim:var(--sk-ink-soft);--cyan:var(--sk-ai);--violet:var(--sk-sovereign-soft);
+ background:var(--sk-bg)!important;color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+html body[data-reading-room][data-reg="raver"] #first-raver{background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reg="raver"] .feel,html body[data-reading-room][data-reg="raver"] #first-raver .feel{font-family:var(--sk-font-raver-display);font-weight:700;letter-spacing:-.01em;color:var(--sk-ink);text-shadow:none}
+html body[data-reg="raver"] .door.primary,html body[data-reading-room][data-reg="raver"] #first-raver .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary);border-radius:var(--sk-radius-pill);font-family:var(--sk-font-raver-display)}
+html body[data-reg="raver"] #foot-quiet{color:var(--sk-ink-mut)}
+html body[data-reg="cypherpunk"]{background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] .btn.primary{background:var(--sk-primary);color:var(--sk-on-primary)}
+#instrument .btn.primary,#instrument .door.primary{color:var(--sk-on-primary)}
+#instrument .bchip{background:var(--sk-b-chip)}
+#instrument .chip{font-size:14px;min-height:var(--sk-control-min)}
+html body[data-reg="cypherpunk"] #instrument .chip{font-size:12px}
+html body[data-reg="cypherpunk"] :is(#instrument .btn,#instrument .card,#instrument .panel,#instrument .wordin,#instrument .words span){border-radius:var(--sk-radius-sm)}
+html body[data-reg="cypherpunk"] #instrument-map button{border-radius:var(--sk-radius-sm);font-size:12px;color:var(--sk-ink-mut)}
+html body[data-reg="cypherpunk"] :is(#instrument h1,#instrument h2){font-family:var(--sk-font-mono);font-size:15px;line-height:1.45;font-weight:600}
+</style>
+<link rel="stylesheet" href="../skaists.css">
+</head>
+<body data-reg="bee" data-bee-theme="custom" data-onb-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="../index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="onb-language" data-language-host></span>
+</div>
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the page's own LADDER, its key engine and its preview status)
+     drives all three, so the facts cannot drift; each register has its own layout, graphic,
+     gesture and voice. Nothing here creates an account or a key: every "try it" hands off to the
+     page's own ceremony below (enterPlain → the instrument), which keeps its honest gauges. -->
+<section id="eternal" aria-label="your place in the hive">
+
+  <!-- NEW BEE — a calm room: one question, plain rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="ask">
+      <div class="et-b-mark" data-etk="et.onb.beehive-nature">beehive nature</div>
+      <h2 class="et-b-h" data-etk="et.onb.your-place-in-the-hive">your place in the hive</h2>
+      <p class="et-b-lede" data-etk="et.onb.a-calm-first-step-it-takes-a">a calm first step. it takes a minute, and nothing is made until you choose.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.onb.your-keys-stay-yours-nobody">your keys stay yours. nobody here holds them.</span></div>
+      <p class="et-b-q" id="etBeeQ" data-etk="et.onb.how-would-you-like-to-sign-i">how would you like to sign in?</p>
+      <div class="et-b-rows" id="etBeeRows" role="radiogroup" aria-labelledby="etBeeQ"><div class="et-b-row"><span data-etk="et.onb.reading-the-choices">reading the choices…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" data-go="know" data-etk="et.onb.continue">continue</button>
+        <a class="et-b-link" href="../index.html" data-etk="et.onb.look-around-the-hive-first">look around the hive first</a>
+        <p class="et-b-foot" data-etk="et.onb.you-can-change-this-later-yo">you can change this later. you stay the same you.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="know" hidden>
+      <button type="button" class="et-b-back" data-go="ask" data-etk="et.onb.how-you-sign-in">‹ how you sign in</button>
+      <h2 class="et-b-h" data-etk="et.onb.before-you-start">before you start</h2>
+      <p class="et-b-lede">three things to know. <span data-et="beePick">…</span></p>
+      <div class="et-b-rows">
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></i><div><b data-etk="et.onb.this-is-a-preview">this is a preview.</b><span data-et="beePreview">no account is made on this site.</span></div></div>
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></i><div><b>you start at <span class="et-bchip" data-et="balance">0 b</span></b><span data-etk="et.onb.nobody-gives-you-a-balance-y">nobody gives you a balance. you earn b by taking part.</span></div></div>
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></i><div><b data-etk="et.onb.your-keys-stay-with-you">your keys stay with you.</b><span data-et="beeKeys">…</span></div></div>
+      </div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.onb.try-the-preview">try the preview</button>
+        <p class="et-b-foot" data-etk="et.onb.the-walkthrough-opens-below">the walkthrough opens below. it is a preview.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="asked" hidden>
+      <div class="et-b-tick" aria-hidden="true">⬡</div>
+      <h2 class="et-b-h et-center" data-etk="et.onb.it-s-open-below">it's open below.</h2>
+      <p class="et-b-lede et-center">your walkthrough with <span data-et="beePickName">…</span> is open further down this page. take it at your own pace.</p>
+      <div class="et-b-card"><h3 data-etk="et.onb.nothing-is-made-yet">nothing is made yet.</h3><p data-et="beeAsked">this site shows a preview. no account is created here.</p></div>
+      <div class="et-b-act"><button type="button" class="et-b-link" data-go="ask" data-etk="et.onb.back-to-the-start">back to the start</button></div>
+    </div>
+  </div>
+
+  <!-- RAVER — the key cell: four rings of light, one per way to hold your keys; the hold steps in -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your keys</h2><span class="et-r-hint" id="etRaverHint">tap a ring · tap the cell</span></div>
+    <svg class="et-r-art" id="etCell" viewBox="-200 -200 400 400" role="group" aria-label="the key cell: four rings, one per way to hold your keys, you at the heart"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-free"></i>free</span><span><i class="lg-cost"></i>costs</span><span><i class="lg-sel"></i>yours</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-seal" hidden>
+      <div class="et-r-tiles" id="etTiles">
+        <button type="button" aria-pressed="false" data-t="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span data-etk="et.onb.preview-only">preview only</span><small data-etk="et.onb.no-account-here">no account here</small></button>
+        <button type="button" aria-pressed="false" data-t="2"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg><span data-etk="et.onb.start-at-zero">start at zero</span><small data-etk="et.onb.earn-it-by-being-here">earn it by being here</small></button>
+        <button type="button" aria-pressed="false" data-t="3" class="et-dash"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.onb.keys-stay-yours">keys stay yours</span><small data-etk="et.onb.nobody-holds-them">nobody holds them</small></button>
+        <button type="button" aria-pressed="false" data-t="4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M6 10l6-6 6 6"/></svg><span data-etk="et.onb.climb-later">climb later</span><small data-etk="et.onb.same-you-stronger-lock">same you, stronger lock</small></button>
+      </div>
+      <div class="et-r-hold">
+        <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etHoldProg"/></svg>
+        <button type="button" class="et-r-holdbtn" id="etHold" disabled aria-describedby="etSealHint"><b data-etk="et.onb.hold">hold</b><span data-etk="et.onb.to-step-in">to step in</span></button>
+      </div>
+      <p class="et-r-note" id="etSealHint">light all four</p>
+      <button type="button" class="et-r-ghost" data-go="line" data-etk="et.onb.back-to-the-rings">back to the rings</button>
+    </div>
+    <button type="button" class="et-r-pill" id="etRaverGo">step in</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the custody ladder, the ceremony pipeline, the receipt, all at first paint -->
+  <div class="et-c">
+    <div class="et-c-path">bnr://onboarding/<span data-et="cyDesig">first-join</span></div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">custody = self · <b data-etk="et.onb.0-keys-held-by-this-page">0 keys held by this page</b></div>
+    <table class="et-c-tab"><thead><tr><th>rung</th><th>holder</th><th>cost</th><th>path</th></tr></thead><tbody id="etLadder"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.onb.ceremony-pipeline-first-join">ceremony pipeline · first join</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo">run the ceremony</button>
+    <h3 class="et-c-h" data-etk="et.onb.receipt-read-from-this-page">receipt · read from this page, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.onb.verify-no-trust-in-this-page">verify · no trust in this page needed</div>
+      <ol><li data-etk="et.onb.devtools-network-reload-no-r">devtools → network → reload: no request leaves this origin on load</li><li data-etk="et.onb.view-source-the-only-fetch-i">view source: the only fetch is the trezor lane, on tap</li><li data-etk="et.onb.bzdid-key-js-is-vendored-her">bzdid-key.js is vendored here: read it, hash it, compare</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="bzdid-key.js" data-etk="et.onb.read-the-key-engine">read the key engine</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/onboarding/index.html" target="_blank" rel="noopener noreferrer">fork the template ↗ <span class="et-sr" data-etk="et.onb.opens-in-a-new-tab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.onb.the-whole-way-in">the whole way in</h2>
+
+
+
+<main id="onboarding-room">
+<article id="first-bee">
+  <p class="eyebrow" data-i18n="onb.mark">BNR · Get started</p>
+  <p class="calm" data-i18n="onb.bee.calm">A place to begin, at your own pace.</p>
+  <h1 class="take" data-i18n="onb.bee.takeaway">Try joining the hive.</h1>
+  <p class="support" data-i18n="onb.bee.support">This is a preview. It does not create an account here.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-go="choice" data-i18n="onb.bee.start">Try the preview</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="threshold-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="threshold-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#142018"/>
+        <stop offset="36%" stop-color="#123028"/>
+        <stop offset="68%" stop-color="#1a2438"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="door-glow" cx="50%" cy="46%" r="48%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".32"/>
+        <stop offset="46%" stop-color="#63c97c" stop-opacity=".12"/>
+        <stop offset="78%" stop-color="#c9a0ff" stop-opacity=".14"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#threshold-wash)"/>
+    <ellipse class="wash" cx="400" cy="400" rx="280" ry="240" fill="url(#door-glow)"/>
+    <g class="living">
+      <ellipse cx="400" cy="622" rx="222" ry="36" fill="#86cc72" opacity=".13"/>
+      <path d="M224 588V354a176 176 0 0 1 352 0v234" fill="#172e29" stroke="#86cc72" stroke-width="3"/>
+      <path d="M259 587V356a141 141 0 0 1 282 0v231" fill="#203139" stroke="#45c2dc" stroke-width="2" opacity=".9"/>
+      <path d="M294 588V360a106 106 0 0 1 212 0v228" fill="#382b4c" stroke="#c9a0ff" stroke-width="4"/>
+      <path d="M322 588V364a78 78 0 0 1 156 0v224" fill="#c9a0ff" opacity=".21"/>
+      <path d="M332 583 226 765M468 583l106 182M400 584v179" fill="none" stroke="#c9a0ff" stroke-width="2" opacity=".5"/>
+      <path d="M340 602h120m-139 39h158m-178 40h198" stroke="#45c2dc" stroke-width="2" opacity=".45"/>
+      <path d="M177 563c-39-69-16-112 15-132 19 64 14 94-15 132Zm444 0c39-69 16-112-15-132-19 64-14 94 15 132Z" fill="#86cc72" opacity=".56"/>
+      <path d="m177 563 16-88m428 88-16-88" stroke="#bde4ac" stroke-width="3"/>
+    </g>
+    <g class="glow" fill="none" stroke="#d8c46a" stroke-width="1.6">
+      <circle cx="400" cy="412" r="38" stroke="#c9a0ff" opacity=".9"/>
+      <circle cx="400" cy="412" r="61" stroke="#45c2dc" opacity=".4"/>
+      <path d="M385 412h30m-9-9 9 9-9 9" stroke="#f5e9ff" stroke-width="3"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="onb.raver.feel">Come as you are. There is room for you here.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-go="figure" data-i18n="onb.raver.tap">Step in</button>
+  </div>
+</article>
+
+<article id="layer-choice">
+  <h2 data-i18n="onb.bee.choice">Use this device to hold your keys.</h2>
+  <p class="honest" data-i18n="onb.bee.preview">On this site, the next screen is a preview. No account is created. A connected wallet host is needed for a real join.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="onb.raver.choice">Your place in the hive. Your keys stay with you.</p>
+  <p class="honest" data-i18n="onb.raver.preview">Explore the joining ritual. This site shows a preview; it does not create an account.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div class="foot" id="foot-quiet"><span data-i18n="onb.foot.door">Your keys stay yours. Nobody here holds them.</span></div>
+
+<div id="instrument">
 <div class="top">
   <span class="mark" aria-hidden="true"></span>
   <span class="brand">BNR</span>
@@ -170,21 +623,32 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
   <button class="chip" id="net" onclick="APP.toggleNet()" title="Works with or without a network">
     <span class="dot"></span><span id="net-t">Online</span>
   </button>
-  <select class="lang" id="lang" onchange="APP.setLang(this.value)" aria-label="Language">
-    <option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option>
-    <option value="fr">FR</option><option value="de">DE</option><option value="ar">العربية ‏</option>
-    <option value="zh">简体</option><option value="hi">हिन्दी</option>
-    <option value="new">＋ yours</option>
-  </select>
 </div>
 
-<main class="stage" id="stage"><!-- screens injected here --></main>
+<nav id="instrument-map" data-reg="cypherpunk" aria-label="Ceremony instrument">
+  <button type="button" data-onb-jump="welcome">1 Welcome doors</button>
+  <button type="button" data-onb-jump="returning">2 Returning</button>
+  <button type="button" data-onb-jump="custody">3 8e ladder</button>
+  <button type="button" data-onb-jump="passkey">4 Passkey</button>
+  <button type="button" data-onb-jump="optical">5 Optical</button>
+  <button type="button" data-onb-jump="trezor">6 Trezor</button>
+  <button type="button" data-onb-jump="recovery">7 Phrase floor</button>
+  <button type="button" data-onb-jump="ready">8 Ready</button>
+  <button type="button" data-onb-jump="net">9 Net + offline</button>
+  <button type="button" data-onb-jump="seams">10–11 Engines + seams</button>
+</nav>
 
-<div class="foot">
+<div class="foot" data-reg="cypherpunk">
   UX preview · zero-network by construction · auth steps here are <b>SIMULATED, labeled
   honestly</b> (house law: PLANNED/REFUSED, never mock) — they bind real when served from
   <span class="mono">wallet-relay</span>. Seat prepares UNSIGNED only; no key ever enters this page.
+  Cite-or-silent: WebAuthn/PRF, Trezor bridge, optical reply, BIP-39/ENGINE readiness.
+  skaists.dev static host does not complete WebAuthn/Trezor native.
 </div>
+
+<div class="stage" id="stage"><!-- screens injected here --></div>
+</div>
+</main>
 
 <script src="vendor/qrcodegen.js"></script>
 <script src="bzdid-key.js"></script> <!-- vendored key engine: PRF→master_prk→Ed25519, BIP39, fingerprints -->
@@ -212,20 +676,12 @@ const APP = {
 
   toggleNet(){ this.ctx.online=!this.ctx.online;
     const on=this.ctx.online;
-    document.getElementById('net').classList.toggle('off',!on);
-    document.getElementById('net-t').textContent = on?'Online':'Offline · mesh';
+    const chip=document.getElementById('net');
+    const label=document.getElementById('net-t');
+    if(chip) chip.classList.toggle('off',!on);
+    if(label) label.textContent = on?'Online':'Offline · mesh';
     // re-render custody so the offline-native option is highlighted
     if(this.current==='custody') render('custody');
-  },
-  setLang(v){
-    if(v==='new'){
-      // the tribal-corpus breadcrumb: every language belongs, incl. ones no
-      // corporation would ever localize. Voluntary corpus, AI-guided.
-      const f=document.querySelector('.foot');
-      f.innerHTML='🌍 <b style="color:var(--ink)">Your language belongs here.</b> BNR is building a voluntary language corpus — including tribal and uncommon languages the big platforms skip — so this page can one day greet everyone in their own words. Ask us how to contribute yours.';
-      return;
-    }
-    document.documentElement.setAttribute('dir', v==='ar'?'rtl':'ltr');
   },
 };
 
@@ -568,6 +1024,38 @@ const SCREENS = {
     <button class="btn primary" onclick="alert('→ hands off to the dashboard surface (crates/wallet-relay/src/dashboard.html)')">Enter dashboard →</button>
     <button class="btn link" onclick="APP.restart()">Start the walkthrough over</button>
   `; },
+
+  netlaw(){ return `
+    <div class="grow">
+      <h2>Net + offline law</h2>
+      <p>The Online chip is a local switch, not a server heartbeat. Offline · mesh keeps
+         the spare-phone optical path first. Nothing here implies skaists.dev static
+         host can complete WebAuthn or Trezor native.</p>
+      <button class="chip" type="button" onclick="APP.toggleNet()">
+        <span class="dot"></span> Toggle online / offline · mesh
+      </button>
+      <p class="muted" style="margin-top:var(--s3)">Same facts at every temperature. First paint only changes.</p>
+      <button class="btn link" onclick="APP.go('welcome')">← Welcome doors</button>
+    </div>`; },
+
+  seams(){ return `
+    <div class="grow">
+      <h2>Vendored engines + honest seams</h2>
+      <div class="panel">
+        <div class="gauge ${ENGINE?'g-known':'g-absent'}"><span class="s">${ENGINE?'ENGINE':'PREVIEW'}</span>
+          <span class="mono">bzdid-key.js</span> ${ENGINE?'present — PRF→master_prk→Ed25519, BIP-39, fingerprints':'absent — keys are not real on this walk'}</div>
+        <div class="gauge ${window.qrcodegen?'g-known':'g-absent'}"><span class="s">${window.qrcodegen?'ENGINE':'PREVIEW'}</span>
+          <span class="mono">qrcodegen</span> ${window.qrcodegen?'present — pairing QR is encoded here':'absent — no code is faked'}</div>
+        <div class="gauge g-stale"><span class="s">Cite-or-silent</span>
+          WebAuthn/PRF capability, Trezor bridge reachability, optical reply verification,
+          BIP-39/ENGINE readiness — named only when probed, never guessed.</div>
+        <div class="gauge g-absent"><span class="s">SIMULATED</span>
+          Auth binds real when served from <span class="mono">wallet-relay</span>.
+          Seat prepares UNSIGNED only. PLANNED / REFUSED / Declared vs Known — never mock success.</div>
+      </div>
+      <p class="muted">Preview prop words are not a backup. ZERO b is the self-funded law, not a starter grant.</p>
+      <button class="btn link" onclick="APP.go('welcome')">← Welcome doors</button>
+    </div>`; },
 };
 
 /* ---------- key build (engine-backed) ----------
@@ -984,8 +1472,258 @@ function render(screen){
 }
 APP.current='welcome';
 render('welcome');
+
+/* ===== three-temperature beats — first paint is what changes ===== */
+function restoreVisibleFocus(focus){
+  if(!focus||!focus.isConnected)return;var target=focus;
+  for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+    target=node.querySelector('summary'); break;
+  }
+  if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultBeat(reading){
+  return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading==='cypherpunk') beat='deeper';
+  document.body.setAttribute('data-onb-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='choice'?'layer-choice':beat==='deeper'?'instrument':null;
+  var node=focusId && document.getElementById(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  if(lastReading){
+    beatChoices.set(lastReading, document.body.getAttribute('data-onb-beat')||'arrival');
+  }
+  document.body.setAttribute('data-onb-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#0c1412':'#06110C';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+function jumpInstrument(id){
+  setBeat('deeper');
+  if(id==='net') return APP.go('netlaw');
+  if(id==='seams') return APP.go('seams');
+  if(id==='trezor'){ APP.ctx.persona='hw'; APP.ctx.custody='trezor'; APP.hist.push(APP.current); APP.current='hardware'; return render(function(){ return SCREENS.hardware('trezor'); }); }
+  if(id==='ready') return APP.go('ready');
+  if(typeof SCREENS[id]==='function') return APP.go(id);
+}
+function enterPlain(id){
+  setBeat('deeper');
+  APP.ctx.persona='new';
+  APP.pick(id);
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var t=e.target&&e.target.closest&&e.target.closest('[data-onb-go],[data-onb-enter],[data-onb-jump]');
+  if(!t) return;
+  if(t.hasAttribute('data-onb-go')){
+    var beat=t.getAttribute('data-onb-go');
+    setBeat(beat);
+    if(beat==='deeper' && (APP.current==='welcome'||!APP.current)) APP.go('welcome',false);
+    return;
+  }
+  if(t.hasAttribute('data-onb-enter')) return enterPlain(t.getAttribute('data-onb-enter'));
+  if(t.hasAttribute('data-onb-jump')) return jumpInstrument(t.getAttribute('data-onb-jump'));
+});
+applyReading();
+(function bootHash(){
+  var h=(location.hash||'').replace(/^#/,'');
+  if(!h) return;
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading!=='cypherpunk' && (document.body.getAttribute('data-onb-beat')||'')!=='deeper') return;
+  jumpInstrument(h);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from this
+   page itself: the custody ladder (LADDER, the same list the ceremony's custody screen draws), the
+   vendored key engine (window.BZDIDKEY → keys real or not, 24 or 12 words), the pairing encoder
+   (window.qrcodegen), the origin (isSecureContext) and the ceremony's own online switch. The site
+   is a preview: nothing here creates an account, a key or a balance. Every "try it" hands off to
+   enterPlain(), the ceremony below, which keeps its own Known / Declared / Preview gauges. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var RAIN=function(){var st=(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);return [st[1],st[2],st[3],st[4]];};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  /* the words each register uses for the same four rungs — the facts (id, cost, free, path)
+     always come from LADDER, never from here */
+  var BEE={passkey:['this phone or computer','unlock it with your face or fingerprint.'],optical:['a spare phone','an old phone, kept offline, signs for you.'],key:['a security key','a small key you tap to sign.'],trezor:['a Trezor','a hardware wallet you can check yourself.']};
+  var RAV={passkey:['this device','your face unlocks it. nothing to carry.'],optical:['a spare phone','keys travel as light. no signal needed.'],key:['a security key','tap to sign. carry it anywhere.'],trezor:['a trezor','open hardware. audit it yourself.']};
+  var D={ways:[],pick:'passkey',engine:false,words:12,qr:false,secure:false,online:true,preview:true,account:'none',balance:0,asked:false,netOnLoad:'none'};
+  var R={mode:'line',lit:{}};
+
+  function read(){
+    var L=(typeof LADDER!=='undefined'&&LADDER)||[];
+    D.ways=L.map(function(o){return {id:o.id,free:!!o.free,cost:o.cost,tag:o.tag,rung:o.rung,title:o.title};});
+    D.engine=!!window.BZDIDKEY; D.words=D.engine?24:12; D.qr=!!(window.qrcodegen&&window.qrcodegen.QrCode);
+    D.secure=!!window.isSecureContext;
+    D.online=!(window.APP&&APP.ctx&&APP.ctx.online===false);
+    if(!D.ways.some(function(w){return w.id===D.pick;})&&D.ways.length)D.pick=D.ways[0].id;
+  }
+  function way(id){for(var i=0;i<D.ways.length;i++)if(D.ways[i].id===id)return D.ways[i];return null;}
+  function costBee(w){return w.free?T('et.onb.free','free'):/^~/.test(w.cost)?T('et.onb.about','about')+' '+w.cost.replace(/^~/,''):w.cost;}
+  function costRaver(w){return w.free?T('et.onb.free','free'):w.cost;}
+  function beeName(id){return T('et.onb.b.'+id,(BEE[id]||[id])[0]);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    box.innerHTML=D.ways.map(function(w){
+      var on=w.id===D.pick;
+      return '<button type="button" class="et-b-row" role="radio" aria-pressed="'+on+'" aria-checked="'+on+'" data-pick="'+esc(w.id)+'"><span class="dot" aria-hidden="true"></span><span class="et-b-rowt">'+esc(beeName(w.id))+'<em>'+esc(T('et.onb.bn.'+w.id,BEE[w.id][1]))+'</em></span><small class="'+(w.free?'free':'')+'">'+esc(costBee(w))+'</small></button>';
+    }).join('');
+    var w=way(D.pick)||{};
+    document.querySelectorAll('#eternal [data-et="beePick"]').forEach(function(e){e.textContent=T('et.onb.b.youChose','you chose')+' '+beeName(D.pick)+'.';});
+    document.querySelectorAll('#eternal [data-et="beePickName"]').forEach(function(e){e.textContent=beeName(D.pick);});
+    document.querySelectorAll('#eternal [data-et="beeKeys"]').forEach(function(e){e.textContent=D.pick==='passkey'?T('et.onb.b.keysDevice','your key lives on this device. we never see it.'):D.pick==='optical'?T('et.onb.b.keysOptical','your keys stay on the offline phone. they travel as light, never over the internet.'):T('et.onb.b.keysHw','your keys stay on the device you carry. we never ask for them.');});
+    document.querySelectorAll('#eternal [data-et="beePreview"]').forEach(function(e){e.textContent=T('et.onb.b.preview','no account is made on this site. a real join needs a connected wallet.');});
+    void w;
+  }
+  function beeStep(s){document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+
+  /* ── RAVER: the key cell — four hexagonal rings, inner = this device, outer = trezor ── */
+  var RAD=[[54,80],[88,114],[122,148],[156,186]];
+  function hexPt(r,k){var a=(-90+60*k)*Math.PI/180;return [r*Math.cos(a),r*Math.sin(a)];}
+  function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+  function band(r0,r1,k){var g=0.035,o0=hexPt(r1,k),o1=hexPt(r1,k+1),i0=hexPt(r0,k),i1=hexPt(r0,k+1);
+    var A=lerp(o0,o1,g),B=lerp(o0,o1,1-g),C=lerp(i0,i1,1-g),E=lerp(i0,i1,g),f=function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1);};
+    return 'M'+f(A)+'L'+f(B)+'L'+f(C)+'L'+f(E)+'Z';}
+  function cell(){
+    var svg=$('etCell'); if(!svg) return;
+    var seal=R.mode==='seal', inn=R.mode==='in', RN=RAIN(), h='';
+    D.ways.slice(0,4).forEach(function(w,i){
+      var r=RAD[i], sel=w.id===D.pick, fill=inn?RN[3-i]:sel?tok('sovereign-strong'):w.free?tok('biomass'):tok('sovereign');
+      h+='<g class="ring" data-pick="'+esc(w.id)+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc((RAV[w.id]||[w.id])[0]+': '+costRaver(w))+'">';
+      for(var k=0;k<6;k++)h+='<path class="seg" d="'+band(r[0],r[1],k)+'" fill="'+fill+'" opacity="'+(seal?0.3:(inn||sel?1:0.62))+'"/>';
+      h+='</g>';
+    });
+    var you=[0,1,2,3,4,5].map(function(k){var p=hexPt(44,k);return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+    var core=[0,1,2,3,4,5].map(function(k){var p=hexPt(30,k);return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+    h+='<g class="you" role="button" tabindex="0" aria-label="'+esc(T('et.onb.r.youAria','you: tap to step in'))+'"><polygon points="'+you+'" fill="'+tok('bg-card')+'"/><polygon points="'+core+'" fill="none" stroke="'+tok('you')+'" stroke-width="1.5" stroke-dasharray="3 3"/><text y="5" text-anchor="middle" fill="'+tok('you')+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">you</text></g>';
+    if(inn){var rim=[0,1,2,3,4,5].map(function(k){var p=hexPt(194,k);return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');h+='<polygon points="'+rim+'" fill="none" stroke="'+(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[])[0]+'" stroke-width="2" stroke-dasharray="2 6"/>';}
+    svg.innerHTML=h;
+  }
+  function raverCard(){
+    var c=$('etRaverCard'); if(!c) return; var i=-1;
+    D.ways.forEach(function(w,j){if(w.id===D.pick)i=j;}); var w=D.ways[i]; if(!w){c.innerHTML='';return;}
+    c.innerHTML='<span class="rk">r'+(i+1)+'</span><div><b>'+esc(T('et.onb.r.'+w.id,RAV[w.id][0])+' · '+costRaver(w))+'</b><span>'+esc(T('et.onb.rn.'+w.id,RAV[w.id][1]))+'</span></div>';
+  }
+  function raver(){
+    var root=document.querySelector('#eternal .et-r'); if(!root) return;
+    var seal=R.mode==='seal', inn=R.mode==='in';
+    $('etRaverTitle').textContent=inn?T('et.onb.r.in','you stepped in'):seal?T('et.onb.r.seal','light it up'):T('et.onb.r.line','your keys');
+    $('etRaverHint').textContent=inn?T('et.onb.r.hIn','the walk is open below · nothing made yet'):seal?T('et.onb.r.hSeal','light all four · then hold'):D.ways.length+' '+T('et.onb.r.hLine','rings · tap a ring · tap the cell');
+    root.querySelector('.et-r-seal').hidden=!seal;
+    $('etRaverCard').hidden=seal; $('etLegend').hidden=seal;
+    var go=$('etRaverGo'); go.hidden=seal;
+    go.textContent=inn?T('et.onb.r.back','back to the rings'):T('et.onb.r.go','step in');
+    var n=[1,2,3,4].filter(function(k){return R.lit[k];}).length;
+    document.querySelectorAll('#etTiles button').forEach(function(b){b.setAttribute('aria-pressed',R.lit[b.getAttribute('data-t')]?'true':'false');});
+    $('etHold').disabled=n<4;
+    $('etSealHint').textContent=n<4?n+' '+T('et.onb.r.lit','of 4 lit'):T('et.onb.r.consent','a preview walk · your hold opens it');
+    cell(); raverCard();
+  }
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etHold').disabled||hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etHoldProg'); hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);prog.style.strokeDashoffset=String(578*(1-f));
+      if(f>=1){hold.raf=0;prog.style.strokeDashoffset='578';enter('raver');return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldProg').style.strokeDashoffset='578';}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etLadder'); if(!tb) return;
+    $('etChips').innerHTML='<span class="on">state preview</span><span class="'+(D.engine?'ok':'no')+'">engine '+(D.engine?'present':'absent')+'</span><span class="'+(D.secure?'ok':'no')+'">'+(D.secure?'secure context':'insecure context')+'</span><span>net '+(D.online?'online':'offline · mesh')+'</span>';
+    tb.innerHTML=D.ways.map(function(w,i){
+      var sel=w.id===D.pick;
+      return '<tr class="pick" data-pick="'+esc(w.id)+'" tabindex="0" aria-selected="'+sel+'"><td>r'+(i+1)+'</td><td>'+esc(w.id)+'</td><td class="'+(w.free?'ok':'')+'">'+esc(w.cost.toLowerCase())+'</td><td>'+esc(w.tag.toLowerCase())+'</td></tr>';
+    }).join('');
+    var w=way(D.pick)||{id:'',tag:''};
+    var auth={passkey:'webauthn create · on this origin',optical:'nonce-bound reply · read as light',key:'fido2 + backup code',trezor:'trezor connect · loaded on tap only'}[w.id]||w.tag;
+    var steps=[
+      ['custody · '+w.id,'rung '+(D.ways.indexOf(w)+1)+' of '+D.ways.length+' · '+(w.free?'free':w.cost)+' · climb later, same identity',D.asked?'done':'now'],
+      ['authenticate',auth+' · simulated on this static host; binds real served from wallet-relay','todo'],
+      ['recovery floor · '+D.words+' words',D.engine?'bip-39 from the vendored engine':'prop words · not a backup','todo'],
+      ['derive identity · ed25519',D.engine?'bzdid-key.js present: prf → master_prk → ed25519':'engine absent: keys are not real on this walk','todo'],
+      ['anchor · did:webvh','planned · this preview writes nothing to any chain','guard'],
+      ['wallet · 0 b','self-funded · no starter grant · balances read from a rail, none faked','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var yn=function(v,y,n){return '<span class="'+(v?'yes':'no')+'">'+esc(v?y:n)+'</span>';};
+    $('etReceipt').innerHTML=[
+      ['origin',esc(location.protocol+'//'+location.host)],
+      ['context',yn(D.secure,'secure · webauthn can run','insecure · webauthn refused here')],
+      ['engine',yn(D.engine,'bzdid-key.js present · keys real','absent · keys not real')],
+      ['encoder',yn(D.qr,'qrcodegen present','absent · no code is faked')],
+      ['account','<span class="gd">none · preview site</span>'],
+      ['balance','<span class="et-bchip">0 b</span> · self-funded'],
+      ['net on load','<span class="yes">no request from this page</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etCyGo').textContent=D.asked?'open · the ceremony is below':'run the ceremony · '+w.id;
+  }
+
+  /* ── the one hand-off: the ceremony below owns every real step ── */
+  function enter(from){
+    D.asked=true;
+    if(from==='bee')beeStep('asked');
+    R.mode='in';raver();cy();
+    if(typeof enterPlain==='function')enterPlain(D.pick);
+    var ins=$('instrument'); if(ins&&ins.scrollIntoView) setTimeout(function(){ins.scrollIntoView({block:'start'});},0);
+  }
+  function choose(id){if(!way(id))return;D.pick=id;bee();raver();cy();}
+
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function all(){read();words();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go]');
+      if(go){var s=go.getAttribute('data-go');if(go.closest('.et-b'))beeStep(s);else{R.mode='line';R.lit={};raver();}return;}
+      var pk=e.target.closest('[data-pick]');
+      if(pk&&!(pk.closest('.et-r')&&R.mode!=='line')){choose(pk.getAttribute('data-pick'));return;}
+      if(e.target.closest('.you')&&R.mode==='line'){R.mode='seal';R.lit={};raver();return;}
+      var tile=e.target.closest('#etTiles button');
+      if(tile){var k=tile.getAttribute('data-t');R.lit[k]=!R.lit[k];raver();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.ring,.you,.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etRaverGo').addEventListener('click',function(){R.mode=R.mode==='in'?'line':'seal';R.lit={};raver();});
+    $('etBeeGo').addEventListener('click',function(){enter('bee');});
+    $('etCyGo').addEventListener('click',function(){enter('cy');});
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    var net=$('net'); if(net) net.addEventListener('click',function(){setTimeout(function(){read();cy();},0);});
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(function(){cell();},0);});
+  }
+  wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=34"></script>
+<script src="../tour.js?v=42"></script>
 </body>
 </html>

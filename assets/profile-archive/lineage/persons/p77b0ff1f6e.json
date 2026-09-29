@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p77b0ff1f6e",
+ "bnr": "bnr://skaists.dev/blood/p77b0ff1f6e",
+ "identity": {
+  "name": "Abner Lowry",
+  "lifespan": "1831–1900",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJD-H5Y"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "57 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "57 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf562f50cb9",
+    "name": "John Lowry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7a4e5d9e9e",
+    "name": "Mary Wilcox",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb3c9d7d399",
+    "name": "John Hyrum Lowry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6b0e4aad8c",
+    "name": "Betsy Louisa Bradley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJD-H5Y",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 57,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

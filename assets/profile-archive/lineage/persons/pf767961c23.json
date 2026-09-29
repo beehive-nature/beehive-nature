@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf767961c23",
+ "bnr": "bnr://skaists.dev/blood/pf767961c23",
+ "identity": {
+  "name": "Michel Kauffman",
+  "lifespan": "1675–1717",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBB4-F61"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "6 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "6 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe2134ca3ad",
+    "name": "Michel Kauffman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p163b375221",
+    "name": "Elsbeth Hirsig",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0b5fa73fd1",
+    "name": "Martin Kauffman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6786d2906d",
+    "name": "Anna Kneisley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBB4-F61",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 6,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

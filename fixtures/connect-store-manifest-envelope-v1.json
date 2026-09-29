@@ -1,0 +1,88 @@
+{
+  "type": "bnr-manifest-envelope-v1",
+  "version": 1,
+  "manifest": {
+    "channel": "plur",
+    "epoch": 3,
+    "sequence": 12,
+    "checkpoint": {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sequence": 12,
+      "policy_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ref": {
+        "address": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "size": 2048
+      }
+    },
+    "encrypted_items": [
+      {
+        "id": "1111111111111111111111111111111111111111111111111111111111111111",
+        "kind": "channel-snapshot",
+        "version": 1,
+        "ref": {
+          "address": "2222222222222222222222222222222222222222222222222222222222222222",
+          "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "size": 8192
+        }
+      },
+      {
+        "id": "4444444444444444444444444444444444444444444444444444444444444444",
+        "kind": "music-recording",
+        "version": 2,
+        "ref": {
+          "address": "5555555555555555555555555555555555555555555555555555555555555555",
+          "sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+          "size": 524288
+        }
+      },
+      {
+        "id": "7777777777777777777777777777777777777777777777777777777777777777",
+        "kind": "music-stems",
+        "version": 1,
+        "ref": {
+          "address": "8888888888888888888888888888888888888888888888888888888888888888",
+          "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+          "size": 262144
+        }
+      },
+      {
+        "id": "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+        "kind": "music-captions",
+        "version": 1,
+        "ref": {
+          "address": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+          "sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+          "size": 16384
+        }
+      }
+    ],
+    "credits": {
+      "creator": [
+        {
+          "pubkey": "1313131313131313131313131313131313131313131313131313131313131313",
+          "display_name": "LoVis waTer"
+        }
+      ],
+      "source": [
+        {
+          "uri": "https://beehivenature.buzz",
+          "title": "beehivenature channel",
+          "sha256": "1414141414141414141414141414141414141414141414141414141414141414"
+        }
+      ]
+    },
+    "versions": {
+      "manifest": 1,
+      "channel": 1,
+      "items": 1
+    },
+    "admission": {
+      "policy_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "max_bytes": 12582912,
+      "max_items": 16,
+      "payment": "disabled",
+      "approval": "trezor"
+    }
+  }
+}

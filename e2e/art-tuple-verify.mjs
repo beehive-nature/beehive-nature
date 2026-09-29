@@ -79,7 +79,9 @@ for (const surf of ['farmers', 'market']) {
     page.on('pageerror', e => errors.push(String(e).slice(0,80)));
     await page.goto(BASE + '/surfaces/blight/' + surf + '.html', { waitUntil:'domcontentloaded', timeout:30000 });
     await page.waitForTimeout(9000);
-    const art = await page.evaluate(() => document.querySelectorAll('svg').length);
+    /* market: count the art on its wall only — the ETERNAL front (2026-09-26) draws its own
+       graphics, which must never pass for chain-rendered art */
+    const art = await page.evaluate(s => document.querySelectorAll(s === 'market' ? '#wall svg' : 'svg').length, surf);
     check(surf + ' loads clean with rendered SVGs', errors.length === 0 && art > 0, errors.length ? errors[0] : art + ' svg nodes');
   } catch (e) { check(surf + ' (live)', false, String(e).slice(0,150)); }
 }

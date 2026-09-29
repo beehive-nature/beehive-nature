@@ -10,6 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { pinRegister } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -132,6 +133,8 @@ const COMMIT_ARGS = { committer: 'banchor22222', epoch: '1000150', new_root: '0'
   prev_root: '0'.repeat(64), tree_size: '19', delta_id: '0'.repeat(64), forced_watermark: '1000150' };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 try {
   /* ── 1 · describe + attach: two adapters, contract v1, vendored lane works
          inside the worker (the stack-law proof — present-but-inert is not ok) */
@@ -195,7 +198,7 @@ try {
     await p2.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
     const sentBefore = await p2.evaluate(() => BNRWALLET._telemetry.vaulta.sent);   // describe already counted
     const r = await p2.evaluate(() => window.BNRWALLET.walletAction('banchor22222', 'commit',
-      { committer: 'x', epoch: '1' }, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' }));
+      { committer: 'x', epoch: '1' }, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' })); // TESTNET-ONLY: eosio documented dev key
     const sentAfter = await p2.evaluate(() => BNRWALLET._telemetry.vaulta.sent);
     const out = await p2.locator('#tx-out').innerText();
     ok('undeclared capability: the shell refuses at the seam — ZERO messages dispatched',

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf2f53148a3",
+ "bnr": "bnr://skaists.dev/blood/pf2f53148a3",
+ "identity": {
+  "name": "John Zeller",
+  "lifespan": "1686–1737",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZL5-V5G"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "10 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "10 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p12362c286a",
+    "name": "Jacques James De Sellaire con Zeller",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa29827f2f8",
+    "name": "Lady Clothilde De Reni DE Valois B",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paa523477d8",
+    "name": "Johann Heinrich Zeller"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZL5-V5G",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 10,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

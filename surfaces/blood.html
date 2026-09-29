@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="dark">
+<title>the blood comb — BNR genesis · fractal archive</title>
+<style>
+:root{--bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#869686;--line:#243026;
+--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--verified:#86CC72;--info:#6FA9E0;--rose:#C41E3A}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:radial-gradient(circle at 50% -10%,#12251b 0%,var(--bg) 60%);color:var(--ink);
+ font:max(13px,var(--fmin,12px))/1.7 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 110px}
+main{max-width:1100px;min-width:0;margin:0 auto;padding-inline:16px}
+.crumbs{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:18px 0 9px;border-bottom:1px solid var(--line);
+ font-size:max(11px,var(--fmin,12px));letter-spacing:.04em;text-transform:none}
+.crumbs a,.crumbs button{color:var(--dim);background:none;border:0;font:inherit;cursor:pointer;letter-spacing:inherit;text-transform:inherit;padding:0}
+.crumbs .here{color:var(--ink)} .crumbs .sep{color:var(--faint)}
+.kicker{font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint);margin-top:22px}
+.crestanchor{float:right;width:86px;height:86px;margin:6px 0 8px 18px;border:1px solid rgba(255,215,0,.35);border-radius:14px;
+ background:radial-gradient(circle at 30% 25%,rgba(255,215,0,.12),rgba(1,8,4,.7));padding:7px}
+.crestanchor img{width:100%;height:100%;object-fit:contain}
+h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weight:600;
+ background-image:linear-gradient(92deg,#e2efdb 40%,#FFD700 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);font-size:max(12px,var(--fmin,12px));max-width:80ch;line-height:1.9}
+.statsbar{margin-top:12px;font-size:max(.78rem,var(--fmin,12px));color:var(--gold);letter-spacing:.02em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.viewswitch{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.viewswitch button{border:0;border-radius:0;min-height:40px}
+.controls .viewswitch button[aria-pressed="true"]{background:var(--gold);color:var(--bg);font-weight:650} /* was out-ranked by .controls button[aria-pressed] and drew gold on gold: a label-less block */
+.entrance{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.econcard{margin-top:12px;border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px 14px;
+ background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(0,229,255,.04));font-size:max(11px,var(--fmin,12px));color:var(--dim);line-height:1.8}
+.econcard b{color:var(--gold)} .econcard .states{color:var(--faint);font-size:max(10px,var(--fmin,12px))}
+.econcard a{color:var(--cyan)}
+.econcard,.econcard *{overflow-wrap:anywhere}
+.entrance a{display:block;text-decoration:none;background:var(--well);border:1px solid var(--line);border-radius:10px;
+ padding:10px 12px;color:var(--ink);font-size:max(11px,var(--fmin,12px));cursor:pointer}
+.entrance a:hover{border-color:var(--gold)}
+.entrance a b{display:block;color:var(--gold);font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;margin-bottom:3px}
+.entrance a span{color:var(--dim);line-height:1.6;font-size:max(10.5px,var(--fmin,12px))}
+#treeview{margin-top:8px;display:none;padding:6px 10px}
+#treeview ul{list-style:none;padding-left:18px;border-left:1px dashed var(--line)}
+#treeview>ul{border-left:0;padding-left:0}
+#treeview li{margin:3px 0}
+#treeview button{background:none;border:0;color:var(--ink);cursor:pointer;font:max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;padding:1px 4px;text-align:left}
+#treeview button .yrs{color:var(--dim)} #treeview button .era{font-size:max(9px,var(--fmin,12px));padding:0 5px;border-radius:99px;border:1px solid var(--line)}
+#treeview details>summary{cursor:pointer;list-style:none}
+#treeview details>summary::before{content:"▸ ";color:var(--faint)}
+#treeview details[open]>summary::before{content:"▾ "}
+.controls input{flex:1;min-width:180px;max-width:340px;background:var(--well);border:1px solid var(--line);
+ border-radius:8px;color:var(--ink);font:max(12.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;padding:9px 12px;min-height:40px}
+.controls input:focus{outline:none;border-color:var(--cyan)}
+.controls button{background:var(--well);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+ padding:8px 12px;font:max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer;min-height:40px}
+.controls button:hover{border-color:var(--gold)}
+.controls button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.searchout{margin-top:8px;display:grid;gap:4px}
+.searchout button{justify-self:start;background:none;border:1px dashed var(--line);border-radius:7px;color:var(--dim);
+ padding:5px 10px;cursor:pointer;font-size:max(11px,var(--fmin,12px))}
+.searchout button:hover{color:var(--ink);border-color:var(--cyan)}
+.lenses{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:max(.7rem,var(--fmin,12px));color:var(--dim)}
+.lenses label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:7px 13px;justify-content:flex-start;margin-top:10px;font-size:max(.68rem,var(--fmin,12px));color:var(--dim)}
+.legend .tk{display:inline-flex;align-items:center;gap:5px}
+.legend .tk i{width:10px;height:10px;background:var(--well);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:inline-block}
+.combwrap{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:
+ radial-gradient(circle at 50% 120%,rgba(255,215,0,.05),transparent 55%),var(--panel);padding:8px;position:relative}
+.combwrap svg{width:100%;height:auto;display:block;touch-action:none;cursor:grab}
+.combwrap svg:active{cursor:grabbing}
+#world{transition:transform .6s cubic-bezier(.22,.9,.36,1)}
+#world.instant{transition:none}
+.hexcell{cursor:pointer;stroke:var(--bg);stroke-width:1.6;transition:filter .15s}
+.hexcell:hover{filter:brightness(1.35)}
+.hexcell.spine{stroke:var(--gold);stroke-width:2.4}
+.hexcell.dup{stroke-dasharray:4 3;fill-opacity:.35!important}
+.hexcell.chrono{stroke:var(--rose);stroke-width:2.4}
+.hextext{pointer-events:none;font-family:'IBM Plex Mono',monospace;fill:#0d1410}
+.hextext.dupmark{fill:var(--gold)}
+.zoombar{position:absolute;top:12px;right:12px;display:grid;gap:6px}
+.zoombar button{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:rgba(10,15,11,.85);
+ color:var(--ink);font:600 15px 'IBM Plex Mono',monospace;cursor:pointer}
+.zoombar button:hover{border-color:var(--gold)}
+.breadcrumb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:max(10.5px,var(--fmin,12px))}
+.breadcrumb button{background:none;border:1px solid var(--line);border-radius:99px;color:var(--dim);
+ padding:3px 10px;cursor:pointer;font:max(10.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace}
+.breadcrumb button.here{color:var(--gold);border-color:var(--gold)}
+.breadcrumb .sep{color:var(--faint)}
+.detail{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.detail .dname{font-size:15px;color:var(--ink);font-weight:600}
+.detail .dyears{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:2px}
+.detail .dchips{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.detail .chip{display:inline-flex;align-items:center;gap:5px;font-size:max(9.5px,var(--fmin,12px));padding:2px 9px;border-radius:99px;
+ border:1px solid var(--line);color:var(--dim)}
+.detail .chip.t{border-color:currentColor}
+.detail .drels{margin-top:10px;display:grid;gap:6px;font-size:max(11.5px,var(--fmin,12px))}
+.detail .drels .lab{font-size:max(9px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint)}
+.detail .drels .layer{font-size:max(11px,var(--fmin,12px));color:var(--dim);line-height:1.7;padding-left:2px}
+.detail .drels .claim{font-size:max(10px,var(--fmin,12px));color:var(--dim);line-height:1.65;margin:5px 0 0 10px;border-left:2px solid var(--line);padding-left:9px}
+.detail .drels button{background:none;border:0;color:var(--cyan);cursor:pointer;font:max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;
+ padding:0;text-align:left;text-decoration:underline dotted}
+.detail .drels button .evtag{color:var(--faint);text-decoration:none}
+.detail .dactions{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.detail .dactions button{background:var(--gold);border:0;color:#152016;border-radius:8px;padding:8px 14px;
+ font:600 max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer}
+.detail .dactions button.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.detail a{color:var(--cyan)}
+.relview{margin-top:6px}
+.relview .hyp{margin-top:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px}
+.relview .hyp.chosen{border-color:var(--gold)}
+.relview .hyp button{margin-top:6px}
+.relview .hyp .trad{color:var(--violet);font-size:max(10px,var(--fmin,12px))}
+.relview .verlist{margin-top:10px;font-size:max(10.5px,var(--fmin,12px));color:var(--faint)}
+.listview{margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.listview summary{cursor:pointer;color:var(--dim);font-size:max(11px,var(--fmin,12px))}
+.listview table{width:100%;border-collapse:collapse;margin-top:8px;font-size:max(10.5px,var(--fmin,12px))}
+.listview td,.listview th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
+.listview th{color:var(--violet);font-weight:400} .listview td.n{color:var(--ink)}
+.listview button{background:none;border:0;color:var(--cyan);cursor:pointer;font:inherit;padding:0;text-decoration:underline dotted}
+.rootnote{margin-top:10px;font-size:max(10.5px,var(--fmin,12px));color:var(--dim)}
+.empty{color:var(--dim);font-size:max(11.5px,var(--fmin,12px));margin-top:10px}
+footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.9}
+@media(max-width:640px){.combwrap{padding:5px}.detail{padding:12px}.zoombar{top:8px;right:8px}}
+/* GUX-01 beat 2b — the mounted composition (engine world + person panel +
+   discovery rail). blood.html owns composition and presentation state only;
+   truth stays in the corpus; the atlas derives space; the panel derives
+   explanation; blood-nav keeps the one navigation/history grammar. */
+#cards{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+#cards:empty{display:none}
+#routestrip{margin:4px 0 8px;overflow-x:auto;padding-bottom:4px}
+#routestrip:empty{display:none}
+.atlashop{font-size:max(11px,var(--fmin,12px));padding:3px 8px;white-space:nowrap}
+.atlashop.ev-recorded{border-color:#3fa66a;background:#14231a;font-weight:600}
+.atlashop.ev-colonial{border-color:#4d8fd1;background:#131c26;font-family:Georgia,serif;font-style:italic}
+.atlashop.ev-medieval{border-color:#c9a13b;background:transparent;border-style:dashed;opacity:.92}
+.atlashop.ev-saga{border-color:#8d6fc9;background:#191327;font-variant:small-caps;letter-spacing:.06em}
+body.gux #comb,body.gux #treeview,body.gux #trail,body.gux #spinebtn{display:none!important}
+body.gux .zoombar{z-index:30} /* above the engine's tree listview (journey-caught) */
+body.gux #atlas{display:block}
+/* one search box (the page's #q) and ONE history (the atlas's back): the
+   panel's own search + back affordances are structurally retired here */
+#ppanel .pp-search{display:none!important}
+#ppanel .pp-backbar{display:none!important}
+body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surface: the panel */
+body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important} /* incumbent-only affordances retire under gux (review d6ca5958): lens filters re-selected the root; the comb's list table + root note showed the INCUMBENT root while the engine stood elsewhere */
+#cards button{text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;flex:1 1 220px;max-width:250px;line-height:1.45}
+#cards button:hover{border-color:var(--cyan)}
+#routestrip button{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;font:inherit;font-size:max(11px,var(--fmin,12px));padding:3px 8px;white-space:nowrap}
+/* ?? GUX-01 zGeneUI navigation layer (blood-nav.mjs) — selection, LOD, drawer */
+.hexcell.sel,button.sel{stroke:var(--gold);stroke-width:2.4px;filter:drop-shadow(0 0 6px rgba(255,215,0,.45))}
+#comb:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+.navhint{margin-top:10px;font-size:max(10.5px,var(--fmin,12px));color:var(--gold);border:1px dashed var(--gold);border-radius:8px;padding:7px 10px}
+.hexcell.ghostslot{fill:none;stroke:var(--faint);stroke-width:1.2;stroke-dasharray:3 3;cursor:pointer}
+#world.lod-far .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark)[data-ring="0"],#world.lod-mid .hextext:not(.dupmark)[data-ring="1"],
+#world.lod-mid .hextext:not(.dupmark)[data-ring="2"]{display:block}
+.drawerbar{display:none}
+@media(max-width:640px){
+ .detail{position:fixed;left:0;right:0;bottom:var(--tbar-h,0px);z-index:40;max-height:min(64vh,calc(100vh - var(--tbar-h,0px) - 24px));overflow-y:auto;
+ border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -8px 30px rgba(0,0,0,.5);
+ transform:translateY(calc(100% - 78px));transition:transform .28s ease}
+ .detail.open{transform:none}
+ .drawerbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);
+ padding:8px 12px;margin:-12px -12px 10px;cursor:default}
+ .drawerbar span{font:600 max(12px,var(--fmin,12px)) 'IBM Plex Mono',monospace;color:var(--gold);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .drawerbar button{background:none;border:1px solid var(--line);border-radius:7px;color:var(--dim);
+ width:44px;height:44px;flex:0 0 44px;cursor:pointer;font-size:18px;line-height:1}
+ /* a closed drawer shows only its handle: what is below the fold is neither painted nor tabbable */
+ .detail:not(.open)>:not(.drawerbar){visibility:hidden;transition:visibility 0s .28s}
+ .detail.open>*{visibility:visible}
+ /* the sheet handle: a grip so the peek reads as a pull-up sheet, not an empty band */
+ .drawerbar::after{content:"";position:absolute;left:50%;top:5px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line)}
+ /* the page ends above the sheet's peek as well as the bar, so the footer links stay in reach */
+ body{padding-bottom:calc(var(--tbar-h,56px) + 94px)!important}
+ /* the discovery cards run the full phone width instead of a 250 px column */
+ #cards button{max-width:none;flex-basis:100%}
+ .drawerbar button:hover{border-color:var(--gold);color:var(--gold)}
+}
+@media(prefers-reduced-motion:reduce){
+ #world{transition:none!important}
+ *{scroll-behavior:auto!important}
+}
+/* The person panel (shared person-panel.css) is desktop-dense mono; inside this page's
+   drawer it reads at the page floor, its labels keep their own casing, and its row and
+   action buttons take a thumb. */
+#detail .pp :is(.pp-res,.pp-res-sub,.pp-res-ctx,.pp-dupwarn,.pp-more,.pp-years,.pp-years-inline,.pp-chip,.pp-h,.pp-sec-note,.pp-rel-line,.pp-endpoints,.pp-kindchip,.pp-lab,.pp-chain,.pp-hop,.pp-ca-line,.pp-link,.pp-coexist,.pp-cyclic,.pp-fam-lab,.pp-row,.pp-row-ev,.pp-frontier>div,.pp-erasup,.pp-layer-lab,.pp-layer-att,.pp-layer-body,.pp-layer-link,.pp-claims summary,.pp-claim,.pp-bnr,.pp-act,.pp-ambig-head,.pp-strip-head,.pp-hook,.pp-hook-open,.pp-strip-note,.pp-teaser,.pp-rescue,.pp-descent,.pp-hop-ellipsis,.pp-kinship,.pp-coverage,.pp-broader-lab,.pp-broader-line,.pp-broader-att,.pp-locked,.pp-back){font-size:max(12.5px,var(--fmin,12px))}
+#detail .pp .pp-act kbd{font-size:max(11px,calc(var(--fmin,12px) - 2px))}
+#detail .pp :is(.pp-h,.pp-lab,.pp-fam-lab,.pp-broader-lab){text-transform:none;letter-spacing:.02em}
+#detail .pp :is(.pp-row,.pp-act,.pp-back,.pp-hook){min-height:44px}
+#detail .pp .pp-layer-link{display:inline-flex;align-items:center;min-height:44px}
+#detail .pp .pp-claims summary{min-height:44px;display:flex;align-items:center}
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{margin:var(--sk-s2) 0 var(--sk-s2)}
+body.et-front .detail:not(.open){transform:translateY(calc(100% + 24px))!important;box-shadow:none}
+#preservebtn{font-size:max(11.5px,var(--fmin,12px))!important;color:var(--bg)!important;min-height:44px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-center{text-align:center}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+
+/* NEW BEE — one question at a time */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-term i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small.out{color:var(--sk-guard)}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{transition:transform var(--dur,.26s)}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-top:1px solid var(--sk-line-soft)}
+.et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+.et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-back{align-self:flex-start;min-height:var(--sk-control-min);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;padding:0}
+.et-b-term{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+.et-b-term:last-child{border-bottom:0}
+.et-b-term i{width:36px;height:36px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none}
+.et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-price{display:grid;grid-template-columns:1fr auto;gap:var(--sk-s2) var(--sk-s3);align-items:center;padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b-price-l{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-price-v{font:400 32px/1 var(--sk-font-bee-serif);text-align:right}
+.et-b-price-n{grid-column:1/-1;font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-verified);background:var(--sk-verified-wash);border-radius:var(--sk-radius);padding:var(--sk-s1) var(--sk-s2)}
+.et-b-consent{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);font:500 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+.et-b-consent input{width:var(--sk-control-check);height:var(--sk-control-check);accent-color:var(--sk-primary)}
+.et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+.et-b-where{background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3);display:grid;gap:var(--sk-s1)}
+.et-b-where b{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}.et-b-where code{font:400 15px/1.4 var(--sk-font-mono);word-break:break-all}
+.et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+.et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}.et-b-card p{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — everything through art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-mandala{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r-mandala .seg{cursor:pointer;transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-mandala .ring:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+.et-r-mandala .ring:focus,.et-r-mandala .you:focus{outline:none}
+.et-r-mandala .you{cursor:pointer}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 12px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.lg-found{background:var(--sk-sovereign)}.lg-not{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}.lg-living{border:1.5px dashed var(--sk-sovereign-soft)}.lg-sel{background:var(--sk-sovereign-strong)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
+.et-r-tiles button{height:108px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s2);font:700 11px/1.2 var(--sk-font-raver-display);letter-spacing:.06em;color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+.et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-price{display:flex;justify-content:center;align-items:center;gap:var(--sk-s2);margin:0 auto var(--sk-s3);padding:var(--sk-s1) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);width:max-content;max-width:100%;min-height:var(--sk-control-min)}
+.et-r-price b{font:700 15px/1.2 var(--sk-font-raver-display)}.et-r-price span{font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-verified)}
+.et-r-hold{position:relative;width:216px;height:216px;margin:0 auto}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#etHold{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#etHold b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}#etHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#etHold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer}
+.et-r-ghost{display:block;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 13px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.et-r-mandala .seg,.et-r-tiles button{transition:none}}
+
+/* CYPHERPUNK — the pipeline is the interface; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 11px/1.4 var(--sk-font-mono);letter-spacing:.04em}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s3);text-align:left;font:600 11px/1.4 var(--sk-font-mono);letter-spacing:.04em;color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-tab td:nth-child(2){white-space:nowrap}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab tr.pick{cursor:pointer}.et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr.names td{height:auto;padding:var(--sk-s1) var(--sk-s3);background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+.et-c-tab tr.names small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab .st-living{color:var(--sk-guard)}.et-c-tab .st-pub{color:var(--sk-verified)}.et-c-tab .st-part{color:var(--sk-info)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:36px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600}.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.consent b{color:var(--sk-you)}.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);word-break:break-word}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --cyan:var(--sk-ai);--gold:var(--sk-you);--violet:var(--sk-sovereign);--verified:var(--sk-verified);--info:var(--sk-info);--rose:var(--sk-rose);
+ background:var(--sk-bg);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{background-image:none;color:var(--sk-ink);font-family:var(--sk-font-bee-serif);font-weight:400;letter-spacing:0}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] footer a{color:var(--sk-link)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --gold:var(--sk-you);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--verified:var(--sk-verified);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{background-image:var(--sk-rainbow);font-family:var(--sk-font-raver-display);font-weight:700;letter-spacing:-.01em}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--cyan:var(--sk-ai);--gold:var(--sk-ai);background:var(--sk-bg)}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+</style>
+<link rel="stylesheet" href="skaists.css">
+<link rel="stylesheet" href="blood-atlas.css?v=1">
+<link rel="stylesheet" href="person-panel.css?v=1">
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span class="sep">▸</span><a href="profile.html#blood-record">dynasty profile</a><span class="sep">▸</span><span class="here">the blood comb</span>
+</nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer below (the archive's own model + the storage receipt) drives all
+     three, so the facts cannot drift; each register has its own layout, graphic, gesture and voice.
+     Nothing here pays: every "keep forever" hands off to the preservation flow further down
+     (#preservebtn), where the live quote and the wallet's own screen are the gate. -->
+<section id="eternal" aria-label="your family line">
+
+  <!-- NEW BEE — a calm library: a list of the people you come from, one choice, plain words -->
+  <div class="et-b" data-et="line">
+    <div class="et-b-step" data-step="line">
+      <div class="et-b-mark">b<b>GENE</b>a<b>LOG</b>y</div>
+      <h2 class="et-b-h">your family line</h2>
+      <p class="et-b-lede">a library of the people you come from. it stays a family draft until you choose to keep it forever.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>living people stay out. always.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span>reading the archive…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" data-go="keep">keep this line forever</button>
+        <a class="et-b-link" href="#q">explore the whole archive</a>
+        <p class="et-b-foot">nothing is kept forever until you say so.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="keep" hidden>
+      <button type="button" class="et-b-back" data-go="line">‹ your family line</button>
+      <h2 class="et-b-h">keep it forever?</h2>
+      <p class="et-b-lede">three things to know first. the choice is yours alone.</p>
+      <div class="et-b-rows">
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></i><div><b>anyone can read it.</b><span>it joins a public family library.</span></div></div>
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8c-3 0-5 2-5 4s2 4 5 4c4 0 6-8 10-8 3 0 5 2 5 4s-2 4-5 4c-4 0-6-8-10-8z"/></svg></i><div><b>it can't be changed or taken down.</b><span>forever means no undo once you pay.</span></div></div>
+        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></i><div><b>living people are left out.</b><span><span data-et="living">…</span> people held back. they stay in the draft.</span></div></div>
+      </div>
+      <div class="et-b-price">
+        <div class="et-b-price-l">one payment. no subscription.</div>
+        <div class="et-b-price-v"><span data-et="ant">…</span></div>
+        <div class="et-b-price-n"><span data-et="beeQuote">…</span></div>
+      </div>
+      <label class="et-b-consent"><input type="checkbox" id="etBeeOk"> <span>i understand, and i choose this.</span></label>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeePay" disabled>pay once and keep forever</button>
+        <p class="et-b-foot">until you pay, nothing is kept forever.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="asked" hidden>
+      <div class="et-b-tick" aria-hidden="true">⬡</div>
+      <h2 class="et-b-h et-center">one step left.</h2>
+      <p class="et-b-lede et-center">a fresh price is being asked from the network below. nothing is paid until your wallet shows the amount and you confirm it there.</p>
+      <div class="et-b-act"><button type="button" class="et-b-link" data-go="line">back to your family line</button></div>
+    </div>
+    <div class="et-b-step" data-step="kept" hidden>
+      <div class="et-b-tick" aria-hidden="true">✓</div>
+      <h2 class="et-b-h et-center">kept.</h2>
+      <p class="et-b-lede et-center">your family line now lives on the Autonomi network. paid once, with your consent on record.</p>
+      <div class="et-b-where"><b>where it lives</b><code data-et="address">…</code></div>
+      <div class="et-b-card"><h3>cousins share ancestors.</h3><p>when a relative starts their line, the people you share connect. one library, grown by many families.</p></div>
+    </div>
+  </div>
+
+  <!-- RAVER — the line is the art: a mandala you tap; the hold is the consent -->
+  <div class="et-r" data-et="line">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your line</h2><span class="et-r-hint" id="etRaverHint">tap a ring · tap you to seal</span></div>
+    <svg class="et-r-mandala" id="etMandala" viewBox="-200 -200 400 400" role="group" aria-label="your line as rings — you at the heart"></svg>
+    <div class="et-r-legend" id="etLegend">
+      <span><i class="lg-found"></i>found</span><span><i class="lg-not"></i>not yet</span><span><i class="lg-living"></i>living · out</span><span><i class="lg-sel"></i>selected</span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-seal" hidden>
+      <div class="et-r-tiles" id="etTiles">
+        <button type="button" aria-pressed="false" data-t="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>everyone sees</button>
+        <button type="button" aria-pressed="false" data-t="2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8c-3 0-5 2-5 4s2 4 5 4c4 0 6-8 10-8 3 0 5 2 5 4s-2 4-5 4c-4 0-6-8-10-8z"/></svg>forever</button>
+        <button type="button" aria-pressed="false" data-t="3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M9 5a8 8 0 0 1 10 10M5 9a8 8 0 0 0 10 10"/></svg>no undo</button>
+        <button type="button" aria-pressed="false" data-t="4" class="et-dash"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>living out</button>
+      </div>
+      <div class="et-r-price"><b data-et="antShort">…</b> <span data-et="raverQuote">estimate</span></div>
+      <div class="et-r-hold">
+        <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etHoldProg"/></svg>
+        <button type="button" id="etHold" disabled aria-describedby="etSealHint"><b>hold</b><span>to seal</span></button>
+      </div>
+      <p class="et-r-note" id="etSealHint">light all four</p>
+      <button type="button" class="et-r-ghost" data-go="line">back to the line</button>
+    </div>
+    <div class="et-r-kept" hidden>
+      <div class="et-r-big" id="etRaverBig">kept</div>
+      <p class="et-r-note" id="etKeptNote"></p>
+    </div>
+    <button type="button" class="et-r-pill" id="etRaverGo">seal the line</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the manifest, the pipeline, the receipt, all at once, verifiable -->
+  <div class="et-c">
+    <div class="et-c-path"><span data-et="bdata">bData://genealogy/…</span></div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">filter living = exclude <b>guard · <span data-et="living">…</span> held</b></div>
+    <table class="et-c-tab"><thead><tr><th>gen</th><th>rel</th><th>slots</th><th>state</th></tr></thead><tbody id="etManifest"></tbody></table>
+    <h3 class="et-c-h">seal pipeline · public path</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCySign">sign consent + settle</button>
+    <h3 class="et-c-h">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h">verify · no trust in this page needed</div>
+      <ol><li>fetch address → bytes</li><li>sha256(bytes) == manifest</li><li>check the consent signature</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="../assets/profile-archive/lineage/zblood-storage-economics.json" download>export receipt</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/tools/genealogy" target="_blank" rel="noopener noreferrer">fork the template ↗ <span class="et-sr">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole archive</h2>
+<header>
+  <a class="crestanchor" href="profile.html#house-archive" title="the founder-created house crest — part of the work itself">
+    <img src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="the founder-created von Zutphen house crest: paired serpents, crowned bee and heart, sun and star, the motto in many tongues">
+  </a>
+  <div class="kicker">bnr genesis · the fractal blood archive</div>
+  <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
+  <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
+  <p class="statsbar" id="stats"></p>
+<p class="statsbar" id="atlasstats"></p>
+</header>
+
+<div class="controls">
+  <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
+  <div class="viewswitch" role="group" aria-label="view">
+    <button id="viewped" type="button" aria-pressed="true">pedigree</button>
+    <button id="viewfan" type="button" aria-pressed="false">fractal</button>
+    <button id="viewtree" type="button" aria-pressed="false">tree</button>
+  </div>
+  <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
+  <button id="resetbtn" type="button" data-i18n="blood.reset">back to the founder</button>
+</div>
+<div class="entrance" id="entrance">
+  <a data-ent="family"><b>family</b><span>the founder's house — living redacted, the personal entrance stays on the profile page</span></a>
+  <a data-ent="records"><b>records</b><span>documents and evidence packs — claims cited, attribution preserved</span></a>
+  <a data-ent="mythology"><b>mythology</b><span>the sagas and the crest's own symbolism — meaning, equal in standing, distinct in kind</span></a>
+  <a data-ent="older"><b>older generations</b><span>the deep and legendary lines — discoverable, never compulsory</span></a>
+</div>
+<div class="econcard" id="econcard" hidden>
+  <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
+  <span class="states" id="econ-states">…</span><br>
+  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ preserve this archive on Autonomi</button>
+</div>
+<div id="preservepanel" hidden style="margin-top:12px;border:1px solid var(--gold);border-radius:14px;padding:16px;background:var(--panel)">
+  <div style="font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--gold)">preserve this family archive</div>
+  <div id="preserve-step" style="margin-top:10px;color:var(--dim);font-size:max(11.5px,var(--fmin,12px));line-height:1.8">checking the preservation service…</div>
+  <div id="preserve-review" hidden>
+    <div style="margin-top:10px;display:grid;gap:6px;font-size:max(11px,var(--fmin,12px));color:var(--dim)">
+      <div style="font-size:max(13px,var(--fmin,12px));color:var(--ink);font-weight:600">Preserve this edition on Autonomi</div>
+      <div><span id="pv-edition"></span> · public edition · living family protected</div>
+      <div><span id="pv-chunks"></span> encrypted network chunks</div>
+      <div style="margin-top:6px"><b style="color:var(--gold);font-size:16px" id="pv-cost"></b></div>
+      <div style="color:var(--faint);font-size:max(10px,var(--fmin,12px))">within your authorized maximum of <span id="pv-bound"></span> ANT + <span id="pv-gasbound"></span> ETH gas — two assets, two bounds, never one dollar figure</div>
+      <div id="pv-bpay" style="margin-top:6px;font-size:max(9.5px,var(--fmin,12px));color:var(--faint);letter-spacing:.03em"></div>
+      <div style="margin-top:4px"><button id="pv-dlinv" type="button" style="background:none;border:1px dashed var(--line);color:var(--cyan);border-radius:7px;padding:5px 10px;font:max(10.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer">↓ download invoice</button>
+        <button id="pv-dlrec" type="button" disabled style="margin-left:6px;background:none;border:1px dashed var(--line);color:var(--faint);border-radius:7px;padding:5px 10px;font:max(10.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:not-allowed" title="receipts are issued from settlement evidence only — no settlement has occurred">↓ download receipt (awaiting settlement)</button></div>
+      <details style="margin-top:6px"><summary style="cursor:pointer;color:var(--faint);font-size:max(10px,var(--fmin,12px))">cypherpunk: payment detail + evidence chain</summary>
+        <div id="pv-detail" style="margin-top:6px;font-size:max(9.5px,var(--fmin,12px));color:var(--faint);line-height:1.7"></div>
+      </details>
+    </div>
+    <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">review with wallet →</button>
+    <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer">cancel (voids this plan)</button>
+  </div>
+  <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:max(11px,var(--fmin,12px))">
+    <span style="color:var(--gold)">⬡</span> uploading to the Autonomi network… <span id="pv-upload-note" style="color:var(--faint)">(the service handles the transaction; no terminal, no manual steps)</span>
+  </div>
+  <div id="preserve-receipt" hidden style="margin-top:12px">
+    <div style="color:var(--verified);font-size:max(12px,var(--fmin,12px));font-weight:600">⬡ your family archive survived the machine</div>
+    <div id="pv-settled" hidden style="margin-top:8px;border:1px solid rgba(134,204,114,.4);border-radius:10px;padding:10px 12px;font-size:max(11px,var(--fmin,12px));color:var(--dim);line-height:1.8"></div>
+    <div id="pv-receipt-body" style="margin-top:6px;font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.8"></div>
+  </div>
+  <div id="preserve-error" hidden style="margin-top:12px;color:var(--rose);font-size:max(11px,var(--fmin,12px))"></div>
+</div>
+<div class="searchout" id="qout"></div>
+<div class="lenses" id="lenses">
+  <label><input type="checkbox" checked data-lens="records"> <span data-i18n="blood.lens.records">records</span></label>
+  <label><input type="checkbox" checked data-lens="tradition"> <span data-i18n="blood.lens.tradition">tradition</span></label>
+  <label><input type="checkbox" checked data-lens="testimony"> <span data-i18n="blood.lens.testimony">family testimony</span></label>
+  <label><input type="checkbox" checked data-lens="spiritual"> <span data-i18n="blood.lens.spiritual">spiritual reflections</span></label>
+</div>
+<div class="legend" id="legend"></div>
+
+<div id="cards" class="guxrail" hidden aria-label="discovery — what this archive can show you"></div>
+<div id="routestrip" class="guxroute" hidden aria-label="the route this card walks"></div>
+<div class="combwrap">
+  <div id="atlas" hidden></div>
+  <svg id="comb" tabindex="0" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
+    <g id="world"></g>
+  </svg>
+  <div id="treeview" aria-label="ancestor tree view"></div>
+  <div class="zoombar">
+    <button id="zin" type="button" aria-label="zoom in">+</button>
+    <button id="zout" type="button" aria-label="zoom out">−</button>
+    <button id="zfit" type="button" aria-label="fit">⌂</button>
+  </div>
+</div>
+<div class="breadcrumb" id="trail" aria-label="exploration trail"></div>
+
+<details class="listview">
+  <summary data-i18n="blood.listview">accessible list view — the same comb, as a table</summary>
+  <table><thead><tr><th>gen</th><th>person</th><th>years</th><th>era</th><th>support</th><th></th></tr></thead>
+  <tbody id="listbody"></tbody></table>
+</details>
+
+<section class="detail" id="detail" aria-live="polite">
+  <div id="ppanel" hidden></div>
+  <p class="empty" id="dempty" data-i18n="blood.pick">click a cell — or search a name — to read an ancestor.</p>
+  <div id="dbody" hidden></div>
+</section>
+
+<p class="rootnote" id="rootnote"></p>
+</main>
+<footer>
+  <div data-i18n="blood.foot">the blood comb · walked from FamilySearch under the founder's own session · living redacted, ids pseudonymized · evidence eras are labels, never proofs</div>
+  <div><a href="../assets/profile-archive/lineage/remington-bloodline.json">lineage corpus (JSON)</a> · <a href="profile.html#blood-record">the crest bio record</a> · <a href="index.html">the hive</a></div>
+</footer>
+<script>
+(function(){
+  var CORPUS_URL='../assets/profile-archive/lineage/remington-bloodline.json';
+  var OVERLAY_URL='../assets/profile-archive/lineage/attested-overlays.json';
+  var RECON_URL='../assets/profile-archive/lineage/reconstructions.json';
+  var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
+  /* byr MIRRORS tools/genealogy/lifespan.mjs birthYear (signed: BC negative, 1-4 digit years); a classic script cannot import it, so tools/genealogy/lifespan.test.mjs holds the two equal */
+  function byr(l){var m=String(l||'').match(/^(\d{1,4})(BC)?/);return m?(m[2]?-parseInt(m[1],10):parseInt(m[1],10)):null;}
+
+  var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
+    packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
+    trail:[],staged:[],viewMode:"ped",retrieved:null,symbolicLinks:[]};
+  var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
+  function addChild(p,c){var a=S.children[p]=S.children[p]||[];if(a.indexOf(c)<0)a.push(c);} // dedup: corpus pass + overlay pass both feed this (ORDER5-R2 item 2)
+  fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
+    S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
+    S.stats=(c.meta&&c.meta.stats)||{};
+    S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
+    S.couples=c.couples||{}; // kept whole for the shared archive resolver (one resolver, two environments)
+    // GUX-01 atlas honesty (founder order 996e9b6c): three counts derived from
+    // the PUBLISHED corpus itself, before overlays — the UI never casually
+    // says "your family tree has N people"; the raw-walk receipt stays separate.
+    S.atlas={
+      published:Object.keys(c.persons||{}).length,
+      bloodline:(function(){var seen=new Set([c.root]),st=[c.root];
+        while(st.length){var id=st.pop();(c.edges[id]||[]).forEach(function(p){if(!seen.has(p)){seen.add(p);st.push(p);}});}
+        var n=0;seen.forEach(function(id2){if(c.persons[id2])n++;});return n;})(),
+      frontier:(function(){var n=0;for(var k in (c.edges||{}))(c.edges[k]||[]).forEach(function(p){if(!c.persons[p])n++;});return n;})()
+    };
+    // spouse index from the corpus's own couples map (skaists.lineage/2):
+    // a spouse step is AFFINITY, never described as blood (the corpus law)
+    S.spouses={};
+    for(var ck in (c.couples||{})){var cu=c.couples[ck];
+      if(!cu||!cu.p1||!cu.p2)continue;
+      (S.spouses[cu.p1]=S.spouses[cu.p1]||[]).push(cu.p2);
+      (S.spouses[cu.p2]=S.spouses[cu.p2]||[]).push(cu.p1);}
+    // lowercase search index precomputed once (F5: no per-keystroke scan cost)
+    S.qnames={};for(var qid in (c.persons||{}))S.qnames[qid]=String(c.persons[qid].name||'').toLowerCase();
+    S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
+    (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
+    for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
+    return fetch(OVERLAY_URL).then(r=>r.json());
+  }).then(ov=>{
+    if(ov){
+      if(ov.persons)for(var id in ov.persons){S.persons[id]=ov.persons[id];if(ov.persons[id].evidencePack)S.packs[id]=ov.persons[id].evidencePack;}
+      if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce].map(function(p){return S.persons[p]?p:(S.refsIndex[p]||p);});S.edges[ce].forEach(function(p){addChild(p,ce);});}
+      S.relEvidence=ov.relationshipEvidence||{};
+      S.testimony=ov.testimony||[];
+      S.symbolicLinks=ov.symbolicLinks||[];
+      // overlay persons join the search index too (attested overlays are people)
+      for(var qid2 in S.persons){if(!(qid2 in S.qnames))S.qnames[qid2]=String(S.persons[qid2].name||'').toLowerCase();}
+    }
+    // Archive 1.1 (founder ruling bdf59735: one resolver, two environments):
+    // the shared relationship resolver boots on the MERGED model — corpus +
+    // attested overlays — created once here, consumed read-only by the
+    // relationship-to-root section and search disambiguation in BOTH modes.
+    // Fail-soft: without it the boundary renders honestly, never a guess.
+    import('./archive-core.mjs').then(function(m){
+      S.archive=m.createArchiveCore({persons:S.persons,edges:S.edges,couples:S.couples,refsIndex:S.refsIndex});
+    }).catch(function(){S.archive=null;});
+    var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
+      .map(function(p){return '../assets/profile-archive/lineage/'+p;});
+    return Promise.all(packUrls.map(function(u){return fetch(u).then(function(r){return r.json();}).then(function(j){
+      S.packData[u.split('/').pop()]=j;
+      if(j&&j.person&&j.person.fsid)S.packs[j.person.fsid]=u.split('/').pop();
+    }).catch(function(){});}).concat([
+      fetch(RECON_URL).then(function(r){return r.json();}).then(function(j){S.recon=j;}).catch(function(){})
+    ]));
+  }).then(function(){
+    S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
+    // ghost frontier: parent references pointing beyond the published corpus,
+    // counted per person AFTER the overlay merge; surfaced as coverage,
+    // never as an empty family, never as a privacy finding (the archive law)
+    S.ghostCount={};
+    for(var gk in S.edges){var gn=0;(S.edges[gk]||[]).forEach(function(p){if(!S.persons[p])gn++;});if(gn)S.ghostCount[gk]=gn;}
+    renderEconCard();
+    renderDyn();
+    // public entrance: Albert Perry Rockwood when present, else the founder
+    var OPEN_ROOT=(S.refsIndex&&S.refsIndex[OPEN_ROOT_FS])||S.root;
+    S.curRoot=S.persons[OPEN_ROOT]?OPEN_ROOT:S.root;
+    // landing doors (evaluated AFTER the corpus is resident):
+    // #p=<internal-id> from person pages; #myth from the profile doorway
+    var pm=location.hash.match(/p=([\w-]+)/);
+    if(pm&&S.persons[pm[1]])S.curRoot=pm[1];
+    var RAG=(S.refsIndex&&S.refsIndex['M8WZ-XZY'])||null;
+    if(/myth/.test(location.hash)&&RAG)S.curRoot=RAG;
+    drawPedigree();showRootNote();renderTrail();renderList();
+    if(pm&&S.persons[pm[1]]){showDetail(pm[1]);document.getElementById("detail").scrollIntoView();}
+    else if(/myth/.test(location.hash)&&RAG){showDetail(RAG);var d0=document.querySelector('#dbody details');if(d0)d0.open=true;}
+    // GUX-01 zGeneUI: hand the booted comb to the navigation module (the
+    // deferred type=module loads after this classic script; both load orders
+    // converge on wire()+onReady())
+    globalThis.__bloodReady=true;
+    // GUX-01 beat 2b — the composition mount's boot payload, published BEFORE
+    // BloodNav.onReady() so the nav layer's legacy applyCtx sees the pending
+    // mount and does NOT rewrite the URL hash in the old vocabulary (the
+    // mount boots from the arriving hash itself; one truth, one applier).
+    globalThis.__guxBoot={S:S,apr:OPEN_ROOT,founder:S.root,deepP:(pm&&S.persons[pm[1]])?pm[1]:null,mythRoot:(/myth/.test(location.hash)&&RAG)?RAG:null};
+    document.dispatchEvent(new Event('gux:boot'));
+    if(globalThis.BloodNav&&BloodNav.wire){BloodNav.wire(globalThis.BloodComb);BloodNav.onReady();}
+  })
+  .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
+
+  // ── reconstruction: which parent-edge does the current view assert? ─────
+  function relKey(child,parent){return child+'|'+parent;}
+  function chosenHyp(child,parent){
+    var ev=S.relEvidence[relKey(child,parent)];
+    if(!ev)return null;
+    var ch=S.recon&&S.recon.current&&S.recon.current.choices&&S.recon.current.choices[relKey(child,parent)];
+    return ch||null;
+  }
+  // edge visible unless a disputed relationship's chosen hypothesis rejects it
+  function edgeVisible(child,parent){
+    var ev=S.relEvidence[relKey(child,parent)];
+    if(!ev)return true;
+    var ch=chosenHyp(child,parent);
+    if(!ch)return true; // no choice staged → draw as walked/overlay
+    // hypotheses carry ids; the hypothesis asserting this edge is the one whose id matches the overlay parent's side
+    var hyp=ev.hypotheses.find(function(h){return h.id===ch;});
+    if(!hyp)return true;
+    // 'sigurd-father' asserts the ovl parent; 'sven-father' rejects him
+    if(/sven/.test(ch)&&/^ovl-/.test(parent))return false;
+    return true;
+  }
+
+  // ── the live storage receipt card: states honest, five-way distinct ─────
+  // ── the preserve flow: review → approve → upload → receipt, all in the UI ─
+  // ── the bPay document layer underneath: QUOTE → INVOICE → AUTHORIZATION →
+  //    SETTLEMENT → RECEIPT → RECONCILIATION, each state distinct and honest —
+  //    the invoice is the authorized expectation (real at quote time), the
+  //    receipt exists ONLY from settlement evidence (tools/genealogy/bpay.mjs
+  //    is the canonical builder; this in-page mirror renders the ceremony) ──
+  var PV = { service: "http://127.0.0.1:8798" };
+  function pvShow(id) {
+    ["preserve-step", "preserve-review", "preserve-progress", "preserve-receipt", "preserve-error"].forEach(function(s) {
+      document.getElementById(s).hidden = s !== id;
+    });
+  }
+  async function pvPlanDigest(plan) {
+    var hashes = (plan.payments || []).map(function(p){return p.quote_hash;}).sort();
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(hashes.join("\n")));
+    return "sha256:" + [...new Uint8Array(buf)].map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }
+  async function pvBuildInvoice(plan) {
+    // mirrors tools/genealogy/bpay.mjs buildInvoice — same schema, same laws
+    var d = await pvPlanDigest(plan);
+    var ceilingAntAtto = 32 * 10 ** 17; // 3.2 ANT
+    if (parseInt(plan.total_amount_atto) > ceilingAntAtto) return null; // the bridge already refused; belt+braces
+    return {
+      schema: "skaists.bpay-invoice/1",
+      invoiceId: "inv-" + plan.upload_id,
+      issuedAt: new Date().toISOString(),
+      issuer: { service: "antd-bridge (keyless prepare)", planSource: "live Autonomi network prepare" },
+      buyer: { role: "founder (Trezor custody)", note: "the paying address is never embedded in artifacts" },
+      subject: { archive: {
+        name: "zBlood first public preservation snapshot",
+        manifestSha256: "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", // PUBLIC-CONSTANT public chain data
+        files: 20537, contentBytes: 62139972,
+        uploadObject: { name: "pkg3.tar", bytes: 80998400,
+          sha256: "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b" } }, // PUBLIC-CONSTANT public chain data
+        encryptedChunks: plan.total_chunks, alreadyStoredChunks: plan.already_stored || 0 },
+      service: { network: "Autonomi", route: "ANT", visibility: "public",
+        destination: "Autonomi network storage — public DataMap address " + (plan.data_map_address || "(pending)") },
+      quote: { state: "quoted (live node quotes — not purchased)",
+        lineItems: [
+          { kind: "network storage", asset: "ANT", amountAtto: plan.total_amount_atto, payments: (plan.payments||[]).length, paymentType: plan.payment_type },
+          { kind: "gas (authorized ceiling, settled at payment)", asset: "ETH", ceilingAtto: "200000000000000" } ],
+        planIdentity: { uploadId: plan.upload_id, dataMapAddress: plan.data_map_address || null,
+          digest: d, artifactSha256: plan.artifact_sha256, artifactBytes: plan.artifact_bytes },
+        persistence: plan.recovered_from
+          ? { law: "RECOVERED — identical quote hashes to the original prepare (bridge-death proof)", recoveredFrom: plan.recovered_from }
+          : { law: "persisted at prepare; survives bridge death (P1 recovery)" },
+        expiration: { model: "job-bound, not clock-bound",
+          note: "the plan is bound to upload_id and persisted by the bridge; a force_fresh re-quote is a NEW plan" } },
+      authorization: { ceiling: { maxStorageANT: "3.2", maxGasETH: "0.0002" },
+        authorizedBy: "founder order 2026-09-17 (separated bounds)",
+        stopConditions: ["sha256(pkg3.tar) ≠ fec5fba8… at upload time","actual storage charge > 3.2 ANT","actual gas > 0.0002 ETH","different artifact or chunk count"],
+        quoteWithinCeiling: true },
+      walletAction: { requested: [
+          { tx: "ERC-20 approve", token: "ANT", spender: "Autonomi payment vault" },
+          { tx: "payForQuotes", contract: "Autonomi payment vault" } ],
+        signer: "founder Trezor — device custody; neither blood.html nor antd-bridge ever holds a key",
+        clearSigning: { erc20Approve: "likely covered — not yet device-observed",
+          payForQuotes: "UNVERIFIED — do NOT claim clear signing until device-tested" } },
+      states: { quote: plan.recovered_from ? "quoted (recovered original)" : "quoted", invoice: "issued",
+        authorization: "ceiling-recorded", settlement: "not-yet", receipt: "not-yet", reconciliation: "not-yet" },
+      state: "issued"
+    };
+  }
+  function pvDownload(name, obj) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" }));
+    a.download = name; a.click(); URL.revokeObjectURL(a.href);
+  }
+  // the SETTLED / PRESERVED presentation — rendered ONLY from a receipt
+  // artifact (settlement evidence); until the Trezor lane lands, nothing calls
+  // it with data, and that honesty is the point
+  function pvRenderSettledPresentation(receipt, invoice) {
+    var host = document.getElementById("pv-settled");
+    var ant = (BigInt(receipt.paid.totalSettledAtto) / 1000000000000000000n).toString();
+    host.innerHTML =
+      '<div style="color:var(--verified);font-weight:650;font-size:max(12px,var(--fmin,12px))">Family Archive Preserved</div>' +
+      '<div>20,537 files · 62.1 MB · paid ' + ant + ' ANT · ' + receipt.settledAt + '</div>' +
+      '<div style="color:var(--faint);font-size:max(10px,var(--fmin,12px))">reference ' + receipt.archive.dataMapAddress + ' · ' + receipt.paid.route + '</div>' +
+      '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button id="pv-viewpay" type="button">View payment details</button>' +
+      '<button id="pv-dlinv2" type="button">Download invoice</button>' +
+      '<button id="pv-dlrec2" type="button">Download receipt</button></div>' +
+      '<details id="pv-paydetails" hidden style="margin-top:8px;font-size:max(9.5px,var(--fmin,12px));color:var(--faint);line-height:1.7">' +
+      'tx refs: ' + receipt.paid.txRefs.map(function(t){return t.hash + ' (' + t.chain + ')';}).join(', ') +
+      ' · gas ' + receipt.fees.gasUsedWei + ' wei · finality: ' + receipt.finality +
+      ' · reconciliation: ' + (receipt.reconciliation ? receipt.reconciliation.verdict : 'pending') + '</details>';
+    host.hidden = false;
+    document.getElementById("pv-viewpay").addEventListener("click", function() {
+      var d = document.getElementById("pv-paydetails"); d.hidden = !d.hidden;
+    });
+    document.getElementById("pv-dlinv2").addEventListener("click", function() { if (invoice) pvDownload(invoice.invoiceId + ".json", invoice); });
+    document.getElementById("pv-dlrec2").addEventListener("click", function() { pvDownload(receipt.receiptId + ".json", receipt); });
+  }
+  document.getElementById("preservebtn").addEventListener("click", async function() {
+    document.getElementById("preservepanel").hidden = false;
+    document.getElementById("preservepanel").scrollIntoView({ behavior: "smooth" });
+    pvShow("preserve-step");
+    document.getElementById("preserve-step").textContent = "connecting to the Autonomi network…";
+    try {
+      const st = await fetch(PV.service + "/health").then(r => r.json());
+      if (!st.connected) {
+        document.getElementById("preserve-step").innerHTML = "the Autonomi network is not reachable from this machine.<br><span style='color:var(--faint)'>the bridge connects keylessly — no credential needed, just network access</span>";
+        return;
+      }
+      // fetch a REAL payment plan from the live network
+      document.getElementById("preserve-step").textContent = "preparing the archive on the network (this encrypts 24 chunks and queries live storage nodes)…";
+      const plan = await fetch(PV.service + "/v1/upload/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "C:/Users/travi/family-lineage/pkg3.tar" })
+      }).then(r => r.json());
+      if (plan.error) { pvShow("preserve-error"); document.getElementById("preserve-error").textContent = plan.error; return; }
+      // display the ceremony
+      document.getElementById("pv-edition").textContent = "20,537 family archive files · 62.1 MB";
+      document.getElementById("pv-chunks").textContent = plan.total_chunks;
+      const antAmt = (parseInt(plan.total_amount_atto) / 1e18).toFixed(6);
+      document.getElementById("pv-cost").textContent = antAmt + " ANT";
+      document.getElementById("pv-bound").textContent = "3.2";
+      document.getElementById("pv-gasbound").textContent = "0.0002";
+      PV.invoice = await pvBuildInvoice(plan);
+      var d = PV.invoice ? PV.invoice.quote.planIdentity.digest.slice(0, 26) + "…" : "—";
+      document.getElementById("pv-bpay").innerHTML =
+        "bPay evidence chain — <span style='color:var(--verified)'>QUOTE ✓</span> · " +
+        "<span style='color:var(--verified)'>INVOICE issued</span> · <span style='color:var(--verified)'>AUTHORIZATION ≤3.2 ANT / ≤0.0002 ETH</span> · " +
+        "SETTLEMENT not-yet · RECEIPT not-yet · RECONCILIATION not-yet" +
+        (plan.recovered_from ? "<br><span style='color:var(--gold)'>recovered plan — the original authorization survived the bridge (fresh quotes discarded)</span>" : "");
+      document.getElementById("pv-detail").innerHTML =
+        "upload_id: " + plan.upload_id + "<br>" +
+        "data_map_address: " + (plan.data_map_address || "pending") + "<br>" +
+        "payment_type: " + plan.payment_type + " · " + (plan.payments ? plan.payments.length : 0) + " node payments<br>" +
+        "plan digest: " + d + "<br>" +
+        "artifact: " + (plan.artifact_sha256 || "?").slice(0, 24) + "… (" + plan.artifact_bytes + " bytes)<br>" +
+        "persistence: " + (PV.invoice ? PV.invoice.quote.persistence.law : "—") + "<br>" +
+        "already_stored: " + plan.already_stored + "<br>" +
+        "<em>no key was used to produce this plan; neither this page nor the bridge can ever hold one</em>";
+      PV.plan = plan;
+      pvShow("preserve-review");
+    } catch (e) {
+      document.getElementById("preserve-step").innerHTML =
+        "the antd-bridge is not running.<br><span style='color:var(--faint)'>it runs keylessly on this machine: tools/antd-bridge/target/release/antd-bridge.exe</span>";
+    }
+  });
+  document.getElementById("pv-dlinv").addEventListener("click", function() {
+    if (PV.invoice) pvDownload(PV.invoice.invoiceId + ".json", PV.invoice);
+  });
+  document.getElementById("pv-cancel").addEventListener("click", function() {
+    // void the open plan so the next preserve quotes fresh (the escape hatch)
+    if (PV.plan && PV.plan.upload_id) {
+      fetch(PV.service + "/v1/upload/abandon", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upload_id: PV.plan.upload_id })
+      }).catch(function() {});
+    }
+    document.getElementById("preservepanel").hidden = true;
+  });
+  document.getElementById("pv-approve").addEventListener("click", function() {
+    if (!PV.plan) return;
+    pvShow("preserve-progress");
+    document.getElementById("pv-upload-note").innerHTML =
+      "the wallet review is the next step — the device screen is the gate.<br>" +
+      "<span style='color:var(--faint)'>this is where the Trezor confirms: " +
+      (parseInt(PV.plan.total_amount_atto)/1e18).toFixed(6) + " ANT for 24 storage chunks. " +
+      "The bridge holds the archive; the wallet holds the money; the device holds the signature.</span>";
+    // TODO: wire Trezor Connect here (the bantfarm pattern)
+    // For now, honestly show what comes next
+    setTimeout(function() {
+      document.getElementById("pv-upload-note").innerHTML +=
+        "<br><br><b style='color:var(--gold)'>→ wallet integration is the active build</b> — the payment plan is real, persisted, and downloadable as an invoice; the device signing is the remaining wire";
+    }, 2000);
+  });
+  function renderEconCard(){
+    fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){
+      var card=document.getElementById('econcard');if(!card)return;card.hidden=false;
+      var ar=E.quotes&&E.quotes.arweave, an=E.quotes&&E.quotes.autonomi, st=E.states||{};
+      var line;
+      if(st.uploaded&&ar){line='cost '+ar.computed.fullArchiveAR+' AR / $'+ar.computed.fullArchiveUSD+' to preserve on '+(st.uploadedAt||'—');}
+      else if(ar&&ar.state==='quoted'){line='quotes to preserve this whole archive — <b>Arweave '+ar.computed.fullArchiveAR+' AR ≈ $'+ar.computed.fullArchiveUSD+'</b> (live @ '+ar.queriedAt.slice(0,10)+')';
+        if(an&&an.computed)line+=' · <b>Autonomi ≈ $'+an.computed.totalUSD+'</b> (client estimate, '+an.raw.confidence+', storage $'+an.computed.storageUSD+' + gas $'+an.computed.gasUSD+' @ '+an.queriedAt.slice(0,10)+')';
+        line+=' — purchase awaits the approval gate';}
+      else {line='preservation quoted — see the receipt';}
+      line+=' · retrievals tested: <b>'+(st.retrievalsTested||0)+'</b> · developer egress bill: <b>'+(st.developerEgressUSD!=null?'$'+st.developerEgressUSD:'serving from our own box until network publication — our egress scales until then')+'</b>';
+      document.getElementById('econ-line').innerHTML=line;
+      document.getElementById('econ-states').innerHTML='states — prepared:'+(st.prepared?'✓':'✗')+' · approved:'+(st.approved?'✓':'✗')+
+        ' · quoted:'+(st.quoted?'✓':'✗')+' · purchased:'+(st.purchased?'✓':'✗')+
+        ' · uploaded:'+(st.uploaded?'✓':'✗')+' · retrieved:'+(st.retrieved?'✓':'✗')+' · hash-verified from storage:'+(st.hashVerifiedFromStorage?'✓':'✗')+
+        ' · <a href="../assets/profile-archive/lineage/zblood-storage-economics.json">the full receipt (JSON) ↗</a>';
+    }).catch(function(){/* card simply stays hidden if the receipt is absent */});
+  }
+  function renderDyn(){
+    document.getElementById('stats').textContent=langText('blood.stats',
+      '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
+      .replace('{w}',S.stats.personsWalked).replace('{d}',S.stats.deceasedPublished)
+      .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.spineGenerations);
+    if(S.atlas)document.getElementById('atlasstats').textContent=langText('blood.atlasstats',
+      'atlas honesty: {p} people in this published atlas · {b} parentward bloodline members represented · {f} frontier references where ancestry continues beyond the published archive')
+      .replace('{p}',S.atlas.published).replace('{b}',S.atlas.bloodline).replace('{f}',S.atlas.frontier);
+    var lg=document.getElementById('legend');lg.innerHTML='';
+    [['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
+     ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
+     ['medieval','prof.arch.blood.tier.medieval','medieval · 1000–1550'],
+     ['saga','prof.arch.blood.tier.saga','saga · before 1000'],
+     ['living','prof.arch.blood.tier.living','living · redacted']].forEach(function(t){
+      var k=document.createElement('span');k.className='tk';
+      var i=document.createElement('i');i.style.background=TIER_COLOR[t[0]];k.appendChild(i);
+      var s=document.createElement('span');s.textContent=langText(t[1],t[2]);k.appendChild(s);
+      lg.appendChild(k);});
+    var cap=document.createElement('span');cap.className='tk';
+    cap.textContent=langText('prof.arch.blood.tier','era labels, not verdicts');lg.appendChild(cap);
+  }
+  document.addEventListener('blang',renderDyn);
+
+  // ── fractal world: pan, zoom, semantic depth ────────────────────────────
+  var svg=document.getElementById('comb'),world=document.getElementById('world');
+  var NS='http://www.w3.org/2000/svg',SQ3=Math.sqrt(3);
+  var HS=17,HW=SQ3*HS,CX=540,BASEY=500,RINGS=7;
+  var view={s:1,tx:0,ty:0};
+  function applyView(instant){
+    if(instant)world.classList.add('instant');else world.classList.remove('instant');
+    world.setAttribute('transform','translate('+view.tx+' '+view.ty+') scale('+view.s+')');
+    if(globalThis.BloodNav&&BloodNav.onZoom)BloodNav.onZoom(view.s);
+    if(instant)requestAnimationFrame(function(){world.classList.remove('instant');});
+  }
+  function centerOn(x,y,instant,keepScale){
+    var s=keepScale||view.s||1;
+    view.s=s;view.tx=CX-x*s;view.ty=BASEY-y*s;applyView(instant===undefined?false:instant);
+  }
+  function svgPoint(evt){
+    var pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;
+    var m=svg.getScreenCTM().inverse();return pt.matrixTransform(m);
+  }
+  svg.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var p=svgPoint(e),factor=Math.pow(1.0015,-e.deltaY);
+    var ns=Math.min(4,Math.max(0.3,view.s*factor));
+    view.tx=p.x-(p.x-view.tx)*(ns/view.s);view.ty=p.y-(p.y-view.ty)*(ns/view.s);view.s=ns;
+    applyView(true);
+  },{passive:false});
+  var drag=null,pinch=null;
+  var pointers=new Map();
+  svg.addEventListener('pointerdown',function(e){
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===1){drag={x:e.clientX,y:e.clientY,tx:view.tx,ty:view.ty};svg.setPointerCapture(e.pointerId);}
+    else if(pointers.size===2){drag=null;var a=[...pointers.values()];pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),s:view.s};}
+  });
+  svg.addEventListener('pointermove',function(e){
+    if(!pointers.has(e.pointerId))return;
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pointers.size===2){
+      var a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+      var ns=Math.min(4,Math.max(0.3,pinch.s*d/pinch.d));
+      var rect=svg.getBoundingClientRect();
+      var cx0=rect.left+rect.width*(CX/1080),cy0=rect.top+rect.height*(BASEY/560);
+      view.tx=cx0-(cx0-view.tx)*(ns/view.s);view.ty=cy0-(cy0-view.ty)*(ns/view.s);view.s=ns;applyView(true);
+    } else if(drag){
+      var rect2=svg.getBoundingClientRect(),kx=1080/rect2.width,ky=560/rect2.height;
+      view.tx=drag.tx+(e.clientX-drag.x)*kx;view.ty=drag.ty+(e.clientY-drag.y)*ky;applyView(true);
+    }
+  });
+  function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(pointers.size===0)drag=null;}
+  svg.addEventListener('pointerup',endPointer);svg.addEventListener('pointercancel',endPointer);
+  document.getElementById('zin').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
+    view.tx=p.x-(p.x-view.tx)*1.3;view.ty=p.y-(p.y-view.ty)*1.3;view.s=Math.min(4,view.s*1.3);applyView();});
+  document.getElementById('zout').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1/1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
+    view.tx=p.x-(p.x-view.tx)/1.3;view.ty=p.y-(p.y-view.ty)/1.3;view.s=Math.max(0.3,view.s/1.3);applyView();});
+  document.getElementById('zfit').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.resetView();}catch(e){}return;}view.s=1;centerOn(0,0,true,1);});
+
+  function hexPts(cx,cy,s){var p=[];for(var a=0;a<6;a++){var r=a*Math.PI/3;p.push((cx+s*Math.cos(r)).toFixed(1)+','+(cy+s*Math.sin(r)).toFixed(1));}return p.join(' ');}
+  var placed={};
+  function drawComb(){
+    world.innerHTML='';placed={};
+    (function cell(id,x,y,ring){
+      if(!id||ring>RINGS)return;
+      var p=S.persons[id];
+      if(placed[id]){ // repeated ancestor: connected view of ONE person, not a duplicate
+        var d=document.createElementNS(NS,'polygon');
+        d.setAttribute('points',hexPts(x,y,HS));d.setAttribute('class','hexcell dup');d.setAttribute('data-pid',id);
+        d.setAttribute('fill',TIER_COLOR[(p&&p.evidence&&p.evidence.class)||'unrecorded']);
+        var t=document.createElementNS(NS,'title');
+        t.textContent=(p?p.name:id)+' — same person, also placed nearer the root (pedigree collapse)';
+        d.appendChild(t);d.addEventListener('click',function(){showDetail(id);});world.appendChild(d);
+        var dm=document.createElementNS(NS,'text');
+        dm.setAttribute('x',x);dm.setAttribute('y',y+3);dm.setAttribute('text-anchor','middle');
+        dm.setAttribute('class','hextext dupmark');dm.setAttribute('font-size','11');dm.textContent='⊙';
+        world.appendChild(dm);return;
+      }
+      if(!p)return;
+      placed[id]=1;
+      var g=document.createElementNS(NS,'polygon');
+      g.setAttribute('points',hexPts(x,y,HS));
+      var chrono=false;
+      g.setAttribute('class','hexcell'+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+      g.setAttribute('data-pid',id);
+      g.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
+      g.setAttribute('fill-opacity',ring===0?'0.95':'0.62');
+      var t=document.createElementNS(NS,'title');
+      t.textContent=(p.name||id)+(p.lifespan?' · '+p.lifespan:'');g.appendChild(t);
+      g.addEventListener('click',function(){showDetail(id);});
+      world.appendChild(g);
+      var nm=String(p.name||'').trim().split(/\s+/).pop()||'—';
+      var tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',x);tx.setAttribute('y',y+3);tx.setAttribute('class','hextext');
+      tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',ring<=1?'10':'8.5');
+      tx.setAttribute('pointer-events','none');
+      tx.setAttribute('data-ring',String(ring));
+      tx.textContent=nm.length>14?nm.slice(0,13)+'…':nm;
+      world.appendChild(tx);
+      if(ring>=RINGS)return;
+      var ps=(S.edges[id]||[]).filter(function(x){return S.persons[x];});
+      var cby=byr(p.lifespan);
+      var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
+      [[fa,-1],[mo,1]].forEach(function(pair){
+        var pid=pair[0],side=pair[1];
+        if(!pid){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot: coverage, honestly drawn
+            var gh=document.createElementNS(NS,'polygon');
+            gh.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS*0.72));
+            gh.setAttribute('class','hexcell ghostslot');
+            var ght=document.createElementNS(NS,'title');
+            ght.textContent='ancestry continues beyond the published archive — further parent references here are not yet published; coverage, not an empty family';
+            gh.appendChild(ght);gh.addEventListener('click',function(){showDetail(id);});world.appendChild(gh);
+          }
+          return;
+        }
+        if(!edgeVisible(id,pid)){
+          // disputed & rejected by current reconstruction: empty geometry, visible dispute
+          var q=document.createElementNS(NS,'text');
+          q.setAttribute('x',x+side*HW/2);q.setAttribute('y',y-1.5*HS);q.setAttribute('text-anchor','middle');
+          q.setAttribute('class','hextext dupmark');q.setAttribute('font-size','12');
+          q.textContent='?';q.style.cursor='pointer';
+          var qt=document.createElementNS(NS,'title');
+          qt.textContent='disputed relationship — the current reconstruction rejects this parent; click the person to inspect';
+          q.appendChild(qt);q.addEventListener('click',function(){showDetail(id);});
+          world.appendChild(q);return;
+        }
+        var pby=byr(S.persons[pid].lifespan);
+        if(cby&&pby&&pby>=cby){ // impossible chronology: parent not older than child
+          var c=document.createElementNS(NS,'polygon');
+          c.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS));
+          c.setAttribute('class','hexcell chrono');
+          c.setAttribute('data-pid',pid);
+          c.setAttribute('fill',TIER_COLOR[S.persons[pid].evidence&&S.persons[pid].evidence.class||'unrecorded']);
+          var ct=document.createElementNS(NS,'title');
+          ct.textContent='IMPOSSIBLE CHRONOLOGY — parent born '+pby+', child born '+cby;
+          c.appendChild(ct);c.addEventListener('click',function(){showDetail(pid);});
+          world.appendChild(c);return; // never recurse past impossible links
+        }
+        cell(pid,x+side*HW/2,y-1.5*HS,ring+1);
+      });
+    })(S.curRoot,0,0,0);
+    renderList();
+  }
+  function renderTrail(){
+    var t=document.getElementById('trail');t.innerHTML='';
+    var mk=function(label,id,isHere){
+      var b=document.createElement('button');b.textContent=label;
+      if(isHere)b.className='here';
+      b.addEventListener('click',function(){setRoot(id,true);});
+      t.appendChild(b);
+    };
+    mk(langText('blood.home','home: the founder'),S.root,S.curRoot===S.root);
+    S.trail.forEach(function(id,i){
+      var sep=document.createElement('span');sep.className='sep';sep.textContent='→';t.appendChild(sep);
+      mk(S.persons[id]?(S.persons[id].name||id).split(' ')[0]:id,id,i===S.trail.length-1&&S.curRoot===id);
+    });
+    if(S.curRoot!==S.root&&S.trail[S.trail.length-1]!==S.curRoot){
+      var sep2=document.createElement('span');sep2.className='sep';sep2.textContent='→';t.appendChild(sep2);
+      mk((S.persons[S.curRoot].name||S.curRoot).split(' ')[0],S.curRoot,true);
+    }
+  }
+  function setRoot(id,noTrail){
+    if(globalThis.__guxAtlas){try{__guxAtlas.reroot(id);}catch(e){}return;} // engine owns the world; re-root is the engine's explicit act
+    if(!S.persons[id])return;
+    if(!noTrail&&S.curRoot&&S.curRoot!==id)S.trail.push(S.curRoot);
+    if(S.trail.length>12)S.trail.shift();
+    S.curRoot=id;showRootNote();renderTrail();
+    if(S.viewMode==='tree')renderTree();
+    else if(S.viewMode==='ped')drawPedigree();
+    else{drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
+    if(globalThis.BloodNav&&BloodNav.onRoot)BloodNav.onRoot(id);
+  }
+  function renderList(){
+    var body=document.getElementById('listbody');if(!body)return;body.innerHTML='';
+    var seen={};
+    (function walk(id,ring){
+      if(!id||ring>5||seen[id]||!S.persons[id])return;seen[id]=1;
+      var p=S.persons[id],tr=document.createElement('tr');
+      var era=p.evidence?p.evidence.class:'unrecorded',sup=p.evidence?(p.evidence.support||'unsourced-entry'):'—';
+      tr.innerHTML='<td>'+ring+'</td><td class="n">'+esc(p.name||id)+'</td><td>'+esc(p.lifespan||'')+
+        '</td><td>'+esc(era)+'</td><td>'+esc(sup)+'</td><td></td>';
+      var btn=document.createElement('button');btn.textContent='read';btn.addEventListener('click',function(){showDetail(id);});
+      tr.lastElementChild.appendChild(btn);body.appendChild(tr);
+      (S.edges[id]||[]).forEach(function(x){if(edgeVisible(id,x))walk(x,ring+1);});
+    })(S.curRoot,0);
+  }
+  function showRootNote(){
+    var n=document.getElementById('rootnote');
+    n.textContent=S.curRoot&&S.curRoot!==S.root
+      ?langText('blood.exploring','exploring from: {n} — the founder is one tap away').replace('{n}',nameOf(S.curRoot))
+      :'';
+  }
+  function nameOf(id){var p=S.persons[id];return p?(p.name||id):id;}
+  function tierChip(cls){return '<span class="chip t" style="color:'+TIER_COLOR[cls]+'">'+esc(cls)+'</span>';}
+  function layersHtml(id,p){
+    var fsrefL=p&&p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
+    var out='<div class="drels"><div class="lab">'+esc(langText('blood.layers','evidence layers'))+'</div>';
+    if(fsrefL&&S.lenses.records)
+      out+='<div class="layer">① '+esc(langText('blood.layer.walked','walked record · FamilySearch'))+' <span style="color:var(--faint)">'+esc(fsrefL.id)+'</span></div>';
+    if(p.corrected)
+      out+='<div class="layer">② '+esc(langText('blood.layer.corrected','founder correction'))+' — '+esc(p.corrected.attested||'')+' · <span style="color:var(--faint)">'+esc((p.corrected.note||'').split(';')[0])+'</span></div>';
+    if(/^ovl-/.test(id))
+      out+='<div class="layer">② '+esc(langText('blood.layer.overlay','attested overlay — outside the provider walk'))+'</div>';
+    var pack=S.packs[id];
+    if(pack&&S.lenses.tradition){
+      var pd=S.packData[pack.split('/').pop()];
+      out+='<div class="layer">③ '+esc(langText('blood.layer.pack','tradition layer — evidence pack'))+' · <a href="../assets/profile-archive/lineage/'+esc(pack)+'">'+esc(pack)+'</a></div>';
+      if(pd&&pd.claims){
+        out+='<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--dim);font-size:max(10.5px,var(--fmin,12px))">'+esc(pd.claims.length)+' '+esc(langText('blood.layer.claims','cited claims — read the tradition itself'))+'</summary>';
+        pd.claims.slice(0,8).forEach(function(cl){
+          out+='<div class="claim"><b>'+esc(cl.source)+'</b> — '+esc(cl.claim)+(cl.url?' <a href="'+esc(cl.url)+'">↗</a>':'')+'</div>';});
+        out+='</details>';
+      }
+    }
+    if(S.lenses.testimony){
+      S.testimony.filter(function(t){return t.lens==='testimony'&&t.text&&/rockwood/i.test(p.name||'')&&/rockwood/i.test(t.subject||'');})
+        .forEach(function(t){out+='<div class="layer" style="border-left:2px solid var(--info);padding-left:8px">⚑ '+esc(langText('blood.layer.testimony','family testimony'))+' — '+esc(t.author)+' · '+esc(t.status)+'<div class="claim">'+esc(t.text)+'</div></div>';});
+    }
+    if(S.lenses.spiritual){
+      S.testimony.filter(function(t){return t.lens==='spiritual';}).forEach(function(t){
+        out+='<div class="layer" style="border-left:2px solid var(--violet);padding-left:8px;color:var(--violet)">✵ '+esc(langText('blood.layer.spiritual','spiritual reflections — attributed, never verification'))+' · '+esc(t.status)+'</div>';});
+    }
+    if(S.symbolicLinks){
+      S.symbolicLinks.filter(function(sl){return (sl.connects||[]).indexOf(id)>=0;}).forEach(function(sl){
+        out+='<div class="layer" style="border-left:2px solid var(--gold);padding-left:8px">✦ '+
+          esc(langText('blood.layer.meaning','meaning — founder-authored symbolism'))+' · <b>'+esc(sl.symbol)+'</b> — '+esc(sl.meaning)+
+          '<div class="claim" style="border-color:var(--gold)">'+esc(sl.attribution)+'</div></div>';
+      });
+    }
+    if(p.evidence&&/saga|medieval/.test(p.evidence.class)&&!pack&&!p.corrected&&S.lenses.records)
+      out+='<div class="layer" style="color:var(--violet)">⚠ '+esc(langText('blood.layer.legend','traditional/mythological layer — this record rides legendary genealogy; it does not upgrade to documented'))+'</div>';
+    out+='</div>';
+    return out;
+  }
+  function showRelationship(child,parent){
+    var key=relKey(child,parent),ev=S.relEvidence[key];
+    var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
+    emp.hidden=true;body.hidden=false;
+    if(!ev){ // ordinary walked relationship: the evidence object for a plain edge
+      body.innerHTML='<div class="dname">'+esc(nameOf(child))+' → '+esc(nameOf(parent))+'</div>'+
+        '<div class="relview"><div class="drels"><div class="lab">relationship evidence</div>'+
+        '<div class="layer">'+esc(langText('blood.rel.walked','walked parent-link · FamilySearch record link (parentIds chain from the r9 walk) — era/support carried on each person, not auto-upgraded by this link'))+'</div></div>'+
+        '<div class="dactions"><button class="ghost" id="backperson">'+esc(langText('blood.rel.back','back to the person'))+'</button></div></div>';
+      document.getElementById('backperson').addEventListener('click',function(){showDetail(child);});
+      return;
+    }
+    var ch=chosenHyp(child,parent);
+    var hyps=ev.hypotheses.map(function(h){
+      return '<div class="hyp'+(h.id===ch?' chosen':'')+'"><b>'+esc(h.label)+'</b>'+
+        '<div class="trad">'+esc(h.tradition)+'</div><div style="color:var(--dim);font-size:max(10.5px,var(--fmin,12px));margin-top:3px">'+esc(h.consequence)+'</div>'+
+        '<button data-hyp="'+esc(h.id)+'">'+(h.id===ch?esc(langText('blood.rel.current','current reconstruction')):esc(langText('blood.rel.choose','make this my current reconstruction')))+'</button></div>';
+    }).join('');
+    var vers=S.recon?(S.recon.versions||[]):[];
+    var vlist=vers.map(function(v){return v.id+' · '+v.date+' · '+esc(v.author);}).join('<br>');
+    if(S.staged.length)vlist+='<br>'+S.staged.map(function(v){return v.id+' · '+v.date+' · '+esc(v.author)+' (staged this session)';}).join('<br>');
+    body.innerHTML='<div class="dname">'+esc(nameOf(child))+' ↔ '+esc(nameOf(parent))+'</div>'+
+      '<div class="dyears">'+esc(ev.claim)+' — '+esc(ev.status)+'</div>'+
+      '<div class="relview"><div class="drels"><div class="lab">competing explanations</div>'+hyps+'</div>'+
+      '<div class="drels"><div class="lab">contradictions</div><div class="layer">'+esc(ev.contradictions)+'</div></div>'+
+      (ev.sources?'<div class="drels"><div class="lab">sources</div>'+ev.sources.map(function(u){return '<a href="'+esc(u)+'">'+esc(u)+'</a>';}).join('<br>')+'</div>':'')+
+      '<div class="verlist"><b>'+esc(langText('blood.rel.mcr','my current reconstruction'))+'</b>: '+esc(S.recon&&S.recon.current?S.recon.current.id+' · '+S.recon.current.date+' — '+S.recon.current.note:'(none)')+'<br>'+vlist+'</div>'+
+      '<div class="dactions"><button class="ghost" id="backperson">'+esc(langText('blood.rel.back','back to the person'))+'</button></div></div>';
+    body.querySelectorAll('[data-hyp]').forEach(function(b){
+      if(b.textContent.indexOf('current')>=0&&b.textContent.indexOf('reconstruction')>=0&&b.getAttribute('data-hyp')===ch)return;
+      b.addEventListener('click',function(){
+        var hid=b.getAttribute('data-hyp');
+        var nv={id:'v'+((S.recon?(S.recon.versions||[]).length:0)+S.staged.length+2),date:new Date().toISOString().slice(0,10),
+          author:'founder (staged in the comb — commit to versions via the repo file)',
+          choices:Object.assign({},S.recon&&S.recon.current?S.recon.current.choices:{},{})};
+        nv.choices[key]=hid;nv.note='switched to '+hid+' in the comb';
+        S.recon.current=nv;S.staged.push(nv);
+        (S.recon.versions=S.recon.versions||[]).push(nv);
+        try{localStorage.setItem('blood-staged',JSON.stringify(S.staged));}catch(e){}
+        redrawCurrent();showRelationship(child,parent);
+      });
+    });
+    document.getElementById('backperson').addEventListener('click',function(){showDetail(child);});
+  }
+  function showDetail(id){
+    if(globalThis.__guxAtlas){ // engine mode: the person panel is THE explanation surface (one-explanation law); relToRoot retires with the incumbent path
+      S.sel=id;try{__guxAtlas.select(id);}catch(e){}
+      return;
+    }
+    var p=S.persons[id];if(!p)return;
+    S.sel=id;
+    if(globalThis.BloodNav&&BloodNav.onSelect)BloodNav.onSelect(id);
+    var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
+    emp.hidden=true;body.hidden=false;
+    var cls=(p.evidence&&p.evidence.class)||'unrecorded';
+    var sup=(p.evidence&&p.evidence.support)||'unsourced-entry';
+    var rels='';
+    var ps=(S.edges[id]||[]).filter(function(x){return S.persons[x];});
+    if(ps.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.parents">parents</div>';
+      ps.forEach(function(x){rels+='<button data-rel="'+esc(x)+'">↑ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+
+        (S.relEvidence[relKey(id,x)]?' <span class="evtag">['+esc(langText('blood.rel.disputed','disputed — inspect'))+']</span>':' <span class="evtag">[walked link]</span>')+'</button>';});
+      rels+='</div>';}
+    if(S.ghostCount&&S.ghostCount[id]){rels+='<div class="drels"><div class="lab">the frontier</div><div class="layer" style="border-left:2px dashed var(--faint);padding-left:8px;color:var(--dim)">ancestry continues beyond the published archive — '+esc(String(S.ghostCount[id]))+' further parent reference'+(S.ghostCount[id]===1?'':'s')+' on this person not yet published here. This is coverage of the walk, not an empty family and not a finding about anyone.</div></div>';}
+    var ch=S.children[id]||[];
+    if(ch.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.children">children</div>';
+      ch.slice(0,12).forEach(function(x){if(S.persons[x])rels+='<button data-go="'+esc(x)+'">↓ '+esc(nameOf(x))+'</button>';});
+      if(ch.length>12)rels+='<span style="color:var(--faint)">… '+(ch.length-12)+' more</span>';
+      rels+='</div>';}
+    var chips=tierChip(cls)+'<span class="chip">support: '+esc(sup)+'</span>';
+    var sp=(S.spouses[id]||[]).filter(function(x){return S.persons[x];});
+    if(sp.length){rels+='<div class="drels"><div class="lab">spouses & partners</div>';
+      sp.slice(0,6).forEach(function(x){rels+='<div class="layer"><button data-go="'+esc(x)+'">⚭ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+'</button> <span class="evtag">[marriage — affinity, never described as blood]</span></div>';});
+      if(sp.length>6)rels+='<span style="color:var(--faint)">… '+(sp.length-6)+' more</span>';
+      rels+='</div>';}
+    if(id!==S.curRoot){
+      var rr=(globalThis.BloodNav&&BloodNav.relToRoot)?BloodNav.relToRoot(id,{curRoot:S.curRoot,archive:S.archive,persons:S.persons}):null;
+      var hopArrow=function(st){return st.via==='child'?'↓':st.via==='spouse'?'≈':'↑';};
+      var stepsHtml=function(){var h='';rr.steps.forEach(function(st,i){
+          if(i>0)h+=' <span class="dim">'+hopArrow(st)+esc(st.hop)+'→</span> ';
+          h+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});return h;};
+      var dis=rr&&rr.disputed?' <span class="evtag">[disputed — this path crosses a cyclic ancestry component]</span>':'';
+      if(rr&&rr.kind==='below'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' down this line'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">parent steps from '+esc(nameOf(id))+' up to the root '+esc(nameOf(S.curRoot))+' — follow the names to walk the line</div></div></div>';
+      } else if(rr&&rr.kind==='above'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' up: an ancestor of the current root'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">child steps down from '+esc(nameOf(id))+' to the root '+esc(nameOf(S.curRoot))+' — an ancestor of where you are standing</div></div></div>';
+      } else if(rr&&rr.kind==='collateral'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — blood through a shared ancestor'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">'+esc(String(rr.upHops))+' generation'+(rr.upHops===1?'':'s')+' up and '+esc(String(rr.downHops))+' down — you share '+esc(nameOf(rr.commonAncestor))+'</div></div></div>';
+      } else if(rr&&rr.kind==='affinity'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — family by marriage'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">connected by marriage/partnership — NOT a blood relationship'+(rr.sharedDescendant?'; you share descendants (co-parents)':'')+'</div></div></div>';
+      } else if(rr&&rr.kind==='none'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root</div><div class="layer" style="color:var(--dim)">no line between here and '+esc(nameOf(S.curRoot))+' in this published atlas — a different branch, or ancestry continuing beyond the published archive; press R to re-root and walk from this person</div></div>';
+      }
+    }
+    if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
+    if(S.packs[id])chips+='<span class="chip" style="color:var(--violet)">'+esc(langText('blood.attested','attested overlay — evidence pack'))+'</span>';
+    var fsref=p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
+    if(!p.living&&fsref)chips+='<span class="chip">'+esc('FS '+fsref.id)+'</span>';
+    if(S.spineIds.has(id))chips+='<span class="chip" style="color:var(--gold)">'+esc(langText('blood.onspine','on the spine'))+'</span>';
+    var cby=byr(p.lifespan);
+    if(cby)(S.edges[id]||[]).forEach(function(x){var pb=byr(S.persons[x]&&S.persons[x].lifespan);
+      if(pb&&pb>=cby)chips+='<span class="chip" style="color:var(--rose)">⚠ impossible chronology (parent b. '+(pb<0?(-pb)+' BC':pb)+')</span>';});
+    body.innerHTML='<div class="dname">'+esc(p.name||id)+'</div>'
+      +(p.lifespan?'<div class="dyears">'+esc(p.lifespan)+'</div>':'')
+      +'<div class="dchips">'+chips+'</div>'+rels+layersHtml(id,p)
+      +'<div class="drels"><div class="lab">'+esc(langText('blood.bnr','bnr blood address'))+'</div>'
+      +'<div style="color:var(--cyan);font-size:max(10.5px,var(--fmin,12px));word-break:break-all">bnr://skaists.dev/blood/'+esc(id)+'</div></div>'
+      +(!p.living&&fsref
+        ?'<div class="drels"><div class="lab">'+esc(langText('blood.fsrec','source record'))+'</div>'
+        +'<div><a href="https://www.familysearch.org/tree/person/details/'+esc(fsref.id)+'" target="_blank" rel="noopener">FamilySearch record '+esc(fsref.id)+' ↗</a>'
+        +(S.retrieved?' <span style="color:var(--faint)">· retrieved '+esc(S.retrieved)+'</span>':'')+'</div></div>'
+        :'')
+      +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
+      +'<a class="ghost" id="openarchive" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/persons/'+esc(id)+'.html">open the archive</a>'
+      +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
+      +'</div>';
+    body.querySelectorAll('[data-rel]').forEach(function(b){
+      b.addEventListener('click',function(){showRelationship(id,b.getAttribute('data-rel'));});});
+    body.querySelectorAll('[data-go]').forEach(function(b){
+      b.addEventListener('click',function(){showDetail(b.getAttribute('data-go'));});});
+    document.getElementById('reroot').addEventListener('click',function(){setRoot(id);});
+  }
+  document.getElementById('spinebtn').addEventListener('click',function(){
+    S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));
+    if(S.viewMode==='ped')drawPedigree();else drawComb();});
+  document.getElementById('resetbtn').addEventListener('click',function(){
+    if(globalThis.__guxAtlas){try{__guxAtlas.home();}catch(e){}return;} // back to the beginning = the URL-derived initial context
+    S.trail=[];setRoot(S.root,true);showDetail(S.root);});
+  // ── view switch: pedigree (truth) ↔ fractal ↔ tree ───────────────────────
+  function setView(mode){
+    if(globalThis.__guxAtlas){try{__guxAtlas.setView(mode==='ped'?'pedigree':mode==='fan'?'fractal':'tree');}catch(e){}return;}
+    S.viewMode=mode;
+    document.getElementById('viewped').setAttribute('aria-pressed',String(mode==='ped'));
+    document.getElementById('viewfan').setAttribute('aria-pressed',String(mode==='fan'));
+    document.getElementById('viewtree').setAttribute('aria-pressed',String(mode==='tree'));
+    document.getElementById('comb').style.display=mode==='tree'?'none':'block';
+    document.querySelector('.zoombar').style.display=mode==='fan'?'grid':'none';
+    document.getElementById('treeview').style.display=mode==='tree'?'block':'none';
+    if(mode==='ped')drawPedigree();
+    if(mode==='fan'){drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);}
+    if(mode==='tree')renderTree();
+    if(globalThis.BloodNav&&BloodNav.onView)BloodNav.onView(mode);
+  }
+  document.getElementById('viewped').addEventListener('click',function(){setView('ped');});
+  document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
+  document.getElementById('viewtree').addEventListener('click',function(){setView('tree');});
+  // role-based parent slots: gender roles decide; unknown-gender parents fill
+  // an EMPTY slot only — the same person is never manufactured into both
+  // positions; a missing parent stays a visibly empty slot
+  // redraw whatever view is CURRENTLY selected — interpretation switches and
+  // any other data change must land in the layout the visitor is looking at
+  function redrawCurrent(){
+    if(globalThis.__guxAtlas)return; // the engine paints its own world
+    if(S.viewMode==='ped')drawPedigree();
+    else if(S.viewMode==='tree')renderTree();
+    else drawComb();
+  }
+  function parentSlots(ps){
+    var fa=null,mo=null,used={};
+    for(var i=0;i<ps.length;i++){var g2=S.persons[ps[i]]&&S.persons[ps[i]].gender;
+      if(g2==='M'&&!fa){fa=ps[i];used[ps[i]]=1;}
+      else if(g2==='F'&&!mo){mo=ps[i];used[ps[i]]=1;}}
+    for(var j=0;j<ps.length;j++){var p2=ps[j];
+      if(used[p2])continue;
+      if(!fa){fa=p2;used[p2]=1;}else if(!mo){mo=p2;used[p2]=1;}}
+    return [fa,mo];
+  }
+  // ── PEDIGREE MODE — the pedigree structure view: strict 1→2→4→8 slots per
+  // generation (ahnentafel), hexagonal aesthetic on top, generation labels,
+  // repeat ancestors as mirrored cells with the ⊙ marker, never invented.
+  function drawPedigree(){
+    world.innerHTML='';
+    var PS=15, PW=SQ3*PS*1.15, PRH=2.4*PS, GENS=5, CXp=540, BASEp=500;
+    var seen={};
+    var GEN_LABELS=['self','parents','grandparents','great-grandparents','2× great-grandparents'];
+    // generation labels down the left edge
+    for(var g=0;g<GENS;g++){
+      var gl=document.createElementNS(NS,'text');
+      gl.setAttribute('x',12);gl.setAttribute('y',BASEp-g*PRH-3*PRH*0.1-PS);
+      gl.setAttribute('class','hextext');gl.setAttribute('fill','var(--faint)');
+      gl.setAttribute('font-size','9');gl.setAttribute('pointer-events','none');
+      gl.textContent=GEN_LABELS[g]||('gen '+g);
+      world.appendChild(gl);
+    }
+    var pathSet=new Set(); // current root-path: TRUE cycle detection
+    (function slot(id,s,g){
+      if(!id||g>=GENS||!S.persons[id])return;
+      var p=S.persons[id];
+      var inGen=s-(1<<g), width=1<<g;
+      var x=CXp+(inGen-(width-1)/2)*PW, y=BASEp-g*PRH;
+      var isDup=!!seen[id];
+      if(!isDup)seen[id]=1;
+      var hex=document.createElementNS(NS,'polygon');
+      hex.setAttribute('points',hexPts(x,y,PS));
+      hex.setAttribute('class','hexcell'+(isDup?' dup':'')+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+hex.setAttribute('data-pid',id);
+      hex.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
+      hex.setAttribute('fill-opacity',g===0?'0.95':'0.62');
+      var t=document.createElementNS(NS,'title');
+      t.textContent=(p.name||id)+(p.lifespan?' · '+p.lifespan:'')+(isDup?' — same person, repeated by pedigree collapse (one archive object)':'');
+      hex.appendChild(t);
+      hex.addEventListener('click',function(){showDetail(id);});
+      world.appendChild(hex);
+      // name label inside (fits: these hexes are roomier than the fractal's)
+      var nm=p.living?'Living':(String(p.name||'').trim().split(/\s+/).slice(0,2).join(' ')||'—');
+      var tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',x);tx.setAttribute('y',y-2);tx.setAttribute('class','hextext');
+      tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',g===0?'9.5':'8'); /* 9.5 units = 12 px on a 390 px phone at the first fit (was 11.5 px) */
+      tx.setAttribute('pointer-events','none');tx.setAttribute('data-ring',String(g));
+      tx.textContent=nm.length>16?nm.slice(0,15)+'…':nm;
+      world.appendChild(tx);
+      var yr=p.lifespan&&!p.living?String(p.lifespan).split('–')[0]:'';
+      if(yr&&g<=2){
+        var ty=document.createElementNS(NS,'text');
+        ty.setAttribute('x',x);ty.setAttribute('y',y+8);ty.setAttribute('class','hextext');
+        ty.setAttribute('text-anchor','middle');ty.setAttribute('font-size','6.5');
+        ty.setAttribute('pointer-events','none');ty.textContent=yr;
+        world.appendChild(ty);
+      }
+      if(isDup){
+        var dm=document.createElementNS(NS,'text');
+        dm.setAttribute('x',x);dm.setAttribute('y',y+3);dm.setAttribute('text-anchor','middle');
+        dm.setAttribute('class','hextext dupmark');dm.setAttribute('font-size','11');dm.textContent='⊙';
+        world.appendChild(dm);
+        // a repeated person KEEPS their known ancestry at this occurrence —
+        // one identity, several pedigree positions; only a true cycle
+        // (an ancestor already on the current root-path) stops recursion
+        if(pathSet[id]){
+          var cy=document.createElementNS(NS,'text');
+          cy.setAttribute('x',x);cy.setAttribute('y',y+14);cy.setAttribute('text-anchor','middle');
+          cy.setAttribute('class','hextext');cy.setAttribute('fill','var(--rose)');cy.setAttribute('font-size','7');
+          cy.setAttribute('pointer-events','none');cy.textContent='↻ cycle';
+          world.appendChild(cy);return;
+        }
+        // fall through to recurse (do NOT return here)
+      }
+      if(g>=GENS-1)return;
+      var ps=(S.edges[id]||[]).filter(function(x2){return S.persons[x2];});
+      var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
+      pathSet.add(id);
+      [[fa,2*s],[mo,2*s+1]].forEach(function(pair2){
+        if(!pair2[0]){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot in the ahnentafel too
+            var gpx=CXp+(((pair2[1]-(1<<(g+1)))-((1<<(g+1))-1)/2)*PW);
+            var ghex=document.createElementNS(NS,'polygon');
+            ghex.setAttribute('points',hexPts(gpx,BASEp-(g+1)*PRH,PS*0.72));
+            ghex.setAttribute('class','hexcell ghostslot');
+            var gtitle=document.createElementNS(NS,'title');
+            gtitle.textContent='ancestry continues beyond the published archive — coverage, not an empty family';
+            ghex.appendChild(gtitle);ghex.addEventListener('click',function(){showDetail(id);});world.appendChild(ghex);
+          }
+          return;
+        }
+        if(!edgeVisible(id,pair2[0])){
+          var q=document.createElementNS(NS,'text');
+          q.setAttribute('x',CXp+((2*(pair2[1]-(1<<(g+1)))+1)/(2<<(g+1))-0.5)*2*((1<<(g+1))/2)*PW*0.5);
+          q.setAttribute('y',BASEp-(g+1)*PRH);q.setAttribute('text-anchor','middle');
+          q.setAttribute('class','hextext dupmark');q.setAttribute('font-size','12');q.textContent='?';
+          q.style.cursor='pointer';q.addEventListener('click',function(){showDetail(id);});
+          world.appendChild(q);return;
+        }
+        var px=CXp+(((pair2[1]-(1<<(g+1)))-((1<<(g+1))-1)/2)*PW);
+        var ln=document.createElementNS(NS,'line');
+        ln.setAttribute('x1',x);ln.setAttribute('y1',y-PS*0.9);
+        ln.setAttribute('x2',px);ln.setAttribute('y2',BASEp-(g+1)*PRH+PS*0.9);
+        ln.setAttribute('stroke','var(--line)');ln.setAttribute('stroke-width','1');
+        world.appendChild(ln);
+        slot(pair2[0],pair2[1],g+1);
+      });
+      pathSet.delete(id);
+    })(S.curRoot,1,0);
+  }
+  function renderTree(){
+    var host=document.getElementById('treeview');host.innerHTML='';
+    var build=function(id,depth){
+      var li=document.createElement('li'),p=S.persons[id];
+      if(!p)return li;
+      var b=document.createElement('button');
+      b.setAttribute('data-pid',id);
+      b.innerHTML=esc(p.name||id)+' <span class="yrs">'+esc(p.lifespan||'')+'</span> '+
+        '<span class="era" style="color:'+TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']+'">'+esc(p.evidence?p.evidence.class:'?')+'</span>';
+      b.addEventListener('click',function(){showDetail(id);});
+      var ps=(S.edges[id]||[]).filter(function(x){return S.persons[x]&&edgeVisible(id,x);});
+      if(!ps.length||depth>=6){li.appendChild(b);return li;}
+      var det=document.createElement('details');if(depth<3)det.open=true;
+      var sum=document.createElement('summary');sum.appendChild(b);det.appendChild(sum);
+      var ul=document.createElement('ul');
+      ps.forEach(function(x){ul.appendChild(build(x,depth+1));});
+      det.appendChild(ul);li.appendChild(det);return li;
+    };
+    var ul=document.createElement('ul');ul.appendChild(build(S.curRoot,0));host.appendChild(ul);
+  }
+  // ── entrance paths: equal standing, no records-first hierarchy ──────────
+  document.getElementById('entrance').addEventListener('click',function(e){
+    var a=e.target.closest('[data-ent]');if(!a)return;
+    var ent=a.getAttribute('data-ent');
+    if(ent==='family'){S.trail=[];setRoot(S.root,true);showDetail(S.root);}
+    else if(ent==='mythology'){
+      var R=(S.refsIndex&&S.refsIndex['M8WZ-XZY'])||S.root;
+      setRoot(R,true);
+      showDetail(R);
+      var det=document.querySelector('#dbody details');if(det)det.open=true;
+      document.getElementById('detail').scrollIntoView({behavior:'smooth'});
+    }
+    else if(ent==='records'){
+      var q=document.getElementById('q');q.value='Rockwood';q.dispatchEvent(new Event('input',{bubbles:true}));
+      document.getElementById('qout').scrollIntoView({behavior:'smooth'});
+    }
+    else if(ent==='older'){
+      var SR=(S.refsIndex&&S.refsIndex['LTSB-5WH'])||S.root;
+      setRoot(SR,true);showDetail(SR);
+    }
+  });
+  document.getElementById('lenses').addEventListener('change',function(e){
+    var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
+    if(globalThis.__guxAtlas)return; // engine mode: lenses are retired (hidden) and NEVER re-select the root (review d6ca5958)
+    if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
+  document.getElementById('q').addEventListener('input',function(){
+    var v=this.value.trim().toLowerCase(),out=document.getElementById('qout');out.innerHTML='';
+    if(v.length<2)return;
+    var hits=[],nameHits={};
+    for(var id in S.persons){
+      if((S.qnames[id]||'').indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);var nm=S.persons[id].name||id;nameHits[nm]=(nameHits[nm]||0)+1;if(hits.length>=12)break;}}
+    hits.forEach(function(hid){
+      var b=document.createElement('button');
+      var p=S.persons[hid];
+      var ctx2=(p.lifespan?' · '+p.lifespan:'')+' · '+(p.evidence?p.evidence.class:'?');
+      if((nameHits[p.name||hid]||0)>1){ // ambiguous name: distinguishing context, never a silent first-pick
+        var gc=(globalThis.BloodNav&&BloodNav.generationContext)?BloodNav.generationContext(hid,{curRoot:S.curRoot,archive:S.archive}):null;
+        ctx2+=' · '+(gc||'not on the current line');
+      }
+      b.textContent=(p.name||hid)+ctx2;
+      b.addEventListener('click',function(){showDetail(hid);});
+      out.appendChild(b);});
+    if(!hits.length){var e2=document.createElement('button');e2.disabled=true;
+      e2.textContent=langText('blood.notfound','no ancestor by that name in the archive');e2.style.opacity=.6;out.appendChild(e2);}
+  });
+  // GUX-01 zGeneUI: the stable seam blood-nav.mjs wires against. Rendering
+  // stays here; navigation state (selection, keyboard, hash context, LOD,
+  // drawer, drag-safety) lives in the module, unit-tested in tools/genealogy.
+  globalThis.BloodComb={S:S,view:view,doc:document,
+    setRoot:setRoot,showDetail:showDetail,setView:setView,
+    redrawCurrent:redrawCurrent,centerOn:centerOn,
+    applyViewInstant:function(){applyView(true);},esc:esc,langText:langText};
+  try{var st=JSON.parse(localStorage.getItem('blood-staged')||'[]');if(st.length)S.staged=st;}catch(e){}
+})();
+</script>
+<script type="module">
+// GUX-01 beat 2b — THE COMPOSITION MOUNT (zGeneUI). blood.html owns
+// composition and presentation state only: truth stays in the corpus; the
+// atlas engine derives spatial state; the person panel derives explanation;
+// blood-nav owns the one navigation/history grammar (hash + session).
+// One corpus truth -> one atlas world -> one person explanation -> one
+// history -> one URL grammar. If ANYTHING here throws, the incumbent comb
+// path stays fully functional (the engine gates all read __guxAtlas).
+import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs";
+import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
+import { fetchArchive } from "./person-panel-corpus.mjs";
+import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => ppEsc(v);
+const BASE = "../assets/profile-archive/lineage/";
+function bootPayload() {
+  if (globalThis.__guxBoot) return Promise.resolve(globalThis.__guxBoot);
+  return new Promise((res) => document.addEventListener("gux:boot", () => res(globalThis.__guxBoot), { once: true }));
+}
+function failQuiet(msg) { try { console.warn("gux mount: " + msg); } catch (e) {} }
+
+try {
+  const boot = await bootPayload();
+  if (!boot || !boot.S) throw new Error("boot payload missing");
+
+  // ONE truth source for the mount: the same corpus JSON the incumbent reads.
+  const corpus = await fetch(BASE + "remington-bloodline.json").then((r) => r.json());
+  const overlay = await fetch(BASE + "attested-overlays.json").then((r) => r.json()).catch(() => null);
+
+  // initial context = URL hash merged with the one-shot session return
+  // (blood-nav's grammar) — a deep link NEVER becomes a founder default.
+  let hctx = decodeHash(location.hash);
+  try {
+    const saved = sessionStorage.getItem(RETURN_KEY);
+    if (saved) {
+      const sctx = decodeHash(saved);
+      if (!hctx.p || hctx.p === sctx.p) { sessionStorage.removeItem(RETURN_KEY); hctx = sctx; }
+    }
+  } catch (e) { /* private mode: hash context still applies */ }
+  const init = initialFromCtx(hctx, boot.apr);
+  if (hctx.myth && boot.mythRoot && !hctx.r) init.root = boot.mythRoot; // #myth doorway keeps its meaning
+
+  let syncing = false;   // loop guard: one wiring echo per gesture
+  let panelAt = null;    // the person the panel is showing
+  let railRoot = init.root;   // the root the discovery rail was last derived for
+  let panelRoot = init.root;  // the root the PANEL last stood on (kept equal to the engine root - ONE root on screen)
+  let atlas = null;
+
+  // the panel (zGenePerson's organ) — the ONE explanation surface
+  const { archive } = await fetchArchive(BASE);
+  const panel = mountPersonPanel($("ppanel"), archive, {
+    root: init.root,
+    onreroot(id) {
+      // "stand here (re-root)" - the panel ASKS, the engine re-roots (one
+      // world, one root on screen; review d6ca5958 finding 5). Loop-guarded:
+      // the onContext(reroot) echo re-syncs panel + rail while syncing holds.
+      if (syncing || !atlas || !id) return;
+      syncing = true; try { atlas.reroot(id); } finally { syncing = false; }
+    },
+    onnavigate(s) {
+      if (syncing || !atlas) return;
+      const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
+      if (id && id !== panelAt) { panelAt = id; syncing = true; atlas.select(id); syncing = false; }
+    },
+    openPersonPage(id) {
+      try { sessionStorage.setItem(RETURN_KEY, syncHash(atlas ? atlas.getContext() : null)); } catch (e) {}
+      window.location.href = archiveUrl(id); // same-origin stays in tab; the one-shot return brings the context back
+    }
+  });
+
+  function openPanelPerson(id) {
+    if (syncing || !panel || !id || panelAt === id) return;
+    syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
+    const d = $("detail"); if (d) d.classList.add("open");
+  }
+
+  // discovery rail — CONTEXTUAL per standing root (the advisor's invariant):
+  // the engine's pure-core ingest on OUR corpus copy with the root overridden;
+  // engine bytes are never touched or mutated.
+  function renderRail(rootId) {
+    const rail = $("cards");
+    if (!rail) return;
+    try {
+      const m = ingest(Object.assign({}, corpus, { root: rootId }), overlay);
+      rail.innerHTML = "";
+      for (const c of discoveries(m)) {
+        const b = document.createElement("button");
+        b.type = "button"; b.dataset.card = c.kind;
+        b.innerHTML = "<div><b>" + esc(c.title) + "</b></div>" +
+          "<div style='color:var(--dim);font-size:max(11px,var(--fmin,12px))'>" + esc(c.hook || "") + "</div>" +
+          (c.count != null ? "<div style='color:var(--info);font-size:max(11px,var(--fmin,12px))'>&#9662; " + esc(String(c.count)) + " — " + esc(c.depthNote || "counted across the whole published archive") + "</div>" : "") +
+          "<div style='color:var(--faint);font-size:max(10px,var(--fmin,12px));margin-top:3px'>" + esc(c.disclosure || "") + "</div>";
+        b.addEventListener("click", () => {
+          const a = c.action; if (!a || !atlas) return;
+          if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
+          else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
+          else if (a.type === "select") atlas.select(a.iid);
+        });
+        rail.appendChild(b);
+      }
+      rail.setAttribute("data-cards", String(rail.children.length));
+      rail.setAttribute("data-rail-root", String(rootId)); // the contextuality marker (invariant test)
+      rail.hidden = rail.children.length === 0;
+    } catch (e) { failQuiet("rail " + (e && e.message)); }
+  }
+  function showRoute(from, to) {
+    const strip = $("routestrip"); if (!strip || !atlas) return;
+    const route = bloodRoute(atlas.model, from, to);
+    if (!route) { strip.hidden = true; strip.innerHTML = ""; return; }
+    strip.hidden = false;
+    strip.setAttribute("data-route-len", String(route.length - 1));
+    strip.innerHTML = "<div style='color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-bottom:4px'>follow the blood — " + (route.length - 1) +
+      " hops · <span style='color:var(--faint)'>" + esc(routeAlternatesPhrase(routeAlternates(atlas.model, from, to))) + "</span></div>" +
+      route.map((iid, i) => {
+        const p = atlas.person(iid) || {};
+        return "<button type='button' class='atlashop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + esc(iid) +
+          "\" title=\"" + esc(p.name || "") + "\">" + (i === 0 ? "&#9678; " : "") + esc(p.name || "Living") + "</button>";
+      }).join("<span style='color:var(--info)'> &#8594; </span>");
+    for (const hb of strip.querySelectorAll("[data-hop]")) hb.addEventListener("click", () => atlas.select(hb.dataset.hop));
+    strip.scrollLeft = 0;
+  }
+
+  // the atlas (zGeneAtlas's organ) — ONE world, ONE history
+  atlas = await createAtlas({
+    mount: $("atlas"),
+    corpus, overlay,
+    initial: init,
+    onContext(ctx, reason) {
+      syncEngineHash(ctx, reason); // blood-nav's ONE-history law: push fresh navigations, echo engine walks, replace selects (review d6ca5958 finding 1)
+      const vb = { viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
+      for (const id in vb) { const el = $(id); if (el) el.setAttribute("aria-pressed", String(ctx.view === vb[id])); }
+      try { boot.S.curRoot = ctx.root; if (ctx.selection) boot.S.sel = ctx.selection; } catch (e) {}
+      if (railRoot !== ctx.root) {
+        railRoot = ctx.root;
+        renderRail(ctx.root); // contextual per root on EVERY path — reroot, back, home, restore (review d6ca5958 finding 2)
+      }
+      if (panelRoot !== ctx.root) {
+        // ONE root on screen, every path: the panel re-stands whenever the
+        // ENGINE root moves - including back/home/restore, where the panel's
+        // internal curRoot used to desync and mute its own stand-here button
+        // (review d6ca5958 finding 5). syncing holds: panel.setRoot fires
+        // onreroot, and this re-stand is an echo, never a fresh re-root.
+        panelRoot = ctx.root;
+        syncing = true; panel.setRoot(ctx.root); syncing = false;
+      }
+      if (reason === "reroot") {
+        panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false;
+      } else if (!syncing && (reason === "select" || reason === "back" || reason === "restore" || reason === "home")) {
+        openPanelPerson(ctx.selection);
+        if (reason === "home" && !ctx.selection && panelAt !== ctx.root) { panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false; }
+      }
+    }
+  });
+  globalThis.__guxAtlas = atlas;
+  setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
+  globalThis.__guxInit = init; // journey seam: the URL-derived initial context
+  document.body.classList.add("gux");
+  // ONE history, one visible affordance: back joins the zoombar (B on the
+  // engine stage does the same); the incumbent trail is retired under gux.
+  // Back walks the stack; at the bottom, back returns EXACTLY home — the
+  // engine's home() restores the URL-derived initial context including
+  // selection and camera (it pushes first, so one-history semantics hold).
+  try {
+    const zb = document.querySelector(".zoombar");
+    if (zb) {
+      const bb = document.createElement("button");
+      bb.type = "button"; bb.id = "guxback"; bb.title = "back — one history (B)";
+      bb.setAttribute("aria-label", "back — one history");
+      bb.textContent = "\u2190";
+      const atInitial = (c) => c.root === init.root && (c.selection || null) === (init.selection || null) && c.view === init.view;
+      bb.addEventListener("click", () => {
+        const d = atlas.core.historyDepth();
+        if (d === 0 && !atInitial(atlas.getContext())) atlas.home();
+        else atlas.back();
+      });
+      zb.insertBefore(bb, zb.firstChild);
+    }
+  } catch (e) { failQuiet("back button " + (e && e.message)); }
+  $("atlas").hidden = false;
+  $("ppanel").hidden = false;
+  $("ppanel").setAttribute("data-pp-mounted", "1");
+  renderRail(atlas.getContext().root);
+  if (atlas.getContext().selection) openPanelPerson(atlas.getContext().selection);
+  else if (init.root) { panelAt = init.root; panel.openPerson(init.root); }
+} catch (e) {
+  failQuiet("engine mount failed — incumbent comb path remains active (" + (e && e.message) + ")");
+}
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the
+   archive's own model (BloodComb.S, rooted at the founder) and the committed storage receipt
+   (zblood-storage-economics.json). "kept" is drawn ONLY when the receipt says uploaded; every
+   keep-forever gesture opens the preservation flow below, where the live quote and the wallet's
+   own screen are the gate. Nothing on this front pays, signs or uploads. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var REL=['you','parents','grandparents','great-grandparents','2× great-grandparents','3× great-grandparents','4× great-grandparents','5× great-grandparents'];
+  var SHORT=['you','parents','grand','great','2× great','3× great','4× great','5× great'];
+  /* the fan chart's colours are skaists tokens, read live from the register (no hex here):
+     found = sovereign, selected = sovereign-strong, not yet = sovereign-wash, living = sovereign-soft dashed;
+     kept = the rainbow read rim to centre (outer ring biomass-green, then ai, info, sovereign) */
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var RAIN=function(){var st=(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);return {5:st[1],4:st[2],3:st[3],2:st[4],1:st[4],rim:st[0]};};
+  var D={gens:[],living:0,spine:0,E:null,st:{},asked:false};
+  var R={mode:'line',sel:4,lit:{}};
+
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function initials(n){var p=String(n||'').trim().split(/\s+/);return ((p[0]||'')[0]||'')+((p.length>1?p[p.length-1]:'')[0]||'');}
+  function fmtAnt(x){return (Math.round(x*100)/100).toFixed(2);}
+  function set(sel,html){document.querySelectorAll('#eternal [data-et="'+sel+'"]').forEach(function(e){e.innerHTML=html;});}
+
+  /* the line, walked parentward from the founder: position p in gen g has parents 2p, 2p+1 */
+  function walk(S){
+    var root=S.root, lvl=[{id:root,pos:0}], gens=[];
+    for(var g=1;g<=7;g++){
+      var nx=[],pub=0,liv=0,beyond=0,slots=Math.pow(2,g),cells=new Array(slots).fill('none');
+      lvl.forEach(function(c){(S.edges[c.id]||[]).slice(0,2).forEach(function(pid,k){
+        var pos=c.pos*2+k, p=S.persons[pid];
+        if(p){nx.push({id:pid,pos:pos});if(p.living){liv++;cells[pos]='living';}else{pub++;cells[pos]='found';}}
+        else{beyond++;cells[pos]='beyond';}
+      });});
+      var people=nx.filter(function(c){return !S.persons[c.id].living;}).map(function(c){var p=S.persons[c.id];return {name:p.name,years:p.lifespan||'',era:(p.evidence&&p.evidence.class)||''};});
+      gens.push({g:g,slots:slots,pub:pub,living:liv,beyond:beyond,cells:cells,people:people});
+      lvl=nx;
+    }
+    return gens;
+  }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    var h='';
+    D.gens.slice(0,5).forEach(function(G){
+      if(G.living&&!G.pub){h+='<div class="et-b-row"><span>'+esc(T('et.rel.'+G.g,REL[G.g]))+'</span><small class="out">'+esc(T('et.b.outLiving','kept out while living'))+'</small></div>';return;}
+      var found=G.pub===G.slots?G.slots+' '+T('et.b.places','places'):G.pub+' '+T('et.b.of','of')+' '+G.slots+' '+T('et.b.places','places');
+      h+='<button type="button" class="et-b-row" aria-expanded="false" data-g="'+G.g+'"><span>'+esc(T('et.rel.'+G.g,REL[G.g]))+'</span><small>'+esc(found)+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';
+      h+='<div class="et-b-people" data-g="'+G.g+'" hidden>'+G.people.slice(0,6).map(function(p){return '<div class="et-b-person"><i>'+esc(initials(p.name))+'</i><div><b>'+esc(p.name)+'</b><span>'+esc(p.years)+'</span></div></div>';}).join('')+
+        (G.people.length>6?'<div class="et-b-more">'+esc(T('et.b.more','and {n} more in the archive below').replace('{n}',G.people.length-6))+'</div>':'')+'</div>';
+    });
+    h+='<div class="et-b-more">'+esc(T('et.b.deep','the line goes {n} generations deep. the whole archive is below.').replace('{n}',D.spine))+'</div>';
+    box.innerHTML=h;
+  }
+  function beeStep(s){document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+
+  /* ── RAVER ── */
+  var RAD={1:[46,62],2:[68,94],3:[98,124],4:[128,154],5:[158,188]};
+  function arc(r0,r1,a0,a1){
+    var p=function(r,a){return (r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);};
+    var big=(a1-a0)>Math.PI?1:0;
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 '+big+' 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 '+big+' 0 '+p(r0,a0)+'Z';
+  }
+  function mandala(){
+    var svg=$('etMandala'); if(!svg) return;
+    var kept=R.mode==='kept', seal=R.mode==='seal', h='', RN=RAIN();
+    D.gens.slice(0,5).forEach(function(G){
+      var r=RAD[G.g], n=G.slots, gap=n>16?0.02:0.035, sel=R.mode==='line'&&R.sel===G.g;
+      h+='<g class="ring" data-g="'+G.g+'" role="button" tabindex="0" aria-pressed="'+(sel?'true':'false')+'" aria-label="'+esc(REL[G.g]+': '+G.pub+' of '+G.slots+' found'+(G.living?', '+G.living+' living, kept out':''))+'">';
+      for(var i=0;i<n;i++){
+        var a0=-Math.PI/2+i*2*Math.PI/n+gap, a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap, c=G.cells[i], fill, extra='';
+        if(c==='living'){fill='none';extra=' stroke="'+tok('sovereign-soft')+'" stroke-width="1.5" stroke-dasharray="4 4"';}
+        else if(c==='found'){fill=kept?RN[G.g]:(sel?tok('sovereign-strong'):tok('sovereign'));}
+        else fill=tok('sovereign-wash');
+        h+='<path class="seg" d="'+arc(r[0],r[1],a0,a1)+'" fill="'+fill+'"'+extra+' opacity="'+(seal?0.3:(kept||sel||R.mode!=='line'?1:0.62))+'"/>';
+      }
+      h+='</g>';
+    });
+    h+='<g class="you" role="button" tabindex="0" aria-label="'+esc(T('et.r.youSeal','you — tap to seal your line'))+'"><circle r="40" fill="'+tok('bg-card')+'"/><circle r="30" fill="none" stroke="'+tok('sovereign')+'" stroke-dasharray="3 4"/><circle r="17" fill="none" stroke="'+tok('you')+'" stroke-dasharray="3 3"/><text y="5" text-anchor="middle" fill="'+tok('you')+'" style="font:600 13px/1.4 var(--sk-font-raver-body)">you</text></g>';
+    if(kept)h+='<circle r="196" fill="none" stroke="'+RN.rim+'" stroke-width="2" stroke-dasharray="2 6"/>';
+    svg.innerHTML=h;
+  }
+  function raverCard(){
+    var c=$('etRaverCard'); if(!c) return;
+    var G=D.gens[R.sel-1]; if(!G){c.innerHTML='';return;}
+    var names=G.people.slice(0,2).map(function(p){return p.name;}).join(' + ');
+    c.innerHTML='<span class="rk">r'+G.g+'</span><div><b>'+esc(names||T('et.r.none','no one found here yet'))+'</b><span>'+esc(T('et.r.ring','ring')+' '+G.g+' · '+SHORT[G.g]+' · '+G.pub+' '+T('et.r.of','of')+' '+G.slots+' '+T('et.r.found','found'))+'</span></div>';
+  }
+  function raver(){
+    var root=document.querySelector('#eternal .et-r'); if(!root) return;
+    var seal=R.mode==='seal', kept=R.mode==='kept', asked=R.mode==='asked';
+    $('etRaverTitle').textContent=kept?T('et.r.kept','kept'):seal?T('et.r.seal','seal it'):asked?T('et.r.asked','asked'):T('et.r.line','your line');
+    $('etRaverHint').textContent=kept?T('et.r.hKept','colour = kept'):seal?T('et.r.hSeal','light all four'):asked?T('et.r.hAsked','the network step is open below'):D.gens.slice(0,5).length+' '+T('et.r.hLine','rings · tap a ring · tap you to seal');
+    root.querySelector('.et-r-seal').hidden=!seal;
+    root.querySelector('.et-r-kept').hidden=!kept;
+    $('etRaverCard').hidden=seal;
+    $('etLegend').hidden=seal;
+    var go=$('etRaverGo'); go.hidden=seal||kept;
+    go.textContent=asked?T('et.r.back','back to the line'):T('et.r.go','seal the line');
+    var n=[1,2,3,4].filter(function(k){return R.lit[k];}).length;
+    document.querySelectorAll('#etTiles button').forEach(function(b){b.setAttribute('aria-pressed',R.lit[b.getAttribute('data-t')]?'true':'false');});
+    $('etHold').disabled=n<4;
+    $('etSealHint').textContent=n<4?n+' '+T('et.r.lit','of 4 lit'):T('et.r.consent','one payment · your hold is your consent');
+    mandala(); raverCard();
+  }
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etHold').disabled||hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etHoldProg'), still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1400);prog.style.strokeDashoffset=String(578*(1-f));
+      if(f>=1){hold.raf=0;prog.style.strokeDashoffset='0';preserve('raver');return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+    void still;
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldProg').style.strokeDashoffset='578';}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etManifest'); if(!tb) return;
+    var st=D.st||{}, E=D.E, an=E&&E.quotes&&E.quotes.autonomi, ar=E&&E.quotes&&E.quotes.arweave;
+    var m=String(st.approved||'').match(/manifest ([0-9a-f]{6,})/i), mid=m?m[1]:'';
+    set('bdata','bData://genealogy/'+esc(mid||T('et.c.unsealed','unsealed'))+(mid?'…':''));
+    $('etChips').innerHTML='<span class="on">state '+(st.uploaded?'kept':'draft')+'</span><span class="'+(st.prepared?'ok':'')+'">edition '+(st.prepared?'prepared ✓':'not prepared')+'</span><span>'+(st.uploaded?'immutable':'mutable')+'</span>';
+    tb.innerHTML=D.gens.map(function(G){
+      var s=G.living&&!G.pub?'<span class="st-living">living·out</span>':G.pub===G.slots?'<span class="st-pub">published '+G.pub+'</span>':'<span class="st-part">published '+G.pub+'/'+G.slots+'</span>';
+      return '<tr class="pick" data-g="'+G.g+'" tabindex="0" aria-expanded="false"><td>g'+G.g+'</td><td>'+esc(SHORT[G.g])+'</td><td>'+G.slots+'</td><td>'+s+'</td></tr>'+
+        '<tr class="names" data-g="'+G.g+'" hidden><td colspan="4">'+(G.people.slice(0,4).map(function(p){return esc(p.name)+'<small>'+esc(p.years)+(p.era?' · '+esc(p.era):'')+'</small>';}).join('')||'<small>kept out while living</small>')+(G.people.length>4?'<small>+ '+(G.people.length-4)+' more in the archive below</small>':'')+'</td></tr>';
+    }).join('');
+    var date=function(x){return x&&String(x).slice(0,10);};
+    var steps=[
+      ['draft','edition packed from the lineage corpus · mutable until sealed',st.prepared?'done':'todo'],
+      ['guard · living = exclude',D.living+' records refused · they never reach the manifest','guard'],
+      ['consent · '+(st.approved?'bound':'not yet'),st.approved?String(st.approved):'no manifest bound yet',st.approved?'consent':'todo'],
+      ['quote · Autonomi',an&&an.computed?('storage '+an.computed.storageANT+' ANT + gas '+an.computed.gasETH+' ETH ≈ $'+an.computed.totalUSD+' · '+(an.raw&&an.raw.confidence||'estimate')+' @ '+date(an.queriedAt)+(ar&&ar.computed?' · alt Arweave '+ar.computed.fullArchiveAR+' AR ≈ $'+ar.computed.fullArchiveUSD:'')+' · a live plan is fetched before any payment'):'not quoted yet',st.quoted?'done':'todo'],
+      ['settle · ANT · pay once',st.purchased?'settled':'not yet · payment is the consent settling · no job before this',st.purchased?'done':'todo'],
+      ['address · immutable · public',st.uploaded?'uploaded':'not yet · anyone fetches → hashes → compares',st.uploaded?'done':'todo']
+    ];
+    var nowAt=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===nowAt?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var yn=function(v,y){return v?'<span class="yes">'+esc(y||'✓')+'</span>':'<span class="no">not yet</span>';};
+    $('etReceipt').innerHTML=[
+      ['address',st.uploaded?esc(st.address||'uploaded'):'<span class="no">not yet · no upload before settlement</span>'],
+      ['manifest',mid?'sha256 '+esc(mid)+'…':'<span class="no">not bound</span>'],
+      ['consent',st.approved?'<span class="sig">bound</span> · '+esc(st.approved):'<span class="no">not yet</span>'],
+      ['guard',esc(D.living)+' living records refused · 0 in manifest'],
+      ['paid',yn(st.purchased,'settled')],
+      ['retrieved',yn(st.retrieved)],
+      ['verified',yn(st.hashVerifiedFromStorage,'hash-verified from storage')]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var sign=$('etCySign'); sign.textContent=st.uploaded?'kept · receipt above':(D.asked?'open · the network step is below':'sign consent + settle'); sign.disabled=!!st.uploaded;
+  }
+
+  /* ── the one hand-off: the preservation flow below owns every real step ── */
+  function preserve(from){
+    D.asked=true;
+    if(from==='bee')beeStep('asked');
+    R.mode='asked';raver();cy();
+    var b=$('preservebtn'); if(b) b.click();
+  }
+
+  function price(){
+    var E=D.E, an=E&&E.quotes&&E.quotes.autonomi;
+    if(an&&an.computed){
+      set('ant',fmtAnt(an.computed.storageANT)+'<br>ANT');
+      set('antShort',fmtAnt(an.computed.storageANT)+' ANT');
+      set('beeQuote',esc(T('et.b.quote','+ network gas · about ${usd} in all · estimated {date}; a fresh price is asked before you pay').replace('{usd}',an.computed.totalUSD).replace('{date}',String(an.queriedAt||'').slice(0,10))));
+      set('raverQuote',esc(T('et.r.quote','estimate · fresh price before you pay')));
+    } else {
+      set('ant',esc(T('et.b.noQuote','price asked when you choose')));set('antShort',esc(T('et.b.noQuoteShort','price asked live')));
+      set('beeQuote',esc(T('et.b.noQuoteLong','the network is asked for a price before anything is paid.')));set('raverQuote','');
+    }
+  }
+  function all(){
+    set('living',esc(D.living));price();bee();raver();cy();
+    if(D.st.uploaded){R.mode='kept';beeStep('kept');set('address',esc(D.st.address||'uploaded'));raver();
+      $('etKeptNote').textContent=T('et.r.keptNote','hollow = living, out · dim = not found yet · colour = kept');}
+  }
+
+  function wire(){
+    var ev=document.getElementById('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go]');
+      if(go){var s=go.getAttribute('data-go');if(go.closest('.et-b'))beeStep(s);else{R.mode='line';R.lit={};raver();}return;}
+      var row=e.target.closest('.et-b-row[data-g]');
+      if(row){var open=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',open?'true':'false');var pp=ev.querySelector('.et-b-people[data-g="'+row.getAttribute('data-g')+'"]');if(pp)pp.hidden=!open;return;}
+      var ring=e.target.closest('.ring');
+      if(ring&&R.mode==='line'){R.sel=+ring.getAttribute('data-g');raver();return;}
+      if(e.target.closest('.you')&&R.mode==='line'&&!D.st.uploaded){R.mode='seal';R.lit={};raver();return;}
+      var tile=e.target.closest('#etTiles button');
+      if(tile){var k=tile.getAttribute('data-t');R.lit[k]=!R.lit[k];raver();return;}
+      var tr=e.target.closest('.et-c-tab tr.pick');
+      if(tr){var o=tr.getAttribute('aria-expanded')!=='true';tr.setAttribute('aria-expanded',o?'true':'false');var nm=ev.querySelector('.et-c-tab tr.names[data-g="'+tr.getAttribute('data-g')+'"]');if(nm)nm.hidden=!o;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.ring,.you,.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etRaverGo').addEventListener('click',function(){if(R.mode==='asked'){R.mode='line';raver();return;}R.mode='seal';R.lit={};raver();});
+    $('etBeeOk').addEventListener('change',function(){$('etBeePay').disabled=!this.checked;});
+    $('etBeePay').addEventListener('click',function(){if(!$('etBeeOk').checked)return;preserve('bee');});
+    $('etCySign').addEventListener('click',function(){if(!D.st.uploaded)preserve('cy');});
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    document.addEventListener('blang',function(){all();});
+  }
+
+  function boot(){
+    var B=window.BloodComb, S=B&&B.S;
+    if(!S||!S.root||!S.persons[S.root]||!Object.keys(S.edges).length){return setTimeout(boot,250);}
+    D.gens=walk(S); D.living=(S.stats&&S.stats.livingRedacted)||0; D.spine=(S.stats&&S.stats.spineGenerations)||D.gens.length;
+    all();
+    fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){D.E=E;D.st=E.states||{};all();}).catch(function(){all();});
+  }
+  /* the person drawer belongs to the archive: its peek waits below the screen until the reader
+     reaches the archive (or opens a person), so it never sits on the three fronts */
+  function peek(){var h=$('etArchive');if(!h)return;var before=h.getBoundingClientRect().top>innerHeight*0.6;document.body.classList.toggle('et-front',before);}
+  addEventListener('scroll',peek,{passive:true});addEventListener('resize',peek);
+  wire(); boot(); peek();
+  window.__eternal={data:D,raver:R};
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

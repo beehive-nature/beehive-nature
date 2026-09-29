@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf0795a3332",
+ "bnr": "bnr://skaists.dev/blood/pf0795a3332",
+ "identity": {
+  "name": "Agnes Hood",
+  "lifespan": "1811–1872",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJC-KHF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "90 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "90 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf778a9ff43",
+    "name": "James Hood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p21c9f04cdc",
+    "name": "Margaret Bilsland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p43ce1fc7ee",
+    "name": "William Hood Hill"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcb63580715",
+    "name": "Alexander Hill Jr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJC-KHF",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 90,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

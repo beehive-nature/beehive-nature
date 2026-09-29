@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe049efdb18",
+ "bnr": "bnr://skaists.dev/blood/pe049efdb18",
+ "identity": {
+  "name": "James Lang Hamilton",
+  "lifespan": "1818–1875",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJ8-QZL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "97 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "97 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p61f556f2a6",
+    "name": "John Hamilton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p93f3b212a7",
+    "name": "Sarah Elizabeth Lang",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4e0a6233a4",
+    "name": "Elizabeth Ann Hamilton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p51c0fdce55",
+    "name": "Mary Ann Campbell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJ8-QZL",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 97,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

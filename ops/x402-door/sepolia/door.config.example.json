@@ -1,0 +1,9 @@
+{
+  "bind": "127.0.0.1:18042",
+  "journal_root": "/var/lib/x402-door",
+  "daily_gas_cap_wei": 200000000000000,
+  "reserved_gas_wei": 150000000000000,
+  "ops_float_available_wei": 400000000000000,
+  "chain": 84532,
+  "facilitator_chain_config": "ops/x402-door/sepolia/chains.example.json"
+}
