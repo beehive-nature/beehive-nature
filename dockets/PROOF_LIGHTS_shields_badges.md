@@ -141,8 +141,8 @@ the same path.
 | `skaists meter \| n/n fronts 100% @<rev>` | The standards meter's evidence, re-derived by the gate | Now (#250, #253) |
 | `BUILD`, `TESTS` | CI job output, once CI-origin provenance is verifiable | With the CI-signing card |
 | `REPRODUCIBLE` | `skaists/buzz` `.github/workflows/ci-images.yml`: the job fails unless a no-cache rebuild gives the identical digest (PR #9) | For CI images only: see below |
-| `LICENSE \| <SPDX>` | The manifest's license field | Now |
-| `SEAL \| <alg>` | The `bnr-seal` suite id (`Suite::as_str`) | Now |
+| `LICENSE \| <SPDX>` | The manifest's license field | Once a derivation in `e2e/render-badges.mjs` reads it and the gate re-derives it |
+| `SEAL \| <alg>` | The `bnr-seal` suite id (`Suite::as_str`) | Once a bnr-seal instrument and a derivation in `e2e/render-badges.mjs` exist, and the gate re-derives it |
 | `ISOLATION \| env+fs` | The `buzz-acp` launcher `--check` probe in CI (PRs #7, #8) | When #8 lands |
 
 **What `REPRODUCIBLE` means.** A reproducibility check *exists* for the CI

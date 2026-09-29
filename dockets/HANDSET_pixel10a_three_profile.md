@@ -102,7 +102,9 @@ Founder ruling, 2026-09-27. Keep it minimal:
    role needs.
 
 Nothing else. In particular: no experimental Buzz builds, no development
-tooling, and no private key that can move funds.
+tooling, no root key and no unbounded fund-moving key. The one exception is the
+device's own non-exportable key and its tier-bounded delegation (T3 enrollment
+§0 and §2), which T4 `wallet/send-limited` needs.
 
 ## 4b. Four evidence dimensions, never one flag
 
