@@ -1,5 +1,16 @@
 # Proof-lights docket: Shields badges derived from signed state
 
+> **Superseded (2026-09-27).** The founder amended this docket the same day.
+> See `docs/dispatches/2026-09-27-proof-lights-docket-amendment.md` and the
+> docket's §3 and §5.
+> - P0 (public Shields) and P1 (a self-hosted Shields with a verifier) are
+>   withdrawn. The adopted path is offline rendering and same-origin
+>   publication, with no badge server.
+> - The three open questions below were ruled in §5: a dedicated
+>   CI-attestation key, no badge server, and text first.
+>
+> This file is kept as the original lane receipt. Do not implement from it.
+
 date 2026-09-27 · seat Claude · founder order: "write the shields badge docket"
 
 ## What landed
@@ -31,5 +42,6 @@ badges, which need no fetch.
 - The Shields facts are read from the pinned source. shields.io itself was
   unreachable from the sandbox.
 - No code: no verifier, no signing step, no deployment.
-- Open questions for the founder are in the docket's §5: the status signing
-  key, the P1 host, and the glyph language.
+- Open questions for the founder were in the docket's §5: the status signing
+  key, the P1 host, and the glyph language. All three are now ruled (see the
+  banner above).

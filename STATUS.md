@@ -35,8 +35,8 @@ it. The current count is the newest ledger entry that states one — at present
 2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
-- `2026-09-29` — **#247: Codex review reconciled.** Thirteen findings over three rounds
-  (`cf3887a`, `6849dab`, `a0eeafd`), all correct and all accuracy fixes:
+- `2026-09-29` — **#247: Codex review reconciled.** Sixteen findings over four rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`), all correct and all accuracy fixes:
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
   - the handset dispatch records the §6 rulings;
@@ -44,6 +44,7 @@ predates it and is superseded.
   - the Shields remote-fetch wording is corrected;
   - the handset docket keeps the bounded E4 device key and gives each verifier its own TOFU pin.
   - round 3 swept the whole diff for remaining copies: §4a, the bnr-seal ledger entry, the dispatch's tamper wording, and the not-yet-derived SEAL and LICENSE badges.
+  - round 4: the original proof-lights dispatch is marked superseded; planned signing and the NIST remark are marked UNVERIFIED; the #250-only paths are named with the PR link.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch

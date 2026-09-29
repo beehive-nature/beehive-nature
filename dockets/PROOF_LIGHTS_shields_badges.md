@@ -11,7 +11,10 @@ value nothing machine-checks is not shown.
 proposed a public-Shields Endpoint phase and a later self-hosted Shields with a
 verifier service. #250 already implements something simpler: offline rendering,
 same-origin publication, no badge server at all. This amendment adopts that path
-(§3) and corrects one wrong claim (§1). It also adds two distinctions the first
+(§3) and corrects one wrong claim (§1). `e2e/render-badges.mjs` and the
+gate-repair dispatch cited below land with #250
+(https://github.com/beehive-nature/beehive-nature/pull/250), not with this
+docket. It also adds two distinctions the first
 version blurred: historical evidence versus live status, and git addressing
 versus cryptographic binding (§2). The founder's rulings on the three open
 questions are in §5.
@@ -78,11 +81,15 @@ read back from the document. The gate also checks:
 
 A signature can authenticate an attestation; it cannot make an unchecked
 derivation correct. So derivation checking comes first and signing second.
+For status documents that authentication is planned, not built. Which bytes,
+which key and which signature are verified is UNVERIFIED until the CI-signing
+card lands its signing and verification functions (§5.1).
 
 **Git addressing versus evidence binding.**
 - `source_blob` is the git blob id: the repository *locator*.
 - It is SHA-1, so it is not the long-term integrity commitment for signed
-  evidence; NIST directs security uses of SHA-1 to SHA-2 or SHA-3.
+  evidence. NIST's direction of security uses of SHA-1 to SHA-2 or SHA-3 is
+  cited guidance, UNVERIFIED by this seat.
 - The commitment is `source_digest: {alg: "sha3-256", value}`. It is
   algorithm-tagged, and `sha3-256` is already in the estate's registry.
 - **Scanner conflicts.** The secret scan blocks 48+ hex runs, so the digest
@@ -173,9 +180,11 @@ what this design replaces):
    - **Lifecycle.** Versioned key ids, defined validity periods, and an
      explicit revocation and rotation procedure.
    - **Owner.** The CI-signing card has a named owner, state, start
-     condition and scope, recorded with the gate repair: #253,
-     `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`, "The CI-signing
-     card" (2026-09-29).
+     condition and scope. They are recorded with the gate repair, section
+     "The CI-signing card" (2026-09-29), in
+     `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`. That file lands
+     with #250 (https://github.com/beehive-nature/beehive-nature/pull/250),
+     not with this docket; until #250 is on `main`, read it on that PR.
 2. **Hosting: no badge server for the first implementation.** The SVG, the
    document and the evidence are published through the existing
    surface-publication path. A verifier service comes only when a live
