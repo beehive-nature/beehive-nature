@@ -57,3 +57,36 @@ The digest is public data, and the secret scan blocks unmarked runs of 48 or mor
 - **A local measurement's revision is asserted, not attested.** If a forger relabels evidence from an older revision as a newer commit, and rewrites the message and SVG to match, the check still passes whenever the page list did not change in between. The check prints "revision asserted by the measurer, not attested" on every PASS. Closing this gap needs origin `ci`, with the run id and attempt bound to the revision, signed by the CI attestation key.
 - **Not live status.** The badge is a historical measurement at its revision. A static SVG cannot turn grey on its own; a badge that claims current health needs a freshness evaluator.
 - **No signature yet.** Dedicated CI signing is the next card. It uses a CI-attestation key (never a wallet or personal key), and its public key is pinned by reviewed trust configuration. The signing step never runs untrusted PR content with the key available.
+
+## The CI-signing card
+
+Recorded 2026-09-29 at the founder's request, so the signing work has a named owner and is not lost between sessions.
+
+- **Owner:** the Claude Code seat in session `session_015NgLKhQoUyK4kxFMpWKbaz` (titled "Badge verification — finish PRs — KEEP"), until the founder reassigns it.
+- **State:** not started.
+- **Starts when:** #250, with this repair folded in, is on main after independent review. Signing an unrepaired gate would authenticate an unchecked derivation.
+- **Needs from the founder:**
+  - generating the CI-attestation key pair (`ml-dsa-65`, from the `bsigner` registry);
+  - storing the private key in a protected GitHub environment.
+  
+  The seat never handles private key material.
+- **Scope:**
+  1. **Canonical bytes.** Define the exact signed byte string for a status document, with the `signature` field excluded.
+  2. **Trust configuration.** A reviewed file pins the trusted public key or keys, each with:
+     - a versioned key id;
+     - a validity period;
+     - a revocation list.
+     
+     The gate never trusts a key carried inside a document.
+  3. **Signing job.** Runs only on pushes to main in the protected environment, never on untrusted PR content. It signs documents whose measurement is `origin: ci` and binds the run id and attempt to the revision via the run's `head_sha`.
+  4. **Gate.** `--check` verifies the signature, key id, validity and revocation. It moves `origin: ci` from fail-closed to verified, and a supplied signature from UNVERIFIED to checked.
+  5. **Negative probes**, in the style of `render-badges.test.mjs`:
+     - wrong key;
+     - unknown key id;
+     - expired key;
+     - revoked key;
+     - a signature over altered bytes;
+     - a CI run whose `head_sha` differs from the document's revision.
+  6. **Rotation procedure,** written down: how a key is replaced, how old signatures are treated, and who approves.
+- **Done when:** a CI-produced, signed status document passes the gate, and every negative probe fails it.
+

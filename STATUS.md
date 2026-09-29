@@ -39,7 +39,8 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   readable, schema-valid evidence (git blob id plus sha3-256), a revision
   that is a commit, coverage of the meter's page list at that revision, and
   every derived field recomputed. A supplied signature or a CI-origin claim
-  fails as unverifiable until the CI-signing card. The badge is unchanged.
+  fails as unverifiable until the CI-signing card (owner and scope recorded
+  in the dispatch, 2026-09-29). The badge is unchanged.
   `node --test e2e/render-badges.test.mjs` → 13/13; 10 of them fail against
   the old gate. Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
 - `2026-09-06` — **Founder promotes Astra to lead; zCode review reconciled.**
