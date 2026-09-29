@@ -226,7 +226,8 @@ Five Codex items on `d69925711`, triaged valid by the reviewer.
   are conditional: "the process on :25 (§1 names it) offers STARTTLS; if it is
   the sink, the desk receipt stands ..." and, for NOT advertised, "if it is
   the sink, this is a real gap ...". The served-cert DIFFERENT line already
-  reads conditionally (round 4).
+  reads conditionally (round 4). (Round 9, AE, removed the "desk receipt
+  stands" consequence: a loopback result describes the current process only.)
 - **O** §4: the negative control is now PER TARGET PORT. Before a target on
   port P is judged, `192.0.2.1 P` must not connect; if it does, that target
   reads `UNKNOWN (port P intercepted)`. A port-587 interceptor can no longer
@@ -450,7 +451,8 @@ Two Codex items on `e3f3cf254`, triaged valid.
   shows the prober was not uniformly blind; the box's STARTTLS state is
   UNVERIFIED until the on-host run. The §2 "the external report was the
   artifact" lines stay, as conditional consequences of a loopback ADVERTISED
-  result ("if it is the sink, ...").
+  result ("if it is the sink, ..."). (Round 9, AE, removed those lines too: a
+  loopback result today says nothing about 08-31.)
 - **AB** §3 expiry: "expiry by itself does not stop load_cert_chain (see the
   load_cert_chain line below for whether it loads); the risk is validating
   senders rejecting the handshake." The old "the sink still loads it and still
@@ -479,7 +481,89 @@ wording. The round-7 Z3 bullet below the round-7 heading still quotes "the
 interceptor was answering" as what round 7 wrote, with a round-8 note that it
 is a hypothesis only.
 
-Script sha256 at round 8: `569afa04…fa40051e`.
+Script sha256 at round 8 (`70d6f1ae4`): `569afa04…fa40051e`, superseded by
+round 9 below.
+
+## review, round 9: AC to AE
+
+Round 8 passed the reviewer's recheck (relayed; the PR-description edits that
+followed it were not a commit). Three Codex items on `70d6f1ae4`, triaged
+valid.
+
+- **AC** §2: the handshake is tracked separately from the post-upgrade SMTP
+  reply. `openssl s_client -starttls smtp` now runs WITHOUT `-quiet` and with
+  `-ign_eof` (so the end of stdin neither closes the connection nor acts as a
+  "Q" command) under `timeout -k 2 15`; its full stdout stays in a variable
+  and is never printed. `hs_negotiated` reads the `New, <protocol>, Cipher is
+  <cipher>` line (a real protocol and a cipher other than `(NONE)`);
+  `post_tls_250` takes the 250 lines, which s_client prints only after the
+  upgrade. Three outcomes: "STARTTLS handshake completed; SMTP answered after
+  upgrade" (with the capabilities), "STARTTLS handshake completed, but the
+  server did not answer EHLO after the upgrade (an SMTP-layer failure after
+  TLS)", or "openssl could not complete STARTTLS". HS_OK replaces TLS_OK in
+  the verdict table. M's served-cert fetch is unchanged.
+- **AD** `plain_verdict` checks completeness FIRST: without a final
+  `250( |$)` line it is INCONCLUSIVE, even with a `250-STARTTLS`
+  continuation. A final `250 STARTTLS` both completes and advertises.
+- **AE** §2 reports the current state only. Both ADVERTISED branches now read
+  "=> the process on :25 (§1 names it, with its start time) offers STARTTLS
+  now; this describes the current process only and does not settle the 08-31
+  observation", and the NOT-advertised branches carry the same scope. The
+  "desk receipt stands / external report was the artifact" consequence is
+  gone from the script; the dispatch's round-5 N and round-8 AA bullets carry
+  a note, and the PR body has no such claim (it already reads "Nothing I
+  measured refutes the desk receipt — but nothing here confirms it either").
+
+### round-9 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+```
+
+Preamble and §2 verdict block sliced unchanged. AC's parsers were fed REAL
+`openssl s_client` stdout (OpenSSL 3.5.7) captured from public hosts; only
+the `New,` line and the derived results are shown:
+
+```
+AD empty                                    -> INCONCLUSIVE
+   greeting only                            -> INCONCLUSIVE
+   truncated after 250-STARTTLS             -> INCONCLUSIVE
+   complete, 250-STARTTLS then 250 8BITMIME -> ADVERTISED
+   complete, final 250 STARTTLS             -> ADVERTISED
+   complete, no STARTTLS (the 08-31 set)    -> NOT_ADVERTISED
+   complete, bare final 250                 -> NOT_ADVERTISED
+AC s_client 1.1.1.1:443 (plain TLS)          New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+                                             hs_negotiated YES · post_tls_250 none
+   -starttls smtp smtp.gmail.com:587         exit 124 (timeout), 1 line, no New line
+                                             hs_negotiated no · post_tls_250 none
+   -starttls smtp outlook MX :25              New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+                                             hs_negotiated YES · post_tls_250 9 lines
+                                             (first: 250-<outlook host> Hello [<client IP, redacted>])
+   -starttls smtp 127.0.0.1:1 (refused)      exit 1, 0 lines · hs_negotiated no · none
+AE HS_OK + complete STARTTLS     -> advertised AND negotiated ... current process only ...
+   HS_OK + complete no STARTTLS  -> NEGOTIATES but is NOT ADVERTISED ... real gap in the current process ...
+   HS_OK + truncated             -> negotiated; advertisement not measured
+   no HS + complete STARTTLS     -> STARTTLS IS advertised ... current process only ...
+   no HS + complete no STARTTLS  -> STARTTLS is NOT advertised ... real gap in the current process ...
+   no HS + truncated             -> INCONCLUSIVE
+```
+
+The Outlook run is a real STARTTLS SMTP exchange through this box's line: a
+TLS 1.3 session and nine post-upgrade 250 lines, read with the same
+`-ign_eof` + EHLO/QUIT stdin the script uses. Not exercised here: the
+"handshake completed, but no answer after the upgrade" branch against a real
+server (that needs a listener that completes TLS and then goes silent), and
+the loopback capture itself on the host.
+
+Script sha256 at round 9: `1958c449…585e0f8e`.
 
 ## status: reviewer rechecks and what is pending
 
@@ -497,7 +581,8 @@ Script sha256 at round 8: `569afa04…fa40051e`.
   became round 7's Y.
 - Round 7 (`e3f3cf254`), items Y and Z1 to Z3, rechecked under dash:
   <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883368931>
-- **Pending:** the reviewer's recheck of round 8 (AA, AB), and the on-host run
-  by an authorized operator. **Current TLS state on the box: UNVERIFIED.** The
+- Round 8 (`70d6f1ae4`), items AA and AB, rechecked by the reviewer (relayed).
+- **Pending:** the reviewer's recheck of round 9 (AC to AE), and the on-host
+  run by an authorized operator. **Current TLS state on the box: UNVERIFIED.** The
   cause of the 08-31 result is UNVERIFIED too (interception suspected, not
   shown). No CI claim is made here.

@@ -38,19 +38,35 @@ rule() { say "------------------------------------------------------------"; }
 
 # verdict on a plain EHLO transcript ($1). Three outcomes, never two: an empty
 # or incomplete transcript is no measurement, so it is INCONCLUSIVE, never a
-# finding. Complete means the EHLO reply's final line arrived: 250 followed by
-# a space or by the end of the line (CRs are stripped first).
+# finding. Completeness is checked FIRST: complete means the EHLO reply's final
+# line arrived (250 followed by a space or by the end of the line; CRs are
+# stripped first). A 250-STARTTLS continuation in a truncated reply is still
+# INCONCLUSIVE; a final "250 STARTTLS" both completes and advertises.
 plain_verdict() {
   _t=$(printf '%s\n' "$1" | tr -d '\r')
-  if [ -z "$_t" ]; then
+  if [ -z "$_t" ] || ! printf '%s\n' "$_t" | grep -Eq '^250( |$)'; then
     echo INCONCLUSIVE
   elif printf '%s\n' "$_t" | grep -qi '^250[- ]STARTTLS'; then
     echo ADVERTISED
-  elif printf '%s\n' "$_t" | grep -Eq '^250( |$)'; then
-    echo NOT_ADVERTISED
   else
-    echo INCONCLUSIVE
+    echo NOT_ADVERTISED
   fi
+}
+
+# does a full (non -quiet) openssl s_client transcript ($1) show a negotiated
+# TLS session? The "New, <protocol>, Cipher is <cipher>" line reads
+# "New, (NONE), Cipher is (NONE)" when no session was negotiated, and names the
+# protocol (TLSv1.2, TLSv1.3, ...) and a real cipher when one was.
+hs_negotiated() {
+  printf '%s\n' "$1" | tr -d '\r' | grep -Eq '^New, (TLSv[0-9.]+|SSLv[0-9.]+), Cipher is [^(]'
+}
+
+# the SMTP reply lines that arrived AFTER the upgrade: with -starttls smtp,
+# s_client consumes the pre-TLS greeting and EHLO itself and prints only what
+# follows the handshake, so any 250 line in its stdout is post-TLS. (A PEM
+# base64 line cannot start "250-" or "250 ": neither "-" nor space is base64.)
+post_tls_250() {
+  printf '%s\n' "$1" | tr -d '\r' | grep -E '^250[- ]'
 }
 
 # TCP connect probe, host $1 port $2. /dev/tcp is a BASH feature: under dash
@@ -198,15 +214,25 @@ rule
 
 # 2 · WHAT THE WIRE SAYS, FROM HERE ----------------------------------------
 say "2 · EHLO over loopback (no middlebox can touch this)"
-TLS_OK=""
+# The handshake and the post-upgrade SMTP reply are separate facts: a server
+# can complete TLS and then close or stall. s_client runs WITHOUT -quiet so
+# its session summary is available to hs_negotiated; -ign_eof keeps the end of
+# stdin from closing the connection (and disables the "Q" command letter), so
+# the EHLO/QUIT below reach the server and its replies are read. The full
+# output stays in SCOUT and is never printed: only derived lines are.
+HS_OK=""
 if command -v openssl >/dev/null 2>&1; then
-  RESP=$(printf 'EHLO diag.localhost\r\nQUIT\r\n' | timeout 15 openssl s_client -quiet -starttls smtp -connect 127.0.0.1:${PORT} 2>/dev/null | head -20)
-  if [ -n "$RESP" ]; then
-    TLS_OK=1
-    say "  STARTTLS handshake completed. Capabilities after upgrade:"
-    say "$RESP" | sed 's/^/    /'
+  SCOUT=$(printf 'EHLO diag.localhost\r\nQUIT\r\n' | timeout -k 2 15 openssl s_client -ign_eof -starttls smtp -connect 127.0.0.1:${PORT} 2>/dev/null)
+  POST=$(post_tls_250 "$SCOUT")
+  if hs_negotiated "$SCOUT"; then HS_OK=1; fi
+  if [ -n "$HS_OK" ] && [ -n "$POST" ]; then
+    say "  STARTTLS handshake completed; SMTP answered after upgrade. Capabilities:"
+    say "$POST" | sed 's/^/    /'
+  elif [ -n "$HS_OK" ]; then
+    say "  STARTTLS handshake completed, but the server did not answer EHLO after the"
+    say "  upgrade (an SMTP-layer failure after TLS)."
   else
-    say "  openssl could not complete STARTTLS. Falling back to a plain EHLO:"
+    say "  openssl could not complete STARTTLS."
   fi
 fi
 PLAIN=""
@@ -221,19 +247,24 @@ say "  plain EHLO transcript:"
 say "${PLAIN:-$NOPLAIN}" | sed 's/^/    /'
 say ""
 PV=$(plain_verdict "$PLAIN")
-if [ -n "$TLS_OK" ]; then
+# Every verdict describes the CURRENT process only: the process may have been
+# restarted since 08-31 (§1 shows its start time), so nothing here settles the
+# 08-31 observation.
+if [ -n "$HS_OK" ]; then
   # negotiation and advertisement are separate facts: openssl s_client
   # -starttls smtp sends STARTTLS even when EHLO does not advertise it, so a
   # completed handshake never proves the advertisement.
   case $PV in
     ADVERTISED)
       say "  VERDICT: STARTTLS advertised AND negotiated on loopback."
-      say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
-      say "     desk receipt stands and the external report was the artifact." ;;
+      say "  => the process on :25 (§1 names it, with its start time) offers STARTTLS now;"
+      say "     this describes the current process only and does not settle the 08-31"
+      say "     observation." ;;
     NOT_ADVERTISED)
       say "  VERDICT: STARTTLS NEGOTIATES but is NOT ADVERTISED in EHLO — senders that"
       say "  follow the advertisement will send plaintext; if the process on :25 (§1"
-      say "  names it) is the sink, this is a real gap." ;;
+      say "  names it, with its start time) is the sink, this is a real gap in the"
+      say "  current process (it does not settle the 08-31 observation)." ;;
     *)
       say "  VERDICT: STARTTLS negotiated; advertisement not measured (no complete EHLO reply)." ;;
   esac
@@ -241,12 +272,15 @@ else
   case $PV in
     ADVERTISED)
       say "  VERDICT: STARTTLS IS advertised on loopback."
-      say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
-      say "     desk receipt stands and the external report was the artifact." ;;
+      say "  => the process on :25 (§1 names it, with its start time) offers STARTTLS now;"
+      say "     this describes the current process only and does not settle the 08-31"
+      say "     observation." ;;
     NOT_ADVERTISED)
       say "  VERDICT: STARTTLS is NOT advertised on loopback."
-      say "  => the process on :25 (§1 names it) does not offer STARTTLS; if it is the"
-      say "     sink, this is a real gap, not a network artifact." ;;
+      say "  => the process on :25 (§1 names it, with its start time) does not offer"
+      say "     STARTTLS now; if it is the sink, this is a real gap in the current"
+      say "     process, not a network artifact (it does not settle the 08-31"
+      say "     observation)." ;;
     *)
       say "  VERDICT: INCONCLUSIVE — no complete EHLO reply, so no finding either way." ;;
   esac
