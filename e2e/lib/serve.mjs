@@ -12,9 +12,8 @@
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
-import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream';
-import { realpath, stat } from 'node:fs/promises';
+import { realpath, open } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 
 export const MIME = {
@@ -27,10 +26,10 @@ export const MIME = {
   '.wasm': 'application/wasm', '.pdf': 'application/pdf', '.zip': 'application/zip',
 };
 
-// a stream that fails after the headers went out (a file rewritten or removed under the server by another
-// seat, an unreadable entry) ends the response instead of killing the harness process; a client that goes
+// a stream that fails after the headers went out ends the response (the socket is destroyed, which a browser
+// reports as a failed load, never as a good 200) instead of killing the harness process; a client that goes
 // away mid-body destroys the file stream too, so no descriptor is left open (pipeline, not pipe)
-const send = (stream, res) => { pipeline(stream, res, err => { if (err && !res.headersSent) { res.writeHead(404); res.end('nf'); } }); };
+const send = (stream, res) => { pipeline(stream, res, err => { if (err && !res.writableEnded) res.destroy(); }); };
 
 export async function serveTree(root) {
   const top = await realpath(resolve(root));
@@ -45,20 +44,28 @@ export async function serveTree(root) {
       if (path.endsWith('/')) file = join(file, 'index.html');
       const real = await realpath(file); // a symlink pointing out of the tree is not served either
       if (!inside(real)) { res.writeHead(404); res.end('nf'); return; }
-      const st = await stat(real);
-      if (st.isDirectory()) { if (path.endsWith('/')) { res.writeHead(404); res.end('nf'); } else { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); } return; }
-      // streamed, with Range honoured so <audio>/<video> can seek
+      // the file is opened first and its size read from that same open handle, so the headers and the body
+      // come from one snapshot: a file rewritten or removed under the server answers 404 or serves the old
+      // bytes whole, never a 200 with a mismatched length. A directory is caught by the open failing.
+      let fh;
+      try { fh = await open(real, 'r'); } catch (e) {
+        if (e.code === 'EISDIR') { if (path.endsWith('/')) { res.writeHead(404); res.end('nf'); } else { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); } return; }
+        throw e;
+      }
+      const st = await fh.stat();
+      if (st.isDirectory()) { await fh.close(); if (path.endsWith('/')) { res.writeHead(404); res.end('nf'); } else { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); } return; }
+      // streamed from the open handle, with Range honoured so <audio>/<video> can seek
       const type = MIME[extname(file).toLowerCase()] || 'application/octet-stream';
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
       if (m && (m[1] || m[2])) {
         const start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
-        if (start > end || start >= st.size) { res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
+        if (start > end || start >= st.size) { await fh.close(); res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
         res.writeHead(206, { 'Content-Type': type, 'Content-Length': end - start + 1, 'Content-Range': `bytes ${start}-${end}/${st.size}`, 'Accept-Ranges': 'bytes' });
-        send(createReadStream(real, { start, end }), res); return;
+        send(fh.createReadStream({ start, end }), res); return; // the stream owns the handle and closes it
       }
       res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' });
-      send(createReadStream(real), res);
-    } catch { if (!res.headersSent) res.writeHead(404); res.end('nf'); }
+      send(fh.createReadStream(), res);
+    } catch { if (!res.headersSent) { res.writeHead(404); res.end('nf'); } else res.destroy(); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
   return { base, close: () => new Promise(r => server.close(() => r())) };

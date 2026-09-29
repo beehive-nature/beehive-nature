@@ -53,7 +53,9 @@ import { argReader, UsageError } from './lib/args.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]'); // --k v or --k=v; a missing value is a UsageError
-process.on('uncaughtException', e => { if (e instanceof UsageError) { process.stderr.write(e.message + '\n'); process.exit(2); } throw e; }); // nothing is open yet when the flags are read
+// the two flag reads happen before anything is open, so a usage error can simply exit 2 here
+const readFlags = () => { try { return { regs: arg('reg', 'bee,raver,cypherpunk'), out: arg('json', '') }; } catch (e) { if (e instanceof UsageError) { process.stderr.write(e.message + '\n'); process.exit(2); } throw e; } };
+const FLAGS = readFlags();
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
    controls carry no words of their own) the card that answers a tap */
@@ -66,10 +68,10 @@ const CONTROLS = {
 };
 const CARD = { bee: null, raver: '#etRaverCard', cypherpunk: null };
 
-const REGS = arg('reg', 'bee,raver,cypherpunk').split(',').map(s => s.trim()).filter(Boolean);
-const unknown = REGS.filter(r => !FRONT[r]);
+const REGS = FLAGS.regs.split(',').map(s => s.trim()).filter(Boolean);
+const unknown = REGS.filter(r => !Object.hasOwn(FRONT, r)); // hasOwn: "constructor" is not a register
 if (!REGS.length || unknown.length) { process.stderr.write(`--reg: unknown register(s) ${unknown.join(', ') || '(none given)'}; known: ${Object.keys(FRONT).join(', ')}\n`); process.exit(2); }
-const OUT = arg('json', '');
+const OUT = FLAGS.out;
 const REVISION = (() => { try { return execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim(); } catch { return 'unknown'; } })();
 const VIEW = { width: 390, height: 844 };
 
@@ -134,7 +136,12 @@ const FINAL = /cannot|can't|no way back|for good|permanent|not .*undo|nowhere el
 // …and a sentence that says a copy stays, or that the page cannot promise what happens elsewhere, is never final
 const STAYS = /copy .* stays|stays where it is|still (there|out there|exists)|cannot reach|not something this page can promise/i;
 const finalWord = t => STAYS.test(t) ? null : (t.match(FINAL) || [null])[0];
+// own-wallet wording: a sentence that says the visitor pays from their own wallet. A sentence that says the
+// opposite ("asks your wallet for nothing", "you pay nothing") is not a hit, so the column can go to "n" once
+// the wording is fixed; the sentence that earned a hit is printed so a reader can judge it.
 const OWN = /your wallet|you pay|own wallet/i;
+const NEGATED = /\bnothing\b|\bnever\b|\bno wallet\b|\bwithout\b|\bnot\b|\bno\b/i;
+const ownWalletSentence = text => (text.match(/[^.!?·\n]+[.!?]?/g) || []).map(s => s.trim()).find(s => OWN.test(s) && !NEGATED.test(s)) || null;
 
 // text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
 // "rendered" is not "in view without scrolling": the page is taller than the viewport.
@@ -184,7 +191,7 @@ const CLICK = { timeout: 5000 }; // no press waits longer than the other waits i
 const errText = e => String(e && e.message ? e.message : e).split('\n')[0]; // a page can throw a bare string
 async function stranger(reg) {
   // the record is built before anything can fail, so a run that dies keeps what it had gathered
-  const R = { reg, revision: REVISION, wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, failedTaps: 0, railWords: [], choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { frontBeforeTaps: {}, cardsRead: {}, archive: {}, archiveWithRow: null }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
+  const R = { reg, revision: REVISION, unsound: [], wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, failedTaps: 0, railWords: [], choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { frontBeforeTaps: {}, cardsRead: {}, archive: {}, archiveWithRow: null }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
   // every cross-origin request is aborted and logged under the phase it happened in
   const wire = { setup: new Set(), load: new Set(), read: new Set(), add: new Set(), 'after-add': new Set(), remove: new Set(), 'after-remove': new Set(), done: new Set() }; let phase = 'setup';
   let t0 = Date.now(); // restarted right before the page opens; setup time is printed on its own
@@ -201,10 +208,10 @@ async function stranger(reg) {
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
-    } catch { R.notes.push('unreliable: the fronts never became ready with an offered purpose (no rail attached offline?)'); }
+    } catch { R.unsound.push('the fronts never became ready with an offered purpose (no rail attached offline?)'); }
     // the register is applied by register.js, which the tour bar loads asynchronously: until body[data-reg]
     // is this register, the requested front is still display:none and every read would be of the wrong one
-    await page.waitForFunction(r => document.body.dataset.reg === r, reg, { timeout: 10000 }).catch(() => R.notes.push(`unreliable: body[data-reg] never became "${reg}" (register.js not applied?); the page was read as it stood`));
+    await page.waitForFunction(r => document.body.dataset.reg === r, reg, { timeout: 10000 }).catch(() => R.unsound.push(`body[data-reg] never became "${reg}" (register.js not applied?); the page was read as it stood`));
     const tReady = Date.now(); R.loadMs = tReady - t0; // page open → fronts ready in this register
     // rails attach one by one and the pressed purpose follows the first open one, so the front's
     // text (cypherpunk's write path in particular) depends on WHEN it is read. Wait until the set
@@ -217,7 +224,7 @@ async function stranger(reg) {
       const now = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.pick + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); }); // the mirror's pick is in the signature too: the raver card renders from it
       if (now !== sig) { sig = now; since = Date.now(); }
       else if (now !== null && Date.now() - since >= 250) break;
-      if (Date.now() - tSettle > 5000) { R.notes.push('unreliable: the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
+      if (Date.now() - tSettle > 5000) { R.unsound.push('the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
       await page.waitForTimeout(50);
     }
     R.settleMs = Date.now() - tSettle; // instrument time, counted inside "ms from open" and printed beside it
@@ -262,10 +269,10 @@ async function stranger(reg) {
       // the run goes on (a dying learning tap must not discard everything else this register gathered)
       const before = await visibleText(page, CARD[reg]);
       o.learnedByTap = true;
-      try { await pressControl(page, reg, o.purpose); } catch (e) { R.notes.push(`tapping the ${o.purpose} ring failed (${errText(e)}): that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
+      try { await pressControl(page, reg, o.purpose); } catch (e) { R.unsound.push(`tapping the ${o.purpose} ring failed (${errText(e)}): that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
       // the card's words under the same rule as "before", so only a real change counts
       const changed = await page.waitForFunction(new Function('a', `const t = (${VISIBLE_WORDS.toString()})([a[0], false, null]); return !!t && t !== a[1];`), [CARD[reg], before], { timeout: 3000 }).then(() => true, () => false);
-      if (!changed) { R.notes.push(`the card did not change within 3 s after tapping ${o.purpose}: that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
+      if (!changed) { R.unsound.push(`the card did not change within 3 s after tapping ${o.purpose}: that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
       o.text = await visibleText(page, CARD[reg]);
       R.learnTaps++; // a learning tap is one that revealed a card
     }
@@ -279,14 +286,15 @@ async function stranger(reg) {
     const declared = await page.evaluate(() => (window.__eternal?.data?.purposes || []).map(p => ({ id: p.id, offered: p.offered, rail: p.rail, terms: p.terms })));
     // own-wallet wording is looked for everywhere the visitor can read it, without counting a sentence twice
     const ownWhere = {
-      'front outside the controls': OWN.test(frontOutside),
-      [options.some(o => o.learnedByTap) ? 'controls (after a tap)' : 'controls']: OWN.test(options.map(o => o.text).join(' ')),
-      archive: OWN.test(archive),
+      'front outside the controls': ownWalletSentence(frontOutside),
+      [options.some(o => o.learnedByTap) ? 'controls (after a tap)' : 'controls']: ownWalletSentence(options.map(o => o.text).join(' · ')),
+      archive: ownWalletSentence(archive),
     };
     R.funding = {
       foreverDeclaredPayer: (declared.find(p => p.id === 'forever') || {}).terms?.payer ?? null,
       visibleOwnWalletWording: Object.values(ownWhere).some(Boolean),
       ownWalletWordingWhere: Object.keys(ownWhere).filter(k => ownWhere[k]),
+      ownWalletSentences: Object.fromEntries(Object.entries(ownWhere).filter(([, s]) => s)),
     };
 
     // CHOICE: for each intent, which control do the words lead to?
@@ -427,7 +435,7 @@ async function stranger(reg) {
     }
   } catch (e) {
     // the run died: keep everything gathered so far and say where it stopped
-    R.notes.push(`run aborted during ${phase}: ${errText(e)}`);
+    R.unsound.push(`run aborted during ${phase}: ${errText(e)}`);
     if (!R.firstFile) R.firstFile = { ok: false, steps: 0, ms: Date.now() - t0, error: `instrument aborted during ${phase}` };
   } finally {
     // the wire log is copied only after the context has closed, so a request fired at teardown is kept too
@@ -441,8 +449,9 @@ async function stranger(reg) {
 // a failed or unreliable measurement: no first file, an aborted run, a remove that errored, a ring that could not be
 // learned, a page that never became ready or never took the register, an offered set still changing at the cap.
 // One predicate, used by the table's row marker and the exit code alike.
-// (a first file that failed because the page's words led nowhere is a measured result, not an unsound run)
-const unsound = r => !(r.firstFile?.ok || r.firstFile?.measured) || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
+// (a first file that failed because the page's words led nowhere is a measured result, not an unsound run).
+// Unsoundness is recorded as data where it is detected (R.unsound), never inferred from note wording.
+const unsound = r => r.unsound.length > 0 || !(r.firstFile?.ok || r.firstFile?.measured) || (r.remove && !r.remove.ok && r.remove.error);
 // one summary per result, used by the stderr line and the table alike
 const summarize = r => {
   const offered = r.choices.filter(c => c.offered);
@@ -484,8 +493,9 @@ for (const r of results) {
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
   if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'}; ${Math.round(r.recover.tourBarKeyRecoveryLinkVisibleFraction * 100)}% of its width inside the viewport and the strip)` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.pressedCardReadFree || r.learnTaps ? `; on the cards the visitor read (the pressed ring's and the ones reached by a tap): ${JSON.stringify(r.leakage.cardsRead)}` : ''}; rail and network words the page declared and that joined the vocabulary: ${r.railWords.join(', ') || 'none'}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
-  L.push(`- funding: own-wallet wording visible ${r.funding.visibleOwnWalletWording}${r.funding.visibleOwnWalletWording ? ' (in: ' + r.funding.ownWalletWordingWhere.join('; ') + ')' : ''}; the forever rail declares payer = ${r.funding.foreverDeclaredPayer ?? 'none (not offered)'}`);
+  L.push(`- funding: own-wallet wording visible ${r.funding.visibleOwnWalletWording}${r.funding.visibleOwnWalletWording ? ' (' + Object.entries(r.funding.ownWalletSentences || {}).map(([k, s]) => `${k}: "${s.slice(0, 100)}"`).join('; ') + ')' : ''}; the forever rail declares payer = ${r.funding.foreverDeclaredPayer ?? 'none (not offered)'}`);
   for (const [ph, hosts] of Object.entries(r.wire)) L.push(`- cross-origin attempted during ${ph} (aborted): ${hosts.join(', ')}`); // every phase, nothing dropped
+  if (r.unsound.length) L.push(`- **unsound:** ${r.unsound.join(' | ')}`);
   if (r.notes.length) L.push(`- notes: ${r.notes.join(' | ')}`);
   L.push('');
 }
