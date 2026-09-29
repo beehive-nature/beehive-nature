@@ -29,7 +29,7 @@ LIB pub|seed: owner==public false · owner==SEED true · item verifies false
 key" the seed. The outcome is the same: owner = seed, and the signature fails.)
 
 A seed-owned item fails its own signature check, so an upload door that verifies it
-refuses it (`Invalid Data Item`). None is on Arweave among the audited items below.
+should refuse it (UNVERIFIED: the door's response to such an item was never captured). None is on Arweave among the audited items below.
 **Any seed ever passed through the defective script was sent to upload.ardrive.io and
 is to be treated as disclosed and never reused.** The receipts name only throwaway
 TESTNET keys for this door.
