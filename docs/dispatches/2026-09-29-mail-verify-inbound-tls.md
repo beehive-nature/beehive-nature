@@ -18,10 +18,13 @@ STARTTLS. Re-run on 2026-09-29 with a control, the same canned capability set
 UNVERIFIED baseline: not re-measured from a clean path in this lane. Round 5
 corrected an earlier wording that said both "require" STARTTLS, which Gmail's
 inbound MX does not of senders.) The withdrawal does not rest on that
-baseline: the same canned set came back from every tested destination, while
+baseline: the same canned set came back from BOTH Google destinations
+(`gmail-smtp-in.l.google.com:25` and `smtp.gmail.com:587`), while
 `outlook-com.olc.protection.outlook.com:25` passed through and did show
 STARTTLS. So an intercepting SMTP path on this seat's own line was answering
-for every destination, and the 08-31 probe measured that path, not the box.
+for (at least) those destinations, the prober could see STARTTLS when a
+destination was not intercepted, and the 08-31 probe measured that path, not
+the box.
 The finding is void. That does not prove STARTTLS works on the box; it means
 that probe cannot say either way. `docs/agents/WALLET-LEDGER.md:46` carried
 the same gap and now has a dated withdrawal note after it (history kept).
@@ -128,7 +131,8 @@ path completes every handshake, and the 1.1.1.1:443 control cannot catch it.
   may not match it". A newer mtime shows a change, not a difference.
 - **J** §2: a completed openssl STARTTLS negotiation decides the verdict
   ("STARTTLS advertised AND negotiated on loopback"); if the plain transcript
-  disagrees, both are printed and the handshake is named conclusive.
+  disagrees, both are printed and the handshake is named conclusive. (That
+  NOTE was removed in round 7, Z1: a handshake does not prove advertisement.)
 - **K** `plain_verdict`: a transcript without the EHLO reply's final `250 `
   line is INCONCLUSIVE, never NOT_ADVERTISED.
 - **L** §3: a readable cert or key with no openssl says "not validated —
@@ -297,8 +301,9 @@ Three Codex items on `94bad057d`, triaged valid, plus the reviewer's Q nit.
 - **V** the Gmail baseline (STARTTLS and SIZE 157286400) has no source in this
   lane and is labelled UNVERIFIED in the script header, this dispatch and the
   PR body. The withdrawal does not rest on it: the same canned set came back
-  from every tested destination, while Outlook's MX passed through showing
-  STARTTLS.
+  from both Google destinations, while Outlook's MX passed through showing
+  STARTTLS. (Round 7 corrected this bullet's earlier "every tested
+  destination".)
 - **W** §3: `openssl x509 -noout` reads only the first cert in the PEM, while
   sink.py's `load_cert_chain` reads the whole file. The sink's own call is now
   run through python3 (timeout 15) as the authority: "load_cert_chain (the
@@ -338,7 +343,89 @@ This box has no real python3 (the `python3` on PATH is the Microsoft Store
 alias, which exits 49), so W's OK and FAILS branches were not run here; they
 are left for the reviewer.
 
-Script sha256 at round 6: `d6f95a0d…15000825`.
+Script sha256 at round 6 (`ebea480a5`): `d6f95a0d…15000825`, superseded by
+round 7 below.
+
+## review, round 7: Y (blocking), Z1 to Z3
+
+The reviewer ran round 6 under dash in WSL with a real python3. Everything
+passed except W with an encrypted key: W caught a valid leaf plus a malformed
+trailing cert (FAILS, SSLError), a mismatched key (FAILS), a valid chain (OK)
+and the unreadable branch; U read TCP CONNECTED on a real loopback listener
+and the per-port negative control fired on the real path; X was fine.
+
+- **Y** §3: with no controlling tty, `load_cert_chain(cert, key)` with no
+  password on an encrypted key printed `OSError` and the process never exited;
+  `timeout 15` did not bound it (still hanging after more than 60 s), so the
+  whole diagnostic hung. The call now passes `password=b""`: an unencrypted key
+  ignores it, and an encrypted key fails at once, which matches the sink under
+  systemd, where there is no tty to prompt on either. The timeout is now
+  `timeout -k 2 15`, so a child that ignores TERM gets KILL 2 s later.
+
+Reviewer's isolated receipt (WSL, python 3.14), as relayed:
+
+```
+password=b"" key=kenc.pem -> 'SSLError' exit=0 in 0s
+password=b"" key=k1.pem   -> 'OK'       exit=0 in 1s
+```
+
+Three Codex items on `ebea480a5`, triaged valid, folded into the same commit:
+
+- **Z1** §2: negotiation and advertisement are separate facts. `openssl
+  s_client -starttls smtp` sends STARTTLS even when EHLO does not advertise it,
+  so a completed handshake does not prove the advertisement. The verdict is
+  now a two-way table: handshake + advertised reads "advertised AND
+  negotiated" (with N's conditional sink wording); handshake + not advertised
+  reads "STARTTLS NEGOTIATES but is NOT ADVERTISED in EHLO — senders that
+  follow the advertisement will send plaintext; if the process on :25 is the
+  sink, this is a real gap"; handshake + incomplete EHLO reads "negotiated;
+  advertisement not measured". Without a handshake the three earlier branches
+  stand. The openssl success line now says "STARTTLS handshake completed", not
+  "the sink does offer it", and round 3's J NOTE ("the completed handshake is
+  the conclusive measurement") is removed as false in general.
+- **Z2** §3: a cert or key mtime in the same second as the listener's start
+  reads "same second as pid N's start — order cannot be determined", as
+  sink_vs_pid already does.
+- **Z3** the quantifiers "every tested destination" and "answering for every
+  destination / everyone" are replaced in the script header, this dispatch and
+  the PR body with what was observed: the same canned set from BOTH Google
+  destinations, Outlook passing through with STARTTLS, so the interceptor was
+  answering for (at least) those destinations.
+
+### round-7 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+$ timeout -k 2 3 sleep 1; echo "timeout -k accepted, exit=$?"
+timeout -k accepted, exit=0
+```
+
+Slices cut unchanged; Z1 fed synthetic TLS_OK / PLAIN, Z2 with a STUB
+proc_start_epoch against the files' real mtimes (1790000000):
+
+```
+Z1 TLS_OK + complete, STARTTLS     -> STARTTLS advertised AND negotiated on loopback.
+   TLS_OK + complete, no STARTTLS  -> STARTTLS NEGOTIATES but is NOT ADVERTISED in EHLO — ...
+   TLS_OK + truncated              -> STARTTLS negotiated; advertisement not measured (no complete EHLO reply).
+   no TLS  + complete, STARTTLS    -> STARTTLS IS advertised on loopback.
+   no TLS  + complete, no STARTTLS -> STARTTLS is NOT advertised on loopback.
+   no TLS  + truncated             -> INCONCLUSIVE — no complete EHLO reply, so no finding either way.
+Z2 start == mtime                  -> same second as pid 4242's start — order cannot be determined
+   start <  mtime                  -> modified after pid 4242 started — the loaded copy may differ
+   start >  mtime                  -> not modified after pid 4242 started
+```
+
+No real python3 on this box, so Y itself was not re-run here.
+
+Script sha256 at round 7: `7d9403b7…fbdebcd30`.
 
 ## status: reviewer rechecks and what is pending
 
@@ -351,7 +438,9 @@ Script sha256 at round 6: `d6f95a0d…15000825`.
   path, where the negative control fired.
 - Round 5 (`2989db565`, `94bad057d`), items N to T, rechecked under dash:
   <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5883041109>
-- **Pending:** the reviewer's recheck of round 6 (U to X, including W's OK and
-  FAILS branches with a real python3), and the on-host run by an authorized
-  operator. **Current TLS state on the box: UNVERIFIED.** No CI claim is made
-  here.
+- Round 6 (`ebea480a5`), items U to X, rechecked by the reviewer under dash in
+  WSL with a real python3, all passing except W with an encrypted key, which
+  became round 7's Y.
+- **Pending:** the reviewer's recheck of round 7 (Y, Z1 to Z3), and the on-host run by an
+  authorized operator. **Current TLS state on the box: UNVERIFIED.** No CI
+  claim is made here.

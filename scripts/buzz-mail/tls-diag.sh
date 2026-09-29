@@ -12,10 +12,10 @@
 # STARTTLS and carries SIZE 20000000. (Gmail's servers are expected to advertise
 # STARTTLS and SIZE 157286400 — UNVERIFIED baseline: not re-measured from a
 # clean path in this lane.) The withdrawal does not rest on that baseline: the
-# same canned set came back from every tested destination, while Outlook's MX
+# same canned set came back from BOTH Google destinations, while Outlook's MX
 # passed through and did show STARTTLS, so an intercepting SMTP path on the
-# prober's line was answering for everyone and the probe could see STARTTLS
-# when it was really there.
+# prober's line was answering for (at least) those destinations, and the probe
+# could see STARTTLS when a destination was not intercepted.
 #
 # The lesson, and the reason this file is a script and not a paragraph: a
 # measurement taken through a middlebox is not a measurement of the target.
@@ -199,7 +199,7 @@ if command -v openssl >/dev/null 2>&1; then
   RESP=$(printf 'EHLO diag.localhost\r\nQUIT\r\n' | timeout 15 openssl s_client -quiet -starttls smtp -connect 127.0.0.1:${PORT} 2>/dev/null | head -20)
   if [ -n "$RESP" ]; then
     TLS_OK=1
-    say "  STARTTLS NEGOTIATED — the sink does offer it. Capabilities after upgrade:"
+    say "  STARTTLS handshake completed. Capabilities after upgrade:"
     say "$RESP" | sed 's/^/    /'
   else
     say "  openssl could not complete STARTTLS. Falling back to a plain EHLO:"
@@ -218,14 +218,21 @@ say "${PLAIN:-$NOPLAIN}" | sed 's/^/    /'
 say ""
 PV=$(plain_verdict "$PLAIN")
 if [ -n "$TLS_OK" ]; then
-  # a completed handshake outranks any plain transcript
-  say "  VERDICT: STARTTLS advertised AND negotiated on loopback."
-  say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
-  say "     desk receipt stands and the external report was the artifact."
-  if [ "$PV" != ADVERTISED ]; then
-    say "  NOTE: the plain transcript reads $PV, which disagrees with the negotiation"
-    say "  above. The completed handshake is the conclusive measurement."
-  fi
+  # negotiation and advertisement are separate facts: openssl s_client
+  # -starttls smtp sends STARTTLS even when EHLO does not advertise it, so a
+  # completed handshake never proves the advertisement.
+  case $PV in
+    ADVERTISED)
+      say "  VERDICT: STARTTLS advertised AND negotiated on loopback."
+      say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
+      say "     desk receipt stands and the external report was the artifact." ;;
+    NOT_ADVERTISED)
+      say "  VERDICT: STARTTLS NEGOTIATES but is NOT ADVERTISED in EHLO — senders that"
+      say "  follow the advertisement will send plaintext; if the process on :25 (§1"
+      say "  names it) is the sink, this is a real gap." ;;
+    *)
+      say "  VERDICT: STARTTLS negotiated; advertisement not measured (no complete EHLO reply)." ;;
+  esac
 else
   case $PV in
     ADVERTISED)
@@ -318,7 +325,12 @@ fi
 # the sink's own call is the authority: openssl x509 above reads only the
 # first cert in the PEM, while load_cert_chain reads the whole file. Only the
 # exception CLASS name is printed, never its message (it can carry a path or
-# key detail).
+# key detail). password=b"" is deliberate: with no password, an encrypted key
+# makes OpenSSL fall back to an interactive passphrase prompt, and with no
+# controlling tty that call hung past `timeout 15` (reviewer, round 6). An
+# unencrypted key ignores the password; an encrypted one fails at once, which
+# matches the sink under systemd, where there is no tty to prompt on either.
+# timeout -k 2 sends KILL 2 s after TERM, in case a child still does not exit.
 LCCW="  load_cert_chain (the sink's own call):"
 if ! command -v python3 >/dev/null 2>&1; then
   say "$LCCW not checked — python3 not installed"
@@ -327,9 +339,9 @@ elif [ ! -e "$CERT" ] || [ ! -e "$KEY" ]; then
 elif [ ! -r "$CERT" ] || [ ! -r "$KEY" ]; then
   say "$LCCW not checked — cert or key not readable by $(id -un); rerun with sudo"
 else
-  LCC=$(timeout 15 python3 -c 'import ssl, sys
+  LCC=$(timeout -k 2 15 python3 -c 'import ssl, sys
 try:
-    ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER).load_cert_chain(sys.argv[1], sys.argv[2])
+    ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER).load_cert_chain(sys.argv[1], sys.argv[2], password=b"")
     print("OK")
 except Exception as e:
     print(type(e).__name__)' "$CERT" "$KEY" </dev/null 2>/dev/null)
@@ -379,6 +391,8 @@ else
         say "  $f: mtime not readable, not compared"
       elif [ "$_m" -gt "$_ls" ]; then
         say "  $f: modified after pid $FIRSTPID started — the loaded copy may differ"
+      elif [ "$_m" -eq "$_ls" ]; then
+        say "  $f: same second as pid $FIRSTPID's start — order cannot be determined"
       else
         say "  $f: not modified after pid $FIRSTPID started"
       fi
