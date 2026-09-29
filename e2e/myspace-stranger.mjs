@@ -25,9 +25,10 @@
 //               during and just after the remove is logged.
 //   RECOVER     whether any visible control offers to undo or bring a removed file back.
 //   LEAKAGE     count of implementation words (adapter, rail, worker, indexeddb, aes,
-//               schnorr, blossom, ant, autonomi, nostr, relay, datamap, chunk, digest,
+//               schnorr, temp, local, blossom, ant, nostr, relay, datamap, chunk, digest,
 //               sha, signer, wallet, gas, token, scheme, predicate, ciphertext, keyref,
-//               pubkey), whole words only, in the register's own front and in the shared
+//               pubkey, plus every rail scheme and network the page declares at run time,
+//               each as one phrase), whole words only, in the register's own front and in the shared
 //               archive below it (visible text only). cypherpunk is expected to say them —
 //               that is its voice — so its count is reported as declared, not as leakage.
 //   FUNDING     whether the visible words, anywhere the visitor can read them (front
@@ -47,17 +48,11 @@ import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serveTree } from './lib/serve.mjs';
+import { argReader } from './lib/args.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const USAGE = 'usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]';
-// a flag given without a value is a mistake, not a request for the default
-const arg = (k, d) => {
-  const eq = process.argv.find(a => a.startsWith('--' + k + '=')); if (eq) return eq.slice(k.length + 3); // --k=v form
-  const i = process.argv.indexOf('--' + k); if (i < 0) return d;
-  const v = process.argv[i + 1]; if (v === undefined || v.startsWith('--')) { process.stderr.write(`--${k} needs a value\n${USAGE}\n`); process.exit(2); }
-  return v;
-};
+const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]'); // --k v or --k=v; a missing value exits 2
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
    controls carry no words of their own) the card that answers a tap */
@@ -183,7 +178,7 @@ async function pressControl(page, reg, purpose) {
   } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
   // the page's own truth (the archive's pressed mode button, or the control's own pressed state) or its
   // data mirror, whichever answers first: the mirror is debounced and can miss a change
-  await page.waitForFunction(([p, sel]) => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`) || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-pressed') === 'true' || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-selected') === 'true' || window.__eternal?.data?.pick === p, [purpose, CONTROLS[reg]], { timeout: 5000 });
+  await page.waitForFunction(([p, sel]) => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`) || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-pressed') === 'true' || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-selected') === 'true', [purpose, CONTROLS[reg]], { timeout: 5000 }); // the page's own pressed state only; the mirror could still hold a stale equal value
 }
 
 const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
@@ -207,10 +202,10 @@ async function stranger(reg) {
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
-    } catch { R.notes.push('the fronts never became ready with an offered purpose (no rail attached offline?)'); }
+    } catch { R.notes.push('unreliable: the fronts never became ready with an offered purpose (no rail attached offline?)'); }
     // the register is applied by register.js, which the tour bar loads asynchronously: until body[data-reg]
     // is this register, the requested front is still display:none and every read would be of the wrong one
-    await page.waitForFunction(r => document.body.dataset.reg === r, reg, { timeout: 10000 }).catch(() => R.notes.push(`body[data-reg] never became "${reg}" (register.js not applied?); the page was read as it stood`));
+    await page.waitForFunction(r => document.body.dataset.reg === r, reg, { timeout: 10000 }).catch(() => R.notes.push(`unreliable: body[data-reg] never became "${reg}" (register.js not applied?); the page was read as it stood`));
     const tReady = Date.now(); R.loadMs = tReady - t0; // page open → fronts ready in this register
     // rails attach one by one and the pressed purpose follows the first open one, so the front's
     // text (cypherpunk's write path in particular) depends on WHEN it is read. Wait until the set
@@ -220,10 +215,10 @@ async function stranger(reg) {
     const tSettle = Date.now(); let sig = null, since = tSettle;
     for (;;) {
       // the signature is the page's own state (register, the archive's mode buttons and which is pressed) plus the mirror's offered set
-      const now = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); });
+      const now = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.pick + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); }); // the mirror's pick is in the signature too: the raver card renders from it
       if (now !== sig) { sig = now; since = Date.now(); }
       else if (now !== null && Date.now() - since >= 250) break;
-      if (Date.now() - tSettle > 5000) { R.notes.push('the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
+      if (Date.now() - tSettle > 5000) { R.notes.push('unreliable: the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
       await page.waitForTimeout(50);
     }
     R.settleMs = Date.now() - tSettle; // instrument time, counted inside "ms from open" and printed beside it
@@ -254,8 +249,11 @@ async function stranger(reg) {
     // a control with no words of its own is learned by tapping it and reading the card that answers.
     // The ring that is pressed when the visitor arrives already has its card on the page: those
     // words are read for free, before any tap moves the card on.
-    const initialPick = R.pickAtRead; // the one pressed purpose the front was read under
+    // the card on the page renders from the fronts' mirror, so the ring it belongs to is the mirror's pick (which
+    // the settle wait has just seen hold still together with the archive's pressed mode)
+    const initialPick = CARD[reg] ? await page.evaluate(() => window.__eternal?.data?.pick ?? null) : R.pickAtRead;
     const initialCard = CARD[reg] ? (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim() : '';
+    if (CARD[reg] && initialPick !== R.pickAtRead) R.notes.push(`the card on arrival belonged to "${initialPick}" while the archive showed "${R.pickAtRead}" pressed`);
     for (const o of options) {
       if (o.visible) { o.text = o.visible; o.learnedByTap = false; continue; }
       if (!CARD[reg] || o.disabled) { o.text = ''; o.learnedByTap = false; continue; }
@@ -459,7 +457,7 @@ for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? ['lifetimeStated', 'readersStated', 'payerStated'].map(k => r.terms[id][k] ? 'y' : 'n').join('·') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg}${r.notes.some(n => n.startsWith('unreliable:') || n.startsWith('run aborted')) ? ' **(unreliable, see notes)**' : ''} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps}${r.firstFile.confirmingPress ? ' (1 confirming the already-pressed purpose)' : ''} (+ picker) · page ${r.firstFile.pageMs} (load ${r.loadMs} + the add itself ${r.firstFile.addMs}) · whole run ${r.firstFile.ms} (instrument ${r.settleMs} settle + ${r.readMs} reading)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');
@@ -480,5 +478,7 @@ for (const r of results) {
 }
 process.stdout.write(L.join('\n') + '\n');
 if (OUT) await writeFile(OUT, JSON.stringify({ revision: REVISION, results }, null, 1));
-// a failed measurement — no first file, an aborted run, a remove that errored, a ring that could not be learned — exits 1
-if (results.some(r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0)) process.exitCode = 1;
+// a failed or unreliable measurement — no first file, an aborted run, a remove that errored, a ring that could not be
+// learned, a page that never became ready or never took the register, an offered set still changing at the cap — exits 1
+const unsound = r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
+if (results.some(unsound)) process.exitCode = 1;

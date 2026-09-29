@@ -5,8 +5,9 @@
 // page's relative links resolve where they would on a real host. Nothing outside the tree is
 // served: the resolved and real path of every file must stay under the tree's real path, so
 // encoded dots and symlinks that leave the tree both get a 404. Used by myspace-stranger.mjs and
-// myspace-seam.mjs; myspace-eternal.test.mjs (CI-gated), fleet-bus.mjs and intake-daybucket.mjs
-// still carry their own copies and can move here when their owners choose.
+// myspace-seam.mjs. The other harnesses under e2e/ that open their own server (184 files on
+// 2026-09-29, `grep -l createServer e2e/*.mjs | wc -l`), myspace-eternal.test.mjs (CI-gated)
+// among them, still carry their own copies; each can move here when its owner chooses.
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
