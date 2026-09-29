@@ -5,7 +5,8 @@
 // page's relative links resolve where they would on a real host. Nothing outside the tree is
 // served: the resolved and real path of every file must stay under the tree's real path, so
 // encoded dots and symlinks that leave the tree both get a 404. Used by myspace-stranger.mjs;
-// the older harnesses carry their own copies and can move here when their owners choose.
+// myspace-eternal.test.mjs, myspace-seam.mjs, fleet-bus.mjs and intake-daybucket.mjs still carry
+// their own copies and can move here when their owners choose.
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
@@ -23,11 +24,12 @@ export async function serveTree(root) {
   const inside = p => p === top || p.startsWith(top + sep);
   const server = createServer(async (req, res) => {
     try {
-      const path = decodeURIComponent(req.url.split('?')[0]);
+      const [rawPath, query] = req.url.split(/\?(.*)/s);
+      const path = decodeURIComponent(rawPath);
       let file = resolve(join(top, path));
       if (!inside(file)) { res.writeHead(404); res.end('nf'); return; }
       if (path.endsWith('/')) file = join(file, 'index.html');
-      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(301, { Location: path + '/' }); res.end(); return; }
+      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(301, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); return; } // the still-encoded path, query kept
       const real = await realpath(file); // a symlink pointing out of the tree is not served either
       if (!inside(real)) { res.writeHead(404); res.end('nf'); return; }
       const body = await readFile(real);

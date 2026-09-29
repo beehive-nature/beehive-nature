@@ -105,7 +105,10 @@ function pickByWords(intent, options) {
 }
 // implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp" is not "gas".
 // The four rail names the page can print (temp, local, blossom, ant) are all in, so the count does not depend on
-// which rail a row happened to land on; so are the networks it names (autonomi, arbitrum).
+// which rail a row happened to land on; so are the networks it names (autonomi, arbitrum). Some of these are also
+// plain English (local, temp, token, scheme, gas): they are counted wherever they appear, and the receipts print
+// every word with its count so a reader can see whether a hit is a rail name or ordinary prose. On this page today
+// they appear only as rail and network names.
 const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'temp', 'local', 'blossom', 'ant', 'autonomi', 'arbitrum', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
 const countLeak = text => { const t = text.toLowerCase(); const hits = {}; for (const k of LEAK) { const n = (t.match(new RegExp('\\b' + k + 's?\\b', 'g')) || []).length; if (n) hits[k.startsWith('sha') ? 'sha' : k] = n; } return hits; };
 const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
@@ -150,6 +153,9 @@ async function pressControl(page, reg, purpose) {
     // the browser maps the ring's own top point (0, -r) to client space, whatever the SVG's layout
     const pt = await page.evaluate(p => { const svg = document.querySelector('#etOrbits'); const c = svg.querySelector(`.orbit[data-et-purpose="${p}"] .hit`); const q = svg.createSVGPoint(); q.x = 0; q.y = -(+c.getAttribute('r')); const m = q.matrixTransform(c.getScreenCTM()); return { x: m.x, y: m.y }; }, purpose);
     if (!(pt.x >= 0 && pt.x < VIEW.width && pt.y >= 0 && pt.y < VIEW.height)) throw new Error(`the ${purpose} ring's tap point (${pt.x | 0},${pt.y | 0}) is outside the ${VIEW.width}×${VIEW.height} viewport`);
+    // a tap lands on whatever is on top at that point: if it is not this ring, name the occluder instead of tapping it
+    const under = await page.evaluate(([x, y, p]) => { const e = document.elementFromPoint(x, y); const ring = e && e.closest(`.orbit[data-et-purpose="${p}"]`); return ring ? null : (e ? (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(/\s+/).join('.') : '')) : 'nothing'); }, [pt.x, pt.y, purpose]);
+    if (under) throw new Error(`the ${purpose} ring's tap point is covered by ${under}`);
     await page.touchscreen.tap(pt.x, pt.y);
   } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
   // the page's own truth (the archive's pressed mode button, or the control's own pressed state) or its
@@ -173,7 +179,7 @@ async function stranger(reg) {
     await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
-    await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => R.notes.push('load: ' + errText(e)));
+    await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
     } catch { R.notes.push('the fronts never became ready with an offered purpose (no rail attached offline?)'); }
@@ -203,7 +209,7 @@ async function stranger(reg) {
     // the fronts (every child of main except the fronts, visible text only)
     const front = CARD[reg] ? await visibleTextOutside(page, FRONT[reg], CARD[reg]) : await visibleText(page, FRONT[reg]);
     const archive = await visibleTextAll(page, 'main > :not(#eternal)');
-    R.leakage.frontBeforeTaps = countLeak(front); R.leakage.front = R.leakage.frontBeforeTaps; R.leakage.archive = countLeak(archive);
+    R.leakage.frontBeforeTaps = countLeak(front); R.leakage.archive = countLeak(archive); // .front is set once the cards are known
     // the purpose controls: their own visible words, and separately what they tell a screen reader
     const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
@@ -278,7 +284,7 @@ async function stranger(reg) {
         const t = pick.text.toLowerCase();
         R.terms[intent.id] = {
           lifetimeStated: /\b(gone|closes|session|stays|while|until|forever|permanent|lasts)\b/.test(t), // not "drop"/"remove": those state deletability, not lifetime
-          readersStated: /only this phone|this phone only|this[ -]device|\b(link|link-holders|anyone|everyone)\b/.test(t),
+          readersStated: /only this phone|this phone only|this[ -]device|\b(link|anyone|everyone)\b/.test(t), // "link-holders" is matched by "link"
           payerStated: /\b(pay|pays|paid|paying|wallet)\b|payer (nobody|the-hive|you)\b/.test(t), // bare "nobody"/"hive" also occur in the deletable and lifetime clauses
         };
       }
@@ -305,8 +311,9 @@ async function stranger(reg) {
         // state, or the mirror's count — whichever the page shows first
         await page.waitForFunction(() => document.querySelector('#list').children.length > 0 || document.body.dataset.state === 'file' || window.__eternal.data.count >= 1, null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
-        await page.waitForFunction(() => window.__eternal.data.count >= 1, null, { timeout: 15000 }); // the mirror follows; the receipt reads from it
+        // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up)
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
+        if (!stored.length) throw new Error('the page showed a stored row but the index has none');
         const archivePressed = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') || null);
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = countLeak(await visibleTextAll(page, 'main > :not(#eternal)'));
@@ -331,7 +338,7 @@ async function stranger(reg) {
       const RM = /\b(remove|delete|drop|bin|trash)\b/i;
       const rmLoc = page.locator('#list').getByRole('button', { name: RM }).or(page.locator('#list').getByRole('link', { name: RM })).locator('visible=true');
       const candidates = await rmLoc.count();
-      const rm = candidates ? { text: (await rmLoc.first().innerText()).trim(), candidates } : null;
+      const rm = candidates ? { text: ((await rmLoc.first().innerText()).trim() || (await rmLoc.first().getAttribute('aria-label')) || '').trim(), candidates } : null; // its words, or its accessible name when it shows only an icon
       if (!rm) {
         // no match: print every rendered control on the rows, so a reader can tell a product gap from an instrument vocabulary miss
         const rowControls = await page.locator('#list button, #list a, #list [role=button]').locator('visible=true').allInnerTexts();
@@ -345,7 +352,8 @@ async function stranger(reg) {
           const sentence = (await visibleText(page, '#del-body')).trim();
           const confirmText = (await visibleText(page, '#delConfirm')).trim();
           await page.click('#delConfirm', CLICK);
-          await page.waitForFunction(() => window.__eternal.data.count === 0, null, { timeout: 10000 });
+          // the page's own truth again: the row leaves the archive, or the index is empty, or the mirror says so
+          await page.waitForFunction(() => document.querySelector('#list').children.length === 0 || document.body.dataset.state === 'empty' || window.__eternal?.data?.count === 0, null, { timeout: 10000 });
           const after = (await visibleText(page, '#status')).trim();
           phase = 'after-remove'; // the remove's own wire is copied only after its phase has ended
           const removeWire = [...wire.remove].sort();
