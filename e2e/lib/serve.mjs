@@ -29,7 +29,7 @@ export async function serveTree(root) {
       let file = resolve(join(top, path));
       if (!inside(file)) { res.writeHead(404); res.end('nf'); return; }
       if (path.endsWith('/')) file = join(file, 'index.html');
-      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(301, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); return; } // the still-encoded path, query kept
+      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(302, { Location: rawPath + '/' + (query ? '?' + query : '') }); res.end(); return; } // the still-encoded path, query kept; 302, never cached
       const real = await realpath(file); // a symlink pointing out of the tree is not served either
       if (!inside(real)) { res.writeHead(404); res.end('nf'); return; }
       const body = await readFile(real);
