@@ -145,7 +145,7 @@ const OWN = /your wallet|you pay|own wallet/i;
 // sentence ("pays nothing", "nothing leaves your wallet", "you do not pay", "asks your wallet for nothing").
 // The sentence that earned a hit is printed, so a reader can judge the two edge shapes this rule gets wrong:
 // "you pay, not from ours" (negation near "pay", counted as not paying) and a negation more than four words away.
-const NEG = '(nothing|never|not|no|n\'t|without|nobody)';
+const NEG = "(nothing|never|not|no|without|nobody|\\w+n't)"; // "don't", "won't", "doesn't" are negations too (a bare n't has no word boundary of its own)
 const PAY = '(pays?|paid|paying|wallet)';
 const NEGATED = new RegExp(`\\b${NEG}\\b\\W+(?:\\w+\\W+){0,4}?\\b${PAY}\\b|\\b${PAY}\\b\\W+(?:\\w+\\W+){0,4}?\\b${NEG}\\b`, 'i');
 const ownWalletSentence = text => (text.match(/[^.!?·\n]+[.!?]?/g) || []).map(s => s.trim()).find(s => OWN.test(s) && !NEGATED.test(s)) || null;
@@ -167,9 +167,10 @@ const visibleText = (page, sel) => page.evaluate(VISIBLE_WORDS, [sel, false, nul
 const visibleTextAll = (page, sel) => page.evaluate(VISIBLE_WORDS, [sel, true, null]);
 const visibleTextOutside = (page, rootSel, skipSel) => page.evaluate(VISIBLE_WORDS, [rootSel, false, skipSel]);
 
-// the purpose the archive shows pressed (the page's own truth); the fronts' mirror only when the archive has no pressed mode
+// the purpose the archive shows pressed: the page's own truth, and nothing else (the mirror derives its pick from
+// this same button, and would only differ when it is stale)
 async function pressedMode(page) {
-  return page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null);
+  return page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? null);
 }
 
 // press a purpose control the way a thumb would, and wait until the page says it is the pick
@@ -194,6 +195,7 @@ async function pressControl(page, reg, purpose) {
 
 const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
 const errText = e => String(e && e.message ? e.message : e).split('\n')[0]; // a page can throw a bare string
+const cut = (s, n) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n) > 0 ? s.lastIndexOf(' ', n) : n) + ' …'; // never mid-word, and marked
 async function stranger(reg) {
   // the record is built before anything can fail, so a run that dies keeps what it had gathered
   const R = { reg, revision: REVISION, unsound: [], wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, failedTaps: 0, railWords: [], choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { frontBeforeTaps: {}, cardsRead: {}, archive: {}, archiveWithRow: null }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
@@ -207,11 +209,11 @@ async function stranger(reg) {
     const page = await ctx.newPage();
     // only requests that leave the origin are intercepted (and aborted, logged under the phase); same-origin
     // requests are never paused, so the page's own timings are not stretched by the interception
-    await page.route(u => u.origin !== base, route => { const u = new URL(route.request().url()); wire[phase].add(u.host + u.pathname); return route.abort(); });
-    // route interception does not see WebSockets or requests a worker makes on its own: those are counted too
-    // (a socket cannot be aborted from here, so it is logged as "ws " and would show in the receipts)
-    page.on('websocket', ws => { try { const u = new URL(ws.url()); if (u.origin !== base) wire[phase].add('ws ' + u.host + u.pathname); } catch {} });
+    // the route only aborts; the context's request event is the one logger (it fires for routed requests and for a
+    // worker's own requests alike). WebSockets are not requests: logged apart, and a socket cannot be aborted from here
+    await page.route(u => u.origin !== base, route => route.abort());
     ctx.on('request', req => { try { const u = new URL(req.url()); if (u.origin !== base) wire[phase].add(u.host + u.pathname); } catch {} });
+    page.on('websocket', ws => { try { const u = new URL(ws.url()); if (u.origin !== base) wire[phase].add('ws ' + u.host + u.pathname); } catch {} });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
@@ -318,7 +320,7 @@ async function stranger(reg) {
         ask: intent.ask, means: intent.id,
         offered: !!(wanted && wanted.offered),
         usable: own ? !own.disabled && !own.stale : null, // the intent's own control: rendered, enabled, and readable by the instrument
-        chose: pick ? pick.purpose : null, control: pick ? pick.text.slice(0, 120) : null, learnedByTap: pick ? !!pick.learnedByTap : null, readOnCard: pick ? !!pick.readOnCard : null, score: p.score,
+        chose: pick ? pick.purpose : null, control: pick ? cut(pick.text, 160) : null, learnedByTap: pick ? !!pick.learnedByTap : null, readOnCard: pick ? !!pick.readOnCard : null, score: p.score,
         tied: p.tied || null,
         wrong: pick ? pick.purpose !== intent.id : null,
       });
@@ -358,7 +360,9 @@ async function stranger(reg) {
         // arrive a few ms before the row is painted, and the archive is read "with the row showing" right after this
         await page.waitForFunction(() => document.querySelector('#list').children.length > 0 || document.body.dataset.state === 'file', null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
-        // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up)
+        // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up).
+        // __myspace.rows() is the page's own loadRows, which would also migrate a legacy row it found; this context is
+        // always cold (one file, written by this run), so there is nothing for it to migrate and it writes nothing
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         if (!stored.length) throw new Error('the page showed a stored row but the index has none');
         if (!stored.some(x => x.purpose === keep.purpose)) throw new Error(`the file was stored under "${stored.map(x => x.purpose).join('/')}", not the pressed "${keep.purpose}"`); // a wrong purpose is never recorded silently

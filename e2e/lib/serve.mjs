@@ -53,6 +53,7 @@ export async function serveTree(root) {
       const st = await fh.stat();
       if (st.isDirectory()) { await fh.close(); fh = null; return directory(res, path, rawPath, query); }
       const type = MIME[extname(file).toLowerCase()] || 'application/octet-stream';
+      if (req.method === 'HEAD') { await fh.close(); fh = null; res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' }); res.end(); return; } // the headers, no read of the body
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
       if (m && (m[1] || m[2])) { // Range honoured so <audio>/<video> can seek
         const start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
