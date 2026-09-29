@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p265ec71938",
+ "bnr": "bnr://skaists.dev/blood/p265ec71938",
+ "identity": {
+  "name": "Rachel Kingsbury",
+  "lifespan": "1705–1767",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHR1-38S"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "20 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "20 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf09434a3e1",
+    "name": "Ephraim Kingsbury",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1f8104b98f",
+    "name": "Phebe Main",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0bb39d7308",
+    "name": "Sybil Lawrence"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHR1-38S",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 20,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

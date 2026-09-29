@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "19 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "19 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "L8MB-H18",
+    "id": "pc1a4884d4f",
+    "name": "Joseph Perry",
     "evidence": "walked provider link"
    },
    {
-    "id": "L8MB-H1X",
+    "id": "p3df61d65b7",
+    "name": "Martha Lovett",
     "evidence": "walked provider link"
    }
   ],
@@ -60,7 +62,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/LD46-L76",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 19,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

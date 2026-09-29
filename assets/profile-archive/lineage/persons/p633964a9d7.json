@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"
@@ -43,6 +43,10 @@
   "children": [
    {
     "id": "p1521cf7af8",
+    "name": "Anna Maria Catherina Anspach"
+   },
+   {
+    "id": "p596a5bf0c0",
     "name": "Anna Maria Catherina Anspach"
    }
   ],

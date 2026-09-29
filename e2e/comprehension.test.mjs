@@ -70,6 +70,10 @@ test('wallet cypherpunk: disclosures stand open', async () => {
 
 test('the reader\u2019s own tap survives a register switch', async () => {
   const { ctx, p } = await at('wallet.html', 'bee');
+  // new bee opens on its home list (the three grammars, 2026-09-26): the
+  // reader's first step to any note is a row; "show me everything" opens all
+  await p.locator('#wl-bee [data-wl-go="all"]').click();
+  await p.waitForTimeout(300);
   await p.locator('details[data-reg-disclose] > summary').first().click();
   await p.waitForTimeout(300);
   await p.locator('#breg-cypherpunk').click();
@@ -131,6 +135,9 @@ test('spend-audit engine: register-aware at render time — bee collapses, cyphe
   assert.equal(stB.open, 0, 'collapsed for bee at mount time');
   assert.ok(stB.headline, 'the recomputed total headline stays visible for every register');
   assert.match(stB.lead, /browser|браузер/i, 'the friendly lead renders');
+  // the receipts live in bee's "see how it works" task (the three grammars, 2026-09-26)
+  await bee.p.locator('#wl-bee [data-wl-go="proof"]').click();
+  await bee.p.waitForTimeout(300);
   await bee.p.locator('#receiptsBody details[data-reg-disclose] > summary').first().click();
   await bee.p.waitForTimeout(250);
   await bee.p.locator('#breg-cypherpunk').click();

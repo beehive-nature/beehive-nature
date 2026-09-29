@@ -21,6 +21,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { pinRegister } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -106,6 +107,8 @@ const big = b => (b.length ? BigInt('0x' + Buffer.from(b).toString('hex')) : 0n)
 const hexOf = b => Buffer.from(b).toString('hex');
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 const leaked = [];
 
 /* a deterministic TEST identity: a fixed 32-byte masterPRK turned into a real

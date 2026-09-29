@@ -45,8 +45,12 @@ const REGS = [['bee', '#breg-bee'], ['raver', '#breg-raver'], ['cypherpunk', '#b
 export async function collectDress(page) {
   return page.evaluate(() => {
     const cs = getComputedStyle(document.body);
-    const section = document.querySelector('main section');
-    const btn = document.querySelector('main button');
+    // sample SHARED content only: a register's own blocks ([data-reg], e.g. the
+    // wallet's bee home list or raver dock) differ per register by design, so
+    // they are never the dress sample (the three grammars, 2026-09-26)
+    const shared = el => !el.closest('[data-reg]:not(body)');
+    const section = [...document.querySelectorAll('main section')].find(shared) || null;
+    const btn = [...document.querySelectorAll('main button')].find(shared) || null;
     const h1 = document.querySelector('h1');
     const h1cs = h1 ? getComputedStyle(h1) : null;
     const tok = n => cs.getPropertyValue(n).trim();

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p596a5bf0c0",
+ "bnr": "bnr://skaists.dev/blood/p596a5bf0c0",
+ "identity": {
+  "name": "Anna Maria Catherina Anspach",
+  "lifespan": "1661–1730",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9N34-9PP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "7 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "7 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p633964a9d7",
+    "name": "Johan Jacob Anspach",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb2e776339f",
+    "name": "Anna Doretha Fischer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paa523477d8",
+    "name": "Johann Heinrich Zeller"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9N34-9PP",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 7,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

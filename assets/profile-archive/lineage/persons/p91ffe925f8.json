@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91ffe925f8",
+ "bnr": "bnr://skaists.dev/blood/p91ffe925f8",
+ "identity": {
+  "name": "James Brisbin",
+  "lifespan": "1706–1781",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MDVK-KC2"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "13 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "13 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pda6a9435d6",
+    "name": "John Brisbane",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2900b2c264",
+    "name": "Jonet Paterson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb8dc03d77d",
+    "name": "James Brisbin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6ee3a408d2",
+    "name": "Beatrix Campbell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf16a84607c",
+    "name": "Mary Sarah Brisbin"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MDVK-KC2",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 13,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

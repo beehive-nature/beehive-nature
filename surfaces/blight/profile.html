@@ -944,6 +944,7 @@ const shortOf=s=>s.slice(0,6)+'…'+s.slice(-4);
 const $=id=>document.getElementById(id);
 const fmt=bal=>{const b=Number(bal)/1e9;return b>=1e6?(b/1e6).toFixed(1)+'M':b>=1e3?(b/1e3).toFixed(1)+'k':String(Math.round(b*100)/100)};
 
+const PFP0=$('pfp').innerHTML; /* the empty rim, as the page first draws it */
 async function visit(v){
   const msg=$('msg');msg.style.color='var(--ink-mut)';
   msg.textContent='resolving…';
@@ -951,6 +952,11 @@ async function visit(v){
   if(!r){msg.style.color='var(--guard)';msg.textContent='that did not resolve — paste the full 0x… address (40 hex chars)';return}
   msg.textContent='reading the chain…';
   const a=r.addr;
+  /* a new address starts from nothing: the last address's holdings, wall and
+     picture must never stand under this one's shorthand (a failed scan below
+     returns early, and would otherwise leave them attributed to it) */
+  $('chips').innerHTML='';$('wall').innerHTML='';$('pfp').innerHTML=PFP0;
+  $('st-tokens').textContent='0';$('st-pieces').textContent='not yet';
   $('identity').hidden=false;
   $('short').textContent=shortOf(r.asTyped);
   $('subline').textContent=r.asTyped.toLowerCase()!==a&&/^0x/.test(r.asTyped)===false
