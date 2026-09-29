@@ -32,6 +32,11 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-29` — **Proof lights handed off: #250 (with #253 folded in), #247
+  and the unstarted CI-signing card.** Both PRs need independent review
+  before `main`. The only landing conflict is this file. Carried forward from
+  the founder's correction: never force-push, not even with a lease; repairs
+  are new commits. Dispatch: `docs/dispatches/2026-09-29-proof-lights-handoff.md`.
 - `2026-09-27` — **Proof lights: the badge gate re-derives, it no longer re-reads.**
   Review of #250 found `render-badges.mjs --check` passed forged documents:
   deleted evidence, 999/999 counts with a matching SVG, a forty-zero
