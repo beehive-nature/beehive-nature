@@ -177,7 +177,14 @@ for (const rec of records) {
     const fnClaims = cs.filter((c) => c.from === "filename");
     const otherClaims = cs.filter((c) => c.from !== "filename");
     if (field === "title" && fnClaims.length && otherClaims.length && otherClaims.every((c) => artifact(c.value))) pool = fnClaims;
-    const winner = pool.find((c) => /pdf-info|xmp|pdf internal/.test(c.from)) ?? pool[0];
+    // resolve winner — RANKED, not first-wins (title path unchanged). For YEAR,
+    // publication facts outrank producer machine dates: filename/title/DOI
+    // claims beat pdf CreationDate, which is a producer artifact (D:0000,
+    // D:1910 from a 1990s Distiller) and is NOT publication year.
+    const RANK = { "pdf internal": 3, filename: 2, "pdf-info CreationDate": 1, "xmp CreateDate": 1 };
+    const winner = field === "year"
+      ? [...pool].sort((a, b) => (RANK[b.from] ?? 1) - (RANK[a.from] ?? 1))[0]
+      : pool.find((c) => /pdf-info|xmp|pdf internal/.test(c.from)) ?? pool[0];
     return { v: winner.value, src: winner.from, conflict: distinct.length > 1 };
   };
   const t = pick("title"), a = pick("author"), y = pick("year"), d = pick("doi");

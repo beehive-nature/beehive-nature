@@ -61,11 +61,13 @@ function route(r) {
   const isScribd = r.original_filename.startsWith("SCRIBD");
   const text = `${r.title ?? ""} ${r.original_filename}`;
 
-  // domain
+  // domain — folder table is the filing axis; keyword matches are PROVISIONAL
+  // subject clues (acquisition topic / title / filename), kept separate.
   let domains = subject ? [...(DOMAIN_BY_SUBJECT[subject] ?? [])] : [];
   if (domains.length) cite("subjects[0]", subject);
+  let provisional = [];
   for (const [re, d] of DOMAIN_KEYWORDS) {
-    if (domains.length < 2 && domains[0] === "other" && re.test(text)) { domains = [d]; cite("title/filename keyword", text.match(re)[0]); break; }
+    if (domains[0] === "other" && re.test(text)) { provisional = [d]; cite("keyword clue (provisional)", text.match(re)[0]); break; }
   }
   if (!domains.length) domains = [];
 
@@ -75,15 +77,15 @@ function route(r) {
   else if (r.doi) { et = "paper"; etWhy = "DOI present in PDF"; cite("doi", r.doi); }
   else {
     for (const [re, t] of EVIDENCE_RULES) if (re.test(text)) { et = t; etWhy = `title/filename matched ${t} pattern`; cite("title/filename keyword", text.match(re)[0]); break; }
-    if (et === "unknown" && r.year !== "unknown" && Number(r.year) >= 1500 && Number(r.year) <= 1950) { et = "archive-record"; etWhy = "year 1500-1950 (archival capture, e.g. title-sweep finds)"; cite("year", r.year); }
+    if (et === "unknown" && r.year !== "unknown" && Number(r.year) >= 1500 && Number(r.year) <= 1950 && r.year_source !== "pdf-info CreationDate" && r.year_source !== "xmp CreateDate") { et = "archive-record"; etWhy = `year ${r.year} from ${r.year_source} (non-producer textual claim) — archival capture candidate`; cite("year", `${r.year} (from ${r.year_source})`); }
     if (et === "unknown" && r.source === "harvest-oa rail") { et = "paper"; etWhy = "OA-rail journal capture (no DOI embedded)"; cite("source", r.source); }
   }
 
   // research_value — retrieval priority for ACTIVE fronts, cited; never truth
   let value = "unknown", why = "no routing rule matched";
   if (r.parse_state !== "CLEAN") { value = "unknown"; why = `parse_state=${r.parse_state} — integrity first, routing deferred`; cite("parse_state", r.parse_state); }
-  else if (r.harvest_phase && r.harvest_phase === CURRENT_PHASE) { value = "high"; why = `acquired under CURRENT harvest phase (${CURRENT_PHASE}, harvest-state.json phase=${state.phase}) — active research front`; cite("harvest_phase", r.harvest_phase); cite("harvest-state.json phase", state.phase); }
-  else if (isScribd) { value = "high"; why = "founder 150-book Scribd curriculum, deadline 2026-10-13 (SCRIBD-MANIFEST target) — active reading program"; cite("original_filename", r.original_filename); }
+  else if (r.harvest_phase && r.harvest_phase === CURRENT_PHASE) { value = "high"; why = `aligned with the ACTIVE collection program: acquired under current harvest phase (${CURRENT_PHASE}, harvest-state.json phase=${state.phase}) — collection-program relevance, NOT evidence quality`; cite("harvest_phase", r.harvest_phase); cite("harvest-state.json phase", state.phase); }
+  else if (isScribd) { value = "high"; why = "aligned with the ACTIVE collection program: founder 150-book Scribd curriculum, deadline 2026-10-13 (SCRIBD-MANIFEST target) — collection-program relevance, NOT evidence quality"; cite("original_filename", r.original_filename); }
   else if (subject === "green-reset-books") { value = "useful"; why = "green-reset reading curriculum holdings"; cite("subjects[0]", subject); }
   else if (r.harvest_phase === "cannabis-hemp") { value = "useful"; why = "phase-0 corpus (cannabis-hemp, 1000-PDF target era) — completed phase, background corpus"; cite("harvest_phase", r.harvest_phase); }
   else if (subject === "unsorted") { value = "unknown"; why = "filed in unsorted/ — taxonomy review pending (blibrary-subjects OVERRIDES queue)"; cite("subjects[0]", subject); }
@@ -92,10 +94,10 @@ function route(r) {
 
   const confidence = value !== "unknown" && domains.length ? "rule-matched" : value !== "unknown" || domains.length ? "partial" : "unknown";
   return {
-    domain: domains, evidence_type: et, research_value: value,
+    domain: domains, domain_provisional: provisional, evidence_type: et, research_value: value,
     why: `${why}; evidence_type=${et} (${etWhy})`,
     evidence: ev, confidence, decisive_note: "decisive is never auto-assigned (human/Laya only)",
-    routed_at: new Date().toISOString(), router: "blibrary-route/1.0.0", current_phase: CURRENT_PHASE,
+    routed_at: new Date().toISOString(), router: "blibrary-route/1.0.1", current_phase: CURRENT_PHASE,
   };
 }
 
@@ -109,9 +111,10 @@ const report = {
   research_value: Object.fromEntries(["high", "useful", "routine", "unknown"].map((v) => [v, count((r) => r.routing.research_value === v)])),
   evidence_type: out.reduce((a, r) => ((a[r.routing.evidence_type] = (a[r.routing.evidence_type] ?? 0) + 1), a), {}),
   domain: out.reduce((a, r) => { for (const d of r.routing.domain) a[d] = (a[d] ?? 0) + 1; return a; }, {}),
+  domain_provisional: out.reduce((a, r) => { for (const d of r.routing.domain_provisional) a[d] = (a[d] ?? 0) + 1; return a; }, {}),
   confidence: out.reduce((a, r) => ((a[r.routing.confidence] = (a[r.routing.confidence] ?? 0) + 1), a), {}),
   decisive_auto_assigned: 0,
-  law: "labels explain relevance with cited metadata and preserved uncertainty; they never rank truth or hide material",
+  law: "labels explain relevance with cited metadata and preserved uncertainty; they never rank truth or hide material. research_value = collection-program relevance (active phase / curriculum), never evidence quality. Harvest topics and filename/title keywords are PROVISIONAL subject clues, kept in domain_provisional. PDF CreationDate is producer metadata, never publication year (year display prefers textual claims).",
 };
 await fsp.writeFile(path.join(REC, `routing-report-${DAY}.json`), JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));

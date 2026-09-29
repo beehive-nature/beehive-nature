@@ -3,7 +3,7 @@
 // usage: node search.mjs <corpusRoot> [--q text] [--subject S] [--source S]
 //        [--provenance P] [--year Y] [--hash H] [--state CLEAN|CORRUPT|PARTIAL]
 //        [--dupes-only] [--unprovenanced] [--value V] [--domain D] [--etype T]
-//        [--limit N] [--json]
+//        [--why] [--limit N] [--json]
 // Prefers routed-*.jsonl (enriched + routing labels) when present.
 import fs from "node:fs";
 import path from "node:path";
@@ -34,7 +34,7 @@ const hits = records.filter((r) => {
   if (flag("dupes-only") && !r.duplicate_of) return false;
   if (flag("unprovenanced") && r.provenance !== "unknown") return false;
   if (get("value") && r.routing?.research_value !== get("value")) return false;
-  if (get("domain") && !r.routing?.domain?.includes(get("domain"))) return false;
+  if (get("domain") && !r.routing?.domain?.includes(get("domain")) && !r.routing?.domain_provisional?.includes(get("domain"))) return false;
   if (get("etype") && r.routing?.evidence_type !== get("etype")) return false;
   if (q) {
     const hay = [r.title, r.author, r.original_filename, r.doi, r.harvest_topic, r.harvest_phase, ...(r.metadata_claims ?? []).map((c) => c.value)].filter(Boolean).join(" ").toLowerCase();
@@ -44,10 +44,14 @@ const hits = records.filter((r) => {
 });
 
 console.error(`${hits.length} match(es) of ${records.length} (index ${file}${useRouted ? ", routed" : ""})`);
+if (useRouted) console.error("legend: research_value = collection-program relevance (active phase / founder curriculum), NOT evidence quality · decisive is human-only · domain shown as folder-based, ~X = provisional keyword clue");
 if (flag("json")) { console.log(JSON.stringify(hits.slice(0, LIMIT), null, 2)); process.exit(0); }
 for (const r of hits.slice(0, LIMIT)) {
   const dupe = r.duplicate_of ? ` [dup of ${r.duplicate_of}]` : "";
-  const rt = r.routing ? ` <${r.routing.research_value}/${r.routing.evidence_type}${r.routing.domain.length ? "/" + r.routing.domain.join("+") : ""}>` : "";
-  console.log(`${r.id}${dupe}${rt} ${r.parse_state} ${r.year} "${r.title}" — ${r.author} | ${r.source} | ${r.subjects.join(",")} | ${r.current_path}`);
+  const prov = r.routing?.domain_provisional?.length ? "~" + r.routing.domain_provisional.join("~") + "" : "";
+  const rt = r.routing ? ` <${r.routing.research_value}/${r.routing.evidence_type}${r.routing.domain.length ? "/" + r.routing.domain.join("+") : ""}${prov ? " " + prov : ""}>` : "";
+  const why = flag("why") && r.routing ? `\n    why: ${r.routing.why}` : "";
+  console.log(`${r.id}${dupe}${rt} ${r.parse_state} ${r.year}${r.year_source === "pdf-info CreationDate" || r.year_source === "xmp CreateDate" ? "*" : ""} "${r.title}" — ${r.author} | ${r.source} | ${r.subjects.join(",")} | ${r.current_path}${why}`);
 }
+if (useRouted) console.error("* = year from producer date (CreationDate) — NOT publication year; treat as provisional");
 if (hits.length > LIMIT) console.error(`... ${hits.length - LIMIT} more (use --limit)`);
