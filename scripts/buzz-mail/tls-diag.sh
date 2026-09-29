@@ -8,9 +8,10 @@
 # MAILROOM_DESK receipt. That probe was WRONG — and the way it was wrong is the
 # point. Re-run on 2026-09-29 with a control, the SAME canned capability set
 #   250-Requested mail action okay, completed / 250-SIZE 20000000 / 250-8BITMIME
-# came back from gmail-smtp-in:25 AND smtp.gmail.com:587, both of which require
-# STARTTLS and advertise SIZE 157286400. An intercepting SMTP path on the
-# prober's line was answering for everyone. Outlook's MX passed through clean,
+# came back from gmail-smtp-in:25 AND smtp.gmail.com:587. That set lacks
+# STARTTLS and carries SIZE 20000000, while Gmail's servers normally advertise
+# STARTTLS and SIZE 157286400 (not re-measured from a clean path in this lane).
+# An intercepting SMTP path on the prober's line was answering for everyone. Outlook's MX passed through clean,
 # which is what proved the probe itself could see STARTTLS when it was real.
 #
 # The lesson, and the reason this file is a script and not a paragraph: a
@@ -103,7 +104,9 @@ sink_file_report() {
     say "    mtime  not readable — no comparison can be made"
   fi
   if [ -r "$SINK_PY" ]; then
-    say "    sha256 $(sha256sum "$SINK_PY" 2>/dev/null | cut -d' ' -f1)"
+    # sink.py lives in this public repo, so its digest is public; the marker
+    # lets an operator paste this line into a dispatch past the hex hook
+    say "    sha256 $(sha256sum "$SINK_PY" 2>/dev/null | cut -d' ' -f1) PUBLIC-CONSTANT"
   else
     say "    sha256 not readable by $(id -un) — rerun with sudo"
   fi
@@ -137,8 +140,11 @@ rule
 say "1 · the process serving :${PORT}"
 FOUND=""
 PIDS=""
+RAN=""   # set once a listener tool actually ran; "found nothing" means nothing without it
 if command -v ss >/dev/null 2>&1; then
-  OUT=$(ss -lptn "sport = :${PORT}" 2>/dev/null | sed 1d)
+  SSOUT=$(ss -lptn "sport = :${PORT}" 2>/dev/null)
+  if [ $? -eq 0 ]; then RAN=ss; fi
+  OUT=$(printf '%s\n' "$SSOUT" | sed 1d)
   if [ -n "$OUT" ]; then
     say "$OUT"
     FOUND=ss
@@ -147,14 +153,21 @@ if command -v ss >/dev/null 2>&1; then
 fi
 if [ -z "$FOUND" ] && command -v lsof >/dev/null 2>&1; then
   OUT=$(lsof -nP -iTCP:${PORT} -sTCP:LISTEN 2>/dev/null)
+  # lsof exits 1 when nothing matched, so 0 and 1 both mean it ran
+  case $? in 0|1) RAN=${RAN:-lsof} ;; esac
   if [ -n "$OUT" ]; then
     say "$OUT"
     FOUND=lsof
     PIDS=$(lsof -t -nP -iTCP:${PORT} -sTCP:LISTEN 2>/dev/null | sort -u)
   fi
 fi
+if [ -z "$FOUND" ] && [ -z "$RAN" ]; then
+  say "INCONCLUSIVE: no listener tool available (ss/lsof missing) — cannot tell"
+  say "whether the service is up."
+  exit 3
+fi
 if [ -z "$FOUND" ]; then
-  say "REFUSING TO GUESS: nothing reported a listener on :${PORT}."
+  say "REFUSING TO GUESS: $RAN ran and reported no listener on :${PORT}."
   say "Either this needs root (try with sudo) or the service is down."
   say "Both are findings — record which, do not assume."
   exit 2
@@ -204,7 +217,8 @@ PV=$(plain_verdict "$PLAIN")
 if [ -n "$TLS_OK" ]; then
   # a completed handshake outranks any plain transcript
   say "  VERDICT: STARTTLS advertised AND negotiated on loopback."
-  say "  => the deployment receipt stands; the external report was the artifact."
+  say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
+  say "     desk receipt stands and the external report was the artifact."
   if [ "$PV" != ADVERTISED ]; then
     say "  NOTE: the plain transcript reads $PV, which disagrees with the negotiation"
     say "  above. The completed handshake is the conclusive measurement."
@@ -213,10 +227,12 @@ else
   case $PV in
     ADVERTISED)
       say "  VERDICT: STARTTLS IS advertised on loopback."
-      say "  => the deployment receipt stands; the external report was the artifact." ;;
+      say "  => the process on :25 (§1 names it) offers STARTTLS; if it is the sink, the"
+      say "     desk receipt stands and the external report was the artifact." ;;
     NOT_ADVERTISED)
       say "  VERDICT: STARTTLS is NOT advertised on loopback."
-      say "  => this is a REAL gap, not a network artifact." ;;
+      say "  => the process on :25 (§1 names it) does not offer STARTTLS; if it is the"
+      say "     sink, this is a real gap, not a network artifact." ;;
     *)
       say "  VERDICT: INCONCLUSIVE — no complete EHLO reply, so no finding either way." ;;
   esac
@@ -337,25 +353,25 @@ if ! command -v bash >/dev/null 2>&1; then
   say "  bash not found — the /dev/tcp probe cannot run; targets are UNKNOWN."
 elif probe_tcp 1.1.1.1 443; then
   say "  OPEN    1.1.1.1:443  (positive control — must read OPEN)"
-  # the negative control: TEST-NET-1 (RFC 5737) is never routed, so a connect
-  # there means something on the path completes every handshake itself, and
-  # then OPEN carries no information about any target.
-  if probe_tcp 192.0.2.1 25; then
-    say "  NEGATIVE CONTROL OPEN: 192.0.2.1:25 connected — this path accepts every"
-    say "  connection, so OPEN means nothing here; targets are UNKNOWN."
-  else
-    say "  not OPEN 192.0.2.1:25  (negative control, TEST-NET-1 — must not read OPEN)"
-    PROBE_OK=1
-  fi
+  PROBE_OK=1
 else
   say "  CONTROL FAILED: 1.1.1.1:443 did not read OPEN."
   say "  The probe itself is broken; targets are UNKNOWN, not BLOCKED."
 fi
+# the negative control, PER TARGET PORT: TEST-NET-1 (RFC 5737) is never routed,
+# so a connect to 192.0.2.1:P means something on the path completes handshakes
+# on port P itself, and then OPEN carries no information about any target on P.
+# An interceptor can sit on one port only, so each target's port is checked.
 for hp in "gmail-smtp-in.l.google.com 25" "smtp.gmail.com 587"; do
   h=$(echo "$hp" | cut -d' ' -f1); p=$(echo "$hp" | cut -d' ' -f2)
   if [ -z "$PROBE_OK" ]; then
     say "  UNKNOWN $h:$p"
+  elif probe_tcp 192.0.2.1 "$p"; then
+    say "  NEGATIVE CONTROL OPEN: 192.0.2.1:$p connected — port $p is intercepted on"
+    say "  this path, so OPEN means nothing for it."
+    say "  UNKNOWN (port $p intercepted)  $h:$p"
   else
+    say "  not OPEN 192.0.2.1:$p  (negative control for :$p, TEST-NET-1 — must not read OPEN)"
     egress_verdict "$h" "$p"
   fi
 done

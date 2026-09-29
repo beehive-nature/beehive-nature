@@ -13,8 +13,11 @@ On 2026-08-31 this seat reported that `agents.skaists.buzz` did not advertise
 STARTTLS. Re-run on 2026-09-29 with a control, the same canned capability set
 (`250-Requested mail action okay, completed` / `250-SIZE 20000000` /
 `250-8BITMIME`) came back from `gmail-smtp-in.l.google.com:25` and from
-`smtp.gmail.com:587`. Both of those require STARTTLS and advertise a different
-SIZE. `outlook-com.olc.protection.outlook.com:25` passed through and did show
+`smtp.gmail.com:587`. That set lacks STARTTLS and carries SIZE 20000000, while
+Gmail's servers normally advertise STARTTLS and SIZE 157286400 (not
+re-measured from a clean path in this lane; round 5 corrected an earlier
+wording that said both "require" STARTTLS, which Gmail's inbound MX does not
+of senders). `outlook-com.olc.protection.outlook.com:25` passed through and did show
 STARTTLS. So an intercepting SMTP path on this seat's own line was answering
 for every destination, and the 08-31 probe measured that path, not the box.
 The finding is void. That does not prove STARTTLS works on the box; it means
@@ -199,16 +202,76 @@ and on the real network path. The canonical-PEM compare in M was accepted.
 Receipts (Git Bash, NOT dash): `sh -n` exit 0, `bash -n` exit 0, shell-chain
 lint ok (41 files), secret-scan tree clean.
 
-Script sha256 at round 4: `76197e76…2b426da9`.
+Script sha256 at round 4 (`2587d8b13`): `76197e76…2b426da9`, superseded by
+round 5 below.
 
-## pending: reviewer recheck
+## review, round 5: N to R, and this section's status
 
-Not run by this seat, because WSL is refused to this worktree: the `sh -n`
-under **dash**, the §4 functional cases (OPEN against 1.1.1.1:443, REFUSED/ERROR
-on 127.0.0.1:1, UNKNOWN (DNS) on `nonexistent.invalid`, NO ANSWER on
-10.255.255.1:25), the §1 functional cases (ss `pid=` parse, the lsof fallback,
-the STALE comparison against a fake `SINK_PY` older and newer than a running
-process), and the full script under dash. Round 2's §1 and §4 cases were
-rechecked by the reviewer (link above); round 3's negative control on a real
-network path, J to M under dash, and M against a real STARTTLS listener are
-**reviewer recheck pending.** No CI claim is made here.
+Five Codex items on `d69925711`, triaged valid by the reviewer.
+
+- **N** §2: the process on :25 is identified only by `comm`, so the verdicts
+  are conditional: "the process on :25 (§1 names it) offers STARTTLS; if it is
+  the sink, the desk receipt stands ..." and, for NOT advertised, "if it is
+  the sink, this is a real gap ...". The served-cert DIFFERENT line already
+  reads conditionally (round 4).
+- **O** §4: the negative control is now PER TARGET PORT. Before a target on
+  port P is judged, `192.0.2.1 P` must not connect; if it does, that target
+  reads `UNKNOWN (port P intercepted)`. A port-587 interceptor can no longer
+  yield OPEN for smtp.gmail.com:587. (This replaces the single 192.0.2.1:25
+  gate from round 3.)
+- **P** the "both require STARTTLS" claim is withdrawn from the script header,
+  this dispatch, and the PR body: Gmail's inbound MX offers STARTTLS but does
+  not require it of senders. The evidence is the SIZE and missing STARTTLS in
+  the canned set, not re-measured from a clean path in this lane.
+- **Q** §1: if neither ss nor lsof ran, "INCONCLUSIVE: no listener tool
+  available (ss/lsof missing)" and exit 3. Only a tool that ran and found
+  nothing gets the needs-root-or-down text (exit 2). lsof exit 1 counts as
+  "ran, nothing matched".
+- **R** §1: the full sink.py sha256 line ends ` PUBLIC-CONSTANT` (sink.py is
+  in this public repo), so an operator can paste it past the hex hook.
+
+### round-5 receipts (Git Bash, NOT dash)
+
+```
+$ sh -n scripts/buzz-mail/tls-diag.sh; echo "sh -n exit=$?"
+sh -n exit=0
+$ bash -n scripts/buzz-mail/tls-diag.sh; echo "bash -n exit=$?"
+bash -n exit=0
+$ sh scripts/lint-shell-chains.sh
+scanned 41 shell file(s)
+SHELL-CHAIN LINT ok — no grep -c short-circuit in tracked shell.
+$ sh scripts/secret-scan.sh tree
+secret-scan: clean - tree mode, 24975 tracked files scanned
+```
+
+Slices cut unchanged with sed; STUB shell functions stand in for ss, lsof,
+probe_tcp and getent where named (branching only, not a network test):
+
+```
+Q  no ss, no lsof (Git Bash has neither)         -> INCONCLUSIVE ... [exit 3]
+   STUB ss exits 1, no lsof                      -> INCONCLUSIVE ... [exit 3]
+   STUB ss exits 0, reports nothing              -> REFUSING TO GUESS: ss ran ... [exit 2]
+   STUB lsof exits 1 (ran, no match)             -> REFUSING TO GUESS: lsof ran ... [exit 2]
+   STUB lsof exits 2                             -> INCONCLUSIVE ... [exit 3]
+O  192.0.2.1 connects only on 587                -> gmail-smtp-in:25 judged (OPEN);
+                                                    UNKNOWN (port 587 intercepted) smtp.gmail.com:587
+   192.0.2.1 connects on every port              -> both targets UNKNOWN (port P intercepted)
+   clean path                                    -> NO ANSWER gmail-smtp-in:25 · OPEN smtp.gmail.com:587
+   positive control fails                        -> CONTROL FAILED, both UNKNOWN
+R  sink_file_report on the repo's own sink.py    -> the sha256 line ends " PUBLIC-CONSTANT"
+```
+
+Script sha256 at round 5: `ccf2fef2…9a87f2ca77`.
+
+## status: reviewer rechecks and what is pending
+
+- Round 1 fix (`c8e22e05f`) rechecked under dash:
+  <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5882389501>
+- Round 2 (`c412905f8`), items A to I, rechecked under dash:
+  <https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5882748673>
+- Rounds 3 and 4 (`d69925711`, `2587d8b13`) rechecked by the reviewer
+  in-session under dash, with a real STARTTLS listener and on the real network
+  path, where the negative control fired.
+- **Pending:** the reviewer's recheck of round 5, and the on-host run by an
+  authorized operator. **Current TLS state on the box: UNVERIFIED.** No CI
+  claim is made here.
