@@ -179,7 +179,7 @@ fn key_debug_output_never_contains_key_material() {
 
 #[test]
 fn generated_keys_differ_and_are_usable() {
-    let (a, b) = (SealKey::generate(), SealKey::generate());
+    let (a, b) = (SealKey::generate().unwrap(), SealKey::generate().unwrap());
     let envelope = seal(&a, &SCOPE_A, RECEIPT).unwrap();
     assert_eq!(&open(&a, &SCOPE_A, &envelope).unwrap()[..], RECEIPT);
     assert_eq!(

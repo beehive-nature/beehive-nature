@@ -35,8 +35,8 @@ it. The current count is the newest ledger entry that states one — at present
 2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
-- `2026-09-29` — **#247: Codex review reconciled.** Sixteen findings over four rounds
-  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`), all correct and all accuracy fixes:
+- `2026-09-29` — **#247: Codex review reconciled.** Eighteen findings over five rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`), all correct and all accuracy fixes:
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
   - the handset dispatch records the §6 rulings;
@@ -45,6 +45,7 @@ predates it and is superseded.
   - the handset docket keeps the bounded E4 device key and gives each verifier its own TOFU pin.
   - round 3 swept the whole diff for remaining copies: §4a, the bnr-seal ledger entry, the dispatch's tamper wording, and the not-yet-derived SEAL and LICENSE badges.
   - round 4: the original proof-lights dispatch is marked superseded; planned signing and the NIST remark are marked UNVERIFIED; the #250-only paths are named with the PR link.
+  - round 5: `seal` and `SealKey::generate` return `SealError::Rng` instead of panicking when the OS RNG fails; the original proof-lights milestone is marked superseded.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch
@@ -57,6 +58,9 @@ predates it and is superseded.
   the founder rulings: a dedicated CI-attestation key, no badge server,
   text first. Dispatch: `docs/dispatches/2026-09-27-proof-lights-docket-amendment.md`.
 - `2026-09-27` — **Proof-lights docket: badges derived from signed state.**
+  **Superseded the same day by the amendment above:** P0 and P1 are withdrawn
+  in favour of offline, same-origin rendering with no badge server. Do not
+  implement from this entry. The original read:
   `dockets/PROOF_LIGHTS_shields_badges.md` makes status badges a projection of
   a signed, expiring, per-commit status document in which every claim names
   its source run. Built in three phases:

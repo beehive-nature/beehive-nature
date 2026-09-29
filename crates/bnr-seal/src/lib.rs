@@ -39,7 +39,8 @@
 //! ## Nonce lifecycle
 //!
 //! Every seal draws a fresh 192-bit nonce from the OS RNG
-//! (`XChaCha20Poly1305::generate_nonce(&mut OsRng)` in [`seal`]). There is no
+//! (`OsRng.try_fill_bytes` in [`seal`]; an RNG failure is [`SealError::Rng`],
+//! never a panic). There is no
 //! counter, so no state has to survive restarts or be shared between
 //! concurrent jobs. The extended nonce is the reason for this suite: random
 //! nonces are sound for it by design, where a 96-bit nonce would need
@@ -47,7 +48,8 @@
 
 #![forbid(unsafe_code)]
 
-use chacha20poly1305::aead::{Aead, AeadCore, KeyInit, OsRng, Payload};
+use chacha20poly1305::aead::rand_core::RngCore;
+use chacha20poly1305::aead::{Aead, KeyInit, OsRng, Payload};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use zeroize::{Zeroize, Zeroizing};
 
@@ -102,10 +104,14 @@ impl SealKey {
         SealKey(bytes)
     }
 
-    /// A fresh key from the OS RNG.
-    pub fn generate() -> Self {
-        let key = XChaCha20Poly1305::generate_key(&mut OsRng);
-        SealKey(key.into())
+    /// A fresh key from the OS RNG. An unavailable RNG is
+    /// [`SealError::Rng`], never a panic.
+    pub fn generate() -> Result<Self, SealError> {
+        let mut key = SealKey([0u8; 32]);
+        OsRng
+            .try_fill_bytes(&mut key.0)
+            .map_err(|_| SealError::Rng)?;
+        Ok(key)
     }
 
     fn cipher(&self) -> XChaCha20Poly1305 {
@@ -163,14 +169,23 @@ impl std::fmt::Display for OpenError {
 
 impl std::error::Error for OpenError {}
 
-/// Sealing failed inside the AEAD. With a well-formed key this happens only
-/// for plaintexts beyond the cipher's length limit.
+/// Why sealing (or key generation) failed.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SealError;
+pub enum SealError {
+    /// The OS RNG could not supply a nonce or key, for example during early
+    /// boot or in a restricted sandbox. Returned instead of panicking.
+    Rng,
+    /// Encryption failed inside the AEAD. With a well-formed key this
+    /// happens only for plaintexts beyond the cipher's length limit.
+    Encrypt,
+}
 
 impl std::fmt::Display for SealError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("AEAD encryption failed")
+        f.write_str(match self {
+            SealError::Rng => "OS RNG unavailable",
+            SealError::Encrypt => "AEAD encryption failed",
+        })
     }
 }
 
@@ -185,7 +200,11 @@ fn associated_data(authenticated_header: &[u8]) -> Vec<u8> {
 
 /// Seal `signed_receipt` for private storage under `key` and `scope`.
 pub fn seal(key: &SealKey, scope: &Scope, signed_receipt: &[u8]) -> Result<Vec<u8>, SealError> {
-    let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
+    let mut nonce = [0u8; NONCE_LEN];
+    OsRng
+        .try_fill_bytes(&mut nonce)
+        .map_err(|_| SealError::Rng)?;
+    let nonce = XNonce::from(nonce);
     let mut envelope = Vec::with_capacity(HEADER_LEN + signed_receipt.len() + TAG_LEN);
     envelope.push(ENVELOPE_VERSION);
     envelope.push(Suite::XChaCha20Poly1305.id());
@@ -201,7 +220,7 @@ pub fn seal(key: &SealKey, scope: &Scope, signed_receipt: &[u8]) -> Result<Vec<u
                 aad: &aad,
             },
         )
-        .map_err(|_| SealError)?;
+        .map_err(|_| SealError::Encrypt)?;
     envelope.extend_from_slice(&ciphertext);
     Ok(envelope)
 }
