@@ -182,7 +182,24 @@ openssl `s_server` has no `-starttls`, and this box has no Python to stand in
 a STARTTLS listener); "public key extraction failed"; the cert/key "not
 modified after" branch.
 
-Script sha256 at round 3: `ca95ef28…ae89a86c`.
+Script sha256 at round 3 (`d69925711`): `ca95ef28…ae89a86c`, superseded by
+round 4 below.
+
+## review, round 4: M wording
+
+The reviewer rechecked `d69925711` under dash, with a real STARTTLS listener
+and on the real network path. The canonical-PEM compare in M was accepted.
+
+- **M wording** §3: a comparison shows a difference, not its cause. The
+  reviewer's own test read DIFFERENT because a different cert was on disk,
+  with no reload involved. The line now reads "served cert: DIFFERENT from the
+  deployed file — the listener on :25 is not serving it (for example, a cert
+  loaded before the file changed; §1 names the process)".
+
+Receipts (Git Bash, NOT dash): `sh -n` exit 0, `bash -n` exit 0, shell-chain
+lint ok (41 files), secret-scan tree clean.
+
+Script sha256 at round 4: `76197e76…2b426da9`.
 
 ## pending: reviewer recheck
 

@@ -303,7 +303,7 @@ else
   elif [ "$SERVED" = "$DEPLOYED" ]; then
     say "  served cert: SAME as deployed"
   else
-    say "  served cert: DIFFERENT — the listener is serving a cert loaded before the file changed; a restart would switch to the deployed one"
+    say "  served cert: DIFFERENT from the deployed file — the listener on :25 is not serving it (for example, a cert loaded before the file changed; §1 names the process)"
   fi
 fi
 
