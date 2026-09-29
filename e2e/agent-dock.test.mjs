@@ -464,5 +464,6 @@ test('the staged notice shows while the agent is still opening, and sending clea
   assert.equal(d.$('adSend').disabled,true);assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
   const queen=d.load(frameFor(d,'queen'));d.$('adSend').click();
   assert.deepEqual(queen.calls,['first stage']);assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
-  d.choose('hearth');d.choose('queen');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+  /* "Message received" outranks the notice, so prove the clear where status empties: a later frame load. */
+  d.load(frameFor(d,'queen'));assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
 });
