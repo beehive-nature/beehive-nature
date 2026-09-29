@@ -54,6 +54,7 @@ export function checkpointState(ark, entry, opts = {}) {
   const { memberArks, manifestUrl, manifest } = loadState(opts);
   if (!memberArks.has(ark))
     throw new Error("REJECT SAVE out-of-queue ark: " + ark + " — nothing may be recorded for it");
+  assertRecordOutcome(entry?.state);
   manifest.images[ark] = { ...entry, guard: "queue-member verified " + new Date().toISOString() };
   writeFileSync(manifestUrl, JSON.stringify(manifest, null, 1));
   return true;
@@ -67,4 +68,37 @@ export function checkpointDownload(ark, entry, opts = {}) {
   if (!/^[0-9a-f]{64}$/.test(entry.sha256 || ""))
     throw new Error("REJECT download without sha256: " + ark);
   return checkpointState(ark, entry, opts);
+}
+
+// ── WALKER-FAILURE CLASS (founder order 2026-09-29h: the four eval-err
+//    executions were correctly returned to pending and retried — make that
+//    classification PART OF THE GUARD: walker failures stay retryable and
+//    never count as resolved record outcomes) ──
+// Walker-failure states are the ones where the WALKER itself errored (its
+// code/transport blew up), NOT the site's answer about the record. Site
+// answers (xml-403, xml-404, binding-403, no-deepzoom-traffic, no-tiles)
+// ARE record outcomes. The test below pins the classification.
+export function isWalkerFailure(state) {
+  return typeof state === "string" && /err$/i.test(state.trim());
+}
+
+export function assertRecordOutcome(state) {
+  if (isWalkerFailure(state))
+    throw new Error(
+      "REJECT walker-failure as record outcome: '" + state + "' — use recordWalkerFailure(); the ark stays pending and retryable",
+    );
+  return true;
+}
+
+// Walker failures go to a SEPARATE retryable log (manifest.walkerFailures),
+// never to manifest.images — so nextPending() keeps handing the ark out.
+export function recordWalkerFailure(ark, err, opts = {}) {
+  const { manifestUrl, manifest } = loadState(opts);
+  manifest.walkerFailures = manifest.walkerFailures || {};
+  (manifest.walkerFailures[ark] = manifest.walkerFailures[ark] || []).push({
+    ts: new Date().toISOString(),
+    err: String(err).slice(0, 200),
+  });
+  writeFileSync(manifestUrl, JSON.stringify(manifest, null, 1));
+  return true;
 }

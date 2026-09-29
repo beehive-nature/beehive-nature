@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { nextPending, assertQueueMember, checkpointState, checkpointDownload } from "./walker-guard.mjs";
+import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure } from "./walker-guard.mjs";
 
 function fixtures() {
   const dir = mkdtempSync(join(tmpdir(), "walker-guard-"));
@@ -74,4 +74,32 @@ test("checkpointDownload ACCEPTS a fully-identified download for a queue member 
   const man = JSON.parse(readFileSync(new URL(opts.manifestPath), "utf8"));
   assert.equal(man.images["CCCC-3333"].state, "downloaded");
   assert.match(man.images["CCCC-3333"].guard, /queue-member verified/);
+});
+
+test("walker failures are REJECTED as record outcomes and stay retryable (founder order 09-29h)", () => {
+  const { opts, manifestPath } = fixtures();
+  // the four execution errors from the 09-29g wake, as the class fixture
+  for (const bad of ["eval-err", "stitch-err", "v3-err"]) {
+    assert.throws(() => checkpointState("BBBB-2222", { state: bad }, opts), /REJECT walker-failure/);
+  }
+  // site answers ARE record outcomes
+  assert.equal(assertRecordOutcome("xml-403"), true);
+  assert.equal(assertRecordOutcome("xml-404"), true);
+  assert.equal(assertRecordOutcome("binding-403"), true);
+  assert.equal(assertRecordOutcome("no-deepzoom-traffic"), true);
+  assert.equal(assertRecordOutcome("no-tiles"), true);
+  assert.equal(assertRecordOutcome("downloaded"), true);
+});
+
+test("recordWalkerFailure logs to the retryable side log and the ark STAYS pending", async () => {
+  const { opts, manifestPath } = fixtures();
+  const before = readFileSync(manifestPath, "utf8");
+  recordWalkerFailure("BBBB-2222", "template syntax slip", opts);
+  const man = JSON.parse(readFileSync(new URL(opts.manifestPath), "utf8"));
+  assert.equal(man.images["BBBB-2222"], undefined, "no outcome recorded in images");
+  assert.equal(man.walkerFailures["BBBB-2222"].length, 1);
+  assert.match(man.walkerFailures["BBBB-2222"][0].err, /template syntax slip/);
+  // still pending: nextPending keeps handing it out
+  const { nextPending: np } = await import("./walker-guard.mjs");
+  assert.ok(np(10, opts).some((p) => p.ark === "BBBB-2222"));
 });
