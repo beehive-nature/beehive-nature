@@ -132,3 +132,52 @@ independent exact-head approval and passing CI. Remaining for a future
 drop: the 20 missing blobs (list above) + the artifact's own 8 woff2/5 OFL
 texts (no byte authority exists for those — if they ever land, byte records
 must be added to the manifest first).
+
+## CORRECTION RIDER (founder readback, same day) — two claims narrowed
+
+The founder read the claims above and disputed two readings. The corrected
+formulations follow the estate's claim → dispute → corrected pattern; the
+original wording stays above as written, THIS rider governs.
+
+**1. "byte-verified" was too strong. Byte count + type agreement is
+necessary, not byte-for-byte identity.** What is actually proven per landed
+file:
+
+- `austras-koks.svg` — one local copy, taken from the artifact's own Files
+  panel (the export channel itself), byte-count exact. No content-hash
+  authority exists to compare against (manifest ids are store ids, proven
+  above), so byte-for-byte equality with the artifact-side original is
+  UNPROVEN.
+- `burti-specimen.png`, `skaists-specimen.png`, `skaists.ttf` — two
+  independent local copies each, md5-identical within each pair. That
+  proves the two local copies agree WITH EACH OTHER; it does not prove
+  either equals the artifact-side original. Provenance (every copy sits in
+  founder-era drops that predate or accompany the kit's construction
+  window) supports the identification but cannot substitute for a byte
+  comparison.
+
+BOUNDARY NOT CROSSED: no byte-for-byte proof against artifact-side
+originals exists or is currently possible. The honest landing claim is:
+**byte-count + type verified, provenance recorded, cross-source md5
+agreement where a second copy exists.** If byte records (content hashes)
+for the blobs ever become available, re-verification is one command
+(`scripts/design-kit-verify.mjs`, extended to hash mode).
+
+**2. Fonts successfully loading ≠ fonts demonstrably matching the kit.**
+The served verification proves the FIRST fact: the sheet's named families
+now load and render on every surface from the estate's in-tree OFL builds —
+`fonts.check` true per register, FontFace `loaded`, 200 same-origin
+fetches, metric deltas vs the fallbacks. Fallback rendering is over. It
+does NOT prove the SECOND: the rendered bytes being the artifact's own
+`fonts/*.woff2` variable builds. Those carry no manifest byte records, so
+exact-build identity with the kit's own files is UNVERIFIED and stays so
+until byte authority lands. The rider's acceptance criterion — "a served
+page computes the resolved family as the KIT face (not the fallback)" — is
+met at **family resolution**; any stronger byte-identity reading is not
+claimed.
+
+**Obligation status, restated plainly:** 20 of 24 blobs remain missing —
+the asset obligation is INCOMPLETE. This seat stays the owner through
+#266's review and CI; any Files-panel drop (founder gesture or hive
+routing) completes against `scripts/design-kit-verify.mjs` with no further
+ceremony.
