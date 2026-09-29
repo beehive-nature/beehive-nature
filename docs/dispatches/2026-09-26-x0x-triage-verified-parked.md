@@ -74,3 +74,20 @@ Each needs a maintainer's nod first.
 
 - Cancel Cursor's Monday 9:10 AM MT duplicate-fix launch. It is not a scheduled task on this machine, so the Cursor-side owner must cancel it and return a receipt.
 - Approve or decline filing the private draft.
+
+## Update 2026-09-28 (read 2026-09-29 01:17Z)
+
+The sections above are the 2026-09-26 record and stay as written. Since then, upstream moved:
+
+- **Closed upstream.** #877, #870, #836, #806 and #797 (plus #961) were closed COMPLETED on 2026-09-28 between 09:55:06Z and 09:55:16Z. #623 and #945 remain open.
+- **On `main` now.** Upstream `main` is at `30c57d2439`. All five fix merge commits, and the tested tree `0bd10ee278`, are ancestors of it (`git merge-base --is-ancestor <sha> 30c57d2439; echo $?` gave 0 for all six). Upstream deleted `codex/final-acceptance-candidate`. So the line "not on main" above is superseded.
+- **Still not released, still not on our box.** v0.45.0 remains the latest upstream release, and the box still runs x0xd 0.45.0.
+
+**Monday launch, GitHub side (foreign oracle: the GitHub API).** Nothing shows that the duplicate-fix launch fired:
+- The fork still has only its two old PRs (#1 and #2, both from September 15 or earlier).
+- No fix branches exist on the fork.
+- Our account opened no upstream PR. Its only upstream activity since 09-26 is a comment on #504.
+- The fork's only `cursoragent@cursor.com` commits (`ad33b67192`, `12b65fbd2a`) are upstream history from 2026-09-06.
+- The fork's 2026-09-28 activity is unrelated: a `main` sync to `30c57d2439`, a `vendor-deps-e803709` pre-release ("vendored crates, offline build"), and a `codex/final-acceptance-candidate` mirror at `e803709f23`.
+
+**Monday launch, Cursor side: NOT RECONCILED.** The agent runs in the founder's Cursor cloud account, not on this machine; this machine has no scheduled tasks. The in-browser Cursor dashboard is not signed in, and this seat does not sign in. The premise of the launch is now void, because the issues are closed upstream. But only the Cursor owner can stop the schedule and return a cancellation receipt.
