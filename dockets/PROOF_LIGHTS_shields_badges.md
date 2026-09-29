@@ -10,11 +10,10 @@ value nothing machine-checks is not shown.
 **Amendment (founder review, 2026-09-27).** The first version of this docket
 proposed a public-Shields Endpoint phase and a later self-hosted Shields with a
 verifier service. #250 already implements something simpler: offline rendering,
-same-origin publication, no badge server at all. This amendment adopts that path
-(§3) and corrects one wrong claim (§1). `e2e/render-badges.mjs` and the
-gate-repair dispatch cited below land with #250
-(https://github.com/beehive-nature/beehive-nature/pull/250), not with this
-docket. It also adds two distinctions the first
+no badge server at all, and today the README as the only place the badge is shown.
+This amendment adopts that path (§3) and corrects one wrong claim (§1).
+`e2e/render-badges.mjs` and the gate-repair dispatch cited below landed with #250
+(merged to `main` as `eeafc5b`). It also adds two distinctions the first
 version blurred: historical evidence versus live status, and git addressing
 versus cryptographic binding (§2). The founder's rulings on the three open
 questions are in §5.
@@ -129,7 +128,7 @@ measure → validate evidence → derive document → verify signature (when sup
 | Gate | `render-badges.mjs --check` plus `render-badges.test.mjs` (the forgery probes), in CI | #253 |
 | Sign and verify | A dedicated CI-attestation key (§5.1) | Next card |
 | Render | `badge-maker`, offline, in CI | #250 |
-| Publish | The existing surface publication path, same-origin. Design-acceptance I1 holds; no badge CDN | #250 |
+| Publish | Today the README only, from the repository (#250). A surface that shows a badge later loads it same-origin through the existing surface publication path, so design-acceptance I1 holds; no badge CDN | README: #250. Surfaces: future |
 
 **Withdrawn from the first version:**
 - the public-Shields Endpoint phase (P0);
@@ -182,12 +181,12 @@ what this design replaces):
    - **Owner.** The CI-signing card has a named owner, state, start
      condition and scope. They are recorded with the gate repair, section
      "The CI-signing card" (2026-09-29), in
-     `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`. That file lands
-     with #250 (https://github.com/beehive-nature/beehive-nature/pull/250),
-     not with this docket; until #250 is on `main`, read it on that PR.
+     `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`, which landed
+     with #250 (`eeafc5b`).
 2. **Hosting: no badge server for the first implementation.** The SVG, the
    document and the evidence are published through the existing
-   surface-publication path. A verifier service comes only when a live
+   surface-publication path (today the README is the only place the badge is
+   shown; no surface includes it yet). A verifier service comes only when a live
    freshness requirement justifies it. The fact that Shields offers a server
    is not a reason.
 3. **Presentation: text first, glyphs optional.**

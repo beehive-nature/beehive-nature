@@ -72,8 +72,8 @@ the bootloader wipes it.
    - **Auditor phone:** scanning the QR code pins the key on that phone. Keep
      the phone physically separate from the handset. Losing it means
      re-pairing that phone only.
-   - **Beehive verifier** (the interim stand-in, and scheduled remote
-     verification per T3 enrollment §2): pairing pins the key in the
+   - **Beehive verifier** (the only path to E4 standing, per the status
+     note above; scheduled remote verification per T3 enrollment §2): pairing pins the key in the
      verifier's own trust state. Losing the auditor phone does not touch it.
    - **Both:** when both are paired, each pin is independent. A mismatch
      reported by either one is a failed attestation.

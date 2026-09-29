@@ -41,8 +41,8 @@ predates it and is superseded.
   #247 keeps both sides of the only conflict, these ledger lines, newest first, and
   rewords the count header so the newest per-suite figure is not read as the workspace
   count. #247 needs renewed approval and CI on its new head before it merges.
-- `2026-09-29` — **#247: Codex review reconciled.** Twenty-six findings over eight rounds
-  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`, `26707d9`, `1d58dac`), all correct. Rounds 1–4 and 6–8 are documentation
+- `2026-09-29` — **#247: Codex review reconciled.** Twenty-eight findings over nine rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`, `26707d9`, `1d58dac`, `594d1ad`); 27 correct, one not applicable (round 9's link rule). Rounds 1–4 and 6–9 are documentation
   and accuracy fixes. Round 5 changes runtime behaviour and the public API (below):
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
@@ -56,6 +56,7 @@ predates it and is superseded.
   - round 6: the ledger separates the round-5 API change; the handset facts are marked founder-verified except the AI-storage reclaim; OEM unlocking is recommended setup, not an E4 condition (the ladder defines E4); the `open`/`Authentication` wording is capped and cited.
   - round 7: the nonce-soundness argument is marked UNVERIFIED, domain separation states its assumption (a `SealKey` is for bnr-seal only), and the AEAD error cites upstream. The independent review's non-blocking points are also carried: the `4 ignored` count, and the interim verifier marked as not yet existing.
   - round 8: E4 tier standing needs scheduled re-attestation through our verifier (T3 §2). A second phone alone gives local assurance only, so the handset holds no E4 standing until the verifier lane lands.
+  - round 9: badge publication is the README only today, with surfaces as future work (the §3 table, §5.2 and the amendment note). The #250 files are now cited as landed (`eeafc5b`), so the docket has no external links.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-29` — **#250: Codex review reconciled (four rounds).** The gate now refuses:
   - forged `renderer` and `law` values (before, they were only required to be present);
