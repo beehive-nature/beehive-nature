@@ -40,10 +40,18 @@ owner". Both claims are deleted and corrected in those files.
 
 ## Past uploads, audited on Arweave (the outside witness)
 
+**Source:** `contracts/vending/tool/arweave-owner-audit.mjs`, functions `audit()` and
+`verifyEd25519Item()` (with `deepHash()` and `serializeTags()`, the ANS-104 signing
+message). Reproduce with `node contracts/vending/tool/arweave-owner-audit.mjs` (reads
+only). `e2e/ar-upload-signer.test.mjs` holds the verifier: it accepts a correctly signed
+item, rejects one whose owner is the seed, and agrees with arbundles on an item the
+library signed (where the library is installed).
+
 The audit covered every item tagged `App-Name=skaists-vending` or
 `Type=agent-birth-certificate`, plus `F8f2GF_ToN4…` by id. For each ed25519 item, the
 signature was re-derived from the raw data and verified against the owner field. An
-owner that held a seed could not verify. Output as printed:
+owner that held a seed could not verify it, except with negligible probability. Output
+of the committed tool, as printed:
 
 ```
 ITEMS 9
@@ -58,7 +66,7 @@ XviV59rLsg ownerLen 512 · owner==Member-Key false · sig valid under owner n/a 
 F8f2GF_ToN ownerLen 32 · owner==Member-Key true · sig valid under owner true · agent ?
 ```
 
-**No seed is on Arweave among these items.**
+**No seed is published in the owner field of any of these items** (by the check above; sound by construction, scoped to these nine).
 - **The four ed25519 items** each have owner equal to their Member-Key, with a valid
   signature. Three are PR #230's in-page mints; the fourth is the 2026-09-01 probe,
   which was built correctly.
@@ -93,7 +101,7 @@ this door is a throwaway TESTNET key.
     the real `SolanaSigner` agrees and the item verifies.
 - The test is wired into CI (`static` job).
 
-Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 5/5 locally, including the
+Receipt: `node --test e2e/ar-upload-signer.test.mjs` passed 7/7 locally, including the
 live library check.
 
 ## Does it block #230?

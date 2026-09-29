@@ -67,3 +67,24 @@ test('the real arbundles SolanaSigner agrees with the stand-in, and the item ver
   const wrong = new arbundles.SolanaSigner(B.encode(Buffer.concat([pub, seed])));
   assert.ok(Buffer.from(wrong.publicKey).equals(seed), 'the reversed order really does put the seed in the owner field');
 });
+
+/* the audit tool behind the dispatch's "no seed on Arweave" line (contracts/vending/tool/arweave-owner-audit.mjs, verifyEd25519Item) */
+const AUD = await import('../contracts/vending/tool/arweave-owner-audit.mjs');
+test('the audit\'s verifier accepts a correctly signed item and rejects one whose owner is the seed', () => {
+  const { seed, pub } = fresh();
+  const priv = createPrivateKey({ key: Buffer.concat([PKCS8, seed]), format: 'der', type: 'pkcs8' });
+  const tags = [{ name: 'App-Name', value: 'skaists-vending' }, { name: 'Member-Key', value: pub.toString('hex') }];
+  const data = new TextEncoder().encode('{"record":"probe"}');
+  const msg = AUD.deepHash([new TextEncoder().encode('dataitem'), new TextEncoder().encode('1'), new TextEncoder().encode('2'), pub, new Uint8Array(0), new Uint8Array(0), AUD.serializeTags(tags), data]);
+  const signature = cryptoSign(null, msg, priv);
+  assert.equal(AUD.verifyEd25519Item({ owner: pub, signature, tags, data }), true);
+  assert.equal(AUD.verifyEd25519Item({ owner: seed, signature, tags, data }), false, 'a seed in the owner field cannot verify the item\'s signature');
+  assert.equal(AUD.verifyEd25519Item({ owner: new Uint8Array(512), signature, tags, data }), null, 'not ed25519: not judged');
+});
+test('the audit\'s verifier agrees with arbundles on an item arbundles signed', { skip: arbundles ? false : 'the reference library is not installed here (npm install --prefix contracts/vending/tool --no-save @dha-team/arbundles bs58)' }, async () => {
+  const { seed, pub } = fresh();
+  const { signer, ready } = memberSigner(seed); await ready;
+  const tags = [{ name: 'App-Name', value: 'skaists-vending' }, { name: 'Member-Key', value: pub.toString('hex') }];
+  const item = arbundles.createData('{"record":"probe"}', signer, { tags }); await item.sign(signer);
+  assert.equal(AUD.verifyEd25519Item({ owner: new Uint8Array(item.rawOwner), signature: new Uint8Array(item.rawSignature), tags, data: new Uint8Array(item.rawData) }), true);
+});
