@@ -1,12 +1,15 @@
 // serve.mjs — one localhost static server for the e2e instruments that drive a surface.
 //
-// Serves a tree over plain http on 127.0.0.1 at a free port, "/" → index.html, with the
-// MIME types the surfaces need. Used by myspace-stranger.mjs; the older harnesses carry
-// their own copies and can move here when their owners choose.
+// Serves a tree over plain http on 127.0.0.1 at a free port, with the MIME types the surfaces
+// need. "/dir/" serves dir/index.html; "/dir" without the slash is redirected to "/dir/" so the
+// page's relative links resolve where they would on a real host. Nothing outside the tree is
+// served: the resolved and real path of every file must stay under the tree's real path, so
+// encoded dots and symlinks that leave the tree both get a 404. Used by myspace-stranger.mjs;
+// the older harnesses carry their own copies and can move here when their owners choose.
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath, stat } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 
 export const MIME = {
@@ -16,17 +19,21 @@ export const MIME = {
 };
 
 export async function serveTree(root) {
-  const top = resolve(root);
+  const top = await realpath(resolve(root));
+  const inside = p => p === top || p.startsWith(top + sep);
   const server = createServer(async (req, res) => {
     try {
-      let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
-      let file = resolve(join(top, p));
-      if (file !== top && !file.startsWith(top + sep)) { res.writeHead(404); res.end('nf'); return; } // nothing outside the tree, encoded dots included
-      let body;
-      try { body = await readFile(file); } catch (e) { if (e.code !== 'EISDIR') throw e; file = join(file, 'index.html'); body = await readFile(file); } // a directory without its slash serves its index
+      const path = decodeURIComponent(req.url.split('?')[0]);
+      let file = resolve(join(top, path));
+      if (!inside(file)) { res.writeHead(404); res.end('nf'); return; }
+      if (path.endsWith('/')) file = join(file, 'index.html');
+      else if ((await stat(file).catch(() => null))?.isDirectory()) { res.writeHead(301, { Location: path + '/' }); res.end(); return; }
+      const real = await realpath(file); // a symlink pointing out of the tree is not served either
+      if (!inside(real)) { res.writeHead(404); res.end('nf'); return; }
+      const body = await readFile(real);
       res.writeHead(200, { 'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream' }); res.end(body);
     } catch { res.writeHead(404); res.end('nf'); }
   });
-  const base = await new Promise(r => server.listen(0, '127.0.0.1', () => r(`http://127.0.0.1:${server.address().port}`)));
+  const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
   return { base, close: () => new Promise(r => server.close(() => r())) };
 }
