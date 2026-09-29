@@ -1,19 +1,19 @@
 {
  "schema": "skaists.images-summary/1",
- "generated": "2026-09-29T01:59:51.958Z",
+ "generated": "2026-09-29T02:10:54.808Z",
  "provider": "familysearch record images via the deepzoom wire (see fs-adapter IMAGE WIRE + SWEEP WIRE LAWS v2 blocks)",
  "boundary": "BYTES ARE PRIVATE-TIER ONLY — this public summary carries counts, sha256 hashes, and ark pointers, never image bytes (archive copyright)",
- "identity": "every downloaded image is tied to its ark by the BINDING LAW (dascloud das/v2/3:1:{ark}/name?namespace=apid); retro-audit 2026-09-29: 18/18 pre-v3 downloads match the binding; all v3 downloads resolve the apid FROM the binding",
+ "identity": "every downloaded image is tied to its ark by the BINDING LAW (dascloud das/v2/3:1:{ark}/name?namespace=apid) AND every ark is a queue member read from skaists.sweep-queue/1 (never typed from memory); retro-audit 2026-09-29: 18/18 pre-v3 downloads match the binding; all v3 downloads resolve the apid FROM the binding; 4 stray memory-typed arks were caught + quarantined same day (1 untied image deleted, bytes never enter the archive without a record tie)",
  "harvested": {
-  "attempted": 74,
+  "attempted": 94,
   "states": {
-   "downloaded": 52,
+   "downloaded": 65,
    "no-deepzoom-traffic": 7,
    "xml-403-all": 6,
-   "xml-403": 9
+   "xml-403": 16
   },
-  "downloaded": 52,
-  "bytes": 12149952
+  "downloaded": 65,
+  "bytes": 15391623
  },
  "images": [
   {
@@ -691,7 +691,176 @@
    "sha256": "8c44a3bd63be9b2d0d920d5bdb3836b8b5f40155a02aac4255074ac9a3d63398", "hexLawNote": "PUBLIC-CONSTANT record image digest",
    "retrieved": "2026-09-29T01:59:34.444Z",
    "fidelity": "deepzoom level 11 of 11 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QS7-9971-63DS",
+   "apid": "apid:TH-1951-32383-3062-36",
+   "w": 2048,
+   "h": 1167,
+   "level": 11,
+   "maxLevel": 11,
+   "tiles": 21,
+   "bytes": 124954,
+   "sha256": "50864b1e63f7e87b9d58faee8f3bf2aa5c758e345e326414d77e8fc7ebabd78e", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:05:10.181Z",
+   "fidelity": "deepzoom level 11 of 11 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QS7-99LB-34GR",
+   "apid": "apid:TH-1951-46743-6985-20",
+   "w": 2048,
+   "h": 1614,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 20,
+   "bytes": 253100,
+   "sha256": "117978ac4d6e32bea839fb7da201d119bc4b08cd4faba2d5e45de96441cfa4b0", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:05:18.361Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QSQ-G98C-9SCJ",
+   "apid": "apid:TH-1942-37171-2087-10",
+   "w": 2048,
+   "h": 1497,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 24,
+   "bytes": 198229,
+   "sha256": "772b1625a137089e934b33c6afb61a68c8a9c78d3a6c1b30cddef6e8b0dbd23a", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:05:25.955Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QSQ-G99K-8ZQ",
+   "apid": "apid:TH-1942-28481-304-85",
+   "w": 2048,
+   "h": 1648,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 20,
+   "bytes": 135491,
+   "sha256": "ef57577f43b332abe596e2782c208e478ea03aca3e9c8edec5f631b03f64119b", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:05:33.681Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:9396-3XH9-Q",
+   "apid": "apid:TH-1-11804-7234-79",
+   "w": 2048,
+   "h": 1779,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 20,
+   "bytes": 244896,
+   "sha256": "87a043e9625893e4ffa876c89da9fb0a0515ee8b51787fa69b815cb3abc545ba", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:06:02.450Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:S3HT-6XH9-Z2F",
+   "apid": "apid:TH-266-12128-36615-56",
+   "w": 2048,
+   "h": 1655,
+   "level": 11,
+   "maxLevel": 11,
+   "tiles": 56,
+   "bytes": 655382,
+   "sha256": "37b7cb03eecb554aa1c794db1e977f295ab82392a294e147cf5f03a84fbedfee", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:06:10.525Z",
+   "fidelity": "deepzoom level 11 of 11 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:S3HY-DBR7-WNL",
+   "apid": "apid:TH-267-11665-140901-63",
+   "w": 2048,
+   "h": 1628,
+   "level": 11,
+   "maxLevel": 11,
+   "tiles": 56,
+   "bytes": 473390,
+   "sha256": "5d8dde78f2d7c54c7f89a5c5cc69efdfc1e8daee4fcc55e0a8b7a5ef96524d8a", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:06:59.175Z",
+   "fidelity": "deepzoom level 11 of 11 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3Q9M-CSPY-F7M4-L",
+   "apid": "apid:TH-909-75525-135231-99",
+   "w": 2048,
+   "h": 1417,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 24,
+   "bytes": 179040,
+   "sha256": "a49c9ca9c49bae190d686973de26d6fa8284728735171657b67903f91b0f2689", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:07:33.912Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QHK-Q3T3-JV14",
+   "apid": "apid:TH-7774-104507-17077-71",
+   "w": 1663,
+   "h": 2048,
+   "level": 11,
+   "maxLevel": 11,
+   "tiles": 42,
+   "bytes": 279455,
+   "sha256": "95ff40959a460fe2e91d960b24c304da6e338a230c4511b74fd309e1cc39426e", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:07:40.277Z",
+   "fidelity": "deepzoom level 11 of 11 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QS7-L98C-9SD2",
+   "apid": "apid:TH-1971-37171-2180-95",
+   "w": 2048,
+   "h": 1489,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 24,
+   "bytes": 188834,
+   "sha256": "0ca27d0a40d2a6e161c42198c412b649c482bf48f584c83dddf6dcee5b733072", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:08:08.163Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3QS7-L99B-JQYJ",
+   "apid": "apid:TH-1971-28757-4427-42",
+   "w": 2048,
+   "h": 1541,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 20,
+   "bytes": 228691,
+   "sha256": "2fee981d580b61e0adb51598c19e0113383c0445c87de4698b000d04b5b009ec", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:08:14.983Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:33SQ-GYBM-9FTC",
+   "apid": "apid:TH-1942-25140-41289-17",
+   "w": 1608,
+   "h": 2048,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 20,
+   "bytes": 194831,
+   "sha256": "8237229f7f5776ac9120806e1652c5c99800543317d0705ae9a4b0f392e36757", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:08:21.865Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3Q9M-C3HH-27WY-W",
+   "apid": "apid:TH-909-88460-141216-0",
+   "w": 1091,
+   "h": 2048,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 15,
+   "bytes": 85378,
+   "sha256": "980dd66671a863fd5f5764683235267be6fcd6da76cdab8c968cb49cb4176005", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-29T02:08:29.453Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
   }
  ],
- "openFrontier": "queue skaists.sweep-queue/1: 67 of 366 resolved (in-queue downloaded 46), 299 remain at queue order (manifest checkpoint per image); negatives are session-scoped observations (xml-403 = storage denied this account tier after binding; no-deepzoom-traffic = zero deepzoom observed this session), re-openable by design; mapping beyond the 404 preMapped pairs: rendered-DOM is the only PROVEN method (useSLS 404 both tiers), other wires unprobed"
+ "openFrontier": "queue skaists.sweep-queue/1: 87 of 366 resolved (in-queue downloaded 59), 279 remain at queue order (manifest checkpoint per image); negatives are session-scoped observations (xml-403 = storage denied this account tier after binding; no-deepzoom-traffic = zero deepzoom observed this session), re-openable by design; mapping beyond the 404 preMapped pairs: rendered-DOM is the only PROVEN method (useSLS 404 both tiers), other wires unprobed"
 }
