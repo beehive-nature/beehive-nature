@@ -9,7 +9,7 @@ import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../surfaces/agent-dock.js',import.meta.url),'utf8');
 
 function dock({height=650,width=1100,position='static',barHeight=540,viewport=null,
-  href='https://bnr.test/surfaces/index.html',clipboard='ok'}={}) {
+  href='https://bnr.test/surfaces/index.html',clipboard='ok',modelContext=null}={}) {
   const frames=[],observers=[];
   const decode=s=>String(s).replace(/&(?:amp|lt|gt|quot|#39);/g,m=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'"}[m]));
   class Events {
@@ -102,7 +102,7 @@ function dock({height=650,width=1100,position='static',barHeight=540,viewport=nu
     observe(target,options){this.target=target;this.options=options;this.active=true;}
     disconnect(){this.active=false;}
   }
-  const document=new Document(href);document.body.setAttribute('data-reg','bee');
+  const document=new Document(href);document.body.setAttribute('data-reg','bee');if(modelContext)document.modelContext=modelContext;
   const bar=position===null?null:document.createElement('nav');
   if(bar){bar.id='tbar';bar.getBoundingClientRect=()=>({height:barHeight,top:height-barHeight,bottom:height});document.body.appendChild(bar);}
   const window=new Events(),copies=[],copyRequests=[];
@@ -366,4 +366,54 @@ test('the shipped Hearth keeps hidden song text while stopping and releasing its
   assert.equal(engine.document.scrolledElement,engine.document.getElementById('chat').lastChild);
   assert.equal(engine.document.scrollOptions.block,'start');
   assert.match(engine.document.scrolledElement.textContent,/route creative prompts/);
+});
+
+/* WebMCP: a recording document.modelContext stands in for the browser. Whether a real
+   Chromium agent discovers and calls these tools still requires browser verification. */
+function modelContext({fail=null}={}){
+  const tools=[];return {tools,registerTool(t){if(fail==='throw')throw new Error('refused');if(fail==='reject')return Promise.reject(new Error('refused'));tools.push(t);return Promise.resolve();}};
+}
+const toolText=r=>{assert.equal(r.content[0].type,'text');return r.content[0].text;};
+
+test('without document.modelContext the dock registers nothing and invents no API',()=>{
+  const d=dock();assert.equal('modelContext' in d.document,false);d.open();d.submit('still works');
+});
+
+test('WebMCP offers two tools; only the list is read-only, and it names who accepts a message',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  assert.deepEqual(mc.tools.map(t=>t.name),['bnr_list_agents','bnr_stage_message']);
+  assert.equal(mc.tools[0].annotations.readOnlyHint,true);assert.equal(mc.tools[1].annotations,undefined);
+  const list=JSON.parse(toolText(await mc.tools[0].execute({})));
+  assert.deepEqual(list.map(a=>[a.id,a.acceptsMessage]),[['queen',true],['hearth',true],['baigents',false],['bloverai',true]]);
+  assert.equal(list[0].page,'https://bnr.test/surfaces/bqueenbee-live.html?dock=8');assert.equal(list[3].page,null);
+  assert.equal(d.win.classList.contains('on'),false);
+});
+
+test('staging opens the chosen agent with the draft and never sends it',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));d.$('adClose').click();
+  const r=toolText(await mc.tools[1].execute({agent:'queen',message:'  What is BNR?  '}));
+  assert.equal(d.win.classList.contains('on'),true);assert.equal(d.chip('queen').getAttribute('aria-pressed'),'true');
+  assert.equal(d.$('adPrompt').value,'What is BNR?');assert.deepEqual(queen.calls,[]);
+  assert.match(r,/Nothing was sent/);assert.match(d.$('adStatus').textContent,/press Send/);
+  d.$('adSend').click();assert.deepEqual(queen.calls,['What is BNR?']);
+});
+
+test('staging keeps the person’s unsent draft and follows the chosen agent',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.choose('bloverai');d.type('my own words');d.choose('queen');
+  const r=toolText(await mc.tools[1].execute({agent:'bloverai',message:'agent words'}));
+  assert.equal(d.$('adPrompt').value,'my own words\n\nagent words');assert.match(r,/after the person/);
+  assert.match(d.$('adStatus').textContent,/press Build handoff/);
+  d.choose('queen');d.choose('bloverai');assert.equal(d.$('adPrompt').value,'my own words\n\nagent words');
+});
+
+test('staging refuses bAigents, unknown agents and empty text without opening the dock',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  for(const input of [{agent:'baigents',message:'hi'},{agent:'nobody',message:'hi'},{agent:'queen',message:'   '},undefined]){
+    assert.match(toolText(await mc.tools[1].execute(input)),/^Not staged/);
+  }
+  assert.equal(d.win.classList.contains('on'),false);assert.equal(d.$('adPrompt').value,'');
+});
+
+test('a registry that throws or rejects never breaks the dock',async()=>{
+  for(const fail of ['throw','reject']){const d=dock({modelContext:modelContext({fail})});await nextTick();d.open();const q=d.load(frameFor(d,'queen'));d.submit('fine');assert.deepEqual(q.calls,['fine']);}
 });

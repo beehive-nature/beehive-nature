@@ -250,4 +250,33 @@
   var seatSafe=function(){try{seatOrb();}catch(e){}};
   seatSafe();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',seatSafe);setTimeout(seatSafe,700);setTimeout(seatSafe,1800);
   if(seatMq){try{seatMq.addEventListener('change',seatSafe);}catch(e){try{seatMq.addListener(seatSafe);}catch(e2){}}}
+  /* WebMCP (W3C Web Machine Learning CG draft, document.modelContext): the dock describes itself
+     to a browser agent. Progressive only: with no API, nothing registers and nothing changes.
+     No tool sends, copies or leaves the page. Staging places words in the composer and the
+     person reads them and presses Send; a person's unsent draft is kept, never replaced. */
+  var mc=document.modelContext;
+  if(mc&&typeof mc.registerTool==='function'){
+    var reply=function(t){return {content:[{type:'text',text:t}]};};
+    var offer=function(t){try{Promise.resolve(mc.registerTool(t)).catch(function(){});}catch(e){}};
+    offer({name:'bnr_list_agents',title:'List the BNR dock agents',
+      description:'List the agents in this page’s BNR agent dock: what each one is for and whether it accepts a message.',
+      inputSchema:{type:'object',properties:{}},annotations:{readOnlyHint:true},
+      execute:function(){return Promise.resolve(reply(JSON.stringify(agents.map(function(a){
+        return {id:a.id,name:a.name,purpose:a.label,note:a.note,acceptsMessage:a.id!=='baigents',page:a.src?new URL(a.src,location.href).href:null};}))));}});
+    offer({name:'bnr_stage_message',title:'Stage a message in the BNR dock',
+      description:'Open the BNR agent dock on one agent and place a draft in its composer. This does not send. The person reads the draft and presses Send.',
+      inputSchema:{type:'object',properties:{
+        agent:{type:'string',enum:['queen','hearth','bloverai'],description:'queen answers from BNR’s written knowledge; hearth routes creative ideas; bloverai builds a handoff for an AI the person chooses.'},
+        message:{type:'string',maxLength:4000,description:'The draft to place. It is appended after any unsent draft already there.'}},required:['agent','message']},
+      execute:function(input){
+        var id=input&&input.agent,v=String((input&&input.message)||'').trim(),a=agents.filter(function(x){return x.id===id&&x.id!=='baigents';})[0];
+        if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
+        if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
+        Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true);
+        var s=sessions[a.id],kept=prompt.value.trim()?prompt.value.replace(/\s+$/,'')+'\n\n':'';
+        prompt.value=(kept+v).slice(0,4000);s.draft=prompt.value;
+        notice('A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.');
+        return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
+      }});
+  }
 })();
