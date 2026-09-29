@@ -8,8 +8,11 @@ date 2026-09-27 · seat Claude · founder order: "write the docket for the three
 `TIERED_ACCESS_attestation_design.md` and `T3_device_enrollment_flows.md` §2.
 
 - **Install:** GrapheneOS on the Stable channel.
-- **Relock:** the bootloader is relocked and OEM unlocking turned off. Without
-  this the device cannot be E4.
+- **Relock:** the bootloader is relocked; without that there is no verified
+  boot, and the device cannot be E4. Turning off OEM unlocking afterwards is
+  recommended setup, and Auditor reports its state. It is not an E4 condition
+  under the ladder; making it one would need a founder amendment of the
+  ladder's E4 definition.
 - **Auditor:** the phone is paired with a second device (TOFU) for ongoing E4
   evidence.
 - **Three profiles:** an owner profile for the sovereign core, a normal-world
@@ -23,9 +26,11 @@ date 2026-09-27 · seat Claude · founder order: "write the docket for the three
 - Every tier claim cites the existing ladder and T3 rows. No new tier and no
   code.
 - UNVERIFIED by this seat: the device codename, support window, release
-  numbers, AI-storage reclaim and MTE default. They come from a
+  numbers, AI-storage reclaim and MTE default. They came from a
   founder-relayed note of 2026-09-26, because grapheneos.org was unreachable
-  from the build sandbox (proxy CONNECT 403).
+  from the build sandbox (proxy CONNECT 403). The founder then verified all of
+  them against grapheneos.org on 2026-09-27 (docket §5), except the AI-storage
+  reclaim, which stays UNVERIFIED.
 - The docket's §6 questions are all ruled (2026-09-27), none open:
   - the permanent auditor is a second physical phone, with a verifier service
     allowed in the interim;

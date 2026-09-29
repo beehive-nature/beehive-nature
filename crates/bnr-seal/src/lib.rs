@@ -151,7 +151,10 @@ pub enum OpenError {
     UnsupportedSuite(u8),
     /// The header names a different scope than the caller expects.
     ScopeMismatch,
-    /// Ciphertext, tag or authenticated header altered, or wrong key.
+    /// Wrong key, or a modified nonce, ciphertext or tag. A changed version,
+    /// suite or scope is caught earlier by its own variant. The one header change
+    /// that reaches this variant is a relabelled scope passed together with a
+    /// matching `expected_scope`: the scope is bound as associated data.
     Authentication,
 }
 

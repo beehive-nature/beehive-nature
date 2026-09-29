@@ -35,8 +35,9 @@ it. The current count is the newest ledger entry that states one — at present
 2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
-- `2026-09-29` — **#247: Codex review reconciled.** Eighteen findings over five rounds
-  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`), all correct and all accuracy fixes:
+- `2026-09-29` — **#247: Codex review reconciled.** Twenty-three findings over six rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`), all correct. Rounds 1–4 and 6 are documentation
+  and accuracy fixes. Round 5 changes runtime behaviour and the public API (below):
   - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
   - `OpenError`'s indistinguishability is narrowed to what `open` does;
   - the handset dispatch records the §6 rulings;
@@ -45,7 +46,8 @@ predates it and is superseded.
   - the handset docket keeps the bounded E4 device key and gives each verifier its own TOFU pin.
   - round 3 swept the whole diff for remaining copies: §4a, the bnr-seal ledger entry, the dispatch's tamper wording, and the not-yet-derived SEAL and LICENSE badges.
   - round 4: the original proof-lights dispatch is marked superseded; planned signing and the NIST remark are marked UNVERIFIED; the #250-only paths are named with the PR link.
-  - round 5: `seal` and `SealKey::generate` return `SealError::Rng` instead of panicking when the OS RNG fails; the original proof-lights milestone is marked superseded.
+  - round 5 (**behaviour and API change**): `seal` and `SealKey::generate` return `SealError::Rng` instead of panicking when the OS RNG fails. `SealError` goes from a unit struct to an enum (`Rng`, `Encrypt`), and `SealKey::generate` now returns `Result<SealKey, SealError>`. The original proof-lights milestone is marked superseded.
+  - round 6: the ledger separates the round-5 API change; the handset facts are marked founder-verified except the AI-storage reclaim; OEM unlocking is recommended setup, not an E4 condition (the ladder defines E4); the `open`/`Authentication` wording is capped and cited.
   Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch
@@ -77,8 +79,10 @@ predates it and is superseded.
   (relocked bootloader, Auditor pairing) and splits it into three profiles:
   sovereign core, normal world with sandboxed Play, and a Beehive/Buzz lab.
   Adds no tier. The phone stops at T4, and root keys stay on the E5 signer.
-  GrapheneOS and Pixel 10a release facts are marked UNVERIFIED (grapheneos.org
-  was unreachable from the sandbox). No code.
+  The GrapheneOS and Pixel 10a facts were UNVERIFIED by this seat, because
+  grapheneos.org was unreachable from the sandbox. The founder then verified
+  all of them against grapheneos.org on 2026-09-27 (docket §5), except the
+  AI-storage reclaim, which stays UNVERIFIED. No code.
   Dispatch: `docs/dispatches/2026-09-27-handset-docket.md`.
 - `2026-09-27` — **`bnr-seal`: private storage envelope for signed receipts.**
   Adds one mechanism: an allowlisted AEAD suite (XChaCha20-Poly1305: the same

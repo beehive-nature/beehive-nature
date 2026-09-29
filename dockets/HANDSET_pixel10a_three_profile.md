@@ -32,10 +32,13 @@ the bootloader wipes it.
 1. Install GrapheneOS with the official web installer, on the **Stable**
    channel. Do not hand-pick an Alpha build. Newer builds arrive through OTA
    once they are promoted.
-2. **Relock the bootloader** as the installer's final step, then turn off
-   OEM unlocking in Developer options. An unlocked bootloader means no verified
-   boot, and the device cannot be E4 whatever OS it runs. This step is
-   mandatory.
+2. **Relock the bootloader** as the installer's final step. An unlocked
+   bootloader means no verified boot, and the device cannot be E4 whatever OS
+   it runs. The relock is mandatory. Then turn off OEM unlocking in Developer
+   options. GrapheneOS recommends this and Auditor reports its state, but it
+   is not an E4 condition under the ladder (E4 = hardware keystore plus
+   verified boot). A device that is relocked and verified, with the toggle
+   still on, is E4 with a flagged setup step.
 3. On first boot, confirm the boot-time notice shows a non-stock OS with a
    **locked** bootloader. A yellow "different OS" notice is expected; an
    unlocked or orange state is not.
@@ -115,7 +118,7 @@ separately. Never collapse them into a single `trusted_handset` boolean:
 |---|---|---|
 | Verified boot | locked bootloader, verified-boot key (§2) | unlocked, or the boot key changes |
 | Hardware memory tagging | MTE enabled for the OS and compatible apps | disabled, or an app runs outside it |
-| Auditor attestation | fresh attestation from the pinned key, OEM unlocking reported disabled (§3) | missed, stale, or pairing broken |
+| Auditor attestation | fresh attestation from the pinned key (§3); OEM unlocking state reported, with disabled expected (§2, flagged if not) | missed, stale, or pairing broken |
 | Profile isolation | owner profile holds only the §4a allowlist | Play or unapproved apps appear in owner |
 
 One degraded property lowers only the authority that depends on it. The whole
