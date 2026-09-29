@@ -1,6 +1,6 @@
 /* ans104.test.mjs — the page's own ANS-104 signer against the reference library.
    surfaces/ans104.js builds and signs a data item with no dependency; here the
-   bytes are handed to @dha-team/arbundles (installed for the vending tool) which
+   bytes are handed to @dha-team/arbundles (a dev-only --no-save install in the vending tool) which
    must parse them, agree on the id, and verify the ed25519 signature. Offline. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,8 +16,9 @@ const sandbox = { self: undefined, crypto: webcrypto, TextEncoder, btoa, atob, r
 vm.runInNewContext(src + '\nthis.ANS104 = ANS104;', sandbox);
 const A = sandbox.ANS104;
 
-/* the reference library is a dev dependency of the vending tool, installed there
-   with npm; CI's static job does not install it, so the parity test SKIPS by name
+/* the reference library is never a declared dependency (its transitive tree carries
+   open advisories and nothing shipped needs it); install it --no-save to run this
+   test live. CI does not, so the live test SKIPS by name
    rather than pretending. The library-free verification below always runs. */
 let arbundles = null; try { arbundles = req('@dha-team/arbundles'); } catch {}
 
@@ -60,7 +61,7 @@ test('the page signer reproduces the reference library\'s item byte for byte (pi
   assert.equal(h, FIXTURE.sha256, 'every byte arbundles wrote');
 });
 
-test('a signed item parses, verifies and carries the same id in arbundles', { skip: arbundles ? false : 'the reference library is not installed here (npm install in contracts/vending/tool)' }, async () => {
+test('a signed item parses, verifies and carries the same id in arbundles', { skip: arbundles ? false : 'the reference library is not installed here (npm install --prefix contracts/vending/tool --no-save @dha-team/arbundles)' }, async () => {
   const { DataItem } = arbundles;
   const key = await A.generateKey();
   const data = new TextEncoder().encode(JSON.stringify({ record: 'probe', n: 1 }));

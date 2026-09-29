@@ -1,7 +1,7 @@
 /* ans104-arbundles.gen.mjs — re-derives the FIXTURE pinned in e2e/ans104.test.mjs
    from the reference library itself, so the pin is checkable by anyone:
 
-     npm install --prefix contracts/vending/tool
+     npm install --prefix contracts/vending/tool --no-save @dha-team/arbundles bs58
      node e2e/fixtures/ans104-arbundles.gen.mjs
 
    It prints { id, bytes, sha256, owner_hex }; id, bytes and sha256 must equal the
@@ -11,8 +11,9 @@
    from a phrase; it guards nothing. */
 import { createRequire } from 'node:module';
 import { createHash, createPrivateKey } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd().replace(/[\\/]e2e([\\/]fixtures)?$/, '');
+const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/[\\/]$/, '');
 const req = createRequire(ROOT + '/contracts/vending/tool/package.json');
 const { createData, SolanaSigner } = req('@dha-team/arbundles');
 let bs58 = req('bs58'); bs58 = bs58.default || bs58;

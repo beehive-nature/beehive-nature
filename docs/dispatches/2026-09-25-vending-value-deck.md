@@ -255,3 +255,18 @@ mocked (jungle4, Turbo, gateway 404, empty index; nothing left the machine):
 approve was disabled and Escape left the plan open mid-mint; the row read "not
 written yet"; the check read waits / ok / waits with "0 failed so far"; reopening
 the plan for the same name kept approve disabled and said why.
+
+## Aikido round — 2026-09-28
+
+Aikido raised 15 findings on `0cca2d804`. Each was read at its line.
+
+- **The dependency advisories are real, and they came from this PR.** Aikido counted 9 advisories across 7 packages, 3 of them high: `ws`, `bigint-buffer` and `uuid`, among others. They arrived with `@ardrive/turbo-sdk`, `@dha-team/arbundles` and `bs58`, which this PR had added to `contracts/vending/tool/package.json`. After review round 1, nothing shipped uses them:
+  - the CLI no longer uploads;
+  - the arbundles parity check is a pinned fixture;
+  - CI never installs the tool.
+
+  The manifest and the lockfile are restored to main's versions, so this PR now adds no dependencies. The reference library becomes a `--no-save` dev install, named in `e2e/fixtures/ans104-arbundles.gen.mjs` and in the skip reason of the live test. `ar-upload.cjs` on main keeps its own undeclared requirements, as it did before.
+- **The 14 `innerHTML` sites are unchanged, and none carries outside data unescaped.** Sites in vending.html, local-agent and the deck were read line by line:
+  - Every name, id, error message and record field passes through `esc()` (it escapes `& < > "`), and every attribute it feeds is double-quoted.
+  - The remaining values are constants, counts, hashes the page computed itself, or `blob:` URLs the browser minted.
+  - The deck line builds its nodes with `textContent`; the flag there is the selector string.
