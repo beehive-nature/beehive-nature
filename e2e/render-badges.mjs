@@ -145,6 +145,8 @@ function render(doc) {
 // git's own blob id (the repository locator) and the algorithm-tagged integrity digest
 const blobId = buf => createHash('sha1').update(`blob ${buf.length}\0`).update(buf).digest('hex');
 const sha3 = buf => createHash('sha3-256').update(buf).digest('hex');
+// canonical ISO-8601 UTC that round-trips unchanged: Date.parse alone accepts '0' and rolls 2026-02-31 into March
+const canonicalTime = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s) && new Date(s).toISOString() === s;
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const DOC_KEYS = ['schema', 'name', 'label', 'instrument', 'ci_step', 'revision', 'measurement', 'measured_at',
   'surfaces', 'fronts', 'fronts_at_100', 'min_score', 'kind_min', 'message', 'color',
@@ -164,7 +166,7 @@ async function verify(doc, evidencePath, svgPath) {
   const extra = keys.filter(k => !DOC_KEYS.includes(k)), missing = DOC_KEYS.filter(k => !keys.includes(k));
   if (extra.length || missing.length) f.push(`schema: ${missing.length ? 'missing ' + missing.join(',') : ''}${extra.length ? ' unknown ' + extra.join(',') : ''}`.trim());
   if (doc.schema !== SCHEMA) f.push(`schema is ${JSON.stringify(doc.schema)}, want ${SCHEMA}`);
-  const B = BADGES[doc.name];
+  const B = Object.hasOwn(BADGES, doc.name) ? BADGES[doc.name] : undefined;   // own keys only: 'constructor' is not a badge
   if (!B) return [...f, `no derivation for badge ${JSON.stringify(doc.name)}`];
   for (const k of ['label', 'instrument', 'ci_step']) if (doc[k] !== B[k]) f.push(`${k} is not the derivation's`);
   if (doc.renderer !== RENDERER) f.push(`renderer is ${JSON.stringify(doc.renderer)}, the installed renderer is ${RENDERER}`);
@@ -198,7 +200,7 @@ async function verify(doc, evidencePath, svgPath) {
   else if (m.origin === 'local') { if (m.run_id !== null || m.run_attempt !== null || Object.keys(m).length !== 3) f.push('measurement origin local must be exactly {origin, run_id: null, run_attempt: null}'); }
   else if (m.origin === 'ci') f.push(`measurement origin ci (run ${m.run_id} attempt ${m.run_attempt}): run binding to the revision is not verifiable yet — FAIL until the CI-signing card`);
   else f.push(`measurement origin ${JSON.stringify(m.origin)} is neither local nor ci`);
-  if (typeof doc.measured_at !== 'string' || Number.isNaN(Date.parse(doc.measured_at))) f.push('measured_at is not a timestamp');
+  if (!canonicalTime(doc.measured_at)) f.push(`measured_at ${JSON.stringify(doc.measured_at)} is not a canonical ISO-8601 UTC timestamp (YYYY-MM-DDTHH:MM:SS.sssZ)`);
   // 8 SIGNATURE
   if (doc.signature !== null) f.push('signature supplied but no verifier exists: UNVERIFIED');
   // 9 SVG
@@ -234,7 +236,7 @@ if (mode === '--check') {
   process.exit(fail ? 1 : 0);
 }
 
-const B = { meter: BADGES['skaists-meter'] }[mode];
+const B = mode === 'meter' ? BADGES['skaists-meter'] : undefined;
 if (!B) { console.error('usage: render-badges.mjs meter --from <instrument.json> --revision <sha> --origin local [--measured-at <iso>] | --check [--dir <dir>]'); process.exit(2); }
 const from = arg('from'), revision = arg('revision'), origin = arg('origin');
 if (!from || !SHA.test(revision || '')) { console.error('--from <json> and --revision <full 40-hex sha> are required'); process.exit(2); }

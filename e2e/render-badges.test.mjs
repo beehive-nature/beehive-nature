@@ -42,7 +42,9 @@ async function probe(forge) {
 }
 const refused = (r, why) => {
   assert.notEqual(r.code, 0, `gate exited 0:\n${r.out}`);
-  assert.doesNotMatch(r.out, /^PASS /m, `a per-badge line still says PASS:\n${r.out}`);
+  // scoped to the forged document: a second, untouched badge may legitimately PASS beside it
+  assert.doesNotMatch(r.out, /^PASS skaists-meter\.json/m, `the forged badge's line still says PASS:\n${r.out}`);
+  assert.match(r.out, /^FAIL skaists-meter\.json/m, `the forged badge has no FAIL line:\n${r.out}`);
   assert.match(r.out, why, r.out);
 };
 
@@ -115,6 +117,20 @@ test('forged fixed metadata fails: the renderer and the law are exactly what der
   refused(await probe(({ doc, put }) => put({ ...doc, renderer: 'badge-maker 9.9.9 (live, signed)' })), /renderer is .* the installed renderer is badge-maker/);
   refused(await probe(({ doc, put }) => put({ ...doc, law: 'live status, signed by the founder' })), /law is not the fixed statement/);
   refused(await probe(({ doc, put }) => put({ ...doc, law: { live: true } })), /law is not the fixed statement/);
+});
+
+test('an inherited property name is not a badge: the check reports it, it does not crash', async () => {
+  for (const name of ['constructor', '__proto__', 'toString']) {
+    const r = await probe(({ doc, put }) => put({ ...doc, name }));
+    refused(r, /no derivation for badge/);
+    assert.doesNotMatch(r.out, /TypeError|at verify/, r.out);
+  }
+});
+
+test('measured_at must be a canonical UTC timestamp: Date.parse leniency is refused', async () => {
+  for (const t of ['0', '2026-02-31T00:00:00.000Z', '2026-09-27', 'Sep 27 2026']) {
+    refused(await probe(({ doc, put }) => put({ ...doc, measured_at: t })), /measured_at .* is not a canonical ISO-8601 UTC timestamp/);
+  }
 });
 
 test('an SVG-only edit fails', async () => {

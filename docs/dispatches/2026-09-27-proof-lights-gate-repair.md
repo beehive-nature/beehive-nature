@@ -63,6 +63,18 @@ Codex raised two findings on this PR. Both were correct.
   - `render-badges.mjs --check` → 1/1. `lint-ci-shape.mjs` → 92/92.
 - **P1: the SHA-1 remark named NIST with no citation.** Step 4 now names the function that computes the digest, `sha3()` via Node's `createHash('sha3-256')`. The SHA-1 deprecation is marked as cited guidance, UNVERIFIED by this seat.
 
+## Codex review of #250 at `802b973` (2026-09-29)
+
+Three P2 findings, all correct. A sweep of the file found one more instance of the same kind.
+
+- **Badge lookup followed inherited properties.** A document named `constructor` resolved to a built-in object and crashed the checker. Check mode now uses `Object.hasOwn(BADGES, …)`. The sweep found derive mode's `{ meter: … }[mode]` had the same flaw, and it now compares the mode string instead.
+- **`measured_at` accepted `Date.parse` leniency.** `0` was accepted, and `2026-02-31` rolled into March. The gate now requires a canonical ISO-8601 UTC string that round-trips unchanged. Derive mode inherits this, because it verifies before it writes: `--measured-at 2026-02-31T00:00:00.000Z` is refused and nothing is written.
+- **The probes' PASS assertion was global.** It would have failed every forgery probe once a second, legitimate badge existed. It is now scoped to `skaists-meter.json`, and each probe also requires that badge's FAIL line.
+
+Receipts:
+- `node --test e2e/render-badges.test.mjs` → 16/16. The two new probes fail against the previous gate (0 pass, 2 fail).
+- `render-badges.mjs --check` → 1/1.
+
 ## What it still does not prove
 
 - **A local measurement's revision is asserted, not attested.** If a forger relabels evidence from an older revision as a newer commit, and rewrites the message and SVG to match, the check still passes whenever the page list did not change in between. The check prints "revision asserted by the measurer, not attested" on every PASS. Closing this gap needs origin `ci`, with the run id and attempt bound to the revision, signed by the CI attestation key.
