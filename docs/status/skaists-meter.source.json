@@ -1,0 +1,4496 @@
+[
+ {
+  "page": "blood.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blood.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blood.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blongevity.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blongevity.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blongevity.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnamesday.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnamesday.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnamesday.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bview.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bview.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bview.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "listening.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "listening.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "listening.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blanguage.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blanguage.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blanguage.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/receive.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/receive.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/receive.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/acid-cascade.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/acid-cascade.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/acid-cascade.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-music.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-music.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-music.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/security.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/security.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/security.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/inscription-explorer.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/inscription-explorer.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/inscription-explorer.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-bio.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-bio.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-bio.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "ant-door.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "ant-door.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "ant-door.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/room.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/room.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/room.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "royalguard.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "royalguard.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "royalguard.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/edible-tracker.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/edible-tracker.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/edible-tracker.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dock.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dock.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dock.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/c1-aid.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/c1-aid.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/c1-aid.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/profile.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/profile.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/profile.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "local-agent/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "local-agent/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "local-agent/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bsymposium.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bsymposium.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bsymposium.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/demo.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/demo.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/demo.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/vaulta-reader.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/vaulta-reader.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/vaulta-reader.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfactory.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfactory.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfactory.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bigen.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bigen.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bigen.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "austras-koks.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "austras-koks.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "austras-koks.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bdata.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bdata.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bdata.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "museum.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "museum.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "museum.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "festival/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "festival/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "festival/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/gallery.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/gallery.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/gallery.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "review.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "review.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "review.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "myspace.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "myspace.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "myspace.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/indigo-index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/indigo-index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/indigo-index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi-organ.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi-organ.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midi-organ.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "stack.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "stack.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "stack.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/compare.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/compare.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/compare.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivebiomass.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivebiomass.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivebiomass.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "comb.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "comb.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "comb.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "privacy-lens.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "privacy-lens.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "privacy-lens.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/flower-lab.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/flower-lab.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/flower-lab.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fieldnotes.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fieldnotes.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fieldnotes.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/coop.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/coop.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/coop.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pulse.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pulse.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pulse.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "or-board.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "or-board.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "or-board.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "btranslated.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "btranslated.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "btranslated.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/workbench.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/workbench.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/workbench.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bmeshasi.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bmeshasi.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bmeshasi.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfood.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfood.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bfood.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-directory.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-directory.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-directory.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "vending.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "vending.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "vending.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "watch.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "watch.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "watch.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "plur.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "plur.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "plur.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/market.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/market.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/market.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "university/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "university/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "university/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "kandi.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "kandi.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "kandi.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/resonance.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/resonance.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/gallery/resonance.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midiroom.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midiroom.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midiroom.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/build.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/build.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/build.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pixelrefiner.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pixelrefiner.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/pixelrefiner.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/bnri-gallery.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/bnri-gallery.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/bnri-gallery.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/plur.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/plur.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/plur.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature-buzz.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature-buzz.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/beehivenature-buzz.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/hexfield.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/hexfield.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/hexfield.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "recover.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "recover.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "recover.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "attest.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "attest.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "attest.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/intake-tracker.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/intake-tracker.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/intake-tracker.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "law-of-the-sea.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "law-of-the-sea.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "law-of-the-sea.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/farmers.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/farmers.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/farmers.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "biq.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "biq.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "biq.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "devroom.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "devroom.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "devroom.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-studio.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-studio.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "buzz-studio.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses-smil.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses-smil.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrroses-smil.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "b4b.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "b4b.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "b4b.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dao-dashboard/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dao-dashboard/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "dao-dashboard/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bearth.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bearth.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bearth.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnames.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnames.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bnames.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "profile.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "profile.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "profile.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "music.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "music.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "music.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/museum.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/museum.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/museum.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "read.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "read.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "read.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "onboarding/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/bnr-dashboard.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/bnr-dashboard.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/bnr-dashboard.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midivault.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midivault.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/midivault.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/lab.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/lab.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "hardware/lab.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-gate.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-gate.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/studio-gate.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/index.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/index.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/index.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-social.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-social.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/bnature-social.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists-buzz.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists-buzz.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "doors/skaists-buzz.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/huddle.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/huddle.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "forge/huddle.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "keys/addresses.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "keys/addresses.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "keys/addresses.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/blend-lab.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/blend-lab.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/blend-lab.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/spliff-lab.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/spliff-lab.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "fleet-hosted/lab/spliff-lab.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "design-system.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "design-system.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "design-system.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/hearth.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/hearth.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/hearth.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bqueenbee-live.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bqueenbee-live.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bqueenbee-live.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bset.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bset.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bset.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "record.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "record.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "record.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrtree.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrtree.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "blight/qrtree.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bantfarm.html",
+  "reg": "bee",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bantfarm.html",
+  "reg": "raver",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ },
+ {
+  "page": "bantfarm.html",
+  "reg": "cypherpunk",
+  "total": 100,
+  "score": {
+   "COLOUR": 100,
+   "TYPE": 100,
+   "RADIUS": 100,
+   "TARGET": 100,
+   "CONTRAST": 100,
+   "CASE": 100
+  },
+  "bad": []
+ }
+]
