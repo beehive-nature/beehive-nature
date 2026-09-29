@@ -43,9 +43,9 @@ questions are in §5.
 Dynamic family together; neither can be turned off without the other.
 - **What the switch covers.** In `core/server/server.js` it only removes the
   open-ended service families from route registration.
-- **What it does not cover.** Every other service still registers and still
-  fetches remotely. For example, the GitHub-license service calls the GitHub
-  API.
+- **What it does not cover.** Every other service still registers, and some
+  of them still fetch upstream. For example, the GitHub-license service calls
+  the GitHub API. (The static `/badge/...` route is one that does not.)
 - **Correction.** It is **not** a global switch for outbound network access.
   The first version said a switched-off instance "fetches nothing"; that was
   wrong.

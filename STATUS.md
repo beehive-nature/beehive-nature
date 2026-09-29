@@ -30,8 +30,19 @@ choice is deliberate:
   weaker than a proof a reviewer can re-run, and are labelled so no reader
   mistakes one for the other.
 Counts follow the same rule: a number is stated as the command that produces
-it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
+it. The current count is the newest ledger entry that states one — at present
+`cargo test --workspace --locked` → **1225 passed, 0 failed** (bnr-seal lane,
+2026-09-27). The earlier `cargo test --workspace` → 179 passed; 1 ignored
+predates it and is superseded.
 
+- `2026-09-29` — **#247: Codex review reconciled.** Five findings at `cf3887a`, all
+  correct and all accuracy fixes:
+  - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
+  - `OpenError`'s indistinguishability is narrowed to what `open` does;
+  - the handset dispatch records the §6 rulings;
+  - the count header is reconciled;
+  - the Shields remote-fetch wording is corrected.
+  Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
 - `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
   Founder review corrected the docket in two places. The Shields switch
   removes only the Dynamic and Endpoint routes (`core/server/server.js`);

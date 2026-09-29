@@ -129,8 +129,13 @@ impl std::fmt::Debug for SealKey {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Scope(pub [u8; SCOPE_LEN]);
 
-/// Why an envelope could not be opened. Wrong key and tampering are
-/// deliberately indistinguishable; both are [`OpenError::Authentication`].
+/// Why an envelope could not be opened. A wrong key and a modified nonce,
+/// ciphertext or tag are deliberately indistinguishable; both are
+/// [`OpenError::Authentication`]. The version, suite and scope are readable
+/// header fields checked before decryption, so a changed one is reported as
+/// [`OpenError::UnsupportedVersion`], [`OpenError::UnsupportedSuite`] or
+/// [`OpenError::ScopeMismatch`]; that reveals nothing the envelope does not
+/// already show.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OpenError {
     /// Shorter than a header plus tag.

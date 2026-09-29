@@ -26,6 +26,8 @@ date 2026-09-27 · seat Claude · founder order: "write the docket for the three
   numbers, AI-storage reclaim and MTE default. They come from a
   founder-relayed note of 2026-09-26, because grapheneos.org was unreachable
   from the build sandbox (proxy CONNECT 403).
-- Open questions for the founder are in the docket's §6: which device is the
-  permanent auditor, whether Profile 3 gets Play, and which apps are allowed
-  at T4 on day one.
+- The docket's §6 questions are all ruled (2026-09-27), none open:
+  - the permanent auditor is a second physical phone, with a verifier service
+    allowed in the interim;
+  - Profile 3 gets no sandboxed Play initially;
+  - the T4 day-one apps are the §4a allowlist.
