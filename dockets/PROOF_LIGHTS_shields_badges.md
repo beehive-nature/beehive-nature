@@ -172,6 +172,10 @@ what this design replaces):
      configuration. A key that accompanies a document is never accepted.
    - **Lifecycle.** Versioned key ids, defined validity periods, and an
      explicit revocation and rotation procedure.
+   - **Owner.** The CI-signing card has a named owner, state, start
+     condition and scope, recorded with the gate repair: #253,
+     `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`, "The CI-signing
+     card" (2026-09-29).
 2. **Hosting: no badge server for the first implementation.** The SVG, the
    document and the evidence are published through the existing
    surface-publication path. A verifier service comes only when a live
