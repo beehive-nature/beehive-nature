@@ -288,7 +288,6 @@ body[data-reg="bee"] .llabel[style*="#D655BB"]{color:#a8238c!important}
 body[data-reg="bee"] :is(.llabel,.lbadge)[style*="#6FA9E0"]{color:#29628f!important;border-color:#29628f!important}
 body[data-reg="bee"] .llabel[style*="#86CC72"],body[data-reg="bee"] .ldot[style*="#86CC72"]{color:#326b39!important}
 body[data-reg="bee"] #arw-go{background:#e2f0ee!important;color:#176879!important;border-color:#176879!important}
-body[data-reg="bee"] #fund-sec .fund-launch{background:var(--well);border-color:var(--line2);color:var(--ink)}
 main summary{min-height:44px;display:flex;align-items:center;gap:6px;cursor:pointer}
 /* the ladder badges were nowrap: "CONFIRMED — read back from the rail" pushed the
    layout viewport to 466 px on a phone. They wrap under their label now. */
@@ -321,6 +320,17 @@ body:not([data-reg="cypherpunk"]) main :is([style*="font-size:8"],[style*="font-
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="keep"]) main>section[data-wl-task="keep"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="key"]) main>section[data-wl-task="key"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="proof"]) main>section[data-wl-task="proof"]{display:none!important}
+/* ══ THE CARD ROUTE'S PLACE (founder standing order 2026-09-26 — payments
+   run through bPay; the #237 reviewer direction applies it to this wallet):
+   the Meld card checkout is a SEPARATE rail, not yet wired into what bPay
+   spends, so new bee and raver's "add money" does not offer it — not in its
+   task, not in "all". Moved, never deleted: cypherpunk keeps the panel,
+   declared and dormant (its own words say where it stands), and when the
+   two lanes are one, this block is the only thing to remove. The rule is
+   scoped to a REGISTERED body on purpose: with scripting off no register
+   is known, and the noscript note stands as it always did. */
+body[data-reg]:not([data-reg="cypherpunk"]) #fund-sec{display:none!important}
+body[data-reg="raver"] #wl-cards .wlr-card[data-wl-card-for="fund-sec"]{display:none!important}
 body:not([data-wl-view="home"]) #wl-bee,body:not([data-wl-view="home"]):not([data-wl-view="have"]) #wl-rave,
 body:is([data-wl-view="home"],[data-wl-view="have"]) #wl-deck{display:none!important}
 body[data-wl-view="home"] #wl-bar{display:none!important}
@@ -416,7 +426,6 @@ body[data-reg="bee"] main>section :is([style*="color:#E9F2EC"],[style*="color:#e
 body[data-reg="bee"] main>section [style*="color:#6FA9E0"]{color:#4d759b!important}
 body[data-reg="bee"] main>section [style*="color:#86CC72"]{color:#2e6b1e!important}
 body[data-reg="bee"] main>section [style*="color:#D655BB"]{color:#a8238c!important}
-body[data-reg="bee"] #fund-sec .fund-launch{background:var(--well);border-color:var(--line2)}
 /* a field in bee is always a light well with ink, whatever inline dress it
    was rendered with (bPay's quote-service field is drawn for the black) */
 body[data-reg="bee"] main>section :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){background:var(--well)!important;color:var(--ink)!important;border-color:var(--line2)!important}
@@ -667,7 +676,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, three ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -1414,7 +1423,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="receiptsBody" style="margin-top:12px;--sa-figure:var(--ink);--sa-care:var(--amber);--sa-care-line:var(--line2)"></div>
 </section>
 
-<!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
+<!-- ══ FUND — Meld hosted checkout (no server of ours · public key only).
+  A SEPARATE card route, not wired into bPay yet (founder standing order
+  2026-09-26): cypherpunk-only until the two lanes are one — the register
+  sheet carries the hiding rule; these words stay for the day they return. ══ -->
 <section id="fund-sec" data-wl-task="add" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
     #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
@@ -1426,9 +1438,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     #fund-sec .fund-launch{display:inline-block;background:var(--well);color:var(--ink);border:1px solid var(--line2);
      border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px;
      text-decoration:none;line-height:1.65}
+    /* the launch exists only when it is LIVE: unconfigured renders no control
+       at all (an unavailable route is a sentence, never a dead button) — this
+       rule must outrank the display above, which would otherwise un-hide it */
+    #fund-sec .fund-launch[hidden]{display:none!important}
     #fund-sec .fund-launch:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
-    #fund-sec .fund-launch[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
-    #fund-sec .fund-launch[aria-disabled="true"]:hover{background:var(--well);color:var(--ink)}
     #fund-sec .fund-note{border:1px solid var(--amber);color:var(--amber);border-radius:8px;
      padding:9px 12px;font-size:10.5px;line-height:1.8;margin-top:10px}
     #fund-sec .fund-nojs{border:1px dashed var(--amber);color:var(--amber);border-radius:8px;
@@ -1442,7 +1456,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </style>
   <h2 data-wl-tech>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
   <h2 data-reg="bee">💳 <span data-i18n="wl.bee.h.fund">buy USDC with a card</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works: who holds what at each step</summary>
+  <p class="law">where this route stands: a separate card way in, <b>not wired into bPay yet</b>. a buy
+  runs through Meld's licensed checkout and lands as USDC on an address you hold, apart from the
+  lane this wallet pays and keeps through. new bee and raver do not see it until the two are one;
+  here it stays declared, dormant until its key is set.</p>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">how the card checkout works: who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b>: it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
@@ -1467,7 +1485,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
       <input id="fund-addr" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
-      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
+      <a id="fund-go" class="fund-launch" href="#" hidden target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
   </div>
@@ -1476,10 +1494,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
        The ONE place the Meld PUBLIC Checkout (widget) key is set. Either
        put it in the data-meld-public-key attribute on the fund-sec section
        element above, or set window.BNR_MELD_PUBLIC_KEY in an earlier
-       script. Empty ⇒
-       this panel shows "funding not configured" and the launch control stays
-       disabled — visible, never silent, never a throw. PUBLIC key only: a
-       secret/BASIC key must never appear here or anywhere client-side. */
+       script. Empty ⇒ the panel states its own state in a sentence and NO
+       launch control is rendered at all — an unconfigured route is prose,
+       never a dead button (the #237 law). PUBLIC key only: a secret/BASIC
+       key must never appear here or anywhere client-side. */
     const BNR_MELD_PUBLIC_KEY = String(
       window.BNR_MELD_PUBLIC_KEY ||
       document.getElementById('fund-sec')?.dataset?.meldPublicKey ||
@@ -1631,18 +1649,21 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         }
         function paint() {
           if (!keyOk) {
-            go.setAttribute('aria-disabled', 'true');
+            /* unconfigured = a sentence with its reason, and NO button at
+               all: nothing on any page shows a dead or greyed launch */
+            go.hidden = true;
             go.setAttribute('href', '#');
-            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b>: card checkout is not switched on here yet. ' +
-              'The button stays asleep until it is; nothing else on this page is affected.' +
-              '<span data-wl-tech> Why: the public Meld Checkout key is not set on this deployment ' +
+            stat.innerHTML = '<b style="color:var(--amber)">card checkout is not switched on here yet</b>: ' +
+              'the public Meld Checkout key is not set on this deployment ' +
               '(BNR_MELD_PUBLIC_KEY / data-meld-public-key). Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
-              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') + '.</span>';
+              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') +
+              '. An unconfigured route shows no buy button at all; when the key is set, ' +
+              'the button returns to this spot, live.';
             return;
           }
           var a = addr.value.trim();
+          go.hidden = false;
           go.setAttribute('href', buildUrl().href);
-          go.setAttribute('aria-disabled', 'false');
           if (note) { stat.innerHTML = note; return; }
           if (a && !addrOk(a)) {
             stat.innerHTML = '<b style="color:var(--amber)">that does not read as an address</b> — ' +
@@ -1724,7 +1745,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
   <h2 data-wl-tech>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <h2 data-reg="bee">🏧 <span data-i18n="wl.bee.h.peer">money in, person to person</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role: the estate sells, it never operates</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">the fiat funnel’s role: the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base). it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
@@ -1736,16 +1757,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   tithe in a single payment: the fallback, SPEC §receive). settlement finality is one vendor
   signature until the estate's own witness set exists, priced as such, never hidden.</p>
   </details>
-  <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
-    <span class="law">receive address (bare <b>to</b>):</span>
-    <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
-    <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
+  <!-- the receive machinery (the raw address, the keyless read, its rows) is
+       engineering: in new bee it folds behind the section's own "show the
+       details" — moved one tap away, never deleted; raver keeps its controls
+       (controls never fold), cypherpunk keeps everything open -->
+  <div data-wl-tech>
+    <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
+      <span class="law">receive address (bare <b>to</b>):</span>
+      <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
+      <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
+    </div>
+    <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
+      <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
+      <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span>
+    </div>
+    <div id="peer-rows" class="law" style="margin-top:10px"></div>
   </div>
-  <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
-    <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
-    <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span>
-  </div>
-  <div id="peer-rows" class="law" style="margin-top:10px"></div>
   <details style="margin-top:10px">
     <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">the intent shape: tithe attached at signal time</summary>
     <div class="law" style="margin-top:6px">the customer's <code>signalIntent</code> carries the split itself (≤10 referral

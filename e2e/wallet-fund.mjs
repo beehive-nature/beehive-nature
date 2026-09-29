@@ -109,27 +109,39 @@ try {
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1200);
     const go = page.locator('#fund-go');
-    ok('launch disabled', (await go.getAttribute('aria-disabled')) === 'true');
-    ok('launch href=#', (await go.getAttribute('href')) === '#');
-    const banner = await page.locator('#fund-stat').innerText();
-    ok('unconfigured banner visible', banner.includes('funding not configured'));
-    // bee and raver fold the engineering (key names, environment, host) one tap
-    // away, behind the section's own toggle: the reader's tap, then the same text
-    if (REG !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); }
-    const bannerFull = await page.locator('#fund-stat').innerText();
-    ok('banner names environment (SANDBOX default)' + (REG === 'cypherpunk' ? '' : ', one tap away in ' + REG), bannerFull.includes('sandbox'));
-    ok('panel body revealed', !(await page.locator('#fund-js').evaluate(el => el.hidden)));
-    ok('asset options USDC_BASE + USDC_ETHEREUM',
-      JSON.stringify(await page.locator('#fund-asset option').evaluateAll(os => os.map(o => o.value))) ===
-      '["USDC_BASE","USDC_ETHEREUM"]');
-    // the launch law: ALWAYS a top-level new tab, never an iframe — the widget
-    // hands off to a third-party hosted checkout on ANOTHER origin (sandbox:
-    // global-stg.transak.com); cross-origin handoff inside a top-level tab is
-    // plain navigation, inside our iframe it would break. Lock it in.
-    ok('launch opens a new tab (target=_blank)', (await go.getAttribute('target')) === '_blank');
-    const rel = (await go.getAttribute('rel')) || '';
-    ok('launch carries rel=noopener noreferrer', rel.includes('noopener') && rel.includes('noreferrer'));
-    ok('panel embeds no iframe', (await page.locator('#fund-sec iframe').count()) === 0);
+    // THE REGISTER LAW (founder standing order 2026-09-26, #237 direction):
+    // the Meld card route is out of new bee and raver's "add money" until it
+    // is wired into bPay — cypherpunk keeps the built panel, declared
+    if (REG !== 'cypherpunk') {
+      const out = await page.evaluate(() => ({
+        boxes: document.getElementById('fund-sec').getClientRects().length,
+        // the BUY button specifically (bPay's honest "Not available yet" audience
+        // rows are prose by design, not this law's subject)
+        dead: [...document.querySelectorAll('.fund-launch, #fund-go')].filter(e => e.getClientRects().length).length,
+      }));
+      ok(`fund panel carries NO boxes in ${REG} (the card route is out of its add money)`, out.boxes === 0, JSON.stringify(out));
+      ok(`no buy button renders in ${REG} at all`, out.dead === 0, out.dead + ' found');
+    } else {
+      // unconfigured = a sentence with its reason, and NO launch control at
+      // all: nothing on any page shows a dead or greyed button
+      ok('launch NOT rendered while unconfigured (no dead button)', await go.isHidden());
+      ok('launch href=#', (await go.getAttribute('href')) === '#');
+      const banner = await page.locator('#fund-stat').innerText();
+      ok('unconfigured state is a sentence: "card checkout is not switched on here yet"', banner.includes('card checkout is not switched on here yet'));
+      ok('banner names environment (SANDBOX default) and its config reason', banner.includes('sandbox') && banner.includes('BNR_MELD_PUBLIC_KEY'));
+      ok('panel body revealed', !(await page.locator('#fund-js').evaluate(el => el.hidden)));
+      ok('asset options USDC_BASE + USDC_ETHEREUM',
+        JSON.stringify(await page.locator('#fund-asset option').evaluateAll(os => os.map(o => o.value))) ===
+        '["USDC_BASE","USDC_ETHEREUM"]');
+      // the launch law: ALWAYS a top-level new tab, never an iframe — the widget
+      // hands off to a third-party hosted checkout on ANOTHER origin; cross-origin
+      // handoff inside a top-level tab is plain navigation, inside our iframe it
+      // would break. Lock it in (attribute checks hold on the hidden link too).
+      ok('launch opens a new tab (target=_blank)', (await go.getAttribute('target')) === '_blank');
+      const rel = (await go.getAttribute('rel')) || '';
+      ok('launch carries rel=noopener noreferrer', rel.includes('noopener') && rel.includes('noreferrer'));
+      ok('panel embeds no iframe', (await page.locator('#fund-sec iframe').count()) === 0);
+    }
     const errs = consoleLines.filter(l => l.startsWith('[console.error]') || l.startsWith('[pageerror]'));
     ok('console free of errors', errs.length === 0, errs.join(' | '));
     await ctx.close();
@@ -137,12 +149,22 @@ try {
 
   /* ── B · sandbox key armed (default env) ───────────────────────────── */
   console.log('B · placeholder key, default env (sandbox):');
-  {
+  if (REG !== 'cypherpunk') {
+    // the person paths stay OUT even with a key armed: the rule is register
+    // law, not a key state (until the route is wired into bPay)
     const ctx = await armedContext(browser);
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
-    ok('launch enabled', (await page.locator('#fund-go').getAttribute('aria-disabled')) === 'false');
+    ok(`key ARMED and ${REG} still shows no fund panel (the block is the bPay order, not the key state)`,
+      await page.evaluate(() => document.getElementById('fund-sec').getClientRects().length === 0));
+    await ctx.close();
+  } else {
+    const ctx = await armedContext(browser);
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    ok('launch rendered and live with the key set', await page.locator('#fund-go').isVisible());
     let u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
     ok('no walletAddressLocked when empty', !u.searchParams.has('walletAddressLocked'));
     await page.selectOption('#fund-asset', 'USDC_ETHEREUM');
@@ -158,8 +180,9 @@ try {
   }
 
   /* ── E · name-form (.eth) input: resolve-then-confirm, honest failure ── */
-  console.log('E · Basename input (Base RPC mocked, deterministic):');
   const MOCK = 'fbd201472d5a439f1f0e408eb5dfaf6ea3687876'; // live-resolved hex of the probe below
+  if (REG === 'cypherpunk') {
+  console.log('E · Basename input (Base RPC mocked, deterministic):');
   {
     const tally = {};
     const ctx = await armedContext(browser);
@@ -247,6 +270,9 @@ try {
     await page.waitForTimeout(600);
     assertUrl(await goHref(page), 'meldcrypto.com', 'USDC_BASE');
     await ctx.close();
+  }
+  } else {
+    console.log('E/E2/E3/C · launcher suites: cypherpunk-only this run (the panel lives there)');
   }
 
   /* ── D · JS disabled: page renders, funding says it needs JS ───────── */

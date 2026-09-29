@@ -204,8 +204,13 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   ok('bee: the browser\'s own back button pops the task too (the stack is real history)', await page.evaluate(() => document.body.dataset.wlView) === 'home');
   await page.click('#wl-bee [data-wl-go="all"]');
   await page.waitForTimeout(300);
-  const all = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).length);
-  ok('bee: "show me everything" is one row away and opens every section (theme freely, gate never)', all === arr.cypherpunk.visibleSections, `${all} vs cypherpunk ${arr.cypherpunk.visibleSections}`);
+  const all = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
+  // every section the register genuinely holds: bridge-sec is out of BOTH
+  // counts (the page shows it when it exists), so the one bee withholds on
+  // top of cypherpunk's count is fund-sec — the bPay order's holdout (§4j)
+  const held = ['fund-sec'];
+  ok('bee: "show me everything" is one row away and opens every section it holds (theme freely, gate never; the card route stays held by law)',
+    all.length === arr.cypherpunk.visibleSections - held.length && held.every(h => !all.includes(h)), `${all.length} vs cypherpunk ${arr.cypherpunk.visibleSections} − ${held.length} held`);
   // a message that names another part of the wallet is a LINK and lands in its task
   await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350);
   await page.click('#wl-bee [data-wl-go="move"]'); await page.waitForTimeout(350);
@@ -332,7 +337,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // has nothing to tap (every section is open). Per section, three measures:
 // the visible words, the visible controls, and any engineering left showing.
 {
-  const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'fund-sec', 'peer-sec'],
+  // fund-sec is deliberately ABSENT from the add task here: the Meld card
+  // route is out of new bee and raver until it is wired into bPay (§4j),
+  // so it has no body to compare. Cypherpunk's panel is measured in §4e/§4j.
+  const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'peer-sec'],
     keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
   const measure = (page, id) => page.evaluate(i => {
     // shown = it has boxes AND no closed <details> folds it (this Chromium keeps boxes for a closed note's content)
@@ -411,13 +419,13 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     stage: document.getElementById('wl-rave').getClientRects().length > 0,
     pressed: [...document.querySelectorAll('#wl-dock [aria-pressed="true"]')].map(b => b.dataset.wlGo),
   }));
-  ok('raver: the "add" glyph deals its parts as glyph cards, each with its word, and no section yet (not bee’s form under a dock)',
-    deck.view === 'add' && deck.sections.length === 0 && deck.cards.join() === 'voucher-sec,fund-sec,peer-sec' && deck.words && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
-  await page.click('#wl-cards [data-wl-card-for="fund-sec"]'); await page.waitForTimeout(500);
-  const card = await page.evaluate(() => ({ open: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id), lit: document.querySelector('[data-wl-card-for="fund-sec"]').getAttribute('aria-pressed') }));
+  ok('raver: the "add" glyph deals its parts as glyph cards (the card route is gone: voucher and fiat in only), each with its word, and no section yet (not bee’s form under a dock)',
+    deck.view === 'add' && deck.sections.length === 0 && deck.cards.join() === 'voucher-sec,peer-sec' && deck.words && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
+  await page.click('#wl-cards [data-wl-card-for="peer-sec"]'); await page.waitForTimeout(500);
+  const card = await page.evaluate(() => ({ open: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id), lit: document.querySelector('[data-wl-card-for="peer-sec"]').getAttribute('aria-pressed') }));
   await page.click('#wl-cards [data-wl-card-for="voucher-sec"]'); await page.waitForTimeout(400);
   const swap = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
-  ok('raver: a card opens its ONE section; another card swaps it (one part at a time)', card.open.join() === 'fund-sec' && card.lit === 'true' && swap.join() === 'voucher-sec', JSON.stringify(card) + ' → ' + swap.join());
+  ok('raver: a card opens its ONE section; another card swaps it (one part at a time)', card.open.join() === 'peer-sec' && card.lit === 'true' && swap.join() === 'voucher-sec', JSON.stringify(card) + ' → ' + swap.join());
   // EVERY deck, on a phone: the first thing under the dock is art, never a section
   const leads = {};
   for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
@@ -735,7 +743,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
     spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
   const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
-  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['buy USDC', 'card checkout is not switched on here yet'], footer: ['the BNR wallet', 'how this page is built'] };
+  // the fund panel's plain facts are CYPHERPUNK's now (the card route is out
+  // of bee and raver until it is wired into bPay — §4j): its heading and its
+  // own statement carry them, not a launch button (none exists at rest)
+  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['buy USDC', 'card checkout is not switched on here yet', 'not wired into bPay yet'], footer: ['the BNR wallet', 'how this page is built'] };
   const seen = (page, sel) => page.evaluate(sel => {
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
     const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
@@ -765,6 +776,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     if (reg === 'raver') await page.click('#wl-dock [data-wl-go="add"]');
     await page.waitForTimeout(350);
     for (const [part, id] of [['voucher', 'voucher-sec'], ['fund', 'fund-sec']]) {
+      // bee and raver carry no fund panel at all (the card route is out of
+      // their add money until it is wired into bPay — §4j): still measured,
+      // and a hidden section must read as no words at all
+      if (reg !== 'cypherpunk' && part === 'fund') { r.fund = await seen(page, '#fund-sec'); continue; }
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
       if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
       r[part] = await seen(page, '#' + id);
@@ -781,7 +796,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
     // receipts: the add task one tap deep, stripped and in colour (to tell a real overlap from a strip artefact)
-    if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="fund-sec"]'); await page.waitForTimeout(300); }
+    if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="voucher-sec"]'); await page.waitForTimeout(300); }
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: join(here, 'shots-wallet-registers', `wallet-${W}-${reg}-add-stripped.png`) });
     await page.evaluate(el => el.remove(), strip); await page.waitForTimeout(300);
@@ -797,8 +812,8 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
   const missing = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
-  const far = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
-  ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
+  const far = reg => ['voucher', 'footer'].flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
+  ok('in bee and raver each one they still carry is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   // tickers and names are words, not shouting
@@ -810,8 +825,12 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
     vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
-  ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
-    REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
+  const lostEvery = reg => ['voucher', 'footer'].flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
+  ok('the plain facts every register still carries show at rest: the voucher balance, the memo warning, the footer\'s name and its way in',
+    REGS.every(r => lostEvery(r).length === 0), REGS.map(r => `${r} ${lostEvery(r).join(', ') || 'all shown'}`).join(' · '));
+  ok('the fund panel\'s plain words — its heading, the checkout state, the bPay statement — show at rest in CYPHERPUNK ONLY (where the built route stays, declared)',
+    lost('cypherpunk').length === 0 && ['bee', 'raver'].every(r => PLAIN.fund.every(m => [390, 1280].every(W => !resW[W][r].fund.includes(m)))),
+    `cypherpunk ${lost('cypherpunk').join(', ') || 'all shown'} · bee/raver carry none of them`);
 }
 
 // 4f · NEW BEE'S OPENING COPY, read as words: every section a bee task opens (its visible
@@ -854,7 +873,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await ctx.close();
   }
   ok('new bee\'s opening copy, dress stripped at 390 and 1280: every section a task opens reads with no capitals-as-shout, no dash and none of the machine words (heading and the intro under it)',
-    found.length === 0 && seenOpen.length >= 2 * 18, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
+    found.length === 0 && seenOpen.length >= 2 * 17, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
 }
 
 // 4g · THE HEADINGS READ AS WORDS: no visible section heading shouts in capitals, in
@@ -896,6 +915,109 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const after = await page.evaluate(() => ({ more: [...document.querySelectorAll('main>section[data-wl-more]')].map(s => s.id), open: [...document.querySelectorAll('main>section[data-wl-open]')].map(s => s.id) }));
   ok('bee\'s opened details do not carry into raver: after the switch no section is unfolded and no card opened itself', before && after.more.length === 0 && after.open.length === 0, JSON.stringify({ before, ...after }));
   await ctx.close();
+}
+
+// 4j · THE FUND BLOCK, by content (founder standing order 2026-09-26: payments
+// run through bPay; the #237 reviewer direction takes the Meld card route out of
+// new bee's and raver's "add money" until an integrated path turns what it buys
+// into what bPay spends). Measured as WORDS and INTERACTIONS, not lengths:
+//   1 Meld is out of bee (and raver deals no card for it)
+//   2 moved, never deleted: cypherpunk keeps the panel, which states plainly
+//     it is a separate card route not wired into bPay yet, and NO page anywhere
+//     shows a dead or greyed buy button — an unconfigured route is a sentence
+//   3 no bee-visible text in "add" starts a sentence with a capital (names that
+//     own theirs excepted)
+//   4 no 0x, chain name or dash-glued technical line is visible in bee's "add"
+//     before "show the details"
+{
+  const NAMES = new Set(['USDC', 'A', 'I', 'Base', 'Ethereum', 'Arweave', 'Vaulta', 'Meld', 'Peer', 'ENS', 'Basename', 'Venmo', 'BNR']);
+  // 1 + 3 + 4 · bee's "add money", at rest, read as words
+  {
+    const { ctx, page } = await open('bee');
+    await page.click('#wl-bee [data-wl-go="add"]'); await page.waitForTimeout(400);
+    const beeAdd = await page.evaluate(() => {
+      const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { if (!d.open && !(d.querySelector(':scope>summary') || {}).contains(e)) return true; } return false; };
+      const vis = e => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden' && !folded(e);
+      const secs = [...document.querySelectorAll('main>section[data-wl-task="add"]')].filter(vis);
+      let text = '';
+      for (const s of secs) { const w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const p = n.parentElement; if (p && vis(p)) text += ' ' + n.textContent; } }
+      const fields = secs.flatMap(s => [...s.querySelectorAll('input,select')]).map(i => (i.placeholder || '') + ' ' + [...(i.options || [])].map(o => o.textContent).join(' '));
+      return {
+        sections: secs.map(s => s.id),
+        fundBoxes: document.getElementById('fund-sec').getClientRects().length,
+        voucherField: !!(document.getElementById('vc-key') && document.getElementById('vc-key').getClientRects().length),
+        voucherGo: !!(document.getElementById('vc-go') && document.getElementById('vc-go').getClientRects().length),
+        text: text.replace(/\s+/g, ' ').trim(),
+        fields: fields.join(' ').replace(/\s+/g, ' ').trim(),
+      };
+    });
+    const BANNED = ['Meld', 'meldcrypto', 'USDC', '0x', 'buy', 'Base', 'Ethereum', 'checkout', 'card'];
+    const hits = BANNED.filter(b => beeAdd.text.toLowerCase().includes(b.toLowerCase()) || beeAdd.fields.toLowerCase().includes(b.toLowerCase()));
+    ok('bee "add money" carries NO card route, by word: the fund section has no boxes and none of its words (Meld, USDC, a chain name, an 0x field, a buy link, "card") are visible at rest',
+      !beeAdd.sections.includes('fund-sec') && beeAdd.fundBoxes === 0 && hits.length === 0,
+      `sections ${beeAdd.sections.join(',')} · banned found: ${hits.join(', ') || 'none'}`);
+    ok('bee "add money" still leaves a working next step: the voucher prepay panel with its own field and button',
+      beeAdd.sections.includes('voucher-sec') && beeAdd.voucherField && beeAdd.voucherGo, JSON.stringify(beeAdd.sections));
+    // 3 · casing: no sentence starts with a capital (names excepted)
+    const sentences = beeAdd.text.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+    const capped = sentences.filter(s => { const m = s.match(/[A-Za-z]/); return m && m[0] === m[0].toUpperCase() && !NAMES.has((s.match(/^[^A-Za-z]*([A-Za-z]+)/) || [])[1]); });
+    ok('no bee-visible sentence in "add" starts with a capital (names that own theirs excepted)',
+      capped.length === 0, capped.slice(0, 3).map(s => '‹' + s.slice(0, 40) + '›').join(' · ') || `${sentences.length} sentences read clean`);
+    // 4 · dashes and 0x before "show the details"
+    ok('no dash as punctuation and no 0x anywhere in bee\'s "add" at rest (technical lines fold behind "show the details")',
+      !/[—–]/.test(beeAdd.text) && !beeAdd.text.includes('0x') && !beeAdd.fields.includes('0x'),
+      (beeAdd.text.match(/[—–]/) || [''])[0] + ' ' + (beeAdd.text.includes('0x') || beeAdd.fields.includes('0x') ? '0x found' : 'clean'));
+    await ctx.close();
+  }
+  // 1 · raver: the deck deals no card for the part its register cannot open
+  {
+    const { ctx, page } = await open('raver');
+    await page.click('#wl-dock [data-wl-go="add"]'); await page.waitForTimeout(400);
+    const deck = await page.evaluate(() => ({
+      cards: [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).map(c => c.dataset.wlCardFor),
+      fundBoxes: document.getElementById('fund-sec').getClientRects().length,
+    }));
+    ok('raver "add money" deals no card for the fund part (voucher and fiat in only); the section has no boxes in its "all" scroll either',
+      !deck.cards.includes('fund-sec') && deck.cards.join() === 'voucher-sec,peer-sec' && deck.fundBoxes === 0, JSON.stringify(deck));
+    await page.click('#wl-dock [data-wl-go="all"]'); await page.waitForTimeout(400);
+    const allView = await page.evaluate(() => document.getElementById('fund-sec').getClientRects().length);
+    ok('raver\'s "all" scroll keeps the card route out too (not only its deck)', allView === 0, allView + ' boxes');
+    await ctx.close();
+  }
+  // 2 · cypherpunk keeps the panel, stated plainly; nothing dead anywhere
+  {
+    const { ctx, page } = await open('cypherpunk');
+    const cy = await page.evaluate(() => {
+      const s = document.getElementById('fund-sec');
+      const vis = e => e.getClientRects().length > 0;
+      const w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); let t = '', n;
+      while ((n = w.nextNode())) { const p = n.parentElement; if (p && vis(p)) t += ' ' + n.textContent; }
+      return {
+        boxes: s.getClientRects().length > 0,
+        text: t.replace(/\s+/g, ' '),
+        buyVisible: !!(document.getElementById('fund-go') && document.getElementById('fund-go').getClientRects().length),
+      };
+    });
+    const MUST = ['not wired into bPay yet', 'card checkout is not switched on here yet', 'BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com', 'buy USDC'];
+    const missing = MUST.filter(m => !cy.text.includes(m));
+    ok('cypherpunk keeps the fund panel, declared: it states plainly it is a separate card route not wired into bPay yet, with its config reason in the open',
+      cy.boxes && missing.length === 0, missing.join(', ') || 'all stated');
+    // the dead-button law, on the PR's own terms: an unconfigured route renders
+    // NO launch control at all (the BUY button; bPay's honest "Not available
+    // yet" audience rows are prose by design, not this law's subject)
+    const dead = await page.evaluate(() => [...document.querySelectorAll('.fund-launch, #fund-go')].filter(e => e.getClientRects().length).map(e => e.id || e.className));
+    ok('no dead or greyed buy button anywhere: unconfigured renders NO launch control (the sentence carries the state)',
+      dead.length === 0 && !cy.buyVisible, (dead.join(', ') || 'none rendered') + ' · buy link ' + (cy.buyVisible ? 'VISIBLE' : 'hidden'));
+    await ctx.close();
+  }
+  // 2 · moved, never deleted — the panel's code and words stay in the file
+  {
+    const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
+    const KEPT = ['BNR_MELD_PUBLIC_KEY', 'MELD_HOSTS', 'buildUrl', 'sb.meldcrypto.com', 'buy USDC (opens Meld)', 'data-meld-public-key'];
+    const gone = KEPT.filter(k => !src.includes(k));
+    ok('the fund panel is MOVED, never deleted: its builder, hosts, key plumbing and launch words all remain in the file for cypherpunk (and for the day the lanes are one)',
+      gone.length === 0, gone.join(', ') || 'all present');
+  }
 }
 
 // 10 · deep links land in the task that holds their target, in every register
@@ -943,9 +1065,16 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     return { ctx, page };
   })();
   ok('#fund-sec paints in "add money" at FIRST paint (no flash of the home screen)', await b.page.evaluate(() => window.__firstView) === 'add', await b.page.evaluate(() => String(window.__firstView)));
-  const f = await b.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('fund-sec').getClientRects().length > 0 }));
-  ok('#fund-sec opens bee on "add money" with fund in view', f.view === 'add' && f.shown, JSON.stringify(f));
+  const f = await b.page.evaluate(() => ({ view: document.body.dataset.wlView, fundShown: document.getElementById('fund-sec').getClientRects().length > 0, voucher: document.getElementById('voucher-sec').getClientRects().length > 0 }));
+  ok('#fund-sec still lands bee on "add money" — with the voucher as its working next step and NO fund panel (the card route is out of bee)',
+    f.view === 'add' && !f.fundShown && f.voucher, JSON.stringify(f));
   await b.ctx.close();
+  {
+    const c = await open('cypherpunk', { path: '/wallet.html#fund-sec', fixture: false });
+    const cy = await c.page.evaluate(() => ({ shown: document.getElementById('fund-sec').getClientRects().length > 0, top: Math.round(document.getElementById('fund-sec').getBoundingClientRect().top) }));
+    ok('#fund-sec lands cypherpunk ON the fund panel (the one register that still carries it, declared)', cy.shown && cy.top >= 0 && cy.top < 400, JSON.stringify(cy));
+    await c.ctx.close();
+  }
 }
 
 // 11 · persistence, casing, receipts at desktop width
