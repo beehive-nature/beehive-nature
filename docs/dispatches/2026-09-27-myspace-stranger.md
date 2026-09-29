@@ -2,7 +2,7 @@
 
 Seat: Fable 5.1. Founder go: "start the MY SPACE stranger instrument on its own branch". Branch `claude-lovis/funny-pascal-bpv6vu-myspace` from main 7d6808d8. No surface touched; this lane measures.
 
-**2026-09-29 revisions.** Three independent agent reviews (code-review, high effort) of this instrument found headline numbers that were artefacts of the instrument, not of the page: the first on commit 6bb5c8ec, the second on b6097862, the third on 22ec3fb5. This dispatch is rewritten around the three-times-corrected instrument; the earlier numbers stay in git and are quoted below so each correction is visible, not silent.
+**2026-09-29 revisions.** Four independent agent reviews (code-review, high effort) of this instrument found headline numbers that were artefacts of the instrument, not of the page, and then instrument defects short of that: the first on commit 6bb5c8ec, the second on b6097862, the third on 22ec3fb5, the fourth on 64720c1d. This dispatch is rewritten around the corrected instrument; the earlier numbers stay in git and are quoted below so each correction is visible, not silent.
 
 ## The question
 
@@ -10,7 +10,7 @@ Can a stranger complete MY SPACE without learning the storage architecture? `e2e
 
 ## Result, branch head over main 7d6808d8 (MY SPACE files unchanged on main since), 390×844, three registers
 
-Runs 19–22 on this box hash identical with the millisecond figures masked, with no instrument notes. Run 20 is quoted.
+Runs 19–22 on this box (third-review instrument) hash identical with the millisecond figures masked, with no instrument notes; runs 23–25 (fourth-review instrument) reproduce them. Run 24 is quoted.
 
 | register | purposes offered | controls readable without a tap | wrong choice (of offered) | led nowhere | first file: steps · ms | wire during keep-here add | wire during remove | terms on control (now / forever): lifetime | remove | outcome stated | finality stated (before confirm / after) | recover offered | leak words in front | leak words in archive | own-wallet wording visible | forever payer (declared) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -70,6 +70,19 @@ Reading it:
 10. **`--reg` typos produced a plausible failed row.** Fixed: unknown registers exit 2 with the known list.
 11. Found while re-running: the page's data mirror reports the new pick before the card re-renders, so the card read after a learning tap could lag by one ring (one run in three showed share/forever tied and forever at −1). Fixed: after a tap the instrument waits for the card's words to change (3 s cap, skipped when the ring was already the pressed one). Four runs then agree.
 
+## Fourth review (2026-09-29, on 64720c1d): seven findings, disposition
+
+1. **Context and page setup ran before the try/finally,** so a failure there still killed the run. Fixed: setup is inside the try under a `setup` phase; the context is closed in finally only if it was opened.
+2. **The no-remove-control path left the phase at `remove`** with an empty literal list, hiding anything on the wire during the recover probe. Fixed: the path records the wire and moves to `after-remove` like the found-control path.
+3. **"outcome stated" accepted any non-empty status,** including the add's leftover "Done.". Fixed: the status before the confirm is captured and the outcome must be a new sentence.
+4. **The TERMS payer proxy matched "nobody" and "hive",** which also occur in the deletable and lifetime clauses. Fixed: pay / pays / paid / payer / paying / wallet, whole words.
+5. **Presses had no timeout** (playwright's 30 s default against 3–15 s everywhere else). Fixed: 5 s on every press.
+6. **The instrument wrote into the page it measures.** Confirmed: `myspace.html` observes `#list` with `attributes: true`, so tagging a button with `data-stranger-rm` fired the page's own refresh right before the remove. Fixed: the remove control is selected with a playwright locator (text filter + `visible=true`) and pressed through it; nothing is written into the page.
+7. **`R.external` duplicated `wire.load`.** Removed.
+8. **Static server duplication.** Still a named follow-up, for the same reason as before.
+
+Results after this round are unchanged from the third review's (runs 23–25; 24 and 25 identical with timings masked, 23 differing only in the recorded pressed purpose when the bee front was read). Run 24 is quoted in the receipts.
+
 ## Two instrument findings from the first commit, still standing
 
 1. **A forced click is not a tap.** The first run selected the wrong orbit in raver and put a request on the wire during what was meant to be a keep-it-here add. The geometry probe showed why: a playwright click at a fixed offset inside the keep ring's hit box (the gesture `e2e/myspace-eternal.test.mjs` uses, `position {5,60}, force`) lands on the next ring out. Real taps on the ring, precise or 12 px off, select the right orbit every time and keep the front and the archive in step. The instrument taps the ring's own point; the product's orbit geometry is sound; the eternal test's gesture is fragile and is left for its owner.
@@ -77,7 +90,7 @@ Reading it:
 
 ## Method
 
-`node e2e/myspace-stranger.mjs [--json out] [--reg bee,raver,cypherpunk]`. Localhost http, cold context per register, all cross-origin requests aborted and logged by phase (load / read / add / after-add / remove / after-remove / done). Purpose chosen by scoring each control's own visible words (or, for a control that shows none, the card that answers a tap on it) against the intent's plain words minus other intents' strong words, whole words only; a zero or tied score is "led nowhere"; the chosen text and score are printed so a person can judge the match. Visible text means an element that is not hidden and has a box on screen. Playwright 1.62, Chromium 141. Full receipts of run 20 follow.
+`node e2e/myspace-stranger.mjs [--json out] [--reg bee,raver,cypherpunk]`. Localhost http, cold context per register, all cross-origin requests aborted and logged by phase (load / read / add / after-add / remove / after-remove / done). Purpose chosen by scoring each control's own visible words (or, for a control that shows none, the card that answers a tap on it) against the intent's plain words minus other intents' strong words, whole words only; a zero or tied score is "led nowhere"; the chosen text and score are printed so a person can judge the match. Visible text means an element that is not hidden and has a box on screen. Playwright 1.62, Chromium 141. Full receipts of run 24 follow.
 
 ## Receipts
 
@@ -87,7 +100,7 @@ Reading it:
 - "keep it on this phone" → chose **keep** (score 8) via "keep it here only this phone opens it. stays until you remove it. stays here"
 - "share it with people" → chose **share** (score 6) via "show the world anyone with the link opens it. stays while the hive keeps it. nobody can delete it. goes out"
 - "keep it forever" → chose **forever** (score 4) via "keep it forever anyone can read it. lasts forever. nobody can delete it. you pay, from your own wallet. goes out"
-- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses, 826 ms from open to the row observed stored (of which 255 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "Done."; no request left the page during the add
+- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses, 833 ms from open to the row observed stored (of which 255 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "Done."; no request left the page during the add
 - remove: control "Remove" (1 visible) → sentence "The bytes go and the key goes with them. Only this phone opens it. Nothing about this file will exist anywhere else." (finality word: "anywhere else") → confirm "Remove from this phone" → outcome "Gone. The bytes and the key were both here, and this file existed nowhere else." (finality word: "Gone"); no request left the page during the remove
 - recover: nothing on screen offers to bring a removed file back; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (in the bar's strip but NOT on screen at this width without scrolling the bar)
 - leak words in the front (read with purpose "keep" pressed): {"wallet":1}; in the shared archive below: {"rail":1,"wallet":1}
@@ -99,7 +112,7 @@ Reading it:
 - "keep it on this phone" → chose **keep** (score 6) via "o2 keep it · local this phone only · stays till you drop it" (read on the card after tapping the ring)
 - "share it with people" → chose **share** (score 4) via "o3 show it · blossom the link opens it · stays while the hive holds it · no delete" (read on the card after tapping the ring)
 - "keep it forever" → chose **forever** (score 4) via "o4 forever · ant anyone reads it · lasts forever · no delete · you pay" (read on the card after tapping the ring)
-- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses (after 4 taps to learn the rings), 1204 ms from open to the row observed stored (of which 256 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "done."; no request left the page during the add
+- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses (after 4 taps to learn the rings), 1232 ms from open to the row observed stored (of which 254 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "done."; no request left the page during the add
 - remove: control "remove" (1 visible) → sentence "The bytes go and the key goes with them. this phone only. Nothing about this file will exist anywhere else." (finality word: "anywhere else") → confirm "remove" → outcome "Gone. The bytes and the key were both here, and this file existed nowhere else." (finality word: "Gone"); no request left the page during the remove
 - recover: nothing on screen offers to bring a removed file back; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (in the bar's strip but NOT on screen at this width without scrolling the bar)
 - leak words in the front (read with purpose "keep" pressed): {}; in the shared archive below: {"rail":1,"wallet":1}
@@ -111,7 +124,7 @@ Reading it:
 - "keep it on this phone" → chose **keep** (score 4) via "keep local readers this-device · lifetime until-you-delete-it · deletable yes · payer nobody · net none"
 - "share it with people" → chose **share** (score 4) via "share blossom readers link-holders · lifetime while-the-store-keeps-it · deletable no · payer the-hive · net skaists.buz"
 - "keep it forever" → chose **forever** (score 6) via "forever ant readers everyone · lifetime permanent · deletable no · payer you · net autonomi, arbitrum-one"
-- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses, 743 ms from open to the row observed stored (of which 255 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "written."; no request left the page during the add
+- first file: stored under keep (rows: [{"purpose":"keep","scheme":"local"}]; archive pressed after add (the page resets to the most private purpose): now) in 3 presses, 829 ms from open to the row observed stored (of which 257 ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading); status shown: "written."; no request left the page during the add
 - remove: control "DROP" (1 visible) → sentence "The bytes go and the key goes with them. readers: this device Nothing about this file will exist anywhere else." (finality word: "anywhere else") → confirm "DROP ROW" → outcome "Gone. The bytes and the key were both here, and this file existed nowhere else." (finality word: "Gone"); no request left the page during the remove
 - recover: nothing on screen offers to bring a removed file back; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (in the bar's strip but NOT on screen at this width without scrolling the bar)
 - leak words in the front (read with purpose "keep" pressed): {"adapter":2,"rail":8,"worker":2,"indexeddb":2,"aes":1,"blossom":3,"ant":3,"autonomi":2,"signer":1,"predicate":1,"keyref":1}; in the shared archive below: {"adapter":3,"rail":7,"worker":1,"indexeddb":1,"aes":1,"wallet":4,"scheme":1,"ciphertext":1,"keyref":1}

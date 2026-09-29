@@ -145,21 +145,24 @@ async function pressControl(page, reg, purpose) {
     const pt = await page.evaluate(p => { const svg = document.querySelector('#etOrbits'); const b = svg.getBoundingClientRect(); const k = b.width / 400; const r = +svg.querySelector(`.orbit[data-et-purpose="${p}"] .hit`).getAttribute('r'); return { x: b.x + b.width / 2, y: b.y + b.height / 2 - r * k }; }, purpose);
     if (!(pt.x >= 0 && pt.x < VIEW.width && pt.y >= 0 && pt.y < VIEW.height)) throw new Error(`the ${purpose} ring's tap point (${pt.x | 0},${pt.y | 0}) is outside the ${VIEW.width}×${VIEW.height} viewport`);
     await page.touchscreen.tap(pt.x, pt.y);
-  } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`);
+  } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
   await page.waitForFunction(p => window.__eternal.data.pick === p, purpose, { timeout: 5000 });
 }
 
+const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
 async function stranger(reg) {
-  const ctx = await browser.newContext({ viewport: VIEW, isMobile: true, hasTouch: true });
-  await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
-  const page = await ctx.newPage();
-  // every cross-origin request is aborted and logged under the phase it happened in
-  const wire = { load: new Set(), read: new Set(), add: new Set(), 'after-add': new Set(), remove: new Set(), 'after-remove': new Set(), done: new Set() }; let phase = 'load';
-  await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
   // the record is built before anything can fail, so a run that dies keeps what it had gathered
-  const R = { reg, revision: REVISION, external: [], wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { front: {}, archive: {} }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
+  const R = { reg, revision: REVISION, wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { front: {}, archive: {} }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
+  // every cross-origin request is aborted and logged under the phase it happened in
+  const wire = { setup: new Set(), load: new Set(), read: new Set(), add: new Set(), 'after-add': new Set(), remove: new Set(), 'after-remove': new Set(), done: new Set() }; let phase = 'setup';
   const t0 = Date.now();
+  let ctx = null;
   try {
+    ctx = await browser.newContext({ viewport: VIEW, isMobile: true, hasTouch: true });
+    await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
+    const page = await ctx.newPage();
+    await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
+    phase = 'load';
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => R.notes.push('load: ' + e.message.split('\n')[0]));
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
@@ -241,7 +244,7 @@ async function stranger(reg) {
         R.terms[intent.id] = {
           lifetimeStated: /gone|closes|session|stays|until|forever|permanent|lasts|drop|remove/.test(t),
           readersStated: /only this phone|this phone only|this device|link|anyone|everyone|readers/.test(t),
-          payerStated: /pay|wallet|paid|payer|nobody|hive/.test(t),
+          payerStated: /\b(pay|pays|paid|payer|paying|wallet)\b/.test(t), // not "nobody"/"hive": those also occur in the deletable and lifetime clauses
         };
       }
     }
@@ -255,7 +258,7 @@ async function stranger(reg) {
       try {
         await pressControl(page, reg, keep.purpose);
         steps++;
-        const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg])]);
+        const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK)]);
         steps++;
         await chooser.setFiles({ name: 'stranger-note.txt', mimeType: 'text/plain', buffer: Buffer.from('a note from a stranger', 'utf8') });
         steps++;
@@ -275,30 +278,31 @@ async function stranger(reg) {
     // REMOVE: find a visible remove control on the stored row, read the confirmation, confirm, check the outcome is stated.
     if (R.firstFile?.ok) {
       phase = 'remove';
-      // only a control with a box on screen counts; the first one is tagged and then pressed
-      // through playwright's own actionability checks, not a programmatic click on a hidden node
-      const rm = await page.evaluate(() => {
-        const cands = [...document.querySelectorAll('#list button, #list a, #list [role=button]')].filter(el => el.getClientRects().length > 0 && /\b(remove|delete|drop|bin|trash)\b/i.test(el.innerText || el.getAttribute('aria-label') || ''));
-        cands.forEach((el, i) => el.setAttribute('data-stranger-rm', String(i)));
-        return cands.length ? { text: (cands[0].innerText || cands[0].getAttribute('aria-label') || '').trim(), candidates: cands.length } : null;
-      });
+      // only a control with a box on screen counts. It is selected with a playwright locator and
+      // pressed through playwright's actionability checks: nothing is written into the page (the
+      // page observes attribute changes on #list and would re-render its fronts on a tag write)
+      const rmLoc = page.locator('#list button, #list a, #list [role=button]').filter({ hasText: /\b(remove|delete|drop|bin|trash)\b/i }).locator('visible=true');
+      const candidates = await rmLoc.count();
+      const rm = candidates ? { text: (await rmLoc.first().innerText()).trim(), candidates } : null;
       if (!rm) {
         // the whole-space list may be below the fold; cypherpunk's front points at "the rows below"
-        R.remove = { control: null, ok: false, note: 'no visible remove control on the stored row', networkDuringRemove: [] };
+        R.remove = { control: null, ok: false, note: 'no visible remove control on the stored row', networkDuringRemove: [...wire.remove].sort() };
+        phase = 'after-remove';
       } else {
         try {
-          await page.click('[data-stranger-rm="0"]');
+          const statusBefore = (await visibleText(page, '#status')).trim(); // the outcome must be a NEW sentence, not the add's leftover
+          await rmLoc.first().click(CLICK);
           await page.waitForSelector('#del-body', { state: 'visible', timeout: 5000 });
           const sentence = (await visibleText(page, '#del-body')).trim();
           const confirmText = (await visibleText(page, '#delConfirm')).trim();
-          await page.click('#delConfirm');
+          await page.click('#delConfirm', CLICK);
           await page.waitForFunction(() => window.__eternal.data.count === 0, null, { timeout: 10000 });
           const after = (await visibleText(page, '#status')).trim();
           const removeWire = [...wire.remove].sort();
           phase = 'after-remove';
           await page.waitForTimeout(250); // let the post-delete render and any adapter follow-up reach the after-remove log
           const fin = t => (t.match(FINAL) || [null])[0];
-          R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after, outcome: after.slice(0, 160), finalityBeforeConfirm: fin(sentence), finalityAfter: fin(after), networkDuringRemove: removeWire };
+          R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: fin(sentence), finalityAfter: fin(after), networkDuringRemove: removeWire };
         } catch (e) { R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: String(e.message).split('\n')[0], networkDuringRemove: [...wire.remove].sort() }; phase = 'after-remove'; }
       }
       // RECOVER: does anything on screen offer to bring it back?
@@ -329,9 +333,8 @@ async function stranger(reg) {
     if (!R.firstFile) R.firstFile = { ok: false, steps: 0, ms: Date.now() - t0, error: `instrument aborted during ${phase}` };
   } finally {
     phase = 'done';
-    R.external = [...wire.load].sort();
     for (const [k, v] of Object.entries(wire)) if (v.size) R.wire[k] = [...v].sort();
-    await ctx.close().catch(() => {});
+    if (ctx) await ctx.close().catch(() => {});
   }
   return R;
 }
