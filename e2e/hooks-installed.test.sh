@@ -60,11 +60,25 @@ hook=$(git rev-parse --git-path hooks)/pre-commit
 grep -q 'scripts/secret-scan.sh' "$hook"
 echo "PASS installer wires the pre-commit hook delegating to the scanner"
 
-# Bite: the same vector must now refuse.
-printf 'synthetic=%s\n' "$vector" > example.txt
+# Bite: stage a REAL delta. Reusing the exact committed line makes git
+# refuse an empty commit even when the scanner is disabled, a false pass.
+printf 'synthetic-wired=%s\n' "$vector" > example.txt
 git add -- example.txt
-if git commit -qm 'wired probe' 2>/dev/null; then
+if git diff --cached --quiet; then
+  echo "FAIL hooked probe has no staged delta"
+  exit 1
+fi
+before=$(git rev-parse HEAD)
+if git commit -qm 'wired probe' > "$testdir/blocked.log" 2>&1; then
   echo "FAIL hooked commit accepted a 48+ hex vector"
+  exit 1
+fi
+if ! grep -qF 'BLOCKED: 48+ char hex run(s)' "$testdir/blocked.log"; then
+  echo "FAIL commit refused without the scanner's hex diagnostic"
+  exit 1
+fi
+if [ "$(git rev-parse HEAD)" != "$before" ]; then
+  echo "FAIL refused probe changed HEAD"
   exit 1
 fi
 echo "PASS hooked commit refuses the vector"
