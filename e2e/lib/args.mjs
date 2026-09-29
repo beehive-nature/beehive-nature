@@ -15,7 +15,7 @@ export function argReader(usage, argv = process.argv) {
     const eq = argv.find(a => a.startsWith('--' + k + '='));
     if (eq) { const v = eq.slice(k.length + 3); if (!v) throw new UsageError(k, usage); return v; }
     const i = argv.indexOf('--' + k); if (i < 0) return d;
-    const v = argv[i + 1]; if (v === undefined || v.startsWith('--')) throw new UsageError(k, usage);
+    const v = argv[i + 1]; if (v === undefined || v === '' || v.startsWith('--')) throw new UsageError(k, usage); // an empty token is a missing value too
     return v;
   };
 }

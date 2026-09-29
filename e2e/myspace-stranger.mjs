@@ -140,7 +140,8 @@ const finalWord = t => STAYS.test(t) ? null : (t.match(FINAL) || [null])[0];
 // opposite ("asks your wallet for nothing", "you pay nothing") is not a hit, so the column can go to "n" once
 // the wording is fixed; the sentence that earned a hit is printed so a reader can judge it.
 const OWN = /your wallet|you pay|own wallet/i;
-const NEGATED = /\bnothing\b|\bnever\b|\bno wallet\b|\bwithout\b|\bnot\b|\bno\b/i;
+// the negation must be about the paying itself, not anywhere in the sentence ("you pay, not from ours" still says you pay)
+const NEGATED = /\b(pays?|paid|paying)\s+nothing\b|\bnever\s+(pays?|paid|paying|asks?)\b|\bwallet\s+for\s+nothing\b|\bno\s+wallet\b|\bwithout\s+(a\s+|your\s+)?wallet\b|\basks?\s+(nothing|for nothing)\b/i;
 const ownWalletSentence = text => (text.match(/[^.!?·\n]+[.!?]?/g) || []).map(s => s.trim()).find(s => OWN.test(s) && !NEGATED.test(s)) || null;
 
 // text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
@@ -203,6 +204,10 @@ async function stranger(reg) {
     // only requests that leave the origin are intercepted (and aborted, logged under the phase); same-origin
     // requests are never paused, so the page's own timings are not stretched by the interception
     await page.route(u => u.origin !== base, route => { const u = new URL(route.request().url()); wire[phase].add(u.host + u.pathname); return route.abort(); });
+    // route interception does not see WebSockets or requests a worker makes on its own: those are counted too
+    // (a socket cannot be aborted from here, so it is logged as "ws " and would show in the receipts)
+    page.on('websocket', ws => { try { const u = new URL(ws.url()); if (u.origin !== base) wire[phase].add('ws ' + u.host + u.pathname); } catch {} });
+    ctx.on('request', req => { try { const u = new URL(req.url()); if (u.origin !== base) wire[phase].add(u.host + u.pathname); } catch {} });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
@@ -359,6 +364,7 @@ async function stranger(reg) {
       } catch (e) {
         phase = 'after-add';
         R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, confirmingPress, ms: Date.now() - t0, error: errText(e), networkDuringAdd: [...wire.add].sort() };
+        R.unsound.push(`the first file did not land: ${errText(e)}`);
       }
       await page.waitForTimeout(250); // a follow-up request to the add belongs here, not to the remove
     } else {
@@ -399,7 +405,7 @@ async function stranger(reg) {
           const removeWire = [...wire.remove].sort();
           await page.waitForTimeout(250); // let the post-delete render and any adapter follow-up reach the after-remove log
           R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: finalWord(sentence), finalityAfter: finalWord(after), networkDuringRemove: removeWire };
-        } catch (e) { phase = 'after-remove'; R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: errText(e), networkDuringRemove: [...wire.remove].sort() }; await page.waitForTimeout(250); }
+        } catch (e) { phase = 'after-remove'; R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: errText(e), networkDuringRemove: [...wire.remove].sort() }; R.unsound.push(`the remove did not complete: ${errText(e)}`); await page.waitForTimeout(250); }
       }
       // RECOVER: does anything rendered on the page offer to bring it back? (rendered = has a box; the page is
       // taller than the viewport, so this is "on the page", not "in view without scrolling")
@@ -450,8 +456,8 @@ async function stranger(reg) {
 // learned, a page that never became ready or never took the register, an offered set still changing at the cap.
 // One predicate, used by the table's row marker and the exit code alike.
 // (a first file that failed because the page's words led nowhere is a measured result, not an unsound run).
-// Unsoundness is recorded as data where it is detected (R.unsound), never inferred from note wording.
-const unsound = r => r.unsound.length > 0 || !(r.firstFile?.ok || r.firstFile?.measured) || (r.remove && !r.remove.ok && r.remove.error);
+// Unsoundness is recorded as data where it is detected (R.unsound) and read from there alone.
+const unsound = r => r.unsound.length > 0;
 // one summary per result, used by the stderr line and the table alike
 const summarize = r => {
   const offered = r.choices.filter(c => c.offered);
