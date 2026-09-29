@@ -57,6 +57,17 @@
    "patch": {
     "living": false,
     "lifespan": "1931–2025",
+    "birth": {
+     "date": "24 June 1931",
+     "place": "Vernal, Utah, United States",
+     "basis": "record: GenealogyBank obit + Find a Grave X3TK-D49C + 1935/1940 church census"
+    },
+    "death": {
+     "date": "27 May 2025",
+     "place": null,
+     "burial": "Millcreek, Salt Lake, Utah, United States",
+     "basis": "record: Find a Grave X3TK-D49C + GenealogyBank obituaries X3JC-YY2X/X3J8-NKKT (obit published 11 June 2025, Salt Lake City)"
+    },
     "evidence": {
      "support": "sourced",
      "basis": "obituary harvested 2026-09-22: born 24 June 1931, died 27 May 2025 (age 93)"
@@ -97,13 +108,24 @@
      }
     ]
    },
-   "note": "The FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: his obituary gives 24 June 1931 to 27 May 2025. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather.",
-   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22"
+   "note": "FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch); the founder attests the family line — famous grandpa is not 'Living'. Founder update 2026-09-18: 'grandpa don died last June ish (we have the date somewhere)' — year recorded as attested-approximate, exact date never invented. RECORD CORRECTION 2026-09-18 (hr/v2 records-search pass): documentary dates — born 24 June 1931 Vernal Utah, died 27 May 2025, obituary published 11 June 2025 (the founder's 'June-ish' matched the obituary publication, not the death date); recall-replaced-by-record documented, nothing silently rewritten. OBITUARY DELIVERED 2026-09-22 (Dignity Memorial, founder-delivered): death now SOURCED; parents Fuller and Edith Remington (matches the walked parents); burial Wasatch Lawn Memorial Park, Millcreek. Marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18 · obituary delivered by the founder 2026-09-22"
   },
   "LNQ5-BSF": {
    "patch": {
     "living": false,
     "lifespan": "1932–2023",
+    "birth": {
+     "date": "16 March 1932",
+     "place": null,
+     "basis": "record: GenealogyBank obit 6VR2-NWV3/6VRJ-QMHX + Find a Grave 6K1Y-RH56"
+    },
+    "death": {
+     "date": "9 January 2023",
+     "place": null,
+     "burial": "Millcreek, Salt Lake, Utah, United States",
+     "basis": "record: Find a Grave 6K1Y-RH56 + obituaries 6VR2-NWV3/6VRJ-QMHX (GenealogyBank, obit 11 Jan 2023 SLC) + XM26-X62M (US Obituary Records 2014-2023, obit 10 Jan 2023 Millcreek)"
+    },
     "evidence": {
      "support": "sourced",
      "basis": "obituary harvested 2026-09-22: born 16 March 1932, died 9 January 2023"
@@ -137,8 +159,8 @@
      }
     ]
    },
-   "note": "The FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: her obituary gives 16 March 1932 to 9 January 2023. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother, the tree's co-builder.",
-   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22"
+   "note": "FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch); she is the founder's deceased grandmother, the church matriarch and master genealogist who co-built this tree with him (12 years ago). Founder update 2026-09-18: 'grandma marilyn died a year decemberish before that' — year recorded as attested-approximate, exact date never invented. RECORD CORRECTION 2026-09-18 (hr/v2 records-search pass): documentary dates — born 16 March 1932, died 9 January 2023, buried Millcreek beside Don (the founder's recall pointed at ~Dec 2024; the record says 9 Jan 2023 — recall corrected by record, both layers preserved). OBITUARY DELIVERED 2026-09-22 (Dignity Memorial, founder-delivered): death now SOURCED; parents Hyrum Deronda and Ardella Lowry (matches the walked parents). Marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18 · obituary delivered by the founder 2026-09-22"
   },
   "KWCL-VNB": {
    "patch": {

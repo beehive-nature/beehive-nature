@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pde86e16567",
+ "bnr": "bnr://skaists.dev/blood/pde86e16567",
+ "identity": {
+  "name": "Johanna Lucus",
+  "lifespan": "1712–1810",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYL7-CMZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd4acab8c62",
+    "name": "William Lucas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4ca19cafb7",
+    "name": "Gracie Jean McAlpine Williams",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1a7f29c355",
+    "name": "Frances Neville"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYL7-CMZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
