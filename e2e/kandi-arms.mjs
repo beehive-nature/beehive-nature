@@ -42,17 +42,24 @@ const b=await chromium.launch();
   ok('it is tagged as spoken for, not generic trade stock', /for Sam/.test(st.tag||''), `tag=${st.tag}`);
 
   // gift it, and receive it in a second browser — it must land LEFT, never re-trading
-  await p.click('#right button'); await p.waitForTimeout(3200);
+  await p.click('#right button');
+  await p.waitForSelector('#giftout.open',{timeout:5000});
+  const mid=await p.evaluate(()=>{const S=JSON.parse(localStorage.getItem('bkandi'));return {right:S.right.length,given:S.given.length};});
+  ok('the handshake does not retire the piece — it is still on the right arm', mid.right===1 && mid.given===0,
+     `right=${mid.right} given=${mid.given}`);
   const giftStr=await p.inputValue('#giftstr');
-  const after=await p.evaluate(()=>{const S=JSON.parse(localStorage.getItem('bkandi'));return {right:S.right.length,given:S.given.length};});
+  await p.click('#finishgift'); await p.waitForTimeout(300);
+  const after=await p.evaluate(()=>{const S=JSON.parse(localStorage.getItem('bkandi'));return {right:S.right.length,given:S.given.length,exp:S.given[0]&&S.given[0].export};});
   ok('gifting removes it from your arm and keeps the memory line', after.right===0 && after.given===1,
      `right=${after.right} given=${after.given}`);
+  ok('the memory line keeps the full export', after.exp===giftStr, String(after.exp||'').slice(0,24));
   ok('the gift string encodes', /^KND1\|/.test(giftStr), giftStr.slice(0,24));
   await p.close();
 
   const p2=await b.newPage();
   await p2.goto(`${BASE}/kandi.html`,{waitUntil:'load'}); await p2.waitForTimeout(400);
-  await p2.fill('#rcv',giftStr); await p2.click('#rcvgo'); await p2.waitForTimeout(300);
+  await p2.fill('#rcv',giftStr); await p2.click('#rcvgo'); await p2.waitForTimeout(200);
+  await p2.click('#rcvkeep'); await p2.waitForTimeout(300);
   const rec=await p2.evaluate(()=>{
     const S=JSON.parse(localStorage.getItem('bkandi'));
     return {left:S.left.length,right:S.right.length,

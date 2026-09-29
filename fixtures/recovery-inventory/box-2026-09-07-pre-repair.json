@@ -1,0 +1,400 @@
+{
+  "deleted_executables": [
+    {
+      "exe": "/usr/lib/systemd/systemd-logind (deleted)",
+      "inside_declared_roots": [],
+      "pid": 1161,
+      "uid": 0
+    },
+    {
+      "exe": "/usr/bin/python3.12 (deleted)",
+      "inside_declared_roots": [],
+      "pid": 1222,
+      "uid": 0
+    },
+    {
+      "exe": "/usr/sbin/agetty (deleted)",
+      "inside_declared_roots": [],
+      "pid": 1271,
+      "uid": 0
+    },
+    {
+      "exe": "/usr/sbin/agetty (deleted)",
+      "inside_declared_roots": [],
+      "pid": 1280,
+      "uid": 0
+    },
+    {
+      "exe": "/home/ubuntu/src/target/debug/buzz-relay (deleted)",
+      "inside_declared_roots": [
+        "dev-relay-build"
+      ],
+      "pid": 3832163,
+      "uid": 1001
+    },
+    {
+      "exe": "/usr/bin/tee (deleted)",
+      "inside_declared_roots": [],
+      "pid": 837178,
+      "uid": 0
+    },
+    {
+      "exe": "/usr/bin/gpg-agent (deleted)",
+      "inside_declared_roots": [],
+      "pid": 933586,
+      "uid": 0
+    }
+  ],
+  "filesystems": [
+    {
+      "free_bytes": 3687030784,
+      "headroom_bytes": -7050387456,
+      "headroom_ok": false,
+      "mount": "/",
+      "reserve_bytes": 10737418240,
+      "status": "reserve-breach"
+    }
+  ],
+  "generated_utc": "2026-09-07T03:57:46Z",
+  "host": "bnr",
+  "roots": [
+    {
+      "artifacts": [
+        {
+          "bytes": 16451368,
+          "kind": "binary",
+          "path": "/opt/bitcoin/bitcoind",
+          "sha256": "1b279e038691c10e30d9c99a071ff967439020c4352e8ea3b156fb6b03751f83",
+          "status": "ok"
+        }
+      ],
+      "classification": "authoritative-state",
+      "footprint_bytes": 6207382084,
+      "id": "bitcoin-chainstate",
+      "mode": "0755",
+      "notes": "prune=2000 BIP-352 go-forward scanning node; failed 2026-09-04T12:21Z root cause No-space LevelDB IO error during block-index flush (journal receipts in dispatch); datadir preservation record in dispatch; no reindex, no delete",
+      "owner_group": "bitcoinu",
+      "owner_uid": 997,
+      "owner_user": "bitcoinu",
+      "path": "/var/lib/bitcoin",
+      "restart": {
+        "executable": "/opt/bitcoin/bitcoind",
+        "executable_sha256": "1b279e038691c10e30d9c99a071ff967439020c4352e8ea3b156fb6b03751f83",
+        "unit": "buzz-bitcoind.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 15541480,
+          "kind": "binary",
+          "path": "/mnt/ant-store/data/node-2/ant-node",
+          "sha256": "ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af",
+          "status": "ok"
+        }
+      ],
+      "classification": "authoritative-state",
+      "footprint_bytes": 5421625670,
+      "id": "ant-node-fence",
+      "mode": "0755",
+      "notes": "6 GiB ext4 loop fence image /home/ubuntu/ant-store.img (apparent size overstates sparse usage); fence.md law: root keeps >=10 GiB free; node identity preserved on re-home 2026-09-04",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/mnt/ant-store",
+      "restart": {
+        "executable": "/mnt/ant-store/data/node-2/ant-node",
+        "executable_sha256": "ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af",
+        "method": "manual (ant node daemon run supervisor)",
+        "unit": null
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 37565016,
+          "kind": "binary",
+          "path": "/home/ubuntu/ant-lane/antd",
+          "sha256": "1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8",
+          "status": "ok"
+        }
+      ],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 56752660,
+      "id": "antd-bridge",
+      "mode": "0775",
+      "notes": "antd cors bridge on 172.18.0.1:8082 (tunnel 18082); ant-door lane",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/home/ubuntu/ant-lane",
+      "restart": {
+        "executable": "/home/ubuntu/ant-lane/antd",
+        "executable_sha256": "1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8",
+        "method": "manual",
+        "unit": null
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 10746,
+          "kind": "source",
+          "path": "/opt/voice-scribe/voice-scribe.mjs",
+          "sha256": "a5ca90fdf4d956502659d305e293c1a54667081e632b0d82147ee4bbbb9e3272",
+          "status": "ok"
+        },
+        {
+          "bytes": 1756,
+          "kind": "source",
+          "path": "/opt/voice-scribe/work-queue.mjs",
+          "sha256": "992fbe216fd998832d93b1f82c3367eb46090a872e98d2db3ebc6c331a298efc",
+          "status": "ok"
+        }
+      ],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 937909681,
+      "id": "voice-scribe",
+      "mode": "0755",
+      "notes": "parity vs origin/main proven full-hash 2026-09-07 (dispatch 2026-09-07-zcode-g0-voice-evidence); model ggml-large-v3-turbo-q5_0 redownloadable",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/opt/voice-scribe",
+      "restart": {
+        "executable": null,
+        "unit": "voice-scribe.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 7190275834,
+      "id": "dev-relay-build",
+      "mode": "0775",
+      "notes": "RUNNING process pid 3832163 (since 2026-09-04 09:30, PPid 1) executes the DELETED debug binary from this tree \u2014 do-not-prune until restart artifact preserved+verified off-volume; build tree itself rebuildable",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/home/ubuntu/src",
+      "prior_status": "missing-restart-dependency",
+      "restart": {
+        "executable": "/home/ubuntu/src/target/debug/buzz-relay",
+        "executable_status": "missing-restart-dependency",
+        "method": "manual: cargo build in skaists/buzz fork @088a677f88737aa42af4d6d790bd2dfe8373e835 (rustc 1.98.0), untracked web scripts preserved this session; dev ports 3315-3317",
+        "unit": null
+      },
+      "status": "active-deleted-executable"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 62568056,
+          "kind": "binary-deployed",
+          "path": "/opt/buzz/buzz-relay-join",
+          "sha256": "209e4b5e96a3a055a9dca9325ad752f88f42489c16ba405d160cec8214ae3777",
+          "status": "ok"
+        }
+      ],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 527645557,
+      "id": "prod-relay-fork-binary",
+      "mode": "0755",
+      "notes": "order-D fork binary bind-mounted into buzz-prod-relay-1 /usr/local/bin/buzz-relay \u2014 the PROD restart artifact, do-not-prune",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/opt/buzz",
+      "restart": {
+        "executable": "/opt/buzz/buzz-relay-join",
+        "executable_sha256": "209e4b5e96a3a055a9dca9325ad752f88f42489c16ba405d160cec8214ae3777",
+        "unit": "docker.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 14907984,
+          "kind": "binary",
+          "path": "/opt/buzz-bclaude/src/target/release/buzz-acp",
+          "sha256": "e67c7104eb0d11d9691c0d0904e743a7fbea5ac43e4eb8f9d494c9f5b7554132",
+          "status": "ok"
+        }
+      ],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 671955247,
+      "id": "buzz-bclaude",
+      "mode": "0755",
+      "notes": "ACTIVE build tree: buzz-acp runs from release dir (exe NOT deleted) \u2014 do-not-prune",
+      "owner_group": "root",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/opt/buzz-bclaude",
+      "restart": {
+        "executable": "/opt/buzz-bclaude/src/target/release/buzz-acp",
+        "executable_sha256": "e67c7104eb0d11d9691c0d0904e743a7fbea5ac43e4eb8f9d494c9f5b7554132",
+        "unit": "buzz-bclaude.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 2546149171,
+      "id": "buzz-compute",
+      "mode": "0755",
+      "notes": "shared-compute node (llama.cpp + models behind skaists.buzz/compute); models redownloadable",
+      "owner_group": "root",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/opt/buzz-compute",
+      "restart": {
+        "executable": null,
+        "unit": "buzz-compute.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "classification": "secret-reference",
+      "id": "x0x-identity",
+      "mode": "0755",
+      "notes": "machine/agent ML-DSA keys \u2014 location/permissions/recovery owner only by law",
+      "owner_group": "x0x",
+      "owner_uid": 995,
+      "owner_user": "x0x",
+      "path": "/var/lib/x0x/identity",
+      "recovery_owner": "founder",
+      "status": "secret-recorded"
+    },
+    {
+      "artifacts": [],
+      "classification": "authoritative-state",
+      "footprint_bytes": 266555069,
+      "id": "docker-volumes",
+      "mode": "0701",
+      "notes": "buzz git-data volumes both hives + bnr-albyhub (Alby Hub LND state is funds-adjacent authoritative \u2014 never pruned)",
+      "owner_group": "root",
+      "owner_uid": 0,
+      "owner_user": "root",
+      "path": "/var/lib/docker/volumes",
+      "restart": {
+        "executable": "/usr/bin/dockerd",
+        "executable_sha256": "5e3505b18446d5e1b0841cf0cdad340260879b82b3a8bc49443adeb4fccf1046",
+        "unit": "docker.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 4318256014,
+      "id": "containerd-images",
+      "mode": "0700",
+      "notes": "image store; unused set rust:1.95-bookworm caddy:2-builder caddy:2-alpine alpine curlimages/curl busybox ~2.6G reclaimable 2026-09-07 (re-pullable)",
+      "owner_group": "root",
+      "owner_uid": 0,
+      "owner_user": "root",
+      "path": "/var/lib/containerd",
+      "restart": {
+        "executable": null,
+        "unit": "containerd.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "rebuildable-index-cache",
+      "footprint_bytes": 1426063360,
+      "id": "systemd-journal",
+      "mode": "2755",
+      "notes": "1.2G at census; vacuum policy 300M recent kept",
+      "owner_group": "systemd-journal",
+      "owner_uid": 0,
+      "owner_user": "root",
+      "path": "/var/log/journal",
+      "restart": {
+        "executable": null,
+        "unit": "systemd-journald.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 44216120,
+          "kind": "binary",
+          "path": "/home/ubuntu/.local/bin/ant",
+          "sha256": "f66ad25076a50ce471a94220dfcd239e78b7adbe12781cef010b56adfca75086",
+          "status": "ok"
+        }
+      ],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 476370924,
+      "id": "ant-cli-home",
+      "mode": "0775",
+      "notes": "autonomi CLI + node dirs; devnet spill precedent reclaimed 2026-09-04",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/home/ubuntu/.local",
+      "restart": {
+        "executable": "/home/ubuntu/.local/bin/ant",
+        "executable_sha256": "f66ad25076a50ce471a94220dfcd239e78b7adbe12781cef010b56adfca75086",
+        "method": "manual (ant node daemon run)",
+        "unit": null
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "authoritative-state",
+      "footprint_bytes": 115617824,
+      "id": "wallet-relay",
+      "mode": "0755",
+      "notes": "bzDiD/wallet relay home \u2014 conservative authoritative classification, not pruned this session",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/opt/buzz-bn",
+      "restart": {
+        "executable": null,
+        "unit": "wallet-relay.service",
+        "unit_file_present": true
+      },
+      "status": "ok"
+    },
+    {
+      "artifacts": [],
+      "classification": "reproducible-artifact",
+      "footprint_bytes": 581179333,
+      "id": "vending-probe",
+      "mode": "0775",
+      "notes": "probe workspace 892M; restart dependency UNKNOWN \u2014 explicit, not pruned this session",
+      "owner_group": "ubuntu",
+      "owner_uid": 1001,
+      "owner_user": "ubuntu",
+      "path": "/home/ubuntu/vending-probe",
+      "restart": {
+        "executable": null,
+        "method": "unknown",
+        "unit": null
+      },
+      "status": "ok"
+    }
+  ],
+  "scan_errors": [],
+  "tool": "recovery-inventory"
+}

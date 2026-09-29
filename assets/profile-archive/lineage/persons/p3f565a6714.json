@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f565a6714",
+ "bnr": "bnr://skaists.dev/blood/p3f565a6714",
+ "identity": {
+  "name": "Elisabeth Gram",
+  "lifespan": "1670–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L26T-XPX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pfa51b5c582",
+    "name": "Anna Catherine Engel"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L26T-XPX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

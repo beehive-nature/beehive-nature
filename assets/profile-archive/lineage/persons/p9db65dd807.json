@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9db65dd807",
+ "bnr": "bnr://skaists.dev/blood/p9db65dd807",
+ "identity": {
+  "name": "Prudence Thurlow",
+  "lifespan": "1701–1744",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ19-MHM"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "18 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "18 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa3a9f819d0",
+    "name": "Jonathan Thurlow",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8f8f5d0191",
+    "name": "Mary Merrill",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9220a51dcc",
+    "name": "Jonathan Hadlock"
+   },
+   {
+    "id": "p254f9ddf59",
+    "name": "Joseph Hadlock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc0876ac81",
+    "name": "Joseph Hadlock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ19-MHM",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 18,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

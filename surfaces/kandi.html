@@ -4,7 +4,8 @@
      your arm; kandi made FOR you never re-trades; nothing is stored anywhere but this
      browser; the string is a checksum, not a signature — kandi trust is floor trust. -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf7f0">
 <title>the kandi bar — make it, name it, gift it</title>
 <style>
 :root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;
@@ -76,26 +77,318 @@ button.act:hover{background:var(--r);color:#0a0612}
 .gv.open{display:block}
 .err{color:var(--amber);font-size:10.5px;margin-top:6px;min-height:16px}
 .given{color:var(--faint);font-size:10px;line-height:1.8;margin-top:10px}
+.giftphase .gp{display:none}
+.giftphase[data-phase="prepared"] .gp[data-phase="prepared"],
+.giftphase[data-phase="copied"] .gp[data-phase="copied"],
+.giftphase[data-phase="copy-needed"] .gp[data-phase="copy-needed"],
+.giftphase[data-phase="completed"] .gp[data-phase="completed"]{display:block}
+.giftphase .gp b{color:var(--ok);letter-spacing:.04em}
+.giftphase .gp .why{color:var(--dim);font-size:10.5px;margin-top:4px;line-height:1.7}
+#giftstr.copy-needed{user-select:text;-webkit-user-select:text}
+.limits{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;color:var(--dim);font-size:11px;line-height:1.7}
+.limits summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.rcvmeta{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.6}
 footer{max-width:860px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 code{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.hs{transition:none}}
-</style></head><body>
+/* three presentations live on this page; gift engine is one */
+body[data-reg="bee"][data-bee-theme="shared"] #comet{display:none}
+body[data-reg="bee"][data-bee-theme="shared"] h1{text-shadow:none}
+body[data-reg="bee"][data-bee-theme="shared"] button.act{background:#fff;color:#6e3fb8;border-color:#857d70}
+body[data-reg="bee"][data-bee-theme="shared"] button.act:hover{background:#a8238c;color:#fff}
+body[data-reg="bee"][data-bee-theme="shared"] .arrival .acts button.keep{background:#a8238c;color:#fff;border-color:#0c1412}
+body[data-reg="bee"][data-bee-theme="shared"] .tag.trade{border-color:#0c1412;color:#6e3fb8}
+body[data-reg="raver"] h1{font-size:clamp(24px,6vw,36px);text-shadow:0 0 28px rgba(214,85,187,.7)}
+body[data-reg="raver"] .brace svg{filter:drop-shadow(0 0 10px rgba(214,85,187,.35))}
+body[data-reg="cypherpunk"]{font-family:ui-monospace,Consolas,monospace}
+body[data-reg="cypherpunk"] .law{font-size:11px}
+/* The shared canvas needs a complete consumer palette and readable controls. */
+[hidden]{display:none!important}
+body[data-reg="bee"][data-bee-theme="shared"]{--p:#176879;--l:#9b397b;--u:#855b0b;--r:#65509a;--ok:#326b39;--amber:#855b0b;--cyan:#176879}
+body[data-reg="bee"] :is(section,.arrival,.hs,.kc){border-radius:16px}
+body[data-reg="bee"] .arrival{background:var(--panel)}
+body[data-reg="bee"] :is(.arrival .from,.arrival .note,.arrival .who,.rcvmeta,.err,.giftphase .gp .why){font-family:var(--bee-font);font-size:1rem;line-height:1.65;letter-spacing:normal;color:var(--dim)}
+body[data-reg="bee"] :is(h2,.giftphase .gp b){font-size:1.25rem;line-height:1.4;letter-spacing:normal}
+body[data-reg="bee"] :is(.kc .who,.kc .tag,.given,.hs .t){font:inherit;font-size:.875rem;line-height:1.65;letter-spacing:normal}
+body[data-reg="bee"] :is(input,textarea,button.act,.arrival .acts button){font:inherit;font-size:1rem;min-height:44px}
+body[data-reg="bee"] .pal button{width:44px;height:44px}
+body[data-reg="bee"] [style*="font-size:"]{font-size:.875rem!important;line-height:1.65!important}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important;color:#0c1412!important;font:500 1rem/1.4 system-ui,sans-serif!important}
+body[data-reg="bee"] #tbar a{min-height:44px!important;color:#0c1412!important;background:#fff!important}
+body[data-reg="bee"] #tbarMore{min-height:44px!important;color:#6e3fb8!important;background:#fff!important;border-color:#e6dfd2!important}
+body[data-reg="raver"] :is(.law,.sub,.err,.rcvmeta),body[data-reg="cypherpunk"] :is(.law,.sub,.err,.rcvmeta){font-size:1rem;line-height:1.7}
+body[data-reg="raver"] :is(.kc .who,.kc .tag,.given,.giftphase .gp .why,.hs .t),body[data-reg="cypherpunk"] :is(.kc .who,.kc .tag,.given,.giftphase .gp .why,.hs .t){font-size:.875rem}
+:is(button,input,textarea,summary,a):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
+.memory{border:1px solid var(--line);border-radius:12px;margin-top:12px;padding:12px;text-align:left}
+.memory summary{min-height:44px;cursor:pointer;color:var(--ink)}
+.memory textarea{width:100%;min-height:88px;margin-block:12px;font-size:1rem}
+.field{flex:1;min-width:140px}.field label{display:block;margin-bottom:6px;font-size:1rem}.field input{width:100%}
+/* the page end at 390 px (2026-09-26 lower-half pass): the night views read at
+   14 px (cypherpunk 13 px mono), quiet text keeps 4.5:1, every footer link and
+   control is a 44 px target. Same words, same order, in every view. */
+body:is([data-reg="raver"],[data-reg="cypherpunk"]){--faint:#8a7fa0}
+body[data-reg="raver"] [style*="font-size:"]{font-size:.875rem!important;line-height:1.65!important}
+body[data-reg="cypherpunk"] [style*="font-size:"]{font-size:.8125rem!important;line-height:1.65!important}
+body[data-reg="raver"] :is(button.act,.limits,.hs .t,.kc .tag){font-size:.875rem}
+body[data-reg="cypherpunk"] :is(button.act,.limits,.hs .t,.kc .tag){font-size:.8125rem}
+body:not([data-reg="bee"]) button.act{min-height:44px}
+body:not([data-reg="bee"]) footer{font-size:.875rem;line-height:1.9}
+body[data-reg="cypherpunk"] footer{font-size:.8125rem}
+body[data-reg="bee"] footer{font-size:.875rem;line-height:1.9}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+[style*="letter-spacing:.06em"]+.law{margin-top:6px}
+body[data-reg="raver"] h2{font-size:1rem}
+body[data-reg="cypherpunk"] h2{font-size:.875rem}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;padding:0 var(--sk-s3);box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-center{text-align:center}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding:var(--sk-s4) var(--sk-s3) 0;border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+.et-bchip{display:inline-flex;align-items:baseline;gap:var(--sk-s1);padding:0 var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-b-chip);color:var(--sk-b-value)!important;font-weight:600;white-space:nowrap}
+
+/* NEW BEE — one question at a time */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-q{margin:0;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-term i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);border-radius:0}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row{cursor:pointer}
+.et-b-row>span{display:flex;flex-direction:column;min-width:0}
+.et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small.free{color:var(--sk-verified)}
+.et-b-row[aria-pressed="true"],.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-pressed="true"] :is(small,em),.et-b-row[aria-expanded="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+.et-b-row[aria-pressed="true"] .dot{border-color:var(--sk-sovereign-strong)}
+.et-b-row[aria-pressed="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;text-align:center}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-back{align-self:flex-start;min-height:var(--sk-control-min);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;padding:0}
+.et-b-term{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+.et-b-term:last-child{border-bottom:0}
+.et-b-term i{width:36px;height:36px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font-style:normal}
+.et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-term span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+.et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+.et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+.et-b-card p{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — everything through art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
+.et-r-tiles button{min-height:108px;padding:var(--sk-s2);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);font:700 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s);text-align:center}
+.et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-hold{position:relative;width:216px;height:216px;margin:0 auto}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.et-r-hold .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+.et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:0}
+.et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+.et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.et-r-art .seg,.et-r-tiles button,.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the pipeline is the interface; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab tr.pick{cursor:pointer}
+.et-c-tab tr.pick:hover td,.et-c-tab tr[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr[aria-selected="true"] td:first-child{color:var(--sk-you)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .gd{color:var(--sk-guard)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .gd{color:var(--sk-guard)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+/* the kandi bar's own front details: the bar styles bare section/h2/button, so the front names itself */
+section#eternal{background:none;border:0;border-radius:0;padding:0;margin:0 auto var(--sk-s2);max-width:30rem}
+main>.et-archive-h{padding-inline:0;letter-spacing:0}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-c-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+#eternal button:disabled{opacity:1;cursor:default}
+.et-b-rowt{flex:1}
+.et-b-people{border-bottom:1px solid var(--sk-line-soft)}
+.et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-top:1px solid var(--sk-line-soft)}
+.et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+.et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+.et-r-legend .lg-right{background:var(--sk-biomass)}.et-r-legend .lg-cross{background:var(--sk-ai)}.et-r-legend .lg-left{background:var(--sk-sovereign)}.et-r-legend .lg-given{border:1.5px dashed var(--sk-ink-mut)}
+.et-r-art .bead,.et-r-art .make{cursor:pointer}
+.et-c-tab tr.names td{height:auto;padding:var(--sk-s1) var(--sk-s2);background:var(--sk-sovereign-tint);color:var(--sk-ink);font:500 12px/1.45 var(--sk-font-mono);word-break:break-all}
+
+/* ── THE WHOLE PAGE, dressed per register: the bar's own variables mapped onto skaists ── */
+html body[data-reg="bee"],html body[data-reg="bee"][data-bee-theme="shared"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+html body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+html body[data-reg="bee"] main>section:not(#eternal){border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
+html body[data-reg="bee"][data-bee-theme="shared"] button.act{background:var(--sk-bg-card);color:var(--sk-sovereign);border-color:var(--sk-ink);border-radius:var(--sk-radius)}
+html body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign-soft);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;text-shadow:none}
+html body[data-reg="raver"] main>section:not(#eternal){border-radius:var(--sk-radius-xl)}
+html body[data-reg="raver"] button.act{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-sovereign);border-radius:var(--sk-radius-pill);font-family:var(--sk-font-raver-body);font-size:14px}
+html body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign-soft);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;text-shadow:none}
+html body[data-reg="cypherpunk"] main>section:not(#eternal){border-radius:var(--sk-radius-sm)}
+html body[data-reg="cypherpunk"] button.act{background:transparent;color:var(--sk-ai);border-color:var(--sk-ai);border-radius:var(--sk-radius-sm);font-size:13px}
+</style>
+<link rel="stylesheet" href="skaists.css">
+</head><body data-reg="bee" data-bee-theme="shared">
 <main>
 <div class="arrival" id="arrival"></div>
 <canvas id="comet" aria-hidden="true"></canvas>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the bar's own committed arms, read through window.__kandi) drives
+     all three, so the facts cannot drift; each register has its own layout, graphic, gesture and
+     voice. Nothing here strings, gifts or keeps a piece: "make" opens the composer below, and
+     "gift it" presses that piece's own gift button, so every write stays with the bar's locked
+     transaction engine. -->
+<section id="eternal" aria-label="your kandi">
+
+  <!-- NEW BEE — a calm room: your arms as plain rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark" data-etk="et.kd.the-kandi-bar">the kandi bar</div>
+      <h2 class="et-b-h" data-etk="et.kd.your-kandi">your kandi</h2>
+      <div class="et-b-lede" data-etk="et.kd.string-beads-into-a-bracelet">string beads into a bracelet, name it, and hand it to a friend. it lives in this browser. no account.</div>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.kd.what-someone-made-for-you-st">what someone made for you stays yours. it never trades.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-etk="et.kd.reading-your-arms">reading your arms…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeMake" data-etk="et.kd.make-a-kandi">make a kandi</button>
+        <button type="button" class="et-b-link" id="etBeeRcv" data-etk="et.kd.someone-gave-you-one-open-it">someone gave you one? open it here</button>
+        <div class="et-b-foot" data-etk="et.kd.nothing-leaves-your-arm-unti">nothing leaves your arm until you say you handed it over.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — every piece is a bead on one big bracelet: right arm, crossing, left arm, handed over -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your arms</h2><span class="et-r-hint" id="etRaverHint">tap a bead</span></div>
+    <svg class="et-r-art" id="etBrace" viewBox="-200 -200 400 400" role="group" aria-label="every piece you hold is one bead on this bracelet"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-right"></i>right · trades</span><span><i class="lg-cross"></i>crossing</span><span><i class="lg-left"></i>left · keeps</span><span><i class="lg-given"></i>handed over</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo">make one</button>
+    <button type="button" class="et-r-ghost" id="etRaverMake" data-etk="et.kd.string-a-new-one">string a new one</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the arms as a table, the handshake as a pipeline, the store as a receipt -->
+  <div class="et-c">
+    <div class="et-c-path" data-etk="et.kd.kandi-localstorage-bkandi">kandi://localStorage/bkandi</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">left arm · rcv = true → gift, cross = refused <b data-etk="et.kd.by-code">by code</b></div>
+    <table class="et-c-tab"><thead><tr><th>arm</th><th>by → for</th><th>beads</th></tr></thead><tbody id="etArms"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.kd.handshake-pipeline-knd1">handshake pipeline · KND1</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo">compose</button>
+    <h3 class="et-c-h" data-etk="et.kd.store-read-from-this-browser">store · read from this browser, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.kd.verify-no-trust-in-this-page">verify · no trust in this page needed</div>
+      <ol><li data-etk="et.kd.localstorage-getitem-bkandi">localStorage.getItem('bkandi') → the rows above</li><li data-etk="et.kd.fnv-1a-32-over-knd1-maker-fo">fnv-1a/32 over KND1|maker|for|ts36|beads, base36 == the sixth field</li><li data-etk="et.kd.a-checksum-not-a-signature-i">a checksum, not a signature: it catches a typo, not a forgery</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyRcv" data-etk="et.kd.paste-a-string">paste a string</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" target="_blank" rel="noopener noreferrer">fork the template ↗ <span class="et-sr" data-etk="et.kd.opens-in-a-new-tab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.kd.the-whole-bar">the whole bar</h2>
+
 <header>
   <h1>🍬 the kandi bar</h1>
   <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it, cross it, show it</span></div>
-  <div class="sub" data-reg="bee">This is the mUseUm's ritual wing, alive — a social page with no
-  inbox. String beads, spell a word, name who it's for, then <b>gift</b> it, <b>cross</b> it, or
-  <b>show</b> it. Each one hands you a short line of text and you carry it in whatever chat you
-  already use, so there is no account here and nobody to sign up with. Your arms live in this
-  browser's own storage and no kandi is ever uploaded. The page makes no outside request at all
-  unless you ask for one: the rails badge at the bottom shows a status checked when this page was
-  built, and only reaches a public chain node if you tap its ↻ — which sends no kandi and no name,
-  though that node does see your address. The one other request is the translation file, fetched
-  from this same site if you pick a language other than English. Your first kandi is already
-  waiting on your left arm.</div>
+  <div class="sub" data-reg="bee">String beads, name it, then hand a line of text to someone you
+  already talk to. Nothing leaves your arm until you say you handed it over. Show is a preview
+  link, not proof they are the only holder. This browser keeps your arms; there is no inbox and
+  no account. Your first kandi is already on your left arm.</div>
   <div class="sub" data-reg="raver">make it. name it. do the handshake. peace, love, unity — and on
   respect, the kandi crosses. right arm trades, left arm keeps, and the crossing doesn't move until
   something lands in your hand. no feed, no room, nobody's inbox — the string goes hand to hand down
@@ -118,29 +411,32 @@ code{color:var(--ink)}
   tap. State is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
   <code>bregister</code>, <code>blang</code>, <code>btranslated_pref</code>, <code>bnr_rails_pin</code>),
   no cookies, no sessionStorage, no IndexedDB, and no XHR, WebSocket, sendBeacon or analytics tag
-  anywhere in the chain. Gift, cross and show all terminate in the OS clipboard — the carrying is done
+  anywhere in the chain.   Gift, cross and show all terminate in the OS clipboard — the carrying is done
   by the person, and <b>&quot;show it&quot; copies a <code>#k=</code> fragment, not a query</b>, so a
   shared piece never enters the host's request log; it does still put the maker and made-FOR names in
   the opener's address bar and history, because the piece IS its seed. Arriving with a fragment only
   pre-fills the receive box and never writes storage. No DM transport, no relay, no inbox, no video:
-  open, not built, and said plainly. The table below is every path this audit found — not a proof that
-  none was missed, which is why view source is in the footer. Names are validated to a strict charset
-  and rendered as text, never markup. Digital kandi copies — the culture's answer is the
-  retirement rule, so gifting removes the piece from your arm and keeps a memory line, the same
-  shape as the corpus's withdrawal law.</div>
+  open, not built, and said plainly. Clipboard write success is not a receive receipt. Animation
+  never retires a piece; a deliberate local handoff writes the full export to the memory line first.
+  A Show link is a copyable preview, not exclusive gift evidence. Crossing is two local handoffs,
+  never an escrow. Names may use letters from any language; bead letters stay <code>[0-9A-Z]</code>
+  and KND1 is not silently reinterpreted. Names are rendered as text, never markup. Digital kandi
+  copies — the culture's answer is the retirement rule, so a completed gift removes the piece from
+  your arm and keeps a memory line, the same shape as the corpus's withdrawal law.</div>
 </header>
 
 <section>
   <h2>⚗ THE COMPOSER — string it</h2>
   <div class="law"><b>Beads:</b> tap colors, or type a word — letters become letter-beads.
   <b>Then name it:</b> who you are (optional), and who it's for (only if it's made <i>for</i>
-  someone — the dedication rides with it forever). Either way it strings onto your <b>right
+  someone — the dedication rides with the copy they receive). Either way it strings onto your <b>right
   arm</b>, because it is yours until you gift it; the made-FOR law binds the copy they receive.</div>
   <div class="pal" id="pal" aria-label="bead colors"></div>
   <div style="font-size:10px;color:var(--faint);margin-top:6px;line-height:1.6">Letters are white beads, like the
   real thing — tap a colour to thread one in, or turn on <b>thread colour</b> and every word comes out alternating.</div>
   <div class="row">
-    <input id="word" placeholder="word beads (A–Z)" maxlength="12" style="flex:1;min-width:140px">
+    <div class="field"><label for="word">Word beads (A–Z)</label>
+    <input id="word" placeholder="word beads (A–Z only)" maxlength="12" autocomplete="off"></div>
     <button class="act" id="addword">add word</button>
     <button class="act" id="thread" type="button" aria-pressed="false"
       title="letters are white beads, like the real thing — thread a colour between them">○ thread colour</button>
@@ -149,8 +445,10 @@ code{color:var(--ink)}
   </div>
   <div class="brace" id="preview" aria-label="bracelet preview"></div>
   <div class="row">
-    <input id="maker" placeholder="made by (optional)" maxlength="24" style="flex:1;min-width:140px">
-    <input id="madefor" placeholder="made FOR (optional — rides with the gift)" maxlength="24" style="flex:1;min-width:180px">
+    <div class="field"><label for="maker">Your name (optional)</label>
+    <input id="maker" placeholder="made by (optional — any language)" maxlength="24" autocomplete="off"></div>
+    <div class="field"><label for="madefor">Made for (optional)</label>
+    <input id="madefor" placeholder="made FOR (optional — rides with the gift)" maxlength="24" autocomplete="off"></div>
     <button class="act" id="stringit">✚ string it onto my right arm</button>
   </div>
   <div class="err" id="cerr"></div>
@@ -162,6 +460,7 @@ code{color:var(--ink)}
   right arm; keepsakes and gifts received ride the left and <b>never re-trade</b>; never ask for
   a specific piece; and <b>what you gift leaves your arm</b> — a memory line stays, history kept.</div>
   <div id="rescuenote" style="display:none;font-size:10.5px;color:var(--amber);border:1px dashed #5c4318;padding:7px 9px;margin-top:10px;line-height:1.6"></div>
+  <div class="err" id="armerr" aria-live="polite"></div>
   <div style="font-size:10.5px;color:var(--ok);letter-spacing:.06em;margin-top:6px">RIGHT ARM — tradeable, and gifts waiting to go</div>
   <div class="karm" id="right"></div>
   <div style="font-size:10.5px;color:var(--amber);letter-spacing:.06em;margin-top:12px">LEFT ARM — keepsakes</div>
@@ -169,11 +468,11 @@ code{color:var(--ink)}
 
   <div style="font-size:10.5px;color:var(--u);letter-spacing:.06em;margin-top:14px">THE CROSSING — offered, and only for another piece</div>
   <div class="law" data-reg="bee">Some kandi you would never give away. Offer it to the crossing
-  instead: it stays yours until somebody puts a piece in your hand, and then the two swap at once.
-  Nothing leaves your arm for nothing.</div>
+  instead: it stays yours until you paste their piece here. The swap happens in this browser only
+  — there is no escrow and no one in the middle.</div>
   <div class="law" data-reg="raver">on respect, the kandi crosses. this is the arm for the piece you
-  would never hand over — it does not move until something lands. what comes back rides the left arm,
-  forever, because it was given to you.</div>
+  would never hand over — it does not move until something lands. what comes back rides the left arm
+  in this browser, because it was given to you.</div>
   <div class="law" data-reg="cypherpunk">Mechanics, stated plainly: a crossing is TWO one-way handoffs
   the page performs locally, not an escrow — there is no third party and nothing to trust but the floor.
   Your side completes at the instant you paste theirs: your piece retires to the memory line and theirs
@@ -183,21 +482,24 @@ code{color:var(--ink)}
   <div class="karm" id="cross"></div>
   <div class="xpanel" id="xpanel">
     <div class="law">Hand them <b>your</b> string, paste <b>theirs</b>. The swap happens the moment
-    you paste — yours retires to the memory line, theirs rides your left arm forever.</div>
+    you paste — yours retires to the memory line, theirs rides your left arm in this browser
+    and never re-trades.</div>
     <div style="font-size:10px;color:var(--faint);margin-top:8px">YOURS — hand this over</div>
-    <textarea id="xmine" readonly style="width:100%;min-height:44px;resize:vertical"></textarea>
+    <textarea id="xmine" aria-label="Your gift text" readonly style="width:100%;min-height:44px;resize:vertical"></textarea>
     <div style="font-size:10px;color:var(--faint);margin-top:8px">THEIRS — paste what they are crossing to you</div>
-    <textarea id="xtheirs" placeholder="KND1|…" style="width:100%;min-height:44px;resize:vertical"></textarea>
+    <textarea id="xtheirs" aria-label="Their gift text" placeholder="KND1|…" style="width:100%;min-height:44px;resize:vertical"></textarea>
     <div class="row" style="margin-top:8px"><button class="act" id="xcopy">copy mine</button><button class="act" id="xdo">complete the crossing</button><button class="act" id="xclose">close</button></div>
     <div class="err" id="xerr"></div>
   </div>
 
   <textarea id="showout" class="shout" readonly aria-label="a pointer to this kandi"></textarea>
+  <div class="err" id="showerr" aria-live="polite"></div>
+  <div class="rcvmeta" id="shownote" hidden data-i18n="kandi.show.hint">A preview link — not proof only they have it</div>
   <div class="given" id="givenlog"></div>
 </section>
 
 <section id="ceremony" style="display:none">
-  <h2>✋ THE HANDSHAKE — the gift crosses on step four</h2>
+  <h2>✋ THE HANDSHAKE — prepare the gift, then let go on purpose</h2>
   <div class="hand" id="steps">
     <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 44 L24 22 M32 44 L32 14 M24 30 Q28 26 32 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 44 L40 22 M48 44 L48 14 M40 30 Q44 26 48 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">1 · PEACE</div></div>
     <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 46 C18 36 14 24 22 18 C28 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M32 46 C46 36 50 24 42 18 C36 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">2 · LOVE</div></div>
@@ -205,30 +507,88 @@ code{color:var(--ink)}
     <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="27" width="32" height="10" rx="5" stroke="var(--r)" stroke-width="3" fill="none"/><circle cx="22" cy="45" r="3" fill="var(--p)"/><circle cx="30" cy="47" r="3" fill="var(--l)"/><circle cx="38" cy="47" r="3" fill="var(--u)"/><circle cx="46" cy="45" r="3" fill="var(--r)"/></svg><div class="t">4 · RESPECT</div></div>
   </div>
   <div class="gv" id="giftout">
-    <div class="law"><b>The kandi crosses.</b> Hand this string over — any channel is the floor.
-    It has left your arm.</div>
-    <textarea id="giftstr" readonly style="width:100%;min-height:56px;resize:vertical"></textarea>
-    <div class="row"><button class="act" id="copygift">copy the kandi</button><button class="act" id="donegift">close</button></div>
+    <div class="law">
+      <span data-reg="bee">Copy this, hand it to them, then tap that you handed it over. It stays
+      on your arm until then.</span>
+      <span data-reg="raver">the kandi is ready to cross — it does not leave your wrist until you
+      let go.</span>
+      <span data-reg="cypherpunk">Prepared export only. Animation does not retire. Local completion
+      writes the full KND1 to the memory line, then removes the piece. Clipboard success is not a
+      receive receipt.</span>
+    </div>
+    <div class="giftphase" id="giftphase" data-phase="prepared" aria-live="polite">
+      <div class="gp" data-phase="prepared">
+        <b data-reg="bee" data-i18n="kandi.gift.ready">Ready to hand over</b>
+        <span class="why" data-reg="raver">ready in your hands — still on your wrist</span>
+        <span class="why" data-reg="cypherpunk">prepared — export ready; this arm unchanged</span>
+      </div>
+      <div class="gp" data-phase="copied">
+        <b data-reg="bee" data-i18n="kandi.gift.copied">Copied here</b>
+        <span class="why" data-reg="raver">copied on this machine — they still have to catch it</span>
+        <span class="why" data-reg="cypherpunk">clipboard write succeeded on this device; that is not delivery and not a receive receipt</span>
+      </div>
+      <div class="gp" data-phase="copy-needed">
+        <b data-reg="bee" data-i18n="kandi.gift.copyNeed">Copy this yourself</b>
+        <span class="why" data-reg="raver">the machine would not copy it — the string is still here to take by hand</span>
+        <span class="why" data-reg="cypherpunk">clipboard rejected or missing — select the export below; recovery is the same KND1 text</span>
+      </div>
+      <div class="gp" data-phase="completed">
+        <b data-reg="bee" data-i18n="kandi.gift.done">Handed over here</b>
+        <span class="why" data-reg="raver">let go on this arm — a memory stays; their keep is still theirs to do</span>
+        <span class="why" data-reg="cypherpunk">local completion: full export stored on the memory line, then retired from the right arm. The other browser must Keep.</span>
+      </div>
+    </div>
+    <textarea id="giftstr" aria-label="Prepared gift text" readonly style="width:100%;min-height:56px;resize:vertical"></textarea>
+    <div class="err" id="gerr" aria-live="polite"></div>
+    <div class="row">
+      <button class="act" id="copygift" type="button">copy the kandi</button>
+      <button class="act" id="finishgift" type="button" data-i18n="kandi.gift.finish">I handed it over</button>
+      <button class="act" id="donegift" type="button">close</button>
+    </div>
   </div>
 </section>
 
 <section>
   <h2>🤲 RECEIVE — through interlocked hands</h2>
-  <div class="law">Paste a kandi string somebody handed you. It lands on your <b>left arm</b> —
-  received kandi keeps, never re-trades.</div>
+  <div class="law">Paste a kandi string somebody handed you. Look first. Keep is a second tap —
+  received kandi then rides your <b>left arm</b> and never re-trades.</div>
   <div class="row">
-    <textarea id="rcv" placeholder="KND1|…" style="flex:1;min-width:220px;min-height:44px;resize:vertical"></textarea>
-    <button class="act" id="rcvgo">receive</button>
+    <textarea id="rcv" aria-label="Gift text to preview" placeholder="KND1|…" style="flex:1;min-width:220px;min-height:44px;resize:vertical"></textarea>
+    <button class="act" id="rcvgo" type="button">look at it</button>
   </div>
-  <div class="err" id="rerr"></div>
+  <div class="gv" id="rcvprev">
+    <div class="law">
+      <span data-reg="bee" data-i18n="kandi.rcv.look">Look first, then keep</span>
+      <span data-reg="raver">this is the piece in your hands — keep it only if you want it on the left</span>
+      <span data-reg="cypherpunk">decode-only preview. Keep writes <code>rcv:true</code> to <code>S.left</code>. Same KND1 is idempotent. Show <code>#k=</code> is not exclusive title.</span>
+    </div>
+    <div id="rcvpiece" class="brace"></div>
+    <div class="rcvmeta" id="rcvmeta"></div>
+    <div class="row">
+      <button class="act" id="rcvkeep" type="button">keep it — onto my left arm</button>
+      <button class="act" id="rcvcancel" type="button">not now</button>
+    </div>
+  </div>
+  <div class="err" id="rerr" aria-live="polite"></div>
 </section>
+<details class="limits" id="kandi-limits" data-view-disclosure="limits">
+  <summary>Limits of this bar</summary>
+  <div data-reg="bee">This page never sends a kandi to anyone. You copy text and carry it. A Show
+  link is a preview, not proof only they have it. Another tab of this same browser can change what
+  is saved here.</div>
+  <div data-reg="raver">no inbox, no escrow, no take-backs — the string is a copy you walk across
+  the floor.</div>
+  <div data-reg="cypherpunk">No remote atomic exchange. Crossing is two local handoffs. Clipboard
+  write ≠ received. Show <code>#k=</code> is a copyable preview, not exclusive title. Checksum ≠
+  signature. <code>localStorage</code> only. Same-origin writes use a Web Lock, a fresh validated snapshot and one storage write. Browsers without Web Locks show saved arms read-only. Older open versions do not take this lock: reload every kandi tab after an upgrade. Animation does not commit retirement.</div>
+</details>
 </main>
 <footer>
   🍬 your kandi lives in this browser — no server holds one · a kandi string is plain text: whoever
   sees it reads the names in it · a checksum, not a signature · no outside request unless you tap ↻ ·
   <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
   <a href="hardware/build.html">🔧 the festival</a> ·
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" target="_blank" rel="noopener noreferrer">view source ↗</a> ·
   <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 <script>
@@ -236,51 +596,154 @@ code{color:var(--ink)}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#ece5f7','#5b4a86','#f4e04d'];
-var NAMERE=/^[A-Za-z0-9 .·'’-]{0,24}$/;
+var NAMEMAX=24;
 var BEADRE=/^[0-9A-Z]{1,40}$/;
+var NAME_OK;
+try{ NAME_OK=/^[\p{L}\p{M}\p{N} .·'’-]+$/u; }
+catch(e){ NAME_OK=/^[A-Za-z0-9 .·'’-]+$/; }
 
-/* ---- state: this browser only, honest shape ---- */
-function load(){ try{ var s=JSON.parse(localStorage.getItem('bkandi')||'null');
-  if(s&&s.v===1&&Array.isArray(s.right)&&Array.isArray(s.left)&&Array.isArray(s.given)) return s;
- }catch(e){} return null; }
-function save(){ try{ localStorage.setItem('bkandi',JSON.stringify(S)); }catch(e){} }
-/* rescue pieces stranded by the made-FOR bug: left arm + rcv:false means you
-   composed it here and it was never received, so it belongs on your right
-   arm. rcv:true is left alone — that kandi really was given to you. */
-function rescueStranded(st){
-  if(!st||!Array.isArray(st.left)||!Array.isArray(st.right)) return st;
-  var keep=[], moved=0;
-  st.left.forEach(function(k){
-    if(k && k.rcv===false){ delete k.rcv; st.right.push(k); moved++; }
-    else keep.push(k);
-  });
-  if(moved) st.left=keep;
-  _rescued=moved;
-  return st;
-}
+function say(id,msg){ var n=$(id); if(n) n.textContent=msg||''; }
+
+/* ---- state: locked local transactions; no startup write ---- */
+var storeBusy=false;
 var _rescued=0;
-var S=rescueStranded(load());
-/* the crossing arrives after some people already have a save; default it
-   rather than widening load()'s shape check, which would refuse — and
-   therefore erase — every arm strung before tonight. */
-if(S && !Array.isArray(S.cross)) S.cross=[];
-if(S&&_rescued) save();
-if(!S){ /* first visit: the mUseUm gifts every guest their first kandi */
-  S={v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:Date.now(),rcv:true}],cross:[],given:[]};
-  save();
+var welcomeTs=Date.now();
+function isStoreBusy(){ return storeBusy; }
+function cloneK(k){ return JSON.parse(JSON.stringify(k)); }
+function pieceKey(k){ return encode(k); }
+function findOn(arr,key){
+  for(var i=0;i<arr.length;i++) if(pieceKey(arr[i])===key) return i;
+  return -1;
 }
+function defaultState(){
+  return {v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:welcomeTs,rcv:true}],cross:[],given:[]};
+}
+function recordObject(value){ return !!value && typeof value==='object' && !Array.isArray(value); }
+function validName(value){ return typeof value==='string' && clean(value)===value; }
+function validTime(value){ return Number.isSafeInteger(value) && value>0; }
+function validFlag(record,name){ return record[name]===undefined || typeof record[name]==='boolean'; }
+function validPiece(k){
+  return recordObject(k) && validName(k.maker) && validName(k.madefor) &&
+    typeof k.beads==='string' && BEADRE.test(k.beads) && validTime(k.ts) &&
+    validFlag(k,'rcv') && validFlag(k,'crossed');
+}
+function validMemory(g){
+  if(!recordObject(g) || typeof g.beads!=='string' || !BEADRE.test(g.beads) ||
+     !validName(g.to) || !validTime(g.ts) || !validFlag(g,'crossed')) return false;
+  // Legacy memories have no export. Never invent their missing maker or time.
+  if(g.export===undefined) return g.maker===undefined && g.madefor===undefined && g.pieceTs===undefined;
+  if(typeof g.export!=='string' || !validName(g.maker) || !validName(g.madefor) || !validTime(g.pieceTs)) return false;
+  var original={maker:g.maker,madefor:g.madefor,beads:g.beads,ts:g.pieceTs};
+  return encode(original)===g.export;
+}
+function validateState(st){
+  return recordObject(st) && st.v===1 && Array.isArray(st.right) && Array.isArray(st.left) &&
+    Array.isArray(st.given) && (st.cross===undefined || Array.isArray(st.cross)) &&
+    st.right.every(validPiece) && st.left.every(validPiece) && (st.cross||[]).every(validPiece) &&
+    st.given.every(validMemory);
+}
+function parseState(raw){
+  try{ var st=JSON.parse(raw); return validateState(st)?st:null; }
+  catch(e){ return null; }
+}
+function rescueStranded(st){
+  var moved=0;
+  st.left=st.left.filter(function(k){
+    if(k.rcv!==false) return true;
+    delete k.rcv; st.right.push(k); moved++; return false;
+  });
+  return moved;
+}
+function readStoreSnapshot(){
+  // A denied read is an error, never evidence of an empty store.
+  var raw=localStorage.getItem('bkandi');
+  if(raw===null) return {raw:null,state:defaultState(),rescued:0};
+  var st=parseState(raw);
+  if(!st) throw new Error('saved arms cannot be read safely — this bar did not overwrite them');
+  if(st.cross===undefined) st.cross=[];
+  return {raw:raw,state:st,rescued:rescueStranded(st)};
+}
+function storeFailure(error){
+  var detail=error && error.message ? error.message : 'the storage request failed';
+  say('armerr','this browser would not save — '+detail);
+}
+var S=defaultState();
+try{
+  var initialStore=readStoreSnapshot();
+  S=initialStore.state; _rescued=initialStore.rescued;
+}catch(e){ storeFailure(e); }
+
+async function commitChange(mutator){
+  if(storeBusy){ say('armerr','another arm action is still saving — wait for it, then try again'); return false; }
+  try{
+    if(typeof navigator==='undefined' || !navigator.locks || typeof navigator.locks.request!=='function' ||
+       typeof AbortSignal==='undefined' || typeof AbortSignal.timeout!=='function'){
+      say('armerr','this browser cannot safely coordinate arm saves — your draft stays here; saved arms are read-only');
+      return false;
+    }
+  }catch(e){ storeFailure(e); return false; }
+  if(typeof mutator!=='function'){ storeFailure(new Error('the arm action is unavailable')); return false; }
+  storeBusy=true;
+  try{
+    await navigator.locks.request('bnr-kandi-store',{signal:AbortSignal.timeout(3000)},function(){
+      var latest=readStoreSnapshot();
+      var candidate=cloneK(latest.state);
+      var result=mutator(candidate);
+      // The lock covers a short synchronous mutation and one setItem. Async work
+      // (clipboard, animation, UI) belongs outside the transaction.
+      if(result && typeof result.then==='function'){
+        Promise.resolve(result).catch(function(){});
+        throw new Error('the arm action must finish inside its storage lock');
+      }
+      if(result===false) throw new Error('the arm action was refused; the saved arms are unchanged');
+      if(!validateState(candidate)) throw new Error('the arm action produced an invalid record; the saved arms are unchanged');
+      var bytes=JSON.stringify(candidate);
+      var committed=parseState(bytes);
+      if(!committed) throw new Error('the arm action could not be represented safely; the saved arms are unchanged');
+      if(bytes!==latest.raw) localStorage.setItem('bkandi',bytes);
+      // No rollback: publish only the successfully committed private candidate.
+      S=committed; _rescued=Math.max(_rescued,latest.rescued);
+    });
+  }catch(e){
+    storeFailure(e);
+    return false;
+  }finally{ storeBusy=false; }
+  say('armerr','');
+  arms();
+  return true;
+}
+function initializeStore(){ return commitChange(function(){}); }
+window.addEventListener('storage',function(e){
+  if(e.key!=='bkandi' && e.key!==null) return;
+  try{
+    // Event bytes may already be stale. Replace from the latest committed
+    // snapshot; unioning old arm arrays can undo a completed Take back.
+    var latest=readStoreSnapshot();
+    S=latest.state; _rescued=latest.rescued;
+    say('armerr','');
+    arms();
+    if(typeof giving!=='undefined' && giving && giving.phase!=='completed' && findOn(S.right,giving.key)<0){
+      say('gerr','that piece is no longer on this arm — a stale gift was not completed');
+    }
+  }catch(e){ storeFailure(e); }
+});
 
 /* ---- codec: KND1|maker|for|ts36|beads|fnv — checksum, not signature ---- */
 function fnv(str){ var h=0x811c9dc5;
   for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; }
   return h.toString(36); }
-function clean(s){ s=String(s||'').replace(/\|/g,'').trim();
-  return NAMERE.test(s)?s:null; }
+function clean(s){
+  s=String(s==null?'':s);
+  if(/\|/.test(s) || /[\u0000-\u001F\u007F]/.test(s)) return null;
+  s=s.trim();
+  if(s.length>NAMEMAX) return null;
+  if(!s) return '';
+  return NAME_OK.test(s)?s:null;
+}
 function encode(k){
   var payload='KND1|'+(k.maker||'')+'|'+(k.madefor||'')+'|'+k.ts.toString(36)+'|'+k.beads;
   return payload+'|'+fnv(payload); }
-/* names are rendered as TEXT, never markup — the estate's charset check
-   already refuses most of it, but the arrival builds innerHTML, so escape. */
+/* names are rendered as TEXT, never markup — the arrival builds innerHTML, so escape. */
 function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function decode(str){
@@ -290,7 +753,7 @@ function decode(str){
   if(maker===null||madefor===null) return {err:'a name carries characters this bar refuses'};
   if(!BEADRE.test(p[4])) return {err:'the bead string is not [0-9A-Z] (1–40 beads)'};
   var ts=parseInt(p[3],36);
-  if(!isFinite(ts)||ts<=0) return {err:'the timestamp does not parse'};
+  if(!/^[0-9a-z]+$/.test(p[3])||!Number.isSafeInteger(ts)||ts<=0) return {err:'the timestamp does not parse'};
   var payload=p.slice(0,5).join('|');
   if(fnv(payload)!==p[5]) return {err:'checksum mismatch — the string was altered or mistyped'};
   return {maker:maker,madefor:madefor,beads:p[4],ts:ts};
@@ -315,6 +778,7 @@ function braceSVG(beads,scale){
 var draft=[];
 var threadOn=false, threadCol=null, threadWalk=0;
 COLS.forEach(function(c,i){ var b=document.createElement('button');
+  b.type='button';
   b.style.background=c; b.title='bead '+i; b.setAttribute('aria-label','color bead '+i);
   b.addEventListener('click',function(){
     threadCol=i;                      /* the last colour you touched is the one you thread */
@@ -343,30 +807,48 @@ function threadWord(letters){
   return out;
 }
 $('addword').onclick=function(){
-  var w=$('word').value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,12);
-  if(!w){ $('cerr').textContent='letters A–Z only'; return; }
-  if(draft.length+w.length>40){ $('cerr').textContent='a bracelet caps at 40 beads — honest wrists'; return; }
+  var raw=String($('word').value||'');
+  var trimmed=raw.trim();
+  var bad=[];
+  for(var i=0;i<trimmed.length;i++){
+    if(!/[A-Za-z]/.test(trimmed[i])) bad.push(trimmed[i]);
+  }
+  if(bad.length){
+    say('cerr','bead letters are A–Z only. These cannot be beads: '+bad.join(' ')+' — names can use them; word beads cannot.');
+    return;
+  }
+  var w=trimmed.toUpperCase();
+  if(!w){ say('cerr','letters A–Z only'); return; }
+  if(draft.length+w.length>40){ say('cerr','a bracelet caps at 40 beads — honest wrists'); return; }
   var beadsIn=threadWord(w.split(''));
-  if(draft.length+beadsIn.length>40){ $('cerr').textContent='forty beads is the string — threading this word would overflow it'; return; }
-  draft=draft.concat(beadsIn); $('word').value=''; $('cerr').textContent=''; paint(); };
+  if(draft.length+beadsIn.length>40){ say('cerr','forty beads is the string — threading this word would overflow it'); return; }
+  draft=draft.concat(beadsIn); $('word').value=''; say('cerr',''); paint();
+};
 $('word').addEventListener('keydown',function(e){ if(e.key==='Enter') $('addword').click(); });
 $('undo').onclick=function(){ draft.pop(); paint(); };
 $('clear').onclick=function(){ draft=[]; paint(); };
-$('stringit').onclick=function(){
-  if(!draft.length){ $('cerr').textContent='no beads yet'; return; }
-  var maker=clean($('maker').value), madefor=clean($('madefor').value);
-  if(maker===null||madefor===null){ $('cerr').textContent='names: letters, digits, spaces, .·’- — max 24'; return; }
-  var k={maker:maker,madefor:madefor,beads:draft.join(''),ts:Date.now()};
-  /* Always your right arm — a piece you made is yours until you gift it,
-     dedication and all. The made-FOR law binds the RECEIVED copy: the gift
-     lands on their left arm with rcv:true and never re-trades. Sending it
-     left here stranded it where no gift button exists. */
-  S.right.push(k);
-  save(); draft=[]; $('maker').value=''; $('madefor').value=''; $('cerr').textContent=''; paint(); arms();
+$('stringit').onclick=async function(){
+  if(!draft.length){ say('cerr','no beads yet'); return; }
+  var makerInput=$('maker').value, forInput=$('madefor').value;
+  var maker=clean(makerInput), madefor=clean(forInput);
+  if(maker===null||madefor===null){
+    say('cerr','Names may use letters from any language, digits, spaces and .·’-. Maximum 24 characters. A | or control character is refused. Bead letters stay A–Z.'); return;
+  }
+  var beads=draft.join('');
+  var k={maker:maker,madefor:madefor,beads:beads,ts:Date.now()};
+  this.disabled=true;
+  var saved=await commitChange(function(st){ st.right.push(k); });
+  this.disabled=false;
+  if(!saved){ say('cerr','This browser would not save. Your bracelet is still on the string.'); return; }
+  // Only clear the captured draft. Edits made while waiting for a lock survive.
+  if(draft.join('')===beads) draft=[];
+  if($('maker').value===makerInput) $('maker').value='';
+  if($('madefor').value===forInput) $('madefor').value='';
+  say('cerr',''); paint();
 };
 
 /* ---- the arms ---- */
-function card(k,side,idx){
+function card(k,side){
   var d=document.createElement('div'); d.className='kc';
   d.innerHTML=braceSVG(k.beads,'110px');
   var who=document.createElement('div'); who.className='who';
@@ -382,15 +864,15 @@ function card(k,side,idx){
     : (dedicated ? 'for '+k.madefor+' — gift it, do not trade it' : 'tradeable'));
   d.appendChild(tag);
   var row=document.createElement('div'); row.className='xrow';
-  function btn(label,fn){ var x=document.createElement('button'); x.className='act';
+  function btn(label,fn){ var x=document.createElement('button'); x.className='act'; x.type='button';
     x.textContent=label; x.addEventListener('click',fn); row.appendChild(x); return x; }
   if(side==='right'){
-    btn('✦ gift it',function(){ gift(idx); });
-    btn('⇄ offer to the crossing',function(){ toCross(idx); });
+    btn('✦ gift it',function(){ gift(k); });
+    btn('⇄ offer to the crossing',function(){ toCross(k); });
   }
   if(side==='cross'){
-    btn('⇄ cross it',function(){ openCross(idx); });
-    btn('↩ take it back',function(){ unCross(idx); });
+    btn('⇄ cross it',function(){ openCross(k); });
+    btn('↩ take it back',function(){ unCross(k); });
   }
   /* show and tell: a POINTER, never the content — the estate's one grammar
      (blight/pointers.js, the DM payload law). Thin enough for any channel. */
@@ -407,100 +889,290 @@ function arms(){
   }
   $('right').innerHTML=''; $('left').innerHTML=''; $('cross').innerHTML='';
   if(!S.right.length) $('right').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing strung yet — the composer is open</div>';
-  S.right.forEach(function(k,i){ $('right').appendChild(card(k,'right',i)); });
-  S.left.forEach(function(k,i){ $('left').appendChild(card(k,'left',i)); });
+  S.right.forEach(function(k){ $('right').appendChild(card(k,'right')); });
+  S.left.forEach(function(k){ $('left').appendChild(card(k,'left')); });
   if(!S.cross.length) $('cross').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing offered — the crossing is for the piece you would never simply give away</div>';
-  S.cross.forEach(function(k,i){ $('cross').appendChild(card(k,'cross',i)); });
-  $('givenlog').textContent=S.given.length
-    ? 'let go, remembered: '+S.given.map(function(g){return (g.beads.length)+' beads '+(g.crossed?'⇄ crossed with ':'→ ')+(g.to||'the floor')}).join(' · ')
-    : '';
+  S.cross.forEach(function(k){ $('cross').appendChild(card(k,'cross')); });
+  renderMemories();
 }
+function renderMemories(){
+  var log=$('givenlog');
+  // Preserve open recovery cards and selection on an unrelated arm update.
+  var signature=JSON.stringify(S.given);
+  if(log.dataset.snapshot===signature) return;
+  log.dataset.snapshot=signature; log.textContent='';
+  S.given.forEach(function(g){
+    var details=document.createElement('details');details.className='memory';
+    var summary=document.createElement('summary');
+    summary.textContent=g.beads.length+' beads '+(g.crossed?'crossed with ':'given to ')+(g.to||'someone')+(g.export?' — recover gift text':' — older memory');
+    details.appendChild(summary);
+    var note=document.createElement('p');
+    note.textContent=g.export?'This is the text you handed over. You can copy it again. It does not put the bracelet back on your arm or prove anyone received it.':'This older memory has no complete gift text to recover.';
+    details.appendChild(note);
+    if(g.export){
+      var out=document.createElement('textarea');out.readOnly=true;out.value=g.export;
+      out.setAttribute('aria-label','Saved gift text');details.appendChild(out);
+      var btn=document.createElement('button');btn.type='button';btn.className='act';btn.textContent='Copy saved gift';
+      var status=document.createElement('p');status.setAttribute('aria-live','polite');
+      btn.onclick=function(){copyText(g.export,out,function(){status.textContent='Copied here. The recipient still chooses whether to keep it.';},function(){status.textContent='Select this text and copy it yourself.';},function(){return details.isConnected;});};
+      details.appendChild(btn);details.appendChild(status);
+    }
+    log.appendChild(details);
+  });
+}
+
 
 /* ---- the crossing: the third arm ----
    THE LAW OF THIS ARM: nothing leaves for nothing. A piece here is not for
    sale and not for gifting — it moves only when another piece lands, and what
    lands rides the LEFT arm, eternal, because it was given to you. This is the
-   arm for work an artist would never hand over one-way. */
-function toCross(idx){ var k=S.right[idx]; if(!k) return;
-  S.right.splice(idx,1); S.cross.push(k); save(); arms(); }
-function unCross(idx){ var k=S.cross[idx]; if(!k) return;
-  S.cross.splice(idx,1); S.right.push(k); save(); arms(); }
-function openCross(idx){
-  var pan=$('xpanel'); if(!pan||!S.cross[idx]) return;
-  pan.classList.add("open");
-  $('xmine').value=encode(S.cross[idx]);
-  $('xtheirs').value=''; $('xerr').textContent='';
-  $('xcopy').onclick=function(){ var t=$('xmine'); t.select();
-    try{ document.execCommand("copy"); }catch(e){}
-    if(navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){}); };
-  $('xclose').onclick=function(){ pan.classList.remove('open'); };
-  $('xdo').onclick=function(){
-    var err=$('xerr'), raw=$('xtheirs').value.trim();
-    var r=decode(raw);
-    if(r.err){ err.textContent='refused — '+r.err; return; }
-    var mine=S.cross[idx];
-    if(!mine){ err.textContent='that piece is no longer on the crossing'; return; }
-    if(encode(mine)===raw){ err.textContent='that is your own string — a crossing needs two hands'; return; }
-    /* the swap, both halves at once: yours retires to the memory line, theirs
-       lands eternal. Never take before giving. */
-    S.given.push({beads:mine.beads,to:(r.maker||'the floor'),ts:Date.now(),crossed:true});
-    S.cross.splice(idx,1);
-    S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true,crossed:true});
-    save(); err.textContent=''; pan.classList.remove('open'); arms();
+   arm for work an artist would never hand over one-way.
+   Crossing is TWO local handoffs this page performs, not an escrow. */
+var crossing=null;
+async function toCross(k){
+  var key=pieceKey(k);
+  await commitChange(function(st){
+    var idx=findOn(st.right,key);if(idx<0) throw Error('that piece is no longer on the right arm');
+    st.cross.push(st.right.splice(idx,1)[0]);
+  });
+}
+async function unCross(k){
+  var key=pieceKey(k);
+  var saved=await commitChange(function(st){
+    var idx=findOn(st.cross,key);if(idx<0) throw Error('that piece is no longer on the crossing');
+    st.right.push(st.cross.splice(idx,1)[0]);
+  });
+  if(saved&&crossing&&crossing.key===key){crossing=null;$('xpanel').classList.remove('open');}
+}
+function openCross(k){
+  var pan=$('xpanel'); if(!pan) return;
+  var key=pieceKey(k); if(findOn(S.cross,key)<0) return;
+  crossing={key:key};
+  pan.classList.add('open');
+  $('xmine').value=key;
+  $('xtheirs').value=''; say('xerr','');
+  $('xcopy').onclick=function(){
+    var op=crossing;if(!op)return;
+    copyText(op.key, $('xmine'), function(){ say('xerr','Copied here. This is not a receive receipt.'); }, function(){
+      say('xerr','Clipboard refused. The gift text is selected above.');
+    },function(){return crossing===op;});
+  };
+  $('xclose').onclick=function(){ pan.classList.remove('open'); crossing=null; };
+  $('xdo').onclick=async function(){
+    var raw=$('xtheirs').value.trim(), r=decode(raw), op=crossing;
+    if(r.err){ say('xerr','refused — '+r.err); return; }
+    if(!op){ say('xerr','that piece is no longer on the crossing'); return; }
+    this.disabled=true;
+    var reason='';
+    var saved=await commitChange(function(st){
+      function refuse(message){reason=message;throw Error(message);}
+      if(crossing!==op) refuse('The crossing was closed or changed. Nothing was exchanged.');
+      var idx=findOn(st.cross,op.key), mine=idx<0?null:st.cross[idx];
+      if(!mine) refuse('that piece is no longer on the crossing');
+      var incoming=encode(r);
+      if(incoming===op.key) refuse('that is your own string — a crossing needs two hands');
+      if(findOn(st.left,incoming)>=0) refuse('already on your left arm — your offered piece stays here');
+      if(findOn(st.right,incoming)>=0||findOn(st.cross,incoming)>=0) refuse('that piece is already yours — a crossing needs two hands');
+      st.given.push({beads:mine.beads,to:r.maker||'the floor',ts:Date.now(),crossed:true,export:encode(mine),maker:mine.maker,madefor:mine.madefor,pieceTs:mine.ts});
+      st.cross.splice(idx,1);
+      st.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true,crossed:true});
+    });
+    this.disabled=false;
+    if(!saved){say('xerr',reason||'This browser would not save. No crossing was completed; your pasted text is still here.');return;}
+    if(crossing===op){say('xerr','');pan.classList.remove('open');crossing=null;}
   };
   pan.scrollIntoView({block:'center'});
-
 }
+
 /* show and tell — the DM payload law: a message is a POINTER, never content.
    PTR is loaded from blight/pointers.js so every surface keeps one grammar. */
+var showAttempt=0;
 function showIt(k){
+  var attempt=++showAttempt;
   var out=$('showout'); if(!out) return;
   var line = (window.PTR && PTR.kandi)
     ? PTR.kandi(encode(k), (k.beads.length)+' beads'+(k.madefor?' for '+k.madefor:''))
-    : location.href.replace(/[?#].*$/,'')+'?k='+encodeURIComponent(encode(k));
+    : location.href.replace(/[?#].*$/,'')+'#k='+encodeURIComponent(encode(k));
   out.value=line; out.classList.add('open'); out.select();
-  try{ document.execCommand('copy'); }catch(e){}
-  if(navigator.clipboard) navigator.clipboard.writeText(line).catch(function(){});
+  var note=$('shownote'); if(note) note.hidden=false;
+  copyText(line, out, function(){ say('showerr','copied a preview link — not proof only they have it'); },
+    function(){ say('showerr','clipboard refused — the preview link is selected above'); },function(){return attempt===showAttempt;});
 }
 
-/* ---- the gift ceremony ---- */
+function copyText(text, el, onOk, onFail){
+  var current=arguments[4]||function(){ return true; };
+  var settled=false;
+  function ok(){ if(settled||!current()) return; settled=true; onOk(); }
+  function fail(){ if(settled||!current()) return; settled=true; if(el){ el.value=text; el.select(); } onFail(); }
+  var p=Promise.resolve().then(function(){
+    if(!current()) return;
+    if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    throw new Error('no clipboard');
+  });
+  p.then(ok).catch(function(){
+    if(!current()) return;
+    try{ if(el){ el.value=text; el.select(); } if(document.execCommand('copy')) ok(); else fail(); }
+    catch(e){ fail(); }
+  });
+}
+
+/* ---- the gift ceremony ----
+   Identity is the KND1 export, never a mutable array index.
+   Animation prepares the handshake only. Retirement is a later tap. */
 var giving=null;
-function gift(idx){
-  giving=idx; $('ceremony').style.display='block'; $('giftout').classList.remove('open');
-  var steps=$('steps').children, k=S.right[idx];
+var giftGen=0;
+function setPhase(phase){
+  if(giving) giving.phase=phase;
+  var box=$('giftphase'); if(box) box.setAttribute('data-phase',phase);
+  var fin=$('finishgift'); if(fin) fin.style.display = phase==='completed' ? 'none' : '';
+}
+function cancelGiving(opts){
+  giftGen++;
+  giving=null;
+  if(!opts||!opts.keepVisible){
+    $('ceremony').style.display='none';
+    $('giftout').classList.remove('open');
+  }
+  setPhase('prepared');
+  say('gerr','');
+}
+function gift(k){
+  var key=pieceKey(k);
+  if(giving && giving.key===key){
+    $('ceremony').style.display='block';
+    $('ceremony').scrollIntoView({block:'center'});
+    return;
+  }
+  if(giving && giving.phase!=='completed') cancelGiving({keepVisible:true});
+  var token=++giftGen;
+  giving={key:key, token:token, phase:'preparing', export:encode(k), piece:cloneK(k)};
+  $('ceremony').style.display='block';
+  $('giftout').classList.remove('open');
+  $('giftstr').value='';
+  $('giftstr').setAttribute('readonly','readonly');
+  say('gerr','');
+  var box=$('giftphase'); if(box) box.setAttribute('data-phase','prepared');
+  var fin=$('finishgift'); if(fin) fin.style.display='';
+  var steps=$('steps').children;
   for(var i=0;i<4;i++) steps[i].classList.remove('on');
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var delay=reduce?0:650;
-  function on(i){ steps[i].classList.add('on');
-    if(i<3) setTimeout(function(){on(i+1)},delay);
+  function on(i){
+    if(!giving || giving.token!==token) return;
+    steps[i].classList.add('on');
+    if(i<3) setTimeout(function(){on(i+1);},delay);
     else setTimeout(function(){
-      $('giftstr').value=encode(k); $('giftout').classList.add('open');
-      /* the retirement rule: what you gift leaves your arm; memory kept */
-      S.given.push({beads:k.beads,to:k.madefor||'',ts:Date.now()});
-      S.right.splice(idx,1); save(); arms();
+      if(!giving || giving.token!==token) return;
+      if(giving.phase==='completed') return;
+      if(findOn(S.right,key)<0){
+        say('gerr','that piece is no longer on this arm — a stale gift was not completed');
+        return;
+      }
+      $('giftstr').value=giving.export;
+      $('giftout').classList.add('open');
+      if(giving.phase==='preparing') setPhase('prepared');
       $('ceremony').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
     },delay);
   }
   on(0);
   $('ceremony').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
 }
-$('copygift').onclick=function(){ $('giftstr').select();
-  try{ document.execCommand('copy'); }catch(e){}
-  if(navigator.clipboard) navigator.clipboard.writeText($('giftstr').value).catch(function(){}); };
-$('donegift').onclick=function(){ $('ceremony').style.display='none'; giving=null; };
-
-/* ---- receive ---- */
-$('rcvgo').onclick=function(){
-  var r=decode($('rcv').value);
-  if(r.err){ $('rerr').textContent='refused — '+r.err; return; }
-  S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true});
-  save(); $('rcv').value=''; $('rerr').textContent=''; arms();
+$('copygift').onclick=function(){
+  if(!giving||giving.phase==='preparing') return;
+  var op=giving, attempt=(op.copyAttempt||0)+1;op.copyAttempt=attempt;
+  var startedCompleted=op.phase==='completed';
+  var text=op.export;
+  $('giftstr').value=text;
+  var current=function(){return giving===op&&op.copyAttempt===attempt&&(startedCompleted||op.phase!=='completed');};
+  copyText(text, $('giftstr'), function(){
+    if(!startedCompleted) setPhase('copied');
+    say('gerr','');
+  }, function(){
+    if(!startedCompleted) setPhase('copy-needed');
+    say('gerr','clipboard refused — select the string and copy it yourself. Copied here is not received.');
+  },current);
 };
+$('finishgift').onclick=async function(){
+  if(!giving || giving.phase==='completed') return;
+  if(giving.phase==='preparing' || !$('giftout').classList.contains('open') || !$('giftstr').value){
+    say('gerr','the handshake is still preparing — the piece is still on your arm'); return;
+  }
+  var op=giving, reason='';this.disabled=true;
+  var saved=await commitChange(function(st){
+    if(giving!==op||op.phase==='completed'){reason='The gift was closed or changed. Nothing was handed over.';throw Error(reason);}
+    var idx=findOn(st.right,op.key);
+    if(idx<0){reason='that piece is no longer on this arm — a stale gift was not completed';throw Error(reason);}
+    var k=st.right[idx];
+    st.given.push({beads:k.beads,to:k.madefor||'',ts:Date.now(),export:encode(k),maker:k.maker,madefor:k.madefor,pieceTs:k.ts});
+    st.right.splice(idx,1);
+  });
+  this.disabled=false;
+  if(giving!==op)return;
+  if(!saved){say('gerr',reason||'this browser would not save — the piece is still on your arm and the export is still above');return;}
+  setPhase('completed');say('gerr','');
+};
+
+$('donegift').onclick=function(){
+  cancelGiving();
+};
+window.addEventListener('pagehide',function(){cancelGiving();});
+
+/* ---- receive: preview first, then explicit Keep ---- */
+var pendingRcv=null;
+function alreadyOnLeft(r){
+  var key=encode(r);
+  return findOn(S.left,key)>=0;
+}
+function showRcvPreview(r, raw){
+  pendingRcv={r:r, raw:raw, key:encode(r)};
+  $('rcvprev').classList.add('open');
+  $('rcvpiece').innerHTML=braceSVG(r.beads,'190px');
+  $('rcvmeta').textContent='made by '+(r.maker||'a stranger at the bar')+(r.madefor?' for '+r.madefor:'')+' · '+r.beads.length+' beads';
+}
+function hideRcvPreview(){
+  pendingRcv=null;
+  $('rcvprev').classList.remove('open');
+  $('rcvpiece').innerHTML='';
+  $('rcvmeta').textContent='';
+}
+async function keepReceived(r, raw, current){
+  if(r.err){ say('rerr','refused — '+r.err); return false; }
+  var reason='', duplicate=false;
+  var saved=await commitChange(function(st){
+    if(current&&!current()) throw Error('the receive preview was closed or changed');
+    var key=encode(r);
+    if(findOn(st.left,key)>=0){duplicate=true;return;}
+    if(findOn(st.right,key)>=0||findOn(st.cross,key)>=0){reason='That piece is already yours. It has not been received from someone else.';throw Error(reason);}
+    st.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true});
+  });
+  say('rerr',saved?(duplicate?'already on your left arm — this browser kept that string once':''):(reason||'this browser would not save — the string is still in the box'));
+  return saved;
+}
+
+$('rcvgo').onclick=function(){
+  var raw=$('rcv').value;
+  var r=decode(raw);
+  if(r.err){ say('rerr','refused — '+r.err); hideRcvPreview(); return; }
+  say('rerr','');
+  showRcvPreview(r, raw);
+};
+$('rcvkeep').onclick=async function(){
+  if(!pendingRcv){ say('rerr','look at a string first'); return; }
+  var op=pendingRcv;this.disabled=true;
+  var saved=await keepReceived(op.r,op.raw,function(){return pendingRcv===op;});
+  this.disabled=false;
+  if(saved&&pendingRcv===op){
+    if($('rcv').value===op.raw) $('rcv').value='';
+    hideRcvPreview();
+  }
+};
+
+$('rcvcancel').onclick=function(){ hideRcvPreview(); say('rerr',''); };
 
 /* THE ARRIVAL. A handed bracelet lands ON the bracelet — not in a form.
    Receiving is still a deliberate tap: nothing is written to your arm until
    you say so, because a page that helps itself to your storage is a page that
-   decided for you. */
+   decided for you. A Show link is a copyable preview, not exclusive evidence. */
 (function(){
   var m=/[#?&]k=([^&]*)/.exec(location.hash+location.search); if(!m) return;
   var str=''; try{ str=decodeURIComponent(m[1]); }catch(e){ return; }
@@ -524,18 +1196,23 @@ $('rcvgo').onclick=function(){
       '<div class="piece">'+braceSVG(r.beads,'190px')+'</div>'+
       '<div class="note">'+(kept
         ? 'It rides your left arm now and never re-trades — that is the floor\u2019s law, and here the law is code. Send one back and it becomes a crossing.'
-        : r.beads.length+' beads, checksum verified. Nothing is written to this browser until you keep it. A kandi string is a copy \u2014 whoever holds it can read the names in it.')+
+        : r.beads.length+' beads, checksum verified. Nothing is written to this browser until you keep it. A Show link is a copyable preview \u2014 not proof only you have it. A kandi string is a copy \u2014 whoever holds it can read the names in it.')+
       '</div>'+
+      '<div class="err" id="arErr"></div>'+
       '<div class="acts">'+
-        (kept?'':'<button class="keep" id="arKeep">\u2665 keep it \u2014 onto my left arm</button>')+
-        '<button id="arBack">\u270e make one back for '+esc(maker)+' \u2192</button>'+
-        '<button id="arSkip">'+(kept?'close':'not now')+'</button>'+
+        (kept?'':'<button class="keep" id="arKeep" type="button">\u2665 keep it \u2014 onto my left arm</button>')+
+        '<button id="arBack" type="button">\u270e make one back for '+esc(maker)+' \u2192</button>'+
+        '<button id="arSkip" type="button">'+(kept?'close':'not now')+'</button>'+
       '</div>';
-    var k=$('arKeep');
-    if(k) k.onclick=function(){
-      S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true});
-      save(); arms(); paintArrival(true);
+    var kbtn=$('arKeep');
+    if(kbtn) kbtn.onclick=async function(){
+      kbtn.disabled=true;
+      var saved=await keepReceived(r,str,function(){return kbtn.isConnected&&box.classList.contains('open');});
+      kbtn.disabled=false;
+      if(!saved){say('arErr',$('rerr').textContent||'this browser would not save');return;}
+      if(kbtn.isConnected) paintArrival(true);
     };
+
     $('arBack').onclick=function(){
       /* the point of the whole page: answering is one tap, and the composer
          opens already pointed at the person who thought of you. */
@@ -545,13 +1222,35 @@ $('rcvgo').onclick=function(){
     };
     $('arSkip').onclick=function(){ box.className='arrival'; };
   }
-  paintArrival(false);
+  paintArrival(alreadyOnLeft(r));
   /* the old receive box still works for a pasted string; it is no longer the
      way a shared link arrives. */
   $('rcv').value=str;
 })();
 
-paint(); arms();
+/* view toggle preserves work: composer draft, gift ceremony, receive preview,
+   language, and per-view disclosure. One gift engine for every view. */
+var readingChoices=new Map();
+var lastReading=null;
+function applyReading(){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(lastReading===reading) return;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading && lastReading!==reading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : (reading==='cypherpunk' && d.getAttribute('data-view-disclosure')==='limits');
+  });
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+applyReading();
+/* read-only window for the ETERNAL front: a copy of the committed arms and the bar's own encoder */
+window.__kandi={state:function(){return cloneK(S);},encode:encode};
+
+paint(); arms(); initializeStore();
 })();
 </script>
 <script>
@@ -649,6 +1348,143 @@ paint(); arms();
   addEventListener('resize',build);
 })();
 </script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is the bar's
+   own committed state, read through window.__kandi (a copy of S and the bar's own KND1 encoder):
+   the right arm, the crossing, the left arm and the memory lines. The front never writes: "make"
+   opens the composer, "open it here" the receive box, and "gift it" / "cross it" press that
+   piece's own buttons, so every change goes through the bar's locked transaction. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function initials(n){var p=String(n||'').trim().split(/\s+/);return (((p[0]||'')[0]||'')+((p.length>1?p[p.length-1]:'')[0]||'')).toLowerCase()||'k';}
+  var ARMS=['right','cross','left','given'];
+  var D={ready:false,right:[],cross:[],left:[],given:[],pieces:[],bytes:0,locks:false};
+  var R={sel:0};
+  var open={};
+
+  function read(){
+    var K=window.__kandi; if(!K) return;
+    var S=K.state(), raw=null; try{raw=localStorage.getItem('bkandi');}catch(e){raw=null;}
+    D.bytes=raw?raw.length:0; D.locks=!!(navigator.locks&&typeof navigator.locks.request==='function');
+    var mk=function(arm){return function(k,i){return {arm:arm,i:i,maker:k.maker||'',madefor:k.madefor||k.to||'',beads:String(k.beads||''),rcv:!!k.rcv,crossed:!!k.crossed,
+      export:arm==='given'?(k.export||''):K.encode(k)};};};
+    D.right=S.right.map(mk('right')); D.cross=(S.cross||[]).map(mk('cross')); D.left=S.left.map(mk('left')); D.given=S.given.map(mk('given'));
+    D.pieces=D.right.concat(D.cross,D.left,D.given); D.ready=true;
+    if(R.sel>=D.pieces.length)R.sel=0;
+  }
+  var ARMW={right:'right arm',cross:'the crossing',left:'left arm',given:'handed over'};
+  function by(p){return p.maker||T('et.kd.stranger','a stranger at the bar');}
+  function make(){var w=$('word');if(w){w.scrollIntoView({block:'center'});w.focus({preventScroll:true});}}
+  function receive(){var r=$('rcv');if(r){r.scrollIntoView({block:'center'});r.focus({preventScroll:true});}}
+  function press(p){ /* the piece's own buttons, built by the bar: right = [gift, offer, show], cross = [cross, take back, show] */
+    var box=$(p.arm), cards=box?box.querySelectorAll('.kc'):[], card=cards[p.i], b=card&&card.querySelectorAll('.xrow button')[0];
+    if(b){card.scrollIntoView({block:'center'});b.click();}
+  }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box||!D.ready) return;
+    var label={right:T('et.kd.b.right','on your right arm'),cross:T('et.kd.b.cross','offered to the crossing'),left:T('et.kd.b.left','on your left arm'),given:T('et.kd.b.given','handed over')};
+    var unit={right:[T('et.kd.b.u1','to give or trade'),T('et.kd.b.un','to give or trade')],cross:[T('et.kd.b.x1','waiting for a swap'),T('et.kd.b.xn','waiting for a swap')],left:[T('et.kd.b.l1','keepsake'),T('et.kd.b.ln','keepsakes')],given:[T('et.kd.b.g1','memory'),T('et.kd.b.gn','memories')]};
+    box.innerHTML=ARMS.map(function(a){
+      var list=D[a], n=list.length, o=!!open[a]&&n>0;
+      var h='<button type="button" class="et-b-row" data-arm="'+a+'" aria-expanded="'+o+'"'+(n?'':' disabled')+'><span class="et-b-rowt">'+esc(label[a])+'</span><small>'+n+' '+esc(unit[a][n===1?0:1])+(n?'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>':'')+'</small></button>';
+      if(o)h+='<div class="et-b-people">'+list.slice(0,6).map(function(p){
+        var sub=(a==='given'?(p.crossed?T('et.kd.b.crossedWith','crossed with'):T('et.kd.b.givenTo','given to'))+' '+(p.madefor||T('et.kd.b.someone','someone')):(p.madefor?T('et.kd.b.for','for')+' '+p.madefor:T('et.kd.b.forAnyone','for anyone')))+' · '+p.beads.length+' '+T('et.kd.b.beads','beads');
+        return '<div class="et-b-person"><i>'+esc(initials(p.maker||'k'))+'</i><div><b>'+esc(T('et.kd.b.by','by')+' '+by(p))+'</b><span>'+esc(sub)+'</span></div></div>';
+      }).join('')+(n>6?'<div class="et-b-more">'+esc(T('et.kd.b.more','and {n} more below').replace('{n}',n-6))+'</div>':'')+'</div>';
+      return h;
+    }).join('');
+  }
+
+  /* ── RAVER: one big bracelet, a bead per piece ── */
+  var MAXB=18;
+  function brace(){
+    var svg=$('etBrace'); if(!svg||!D.ready) return;
+    var list=D.pieces.slice(0,MAXB), n=list.length, h='<circle r="150" fill="none" stroke="'+tok('line')+'" stroke-width="3"/>';
+    var r=n>12?16:n>6?20:24, col={right:tok('biomass'),cross:tok('ai'),left:tok('sovereign')};
+    list.forEach(function(p,k){
+      var a=-Math.PI/2+k*2*Math.PI/Math.max(n,1), x=(150*Math.cos(a)).toFixed(1), y=(150*Math.sin(a)).toFixed(1), sel=k===R.sel;
+      var fill=p.arm==='given'?'none':sel?tok('sovereign-strong'):col[p.arm];
+      h+='<g class="bead" data-k="'+k+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(ARMW[p.arm]+': '+T('et.kd.r.by','by')+' '+by(p)+', '+p.beads.length+' '+T('et.kd.r.beads','beads'))+'">'+
+        '<circle class="hit" cx="'+x+'" cy="'+y+'" r="25" fill="transparent"/>'+
+        '<circle class="seg" cx="'+x+'" cy="'+y+'" r="'+(sel?r+4:r)+'" fill="'+fill+'"'+(p.arm==='given'?' stroke="'+tok('ink-mut')+'" stroke-width="2" stroke-dasharray="3 4"':' stroke="'+tok('bg')+'" stroke-width="3"')+' opacity="'+(sel?1:0.8)+'"/>'+
+        /* the piece's own string, bead for bead: letter beads are white, like the real thing; colour beads take the arm's colour */
+        p.beads.split('').map(function(ch,j,all){var b=2*Math.PI*j/all.length-Math.PI/2,rr=(sel?r+4:r)+7;return '<circle cx="'+(+x+rr*Math.cos(b)).toFixed(1)+'" cy="'+(+y+rr*Math.sin(b)).toFixed(1)+'" r="'+(all.length>24?2:3)+'" fill="'+(/[A-Z]/.test(ch)?tok('ink'):p.arm==='given'?tok('ink-mut'):col[p.arm])+'"/>';}).join('')+'</g>';
+    });
+    h+='<g class="make" role="button" tabindex="0" aria-label="'+esc(T('et.kd.r.makeAria','make a kandi'))+'"><circle r="48" fill="'+tok('primary')+'"/><path d="M0 -16V16M-16 0H16" fill="none" stroke="'+tok('on-primary')+'" stroke-width="4" stroke-linecap="round"/></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!D.ready) return;
+    var p=D.pieces[R.sel], c=$('etRaverCard');
+    $('etRaverHint').textContent=D.pieces.length+' '+(D.pieces.length===1?T('et.kd.r.one','piece · tap it'):T('et.kd.r.many','pieces · tap a bead'))+(D.pieces.length>MAXB?' · '+MAXB+' '+T('et.kd.r.shown','shown'):'');
+    var tag={right:p&&p.madefor?T('et.kd.r.ded','made for them · gift it'):T('et.kd.r.trade','tradeable'),cross:T('et.kd.r.xing','crosses only for another piece'),left:T('et.kd.r.keep','keepsake · never re-trades'),given:T('et.kd.r.gone','handed over · a memory stays')};
+    c.innerHTML=p?'<span class="rk">'+esc({right:'r',cross:'x',left:'l',given:'g'}[p.arm])+(p.i+1)+'</span><div><b>'+esc(T('et.kd.r.by','by')+' '+by(p)+(p.madefor?' → '+p.madefor:''))+'</b><span>'+esc(p.beads.length+' '+T('et.kd.r.beads','beads')+' · '+ARMW[p.arm]+' · '+tag[p.arm])+'</span></div>':'<span class="rk">k</span><div><b>'+esc(T('et.kd.r.empty','no kandi yet'))+'</b><span>'+esc(T('et.kd.r.emptyHint','tap the + to string one'))+'</span></div>';
+    var go=$('etRaverGo');
+    go.textContent=p&&p.arm==='right'?T('et.kd.r.gift','gift it'):p&&p.arm==='cross'?T('et.kd.r.cross','cross it'):T('et.kd.r.make','make one');
+    $('etRaverMake').hidden=!(p&&(p.arm==='right'||p.arm==='cross'));
+    brace();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(!D.ready) return;
+    $('etChips').innerHTML='<span class="on">v1</span><span>pieces '+(D.right.length+D.cross.length+D.left.length)+'</span><span>memories '+D.given.length+'</span><span class="'+(D.locks?'ok':'no')+'">web locks '+(D.locks?'present':'absent · read-only')+'</span>';
+    $('etArms').innerHTML=D.pieces.map(function(p,k){
+      var o=!!open['c'+k];
+      return '<tr class="pick" data-k="'+k+'" tabindex="0" aria-expanded="'+o+'"><td>'+p.arm+(p.arm==='left'&&p.rcv?' · rcv':'')+'</td><td>'+esc(by(p))+' → '+esc(p.madefor||'any')+'</td><td>'+p.beads.length+'</td></tr>'+
+        (o?'<tr class="names"><td colspan="3">'+esc(p.export||'older memory · no export saved')+'</td></tr>':'');
+    }).join('')||'<tr><td colspan="3">0 pieces · the composer is open below</td></tr>';
+    var steps=[
+      ['compose · [0-9A-Z]{1,40}','ten colour beads + letter beads · the draft lives in this page only','todo'],
+      ['name · maker, for ≤ 24','any language · rendered as text, never markup','todo'],
+      ['string · right arm',D.right.length+' on the right arm · written under a web lock, one storage write',D.right.length?'done':'now'],
+      ['prepare · KND1 export','KND1|maker|for|ts36|beads|fnv · a copy, not a token','todo'],
+      ['hand over · you carry it','clipboard write ≠ received · no inbox, no relay, no escrow','guard'],
+      ['retire · memory line',D.given.length+' handed over · the piece leaves the arm, the export stays',D.given.length?'done':'todo']
+    ];
+    var now=steps.findIndex(function(s){return s[2]==='now';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[
+      ['store',D.bytes?'<span class="yes">localStorage bkandi · '+D.bytes+' bytes</span>':'<span class="no">not written yet · nothing saved</span>'],
+      ['right',String(D.right.length)],['crossing',String(D.cross.length)],['left',String(D.left.length)+' · rcv '+D.left.filter(function(p){return p.rcv;}).length],['given',String(D.given.length)],
+      ['network','<span class="yes">none on load</span> · ↻ asks only on tap'],
+      ['trust','<span class="gd">fnv-1a/32 checksum · not a signature</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-arm]'); if(row){var a=row.getAttribute('data-arm');open[a]=!open[a];bee();return;}
+      var bd=e.target.closest('.bead'); if(bd){R.sel=+bd.getAttribute('data-k');raver();return;}
+      if(e.target.closest('.make')){make();return;}
+      var tr=e.target.closest('.et-c-tab tr.pick'); if(tr){var k='c'+tr.getAttribute('data-k');open[k]=!open[k];cy();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.bead,.make,.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etBeeMake').addEventListener('click',make); $('etRaverMake').addEventListener('click',make); $('etCyGo').addEventListener('click',make);
+    $('etBeeRcv').addEventListener('click',receive); $('etCyRcv').addEventListener('click',receive);
+    $('etRaverGo').addEventListener('click',function(){var p=D.pieces[R.sel];if(p&&(p.arm==='right'||p.arm==='cross'))press(p);else make();});
+    var mo=new MutationObserver(function(){read();bee();raver();cy();});
+    ['right','left','cross','givenlog'].forEach(function(id){var n=$(id);if(n)mo.observe(n,{childList:true});});
+    document.addEventListener('blang',function(){words();all();});
+    window.addEventListener('storage',function(e){if(e.key==='bkandi'||e.key===null)setTimeout(all,0);});
+  }
+  wire(); words(); all(); setTimeout(all,800);
+  window.__eternal={data:D,raver:R};
+})();
+</script>
 <script src="blight/pointers.js"></script>
-<script src="tour.js?v=34"></script>
+<script src="tour.js?v=42"></script>
 </body></html>

@@ -1,0 +1,16 @@
+epidemic_forward_bytes: 1405.16 KiB/s; 86.33 MB/min
+epidemic_forward_msgs: 29677
+relay_bytes: 0.00 KiB/s; 0.00 MB/min
+relay_msgs: 0
+unsubscribed_refused_frames: 6431
+passthrough_refresh_runs: 0
+   122539845 bytes     398.82 KiB/s  48c7b5c7b6b981ca  x0x/caps/v1/response/targeted-v2
+   111170064 bytes     361.82 KiB/s  29f3042b0b96bc05  x0x/announce/v3/blob
+    50886383 bytes     165.62 KiB/s  0fe8dab9818469c5  x0x.machine.announce.v3
+    40671871 bytes     132.37 KiB/s  a746d680e31732d1  x0x/dm/v1/bus
+    30696380 bytes      99.91 KiB/s  143d90e8ad14052e  x0x/caps/v1/request/targeted-v2
+    20613779 bytes      67.09 KiB/s  802ee0ebd00757bd  x0x.identity.announce.v2
+    18009600 bytes      58.61 KiB/s  72e595c2a0f13284  x0x/caps/v2/digest
+     6700157 bytes      21.81 KiB/s  8404a8731fd56b98  x0x.discovery.groups
+
+Window accepted: dt=300s; evidence in /tmp/x0x504/evidence-leaf-20260915-run01

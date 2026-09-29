@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9b39057661",
+ "bnr": "bnr://skaists.dev/blood/p9b39057661",
+ "identity": {
+  "name": "Elizabeth Brumbach",
+  "lifespan": "1772–1862",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8T5-K19"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "9 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "9 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf132682fed",
+    "name": "Johann Heinrich Brumbach II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p10c6a1e195",
+    "name": "Anna Kauffman",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa5247c9361",
+    "name": "Henry Miller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf7fb0dd41d",
+    "name": "Abraham Miller",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8T5-K19",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 9,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

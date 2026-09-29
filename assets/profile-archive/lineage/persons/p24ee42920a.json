@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p24ee42920a",
+ "bnr": "bnr://skaists.dev/blood/p24ee42920a",
+ "identity": {
+  "name": "John Cram",
+  "lifespan": "1685–1759",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJR8-L3N"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "16 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "16 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4f56ef4b1b",
+    "name": "Thomas Cram Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdc74a5bb34",
+    "name": "Elizabeth Weare",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peee937539a",
+    "name": "Elizabeth Cram"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJR8-L3N",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 16,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

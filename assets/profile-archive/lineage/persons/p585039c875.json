@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p585039c875",
+ "bnr": "bnr://skaists.dev/blood/p585039c875",
+ "identity": {
+  "name": "Elizabeth Dudley",
+  "lifespan": "1678–1757",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCR1-LJ1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "14 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "14 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5ae598219a",
+    "name": "William Dudley II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde5ab64a5e",
+    "name": "Mary Roe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p89918f19fb",
+    "name": "Joseph Remington"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCR1-LJ1",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 14,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

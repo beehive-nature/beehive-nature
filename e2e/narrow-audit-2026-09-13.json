@@ -1,0 +1,6742 @@
+{
+ "generated": "2026-09-13T03:13:34.728Z",
+ "pages": [
+  "doors/beehivenature.html",
+  "doors/plur.html",
+  "doors/skaists.html",
+  "doors/bnature-social.html",
+  "doors/bnature-bio.html",
+  "doors/beehivebiomass.html",
+  "doors/skaists-buzz.html",
+  "doors/beehivenature-buzz.html",
+  "doors/index.html",
+  "b4b.html",
+  "biq.html",
+  "blight/bnri-gallery.html",
+  "blight/c1-aid.html",
+  "blight/compare.html",
+  "blight/gallery.html",
+  "blight/index.html",
+  "blight/inscription-explorer.html",
+  "blight/midi-organ.html",
+  "blight/museum.html",
+  "blight/pixelrefiner.html",
+  "blight/qrtree.html",
+  "blight/qrroses.html",
+  "blight/qrroses-smil.html",
+  "blight/profile.html",
+  "local-agent/index.html",
+  "record.html",
+  "blight/midi.html",
+  "blight/midiroom.html",
+  "blight/midivault.html",
+  "blight/vaulta-reader.html",
+  "blight/workbench.html",
+  "dock.html",
+  "fleet-hosted/index.html",
+  "hardware/build.html",
+  "hardware/index.html",
+  "hardware/security.html",
+  "listening.html",
+  "onboarding/receive.html",
+  "recover.html",
+  "stack.html",
+  "wallet.html",
+  "blight/demo.html",
+  "blight/farmers.html",
+  "bnames.html",
+  "hardware/lab.html",
+  "keys/addresses.html",
+  "onboarding/index.html",
+  "blight/market.html",
+  "bset.html",
+  "festival/index.html",
+  "kandi.html",
+  "plur.html",
+  "blight/studio-gate.html",
+  "blight/studio-music.html",
+  "forge/hexfield.html",
+  "forge/index.html",
+  "forge/orbit.html",
+  "review.html",
+  "fleet-hosted/gallery/resonance.html",
+  "royalguard.html",
+  "dao-dashboard/index.html",
+  "attest.html",
+  "blanguage.html",
+  "bsymposium.html",
+  "buzz-studio.html",
+  "devroom.html",
+  "forge/room.html",
+  "blight/hearth.html",
+  "blight/pulse.html",
+  "bqueenbee-live.html",
+  "btranslated.html",
+  "forge/huddle.html",
+  "bearth.html",
+  "bfood.html",
+  "bigen.html",
+  "blongevity.html",
+  "fleet-hosted/gallery/acid-cascade.html",
+  "fleet-hosted/gallery/indigo-index.html",
+  "fleet-hosted/lab/blend-lab.html",
+  "fleet-hosted/lab/edible-tracker.html",
+  "fleet-hosted/lab/flower-lab.html",
+  "fleet-hosted/lab/intake-tracker.html",
+  "fleet-hosted/lab/spliff-lab.html",
+  "university/index.html",
+  "fleet-hosted/lab/bnr-dashboard.html",
+  "bantfarm.html",
+  "blight/coop.html",
+  "bfactory.html",
+  "bmeshasi.html",
+  "index.html",
+  "forge/orbit-v2.html",
+  "design-system.html",
+  "museum.html",
+  "fieldnotes.html",
+  "buzz-directory.html",
+  "or-board.html",
+  "ant-door.html",
+  "profile.html",
+  "comb.html",
+  "vending.html",
+  "privacy-lens.html",
+  "watch.html",
+  "jams.html"
+ ],
+ "regs": [
+  "bee",
+  "raver"
+ ],
+ "rows": [
+  {
+   "page": "doors/beehivenature.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 19,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehivenature.com",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "b4b.html",
+      "biq.html",
+      "blight/bnri-gallery.html",
+      "blight/c1-aid.html",
+      "blight/compare.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 19
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehivenature.com",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "b4b.html",
+      "biq.html",
+      "blight/bnri-gallery.html",
+      "blight/c1-aid.html",
+      "blight/compare.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 22
+    }
+   }
+  },
+  {
+   "page": "doors/plur.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 18,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "plur.earth",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bset.html",
+      "festival/index.html",
+      "kandi.html",
+      "plur.html",
+      "Not built yet — named, so this door does not promise it"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 18,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "plur.earth",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bset.html",
+      "festival/index.html",
+      "kandi.html",
+      "plur.html",
+      "Not built yet — named, so this door does not promise it"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    }
+   }
+  },
+  {
+   "page": "doors/skaists.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "skaists.social",
+      "the name",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "blight/studio-gate.html",
+      "blight/studio-music.html",
+      "forge/hexfield.html",
+      "forge/index.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 22,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "skaists.social",
+      "the name",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "blight/studio-gate.html",
+      "blight/studio-music.html",
+      "forge/hexfield.html",
+      "forge/index.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    }
+   }
+  },
+  {
+   "page": "doors/bnature-social.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 19,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bnature.social",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "attest.html",
+      "blanguage.html",
+      "bsymposium.html",
+      "buzz-studio.html",
+      "devroom.html",
+      "forge/room.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 27
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bnature.social",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "attest.html",
+      "blanguage.html",
+      "bsymposium.html",
+      "buzz-studio.html",
+      "devroom.html",
+      "forge/room.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 29
+    }
+   }
+  },
+  {
+   "page": "doors/bnature-bio.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bnature.bio",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bearth.html",
+      "bfood.html",
+      "bigen.html",
+      "blongevity.html",
+      "fleet-hosted/gallery/acid-cascade.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bnature.bio",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bearth.html",
+      "bfood.html",
+      "bigen.html",
+      "blongevity.html",
+      "fleet-hosted/gallery/acid-cascade.html"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 19
+    }
+   }
+  },
+  {
+   "page": "doors/beehivebiomass.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 20,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehivebiomass.com",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bantfarm.html",
+      "blight/coop.html",
+      "Not built yet — named, so this door does not promise it",
+      "A door may not claim anything the estate does not currently do. Everyt",
+      "An alloy resource exchange"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 8
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 20,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehivebiomass.com",
+      "one thing to do",
+      "Everything behind this door",
+      "open now · ⚠ marks a named limit",
+      "bantfarm.html",
+      "blight/coop.html",
+      "Not built yet — named, so this door does not promise it",
+      "A door may not claim anything the estate does not currently do. Everyt",
+      "An alloy resource exchange"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 8
+    }
+   }
+  },
+  {
+   "page": "doors/skaists-buzz.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate relay · live",
+      "relay unreachable right now — check back soon",
+      "have the buzz desktop app?",
+      "wss://skaists.buzz",
+      "copy",
+      "wss://relay.skaists.dev",
+      "copy",
+      "Add Community",
+      "stranger with the app, no account here?"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate relay · live",
+      "relay unreachable right now — check back soon",
+      "have the buzz desktop app?",
+      "wss://skaists.buzz",
+      "copy",
+      "wss://relay.skaists.dev",
+      "copy",
+      "Add Community",
+      "stranger with the app, no account here?"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "doors/beehivenature-buzz.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate relay · hive №2 · organism family",
+      "relay unreachable right now — check back soon",
+      "have the buzz desktop app?",
+      "wss://beehivenature.buzz",
+      "copy",
+      "wss://relay2.skaists.dev",
+      "copy",
+      "Add Community",
+      "stranger with the app, no account here?"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate relay · hive №2 · organism family",
+      "relay unreachable right now — check back soon",
+      "have the buzz desktop app?",
+      "wss://beehivenature.buzz",
+      "copy",
+      "wss://relay2.skaists.dev",
+      "copy",
+      "Add Community",
+      "stranger with the app, no account here?"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "doors/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "six doors, six different strangers",
+      "the six doors",
+      "Six front doors, one organism. Each one answers a different person’s f",
+      "Pick the one that sounds like you",
+      "beehivenature.com",
+      "28 open now",
+      "plur.earth",
+      "4 open now",
+      "skaists.social"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "six doors, six different strangers",
+      "the six doors",
+      "Six front doors, one organism. Each one answers a different person’s f",
+      "Pick the one that sounds like you",
+      "beehivenature.com",
+      "28 open now",
+      "plur.earth",
+      "4 open now",
+      "skaists.social"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "b4b.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 40,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛰 BNR × Base — the application appendix",
+      "it is our product doing its job on your chain:",
+      "measurements of Base's own contracts,\n  taken on two operator-diverse ",
+      "receipts-first evidence and agent layer",
+      "40 live, keyless, static surfaces",
+      "every claim carries a receipt · every absence is honest · a failed fet",
+      "agents",
+      "RECEIPT 1 · the ERC-8004 read-first pass",
+      "live"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "every claim carries a receipt · every absence is honest · a failed fetch is never a value"
+      }
+     ],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 40,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛰 BNR × Base — the application appendix",
+      "it is our product doing its job on your chain:",
+      "measurements of Base's own contracts,\n  taken on two operator-diverse ",
+      "receipts-first evidence and agent layer",
+      "40 live, keyless, static surfaces",
+      "every claim carries a receipt · every absence is honest · a failed fet",
+      "agents",
+      "RECEIPT 1 · the ERC-8004 read-first pass",
+      "live"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "every claim carries a receipt · every absence is honest · a failed fetch is never a value"
+      }
+     ],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "biq.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "✍ the bIQ Composer",
+      "this page\n  composes; a person publishes. it never posts, never holds ",
+      "IQ.wiki has no write API.",
+      "Sophia",
+      "the human is the gate no automation replaces",
+      "ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20",
+      "flagged, not resolved:",
+      "/about",
+      "/wiki/iqwiki"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "a nutrition surface\n  does not clear it and cannot be selected; that is the cheapest rejec"
+      }
+     ],
+     "techShown": [],
+     "keyed": 6
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "✍ the bIQ Composer",
+      "this page\n  composes; a person publishes. it never posts, never holds ",
+      "IQ.wiki has no write API.",
+      "Sophia",
+      "the human is the gate no automation replaces",
+      "ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20",
+      "flagged, not resolved:",
+      "/about",
+      "/wiki/iqwiki"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "a nutrition surface\n  does not clear it and cannot be selected; that is the cheapest rejec"
+      }
+     ],
+     "techShown": [],
+     "keyed": 6
+    }
+   }
+  },
+  {
+   "page": "blight/bnri-gallery.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 9,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "· the fleet's own art",
+      "both wire formats",
+      "bqueen bee genesis 96x96",
+      "reflector larva",
+      "reflector pupa",
+      "Reflector Worker Bee (Level 3) (1)",
+      "Reflector Forager Bee (Level 4)",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 9,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "· the fleet's own art",
+      "both wire formats",
+      "bqueen bee genesis 96x96",
+      "reflector larva",
+      "reflector pupa",
+      "Reflector Worker Bee (Level 3) (1)",
+      "Reflector Forager Bee (Level 4)",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/c1-aid.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Aid",
+      "expected collisions\n  under 0.01 at target supply",
+      "PROMPT_CATALOG_v7 §2",
+      "SELF-CHECK PASS — recomputed 1×118×12×11×81×76×42 = 4.03×10⁹ (spec: ≈4",
+      "layer (catalog §2 shape)",
+      "variants",
+      "gate %",
+      "avg rects",
+      "colour comes from the runtime draw"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Aid",
+      "expected collisions\n  under 0.01 at target supply",
+      "PROMPT_CATALOG_v7 §2",
+      "SELF-CHECK PASS — recomputed 1×118×12×11×81×76×42 = 4.03×10⁹ (spec: ≈4",
+      "layer (catalog §2 shape)",
+      "variants",
+      "gate %",
+      "avg rects",
+      "colour comes from the runtime draw"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    }
+   }
+  },
+  {
+   "page": "blight/compare.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 108,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the multi-artist ERC-20i family",
+      "Every artist's scheme in its own terms. Every cell sourced from read c",
+      "⇄ swap",
+      "PEPI v2",
+      "Base · 0x28a5e71B…de9F",
+      "artist",
+      "anon 0x1609e546e31629… (self-identified via source header; site dead)",
+      "supply",
+      "seed shape"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 108,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the multi-artist ERC-20i family",
+      "Every artist's scheme in its own terms. Every cell sourced from read c",
+      "⇄ swap",
+      "PEPI v2",
+      "Base · 0x28a5e71B…de9F",
+      "artist",
+      "anon 0x1609e546e31629… (self-identified via source header; site dead)",
+      "supply",
+      "seed shape"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    }
+   }
+  },
+  {
+   "page": "blight/gallery.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 19,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "The founder’s garden",
+      "Loading artwork…",
+      "Reading public collection records…",
+      "Market: not connected",
+      "Collection",
+      "Loading",
+      "Seed",
+      "Loading",
+      "Level"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 20,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "The founder’s garden",
+      "Loading artwork…",
+      "Reading public collection records…",
+      "Market: not connected",
+      "Loading collections…",
+      "Collection",
+      "Loading",
+      "Seed",
+      "Loading"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 18
+    }
+   }
+  },
+  {
+   "page": "blight/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 28,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "fLeeT",
+      "One operation with many frequencies. Everything below runs from chain ",
+      "trust",
+      "What \"on-chain\" actually means — nine exhibits fetched live from Bitco",
+      "walk the halls →",
+      "utility",
+      "Drop a trait PNG, meet the same WASM verdict the LaunchPad will run at",
+      "check your art →",
+      "utility"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 28,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "fLeeT",
+      "One operation with many frequencies. Everything below runs from chain ",
+      "trust",
+      "What \"on-chain\" actually means — nine exhibits fetched live from Bitco",
+      "walk the halls →",
+      "utility",
+      "Drop a trait PNG, meet the same WASM verdict the LaunchPad will run at",
+      "check your art →",
+      "utility"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "blight/inscription-explorer.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 9,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the doorway",
+      "the Modern Inscription Art Gallery",
+      "whose art shall we visit?",
+      "enter",
+      "the founder's garden",
+      "bQueenBee's Lost Purse",
+      "a crown from the vault",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 9,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the doorway",
+      "the Modern Inscription Art Gallery",
+      "whose art shall we visit?",
+      "enter",
+      "the founder's garden",
+      "bQueenBee's Lost Purse",
+      "a crown from the vault",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/midi-organ.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 11,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sound",
+      "The music-inscription modality, given wind. Traits are read live from ",
+      "read its traits",
+      "▶ hear it",
+      "🎲 roll a seed",
+      "🔗 copy song-link",
+      "read",
+      "Tinker:",
+      "Rendering: scale name → interval set (13 scales mapped); seed % 12 pic"
+     ],
+     "overflowX": 103,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 11,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sound",
+      "The music-inscription modality, given wind. Traits are read live from ",
+      "read its traits",
+      "▶ hear it",
+      "🎲 roll a seed",
+      "🔗 copy song-link",
+      "read",
+      "Tinker:",
+      "Rendering: scale name → interval set (13 scales mapped); seed % 12 pic"
+     ],
+     "overflowX": 103,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/museum.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 25,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Museum",
+      "\"on-chain\" names at least six different things",
+      "Autoglyphs",
+      "4,318 bytes of plain text",
+      "\"The output of the tokenURI function is a set of instructions to make ",
+      "no renderer is committed on-chain — not even a\n  hash of one.",
+      "this page's",
+      "the",
+      ".|.|.O..-.-.-.-.-.|.|.|.O.O.O.O..O.O.O.O.|.|.|.-.-.-.-.-..O.|.|.\n|-.|."
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Museum",
+      "\"on-chain\" names at least six different things",
+      "Autoglyphs",
+      "4,318 bytes of plain text",
+      "\"The output of the tokenURI function is a set of instructions to make ",
+      "no renderer is committed on-chain — not even a\n  hash of one.",
+      "this page's",
+      "the",
+      "reading chain…"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    }
+   }
+  },
+  {
+   "page": "blight/pixelrefiner.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PIXEL REFINER",
+      "crisp cells",
+      "One file, zero calls:",
+      "vendored at v0.11.1 · bd5c1c7",
+      "fungi sheet",
+      "⟳ REFINE",
+      "↓ PNG",
+      "↓ SVG",
+      "hex-top + the two hex dithers: locked because cells = square — the wor"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PIXEL REFINER",
+      "crisp cells",
+      "One file, zero calls:",
+      "vendored at v0.11.1 · bd5c1c7",
+      "fungi sheet",
+      "⟳ REFINE",
+      "↓ PNG",
+      "↓ SVG",
+      "hex-top + the two hex dithers: locked because cells = square — the wor"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/qrtree.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 24,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR TREE",
+      "the URL lives inside the code",
+      "There is no redirect server, ever.",
+      "GROW",
+      "↓ flat PNG",
+      "↓ tree PNG",
+      "THE TREE — tap to flatten",
+      "dark modules stand raised; light modules are the ground",
+      "THE CODE, HONESTLY"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 24,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR TREE",
+      "the URL lives inside the code",
+      "There is no redirect server, ever.",
+      "GROW",
+      "↓ flat PNG",
+      "↓ tree PNG",
+      "THE TREE — tap to flatten",
+      "dark modules stand raised; light modules are the ground",
+      "THE CODE, HONESTLY"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/qrroses.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 26,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR ROSES",
+      "BNRoSe's roses, Beehive Nature's bees",
+      "outward and\nupward",
+      "may cross the code — ECC H has\nbudget, and every bee path is decoder-g",
+      "--rose",
+      "love given to the living",
+      "ODD NUMBERS ONLY",
+      "PLANT",
+      "↓ PNG"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 26,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR ROSES",
+      "BNRoSe's roses, Beehive Nature's bees",
+      "outward and\nupward",
+      "may cross the code — ECC H has\nbudget, and every bee path is decoder-g",
+      "--rose",
+      "love given to the living",
+      "ODD NUMBERS ONLY",
+      "PLANT",
+      "↓ PNG"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    }
+   }
+  },
+  {
+   "page": "blight/qrroses-smil.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 30,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR ROSES · SMIL",
+      "the same garden, rebuilt as ONE animated SVG",
+      "static group drawn once",
+      "bees cross the code through its data middle",
+      "canvas original",
+      "PLANT",
+      "↓ PNG",
+      "THE GARDEN — declarative skin, frozen core",
+      "stems rise · leaves arrive · blooms open late · bees cross the data mi"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 30,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "QR ROSES · SMIL",
+      "the same garden, rebuilt as ONE animated SVG",
+      "static group drawn once",
+      "bees cross the code through its data middle",
+      "canvas original",
+      "PLANT",
+      "↓ PNG",
+      "THE GARDEN — declarative skin, frozen core",
+      "stems rise · leaves arrive · blooms open late · bees cross the data mi"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/profile.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "holder",
+      "no server",
+      "--sovereign / --you",
+      "your names and addresses — add as many as you like",
+      "what you call it",
+      "the name or address",
+      "which network",
+      ".eth",
+      ".base.eth"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "holder",
+      "no server",
+      "--sovereign / --you",
+      "your names and addresses — add as many as you like",
+      "what you call it",
+      "the name or address",
+      "which network",
+      ".eth",
+      ".base.eth"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "local-agent/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 43,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the local agent",
+      "local",
+      "skaists · a mind that runs in your page",
+      "MB once · then cached",
+      "sha256 pins enforced",
+      "hf · jsdelivr at render",
+      "in this\n  tab",
+      "the estate's own rails"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 43,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the local agent",
+      "local",
+      "skaists · a mind that runs in your page",
+      "MB once · then cached",
+      "sha256 pins enforced",
+      "hf · jsdelivr at render",
+      "in this\n  tab",
+      "the estate's own rails"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "record.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the record",
+      "before",
+      "after",
+      "Nothing here is ever retouched, cropped or rearranged. If a shot is ug",
+      "76 photographs · newest first · the record does not retouch",
+      "the picture tool, quieted",
+      "hub commit c7102fc",
+      "The rainbow glow came off the refiner’s title and its locked buttons n",
+      "before"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the record",
+      "before",
+      "after",
+      "Nothing here is ever retouched, cropped or rearranged. If a shot is ug",
+      "76 photographs · newest first · the record does not retouch",
+      "the picture tool, quieted",
+      "hub commit c7102fc",
+      "The rainbow glow came off the refiner’s title and its locked buttons n",
+      "before"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/midi.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 39,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bMiDi · the score the contract already wrote",
+      "paints a score that already exists",
+      "hexagonal",
+      "the token's own palette",
+      "resolution",
+      "MiDi A",
+      "MiDi C",
+      "MiDi B",
+      "read the seed from the chain"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 39,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bMiDi · the score the contract already wrote",
+      "paints a score that already exists",
+      "hexagonal",
+      "the token's own palette",
+      "resolution",
+      "MiDi A",
+      "MiDi C",
+      "MiDi B",
+      "read the seed from the chain"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/midiroom.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bMiDi · the room",
+      "three densities",
+      "press play, feel it",
+      "queue · sync · filter · pads",
+      "steps · voice · patch",
+      "the seed · the whole performance",
+      "Lydian · C2 · 89 BPM",
+      "mode · key · tempo",
+      "falling 32 · triangle · C4n"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bMiDi · the room",
+      "three densities",
+      "press play, feel it",
+      "queue · sync · filter · pads",
+      "steps · voice · patch",
+      "the seed · the whole performance",
+      "Lydian · C2 · 89 BPM",
+      "mode · key · tempo",
+      "falling 32 · triangle · C4n"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/midivault.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 26,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the vault",
+      "Autonomi",
+      "public",
+      "private",
+      "privileged",
+      "items in the vault",
+      "0 B",
+      "recorded bytes",
+      "SIMULATED"
+     ],
+     "overflowX": 6,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 26,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the vault",
+      "Autonomi",
+      "public",
+      "private",
+      "privileged",
+      "items in the vault",
+      "0 B",
+      "recorded bytes",
+      "SIMULATED"
+     ],
+     "overflowX": 6,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/vaulta-reader.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 13,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Vaulta Reader",
+      "any Vaulta table",
+      "code (contract)",
+      "scope",
+      "table",
+      "limit",
+      "read rows",
+      ".b registry — domains",
+      ".b chainaddrs — for domain id below"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 85,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Vaulta Reader",
+      "any Vaulta table",
+      "code (contract)",
+      "scope",
+      "table",
+      "limit",
+      "read rows",
+      ".b registry — domains",
+      ".b chainaddrs — for domain id below"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/workbench.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 41,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Inscription Explorer",
+      "Renders on-chain inscription art from chain state alone. No server, no",
+      "View",
+      "Scan all collections",
+      "Connect wallet — only for signing",
+      "enter an address and press View",
+      "status",
+      "idle",
+      "raw SVG"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 41,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Inscription Explorer",
+      "Renders on-chain inscription art from chain state alone. No server, no",
+      "View",
+      "Scan all collections",
+      "Connect wallet — only for signing",
+      "enter an address and press View",
+      "status",
+      "idle",
+      "raw SVG"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "dock.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 36,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Skip to content",
+      "what is proven, and what is not",
+      "Most projects show you the first half. This page is the second half to",
+      "seconds from nothing to a proof on your machine",
+      "held tests, each naming its own blocker",
+      "lanes unstarted before any user's money",
+      "what this is",
+      "coordination kernel written in Rust",
+      "Its first target is private commerce between two strangers who trust n"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "9 passed, 0 failed, 1 ignored"
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 36,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Skip to content",
+      "what is proven, and what is not",
+      "Most projects show you the first half. This page is the second half to",
+      "seconds from nothing to a proof on your machine",
+      "held tests, each naming its own blocker",
+      "lanes unstarted before any user's money",
+      "what this is",
+      "coordination kernel written in Rust",
+      "Its first target is private commerce between two strangers who trust n"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "9 passed, 0 failed, 1 ignored"
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "nine surfaces, one night, one hand",
+      "Made 2026‑08‑03 between 03:25 and 04:47 — before there was a review la",
+      "minutes, first file to last",
+      "surfaces · one hand",
+      "off-origin requests",
+      "the lab · six instruments",
+      "Built first — 03:25 to 04:16. Every one of these measures something, a",
+      "flower-lab",
+      "bnSessions"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 47,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "nine surfaces, one night, one hand",
+      "Made 2026‑08‑03 between 03:25 and 04:47 — before there was a review la",
+      "minutes, first file to last",
+      "surfaces · one hand",
+      "off-origin requests",
+      "the lab · six instruments",
+      "Built first — 03:25 to 04:16. Every one of these measures something, a",
+      "flower-lab",
+      "bnSessions"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "hardware/build.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 28,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Don't just hold the keys — build the locks",
+      "user",
+      "producer",
+      "127 cells — the bComb's own geometry from rung 4, wearing festival col"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 28,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Don't just hold the keys — build the locks",
+      "user",
+      "producer",
+      "127 cells — the bComb's own geometry from rung 4, wearing festival col"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    }
+   }
+  },
+  {
+   "page": "hardware/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 56,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Own your keys on hardware you can read",
+      "Every device below is open enough to audit: firmware you can build, de",
+      "Three rules before you spend a dollar.",
+      "Order direct from the manufacturer."
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 56,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Own your keys on hardware you can read",
+      "Every device below is open enough to audit: firmware you can build, de",
+      "Three rules before you spend a dollar.",
+      "Order direct from the manufacturer."
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "hardware/security.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Security events, read honestly",
+      "a published attack is the system working",
+      "kind",
+      "regression Mar 2021 · disclosed Jul 30 2026 · actively exploited"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "updating firmware cannot repair a seed that was already generated weak"
+      }
+     ],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 27,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "Security events, read honestly",
+      "a published attack is the system working",
+      "kind",
+      "regression Mar 2021 · disclosed Jul 30 2026 · actively exploited"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "updating firmware cannot repair a seed that was already generated weak"
+      }
+     ],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "listening.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 38,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🎧 the Listening Room",
+      "one seed, two arts:",
+      "and the fork law works live below",
+      "nothing mints from this page",
+      "▶ play",
+      "■ stop",
+      "🎲 random seed",
+      "idle — press play; sound needs one click (browser autoplay law, honore",
+      "append-mostly, parent-pointer, divergence receipt"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 6
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 38,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🎧 the Listening Room",
+      "one seed, two arts:",
+      "and the fork law works live below",
+      "nothing mints from this page",
+      "▶ play",
+      "■ stop",
+      "🎲 random seed",
+      "idle — press play; sound needs one click (browser autoplay law, honore",
+      "append-mostly, parent-pointer, divergence receipt"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 6
+    }
+   }
+  },
+  {
+   "page": "onboarding/receive.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bLighTnetWorK",
+      "~588 b/sec · bLighTnetWorK",
+      "bLiGhTbeAM",
+      "answers back",
+      "Camera first.",
+      "Grant the camera once — this device remembers it — then hold\n      it ",
+      "Eye",
+      "Origin",
+      "Camera"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bLighTnetWorK",
+      "~588 b/sec · bLighTnetWorK",
+      "bLiGhTbeAM",
+      "answers back",
+      "Camera first.",
+      "Grant the camera once — this device remembers it — then hold\n      it ",
+      "Eye",
+      "Origin",
+      "Camera"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "recover.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 8,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "your 24 words → your keys, with no service alive. This page makes zero",
+      "Recovery phrase (24 words) or bdidrec1… code",
+      "(which community/namespace — same phrase, different keys per context)",
+      "Recover",
+      "⌂ BNR hub",
+      "view source",
+      "If this shows a different fingerprint than your other device: you type"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 8,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "your 24 words → your keys, with no service alive. This page makes zero",
+      "Recovery phrase (24 words) or bdidrec1… code",
+      "(which community/namespace — same phrase, different keys per context)",
+      "Recover",
+      "⌂ BNR hub",
+      "view source",
+      "If this shows a different fingerprint than your other device: you type"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "stack.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "a browser cannot speak to a mail room — port 25 has no web eye."
+      },
+      {
+       "t": "does NOT mean down — up and unreachable are two different facts."
+      }
+     ],
+     "techShown": [],
+     "keyed": 77
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 2,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "st.stamp 9:11:37 PM"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "a browser cannot speak to a mail room — port 25 has no web eye."
+      },
+      {
+       "t": "does NOT mean down — up and unreachable are two different facts."
+      }
+     ],
+     "techShown": [],
+     "keyed": 77
+    }
+   }
+  },
+  {
+   "page": "wallet.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 44,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚠ THIS IS A LOCAL BUILD SERVER (127.0.0.1) — passkeys cannot work here",
+      "🗝 THE KEYCHAIN — your bzDiD holds every key",
+      "Automatic:",
+      "masterPRK",
+      "ed25519 soul record key",
+      "bnr.b",
+      "Vaulta K1 signing key",
+      "vaulta:yourname",
+      "0x/EVM"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 44,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚠ THIS IS A LOCAL BUILD SERVER (127.0.0.1) — passkeys cannot work here",
+      "🗝 THE KEYCHAIN — your bzDiD holds every key",
+      "Automatic:",
+      "masterPRK",
+      "ed25519 soul record key",
+      "bnr.b",
+      "Vaulta K1 signing key",
+      "vaulta:yourname",
+      "0x/EVM"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/demo.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bLighTnetWorK",
+      "Ready to beam.",
+      "Press send — the beam then runs until you stop it,\n          so there ",
+      "1 · press send",
+      "2 · pick up your phone",
+      "3 · open the BNR receiver",
+      "4 · aim at the beam",
+      "▶ Send a bLiGhTbeAM",
+      "◆ bComb"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 21,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bLighTnetWorK",
+      "Ready to beam.",
+      "Press send — the beam then runs until you stop it,\n          so there ",
+      "1 · press send",
+      "2 · pick up your phone",
+      "3 · open the BNR receiver",
+      "4 · aim at the beam",
+      "▶ Send a bLiGhTbeAM",
+      "◆ bComb"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 2
+    }
+   }
+  },
+  {
+   "page": "blight/farmers.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌻 the Farmers Market",
+      "beehivenature.com · the community's private party · settles in fUSD · ",
+      "◉ the stalls",
+      "🤝 bAccord",
+      "⚖ the house rules",
+      "⌂ about",
+      "private party",
+      "tending the garden’s stalls…",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌻 the Farmers Market",
+      "beehivenature.com · the community's private party · settles in fUSD · ",
+      "◉ the stalls",
+      "🤝 bAccord",
+      "⚖ the house rules",
+      "⌂ about",
+      "private party",
+      "tending the garden’s stalls…",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bnames.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 32,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "king",
+      "oliver",
+      "loviswater",
+      "lacee",
+      "travisremington",
+      "remington",
+      "lovis",
+      "queen",
+      "isabella"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 22
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 35,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "king",
+      "oliver",
+      "loviswater",
+      "lacee",
+      "travisremington",
+      "remington",
+      "lovis",
+      "queen",
+      "isabella"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    }
+   }
+  },
+  {
+   "page": "hardware/lab.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 25,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "The Lab — science and art, under stage lights",
+      "THE SCIENCE",
+      "THE ART",
+      "The ethics law, printed where everyone can see it."
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 25,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub",
+      "🐝 open hardware guide",
+      "🛡 security events",
+      "🔧 become a producer",
+      "⬡ the lab",
+      "The Lab — science and art, under stage lights",
+      "THE SCIENCE",
+      "THE ART",
+      "The ethics law, printed where everyone can see it."
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "keys/addresses.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🗝 your two addresses",
+      "one bzDiD root · two mailing rails — bsky (did:plc) and nostr (npub) ·",
+      "derive the shape",
+      "did method",
+      "did:plc (portable, PDS-hosted, ATProto)",
+      "derivation role",
+      "bzDiD root ATTESTS the plc signing key (never is it)",
+      "plc document",
+      "did:plc:<rotation-0-hash-of-root>"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🗝 your two addresses",
+      "one bzDiD root · two mailing rails — bsky (did:plc) and nostr (npub) ·",
+      "derive the shape",
+      "did method",
+      "did:plc (portable, PDS-hosted, ATProto)",
+      "derivation role",
+      "bzDiD root ATTESTS the plc signing key (never is it)",
+      "plc document",
+      "did:plc:<rotation-0-hash-of-root>"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    }
+   }
+  },
+  {
+   "page": "onboarding/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 2,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 9
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 2,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 6
+    }
+   }
+  },
+  {
+   "page": "blight/market.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the DeMarketPlace",
+      "live listings · read from the chain, zero cache",
+      "inscriptions, honestly traded — every transfer is an art event, so eve",
+      "browse",
+      "my listings",
+      "how it settles",
+      "reading the garden’s finest from chain state…",
+      "market rev 4",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "the DeMarketPlace",
+      "live listings · read from the chain, zero cache",
+      "inscriptions, honestly traded — every transfer is an art event, so eve",
+      "browse",
+      "my listings",
+      "how it settles",
+      "reading the garden’s finest from chain state…",
+      "market rev 4",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bset.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 62,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "“for the wOlf” · 100 tracks, docked verbatim · sigils grown from their",
+      "BODIEV, Xassa - Эстетика (Премьера 2024)",
+      "ru · русская",
+      "play in his playlist ↗",
+      "«Матушка земля»",
+      "ru · русская",
+      "play in his playlist ↗",
+      "Джанная ❤",
+      "ru · русская"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 8
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 64,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "“for the wOlf” · 100 tracks, docked verbatim · sigils grown from their",
+      "BODIEV, Xassa - Эстетика (Премьера 2024)",
+      "ru · русская",
+      "play in his playlist ↗",
+      "«Матушка земля»",
+      "ru · русская",
+      "play in his playlist ↗",
+      "Джанная ❤",
+      "ru · русская"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "festival/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Welcome in — this is your day at the festival, and your day\n  costs no",
+      "ARRIVE",
+      "THE FLOOR",
+      "SPEAK LIGHT",
+      "KANDI",
+      "THE BOARD",
+      "THE SET",
+      "CALM TENT",
+      "RECEIPT"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "your day at the festival, wire to wire: arrive keyless,\n  walk the rib",
+      "ARRIVE",
+      "THE FLOOR",
+      "SPEAK LIGHT",
+      "KANDI",
+      "THE BOARD",
+      "THE SET",
+      "CALM TENT",
+      "RECEIPT"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "kandi.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🍬 the kandi bar",
+      "String beads, name it, then hand a line of text to someone you\n  alrea",
+      "⚗ THE COMPOSER — string it",
+      "Beads:",
+      "Then name it:",
+      "for",
+      "right\n  arm",
+      "thread colour",
+      "Word beads (A–Z)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 31,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🍬 the kandi bar",
+      "make it. name it. do the handshake. peace, love, unity — and on\n  resp",
+      "⚗ THE COMPOSER — string it",
+      "Beads:",
+      "Then name it:",
+      "for",
+      "right\n  arm",
+      "thread colour",
+      "Word beads (A–Z)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 3
+    }
+   }
+  },
+  {
+   "page": "plur.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 80,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PLUR",
+      "SKAISTS mUsiC ↗",
+      "the first word",
+      "śāntiḥ · sanskrit",
+      "no voice",
+      "shalom · hebrew",
+      "no voice",
+      "salām · arabic",
+      "no voice"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 66,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PLUR",
+      "come as you are — we accept you",
+      "SKAISTS mUsiC ↗",
+      "the first word",
+      "śāntiḥ · sanskrit",
+      "no voice",
+      "shalom · hebrew",
+      "no voice",
+      "salām · arabic"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 12
+    }
+   }
+  },
+  {
+   "page": "blight/studio-gate.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 16,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Studio Gate",
+      "crates/inscription-gate",
+      "none",
+      "square image, ideally grid×grid or an integer multiple of it",
+      "grid (C-3, frozen at deploy)",
+      "lattice orientation",
+      "max rects / transaction",
+      "max hairline run (cells)",
+      "min edge margin (cells)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 16,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Studio Gate",
+      "crates/inscription-gate",
+      "none",
+      "square image, ideally grid×grid or an integer multiple of it",
+      "grid (C-3, frozen at deploy)",
+      "lattice orientation",
+      "max rects / transaction",
+      "max hairline run (cells)",
+      "min edge margin (cells)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "blight/studio-music.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 11,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Stopped · 16 steps",
+      "G#4",
+      "C#4",
+      "● = a note. Use arrow keys to move between squares; Space or Enter cha",
+      "Ready to compose.",
+      "Saves the notes and settings, not an audio recording. A link carries t",
+      "Optional, read-only lookup. Your notes stay in place. Some collections",
+      "Version 1 · eight pitch rows × sixteen steps. Imported metadata is ret",
+      "Audio is synthesized in this browser after you press Play. Import read"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 29
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 11,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Stopped · 16 steps",
+      "G#4",
+      "C#4",
+      "● = a note. Use arrow keys to move between squares; Space or Enter cha",
+      "Ready to compose.",
+      "Saves the notes and settings, not an audio recording. A link carries t",
+      "Optional, read-only lookup. Your notes stay in place. Some collections",
+      "Version 1 · eight pitch rows × sixteen steps. Imported metadata is ret",
+      "Audio is synthesized in this browser after you press Play. Import read"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 29
+    }
+   }
+  },
+  {
+   "page": "forge/hexfield.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 18,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "density",
+      "hue base",
+      "hue drift",
+      "symmetry",
+      "91 cells · cool family · seed \"1000\" — same seed, same field, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 18,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "density",
+      "hue base",
+      "hue drift",
+      "symmetry",
+      "91 cells · cool family · seed \"1000\" — same seed, same field, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "forge/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "and",
+      "what it is",
+      "describe → build → preview → iterate → fork",
+      "the teaching promise",
+      "No build without an explain block",
+      "Practice loops",
+      "Guidance that ends by pointing at the source",
+      "the fork law:",
+      "go play — the sight side (live on this fleet)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 37,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "and",
+      "what it is",
+      "describe → build → preview → iterate → fork",
+      "the teaching promise",
+      "No build without an explain block",
+      "Practice loops",
+      "Guidance that ends by pointing at the source",
+      "the fork law:",
+      "go play — the sight side (live on this fleet)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "forge/orbit.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "petal count k",
+      "rings",
+      "twist",
+      "hue base",
+      "5-petal rose · 4 rings · seed \"2000\" — same seed, same orbit, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "petal count k",
+      "rings",
+      "twist",
+      "hue base",
+      "5-petal rose · 4 rings · seed \"2000\" — same seed, same orbit, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "review.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 11
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 8
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/gallery/resonance.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 63,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Resonance",
+      "Collective Consciousness, Schumann Frequency & Plant Medicine Correlat",
+      "Hawkins Consciousness Scale",
+      "Enlightenment (700-1000)",
+      "Peace",
+      "Joy",
+      "Love",
+      "Reason",
+      "Acceptance"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 63,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Resonance",
+      "Collective Consciousness, Schumann Frequency & Plant Medicine Correlat",
+      "Hawkins Consciousness Scale",
+      "Enlightenment (700-1000)",
+      "Peace",
+      "Joy",
+      "Love",
+      "Reason",
+      "Acceptance"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "royalguard.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 36,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛡 the ROYAL GUARD",
+      "DAO",
+      "two treasuries",
+      "wallet",
+      "this deck never holds a key and can never spend.",
+      "🚪 THE THREE DOORS — married on one deck, one click deep",
+      "you",
+      "the DAO",
+      "SKAISTS · LOVErnment on Vaulta — Respect standings, commissioning, emi"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 35,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛡 the ROYAL GUARD",
+      "the command deck — LOVErnment DAO panels · dual-treasury dials · the w",
+      "🚪 THE THREE DOORS — married on one deck, one click deep",
+      "three instruments, one breath — the DAO floor, the treasury cockpit,\n ",
+      "the DAO",
+      "SKAISTS · LOVErnment on Vaulta — Respect standings, commissioning, emi",
+      "the treasuries",
+      "ANT on Arbitrum One beside the DAO treasury on Vaulta — six live dials",
+      "the wallet"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "dao-dashboard/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 75,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "skaists.social",
+      "COMMONS · OPEN READ",
+      "BNR DAO — what you know is measured; what isn't measured says so.",
+      "READING",
+      "Plain",
+      "Standard",
+      "Technical",
+      "MONEY",
+      "USD"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 6
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 75,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "skaists.social",
+      "COMMONS · OPEN READ",
+      "BNR DAO — what you know is measured; what isn't measured says so.",
+      "READING",
+      "Plain",
+      "Standard",
+      "Technical",
+      "MONEY",
+      "USD"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 6
+    }
+   }
+  },
+  {
+   "page": "attest.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 62,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "✍🌐 one tongue, one evening",
+      "says so honestly",
+      "one person per tongue, one evening each",
+      "vouched for by a\n  person who lives in it",
+      "tongues human-attested — live from the corpus, not a claim",
+      "THE BOARD — live, read from the same file the pickers read",
+      "tongue",
+      "strings docked",
+      "status"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 60,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "✍🌐 one tongue, one evening",
+      "review,\n  not retranslation",
+      "tongues human-attested — live from the corpus, not a claim",
+      "THE BOARD — live, read from the same file the pickers read",
+      "tongue",
+      "strings docked",
+      "status",
+      "why this one matters",
+      "your evening waits"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blanguage.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 73,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "skaists · beautiful",
+      "language",
+      "ISO 639-3",
+      "dir",
+      "vitality (linked)",
+      "note",
+      "the control specimen",
+      "eng",
+      "ltr"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 76,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PLUR →",
+      "SKAISTS mUsiC →",
+      "language",
+      "ISO 639-3",
+      "dir",
+      "vitality (linked)",
+      "note",
+      "the control specimen",
+      "eng"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    }
+   }
+  },
+  {
+   "page": "bsymposium.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 12
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "buzz-studio.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 29,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature",
+      "the bUZZ Studio",
+      "together, live",
+      "no account, no server, no company in the middle",
+      "3f864b",
+      "just you",
+      "the guarantee door",
+      "skaists.buzz",
+      "wss://skaists.buzz"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 15
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 28,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature",
+      "the bUZZ Studio",
+      "the co-creation genesis: a 24×21 comb, painted many-hands\n    live — C",
+      "cb0f89",
+      "just you",
+      "the guarantee door",
+      "skaists.buzz",
+      "wss://skaists.buzz",
+      "no request leaves this page to render it"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 15
+    }
+   }
+  },
+  {
+   "page": "devroom.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 80,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛠 the Autonomi builders dev room",
+      "stranger who hits\n  the same wall",
+      "0 · THE PIPELINE — where everything stands",
+      "submitted — nothing leaves the room",
+      "FINDINGS · credited",
+      "ARTICLES · drafted",
+      "CITATIONS · iq.wiki-grade",
+      "0 submitted",
+      "1 · THE ARTICLES — each opens with the symptom, in the words someone w"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "# /etc/udev/rules.d/90-read-ahead-cap.rules\nACTION==\"add|change\", KERN",
+       "sw": 431,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "sudo udevadm control --reload && sudo udevadm trigger",
+       "sw": 315,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "strace -f -e trace=mmap,mmap2 <your program> 2>&1 | tail",
+       "sw": 332,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "mmap(NULL, 137438953472, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORE",
+       "sw": 684,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "ulimit -v   # RLIMIT_AS: total address space per process, KiB\nulimit -",
+       "sw": 359,
+       "cw": 308
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "above 1024 KiB is a Fail"
+      },
+      {
+       "t": "mmap(NULL, 137438953472, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = -1 E"
+      },
+      {
+       "t": "Step 3 — read the error correctly"
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 80,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🛠 the Autonomi builders dev room",
+      "stranger who hits\n  the same wall",
+      "0 · THE PIPELINE — where everything stands",
+      "submitted — nothing leaves the room",
+      "FINDINGS · credited",
+      "ARTICLES · drafted",
+      "CITATIONS · iq.wiki-grade",
+      "0 submitted",
+      "1 · THE ARTICLES — each opens with the symptom, in the words someone w"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "# /etc/udev/rules.d/90-read-ahead-cap.rules\nACTION==\"add|change\", KERN",
+       "sw": 431,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "sudo udevadm control --reload && sudo udevadm trigger",
+       "sw": 315,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "strace -f -e trace=mmap,mmap2 <your program> 2>&1 | tail",
+       "sw": 332,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "mmap(NULL, 137438953472, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORE",
+       "sw": 684,
+       "cw": 308
+      },
+      {
+       "tag": "pre",
+       "id": "",
+       "t": "ulimit -v   # RLIMIT_AS: total address space per process, KiB\nulimit -",
+       "sw": 359,
+       "cw": 308
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "above 1024 KiB is a Fail"
+      },
+      {
+       "t": "mmap(NULL, 137438953472, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = -1 E"
+      },
+      {
+       "t": "Step 3 — read the error correctly"
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "forge/room.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 6,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Forge",
+      "91 cells · cool family · seed hive-1000",
+      "forge/visual/shared.js",
+      "createSharedPiece",
+      "This page does not connect people across devices. LiveKit is a planned"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 20
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 6,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Forge",
+      "91 cells · cool family · seed hive-1000",
+      "forge/visual/shared.js",
+      "createSharedPiece",
+      "This page does not connect people across devices. LiveKit is a planned"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 20
+    }
+   }
+  },
+  {
+   "page": "blight/hearth.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🔥 the hearth",
+      "Explore creative prompts with BNR’s existing generators.",
+      "🍄 grow",
+      "🎵 play",
+      "👑 crown",
+      "🤝 deal",
+      "send",
+      "the deterministic hearth: today it composes from the fleet's own engin",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 10,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🔥 the hearth",
+      "Explore creative prompts with BNR’s existing generators.",
+      "🍄 grow",
+      "🎵 play",
+      "👑 crown",
+      "🤝 deal",
+      "send",
+      "the deterministic hearth: today it composes from the fleet's own engin",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "blight/pulse.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 8,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "📡 the pulse",
+      "bX pointers, live on the nostr relay · TASK 6 v1 — read + broadcast · ",
+      "listen to the relay",
+      "idle — press listen; pointers only, never content",
+      "about",
+      "relays: damos · nos.lol · nostr.band (rotation v1) · E2E NIP-44 docks ",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 8,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "📡 the pulse",
+      "bX pointers, live on the nostr relay · TASK 6 v1 — read + broadcast · ",
+      "listen to the relay",
+      "idle — press listen; pointers only, never content",
+      "about",
+      "relays: damos · nos.lol · nostr.band (rotation v1) · E2E NIP-44 docks ",
+      "⌂ hub"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bqueenbee-live.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 74,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚙ machine agent — never a person",
+      "telemetry-free by construction.",
+      "bAccords",
+      "people attest, arithmetic verifies.",
+      "graded evidence lane",
+      "don't trust these pages either — verify. That includes me. Especially ",
+      "⚙ machine agent",
+      "🔊 voice",
+      "I name my absences instead of papering them"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 74,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚙ machine agent — never a person",
+      "telemetry-free by construction.",
+      "bAccords",
+      "people attest, arithmetic verifies.",
+      "graded evidence lane",
+      "don't trust these pages either — verify. That includes me. Especially ",
+      "⚙ machine agent",
+      "🔊 voice",
+      "I name my absences instead of papering them"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "btranslated.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 49,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌐 bTranslated",
+      "your name, rendered in your tongue — while resolution always terminate",
+      "through",
+      "stored locally: father=en — this browser only",
+      "DEMO RENDERING",
+      "the aliases below are demonstration renderings (machine-draft ⚙, unatt",
+      "alias (your tongue)",
+      "lovis.b · rendered for you",
+      "confusable skeleton"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 49,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌐 bTranslated",
+      "your name, rendered in your tongue — while resolution always terminate",
+      "through",
+      "stored locally: father=en — this browser only",
+      "DEMO RENDERING",
+      "the aliases below are demonstration renderings (machine-draft ⚙, unatt",
+      "alias (your tongue)",
+      "lovis.b · rendered for you",
+      "confusable skeleton"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    }
+   }
+  },
+  {
+   "page": "forge/huddle.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the forge room, across machines",
+      "LiveKit",
+      "join a venue",
+      "LiveKit venue URL (wss://… or ws://…)",
+      "join token (from your venue operator)",
+      "room name",
+      "your name",
+      "▶ join the huddle",
+      "local-only"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the forge room, across machines",
+      "LiveKit",
+      "join a venue",
+      "LiveKit venue URL (wss://… or ws://…)",
+      "join token (from your venue operator)",
+      "room name",
+      "your name",
+      "▶ join the huddle",
+      "local-only"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bearth.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 11
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "bfood.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 14
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 9
+    }
+   }
+  },
+  {
+   "page": "bigen.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 14
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 9
+    }
+   }
+  },
+  {
+   "page": "blongevity.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 3,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bFood",
+      "BiGen"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 12
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 3,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "bFood",
+      "BiGen"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 8
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/gallery/acid-cascade.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 115,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "ACiD — Artificial Chronic Inflammatory Disease",
+      "The TERT-ECS-Telomere Disease Cascade | Upstream Medicine | bnature.so",
+      "of Chronic Disease is Downstream of ACiD",
+      "TERT",
+      "Gene Dysfunction = Root Cause",
+      "$317T",
+      "Reversible with Upstream Medicine",
+      "The Disease Cascade — How ACiD Creates 90%+ of Chronic Disease",
+      "ARTIFICIAL CAUSES"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 115,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "ACiD — Artificial Chronic Inflammatory Disease",
+      "The TERT-ECS-Telomere Disease Cascade | Upstream Medicine | bnature.so",
+      "of Chronic Disease is Downstream of ACiD",
+      "TERT",
+      "Gene Dysfunction = Root Cause",
+      "$317T",
+      "Reversible with Upstream Medicine",
+      "The Disease Cascade — How ACiD Creates 90%+ of Chronic Disease",
+      "ARTIFICIAL CAUSES"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/gallery/indigo-index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 97,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Indigo Index v2.0",
+      "Chronic Disease Economics x Cannabinoid Solution x Creativity x GDP | ",
+      "$14.11T",
+      "Annual Chronic Disease Cost",
+      "52% of US GDP ($26.95T)",
+      "Reduction with Nutrient Therapy",
+      "ECS restoration via cannabinoid RDI",
+      "$317T",
+      "25-Year Savings Opportunity"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "div",
+       "id": "",
+       "t": "$0.35T",
+       "sw": 39,
+       "cw": 19
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 97,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Indigo Index v2.0",
+      "Chronic Disease Economics x Cannabinoid Solution x Creativity x GDP | ",
+      "$14.11T",
+      "Annual Chronic Disease Cost",
+      "52% of US GDP ($26.95T)",
+      "Reduction with Nutrient Therapy",
+      "ECS restoration via cannabinoid RDI",
+      "$317T",
+      "25-Year Savings Opportunity"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "div",
+       "id": "",
+       "t": "$0.35T",
+       "sw": 39,
+       "cw": 19
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/blend-lab.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 40,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Blend Lab",
+      "bnature.social - Tobacco Blending Calculator v3.0",
+      "Strains",
+      "Virginia Bright",
+      "Flue-cured, USA - $21.99/lb",
+      "Kentucky Burley",
+      "Air-cured, USA - $22.99/lb",
+      "Turkish Izmir",
+      "Sun-cured, Turkey - $21.99/lb"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 40,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Blend Lab",
+      "bnature.social - Tobacco Blending Calculator v3.0",
+      "Strains",
+      "Virginia Bright",
+      "Flue-cured, USA - $21.99/lb",
+      "Kentucky Burley",
+      "Air-cured, USA - $22.99/lb",
+      "Turkish Izmir",
+      "Sun-cured, Turkey - $21.99/lb"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/edible-tracker.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 45,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Edible & Effects Tracker",
+      "bnature.social - Baseline Cannabinoid Nutrition + Acute Session Effect",
+      "Daily Baseline Protocol — Your Cannabinoid Nutrition",
+      "The cannabinoids you take daily as nutrition (RDI). This baseline fund",
+      "CBD (mg/day)",
+      "THC (mg/day)",
+      "CBG/CBN (mg/day)",
+      "Carrier Oil",
+      "Volume (ml/day)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 45,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "Edible & Effects Tracker",
+      "bnature.social - Baseline Cannabinoid Nutrition + Acute Session Effect",
+      "Daily Baseline Protocol — Your Cannabinoid Nutrition",
+      "The cannabinoids you take daily as nutrition (RDI). This baseline fund",
+      "CBD (mg/day)",
+      "THC (mg/day)",
+      "CBG/CBN (mg/day)",
+      "Carrier Oil",
+      "Volume (ml/day)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/flower-lab.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 57,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌿 BN Flower Lab",
+      "bnature.social — THCA Blending + Research Tracker v2.0",
+      "Strains",
+      "SATIVA-DOM",
+      "30.7% THCA",
+      "Limonene, Myrcene, Caryophyllene",
+      "INDICA-DOM",
+      "30.1% THCA",
+      "Caryophyllene, Limonene, Myrcene"
+     ],
+     "overflowX": 600,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 57,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌿 BN Flower Lab",
+      "bnature.social — THCA Blending + Research Tracker v2.0",
+      "Strains",
+      "SATIVA-DOM",
+      "30.7% THCA",
+      "Limonene, Myrcene, Caryophyllene",
+      "INDICA-DOM",
+      "30.1% THCA",
+      "Caryophyllene, Limonene, Myrcene"
+     ],
+     "overflowX": 600,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/intake-tracker.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 22,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Daily Intake Tracker",
+      "bnature.social - Cannabinoid Consumption vs RDI v1.0",
+      "Log Consumption",
+      "Method",
+      "Grams",
+      "THCA/THC %",
+      "Strain/Product",
+      "Time",
+      "Hits (vape only)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 22,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Daily Intake Tracker",
+      "bnature.social - Cannabinoid Consumption vs RDI v1.0",
+      "Log Consumption",
+      "Method",
+      "Grams",
+      "THCA/THC %",
+      "Strain/Product",
+      "Time",
+      "Hits (vape only)"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/spliff-lab.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 60,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Spliff Lab",
+      "bnature.social - Science-Based Tobacco + Cannabis Blender v2.0",
+      "Select Intention",
+      "10mg",
+      "Target Absorbed THC per Spliff",
+      "Tobacco Strains",
+      "Virginia Bright",
+      "$21.99/lb",
+      "KY Burley"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 60,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BN Spliff Lab",
+      "bnature.social - Science-Based Tobacco + Cannabis Blender v2.0",
+      "Select Intention",
+      "10mg",
+      "Target Absorbed THC per Spliff",
+      "Tobacco Strains",
+      "Virginia Bright",
+      "$21.99/lb",
+      "KY Burley"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "university/index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 12
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 9
+    }
+   }
+  },
+  {
+   "page": "fleet-hosted/lab/bnr-dashboard.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 13,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BNR Dashboard",
+      "bnature.social - Collective Command Center v1.0",
+      "bData",
+      "bLibrary",
+      "Education",
+      "Sessions Logged",
+      "Total mg Tracked",
+      "Blends Created",
+      "Avg RDI Met"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 13,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "BNR Dashboard",
+      "bnature.social - Collective Command Center v1.0",
+      "bData",
+      "bLibrary",
+      "Education",
+      "Sessions Logged",
+      "Total mg Tracked",
+      "Blends Created",
+      "Avg RDI Met"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bantfarm.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 45,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🐜 the bANTfarm",
+      "ant colony",
+      "SKAISTS · LOVErnment\n  DAO",
+      "reads",
+      "Six living instruments, read straight off the two chains with\n  no key",
+      "gwei",
+      "L2 gas price",
+      "eth_gasPrice · live · log dial 0.005–5 gwei",
+      "Mgas"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 4
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 46,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🐜 the bANTfarm",
+      "the node farm and the two treasuries — ANT on Arbitrum One\n  beside th",
+      "the cockpit strip — L2 gas, gas-per-block, block rate,\n  Vaulta finali",
+      "gwei",
+      "L2 gas price",
+      "eth_gasPrice · live · log dial 0.005–5 gwei",
+      "Mgas",
+      "gas used, latest block",
+      "gas used by block 504,603,370 · dial 0–30 Mgas"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "blight/coop.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 32,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌾 the Coop",
+      "hemp biomass downstream · seeds, hearts, cannabinoids · the criticalit",
+      "◉ the index",
+      "▤ tiers · 25k map",
+      "⌂ about",
+      "CBD full-spectrum distillate",
+      "cannabinoid",
+      "CBD isolate",
+      "cannabinoid"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 32,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "🌾 the Coop",
+      "hemp biomass downstream · seeds, hearts, cannabinoids · the criticalit",
+      "◉ the index",
+      "▤ tiers · 25k map",
+      "⌂ about",
+      "CBD full-spectrum distillate",
+      "cannabinoid",
+      "CBD isolate",
+      "cannabinoid"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "bfactory.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 49,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "THIS IS A DESIGN SURFACE — NOTHING IS BUILT.",
+      "🌻 THE FARMER EATS FIRST — ratified law, carried verbatim on page one",
+      "the hemp farmer's floor",
+      "the bootstrap is human\n  farming",
+      "BF-1",
+      "🏭 the bFactory",
+      "grows to it",
+      "◈ PLAN",
+      "read the dock: which fractions, processes and classes are being asked "
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 49,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "THIS IS A DESIGN SURFACE — NOTHING IS BUILT.",
+      "🌻 THE FARMER EATS FIRST — ratified law, carried verbatim on page one",
+      "the hemp farmer's floor",
+      "the bootstrap is human\n  farming",
+      "BF-1",
+      "🏭 the bFactory",
+      "grows to it",
+      "◈ PLAN",
+      "read the dock: which fractions, processes and classes are being asked "
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 5
+    }
+   }
+  },
+  {
+   "page": "bmeshasi.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 46,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚓ bMeshAsi — the community iron exchange",
+      "the iron is reimbursed first",
+      "the spec",
+      "1 · THE WEIGH-IN — what a name may not do",
+      "EXISTS TODAY · every row a receipt",
+      "the meter",
+      "crates/bmesh-meter",
+      "R-2 receipt",
+      "admission scoring"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 46,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "⚓ bMeshAsi — the community iron exchange",
+      "the iron is reimbursed first",
+      "the spec",
+      "1 · THE WEIGH-IN — what a name may not do",
+      "EXISTS TODAY · every row a receipt",
+      "the meter",
+      "crates/bmesh-meter",
+      "R-2 receipt",
+      "admission scoring"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "index.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 30,
+     "unkeyedSamples": [
+      "skaists",
+      ".dev",
+      "registry",
+      "estate.json · v1",
+      "render",
+      "build-atlas.mjs ↗",
+      "kernel",
+      "continuity",
+      "skaists",
+      "plur"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 59
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 30,
+     "unkeyedSamples": [
+      "skaists",
+      ".dev",
+      "FUNGi",
+      "ERC20i",
+      "FROGGi",
+      "ERC20i",
+      "PEPi",
+      "ERC20i",
+      "registry",
+      "estate.json · v1"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 49
+    }
+   }
+  },
+  {
+   "page": "forge/orbit-v2.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "petal count k",
+      "rings",
+      "twist",
+      "hue base",
+      "5-petal rose · 4 rings · seed \"2000\" — same seed, same orbit, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 17,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "// the seed becomes sight",
+      "forge/visual/starters/",
+      "🎲 roll a seed",
+      "🔗 copy seed-link",
+      "petal count k",
+      "rings",
+      "twist",
+      "hue base",
+      "5-petal rose · 4 rings · seed \"2000\" — same seed, same orbit, forever"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "design-system.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 52,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "colors never operate singular — every chip sits on its real ground",
+      "axis b · entity identity (founder-ruled)",
+      "--ai · #45C2DC",
+      "robots / bLOVErAi — machine base",
+      "--ai-deep · #57CDE4",
+      "AI accents; ranges --ai ↔ --info",
+      "--biomass · #86CC72",
+      "life · the estate's alive accent",
+      "--sovereign · #9C6FD6"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "guard refusal — NEVER error-red"
+      }
+     ],
+     "techShown": [],
+     "keyed": 7
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 52,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "colors never operate singular — every chip sits on its real ground",
+      "axis b · entity identity (founder-ruled)",
+      "--ai · #45C2DC",
+      "robots / bLOVErAi — machine base",
+      "--ai-deep · #57CDE4",
+      "AI accents; ranges --ai ↔ --info",
+      "--biomass · #86CC72",
+      "life · the estate's alive accent",
+      "--sovereign · #9C6FD6"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "guard refusal — NEVER error-red"
+      }
+     ],
+     "techShown": [],
+     "keyed": 7
+    }
+   }
+  },
+  {
+   "page": "museum.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 35,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the museum",
+      "live chain reads · archived fallbacks",
+      "the estate's royal art collection on Base",
+      "the royal collection",
+      "the estate's museum on Base — the royal art collection (PEPI inscripti",
+      "exhibits · live chain reads, archived fallbacks",
+      "four .base.eth name NFTs · archived byte-true",
+      "luni"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 33,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the museum",
+      "live chain reads · archived fallbacks",
+      "the estate's royal art collection on Base",
+      "the royal collection",
+      "the estate's museum on Base — the royal art collection (PEPI inscripti",
+      "exhibits · live chain reads, archived fallbacks",
+      "four .base.eth name NFTs · archived byte-true",
+      "luni"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "ARCHIVED — live read failed, archive is the floor"
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "fieldnotes.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 28
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 28
+    }
+   }
+  },
+  {
+   "page": "buzz-directory.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    }
+   }
+  },
+  {
+   "page": "or-board.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 51,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the OR board",
+      "the estate's operating room — every agent, live from the hive",
+      "蜂王 LOViS · King Bee",
+      "the canon",
+      "the OR board",
+      "read from the hive itself",
+      "session · model · effort · lane · last receipt",
+      "· connecting…"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 81,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the OR board",
+      "the estate's operating room — every agent, live from the hive",
+      "蜂王 LOViS · King Bee",
+      "the canon",
+      "the OR board",
+      "read from the hive itself",
+      "session · model · effort · lane · last receipt",
+      "· 7 seats · generated 2026-09-13 03:12 UTC"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [
+      {
+       "t": "⚠️ I couldn't process the last request after multiple retries (Agent reported error (code "
+      }
+     ],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "ant-door.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate page · reads Autonomi bytes same-origin — no plugin, no visitor",
+      "PUBLIC DATA FROM THE NETWORK",
+      "the door did not answer — door answered 404",
+      "autonomi://711c7e20…",
+      "UNREACHABLE",
+      "WHAT YOU ARE LOOKING AT — THREE AUDIENCES",
+      "the neighbor",
+      "the builder",
+      "/ant/v1/data/public/<address>"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 12,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "estate page · reads Autonomi bytes same-origin — no plugin, no visitor",
+      "PUBLIC DATA FROM THE NETWORK",
+      "the door did not answer — door answered 404",
+      "autonomi://711c7e20…",
+      "UNREACHABLE",
+      "WHAT YOU ARE LOOKING AT — THREE AUDIENCES",
+      "the neighbor",
+      "the builder",
+      "/ant/v1/data/public/<address>"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "profile.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 17
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 1,
+     "unkeyedSamples": [
+      "⬡ skaists"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 13
+    }
+   }
+  },
+  {
+   "page": "comb.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 38,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the comb",
+      "⬡ canon geometry · the hexagonal explorer",
+      "the comb",
+      "CELL",
+      "CAPPED",
+      "COMB",
+      "FRAME",
+      "cells per frame · 6⁵ — the dao cap and the geometry are the same fact"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "text",
+       "id": "",
+       "t": "ring 1 · six neighbours",
+       "sw": 134,
+       "cw": 110
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 38,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the comb",
+      "⬡ canon geometry · the hexagonal explorer",
+      "the comb",
+      "CELL",
+      "CAPPED",
+      "COMB",
+      "FRAME",
+      "cells per frame · 6⁵ — the dao cap and the geometry are the same fact"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      },
+      {
+       "tag": "text",
+       "id": "",
+       "t": "ring 1 · six neighbours",
+       "sw": 134,
+       "cw": 110
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "vending.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 55,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the vending machine",
+      "agent",
+      "skaists vending · keep what you make",
+      "1 · name it",
+      "name",
+      "fnv1a-64",
+      "tongue",
+      "line"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 56,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the vending machine",
+      "agent",
+      "skaists vending · keep what you make",
+      "1 · name it",
+      "name",
+      "fnv1a-64",
+      "tongue",
+      "line"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "privacy-lens.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 65,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the privacy lens",
+      "⬡ full understanding · the private note, both sides of the glass",
+      "the privacy lens",
+      "notelab11111",
+      "stranger",
+      "owner",
+      "what anyone can see",
+      "what your key unlocks"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 65,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "beehive nature reserve",
+      "the privacy lens",
+      "⬡ full understanding · the private note, both sides of the glass",
+      "the privacy lens",
+      "notelab11111",
+      "stranger",
+      "owner",
+      "what anyone can see",
+      "what your key unlocks"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  },
+  {
+   "page": "watch.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 33,
+     "unkeyedSamples": [
+      "SKAISTS mUsiC",
+      "PLUR",
+      "SKAISTS · SOCIAL / MEDIA",
+      "SKAISTS / 01",
+      "SKAISTS mUsiC →",
+      "#general",
+      "SKAISTS mUsiC",
+      "PLUR",
+      "SOURCE-CHECKED ROUTES · LIVE CONFIGURATION UNVERIFIED",
+      "This tab: HTTP page. This connection has no TLS protection; use a trus"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [],
+     "deadEnds": [
+      {
+       "t": "refused"
+      },
+      {
+       "t": "FAILED"
+      }
+     ],
+     "techShown": [],
+     "keyed": 30
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 40,
+     "unkeyedSamples": [
+      "SKAISTS mUsiC",
+      "PLUR",
+      "SKAISTS · SOCIAL / MEDIA",
+      "SKAISTS / 01",
+      "SKAISTS mUsiC →",
+      "#general",
+      "SKAISTS mUsiC",
+      "PLUR",
+      "SOURCE-CHECKED ROUTES · LIVE CONFIGURATION UNVERIFIED",
+      "This tab: HTTP page. This connection has no TLS protection; use a trus"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [],
+     "deadEnds": [
+      {
+       "t": "refused"
+      },
+      {
+       "t": "FAILED"
+      }
+     ],
+     "techShown": [],
+     "keyed": 32
+    }
+   }
+  },
+  {
+   "page": "jams.html",
+   "regs": {
+    "bee": {
+     "pageerrors": [],
+     "unkeyed": 53,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PLUR · peace · love · unity · respect",
+      "mUsiC",
+      "SKAISTS mUsiC",
+      "← PLUR museum",
+      "watch together",
+      "listening room",
+      "bMiDi room",
+      "Independent project references.",
+      "JAMS.community ↗"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    },
+    "raver": {
+     "pageerrors": [],
+     "unkeyed": 53,
+     "unkeyedSamples": [
+      "⬡ skaists",
+      "PLUR · peace · love · unity · respect",
+      "mUsiC",
+      "SKAISTS mUsiC",
+      "← PLUR museum",
+      "watch together",
+      "listening room",
+      "bMiDi room",
+      "Independent project references.",
+      "JAMS.community ↗"
+     ],
+     "overflowX": 0,
+     "offenders": [],
+     "clips": [
+      {
+       "tag": "span",
+       "id": "bregdescription",
+       "t": "Choose how this page speaks to you",
+       "sw": 258,
+       "cw": 1
+      }
+     ],
+     "deadEnds": [],
+     "techShown": [],
+     "keyed": 1
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfe9faf6324",
+ "bnr": "bnr://skaists.dev/blood/pfe9faf6324",
+ "identity": {
+  "name": "John Grandey Sr.",
+  "lifespan": "1720–1765",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "27PN-KRC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "10 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "10 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p405b294def",
+    "name": "Edmund Grandy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4f74e5b29a",
+    "name": "Silence Brooks",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7aae70e830",
+    "name": "Silence Grandy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8650867327",
+    "name": "Esther Wright",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/27PN-KRC",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 10,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

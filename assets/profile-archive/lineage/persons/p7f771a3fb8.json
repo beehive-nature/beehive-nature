@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7f771a3fb8",
+ "bnr": "bnr://skaists.dev/blood/p7f771a3fb8",
+ "identity": {
+  "name": "Rasmus Bertelsen",
+  "lifespan": "1698–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "271G-NLG"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "9 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "9 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbeeaac09c5",
+    "name": "Bertel Pedersen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p01244ed516",
+    "name": "Kiaersten Rasmusdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5bce7e075d",
+    "name": "Kirsten Rasmusdatter"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/271G-NLG",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 9,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

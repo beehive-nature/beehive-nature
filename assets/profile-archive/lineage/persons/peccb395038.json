@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peccb395038",
+ "bnr": "bnr://skaists.dev/blood/peccb395038",
+ "identity": {
+  "name": "Jorgen Olsen",
+  "lifespan": "1710–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MNP6-MFC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p241d440913",
+    "name": "Mads Jørgensen"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MNP6-MFC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

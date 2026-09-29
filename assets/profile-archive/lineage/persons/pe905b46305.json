@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe905b46305",
+ "bnr": "bnr://skaists.dev/blood/pe905b46305",
+ "identity": {
+  "name": "James Wildes",
+  "lifespan": "1790–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7TB-LZG"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "5 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "5 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p817c951fd5",
+    "name": "James Walton Wildes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad746556c2",
+    "name": "Hannah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd7d4ba9a27",
+    "name": "Ann Wiles"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8b7c7aa7ea",
+    "name": "Mary Hole",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7TB-LZG",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 5,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

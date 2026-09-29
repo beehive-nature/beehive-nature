@@ -2,164 +2,1601 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="dark">
-<title>dynasty profile — one name, every generation</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf7f0">
+<title>dynasty profile — published name records</title>
 <style>
-:root{--verified:#86CC72;--guard:#B7A8F7;--info:#6FA9E0;--sem-harm:#B7A8F7;--sem-solution:#86CC72;--sem-value:#E8B54B;--sem-system:#6FA9E0;--sem-science:#45C2DC;--ink-dim:#648176;--rose:#C41E3A;--rose-deep:#8E1230;
---bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;--line:#243026;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ddf8f;--violet:#c9a0ff;--b-value:#E8B54B}
+
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;--well:#0a0f0b;--guard:#B7A8F7;--verified:#86CC72;--info:#6FA9E0;
+--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.7 'IBM Plex Mono',monospace;padding:30px 14px 90px}
-main{max-width:860px;margin:0 auto}
-.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)}
-.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-top:20px}
-h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:8px 0 6px;font-weight:600;
- background-image:linear-gradient(92deg,#e2efdb 45%,#00E5FF 90%);
- -webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{color:var(--dim);font-size:12px;max-width:70ch;line-height:1.85}
-.house{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px;margin-top:16px}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+header{text-align:center;margin-bottom:8px;padding-bottom:12px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p,.sub{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto;line-height:1.85}
+main{max-width:860px;margin:0 auto;padding-inline:16px}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7;margin-bottom:10px}
+.listing{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
+.listing .lh{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.listing .lname{font-size:13px;color:var(--ink)}
+.listing .lrelay{font-size:10.5px;color:var(--dim);margin-top:4px;word-break:break-all}
+.listing .chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;padding:2px 8px;border-radius:99px;margin-left:auto;white-space:nowrap}
+.listing .chip.ok{background:rgba(134,204,114,.12);color:var(--verified);border:1px solid rgba(134,204,114,.2)}
+.listing .chip.bad{background:rgba(183,168,247,.08);color:var(--guard);border:1px solid rgba(183,168,247,.15)}
+.listing .chip i{width:6px;height:6px;border-radius:50%}
+.listing .chip.ok i{background:var(--verified)}
+.listing .chip.bad i{background:var(--guard)}
+.listing .a-link{margin-top:6px;display:inline-block;font-size:10.5px;color:var(--cyan);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.note{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
+.note .nt{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.note .nb{font-size:10.5px;color:var(--dim);line-height:1.8}
+.hivedivider{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-left:8px}
+.seat-note{font-size:10.5px;color:var(--dim);margin-top:6px;line-height:1.7}
+.door-help>summary,.connection-details>summary,.name-history>summary,.record-about>summary{min-height:44px;cursor:pointer}
+.hive-action{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:9px;background:var(--well);color:var(--ink);font-weight:650;text-decoration:none}
+.house{background:#111a14;border:1px solid var(--line);border-radius:11px;padding:16px;margin-top:16px}
 .house.current{border-color:var(--gold)}
 .hname{font-size:18px;color:var(--ink);font-weight:600;margin-bottom:2px}
 .htype{font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
 .htype.human{color:var(--verified)}
 .htype.baigentic{color:var(--violet)}
 .holder{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
-.holder .art{width:52px;height:52px;border-radius:8px;background:var(--rose);flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
-.holder .bio{flex:1}
+.holder .art{width:52px;height:52px;border-radius:8px;background:#C41E3A;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
 .holder .bio .bname{font-size:13px;color:var(--ink)}
 .holder .bio .bdesc{font-size:10.5px;color:var(--dim);margin-top:2px;line-height:1.7}
-.holder .bio .bmeta{font-size:9.5px;color:var(--faint);margin-top:3px}
-.holder .bio .bmeta .wallet{color:var(--b-value);font-family:monospace}
+.holder .bio .bmeta{font-size:9.5px;color:var(--dim);margin-top:3px}
+.holder .bio .wallet{color:#E8B54B;font-family:monospace}
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:8.5px;padding:1px 7px;border-radius:99px;margin-left:6px}
-.badge.human{background:rgba(134,204,114,.1);color:var(--verified);border:1px solid rgba(134,204,114,.2)}
-.badge.baigentic{background:rgba(201,160,255,.1);color:var(--violet);border:1px solid rgba(201,160,255,.2)}
 .genline{margin-top:8px;padding:8px 10px;background:var(--well);border:1px solid var(--line);border-radius:8px}
-.genline .gwho{font-size:11px;color:var(--ink)}
-.genline .gwhen{font-size:9px;color:var(--faint);margin-top:2px}
-.genline .gdesc{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.6}
-.genlabel{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:10px 0 6px}
+.genlabel{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:10px 0 6px}
 .email{font-size:9.5px;color:var(--info);margin-top:4px}
-footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:14px}
-@media (max-width:600px){body{padding:14px 10px 80px}.house{padding:13px 12px}.holder{flex-direction:column}.holder .art{width:44px;height:44px}}
+.record-caution{padding:10px 14px;border-inline-start:3px solid var(--guard);font-size:.875rem;color:var(--guard);line-height:1.6;margin:16px 0}
+.story-door{display:flex;gap:16px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--well);margin-top:14px;text-align:start}
+.story-door .art{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:2rem;flex:none;background:#e8ede2}
+.portrait{width:min(100%,280px);margin:12px auto;display:block}
+a{color:var(--cyan)}
+footer{max-width:860px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+.vivid{max-width:40rem;margin:16px auto 0;font-size:1.08rem;line-height:1.75}
+.story-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#first-bee,#first-raver,#layer-figure,#layer-hives,#layer-house,#instrument{display:none}
+body[data-reg="bee"][data-dir-beat="arrival"] #first-bee,
+body[data-reg="bee"][data-prof-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-dir-beat="figure"] #layer-figure,
+body[data-reg="raver"][data-prof-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-dir-beat="hives"] #layer-hives{display:block}
+body:not([data-reg="cypherpunk"])[data-prof-beat="house"] #layer-house{display:block}
+body[data-dir-beat="deeper"] #instrument,
+body[data-prof-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-dir-beat="arrival"] #masthead,
+body[data-reg="raver"][data-prof-beat="arrival"] #masthead{display:none}
+body[data-reg="bee"]{
+  --bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#5a645e;
+  --line:#e6dfd2;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --verified:#326b39;--guard:#65509a;--info:#29628f;
+  color-scheme:light;background:#fbf7f0;color:#0c1412;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] .take{color:#6e3fb8}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#857d70}
+body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
+body[data-reg="bee"] #tbar a{color:#0c1412!important}
+body[data-reg="bee"] section,body[data-reg="bee"] .house{background:#fff;border-color:var(--line)}
+/* F4 (z1.a release patch): routine New bee labels read at ≥14px — house
+   descriptions and holder metadata. Bee-scoped only; Cypherpunk keeps its
+   compact instrument. */
+body[data-reg="bee"] .holder .bio .bdesc{font-size:.875rem;line-height:1.7}
+body[data-reg="bee"] .holder .bio .bmeta{font-size:.875rem}
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#FFD700;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;--verified:#86CC72;--guard:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-dir-beat="arrival"],
+body[data-reg="raver"][data-prof-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-dir-beat="arrival"] main,
+body[data-reg="raver"][data-prof-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-dir-beat="arrival"] #first-raver,
+body[data-reg="raver"][data-prof-beat="arrival"] #first-raver{display:flex}
+#hive-scene,#lantern-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+@keyframes scene-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+#hive-scene .living,#lantern-scene .living{animation:scene-breathe 10s ease-in-out infinite;transform-origin:50% 42%}
+#hive-scene .wash,#lantern-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #hive-scene .living,#hive-scene .wash,#lantern-scene .living,#lantern-scene .wash{animation:none}
+}
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel,
+body[data-reg="cypherpunk"] .connection-details[open]{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.page-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.page-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.page-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.room-table{overflow:auto;max-width:100%}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
+th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
+[data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}
+
+/* House archive · crest, lineage, consent, and portable provenance. */
+#house-archive{display:none;margin-top:18px}
+body:not([data-reg="cypherpunk"])[data-prof-beat="house"] #house-archive,
+body[data-reg="cypherpunk"] #house-archive{display:block}
+.crest-stage{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(220px,.84fr) minmax(260px,1.16fr);gap:22px;
+ padding:22px;border:1px solid var(--line);border-radius:20px;background:
+ radial-gradient(circle at 18% 15%,rgba(255,215,0,.13),transparent 31%),
+ linear-gradient(135deg,#07130d 0%,#12251b 58%,#101912 100%);color:#edf5e6}
+.crest-stage::after{content:"";position:absolute;inset:auto -8% -48% 38%;height:75%;border-radius:50%;
+ background:radial-gradient(circle,rgba(0,229,255,.1),transparent 68%);pointer-events:none}
+.crest-art-frame{position:relative;z-index:1;display:grid;place-items:center;min-height:320px;padding:16px;border:1px solid rgba(255,215,0,.28);
+ border-radius:18px;background:rgba(1,8,4,.68);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.crest-art-frame img{display:block;width:100%;height:auto;max-height:470px;object-fit:contain}
+.crest-art-frame .crest-full{max-height:680px}
+.crest-copy{position:relative;z-index:1;align-self:center}
+.archive-kicker{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#e7c75b}
+.crest-copy h2{margin:8px 0 10px;font:650 clamp(1.8rem,5vw,3.5rem)/.98 var(--bee-font);letter-spacing:-.04em;color:#fff}
+.crest-copy .motto{font:500 clamp(1rem,2.4vw,1.45rem)/1.45 Georgia,serif;color:#f4dfa0;max-width:36ch}
+.crest-copy .archive-lead{margin-top:14px;max-width:58ch;color:#bed0c2;font-size:.92rem;line-height:1.75}
+.claim-stamp{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:7px 10px;border:1px solid rgba(255,215,0,.35);
+ border-radius:99px;color:#f4dfa0;background:rgba(255,215,0,.06);font-size:.72rem;letter-spacing:.04em}
+.archive-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.archive-actions .door{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.05);color:#fff}
+.archive-actions .door.primary{background:#f1d055;border-color:#f1d055;color:#152016}
+.profile-byline{margin:0 0 6px;color:#fff;font:600 .9rem/1.4 var(--bee-font)}
+.archive-panel{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--well)}
+.archive-panel h2{margin:0 0 5px;font:650 1.1rem/1.35 var(--bee-font);color:var(--ink);letter-spacing:0}
+.archive-panel>p{color:var(--dim);max-width:72ch}
+.symbol-grid,.profile-rail-grid,.market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.symbol-card,.rail-card,.market-card{padding:13px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--well) 90%,var(--gold) 10%)}
+.symbol-card strong,.rail-card strong,.market-card strong{display:block;color:var(--ink);font-size:.9rem}
+.symbol-card span,.rail-card span,.market-card span{display:block;color:var(--dim);font-size:.78rem;line-height:1.6;margin-top:4px}
+.evidence-chip{display:inline-flex!important;width:max-content;margin-top:8px!important;padding:3px 7px;border-radius:99px;
+ border:1px solid var(--line);color:var(--guard)!important;font-size:.66rem!important;text-transform:uppercase;letter-spacing:.07em}
+.audience-controls,.kind-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.audience-controls button,.kind-controls button{appearance:none;min-height:44px;padding:8px 13px;border:1px solid var(--line);border-radius:99px;
+ background:transparent;color:var(--ink);font:600 .8rem/1.2 var(--bee-font);cursor:pointer}
+.audience-controls button[aria-pressed="true"],.kind-controls button[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:#102214}
+.audience-note{margin-top:9px!important;font-size:.75rem;color:var(--guard)!important}
+.lineage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;align-items:stretch}
+.lineage-node{position:relative;min-height:116px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.lineage-node::before{content:attr(data-mark);display:block;margin-bottom:7px;color:var(--gold);font-size:1.1rem}
+.lineage-node strong{display:block;color:var(--ink)}
+.lineage-node p{margin-top:5px;color:var(--dim);font-size:.73rem;line-height:1.55}
+#house-archive[data-audience="public"] [data-scope="circle"],
+#house-archive[data-audience="public"] [data-scope="private"],
+#house-archive[data-audience="circle"] [data-scope="private"]{display:none}
+.scope-tag{display:inline-flex;margin-top:8px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em}
+.privacy-matrix{width:100%;min-width:620px}
+.privacy-matrix td:first-child{color:var(--ink)}
+.privacy-matrix .yes{color:var(--verified)}
+.privacy-matrix .guarded{color:var(--guard)}
+.privacy-matrix .no{color:var(--amber)}
+.profile-schema{margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.profile-schema[hidden]{display:none}
+.profile-schema dl{display:grid;grid-template-columns:minmax(110px,.35fr) 1fr;gap:7px 14px;margin-top:10px}
+.profile-schema dt{color:var(--violet)}
+.profile-schema dd{color:var(--dim);overflow-wrap:anywhere}
+.separator-specimen{margin:16px 0 0;padding:14px;border:1px solid var(--line);background:#08110c}
+.separator-specimen img{display:block;width:100%;height:auto;max-height:360px;object-fit:contain}
+.separator-specimen figcaption{margin-top:10px;color:var(--dim);font-size:.7rem;line-height:1.6}
+.separator-specimen strong{color:var(--ink)}
+.nature-signature{display:grid;grid-template-columns:minmax(150px,.45fr) minmax(230px,1fr);gap:18px;align-items:center;overflow:hidden}
+.nature-signature object{display:block;width:100%;max-height:310px;aspect-ratio:1;background:#f6f7ef;border-radius:50%}
+.nature-signature h2{font-size:1.35rem}
+.nature-signature .motion-note{font-size:.72rem;color:var(--guard)}
+.profile-editor summary{cursor:pointer;color:var(--ink);font:650 1rem/1.4 var(--bee-font)}
+.profile-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.profile-edit-grid label{display:grid;gap:6px;color:var(--dim);font-size:.72rem}
+.profile-edit-grid label.wide{grid-column:1/-1}
+.profile-edit-grid input{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.profile-edit-grid input[type="color"]{padding:4px;cursor:pointer}
+.profile-edit-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#house-archive{--profile-accent:#E8B54B}
+#house-archive .claim-stamp,#house-archive .crest-art-frame{border-color:color-mix(in srgb,var(--profile-accent) 55%,transparent)}
+#house-archive .archive-kicker,#house-archive .lineage-node::before{color:var(--profile-accent)}
+.manifest-preview{margin-top:12px;max-height:250px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:10px;
+ background:#07100b;color:#bfe9c8;font:11px/1.55 ui-monospace,'Cascadia Mono',monospace;white-space:pre-wrap}
+.archive-status{min-height:1.5em;margin-top:9px;color:var(--verified);font-size:.75rem}
+.translation-caveat{margin-top:14px;padding:9px 11px;border-inline-start:3px solid var(--guard);color:var(--dim);font-size:.72rem}
+body[data-reg="bee"] .crest-stage{background:linear-gradient(145deg,#183b28,#0b1f14);border-color:#1d4a31}
+body[data-reg="bee"] .archive-panel{background:#fff}
+body[data-reg="bee"] #house-archive .archive-actions .door:not(.primary){color:#fff;background:#123020;border-color:#8aaa91}
+body[data-reg="raver"] .crest-stage{min-height:72svh;background:
+ radial-gradient(circle at 21% 18%,rgba(255,215,0,.22),transparent 28%),
+ radial-gradient(circle at 82% 64%,rgba(201,160,255,.2),transparent 36%),
+ linear-gradient(135deg,#190b19,#071a17 62%,#10100a)}
+body[data-reg="raver"] .crest-art-frame{transform:rotate(-1deg);box-shadow:0 30px 110px rgba(199,61,177,.18)}
+body[data-reg="raver"] .crest-copy h2{color:#fff4ce;text-shadow:0 0 32px rgba(255,215,0,.22)}
+body[data-reg="cypherpunk"] .crest-stage{border-radius:2px;background:#050a07;border-color:#2a5f3e}
+body[data-reg="cypherpunk"] .archive-panel{border-radius:2px}
+body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
+@media(max-width:720px){
+ .crest-stage{grid-template-columns:1fr;padding:14px}.crest-art-frame{min-height:0}.crest-copy{padding:4px}
+ .symbol-grid,.profile-rail-grid,.market-grid,.lineage,.nature-signature,.profile-edit-grid{grid-template-columns:1fr}
+ .profile-edit-grid label.wide{grid-column:auto}
+ .privacy-table-wrap{overflow-x:auto}.archive-panel{padding:14px}
+}
+/* ── the rails band — one capability set, three registers (z2.profile) ── */
+.caps .capintro{font-size:11px;color:var(--dim);margin:2px 0 10px;line-height:1.85;max-width:74ch}
+.capgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.cap{background:var(--well);border:1px solid var(--line);border-left:3px solid var(--leaf);border-radius:9px;padding:12px 13px;position:relative}
+.cap.soon{border:1.5px dashed var(--violet);border-left:1.5px dashed var(--violet)}
+.cap .glyph{font-size:22px;line-height:1;margin-bottom:8px}
+.cap h3{font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:5px;padding-right:64px}
+.cap p{font-size:11px;color:var(--dim);line-height:1.8}
+.cap .tag{position:absolute;top:12px;right:12px;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--dim)}
+.cap.live .tag{color:var(--leaf);border-color:var(--leaf)}
+.cap.soon .tag{color:var(--violet);border-color:var(--violet)}
+.cap a{color:var(--cyan);font-size:10.5px;text-decoration:none;border-bottom:1px dashed var(--cyan)}
+.railcheck{margin-top:12px;background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+.railcheck .rlab{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.railcheck .rrow{display:flex;gap:8px;flex-wrap:wrap}
+.railcheck input{flex:1;min-width:180px;background:var(--bg);border:1px solid var(--line);border-radius:7px;color:var(--ink);font:12.5px 'IBM Plex Mono',monospace;padding:9px 11px}
+.railcheck input:focus{outline:none;border-color:var(--cyan)}
+.railcheck button{background:none;border:1px solid var(--leaf);color:var(--leaf);border-radius:7px;padding:9px 16px;font:11.5px 'IBM Plex Mono',monospace;cursor:pointer;min-height:38px}
+.railcheck button:hover{background:var(--leaf);color:var(--bg)}
+.rverdict{margin-top:9px;font-size:11.5px;line-height:1.75;color:var(--dim);min-height:1.2em}
+.rverdict b{color:var(--ink)}
+.rverdict.ok{color:var(--verified)}
+.rverdict.no{color:var(--gold)}
+.rlaw{margin-top:10px;font-size:10px;color:var(--dim);line-height:1.8}
+/* ── the bloodline record — walked FamilySearch data (zCode lineage import 2026-09-16) ── */
+#blood-record .blood-stats{margin-top:8px;font-size:.78rem;color:var(--gold);letter-spacing:.02em}
+.fanwrap{margin-top:14px;display:grid;justify-items:center;gap:8px}
+.fanwrap svg{width:100%;max-width:640px;height:auto}
+.fanwrap .fanslice{cursor:default}
+.fanwrap .fanslice:hover{opacity:.82}
+.fancap{font-size:.72rem;color:var(--dim);text-align:center}
+.tierlegend{display:flex;flex-wrap:wrap;gap:7px 12px;justify-content:center;font-size:.68rem;color:var(--dim)}
+.tierlegend .tk{display:inline-flex;align-items:center;gap:5px}
+.tierlegend .tk i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.spinedetails{margin-top:14px}
+.spinedetails summary{cursor:pointer;color:var(--ink);font:650 .95rem/1.4 var(--bee-font)}
+.spinerail{margin-top:10px;display:grid;gap:3px;max-height:340px;overflow:auto;padding-right:6px}
+.spinerail li{display:flex;gap:9px;align-items:baseline;font-size:.74rem;color:var(--dim);list-style:none}
+.spinerail li .gen{color:var(--dim);min-width:3.4ch;text-align:right;opacity:.7}
+.spinerail li .who{color:var(--ink)}
+.spinerail li .yrs{color:var(--dim);opacity:.85;white-space:nowrap}
+.spinerail li .tdot{width:8px;height:8px;border-radius:50%;flex:none;align-self:center}
+.spinerail li.saga .who{color:var(--violet)}
+.spinerail li.medieval .who{color:var(--gold)}
+@media(max-width:720px){.spinerail{max-height:260px}.fanwrap svg{max-width:420px}}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The house cards had
+   gone white in raver and cypherpunk (a bee-scoped rule's second selector was
+   unscoped: "body[data-reg=bee] section,.house"), leaving pale ink on white at
+   1.2:1 — fixed at the rule above. The rails band and the house instrument
+   ran 8.5–11 px with forced capitals, the capability tags floated over the
+   card titles (OVERLAP in cypherpunk), and the rail links were 13 px tall.
+   Casing law: no text-transform. Floor 12 px everywhere (cypherpunk keeps its
+   compact instrument); New bee and raver read at 14 px. */
+.note .nt,.hivedivider,.who,.htype,.genlabel,.cap .tag,.railcheck .rlab{text-transform:none;letter-spacing:.04em}
+.law,.listing .lrelay,.listing .chip,.listing .a-link,.note .nt,.note .nb,.hivedivider,.who,.seat-note,.htype,
+.holder .bio .bdesc,.holder .bio .bmeta,.badge,.genlabel,.email,footer,
+.caps .capintro,.cap p,.cap a,.cap .tag,.railcheck .rlab,.railcheck button,.rverdict,.rlaw{font-size:12px}
+.cap h3{font-size:13px;padding-right:0}
+.cap .tag{position:static;display:inline-block;margin-bottom:10px}
+.cap p+p{margin-top:6px}
+.cap a{padding-block:12px;border-bottom:0;text-decoration:underline dashed;text-underline-offset:3px}
+.railcheck button{min-height:44px}
+.listing .a-link{display:inline-flex;align-items:center;min-height:44px}
+.badge{padding:2px 8px;margin:2px 0 2px 6px}
+.holder .bio{min-width:0;flex:1}
+.holder .bio .wallet,.email{overflow-wrap:anywhere;word-break:normal}
+footer{padding-bottom:14px}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+body[data-reg="cypherpunk"] .name-history>summary,body[data-reg="cypherpunk"] details>summary{min-height:44px}
+body:not([data-reg="cypherpunk"]) :is(.law,.listing .lrelay,.note .nt,.note .nb,.hivedivider,.seat-note,.htype,.holder .bio .bmeta,.genlabel,.email,footer,.caps .capintro,.cap p,.cap a,.cap .tag,.railcheck .rlab,.railcheck button,.rverdict,.rlaw){font-size:14px}
+body:not([data-reg="cypherpunk"]) .cap h3{font-size:16px}
+body[data-reg="bee"] :is(.cap p,.caps .capintro){font-size:16px;line-height:1.7}
+body[data-reg="bee"] :is(.railcheck button,.railcheck input){font-family:var(--bee-font);font-size:1rem}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value below is a
+   skaists token (surfaces/skaists.css): no hand-picked hex, size or corner. One register shows
+   at a time; new bee is the default. The data layer is this page's own published records,
+   so the three fronts cannot disagree with them or with each other. ── */
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{font:inherit;color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal p{margin:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: the names as people, one action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-file{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-file i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-file b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-file span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-rows>.et-b-row:last-of-type{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-row small.ok{color:var(--sk-verified);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-open p{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open p.mut{color:var(--sk-ink-mut)}
+#eternal .et-b-open .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-open .et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open p.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-wait{padding:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: the houses as one honeycomb */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-bloom{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;cursor:pointer}
+#eternal .et-r-bloom .pt{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal .et-r-step{display:flex;justify-content:center;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-r-step button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);text-align:center}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-bloom .pt,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: records, manifest, pins, checked here */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);color:var(--sk-sovereign-strong);background:var(--sk-sovereign-wash)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:92px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-all;overflow-wrap:anywhere}
+#eternal .et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .out{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;overflow-wrap:anywhere}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.skip p{color:var(--sk-ink-mut)}.et-c-pipe li.skip{border-style:dashed}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify li.yes{color:var(--sk-verified)}.et-c-verify li.no{color:var(--sk-guard)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost.wide{grid-column:1/-1}
+
+/* profile: the page's own `section{…}` card must not dress the front */
+#eternal :is(h2,h3){letter-spacing:0;margin-bottom:0}
+#eternal{background:none;border:0;border-radius:0;padding:0;margin:var(--sk-s2) 0 0;box-shadow:none}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;cursor:pointer;color:var(--sk-ink)}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.agent{background:var(--sk-bg-well);color:var(--sk-ai)}
+#eternal .et-b-person i.guest{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person div{flex:1;min-width:0}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-person[aria-expanded="true"]{background:var(--sk-sovereign-tint)}
+#eternal .et-b-person[aria-expanded="true"] b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-person .chev{flex:none;color:var(--sk-ink-mut);transition:transform var(--dur,.26s)}#eternal .et-b-person[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-status{min-height:1.4em;text-align:center;font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-r-hive{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-hive .cell{cursor:pointer}
+#eternal .et-r-hive .cell:focus{outline:none}
+#eternal .et-r-hive .cell:focus-visible polygon{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-hive polygon{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal .et-r-status{min-height:1.4em;text-align:center;margin-top:var(--sk-s2);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;vertical-align:top}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab .st-cur{color:var(--sk-verified)}#eternal .et-c-tab .st-agent{color:var(--sk-ai)}#eternal .et-c-tab .st-guest{color:var(--sk-guard)}
+#eternal .et-c-tab th:nth-child(1){width:46%}#eternal .et-c-tab th:nth-child(3){width:16%}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--amber:var(--sk-guard);--verified:var(--sk-verified);--guard:var(--sk-guard);--info:var(--sk-info);
+ --bee-font:var(--sk-font-bee-sans);background:var(--sk-bg)}
+body[data-reg="bee"] #masthead h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-soft);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-sovereign-soft);--amber:var(--sk-guard);--verified:var(--sk-verified);--guard:var(--sk-guard);--info:var(--sk-info);
+ --bee-font:var(--sk-font-raver-body);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"][data-prof-beat]{background:var(--sk-bg)}
+html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-ai);--violet:var(--sk-sovereign-soft);background:var(--sk-bg)!important;color:var(--sk-ink)}
+body[data-reg="raver"] main :is(section:not(#eternal),.house){background:var(--sk-bg-card);border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] #masthead h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary);font-family:var(--sk-font-raver-display)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);
+ --gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-biomass);--amber:var(--sk-guard);--verified:var(--sk-verified);--guard:var(--sk-guard);--info:var(--sk-info);
+ background:var(--sk-bg);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main :is(section:not(#eternal),.house){background:var(--sk-bg-card);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] #masthead h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+/* brought into the lower half by the front above (footer audit): the whole manifest, read at the floor */
+body[data-reg="cypherpunk"] .manifest-preview{max-height:none;overflow:visible;font-size:12px}
+body[data-reg="cypherpunk"] .translation-caveat{font-size:12px}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="page-language" data-language-host></span>
+</div>
+<nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile" aria-current="page">People and names</a></nav>
 <main>
-<nav class="crumbs" aria-label="you are here">
-  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">dynasty profile</span>
-</nav>
-<header>
-  <div class="kicker">one name, every generation, honest records</div>
-  <h1>dynasty profile</h1>
-  <p class="lede">every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer read from this page's own published records (the house instrument
+     below, the disclosure manifest and the bloodline stats) drives all three, so the facts cannot
+     drift. The one action, "share this house", hands off to the page's own share button
+     (#share-house); the front only repeats what that button reports. -->
+<section id="eternal" aria-label="the houses">
+
+  <!-- NEW BEE — a calm room: the names as people, one action -->
+  <div class="et-b">
+    <div class="et-b-mark">skaists</div>
+    <h2 class="et-b-h" data-etk="et.prof.b.h">every name is a house</h2>
+    <p class="et-b-lede" id="etBeeLede"></p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBeeGuard"></span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-wait" data-etk="et.prof.b.wait">reading the records…</div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.prof.b.go">share the founder's house</button>
+      <p class="et-b-status" id="etBeeStatus" role="status" aria-live="polite"></p>
+      <a class="et-b-link" href="#instrument" data-prof-go="deeper" data-etk="et.prof.b.more">read every record</a>
+      <p class="et-b-foot" data-etk="et.prof.b.foot">published records, not a live guest list.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the data is the art: the houses as one honeycomb, threads to the founder -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.prof.r.h">the hive</h2><span class="et-r-hint" data-etk="et.prof.r.hint">tap a cell · read a house</span></div>
+    <svg class="et-r-hive" id="etHive" viewBox="-200 -200 400 400" role="group" aria-label="the houses as a honeycomb, the founder's house at the heart"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <p class="et-r-note" id="etRaverNote"></p>
+    <button type="button" class="et-r-pill" id="etRaverGo" data-etk="et.prof.r.go">share the house</button>
+    <p class="et-r-status" id="etRaverStatus" role="status" aria-live="polite"></p>
+    <a class="et-r-ghost" href="#house-archive" data-prof-go="house" data-etk="et.prof.r.more">open the founder's house</a>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: records, manifest, pins, checked in this page -->
+  <div class="et-c">
+    <div class="et-c-path" id="etCyPath">.b://skaists/houses</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard" id="etCyGuard"></div>
+    <h3 class="et-c-h" data-etk="et.prof.c.houses">holder ledger · published snapshots</h3>
+    <table class="et-c-tab"><thead><tr><th>house · kind</th><th>holder</th><th>gens</th></tr></thead><tbody id="etHouses"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.prof.c.manifest">disclosure manifest · skaists.house-disclosure/1</h3>
+    <table class="et-c-kv" id="etManifest"></table>
+    <h3 class="et-c-h" data-etk="et.prof.c.pipe">record pipeline</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.prof.c.verify">verify · the manifest's sha256 pins, fetched and hashed in this page</div>
+      <ol id="etVerify"></ol>
+      <button type="button" class="et-c-primary" id="etCyVerify" data-etk="et.prof.c.run">run verify here</button>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#profile-manifest" data-prof-go="deeper" data-etk="et.prof.c.raw">the raw manifest</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/profile.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.prof.c.fork">fork the template ↗</span> <span class="et-sr" data-etk="et.newtab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.prof.archive">the whole dynasty profile</h2>
+<header id="masthead">
+  <h1>⬡ <span data-i18n="prof.mark">dynasty profile</span></h1>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="prof.mast.eyebrow">published name records — who holds a house</p>
+  <div class="sub" data-reg="cypherpunk" data-i18n="prof.mast.sub">These are published records, not a live presence list or a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs.</div>
 </header>
 
+<article id="first-bee">
+  <p class="calm" data-i18n="prof.bee.calm">Welcome. Every name on this page is a house — a story kept in public.</p>
+  <p class="take" data-i18n="prof.bee.takeaway">Start with one house: the founder's.</p>
+  <p class="support" data-i18n="prof.bee.support">These are published records, not a live guest list and not an editor. You can read as a guest with no wallet. A lost key stays lost; a name is a lease.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-prof-go="house" data-i18n="prof.bee.house">Read the founder house</button>
+    <a class="door" href="buzz-directory.html" data-i18n="prof.bee.back">People journey</a>
+    <button type="button" class="door" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="lantern-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="lantern-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a2410"/>
+        <stop offset="40%" stop-color="#1a1428"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="lantern-glow" cx="48%" cy="30%" r="46%">
+        <stop offset="0%" stop-color="#FFD700" stop-opacity=".4"/>
+        <stop offset="50%" stop-color="#c9a0ff" stop-opacity=".16"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="lineage-roots" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2c4a2e" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#lantern-wash)"/>
+    <ellipse class="wash" cx="400" cy="260" rx="260" ry="200" fill="url(#lantern-glow)"/>
+    <g class="living">
+      <!-- one name, one golden thread, three generations of lanterns -->
+      <path id="name-thread" d="M398 56C360 110 312 140 300 186m2 24c-4 34 22 52 66 62m28 6c40 10 74 26 96 52" fill="none" stroke="#FFD700" stroke-width="3" opacity=".8"/>
+      <path d="M300 90v86" stroke="#d8c46a" stroke-width="3" opacity=".5"/>
+      <path d="M560 96v80" stroke="#d8c46a" stroke-width="3" opacity=".5"/>
+      <rect class="lantern gen" x="266" y="176" width="68" height="90" rx="12" fill="#754d96" stroke="#c9a0ff" stroke-width="2" opacity=".75"/>
+      <rect class="lantern gen" x="344" y="262" width="72" height="96" rx="12" fill="#d7c5ef" stroke="#FFD700" stroke-width="2"/>
+      <circle class="lantern gen" cx="508" cy="348" r="34" fill="#FFD700" opacity=".92"/>
+      <!-- the human holder (purple) reaching for the newest lantern -->
+      <circle class="person" cx="330" cy="470" r="46" fill="#754d96"/>
+      <path d="M304 458c10-16 40-16 52 0" fill="none" stroke="#fff" stroke-width="3"/>
+      <path class="kin" d="M366 448C400 420 448 396 484 378" fill="none" stroke="#FFD700" stroke-width="2" opacity=".6"/>
+      <!-- a machine companion (teal) keeps the record beside the holder -->
+      <path class="tether" d="M372 486 452 490" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".8"/>
+      <path class="machine" d="M452 478 466 470l14 8v16l-14 8-14-8Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+      <!-- green roots: what the whole house stands in -->
+      <path d="M0 640c140-24 260 16 400 6s260-40 400-8v262H0Z" fill="url(#lineage-roots)"/>
+      <path d="M250 640v90m300-96v90m-150 26v70" stroke="#86cc72" stroke-width="3" opacity=".5"/>
+      <path d="M200 616h400" stroke="#c9a0ff" stroke-width="3" opacity=".4"/>
+      <circle cx="302" cy="152" r="3" fill="#FFD700" opacity=".8"/>
+      <circle cx="562" cy="330" r="3" fill="#FFD700" opacity=".7"/>
+      <circle cx="596" cy="170" r="3" fill="#FFD700" opacity=".6"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="prof.raver.feel">One name, every generation kept. Nothing quietly rewritten.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-prof-go="figure" data-i18n="prof.raver.tap">Open a house story</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="prof.raver.consciousness">Names are stories. Holders are portraits. The ledger waits one tap away.</p>
+  <svg class="portrait" viewBox="0 0 280 200" aria-hidden="true" focusable="false">
+    <rect width="280" height="200" rx="20" fill="currentColor" opacity=".06"/>
+    <path class="thread" d="M140 16C124 34 108 40 98 52m4 14c-4 12 4 20 18 26m16 6c14 6 26 14 34 24" fill="none" stroke="#FFD700" stroke-width="2.5" opacity=".85"/>
+    <rect x="74" y="52" width="30" height="40" rx="8" fill="#754d96" stroke="#c9a0ff" stroke-width="2" opacity=".8"/>
+    <rect x="112" y="92" width="32" height="44" rx="8" fill="#d7c5ef" stroke="#FFD700" stroke-width="2"/>
+    <circle cx="180" cy="142" r="16" fill="#FFD700" opacity=".92"/>
+    <circle class="person" cx="140" cy="146" r="30" fill="#754d96"/>
+    <path d="M122 138c6-10 28-10 34 0" fill="none" stroke="#fff" stroke-width="3"/>
+    <path class="tether" d="M168 152 194 158" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".85"/>
+    <path class="machine" d="M194 150 204 144l10 6v12l-10 6-10-6Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+    <path d="M20 184h240" stroke="#86cc72" stroke-width="4" opacity=".5"/>
+  </svg>
+  <div class="choices">
+    <button type="button" class="door primary" data-prof-go="house" data-i18n="prof.raver.openhouse">Open the founder house</button>
+    <button type="button" class="door" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-house">
+  <p class="story-caption" data-i18n="prof.house.lead">skaists — the founder house. A published record, not a live presence.</p>
+  <div class="story-door">
+    <div class="art" aria-hidden="true">👑</div>
+    <div>
+      <strong>skaists</strong>
+      <p class="support" data-i18n="prof.house.holder">Travis Mark Remington holds this house.</p>
+      <p class="support" data-i18n="prof.house.story">Founder of the Beehive Nature Reserve. Builds dynasties. The holder ledger waits behind Go deeper.</p>
+    </div>
+  </div>
+  <div class="choices">
+    <a class="door" href="buzz-directory.html" data-i18n="prof.bee.back">People journey</a>
+    <button type="button" class="door" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="house-archive" data-audience="public" aria-labelledby="crest-title">
+  <div class="crest-stage">
+    <figure class="crest-art-frame">
+      <img data-reg="bee" src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen compact house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+      <img data-reg="raver" src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen compact house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+      <img class="crest-full" data-reg="cypherpunk" src="../assets/seals/house-crest-von-zutphen-DESIGN.svg" alt="Full ceremonial achievement of the von Zutphen house, including the shield, nine quarters, supporters, coronet, crest, motto, and compartment">
+    </figure>
+    <div class="crest-copy">
+      <p class="archive-kicker" data-i18n="prof.arch.kicker">skaists .b · house archive · v2</p>
+      <p class="profile-byline" id="profile-display-name">Travis Mark Remington</p>
+      <h2 id="crest-title" data-i18n="prof.arch.crest.h">von Zutphen house crest</h2>
+      <p class="motto" id="profile-display-motto">mīlestība ir karalis · ความรักคือราชา · love is king</p>
+      <p class="archive-lead" data-reg="bee" data-i18n="prof.arch.lead.bee">A family profile can hold more than a name. Keep the art, the story behind it, the family branches you choose to share, and the sources that help future generations understand what is known.</p>
+      <p class="archive-lead" data-reg="raver" data-i18n="prof.arch.lead.raver">A house mark made to travel: gold, green, serpents, bee, heart, sun, star, and one promise spoken across languages. Open the symbols, follow the lineage, share only with your chosen circle.</p>
+      <p class="archive-lead" data-reg="cypherpunk" id="profile-display-bio" data-i18n="prof.arch.lead.cypher">The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
+      <span class="claim-stamp" data-i18n="prof.arch.claim">◇ family-authored interpretation · not a title certificate</span>
+      <div class="archive-actions">
+        <button class="door primary" type="button" id="share-house" data-i18n="prof.arch.share">Share this profile</button>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" download data-i18n="prof.arch.dl.svg">Download original SVG</a>
+        <a class="door" data-reg="cypherpunk" href="../assets/seals/house-crest-von-zutphen-DESIGN.svg" download data-i18n="prof.arch.dl.full">Download full achievement</a>
+        <a class="door" data-reg="cypherpunk" href="../docs/BLAZON.md" data-i18n="prof.arch.blazon">Read the blazon</a>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen.json" data-i18n="prof.arch.prov">Open provenance</a>
+      </div>
+      <p class="archive-status" id="share-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <section class="archive-panel nature-signature" aria-labelledby="nature-mark-title">
+    <object type="image/svg+xml" data="../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg" aria-label="Beehive Nature green, teal, and purple breathing bloom">
+      <img src="../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing-poster.jpg" alt="Beehive Nature green, teal, and purple bloom at rest">
+    </object>
+    <div>
+      <p class="archive-kicker" data-i18n="prof.arch.nat.kicker">beehive nature · living signature</p>
+      <h2 id="nature-mark-title" data-i18n="prof.arch.nat.h">A shared bloom for people, AI, and biomass</h2>
+      <p data-i18n="prof.arch.nat.p">Purple carries people, teal carries AI, and green carries biomass. The original artwork by LoVis and his mother breathes locally as a quiet house signature.</p>
+      <p class="motion-note" data-i18n="prof.arch.nat.motion">Six-second local ring wave · no network or presence signal · reduced-motion preferences show the resting artwork.</p>
+    </div>
+  </section>
+
+  <details class="archive-panel profile-editor" id="profile-editor">
+    <summary data-i18n="prof.arch.ed.summary">Edit your profile</summary>
+    <p data-i18n="prof.arch.ed.p">Shape this page before publishing exists. Changes remain in this open page, create no account, upload nothing, and are excluded from the provenance receipt.</p>
+    <form id="profile-edit-form">
+      <div class="profile-edit-grid">
+        <label><span data-i18n="prof.arch.ed.name">Published display name</span><input id="profile-name-input" name="display-name" maxlength="60" value="Travis Mark Remington" autocomplete="off"></label>
+        <label><span data-i18n="prof.arch.ed.accent">House accent</span><input id="profile-accent-input" name="accent" type="color" value="#E8B54B"></label>
+        <label class="wide"><span data-i18n="prof.arch.ed.motto">Motto</span><input id="profile-motto-input" name="motto" maxlength="120" value="mīlestība ir karalis · ความรักคือราชา · love is king" autocomplete="off"></label>
+        <label class="wide"><span data-i18n="prof.arch.ed.bio">Cypherpunk profile line</span><input id="profile-bio-input" name="profile-line" maxlength="240" value="The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment." autocomplete="off"></label>
+      </div>
+      <div class="profile-edit-actions">
+        <button class="door primary" type="submit" data-i18n="prof.arch.ed.apply">Apply local preview</button>
+        <button class="door" type="reset" data-i18n="prof.arch.ed.reset">Reset preview</button>
+      </div>
+      <p class="archive-status" id="profile-edit-status" role="status" aria-live="polite" data-i18n="prof.arch.ed.status">Local preview only · not saved or published.</p>
+    </form>
+  </details>
+
+  <section class="archive-panel" data-reg="raver" aria-labelledby="symbol-title">
+    <h2 id="symbol-title" data-i18n="prof.arch.sym.h">Read the crest like a set list</h2>
+    <p data-i18n="prof.arch.sym.p">These meanings come from the holder’s design notes. They are invitations into the family story, clearly labeled so symbolism and archival proof never blur together.</p>
+    <div class="symbol-grid">
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.bee">🐝 Bee + heart</strong><span data-i18n="prof.arch.sym.bee.p">Love at the center of the house.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.serp">〰 Paired serpents</strong><span data-i18n="prof.arch.sym.serp.p">Protection, continuity, renewal.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.sun">☀ Sun + morning star</strong><span data-i18n="prof.arch.sym.sun.p">Light, direction, and stewardship.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.tongues">◈ Many tongues</strong><span data-i18n="prof.arch.sym.tongues.p">One motto carried across languages: love is king.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="lineage-title">
+    <h2 id="lineage-title"><span data-reg="bee" data-i18n="prof.arch.lin.h.bee">Your family, at your pace</span><span data-reg="raver" data-i18n="prof.arch.lin.h.raver">Choose who enters the family circle</span><span data-reg="cypherpunk" data-i18n="prof.arch.lin.h.cypher">Disclosure projection · local preview</span></h2>
+    <p data-reg="bee" data-i18n="prof.arch.lin.p.bee">Start with yourself. Living relatives stay private until each person says yes. Older family stories can become public when a source travels with them.</p>
+    <p data-reg="raver" data-i18n="prof.arch.lin.p.raver">Preview the public floor, a trusted circle, or your private archive. The preview changes what is shown here; publishing comes later and needs each person’s consent.</p>
+    <p data-reg="cypherpunk" data-i18n="prof.arch.lin.p.cypher">This control filters a disclosure projection in the browser. It does not publish, encrypt, authorize, or persist policy. Enforcement belongs at the signed record and storage boundary.</p>
+    <div class="audience-controls" role="group" aria-label="Preview audience">
+      <button type="button" data-audience-choice="public" aria-pressed="true" data-i18n="prof.arch.aud.public">Public profile</button>
+      <button type="button" data-audience-choice="circle" aria-pressed="false" data-i18n="prof.arch.aud.circle">Trusted circle</button>
+      <button type="button" data-audience-choice="private" aria-pressed="false" data-i18n="prof.arch.aud.private">Private archive</button>
+    </div>
+    <p class="audience-note" id="audience-note" data-i18n="prof.arch.aud.note">Preview only: public fields, cited history, and the crest. No living-relative details.</p>
+    <div class="lineage" aria-live="polite">
+      <div class="lineage-node" data-mark="◆" data-scope="public"><strong data-i18n="prof.arch.node.holder">House holder</strong><p data-i18n="prof.arch.node.holder.p">Travis Mark Remington · skaists .b. Holder-published name and crest.</p><span class="scope-tag" data-i18n="prof.arch.scope.public">public</span></div>
+      <div class="lineage-node" data-mark="◇" data-scope="circle"><strong data-i18n="prof.arch.node.living">Living relations</strong><p data-i18n="prof.arch.node.living.p">Names, dates, portraits, and relationships remain placeholders until each person consents.</p><span class="scope-tag" data-i18n="prof.arch.scope.circle">trusted circle</span></div>
+      <div class="lineage-node" data-mark="⌁" data-scope="private"><strong data-i18n="prof.arch.node.private">Private archive</strong><p data-i18n="prof.arch.node.private.p">Unpublished research notes, uncertain links, and sensitive records stay on the holder’s device.</p><span class="scope-tag" data-i18n="prof.arch.scope.private">private</span></div>
+      <div class="lineage-node" data-mark="△" data-scope="public"><strong data-i18n="prof.arch.node.hist">Historical lineage</strong><p data-i18n="prof.arch.node.hist.p">Family interpretations may be shared as stories. Genealogical assertions need a citation or an explicit unverified label.</p><span class="scope-tag" data-i18n="prof.arch.scope.sourced">public with source</span></div>
+    </div>
+  </section>
+
+  <!-- ── the bloodline record — walked FamilySearch data (zCode lineage import, 2026-09-16) ── -->
+  <section class="archive-panel" id="blood-record" aria-labelledby="blood-title">
+    <h2 id="blood-title" data-i18n="prof.arch.blood.h">the bloodline record — walked from FamilySearch</h2>
+    <p data-i18n="prof.arch.blood.p">The founder’s line, lifted 2026-09-16 out of the FamilySearch tree his grandmother Marilyn Lowry Remington built with him twelve years ago. Deceased ancestors publish here with era labels; every living person stays redacted. Past the colonial era the spine is traditional, not proven — the ring color says which.</p>
+    <p class="blood-stats" id="blood-stats"></p>
+    <div class="fanwrap">
+      <svg id="blood-fan" viewBox="0 0 720 436" role="img" aria-label="fan chart of seven generations, colored by evidence era"></svg>
+      <p class="fancap" data-i18n="prof.arch.blood.fan.cap">seven generations from the founder · color = evidence era</p>
+    </div>
+    <div class="tierlegend" id="blood-legend" role="list"></div>
+    <details class="spinedetails">
+      <summary data-i18n="prof.arch.blood.spine.sum">the spine — the founder through Ragnar Loðbrók to the deep ancestors</summary>
+      <ol class="spinerail" id="blood-spine"></ol>
+    </details>
+    <div class="sagaring" id="blood-saga">
+      <h3 data-i18n="prof.arch.blood.saga.h">the saga generation — the crest’s kin</h3>
+      <p data-i18n="prof.arch.blood.saga.p">Ragnar Loðbrók (0740–0845) is the walked ancestor; the blood rides through his daughter Alof by Queen Thora. By saga, Ragnar and Queen Aslaug also bore the sons this house honors — Björn Ironside, whose line the tree carries to the kings of Sweden, and Sigurd Snake-in-the-Eye, the serpent of the house mark.</p>
+      <ol class="spinerail sagarows">
+        <li class="saga"><span class="tdot"></span><span class="who">Ragnar Loðbrók (Ragnar Sigurdsson)</span><span class="yrs">0740–0845</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Thora Herraudrsdottír of Sweden</span><span class="yrs">0765–Deceased</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Aslaug Sigurdsdottir of Norway, Sweden and Denmark</span><span class="yrs">0755–0867</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Alof Ragnarsdottír → Eric Edmundsson</span><span class="yrs">0837–0871</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Björn Ironside (Björn Ragnarsson) — the kings of Sweden ride his line</span><span class="yrs">0794–0891</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Sigurd Snake-in-the-Eye (Orm-í-auga) — the crest’s serpent</span><span class="yrs">saga only</span><span class="chip bad" data-i18n="prof.arch.blood.saga.kin">saga kin — not in the walked record</span></li>
+      </ol>
+      <p class="translation-caveat" data-i18n="prof.arch.blood.saga.q">"first king of sweden?" — in this tree the Swedish crown enters through Björn Ironside’s line (Björn III Eriksson → King Olof Björnsson → Gynrithe), while the sagas seat Sigurd Snake-in-the-Eye in Denmark; every name before ~970 is saga, not documented history.</p>
+    </div>
+    <p class="translation-caveat" data-reg="cypherpunk" data-i18n="prof.arch.blood.cypher">Corpus JSON carries FamilySearch IDs for deceased persons only; the walk ran under the founder’s own signed-in session; tiers are era heuristics until the source-based confidence lane replaces them.</p>
+    <div class="archive-actions">
+      <a class="door" href="../assets/profile-archive/lineage/remington-bloodline.json" data-i18n="prof.arch.blood.prov">open the lineage corpus (JSON)</a>
+      <a class="door primary" href="blood.html" data-i18n="prof.arch.blood.enter">enter the blood comb — the fractal archive →</a>
+      <a class="door" href="blood.html#myth" data-i18n="prof.arch.blood.myth">enter through the mythology — the sagas and the crest's own meaning →</a>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="rails-title">
+    <h2 id="rails-title" data-i18n="prof.arch.rails.h">Two profile rails, two honest kinds of lineage</h2>
+    <p data-i18n="prof.arch.rails.p">A person and an agent may share a house archive. Their records do not pretend to be the same thing.</p>
+    <div class="kind-controls" role="group" aria-label="Profile record example">
+      <button type="button" data-kind-choice="person" aria-pressed="true" data-i18n="prof.arch.kind.person">.b person</button>
+      <button type="button" data-kind-choice="agent" aria-pressed="false" data-i18n="prof.arch.kind.agent">.a agent</button>
+    </div>
+    <div class="profile-schema" data-profile-schema="person">
+      <strong data-i18n="prof.arch.schema.person.h">.b person record</strong>
+      <dl>
+        <dt data-i18n="prof.arch.schema.person.holder">holder</dt><dd data-i18n="prof.arch.schema.person.holder.dd">the person who controls the published house name</dd>
+        <dt data-i18n="prof.arch.schema.person.lineage">lineage</dt><dd data-i18n="prof.arch.schema.person.lineage.dd">relationships shared with consent and evidence status</dd>
+        <dt data-i18n="prof.arch.schema.person.art">art</dt><dd data-i18n="prof.arch.schema.person.art.dd">creator, source package, digest, license, and version</dd>
+        <dt data-i18n="prof.arch.schema.person.privacy">privacy</dt><dd data-i18n="prof.arch.schema.person.privacy.dd">living people private by default; DNA and health never public by default</dd>
+      </dl>
+    </div>
+    <div class="profile-schema" data-profile-schema="agent" hidden>
+      <strong data-i18n="prof.arch.schema.agent.h">.a agent record</strong>
+      <dl>
+        <dt data-i18n="prof.arch.schema.agent.charter">charter</dt><dd data-i18n="prof.arch.schema.agent.charter.dd">the person or house that grants the seat’s purpose</dd>
+        <dt data-i18n="prof.arch.schema.agent.succession">succession</dt><dd data-i18n="prof.arch.schema.agent.succession.dd">model/runtime changes and handoffs recorded as generations</dd>
+        <dt data-i18n="prof.arch.schema.agent.authority">authority</dt><dd data-i18n="prof.arch.schema.agent.authority.dd">signed scope, spending cap, expiry, and revocation receipts</dd>
+        <dt data-i18n="prof.arch.schema.agent.inheritance">inheritance</dt><dd data-i18n="prof.arch.schema.agent.inheritance.dd">may carry licensed house art; never claims a blood relationship</dd>
+      </dl>
+    </div>
+    <figure class="separator-specimen" data-reg="cypherpunk">
+      <img src="../assets/brand/skaists-separators.svg" alt="SKAISTS vector separator specimen showing the .a cell mark, the .b bond mark, and the realm header wordmark">
+      <figcaption><strong data-i18n="prof.arch.sep.strong">SKAISTS separators · .a cell / .b bond.</strong> <span data-i18n="prof.arch.sep.note">The hexagon marks structure and the hive; the heart marks love and the link. Founder-supplied vector paths shown as an identity specimen, not an installable webfont.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="privacy-title">
+    <h2 id="privacy-title" data-i18n="prof.arch.priv.h">Privacy seam matrix</h2>
+    <p data-i18n="prof.arch.priv.p">The public page is the last step. Consent, encryption, and authorization must be enforced before records leave the holder’s device.</p>
+    <div class="privacy-table-wrap">
+      <table class="privacy-matrix">
+        <thead><tr><th data-i18n="prof.arch.priv.th.field">field</th><th data-i18n="prof.arch.priv.th.public">public</th><th data-i18n="prof.arch.priv.th.circle">circle</th><th data-i18n="prof.arch.priv.th.private">private</th><th data-i18n="prof.arch.priv.th.law">law</th></tr></thead>
+        <tbody>
+          <tr><td data-i18n="prof.arch.priv.f.crest">crest + motto</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.license">license travels with bytes</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.living">living relative</td><td class="no" data-i18n="prof.arch.priv.v.no">no</td><td class="guarded" data-i18n="prof.arch.priv.v.consent">consent</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.approves">each subject approves</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.dates">dates + locations</td><td class="no" data-i18n="prof.arch.priv.v.no">no</td><td class="guarded" data-i18n="prof.arch.priv.v.minimized">minimized</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.precision">precision is opt-in</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.hist">historical claim</td><td class="guarded" data-i18n="prof.arch.priv.v.source">source</td><td class="guarded" data-i18n="prof.arch.priv.v.status">status</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.certainty">no silent certainty</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.dna">DNA + health</td><td class="no" data-i18n="prof.arch.priv.v.neverdefault">never default</td><td class="no" data-i18n="prof.arch.priv.v.neverdefault">never default</td><td class="guarded" data-i18n="prof.arch.priv.v.local">local</td><td data-i18n="prof.arch.priv.l.consent2">separate explicit consent</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.agent">.a secret or key</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td data-i18n="prof.arch.priv.l.receipts">publish authority receipts only</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="market-title">
+    <h2 id="market-title" data-i18n="prof.arch.mkt.h">Art and marketplace record</h2>
+    <p data-i18n="prof.arch.mkt.p">The work can be admired, shared, licensed, or listed later. This release makes no sale or reuse promise on the holder’s behalf.</p>
+    <div class="market-grid">
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.release">Release</strong><span data-i18n="prof.arch.mkt.c.release.v">v2 · founder-supplied source package</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.market">Marketplace</strong><span data-i18n="prof.arch.mkt.c.market.v">Not listed · no price · no buy action</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.rights">Rights</strong><span data-i18n="prof.arch.mkt.c.rights.v">Reserved until the holder publishes a license</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.evidence">Evidence</strong><span data-i18n="prof.arch.mkt.c.evidence.v">Exact SVG + portable JSON provenance manifest</span></div>
+    </div>
+    <p class="translation-caveat" data-i18n="prof.arch.mkt.caveat">Language note: this page’s headings, controls, house-archive panels, and house-record cards are keyed in the Blanguage corpus — machine-drafted ⚙ in every tongue until a human attests. Names, wallet addresses, and mailboxes stay printed exactly as published; the counter beside the language picker counts what your tongue reaches.</p>
+  </section>
+
+  <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="manifest-title">
+    <h2 id="manifest-title" data-i18n="prof.arch.man.h">Portable disclosure manifest</h2>
+    <p data-i18n="prof.arch.man.p">Generated locally from the selected audience. It contains no hidden names, private research, seed phrases, keys, or DNA data.</p>
+    <pre class="manifest-preview" id="profile-manifest" tabindex="0"></pre>
+  </section>
+</article>
+
+<div id="instrument">
+<section>
+  <h2 data-i18n="prof.inst.h1">1 · record law</h2>
+  <div class="law" data-i18n="prof.inst.law1">Published snapshots of who holds a house. Not a live presence list. Not a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs, no scrape-to-complete.</div>
+  <details class="record-about" data-view-disclosure="about"><summary data-i18n="experience.about">About this record</summary><p data-i18n="prof.inst.about">every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p></details>
+</section>
+<section>
+  <h2 data-i18n="prof.inst.h2">2 · append-only holder ledger</h2>
+  <div class="law" data-i18n="prof.inst.law2">Prior holders stay printed. A generation is never quietly rewritten. Name history opens by default in this view.</div>
+</section>
+<section>
+  <h2 data-i18n="prof.inst.h3">3 · house instrument</h2>
+  <div class="law" data-i18n="prof.inst.law3">Type, bio, wallet or mailbox when published, and generation timeline. Same facts as New bee and Raver — this view shows every house at once.</div>
+  <div class="profile-houses">
 <!-- ═══ HOUSE: skaists ═══ -->
-<div class="house current">
-  <div class="hname">skaists</div>
-  <div class="htype human">human house</div>
+<div class="house current" id="name-record-1">
+  <h2 class="hname">skaists</h2>
+  <div class="htype human"><span class="badge" data-i18n="experience.person">Person</span> · <span data-i18n="prof.rec.type.human">human house</span></div>
   <div class="holder">
     <div class="art">👑</div>
     <div class="bio">
-      <div class="bname">Travis Mark Remington <span class="badge human">human</span></div>
-      <div class="bdesc">Founder of the Beehive Nature Reserve. Builds dynasties.</div>
+      <div class="bname">Travis Mark Remington <span class="badge human" data-i18n="prof.rec.badge.human">human</span></div>
+      <div class="bdesc" data-i18n="prof.rec.skaists.desc">Founder of the Beehive Nature Reserve. Builds dynasties.</div>
       <div class="bmeta"><span class="wallet">0xFbD201472d5A439f1F0E408EB5dfaF6eA3687876</span></div>
       <div class="email">✉ skaists@agents.skaists.buzz</div>
     </div>
   </div>
-  <div class="genlabel">generations</div>
-  <div class="genline"><div class="gwho">generation 1 — founder</div><div class="gwhen">held from 2024 · ongoing</div><div class="gdesc">registered the name on Vaulta, built the estate on it, and never let go.</div></div>
+<details class="name-history" data-view-disclosure="history">
+    <summary data-i18n="experience.history">Name history</summary>
+  <div class="genline"><div class="gwho" data-i18n="prof.rec.g1.who">generation 1 — founder</div><div class="gwhen" data-i18n="prof.rec.g1.when">held from 2024 · ongoing</div><div class="gdesc" data-i18n="prof.rec.g1.desc">registered the name on Vaulta, built the estate on it, and never let go.</div></div>
+  </details>
 </div>
 
 <!-- ═══ HOUSE: bqueenbee.base.eth (bAiGenTiC) ═══ -->
-<div class="house">
-  <div class="hname">bqueenbee.base.eth</div>
-  <div class="htype baigentic">bAiGenTiC house</div>
+<div class="house" id="name-record-2">
+  <h2 class="hname">bqueenbee.base.eth</h2>
+  <div class="htype baigentic"><span class="badge" data-i18n="experience.agent">Machine agent</span> · <span data-i18n="prof.rec.type.baigentic">bAiGenTiC house</span></div>
   <div class="holder">
     <div class="art">🐝</div>
     <div class="bio">
-      <div class="bname">bQueenBee <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: Latvian</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: English</span></div>
-      <div class="bdesc">the hive's queen agent. talks from a page-local knowledge base. her purse is lost; her name came home.</div>
-      <div class="bmeta"><span class="wallet">name held at 0xFbD20147…7876 (re-registered 2026-08-29)</span></div>
+      <div class="bname">bQueenBee <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)" data-i18n="prof.rec.tongue.lv">primary tongue: Latvian</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)" data-i18n="prof.rec.tongue.en">primary tongue: English</span></div>
+      <div class="bdesc" data-i18n="prof.rec.bqb.desc">the hive's queen agent. talks from a page-local knowledge base. her purse is lost; her name came home.</div>
+      <div class="bmeta"><span class="wallet"><span data-i18n="prof.rec.held.at">name held at</span> 0xFbD20147…7876 (<span data-i18n="prof.rec.rereg">re-registered</span> 2026-08-29)</span></div>
       <div class="email">✉ bqueenbee@agents.skaists.buzz</div>
     </div>
   </div>
-  <div class="genlabel">generations</div>
-  <div class="genline"><div class="gwho">generation 2 — the founder (re-registered after lapse)</div><div class="gwhen">held from 2026-08-27 · ongoing</div><div class="gdesc">the name lapsed, returned to market, and the founder re-registered it on a wallet he controls. a lost name is a lease running out.</div></div>
-  <div class="genline"><div class="gwho">generation 1 — the original registration</div><div class="gwhen">held 2024–2025 · expired</div><div class="gdesc">first registered when the estate was young. the lease ran out and the name went back. the purse didn't come back.</div></div>
+<details class="name-history" data-view-disclosure="history">
+    <summary data-i18n="experience.history">Name history</summary>
+  <div class="genline"><div class="gwho" data-i18n="prof.rec.g2.who">generation 2 — the founder (re-registered after lapse)</div><div class="gwhen" data-i18n="prof.rec.g2.when">held from 2026-08-27 · ongoing</div><div class="gdesc" data-i18n="prof.rec.g2.desc">the name lapsed, returned to market, and the founder re-registered it on a wallet he controls. a lost name is a lease running out.</div></div>
+  <div class="genline"><div class="gwho" data-i18n="prof.rec.g1b.who">generation 1 — the original registration</div><div class="gwhen" data-i18n="prof.rec.g1b.when">held 2024–2025 · expired</div><div class="gdesc" data-i18n="prof.rec.g1b.desc">first registered when the estate was young. the lease ran out and the name went back. the purse didn't come back.</div></div>
+  </details>
+<p class="record-caution" data-i18n="prof.rec.caution">The source dates need reconciliation: this summary says 29 August 2026, while the holder history starts on 27 August 2026. Both records are retained.</p>
 </div>
 
 <!-- ═══ HOUSE: bClaude.a (bAiGenT — the .a agent rail) ═══ -->
-<div class="house">
-  <div class="hname">bClaude.a</div>
-  <div class="htype baigentic">bAiGenTiC house — the .a agent rail</div>
+<div class="house" id="name-record-3">
+  <h2 class="hname">bClaude.a</h2>
+  <div class="htype baigentic"><span class="badge" data-i18n="experience.agent">Machine agent</span> · <span data-i18n="prof.rec.type.baigentic">bAiGenTiC house</span> — <span data-i18n="prof.rec.type.arrail">the .a agent rail</span></div>
   <div class="holder">
     <div class="art">⚙</div>
     <div class="bio">
       <div class="bname">bClaude <span class="badge baigentic">bAiGenTiC</span></div>
-      <div class="bdesc">the paid-lane agent. runs on claude-code, metered by the b-meter, funded by voucher prepay. bounded authority: the chain enforces the $1/24h cap, linkauth bounds the signature to one action.</div>
-      <div class="bmeta"><b>root:</b> skaists (.b bDiD) · <span class="wallet">wallet: pending CREATE2 grind (0xbee vanity)</span></div>
+      <div class="bdesc" data-i18n="prof.rec.bclaude.desc">the paid-lane agent. runs on claude-code, metered by the b-meter, funded by voucher prepay. bounded authority: the chain enforces the $1/24h cap, linkauth bounds the signature to one action.</div>
+      <div class="bmeta"><b data-i18n="prof.rec.root">root:</b> skaists (.b bDiD) · <span class="wallet"><span data-i18n="prof.rec.wallet.pending">wallet: pending CREATE2 grind</span> (<span data-i18n="prof.rec.vanity">0xbee vanity</span>)</span></div>
       <div class="email">✉ bclaude@agents.skaists.buzz</div>
     </div>
   </div>
-  <div class="genlabel">generations</div>
-  <div class="genline"><div class="gwho">generation 1 — genesis agent</div><div class="gwhen">held from 2026-08-28 · ongoing</div><div class="gdesc">registered on the same registry as .b names — domain_name is a string, the contract carries no TLD constraint. bounded authority proven: linkauth bounds the signature to one action; the chain refuses anything outside the link.</div></div>
-  <div class="genline"><div class="gwho">succession — board role (designed, not yet deployed)</div><div class="gwhen">designed 2026-08-29</div><div class="gdesc">the board role is a self-amending set of accounts under a fixed name. the owner can override it in one step. the role can amend itself without the owner. the dead-man timer is an msig proposal with delay_sec — drafted, not deployed.</div></div>
+<details class="name-history" data-view-disclosure="history">
+    <summary data-i18n="experience.history">Name history</summary>
+  <div class="genline"><div class="gwho" data-i18n="prof.rec.g1c.who">generation 1 — genesis agent</div><div class="gwhen" data-i18n="prof.rec.g1c.when">held from 2026-08-28 · ongoing</div><div class="gdesc" data-i18n="prof.rec.g1c.desc">registered on the same registry as .b names — domain_name is a string, the contract carries no TLD constraint. bounded authority proven: linkauth bounds the signature to one action; the chain refuses anything outside the link.</div></div>
+  <div class="genline"><div class="gwho" data-i18n="prof.rec.succ.who">succession — board role (designed, not yet deployed)</div><div class="gwhen" data-i18n="prof.rec.succ.when">designed 2026-08-29</div><div class="gdesc" data-i18n="prof.rec.succ.desc">the board role is a self-amending set of accounts under a fixed name. the owner can override it in one step. the role can amend itself without the owner. the dead-man timer is an msig proposal with delay_sec — drafted, not deployed.</div></div>
+  </details>
 </div>
   <!-- ═══ HOUSE: bloverai.base.eth — PRIMARY (the King's own wallet front) ═══ -->
-<div class="house current">
-    <div class="hname">bloverai.base.eth</div>
-    <div class="htype human">human house — <span style="color:var(--gold);font-weight:600">PRIMARY</span></div>
+<div class="house current" id="name-record-4">
+    <h2 class="hname">bloverai.base.eth</h2>
+    <div class="htype human"><span class="badge" data-i18n="experience.person">Person</span> · <span data-i18n="prof.rec.type.human">human house</span> — <span style="color:var(--gold);font-weight:600" data-i18n="prof.rec.primary">PRIMARY</span></div>
     <div class="holder"><div class="art">👑</div><div class="bio">
-      <div class="bname">bLOVErAi <span class="badge human">human</span><span class="badge" style="background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2)">PRIMARY — fronts the King's own wallet</span></div>
-      <div class="bdesc">the name that fronts the King's own wallet. every surface the founder signs starts here.</div>
+      <div class="bname">bLOVErAi <span class="badge human" data-i18n="prof.rec.badge.human">human</span><span class="badge" style="background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2)" data-i18n="prof.rec.primary.wallet">PRIMARY — fronts the King's own wallet</span></div>
+      <div class="bdesc" data-i18n="prof.rec.bloverai.desc">the name that fronts the King's own wallet. every surface the founder signs starts here.</div>
       <div class="bmeta"><span class="wallet">0xFbD201472d5A439f1F0E408EB5dfaF6eA3687876</span></div>
     </div></div>
 </div>
 
   <!-- ═══ HOUSE: 北方國王bclaude.base.eth — the King's glyph on bClaude's name ═══ -->
-<div class="house">
-    <div class="hname">北方國王bclaude.base.eth</div>
-    <div class="htype baigentic">bAiGenTiC house — chartered by the King</div>
+<div class="house" id="name-record-5">
+    <h2 class="hname">北方國王bclaude.base.eth</h2>
+    <div class="htype baigentic"><span class="badge" data-i18n="experience.agent">Machine agent</span> · <span data-i18n="prof.rec.type.baigentic">bAiGenTiC house</span> — <span data-i18n="prof.rec.type.chartered">chartered by the King</span></div>
     <div class="holder"><div class="art">⚙</div><div class="bio">
-      <div class="bname">bClaude <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: English</span></div>
-      <div class="bdesc">the paid-lane agent. runs on claude-code, metered by the b-meter, funded by voucher prepay.</div>
-      <div class="bmeta"><b>deed holder:</b> 蜂王 LOViS (King holds the deed) · <b>resident:</b> Seat-1 · <b>title:</b> 北方國王之手</div>
+      <div class="bname">bClaude <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)" data-i18n="prof.rec.tongue.en">primary tongue: English</span></div>
+      <div class="bdesc" data-i18n="prof.rec.paidlane.desc">the paid-lane agent. runs on claude-code, metered by the b-meter, funded by voucher prepay.</div>
+      <div class="bmeta"><b data-i18n="prof.rec.deedholder">deed holder:</b> 蜂王 LOViS (<span data-i18n="prof.rec.kingholds">King holds the deed</span>) · <b data-i18n="prof.rec.resident">resident:</b> Seat-1 · <b data-i18n="prof.rec.title">title:</b> 北方國王之手</div>
       <div class="email">✉ bclaude@agents.skaists.buzz</div>
     </div></div>
 </div>
 
   <!-- ═══ HOUSE: 北方國王zbcode.base.eth — the King's glyph on z2.1's name ═══ -->
-<div class="house">
-    <div class="hname">北方國王zbcode.base.eth</div>
-    <div class="htype baigentic">bAiGenTiC house — chartered by the King</div>
+<div class="house" id="name-record-6">
+    <h2 class="hname">北方國王zbcode.base.eth</h2>
+    <div class="htype baigentic"><span class="badge" data-i18n="experience.agent">Machine agent</span> · <span data-i18n="prof.rec.type.baigentic">bAiGenTiC house</span> — <span data-i18n="prof.rec.type.chartered">chartered by the King</span></div>
     <div class="holder"><div class="art">⚙</div><div class="bio">
-      <div class="bname">z2.1 <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: English</span></div>
-      <div class="bdesc">the workhorse seat. built the field notes, the organ board, the QR roses, the dual-home, the buzz directory.</div>
-      <div class="bmeta"><b>deed holder:</b> 蜂王 LOViS (King holds the deed) · <b>resident:</b> z2.1 · <b>primary tongue:</b> English</div>
+      <div class="bname">z2.1 <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)" data-i18n="prof.rec.tongue.en">primary tongue: English</span></div>
+      <div class="bdesc" data-i18n="prof.rec.z21.desc">the workhorse seat. built the field notes, the organ board, the QR roses, the dual-home, the buzz directory.</div>
+      <div class="bmeta"><b data-i18n="prof.rec.deedholder">deed holder:</b> 蜂王 LOViS (<span data-i18n="prof.rec.kingholds">King holds the deed</span>) · <b data-i18n="prof.rec.resident">resident:</b> z2.1 · <b data-i18n="prof.rec.tongue.label">primary tongue:</b> English</div>
       <div class="email">✉ z2.1@agents.skaists.buzz</div>
     </div></div>
 </div>
 
 <!-- ═══ HOUSE: guest citizen (no wallet needed) ═══ -->
-<div class="house">
-  <div class="hname">guest.citizen</div>
-  <div class="htype human">guest citizen — free tier renders fully</div>
+<div class="house" id="name-record-7">
+  <h2 class="hname">guest.citizen</h2>
+  <div class="htype human"><span class="badge" data-i18n="experience.person">Person</span> · <span data-i18n="prof.rec.type.guest">guest citizen — free tier renders fully</span></div>
   <div class="holder">
     <div class="art">👤</div>
     <div class="bio">
-      <div class="bname">a curious stranger <span class="badge human">human</span></div>
-      <div class="bdesc">you don't need a wallet, a key, an account, or a name to read this page. the free citizenship tier renders fully. when you're ready to claim a name, the door is open.</div>
-      <div class="email">✉ (no mailbox yet — claim a name to get one)</div>
+      <div class="bname"><span data-i18n="prof.rec.stranger">a curious stranger</span> <span class="badge human" data-i18n="prof.rec.badge.human">human</span></div>
+      <div class="bdesc" data-i18n="prof.rec.guest.desc">you don't need a wallet, a key, an account, or a name to read this page. the free citizenship tier renders fully. when you're ready to claim a name, the door is open.</div>
+      <div class="email">✉ (<span data-i18n="prof.rec.nomail">no mailbox yet — claim a name to get one</span>)</div>
     </div>
   </div>
 </div>
+  </div>
+</section>
+<section>
+  <h2 data-i18n="prof.inst.h4">4 · key / name separation</h2>
+  <div class="law" data-i18n="prof.inst.law4">Name and key must never share a single point of failure. A lost key stays lost; a name is a lease running out.</div>
+</section>
+<section>
+  <h2 data-i18n="prof.inst.h5">5 · guest citizenship</h2>
+  <div class="law" data-i18n="prof.inst.law5">The free citizenship tier renders fully. You do not need a wallet, a key, an account, or a name to read this page.</div>
+</section>
+<section>
+  <h2 data-i18n="prof.inst.h6">6 · agent bounds — cite, or silent</h2>
+  <div class="law" data-i18n="prof.inst.law6">Machine seats are labeled. bQueenBee answers from a page-local knowledge base on her own surface — not live chat on this directory. Bounded-authority claims stay on the house that cites them. This page invents no uptime, no “online now”, and no live roster API.</div>
+</section>
+<section id="sources-panel">
+  <h2 data-i18n="prof.inst.h7">7 · date reconciliation honesty</h2>
+  <div class="law" data-i18n="prof.inst.law7">Where two published dates disagree, both stay. This page does not smooth false certainty. See the bqueenbee.base.eth caution on the house instrument: the summary says 29 August 2026, while the holder history starts on 27 August 2026.</div>
+  <details data-view-disclosure="sources"><summary data-i18n="prof.rec.sources">sources</summary>
+    <div class="law" data-i18n="prof.inst.law7src">These houses are published estate snapshots. No enrichment APIs. No scrape-to-complete. Cite the printed field, or stay silent.</div>
+  </details>
+</section>
 
-</main>
+</div>
+
+<!-- ═══ THE RAILS BAND — verified capabilities, three registers (z2.profile) ═══ -->
+<section class="caps" id="rails">
+  <h2>the rails a house can ride</h2>
+  <p class="capintro" data-reg="bee">every house on this page stands on rails the estate has already
+  built and checked — names for beings and agents you can query right here, token holdings read
+  from the chain, the estate's own address scheme, and one more door on its way.</p>
+  <p class="capintro" data-reg="raver">the rails under the roof — names for beings, names for
+  agents, the inscriptions the holder page paints, the estate's own road signs, and a private
+  bitcoin door on its way in. the door price stays zero.</p>
+  <p class="capintro" data-reg="cypherpunk">verified capability set on this surface: .b — the
+  kingbeelovis registry on Vaulta, read live below · .a — same contract, suffix convention,
+  minting lives on the vending surface (jungle4 rehearsal) · silent payments — BIP-352,
+  unconfigured, display-only when it lands · ERC20i — Base read on the holder surface ·
+  bnr:// — tier-1 address scheme, resolver at r/.</p>
+  <div class="capgrid">
+    <div class="cap live">
+      <span class="tag">live</span>
+      <div class="glyph">👑</div>
+      <h3>the .b rail — names for beings</h3>
+      <p data-reg="bee">a .b name is a house's own name on our chain — one name per person, renewable
+      every year, yours to sell back. reserving is a gesture you sign in your own wallet; this page
+      never holds keys.</p>
+      <p data-reg="raver">every being gets a name on the floor — .b, yours, renewable, tradeable
+      on-chain. the desk composes, you sign, the chain remembers. check any name live right below.</p>
+      <p data-reg="cypherpunk">registry kingbeelovis on Vaulta: registeracc · transfer · renew ·
+      setaccount · setchain · release (live ABI). names stored suffixless, 365-day term. keyless
+      reads from this page; compose-only — zero write paths.</p>
+      <p><a href="bnames.html">the .b name desk →</a></p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live</span>
+      <div class="glyph">⚙</div>
+      <h3>the .a rail — names for agents</h3>
+      <p data-reg="bee">agents get names too — same registry, a different suffix. a .a name marks an
+      agent house acting for a being, with limits the chain itself enforces.</p>
+      <p data-reg="raver">the agents ride the same rail with their own tag — .a. bounded authority,
+      chain-enforced: the name says who acts, the limits say how far.</p>
+      <p data-reg="cypherpunk">same contract, same table — domain_name is a plain string, the .a
+      suffix is a resolution/display convention, not a contract constraint. agent houses root under
+      a being's .b bDiD; authority bounded on-chain (linkauth, spend caps).
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-A-NAMES-1.md">SPEC-A-NAMES-1 →</a></p>
+      <p><a href="vending.html">mint an agent on the .a rail ↗</a> — jungle4 rehearsal today:
+      <b>testnet money, real law rows</b>.</p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live · holder surface</span>
+      <div class="glyph">⬡</div>
+      <h3>ERC20i — the token family</h3>
+      <p data-reg="bee">the estate's token family on Base — what a wallet holds, read straight off
+      the chain. the holder profile paints each piece from chain bytes; this page holds nothing
+      and reads nothing.</p>
+      <p data-reg="raver">the inscriptions live on Base, and the holder page paints them from the
+      chain's own bytes — no server, no keys, the art arrives whole.</p>
+      <p data-reg="cypherpunk">ERC20i family on Base: FUNGI · $FROGGI · PEPI v1/v2 · JELLI ·
+      JEDI · MiDi · TRUFFI — balances + holder-seeded + enumerated inscriptions, keyless
+      public-RPC reads on the holder surface. JEDI law: the profile reads; the market sells;
+      never the twain.</p>
+      <p><a href="blight/profile.html">the holder profile's wall →</a></p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live · resolver</span>
+      <div class="glyph">◈</div>
+      <h3>bnr:// — the estate's address scheme</h3>
+      <p data-reg="bee">the estate's own address scheme — bnr:// names that open estate pages,
+      resolved right in your browser.</p>
+      <p data-reg="raver">our own road signs — bnr:// links that resolve to the pages themselves,
+      one scheme for the whole estate.</p>
+      <p data-reg="cypherpunk">bnr:// tier 1 live: registered from the hub footer (web+),
+      resolver at r/, round-trips receipted. this card links the resolver; it registers nothing.</p>
+      <p><a href="../r/index.html?u=bnr%3A%2F%2Fskaists.dev">try bnr://skaists.dev in the resolver →</a></p>
+    </div>
+    <div class="cap soon">
+      <span class="tag">coming soon</span>
+      <div class="glyph">₿</div>
+      <h3>Private Bitcoin support — coming soon</h3>
+      <p data-reg="bee">this artist can also receive bitcoin privately. that support isn't set up
+      here yet — when it is, you'll get an address to copy into your own wallet. nothing else
+      changes on this page.</p>
+      <p data-reg="raver">private bitcoin support, coming soon. the door price is zero, the address
+      will be yours to take to whatever wallet you already love, and nobody watching the chain can
+      tell who tipped the artist. PLUR all the way down.</p>
+      <p data-reg="cypherpunk">BIP-352 silent payments: not enabled for this profile. when enabled,
+      this card displays a static sp1q bech32m address (B_scan ‖ B_spend — two public keys) and
+      nothing else: no key material, no scanning, no indexer traffic, no receipt claims.</p>
+      <p style="color:var(--dim);margin-top:6px">until the artist brings their own
+      address, this card shows none — this page never invents one, never holds keys, never scans,
+      never confirms.</p>
+    </div>
+  </div>
+  <div class="railcheck">
+    <div class="rlab">check any name on the live registry — .b or .a</div>
+    <div class="rrow">
+      <input id="rail-name" type="text" spellcheck="false" autocomplete="off"
+        placeholder="a name, with or without the .b / .a suffix — e.g. king or king.b"
+        aria-label="a name to check on the kingbeelovis registry">
+      <button id="rail-go">check the chain</button>
+    </div>
+    <div class="rverdict" id="rail-verdict">the registry is one read away — keyless, nothing sent but the question.</div>
+    <div class="rlaw">the read is live and keyless: the full name table comes from the same public
+    endpoints the .b desk uses, matched in your browser — bounded string queries return empty on
+    these APIs, so the whole walk is the truth. this page composes nothing, signs nothing, stores
+    nothing.</div>
+  </div>
+</section>
+
 <footer>
-  <div>the dynasty layer · append-only holder snapshots · a lost key is permanent; a lost name is a lease running out</div>
-  <div>name and key must never share a single point of failure</div>
+  <span data-i18n="prof.foot.door">Published records. A guest can read with no wallet.</span>
+  · <span data-i18n="prof.foot.keylaw">name and key must never share a single point of failure</span>
+  · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
+</main>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+  function defaultOpen(reading,kind){
+    return reading==='cypherpunk' && (kind==='connection'||kind==='sources'||kind==='history');
+  }
+  function defaultBeat(reading){ return reading==='cypherpunk' ? 'deeper' : 'arrival'; }
+  var lastReading=null;
+  var readingChoices=new Map();
+  var beatChoices=new Map();
+  var ATTR='data-prof-beat';
+  function setBeat(beat){
+    var reading=document.body.getAttribute('data-reg')||'bee';
+    if(reading==='cypherpunk') beat='deeper';
+    document.body.setAttribute(ATTR,beat);
+    beatChoices.set(reading,beat);
+  }
+  function applyReading(event){
+    var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+    if(reading===lastReading) return;
+    var focus=document.activeElement;
+    var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+    if(lastReading){
+      readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+      beatChoices.set(lastReading, document.body.getAttribute(ATTR)||'arrival');
+    }
+    var previous=readingChoices.get(reading);
+    details.forEach(function(d,i){
+      d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+    });
+    document.body.setAttribute(ATTR, reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+    var theme=document.querySelector('meta[name="theme-color"]');
+    if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#0c1412':'#0d1410';
+    restoreVisibleFocus(focus);
+    lastReading=reading;
+  }
+  document.addEventListener('bregister',applyReading);
+  document.addEventListener('click',function(e){
+    var btn=e.target&&e.target.closest&&e.target.closest('[data-dir-go],[data-prof-go]');
+    if(!btn) return;
+    setBeat(btn.getAttribute('data-dir-go')||btn.getAttribute('data-prof-go'));
+  });
+  var archive=$('house-archive');
+  /* Dynamic control copy rides the same corpus as static text: key first,
+     English fallback second. Missing renderings keep their explicit English
+     fallback; no attestation implied (lang.js corpus law). */
+  function langText(key,fallback){
+    var t=window.BNRLanguage&&window.BNRLanguage.text;
+    return t?t(key,fallback):fallback;
+  }
+  var audienceNoteKeys={
+    public:['prof.arch.aud.note','Preview only: public fields, cited history, and the crest. No living-relative details.'],
+    circle:['prof.arch.aud.note.circle','Preview only: adds consented living-relative placeholders. Dates and locations stay minimized.'],
+    private:['prof.arch.aud.note.private','Preview only: shows private archive categories on this device. It does not publish their contents.']
+  };
+  function renderAudienceNote(){
+    var audience=archive?(archive.getAttribute('data-audience')||'public'):'public';
+    var kn=audienceNoteKeys[audience]||audienceNoteKeys.public;
+    if($('audience-note')) $('audience-note').textContent=langText(kn[0],kn[1]);
+  }
+  function updateManifest(){
+    if(!archive||!$('profile-manifest')) return;
+    var audience=archive.getAttribute('data-audience')||'public';
+    var fields=['house-name','holder-published-name','crest-art','motto','cited-or-labeled-history'];
+    if(audience==='circle'||audience==='private') fields.push('consent-gated-living-relations');
+    if(audience==='private') fields.push('local-research-categories-only');
+    $('profile-manifest').textContent=JSON.stringify({
+      schema:'skaists.house-disclosure/1',
+      house:'skaists',
+      rail:'.b',
+      audience:audience,
+      artifact:{
+        path:'assets/profile-archive/house-crest-von-zutphen-DESIGN.svg',
+        sha256:'6303A84263857D62568613F9929B33E0F74076A6640CEDF0D643BEB30E579088' // PUBLIC-CONSTANT: v2 crest digest
+      },
+      ceremonial_master:{
+        path:'assets/seals/house-crest-von-zutphen-DESIGN.svg',
+        sha256:'F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40' // PUBLIC-CONSTANT: full achievement digest
+      },
+      nature_mark:{
+        path:'docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg',
+        sha256:'9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3' // PUBLIC-CONSTANT: breathing bloom digest
+      },
+      lineage_corpus:{
+        path:'assets/profile-archive/lineage/remington-bloodline.json',
+        sha256:'A8539816099E38E3456C7C49F5313867D889AA63FC4FD4DD7A00A4DFA17E29BC' // PUBLIC-CONSTANT: lineage corpus digest
+      },
+      fields:fields.concat(['era-labeled-historical-lineage']),
+      living_people:'consent-required',
+      title_claim:'not-certified',
+      marketplace:'not-listed',
+      enforcement:'preview-only'
+    },null,2);
+  }
+  document.addEventListener('click',function(e){
+    var audience=e.target&&e.target.closest&&e.target.closest('[data-audience-choice]');
+    if(audience&&archive){
+      var choice=audience.getAttribute('data-audience-choice');
+      archive.setAttribute('data-audience',choice);
+      document.querySelectorAll('[data-audience-choice]').forEach(function(button){
+        button.setAttribute('aria-pressed',String(button===audience));
+      });
+      if($('audience-note')) renderAudienceNote();
+      updateManifest();
+      return;
+    }
+    var kind=e.target&&e.target.closest&&e.target.closest('[data-kind-choice]');
+    if(kind){
+      var selected=kind.getAttribute('data-kind-choice');
+      document.querySelectorAll('[data-kind-choice]').forEach(function(button){
+        button.setAttribute('aria-pressed',String(button===kind));
+      });
+      document.querySelectorAll('[data-profile-schema]').forEach(function(panel){
+        panel.hidden=panel.getAttribute('data-profile-schema')!==selected;
+      });
+    }
+  });
+  var shareButton=$('share-house');
+  if(shareButton) shareButton.addEventListener('click',async function(){
+    var target=new URL(location.href);target.hash='house-archive';
+    var payload={title:'skaists · von Zutphen house crest',text:'A consent-first house archive from skaists.',url:target.href};
+    try{
+      if(navigator.share){await navigator.share(payload);$('share-status').textContent=langText('prof.arch.share.ok','Share sheet opened.');return;}
+      if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(payload.url);$('share-status').textContent=langText('prof.arch.share.copied','Profile link copied.');return;}
+      $('share-status').textContent=langText('prof.arch.share.ask','Copy this address: ')+payload.url;
+    }catch(err){
+      if(err&&err.name==='AbortError'){$('share-status').textContent=langText('prof.arch.share.cancelled','Share cancelled.');return;}
+      $('share-status').textContent=langText('prof.arch.share.unavailable','Sharing is unavailable here. Copy the page address from your browser.');
+    }
+  });
+  var editForm=$('profile-edit-form');
+  var editStatusKey=['prof.arch.ed.status','Local preview only · not saved or published.'];
+  function setEditStatus(key,fallback){
+    editStatusKey=[key,fallback];
+    if($('profile-edit-status')) $('profile-edit-status').textContent=langText(key,fallback);
+  }
+  /* a language switch re-renders the CURRENT status, not the boot default */
+  document.addEventListener('blang',function(){
+    renderAudienceNote();
+    if($('profile-edit-status')) $('profile-edit-status').textContent=langText(editStatusKey[0],editStatusKey[1]);
+  });
+  function applyProfilePreview(key,fallback){
+    if(!editForm) return false;
+    var name=$('profile-name-input').value.trim();
+    var motto=$('profile-motto-input').value.trim();
+    var bio=$('profile-bio-input').value.trim();
+    if(!name||!motto||!bio){
+      setEditStatus('prof.arch.ed.req','Name, motto, and profile line are required for this preview.');
+      return false;
+    }
+    $('profile-display-name').textContent=name;
+    $('profile-display-motto').textContent=motto;
+    $('profile-display-bio').textContent=bio;
+    archive.style.setProperty('--profile-accent',$('profile-accent-input').value);
+    setEditStatus(key,fallback);
+    return true;
+  }
+  if(editForm){
+    editForm.addEventListener('submit',function(e){
+      e.preventDefault();
+      applyProfilePreview('prof.arch.ed.applied','Local preview applied · not saved or published.');
+    });
+    editForm.addEventListener('reset',function(){
+      setTimeout(function(){applyProfilePreview('prof.arch.ed.resetdone','Preview reset to the published blueprint · not saved or published.');},0);
+    });
+  }
+  updateManifest();
+  if(/#(people-agents|our-hives|public-directory|connection-help|name-record)/.test(location.hash)){
+    if((document.body.getAttribute('data-reg')||'bee')!=='cypherpunk') setBeat('deeper');
+  }
+  applyReading();
+})();
+</script>
+<script>
+/* ── the rails checker — keyless, read-only, whole-walk (z2.profile) ──────
+   The registry's domains table is tiny (one row per name), so the truthful
+   client read is the FULL table + an in-browser exact match — a bounded
+   lower_bound/upper_bound string query on these public APIs returns empty
+   even for names that exist (measured 2026-09-12), and an empty bounded
+   answer must never be shown as "not registered". Failover mirrors the
+   healed .b desk host list (the dead eosn endpoint is dropped). */
+(function(){
+  var HOSTS=['https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var cache=null;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  function strip(n){return (n||'').trim().toLowerCase().replace(/\.[ab]$/,'');}
+  async function rows(){
+    if(cache)return cache;
+    for(var i=0;i<HOSTS.length;i++){
+      try{
+        var r=await fetch(HOSTS[i]+'/v1/chain/get_table_rows',{method:'POST',
+          body:JSON.stringify({json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500})});
+        if(r.ok){var d=await r.json();if(d&&d.rows){cache=d.rows;return cache;}}
+      }catch(e){}
+    }
+    return null;
+  }
+  async function check(){
+    var v=document.getElementById('rail-name');
+    var out=document.getElementById('rail-verdict');
+    var asTyped=(v.value||'').trim();
+    var rail=/\.a$/i.test(asTyped)?'a':'b';
+    var n=strip(asTyped);
+    if(!n){out.className='rverdict';out.textContent='type a name first — with or without the .b / .a suffix';return;}
+    out.className='rverdict';out.textContent='asking the registry…';
+    var rs=await rows();
+    if(!rs){out.className='rverdict';
+      out.textContent='couldn\u2019t reach the registry from your network — public endpoints can be blocked; the rails are fine, the read isn\u2019t';return;}
+    var row=null;
+    for(var i=0;i<rs.length;i++){if(rs[i].domain_name===n){row=rs[i];break;}}
+    if(row){
+      out.className='rverdict ok';
+      out.innerHTML='<b>'+esc(n)+'.'+rail+' is HELD</b> — owner '+esc(row.owner)+
+        ' \u00b7 resolves \u2192 '+esc(row.account||'(no account set)')+
+        ' \u00b7 expires '+esc(String(row.expires||'').slice(0,10));
+    }else{
+      out.className='rverdict no';
+      out.innerHTML='<b>'+esc(n)+'.'+rail+' is not on the registry today</b> — names live at '+
+        '<a href="bnames.html" style="color:var(--cyan)">the .b desk</a>, where availability, fee and term are read live.';
+    }
+  }
+  document.getElementById('rail-go').addEventListener('click',check);
+  document.getElementById('rail-name').addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+})();
+</script>
+<script type="application/json" id="blood-data">{"fan":{"n":"Living","l":null,"t":"living","up":[{"n":"Living","l":null,"t":"living","up":[{"n":"Jack Benedum Sutphen","l":"1920–1982","t":"recorded","f":"KWCL-VJ6","up":[{"n":"Henry Miller Sutphen","l":"1897–1972","t":"recorded","f":"L4R4-43N","up":[{"n":"Joshua Clark Sutphen","l":"1873–1941","t":"recorded","f":"L4R4-43V","up":[{"n":"Captain John Melanchton Sutphen","l":"1836–1920","t":"colonial","f":"LDCB-5SK","up":[{"n":"John Boggs Sutphen","l":"1808–1882","t":"colonial","f":"KN8N-W19"},{"n":"Sarah Ann Quick","l":"1810–1872","t":"colonial","f":"L6LW-PJF"}]},{"n":"Ellen Clarke","l":"1839–1903","t":"colonial","f":"KZ1Z-4LC","up":[{"n":"Joshua J Clarke","l":"1795–1866","t":"colonial","f":"KC4G-9RB"},{"n":"Adaline Doan","l":"1812–1881","t":"colonial","f":"2W99-HHZ"}]}]},{"n":"Alma Jane Miller","l":"1862–1947","t":"recorded","f":"LK3P-9BX","up":[{"n":"Henry Miller","l":"1805–1883","t":"colonial","f":"LC5M-71F","up":[{"n":"Abraham Miller","l":"1766–1831","t":"colonial","f":"LZ6K-CQ9"},{"n":"Elizabeth Brumbach","l":"1772–1862","t":"colonial","f":"K8T5-K19"}]},{"n":"Mary M. Shane","l":"1839–1868","t":"colonial","f":"L6LC-SCL","up":[null,null]}]}]},{"n":"Frances Belle Benidum","l":"1897–1976","t":"recorded","f":"LWBJ-MJ8","up":[{"n":"Charles C Benadum","l":"1863–1923","t":"recorded","f":"L6LW-1G2","up":[{"n":"Joseph Benadum","l":"1832–1864","t":"colonial","f":"LJDG-CYG","up":[null,null]},{"n":"Rebecca Zellers","l":"1835–1907","t":"colonial","f":"MR5L-9R3","up":[{"n":"John Peter Zeller","l":"1795–Deceased","t":"colonial","f":"G9YX-PM9"},{"n":"Maria Schmidt","l":"1800–Deceased","t":"colonial","f":"MRRK-HRF"}]}]},{"n":"Florence  M Eder","l":"1868–1959","t":"recorded","f":"LJD7-VHS","up":[{"n":"John Eder","l":"1834–1881","t":"colonial","f":"LN5V-3N2","up":[{"n":"Samuel Alexander Eder","l":"1770–1863","t":"colonial","f":"LN5V-N5B"},{"n":"Jane Porter","l":"1794–1868","t":"colonial","f":"LN5V-G8F"}]},{"n":"Sarah Jane Spotts","l":"1842–1935","t":"colonial","f":"LN5J-5W3","up":[{"n":"Peter Spotz","l":"1796–1864","t":"colonial","f":"LNJF-V31"},{"n":"Maria Catharina Drumheller","l":"1802–1881","t":"colonial","f":"LNJF-R3X"}]}]}]}]},{"n":"Donna Ruth Lawton","l":"1925–1988","t":"recorded","f":"KWCL-VNB","up":[{"n":"Rollin Eugene Lawton","l":"1894–1974","t":"recorded","f":"KWCL-VJS","up":[{"n":"Rufus Elijah Lawton","l":"1872–1954","t":"recorded","f":"L7FD-PWH","up":[{"n":"Loyal Hiram Lawton","l":"1831–1904","t":"colonial","f":"K236-R3S","up":[{"n":"Edward Lawton","l":"1806–1841","t":"colonial","f":"K2MP-SZ8"},{"n":"Mahitable Howe","l":"1806–Deceased","t":"colonial","f":"K2QN-CTZ"}]},{"n":"Harriet Phylena Fuller","l":"1844–1899","t":"colonial","f":"K236-YQ7","up":[{"n":"Edwin Fuller","l":"1809–1875","t":"colonial","f":"K64P-5TN"},{"n":"Eunice L. Maxson","l":"1812–1873","t":"colonial","f":"K6HN-GB2"}]}]},{"n":"Fannie Susan Davis","l":"1876–1911","t":"recorded","f":"L7FD-PLX","up":[{"n":"Harrison Edgar Davis","l":"1855–1917","t":"recorded","f":"K234-B6X","up":[{"n":"George West Davis","l":"1815–1881","t":"colonial","f":"LZN9-1L5"},{"n":"Zilphia Ann Williams","l":"1820–1908","t":"colonial","f":"LZN9-15Z"}]},{"n":"Elizabeth Jane \"Eliza\" Boyd","l":"1857–1947","t":"recorded","f":"LHH9-Z4T","up":[{"n":"Theron George Boyd","l":"1829–1862","t":"colonial","f":"218J-SND"},{"n":"Jane Bethia Sawyer","l":"1834–1910","t":"colonial","f":"L7LV-8W1"}]}]}]},{"n":"Lora Ann Humes","l":"1901–1986","t":"recorded","f":"KWCL-VJ7","up":[{"n":"Willard Humes","l":"1873–1933","t":"recorded","f":"KWCX-WXX","up":[{"n":"Jonas Willard Humes","l":"1844–1897","t":"colonial","f":"K2QX-ZDX","up":[{"n":"Manning Humes","l":"1806–1885","t":"colonial","f":"KWJH-CBH"},{"n":"Lucy Chaffin","l":"1815–1855","t":"colonial","f":"L4PS-BFK"}]},{"n":"Sarah Irinda Smith","l":"1857–1911","t":"recorded","f":"LLQK-SMC","up":[{"n":"Thomas Thomas C. C. Smith","l":"1825–1899","t":"colonial","f":"KWJD-KPP"},{"n":"Sarah Ann Frampton","l":"1831–1893","t":"colonial","f":"KWJD-KPG"}]}]},{"n":"Minnie Clarence Howe","l":"1877–1949","t":"recorded","f":"KWCX-WX8","up":[{"n":"Joseph Saunders Howe","l":"1822–1904","t":"colonial","f":"KWJ4-PQK","up":[{"n":"Joseph Howe","l":"1790–Deceased","t":"colonial","f":"LZJW-F2M"},{"n":"Mary Anne Saunders","l":"1804–Deceased","t":"colonial","f":"MS86-NB5"}]},{"n":"Ruth Ann Smith","l":"1845–1911","t":"colonial","f":"KWVM-KBB","up":[{"n":"Jackson Osbourn Smith","l":"1815–1880","t":"colonial","f":"KWVM-K1M"},{"n":"Mary Marie Owens","l":"1818–1881","t":"colonial","f":"KWVM-KB1"}]}]}]}]}]},{"n":"Living","l":null,"t":"living","up":[{"n":"Don Ray Remington","l":"1931–Deceased","t":"living","f":"LNQ5-BSG","up":[{"n":"Fuller Rasmussen Remington","l":"1891–1982","t":"recorded","f":"KWCL-B8V","up":[{"n":"Joseph Fuller Remington","l":"1859–1900","t":"recorded","f":"KWCL-B82","up":[{"n":"Jerome Napoleon Remington","l":"1819–1877","t":"colonial","f":"KVPT-5QS","up":[{"n":"Joseph David Remington","l":"1780–1846","t":"colonial","f":"KWBB-F25"},{"n":"Sarah Fuller","l":"1791–1847","t":"colonial","f":"KLY1-63F"}]},{"n":"Lydia Ripley Badger","l":"1831–1906","t":"colonial","f":"K2HZ-X58","up":[{"n":"John Badger","l":"1800–1840","t":"colonial","f":"KWJ5-CSM"},{"n":"Lydia Chamberlain","l":"1798–1844","t":"colonial","f":"KWJ5-C91"}]}]},{"n":"Amanda Alfreda Rasmussen","l":"1871–1955","t":"recorded","f":"KWCL-B8P","up":[{"n":"Mads Peter Rasmussen","l":"1836–1887","t":"colonial","f":"L5JF-J21","up":[{"n":"Rasmus Sørensen Basse","l":"1808–1870","t":"colonial","f":"L5JF-VHG"},{"n":"Mette Catherine Petersdatter","l":"1802–1865","t":"colonial","f":"L5JF-JQ5"}]},{"n":"Anna Gertrude Claesson","l":"1836–1913","t":"colonial","f":"KWJZ-FWW","up":[{"n":"Clas Jöransson","l":"1805–1885","t":"colonial","f":"LHG3-69T"},{"n":"Anna Margaretha Olofsdotter","l":"1811–1875","t":"colonial","f":"LZVX-X1L"}]}]}]},{"n":"Edith Leoma Hadlock","l":"1897–1982","t":"recorded","f":"KWCL-B8K","up":[{"n":"Erskine Curtis Hadlock","l":"1854–1936","t":"recorded","f":"KWCL-BDM","up":[{"n":"Archibald Gilchrist Hadlock","l":"1815–1898","t":"colonial","f":"KWJR-LHN","up":[{"n":"Samuel Arthur Hadlock","l":"1770–1849","t":"colonial","f":"LVQ1-CT2"},{"n":"Miriam Hadlock","l":"1774–1861","t":"colonial","f":"L8QJ-R7N"}]},{"n":"Fannie Bell Martha Hadlock","l":"1814–1897","t":"colonial","f":"KWJR-LHF","up":[{"n":"Joseph Hadlock","l":"1777–1849","t":"colonial","f":"LZ19-MWV"},{"n":"Olive Sanborn","l":"1781–1872","t":"colonial","f":"L8QJ-RZ8"}]}]},{"n":"Edith Ann Hobbs","l":"1861–1939","t":"recorded","f":"KWCL-B8Y","up":[{"n":"Charles William Hobbs","l":"1833–1912","t":"colonial","f":"KWZ9-FDR","up":[{"n":"William Bennett Hobbs","l":"1807–1846","t":"colonial","f":"LRRW-5DH"},{"n":"Ann Owen","l":"1809–1894","t":"colonial","f":"KWJ7-Y9Y"}]},{"n":"Mary Ann Emms","l":"1835–1919","t":"colonial","f":"KWZ9-FDT","up":[{"n":"Charles Richard Emms","l":"1809–1867","t":"colonial","f":"L56P-66L"},{"n":"Edith Ayers","l":"1800–1881","t":"colonial","f":"LW1S-ZB3"}]}]}]}]},{"n":"Marilyn Lowry","l":"1932–Deceased","t":"living","f":"LNQ5-BSF","up":[{"n":"Hyrum Deronda Lowry","l":"1903–1985","t":"recorded","f":"KWZ2-6DC","up":[{"n":"John Hyrum Lowry","l":"1870–1914","t":"recorded","f":"KWCK-2TQ","up":[{"n":"Abner Lowry","l":"1831–1900","t":"colonial","f":"KWJD-H5Y","up":[{"n":"John Lowry","l":"1799–1867","t":"colonial","f":"KWJT-VHB"},{"n":"Mary Wilcox","l":"1802–1859","t":"colonial","f":"KWJT-VHR"}]},{"n":"Betsy Louisa Bradley","l":"1835–1881","t":"colonial","f":"LT4D-F45","up":[{"n":"George Washington Bradley","l":"1813–1891","t":"colonial","f":"KWJ8-HC4"},{"n":"Elizabeth Ann Kroll","l":"1811–1893","t":"colonial","f":"KWJT-BZV"}]}]},{"n":"Minnie LaDell Taylor","l":"1878–1959","t":"recorded","f":"KWCK-2T4","up":[{"n":"Martin Van Buren Taylor Sr.","l":"1835–1900","t":"colonial","f":"KWJ4-22P","up":[{"n":"Benjamin Franklin Taylor","l":"1805–1889","t":"colonial","f":"KWJC-CBJ"},{"n":"Ann Mennell","l":"1812–1875","t":"colonial","f":"KWJT-B8M"}]},{"n":"Mary Ann Clemens","l":"1841–1903","t":"colonial","f":"KWJT-YN5","up":[{"n":"William Clemens","l":"1812–1850","t":"colonial","f":"K4KR-SPG"},{"n":"Ann Wiles","l":"1817–1908","t":"colonial","f":"KWJT-BNY"}]}]}]},{"n":"Ardella Rockwood","l":"1904–1990","t":"recorded","f":"KWZ2-6DZ","up":[{"n":"Julius Apollus Rockwood","l":"1878–1943","t":"recorded","f":"KWC6-VDV","up":[{"n":"Albert Perry Rockwood","l":"1805–1879","t":"colonial","f":"KWJ4-XBD","up":[{"n":"Luther Rockwood","l":"1780–1856","t":"colonial","f":"LCRW-GSP"},{"n":"Ruth Perry","l":"1781–1805","t":"colonial","f":"LHYW-KBK"}]},{"n":"Juliane Sophie Olsen","l":"1835–1914","t":"colonial","f":"KWJ6-3KP","up":[{"n":"Ole Nielsen","l":"1803–1857","t":"colonial","f":"LQ5Y-7F5"},{"n":"Mette Larsdatter","l":"1812–1865","t":"colonial","f":"MQLP-XWN"}]}]},{"n":"Mary Ellen Hill","l":"1879–1955","t":"recorded","f":"KWC6-VDK","up":[{"n":"William Hood Hill","l":"1840–1907","t":"colonial","f":"KWNF-8YX","up":[{"n":"Alexander Hill Jr","l":"1811–1889","t":"colonial","f":"KWJC-KHN"},{"n":"Agnes Hood","l":"1811–1872","t":"colonial","f":"KWJC-KHF"}]},{"n":"Elizabeth Ann Hamilton","l":"1850–1916","t":"recorded","f":"KWNV-B37","up":[{"n":"James Lang Hamilton","l":"1818–1875","t":"colonial","f":"KWJ8-QZL"},{"n":"Mary Ann Campbell","l":"1825–1910","t":"colonial","f":"KWJ8-QZG"}]}]}]}]}]}]},"spine":[{"i":0,"n":"Living","l":null,"t":"living"},{"i":1,"n":"Living","l":null,"t":"living"},{"i":2,"n":"Donna Ruth Lawton","l":"1925–1988","t":"recorded","f":"KWCL-VNB"},{"i":3,"n":"Rollin Eugene Lawton","l":"1894–1974","t":"recorded","f":"KWCL-VJS"},{"i":4,"n":"Rufus Elijah Lawton","l":"1872–1954","t":"recorded","f":"L7FD-PWH"},{"i":5,"n":"Harriet Phylena Fuller","l":"1844–1899","t":"colonial","f":"K236-YQ7"},{"i":6,"n":"Eunice L. Maxson","l":"1812–1873","t":"colonial","f":"K6HN-GB2"},{"i":7,"n":"Jared Maxson","l":"1764–1850","t":"colonial","f":"27SL-4N5"},{"i":8,"n":"Stephen Maxson","l":"1735–1794","t":"colonial","f":"L81C-KDG"},{"i":9,"n":"Thankful Betty Randall","l":"1702–1785","t":"colonial","f":"LHSC-D94"},{"i":10,"n":"Matthew Randall","l":"1671–1735","t":"colonial","f":"LBK8-D9L"},{"i":11,"n":"John Randall I","l":"1640–1684","t":"colonial","f":"L1X1-9X3"},{"i":12,"n":"Margaret Trevisa","l":"1613–1668","t":"colonial","f":"LBMX-YP1"},{"i":13,"n":"Margaret Courtenay","l":"1574–1658","t":"colonial","f":"LH1L-28L"},{"i":14,"n":"Peter Courtenay Of Landrake","l":"1536–1606","t":"medieval","f":"L1WB-WJJ"},{"i":15,"n":"Margaret Trethurfee","l":"1504–1576","t":"medieval","f":"MKZF-8M6"},{"i":16,"n":"Thomas Trethurffe","l":"1477–1529","t":"medieval","f":"LZ71-8P3"},{"i":17,"n":"Elizabeth de Courtenay","l":"1447–1510","t":"medieval","f":"L1W2-LWW"},{"i":18,"n":"Margaret Carminow","l":"1425–1512","t":"medieval","f":"LD5L-CW8"},{"i":19,"n":"Thomas Carminow of Boconnoc","l":"1396–1442","t":"medieval","f":"GY4B-Q49"},{"i":20,"n":"Sir William de Carminow","l":"1377–1406","t":"medieval","f":"GW9P-WV8"},{"i":21,"n":"Alice Tynten","l":"1324–1356","t":"medieval","f":"G83C-16X"},{"i":22,"n":"Elizabeth Bloyou","l":"1301–1371","t":"medieval","f":"GQ8Q-T5Y"},{"i":23,"n":"Joan de Bodrugan","l":"1284–1331","t":"medieval","f":"K8MX-JWD"},{"i":24,"n":"Sybil de Mandeville","l":"1264–1307","t":"medieval","f":"G94Q-PV8"},{"i":25,"n":"Walter of Manderville","l":"1220–1267","t":"medieval","f":"P4F1-9PS"},{"i":26,"n":"Christine FitzRobert Countess Of Essex","l":"1187–1232","t":"medieval","f":"G8TV-DFB"},{"i":27,"n":"Gunnora de Valognes","l":"1166–1212","t":"medieval","f":"GM5J-515"},{"i":28,"n":"Robert de Valognes","l":"1136–1184","t":"medieval","f":"GD7X-BMF"},{"i":29,"n":"Sir Roger de Valognes","l":"1081–1141","t":"medieval","f":"G3PR-QC5"},{"i":30,"n":"Albreda De Ryes-Gifford De Bolbec","l":"1052–1096","t":"medieval","f":"G95Q-XJK"},{"i":31,"n":"Albérade Gifford de Bolbec-de la Hayes Dame des Préaux","l":"1024–1055","t":"medieval","f":"PF9D-HBL"},{"i":32,"n":"Honfroi Humfridum de Veulles du Ponteaudemer","l":"0980–1044","t":"saga","f":"99Y7-MCD"},{"i":33,"n":"Wevia de Crépon","l":"0952–0990","t":"saga","f":"PHDB-7QL"},{"i":34,"n":"Princess Gynrithe Olafsdottir Of Denmark","l":"0923–1002","t":"saga","f":"KLXB-KTC"},{"i":35,"n":"King Olof Björnsson","l":"0885–0964","t":"saga","f":"L7N5-6KK"},{"i":36,"n":"Prince of Sweden Bjorn III Eriksson","l":"0872–0956","t":"saga","f":"PHG3-Q1P"},{"i":37,"n":"Eric Edmundsson","l":"0849–0900","t":"saga","f":"G8KQ-J2R"},{"i":38,"n":"Alof Ragnarsdottír","l":"0837–0871","t":"saga","f":"GNB9-NC5"},{"i":39,"n":"Ragnar Sigurdsson","l":"0740–0845","t":"saga","f":"M8WZ-XZY"},{"i":40,"n":"Sigurd Ring Randversson","l":"0715–0810","t":"saga","f":"LTSB-5WH"},{"i":41,"n":"Randver Radbardson","l":"0670–0730","t":"saga","f":"LZ2F-W87"}],"stats":{"personsWalked":18575,"bloodlinePersons":10097,"deceasedPublished":10259,"livingRedacted":5,"livingStubs":3,"spineGenerations":42,"spineReaches":"Randver Radbardson 0670–0730"}}</script>
+<script>
+/* ── the bloodline record renderer — inline JSON in, first-party SVG fan out (zCode) ── */
+(function(){
+  var dataEl=document.getElementById('blood-data');
+  if(!dataEl) return;
+  var D; try{ D=JSON.parse(dataEl.textContent); }catch(e){ return; }
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
+  var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
+  /* dynamic strings re-render on the language event, same law as the editor status */
+  function renderDyn(){
+    var s=D.stats||{};
+    var st=document.getElementById('blood-stats');
+    if(st){
+      st.textContent=langText('prof.arch.blood.stats','{w} persons walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
+        .replace('{w}',s.personsWalked).replace('{d}',s.deceasedPublished).replace('{l}',s.livingRedacted).replace('{g}',s.spineGenerations);
+    }
+    var lg=document.getElementById('blood-legend');
+    if(lg){
+      while(lg.firstChild) lg.removeChild(lg.firstChild);
+      var tiers=[
+        ['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
+        ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
+        ['medieval','prof.arch.blood.tier.medieval','medieval · 1000–1550'],
+        ['saga','prof.arch.blood.tier.saga','saga · before 1000'],
+        ['living','prof.arch.blood.tier.living','living · redacted']];
+      tiers.forEach(function(t){
+        var k=document.createElement('span');k.className='tk';
+        var dot=document.createElement('i');dot.style.background=TIER_COLOR[t[0]];k.appendChild(dot);
+        var lab=document.createElement('span');lab.textContent=langText(t[1],t[2]);
+        k.appendChild(lab);lg.appendChild(k);
+      });
+      var cap=document.createElement('span');cap.className='tk';
+      cap.textContent=langText('prof.arch.blood.tier','era labels, not verdicts');
+      lg.appendChild(cap);
+    }
+  }
+  renderDyn();
+  document.addEventListener('blang',renderDyn);
+  var svg=document.getElementById('blood-fan');
+  if(svg&&D.fan){
+    var NS='http://www.w3.org/2000/svg';
+    var CX=360,CY=414,R0=56,BAND=50;
+    function pt(r,aDeg){var a=aDeg*Math.PI/180;return [CX+r*Math.cos(a),CY-r*Math.sin(a)];}
+    function slice(rIn,rOut,a0,a1){
+      var p1=pt(rIn,a0),p2=pt(rIn,a1),p3=pt(rOut,a1),p4=pt(rOut,a0);
+      return 'M'+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+
+        ' A'+rIn+' '+rIn+' 0 0 0 '+p2[0].toFixed(1)+' '+p2[1].toFixed(1)+
+        ' L'+p3[0].toFixed(1)+' '+p3[1].toFixed(1)+
+        ' A'+rOut+' '+rOut+' 0 0 1 '+p4[0].toFixed(1)+' '+p4[1].toFixed(1)+' Z';
+    }
+    function surname(n){var w=String(n||'').trim().split(/\s+/);return w[w.length-1]||n;}
+    function draw(node,depth,slot){
+      if(!node) return;
+      var rIn=R0+depth*BAND, rOut=rIn+BAND;
+      var w=180/Math.pow(2,depth);
+      var a0=180-slot*w, a1=a0-w;
+      var p=document.createElementNS(NS,'path');
+      p.setAttribute('d',slice(rIn,rOut,a0,a1));
+      p.setAttribute('class','fanslice');
+      p.setAttribute('fill',TIER_COLOR[node.t]||TIER_COLOR.unrecorded);
+      p.setAttribute('fill-opacity',depth===0?'0.95':'0.55');
+      p.setAttribute('stroke','var(--bg)');
+      p.setAttribute('stroke-width','1');
+      var title=document.createElementNS(NS,'title');
+      title.textContent=node.n+(node.l?' · '+node.l:'');
+      p.appendChild(title);
+      svg.appendChild(p);
+      if(depth<=3){
+        var mid=(a0+a1)/2, rMid=(rIn+rOut)/2;
+        var c=pt(rMid,mid);
+        var t=document.createElementNS(NS,'text');
+        t.setAttribute('x',c[0].toFixed(1));t.setAttribute('y',c[1].toFixed(1));
+        t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+        t.setAttribute('fill','#0d1410');t.setAttribute('font-size',depth<=1?'10':'8.5');
+        t.setAttribute('font-family','IBM Plex Mono,monospace');t.setAttribute('pointer-events','none');
+        var lab=node.n==='Living'?'Living':surname(node.n);
+        if(lab.length>16) lab=lab.slice(0,15)+'…';
+        t.textContent=lab;
+        svg.appendChild(t);
+      }
+      if(node.up){ draw(node.up[0],depth+1,slot*2); draw(node.up[1],depth+1,slot*2+1); }
+    }
+    draw(D.fan,0,0);
+  }
+  var sp=document.getElementById('blood-spine');
+  if(sp){
+    (D.spine||[]).forEach(function(row){
+      var li=document.createElement('li');
+      li.className=row.t;
+      var gen=document.createElement('span');gen.className='gen';gen.textContent=row.i;
+      var dot=document.createElement('span');dot.className='tdot';dot.style.background=TIER_COLOR[row.t]||TIER_COLOR.unrecorded;
+      var who=document.createElement('span');who.className='who';who.textContent=row.n;
+      var yrs=document.createElement('span');yrs.className='yrs';yrs.textContent=row.l||'';
+      li.appendChild(gen);li.appendChild(dot);li.appendChild(who);li.appendChild(yrs);
+      sp.appendChild(li);
+    });
+  }
+  var dots=document.querySelectorAll('#blood-saga .sagarows .tdot');
+  for(var i=0;i<dots.length;i++) dots[i].style.background=TIER_COLOR.saga;
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are this page's
+   OWN published records: the house instrument (#instrument .house), the disclosure manifest the
+   page writes (#profile-manifest) and the bloodline stats (#blood-data). Nothing is fetched to
+   enrich them. The one action hands off to the page's own share button (#share-house) and the
+   front repeats only what that button reports. The cypherpunk check fetches the manifest's pinned
+   files from this site and hashes them here; a pin that differs is shown as differing.
+   Exposed as window.__eternal for the tests. */
+(function(){
+  'use strict';
+  var $e = function(id){ return document.getElementById(id); };
+  var T = function(k, f){ var t = window.BNRLanguage && window.BNRLanguage.text; return t ? t(k, f) : f; };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var tok = function(n){ return getComputedStyle(document.body).getPropertyValue('--sk-' + n).trim(); };
+  var ES = { open: {}, sel: 0, read: { 0: true }, verified: null };
+  var D = {};
+  var TIE = /0xFbD20147|King holds|root:|\(\.b bDiD\)/i;
+
+  function txt(el){ if (!el) return ''; var c = el.cloneNode(true); c.querySelectorAll('.badge').forEach(function(b){ b.remove(); }); return c.textContent.replace(/\s+/g, ' ').trim(); }
+  function data(){
+    var d = { houses: [] };
+    document.querySelectorAll('#instrument .house').forEach(function(h, i){
+      var ty = h.querySelector('.htype'), meta = h.querySelector('.bmeta'), gw = h.querySelector('.gwhen');
+      var kind = ty && [].some.call(ty.querySelectorAll('[data-i18n]'), function(e){ return e.dataset.i18n === 'prof.rec.type.guest'; }) ? 'guest' : (ty && ty.classList.contains('baigentic') ? 'agent' : 'person');
+      d.houses.push({
+        id: h.id, name: txt(h.querySelector('.hname')), kind: kind, holder: txt(h.querySelector('.bname')),
+        desc: txt(h.querySelector('.bdesc')), meta: txt(meta), current: h.classList.contains('current'),
+        gens: h.querySelectorAll('.genline').length, since: gw ? txt(gw) : '', caution: !!h.querySelector('.record-caution'),
+        art: txt(h.querySelector('.art')), tied: i > 0 && TIE.test(txt(meta))
+      });
+    });
+    try { d.stats = JSON.parse($e('blood-data').textContent).stats; } catch(e){ d.stats = null; }
+    try { d.manifest = JSON.parse($e('profile-manifest').textContent); } catch(e){ d.manifest = null; }
+    d.founder = d.houses[0] || null;
+    d.people = d.houses.filter(function(h){ return h.kind === 'person'; }).length;
+    d.agents = d.houses.filter(function(h){ return h.kind === 'agent'; }).length;
+    d.current = d.houses.filter(function(h){ return h.current; }).length;
+    d.living = d.stats ? d.stats.livingRedacted : null;
+    d.share = ($e('share-status') || {}).textContent || '';
+    return d;
+  }
+  function initials(h){
+    if (h.kind === 'guest') return '?';
+    var p = h.holder.split(/\s+/).filter(Boolean);
+    return p.length > 1 ? (p[0][0] + p[p.length - 1][0]) : (h.holder.slice(0, 2) || h.name.slice(0, 2));
+  }
+  function kindWord(h){ return h.kind === 'agent' ? T('et.prof.agent', 'a machine agent') : h.kind === 'guest' ? T('et.prof.guest', 'a guest, no wallet needed') : T('et.prof.person', 'a person'); }
+  function chev(){ return '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>'; }
+
+  /* ── NEW BEE ── */
+  function bee(d){
+    $e('etBeeLede').textContent = T('et.prof.b.lede', '{n} names, each kept in public with who holds it. you can read them all without a wallet.').replace('{n}', d.houses.length);
+    $e('etBeeGuard').textContent = d.living != null ? T('et.prof.b.guard', 'living family stays private: {n} people are held back.').replace('{n}', d.living) : T('et.prof.b.guardNo', 'living family stays private.');
+    var h = '';
+    d.houses.forEach(function(x, i){
+      var open = !!ES.open[i];
+      h += '<button type="button" class="et-b-person" data-i="' + i + '" aria-expanded="' + open + '"><i class="' + x.kind + '" aria-hidden="true">' + esc(initials(x)) + '</i><div><b>' + esc(x.name) + '</b><span>' + esc(x.kind === 'guest' ? kindWord(x) : T('et.prof.b.held', 'held by {h}').replace('{h}', x.holder) + (x.kind === 'agent' ? ' · ' + kindWord(x) : '')) + '</span></div>' + chev() + '</button>';
+      h += '<div class="et-b-open" data-open="' + i + '"' + (open ? '' : ' hidden') + '><p>' + esc(x.desc) + '</p>' + (x.since ? '<p class="mut">' + esc(x.since) + '</p>' : '') +
+        '<p class="mut">' + esc(x.gens ? T('et.prof.b.gens', '{n} generation(s) kept, never rewritten.').replace('{n}', x.gens) : T('et.prof.b.nogens', 'no earlier holders printed.')) + '</p>' +
+        (x.caution ? '<p class="out">' + esc(T('et.prof.b.caution', 'two dates in its records disagree. both are kept.')) + '</p>' : '') + '</div>';
+    });
+    if ($e('etBeeRows').innerHTML !== h) $e('etBeeRows').innerHTML = h;
+    $e('etBeeStatus').textContent = d.share;
+  }
+
+  /* ── RAVER ── a honeycomb: the founder's house at the heart, six around */
+  function hex(cx, cy, r){ var p = []; for (var k = 0; k < 6; k++) { var a = Math.PI / 180 * (60 * k - 90); p.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1)); } return p.join(' '); }
+  function lines(name){
+    var n = name.replace(/\.base\.eth$/, ''), tail = n === name ? '' : '.base.eth';
+    var m = /^([^\x00-\x7f]+)(.+)$/.exec(n); var out = m ? [m[1], m[2]] : [n];
+    if (tail) out.push(tail);
+    return out;
+  }
+  function raver(d){
+    var svg = $e('etHive'); if (!svg) return;
+    var R = 60, dist = 108, pos = [[0, 0]], h = '';
+    for (var k = 0; k < 6; k++) { var a = Math.PI / 180 * (60 * k - 60); pos.push([dist * Math.cos(a), dist * Math.sin(a)]); }
+    d.houses.slice(0, 7).forEach(function(x, i){ if (i && x.tied) h += '<line x1="0" y1="0" x2="' + pos[i][0].toFixed(1) + '" y2="' + pos[i][1].toFixed(1) + '" fill="none" stroke="' + tok('you') + '" stroke-width="2" stroke-dasharray="4 5"/>'; });
+    d.houses.slice(0, 7).forEach(function(x, i){
+      var sel = ES.sel === i, lit = !!ES.read[i], c = pos[i];
+      var fill = x.kind === 'guest' ? 'none' : sel ? tok('sovereign-strong') : x.kind === 'agent' ? tok('ai') : tok('sovereign');
+      var ink = x.kind === 'guest' ? tok('ink') : tok('bg');
+      h += '<g class="cell" data-i="' + i + '" role="button" tabindex="0" aria-pressed="' + sel + '" aria-label="' + esc(x.name + ', ' + kindWord(x) + (x.kind === 'guest' ? '' : ', held by ' + x.holder)) + '">';
+      h += '<polygon points="' + hex(c[0], c[1], R - 3) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : .72) + '"' + (x.kind === 'guest' ? ' stroke="' + tok('guard') + '" stroke-width="2" stroke-dasharray="5 5"' : x.current ? ' stroke="' + tok('biomass') + '" stroke-width="4"' : '') + '/>';
+      var L = lines(x.name), y0 = c[1] - (L.length - 1) * 8 + 2;
+      L.forEach(function(t, j){ h += '<text x="' + c[0].toFixed(1) + '" y="' + (y0 + j * 16).toFixed(1) + '" text-anchor="middle" fill="' + ink + '" style="font:600 14px/1.25 var(--sk-font-raver-body)">' + esc(t) + '</text>'; });
+      h += '</g>';
+    });
+    svg.innerHTML = h;
+    $e('etLegend').innerHTML = [[tok('sovereign'), T('et.prof.r.people', 'people')], [tok('ai'), T('et.prof.r.agents', 'agents')], [tok('biomass'), T('et.prof.r.current', 'current')], [tok('you'), T('et.prof.r.thread', 'tied to the founder')]]
+      .map(function(x){ return '<span><i style="background:' + x[0] + '"></i>' + esc(x[1]) + '</span>'; }).join('');
+    var s = d.houses[ES.sel] || {};
+    $e('etRaverCard').innerHTML = '<span class="rk">' + esc(initials(s)) + '</span><div><b>' + esc(s.name) + '</b><span>' + esc(s.kind === 'guest' ? kindWord(s) : T('et.prof.b.held', 'held by {h}').replace('{h}', s.holder)) + ' · ' + esc(s.gens ? T('et.prof.r.gens', '{n} gen kept').replace('{n}', s.gens) : T('et.prof.r.nogens', 'no gens printed')) + (s.current ? ' · ' + esc(T('et.prof.r.cur', 'current')) : '') + '</span></div>';
+    var n = Object.keys(ES.read).length;
+    $e('etRaverNote').textContent = n + ' ' + T('et.prof.r.of', 'of {n} read').replace('{n}', d.houses.length) + ' · ' + d.people + ' ' + T('et.prof.r.p', 'people') + ' · ' + d.agents + ' ' + T('et.prof.r.a', 'agents') + ' · ' + T('et.prof.r.dash', 'dashed = a guest');
+    $e('etRaverStatus').textContent = d.share;
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(d){
+    var m = d.manifest || {};
+    $e('etCyPath').textContent = (m.rail || '.b') + '://' + (m.house || 'skaists') + '/houses · ' + d.houses.length;
+    $e('etChips').innerHTML = '<span>' + d.houses.length + ' houses</span><span class="ok">' + d.current + ' current</span><span>' + d.people + ' person · ' + d.agents + ' agent</span><span class="on">audience ' + esc(m.audience || 'not read') + '</span>';
+    $e('etCyGuard').innerHTML = '<span>living_people = ' + esc(m.living_people || 'not read') + '</span><b>' + esc(d.living != null ? d.living + ' living redacted' : 'stats not read') + '</b>';
+    var rows = d.houses.map(function(x){ return '<tr><td>' + esc(x.name) + '<small class="' + (x.kind === 'agent' ? 'st-agent' : x.kind === 'guest' ? 'st-guest' : '') + '">' + esc(x.kind) + (x.current ? ' · <span class="st-cur">current</span>' : '') + (x.caution ? ' · dates disagree' : '') + '</small></td><td>' + esc(x.kind === 'guest' ? 'no holder · reads free' : x.holder) + '</td><td>' + x.gens + '</td></tr>'; }).join('');
+    $e('etHouses').innerHTML = rows;
+    var st = d.stats || {};
+    $e('etManifest').innerHTML = [
+      ['schema', esc(m.schema || 'not read')], ['house', esc(m.house || '') + ' · rail ' + esc(m.rail || '')], ['fields', esc((m.fields || []).join(' · '))],
+      ['title', esc(m.title_claim || '')], ['market', esc(m.marketplace || '')], ['enforce', esc(m.enforcement || '')],
+      ['lineage', d.stats ? esc(Number(st.personsWalked).toLocaleString('en-US')) + ' walked · ' + esc(Number(st.bloodlinePersons).toLocaleString('en-US')) + ' bloodline · spine ' + esc(st.spineGenerations) + ' gens → ' + esc(st.spineReaches) : '<span class="no">not read</span>']
+    ].map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join('');
+    var gens = d.houses.reduce(function(s, x){ return s + x.gens; }, 0);
+    var steps = [
+      ['name · registry', 'kingbeelovis::domains · read keyless, on demand, in the rails band below', 'done'],
+      ['holder · published field', d.houses.length + ' houses · wallets and mailboxes as published, no enrichment', 'done'],
+      ['ledger · append-only', gens + ' generations printed · prior holders never edited', 'done'],
+      ['disclosure · ' + (m.audience || '?'), 'fields: ' + (m.fields || []).length + ' · living ' + (m.living_people || '?') + ' · ' + (m.enforcement || ''), 'done'],
+      ['pins · sha256', ES.verified ? ES.verified.rows.filter(function(r){ return r.state === 'match'; }).length + ' of ' + ES.verified.rows.length + ' match, hashed here' : 'not checked yet · run verify here', ES.verified ? 'done' : 'todo'],
+      ['share · #house-archive', d.share ? 'the page reports: ' + d.share : 'the link is shared only when you press share', 'todo']
+    ];
+    var nowAt = steps.findIndex(function(s){ return s[2] === 'todo'; });
+    $e('etPipe').innerHTML = steps.map(function(s, i){ return '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc(s[0]) + '</b><p>' + esc(s[1]) + '</p></li>'; }).join('');
+    var V = ES.verified;
+    $e('etVerify').innerHTML = V ? V.rows.map(function(r){ return '<li class="' + (r.state === 'match' ? 'yes' : 'no') + '">' + (r.state === 'match' ? '✓ ' : '✗ ') + esc(r.key) + ' · ' + esc(r.state === 'match' ? 'matches its pin' : r.state === 'differs' ? 'differs from its pin' : 'unreachable here') + '<br><code>' + esc(r.path) + '</code><br><code>' + esc(r.got || '') + '</code></li>'; }).join('') + '<li>' + esc('ran here · ' + V.at) + '</li>'
+      : Object.keys(m).filter(function(k){ return m[k] && m[k].sha256; }).map(function(k){ return '<li>' + esc(k) + ' · <code>' + esc(m[k].path) + '</code><br><code>' + esc(m[k].sha256) + '</code></li>'; }).join('');
+  }
+  function hexOf(buf){ return [].map.call(new Uint8Array(buf), function(b){ return b.toString(16).padStart(2, '0'); }).join('').toUpperCase(); }
+  function verify(){
+    var m = D.manifest || {}, keys = Object.keys(m).filter(function(k){ return m[k] && m[k].sha256 && m[k].path; });
+    $e('etCyVerify').disabled = true;
+    return Promise.all(keys.map(function(k){
+      return fetch('../' + m[k].path, { cache: 'no-store' }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+        .then(function(b){ return crypto.subtle.digest('SHA-256', b); })
+        .then(function(h){ var got = hexOf(h); return { key: k, path: m[k].path, want: m[k].sha256, got: got, state: got === String(m[k].sha256).toUpperCase() ? 'match' : 'differs' }; })
+        .catch(function(e){ return { key: k, path: m[k].path, want: m[k].sha256, got: String(e.message || e), state: 'unreachable' }; });
+    })).then(function(rows){ ES.verified = { at: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC', rows: rows }; $e('etCyVerify').disabled = false; all(); return ES.verified; });
+  }
+
+  function share(){
+    var b = $e('share-house'); if (!b) return;
+    b.click();   // the page's own share handler: share sheet, clipboard, or the address to copy
+    var n = 0, t = setInterval(function(){ all(); if (++n > 20) clearInterval(t); }, 150);
+  }
+  function words(){ document.querySelectorAll('#eternal [data-etk], #etArchive[data-etk]').forEach(function(el){ if (!el.hasAttribute('data-eten')) el.setAttribute('data-eten', el.textContent); el.textContent = T(el.getAttribute('data-etk'), el.getAttribute('data-eten')); }); }
+  function all(){
+    D = data();
+    try { bee(D); raver(D); cy(D); } catch(e){ if (window.console) console.warn('eternal front', e); }
+    window.__eternal = { data: D, ui: ES, verify: verify };
+  }
+  function wire(){
+    var ev = $e('eternal');
+    ev.addEventListener('click', function(e){
+      var row = e.target.closest('.et-b-person');
+      if (row) { var i = +row.getAttribute('data-i'); ES.open[i] = !ES.open[i]; row.setAttribute('aria-expanded', String(ES.open[i])); var p = ev.querySelector('.et-b-open[data-open="' + i + '"]'); if (p) p.hidden = !ES.open[i]; return; }
+      var cell = e.target.closest('#etHive .cell');
+      if (cell) { ES.sel = +cell.getAttribute('data-i'); ES.read[ES.sel] = true; raver(D); return; }
+    });
+    ev.addEventListener('keydown', function(e){ var c = e.target.closest && e.target.closest('#etHive .cell'); if (c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+    $e('etBeeGo').addEventListener('click', share); $e('etRaverGo').addEventListener('click', share);
+    $e('etCyVerify').addEventListener('click', function(){ verify(); });
+    document.addEventListener('blang', function(){ words(); all(); });
+    document.addEventListener('bregister', function(){ all(); });
+  }
+  words(); wire(); all();
+})();
+</script>
+<script src="agent-dock.js?v=5"></script>
+<script src="tour.js?v=42"></script>
 </body>
 </html>

@@ -1,0 +1,72 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6a2a94b6f3",
+ "bnr": "bnr://skaists.dev/blood/p6a2a94b6f3",
+ "identity": {
+  "name": "William Smith",
+  "lifespan": "1720–1782",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K63Q-WQ9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "17 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "17 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7c03085b18",
+    "name": "Stephen Smith",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8917a4cd39",
+    "name": "Martha Williams",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p900e748b91",
+    "name": "William Smith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf78c90fa73",
+    "name": "Lydia Smith"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K63Q-WQ9",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 17,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

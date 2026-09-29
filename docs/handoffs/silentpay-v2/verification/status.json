@@ -1,0 +1,14 @@
+{
+  "checked_on": "2026-09-08",
+  "command": "python -m unittest discover -s tests -v",
+  "working_directory": "baseline/silentpay_v2",
+  "python": "3.13.5",
+  "cryptography": "46.0.4",
+  "jsonschema": "4.26.0",
+  "rust_built": false,
+  "cpp_built": false,
+  "deployed": false,
+  "codex_task_started": false,
+  "scope": "Python in-process reference tests only; no network integration, privacy, ZK, FHE or hardware validation",
+  "passed": true
+}

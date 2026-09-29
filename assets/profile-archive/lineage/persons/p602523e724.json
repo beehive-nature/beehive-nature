@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p602523e724",
+ "bnr": "bnr://skaists.dev/blood/p602523e724",
+ "identity": {
+  "name": "Jacob Kroll",
+  "lifespan": "1772–1853",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC5G-ZYD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "15 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "15 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p815a596b46",
+    "name": "Johann Jurg Kroll",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3cbb21f7d2",
+    "name": "Deborah Ritter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pff1b4894a4",
+    "name": "Elizabeth Ann Kroll"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0222fb209c",
+    "name": "Maria Catharine Waldman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC5G-ZYD",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 15,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

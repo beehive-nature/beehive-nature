@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf341230c13",
+ "bnr": "bnr://skaists.dev/blood/pf341230c13",
+ "identity": {
+  "name": "George Lawton",
+  "lifespan": "1767–1835",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZL7-TH9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "5 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "5 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9a171d65c5",
+    "name": "Giles Lawton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdcbd1a729d",
+    "name": "Mary Lawton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe409e943a2",
+    "name": "Giles Lawton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "UNKNOWN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0a907c7747",
+    "name": "Edward Lawton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6210b0c67d",
+    "name": "Abigail Hall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZL7-TH9",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 5,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

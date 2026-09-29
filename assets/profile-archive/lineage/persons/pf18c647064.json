@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf18c647064",
+ "bnr": "bnr://skaists.dev/blood/pf18c647064",
+ "identity": {
+  "name": "Clas Jöransson",
+  "lifespan": "1805–1885",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHG3-69T"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "23 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "23 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc7f11999c5",
+    "name": "Jöran Hansson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf242837614",
+    "name": "Anna Clasdotter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p73a9da7809",
+    "name": "Anna Gertrude Claesson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p73222c4499",
+    "name": "Anna Margaretha Olofsdotter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHG3-69T",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 23,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

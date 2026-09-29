@@ -1,0 +1,44 @@
+# buzz-mailgate.service.example — INACTIVE EXAMPLE, NOT DEPLOYED
+#
+# AGENTS.md law: ops/ in-tree is VERBATIM what runs on the box. This unit
+# runs nowhere — it lives under scripts/buzz-mail/examples/ until the
+# founder's activation gesture lands it in ops/ TOGETHER WITH the box
+# change (never touch the box to make ops/ catch up; correction 1e18cbf8
+# #3). Read cutover-from-triage.md in this directory before ever wiring
+# this: the single-reader law forbids running this and buzz-mail-triage
+# against the same Maildir at the same time.
+
+[Unit]
+Description=bMAILroom gate: single mailbox reader (dedupe, sensitive hold, opaque Buzz notify; draft-only) — supersedes buzz-mail-triage.timer, never dual-runs
+After=buzz-mail-sink.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 /opt/buzz-mail/mailgate.py
+StateDirectory=buzz-mailgate
+StateDirectoryMode=0700
+UMask=0077
+TimeoutStartSec=300
+CPUQuota=20%
+MemoryMax=192M
+TasksMax=16
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+# CANDIDATE LAW: no network at all. The notification seam ships DISABLED
+# (no service key provisioned; SpoolLogPublisher only) and the drafting
+# stage is keyed off. Activating the relay transport or the meter-model
+# drafting is a deliberate unit-policy change that rides the founder's
+# activation gesture — it must re-open this address policy on purpose.
+IPAddressDeny=any
+# The reader sees every rostered Maildir read-only; state is its own.
+ReadOnlyPaths=/var/mail-agents

@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf8040cb8f1",
+ "bnr": "bnr://skaists.dev/blood/pf8040cb8f1",
+ "identity": {
+  "name": "Anna Margaretha Waffenschmidt",
+  "lifespan": "1680–1743",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZVS-8RS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "5 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "5 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe6645eb624",
+    "name": "Johannes Waffenschmidt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3758965d5f",
+    "name": "Anna Catharina Neus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p829dd810b4",
+    "name": "Catharina Heid",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p95f90650a9",
+    "name": "Anna Julianna Kemper"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb0b4bfb8d6",
+    "name": "Johann Georg Kemper Sr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZVS-8RS",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 5,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

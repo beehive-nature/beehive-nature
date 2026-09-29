@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
 <title>PLUR — four words, every mouth</title>
 <style>
   :root{
@@ -14,7 +15,7 @@
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
   body{background:var(--bg);color:var(--ink);font-family:var(--font);overflow-x:hidden;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
 
@@ -82,16 +83,20 @@
   .note b{color:var(--ink);font-weight:600}
   .note .big{font-size:1.5rem;color:var(--ink);letter-spacing:.02em;display:block;margin:14px 0;text-align:center}
 
-  /* ── voice bar ── */
-  .vb{position:sticky;top:0;z-index:40;background:rgba(4,11,8,.9);backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--line);padding:9px 20px}
-  .vb .in{max-width:1000px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .vb select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
-    border-radius:999px;padding:5px 11px;max-width:210px}
-  .vb button{font:inherit;font-size:12px;font-weight:600;background:none;color:var(--ink-mut);
-    border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
-  .vb button:hover{color:var(--ink);border-color:var(--ai)}
-  .vb .st{font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-left:auto;letter-spacing:.04em}
+  /* ── pronunciation example — OPTIONAL, in-flow beside the peace words,
+     never the page's first task. Plays nothing until pressed; disables
+     itself honestly when no Hebrew or Arabic voice exists. ── */
+  .voicebox{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:rgba(10,20,16,.35)}
+  .voicebox button{font:inherit;font-size:.92rem;font-weight:600;background:none;color:var(--ink);
+    border:1px solid var(--ai);border-radius:999px;padding:9px 16px;cursor:pointer;min-height:44px}
+  .voicebox button:hover:enabled{color:var(--ai);border-color:var(--ai)}
+  .voicebox button:disabled{cursor:not-allowed;opacity:.55;border-style:dashed}
+  .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
+  .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:5px 11px;max-width:230px}
+  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
   footer .m{font-family:var(--mono);letter-spacing:.16em;color:var(--sovereign-soft);margin-top:12px;font-size:.8rem}
@@ -206,85 +211,342 @@
     .petal{opacity:1;transform:scale(1) rotate(var(--pr,0deg))}
     .rp{opacity:1;transform:none}
   }
-</style>
-</head>
-<body>
 
-<div class="vb"><div class="in">
-  <select id="vsel"><option>voices…</option></select>
-  <button id="vsalam" type="button">▶ shalom · salām</button>
-  <span class="st" id="vst">—</span>
-</div></div>
+  .view-title{font-size:clamp(1.8rem,5vw,3.7rem);margin:22px 0 0;letter-spacing:-.04em}
+  .plur-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:30px auto 0;max-width:850px}
+  .plur-actions a{padding:14px 20px;border:1px solid var(--ink-mut);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:650}
+  .plur-actions a:hover,.plur-actions a:focus-visible{background:var(--you);color:#fff;outline:2px solid currentColor;outline-offset:3px}
+  .entry-note{font-size:.85rem!important;max-width:60ch!important}
+  .w .r,.w.novoice .mute{opacity:1}.w .r{color:var(--ink-mut)}
+  .boundary{max-width:1120px;margin:auto;padding:48px 24px;font:15px/1.65 var(--mono)}
+  .boundary h2,.boundary h3{margin:0 0 20px}.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:30px}
+  .flow>div{padding:20px;border:1px solid var(--ink-mut);border-top:3px solid var(--ai)}
+  .boundary dt{color:var(--ai);margin-top:18px}.boundary dd{margin:0;overflow-wrap:anywhere}
+  .privacy-note{padding:18px;margin-top:24px;border:1px solid var(--ink-mut);border-radius:12px;font-size:.9rem;line-height:1.6}.privacy-note span{display:block}
+  body[data-reg="bee"]{--bg:#f6f7ef;--ink:#0c1412;--ink-mut:#425f50;--ink-dim:#5a645e;--line:#ced8cc;--ai:#176578;--you:#89316f}
+  body[data-reg="bee"] .open{min-height:60vh}body[data-reg="bee"] .plur{background:none;color:#6e3fb8;font-size:clamp(3rem,12vw,7rem)}
+  body[data-reg="bee"] .field .en{color:#6e3fb8;text-shadow:none}body[data-reg="bee"] .note{display:none}
+  body[data-reg="bee"] .field{padding:45px 20px}body[data-reg="bee"] .voicebox{background:#fff}body[data-reg="bee"] .voicebox select{background:#fff;color:#0c1412}
+  body[data-reg="raver"] .open{background:radial-gradient(ellipse at 20% 40%,#511d49 0,transparent 60%),radial-gradient(ellipse at 90% 60%,#12434b 0,transparent 60%)}
+  body[data-reg="raver"] .plur-actions a:nth-child(2){background:#d655bb;color:#110c18;border-color:#d655bb;order:-1}
+  body[data-reg="cypherpunk"] .open{min-height:0;padding:40px 22px;text-align:start}body[data-reg="cypherpunk"] .plur{font:700 2rem var(--mono);color:var(--biomass);background:none}
+  body[data-reg="cypherpunk"] .open p{max-width:80ch;margin-inline:0}body[data-reg="cypherpunk"] .glow{display:none}
+  @media(max-width:640px){.flow{grid-template-columns:1fr}.plur-actions a{flex:1 1 40%;font-size:.95rem}.expand{letter-spacing:.12em}.w{min-height:48px}.boundary{padding:30px 18px}}
+
+  /* THE LOWER HALF AT 390 (2026-09-26, footer audit). The word fields'
+     romanisations were 10 px and every "no voice" mark 8 px (drawn over the
+     word's corner); the mono labels (.gloss, the odd-number law, the pillar
+     roles, the note heads) were forced capitals at 10–11 px in --ink-dim
+     (3.9:1, and 2:1 for the footer motto on New bee's paper). Casing law:
+     no text-transform. Floor 12 px everywhere; New bee and raver read their
+     secondary labels at 14 px. The "no voice" mark now sits under its word in
+     the flow instead of floating over the corner. */
+  .expand,.hint,.field .gloss,.note h3,.oddlaw{text-transform:none}
+  .field .gloss,.oddlaw,.hint{letter-spacing:.06em;font-size:12px;color:var(--ink-mut)}
+  .w .r{font-size:12px;letter-spacing:.02em}
+  .w .mute{position:static;display:block;font-size:12px;letter-spacing:.02em;color:var(--ink-mut);margin-top:1px}
+  .note h3{font-size:12px;letter-spacing:.08em}
+  .talk h2 .who{font-size:12px;letter-spacing:.12em}
+  .tongues{color:var(--ink-mut)}
+  .talkst{font-size:12px;letter-spacing:.04em;color:var(--ink-mut)}
+  .pillar .is{font-size:12px;letter-spacing:.06em;color:var(--ink-mut)}
+  .voicebox .st{font-size:12px;color:var(--ink-mut)}
+  .voicebox .vnote{color:var(--ink-mut)}
+  .msg .tag{font-size:12px}
+  .oddpick button{color:var(--ink);min-height:44px}
+  .roselinks a{display:inline-flex;align-items:center;min-height:44px}
+  .seeds button{min-height:44px}
+  .stone .dock{line-height:2}
+  .stone .dock a{padding-block:12px}
+  footer .m{letter-spacing:.08em}
+  body:not([data-reg="cypherpunk"]) :is(.w .r,.w .mute,.field .gloss,.oddlaw,.note h3,.talk h2 .who,.talkst,.pillar .is,.voicebox .st,.tongues,.msg .tag,.stone .dock){font-size:14px}
+  body:not([data-reg="cypherpunk"]) :is(.roselinks a,.seeds button){font-size:14px}
+  footer{color:var(--ink-mut)}
+  body[data-reg="bee"] footer .m{color:#65509a;font-size:.875rem}
+  body[data-reg="bee"]{--rose-lift:#a31c35}
+  body:not([data-reg="bee"]) .w .mute{color:var(--guard)}
+  body[data-reg="bee"] .w .mute{color:#65509a}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{margin:0 auto var(--sk-s2);padding:var(--sk-s4) var(--sk-s3) 0;border:0;border-radius:0;background:transparent;font-size:16px;line-height:1.45;max-width:596px}
+.et-archive-h{max-width:596px;margin-inline:auto!important;padding-inline:var(--sk-s3)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{transition:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm welcome: four words, where they live, one plain step */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+.et-b-row:last-child{border-bottom:0}
+a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row .chev{flex:none}
+.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;padding:0}
+.et-b-link:hover{color:var(--sk-link-hover)!important;background:transparent}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the words are a constellation: four fields, one star per spoken word, filled where
+   this browser has a voice, hollow where it has none. Tap a field, tap a word to hear it. The sky
+   turns once in three minutes (far under 3 Hz), pauses on the switch, and is still under
+   prefers-reduced-motion. */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-stars{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r-stars .field-w{cursor:pointer}
+.et-r-stars .field-w .zone{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+.et-r-stars .field-w.sel .zone{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-soft)}
+.et-r-stars .field-w:focus{outline:none}.et-r-stars .field-w:focus-visible .zone{stroke:var(--sk-ink);stroke-width:3}
+.et-r-stars .star{stroke-width:2}
+.et-r-stars .star.mute{fill:none!important}
+.et-r-stars .k-peace .star{fill:var(--sk-guard);stroke:var(--sk-guard)}.et-r-stars .k-love .star{fill:var(--sk-you);stroke:var(--sk-you)}
+.et-r-stars .k-unity .star{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}.et-r-stars .k-respect .star{fill:var(--sk-info);stroke:var(--sk-info)}
+.et-r-stars .star.root{stroke:var(--sk-ink)}
+.et-r-stars .lbl-w{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-stars .k-peace .lbl-w{fill:var(--sk-guard)}.et-r-stars .k-love .lbl-w{fill:var(--sk-you)}.et-r-stars .k-unity .lbl-w{fill:var(--sk-sovereign-soft)}.et-r-stars .k-respect .lbl-w{fill:var(--sk-info)}
+.et-r-stars .core{fill:var(--sk-bg);stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5}
+.et-r-stars .core-t{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-turn{transform-origin:0 0;animation:etTurn 180s linear infinite}
+@keyframes etTurn{to{transform:rotate(360deg)}}
+body.et-still .et-r-turn{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r-turn{animation:none}}
+.et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+.et-r-chips button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+.et-r-chips button.mute{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-card .et-r-word{display:block;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink);margin-bottom:var(--sk-s1)}
+.et-c-fields td{height:var(--sk-control-min)}
+.et-c-fields .st-ok{color:var(--sk-verified)}.et-c-fields .st-no{color:var(--sk-guard)}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-legend em{font-style:normal}
+.lg-voice{background:var(--sk-sovereign)}.lg-mute{border:1.5px solid var(--sk-sovereign)}.lg-root{background:var(--sk-sovereign);border:2px solid var(--sk-ink)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-forks{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.et-r-pill:hover{background:var(--sk-primary)}
+.et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+.et-r-pill .lbl{position:relative}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-ghost{display:block;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-ghost:hover{background:none}
+
+/* CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;margin:0}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-kv{width:100%;margin:0;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-notes{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+.et-c-notes th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+.et-c-notes td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);white-space:nowrap}
+.et-c-notes td.on{color:var(--sk-verified)}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600}.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;padding:0}
+.et-c-primary:hover{background:var(--sk-primary)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-ghost:hover{background:transparent}
+/* ── THE WHOLE FLOOR, dressed per register: the page's own variables mapped onto skaists. The
+   four words take the cornerstone's own colours (peace = guard, love = you, unity = sovereign,
+   respect = info); honey stays for b amounts only. ── */
+body[data-reg]{--ai:var(--sk-ai);--biomass:var(--sk-verified);--sovereign:var(--sk-sovereign);--sovereign-soft:var(--sk-sovereign-soft);--you:var(--sk-you);--info:var(--sk-info);--guard:var(--sk-guard);
+ --bg:var(--sk-bg);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-dim);--line:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .f-peace{--hue:var(--sk-guard)}body[data-reg] .f-love{--hue:var(--sk-you)}body[data-reg] .f-unity{--hue:var(--sk-sovereign)}body[data-reg] .f-respect{--hue:var(--sk-info)}
+body[data-reg] .stone .dock a{color:var(--sk-link);border-bottom-color:var(--sk-link)}
+body[data-reg="bee"]{--font:var(--sk-font-bee-sans);--mono:var(--sk-font-mono);color-scheme:light}
+body[data-reg="bee"] .plur,body[data-reg="bee"] .field .en{color:var(--sk-sovereign)}
+body[data-reg="bee"] .view-title{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] footer .m,body[data-reg="bee"] .w .mute{color:var(--sk-sovereign)}
+body[data-reg="bee"] .voicebox,body[data-reg="bee"] .voicebox select{background:var(--sk-bg-card);color:var(--sk-ink)}
+body[data-reg="raver"]{--font:var(--sk-font-raver-body);--mono:var(--sk-font-raver-body)}
+body[data-reg="raver"] :is(.view-title,.plur,.field .en,.roses h2,.talk h2,.stone h2){font-family:var(--sk-font-raver-display)}
+body[data-reg="raver"] .plur-actions a:nth-child(2){background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="cypherpunk"]{--font:var(--sk-font-mono);--mono:var(--sk-font-mono);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.voicebox,.voicebox button,.voicebox select,.privacy-note,.msg,.pillar,.composer input,.composer button,.tongues select,.seeds button,.oddpick button,.roselinks a,.plur-actions a){border-radius:var(--sk-radius-sm)}
+body[data-reg] #eternal{border:0;padding-bottom:0}
+</style>
+<link rel="stylesheet" href="skaists.css">
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the word cards this page carries, the browser's own voices as the
+     page's bvoice module found them, the tutor's last real answer) drives all three, so the facts
+     cannot drift; each register has its own layout, graphic, gesture and voice. Nothing here speaks
+     or sends on its own: a word is heard by pressing the page's own word card (bvoice), the pair by
+     #vsalam, and the conversation is the page's #talk, where sending is the reader's choice. -->
+<section id="eternal" aria-label="four words, every mouth">
+
+  <!-- NEW BEE — a calm welcome: four words, where they live, one plain step -->
+  <div class="et-b">
+    <div class="et-b-mark">PLUR</div>
+    <h2 class="et-b-h" data-t="et.plur.b.title">four words, every language</h2>
+    <p class="et-b-lede" data-t="et.plur.b.lede">peace, love, unity and respect, written the way people say them around the world. start with one word.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.plur.b.guard">nothing plays until you press it. no account needed.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-t="et.plur.b.reading">reading the words…</span></div></div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">checking your browser's voices…</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeStart">start with peace</button>
+      <button type="button" class="et-b-link" data-go="talk" data-t="et.plur.b.talk">try a conversation</button>
+      <p class="et-b-foot" data-t="et.plur.b.foot">come as you are. we accept you.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the words are a constellation: four fields of stars; tap a field, tap a word -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">one floor</h2><span class="et-r-hint" id="etRaverHint">reading the stars…</span></div>
+    <svg class="et-r-stars" id="etStars" viewBox="-200 -200 400 400" role="group" aria-label="the four words as a constellation, one star per spoken word"></svg>
+    <div class="et-r-legend" aria-label="what the stars mean">
+      <span><i class="lg-voice"></i><em data-t="et.plur.r.voice">has a voice</em></span><span><i class="lg-mute"></i><em data-t="et.plur.r.mute">no voice here</em></span><span><i class="lg-root"></i><em data-t="et.plur.r.root">root word</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-chips" id="etChipsR"></div>
+    <button type="button" class="et-r-pill" id="etRaverTalk">say it back</button>
+    <p class="et-r-note" data-t="et.plur.r.talkHint">the tutor answers in both tongues · sending is your choice</p>
+    <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor's state -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">plur://four-words · embedded word cards</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <table class="et-c-notes et-c-fields" id="etFields"></table>
+    <button type="button" class="et-c-primary" id="etCyTalk">open the conversation</button>
+    <h3 class="et-c-h" data-t="et.plur.c.flowH">data flow · current implementation</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.plur.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.plur.c.verifyH">verify · in your own console</div>
+      <ol><li>speechSynthesis.getVoices() → the voices this page can use</li><li>document.querySelectorAll('.w.novoice').length → the words left silent</li><li>watch the network tab: nothing leaves until you press send</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyPair">hear the pair</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/plur.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.plur.archive">the whole floor</h2>
 
 <section class="open">
   <div class="glow"></div>
   <div class="inner">
     <div class="plur">PLUR</div>
-    <div class="expand">peace · love · unity · respect</div>
-    <p class="floor">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
-    <p>Four words that were never anyone's property. Here they are in every tongue this house speaks. Touch one and hear it.</p>
-    <div class="hint" data-key="d.plur.hint">tap any word · then talk back with the hive ↓</div>
+<h1 class="view-title" data-reg="bee"><span data-i18n="plur.welcome">Come as you are.</span></h1>
+<h1 class="view-title" data-reg="raver"><span data-i18n="plur.floor">One floor. Every tongue.</span></h1>
+<h1 class="view-title" data-reg="cypherpunk">PLUR / interaction &amp; trust boundaries</h1>
+    <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
+    <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
+    <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
   </div>
 </section>
 
-<section class="field f-peace">
-  <div class="en">peace</div>
-  <div class="gloss">the first word</div>
+<section class="field f-peace" id="words">
+  <div class="en" data-i18n="plur.peace">peace</div>
+  <div class="gloss" data-i18n="plur.g1">the first word</div>
   <div class="constellation">
-    <button class="w root" data-sz="xl" data-say="शान्तिः" data-lang="sa"><span class="t">शान्तिः</span><span class="r">śāntiḥ · sanskrit</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="xl" data-say="שלום" data-lang="he"><span class="t">שלום</span><span class="r">shalom · hebrew</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="xl" data-say="سلام" data-lang="ar"><span class="t">سلام</span><span class="r">salām · arabic</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="miers" data-lang="lv"><span class="t">miers</span><span class="r">latvian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="мир" data-lang="ru"><span class="t">мир</span><span class="r">mir · russian · also "world"</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="мир" data-lang="uk"><span class="t">мир</span><span class="r">myr · ukrainian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="тынычлык" data-lang="tt"><span class="t">тынычлык</span><span class="r">tınıçlıq · tatar</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="和平" data-lang="zh-CN"><span class="t">和平</span><span class="r">hépíng · chinese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="平和" data-lang="ja"><span class="t">平和</span><span class="r">heiwa · japanese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="평화" data-lang="ko"><span class="t">평화</span><span class="r">pyeonghwa · korean</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="m" data-say="สันติภาพ" data-lang="th"><span class="t">สันติภาพ</span><span class="r">sǎntiphâap · thai</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="m" data-say="शांति" data-lang="hi"><span class="t">शांति</span><span class="r">shānti · hindi</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="শান্তি" data-lang="bn"><span class="t">শান্তি</span><span class="r">shanti · bengali</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="صلح" data-lang="fa"><span class="t">صلح</span><span class="r">solh · persian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="امن" data-lang="ur"><span class="t">امن</span><span class="r">aman · urdu</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="barış" data-lang="tr"><span class="t">barış</span><span class="r">turkish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="béke" data-lang="hu"><span class="t">béke</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="rauha" data-lang="fi"><span class="t">rauha</span><span class="r">finnish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="fred" data-lang="sv"><span class="t">fred</span><span class="r">swedish · danish · norwegian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="paix" data-lang="fr"><span class="t">paix</span><span class="r">french</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="paz" data-lang="es"><span class="t">paz</span><span class="r">spanish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="sìth" data-lang="gd"><span class="t">sìth</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="शान्तिः" data-lang="sa"><span class="t">शान्तिः</span><span class="r">śāntiḥ · sanskrit</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="שלום" data-lang="he"><span class="t">שלום</span><span class="r">shalom · hebrew</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="سلام" data-lang="ar"><span class="t">سلام</span><span class="r">salām · arabic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="miers" data-lang="lv"><span class="t">miers</span><span class="r">latvian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="мир" data-lang="ru"><span class="t">мир</span><span class="r">mir · russian · also "world"</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="мир" data-lang="uk"><span class="t">мир</span><span class="r">myr · ukrainian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="тынычлык" data-lang="tt"><span class="t">тынычлык</span><span class="r">tınıçlıq · tatar</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="和平" data-lang="zh-CN"><span class="t">和平</span><span class="r">hépíng · chinese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="平和" data-lang="ja"><span class="t">平和</span><span class="r">heiwa · japanese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="평화" data-lang="ko"><span class="t">평화</span><span class="r">pyeonghwa · korean</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="สันติภาพ" data-lang="th"><span class="t">สันติภาพ</span><span class="r">sǎntiphâap · thai</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="शांति" data-lang="hi"><span class="t">शांति</span><span class="r">shānti · hindi</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="শান্তি" data-lang="bn"><span class="t">শান্তি</span><span class="r">shanti · bengali</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="صلح" data-lang="fa"><span class="t">صلح</span><span class="r">solh · persian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="امن" data-lang="ur"><span class="t">امن</span><span class="r">aman · urdu</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="barış" data-lang="tr"><span class="t">barış</span><span class="r">turkish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="béke" data-lang="hu"><span class="t">béke</span><span class="r">hungarian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="rauha" data-lang="fi"><span class="t">rauha</span><span class="r">finnish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="fred" data-lang="sv"><span class="t">fred</span><span class="r">swedish · danish · norwegian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="paix" data-lang="fr"><span class="t">paix</span><span class="r">french</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="paz" data-lang="es"><span class="t">paz</span><span class="r">spanish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="sìth" data-lang="gd"><span class="t">sìth</span><span class="r">gaelic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+  </div>
+  <div class="voicebox" role="group" aria-label="optional pronunciation example">
+    <button id="vsalam" type="button" aria-describedby="vnote"><span aria-hidden="true">🔊</span> <span data-i18n="plur.hearPair">Hear the Hebrew and Arabic greetings</span></button>
+    <label class="vpick" for="vsel"><span data-i18n="plur.voicePick">Voice used for listening</span>
+      <select id="vsel"></select>
+    </label>
+    <span class="st" id="vst" role="status">—</span>
+    <p class="vnote" id="vnote" data-i18n="plur.hearPairNote">Optional pronunciation example beside the words. It plays the two greetings in turn, only when you press it, and only if your browser offers a Hebrew or an Arabic voice. Nothing plays automatically.</p>
   </div>
   <div class="note">
     <h3>the word two peoples share</h3>
     <span class="big">שלום · سلام</span>
-    <p><b>Shalom</b> and <b>salām</b> are the same word. One Semitic root — <b>S‑L‑M</b> — meaning whole, entire, unbroken. Not the absence of war; the state of nothing being missing.</p>
-    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with the same word. Nobody had to negotiate that. It was already true before anyone drew a border.</p>
-    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> walked east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
+    <p><b>Shalom</b> and <b>salām</b> are cognate greetings from the same Semitic root — <b>S‑L‑M</b> — a root long associated with wholeness and well-being. Not the absence of war; the sense of nothing being missing.</p>
+    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with words from that one root. Nobody had to negotiate that. It was already there before anyone drew a border.</p>
+    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> travelled east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
   </div>
 </section>
 
 <section class="field f-love">
-  <div class="en">love</div>
+  <div class="en" data-i18n="plur.love">love</div>
   <div class="gloss">mīlestība ir karalis</div>
   <div class="constellation">
-    <button class="w root" data-sz="xl" data-say="mīlestība" data-lang="lv"><span class="t">mīlestība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="प्रेम" data-lang="sa"><span class="t">प्रेम</span><span class="r">prema · sanskrit</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="xl" data-say="愛" data-lang="ja"><span class="t">愛</span><span class="r">ai · ài · japanese · chinese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="사랑" data-lang="ko"><span class="t">사랑</span><span class="r">sarang · korean</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="любов" data-lang="uk"><span class="t">любов</span><span class="r">liubov · ukrainian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="мәхәббәт" data-lang="tt"><span class="t">мәхәббәт</span><span class="r">mäxäbbät · tatar</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="l" data-say="عشق" data-lang="fa"><span class="t">عشق</span><span class="r">ʿeshq · persian · the burning kind</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="حب" data-lang="ar"><span class="t">حب</span><span class="r">ḥubb · arabic</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="אהבה" data-lang="he"><span class="t">אהבה</span><span class="r">ahava · hebrew</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="ความรัก" data-lang="th"><span class="t">ความรัก</span><span class="r">khwaam rák · thai</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="प्रेम" data-lang="hi"><span class="t">प्रेम</span><span class="r">prem · hindi</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="m" data-say="aşk" data-lang="tr"><span class="t">aşk</span><span class="r">turkish · the consuming one</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="sevgi" data-lang="tr"><span class="t">sevgi</span><span class="r">turkish · the tender one</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="szeretet" data-lang="hu"><span class="t">szeretet</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="rakkaus" data-lang="fi"><span class="t">rakkaus</span><span class="r">finnish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="amour" data-lang="fr"><span class="t">amour</span><span class="r">french</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="amor" data-lang="es"><span class="t">amor</span><span class="r">spanish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="gaol" data-lang="gd"><span class="t">gaol</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="mīlestība" data-lang="lv"><span class="t">mīlestība</span><span class="r">latvian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="प्रेम" data-lang="sa"><span class="t">प्रेम</span><span class="r">prema · sanskrit</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="xl" data-say="愛" data-lang="ja"><span class="t">愛</span><span class="r">ai · ài · japanese · chinese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="사랑" data-lang="ko"><span class="t">사랑</span><span class="r">sarang · korean</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="любов" data-lang="uk"><span class="t">любов</span><span class="r">liubov · ukrainian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="мәхәббәт" data-lang="tt"><span class="t">мәхәббәт</span><span class="r">mäxäbbät · tatar</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="l" data-say="عشق" data-lang="fa"><span class="t">عشق</span><span class="r">ʿeshq · persian · the burning kind</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="حب" data-lang="ar"><span class="t">حب</span><span class="r">ḥubb · arabic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="אהבה" data-lang="he"><span class="t">אהבה</span><span class="r">ahava · hebrew</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความรัก" data-lang="th"><span class="t">ความรัก</span><span class="r">khwaam rák · thai</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="प्रेम" data-lang="hi"><span class="t">प्रेम</span><span class="r">prem · hindi</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="aşk" data-lang="tr"><span class="t">aşk</span><span class="r">turkish · the consuming one</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="sevgi" data-lang="tr"><span class="t">sevgi</span><span class="r">turkish · the tender one</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="szeretet" data-lang="hu"><span class="t">szeretet</span><span class="r">hungarian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="rakkaus" data-lang="fi"><span class="t">rakkaus</span><span class="r">finnish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="amour" data-lang="fr"><span class="t">amour</span><span class="r">french</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="amor" data-lang="es"><span class="t">amor</span><span class="r">spanish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="gaol" data-lang="gd"><span class="t">gaol</span><span class="r">gaelic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
   </div>
   <div class="note">
     <h3>one english word, many real ones</h3>
@@ -294,27 +556,27 @@
 </section>
 
 <section class="field f-unity">
-  <div class="en">unity</div>
-  <div class="gloss">the hive word</div>
+  <div class="en" data-i18n="plur.unity">unity</div>
+  <div class="gloss" data-i18n="plur.g3">the hive word</div>
   <div class="constellation">
-    <button class="w root" data-sz="xl" data-say="एकता" data-lang="sa"><span class="t">एकता</span><span class="r">ekatā · sanskrit · one-ness</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="vienotība" data-lang="lv"><span class="t">vienotība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="єдність" data-lang="uk"><span class="t">єдність</span><span class="r">yednist · ukrainian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="берлек" data-lang="tt"><span class="t">берлек</span><span class="r">berlek · tatar</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="团结" data-lang="zh-CN"><span class="t">团结</span><span class="r">tuánjié · chinese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="統一" data-lang="ja"><span class="t">統一</span><span class="r">tōitsu · japanese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="단결" data-lang="ko"><span class="t">단결</span><span class="r">dangyeol · korean</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="وحدة" data-lang="ar"><span class="t">وحدة</span><span class="r">waḥda · arabic</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="אחדות" data-lang="he"><span class="t">אחדות</span><span class="r">achdut · hebrew</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="وحدت" data-lang="fa"><span class="t">وحدت</span><span class="r">vahdat · persian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="ความสามัคคี" data-lang="th"><span class="t">ความสามัคคี</span><span class="r">sǎmákkhii · thai</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="एकता" data-lang="hi"><span class="t">एकता</span><span class="r">ektā · hindi</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="birlik" data-lang="tr"><span class="t">birlik</span><span class="r">turkish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="egység" data-lang="hu"><span class="t">egység</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="ykseys" data-lang="fi"><span class="t">ykseys</span><span class="r">finnish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="unité" data-lang="fr"><span class="t">unité</span><span class="r">french</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="unidad" data-lang="es"><span class="t">unidad</span><span class="r">spanish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="aonachd" data-lang="gd"><span class="t">aonachd</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="एकता" data-lang="sa"><span class="t">एकता</span><span class="r">ekatā · sanskrit · one-ness</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="vienotība" data-lang="lv"><span class="t">vienotība</span><span class="r">latvian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="єдність" data-lang="uk"><span class="t">єдність</span><span class="r">yednist · ukrainian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="берлек" data-lang="tt"><span class="t">берлек</span><span class="r">berlek · tatar</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="团结" data-lang="zh-CN"><span class="t">团结</span><span class="r">tuánjié · chinese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="統一" data-lang="ja"><span class="t">統一</span><span class="r">tōitsu · japanese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="단결" data-lang="ko"><span class="t">단결</span><span class="r">dangyeol · korean</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="وحدة" data-lang="ar"><span class="t">وحدة</span><span class="r">waḥda · arabic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="אחדות" data-lang="he"><span class="t">אחדות</span><span class="r">achdut · hebrew</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="وحدت" data-lang="fa"><span class="t">وحدت</span><span class="r">vahdat · persian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความสามัคคี" data-lang="th"><span class="t">ความสามัคคี</span><span class="r">sǎmákkhii · thai</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="एकता" data-lang="hi"><span class="t">एकता</span><span class="r">ektā · hindi</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="birlik" data-lang="tr"><span class="t">birlik</span><span class="r">turkish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="egység" data-lang="hu"><span class="t">egység</span><span class="r">hungarian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="ykseys" data-lang="fi"><span class="t">ykseys</span><span class="r">finnish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="unité" data-lang="fr"><span class="t">unité</span><span class="r">french</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="unidad" data-lang="es"><span class="t">unidad</span><span class="r">spanish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="aonachd" data-lang="gd"><span class="t">aonachd</span><span class="r">gaelic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
   </div>
   <div class="note">
     <h3>one, made into a thing</h3>
@@ -324,27 +586,27 @@
 </section>
 
 <section class="field f-respect">
-  <div class="en">respect</div>
-  <div class="gloss">the one that has to be given</div>
+  <div class="en" data-i18n="plur.respect">respect</div>
+  <div class="gloss" data-i18n="plur.g4">the one that has to be given</div>
   <div class="constellation">
-    <button class="w root" data-sz="xl" data-say="כבוד" data-lang="he"><span class="t">כבוד</span><span class="r">kavod · hebrew · weight, honour</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="cieņa" data-lang="lv"><span class="t">cieņa</span><span class="r">latvian</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="l" data-say="احترام" data-lang="ar"><span class="t">احترام</span><span class="r">iḥtirām · arabic</span><span class="mute">no voice</span></button>
-    <button class="w root" data-sz="m" data-say="хөрмәт" data-lang="tt"><span class="t">хөрмәт</span><span class="r">xörmät · tatar · from the arabic</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="повага" data-lang="uk"><span class="t">повага</span><span class="r">povaha · ukrainian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="l" data-say="尊重" data-lang="zh-CN"><span class="t">尊重</span><span class="r">zūnzhòng · chinese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="尊敬" data-lang="ja"><span class="t">尊敬</span><span class="r">sonkei · japanese</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="존중" data-lang="ko"><span class="t">존중</span><span class="r">jonjung · korean</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="सम्मान" data-lang="sa"><span class="t">सम्मान</span><span class="r">sammāna · sanskrit</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="सम्मान" data-lang="hi"><span class="t">सम्मान</span><span class="r">sammān · hindi</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="ความเคารพ" data-lang="th"><span class="t">ความเคารพ</span><span class="r">khwaam khaoróp · thai</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="احترام" data-lang="fa"><span class="t">احترام</span><span class="r">ehterām · persian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="saygı" data-lang="tr"><span class="t">saygı</span><span class="r">turkish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="tisztelet" data-lang="hu"><span class="t">tisztelet</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="kunnioitus" data-lang="fi"><span class="t">kunnioitus</span><span class="r">finnish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="respect" data-lang="fr"><span class="t">respect</span><span class="r">french</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="m" data-say="respeto" data-lang="es"><span class="t">respeto</span><span class="r">spanish</span><span class="mute">no voice</span></button>
-    <button class="w" data-sz="s" data-say="urram" data-lang="gd"><span class="t">urram</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="כבוד" data-lang="he"><span class="t">כבוד</span><span class="r">kavod · hebrew · weight, honour</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="cieņa" data-lang="lv"><span class="t">cieņa</span><span class="r">latvian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="l" data-say="احترام" data-lang="ar"><span class="t">احترام</span><span class="r">iḥtirām · arabic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="хөрмәт" data-lang="tt"><span class="t">хөрмәт</span><span class="r">xörmät · tatar · from the arabic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="повага" data-lang="uk"><span class="t">повага</span><span class="r">povaha · ukrainian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="l" data-say="尊重" data-lang="zh-CN"><span class="t">尊重</span><span class="r">zūnzhòng · chinese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="尊敬" data-lang="ja"><span class="t">尊敬</span><span class="r">sonkei · japanese</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="존중" data-lang="ko"><span class="t">존중</span><span class="r">jonjung · korean</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="सम्मान" data-lang="sa"><span class="t">सम्मान</span><span class="r">sammāna · sanskrit</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="सम्मान" data-lang="hi"><span class="t">सम्मान</span><span class="r">sammān · hindi</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความเคารพ" data-lang="th"><span class="t">ความเคารพ</span><span class="r">khwaam khaoróp · thai</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="احترام" data-lang="fa"><span class="t">احترام</span><span class="r">ehterām · persian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="saygı" data-lang="tr"><span class="t">saygı</span><span class="r">turkish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="tisztelet" data-lang="hu"><span class="t">tisztelet</span><span class="r">hungarian</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="kunnioitus" data-lang="fi"><span class="t">kunnioitus</span><span class="r">finnish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="respect" data-lang="fr"><span class="t">respect</span><span class="r">french</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="m" data-say="respeto" data-lang="es"><span class="t">respeto</span><span class="r">spanish</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
+    <button class="w" data-sz="s" data-say="urram" data-lang="gd"><span class="t">urram</span><span class="r">gaelic</span><span class="mute" data-i18n="plur.novoice">no voice</span></button>
   </div>
   <div class="note">
     <h3>respect has weight</h3>
@@ -364,33 +626,33 @@
     d.plur.stone.dock
 ═══════════════════════════════════════════════════════════════════ -->
 
-<section class="roses" id="roses" data-key="d.plur.roses">
-  <h2 data-key="d.plur.roses.h">roses for the <b>crossing</b></h2>
-  <p class="why" data-key="d.plur.roses.why">In Riga the flower shops never close, because you do not arrive
+<section class="roses" id="roses">
+  <h2 data-i18n="d.plur.roses.h">roses for the <b>crossing</b></h2>
+  <p class="why" data-i18n="d.plur.roses.why">In Riga the flower shops never close, because you do not arrive
     empty‑handed. <b>Red roses</b>, always an <b>odd number</b> — in Latvia, even flowers are for the grave.
     The core is frozen; the garden is skin.</p>
   <svg class="bouquet" id="bouquet" viewBox="0 0 640 460" role="img"
        aria-label="a bouquet of red roses, always an odd number"></svg>
-  <div class="oddlaw" data-key="d.plur.roses.oddlaw">odd numbers only · 3 · 5 · 7 · 11 · even is for mourning</div>
+  <div class="oddlaw" data-i18n="d.plur.roses.oddlaw">odd numbers only · 3 · 5 · 7 · 11 · even is for mourning</div>
   <div class="oddpick" id="oddpick" role="group" aria-label="how many roses">
-    <button type="button" data-n="3">3 roses</button>
-    <button type="button" data-n="5" aria-pressed="true">5 roses</button>
-    <button type="button" data-n="7">7 roses</button>
-    <button type="button" data-n="11">11 roses</button>
+    <button type="button" data-n="3" data-i18n="plur.roses.n3">3 roses</button>
+    <button type="button" data-n="5" aria-pressed="true" data-i18n="plur.roses.n5">5 roses</button>
+    <button type="button" data-n="7" data-i18n="plur.roses.n7">7 roses</button>
+    <button type="button" data-n="11" data-i18n="plur.roses.n11">11 roses</button>
   </div>
   <div class="roselinks">
-    <a href="qrroses.html" data-key="d.plur.roses.cut">✂ cut this bouquet as a QR rose</a>
-    <a href="qrtree.html">grow the QR tree</a>
-    <a href="blight/museum.html" data-key="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>
-  </div>
+    <a href="blight/qrroses.html" data-i18n="d.plur.roses.cut">✂ cut this bouquet as a QR rose</a>
+    <a href="blight/qrtree.html" data-i18n="plur.qrtree">grow the QR tree</a>
+    <a href="blight/museum.html" data-i18n="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>  </div>
 </section>
 
-<section class="talk" id="talk" data-key="d.plur.talk">
+<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
+<section class="talk" id="talk">
   <div class="wrap">
-    <h2 data-key="d.plur.talk.h">now say it back
-      <span class="who" data-key="d.plur.talk.who">bLOVErAi · Ai tutor · two‑way</span>
+    <h2><span data-i18n="d.plur.talk.h">now say it back</span>
+      <span class="who" data-i18n="d.plur.talk.who">bLOVErAi · Ai tutor · two‑way</span>
     </h2>
-    <p class="sub" data-key="d.plur.talk.sub">Pick the tongue you live in and the one you want to learn.
+    <p class="sub" data-i18n="d.plur.talk.sub">Pick the tongue you live in and the one you want to learn.
       Write or speak — the hive answers in both, and every word it gives you can be tapped and heard.
       This is where a stranger stops reading the estate and starts <b>talking</b> to it.</p>
 
@@ -405,57 +667,56 @@
     </div>
 
     <div class="seeds" id="seeds">
-      <button type="button" data-seed="Teach me to say “peace” and greet someone with it.">☮ start with peace</button>
-      <button type="button" data-seed="Teach me the word for love, and how to tell someone I love them.">♥ start with love</button>
-      <button type="button" data-seed="How do I say “come as you are — we accept you”?">✦ come as you are</button>
-      <button type="button" data-seed="Greet me, then teach me to answer politely.">✋ just greet me</button>
+      <button type="button" data-seed="Teach me to say “peace” and greet someone with it." data-i18n="plur.seed.peace">☮ start with peace</button>
+      <button type="button" data-seed="Teach me the word for love, and how to tell someone I love them." data-i18n="plur.seed.love">♥ start with love</button>
+      <button type="button" data-seed="How do I say “come as you are — we accept you”?" data-i18n="plur.seed.come">✦ come as you are</button>
+      <button type="button" data-seed="Greet me, then teach me to answer politely." data-i18n="plur.seed.greet">✋ just greet me</button>
     </div>
 
-    <div class="thread" id="thread" aria-live="polite"></div>
+    <aside class="privacy-note"><span data-i18n="plur.privacy">Sending shares your text and this conversation with an external AI provider. Voice input may use your browser vendor’s service. Do not enter private information.</span> <span><span data-i18n="plur.draft">AI replies and translations can be wrong; community review matters.</span></span></aside><div class="thread" id="thread" aria-live="polite"></div>
 
     <div class="composer">
       <button type="button" class="mic" id="mic" title="hold to speak" aria-label="hold to speak">🎙</button>
       <input id="say" type="text" autocomplete="off" spellcheck="false"
              placeholder="write in your tongue, or hold the mic…" aria-label="your message">
-      <button type="button" class="send" id="send" data-key="d.plur.talk.send">send ↑</button>
+      <button type="button" class="send" id="send" data-i18n="d.plur.talk.send">send ↑</button>
     </div>
     <div class="talkst" id="talkst">—</div>
   </div>
 </section>
 
-<section class="stone" data-key="d.plur.stone">
+<section data-reg="cypherpunk" class="stone">
   <div class="wrap">
-    <h2 data-key="d.plur.stone.h">four words are the whole constitution</h2>
-    <p class="sub" data-key="d.plur.stone.sub">Communication is the cornerstone of this estate.
+    <h2 data-i18n="d.plur.stone.h">four words are the whole constitution</h2>
+    <p class="sub" data-i18n="d.plur.stone.sub">Communication is the cornerstone of this estate.
       Every law we have is one of these four words, written down carefully.</p>
     <div class="pillars">
       <div class="pillar p-peace" style="animation-delay:.05s">
         <div class="word">peace</div><div class="is">→ the guard</div>
-        <p data-key="d.plur.stone.peace">A refusal is not an error. The guard that says no, gently, is peace working — which is why it is never painted alarm‑red.</p>
+        <p data-i18n="d.plur.stone.peace">A refusal is not an error. The guard that says no, gently, is peace working — which is why it is never painted alarm‑red.</p>
       </div>
       <div class="pillar p-love" style="animation-delay:.15s">
         <div class="word">love</div><div class="is">→ the LOVErnment</div>
-        <p data-key="d.plur.stone.love">Law written as care. mīlestība ir karalis — love is king — is not the motto of the governance stack; it is its spec.</p>
+        <p data-i18n="d.plur.stone.love">Law written as care. mīlestība ir karalis — love is king — is not the motto of the governance stack; it is its spec.</p>
       </div>
       <div class="pillar p-unity" style="animation-delay:.25s">
         <div class="word">unity</div><div class="is">→ the hive</div>
-        <p data-key="d.plur.stone.unity">Many mouths, one corpus. Twenty‑seven tongues render every key, and one of them is here because a real person asked for her language.</p>
+        <p data-i18n="d.plur.stone.unity">Many mouths, one corpus. Twenty‑seven tongues render every key, and one of them is here because a real person asked for her language.</p>
       </div>
       <div class="pillar p-respect" style="animation-delay:.35s">
         <div class="word">respect</div><div class="is">→ bRESPECT</div>
-        <p data-key="d.plur.stone.respect">Hebrew keeps the secret: respect means weight. Meetings where every voice is given weight — that is the whole mechanism.</p>
+        <p data-i18n="d.plur.stone.respect">Hebrew keeps the secret: respect means weight. Meetings where every voice is given weight — that is the whole mechanism.</p>
       </div>
     </div>
-    <p class="dock" data-key="d.plur.stone.dock">every word on this page lives in the
-      <a href="blanguage.html">language dock</a> · 27 tongues · one corpus ·
-      <a href="index.html">back to the hive</a></p>
-  </div>
+    <p class="dock"><span data-key="d.plur.stone.dock1">every word on this page lives in the</span>
+      <a href="blanguage.html"><span data-key="d.plur.stone.dock2">language dock</span></a> · <span data-key="d.plur.stone.dock3">27 tongues · one corpus</span> ·
+      <a href="index.html"><span data-key="d.plur.stone.dock4">back to the hive</span></a></p>  </div>
 </section>
 
 
 <footer>
-  <div>four words · every mouth this house speaks · beehive nature reserve</div>
-  <div class="m">come as you are · we accept you</div>
+  <div data-i18n="plur.foot">four words · every mouth this house speaks · beehive nature reserve</div>
+  <div class="m" data-i18n="plur.footm">come as you are · we accept you</div>
 </footer>
 
 <script>
@@ -471,13 +732,33 @@
   var voices = [], byLang = {}, override = null, current = null;
 
   if(!synth){
-    st.textContent = 'no speech engine in this browser';
+    stDirty=true; st.textContent = T('plur.st.noengine', 'no speech engine in this browser');
     words.forEach(function(w){ w.classList.add('novoice'); });
     sel.disabled = salam.disabled = true;
     window.bvoice = { speak:function(t,l,then){ if(then) then(); }, has:function(){ return false; } };
     return;
   }
   function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
+  /* the shared corpus lookup keeps script-written strings translatable with
+     a visible English fallback (corpus law) */
+  function T(key, fallback){
+    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+      ? window.BNRLanguage.text(key, fallback) : fallback;
+  }
+  /* honest enable/disable for the optional pronunciation example: it is
+     usable exactly when a Hebrew OR an Arabic voice exists — never a mystery
+     button, never silent-on-click without an explanation */
+  function pairVoices(){
+    return words.filter(function(w){
+      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
+    });
+  }
+  function refreshSalam(){
+    var ok = pairVoices().length > 0;
+    salam.disabled = !ok;
+    st.textContent = ok ? T('plur.voiceReady', 'a Hebrew or Arabic voice is available for the example')
+                        : T('plur.voiceNone', 'No Hebrew or Arabic voice is installed in this browser, so this example stays silent; the written greetings remain.');
+  }
 
   function index(){
     voices = synth.getVoices() || [];
@@ -490,13 +771,16 @@
       ok ? have[b]=1 : miss[b]=1;
     });
     var h = Object.keys(have).length, m = Object.keys(miss).length;
-    st.textContent = h + ' tongues speak here · ' + m + ' have no voice on this machine';
+    /* the status line belongs to the pronunciation example (refreshSalam);
+       the general voice summary stays visible on the word cards themselves */
+    sel.title = h + ' tongues speak here · ' + m + ' have no voice on this machine';
     fill();
+    refreshSalam();
   }
   function fill(){
     sel.innerHTML = '';
     var a = document.createElement('option');
-    a.value=''; a.textContent='match each tongue'; sel.appendChild(a);
+    a.value=''; a.textContent = T('plur.voiceMatch', 'match each tongue'); sel.appendChild(a);
     voices.forEach(function(v,i){
       var o=document.createElement('option'); o.value=String(i);
       o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
@@ -530,11 +814,9 @@
     w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
   });
   salam.addEventListener('click', function(){
-    var pair = words.filter(function(w){
-      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
-    });
-    if(!pair.length){ st.textContent = 'no hebrew or arabic voice on this machine'; return; }
-    pair[0].scrollIntoView({block:'center'});
+    var pair = pairVoices();
+    if(!pair.length){ refreshSalam(); return; } /* honest disable makes this rare; the runtime check stays as a guard */
+    pair[0].scrollIntoView({block:'center',behavior:'auto'}); /* jump, not glide: reduced-motion safe */
     say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
   });
   window.bvoice = {
@@ -736,7 +1018,24 @@
   var thread=document.getElementById('thread'), input=document.getElementById('say'),
       send=document.getElementById('send'), st=document.getElementById('talkst'),
       mic=document.getElementById('mic');
-  var history=[], busy=false;
+  var history=[], busy=false, stDirty=false;
+  /* same corpus lookup as the words block above — this second block has its
+     own scope, so it carries its own T (corpus law: English fallback visible) */
+  function T(key, fallback){
+    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+      ? window.BNRLanguage.text(key, fallback) : fallback;
+  }
+  /* the composer hint follows the corpus too — placeholders are not data-i18n
+     swappable, so the page carries its own hook (corpus law: English fallback) */
+  function sayHint(){
+    input.placeholder=T('plur.sayph', 'write in your tongue, or hold the mic…');
+    input.setAttribute('aria-label', T('plur.sayal', 'your message'));
+    /* the idle hint re-renders with the corpus once it loads (boot runs before
+       tour.js); once any live status replaced it, it stays out of the way */
+    if(!stDirty) st.textContent=T('plur.st.pick', 'pick your tongues, then touch a seed above ↑');
+  }
+  document.addEventListener('blang', sayHint);
+  sayHint();
 
   function name(code){ for(var i=0;i<LANGS.length;i++) if(LANGS[i][0]===code) return LANGS[i][1]; return code; }
 
@@ -794,7 +1093,7 @@
     bubble('you','you · '+name(myL.value).split(' · ')[0]).appendChild(document.createTextNode(text));
     var think=bubble('hive','bLOVErAi');
     think.innerHTML+='<span class="thinking"><i></i><i></i><i></i></span>';
-    st.textContent='the hive is listening…';
+    stDirty=true; st.textContent=T('plur.st.listening', 'the hive is listening…');
     history.push({role:'user', content:text});
 
     var sys='You are bLOVErAi, the Beehive Nature estate\'s warm Ai language tutor on the PLUR page. '+
@@ -810,20 +1109,21 @@
     fetch('https://api.anthropic.com/v1/messages',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:sys, messages:history})
-    }).then(function(r){ return r.json(); })
+    }).then(function(r){ if(!r.ok) throw new Error('provider-unavailable'); return r.json(); })
     .then(function(d){
+      if(!Array.isArray(d.content) || !d.content.some(function(c){return c.type==='text' && c.text && c.text.trim();})) throw new Error('empty-reply');
       think.remove();
       var txt=(d.content||[]).map(function(c){return c.type==='text'?c.text:''}).join('').trim()
         .replace(/```json|```/g,'').trim();
       var data; try{ data=JSON.parse(txt); }catch(e){ data={reply:[{t:txt,lang:lnL.value,rom:null,gloss:''}]}; }
       history.push({role:'assistant', content:txt});
       renderHive(data);
-      st.textContent='tap any word the hive gave you to hear it';
+      stDirty=true; st.textContent=T('plur.st.tapword', 'tap any word the hive gave you to hear it');
     })
     .catch(function(){
       think.remove();
-      bubble('sys').textContent='the tutor can\'t reach the hive from this copy — the words above still speak. try again, or open this page where the relay lives.';
-      st.textContent='offline · honest about it';
+      bubble('sys').textContent='the tutor is unavailable in this copy. Your message was not answered. The word cards still work when a browser voice is available.';
+      stDirty=true; st.textContent=T('plur.st.offline', 'offline · honest about it');
       history.pop();
     })
     .finally(function(){ busy=false; });
@@ -843,13 +1143,13 @@
     function stop(){ if(rec){ try{rec.stop()}catch(e){} } mic.dataset.live='0'; }
     function start(){
       rec=new SR(); rec.lang=myL.value; rec.interimResults=true;
-      mic.dataset.live='1'; st.textContent='listening in '+name(myL.value).split(' · ')[0]+'…';
+      mic.dataset.live='1'; stDirty=true; st.textContent='listening in '+name(myL.value).split(' · ')[0]+'…';
       rec.onresult=function(ev){
         var s=''; for(var i=0;i<ev.results.length;i++) s+=ev.results[i][0].transcript;
         input.value=s;
       };
-      rec.onend=function(){ mic.dataset.live='0'; if(input.value.trim()) st.textContent='release sent nothing — press send when ready'; };
-      rec.onerror=function(){ mic.dataset.live='0'; st.textContent='the mic didn\'t catch that'; };
+      rec.onend=function(){ mic.dataset.live='0'; if(input.value.trim()) stDirty=true; st.textContent=T('plur.st.nosend', 'release sent nothing — press send when ready'); };
+      rec.onerror=function(){ mic.dataset.live='0'; stDirty=true; st.textContent=T('plur.st.micmiss', 'the mic didn\'t catch that'); };
       try{ rec.start(); }catch(e){ mic.dataset.live='0'; }
     }
     mic.addEventListener('pointerdown', start);
@@ -857,8 +1157,140 @@
     mic.addEventListener('pointerleave', stop);
   }
 
-  st.textContent='pick your tongues, then touch a seed above ↑';
+  st.textContent=T('plur.st.pick', 'pick your tongues, then touch a seed above ↑');
 })();
 </script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the page
+   itself: the word cards it carries (.field .w: the word, its tongue, its romanisation), the voices
+   the page's bvoice module found in this browser (.w.novoice, #vsalam), speech recognition's
+   presence, and the tutor's last real answer in #thread. Nothing here speaks or sends on its own: a
+   word is heard by pressing the page's own card, the pair by #vsalam, and the conversation is the
+   page's #talk, where sending stays the reader's choice. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var KEYS=['peace','love','unity','respect'];
+  var D={fields:[],total:0,tongues:0,voiced:0,voices:0,pair:false,recognition:false,tutor:'not verified',engine:false};
+  var R={sel:0,word:null};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){document.querySelectorAll('#eternal [data-et="'+sel+'"]').forEach(function(e){e.textContent=txt;});}
+  function cards(k){return [].slice.call(document.querySelectorAll('.field.f-'+k+' .constellation .w'));}
+  function read(){
+    var all=new Set();
+    D.fields=KEYS.map(function(k){var ws=cards(k).map(function(w){all.add((w.dataset.lang||'').split('-')[0]);
+      return {say:w.dataset.say,lang:w.dataset.lang,rom:((w.querySelector('.r')||{}).textContent||'').trim(),voice:!w.classList.contains('novoice'),root:w.classList.contains('root'),sz:w.dataset.sz||'m'};});
+      return {key:k,n:ws.length,tongues:new Set(ws.map(function(w){return w.lang.split('-')[0];})).size,voiced:ws.filter(function(w){return w.voice;}).length,words:ws};});
+    D.total=D.fields.reduce(function(a,f){return a+f.n;},0); D.tongues=all.size;
+    D.voiced=D.fields.reduce(function(a,f){return a+f.voiced;},0);
+    D.engine=!!window.speechSynthesis; D.voices=D.engine?(speechSynthesis.getVoices()||[]).length:0;
+    D.pair=!!($('vsalam')&&!$('vsalam').disabled);
+    D.recognition=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    var th=$('thread'); D.tutor=th&&th.querySelector('.msg.hive:not(:has(.thinking))')?'answered':th&&th.querySelector('.msg.sys')?'unavailable':'not verified';
+  }
+  function fieldName(k){return T('plur.'+k,k);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBeeRows').innerHTML=D.fields.map(function(f){
+      return '<button type="button" class="et-b-row" data-go="f-'+f.key+'"><span>'+esc(fieldName(f.key))+'</span><small>'+esc(f.n+' '+T('et.plur.b.ways','ways to say it'))+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
+    $('etBeeNow').textContent=!D.engine?T('et.plur.b.noEngine','this browser cannot speak, so the words stay written. every one of them is here to read.')
+      :D.voiced?T('et.plur.b.voiced','your browser can say {n} of these {t} words out loud. press one to hear it.').replace('{n}',D.voiced).replace('{t}',D.total)
+      :T('et.plur.b.silent','your browser has no voices for these words yet, so they stay written. every one of them is here to read.');
+    $('etBeeStart').textContent=T('et.plur.b.start','start with peace');
+  }
+
+  /* ── RAVER ── */
+  var built='';
+  function stars(){
+    var svg=$('etStars'); if(!svg)return;
+    var sig=D.fields.map(function(f){return f.words.map(function(w){return w.voice?1:0;}).join('');}).join('|');
+    if(sig!==built){
+      var h='<g class="et-r-turn">';
+      D.fields.forEach(function(f,k){
+        var a0=-Math.PI/2+k*Math.PI/2+0.06, a1=a0+Math.PI/2-0.12, p=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+        h+='<g class="field-w k-'+f.key+'" data-k="'+k+'" role="button" tabindex="0" aria-label="'+esc(fieldName(f.key)+': '+f.n+' words, '+f.voiced+' with a voice here')+'">';
+        h+='<path class="zone" d="M'+p(58,a0)+'A58 58 0 0 1 '+p(58,a1)+'L'+p(194,a1)+'A194 194 0 0 0 '+p(194,a0)+'Z"/>';
+        f.words.forEach(function(w,i){var a=a0+(i+0.5)*(a1-a0)/f.n, r=88+(i%4)*27, s={xl:9,l:7.5,m:6,s:5}[w.sz]||6;
+          h+='<circle class="star'+(w.voice?'':' mute')+(w.root?' root':'')+'" cx="'+(r*Math.cos(a)).toFixed(1)+'" cy="'+(r*Math.sin(a)).toFixed(1)+'" r="'+s+'"/>';});
+        var am=(a0+a1)/2; h+='<text class="lbl-w" x="'+(75*Math.cos(am)).toFixed(1)+'" y="'+(75*Math.sin(am)+5).toFixed(1)+'" text-anchor="middle">'+esc(f.key[0])+'</text></g>';
+      });
+      h+='</g><circle class="core" r="44"/><text class="core-t" y="5" text-anchor="middle">PLUR</text>';
+      svg.innerHTML=h; built=sig;
+    }
+    svg.querySelectorAll('.field-w').forEach(function(g){g.classList.toggle('sel',+g.getAttribute('data-k')===R.sel);});
+  }
+  function raver(){
+    $('etRaverHint').textContent=D.total+' '+T('et.plur.r.words','words')+' · '+D.tongues+' '+T('et.plur.r.tongues','tongues')+' · '+D.voiced+' '+T('et.plur.r.voiced','with a voice');
+    stars();
+    var f=D.fields[R.sel], c=$('etRaverCard'), w=f&&R.word!=null&&f.words[R.word];
+    if(w)c.innerHTML='<span class="rk">'+esc(w.lang)+'</span><div><span class="et-r-word" dir="auto">'+esc(w.say)+'</span><span>'+esc(w.rom+' · '+(w.voice?T('et.plur.r.heard','sent to your voice'):T('et.plur.r.noVoice','no voice for this tongue here · the word stays written')))+'</span></div>';
+    else if(f)c.innerHTML='<span class="rk">'+esc(f.n)+'</span><div><b>'+esc(fieldName(f.key))+'</b><span>'+esc(f.tongues+' '+T('et.plur.r.tongues','tongues')+' · '+f.voiced+' '+T('et.plur.r.voiced','with a voice')+' · '+T('et.plur.r.tap','tap a word'))+'</span></div>';
+    $('etChipsR').innerHTML=f?f.words.map(function(w,i){return '<button type="button" class="'+(w.voice?'':'mute')+'" data-w="'+i+'" aria-pressed="'+(R.word===i)+'" lang="'+esc(w.lang)+'" dir="auto">'+esc(w.say)+'</button>';}).join(''):'';
+    $('etRaverTitle').textContent=T('et.plur.r.h','one floor');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etChips').innerHTML='<span class="'+(D.voiced?'ok':'on')+'">voiced '+D.voiced+'/'+D.total+'</span><span>'+D.tongues+' tongues</span><span class="on">tutor '+esc(D.tutor)+'</span>';
+    $('etFields').innerHTML='<tr><th>word</th><th>cards</th><th>tongues</th><th>voiced</th></tr>'+D.fields.map(function(f){
+      return '<tr><td>'+esc(f.key)+'</td><td>'+f.n+'</td><td>'+f.tongues+'</td><td class="'+(f.voiced?'st-ok':'st-no')+'">'+f.voiced+'/'+f.n+'</td></tr>';}).join('')+
+      '<tr><td>total</td><td>'+D.total+'</td><td>'+D.tongues+'</td><td class="'+(D.voiced?'st-ok':'st-no')+'">'+D.voiced+'/'+D.total+'</td></tr>';
+    var steps=[
+      ['browser · word cards',D.total+' cards embedded in this document · register and tongue kept on this origin','done'],
+      ['voice engine',!D.engine?'no speechSynthesis in this browser · every card labelled silent':D.voices+' installed voices · '+D.voiced+' of '+D.total+' cards can speak · local-only audio not established',D.engine?'done':'guard'],
+      ['voice in',D.recognition?'SpeechRecognition present · may use a browser vendor service':'no SpeechRecognition · the mic stays off',D.recognition?'done':'guard'],
+      ['ai provider',D.tutor==='answered'?'api.anthropic.com/v1/messages answered':D.tutor==='unavailable'?'api.anthropic.com/v1/messages refused · the message was not answered':'api.anthropic.com/v1/messages · no auth header configured · not verified · nothing sent until you press send',D.tutor==='answered'?'done':'now']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
+    $('etReceipt').innerHTML=kv([
+      ['voices',esc(String(D.voices))],['voiced',esc(D.voiced+' / '+D.total)],
+      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic voice exists</span>':'<span class="no">no Hebrew or Arabic voice · the example stays silent</span>'],
+      ['tutor',D.tutor==='answered'?'<span class="yes">answered</span>':'<span class="no">'+esc(D.tutor)+'</span>'],
+      ['sent','<span class="yes">nothing</span> · until you press send'],
+      ['unverified','provider retention · relay privacy · end-to-end encryption']]);
+    var b=$('etCyPair'); b.disabled=!D.pair; b.textContent=D.pair?T('et.plur.c.pair','hear the pair'):T('et.plur.c.noPair','hear the pair · no voice');
+  }
+
+  function labels(){document.querySelectorAll('[data-t^="et.plur."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the page owns every real step ── */
+  function goField(k){var s=document.querySelector('.field.f-'+k);if(!s)return;s.scrollIntoView({block:'start'});var w=s.querySelector('.w');if(w)w.focus({preventScroll:true});}
+  function talk(){var t=$('talk');if(t)t.scrollIntoView({block:'start'});var i=$('say');if(i)i.focus({preventScroll:true});}
+  function hear(k,i){var w=cards(KEYS[k])[i];if(w)w.click();}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.plur.r.stillOs','still · your device asks for less motion'):still?T('et.plur.r.resume','resume motion'):T('et.plur.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeStart').addEventListener('click',function(){goField('peace');});
+    $('etRaverTalk').addEventListener('click',talk);
+    $('etCyTalk').addEventListener('click',talk);
+    $('etCyPair').addEventListener('click',function(){var b=$('vsalam');if(b&&!b.disabled)b.click();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    ev.addEventListener('click',function(e){
+      if(e.target.closest('[data-go="talk"]')){talk();return;}
+      var row=e.target.closest('.et-b-row[data-go]'); if(row){goField(row.getAttribute('data-go').slice(2));return;}
+      var f=e.target.closest('#etStars .field-w'); if(f){R.sel=+f.getAttribute('data-k');R.word=null;raver();return;}
+      var c=e.target.closest('#etChipsR button'); if(c){R.word=+c.getAttribute('data-w');hear(R.sel,R.word);raver();}
+    });
+    ev.addEventListener('keydown',function(e){var f=e.target.closest&&e.target.closest('#etStars .field-w');if(f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();f.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    /* the page speaks through its own nodes: voices re-index the cards, the tutor answers in #thread */
+    var mo=new MutationObserver(function(){all();});
+    document.querySelectorAll('.field .constellation').forEach(function(c){mo.observe(c,{attributes:true,subtree:true,attributeFilter:['class']});});
+    if($('vsalam'))mo.observe($('vsalam'),{attributes:true,attributeFilter:['disabled']});
+    if($('thread'))mo.observe($('thread'),{childList:true,subtree:true});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
+</script>
+<script src="tour.js?v=42"></script>
 </body>
 </html>

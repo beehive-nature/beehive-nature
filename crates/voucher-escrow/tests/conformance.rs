@@ -2,7 +2,7 @@
 //! `scripts/buzz-meter/test_voucher_escrow.py`. Same laws, same numbers —
 //! the Rust core must agree with the Python engine on every claim.
 
-use voucher_escrow::{Escrow, RateSet, VoucherError};
+use voucher_escrow::{ConversionQuote, Escrow, RateSet, VoucherError};
 
 const Q: u128 = 10_000; // 1.0000 A in quatch
 const IN_RATE: u128 = 200; // 0.000002 A/token  (fp8)
@@ -111,13 +111,20 @@ fn proofs_1_to_10() {
 fn proofs_11_to_16_usdc_rail() {
     let mut es = Escrow::new();
 
-    // 11. refuses without base_tx / rate_ref
+    // 11. refuses without base_tx (valid quote, so the tx check is what fires)
     assert!(matches!(
-        es.deposit_usdc("member-x", 10_000_000, "", 25_000_000, "card@v1", 1),
+        es.deposit_usdc(
+            "member-x",
+            10_000_000,
+            "",
+            &ConversionQuote::new("q-a", 25_000_000, "card@v1", 0).unwrap(),
+            1
+        ),
         Err(VoucherError::MissingRef(_))
     ));
+    // …and without a rate_ref — a typed refusal at quote construction
     assert!(matches!(
-        es.deposit_usdc("member-x", 10_000_000, "0xabc", 25_000_000, "", 1),
+        ConversionQuote::new("q-b", 25_000_000, "", 0),
         Err(VoucherError::MissingRef(_))
     ));
     // 12. 10 USDC @ 2.5 -> 25.0000 A credited; rate + rate_ref on the event
@@ -126,8 +133,7 @@ fn proofs_11_to_16_usdc_rail() {
             "member-x",
             10_000_000,
             "0xbase123",
-            250_000_000,
-            "estate-rate-card@v1-demo",
+            &ConversionQuote::new("q-c", 250_000_000, "estate-rate-card@v1-demo", 1).unwrap(),
             2,
         )
         .unwrap();
@@ -154,7 +160,13 @@ fn proofs_11_to_16_usdc_rail() {
     assert_eq!(es.balance("member-x"), "29.7800");
     // 15. dust refused (credit rounds to zero)
     assert!(matches!(
-        es.deposit_usdc("member-x", 10, "0xdust", 250_000_000, "card@v1", 5),
+        es.deposit_usdc(
+            "member-x",
+            10,
+            "0xdust",
+            &ConversionQuote::new("q-d", 250_000_000, "card@v1", 4).unwrap(),
+            5
+        ),
         Err(VoucherError::DustRefused)
     ));
     // 16. chain verifies with the USDC event shape

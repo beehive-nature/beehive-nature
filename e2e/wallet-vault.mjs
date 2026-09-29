@@ -3,6 +3,7 @@
 // null-deref or a WebCrypto call that only fails in a browser; this can.
 // Run:  cd e2e && node wallet-vault.mjs
 import { chromium } from 'playwright';
+import { pinRegister } from './wallet-register-pin.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,8 @@ const t = (name, v, detail) => {
 };
 
 const browser = await chromium.launch({ args:['--no-sandbox'] });
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 const ctx = await browser.newContext();
 const page = await ctx.newPage();
 
@@ -93,7 +96,7 @@ t('valid 12-word phrase recognised', /valid BIP-39/.test(await page.textContent(
 await page.fill('#vlt-secret', `${A(11)} zoo`);
 await page.waitForTimeout(350);
 t('bad checksum caught in the browser', /checksum failed/.test(await page.textContent('#vlt-check')));
-await page.fill('#vlt-secret', 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn');
+await page.fill('#vlt-secret', 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn'); // PUBLIC-CONSTANT: published compressed WIF test vector (same as tools/test-vault.js)
 await page.waitForTimeout(350);
 t('Vaulta key recognised', /valid Vaulta active key/.test(await page.textContent('#vlt-check')));
 
@@ -116,7 +119,7 @@ t('reveal shows the secret', /KwDiBf89/.test(await page.textContent('#vlt-reveal
 await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
 await page.waitForTimeout(300);
 t('key handed to the bridge field',
-  (await page.inputValue('#br-wif')) === 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn');
+  (await page.inputValue('#br-wif')) === 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn'); // PUBLIC-CONSTANT: published compressed WIF test vector
 
 console.log('\n── lock / unlock round trip ──');
 await page.click('#vlt-lock');

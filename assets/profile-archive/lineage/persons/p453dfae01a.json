@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p453dfae01a",
+ "bnr": "bnr://skaists.dev/blood/p453dfae01a",
+ "identity": {
+  "name": "Olof Olofsson",
+  "lifespan": "1782–1841",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ2F-1LB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "13 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "13 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd4352a5a5f",
+    "name": "Olof Larsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7cdbd67ec3",
+    "name": "Anna Hansdotter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p73222c4499",
+    "name": "Anna Margaretha Olofsdotter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7f99f2a76c",
+    "name": "Catharina Larsdotter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ2F-1LB",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 13,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

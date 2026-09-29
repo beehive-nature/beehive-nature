@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3db0efeed8",
+ "bnr": "bnr://skaists.dev/blood/p3db0efeed8",
+ "identity": {
+  "name": "James Hadlock",
+  "lifespan": "1654–1716",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ1Q-LM3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "47 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "47 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a4e372d1a",
+    "name": "James Hadlock",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdb5a710ff0",
+    "name": "Damaris Fosdick",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdc0876ac81",
+    "name": "Joseph Hadlock"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ1Q-LM3",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 47,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

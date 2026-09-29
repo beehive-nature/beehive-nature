@@ -1,10 +1,45 @@
 #!/usr/bin/env node
 // Extract readable text from a PDF's content streams (best-effort, read-only).
-// Inflates FlateDecode streams and collects text-showing operators (Tj/TJ),
-// plus raw latin1 fallback. For verification peeking, not full parsing.
+// Inflates FlateDecode streams and decodes LZWDecode streams (Distiller 3-era
+// PDFs compress with LZW — a Flate-only reader sees "no text" where text
+// exists; that gap is how a born-digital hybrid got misread as scan-only),
+// then collects text-showing operators (Tj/TJ), plus raw latin1 fallback.
+// For verification peeking, not full parsing.
 // usage: node peek-pdf-text.mjs <file.pdf> [--max-chars N] [--streams N]
 import fs from "node:fs";
 import zlib from "node:zlib";
+
+// PDF LZWDecode: 9..12-bit codes, 256=clear, 257=EOD, early-change width
+// growth (width increments when the table reaches 2^width - 1 entries).
+function lzwDecode(bytes) {
+  const out = [];
+  let dict = new Map(); let next = 258; let width = 9;
+  const reset = () => { dict = new Map(); for (let i = 0; i < 256; i++) dict.set(i, [i]); next = 258; width = 9; };
+  reset();
+  let bitBuf = 0, bitCnt = 0, pos = 0, prev = null;
+  const readCode = () => {
+    while (bitCnt < width) {
+      if (pos >= bytes.length) return 257;
+      bitBuf = (bitBuf << 8) | bytes[pos++]; bitCnt += 8;
+    }
+    const code = (bitBuf >> (bitCnt - width)) & ((1 << width) - 1);
+    bitCnt -= width;
+    return code;
+  };
+  for (;;) {
+    const code = readCode();
+    if (code === 257) break;
+    if (code === 256) { prev = null; reset(); continue; }
+    let entry;
+    if (dict.has(code)) entry = dict.get(code);
+    else if (code === next && prev) entry = [...prev, prev[0]];
+    else break; // corrupt
+    out.push(...entry);
+    if (prev) { dict.set(next++, [...prev, entry[0]]); if (next === (1 << width) - 1 && width < 12) width++; }
+    prev = entry;
+  }
+  return Uint8Array.from(out);
+}
 
 const argv = process.argv.slice(2);
 const file = argv[0];
@@ -23,12 +58,12 @@ while (streams < NS) {
   let data = buf.subarray(s + 6, e);
   if (data[0] === 13) data = data.subarray(1);
   if (data[0] === 10) data = data.subarray(1);
-  // only inflate streams declared Flate (look back at the dict)
+  // only decode streams declared Flate or LZW (look back at the dict)
   const dictStart = Math.max(0, s - 600);
   const dict = buf.subarray(dictStart, s).toString("latin1");
-  if (dict.includes("FlateDecode")) {
+  if (dict.includes("FlateDecode") || dict.includes("LZWDecode")) {
     try {
-      const inf = zlib.inflateSync(data).toString("latin1");
+      const inf = (dict.includes("FlateDecode") ? zlib.inflateSync(data) : Buffer.from(lzwDecode(data))).toString("latin1");
       // text-showing ops: (string) Tj, [(s1) n (s2)] TJ, and <hex> variants
       const texts = [];
       for (const m of inf.matchAll(/\((?:\\.|[^\\()])*\)/g)) {

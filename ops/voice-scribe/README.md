@@ -1,5 +1,17 @@
 # voice-scribe — Latvian voice IN the Buzz room
 
+**Audit update (Astra, 2026-09-06):** the worker now actually serializes
+jobs, with one running and three waiting. Failed spool creation releases its
+slot; every probe has a timeout and output bound, and cleanup waits for child
+exit. Accepted input formats and protocols are restricted before conversion.
+The unit uses a dynamic service identity, protected home/read-only system,
+empty capabilities, a three-GiB memory ceiling and `/run/voice-scribe` as a
+private runtime spool. The model remains read-only under `/opt/voice-scribe`.
+Six regression tests run via `npm test`; the lockfile pins the existing
+runtime dependency version. Install dependencies with `npm ci --ignore-scripts`.
+The [change receipt](../../docs/dispatches/2026-09-06-astra-change-receipt.md)
+contains deployment verification and rollback paths.
+
 The voice lane (2026-09-04): a phone records a voice note in the room
 composer → the note is POSTed to the community's transcription door →
 whisper.cpp on the box transcribes it (multilingual model, language PINNED
@@ -41,7 +53,7 @@ a digest; no recording is ever stored.
 
 ```
 rsync this dir → /opt/voice-scribe (whisper.cpp/ + model live beside it)
-cd /opt/voice-scribe && npm install
+cd /opt/voice-scribe && npm ci --ignore-scripts
 sudo systemctl enable --now voice-scribe
 # caddy: add the /voice blocks, then
 sudo docker exec buzz-prod-caddy-1 caddy reload --config /etc/caddy/Caddyfile

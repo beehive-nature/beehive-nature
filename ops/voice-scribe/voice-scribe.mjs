@@ -21,10 +21,9 @@ import http from "node:http";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { verifyEvent } from "nostr-tools/pure";
+import { createSerialQueue, runChild } from "./work-queue.mjs";
 
 const BIND = process.env.VOICE_BIND || "172.18.0.1";
 const PORT = Number(process.env.VOICE_PORT || 8093);
@@ -43,7 +42,7 @@ const MAX_AUDIO_SECS = 120;
 const JOB_TIMEOUT_MS = Number(process.env.VOICE_JOB_TIMEOUT_MS || 240_000);
 const MAX_QUEUE = 3;
 
-for (const dir of [SPOOL, path.dirname(MODEL)]) fs.mkdirSync(dir, { recursive: true });
+fs.mkdirSync(SPOOL, { recursive: true, mode: 0o700 });
 
 function log(line) {
   process.stdout.write(JSON.stringify({ ts: new Date().toISOString(), ...line }) + "\n");
@@ -54,27 +53,7 @@ function sha256Hex(buffer) {
 }
 
 function run(cmd, args, { timeoutMs = JOB_TIMEOUT_MS } = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: ["ignore", "ignore", "pipe"] });
-    let stderr = "";
-    const timer = setTimeout(() => {
-      child.kill("SIGKILL");
-      reject(new Error("the transcriber took too long and was stopped"));
-    }, timeoutMs);
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-      if (stderr.length > 8000) stderr = stderr.slice(-8000);
-    });
-    child.on("error", (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      if (code === 0) resolve();
-      else reject(new Error(`${path.basename(cmd)} exited ${code}`));
-    });
-  });
+  return runChild(cmd, args, { timeoutMs });
 }
 
 // --- NIP-98 ------------------------------------------------------------
@@ -128,14 +107,14 @@ function authorize(headerValue, bodyDigest) {
 }
 
 // --- the scribe pipeline ------------------------------------------------
-let queueDepth = 0;
+const workQueue = createSerialQueue(MAX_QUEUE + 1);
 
 async function transcribe(buffer, lang) {
-  if (queueDepth >= MAX_QUEUE + 1) throw Object.assign(new Error("the scribe is busy — try again in a moment"), { statusCode: 503 });
-  queueDepth += 1;
+  return workQueue.run(async () => {
   const started = Date.now();
-  const jobDir = await fsp.mkdtemp(path.join(SPOOL, "job-"));
+  let jobDir;
   try {
+    jobDir = await fsp.mkdtemp(path.join(SPOOL, "job-"));
     const inFile = path.join(jobDir, "in.bin");
     const wavFile = path.join(jobDir, "in.wav");
     const outBase = path.join(jobDir, "out");
@@ -151,14 +130,8 @@ async function transcribe(buffer, lang) {
     // (no Cues seek head) — ffprobe on the RAW blob cannot answer. Convert
     // first (cheap, linear), then read the duration from the wav, where it
     // is exact by construction.
-    await run(FFMPEG, ["-y", "-loglevel", "error", "-i", inFile, "-ac", "1", "-ar", "16000", wavFile]);
-    const dur = await new Promise((resolve, reject) => {
-      const child = spawn(FFPROBE, ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wavFile]);
-      let out = "";
-      child.stdout.on("data", (c) => (out += c));
-      child.on("error", reject);
-      child.on("close", (code) => (code === 0 ? resolve(Number.parseFloat(out.trim())) : reject(new Error("the audio could not be read"))));
-    });
+    await run(FFMPEG, ["-y", "-loglevel", "error", "-protocol_whitelist", "file,pipe", "-format_whitelist", "matroska,webm,mov,ogg,wav,mp3,aac,flac", "-i", inFile, "-t", String(MAX_AUDIO_SECS + 1), "-ac", "1", "-ar", "16000", wavFile]);
+    const dur = Number.parseFloat(await runChild(FFPROBE, ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wavFile], { timeoutMs: 10_000, capture: true }));
     if (!Number.isFinite(dur)) throw new Error("the audio could not be read");
     if (dur < 0.3) throw new Error("that recording is too short to transcribe");
     if (dur > MAX_AUDIO_SECS) throw new Error(`voice notes are capped at ${MAX_AUDIO_SECS}s on this door`);
@@ -169,9 +142,9 @@ async function transcribe(buffer, lang) {
     if (!transcript) throw new Error("nothing intelligible was heard in that recording");
     return { transcript, ms: Date.now() - started };
   } finally {
-    queueDepth -= 1;
-    await fsp.rm(jobDir, { recursive: true, force: true }).catch(() => {});
+    if (jobDir) await fsp.rm(jobDir, { recursive: true, force: true });
   }
+  });
 }
 
 // --- http ----------------------------------------------------------------
@@ -192,7 +165,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (req.method === "GET" && req.url === "/healthz") {
-    sendJson(res, 200, { ok: true, model: path.basename(MODEL), langs: LANGS, canonical: CANONICAL_URL, queue: queueDepth });
+    sendJson(res, 200, { ok: true, model: path.basename(MODEL), langs: LANGS, canonical: CANONICAL_URL, queue: workQueue.depth });
     return;
   }
   if (req.method !== "POST") {
@@ -200,7 +173,9 @@ const server = http.createServer((req, res) => {
     return;
   }
   const contentType = String(req.headers["content-type"] || "");
-  const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  let url;
+  try { url = new URL(req.url || "/", "http://localhost"); }
+  catch { sendJson(res, 400, { ok: false, error: "invalid request URL" }); return; }
   const chunks = [];
   let bytes = 0;
   let refused = null;
@@ -235,6 +210,10 @@ const server = http.createServer((req, res) => {
   });
 });
 
+server.headersTimeout = 10_000;
+server.requestTimeout = 30_000;
+server.maxConnections = 32;
+
 server.listen(PORT, BIND, () => {
-  log({ listening: `${BIND}:${PORT}`, canonical: CANONICAL_URL, langs: LANGS, model: path.basename(MODEL) });
+  log({ listening: `${BIND}:${server.address().port}`, canonical: CANONICAL_URL, langs: LANGS, model: path.basename(MODEL) });
 });

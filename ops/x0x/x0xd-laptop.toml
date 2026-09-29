@@ -1,14 +1,21 @@
-# x0xd laptop ON-DEMAND profile (lane x0x round 5, 2026-09-05).
+# x0xd laptop ON-DEMAND profile (lane x0x round 5 2026-09-05; corrected 2026-09-15).
 # The founder's building wifi saturated at default gossip (~6 Mbps sustained
-# relay burden from a default Leaf). This profile shrinks the eager fan-out:
-# active view 6 -> 2, passive 30 -> 6. There is NO byte-rate cap in v0.41.2 —
-# noted upstream in saorsa-labs/x0x#505 as a second data point.
+# eager burden from a default Leaf; 2026-09-15 field capture measured
+# 86.33 MB/min on a datacenter Leaf — docs/dispatches/2026-09-15-x0x-505-504-field-evidence.md).
+#
+# CORRECTION 2026-09-15: this profile previously set active_view_size = 2 /
+# passive_view_size = 6. Those keys are parsed-but-IGNORED at runtime
+# (deprecated in src/gossip/config.rs; dirvine's #505 note 2026-09-14) — any
+# improvement we attributed to them is unexplained. The fan-out knob that DOES
+# feed membership is leaf_max_eager_degree (default 2, left at default here).
+# NO enforced byte cap exists in any release to date: leaf_egress_soft/hard_
+# bytes_per_sec are OBSERVE-ONLY thresholds. The laptop's real protection is
+# the ON-DEMAND law itself — daemon up only for a leashed tunnel session,
+# auto-down after 10 min (x0x-tunnel.ps1 / box-tunnel.sh _watch).
 api_address = "127.0.0.1:12700"
 log_level = "warn"
 
-[gossip]
-active_view_size = 2
-passive_view_size = 6
+# [gossip] intentionally absent — defaults apply (leaf_max_eager_degree = 2).
 
 [peer_relay]
 enabled = false

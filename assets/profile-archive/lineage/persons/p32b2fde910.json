@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p32b2fde910",
+ "bnr": "bnr://skaists.dev/blood/p32b2fde910",
+ "identity": {
+  "name": "Olive Sanborn",
+  "lifespan": "1781–1872",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8QJ-RZ8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "27 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "27 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf69120bcc3",
+    "name": "Richard Sanborn",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6e25fd6147",
+    "name": "Martha Morse",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfc8d6cf8c8",
+    "name": "Fannie Bell Martha Hadlock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd9181bfe85",
+    "name": "Joseph Hadlock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8QJ-RZ8",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 27,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6554f58ee1",
+ "bnr": "bnr://skaists.dev/blood/p6554f58ee1",
+ "identity": {
+  "name": "Thomas Remington",
+  "lifespan": "1634–1731",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2HJ-LYW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LCJS-WZ6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LR6N-WCN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb7ae83e133",
+    "name": "Joseph Remington"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e311222f7",
+    "name": "Mehitable Walker",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2HJ-LYW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

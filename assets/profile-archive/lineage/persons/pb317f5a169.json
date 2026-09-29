@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb317f5a169",
+ "bnr": "bnr://skaists.dev/blood/pb317f5a169",
+ "identity": {
+  "name": "Robert Williams",
+  "lifespan": "1775–1867",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRWK-ZJS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "6 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "6 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0998836893",
+    "name": "Captain Daniel Williams",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3addb25006",
+    "name": "Amy Susan Burdick",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7530442f3c",
+    "name": "Zilphia Ann Williams"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5d5b7bf816",
+    "name": "Zilpah Davis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRWK-ZJS",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 6,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

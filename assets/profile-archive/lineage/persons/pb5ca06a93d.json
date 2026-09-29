@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb5ca06a93d",
+ "bnr": "bnr://skaists.dev/blood/pb5ca06a93d",
+ "identity": {
+  "name": "Albert Jacobus Sutphen",
+  "lifespan": "1775–1836",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZJS-3JW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "14 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "14 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p328f7e9f24",
+    "name": "Jacobus James Sutphen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6df00b5d37",
+    "name": "Elisabeth Voorhees",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p982f8f253c",
+    "name": "John Boggs Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p85b189cebd",
+    "name": "Eleanor Spencer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZJS-3JW",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 14,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

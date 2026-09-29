@@ -1,0 +1,113 @@
+{
+  "lexicon": 1,
+  "id": "com.beehivenature.temp.royalReview",
+  "description": "EXPERIMENTAL — a Royal Review verdict binding a reviewed atproto record to its explicit storage references and, when one exists, to a validated com.beehivenature.receipt. The '.temp.' segment marks this as an unstable variant NSID per the AT Protocol Lexicon Style Guide ('Experimental schemas and projects can use variant NSIDs (eg, including .temp. in the name hierarchy)'); it must be promoted to a stable NSID (or dropped) before any corpus depends on it. Not published to any PDS; local candidate only.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "description": "One reviewer's verdict on one subject record. The atproto record lives in the author's repo at at://<author>/com.beehivenature.temp.royalReview/<rkey>; the Nostr twin (kind 30078, d-tag = rkey) carries the same content on the BNR-owned rail. Owned rail first, atproto mirror second (mirror-by-law).",
+      "record": {
+        "type": "object",
+        "required": [
+          "author",
+          "subject",
+          "verdict",
+          "storageRefs",
+          "createdAt"
+        ],
+        "properties": {
+          "author": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the reviewer. Must equal the repo authority the atproto twin is written to; the Nostr twin binds to it via the atproto.record tag. Syntax-validated only here — resolution is a network act."
+          },
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The reviewed record: at-uri + cid. This contract additionally requires the uri to address a RECORD (at://did/collection/rkey, DID authority) — repo-root or collection-only uris are legal at-uris but not a reviewable subject here. Repo-root strongRefs remain legal INSIDE receipt records (SPEC_LEXICON-1 §5.1 repo-state form)."
+          },
+          "verdict": {
+            "type": "ref",
+            "ref": "#verdict"
+          },
+          "storageRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxLength": 16,
+            "items": {
+              "type": "ref",
+              "ref": "#storageRef"
+            },
+            "description": "Explicit storage references for the reviewed artifact. A review asserts 'I verified bytes at these addresses', so unlike the receipt lexicon's mediaPointer (sha256 optional, omit = unverifiable) a storageRef without sha256 is REFUSED here. The sha256 fields carry the assertion's SHAPE; proving the bytes is a separate, live-adapter act."
+          },
+          "receipt": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Optional strongRef to a VALIDATED com.beehivenature.receipt record anchoring the subject. Fail-closed: a publisher that cannot produce the receipt record's bytes for cross-validation must omit this field, not reference blind."
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 20000,
+            "description": "Free-text notes. maxLength counts UTF-8 BYTES (the Lexicon counting rule: 'maximum length of value, in UTF-8 bytes'), not characters or graphemes. A maxGraphemes bound is remaining work pending a grapheme counter in the dependency tree (the estate is 28-tongue multilingual). Unknown extra fields in this record are TOLERATED per the Lexicon spec's open-properties rule ('Unexpected fields in data which otherwise conforms to the Lexicon should be ignored'); this crate's Rust types simply never emit them."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "RFC 3339 with uppercase T, timezone required, ARBITRARY fractional precision (official example 1985-04-12T23:20:50.123456Z), and -00:00 explicitly REJECTED (negative zero = unknown local offset) — the atproto Lexicon datetime grammar. The Nostr twin additionally requires a non-negative instant (created_at is u64 seconds), a twin policy distinct from the record grammar; the original string travels verbatim into the twin content and hash input."
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "knownValues": [
+        "sound",
+        "sound-with-notes",
+        "unsound",
+        "unverified"
+      ],
+      "description": "Aligned with the estate's crypto-language law: wording caps at 'sound by construction'; a claim without a citable source stops at 'unverified'. NOTE: per the Lexicon spec, knownValues is a non-enforcing hint ('Values are not limited to this set (aka, not a closed enum)'); this crate's validator enforces the four values strictly anyway — a permitted stricter-than-schema local policy. If closed-at-schema is wanted, swap knownValues for enum (a vocabulary decision for Astra/founder, not this crate)."
+    },
+    "storageRef": {
+      "type": "object",
+      "required": [
+        "scheme",
+        "address",
+        "sha256"
+      ],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "knownValues": [
+            "ar",
+            "ant"
+          ],
+          "description": "Same vocabulary as the receipt lexicon's mediaPointer.scheme — one storage vocabulary across both records, no second source of truth. 'ar' = Arweave txId (43-char Base64URL), 'ant' = Autonomi address."
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Content address on that rail."
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "description": "SHA-256 of the referenced bytes, lowercase hex. REQUIRED here (see storageRefs). SYNTAX ONLY: a well-shaped digest asserts nothing about bytes actually retrieved — retrieval-and-hash verification is a live-adapter responsibility (see the crate's verification levels L0/L1/L2); no validator in this crate performs it."
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Byte length of the referenced payload; truncation pre-check. Optional. Mirrors the receipt lexicon v0.2 additive fields."
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Short human hint, e.g. 'repo CAR'. Optional, advisory. maxLength counts UTF-8 bytes (Lexicon counting rule)."
+        }
+      }
+    }
+  }
+}

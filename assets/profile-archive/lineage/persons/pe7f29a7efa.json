@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe7f29a7efa",
+ "bnr": "bnr://skaists.dev/blood/pe7f29a7efa",
+ "identity": {
+  "name": "Mette Nielsdatter",
+  "lifespan": "1732–1801",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8XT-7MP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "8 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "8 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02cb862e58",
+    "name": "Niels Christian Vester",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p21d8facc27",
+    "name": "Anne Jensdr Kobero",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7558c0d547",
+    "name": "Peder Lauritsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p03076eff1b",
+    "name": "Laurits Jensen Smed",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8XT-7MP",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 8,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

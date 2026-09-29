@@ -5,8 +5,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
-<title>BiGen — the evidence library · cannabis &amp; cancer, exhibit 001</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf7f0">
+<title>BiGen — the evidence library</title>
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
 /* tier set = the six-checks-validated categorical set for surface #0d1410
@@ -15,16 +16,28 @@
    validator run (3a0be7b); normal 22.7, contrast ≥3:1 — receipt in review.html).
    Identity never rides color alone: marker + label always.
    REFUTED and REFUTED-AS-UNIVERSAL share a hue BY DESIGN and differ by marker ✗/⊘. */
---t-sup:#3f9c55;--t-mix:#c07f1c;--t-unt:#0092a6;--t-ref:#a476ec}
+--t-sup:#3f9c55;--t-mix:#c07f1c;--t-unt:#0092a6;--t-ref:#a476ec;
+--well:#0a0f0b;--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
-header{text-align:center;margin-bottom:10px}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+main{max-width:880px;margin:0 auto;padding-inline:16px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / Symposium #46 / Hexagon #47 / bLongevity #48 / Review #49. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
+header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,80%);height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
-main{max-width:880px;margin:0 auto}
+.sub{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
 section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
 .law{color:var(--dim);font-size:10px;line-height:1.7}
+.law b{color:var(--ink)}
 .banner{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-bottom:10px}
 a{color:var(--cyan)}
 .wrap{overflow-x:auto}
@@ -53,21 +66,468 @@ td.cl{color:var(--ink)}
 .flag-true{color:var(--amber)} .flag-gap{color:var(--violet)}
 .rcg{background:#0d1410;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:10.5px;line-height:1.8}
 .rcg .m{color:var(--ink)} .rcg .n{color:var(--dim)}
+.cb{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;font-size:10.5px;color:var(--dim)}
+.cb b{color:var(--ink);font-weight:400}
 details{margin-top:10px}
-summary{cursor:pointer;color:var(--violet);font-size:10.5px}
+main summary{cursor:pointer;color:var(--violet);font-size:10.5px}
 pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
-footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:880px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,.tgl button:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.fence{font-size:.875rem;color:var(--dim);margin-top:14px;max-width:36rem;margin-inline:auto}
+.map-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#first-bee,#first-raver,#layer-figure,#layer-map,#instrument{display:none}
+body[data-reg="bee"][data-bigen-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-bigen-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-bigen-beat="map"] #layer-map{display:block}
+body[data-bigen-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-bigen-beat="arrival"] #masthead{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#5a645e;
+  --line:#e6dfd2;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --t-sup:#326b39;--t-mix:#855b0b;--t-unt:#176879;--t-ref:#65509a;
+  color-scheme:light;
+  background:#fbf7f0;color:#0c1412;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] header::after{opacity:.25}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair,.fence,.map-caption{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#6e3fb8}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#857d70}
+body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
+body[data-reg="bee"] #tbar a{color:#0c1412!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] .banner{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
+body[data-reg="bee"] :is(.card,.ib div,.rcg,pre){background:#efe9dd;border-color:var(--line)}
+
+/* Raver — library-as-garden, not a courtroom. Feeling first; the map one tap away. */
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-bigen-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-bigen-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-bigen-beat="arrival"] #first-raver{display:flex}
+#mark-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes mark-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes mark-glow{0%,100%{opacity:.35}50%{opacity:.8}}
+#mark-scene .living{animation:mark-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#mark-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+#mark-scene .glow{animation:mark-glow 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #mark-scene .living,#mark-scene .wash,#mark-scene .glow{animation:none}
+}
+
+/* Cypherpunk keeps today's full evidence-library instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.bigen-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.bigen-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.bigen-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.bigen-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* lower half at 390 px — the instrument's reading floor (founder phone review, 2026-09-26):
+   12px+ everywhere incl. cypherpunk, 44px footer doors and toggles */
+section h2{font-size:12.5px;letter-spacing:.05em;line-height:1.5}
+.law{font-size:12.5px;line-height:1.75}
+.banner{font-size:12.5px}
+table{font-size:12px}
+.rnote{font-size:12px;color:var(--dim);margin-top:3px;line-height:1.6}
+.cite{font-size:12px}
+.tgl button{font-size:12.5px;min-height:44px;padding:8px 14px}
+#state-prose{font-size:13px}
+.gm{font-size:12px}.gm .h{font-size:12px}
+.card h3{font-size:13px}.card h3 .what{font-size:12px}
+.ib div{font-size:12px}
+.rcg,.cb{font-size:12px}
+main summary{font-size:12.5px}
+main details:not([data-reg-disclose]):not(#sources-panel)>summary{padding-block:12px}
+pre{font-size:12px}
+footer{font-size:12.5px;line-height:1.7}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] :is(.law,#state-prose,.banner){font:16px/1.7 var(--bee-font)}
+body[data-reg="bee"] :is(table,.rnote,.cite,.tgl button,.gm,.gm .h,.card h3 .what,.ib div,.rcg,.cb,main summary,footer){font-family:var(--bee-font);font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] main summary{font-size:16px}
+body[data-reg="bee"] .card h3{font:600 15px/1.5 var(--bee-font)}
+body[data-reg="bee"] section h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] :is(.law,#state-prose,.banner){font-size:14.5px}
+body[data-reg="raver"] :is(table,.rnote,.cite,.tgl button,.gm,.gm .h,.card h3,.card h3 .what,.ib div,.rcg,.cb,main summary,footer,section h2){font-size:14px}
+#srctab td:last-child a,td.cite a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+@media (max-width:520px){
+ /* the claim tables read as cards on a phone: claim across the full width, verdict + sources beneath it */
+ :is(#tiers,#tiers2) tr:first-child{display:none}
+ :is(#tiers,#tiers2) tr{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:12px;border-bottom:1px solid var(--line);padding:6px 0}
+ :is(#tiers,#tiers2) td{border-bottom:0}
+ :is(#tiers,#tiers2) td.cl{grid-column:1/-1;padding-bottom:2px}
+ :is(#tiers,#tiers2) td.cite{white-space:normal;text-align:end}
+}
+@media (max-width:520px){
+ /* the sources table as cards: key + title across, what it is and its link beneath */
+ #srctab tr:has(th){display:none}
+ #srctab tr{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"k c c" "k t l";align-items:start;column-gap:10px;border-bottom:1px solid var(--line);padding:6px 0}
+ #srctab td{border-bottom:0;padding:2px 0}
+ #srctab td:nth-child(1){grid-area:k}
+ #srctab td:nth-child(2){grid-area:c}
+ #srctab td:nth-child(3){grid-area:t}
+ #srctab td:nth-child(4){grid-area:l;text-align:end;max-width:9em;overflow-wrap:anywhere}
+}
+#sources-panel>summary h2{font-size:13px;font-weight:400;letter-spacing:.05em;color:var(--violet)}
+body[data-reg="bee"] #sources-panel>summary h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] #sources-panel>summary h2{font-size:15px}
+/* ── ETERNAL FRONT (docs/design/eternal) — the reading-room front. Every value is a skaists token
+   (surfaces/skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size
+   or corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time. ── */
+#eternal{display:block;margin:var(--sk-s3) 0 var(--sk-s2);padding:0;border:0;border-radius:0;background:transparent;text-align:start;max-width:40rem;margin-inline:auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p{margin:0;letter-spacing:normal}
+#eternal button{color:inherit;font:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5) auto var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-fig{display:flex;align-items:baseline;gap:var(--sk-s2);flex-wrap:wrap;padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b-fig b{font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-ink)!important;cursor:pointer}
+.et-b-row:last-child{border-bottom:0}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important;font-weight:600!important}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);display:grid;gap:var(--sk-s1)}
+.et-b-open p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-open small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-dot{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);flex:none}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s2);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);justify-content:center;margin:var(--sk-s2) 0}
+.et-r-chips button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s3);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+.et-r-note{margin-top:var(--sk-s2)!important;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1)!important;text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-hold{position:relative;display:block;width:132px;height:132px;margin:var(--sk-s3) auto 0;border:0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink)!important;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .trk{fill:none;stroke:var(--sk-line);stroke-width:6}
+.et-r-hold .prg{fill:none;stroke:var(--sk-biomass);stroke-width:6;stroke-linecap:round;stroke-dasharray:370;stroke-dashoffset:370}
+.et-r-hold b{position:relative;display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-hold span{position:relative;display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+.et-r .breathe{animation:et-breathe 4s ease-in-out infinite}
+body[data-motion-paused="true"] #eternal .breathe{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r .breathe{animation:none}.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:bottom;white-space:normal;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0!important}
+.et-c-tab td.k{color:var(--sk-guard)!important;white-space:nowrap}
+.et-c-tab td.v{white-space:nowrap;text-align:end}
+.et-c-tab tr.pick{cursor:pointer}.et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr.more td{height:auto;padding:var(--sk-s1) var(--sk-s2) var(--sk-s2);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)!important}
+.et-c-tab tr.more small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab tr.more a{display:inline-flex;align-items:center;min-height:var(--sk-control-min);min-width:var(--sk-control-min);margin-inline-end:var(--sk-s2);color:var(--sk-link)!important;font:500 12px/1.45 var(--sk-font-mono)}
+.t-ok{color:var(--sk-verified)!important}.t-part{color:var(--sk-info)!important}.t-guard{color:var(--sk-guard)!important}.t-you{color:var(--sk-you)!important}.t-ai{color:var(--sk-ai)!important}.t-mut{color:var(--sk-ink-mut)!important}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+.et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center;padding:0 var(--sk-s2)}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:120px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;white-space:normal}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;overflow-wrap:anywhere}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;background:transparent}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg{display:flex;gap:var(--sk-s1);flex-wrap:wrap;margin:var(--sk-s2) 0}
+.et-c-seg button{min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:500 12px/1.45 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)!important}
+.et-c-tab tr.pick small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono)}
+.et-c-tab td.k{white-space:normal}
+#eternal table{min-width:0!important;width:100%;max-width:100%}
+#eternal .room-table{overflow:visible}
+/* ── THE WHOLE LIBRARY, dressed per register: the page's own variables mapped onto skaists.
+   The tier set stays the page's validated categorical set (it IS skaists' cat-* four). ── */
+html body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--bee-font:var(--sk-font-bee-sans);background:var(--sk-bg);color:var(--sk-ink)}
+html body[data-reg="bee"] #masthead h1{font-family:var(--sk-font-bee-serif);font-weight:400}
+html body[data-reg="bee"] .banner{background:var(--sk-guard-wash);border-color:var(--sk-guard);color:var(--sk-guard)}
+html body[data-reg="bee"] :is(.card,.ib div,.rcg,pre){background:var(--sk-bg-well);border-color:var(--sk-line)}
+html body[data-reg="bee"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+html body[data-reg="bee"] .door:not(.primary){background:var(--sk-bg-card);border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="bee"] .take{color:var(--sk-sovereign)}
+html body[data-reg="raver"],html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-soft);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-sovereign-soft);--amber:var(--sk-cat-bug);background:var(--sk-bg)!important;color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] #first-raver{background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reg="raver"] #first-raver .feel,html body[data-reg="raver"] .take{font-family:var(--sk-font-raver-display);color:var(--sk-ink)}
+html body[data-reg="raver"] .door.primary,html body[data-reading-room][data-reg="raver"] #first-raver .door.primary{background:var(--sk-primary);border-color:var(--sk-primary);color:var(--sk-on-primary)}
+html body[data-reg="raver"] .door:not(.primary){background:transparent;border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="raver"] :is(section,.card,.ib div,.rcg,pre,.banner){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="raver"] .banner{color:var(--sk-guard)}
+html body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--amber:var(--sk-cat-bug);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] :is(section,.card,.ib div,.rcg,pre,.tgl button){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="cypherpunk"] .banner{background:var(--sk-bg);border-color:var(--sk-guard);color:var(--sk-guard)}
+html body[data-reg="cypherpunk"] .tgl button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)}
+html body[data-reg="cypherpunk"] #masthead h1{color:var(--sk-ai);font-family:var(--sk-font-mono)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
-<header>
-  <h1>⌕ BiGen — the evidence library</h1>
-  <p>systematic review in the Cochrane tradition, as a public repo: standing queries instead of
+<body data-reg="bee" data-bee-theme="custom" data-bigen-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="bigen-language" data-language-host></span>
+</div>
+<main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the library's own claim table, gap map, sources and register,
+     exposed by the instrument script as window.__bigen) drives all three, so the verdicts cannot
+     drift. Every gesture hands off to the library's own beats (data-bigen-go) or to a source. -->
+<section id="eternal" aria-label="what the evidence says">
+
+  <!-- NEW BEE — a calm reading room: the verdicts as plain rows, one choice -->
+  <div class="et-b">
+    <div class="et-b-mark">BiGen</div>
+    <h2 class="et-b-h" id="etBeeTitle">what the evidence says</h2>
+    <p class="et-b-lede" id="etBeeLede">claims about cannabis and cancer, each graded against its sources.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBeeGuard">not medical advice. early research is not proof.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" data-bigen-go="map" id="etBeeGo">open the map</button>
+      <button type="button" class="et-b-link" data-bigen-go="deeper" id="etBeeDeeper">read every source</button>
+      <p class="et-b-foot" id="etBeeFoot"></p>
+    </div>
+  </div>
+
+  <!-- RAVER — the verdict wheel: each petal a claim, its length its sources, the heart empty on purpose -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the verdict wheel</h2><span class="et-r-hint" id="etRaverHint">tap a petal</span></div>
+    <div class="et-r-chips" id="etExhibits" role="group" aria-label="exhibit"></div>
+    <svg class="et-r-art" id="etWheel" viewBox="-180 -180 360 360" role="group" aria-label="the claims as petals around an empty heart"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" data-bigen-go="map" id="etRaverGo">open the gap map</button>
+    <button type="button" class="et-r-ghost" data-bigen-go="deeper" id="etRaverDeeper">every source, below</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the map as data, the register, the sweep, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etPath">bigen://evidence-maps/</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard" id="etGuard"></div>
+    <div class="et-c-seg" id="etSeg" role="group" aria-label="exhibit"></div>
+    <table class="et-c-tab"><thead><tr><th>id</th><th>claim · tier · sources</th></tr></thead><tbody id="etClaims"></tbody></table>
+    <h3 class="et-c-h" id="etGapH">gap map · the empty cells are the finding</h3>
+    <table class="et-c-tab"><thead id="etGapHead"></thead><tbody id="etGap"></tbody></table>
+    <h3 class="et-c-h" id="etPipeH">register pipeline · standing, not stale</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <a class="et-c-primary" id="etQuery" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer"><span id="etQueryL">run the standing query on pubmed ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    <h3 class="et-c-h" id="etRecH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" id="etVerifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etYaml">read the yaml ↓</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bigen.html" target="_blank" rel="noopener noreferrer"><span id="etFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole library</h2>
+<header id="masthead">
+  <h1>⌕ <span data-i18n="bigen.mark">BiGen — the evidence library</span></h1>
+  <p class="eyebrow pair" data-i18n="bigen.pair">graded evidence, not a brochure</p>
+  <div class="sub" data-reg="cypherpunk">systematic review in the Cochrane tradition, as a public repo: standing queries instead of
   stale searches, plots as YAML instead of PDF images, judgments in git history instead of editorial
   memory. this surface is exhibit 001 — the cannabis &amp; cancer corpus as an
-  <b style="color:var(--gold);font-weight:400">evidence map</b>: mechanistic and early-phase, honestly not poolable.</p>
+  <b style="color:var(--gold);font-weight:400">evidence map</b>: mechanistic and early-phase, honestly not poolable.
+  not medical advice. preclinical strength is not clinical proof in either direction.</div>
 </header>
-<main>
+
+<article id="first-bee">
+  <p class="calm" data-i18n="bigen.bee.calm">This is an evidence library you can re-run — not a brochure you have to trust.</p>
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <p class="support" data-i18n="bigen.bee.support">exhibit 001 is early-phase and honestly not poolable — cannabis &amp; cancer, named once.</p>
+  <p class="fence" data-i18n="bigen.bee.fence">Claims arrive graded or not at all — not medical advice.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="map" data-i18n="bigen.bee.map">Open the map</button>
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="mark-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A soft search and mark glow — library as garden, not a courtroom">
+    <defs>
+      <linearGradient id="garden-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a2a18"/>
+        <stop offset="32%" stop-color="#123028"/>
+        <stop offset="62%" stop-color="#142838"/>
+        <stop offset="88%" stop-color="#1c1830"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="mark-glow" cx="50%" cy="40%" r="52%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".38"/>
+        <stop offset="42%" stop-color="#63c97c" stop-opacity=".16"/>
+        <stop offset="74%" stop-color="#7ee0d0" stop-opacity=".12"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#garden-wash)"/>
+    <ellipse class="wash" cx="400" cy="360" rx="320" ry="260" fill="url(#mark-glow)"/>
+    <g class="living">
+      <ellipse cx="250" cy="280" rx="70" ry="110" fill="#63c97c" opacity=".18" transform="rotate(-28 250 280)"/>
+      <ellipse cx="560" cy="320" rx="64" ry="100" fill="#7ee0d0" opacity=".16" transform="rotate(18 560 320)"/>
+      <ellipse cx="400" cy="520" rx="90" ry="50" fill="#c9a0ff" opacity=".14"/>
+    </g>
+    <g class="glow" fill="none" stroke="#d8c46a" stroke-width="2.2">
+      <path d="M213 304 L292 258 L371 304 L371 396 L292 442 L213 396Z" fill="#70b989" fill-opacity=".25" stroke="#a5ddb2" stroke-width="3"/>
+      <path d="M371 304 L450 258 L529 304 L529 396 L450 442 L371 396Z" stroke="#d1c2e8" stroke-width="3" stroke-dasharray="7 9"/>
+      <path d="M292 442 L371 396 L450 442 L450 534 L371 580 L292 534Z" stroke="#c7b2e2" stroke-width="3" stroke-dasharray="7 9"/>
+      <circle cx="463" cy="470" r="85" stroke="#c8ece7" stroke-width="5" fill="#123c36" fill-opacity=".4"/>
+      <path d="M526 534 L590 601" stroke="#c8ece7" stroke-width="14" stroke-linecap="round"/>
+      <circle cx="400" cy="390" r="28" opacity=".55"/>
+      <path d="M420 410 L456 446" opacity=".5"/>
+    </g>
+    <g class="glow" fill="#c9a0ff" opacity=".28">
+      <rect x="210" y="560" width="54" height="36" rx="4"/>
+      <rect x="280" y="560" width="54" height="36" rx="4"/>
+      <rect x="466" y="560" width="54" height="36" rx="4" fill="none" stroke="#7ee0d0" stroke-width="1.6"/>
+      <rect x="536" y="560" width="54" height="36" rx="4" fill="none" stroke="#7ee0d0" stroke-width="1.6"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="bigen.raver.feel">What if the empty cells were the most honest answer?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="figure" data-i18n="bigen.raver.walk">Walk the map</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="bigen.raver.consciousness">A pooled number on an evidence map is a category error — this page refuses it.</p>
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <p class="support" data-i18n="bigen.bee.support">exhibit 001 is early-phase and honestly not poolable — cannabis &amp; cancer, named once.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="map" data-i18n="bigen.bee.map">Open the map</button>
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-map">
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <p class="banner" data-i18n="bigen.map.limit">This collection contains early research. It does not show that a treatment works.</p>
+  <div class="wrap"><div class="gm" id="calm-gapmap">
+    <div class="h"></div>
+    <div class="h" data-i18n="bigen.map.plant">Plant combination</div>
+    <div class="h" data-i18n="bigen.map.synthetic">Synthetic isolate</div>
+    <div class="h" data-i18n="bigen.map.cbd">CBD isolate</div>
+    <div class="r" data-i18n="bigen.map.support">Supportive care</div>
+    <div class="cell full" data-i18n="bigen.map.present">Evidence present</div>
+    <div class="cell full" data-i18n="bigen.map.present">Evidence present</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
+    <div class="r" data-i18n="bigen.map.tumour">Antitumour research</div>
+    <div class="cell early" data-i18n="bigen.map.early">Early research</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
+  </div></div>
+  <p class="map-caption" data-i18n="bigen.map.caption">Empty cells are the finding — this corpus is early-phase and honestly not poolable.</p>
+  <div class="choices">
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="instrument">
+<div class="law">honest seams, visible on contact: not medical advice · not poolable · preclinical strength is not clinical proof in either direction.</div>
 
 <section>
   <h2><span data-i18n="h.033">WHY THIS EXISTS — the four things Cochrane cannot retrofit</span></h2>
@@ -79,9 +539,9 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     <tr><td class="cl">dissent</td><td>write a letter to the editor</td><td>fork, change the rating, show your work</td></tr>
   </table></div>
   <div class="law" style="margin-top:8px">a Cochrane forest plot is an assertion you trust; a BiGen plot is a computation
-  you re-run. architecture: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/ARCHITECTURE.md">bigen/ARCHITECTURE.md</a> ·
-  integrity schema: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/integrity/SCHEMA.md">bigen/integrity/SCHEMA.md</a> ·
-  design law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-02-bigen-library.md">DESIGN-BRIEF-02</a>.
+  you re-run. architecture: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer">bigen/ARCHITECTURE.md</a> ·
+  integrity schema: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/integrity/SCHEMA.md" target="_blank" rel="noopener noreferrer">bigen/integrity/SCHEMA.md</a> ·
+  design law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-02-bigen-library.md" target="_blank" rel="noopener noreferrer">DESIGN-BRIEF-02</a>.
   every record below was verified against PubMed via E-utilities on <span id="vdate">2026-08-19</span> — not against recollection.</div>
 </section>
 
@@ -124,7 +584,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   against <b>~160 cannabinoids identified in the plant</b> — a COA's "Total Cannabinoids" line is a panel floor
   wearing a total's name. this corpus is regulatory tables + same-sample assays: <b>not poolable — no pooled
   estimate will ever render here.</b> source of record:
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT</a> (Seat 3, 37a432f; Canada IHR figure corrected same-day at 72661ef in the sibling receipt).</div>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT</a> (Seat 3, 37a432f; Canada IHR figure corrected same-day at 72661ef in the sibling receipt).</div>
   <div class="wrap"><table id="tiers2">
     <tr><th>claim</th><th>verdict</th><th class="cite">sources</th></tr>
   </table></div>
@@ -171,10 +631,10 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   </table></div>
   <div class="law" style="margin-top:8px">read rows 3 and 4 together: sponsored studies score <i>better</i> on standard
   methodology — the bias is not in the method section, it is in the sentence after the table. that sentence is what
-  <b>results_conclusions_gap</b> measures. <a href="https://doi.org/10.1002/14651858.MR000033.pub3">Lundh et al. 2017, MR000033</a>.</div>
+  <b>results_conclusions_gap</b> measures. <a href="https://doi.org/10.1002/14651858.MR000033.pub3" target="_blank" rel="noopener noreferrer">Lundh et al. 2017, MR000033</a>.</div>
   <div class="rcg"><span class="m">the instrument pointed at ourselves first:</span> <span class="n">BiGen's own ECS map
   attributed CBD's stem-cell effect to an "AMPK→SIRT1/autophagy pathway." AMPK appears nowhere in the source's
-  abstract, keywords, or MeSH terms (<a href="https://doi.org/10.21873/invivo.14186">In Vivo 2026;40(1):222–234</a>, PMID 41482390).
+  abstract, keywords, or MeSH terms (<a href="https://doi.org/10.21873/invivo.14186" target="_blank" rel="noopener noreferrer">In Vivo 2026;40(1):222–234</a>, PMID 41482390).
   logged as CORRECTIONS-01 EDIT 1 — a library that only runs its instruments on other people's work has not implemented them.</span></div>
 </section>
 
@@ -185,47 +645,104 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   </details>
 </section>
 
-<section>
-  <h2><span data-i18n="h.043">SOURCES — cite or the cell stays silent</span></h2>
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary><h2 style="margin:0"><span data-i18n="h.043">SOURCES — cite or the cell stays silent</span></h2></summary>
+  <div class="law">External citations — each link opens in a new tab so this page and session stay put.</div>
   <div class="wrap"><table id="srctab"></table></div>
-</section>
+</details>
 
+</div>
 </main>
 <footer>
-  an evidence map, not medical advice · preclinical strength is not clinical proof in either direction ·
-  AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature">source tree</a> ·
-  this page: surfaces/bigen.html · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
-  don't trust these pages either — every claim links its source. Verify.
+  <span data-i18n="bigen.foot.library">an evidence map, not medical advice</span>
+  <span data-reg="cypherpunk"> · preclinical strength is not clinical proof in either direction
+  · AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener noreferrer">source tree</a>
+  · this page: surfaces/bigen.html</span>
+  · <a href="university/index.html" data-i18n="bigen.foot.learn">learn to check this page</a>
+  · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
+  <span data-i18n="bigen.foot.verify">don't trust these pages either — every claim links its source. Verify.</span>
 </footer>
 
-<script src="tour.js?v=34"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && kind==='sources';
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading==='cypherpunk') beat='deeper';
+  document.body.setAttribute('data-bigen-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='map'?'layer-map':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-bigen-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-bigen-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#0c1412':'#0d1410';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-bigen-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-bigen-go'));
+});
+applyReading();
 
 /* ===== receipts: everything below was verified live via PubMed E-utilities, 2026-08-19 ===== */
 
-var P=function(id){return '<a href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/">PMID '+id+'</a>';};
+var P=function(id){return '<a href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/" target="_blank" rel="noopener noreferrer">PMID '+id+'</a>';};
+var XA=function(href,label){return '<a href="'+href+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';};
 
 var SRC={
  R01:{c:'Guzmán 2003 · Nat Rev Cancer 3(10)',t:'landmark review — the preclinical case',l:P('14570037')},
  R02:{c:'Velasco, Sánchez, Guzmán 2012 · Nat Rev Cancer 12(6)',t:'the mechanisms-by-cancer-type review',l:P('22555283')},
  R03:{c:'Guzmán et al. 2006 · Br J Cancer 95(2)',t:'pilot: intratumoral Δ9-THC, recurrent glioblastoma, n=9',l:P('16804518')},
- R04:{c:'ASCO/JCO 2017 · 35(15s):2046',t:'phase 2 randomised: nabiximols (1:1 CBD:THC) + temozolomide, recurrent GBM',l:'<a href="https://ascopubs.org/doi/10.1200/JCO.2017.35.15_suppl.2046">JCO abstract</a>'},
+ R04:{c:'ASCO/JCO 2017 · 35(15s):2046',t:'phase 2 randomised: nabiximols (1:1 CBD:THC) + temozolomide, recurrent GBM',l:XA('https://ascopubs.org/doi/10.1200/JCO.2017.35.15_suppl.2046','JCO abstract')},
  R05:{c:'Johnson et al. 2010 · J Pain Symptom Manage 39(2)',t:'RCT: THC:CBD extract, intractable cancer pain',l:P('19896326')},
  R06:{c:'CINV systematic review 2020 · Support Care Cancer',t:'oral cannabinoids for chemotherapy nausea/vomiting prophylaxis',l:P('31916006')},
  R07:{c:'Strasser et al. 2006 · J Clin Oncol',t:'RCT: cannabis extract vs THC vs placebo, cancer cachexia — null',l:P('16849753')},
- R08:{c:'Zhang et al. 2015 · Int J Cancer',t:'pooled analysis, ILCC: cannabis smoking & lung cancer (2,159 cases)',l:P('24947688')+' · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4262725/">PMC</a>'},
+ R08:{c:'Zhang et al. 2015 · Int J Cancer',t:'pooled analysis, ILCC: cannabis smoking & lung cancer (2,159 cases)',l:P('24947688')+' · '+XA('https://pmc.ncbi.nlm.nih.gov/articles/PMC4262725/','PMC')},
  R09:{c:'Doherty et al. 2021 · Br J Cancer',t:'"hype or hope?" — the sober read on glioblastoma evidence',l:P('33623077')},
- R10:{c:'NASEM 2017 · the Health Effects of Cannabis and Cannabinoids',t:'the congressionally-mandated evidence review',l:'<a href="https://nap.nationalacademies.org/catalog/24625/">NAP 24625</a>'},
+ R10:{c:'NASEM 2017 · the Health Effects of Cannabis and Cannabinoids',t:'the congressionally-mandated evidence review',l:XA('https://nap.nationalacademies.org/catalog/24625/','NAP 24625')},
  R11:{c:'Bint Faiz et al. 2024',t:'current review: therapeutic potential in cancer',l:P('39331301')},
  R12:{c:'Castle et al. 2025',t:'meta-analysis: medical cannabis in cancer populations',l:P('40303989')},
  R13:{c:'Creangă-Murariu et al. 2026',t:'antitumour activity + interaction with oncology treatments',l:P('42198443')},
- R14:{c:'Javid et al. 2025',t:'glioma immune modulation review',l:'<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12334796/">PMC12334796</a>'},
+ R14:{c:'Javid et al. 2025',t:'glioma immune modulation review',l:XA('https://pmc.ncbi.nlm.nih.gov/articles/PMC12334796/','PMC12334796')},
  R15:{c:'Alghamdi et al. 2025',t:'systematic review: synthetic cannabinoids, CB2 agonists',l:P('40483537')},
- R16:{c:'Feng et al. 2024 · J Transl Med',t:'CBD + THC/CBG synergy, radiosensitisation — bench to bedside',l:'<a href="https://doi.org/10.1186/s12967-024-05477-0">DOI</a>'},
- R17:{c:'Baumeister et al. 2021',t:'Mendelian randomisation: cannabis-use genetic liability &amp; squamous cell carcinoma',l:'<a href="https://www.sciencedirect.com/science/article/pii/S1556086421021055">eBioMedicine</a>'},
- R18:{c:'Hussein et al. 2014 · Alexandria J Med',t:'cannabis extract &amp; hepatic TERT mRNA in mice (not PubMed-indexed)',l:'<a href="https://doi.org/10.1016/j.ajme.2014.02.003">DOI</a>'},
+ R16:{c:'Feng et al. 2024 · J Transl Med',t:'CBD + THC/CBG synergy, radiosensitisation — bench to bedside',l:XA('https://doi.org/10.1186/s12967-024-05477-0','DOI')},
+ R17:{c:'Baumeister et al. 2021',t:'Mendelian randomisation: cannabis-use genetic liability &amp; squamous cell carcinoma',l:XA('https://www.sciencedirect.com/science/article/pii/S1556086421021055','eBioMedicine')},
+ R18:{c:'Hussein et al. 2014 · Alexandria J Med',t:'cannabis extract &amp; hepatic TERT mRNA in mice (not PubMed-indexed)',l:XA('https://doi.org/10.1016/j.ajme.2014.02.003','DOI')},
  R19:{c:'Chueaphromsri et al. 2026 · In Vivo 40(1)',t:'CBD &amp; senescence in normal human mesenchymal stem cells',l:P('41482390')}
 };
 var S=function(){var a=[];for(var i=0;i<arguments.length;i++)a.push(SRC[arguments[i]].l);return a.join(' ');};
@@ -264,14 +781,14 @@ var tb=$('tiers');
 ROWS.forEach(function(r){
  var tr=document.createElement('tr');
  var t=TIER[r.t];
- tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div class="rnote">'+r.note+'</div>':'')+'</td>'
   +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
   +'<td class="cite">'+(r.s.length?S.apply(null,r.s):'<span style="font-style:italic">none — that is the verdict</span>')+'</td>';
  tb.appendChild(tr);
 });
 
 /* ===== EXHIBIT 002 — the COA panel undercount; source of record: docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md ===== */
-var REC='<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">receipt §</a>';
+var REC=XA('https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md','receipt §');
 var ROWS2=[
  {cl:'a lab\'s "total cannabinoids" is its own panel\'s sum, not a total',
   t:'sup',s:[REC+'1'],note:'regulator floors: Health Canada 4 · Oregon 4 · California 6 · Colorado 8 · AOAC 12 · commercial ceiling 15–16 · USDA hemp compliance one analyte pair — against ~160 identified'},
@@ -282,7 +799,7 @@ var ROWS2=[
  {cl:'"10–30% of extract mass is unidentified on a typical COA"',
   t:'ref',s:[REC+'4a'],note:'traces only to trade press that 403\'d, no primary citation — the gap is proven in compound count, never mass'},
  {cl:'"there are 113 cannabinoids"',
-  t:'ref',s:[REC+'2'],note:'no primary source exists behind cannabis writing\'s most-quoted number; the Mississippi series runs 70 → 104 → 120 → 125; current: ~160 identified (Gandlevskiy 2025, PMID <a href="https://pubmed.ncbi.nlm.nih.gov/41321142/">41321142</a>) or 125 isolated-and-characterised (Radwan 2021) — detected ≠ characterised'},
+  t:'ref',s:[REC+'2'],note:'no primary source exists behind cannabis writing\'s most-quoted number; the Mississippi series runs 70 → 104 → 120 → 125; current: ~160 identified (Gandlevskiy 2025, PMID <a href="https://pubmed.ncbi.nlm.nih.gov/41321142/" target="_blank" rel="noopener noreferrer">41321142</a>) or 125 isolated-and-characterised (Radwan 2021) — detected ≠ characterised'},
  {cl:'panel width is what limits seed cannabinoid content',
   t:'unt',s:[REC+'4b'],note:'no source in the corpus describes seed — hull-on, dehulled, or oil; the seed ceiling is the contamination mechanism (no glandular trichomes), not the analyte count'},
  {cl:'a reference method exists for true total-cannabinoid content',
@@ -292,7 +809,7 @@ var tb2=$('tiers2');
 ROWS2.forEach(function(r){
  var tr=document.createElement('tr');
  var t=TIER[r.t];
- tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div class="rnote">'+r.note+'</div>':'')+'</td>'
   +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
   +'<td class="cite">'+r.s.join(' ')+'</td>';
  tb2.appendChild(tr);
@@ -314,22 +831,25 @@ GM.rows.forEach(function(row){
  gm.innerHTML+=h;
 });
 
-/* register: executable search strategy + sweep receipts */
+/* register: executable search strategy + sweep receipts — ONE record (REG), read by the
+   register text below, the yaml, and the ETERNAL front (window.__bigen) */
+var REG={query:'(cannabinoid OR cannabidiol OR dronabinol OR nabilone OR cannabis) AND (cancer OR oncology OR tumour OR tumor OR antineoplastic) AND (randomized controlled trial[pt] OR meta-analysis[pt] OR systematic review[pt])',
+ schedule:'weekly',last_run:'2026-08-19',new_since_last:0,swept:13,flagged:0,manual:1,manual_who:'Hussein 2014'};
 $('queries').textContent=
 '- id: cannabinoid-cancer-oncology\n'+
 '  pubmed:\n'+
 '    query: "(cannabinoid OR cannabidiol OR dronabinol OR nabilone OR cannabis)\n'+
 '            AND (cancer OR oncology OR tumour OR tumor OR antineoplastic)\n'+
 '            AND (randomized controlled trial[pt] OR meta-analysis[pt] OR systematic review[pt])"\n'+
-'  schedule: weekly\n'+
-'  last_run: 2026-08-19\n'+
-'  new_since_last: 0          # corpus seeded this run\n'+
+'  schedule: '+REG.schedule+'\n'+
+'  last_run: '+REG.last_run+'\n'+
+'  new_since_last: '+REG.new_since_last+'          # corpus seeded this run\n'+
 '- id: integrity-sweep-cancer\n'+
 '  type: retraction_check     # PubMed "Retracted Publication"[pt] on every uid\n'+
 '  targets: all_included_studies\n'+
-'  schedule: weekly\n'+
-'  last_run: 2026-08-19\n'+
-'  result: 13 swept · 0 flagged · 1 manual-watch (Hussein 2014, not indexed)\n'+
+'  schedule: '+REG.schedule+'\n'+
+'  last_run: '+REG.last_run+'\n'+
+'  result: '+REG.swept+' swept · '+REG.flagged+' flagged · '+REG.manual+' manual-watch ('+REG.manual_who+', not indexed)\n'+
 '  on_change: open_amendment  # a retraction is an AMENDMENTS event, never a silent edit';
 
 /* study cards: one integrity block per study, fields only where verified */
@@ -430,6 +950,145 @@ function setLevel(v){
  });
 }
 setLevel('p');
+window.setLevel=setLevel;
+/* the one data layer the ETERNAL front reads (never a second copy of a verdict) */
+window.__bigen={SRC:SRC,TIER:TIER,ROWS:ROWS,ROWS2:ROWS2,GM:GM,REG:REG};
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the
+   library's own: window.__bigen, exposed by the instrument script above (the claim tables ROWS and
+   ROWS2, the tier set, the gap map GM, the sources SRC and the register REG). Nothing here grades,
+   pools or re-words a verdict: each register draws the same rows. Every gesture hands off to the
+   library's own beats (data-bigen-go) or opens a source in a new tab. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var B=window.__bigen; if(!B||!document.getElementById('eternal')) return;
+  var ORDER=['sup','mix','unt','ref','runiv'];
+  var TOK={sup:'cat-works',mix:'cat-bug',unt:'cat-gap',ref:'cat-idea',runiv:'cat-idea'};
+  var WORD={sup:'supported',mix:'mixed',unt:'untested',ref:'refuted',runiv:'refuted as universal'};
+  var EX=[{id:'001',topic:'cannabis & cancer',file:'cannabis-cancer.yaml',rows:B.ROWS},
+          {id:'002',topic:'the panel undercount',file:'cannabinoid-panel-undercount',rows:B.ROWS2}];
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function plain(h){var d=document.createElement('div');d.innerHTML=h;return d.textContent;}
+  function word(t){return T('et.bigen.tier.'+t,WORD[t]);}
+
+  /* the data layer: derived once from the page's own tables, read by all three renderers */
+  var D={exhibits:EX.map(function(x){
+    var claims=x.rows.map(function(r,i){return {id:'c'+String(i+1).padStart(2,'0'),claim:r.cl,tier:r.t,mark:B.TIER[r.t].m,src:r.s.length,note:r.note||'',links:(r.s||[]).map(function(s){return B.SRC[s]?B.SRC[s].l:s;})};});
+    var tiers={};ORDER.forEach(function(t){tiers[t]=claims.filter(function(c){return c.tier===t;}).length;});
+    return {id:x.id,topic:x.topic,file:x.file,claims:claims,tiers:tiers};
+  }),
+  gap:B.GM.rows.map(function(r){return {row:r.r.split(' — ')[0],cells:r.cells.map(function(c){return c.split('|')[0];})};}),
+  cols:B.GM.cols.map(function(c){return c.split(' (')[0];}),
+  sources:Object.keys(B.SRC).length, reg:B.REG};
+  D.gapEmpty=D.gap.reduce(function(a,r){return a+r.cells.filter(function(c){return c==='empty';}).length;},0);
+  D.gapCells=D.gap.length*D.cols.length;
+  var R={ex:0,sel:0};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var X=D.exhibits[0], h='';
+    $('etBeeLede').textContent=T('et.bigen.b.lede','{n} claims about cannabis and cancer, each graded against its sources. an empty cell is a finding, not a failure.').replace('{n}',X.claims.length);
+    ORDER.forEach(function(t){
+      var mine=X.claims.filter(function(c){return c.tier===t;}); if(!mine.length) return;
+      h+='<button type="button" class="et-b-row" aria-expanded="false" data-t="'+t+'"><span>'+esc(word(t))+'</span><small>'+mine.length+' '+esc(mine.length===1?T('et.bigen.b.claim','claim'):T('et.bigen.b.claims','claims'))+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+        '<div class="et-b-open" data-t="'+t+'" hidden>'+mine.map(function(c){return '<p><span class="et-b-dot" aria-hidden="true">'+esc(c.mark)+'</span> '+esc(c.claim)+'<small>'+esc(c.src?c.src+' '+(c.src===1?T('et.bigen.b.source','source'):T('et.bigen.b.sources','sources')):T('et.bigen.b.nosource','no study has asked this yet. that is the verdict.'))+'</small></p>';}).join('')+'</div>';
+    });
+    h+='<button type="button" class="et-b-row" aria-expanded="false" data-t="gap"><span>'+esc(T('et.bigen.b.gap','the empty cells'))+'</span><small>'+D.gapEmpty+' '+esc(T('et.bigen.b.of','of'))+' '+D.gapCells+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+      '<div class="et-b-open" data-t="gap" hidden><p>'+esc(T('et.bigen.b.gapLine','no trial of a synthetic isolate against tumours exists, and no trial of CBD alone in cancer exists for any purpose.'))+'<small>'+esc(T('et.bigen.b.gapNote','an empty cell is information, not a gap in the work.'))+'</small></p></div>';
+    $('etBeeRows').innerHTML=h;
+    $('etBeeFoot').textContent=T('et.bigen.b.foot','every claim links its source, checked against PubMed on {date}.').replace('{date}',D.reg.last_run);
+  }
+
+  /* ── RAVER ── the verdict wheel */
+  function petal(r0,r1,a0,a1){
+    var p=function(r,a){return (r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);};
+    return 'M'+p(r0,a0)+'L'+p(r1,a0)+'A'+r1+' '+r1+' 0 0 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 0 0 '+p(r0,a0)+'Z';
+  }
+  function wheel(){
+    var X=D.exhibits[R.ex], n=X.claims.length, h='';
+    X.claims.forEach(function(c,i){
+      var gap=0.05, a0=-Math.PI/2+i*2*Math.PI/n+gap, a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap;
+      var r1=Math.min(172,96+Math.max(1,c.src)*19), sel=i===R.sel, hollow=c.tier==='unt';
+      h+='<g role="button" tabindex="0" data-i="'+i+'" aria-pressed="'+sel+'" aria-label="'+esc(c.id+' · '+word(c.tier)+' · '+c.src+' '+T('et.bigen.r.sources','sources')+' · '+c.claim)+'">'+
+        '<path class="hit'+(sel?' breathe':'')+'" d="'+petal(52,r1,a0,a1)+'" style="fill:'+(hollow?'var(--sk-bg-card)':'var(--sk-'+TOK[c.tier]+')')+';stroke:'+(sel?'var(--sk-ink)':'var(--sk-'+TOK[c.tier]+')')+';stroke-width:'+(sel?2:1.5)+';'+(hollow?'stroke-dasharray:5 5;':'')+'opacity:'+(sel?1:0.72)+'"/></g>';
+    });
+    h+='<circle r="44" style="fill:var(--sk-bg-card);stroke:var(--sk-sovereign);stroke-dasharray:3 5"/>'+
+      '<text y="-6" text-anchor="middle" style="fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.bigen.r.heart1','no pooled'))+'</text>'+
+      '<text y="14" text-anchor="middle" style="fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.bigen.r.heart2','number'))+'</text>';
+    $('etWheel').innerHTML=h;
+  }
+  function raver(){
+    var X=D.exhibits[R.ex], c=X.claims[R.sel];
+    $('etExhibits').innerHTML=D.exhibits.map(function(x,i){return '<button type="button" data-ex="'+i+'" aria-pressed="'+(i===R.ex)+'">'+esc(x.id)+'</button>';}).join('');
+    $('etRaverHint').textContent=X.claims.length+' '+T('et.bigen.r.hint','petals · tap one to light it');
+    $('etLegend').innerHTML=ORDER.filter(function(t){return t!=='runiv';}).map(function(t){return '<span><i style="'+(t==='unt'?'border:1.5px dashed var(--sk-cat-gap)':'background:var(--sk-'+TOK[t]+')')+'"></i>'+esc(t==='ref'?T('et.bigen.r.refuted','refuted · either kind'):word(t))+'</span>';}).join('')+'<span>'+esc(T('et.bigen.r.len','longer = more sources'))+'</span>';
+    $('etRaverCard').innerHTML='<span class="rk">'+esc(c.mark)+'</span><div><b>'+esc(c.claim)+'</b><span>'+esc(word(c.tier)+' · '+c.src+' '+(c.src===1?T('et.bigen.b.source','source'):T('et.bigen.b.sources','sources'))+' · '+X.id+' '+X.topic)+'</span></div>';
+    wheel();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var X=D.exhibits[R.ex];
+    $('etPath').textContent='bigen://evidence-maps/'+X.file;
+    $('etChips').innerHTML='<span class="on">poolable false</span><span>'+X.claims.length+' claims · '+D.sources+' sources</span><span class="ok">verified '+esc(D.reg.last_run)+'</span>';
+    $('etGuard').innerHTML=esc(T('et.bigen.c.guard','pooled estimate = never rendered'))+' <b>'+esc(T('et.bigen.c.guardWhy','a category error on an evidence map'))+'</b>';
+    $('etSeg').innerHTML=D.exhibits.map(function(x,i){return '<button type="button" data-ex="'+i+'" aria-pressed="'+(i===R.ex)+'">exhibit '+esc(x.id)+' · '+esc(x.topic)+'</button>';}).join('');
+    var cls={sup:'t-ok',mix:'t-part',unt:'t-ai',ref:'t-guard',runiv:'t-guard'};
+    $('etClaims').innerHTML=X.claims.map(function(c,i){
+      return '<tr class="pick" data-i="'+i+'" tabindex="0" aria-expanded="false"><td class="k">'+c.id+'</td><td>'+esc(c.claim)+'<small class="'+cls[c.tier]+'">'+esc(c.mark+' '+B.TIER[c.tier].n.toLowerCase()+' · src '+c.src)+'</small></td></tr>'+
+        '<tr class="more" data-i="'+i+'" hidden><td colspan="2">'+esc(c.note)+(c.links.length?'<small>'+c.links.join(' ')+'</small>':'<small>'+esc(T('et.bigen.c.none','sources: [] · none is the verdict'))+'</small>')+'</td></tr>';
+    }).join('');
+    $('etGapHead').innerHTML='<tr><th>formulation</th>'+D.gap.map(function(r){return '<th>'+esc(r.row)+'</th>';}).join('')+'</tr>';
+    var cw={full:'<span class="t-ok">occupied</span>',early:'<span class="t-part">early-phase</span>',empty:'<span class="t-guard">empty</span>'};
+    $('etGap').innerHTML=D.cols.map(function(col,j){return '<tr><td class="k">'+esc(col)+'</td>'+D.gap.map(function(r){return '<td>'+cw[r.cells[j]]+'</td>';}).join('')+'</tr>';}).join('');
+    var g=D.reg;
+    $('etPipe').innerHTML=[
+      ['done','standing query · pubmed · '+g.schedule,'last_run '+g.last_run+' · new_since_last '+g.new_since_last],
+      ['done','corpus · '+D.sources+' sources','R01…R'+D.sources+' · every row links its PMID or DOI'],
+      ['done','grade · ✓ ≈ ? ✗ ⊘','untested = no study has asked the question · not a negative result'],
+      ['done','integrity sweep · retraction check',g.swept+' swept · '+g.flagged+' flagged · '+g.manual+' manual watch ('+g.manual_who+', not indexed)'],
+      ['guard','render · poolable false','no pooled estimate is defined, ever · a published pooled analysis is cited as theirs'],
+      ['now','dissent · fork the yaml','change a verdict, show your work · that is the dissent mechanism']
+    ].map(function(s){return '<li class="'+s[0]+'"><b>'+esc(s[1])+'</b><p>'+esc(s[2])+'</p></li>';}).join('');
+    $('etQuery').href='https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(g.query);
+    $('etReceipt').innerHTML=[
+      ['map',esc(X.file)+' · exhibit '+esc(X.id)],
+      ['claims',D.exhibits.map(function(x){return x.id+' '+x.claims.length;}).join(' · ')],
+      ['tiers',ORDER.map(function(t){return esc(t)+' '+X.tiers[t];}).join(' · ')],
+      ['gap cells',D.gapEmpty+' of '+D.gapCells+' empty'],
+      ['retraction',g.swept+' swept / '+g.flagged+' flagged / '+g.manual+' manual watch'],
+      ['verified','<span class="t-ok">'+esc(g.last_run)+'</span> · pubmed e-utilities'],
+      ['pooled','<span class="t-guard">never rendered</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etVerify').innerHTML=['open any source row above → read the abstract yourself',
+      'run the standing query → compare the corpus with <code>new_since_last '+g.new_since_last+'</code>',
+      'append <code>AND "Retracted Publication"[pt]</code> → expect '+g.flagged+' hits'].map(function(s){return '<li>'+s+'</li>';}).join('');
+  }
+
+  function all(){bee();raver();cy();}
+  var ev=$('eternal');
+  ev.addEventListener('click',function(e){
+    var row=e.target.closest('.et-b-row[data-t]');
+    if(row){var o=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',String(o));var p=ev.querySelector('.et-b-open[data-t="'+row.getAttribute('data-t')+'"]');if(p)p.hidden=!o;return;}
+    var ex=e.target.closest('[data-ex]');
+    if(ex){R.ex=+ex.getAttribute('data-ex');R.sel=0;raver();cy();return;}
+    var pt=e.target.closest('#etWheel [data-i]');
+    if(pt){R.sel=+pt.getAttribute('data-i');raver();var f=ev.querySelector('#etWheel [data-i="'+R.sel+'"]');if(f&&e.detail===0)f.focus();return;}
+    var tr=e.target.closest('.et-c-tab tr.pick');
+    if(tr&&!e.target.closest('a')){var o2=tr.getAttribute('aria-expanded')!=='true';tr.setAttribute('aria-expanded',String(o2));var m=ev.querySelector('.et-c-tab tr.more[data-i="'+tr.getAttribute('data-i')+'"]');if(m)m.hidden=!o2;}
+  });
+  ev.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var t=e.target.closest('#etWheel [data-i],.et-c-tab tr.pick'); if(!t)return;
+    e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  });
+  $('etYaml').addEventListener('click',function(){var y=$('yaml'),d=y&&y.closest('details');if(d)d.open=true;if(y)y.scrollIntoView({block:'start'});});
+  document.addEventListener('blang',all);
+  all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 </body>

@@ -1,0 +1,102 @@
+{
+ "generated": "2026-09-16T17:42:11.331Z",
+ "origin": "https://skaists.dev",
+ "rows": [
+  {
+   "page": "surfaces/index.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 506,
+    "keyedHolders": 509,
+    "counter": "⚙ 472/1891"
+   }
+  },
+  {
+   "page": "surfaces/wallet.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 59,
+    "keyedHolders": 61,
+    "counter": "⚙ 42/456"
+   }
+  },
+  {
+   "page": "surfaces/plur.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 127,
+    "keyedHolders": 131,
+    "counter": "⚙ 115/272"
+   }
+  },
+  {
+   "page": "surfaces/watch.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 61,
+    "keyedHolders": 61,
+    "counter": "⚙ 55/99"
+   }
+  },
+  {
+   "page": "surfaces/vending.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 48,
+    "keyedHolders": 49,
+    "counter": "⚙ 47/68"
+   }
+  },
+  {
+   "page": "surfaces/or-board.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 36,
+    "keyedHolders": 36,
+    "counter": "⚙ 29/39"
+   }
+  },
+  {
+   "page": "surfaces/privacy-lens.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 4,
+    "keyedHolders": 4,
+    "counter": "⚙ 0/38"
+   }
+  },
+  {
+   "page": "surfaces/profile.html",
+   "errs": [],
+   "checks": {
+    "regToggle": true,
+    "langToggle": true,
+    "corpusLoaded": true,
+    "ruRendered": 253,
+    "keyedHolders": 253,
+    "counter": "⚙ 16/43"
+   }
+  }
+ ]
+}

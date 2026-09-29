@@ -26,7 +26,7 @@
        open, and the tbar stretches to its tallest rider (see register.js /
        lang.js, same law). The tour bar is nobody's element selector. */
     el.style.cssText = 'display:inline-flex;align-items:center;gap:5px;margin:0 0 0 10px;padding-left:10px;' +
-      'border-left:1px solid #243026;font:10px "IBM Plex Mono",monospace;color:#8a9a8a;flex-shrink:0;' +
+      'border-left:1px solid #243026;font:12px ui-monospace,"IBM Plex Mono",monospace;color:#9aa39d;flex-shrink:0;' +
       'min-height:0;height:auto;box-sizing:border-box';
     el.innerHTML = '<span id="rb-dot" style="width:7px;height:7px;border-radius:50%;background:#5f6f61;display:inline-block;margin:0;min-height:0;box-sizing:border-box"></span>' +
       '<span id="rb-txt" style="margin:0;min-height:0;height:auto;box-sizing:border-box">rails…</span>';
@@ -80,7 +80,7 @@
     var r = document.getElementById('rb-recheck');
     if (r) r.onclick = recheck;
   }
-  var CHECK = ' <span id="rb-recheck" role="button" tabindex="0" title="ask a public chain node right now — the only outside request this page ever makes" style="color:#8a9a8a;cursor:pointer;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">↻</span>';
+  var CHECK = ' <span id="rb-recheck" role="button" tabindex="0" title="ask a public chain node right now — the only outside request this page ever makes" style="color:#8a9a8a;cursor:pointer;display:inline-flex;align-items:center;min-height:44px;padding:0 8px;border-radius:6px">↻</span>';
   async function boot(justAsked) {
     var dot = document.getElementById('rb-dot'), txt = document.getElementById('rb-txt');
     if (!dot || !txt) return;
@@ -92,8 +92,8 @@
       dot.style.background = '#7ddf8f'; dot.title = 'rails live · ' + when;
       var B = (location.pathname.indexOf('/beehive-nature/') === 0 ? '/beehive-nature/' : '/');
       txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span> · <a href="' + B +
-        'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">connect</a> · <a href="' + B +
-        'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">create bzDiD</a>';
+        'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 8px;border-radius:6px">connect</a> · <a href="' + B +
+        'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 8px;border-radius:6px">create bzDiD</a>';
       wireRecheck();
       return;
     }
@@ -120,7 +120,14 @@
       state = '⚠ fingerprint CHANGED — possible spoof'; col = '#ffb347';
       dot.style.background = '#ffb347';
     }
-    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soul + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span>';
+    /* the soul renders in HTML contexts — escape it (z2.sec S3): storage is
+       same-origin trust, but the badge must not turn a stored value into markup */
+    var esc = function (s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    };
+    var soulSafe = esc(soul);
+    txt.innerHTML = '<b style="color:#7ddf8f">' + soulSafe + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soulSafe + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span>';
     txt.title = 'bDiD + crypto rails connected · keyless · origin-pinned · ' + when;
     wireRecheck();
     var tp = document.getElementById('rb-trust');

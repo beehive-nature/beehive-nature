@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6e0c6768a8",
+ "bnr": "bnr://skaists.dev/blood/p6e0c6768a8",
+ "identity": {
+  "name": "Nathaniel Pettee",
+  "lifespan": "1691–1747",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB8G-G5S"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "28 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "28 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4071820716",
+    "name": "Joseph Pettee I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1bfaf76ae2",
+    "name": "Sarah Whitmarsh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p52c626f587",
+    "name": "William Petty"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB8G-G5S",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 28,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

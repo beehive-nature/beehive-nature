@@ -1,0 +1,36 @@
+{
+  "kind": "x0x-622-offline-shape-receipt",
+  "public_mesh": false,
+  "health_version": "0.41.4",
+  "participation": {
+    "epidemic_forward_bytes": 0,
+    "epidemic_forward_msgs": 0,
+    "mode": "leaf",
+    "passthrough_refresh_ran": false,
+    "passthrough_refresh_runs": 0,
+    "reason": "default_leaf",
+    "relay_bytes": 0,
+    "relay_bytes_semantics": "non_subscribed_forward",
+    "relay_msgs": 0,
+    "unsubscribed_refused_bytes": 0,
+    "unsubscribed_refused_frames": 0,
+    "unsubscribed_refused_graft_equiv": 0
+  },
+  "message_kinds": {
+    "anti_entropy": 0,
+    "decode_failed": 0,
+    "eager": 0,
+    "graft": 0,
+    "ihave": 0,
+    "iwant": 0,
+    "other": 0,
+    "prune": 0
+  },
+  "has_egress_budget": true,
+  "has_outbound_by_topic": true,
+  "collector_rc": 1,
+  "collector_rejected_short_window": true,
+  "decoy_default_port_hits": 0,
+  "raw_t0_kept": true,
+  "own_child_stopped": true
+}

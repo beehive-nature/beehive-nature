@@ -1,0 +1,40 @@
+{
+  "kind": "x0x-622-r4-runner-review",
+  "candidate": "13bbd756",
+  "public_mesh": false,
+  "offline": true,
+  "fast_suite": "27/27",
+  "race_control": "8/8",
+  "check_runs": "11/11 successful",
+  "probes": [
+    {
+      "name": "attempt-cap",
+      "requested_attempts": 4,
+      "attempt_dirs": 4,
+      "runner_exit": 7,
+      "finding": "three retries are accepted although the packet permits at most two"
+    },
+    {
+      "name": "lease-cap",
+      "requested_lease_seconds": 10801,
+      "attempt_dirs": 1,
+      "runner_exit": 7,
+      "finding": "a lease beyond the declared three-hour bound is accepted"
+    },
+    {
+      "name": "evidence-root-containment",
+      "mount_gate": "/dev/shm",
+      "evidence_root_on_different_device": true,
+      "attempt_dirs_written_outside_mount": true,
+      "runner_exit": 0,
+      "finding": "mount gate does not constrain X0X_EVIDENCE_ROOT to the bounded filesystem"
+    },
+    {
+      "name": "collision-cleanup-receipt",
+      "runner_exit": 5,
+      "node_stop_ran": true,
+      "cleanup_receipts": [],
+      "finding": "post-start evidence collision cleans the node without a CLEANUP.json receipt"
+    }
+  ]
+}

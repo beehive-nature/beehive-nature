@@ -1,0 +1,32 @@
+# x0x505-A2b fragment capture distillation (2026-09-15, v0.41.3 restart, NO effective drop)
+# raw pcap preserved on box ~/x0x-evidence-20260915/x0x505-A2b-frag.pcap (4.8MB, sha-checked)
+
+== totals ==
+4007
+== direction ==
+      3 In
+   4004 Out
+== oversized datagrams (first-frags, Out) by destination ==
+    548 217.118.206.2.63295:
+    540 107-250-148-193.zrh.ifog.li.5483:
+     24 static.172.101.203.116.clients.your-server.de.https:
+      5 static.229.157.21.65.clients.your-server.de.6483:
+      5 static.229.157.21.65.clients.your-server.de.5483:
+      5 142.93.199.50.https:
+      4 85.204.78.5.9522:
+      3 static.172.101.203.116.clients.your-server.de.6483:
+      3 static.172.101.203.116.clients.your-server.de.5483:
+      3 h-155-4-82-77.A980.priv.bahnhof.se.5483:
+      3 customer.lndngbr1.isp.starlink.com.44843:
+      3 217-62-187-34.cable.dynamic.v4.ziggo.nl.5483:
+== first 10 lines ==
+16:47:12.041511 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com.5483 > static.172.101.203.116.clients.your-server.de.https: UDP, length 4096
+16:47:12.041519 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041521 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041535 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com.5483 > static.172.101.203.116.clients.your-server.de.https: UDP, length 4096
+16:47:12.041543 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041544 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041558 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com.5483 > static.172.101.203.116.clients.your-server.de.https: UDP, length 4096
+16:47:12.041565 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041567 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com > static.172.101.203.116.clients.your-server.de: udp
+16:47:12.041581 enp0s6 Out IP bnr.subnet08111849.vcn08111849.oraclevcn.com.5483 > static.172.101.203.116.clients.your-server.de.https: UDP, length 4096
