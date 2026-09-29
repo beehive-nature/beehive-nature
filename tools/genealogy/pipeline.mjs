@@ -4,7 +4,7 @@
 // name regex to pin it (e.g. "Sigurd Ring de Trondheim").
 import { readFileSync, writeFileSync } from "node:fs";
 import { existsSync, readdirSync } from "node:fs";
-import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
+import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass, applyCorrection } from "./model.mjs";
 import { importWalk, importSourceWalk, harvestRecord, researchBasis } from "./fs-adapter.mjs";
 import { publish } from "./publish.mjs";
 import { joinLine, emptyPart } from "./lines.mjs";
@@ -45,15 +45,8 @@ let correctionsApplied = 0, overlayPersons = 0;
 if (overlay) {
   for (const [id, c] of Object.entries(overlay.corrections || {})) {
     if (!model.persons[id] || !c?.patch) continue;
-    model.persons[id] = {
-      ...model.persons[id], ...c.patch,
-      corrected: { attested: c.attested || "founder", note: c.note || "" },
-    };
-    // corrections recompute DERIVED metadata: a founder-attested death moves
-    // the era off 'living' — stale era on a corrected person is a bug
-    const fixed = model.persons[id];
-    const era = evidenceClass({ living: fixed.living, lifespan: fixed.lifespan });
-    fixed.evidence = { ...(fixed.evidence || {}), era, class: era };
+    try { model.persons[id] = applyCorrection(model.persons[id], c); }
+    catch (e) { console.error(`correction ${id}: ${e.message}`); process.exit(1); }
     correctionsApplied++;
   }
   for (const [id, p] of Object.entries(overlay.persons || {})) {

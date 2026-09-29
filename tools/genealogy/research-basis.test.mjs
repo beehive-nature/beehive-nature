@@ -19,6 +19,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 import { harvestRecord, researchBasis } from "./fs-adapter.mjs";
+import { applyCorrection } from "./model.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const L = join(HERE, "..", "..", "assets", "profile-archive", "lineage");
@@ -48,7 +49,7 @@ test("B1: every published research.basis is the sentence researchBasis() gives f
     const want = researchBasis(p);
     if (p.research.basis !== want) drift.push(`${id}: ${JSON.stringify(p.research.basis)} -> ${JSON.stringify(want)}`);
     if (harvestRecord(p)) branch.harvested++;
-    else if (Array.isArray(p.sources) && p.sources.length) branch.cited++;
+    else if (Array.isArray(p.cited) && p.cited.length) branch.cited++;
     else branch.none++;
   }
   assert.deepEqual(drift, [], "the archive and the generator disagree about what was harvested");
@@ -74,4 +75,32 @@ test("B2: every staged records.sources is a real harvest record, never an empty 
   }
   assert.ok(files > 10000 && withSources > 0, `read ${files} staged files, ${withSources} with records.sources`);
   assert.deepEqual(bad, []);
+});
+
+/* C: `sources` has ONE meaning in the data. A correction's cited documents live
+ * in `cited`; the pipeline applies corrections BEFORE the harvest, which writes
+ * `sources`, so a cited array left under `sources` is lost at the first harvest
+ * that finds anything for that person. */
+test("C: no published person and no correction carries cited documents under `sources`", () => {
+  const overlay = JSON.parse(readFileSync(join(L, "attested-overlays.json"), "utf8"));
+  const corrections = Object.entries(overlay.corrections || {});
+  const refused = [];
+  let citedPatches = 0;
+  for (const [id, c] of corrections) {
+    if (Array.isArray(c.patch && c.patch.cited)) citedPatches++;
+    try { applyCorrection({}, c); } catch (e) { refused.push(`${id}: ${e.message}`); }
+  }
+  /* non-vacuity: the real corrections were read, and some carry cited documents */
+  assert.ok(corrections.length > 0 && citedPatches > 0, `${corrections.length} corrections, ${citedPatches} with cited`);
+  assert.deepEqual(refused, []);
+
+  const arrays = [];
+  let records = 0, cited = 0;
+  for (const [id, p] of persons) {
+    if (Array.isArray(p.sources)) arrays.push(id);
+    else if (harvestRecord(p)) records++;
+    if (Array.isArray(p.cited)) cited++;
+  }
+  assert.ok(records > 0 && cited > 0, `${records} harvest records, ${cited} persons with cited`);
+  assert.deepEqual(arrays, [], "a published person carries an array under `sources`");
 });
