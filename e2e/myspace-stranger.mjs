@@ -116,7 +116,8 @@ const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
 const FINAL = /gone|cannot|can't|no way back|for good|permanent|not .*undo|nowhere else|anywhere else|no longer|will not exist|won't exist/i;
 const OWN = /your wallet|you pay|own wallet/i;
 
-// text a visitor can see: a hidden element, or one with no box on screen, contributes nothing
+// text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
+// "rendered" is not "in view without scrolling": the page is taller than the viewport.
 // (getClientRects, not offsetParent — the confirmation sheet is position:fixed and has no offsetParent)
 async function visibleText(page, sel) {
   return page.evaluate(s => { const el = document.querySelector(s); return el && !el.hidden && el.getClientRects().length > 0 ? (el.innerText || el.textContent || '') : ''; }, sel);
@@ -155,14 +156,15 @@ async function stranger(reg) {
   const R = { reg, revision: REVISION, wire: {}, offered: [], controlsReadableWithoutTap: null, learnTaps: 0, choices: [], firstFile: null, terms: {}, remove: null, recover: null, leakage: { front: {}, archive: {} }, funding: { foreverDeclaredPayer: null, visibleOwnWalletWording: false, ownWalletWordingWhere: [] }, settleMs: 0, pickAtRead: null, notes: [] };
   // every cross-origin request is aborted and logged under the phase it happened in
   const wire = { setup: new Set(), load: new Set(), read: new Set(), add: new Set(), 'after-add': new Set(), remove: new Set(), 'after-remove': new Set(), done: new Set() }; let phase = 'setup';
-  const t0 = Date.now();
+  let t0 = Date.now(); // restarted right before the page opens; setup time is printed on its own
   let ctx = null;
   try {
     ctx = await browser.newContext({ viewport: VIEW, isMobile: true, hasTouch: true });
     await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
     const page = await ctx.newPage();
     await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
-    phase = 'load';
+    R.setupMs = Date.now() - t0;
+    phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => R.notes.push('load: ' + e.message.split('\n')[0]));
     try {
       await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
@@ -171,14 +173,15 @@ async function stranger(reg) {
     // text (cypherpunk's write path in particular) depends on WHEN it is read. Wait until the set
     // of offered purposes and the pressed one have held still for 250 ms (a purpose that is
     // legitimately never offered does not hold the wait; 5 s cap), then record what was read under.
-    const tSettle = Date.now();
-    await page.waitForFunction(() => {
-      const d = window.__eternal?.data; if (!d) return false;
-      const sig = d.purposes.map(x => x.id + ':' + x.offered).join(',') + '|' + d.pick;
-      const w = window.__strangerSettle || (window.__strangerSettle = { sig: null, since: 0 });
-      if (w.sig !== sig) { w.sig = sig; w.since = performance.now(); return false; }
-      return performance.now() - w.since >= 250;
-    }, null, { timeout: 5000, polling: 50 }).catch(() => R.notes.push('the offered purposes kept changing for 5 s; the front was read as it stood'));
+    // (polled from this side; the instrument writes nothing into the page it measures)
+    const tSettle = Date.now(); let sig = null, since = tSettle;
+    for (;;) {
+      const now = await page.evaluate(() => { const d = window.__eternal?.data; return d ? d.purposes.map(x => x.id + ':' + x.offered).join(',') + '|' + d.pick : null; });
+      if (now !== sig) { sig = now; since = Date.now(); }
+      else if (now !== null && Date.now() - since >= 250) break;
+      if (Date.now() - tSettle > 5000) { R.notes.push('the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
+      await page.waitForTimeout(50);
+    }
     R.settleMs = Date.now() - tSettle; // instrument time, counted inside "ms from open" and printed beside it
     R.pickAtRead = await page.evaluate(() => window.__eternal?.data?.pick ?? null);
 
@@ -187,7 +190,7 @@ async function stranger(reg) {
     // fronts (every child of main except the fronts, visible text only)
     const front = await visibleText(page, FRONT[reg]);
     const archive = await visibleTextAll(page, 'main > :not(#eternal)');
-    R.leakage = { front: countLeak(front), archive: countLeak(archive) };
+    R.leakage = { frontBeforeTaps: countLeak(front), front: countLeak(front), cardsRead: {}, archive: countLeak(archive), archiveWithRow: null };
     // the purpose controls: their own visible words, and separately what they tell a screen reader
     const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
@@ -211,6 +214,10 @@ async function stranger(reg) {
       o.text = (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim(); o.learnedByTap = true;
     }
     R.controlsReadableWithoutTap = options.filter(o => !o.learnedByTap && o.text).length;
+    // the words read on the cards during the learning taps are words the visitor had to read: they count
+    const cardsRead = options.filter(o => o.learnedByTap).map(o => o.text).join(' ');
+    R.leakage.cardsRead = countLeak(cardsRead);
+    R.leakage.front = countLeak(front + ' ' + cardsRead);
     const declared = await page.evaluate(() => (window.__eternal?.data?.purposes || []).map(p => ({ id: p.id, offered: p.offered, rail: p.rail, terms: p.terms })));
     // own-wallet wording is looked for everywhere the visitor can read it, without counting a sentence twice
     const ownWhere = {
@@ -242,8 +249,8 @@ async function stranger(reg) {
       if (pick && pick.purpose === intent.id) {
         const t = pick.text.toLowerCase();
         R.terms[intent.id] = {
-          lifetimeStated: /gone|closes|session|stays|until|forever|permanent|lasts|drop|remove/.test(t),
-          readersStated: /only this phone|this phone only|this device|link|anyone|everyone|readers/.test(t),
+          lifetimeStated: /\b(gone|closes|session|stays|until|forever|permanent|lasts|drop|remove)\b/.test(t),
+          readersStated: /only this phone|this phone only|this device|\b(link|anyone|everyone|readers)\b/.test(t),
           payerStated: /\b(pay|pays|paid|payer|paying|wallet)\b/.test(t), // not "nobody"/"hive": those also occur in the deletable and lifetime clauses
         };
       }
@@ -260,13 +267,15 @@ async function stranger(reg) {
         steps++;
         const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK)]);
         steps++;
+        // the file picker is the device's dialog, not a press on the page: it is counted apart from the presses
         await chooser.setFiles({ name: 'stranger-note.txt', mimeType: 'text/plain', buffer: Buffer.from('a note from a stranger', 'utf8') });
-        steps++;
         await page.waitForFunction(() => window.__eternal.data.count >= 1, null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         const archivePressed = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') || null);
-        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, ms: tStored - t0, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
+        // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
+        R.leakage.archiveWithRow = countLeak(await visibleTextAll(page, 'main > :not(#eternal)'));
+        R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, picker: true, ms: tStored - t0, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
       } catch (e) {
         R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, ms: Date.now() - t0, error: String(e.message).split('\n')[0], networkDuringAdd: [...wire.add].sort() };
       }
@@ -278,7 +287,7 @@ async function stranger(reg) {
     // REMOVE: find a visible remove control on the stored row, read the confirmation, confirm, check the outcome is stated.
     if (R.firstFile?.ok) {
       phase = 'remove';
-      // only a control with a box on screen counts. It is selected with a playwright locator and
+      // only a rendered control (one with a box) counts. It is selected with a playwright locator and
       // pressed through playwright's actionability checks: nothing is written into the page (the
       // page observes attribute changes on #list and would re-render its fronts on a tag write)
       const rmLoc = page.locator('#list button, #list a, #list [role=button]').filter({ hasText: /\b(remove|delete|drop|bin|trash)\b/i }).locator('visible=true');
@@ -286,7 +295,7 @@ async function stranger(reg) {
       const rm = candidates ? { text: (await rmLoc.first().innerText()).trim(), candidates } : null;
       if (!rm) {
         // the whole-space list may be below the fold; cypherpunk's front points at "the rows below"
-        R.remove = { control: null, ok: false, note: 'no visible remove control on the stored row', networkDuringRemove: [...wire.remove].sort() };
+        R.remove = { control: null, ok: false, note: 'no rendered remove control on the stored row', networkDuringRemove: [...wire.remove].sort() };
         phase = 'after-remove';
       } else {
         try {
@@ -305,12 +314,13 @@ async function stranger(reg) {
           R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: fin(sentence), finalityAfter: fin(after), networkDuringRemove: removeWire };
         } catch (e) { R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: String(e.message).split('\n')[0], networkDuringRemove: [...wire.remove].sort() }; phase = 'after-remove'; }
       }
-      // RECOVER: does anything on screen offer to bring it back?
+      // RECOVER: does anything rendered on the page offer to bring it back? (rendered = has a box; the page is
+      // taller than the viewport, so this is "on the page", not "in view without scrolling")
       // Only the page's own controls count: the estate's tour bar carries a "recover" link that is
       // about KEY recovery (surfaces/recover.html), and a stranger who followed it would not get
       // their file back. Anything inside #tbar or pointing at recover.html is excluded by name.
       const rec = await page.evaluate(() => {
-        // same visibility rule as everywhere else (client rects): a position:fixed undo toast has no offsetParent and must still count
+        // same rendered rule as everywhere else (client rects): a position:fixed undo toast has no offsetParent and must still count
         const els = [...document.querySelectorAll('main button, main a, main [role=button], main summary, .sheet button, body > button, body > [role=button]')].filter(el => !el.hidden && el.getClientRects().length > 0 && !el.closest('#tbar') && !/recover\.html/.test(el.getAttribute('href') || ''));
         const hit = els.find(el => /\b(undo|restore|recover)\b|bring .* back|put .* back|get .* back/i.test(el.innerText || el.getAttribute('aria-label') || ''));
         return hit ? (hit.innerText || hit.getAttribute('aria-label')).trim() : null;
@@ -342,7 +352,7 @@ async function stranger(reg) {
 // one summary per result, used by the stderr line and the table alike
 const summarize = r => {
   const offered = r.choices.filter(c => c.offered);
-  return { wrong: offered.filter(c => c.wrong).length, offered: offered.length, nowhere: offered.filter(c => c.chose === null).length, leakFront: sum(r.leakage.front), leakArchive: sum(r.leakage.archive) };
+  return { wrong: offered.filter(c => c.wrong).length, offered: offered.length, nowhere: offered.filter(c => c.chose === null).length, leakFront: sum(r.leakage.front), leakCards: sum(r.leakage.cardsRead), leakArchive: sum(r.leakage.archive), leakArchiveWithRow: r.leakage.archiveWithRow ? sum(r.leakage.archiveWithRow) : null };
 };
 
 const results = [];
@@ -350,7 +360,7 @@ for (const reg of REGS) {
   const r = await stranger(reg);
   results.push(r);
   const s = summarize(r);
-  process.stderr.write(`${reg.padEnd(11)} offered ${r.offered.join(',') || 'none'} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' steps ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} archive ${s.leakArchive} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
+  process.stderr.write(`${reg.padEnd(11)} offered ${r.offered.join(',') || 'none'} | readable without a tap ${r.controlsReadableWithoutTap}/${r.offered.length} | wrong choice ${s.wrong}/${s.offered} | first file ${r.firstFile?.ok ? r.firstFile.steps + ' presses+picker ' + r.firstFile.ms + 'ms' : 'FAILED: ' + r.firstFile?.error} | remove ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | recover ${r.recover ? (r.recover.offered ? 'offered' : 'none') : '—'} | leak front ${s.leakFront} (cards ${s.leakCards}) archive ${s.leakArchive}/${s.leakArchiveWithRow ?? '—'} | own-wallet wording ${r.funding.visibleOwnWalletWording}\n`);
 }
 await browser.close(); server.close();
 
@@ -359,13 +369,13 @@ L.push(`# MY SPACE — the stranger instrument, ${results.length} registers at $
 L.push('');
 L.push('Machine-measured. CHOICE, FIRST FILE, REMOVE, RECOVER, LEAKAGE and FUNDING are observed behaviour and visible wording. TERMS is a proxy (the sentence is on the control, or on its card after a tap, before the choice), not comprehension. Task completion rate and comprehension of temporary vs forever are not measured here: they need people.');
 L.push('');
-L.push('| register | purposes offered | controls readable without a tap | wrong choice (of offered) | led nowhere | first file: steps · ms | wire during keep-here add | wire during remove | terms on control (now / forever): lifetime | remove | outcome stated | finality stated (before confirm / after) | recover offered | leak words in front | leak words in archive | own-wallet wording visible | forever payer (declared) |');
+L.push('| register | purposes offered | controls readable without a tap | wrong choice (of offered) | led nowhere | first file: page presses (+ the file picker) · ms | wire during keep-here add | wire during remove | terms on control (now / forever): lifetime | remove | outcome stated | finality stated (before confirm / after) | recover offered | leak words in front (incl. cards read) | leak words in archive (empty / with the stored row) | own-wallet wording visible | forever payer (declared) |');
 L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
 for (const r of results) {
   const s = summarize(r);
   const lt = id => r.terms[id] ? (r.terms[id].lifetimeStated ? 'y' : 'n') : '—';
   const yn = v => v ? 'y' : 'n';
-  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps} · ${r.firstFile.ms} (${r.settleMs} of it instrument settle)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
+  L.push(`| ${r.reg} | ${r.offered.join(', ') || 'none'} | ${r.controlsReadableWithoutTap ?? '—'}/${r.offered.length}${r.learnTaps ? ' (' + r.learnTaps + ' taps to learn the rest)' : ''} | ${s.wrong}/${s.offered} | ${s.nowhere} | ${r.firstFile?.ok ? `${r.firstFile.steps} (+ picker) · ${r.firstFile.ms} (${r.settleMs} of it instrument settle)` : 'FAILED'} | ${r.firstFile?.networkDuringAdd?.length ? '**' + r.firstFile.networkDuringAdd.length + ' request(s)**' : 'none'} | ${r.remove ? (r.remove.networkDuringRemove?.length ? '**' + r.remove.networkDuringRemove.length + ' request(s)**' : 'none') : '—'} | ${lt('now')} / ${lt('forever')} | ${r.remove ? (r.remove.ok ? 'ok' : 'no') : '—'} | ${r.remove?.ok ? yn(r.remove.outcomeStated) : '—'} | ${r.remove?.ok ? yn(r.remove.finalityBeforeConfirm) + ' / ' + yn(r.remove.finalityAfter) : '—'} | ${r.recover ? yn(r.recover.offered) : '—'} | ${s.leakFront}${s.leakCards ? ' (' + s.leakCards + ' on the cards)' : ''}${r.reg === 'cypherpunk' ? ' (declared voice)' : ''} | ${s.leakArchive} / ${s.leakArchiveWithRow ?? '—'} | ${r.funding.visibleOwnWalletWording ? 'y (' + r.funding.ownWalletWordingWhere.join('; ') + ')' : 'n'} | ${r.funding.foreverDeclaredPayer ?? '—'} |`);
 }
 L.push('');
 L.push('## Receipts');
@@ -374,10 +384,10 @@ for (const r of results) {
   L.push(`### ${r.reg}`);
   L.push(`- controls readable without a tap: ${r.controlsReadableWithoutTap ?? '—'} of ${r.offered.length}${r.learnTaps ? `; the other ${r.learnTaps} carry no words of their own and were learned by tapping each and reading the card` : ''}`);
   for (const c of r.choices) L.push(`- "${c.ask}" → ${c.offered ? (c.chose ? `chose **${c.chose}**${c.wrong ? ' (WRONG, meant ' + c.means + ')' : ''} (score ${c.score}) via "${c.control}"${c.learnedByTap ? ' (read on the card after tapping the ring)' : ''}` : `the words led nowhere (top score ${c.score}${c.tied ? ', tied between ' + c.tied.join(' / ') : ''})`) : 'not offered on this page'}`);
-  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from open to the row observed stored (of which ${r.settleMs} ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
+  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored (of which ${r.settleMs} ms is the instrument waiting for the offered purposes and the pressed one to hold still before reading; ${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
-  if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing on screen offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
-  L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.front)}; in the shared archive below: ${JSON.stringify(r.leakage.archive)}`);
+  if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
+  L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.learnTaps ? `; on the cards read during the learning taps: ${JSON.stringify(r.leakage.cardsRead)}; front including those cards: ${JSON.stringify(r.leakage.front)}` : ''}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
   L.push(`- funding: own-wallet wording visible ${r.funding.visibleOwnWalletWording}${r.funding.visibleOwnWalletWording ? ' (in: ' + r.funding.ownWalletWordingWhere.join('; ') + ')' : ''}; the forever rail declares payer = ${r.funding.foreverDeclaredPayer ?? 'none (not offered)'}`);
   for (const [ph, hosts] of Object.entries(r.wire)) if (ph !== 'add' && ph !== 'remove') L.push(`- cross-origin attempted during ${ph} (aborted): ${hosts.join(', ')}`);
   if (r.notes.length) L.push(`- notes: ${r.notes.join(' | ')}`);
