@@ -24,11 +24,12 @@
 //               separately with the matching word printed. Every cross-origin request
 //               during and just after the remove is logged.
 //   RECOVER     whether any visible control offers to undo or bring a removed file back.
-//   LEAKAGE     count of implementation words (adapter, rail, worker, indexeddb, aes,
-//               schnorr, temp, local, blossom, ant, nostr, relay, datamap, chunk, digest,
-//               sha, signer, wallet, gas, token, scheme, predicate, ciphertext, keyref,
-//               pubkey, plus every rail scheme and network the page declares at run time,
-//               each as one phrase), whole words only, in the register's own front and in the shared
+//   LEAKAGE     count of implementation words: a fixed list (adapter, rail, worker, indexeddb,
+//               aes, schnorr, nostr, relay, datamap, chunk, digest, sha, signer, wallet, gas,
+//               token, scheme, predicate, ciphertext, keyref, pubkey) plus every rail scheme
+//               and network the page itself declares at run time (temp, local, blossom, ant,
+//               autonomi, arbitrum-one, skaists.buzz today), each declared name as one phrase
+//               counted once; whole words only, in the register's own front and in the shared
 //               archive below it (visible text only). cypherpunk is expected to say them —
 //               that is its voice — so its count is reported as declared, not as leakage.
 //   FUNDING     whether the visible words, anywhere the visitor can read them (front
@@ -52,9 +53,9 @@ import { argReader, UsageError } from './lib/args.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]'); // --k v or --k=v; a missing value is a UsageError
-// the two flag reads happen before anything is open, so a usage error can simply exit 2 here
-const readFlags = () => { try { return { regs: arg('reg', 'bee,raver,cypherpunk'), out: arg('json', '') }; } catch (e) { if (e instanceof UsageError) { process.stderr.write(e.message + '\n'); process.exit(2); } throw e; } };
+// --k v or --k=v; a missing value or an unknown flag is a UsageError. The flags are read before anything
+// is open, so a usage error can simply exit 2 here
+const readFlags = () => { try { const arg = argReader('usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]', ['json', 'reg']); return { regs: arg('reg', 'bee,raver,cypherpunk'), out: arg('json', '') }; } catch (e) { if (e instanceof UsageError) { process.stderr.write(e.message + '\n'); process.exit(2); } throw e; } };
 const FLAGS = readFlags();
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
@@ -140,8 +141,13 @@ const finalWord = t => STAYS.test(t) ? null : (t.match(FINAL) || [null])[0];
 // opposite ("asks your wallet for nothing", "you pay nothing") is not a hit, so the column can go to "n" once
 // the wording is fixed; the sentence that earned a hit is printed so a reader can judge it.
 const OWN = /your wallet|you pay|own wallet/i;
-// the negation must be about the paying itself, not anywhere in the sentence ("you pay, not from ours" still says you pay)
-const NEGATED = /\b(pays?|paid|paying)\s+nothing\b|\bnever\s+(pays?|paid|paying|asks?)\b|\bwallet\s+for\s+nothing\b|\bno\s+wallet\b|\bwithout\s+(a\s+|your\s+)?wallet\b|\basks?\s+(nothing|for nothing)\b/i;
+// the negation must be about the paying: a negating word within four words of "pay" or "wallet" in the same
+// sentence ("pays nothing", "nothing leaves your wallet", "you do not pay", "asks your wallet for nothing").
+// The sentence that earned a hit is printed, so a reader can judge the two edge shapes this rule gets wrong:
+// "you pay, not from ours" (negation near "pay", counted as not paying) and a negation more than four words away.
+const NEG = '(nothing|never|not|no|n\'t|without|nobody)';
+const PAY = '(pays?|paid|paying|wallet)';
+const NEGATED = new RegExp(`\\b${NEG}\\b\\W+(?:\\w+\\W+){0,4}?\\b${PAY}\\b|\\b${PAY}\\b\\W+(?:\\w+\\W+){0,4}?\\b${NEG}\\b`, 'i');
 const ownWalletSentence = text => (text.match(/[^.!?·\n]+[.!?]?/g) || []).map(s => s.trim()).find(s => OWN.test(s) && !NEGATED.test(s)) || null;
 
 // text a visitor can read: a hidden element, or one that is not rendered (no box), contributes nothing.
@@ -181,8 +187,6 @@ async function pressControl(page, reg, purpose) {
     if (under) throw new Error(`the ${purpose} ring's tap point is covered by ${under}`);
     await page.touchscreen.tap(pt.x, pt.y);
   } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
-  // the page's own truth (the archive's pressed mode button, or the control's own pressed state) or its
-  // data mirror, whichever answers first: the mirror is debounced and can miss a change
   // the archive's pressed mode button is the page's own state (the fronts' aria-pressed is rendered from the
   // debounced mirror, which can hold a stale equal value, so it is not enough on its own)
   await page.waitForFunction(p => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`), purpose, { timeout: 5000 });
@@ -326,7 +330,7 @@ async function stranger(reg) {
         R.terms[intent.id] = {
           lifetimeStated: /\b(gone|closes|session|stays|while|until|forever|permanent|lasts)\b/.test(t), // not "drop"/"remove": those state deletability, not lifetime
           readersStated: /only this phone|this phone only|this[ -]device|\b(link|anyone|everyone)\b/.test(t), // "link-holders" is matched by "link"
-          payerStated: /\b(pay|pays|paid|paying|wallet)\b|\bpayer \S+/.test(t), // bee/raver say it in prose; cypherpunk prints "payer <any value>" — a new payer value must still count
+          payerStated: /\b(pay|pays|paid|paying|wallet)\b|\bpayer (?!(undefined|null|none|—|-|·)\b)\S+/.test(t), // bee/raver say it in prose; cypherpunk prints "payer <value>" — any real value counts, an empty one ("undefined", "none") does not
         };
       }
     }
@@ -350,7 +354,9 @@ async function stranger(reg) {
         await chooser.setFiles({ name: 'stranger-note.txt', mimeType: 'text/plain', buffer: Buffer.from('a note from a stranger', 'utf8') });
         // the page's own truth, not only its data mirror: a row painted into the archive, the body's file
         // state, or the mirror's count — whichever the page shows first
-        await page.waitForFunction(() => document.querySelector('#list').children.length > 0 || document.body.dataset.state === 'file' || (window.__eternal?.data?.count ?? 0) >= 1, null, { timeout: 15000 });
+        // the page's own truth only (a row painted into the archive, or the body's file state): the mirror's count can
+        // arrive a few ms before the row is painted, and the archive is read "with the row showing" right after this
+        await page.waitForFunction(() => document.querySelector('#list').children.length > 0 || document.body.dataset.state === 'file', null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
         // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up)
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
@@ -382,10 +388,11 @@ async function stranger(reg) {
       const RM = /\b(remove|delete|drop|bin|trash)\b/i;
       const rmLoc = page.locator('#list').getByRole('button', { name: RM }).or(page.locator('#list').getByRole('link', { name: RM })).locator('visible=true');
       const candidates = await rmLoc.count();
-      const rm = candidates ? { text: ((await rmLoc.first().innerText()).trim() || (await rmLoc.first().getAttribute('aria-label')) || '').trim(), candidates } : null; // its words, or its accessible name when it shows only an icon
+      // its words under the one visibility rule, or its accessible name when it shows only an icon
+      const rm = candidates ? { text: await rmLoc.first().evaluate(new Function('el', SEEN_TEXT + ` return wordsIn(el, null) || (el.getAttribute('aria-label') || '').trim();`)), candidates } : null;
       if (!rm) {
         // no match: print every rendered control on the rows, so a reader can tell a product gap from an instrument vocabulary miss
-        const rowControls = await page.locator('#list button, #list a, #list [role=button]').locator('visible=true').allInnerTexts();
+        const rowControls = await page.evaluate(new Function(SEEN_TEXT + ` return [...document.querySelectorAll('#list button, #list a, #list [role=button]')].filter(seen).map(el => wordsIn(el, null) || (el.getAttribute('aria-label') || '').trim());`));
         phase = 'after-remove';
         R.remove = { control: null, ok: false, note: `no rendered control on the stored row says remove / delete / drop / bin / trash; the row's controls say: ${rowControls.map(t => '"' + t.trim() + '"').join(', ') || 'nothing'}`, networkDuringRemove: [...wire.remove].sort() };
         await page.waitForTimeout(250); // the after-remove window is opened on every path, not only the successful one
@@ -495,7 +502,7 @@ for (const r of results) {
   L.push(`- controls readable without a tap: ${r.controlsReadableWithoutTap ?? '—'} of ${r.offered.length}${r.pressedCardReadFree ? " (the pressed ring's card was already on the page)" : ''}${r.learnTaps ? `; ${r.learnTaps} carry no words of their own and were learned by tapping each and reading the card` : ''}${r.failedTaps ? `; ${r.failedTaps} could not be learned (tap failed or the card did not answer; see notes)` : ''}`);
   for (const [id, t] of Object.entries(r.terms)) L.push(`- terms on the ${id} control before the choice: lifetime ${t.lifetimeStated ? 'stated' : 'not stated'}, readers ${t.readersStated ? 'stated' : 'not stated'}, payer ${t.payerStated ? 'stated' : 'not stated'}`);
   for (const c of r.choices) L.push(`- "${c.ask}" → ${c.offered ? (c.chose ? `chose **${c.chose}**${c.wrong ? ' (WRONG, meant ' + c.means + ')' : ''} (score ${c.score}) via "${c.control}"${c.learnedByTap ? ' (read on the card after tapping the ring)' : c.readOnCard ? ' (read on the card the pressed ring already showed)' : ''}` : `the words led nowhere (top score ${c.score}${c.tied ? ', tied between ' + c.tied.join(' / ') : ''})`) : 'not offered on this page'}${c.offered && c.usable === false ? ' — the control for this purpose is disabled or unreadable, so it could not be chosen' : ''}`);
-  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored: ${r.loadMs} ms until the fronts were ready in this register, ${r.settleMs} ms of the instrument waiting for the offered purposes and the pressed one to hold still, ${r.readMs} ms of the instrument reading the page and learning the controls, ${r.firstFile.addMs} ms for the add itself from the purpose press to the row (the press, the add press, the picker and their round-trips through the harness are inside it), and the rest between those (${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
+  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored: ${r.loadMs} ms until the fronts were ready in this register, ${r.settleMs} ms of the instrument waiting for the offered purposes and the pressed one to hold still, ${r.readMs} ms of the instrument reading the page and learning the controls, ${r.firstFile.addMs} ms for the add itself from the purpose press to the row (the press, the add press, the picker and their round-trips through the harness are inside it), and the rest between those (${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : (r.firstFile.measured ? 'no file, measured: ' : 'FAILED (instrument): ') + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
   if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'}; ${Math.round(r.recover.tourBarKeyRecoveryLinkVisibleFraction * 100)}% of its width inside the viewport and the strip)` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.pressedCardReadFree || r.learnTaps ? `; on the cards the visitor read (the pressed ring's and the ones reached by a tap): ${JSON.stringify(r.leakage.cardsRead)}` : ''}; rail and network words the page declared and that joined the vocabulary: ${r.railWords.join(', ') || 'none'}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
@@ -507,6 +514,4 @@ for (const r of results) {
 }
 process.stdout.write(L.join('\n') + '\n');
 if (OUT) await writeFile(OUT, JSON.stringify({ revision: REVISION, results }, null, 1));
-// a failed or unreliable measurement — no first file, an aborted run, a remove that errored, a ring that could not be
-// learned, a page that never became ready or never took the register, an offered set still changing at the cap — exits 1
 if (results.some(unsound)) process.exitCode = 1;

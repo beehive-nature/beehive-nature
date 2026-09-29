@@ -39,6 +39,7 @@ export async function serveTree(root) {
   const top = await realpath(resolve(root));
   const inside = p => p === top || p.startsWith(top + sep);
   const server = createServer(async (req, res) => {
+    let fh = null; // the open file handle, closed on every path that does not hand it to a stream
     try {
       const [rawPathIn, query] = req.url.split(/\?(.*)/s);
       const rawPath = rawPathIn.replace(/^\/+/, '/'); // "//dir" would otherwise redirect off the origin (protocol-relative)
@@ -48,21 +49,20 @@ export async function serveTree(root) {
       if (path.endsWith('/')) file = join(file, 'index.html');
       const real = await realpath(file); // a symlink pointing out of the tree is not served either
       if (!inside(real)) return notFound(res);
-      let fh;
       try { fh = await open(real, 'r'); } catch (e) { if (e.code === 'EISDIR') return directory(res, path, rawPath, query); throw e; }
       const st = await fh.stat();
-      if (st.isDirectory()) { await fh.close(); return directory(res, path, rawPath, query); }
+      if (st.isDirectory()) { await fh.close(); fh = null; return directory(res, path, rawPath, query); }
       const type = MIME[extname(file).toLowerCase()] || 'application/octet-stream';
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
       if (m && (m[1] || m[2])) { // Range honoured so <audio>/<video> can seek
         const start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
-        if (start > end || start >= st.size) { await fh.close(); res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
+        if (start > end || start >= st.size) { await fh.close(); fh = null; res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
         res.writeHead(206, { 'Content-Type': type, 'Content-Length': end - start + 1, 'Content-Range': `bytes ${start}-${end}/${st.size}`, 'Accept-Ranges': 'bytes' });
-        return send(fh.createReadStream({ start, end }), res);
+        const s = fh.createReadStream({ start, end }); fh = null; return send(s, res); // the stream owns the handle from here
       }
       res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' });
-      send(fh.createReadStream({ start: 0, end: Math.max(0, st.size - 1) }), res); // bounded to the size the header promised
-    } catch { notFound(res); }
+      const s = fh.createReadStream({ start: 0, end: Math.max(0, st.size - 1) }); fh = null; send(s, res); // bounded to the size the header promised
+    } catch { if (fh) fh.close().catch(() => {}); notFound(res); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
   return { base, close: () => new Promise(r => server.close(() => r())) };
