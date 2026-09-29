@@ -45,13 +45,16 @@ No tool sends, copies, navigates or leaves the page. Agent text only reaches `.v
 | `03d673306` | same reviewer | APPROVE-WITH-NITS: "send clears" test proved nothing |
 | `e238cb682` | Explore subagent | APPROVE-WITH-NITS (test commit), then merge preview into `3939e4023`: APPROVE-WITH-NITS |
 | `e238cb682` | Codex security review | 2 P1 + 4 P2. P2: stale status hid the notice, the draft was not verbatim, focus was left on a submit control, dedup outlived provenance. P1: this dispatch was missing, and the PR body counts were stale |
-| `55a6e7489` | fixes for all four P2s | re-review pending at the time of writing |
+| `0a14c780a` | Explore subagent, merge preview into `3939e4023` | APPROVE-WITH-NITS: all four P2s fixed. Nits: `/help` didn't clear the stage, a stage clears bLOVErAi's "Copy was blocked", the dedup test couldn't isolate send, and the native run's head was unstated |
+| `0a14c780a` | Codex security review | **no security issues found** |
+| `0a14c780a` | Codex code review | 2 P2: a transient "not ready" error (Enter while the frame loads) was kept as if the frame had failed to open, hiding the notice; a staged `/help` or `/install` that was sent left the stage and dedup set (the same defect as nit 1) |
+| next head | fixes for both | `s.openFailed` is set only by a frame that loaded and failed `expectedFrame`, and only that keeps its error. The slash-command branch clears `staged` and `lastStaged` |
 
 A reviewer's claim that the `Co-Authored-By` trailer names the wrong model was rejected: the trailer follows this session's own attribution instruction.
 
 ## Receipts
 
-- **Unit harness:** `node --test e2e/agent-dock.test.mjs` passes 43/43 at `55a6e7489`, with 16 new tests.
+- **Unit harness:** `node --test e2e/agent-dock.test.mjs` passes 45/45 at the head after `0a14c780a`, with 18 new tests (43/43 with 16 new at `55a6e7489`). Both tests from the last round fail on `0a14c780a`'s code.
   - Each fix is mutation-checked: the new test fails on the prior code.
   - Not explained: the whole file run against `e238cb682`'s dock hung (a synchronous stall; `--test-timeout` did not fire), while each new test alone just fails. The fixed code runs to completion.
 - **CI unit list** (`tests.yml` front-door line):
@@ -59,7 +62,7 @@ A reviewer's claim that the `Co-Authored-By` trailer names the wrong model was r
   - At `03d673306`: 389/389, three times.
 - **CI on `e238cb682`:** `tests` and `secret-scan` were green on both the push and pull_request runs.
 - **Stand-in browser:** the app's browser pane, a real Chromium DOM with a fake registry and the real bQueenBee engine. Focus was kept, the notice survived the engine load, the engine's chat was unchanged, and the repeat was refused.
-- **Native Chrome 153.0.8010.53, throwaway profile** (a separate process, temporary `--user-data-dir` deleted after; the founder's Chrome was untouched):
+- **Native Chrome 153.0.8010.53, throwaway profile, run at head `e238cb682`**, before the Codex fixes. Its "focus kept" is about a field elsewhere on the page, which later code still leaves alone. The later move-off-the-composer path is proven by the unit harness only, not natively. (a separate process, temporary `--user-data-dir` deleted after; the founder's Chrome was untouched):
   - The flag was set only in that profile's `Local State` as `enable-webmcp-testing@1`. The name was read from its own `chrome://flags`.
   - Control, with no flag: no `document.modelContext`.
   - With the flag, on `surfaces/bmeshasi.html`: native `getTools()` listed both tools. Native `executeTool` round-trips passed list, stage (dock open, focus kept, nothing sent, engine chat unchanged), repeat refusal and bAigents refusal.

@@ -106,7 +106,7 @@
   });}
   function suspend(s,inactive){var f=s.frame&&expectedFrame(s);if(f&&typeof f.window.bnrDockSuspend==='function')f.window.bnrDockSuspend(inactive);}
   function prepareFrame(s,loaded){
-    var f=expectedFrame(s);s.ready=!!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
+    var f=expectedFrame(s);s.ready=!!f;s.openFailed=!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
     var d=f.document;d.documentElement.classList.add('ad-embedded');d.documentElement.setAttribute('data-ad-view',document.body.getAttribute('data-reg')||'bee');d.body.setAttribute('data-reg',document.body.getAttribute('data-reg')||'bee');
     if(!d.getElementById('adReading')){
       var st=d.createElement('style');st.id='adReading';st.textContent=frameCss;d.head.appendChild(st);
@@ -164,7 +164,7 @@
   }
   function send(){
     var s=session(current),v=prompt.value.trim();if(!v||current.id==='baigents')return;s.draft=prompt.value;
-    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';helpOpen=true;showCurrent();return;}
+    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';s.staged='';s.lastStaged='';helpOpen=true;showCurrent();return;}
     if(current.src){var f=s.ready&&expectedFrame(s);if(!f){s.status='Your message was not sent. The agent is not ready; your draft is kept.';s.error=true;updateComposer();return;}
       try{f.document.getElementById('q').value=v;f.window.ask();}catch(e){s.status='The agent could not accept your message. Your draft is kept; check the conversation before trying again.';s.error=true;updateComposer();return;}
       s.status='Message received by '+current.name+'.';
@@ -283,8 +283,9 @@
         var f=document.activeElement;if(f===prompt||f===$('adSend')){$('adTitle').setAttribute('tabindex','-1');$('adTitle').focus();}
         Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
         var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;s.lastStaged=v;
-        /* an old receipt or send failure must not hide the notice; an agent that cannot open keeps its error */
-        if(!(a.src&&!s.ready&&s.error)){s.status='';s.error=false;}
+        /* an old receipt or send failure (including "not ready" while loading) must not hide the notice;
+           only a frame that loaded and failed to open keeps its error */
+        if(!s.openFailed){s.status='';s.error=false;}
         s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
         return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
       }});

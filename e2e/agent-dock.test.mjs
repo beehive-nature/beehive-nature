@@ -505,3 +505,22 @@ test('deduplication expires once the person edits or sends, so their own identic
   assert.equal(d.$('adPrompt').value,'same\n\nsame');
   d.type(d.$('adPrompt').value+' edited');assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'same'})),/^Draft staged/);
 });
+
+/* Codex review of 0a14c780a (P2 x2): a transient "not ready" is not a failed open; slash commands consume a stage too. */
+test('an Enter pressed while the agent loads leaves a transient error that the staged notice replaces',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.submit('too early');
+  assert.match(d.$('adStatus').textContent,/not sent/);assert.equal(d.$('adStatus').getAttribute('data-error'),'true');
+  await mc.tools[1].execute({agent:'queen',message:'staged while loading'});
+  assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);assert.equal(d.$('adStatus').getAttribute('data-error'),'false');
+  const queen=d.load(frameFor(d,'queen'));assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);assert.deepEqual(queen.calls,[]);
+});
+
+test('a staged /help or /install that the person sends clears the stage like any other send',async()=>{
+  for(const cmd of ['/help','/install']){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.load(frameFor(d,'queen'));
+    await mc.tools[1].execute({agent:'queen',message:cmd});d.$('adSend').click();
+    assert.equal(d.$('adHelp').hidden,false);assert.equal(d.$('adPrompt').value,'');
+    d.choose('queen');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+    assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:cmd})),/^Draft staged/);
+  }
+});
