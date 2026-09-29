@@ -20,10 +20,11 @@ export async function serveTree(root) {
   const server = createServer(async (req, res) => {
     try {
       let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
-      const file = resolve(join(top, p));
+      let file = resolve(join(top, p));
       if (file !== top && !file.startsWith(top + sep)) { res.writeHead(404); res.end('nf'); return; } // nothing outside the tree, encoded dots included
-      const body = await readFile(file);
-      res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream' }); res.end(body);
+      let body;
+      try { body = await readFile(file); } catch (e) { if (e.code !== 'EISDIR') throw e; file = join(file, 'index.html'); body = await readFile(file); } // a directory without its slash serves its index
+      res.writeHead(200, { 'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream' }); res.end(body);
     } catch { res.writeHead(404); res.end('nf'); }
   });
   const base = await new Promise(r => server.listen(0, '127.0.0.1', () => r(`http://127.0.0.1:${server.address().port}`)));

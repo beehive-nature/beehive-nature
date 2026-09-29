@@ -103,8 +103,10 @@ function pickByWords(intent, options) {
   if (top <= 0 || leaders.length > 1) return { none: true, score: top, tied: leaders.length > 1 ? leaders.map(l => l.purpose) : null };
   return leaders[0];
 }
-// implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp" is not "gas"
-const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'blossom', 'ant', 'autonomi', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
+// implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp" is not "gas".
+// The four rail names the page can print (temp, local, blossom, ant) are all in, so the count does not depend on
+// which rail a row happened to land on; so are the networks it names (autonomi, arbitrum).
+const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'temp', 'local', 'blossom', 'ant', 'autonomi', 'arbitrum', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
 const countLeak = text => { const t = text.toLowerCase(); const hits = {}; for (const k of LEAK) { const n = (t.match(new RegExp('\\b' + k + 's?\\b', 'g')) || []).length; if (n) hits[k.startsWith('sha') ? 'sha' : k] = n; } return hits; };
 const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
 // finality: the words that say a removed file is not coming back. A bare "gone" never counts: the page's
@@ -113,7 +115,8 @@ const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
 // stays is never final. "permanent" also occurs in lifetime clauses; the matched words are printed and
 // a reader judges them.
 const FINAL = /cannot|can't|no way back|for good|permanent|not .*undo|nowhere else|anywhere else|existed nowhere|no longer|will not exist|won't exist/i;
-const STAYS = /copy .* stays|stays where it is|still (there|out there|exists)/i;
+// …and a sentence that says a copy stays, or that the page cannot promise what happens elsewhere, is never final
+const STAYS = /copy .* stays|stays where it is|still (there|out there|exists)|cannot reach|not something this page can promise/i;
 const finalWord = t => STAYS.test(t) ? null : (t.match(FINAL) || [null])[0];
 const OWN = /your wallet|you pay|own wallet/i;
 
@@ -149,7 +152,9 @@ async function pressControl(page, reg, purpose) {
     if (!(pt.x >= 0 && pt.x < VIEW.width && pt.y >= 0 && pt.y < VIEW.height)) throw new Error(`the ${purpose} ring's tap point (${pt.x | 0},${pt.y | 0}) is outside the ${VIEW.width}×${VIEW.height} viewport`);
     await page.touchscreen.tap(pt.x, pt.y);
   } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
-  await page.waitForFunction(p => window.__eternal.data.pick === p, purpose, { timeout: 5000 });
+  // the page's own truth (the archive's pressed mode button, or the control's own pressed state) or its
+  // data mirror, whichever answers first: the mirror is debounced and can miss a change
+  await page.waitForFunction(([p, sel]) => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`) || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-pressed') === 'true' || document.querySelector(`${sel}[data-et-purpose="${p}"]`)?.getAttribute('aria-selected') === 'true' || window.__eternal?.data?.pick === p, [purpose, CONTROLS[reg]], { timeout: 5000 });
 }
 
 const CLICK = { timeout: 5000 }; // no press waits longer than the other waits in this file
@@ -194,11 +199,12 @@ async function stranger(reg) {
     // the fronts (every child of main except the fronts, visible text only)
     const front = CARD[reg] ? await visibleTextOutside(page, FRONT[reg], CARD[reg]) : await visibleText(page, FRONT[reg]);
     const archive = await visibleTextAll(page, 'main > :not(#eternal)');
-    R.leakage = { frontBeforeTaps: countLeak(front), front: countLeak(front), cardsRead: {}, archive: countLeak(archive), archiveWithRow: null };
+    R.leakage.frontBeforeTaps = countLeak(front); R.leakage.front = R.leakage.frontBeforeTaps; R.leakage.archive = countLeak(archive);
     // the purpose controls: their own visible words, and separately what they tell a screen reader
     const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
-      visible: (el.innerText ?? el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+      // the same rendered rule as every other read: a control that has no box shows no words
+      visible: !el.hidden && el.getClientRects().length > 0 ? (el.innerText ?? el.textContent ?? '').replace(/\s+/g, ' ').trim() : '',
       aria: el.getAttribute('aria-label') || '',
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
     })), CONTROLS[reg]);
@@ -290,18 +296,21 @@ async function stranger(reg) {
         await chooser.setFiles({ name: 'stranger-note.txt', mimeType: 'text/plain', buffer: Buffer.from('a note from a stranger', 'utf8') });
         // the page's own truth, not only its data mirror: a rendered row control in the archive, the body's
         // file state, or the mirror's count — whichever the page shows first
-        await page.waitForFunction(() => document.querySelector('#list button, #list a, #list [role=button]') || document.body.dataset.state === 'file' || window.__eternal.data.count >= 1, null, { timeout: 15000 });
+        // the page's own truth, not only its data mirror: a row painted into the archive, the body's file
+        // state, or the mirror's count — whichever the page shows first
+        await page.waitForFunction(() => document.querySelector('#list').children.length > 0 || document.body.dataset.state === 'file' || window.__eternal.data.count >= 1, null, { timeout: 15000 });
         const tStored = Date.now(); // the clock stops the moment the row is observed stored, before any further reads
         await page.waitForFunction(() => window.__eternal.data.count >= 1, null, { timeout: 15000 }); // the mirror follows; the receipt reads from it
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         const archivePressed = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') || null);
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = countLeak(await visibleTextAll(page, 'main > :not(#eternal)'));
+        phase = 'after-add'; // the add's own wire is copied only after its phase has ended, so nothing lands after the copy
         R.firstFile = { ok: true, purposeChosen: keep.purpose, archivePressedAfterAdd: archivePressed, stored, steps, confirmingPress, picker: true, ms: tStored - t0, addMs: tStored - tAdd, statusShown: await visibleText(page, '#status'), networkDuringAdd: [...wire.add].sort() };
       } catch (e) {
+        phase = 'after-add';
         R.firstFile = { ok: false, purposeChosen: keep.purpose, steps, confirmingPress, ms: Date.now() - t0, error: errText(e), networkDuringAdd: [...wire.add].sort() };
       }
-      phase = 'after-add';
       await page.waitForTimeout(250); // a follow-up request to the add belongs here, not to the remove
     } else {
       R.firstFile = { ok: false, steps: 0, ms: Date.now() - t0, error: !options.length ? 'no purpose controls rendered' : `no usable control's words led to keep (top score ${keepPick.score}${keepPick.tied ? ', tied ' + keepPick.tied.join('/') : ''})` };
@@ -331,11 +340,11 @@ async function stranger(reg) {
           await page.click('#delConfirm', CLICK);
           await page.waitForFunction(() => window.__eternal.data.count === 0, null, { timeout: 10000 });
           const after = (await visibleText(page, '#status')).trim();
+          phase = 'after-remove'; // the remove's own wire is copied only after its phase has ended
           const removeWire = [...wire.remove].sort();
-          phase = 'after-remove';
           await page.waitForTimeout(250); // let the post-delete render and any adapter follow-up reach the after-remove log
           R.remove = { control: rm.text, candidates: rm.candidates, sentence, confirm: confirmText, ok: true, outcomeStated: !!after && after !== statusBefore, outcome: after.slice(0, 160), finalityBeforeConfirm: finalWord(sentence), finalityAfter: finalWord(after), networkDuringRemove: removeWire };
-        } catch (e) { R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: errText(e), networkDuringRemove: [...wire.remove].sort() }; phase = 'after-remove'; }
+        } catch (e) { phase = 'after-remove'; R.remove = { control: rm.text, candidates: rm.candidates, ok: false, error: errText(e), networkDuringRemove: [...wire.remove].sort() }; }
       }
       // RECOVER: does anything rendered on the page offer to bring it back? (rendered = has a box; the page is
       // taller than the viewport, so this is "on the page", not "in view without scrolling")
@@ -418,7 +427,7 @@ for (const r of results) {
   if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.pressedCardReadFree || r.learnTaps ? `; on the cards the visitor read (the pressed ring's and the ones reached by a tap): ${JSON.stringify(r.leakage.cardsRead)}; front including those cards: ${JSON.stringify(r.leakage.front)}` : ''}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
   L.push(`- funding: own-wallet wording visible ${r.funding.visibleOwnWalletWording}${r.funding.visibleOwnWalletWording ? ' (in: ' + r.funding.ownWalletWordingWhere.join('; ') + ')' : ''}; the forever rail declares payer = ${r.funding.foreverDeclaredPayer ?? 'none (not offered)'}`);
-  for (const [ph, hosts] of Object.entries(r.wire)) if (ph !== 'add' && ph !== 'remove') L.push(`- cross-origin attempted during ${ph} (aborted): ${hosts.join(', ')}`);
+  for (const [ph, hosts] of Object.entries(r.wire)) L.push(`- cross-origin attempted during ${ph} (aborted): ${hosts.join(', ')}`); // every phase, nothing dropped
   if (r.notes.length) L.push(`- notes: ${r.notes.join(' | ')}`);
   L.push('');
 }
