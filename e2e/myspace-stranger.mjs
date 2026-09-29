@@ -236,13 +236,13 @@ async function stranger(reg) {
     const leak = t => countLeak(t, R.railWords);
     R.leakage.frontBeforeTaps = leak(front); R.leakage.archive = leak(archive); // .front is set once the cards are known
     // the purpose controls: their own visible words, and separately what they tell a screen reader
-    const options = await page.evaluate(sel => [...document.querySelectorAll(sel)].map(el => ({
+    // the controls' own words under the one visibility rule (an SVG ring has no text of its own; a <title> inside it is not shown)
+    const options = await page.evaluate(new Function('sel', SEEN_TEXT + ` return [...document.querySelectorAll(sel)].map(el => ({
       purpose: el.getAttribute('data-et-purpose'),
-      // the same rendered rule as every other read: a control that has no box shows no words
-      visible: (typeof el.innerText === 'string' && !el.hidden && el.getClientRects().length > 0) ? el.innerText.replace(/\s+/g, ' ').trim() : '', // an SVG control has no innerText: no words of its own (a <title> inside it is not shown)
+      visible: typeof el.innerText === 'string' ? wordsIn(el, null) : '',
       aria: el.getAttribute('aria-label') || '',
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
-    })), CONTROLS[reg]);
+    }));`), CONTROLS[reg]);
     R.offered = options.map(o => o.purpose);
     // the front's words outside the controls, read now, before any learning tap changes the card
     const frontOutside = await visibleTextOutside(page, FRONT[reg], CARD[reg] ? `${CONTROLS[reg]}, ${CARD[reg]}` : CONTROLS[reg]); // the card is the pressed control's words, not the front's own
@@ -252,7 +252,7 @@ async function stranger(reg) {
     // the card on the page renders from the fronts' mirror, so the ring it belongs to is the mirror's pick (which
     // the settle wait has just seen hold still together with the archive's pressed mode)
     const initialPick = CARD[reg] ? await page.evaluate(() => window.__eternal?.data?.pick ?? null) : R.pickAtRead;
-    const initialCard = CARD[reg] ? (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim() : '';
+    const initialCard = CARD[reg] ? await visibleText(page, CARD[reg]) : '';
     if (CARD[reg] && initialPick !== R.pickAtRead) R.notes.push(`the card on arrival belonged to "${initialPick}" while the archive showed "${R.pickAtRead}" pressed`);
     for (const o of options) {
       if (o.visible) { o.text = o.visible; o.learnedByTap = false; continue; }
@@ -261,12 +261,13 @@ async function stranger(reg) {
       // the page's data mirror updates before the card re-renders, so after the tap wait for the card's words to change.
       // A tap that fails, or a card that does not answer, leaves that ring's words unknown: the ring is not scored and
       // the run goes on (a dying learning tap must not discard everything else this register gathered)
-      const before = (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim();
+      const before = await visibleText(page, CARD[reg]);
       o.learnedByTap = true;
       try { await pressControl(page, reg, o.purpose); } catch (e) { R.notes.push(`tapping the ${o.purpose} ring failed (${errText(e)}): that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
-      const changed = await page.waitForFunction(([sel, b]) => { const el = document.querySelector(sel); const t = (el?.innerText || '').replace(/\s+/g, ' ').trim(); return !!t && t !== b; }, [CARD[reg], before], { timeout: 3000 }).then(() => true, () => false);
+      // the card's words under the same rule as "before", so only a real change counts
+      const changed = await page.waitForFunction(new Function('a', SEEN_TEXT + ` const el = document.querySelector(a[0]); const t = el ? wordsIn(el, null) : ''; return !!t && t !== a[1];`), [CARD[reg], before], { timeout: 3000 }).then(() => true, () => false);
       if (!changed) { R.notes.push(`the card did not change within 3 s after tapping ${o.purpose}: that ring's words are unknown to the instrument, not scored`); o.text = ''; o.stale = true; R.failedTaps++; continue; }
-      o.text = (await visibleText(page, CARD[reg])).replace(/\s+/g, ' ').trim();
+      o.text = await visibleText(page, CARD[reg]);
       R.learnTaps++; // a learning tap is one that revealed a card
     }
     R.controlsReadableWithoutTap = options.filter(o => !o.learnedByTap && o.text).length;
@@ -325,10 +326,10 @@ async function stranger(reg) {
     if (keep) {
       phase = 'add'; const tAdd = Date.now();
       try {
-        // if the chosen purpose is already the pressed one on arrival, this press only confirms it: counted, and said so.
-        // (page.click checks that the control receives the pointer at the action point, so the press is known to
-        // have landed even though it changes nothing; the raver tap is never a confirming one, the learning taps
-        // having moved the pick)
+        // if the chosen purpose is already the pressed one when the add begins, this press only confirms it: counted,
+        // and said so. (page.click checks that the control receives the pointer at the action point, so the press is
+        // known to have landed even though it changes nothing. In raver the learning taps move the pick, so the press
+        // is a confirming one only if keep happened to be the last ring learned; the flag is computed, not assumed.)
         confirmingPress = (await pressedMode(page)) === keep.purpose;
         await pressControl(page, reg, keep.purpose);
         steps++;
@@ -353,7 +354,8 @@ async function stranger(reg) {
       }
       await page.waitForTimeout(250); // a follow-up request to the add belongs here, not to the remove
     } else {
-      R.firstFile = { ok: false, steps: 0, ms: Date.now() - t0, error: !options.length ? 'no purpose controls rendered' : `no usable control's words led to keep (top score ${keepPick.score}${keepPick.tied ? ', tied ' + keepPick.tied.join('/') : ''})` };
+      // a measured result, not an instrument failure: the page's words led nowhere, or offered no control at all
+      R.firstFile = { ok: false, measured: true, steps: 0, ms: Date.now() - t0, error: !options.length ? 'no purpose controls rendered' : `no usable control's words led to keep (top score ${keepPick.score}${keepPick.tied ? ', tied ' + keepPick.tied.join('/') : ''})` };
     }
 
     // REMOVE: find a visible remove control on the stored row, read the confirmation, confirm, check the outcome is stated.
@@ -396,15 +398,14 @@ async function stranger(reg) {
       // Only the page's own controls count: the estate's tour bar carries a "recover" link that is
       // about KEY recovery (surfaces/recover.html), and a stranger who followed it would not get
       // their file back. Anything inside #tbar or pointing at recover.html is excluded by name.
-      const rec = await page.evaluate(() => {
-        // same rendered rule as everywhere else (client rects): a position:fixed undo toast has no offsetParent and must still count
-        // anywhere on the page but the tour bar (a toast can be nested anywhere under body); the words on the
-        // control and its accessible name are both read, so an icon button named "Undo" counts
-        const els = [...document.querySelectorAll('button, a, [role=button], summary')].filter(el => !el.hidden && el.getClientRects().length > 0 && !el.closest('#tbar') && !/recover\.html/.test(el.getAttribute('href') || ''));
-        const words = el => ((el.innerText || '') + ' ' + (el.getAttribute('aria-label') || '')).trim();
-        const hit = els.find(el => /\b(undo|restore|recover)\b|\b(bring|put|get)\b[^.]{0,40}?\bback\b/i.test(words(el)));
-        return hit ? words(hit) : null;
-      });
+      const rec = await page.evaluate(new Function(SEEN_TEXT + `
+        // the one visibility rule (a position:fixed undo toast has no offsetParent and must still count), anywhere on
+        // the page but the tour bar; the control's own words and its accessible name are both read, so an icon
+        // button named "Undo" counts
+        const els = [...document.querySelectorAll('button, a, [role=button], summary')].filter(el => seen(el) && !el.closest('#tbar') && !/recover\\.html/.test(el.getAttribute('href') || ''));
+        const words = el => (wordsIn(el, null) + ' ' + (el.getAttribute('aria-label') || '')).trim();
+        const hit = els.find(el => /\\b(undo|restore|recover)\\b|\\b(bring|put|get)\\b[^.]{0,40}?\\bback\\b/i.test(words(el)));
+        return hit ? words(hit) : null;`));
       // the tour bar's "recover" link: present in the DOM, and actually on screen at this width? The bar's
       // link strip scrolls and is masked at 390 px, so presence alone would overstate what a visitor sees.
       // "on screen" = at least half of the link's width lies inside both the viewport and its scrolling strip,
@@ -437,7 +438,8 @@ async function stranger(reg) {
 // a failed or unreliable measurement: no first file, an aborted run, a remove that errored, a ring that could not be
 // learned, a page that never became ready or never took the register, an offered set still changing at the cap.
 // One predicate, used by the table's row marker and the exit code alike.
-const unsound = r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
+// (a first file that failed because the page's words led nowhere is a measured result, not an unsound run)
+const unsound = r => !(r.firstFile?.ok || r.firstFile?.measured) || r.notes.some(n => n.startsWith('run aborted') || n.startsWith('unreliable:')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0;
 // one summary per result, used by the stderr line and the table alike
 const summarize = r => {
   const offered = r.choices.filter(c => c.offered);

@@ -26,6 +26,10 @@ export const MIME = {
   '.wasm': 'application/wasm', '.pdf': 'application/pdf', '.zip': 'application/zip',
 };
 
+// a stream that fails after the headers went out (a file rewritten or removed under the server by another
+// seat, an unreadable entry) ends the response instead of killing the harness process
+const send = (stream, res) => { stream.on('error', () => { if (!res.headersSent) { res.writeHead(404); res.end('nf'); } else res.destroy(); }); stream.pipe(res); };
+
 export async function serveTree(root) {
   const top = await realpath(resolve(root));
   const inside = p => p === top || p.startsWith(top + sep);
@@ -48,11 +52,11 @@ export async function serveTree(root) {
         const start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
         if (start > end || start >= st.size) { res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }); res.end(); return; }
         res.writeHead(206, { 'Content-Type': type, 'Content-Length': end - start + 1, 'Content-Range': `bytes ${start}-${end}/${st.size}`, 'Accept-Ranges': 'bytes' });
-        createReadStream(real, { start, end }).pipe(res); return;
+        send(createReadStream(real, { start, end }), res); return;
       }
       res.writeHead(200, { 'Content-Type': type, 'Content-Length': st.size, 'Accept-Ranges': 'bytes' });
-      createReadStream(real).pipe(res);
-    } catch { res.writeHead(404); res.end('nf'); }
+      send(createReadStream(real), res);
+    } catch { if (!res.headersSent) res.writeHead(404); res.end('nf'); }
   });
   const base = await new Promise((ok, fail) => { server.once('error', fail); server.listen(0, '127.0.0.1', () => ok(`http://127.0.0.1:${server.address().port}`)); });
   return { base, close: () => new Promise(r => server.close(() => r())) };
