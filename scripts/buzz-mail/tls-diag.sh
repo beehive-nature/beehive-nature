@@ -25,6 +25,25 @@ PORT=25
 say() { printf '%s\n' "$*"; }
 rule() { say "------------------------------------------------------------"; }
 
+# verdict on a plain EHLO transcript ($1). Three outcomes, never two: an empty
+# transcript is no measurement, so it is INCONCLUSIVE, never a finding.
+plain_verdict() {
+  if [ -z "$1" ]; then
+    echo INCONCLUSIVE
+  elif printf '%s\n' "$1" | grep -qi '^250[- ]STARTTLS'; then
+    echo ADVERTISED
+  else
+    echo NOT_ADVERTISED
+  fi
+}
+
+# TCP connect probe, host $1 port $2. /dev/tcp is a BASH feature: under dash
+# (Ubuntu /bin/sh) it is an ordinary file path and fails for every target, so
+# this must run under bash. Exit 0 = connected.
+probe_tcp() {
+  timeout 8 bash -c 'echo > "/dev/tcp/$1/$2"' probe "$1" "$2" 2>/dev/null
+}
+
 say "tls-diag — $(date -u '+%Y-%m-%dT%H:%M:%SZ') on $(hostname)"
 rule
 
@@ -51,10 +70,15 @@ fi
 # 'the config says X but the wire says Y'
 say ""
 say "  start time of the listener (config edited AFTER this is NOT loaded):"
-for p in $(ss -lptn "sport = :${PORT}" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u); do
+PIDS=$(ss -lptn "sport = :${PORT}" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u)
+for p in $PIDS; do
   say "    pid $p  started $(ps -o lstart= -p "$p" 2>/dev/null | tr -s ' ')"
   say "    cmd   $(ps -o args= -p "$p" 2>/dev/null | cut -c1-100)"
 done
+if [ -z "$PIDS" ]; then
+  say "    start time not visible — rerun with sudo"
+  say "    (ss without root prints no users: field, or the listener was found via lsof)"
+fi
 rule
 
 # 2 · WHAT THE WIRE SAYS, FROM HERE ----------------------------------------
@@ -68,18 +92,27 @@ if command -v openssl >/dev/null 2>&1; then
     say "  openssl could not complete STARTTLS. Falling back to a plain EHLO:"
   fi
 fi
-PLAIN=$( (printf 'EHLO diag.localhost\r\n'; sleep 2; printf 'QUIT\r\n'; sleep 1) | timeout 15 nc 127.0.0.1 ${PORT} 2>/dev/null )
+PLAIN=""
+if command -v nc >/dev/null 2>&1; then
+  PLAIN=$( (printf 'EHLO diag.localhost\r\n'; sleep 2; printf 'QUIT\r\n'; sleep 1) | timeout 15 nc 127.0.0.1 ${PORT} 2>/dev/null )
+  NOPLAIN="(no response from 127.0.0.1:${PORT})"
+else
+  NOPLAIN="(nc is not installed — no plain EHLO was sent)"
+fi
 say ""
 say "  plain EHLO transcript:"
-say "${PLAIN:-  (no response — the service may be down)}" | sed 's/^/    /'
+say "${PLAIN:-$NOPLAIN}" | sed 's/^/    /'
 say ""
-if printf '%s' "$PLAIN" | grep -qi '^250[- ]STARTTLS'; then
-  say "  VERDICT: STARTTLS IS advertised on loopback."
-  say "  => the deployment receipt stands; the external report was the artifact."
-else
-  say "  VERDICT: STARTTLS is NOT advertised on loopback."
-  say "  => this is a REAL gap, not a network artifact. Check §3 below for why."
-fi
+case $(plain_verdict "$PLAIN") in
+  ADVERTISED)
+    say "  VERDICT: STARTTLS IS advertised on loopback."
+    say "  => the deployment receipt stands; the external report was the artifact." ;;
+  NOT_ADVERTISED)
+    say "  VERDICT: STARTTLS is NOT advertised on loopback."
+    say "  => this is a REAL gap, not a network artifact." ;;
+  *)
+    say "  VERDICT: INCONCLUSIVE — no transcript, so no finding either way." ;;
+esac
 rule
 
 # 3 · DOES THE CERT THE CONFIG NAMES ACTUALLY EXIST AND PARSE? -------------
@@ -92,23 +125,38 @@ for f in "$CERT" "$KEY"; do
   elif [ -e "$f" ]; then
     say "  $f  EXISTS BUT NOT READABLE BY $(id -un) — run with sudo to judge this"
   else
-    say "  $f  MISSING  <-- aiosmtpd falls back to plaintext when the cert is absent"
+    say "  $f  MISSING  <-- sink.py load_cert_chain raises on a missing file,"
+    say "      so the service cannot have started with it"
   fi
 done
 if [ -r "$CERT" ] && command -v openssl >/dev/null 2>&1; then
   say "  subject : $(openssl x509 -in "$CERT" -noout -subject 2>/dev/null)"
   say "  validity: $(openssl x509 -in "$CERT" -noout -dates 2>/dev/null | tr '\n' ' ')"
   if ! openssl x509 -in "$CERT" -noout -checkend 0 >/dev/null 2>&1; then
-    say "  *** THE CERT HAS EXPIRED — the most likely cause of a silent TLS fallback ***"
+    say "  *** THE CERT HAS EXPIRED ***"
+    say "  load_cert_chain does not check expiry: the sink still loads it and still"
+    say "  offers STARTTLS. The risk is sending servers rejecting the handshake."
   fi
 fi
 rule
 
 # 4 · IS 587 EGRESS OPEN? (the relay question, MEASURED not assumed) -------
 say "4 · outbound reachability — measured, not assumed"
+PROBE_OK=""
+if ! command -v bash >/dev/null 2>&1; then
+  say "  bash not found — the /dev/tcp probe cannot run; targets are UNKNOWN."
+elif probe_tcp 1.1.1.1 443; then
+  say "  OPEN    1.1.1.1:443  (control — must read OPEN)"
+  PROBE_OK=1
+else
+  say "  CONTROL FAILED: 1.1.1.1:443 did not read OPEN."
+  say "  The probe itself is broken; targets are UNKNOWN, not BLOCKED."
+fi
 for hp in "gmail-smtp-in.l.google.com 25" "smtp.gmail.com 587"; do
   h=$(echo "$hp" | cut -d' ' -f1); p=$(echo "$hp" | cut -d' ' -f2)
-  if timeout 8 sh -c "echo > /dev/tcp/$h/$p" 2>/dev/null; then
+  if [ -z "$PROBE_OK" ]; then
+    say "  UNKNOWN $h:$p"
+  elif probe_tcp "$h" "$p"; then
     say "  OPEN    $h:$p"
   else
     say "  BLOCKED $h:$p"
