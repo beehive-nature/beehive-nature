@@ -166,17 +166,21 @@ as a memory row in the browser.
 `ar://QpwCYL3F5m9xZ50mLxCy46kZrmMCR-CwU5Z26jvrceY` — both `CONFIRMED` at the
 door, winc 0, owner = member key.
 
-**The chain row** is the one act the page cannot sign; it is queued in the
-browser and `scripts/vending-machine.mjs --row <name> <id>` writes it from the
-seat (fetch, re-hash, refuse on mismatch, then mint/update).
+**The chain row** is the one act the page cannot sign. It is not written until
+the seat runs `scripts/vending-machine.mjs --row <name> <id>` (fetch, re-hash,
+check the item owner on Arweave, refuse a name held by another key, then
+mint/update). The page says so; nothing queues it. (Corrected 2026-09-28: an
+earlier line here said the row was "queued in the browser" — a localStorage key
+nothing read. Deleted, not patched.)
 
 **bPay only (founder law 2026-09-26):** the USDC/PYUSD rails, the EIP-681 link,
 the injected-wallet path and their constants are gone from vending.html; one
 held bPay row says in words that the seat is not named yet.
 
-**The registers:** vending.html is still a single dark presentation; the
-raver and new bee readings the founder demands on every surface are not yet
-authored for it — named here, not hidden.
+**The registers:** vending.html and local-agent/index.html now carry main's
+ETERNAL three-product fronts (waves 1-3, merged in), gated at 100% in CI. The
+value deck (vending-deck.html) is the one surface in this PR without its own
+three fronts — named here, not hidden.
 
 ## Not done, said plainly
 
@@ -185,3 +189,41 @@ authored for it — named here, not hidden.
 - Messaging-blank in Buzz: not diagnosed here (L2 gate not met); needs an
   in-app evidence packet.
 - Translations are machine drafts (⚙) until a human attests them.
+
+## Review round 1 — 2026-09-28 (new owner, independent read-only review)
+
+The PR changed hands with no rebuild. An independent read-only reviewer (Explore,
+not the author) read `origin/main...fc4d4ef68` and returned REQUEST CHANGES:
+3 blockers, 8 should-fix. Each was checked against the code before fixing.
+Branch first brought level with main at `6265de4a4` (clean merge, 49 commits).
+
+| # | finding | fix |
+|---|---|---|
+| B1 | page said "this page signs nothing" while approve signs; "the row follows"; "nothing partial was kept" after a failed upload | copy says the new key signs, nothing is paid, the row is not written until the seat writes it; a failure at the upload step says the item may be permanent and the key above is its owner |
+| B2 | the cypherpunk pipeline still read "transfer · memo-bound … memo vending:" (from main's wave) | replaced by key + certificate in page, certificate on Arweave, row awaits the seat; a test forbids `memo vending:` / `memo-bound` in the page |
+| B3 | the CLI generated member keys and kept their seeds in `%LOCALAPPDATA%/skaists-vending/members` | the CLI no longer makes or keeps member keys: a real mint refuses and names the page; `--dry-run` uses a throwaway key in memory; the upload path is deleted |
+| 4 | key offered only after ~78 s of read-back | offered right after it is made, before any upload |
+| 5 | Escape/outside click said "nothing moved" mid-mint; approve could double-fire | plan cannot close and approve/refuse are disabled while a mint runs |
+| 6 | read-back had no clock | "try n of 6 · s" |
+| 7 | the resurrection check read FAIL after an in-page mint (no row yet) | says the row waits, checks by id and key, reports two-way instead of three-way |
+| 8 | the agent page claimed an owner from a self-consistent record | owner read from Arweave's index: different signer refused, unindexed said plainly (in the page and in the agent's own system turn); gateway fetch timeout; records without answers refused |
+| 9 | `--row` could re-point another member's row | refuses when the name is held by another key; refuses unless Arweave's owner equals the certificate's member key |
+| 10 | ANS-104 parity with arbundles only ran where the library was installed | a byte-exact fixture signed by `@dha-team/arbundles` is pinned in `e2e/ans104.test.mjs`; CI checks every byte with no install |
+| 11 | a test passed only on an unreachable `a-legacy` branch | branch deleted; the test now checks the live mint's truth |
+| nit | deck sent the bearer token to any typed door | the door must pass the same literal-loopback law as the origin before any request |
+
+**Found while fixing #10 (outside this PR):** arbundles' `SolanaSigner` reads
+its secret as `seed ‖ public`. `contracts/vending/tool/ar-upload.cjs` packs
+`public ‖ seed`, which would publish the member's SEED as the item owner. The
+fixture proves it: `pub ‖ seed` gave owner = sha256(phrase) = the seed. Arweave
+checked as the outside witness: every ed25519 item tagged `skaists-vending`
+(`bee`, `bee two`, `bee three`, the in-page mints) has owner = its Member-Key,
+and the five older `vendingtest` items are RSA, so nothing leaked. The CLI copy
+of that path is deleted here; `ar-upload.cjs` is a separate task.
+
+**Receipts:** vending tests 25/25 (`node --test vending-deck vending-machine
+vending-cert ans104`); `vending-eternal` + `local-agent-eternal` 11/11;
+`skaists-conformance --only vending.html,local-agent/index.html --min 100`
+100% in all three registers; `estate-source` 11/0; `x402-engine-parity` ok;
+`polish-i18n` 25/0; headless load of the three pages with every outside request
+aborted: zero page errors.

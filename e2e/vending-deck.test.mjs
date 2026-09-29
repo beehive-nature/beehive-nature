@@ -9,7 +9,8 @@
       honey outside b, lowercase-start headings and buttons, no dash for an unknown,
       every keyed word docked in the corpus for every tongue, message text set as
       text, no token ever stored, a literal loopback door by default.
-   3. THE RUNNER — refuses loudly on a bad door or a missing token file. */
+   3. THE TOKEN — sent to a literal loopback door only; any other door is refused
+      before a request carries it. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -131,6 +132,10 @@ test('messages are text, tokens live in memory, the door defaults to a literal l
   assert.match(html, /id="token" type="password" autocomplete="off"/);
   assert.match(html, /id="door" value="http:\/\/127\.0\.0\.1:12700"/);
   assert.equal(D.LOOPBACK_DOOR, 'http://127.0.0.1:12700'); assert.ok(D.originMayAsk(D.LOOPBACK_DOOR));
+  const gate = app.indexOf('if (!D.originMayAsk(door)) {'), first = app.indexOf("get('mesh', door + '/health'");
+  assert.ok(gate > 0 && first > gate, 'a typed door is checked before the first request carries the token');
+  assert.match(app.slice(gate, first), /the token was not sent' \}\)\]\); set\('mesh', 'declined', 'deck\.mesh\.refused'\); return; \}/, 'a door that is not loopback is refused and returns');
+  assert.equal(D.originMayAsk('https://evil.example'), false); assert.equal(D.originMayAsk('http://localhost:12700'), false);
   assert.match(app, /credentials: 'omit'/); assert.match(app, /referrerPolicy: 'no-referrer'/);
   assert.match(app, /\$\('#token'\)\.value = ''/, 'the pasted token is cleared from the field once taken');
 });

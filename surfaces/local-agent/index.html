@@ -547,7 +547,7 @@ S.model = MODEL_ID; S.door = MODEL_DOOR; S.p1 = P1_DOOR;   // the page's own con
      copy seeds over minutes); either copy must hash true below */
   try { const local = localStorage.getItem('agent.cert.' + cert); if (local) { rec = JSON.parse(local); from = 'this browser (minted here)'; } } catch {}
   if (!rec) for (const g of ['https://arweave.net']) {
-    try { const r = await fetch(g + '/' + cert, { cache: 'no-store' }); if (!r.ok) continue; rec = await r.json(); from = g; break; } catch {}
+    try { const r = await fetch(g + '/' + cert, { cache: 'no-store', signal: AbortSignal.timeout(15000) }); if (!r.ok) continue; rec = await r.json(); from = g; break; } catch {}
   }
   if (!rec) { out.innerHTML = '<span style="color:var(--amber)">the certificate ar://' + esc(cert) + ' is not readable from a gateway yet — try again in a minute; the id is permanent.</span>'; return; }
   /* the hash law, in this page too */
@@ -556,12 +556,25 @@ S.model = MODEL_ID; S.door = MODEL_DOOR; S.p1 = P1_DOOR;   // the page's own con
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(sortDeep(copy))));
   const hash = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
   if (!rec.hash || hash !== rec.hash.value || !rec.agent || rec.agent.name !== name) { out.innerHTML = '<span style="color:var(--amber)">the record at ar://' + esc(cert) + ' does not hash true for ' + esc(name) + ' — refused.</span>'; return; }
+  if (!rec.answers || !rec.answers.when_minted_utc || !rec.answers.what_is_this) { out.innerHTML = '<span style="color:var(--amber)">the record at ar://' + esc(cert) + ' hashes true but carries no birth answers — refused.</span>'; return; }
   const memKey = 'agent.memory.' + name + '.' + cert.slice(0, 8);
   let memory = []; try { memory = JSON.parse(localStorage.getItem(memKey) || '[]'); } catch {}
-  const owner = rec.answers && rec.answers.who_owns_it ? rec.answers.who_owns_it.member_key_ed25519_hex : '';
-  S.agent = { name, cert, record: rec, memKey, memory,
-    system: `You are ${name}.a, an agent of the skaists .a house, minted ${rec.answers.when_minted_utc} for the member whose ed25519 key is ${owner}. Your birth certificate is permanent at ar://${cert} (sha256 ${rec.hash.value}). You speak ${rec.agent.tongue} and English, plainly and truthfully, in short answers. You are ${rec.answers.what_is_this}. You never claim to be a person.` };
-  out.innerHTML = '<b>' + esc(name) + '.a</b> — birth certificate read from ' + esc(from.replace('https://', '')) + ', hash true · minted ' + esc(rec.answers.when_minted_utc) + ' · memory ' + memory.length + ' row(s) in this browser.<br>wake the mind and it answers as ' + esc(name) + '.a.';
+  const owner = rec.answers.who_owns_it ? rec.answers.who_owns_it.member_key_ed25519_hex || '' : '';
+  /* a hash only proves the record agrees with itself; who signed the item is
+     Arweave's to say. The owner is claimed only when its index agrees; a
+     different signer is refused, an unindexed one is said plainly */
+  let ownerKey = null;
+  try {
+    const g = await fetch('https://arweave.net/graphql', { method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(15000),
+      body: JSON.stringify({ query: 'query($ids:[ID!]){transactions(ids:$ids){edges{node{owner{key}}}}}', variables: { ids: [cert] } }) });
+    const k = g.ok ? (await g.json())?.data?.transactions?.edges?.[0]?.node?.owner?.key : null;
+    if (typeof k === 'string') { const b = atob(k.replace(/-/g, '+').replace(/_/g, '/')); ownerKey = [...b].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(''); }
+  } catch {}
+  if (ownerKey && ownerKey !== owner) { out.innerHTML = '<span style="color:var(--amber)">ar://' + esc(cert) + ' was signed by a different key than its certificate names — refused.</span>'; return; }
+  const proven = !!ownerKey;
+  S.agent = { name, cert, record: rec, memKey, memory, ownerProven: proven,
+    system: `You are ${name}.a, an agent of the skaists .a house, minted ${rec.answers.when_minted_utc}. ${proven ? `You belong to the member whose ed25519 key is ${owner}; Arweave confirms that key signed your certificate.` : `Your certificate names the member key ${owner}; Arweave has not yet confirmed which key signed it, so you say so if asked who owns you.`} Your birth certificate is permanent at ar://${cert} (sha256 ${rec.hash.value}). You speak ${rec.agent.tongue} and English, plainly and truthfully, in short answers. You are ${rec.answers.what_is_this}. You never claim to be a person.` };
+  out.innerHTML = '<b>' + esc(name) + '.a</b> — birth certificate read from ' + esc(from.replace('https://', '')) + ', hash true · owner ' + (proven ? 'confirmed by Arweave' : 'named, not yet confirmed by Arweave') + ' · minted ' + esc(rec.answers.when_minted_utc) + ' · memory ' + memory.length + ' row(s) in this browser.<br>wake the mind and it answers as ' + esc(name) + '.a.';
   $('prompt').value = 'who are you, and who owns you?';
 })();
 

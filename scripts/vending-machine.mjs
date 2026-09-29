@@ -1,29 +1,29 @@
 #!/usr/bin/env node
-/* vending-machine.mjs — THE MINT, as a machine door instead of a hand-run tool.
+/* vending-machine.mjs — the machine seat's half of the mint.
 
-   The page (surfaces/vending.html) used to say "send A with a memo and the
-   poller will catch your mint". The contract has no token-receipt path, so
-   that could never mint (contracts/vending/src/vending.cpp: `mint` is the
-   only writer and it wants the owner's own signature). This is the door that
-   actually mints, the same road contracts/vending/tool/mint.mjs proved
-   (RECEIPT_VENDING_MINT_2026-09-01), served on loopback for the page:
+   The mint happens in the member's own browser (surfaces/vending.html): the
+   member's ed25519 key is made there, signs the certificate, and is handed to
+   the member; this machine never makes, sees or keeps a member key. What the
+   page cannot do is sign the chain's pointer row — `mint` in
+   contracts/vending/src/vending.cpp wants the seat's own signature. This
+   script is that one step, run on the machine whose environment holds the
+   seat key (BNRAPOLL_WIF, the variable the receipted tool used):
 
-     1. canonical name (the page's own law: NFC · trim · collapse · lowercase)
-     2. a fresh member ed25519 key — written to the member's own vault file on
-        THIS machine (the tool's convention), never returned over the wire
-     3. a1-log genesis under that key (the store binding)
-     4. the birth certificate + its content hash (cert.mjs)
-     5. Arweave: ANS-104 data item signed ed25519 so the item OWNER is the
-        member key (the key road), through Turbo's free tier from this machine
-     6. the pointer row: `mint` (or `update` for a re-mint) on jungle4, signed
-        with the machine seat's key read from the environment — BNRAPOLL_WIF,
-        the same variable the receipted tool used. Absent → this door REFUSES
-        before step 5, so nothing is uploaded for a row that cannot be written.
+     node scripts/vending-machine.mjs --row <name> <ar id>
 
+     1. the certificate is fetched from a gateway and re-hashed; a record that
+        does not hash true for <name> is refused
+     2. the item's OWNER is read from Arweave's index and must equal the member
+        key the certificate names; unreadable or different ⇒ refused
+     3. a name already on the certs table under a different member key is
+        refused, never hijacked; the same key re-points its own row (`update`)
+     4. the row is signed with the seat key; absent ⇒ refused, nothing written
+
+   `<name> --dry-run` composes a hash-true certificate under a throwaway key
+   held in memory only (never written), to prove the recipe offline.
    Every step is reported as a named row; every failure is a named refusal.
-   Nothing here prints, logs or returns a private key. */
-import { createHash, generateKeyPairSync, createPrivateKey } from 'node:crypto';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync } from 'node:fs';
+   Nothing here prints, logs, writes or returns a private key. */
+import { generateKeyPairSync } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -53,50 +53,34 @@ export function canonicalName(raw, tongue) {
 
 export function refuse(step, why) { const e = new Error(why); e.step = step; e.refused = true; return e; }
 
-/* the member's vault on this machine: one file per agent name, the tool's convention */
-function vaultDir() { const d = join(process.env.LOCALAPPDATA || process.env.TEMP || HERE, 'skaists-vending', 'members'); mkdirSync(d, { recursive: true }); return d; }
-function memberKey(canon) {
-  const file = join(vaultDir(), createHash('sha256').update(canon).digest('hex').slice(0, 16) + '.seed.json');
-  if (existsSync(file)) { const j = JSON.parse(readFileSync(file, 'utf8')); return { seedB64url: j.seedB64url, pubHex: j.pubHex, file, fresh: false }; }
+/* a throwaway key for the dry run: in memory only, gone when the process ends */
+function throwawayKey() {
   const { publicKey, privateKey } = generateKeyPairSync('ed25519');
-  const seedB64url = privateKey.export({ format: 'jwk' }).d;
-  const pubHex = publicKey.export({ type: 'spki', format: 'der' }).subarray(-32).toString('hex');
-  writeFileSync(file, JSON.stringify({ agent: canon, seedB64url, pubHex, note: 'TESTNET rehearsal member key — yours, kept on this machine only' }, null, 2));
-  try { chmodSync(file, 0o600); } catch {}
-  return { seedB64url, pubHex, file, fresh: true };
+  return { seed: Buffer.from(privateKey.export({ format: 'jwk' }).d, 'base64url'), pubHex: publicKey.export({ type: 'spki', format: 'der' }).subarray(-32).toString('hex') };
 }
 
-/* step 5: Turbo upload, ed25519 owner = member key (ar-upload.cjs, run here) */
-async function uploadToArweave(seedB64url, bytes, tags) {
-  let TurboFactory, SolanaSigner, bs58;
-  try {
-    ({ TurboFactory } = (() => { try { return require('@ardrive/turbo-sdk/node'); } catch { return require('@ardrive/turbo-sdk'); } })());
-    ({ SolanaSigner } = require('@dha-team/arbundles'));
-    bs58 = require('bs58'); bs58 = bs58.default || bs58;
-  } catch (e) { throw refuse('arweave', 'the Arweave libraries are not installed in contracts/vending/tool (npm install there): ' + e.message); }
-  const seed = Buffer.from(seedB64url, 'base64url');
-  const pubRaw = createPrivateKey({ key: Buffer.concat([Buffer.from('302e020100300506032b657004220420', 'hex'), seed]), format: 'der', type: 'pkcs8' })
-    .export({ format: 'jwk' }).x;
-  const pub = Buffer.from(pubRaw, 'base64url');
-  const secret64 = Buffer.concat([pub, seed]);   /* Solana layout: pub(32) ‖ seed(32) — owner = pub, signer = seed */
-  const signer = new SolanaSigner(bs58.encode(secret64));
-  const turbo = TurboFactory.authenticated({ signer, token: 'solana' });
-  const res = await turbo.uploadFile({ fileStreamFactory: () => bytes, fileSizeFactory: () => bytes.length,
-    dataItemOpts: { tags: tags.map(({ name, value }) => ({ name, value })) } });
-  if (!res || typeof res.id !== 'string' || res.id.length !== 43) throw refuse('arweave', 'the upload door returned no 43-character id');
-  return { id: res.id, owner: res.owner, winc: res.winc };
+/* the item's owner from Arweave's own index, as hex of the 32-byte ed25519 key */
+export async function itemOwnerHex(arId, fetchImpl = fetch) {
+  const r = await fetchImpl('https://arweave.net/graphql', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ query: 'query($ids:[ID!]){transactions(ids:$ids){edges{node{owner{key}}}}}', variables: { ids: [arId] } }),
+    signal: AbortSignal.timeout(15000) });
+  if (!r.ok) return null;
+  const key = (await r.json())?.data?.transactions?.edges?.[0]?.node?.owner?.key;
+  return typeof key === 'string' ? Buffer.from(key, 'base64url').toString('hex') : null;
 }
 
-/* step 6: the pointer row, signed with the machine seat's key from the environment */
+/* the pointer row, signed with the machine seat's key from the environment */
 async function writePointerRow({ canon, pubHex, arId, hash, template, tongue }) {
   const wif = process.env[KEY_ENV];
-  if (!wif) throw refuse('sign', KEY_ENV + ' is not in this machine\'s environment; the door will not upload a certificate it cannot point to');
+  if (!wif) throw refuse('sign', KEY_ENV + ' is not in this machine\'s environment; nothing was written');
   const { Api, JsonRpc } = require('eosjs');
   const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig.js');
   const rpc = new JsonRpc(RPC, { fetch });
   const api = new Api({ rpc, signatureProvider: new JsSignatureProvider([wif]), textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
   const existing = await rpc.get_table_rows({ json: true, code: CONTRACT, scope: CONTRACT, table: 'certs', limit: 100 });
-  const already = (existing.rows || []).some((r) => r.agent_name === canon);
+  const held = (existing.rows || []).find((r) => r.agent_name === canon);
+  if (held && held.member_key !== pubHex) throw refuse('collision', canon + ' is already held by another member key; refused, never hijacked');
+  const already = !!held;
   const r = await api.transact({ actions: [{
     account: CONTRACT, name: already ? 'update' : 'mint',
     authorization: [{ actor: MEMBER_ACCT, permission: 'active' }],
@@ -107,15 +91,14 @@ async function writePointerRow({ canon, pubHex, arId, hash, template, tongue }) 
   return { trx: r.transaction_id, action: already ? 'update' : 'mint' };
 }
 
-/* the whole mint. `report(step, detail)` is called as each step lands.
-   opts.dryRun stops after the certificate (no upload, no row): what the
-   self-test and an unarmed machine can prove. */
+/* the recipe, offline: `report(step, detail)` is called as each step lands.
+   Only the dry run lives here. A member key is made in the member's own
+   browser, never on this machine, so a real mint refuses and names the page. */
 export async function mint({ name, tongue = 'latvian', template = 'bqueenbee-genesis-1', dryRun = false, report = () => {} }) {
+  if (!dryRun) throw refuse('mint', 'a member key is made in the member\'s own browser (surfaces/vending.html), never on this machine; this door writes the pointer row only: --row <name> <ar id>');
   const canon = canonicalName(name, tongue); report('name', { canonical: canon });
-  const armed = !!process.env[KEY_ENV];
-  if (!dryRun && !armed) throw refuse('sign', KEY_ENV + ' is not in this machine\'s environment; nothing was uploaded and nothing was written');
-  const k = memberKey(canon); report('key', { member_key: k.pubHex, vault: k.file, fresh: k.fresh });
-  const memberPriv = await a1.importMemberSeed(Buffer.from(k.seedB64url, 'base64url'));
+  const k = throwawayKey(); report('key', { member_key: k.pubHex, kept: 'nowhere, memory only' });
+  const memberPriv = await a1.importMemberSeed(k.seed);
   const genesis = await a1.genesisRevision({ agent: canon, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: memberPriv });
   const genesisHash = a1.hashRevision(genesis); report('memory', { a1_genesis: genesisHash });
   const storeBinding = { store: 'autonomi', binding: 'a1-log v1 — append-only hash-linked revisions, owner-signed ed25519 (this member key); resolver takes the highest valid revision; deletable by the member',
@@ -125,20 +108,15 @@ export async function mint({ name, tongue = 'latvian', template = 'bqueenbee-gen
   const record = cert.composeCertificate({ agentName: canon, house: 'a', tongue, template, memberKeyHex: k.pubHex, memberAccount: MEMBER_ACCT, mintedIso, storeBinding });
   const bytes = Buffer.from(cert.canonicalJson(record), 'utf8'); const hash = cert.contentHash(record);
   report('certificate', { bytes: bytes.length, hash });
-  if (dryRun) return { canonical: canon, member_key: k.pubHex, hash, bytes: bytes.length, dryRun: true };
-  const up = await uploadToArweave(k.seedB64url, bytes, cert.certTags({ agentName: canon, memberKeyHex: k.pubHex, spec: 'SPEC-VENDING-1' }));
-  report('arweave', up);
-  const row = await writePointerRow({ canon, pubHex: k.pubHex, arId: up.id, hash, template, tongue });
-  report('row', row);
-  return { canonical: canon, member_key: k.pubHex, hash, bytes: bytes.length, ar_id: up.id, owner: up.owner, trx: row.trx, action: row.action, minted: mintedIso };
+  return { canonical: canon, member_key: k.pubHex, hash, bytes: bytes.length, dryRun: true };
 }
 
-/* the pointer row alone, for a certificate the page already put on the
-   permaweb (the page cannot sign the row; the seat can): fetch, re-hash,
-   refuse on mismatch, then mint/update. */
-export async function row({ name, arId, tongue = 'latvian', template = 'bqueenbee-genesis-1', report = () => {} }) {
+/* the pointer row for a certificate the page already put on the permaweb
+   (the page cannot sign the row; the seat can): fetch, re-hash, check the
+   owner, refuse a hijack, then mint/update. */
+export async function row({ name, arId, tongue = 'latvian', template = 'bqueenbee-genesis-1', report = () => {}, ownerOf = itemOwnerHex }) {
   const canon = canonicalName(name, tongue);
-  if (!/^[A-Za-z0-9_-]{43}$/.test(arId)) throw refuse('arweave', 'not a 43-character arweave id');
+  if (!/^[A-Za-z0-9_-]{43}$/.test(arId || '')) throw refuse('arweave', 'not a 43-character arweave id');
   let rec = null;
   for (const g of ['https://arweave.net']) {
     try { const r = await fetch(g + '/' + arId, { signal: AbortSignal.timeout(15000) }); if (r.ok) { rec = await r.json(); report('fetched', { from: g }); break; } } catch {}
@@ -146,14 +124,18 @@ export async function row({ name, arId, tongue = 'latvian', template = 'bqueenbe
   if (!rec) throw refuse('arweave', 'the certificate is not readable from a gateway yet');
   const v = cert.verifyCertificate(rec);
   if (!v.ok || !rec.agent || rec.agent.name !== canon) throw refuse('hash', 'the record does not hash true for ' + canon);
-  const pubHex = rec.answers.who_owns_it.member_key_ed25519_hex;
-  report('verified', { hash: v.hash, member_key: pubHex });
+  const pubHex = rec.answers?.who_owns_it?.member_key_ed25519_hex;
+  if (!/^[0-9a-f]{64}$/.test(pubHex || '')) throw refuse('hash', 'the record names no ed25519 member key');
+  const owner = await ownerOf(arId).catch(() => null);
+  if (!owner) throw refuse('owner', 'Arweave has not indexed the item\'s owner yet; try again in a few minutes');
+  if (owner !== pubHex) throw refuse('owner', 'the item was signed by a different key than the certificate names');
+  report('verified', { hash: v.hash, member_key: pubHex, owner: 'matches' });
   const out = await writePointerRow({ canon, pubHex, arId, hash: v.hash, template: rec.agent.template || template, tongue: rec.agent.tongue || tongue });
   report('row', out); return { canonical: canon, ar_id: arId, hash: v.hash, ...out };
 }
 
-/* CLI: node scripts/vending-machine.mjs <name> [tongue] [template] [--dry-run]
-        node scripts/vending-machine.mjs --row <name> <ar id>            */
+/* CLI: node scripts/vending-machine.mjs --row <name> <ar id>
+        node scripts/vending-machine.mjs <name> [tongue] [template] --dry-run   */
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const args = process.argv.slice(2); const dryRun = args.includes('--dry-run'); const pos = args.filter((a) => !a.startsWith('--'));
   if (args.includes('--row')) {
@@ -161,7 +143,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     catch (e) { console.error('REFUSED at ' + (e.step || 'unknown') + ': ' + e.message); process.exit(1); }
     process.exit(0);
   }
-  if (!pos[0]) { console.error('usage: node scripts/vending-machine.mjs <name> [tongue] [template] [--dry-run]'); process.exit(2); }
+  if (!pos[0]) { console.error('usage: node scripts/vending-machine.mjs --row <name> <ar id> | <name> [tongue] [template] --dry-run'); process.exit(2); }
   try {
     const out = await mint({ name: pos[0], tongue: pos[1], template: pos[2], dryRun, report: (s, d) => console.log(s + ':', JSON.stringify(d)) });
     console.log('MINT-DONE', JSON.stringify(out));

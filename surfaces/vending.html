@@ -582,11 +582,13 @@ body:not([data-reg="cypherpunk"]) :is(.step,.note){font-size:14px}
       <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
       <h3>what happens after you approve</h3>
       <div class="what">
-        <div>on the jungle4 rehearsal <b>nothing is paid and this page signs nothing</b>;
-        the money rails open when the founder names the seat</div>
-        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) from
-        one line on the machine that holds the seat key, under your own member
-        key — collision ⇒ refused, never hijacked</div>
+        <div>on the jungle4 rehearsal <b>nothing is paid</b>; your new key is made in
+        this page and signs your certificate. the money rails open when the founder
+        names the seat</div>
+        <div>your row on Vaulta (jungle4 rehearsal today) is written later by the
+        machine seat, which alone can sign it, under your own member key; until
+        then your key finds your certificate. a name held by another key is
+        refused, never hijacked</div>
         <div>the birth certificate goes to Arweave, permanent, carrying the recipe</div>
         <div>your agent stands: .a house, your tongue, your key — watch it land
         below, then keep it forever</div>
@@ -596,8 +598,9 @@ body:not([data-reg="cypherpunk"]) :is(.step,.note){font-size:14px}
         <label class="rail pick"><input type="radio" name="vrail" value="a" checked>
           <span><span class="rn">the rehearsal rail — live today, nothing to pay</span>
           <span class="rd">your key is made here, your certificate goes to the permaweb from
-          this page, and your agent wakes in your tab. the chain row follows from the
-          machine's seat. the law rows above are real; the money is not asked for yet.</span></span></label>
+          this page, and your agent wakes in your tab. the chain row is not written by
+          this page; the machine seat writes it later, and until then your key finds the
+          certificate. the law rows above are real; the money is not asked for yet.</span></span></label>
         <label class="rail"><input type="radio" name="vrail" value="bpay" disabled>
           <span><span class="rn">bPay — <b>held</b> until the founder names the seat</span>
           <span class="rd">the one payment door of the estate. when the seat is named, the
@@ -607,7 +610,7 @@ body:not([data-reg="cypherpunk"]) :is(.step,.note){font-size:14px}
       <div id="doorstate"></div>
       <div class="btns">
         <button class="refuse" id="prefuse">refuse — nothing moves</button>
-        <button class="approve" id="papprove">approve · pay</button>
+        <button class="approve" id="papprove">approve · mint</button>
       </div>
     </div>
   </div>
@@ -623,8 +626,6 @@ const CONTRACT = 'bnrapolltest';                    // TESTNET-ONLY jungle4 rehe
 const MONITOR_TX = 'https://monitor.jungletestnet.io/#accountActions:';
 const AR = 'https://arweave.net';
 const CG = 'https://api.coingecko.com/api/v3/simple/price?ids=vaulta&vs_currencies=usd';
-/* money-rail constants — each cited at source, none invented */
-const CHAINS = { 1:'Ethereum', 42161:'Arbitrum One', 8453:'Base', 137:'Polygon PoS', 914:'X Layer' };
 /* the machine's money seat on the paid rails is a FOUNDER CEREMONY
    (SPEC-VENDING-2 §money: the first paid mint is the door's first receipt).
    The rail's own law: unbound senders never auto-credit — so the door holds
@@ -854,7 +855,7 @@ const verifyCert = async r => (!r || r.record !== 'agent-birth-certificate')
 /* the 11 gates of contracts/vending/tool/resurrect.mjs, client-side, live */
 async function resurrect() {
   const list = $('vres-list'); list.innerHTML = ''; $('vres-sum').textContent = 'running…';
-  let pass = 0, fail = 0;
+  let pass = 0, fail = 0, ways = 'three ways';
   const li = (name, ok, detail) => {
     const el = document.createElement('li');
     el.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? 'ok' : 'FAIL'}</span> ${esc(name)}` +
@@ -863,14 +864,22 @@ async function resurrect() {
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
     ok ? pass++ : fail++;
     $('vres-sum').innerHTML = fail === 0
-      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> Found from your key alone. Fingerprint matched three ways. A forged copy was refused.`
+      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> Found from your key alone. Fingerprint matched ${ways}. A forged copy was refused.`
       : `<span class="fail">${fail} failed</span> — the record did not prove itself; look at the lines above.`;
   };
   const name = state.cert?.agent_name; if (!name) { li('a certificate to test', false, 'no ledger row visible'); return; }
-  /* 1 · the name road */
-  const row = state.certs.find(r => r.agent_name === name);
-  li('name road: name → chain row → ar id (jungle4, public state)', !!row, row ? 'row ' + row.id : 'not found');
-  if (!row) return;
+  /* 1 · the name road. A certificate minted in this page has no chain row
+     until the machine seat writes it: that is said as waiting, not failure,
+     and the checks go on by the certificate's own id and key */
+  const onChain = state.certs.find(r => r.agent_name === name);
+  if (onChain) li('name road: name → chain row → ar id (jungle4, public state)', true, 'row ' + onChain.id);
+  else if (state.cert.ar_id) {
+    ways = 'two ways (the chain row is not written yet)';
+    const el = document.createElement('li');
+    el.innerHTML = `<span class="m">waits</span> name road: the chain row is not written yet <span class="m">— the machine seat writes it; checking by the certificate's id and key instead</span>`;
+    list.appendChild(el); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  } else { li('name road: name → chain row → ar id (jungle4, public state)', false, 'not found'); return; }
+  const row = onChain || state.cert;
   /* 2 · shape */
   li('ar id is a 43-char data item', row.ar_id.length === 43, row.ar_id.slice(0, 10) + '…');
   /* 3 · fetch */
@@ -887,8 +896,10 @@ async function resurrect() {
   li('content hash verifies (re-derive · re-hash · compare)', v.ok,
     (v.ok ? (await contentHash(cert)).slice(0, 12) + '…' : v.reason));
   /* 6 · three-way */
-  li('chain row hash agrees — three-way match', row.content_hash === cert.hash?.value,
+  if (onChain) li('chain row hash agrees — three-way match', row.content_hash === cert.hash?.value,
     row.content_hash.slice(0, 12) + '…');
+  else li('the hash minted in this page agrees with the permaweb copy (two ways; the chain makes three once its row is written)',
+    row.content_hash === cert.hash?.value, row.content_hash.slice(0, 12) + '…');
   /* 7 · recipe */
   li('recipe carried (the species survives the estate)',
     !!cert.recipe?.layers && Array.isArray(cert.recipe?.restand_steps));
@@ -951,8 +962,10 @@ const closePlan = msg => { plan.classList.remove('open'); document.body.style.ov
     el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 8000); } };
 $('vmintbtn').addEventListener('click', openPlan);
 $('prefuse').addEventListener('click', () => closePlan('refused — nothing moved, nothing was ever built'));
-plan.addEventListener('click', e => { if (e.target === plan) closePlan('dismissed — nothing moved'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open')) closePlan('dismissed — nothing moved'); });
+/* while a mint runs the plan stays open: closing it would not stop the upload */
+let minting = false;
+plan.addEventListener('click', e => { if (e.target === plan && !minting) closePlan('dismissed — nothing moved'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open') && !minting) closePlan('dismissed — nothing moved'); });
 
 const payTotal = () => { const L = state.law, p = state.price;
   return (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * (p || PRICE_FALLBACK); };
@@ -971,43 +984,22 @@ $('papprove').addEventListener('click', async () => {
        (ans104.js, held to the reference library), through Turbo's free door,
        with no server between the member and Arweave; then it is read back
        from a gateway and re-hashed. The one thing this page cannot do is
-       sign the chain's pointer row — that needs the machine seat's key, so
-       the row is queued for the seat and the key road (owner = member key,
-       Member-Key tag) already finds the certificate without it. The agent
-       is handed over at the end: a mind in your tab, wearing this
-       certificate. */
-    try { await mintInPage(door); } catch (e) { hold('the mint stopped at <b>' + esc(String(e.step || 'unknown')) + '</b> — <i>' + esc(String(e.message || e).slice(0, 160)) + '</i>. nothing partial was kept.'); }
-    return;
-  }
-  if (rail === 'a-legacy') {
-    /* THE TRUTH (founder catch 2026-09-25, "imagine that none of it works"):
-       the contract has no token-receipt path — vending.cpp's only writer is
-       `mint`, and it wants the owner's own signature. Sending A with a memo
-       never minted anything, and this page signs nothing. The machine that
-       mints is scripts/vending-machine.mjs, run on the estate machine whose
-       environment holds the seat key (BNRAPOLL_WIF); one line, every step
-       reported, refusal before any upload if the key is absent. This screen
-       now says exactly that and then watches the chain's own certs table
-       (the history door the old poller read answers 500). */
-    const line = `node scripts/vending-machine.mjs "${state.canonName}" ${$('vtongue').value || 'latvian'} ${$('vline').value || 'bqueenbee-genesis-1'}`;
-    door.innerHTML = `<span class="held">this page signs nothing — nothing moved.</span><br>
-      the row is written by the machine's own seat, from one line on the estate machine that holds the seat key:<br>
-      <code class="code" style="color:var(--gold);user-select:all">${esc(line)}</code><br>
-      the rate <code>${(state.law.basisA).toFixed(4)} A</code> and the tithe <code>${(state.law.titheBp / 100).toFixed(2)}%</code> are the law rows above;
-      on the jungle4 rehearsal no A changes hands — the money rails wait for the founder's seat. this screen watches the chain for your row.`;
-    /* watching mode: the nectar cell lives while we wait for the row on chain */
-    const hexN = document.querySelector('#c-nectar .hex');
-    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching the chain for ' + (state.canonName || 'your row');
-    const mine = state.canonName;
-    const watch = setInterval(async () => {
-      try { await readCerts(); } catch { return; }
-      const row = state.certs.find(r => r.agent_name === mine);
-      if (row) { clearInterval(watch); hexN.classList.remove('live');
-        $('c-nectar-s').textContent = 'it was written'; $('c-nectar').classList.add('past');
-        $('c-honey-s').textContent = 'row on chain · ' + String(row.minted || '').replace('T', ' ') + ' UTC'; $('c-honey').classList.add('past');
-        $('c-capped-s').textContent = 'certificate ' + row.ar_id.slice(0, 8) + '…';
-        state.cert = row; renderCert(); walkMints().catch(() => {}); }
-    }, 12000);
+       sign the chain's pointer row — that needs the machine seat's key, and
+       the seat writes it later (scripts/vending-machine.mjs --row); the key
+       road (owner = member key, Member-Key tag) finds the certificate
+       without it. The agent is handed over at the end: a mind in your tab,
+       wearing this certificate. */
+    if (minting) return;
+    minting = true; $('papprove').disabled = true; $('prefuse').disabled = true;
+    try { await mintInPage(door); }
+    catch (e) {
+      /* once the upload was attempted the item may already be permanent; the
+         key offered above is its owner, so say that instead of "nothing kept" */
+      const after = e.step === 'arweave';
+      door.innerHTML = (e.step === 'name' ? '' : door.innerHTML + '<br>') + `<span class="held">the mint stopped at <b>${esc(String(e.step || 'unknown'))}</b></span> — <i>${esc(String(e.message || e).slice(0, 160))}</i>. ` +
+        (after ? 'the certificate may have reached the permaweb anyway; the key offered above is its owner, keep it.' : 'nothing was uploaded and nothing partial was kept.');
+    }
+    finally { minting = false; $('papprove').disabled = false; $('prefuse').disabled = false; }
     return;
   }
   /* every other door is bPay, held until the founder names the seat (founder
@@ -1030,6 +1022,10 @@ async function mintInPage(door) {
   say('<span class="held">minting — nothing to pay on the rehearsal rail.</span><br>1 · your key');
   /* 1 · the member's key, made here, handed to them below */
   let key; try { key = await A.generateKey(); } catch (e) { throw step('key', new Error('this browser cannot make an Ed25519 key (WebCrypto): ' + e.message)); }
+  /* the key is offered before anything is uploaded: if this tab closes
+     mid-mint, a certificate already on the permaweb still has its owner */
+  const keyBlob = extra => URL.createObjectURL(new Blob([JSON.stringify(Object.assign({ agent: name + '.a', member_key_ed25519_hex: key.publicHex, seed_hex: A.hex(key.seed) }, extra), null, 2)], { type: 'application/json' }));
+  say(door.innerHTML + ` ✓ · <a class="code" style="color:var(--gold)" href="${keyBlob({ note: 'your key, made in your browser. keep it; the machine does not have a copy. the certificate id is added to the file offered when the mint finishes.' })}" download="${esc(name)}.a.key.json">↓ keep your key now</a>`);
   /* 2 · memory genesis + the certificate */
   const genesis = await C.genesisRevision({ agent: name, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: key.privateKey });
   const binding = C.storeBinding(genesis, await C.hashRevision(genesis));
@@ -1051,7 +1047,9 @@ async function mintInPage(door) {
   let status = null, verified = null;
   try { const r = await fetch(`https://upload.ardrive.io/v1/tx/${up.id}/status`, { signal: AbortSignal.timeout(8000), cache: 'no-store' }); if (r.ok) status = (await r.json()).status || null; } catch (e) {}
   if (status) cells(null, null, 'door says ' + status + ' · reading it back…');
+  const t0 = Date.now();
   for (let i = 0; i < 6 && !verified; i++) {
+    cells(null, null, `reading it back · try ${i + 1} of 6 · ${Math.round((Date.now() - t0) / 1000)} s`);
     for (const g of GATEWAYS) {
       try { const r = await fetch(`${g}/${up.id}`, { signal: AbortSignal.timeout(8000), cache: 'no-store' });
         if (!r.ok) continue; const back = await r.json(); const v = await C.verifyCertificate(back);
@@ -1063,19 +1061,17 @@ async function mintInPage(door) {
   else if (status) { cells(null, null, 'the door says ' + status + ' · gateways seed it within minutes'); $('c-capped').classList.add('past'); }
   else cells(null, null, 'not readable from a gateway yet — the id is yours, gateways seed within minutes');
   hexN.classList.remove('live');
-  /* 5 · the chain row: queued for the machine seat (it alone can sign it) */
-  const pending = { name, tongue, template, member_key: key.publicHex, ar_id: up.id, content_hash: record.hash.value, minted: mintedIso, owner: up.owner };
-  /* the record itself rides to the agent page in this browser, so the agent
+  /* 5 · the chain row is not written by this page (it cannot sign it); the
+     seat writes it with one line, and until then the key road finds it.
+     The record itself rides to the agent page in this browser, so the agent
      wakes now — gateways seed the permaweb copy over minutes, and the agent
      page still re-hashes whichever copy it reads */
   try { localStorage.setItem('agent.cert.' + up.id, C.canonicalJson(record)); } catch (e) {}
-  try { const q = JSON.parse(localStorage.getItem('vending.rows.pending') || '[]'); q.push(pending); localStorage.setItem('vending.rows.pending', JSON.stringify(q)); } catch (e) {}
-  $('vtx').innerHTML = `certificate landed · the chain pointer row waits for the machine seat's signature (queued in this browser); until then the key road finds it: owner <code>${esc(up.owner)}</code>`;
+  $('vtx').innerHTML = `certificate landed · the chain row is not written yet; the machine seat writes it with <code>node scripts/vending-machine.mjs --row "${esc(name)}" ${esc(up.id)}</code>. until then your key finds it: owner <code>${esc(up.owner)}</code>`;
   /* 6 · yours to keep: the certificate card, the key file, the agent */
   state.cert = { agent_name: name, member_key: key.publicHex, ar_id: up.id, content_hash: record.hash.value, minted: mintedIso, template_id: template, tongue };
   renderCert(); $('vcert-q').textContent = '"' + record.answers.what_is_this + '"';
-  const keyFile = new Blob([JSON.stringify({ agent: name + '.a', member_key_ed25519_hex: key.publicHex, seed_hex: A.hex(key.seed), certificate: 'ar://' + up.id, content_hash: record.hash.value, minted: mintedIso, note: 'your key. the certificate\'s owner. keep it; the machine does not have a copy.' }, null, 2)], { type: 'application/json' });
-  const keyUrl = URL.createObjectURL(keyFile);
+  const keyUrl = keyBlob({ certificate: 'ar://' + up.id, content_hash: record.hash.value, minted: mintedIso, note: 'your key. the certificate\'s owner. keep it; the machine does not have a copy.' });
   const agentUrl = `local-agent/index.html?agent=${encodeURIComponent(name)}&cert=${encodeURIComponent(up.id)}`;
   say(door.innerHTML + ` ✓<br>4 · ${verified ? 'read back and hash-true' : 'id issued'}<br><br>
     <a class="code" style="color:var(--gold)" href="${keyUrl}" download="${esc(name)}.a.key.json">↓ keep your key (${esc(name)}.a.key.json)</a> · the certificate's owner; the machine keeps no copy<br>
@@ -1270,9 +1266,9 @@ async function mintInPage(door) {
       ['key · fnv1a-64', d.key ? d.key : 'waits on the name', d.key ? 'done' : 'todo'],
       ['collision · certs table', d.taken ? 'taken · refused' : (d.lawRead ? 'free against ' + d.certs + ' rows' : 'ledger not read'), d.taken ? 'todo' : (d.lawRead && d.key ? 'done' : 'todo')],
       ['plan · approve or refuse', 'the plan screen itemizes every cost · nothing charged, signed or sent before approve', 'todo'],
-      ['transfer · memo-bound', 'send ' + (d.totalA != null ? d.totalA.toFixed(4) + ' A' : 'the total') + ' to ' + CONTRACT + ' · memo vending:' + (d.canonical || '<name>'), 'todo'],
-      ['row · jungle4', m && m.name === d.canonical ? 'landed · block ' + m.block + (m.irrev ? ' · irreversible' : '') : 'not yet for this name', m && m.name === d.canonical ? 'done' : 'todo'],
-      ['certificate · Arweave', d.cert && d.cert.agent_name === d.canonical ? 'ar://' + d.cert.ar_id : 'not yet for this name', d.cert && d.cert.agent_name === d.canonical ? 'done' : 'todo']
+      ['key + certificate · in page', 'your ed25519 key is made in this page and signs the certificate · nothing to pay on the rehearsal rail', d.cert && d.cert.agent_name === d.canonical ? 'done' : 'todo'],
+      ['certificate · Arweave', d.cert && d.cert.agent_name === d.canonical ? 'ar://' + d.cert.ar_id : 'not yet for this name', d.cert && d.cert.agent_name === d.canonical ? 'done' : 'todo'],
+      ['row · jungle4', m && m.name === d.canonical ? 'landed · block ' + m.block + (m.irrev ? ' · irreversible' : '') : 'not written yet · the machine seat writes it', m && m.name === d.canonical ? 'done' : 'todo']
     ];
     var nowAt = steps.findIndex(function(s){ return s[2] === 'todo'; });
     $e('etPipe').innerHTML = steps.map(function(s, i){ return '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc2(s[0]) + '</b><p>' + esc2(s[1]) + '</p></li>'; }).join('');

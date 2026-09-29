@@ -39,6 +39,26 @@ test('the signature verifies under WebCrypto over the same deepHash, and the id 
   assert.deepEqual([...b.slice(b.length - data.length)], [...data]);
 });
 
+/* the reference library's own bytes, pinned: @dha-team/arbundles createData +
+   SolanaSigner (secret = seed ‖ public, the order it reads) signed this item
+   from the seed below (ed25519 is deterministic),
+   so CI holds the page's signer to the library with no install. The seed is a
+   public test constant, derived from a phrase; it guards nothing. */
+const FIXTURE = { phrase: 'skaists ans104 fixture seed · public, test-only', data: JSON.stringify({ record: 'ans104-fixture', n: 1 }),
+  id: '9rtakX7KQvAFPwKE2bBjNuo-Y9oCAmgE9046fv5-qAg', length: 312,
+  sha256: 'e4c5dc832f3bd7e178ce6b43ef64420f5c6767032f477ce5e6e62df096963838' }; // PUBLIC-CONSTANT: sha256 of the arbundles-signed fixture item
+
+test('the page signer reproduces the reference library\'s item byte for byte (pinned fixture, no install)', async () => {
+  const seed = new Uint8Array(await webcrypto.subtle.digest('SHA-256', new TextEncoder().encode(FIXTURE.phrase)));
+  const key = await A.importSeed(seed);
+  const tags = [{ name: 'App-Name', value: 'skaists-vending' }, { name: 'Type', value: 'agent-birth-certificate' }, { name: 'Content-Type', value: 'application/json' }, { name: 'Member-Key', value: key.publicHex }];
+  const item = await A.sign(key, new TextEncoder().encode(FIXTURE.data), tags);
+  assert.equal(item.bytes.length, FIXTURE.length);
+  assert.equal(item.id, FIXTURE.id, 'the id arbundles computed');
+  const h = [...new Uint8Array(await webcrypto.subtle.digest('SHA-256', item.bytes))].map((b) => b.toString(16).padStart(2, '0')).join('');
+  assert.equal(h, FIXTURE.sha256, 'every byte arbundles wrote');
+});
+
 test('a signed item parses, verifies and carries the same id in arbundles', { skip: arbundles ? false : 'the reference library is not installed here (npm install in contracts/vending/tool)' }, async () => {
   const { DataItem } = arbundles;
   const key = await A.generateKey();
