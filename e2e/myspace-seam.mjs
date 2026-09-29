@@ -38,28 +38,18 @@
 // are NOT mocked — there is nothing to mock, which is the point of them.
 //
 // Run:  cd e2e && node myspace-seam.mjs
-import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { extname, join, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { serveTree } from './lib/serve.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const PORT = 8897;
-const PAGE = `http://127.0.0.1:${PORT}/surfaces/myspace.html`;
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
-
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(PORT, '127.0.0.1', r));
+// one shared static server (e2e/lib/serve.mjs): a free port, the surfaces' MIME types, nothing outside the tree
+const { base: BASE, close: closeServer } = await serveTree(ROOT);
+const PAGE = `${BASE}/surfaces/myspace.html`;
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -97,7 +87,7 @@ function eventId(ev) {
 // at, and a code path that "is not entered" is a weaker claim than a wire that
 // stayed silent.
 function offBox(ctx, bag) {
-  ctx.on('request', req => { if (!req.url().startsWith(`http://127.0.0.1:${PORT}`)) bag.push(req.method() + ' ' + req.url()); });
+  ctx.on('request', req => { if (!req.url().startsWith(BASE)) bag.push(req.method() + ' ' + req.url()); });
 }
 
 async function mockHive(ctx) {
@@ -1643,7 +1633,7 @@ try {
   console.log('  FAIL harness — ' + (e && e.stack || e));
 } finally {
   await browser.close();
-  server.close();
+  await closeServer();
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

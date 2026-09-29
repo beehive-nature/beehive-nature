@@ -4,9 +4,9 @@
 // need. "/dir/" serves dir/index.html; "/dir" without the slash is redirected to "/dir/" so the
 // page's relative links resolve where they would on a real host. Nothing outside the tree is
 // served: the resolved and real path of every file must stay under the tree's real path, so
-// encoded dots and symlinks that leave the tree both get a 404. Used by myspace-stranger.mjs;
-// myspace-eternal.test.mjs, myspace-seam.mjs, fleet-bus.mjs and intake-daybucket.mjs still carry
-// their own copies and can move here when their owners choose.
+// encoded dots and symlinks that leave the tree both get a 404. Used by myspace-stranger.mjs and
+// myspace-seam.mjs; myspace-eternal.test.mjs (CI-gated), fleet-bus.mjs and intake-daybucket.mjs
+// still carry their own copies and can move here when their owners choose.
 //
 //   const { base, close } = await serveTree(ROOT);   // base = 'http://127.0.0.1:NNNNN'
 import { createServer } from 'node:http';
@@ -24,7 +24,8 @@ export async function serveTree(root) {
   const inside = p => p === top || p.startsWith(top + sep);
   const server = createServer(async (req, res) => {
     try {
-      const [rawPath, query] = req.url.split(/\?(.*)/s);
+      const [rawPathIn, query] = req.url.split(/\?(.*)/s);
+      const rawPath = rawPathIn.replace(/^\/+/, '/'); // "//dir" would otherwise redirect off the origin (protocol-relative)
       const path = decodeURIComponent(rawPath);
       let file = resolve(join(top, path));
       if (!inside(file)) { res.writeHead(404); res.end('nf'); return; }

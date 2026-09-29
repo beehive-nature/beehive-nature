@@ -52,7 +52,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const USAGE = 'usage: node myspace-stranger.mjs [--json out.json] [--reg bee,raver,cypherpunk]';
 // a flag given without a value is a mistake, not a request for the default
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); if (i < 0) return d; const v = process.argv[i + 1]; if (v === undefined || v.startsWith('--')) { process.stderr.write(`--${k} needs a value\n${USAGE}\n`); process.exit(2); } return v; };
+const arg = (k, d) => {
+  const eq = process.argv.find(a => a.startsWith('--' + k + '=')); if (eq) return eq.slice(k.length + 3); // --k=v form
+  const i = process.argv.indexOf('--' + k); if (i < 0) return d;
+  const v = process.argv[i + 1]; if (v === undefined || v.startsWith('--')) { process.stderr.write(`--${k} needs a value\n${USAGE}\n`); process.exit(2); }
+  return v;
+};
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
    controls carry no words of their own) the card that answers a tap */
@@ -114,10 +119,12 @@ const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'temp'
 // each as one whole phrase, so a fifth rail is counted the day it attaches and a phrase is never counted twice
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const countLeak = (text, extra = []) => {
-  const t = text.toLowerCase(); const hits = {};
-  const terms = [...LEAK.map(k => ({ key: k.startsWith('sha') ? 'sha' : k, src: k })), ...extra.filter(p => !LEAK.includes(p)).map(p => ({ key: p, src: esc(p) }))];
-  // edges are "not a word character", so a phrase that ends in "/" or ":" still matches whole
-  for (const { key, src } of terms) { const n = (t.match(new RegExp('(?<!\\w)' + src + 's?(?!\\w)', 'g')) || []).length; if (n) hits[key] = (hits[key] || 0) + n; }
+  let t = text.toLowerCase(); const hits = {};
+  // edges are "not a word character", so a phrase that ends in "/" or ":" still matches whole; every match is
+  // blanked out of the text, so a fixed word inside a declared phrase is never counted a second time
+  const count = (key, src) => { const re = new RegExp('(?<!\\w)' + src + 's?(?!\\w)', 'g'); const n = (t.match(re) || []).length; if (n) { hits[key] = (hits[key] || 0) + n; t = t.replace(re, ' '); } };
+  for (const p of [...new Set(extra.filter(p => !LEAK.includes(p)))].sort((a, b) => b.length - a.length)) count(p, esc(p)); // declared phrases first, longest first
+  for (const k of LEAK) count(k.startsWith('sha') ? 'sha' : k, k);
   return hits;
 };
 const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
@@ -154,6 +161,11 @@ async function visibleTextOutside(page, rootSel, skipSel) {
   }, [rootSel, skipSel]);
 }
 
+// the purpose the archive shows pressed (the page's own truth); the fronts' mirror only when the archive has no pressed mode
+async function pressedMode(page) {
+  return page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null);
+}
+
 // press a purpose control the way a thumb would, and wait until the page says it is the pick
 async function pressControl(page, reg, purpose) {
   if (reg === 'raver') {
@@ -187,7 +199,9 @@ async function stranger(reg) {
     ctx = await browser.newContext({ viewport: VIEW, isMobile: true, hasTouch: true });
     await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
     const page = await ctx.newPage();
-    await page.route('**/*', route => { const u = new URL(route.request().url()); if (u.origin !== base) { wire[phase].add(u.host + u.pathname); return route.abort(); } route.continue(); });
+    // only requests that leave the origin are intercepted (and aborted, logged under the phase); same-origin
+    // requests are never paused, so the page's own timings are not stretched by the interception
+    await page.route(u => u.origin !== base, route => { const u = new URL(route.request().url()); wire[phase].add(u.host + u.pathname); return route.abort(); });
     R.setupMs = Date.now() - t0;
     phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
@@ -213,7 +227,7 @@ async function stranger(reg) {
       await page.waitForTimeout(50);
     }
     R.settleMs = Date.now() - tSettle; // instrument time, counted inside "ms from open" and printed beside it
-    R.pickAtRead = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null); // the page's pressed mode first, the mirror only if there is none
+    R.pickAtRead = await pressedMode(page);
 
     phase = 'read'; const tRead = Date.now();
     // what the stranger can see: the register's front (without its card, whose words belong to
@@ -301,7 +315,7 @@ async function stranger(reg) {
         R.terms[intent.id] = {
           lifetimeStated: /\b(gone|closes|session|stays|while|until|forever|permanent|lasts)\b/.test(t), // not "drop"/"remove": those state deletability, not lifetime
           readersStated: /only this phone|this phone only|this[ -]device|\b(link|anyone|everyone)\b/.test(t), // "link-holders" is matched by "link"
-          payerStated: /\b(pay|pays|paid|paying|wallet)\b|payer (nobody|the-hive|you)\b/.test(t), // bare "nobody"/"hive" also occur in the deletable and lifetime clauses
+          payerStated: /\b(pay|pays|paid|paying|wallet)\b|\bpayer \S+/.test(t), // bee/raver say it in prose; cypherpunk prints "payer <any value>" — a new payer value must still count
         };
       }
     }
@@ -317,7 +331,7 @@ async function stranger(reg) {
         // (page.click checks that the control receives the pointer at the action point, so the press is known to
         // have landed even though it changes nothing; the raver tap is never a confirming one, the learning taps
         // having moved the pick)
-        confirmingPress = (await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') ?? window.__eternal?.data?.pick ?? null)) === keep.purpose; // the page's pressed mode, not the mirror
+        confirmingPress = (await pressedMode(page)) === keep.purpose;
         await pressControl(page, reg, keep.purpose);
         steps++;
         const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click(ADD[reg], CLICK).then(() => { steps++; })]);
@@ -330,7 +344,7 @@ async function stranger(reg) {
         // the receipt reads the index itself, not the debounced mirror (which can miss the change and never catch up)
         const stored = await page.evaluate(() => window.__myspace.rows().then(r => r.map(x => ({ purpose: x.purpose, scheme: x.addr && x.addr.scheme }))));
         if (!stored.length) throw new Error('the page showed a stored row but the index has none');
-        const archivePressed = await page.evaluate(() => document.querySelector('#modes .mode[aria-pressed="true"]')?.getAttribute('data-purpose') || null);
+        const archivePressed = await pressedMode(page);
         // the archive is read again now that a row exists: the row's own words are what the visitor reads to find the remove control
         R.leakage.archiveWithRow = leak(await visibleTextAll(page, 'main > :not(#eternal)'));
         phase = 'after-add'; // the add's own wire is copied only after its phase has ended, so nothing lands after the copy
@@ -455,7 +469,7 @@ for (const r of results) {
   L.push(`- controls readable without a tap: ${r.controlsReadableWithoutTap ?? '—'} of ${r.offered.length}${r.pressedCardReadFree ? " (the pressed ring's card was already on the page)" : ''}${r.learnTaps ? `; ${r.learnTaps} carry no words of their own and were learned by tapping each and reading the card` : ''}${r.failedTaps ? `; ${r.failedTaps} could not be learned (tap failed or the card did not answer; see notes)` : ''}`);
   for (const [id, t] of Object.entries(r.terms)) L.push(`- terms on the ${id} control before the choice: lifetime ${t.lifetimeStated ? 'stated' : 'not stated'}, readers ${t.readersStated ? 'stated' : 'not stated'}, payer ${t.payerStated ? 'stated' : 'not stated'}`);
   for (const c of r.choices) L.push(`- "${c.ask}" → ${c.offered ? (c.chose ? `chose **${c.chose}**${c.wrong ? ' (WRONG, meant ' + c.means + ')' : ''} (score ${c.score}) via "${c.control}"${c.learnedByTap ? ' (read on the card after tapping the ring)' : c.readOnCard ? ' (read on the card the pressed ring already showed)' : ''}` : `the words led nowhere (top score ${c.score}${c.tied ? ', tied between ' + c.tied.join(' / ') : ''})`) : 'not offered on this page'}${c.offered && c.usable === false ? ' — the control for this purpose is disabled or unreadable, so it could not be chosen' : ''}`);
-  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored: ${r.loadMs} ms until the fronts were ready in this register, ${r.settleMs} ms of the instrument waiting for the offered purposes and the pressed one to hold still, ${r.readMs} ms of the instrument reading the page and learning the controls, ${r.firstFile.addMs} ms for the add itself from the purpose press to the row, and the rest between those (${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
+  if (r.firstFile) L.push(`- first file: ${r.firstFile.ok ? `stored under ${r.firstFile.purposeChosen} (rows: ${JSON.stringify(r.firstFile.stored)}; archive pressed after add (the page resets to the most private purpose): ${r.firstFile.archivePressedAfterAdd}) in ${r.firstFile.steps} presses on the page${r.firstFile.confirmingPress ? ' (the first only confirmed ' + r.firstFile.purposeChosen + ', already pressed on arrival)' : ''} plus the file picker${r.learnTaps ? ' (after ' + r.learnTaps + ' taps to learn the rings)' : ''}, ${r.firstFile.ms} ms from page open to the row observed stored: ${r.loadMs} ms until the fronts were ready in this register, ${r.settleMs} ms of the instrument waiting for the offered purposes and the pressed one to hold still, ${r.readMs} ms of the instrument reading the page and learning the controls, ${r.firstFile.addMs} ms for the add itself from the purpose press to the row (the press, the add press, the picker and their round-trips through the harness are inside it), and the rest between those (${r.setupMs} ms of browser-context setup before the open is not counted)${r.firstFile.statusShown ? '; status shown: "' + r.firstFile.statusShown.slice(0, 120) + '"' : '; no status sentence shown'}` : 'FAILED: ' + r.firstFile.error}${r.firstFile.networkDuringAdd?.length ? `; **requests attempted during the add: ${r.firstFile.networkDuringAdd.join(', ')}** (aborted by the harness)` : '; no request left the page during the add'}`);
   if (r.remove) L.push(`- remove: ${r.remove.ok ? `control "${r.remove.control}" (${r.remove.candidates} visible) → sentence "${r.remove.sentence}" (finality word: ${r.remove.finalityBeforeConfirm ? '"' + r.remove.finalityBeforeConfirm + '"' : 'none'}) → confirm "${r.remove.confirm}" → outcome "${r.remove.outcome || '(nothing stated)'}" (finality word: ${r.remove.finalityAfter ? '"' + r.remove.finalityAfter + '"' : 'none'})` : (r.remove.note || r.remove.error)}${r.remove.networkDuringRemove?.length ? `; **requests attempted during the remove: ${r.remove.networkDuringRemove.join(', ')}** (aborted by the harness)` : '; no request left the page during the remove'}`);
   if (r.recover) L.push(`- recover: ${r.recover.offered ? `offered as "${r.recover.control}"` : 'nothing rendered on the page offers to bring a removed file back'}${r.recover.tourBarKeyRecoveryLinkPresent ? `; the tour bar carries a link named "recover" that leads to KEY recovery, not file recovery (${r.recover.tourBarKeyRecoveryLinkOnScreen ? 'on screen at this width' : 'in the bar\'s strip but NOT on screen at this width without scrolling the bar'})` : ''}`);
   L.push(`- leak words in the front (read with purpose "${r.pickAtRead}" pressed): ${JSON.stringify(r.leakage.frontBeforeTaps)}${r.pressedCardReadFree || r.learnTaps ? `; on the cards the visitor read (the pressed ring's and the ones reached by a tap): ${JSON.stringify(r.leakage.cardsRead)}` : ''}; rail and network words the page declared and that joined the vocabulary: ${r.railWords.join(', ') || 'none'}; in the shared archive below while empty: ${JSON.stringify(r.leakage.archive)}${r.leakage.archiveWithRow ? `; with the stored row showing: ${JSON.stringify(r.leakage.archiveWithRow)}` : ''}`);
@@ -466,5 +480,5 @@ for (const r of results) {
 }
 process.stdout.write(L.join('\n') + '\n');
 if (OUT) await writeFile(OUT, JSON.stringify({ revision: REVISION, results }, null, 1));
-// a register that did not get its first file, or whose run aborted, is a failed measurement: say so in the exit code
-if (results.some(r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted')))) process.exitCode = 1;
+// a failed measurement — no first file, an aborted run, a remove that errored, a ring that could not be learned — exits 1
+if (results.some(r => !r.firstFile?.ok || r.notes.some(n => n.startsWith('run aborted')) || (r.remove && !r.remove.ok && r.remove.error) || r.failedTaps > 0)) process.exitCode = 1;
