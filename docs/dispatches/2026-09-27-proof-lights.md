@@ -13,7 +13,7 @@ A badge is a projection of machine-verifiable state, not a typed claim. Four law
 
     `node e2e/render-badges.mjs --check` re-renders every status document and fails if the committed SVG differs, and fails closed if there are no documents to check. It runs in the meter job, directly after the skaists meter step (`.github/workflows/tests.yml`, "Proof lights — every badge is exactly what its status document renders", `if: always()`; `scripts/lint-ci-shape.mjs` 91/91).
 
-Not signed yet: the status document carries a `signature` slot that stays null until the founder's key signs the canonical bytes. Unsigned is stated in the document and printed by the check, never implied away.
+Not signed yet: the status document carries a `signature` slot that stays null until the founder's key signs the canonical bytes. Unsigned is stated in the document and printed by the check, never implied away. *Superseded by the founder ruling of 2026-09-27: status documents are signed by a dedicated CI-attestation key, never a personal or wallet key. See `2026-09-27-proof-lights-gate-repair.md`, "The CI-signing card".*
 
 ## The first badge — the skaists standards meter
 
@@ -37,5 +37,5 @@ Files: `docs/status/skaists-meter.source.json` (the 321-row instrument output, b
 ## Next
 
 - Second badge after #246 merges: `registers | 48/49 pass @<sha>` from `register-divergence.mjs --json`, same law.
-- Founder signature over the document's canonical bytes; the check then verifies the signature too.
+- ~~Founder signature over the document's canonical bytes~~ (superseded, see above): a CI-attestation signature over the document's canonical bytes, verified by the check against a pinned public key. This is the CI-signing card; its owner and scope are recorded in `2026-09-27-proof-lights-gate-repair.md`.
 - Per-register voice: badge text is the cypherpunk reading. On a new-bee front the same fact becomes a sentence, or the trust layer itself breaks the three-readings ruling.
