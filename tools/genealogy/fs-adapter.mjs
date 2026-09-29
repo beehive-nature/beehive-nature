@@ -508,6 +508,20 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 //     the two 9/19 no-deepzoom queue members), REMAINING = 341 (not 343,
 //     not ~335); manifest checkpoint after EVERY image.
 //
+// ── WALKER GUARD (founder order 2026-09-29d: "remembering the rule hasn't
+//    prevented the same failure class" — the 09-29c stray arks were typed
+//    from memory AFTER the prose law was banked, so the law is now CODE) ──
+// tools/genealogy/walker-guard.mjs (7/7 tests, walker-guard.test.mjs incl.
+// the actual stray 33SQ-GBSF-9FTG as the rejection fixture):
+//   · nextPending(n) is the ONLY sanctioned source of the next arks —
+//     read from the saved queue minus resolved manifest states, in order;
+//   · assertQueueMember(ark) MUST run before any fetch — rejects
+//     malformed / out-of-queue / already-resolved identifiers;
+//   · saves go ONLY through checkpointState/checkpointDownload, which
+//     re-verify membership on the save side and refuse downloads lacking
+//     a binding apid or sha256 (bytes without identity never land).
+// Memory-typed arks are void BY CONSTRUCTION, not by remembering.
+//
 // ── IMAGE-SWEEP QUEUE (reconciled 2026-09-28 founder readback; executes
 //    only under a live authed founder session; bytes private-tier per the
 //    preserve discipline) ──
