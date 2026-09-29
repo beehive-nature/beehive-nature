@@ -169,9 +169,9 @@
       try{f.document.getElementById('q').value=v;f.window.ask();}catch(e){s.status='The agent could not accept your message. Your draft is kept; check the conversation before trying again.';s.error=true;updateComposer();return;}
       s.status='Message received by '+current.name+'.';
     }else{buildHandoff(s,v);s.status='Handoff prepared here. Copy it when you are ready.';}
-    s.error=false;s.staged='';prompt.value='';s.draft='';updateComposer();prompt.focus();
+    s.error=false;s.staged='';s.lastStaged='';prompt.value='';s.draft='';updateComposer();prompt.focus();
   }
-  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){var s=sessions[current.id];if(s){s.draft=prompt.value;if(s.staged){s.staged='';updateComposer();}}});
+  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){var s=sessions[current.id];if(s){s.draft=prompt.value;s.lastStaged='';if(s.staged){s.staged='';updateComposer();}}});
   prompt.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();send();}});
   function shortcut(e){if(e.isComposing)return;if(e.key==='Escape'&&win.classList.contains('on')){e.preventDefault();setOpen(false);return;}if(!e.altKey)return;var k=e.key.toLowerCase();
     if(k==='/'||k==='m'){e.preventDefault();setOpen(!win.classList.contains('on'));}else if(k==='h'){e.preventDefault();setOpen(true);}else if(/^[1-4]$/.test(k)){e.preventDefault();$('adAgents').querySelectorAll('.adAg')[Number(k)-1].click();setOpen(true);}
@@ -273,11 +273,18 @@
         var id=input&&input.agent,v=String((input&&input.message)||'').trim(),a=agents.filter(function(x){return x.id===id&&x.id!=='baigents';})[0];
         if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
         if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
-        var had=String((sessions[a.id]&&sessions[a.id].draft)||'').replace(/\s+$/,''),kept=had.trim()?had+'\n\n':'';
-        if(sessions[a.id]&&sessions[a.id].lastStaged===v&&(had===v||had.slice(-v.length-2)==='\n\n'+v))return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
+        /* the person's draft is kept byte for byte; only a separator is added, and only as much as it lacks */
+        var had=String((sessions[a.id]&&sessions[a.id].draft)||''),kept=had?had+(/\n[ \t]*\n[ \t]*$/.test(had)?'':/\n[ \t]*$/.test(had)?'\n':'\n\n'):'';
+        /* lastStaged is cleared by any edit or send, so while it is set the draft still ends with that stage */
+        if(sessions[a.id]&&sessions[a.id].lastStaged===v)return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
         if(kept.length+v.length>4000)return Promise.resolve(reply('Not staged. The person’s unsent draft leaves room for '+Math.max(0,4000-kept.length)+' characters; this message has '+v.length+'.'));
+        /* if the person is in the composer or on Send, the composer is about to change under them: move focus
+           to the dock title, which cannot submit; focus anywhere else on the page is left alone */
+        var f=document.activeElement;if(f===prompt||f===$('adSend')){$('adTitle').setAttribute('tabindex','-1');$('adTitle').focus();}
         Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
         var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;s.lastStaged=v;
+        /* an old receipt or send failure must not hide the notice; an agent that cannot open keeps its error */
+        if(!(a.src&&!s.ready&&s.error)){s.status='';s.error=false;}
         s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
         return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
       }});

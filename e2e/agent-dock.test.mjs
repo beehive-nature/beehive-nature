@@ -467,3 +467,41 @@ test('the staged notice shows while the agent is still opening, and sending clea
   /* "Message received" outranks the notice, so prove the clear where status empties: a later frame load. */
   d.load(frameFor(d,'queen'));assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
 });
+
+/* Codex review of e238cb682 (P2 x4), each pinned. */
+test('an old receipt or send failure does not hide the staged notice; an agent that cannot open keeps its error',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));d.submit('first');
+  assert.match(d.$('adStatus').textContent,/received by bQueenBee/);
+  await mc.tools[1].execute({agent:'queen',message:'second'});assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  assert.equal(d.$('adStatus').getAttribute('data-error'),'false');assert.deepEqual(queen.calls,['first']);
+  const e=dock({modelContext:modelContext()});e.open();e.load(frameFor(e,'queen'),{ask:'throw'});e.submit('refused');
+  assert.equal(e.$('adStatus').getAttribute('data-error'),'true');
+  await e.window.document.modelContext.tools[1].execute({agent:'queen',message:'next'});assert.match(e.$('adStatus').textContent,/browser agent placed a draft/);
+  const u=dock({modelContext:modelContext()});u.open();u.load(frameFor(u,'queen'),{missingInput:true});
+  await u.window.document.modelContext.tools[1].execute({agent:'queen',message:'cannot open'});
+  assert.match(u.$('adStatus').textContent,/could not open here/);assert.equal(u.$('adStatus').getAttribute('data-error'),'true');
+});
+
+test('the person’s draft is kept byte for byte, trailing spaces and newlines included',async()=>{
+  for(const [mine,expected] of [['line one\n','line one\n\nx'],['spaced  ','spaced  \n\nx'],['para\n\n','para\n\nx'],['tabbed\n\t','tabbed\n\t\nx'],['   ','   \n\nx']]){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.type(mine);
+    assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'x'})),/^Draft staged/);
+    assert.equal(d.$('adPrompt').value,expected);assert.ok(d.$('adPrompt').value.startsWith(mine));
+  }
+});
+
+test('staging moves focus off the composer or Send, never leaving a submit control under the person',async()=>{
+  for(const target of ['adPrompt','adSend']){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.load(frameFor(d,'queen'));d.type('my queen draft');d.$(target).focus();
+    await mc.tools[1].execute({agent:'hearth',message:'staged for hearth'});
+    assert.equal(d.document.activeElement,d.$('adTitle'));assert.equal(d.$('adTitle').getAttribute('tabindex'),'-1');
+  }
+});
+
+test('deduplication expires once the person edits or sends, so their own identical words can be staged after',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));
+  await mc.tools[1].execute({agent:'queen',message:'same'});d.$('adSend').click();assert.deepEqual(queen.calls,['same']);
+  d.type('same');assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'same'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'same\n\nsame');
+  d.type(d.$('adPrompt').value+' edited');assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'same'})),/^Draft staged/);
+});
