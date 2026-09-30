@@ -986,6 +986,16 @@ document.addEventListener('DOMContentLoaded',function(){
     if (!state.plan && t0 > 15) t0 = 0;
     if (playing === my || state.preview) {
       const resume = state.stalled || !v.paused;   // ran dry, or playing: go on; the viewer's own pause stays
+      // Already painting from the one start Blob: do NOT reassign src here (that black-flashed
+      // mid-play on live). Grow via the stalled-resume path when the playhead nears the edge.
+      if (state.sounded && v.videoWidth > 0 && !state.stalled) {
+        state.done = true;
+        note('full file in · keep playing copy (no finish src thrash)');
+        cachePut(a, full);
+        hashBlob(full).then(sha => { if (my === job) { metrics.sha = sha; note('sha256 ' + (sha || 'unavailable')); paintNerd(); } });
+        say(null);
+        return true;
+      }
       state.busy = true;
       let ok = false;
       state.paintedAt = 0; // allow the final src assign even if a deferred start painted nothing useful
