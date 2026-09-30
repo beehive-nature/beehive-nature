@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure, recordObservation } from "./walker-guard.mjs";
+import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure, recordObservation, acquireWriterLock, releaseWriterLock } from "./walker-guard.mjs";
 
 function fixtures() {
   const dir = mkdtempSync(join(tmpdir(), "walker-guard-"));
@@ -23,7 +23,9 @@ function fixtures() {
   writeFileSync(manifestPath, JSON.stringify({ schema: "skaists.images-harvest/1", images: {
     "AAAA-1111": { state: "downloaded", apid: "apid:TH-1-1-1-1-1", sha256: "0".repeat(64) },
   } }));
-  return { opts: { queuePath: "file:///" + queuePath.replace(/\\/g, "/"), manifestPath: "file:///" + manifestPath.replace(/\\/g, "/") }, manifestPath };
+  const lockPath = "file:///" + manifestPath.replace(/\\/g, "/").replace("images-manifest.json", ".writer-lock-test.json");
+  acquireWriterLock("test-writer", { lockPath });
+  return { opts: { queuePath: "file:///" + queuePath.replace(/\\/g, "/"), manifestPath: "file:///" + manifestPath.replace(/\\/g, "/"), writer: "test-writer", lockPath }, manifestPath };
 }
 
 test("nextPending yields only unresolved queue members, in queue order", () => {
@@ -120,4 +122,37 @@ test("recordObservation side-logs the absence-observation and the ark STAYS pend
   assert.equal(man.retryableObservations["CCCC-3333"].length, 1);
   const { nextPending: np } = await import("./walker-guard.mjs");
   assert.ok(np(10, opts).some((p) => p.ark === "CCCC-3333"));
+});
+
+test("EXCLUSIVE WRITER LOCK: a second writer is REFUSED while the lock is fresh (founder order 09-30c)", () => {
+  const { opts } = fixtures();
+  const lockOpts = { ...opts, lockPath: opts.manifestPath.replace("images-manifest.json", ".writer-lock.json") };
+  const A = acquireWriterLock("writer-A/imgqueue-owner", lockOpts);
+  assert.match(A.writerId, /writer-A/);
+  // second writer refused
+  assert.throws(() => acquireWriterLock("writer-B/other-session", lockOpts), /REFUSED: exclusive writer lock held by writer-A/);
+  // saves without a writer identity refused
+  assert.throws(() => checkpointState("BBBB-2222", { state: "xml-403" }, { ...lockOpts, writer: undefined }), /REFUSED: save without a writer identity/);
+  // saves from the NON-holder refused
+  assert.throws(() => checkpointState("BBBB-2222", { state: "xml-403" }, { ...lockOpts, writer: "writer-B/other-session" }), /REFUSED: exclusive writer lock held by/);
+});
+
+test("lock: the holder may save; stale locks allow takeover with audit trail; release works", () => {
+  const { opts, manifestPath } = fixtures();
+  const lockOpts = { ...opts, lockPath: opts.manifestPath.replace("images-manifest.json", ".writer-lock.json") };
+  acquireWriterLock("writer-A/imgqueue-owner", lockOpts);
+  // holder saves fine
+  checkpointState("BBBB-2222", { state: "xml-403", ts: new Date().toISOString() }, { ...lockOpts, writer: "writer-A/imgqueue-owner" });
+  // age the heartbeat → takeover by B allowed, previousWriter recorded
+  const lockUrl = new URL(lockOpts.lockPath);
+  const aged = JSON.parse(readFileSync(lockUrl, "utf8"));
+  aged.heartbeat = new Date(Date.now() - 11 * 60 * 1000).toISOString();
+  writeFileSync(lockUrl, JSON.stringify(aged));
+  const B = acquireWriterLock("writer-B/other-session", lockOpts);
+  assert.equal(B.previousWriter.writerId, "writer-A/imgqueue-owner");
+  // A is now refused (B holds it)
+  assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, { ...lockOpts, writer: "writer-A/imgqueue-owner" }), /held by writer-B/);
+  releaseWriterLock("writer-B/other-session", lockOpts);
+  // released → no lock → saves refused again (must re-acquire)
+  assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, { ...lockOpts, writer: "writer-B/other-session" }), /no writer lock exists/);
 });

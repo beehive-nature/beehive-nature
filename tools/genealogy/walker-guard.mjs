@@ -11,11 +11,55 @@
 //     lacking a binding apid or a sha256 (bytes without identity never land).
 // Memory-typed arks are void. The tests in walker-guard.test.mjs prove the
 // rejections (including the actual stray from the 2026-09-29c incident).
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from "node:fs";
 
 // Default paths = the live private tier. CI/tests inject fixtures via opts.
 const DEFAULT_QUEUE = "file:///C:/Users/travi/family-lineage/images-harvest/sweep-queue.json";
 const DEFAULT_MANIFEST = "file:///C:/Users/travi/family-lineage/images-harvest/images-manifest.json";
+const DEFAULT_LOCK = "file:///C:/Users/travi/family-lineage/images-harvest/.writer-lock.json";
+const LOCK_STALE_MS = 10 * 60 * 1000; // heartbeat older than this = takeover allowed
+
+// ── EXCLUSIVE WRITER LOCK (founder order 2026-09-30c: another session
+//    reported saving images during this walker's run, contradicting the
+//    sole-writer claim — every walker entry point now shares ONE lock, and
+//    every save path REQUIRES holding it; a second writer is refused) ──
+export function acquireWriterLock(writerId, opts = {}) {
+  if (!writerId) throw new Error("writerId required");
+  const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
+  const now = new Date().toISOString();
+  let prev = null;
+  if (existsSync(lockUrl)) {
+    try { prev = JSON.parse(readFileSync(lockUrl, "utf8")); } catch { prev = null; }
+    if (prev && prev.writerId !== writerId && (Date.now() - Date.parse(prev.heartbeat)) < LOCK_STALE_MS)
+      throw new Error("REFUSED: exclusive writer lock held by " + prev.writerId + " (heartbeat " + prev.heartbeat + ") — a second writer may not run");
+  }
+  const lock = { schema: "skaists.writer-lock/1", writerId, acquiredAt: (prev && prev.writerId === writerId && prev.acquiredAt) || now,
+    heartbeat: now, previousWriter: prev && prev.writerId !== writerId ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now } : (prev && prev.previousWriter) || null };
+  writeFileSync(lockUrl, JSON.stringify(lock, null, 1));
+  return lock;
+}
+
+export function assertWriterLock(writerId, opts = {}) {
+  if (!writerId) throw new Error("REFUSED: save without a writer identity — acquireWriterLock first");
+  const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
+  if (!existsSync(lockUrl)) throw new Error("REFUSED: no writer lock exists — acquireWriterLock first");
+  const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
+  if (lock.writerId !== writerId)
+    throw new Error("REFUSED: exclusive writer lock held by " + lock.writerId + ", not " + writerId);
+  if (Date.now() - Date.parse(lock.heartbeat) >= LOCK_STALE_MS)
+    throw new Error("REFUSED: writer lock heartbeat stale (since " + lock.heartbeat + ") — re-acquire");
+  return true;
+}
+
+export function releaseWriterLock(writerId, opts = {}) {
+  const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
+  if (!existsSync(lockUrl)) return true;
+  const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
+  if (lock.writerId !== writerId)
+    throw new Error("REFUSED: cannot release a lock held by " + lock.writerId);
+  unlinkSync(lockUrl);
+  return true;
+}
 
 export function loadState(opts = {}) {
   const queueUrl = new URL(opts.queuePath || DEFAULT_QUEUE);
@@ -50,7 +94,9 @@ export function assertQueueMember(ark, opts = {}) {
 }
 
 // Save-side guard for any state (negative or downloaded).
+// opts.writer is REQUIRED — the exclusive writer lock must be held (09-30c).
 export function checkpointState(ark, entry, opts = {}) {
+  assertWriterLock(opts.writer, opts);
   const { memberArks, manifestUrl, manifest } = loadState(opts);
   if (!memberArks.has(ark))
     throw new Error("REJECT SAVE out-of-queue ark: " + ark + " — nothing may be recorded for it");
@@ -109,6 +155,7 @@ export function isRetryableObservation(state) {
 // Absence-observations go to manifest.retryableObservations (side log,
 // never images) — the ark stays pending. Silence is not proof.
 export function recordObservation(ark, kind, detail, opts = {}) {
+  assertWriterLock(opts.writer, opts);
   const { manifestUrl, manifest } = loadState(opts);
   manifest.retryableObservations = manifest.retryableObservations || {};
   (manifest.retryableObservations[ark] = manifest.retryableObservations[ark] || []).push({
@@ -121,6 +168,7 @@ export function recordObservation(ark, kind, detail, opts = {}) {
 // Walker failures go to a SEPARATE retryable log (manifest.walkerFailures),
 // never to manifest.images — so nextPending() keeps handing the ark out.
 export function recordWalkerFailure(ark, err, opts = {}) {
+  assertWriterLock(opts.writer, opts);
   const { manifestUrl, manifest } = loadState(opts);
   manifest.walkerFailures = manifest.walkerFailures || {};
   (manifest.walkerFailures[ark] = manifest.walkerFailures[ark] || []).push({
