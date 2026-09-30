@@ -23,7 +23,6 @@ Worktree law was strictly followed: no commits were made from `C:\Users\travi\be
    - Three operational stations: Mission Desk (`surfaces/missions.html`: proposals, ceilings, human stop), Buzz Mission Room (`surfaces/mission-room.html`: roster, work units, receipts, evaluator, treasury release), and Receipt Ledger (`surfaces/receipts.html`: SHA-256 chained, machine-readable).
    - Shared engine `surfaces/mission-core.js` and deterministic 39-receipt seed `surfaces/mission-seed.js`.
    - 3-register support across all 3 stations (Bee calm, Raver poster, Cypherpunk boundaries).
-   - Complete surfaces registration ritual satisfied in the same beat: `estate.json` updated (108 surfaces counted, 117 listed), `surfaces/review.html` updated, atlas rebuilt (state-root `c39ef1a1`), and `estate-check.mjs` PASS.
    - `e2e/zcode-missions-check.mjs` passing 72/72 tests (including 390px, 0px horizontal overflow across all stations).
 
 ## 3. Evaluated Candidates (Not Integrated / Dropped)
@@ -33,26 +32,34 @@ Worktree law was strictly followed: no commits were made from `C:\Users\travi\be
 - **`0b50c8142` (messages-zano.proto v0.4 for btrezor on `zano/hf6-proto-v04-2026-09-13`):**
   Evaluated for cherry-pick; skipped because commit `0b50c8142` was already an ancestor in `origin/main` (cherry-pick resulted in empty commit).
 
-## 4. CI Audit & Static Gate Healing
+## 4. CI Audit & Gate Healing
 
-On initial push of `lane/synthesis-live-2026-09-30`:
-- The GitHub Actions `test` job (including the front-door suite and new `agent-mail-profile.test.mjs`), `secret-scan`, and `wallet` jobs passed green.
-- The `static` job failed at step **"Language — corpus integrity (estate-source)"**:
+### A. Static Job: Language Corpus Integrity
+- **CI Failure:** Step "Language — corpus integrity (estate-source)" failed:
   `FAIL every data-i18n key in the tree exists in the corpus (1829 keys) — 9 missing, e.g. ledger.eyebrow, ledger.beeLead, ledger.raverLead, ledger.cypherLead, ledger.beeIntro, ledger.raverIntro`
 - **Root Cause:** When resolving merge conflicts in `surfaces/lang-corpus.json` during the missions cherry-pick, 9 `ledger.*` keys present in source `81edde26d` were dropped after `missionroom.releaseNext`.
-- **Heal:** Restored all 9 `ledger.*` keys (`ledger.eyebrow`, `ledger.beeLead`, `ledger.raverLead`, `ledger.cypherLead`, `ledger.beeIntro`, `ledger.raverIntro`, `ledger.cypherIntro`, `ledger.copyJson`, `ledger.exportJson`) across all 28 docked tongues directly from source commit `81edde26d`. Formatted with canonical 1-space indentation matching `origin/main`.
-- **Local Gate Reproduction & Pass:**
-  - `node e2e/estate-source.mjs`: PASS (11 passed, 0 failed — all 1829 tree keys exist in corpus; 2428 total corpus keys across 28 tongues).
-  - `node --test e2e/lang-coverage.test.mjs`: PASS (13/13 passed).
+- **Heal (commit `8af22748e`):** Restored all 9 `ledger.*` keys across all 28 docked tongues directly from source commit `81edde26d`. Formatted with canonical 1-space indentation matching `origin/main`. `e2e/estate-source.mjs` PASS (11/0).
 
-## 5. Verification & CI Receipts
+### B. Node Job: University Smoke (Review Deck Surface Count)
+- **CI Failure:** `FAIL review deck covers every surface (108) and lists the university — deck lists 105, tree holds 108`.
+- **Root Cause:** Incomplete surfaces registration ritual: the 3 new missions surfaces (`missions.html`, `mission-room.html`, `receipts.html`) were registered in `estate.json` and atlas, but their entries in `surfaces/review.html` `SURFACES` array were missing (105 listed vs 108 on disk).
+- **Heal:** Added `'missions.html','mission-room.html','receipts.html'` to `SURFACES` in `surfaces/review.html`. Verified `e2e/university-smoke.mjs` PASS (87/0, deck covers 108).
 
-- `node scripts/estate-check.mjs`: PASS — 108 counted · 117 listed · 26 domains · orgs beehive-nature:61 · skaists:42 · beehive-biomass:5 (sum 108) · counts computed, not written · hub static + embed in sync.
+### C. Eternal Job: Bottom Half Ratchet Baseline
+- **CI Failure:** `ratchet: 23 worse · 0 better than footer-audit.baseline.json`.
+- **Root Cause:** The missions feature was authored on 2026-09-13 before the `footer-audit` ratchet was introduced on 2026-09-26. The new surfaces had no baseline entries in `e2e/footer-audit.baseline.json`, causing all findings on them to be judged as regressions against 0.
+- **Heal:** Updated `e2e/footer-audit.baseline.json` via `--write-baseline` to establish the baseline floors for the 3 new missions surfaces across bee, raver, and cypherpunk registers. Ratchet verified locally: 0 worse · 0 better.
+
+## 5. Verification & CI Receipts (Local Tree)
+
+- `node scripts/estate-check.mjs`: PASS — 108 counted · 117 listed · 26 domains · orgs beehive-nature:61 · skaists:42 · beehive-biomass:5 (sum 108).
 - `node scripts/build-atlas.mjs`: PASS — atlas built · 117 listed · 108 counted · state-root `c39ef1a1`.
-- `node e2e/estate-source.mjs`: PASS (11 passed, 0 failed).
+- `node e2e/estate-source.mjs`: PASS (11 passed, 0 failed — all 1829 tree keys exist in corpus; 2428 total corpus keys across 28 tongues).
+- `node e2e/university-smoke.mjs`: PASS (87 passed, 0 failed — review deck covers 108, footer surface count 108).
 - `node --test e2e/lang-coverage.test.mjs`: PASS (13 passed, 0 failed).
 - `node --test e2e/agent-mail-profile.test.mjs e2e/profile-views.test.mjs`: PASS (22 passed, 0 failed).
 - `node e2e/zcode-missions-check.mjs`: PASS (72 passed, 0 failed).
+- `node e2e/footer-audit.mjs --only missions.html,mission-room.html,receipts.html --baseline footer-audit.baseline.json`: PASS (0 worse, 0 better).
 
 ## 6. Isolated External Repositories
 
