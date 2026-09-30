@@ -1,18 +1,18 @@
 {
  "schema": "skaists.images-summary/1",
- "generated": "2026-09-30T15:59:16.051Z",
+ "generated": "2026-09-30T16:00:54.161Z",
  "provider": "familysearch record images via the deepzoom wire (see fs-adapter IMAGE WIRE + SWEEP WIRE LAWS v2 + WALKER GUARD blocks)",
  "boundary": "BYTES ARE PRIVATE-TIER ONLY — this public summary carries counts, sha256 hashes, and ark pointers, never image bytes (archive copyright)",
  "identity": "BINDING LAW (dascloud das/v2/3:1:{ark}/name?namespace=apid) + CODE-ENFORCED walker guard (tools/genealogy/walker-guard.mjs, 11/11 tests): nextPending is the only ark source; assertQueueMember before any fetch; only downloads and EXPLICIT site denials (xml-N for the bound apid) are outcomes — walker failures and absence-observations (missing traffic/tiles, binding failures, timeouts) stay retryable in side logs, never outcomes (founder orders 09-29d/h/i); the 7 standing no-deepzoom outcomes were reclassified to pending 09-29i and 5 of them downloaded on retry — silence was not proof",
  "harvested": {
-  "attempted": 227,
+  "attempted": 231,
   "states": {
-   "downloaded": 173,
+   "downloaded": 175,
    "xml-403-all": 6,
-   "xml-403": 48
+   "xml-403": 50
   },
-  "downloaded": 173,
-  "bytes": 45671857
+  "downloaded": 175,
+  "bytes": 46151527
  },
  "images": [
   {
@@ -2263,7 +2263,33 @@
    "sha256": "56982f4d023fc66bbde4e06b36918a6aa8345935fc9266231be22be8f718d9e6", "hexLawNote": "PUBLIC-CONSTANT record image digest",
    "retrieved": "2026-09-30T15:58:37.580Z",
    "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3Q9M-C37S-J39J-B",
+   "apid": "apid:TH-909-85577-82438-42",
+   "w": 1558,
+   "h": 2048,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 24,
+   "bytes": 277744,
+   "sha256": "394a9e65134e2e88acaec9b41ada32e563116870e7e7af31d996db525ea271b8", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-30T16:00:21.713Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
+  },
+  {
+   "ark": "3:1:3Q9M-C37S-J3MJ-K",
+   "apid": "apid:TH-909-85577-81529-40",
+   "w": 1558,
+   "h": 2048,
+   "level": 11,
+   "maxLevel": 12,
+   "tiles": 24,
+   "bytes": 201926,
+   "sha256": "ea9ef721c6a045ef92550f05f025e1bfc1f509fedbe6e0a03240e5729df1ab5d", "hexLawNote": "PUBLIC-CONSTANT record image digest",
+   "retrieved": "2026-09-30T16:00:28.083Z",
+   "fidelity": "deepzoom level 11 of 12 — readable tier, not claimed as maximum pyramid fidelity"
   }
  ],
- "openFrontier": "queue skaists.sweep-queue/1: 220 of 366 resolved (60.1%; in-queue downloaded 167), 146 remain at queue order (guarded manifest checkpoint per image); walker failures + absence-observations retryable by design in side logs; mapping beyond the 404 preMapped pairs: rendered-DOM is the only PROVEN method (useSLS 404 both tiers), other wires unprobed"
+ "openFrontier": "queue skaists.sweep-queue/1: 224 of 366 resolved (61.2%; in-queue downloaded 169), 142 remain at queue order (guarded manifest checkpoint per image); walker failures + absence-observations retryable by design in side logs; mapping beyond the 404 preMapped pairs: rendered-DOM is the only PROVEN method (useSLS 404 both tiers), other wires unprobed"
 }
