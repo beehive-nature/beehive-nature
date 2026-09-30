@@ -361,20 +361,20 @@ document.addEventListener('DOMContentLoaded',function(){
    read, bitrate = mdat bytes / duration; playback starts (and resumes
    after running dry) only when the rest of the media, at the measured
    rate, lands before the playhead needs it. Until then the viewer sees
-   "ready to play in ~N s". No MSE: the playing Blob is swapped for a
-   bigger one shortly before it runs dry (a brief hiccup, not a freeze).
+   "ready to play in ~N s". No MSE: never reassign video.src mid-play
+   (that was the rapid flicker). Hold the playhead at the Blob edge; one paint resumes, or finishBinary closes.
    Three-temp progressive disclosure (register.js / data-reg): New bee =
    calm paste->Open->video; Raver = softer pulse copy; Cypherpunk =
    Autonomi-class instrument sheet — honest client/door metrics only. */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
-  const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
-  const EARLY_MDAT = 256 << 10, STUB_CL = 128 << 10;
+  const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000, BLOB_WAIT_FULL = 120000;
+  const EARLY_MDAT = 2 << 20, STUB_CL = 128 << 10;
   // Time-based start (replaces the fixed 12 MiB PLAY_MIN, ~1-2 s of 8K): go once the rest of the
   // media, at the measured rate with SAFETY slack, lands MARGIN seconds before the playhead needs
-  // it, with AHEAD seconds already local past the playhead. While playing, a bigger Blob replaces
-  // the running one only when the playhead is within EXTEND_LEAD (+10%) of its end and the
-  // download holds EXTEND_GAIN more seconds (the 2 MiB refreshes of 2026-09-21 thrashed decode).
+  // it, with AHEAD seconds already local past the playhead. While playing, NEVER replace the
+  // Blob (src thrash = flicker). Hold at EXTEND_LEAD; one stalled-resume paint or finishBinary.
+  // (Removed mid-play extend->setBlob->v.src thrash that flashed the stage every few seconds.)
   const SAFETY = 1.15, MARGIN = 2, AHEAD = 1, EXTEND_LEAD = 1.5, EXTEND_GAIN = 2;
   const WAIT_EN = 'Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.';
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-wait', 's-fail'];
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded',function(){
   let feed = null;
   const newFeed = my => (feed = {
     my, parts: [], bytes: 0, mime: '', early: false, me: 0, plan: null, planless: false,
-    preview: false, sounded: false, stalled: false, busy: false, done: false,
+    preview: false, previewTried: false, srcLocked: false, sounded: false, stalled: false, busy: false, done: false,
     acc: null, folded: 0, accBytes: 0, paintedAt: 0, retryAt: 0,
   });
   // Early Blob carries full moov duration but short mdat: past its last byte Chrome errors out
@@ -766,22 +766,46 @@ document.addEventListener('DOMContentLoaded',function(){
     frameGen++;
     const gen = frameGen;
     return new Promise(done => {
-      const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('error', no); done(ok); };
-      const yes = () => { if (gen === frameGen) end(true); };
-      const no = () => { if (gen === frameGen) end(false); };
+      const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('loadedmetadata', yes); v.removeEventListener('canplay', yes); v.removeEventListener('error', no); done(ok); };
+      const yes = () => { if (gen === frameGen && (v.videoWidth > 0 || v.readyState >= 2)) end(true); };
+      const no = () => {
+        if (gen !== frameGen) return;
+        try { window.__bviewMediaErr = v.error ? (v.error.code + ':' + (v.error.message || '')) : 'error-event'; } catch {}
+        end(false);
+      };
       const t = setTimeout(() => end(false), ms);
       v.addEventListener('loadeddata', yes);
+      v.addEventListener('loadedmetadata', yes);
+      v.addEventListener('canplay', yes);
       v.addEventListener('error', no);
       assign();
-      if (gen === frameGen && v.readyState >= 2 && v.videoWidth > 0) end(true);
+      if (gen === frameGen && v.readyState >= 1 && v.videoWidth > 0) end(true);
     });
   };
-  const setBlob = blob => {
+  // Count real media-element src assigns (proof: flicker = this climbing every chunk).
+  window.__bviewSrcAssigns = window.__bviewSrcAssigns || 0;
+  const setBlob = (blob, st) => {
+    // Refuse a no-growth repaint: same bytes already on the element = thrash with no new mdat.
+    if (st && st.paintedAt > 0 && st.accBytes > 0 && st.accBytes <= st.paintedAt) return false;
     if (blobUrl) URL.revokeObjectURL(blobUrl);
+    // Drop the old src without load() — load() on an empty src fires error and aborts paintSrc
+    // before the new Blob URL is attached (DEMUXER_ERROR / instant end(false)).
+    try { v.removeAttribute('src'); v.removeAttribute('srcObject'); } catch {}
     blobUrl = URL.createObjectURL(blob);
-    v.src = blobUrl; v.load();
+    window.__bviewSrcAssigns++;
+    v.src = blobUrl;
+    try { v.load(); } catch {}
+    return true;
   };
-  const paintBlob = (blob, ms) => paintSrc(() => setBlob(blob), ms);
+  const paintBlob = (blob, ms, st) => {
+    let refused = false;
+    return paintSrc(() => {
+      if (setBlob(blob, st) === false) { refused = true; return; }
+    }, ms).then(ok => {
+      if (refused) return v.videoWidth > 0; // already on element
+      return ok;
+    });
+  };
   const prefixOf = (parts, bytes, need) => {
     const n = Math.min(bytes, need), u = new Uint8Array(n); let o = 0;
     for (const p of parts) { const k = Math.min(p.length, n - o); u.set(p.subarray(0, k), o); o += k; if (o >= n) break; }
@@ -808,7 +832,8 @@ document.addEventListener('DOMContentLoaded',function(){
     st.busy = true;
     try {
       const blob = snap(st), n = st.accBytes;
-      const ok = await paintBlob(blob, BLOB_WAIT);
+      if (n <= st.paintedAt) return false;   // nothing new to put on the element
+      const ok = await paintBlob(blob, (n > (32 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), st);
       if (st.my !== job) return false;
       if (!ok) { st.retryAt = bytesAt(st.plan, mediaAt(st.plan, st.bytes) + EXTEND_GAIN); return false; }
       st.paintedAt = n;
@@ -822,7 +847,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   // Time-based playback, called per chunk and from the media element's own events: start, and
   // resume after running dry, only once waitFor() says the download will stay ahead; while
-  // playing, extend the Blob shortly before the playhead reaches its end.
+  // playing, hold the playhead — never mid-play src thrash.
   async function steer(st) {
     const pl = st.plan, my = st.my;
     if (my !== job || !pl || !st.preview || st.busy || st.done || st.bytes < st.retryAt) return;
@@ -832,25 +857,50 @@ document.addEventListener('DOMContentLoaded',function(){
       const w = waitFor(pl, st.bytes, keepAt, st.stalled ? AHEAD + EXTEND_GAIN : AHEAD);
       if (w === null) return;                  // no rate yet: the bar and MB counter speak
       if (w > 0) { showWait(w); return; }
-      if (!(await extend(st, keepAt, st.sounded))) return;
+      // Floor A: at most ONE src assign for start (or one for resume after hold).
+      if (st.srcLocked && !st.stalled) return;
+      // Huge files: wait for a real first-frame budget (>=32MiB) before the one paint.
+      if (!st.stalled && metrics.cl && metrics.cl > (48 << 20) && st.bytes < (32 << 20)) {
+        showWait(Math.max(1, Math.ceil(((32 << 20) - st.bytes) / Math.max(rateBps(), 1))));
+        return;
+      }
+      if (!(await extend(st, keepAt, st.sounded))) {
+        st.srcLocked = true;
+        note('start paint deferred to full file (no src thrash)');
+        return;
+      }
+      st.srcLocked = true;
+      if (!(v.videoWidth > 0)) {
+        note('start paint has no frame yet; holding until full file (no src thrash)');
+        return;
+      }
       st.stalled = false; waitS = 0; paintFlow(); renderInst();
       if (!st.sounded) { st.sounded = true; playing = my; say(null); await goSound(my); }
       else say(null);
       return;
     }
-    if (v.paused || st.paintedAt >= pl.m1) return;   // the viewer's own pause; or nothing left to add
-    // Near the (estimated, ~10% optimistic) end of the running Blob, swap once the download holds
-    // EXTEND_GAIN more seconds -- or, closer in, at least what is left to play of this Blob (0.5 s
-    // floor), so a download only just ahead is followed instead of running dry.
+    if (v.paused || st.paintedAt >= pl.m1) return;   // the viewer own pause; or nothing left to add
+    // Near the end of the running Blob: HOLD the playhead — never reassign video.src mid-play.
+    // Mid-download src swaps (extend -> setBlob -> v.src= + load) were the rapid flicker.
     const edge = mediaAt(pl, st.paintedAt), left = edge - 0.1 * edge - v.currentTime;
     if (left > EXTEND_LEAD) return;
-    if (st.bytes < pl.m1 && mediaAt(pl, st.bytes) - edge < Math.min(EXTEND_GAIN, Math.max(0.5, left))) return;
-    await extend(st, v.currentTime, true);
+    if (v.currentTime > 0.05) keepAt = v.currentTime;
+    st.stalled = true;
+    try { v.pause(); } catch {}
+    note('hold playhead at ' + keepAt.toFixed(2) + ' s: one paint when the rule allows (no mid-play src thrash)');
+    const w = waitFor(pl, st.bytes, keepAt, AHEAD + EXTEND_GAIN);
+    if (w === null) return;
+    if (w > 0) { showWait(w); return; }
+    if (st.bytes <= st.paintedAt) return;
+    st.srcLocked = false; // allow exactly one resume paint
+    if (!(await extend(st, keepAt, true))) { st.srcLocked = true; return; }
+    st.srcLocked = true;
+    st.stalled = false; waitS = 0; paintFlow(); renderInst(); say(null);
   }
   // Per chunk: find moov, read the time plan, paint the first frame, then steer() by time.
   async function flushEarlyPaint(parts, bytes, state, my) {
     state.parts = parts; state.bytes = bytes;
-    if (my !== job || bytes < 32 || state.busy || state.me < 0) return;
+    if (my !== job || bytes < 32 || state.busy || state.me < 0 || bytes < (state.retryAt || 0)) return;
     if (!state.me) {
       const head = prefixOf(parts, bytes, Math.min(bytes, 1 << 20));
       const me = moovEnd(head);
@@ -872,23 +922,38 @@ document.addEventListener('DOMContentLoaded',function(){
       paintNerd();
     }
 
-    // Phase A -- first frame only (paused at 0). Never autoplay a short-mdat Blob (moov duration yank).
+    // Phase A -- at most ONE early paint. Skip on huge CL (8K): first frame needs MiBs of mdat.
+    if (!state.preview && metrics.cl && metrics.cl > (48 << 20)) {
+      state.previewTried = true;
+      state.preview = true;
+      state.early = false;
+      note('early frame skipped (large file): one paint at start/finish');
+      return;
+    }
+    // Phase A -- at most ONE early paint. 8K needs far more than EARLY_MDAT for a
+    // decodable first frame; retrying every chunk (clearing or reassigning src) was the
+    // rapid flicker (live: __bviewSrcAssigns 220 in 8s, videoWidth stuck at 0).
     if (!state.preview) {
+      if (state.previewTried) return;
+      state.previewTried = true;
       state.busy = true;
       let ok = false;
-      try { ok = await paintBlob(snap(state), BLOB_WAIT); } finally { state.busy = false; }
-      if (!(my === job && ok && v.videoWidth > 0)) {
-        if (my === job) { frameGen++; v.removeAttribute('src'); v.load(); }
+      try { ok = await paintBlob(snap(state), BLOB_WAIT, state); } finally { state.busy = false; }
+      if (my === job && ok && v.videoWidth > 0) {
+        state.preview = true;
+        state.early = true;
+        state.paintedAt = state.accBytes;
+        try { v.pause(); v.currentTime = 0; } catch {}
+        keepAt = 0;
+        playing = my;
+        markFirstFrame();
+        say(null);
         return;
       }
+      // Defer pixels to the one start paint in Phase B / finishBinary. Never strip src in a loop.
       state.preview = true;
-      state.early = true;
-      state.paintedAt = state.accBytes;
-      try { v.pause(); v.currentTime = 0; } catch {}
-      keepAt = 0;
-      playing = my;
-      markFirstFrame();
-      say(null); // clear "Fetching…" — frame is up; bar + rate still show progress
+      state.early = false;
+      note('early frame deferred: one paint at start (no src thrash)');
       return;
     }
 
@@ -909,36 +974,51 @@ document.addEventListener('DOMContentLoaded',function(){
     for (const until = performance.now() + BLOB_WAIT; state.busy && performance.now() < until;) await new Promise(r => setTimeout(r, 50));
     if (my !== job) return true;
     const full = snap(state);
-    await cachePut(a, full);
     metrics.bytes = bytes;
     metrics.doneMs = metrics.t0 ? performance.now() - metrics.t0 : null;
-    metrics.sha = await hashBlob(full);
-    note('all ' + fmtMb(bytes) + ' in · sha256 ' + (metrics.sha || 'unavailable'));
+    note('all ' + fmtMb(bytes) + ' in');
     paintNerd(); renderInst();
-    if (my !== job) return true;   // a new address arrived while this one was hashed
-    // Resume where the viewer is NOW (hashing a large file takes seconds of playback). With a time
-    // plan keepAt only ever holds a playhead the running Blob could reach; without one, a playhead
-    // past 15 s is an end-of-data yank, discarded.
+    if (my !== job) return true;
+    // Hash AFTER paint so a 200MB SHA does not delay the one src assign.
+    // Resume where the viewer is NOW. With a time plan keepAt only ever holds a playhead the
+    // running Blob could reach; without one, a playhead past 15 s is an end-of-data yank, discarded.
     let t0 = keepAt || 0;
     if (!state.plan && t0 > 15) t0 = 0;
     if (playing === my || state.preview) {
       const resume = state.stalled || !v.paused;   // ran dry, or playing: go on; the viewer's own pause stays
+      // Already painting from the one start Blob: do NOT reassign src here (that black-flashed
+      // mid-play on live). Grow via the stalled-resume path when the playhead nears the edge.
+      if (state.sounded && v.videoWidth > 0 && !state.stalled) {
+        state.done = true;
+        note('full file in · keep playing copy (no finish src thrash)');
+        cachePut(a, full);
+        hashBlob(full).then(sha => { if (my === job) { metrics.sha = sha; note('sha256 ' + (sha || 'unavailable')); paintNerd(); } });
+        say(null);
+        return true;
+      }
       state.busy = true;
       let ok = false;
-      try { ok = await paintBlob(full, BLOB_WAIT); } finally { state.busy = false; }
+      state.paintedAt = 0; // allow the final src assign even if a deferred start painted nothing useful
+      try { ok = await paintBlob(full, (bytes > (48 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), state); } finally { state.busy = false; }
       if (my !== job) return true;
-      if (ok) {
-        state.paintedAt = bytes; state.stalled = false;
+      if (ok || (v.videoWidth > 0)) {
+        state.paintedAt = bytes; state.stalled = false; state.srcLocked = true;
         try { v.currentTime = t0; } catch {}
         keepAt = t0;
         playing = my; say(null);
         markFirstFrame();
         if (!state.sounded) { state.sounded = true; await goSound(my); }
         else if (resume) { try { await v.play(); } catch {} }
-      } else say(null);
+        cachePut(a, full);
+        hashBlob(full).then(sha => { if (my === job) { metrics.sha = sha; note('sha256 ' + (sha || 'unavailable')); paintNerd(); } });
+      } else {
+        note('full paint produced no frame');
+        say('s-fail');
+        cachePut(a, full);
+      }
       return true;
     }
-    const ok = await paintBlob(full, BLOB_WAIT);
+    const ok = await paintBlob(full, (bytes > (48 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), state);
     if (my === job) { if (ok) { playing = my; say(null); markFirstFrame(); await goSound(my); } else say('s-fail'); }
     return true;
   }
@@ -1094,7 +1174,7 @@ document.addEventListener('DOMContentLoaded',function(){
       metrics.sha = await hashBlob(hit);
       metrics.doneMs = performance.now() - metrics.t0;
       paintNerd();
-      if (await paintBlob(hit, BLOB_WAIT)) {
+      if (await paintBlob(hit, BLOB_WAIT, null)) {
         if (my === job) { playing = my; say(null); markFirstFrame(); await goSound(my); }
         return;
       }
