@@ -28,6 +28,7 @@ mod mcp;
 mod page;
 mod qwen;
 mod replay;
+mod replay_reader;
 mod resolve;
 mod seat;
 mod tokens;
@@ -45,6 +46,7 @@ fn main() {
         Some("agentloop") => agentloop_cmd(&args[1..]),
         Some("qwen-count") => qwen_count_cmd(&args[1..]),
         Some("resolve") => resolve_cmd(&args[1..]),
+        Some("replay-inspect") => replay_inspect_cmd(&args[1..]),
         Some("version") | None => {
             println!(
                 "banchor {} — the serving organ of bHEartWALLet",
@@ -53,7 +55,7 @@ fn main() {
             println!("laws: untrusted-data delimiters · strip-hidden · plan-then-approve · no-screenshot durable path · bsigner-independence");
         }
         Some(other) => {
-            eprintln!("unknown command {other:?} — serve | milestone1 | agentloop | qwen-count | resolve | version");
+            eprintln!("unknown command {other:?} — serve | milestone1 | agentloop | qwen-count | resolve | replay-inspect | version");
             std::process::exit(2);
         }
     }
@@ -386,6 +388,154 @@ fn resolve_cmd(args: &[String]) {
         Err(e) => {
             eprintln!("resolve FAILED: {e}");
             std::process::exit(1);
+        }
+    }
+}
+
+/// G2-B — one bounded, offline, read-only inspection of a replay file.
+/// Emits JSON metadata plus a PROPOSED cursor; never auto-saves, never
+/// starts the daemon, never touches the source. Default output excludes
+/// raw page/model payloads (--raw returns them, labeled untrusted).
+fn replay_inspect_cmd(args: &[String]) {
+    let mut file: Option<String> = None;
+    let mut key: Option<String> = None;
+    let mut cursor: Option<String> = None;
+    let mut show_raw = false;
+    let mut max_records: usize = replay_reader::MAX_BATCH_RECORDS;
+    let mut max_bytes: usize = replay_reader::MAX_BATCH_BYTES;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--file" if i + 1 < args.len() => {
+                file = Some(args[i + 1].clone());
+                i += 2;
+            }
+            "--source-key" if i + 1 < args.len() => {
+                key = Some(args[i + 1].clone());
+                i += 2;
+            }
+            "--cursor" if i + 1 < args.len() => {
+                cursor = Some(args[i + 1].clone());
+                i += 2;
+            }
+            "--raw" => {
+                show_raw = true;
+                i += 1;
+            }
+            "--max-records" if i + 1 < args.len() => match args[i + 1].parse::<usize>() {
+                Ok(n) if n >= 1 => {
+                    max_records = n.min(replay_reader::MAX_BATCH_RECORDS);
+                    i += 2;
+                }
+                _ => {
+                    eprintln!("replay-inspect: --max-records needs an integer >= 1");
+                    std::process::exit(2);
+                }
+            },
+            "--max-bytes" if i + 1 < args.len() => match args[i + 1].parse::<usize>() {
+                Ok(n) if n >= 1 => {
+                    max_bytes = n.min(replay_reader::MAX_BATCH_BYTES);
+                    i += 2;
+                }
+                _ => {
+                    eprintln!("replay-inspect: --max-bytes needs an integer >= 1");
+                    std::process::exit(2);
+                }
+            },
+            other => {
+                eprintln!("replay-inspect: unknown flag {other:?}");
+                std::process::exit(2);
+            }
+        }
+    }
+    let (file, key) = match (file, key) {
+        (Some(f), Some(k)) => (f, k),
+        _ => {
+            eprintln!("replay-inspect: --file and --source-key are required");
+            std::process::exit(2);
+        }
+    };
+    let resume = match &cursor {
+        Some(path) => match replay_reader::load_cursor_file(std::path::Path::new(path), &key) {
+            Ok(c) => replay_reader::Resume::Cursor(c),
+            Err(e) => {
+                eprintln!("replay-inspect: cursor refused: {e}");
+                std::process::exit(3);
+            }
+        },
+        None => replay_reader::Resume::Start,
+    };
+    let mut source = match replay_reader::FileSource::open(std::path::Path::new(&file)) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("replay-inspect: {e}");
+            std::process::exit(3);
+        }
+    };
+    let budget = replay_reader::Budget {
+        max_batch_records: max_records,
+        max_batch_bytes: max_bytes,
+        ..Default::default()
+    };
+    match replay_reader::read_batch(&mut source, resume, &key, budget) {
+        Ok(out) => {
+            use serde_json::json;
+            let records: Vec<serde_json::Value> = out
+                .records
+                .iter()
+                .map(|r| {
+                    let mut o = json!({
+                        "offset": r.offset, "len": r.len, "ev": r.ev,
+                        "t": r.t, "t_ms": r.t_ms,
+                    });
+                    if show_raw {
+                        o["raw_untrusted"] = json!(r.raw);
+                    }
+                    o
+                })
+                .collect();
+            let stop = match &out.stop {
+                replay_reader::StopReason::EndOfCapturedExtent => {
+                    json!({"kind": "end_of_captured_extent"})
+                }
+                replay_reader::StopReason::IncompleteTail { starts_at } => {
+                    json!({"kind": "incomplete_tail", "starts_at": starts_at})
+                }
+                replay_reader::StopReason::FramingRefused { at, fault } => {
+                    json!({"kind": "framing_refused", "at": at, "fault": fault.to_string()})
+                }
+                replay_reader::StopReason::LimitReached { records, bytes } => {
+                    json!({"kind": "limit_reached", "records": records, "bytes": bytes})
+                }
+                replay_reader::StopReason::BudgetTooSmall { first_record_bytes } => {
+                    json!({"kind": "budget_too_small", "first_record_bytes": first_record_bytes})
+                }
+            };
+            let output = json!({
+                "tool": "banchor replay-inspect",
+                "extent_len": out.extent_len,
+                "next_offset": out.next_offset,
+                "observed_backlog_bytes": out.observed_backlog_bytes,
+                "stop": stop,
+                "session": out.session,
+                "records": records,
+                "candidate_cursor": {
+                    "v": replay_reader::CURSOR_VERSION,
+                    "src": out.candidate.src,
+                    "next": out.candidate.next,
+                    "len": out.candidate.prior_len,
+                    "digest": { "alg": replay_reader::DIGEST_ALG, "b64u": out.candidate.digest_b64u },
+                },
+                "note": "candidate cursor NOT saved — accept the batch, then save a new checkpoint explicitly",
+            });
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&output).unwrap_or_default()
+            );
+        }
+        Err(e) => {
+            eprintln!("replay-inspect: {e}");
+            std::process::exit(3);
         }
     }
 }
