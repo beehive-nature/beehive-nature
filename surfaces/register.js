@@ -10,6 +10,28 @@
   window.__bnrRegister=true;
   var script=document.currentScript;
   var home=new URL('index.html',script&&script.src||location.href).href;
+  /* THE KIT FACES (#257 follow-through 2026-09-28, design-system/manifest.json):
+     the sheet's families are self-hosted in-tree — fonts/eternal/*.woff2 under
+     SIL OFL 1.1 (fonts/eternal/OFL.md) plus the house hand burti at
+     fonts/burti.woff2. Same-origin beside this script, never a font CDN; a
+     tongue a face does not cover falls to the system face already in each
+     register's stack. Pages with their own @font-face for the same family
+     (skaists.css, atlas.css) coexist: identical descriptors resolve to one fetch. */
+  (function(){
+    var base=(script&&script.src)?script.src.replace(/register\.js(?:\?.*)?$/i,''):home.replace(/[^\/]*$/,'');
+    var h=document.head||document.documentElement;
+    if(!document.getElementById('bkitfonts')){
+      var l=document.createElement('link');
+      l.id='bkitfonts';l.rel='stylesheet';l.href=base+'fonts/eternal-fonts.css';
+      h.appendChild(l);
+    }
+    if(!document.getElementById('bkitburti')){
+      var st=document.createElement('style');
+      st.id='bkitburti';
+      st.textContent="@font-face{font-family:'burti';font-style:normal;font-weight:400;font-display:swap;src:url('"+base+"fonts/burti.woff2') format('woff2')}";
+      h.appendChild(st);
+    }
+  })();
   var REGS=[['bee','🐝','reg.bee','new bee'],['raver','🎛','reg.raver','raver'],['cypherpunk','⚗','reg.cypherpunk','cypherpunk']];
   function pref(){ try{ var v=localStorage.getItem('bregister');
     return (v==='raver'||v==='cypherpunk')?v:'bee'; }catch(e){ return 'bee'; } }
