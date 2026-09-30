@@ -100,11 +100,276 @@ body[data-reg=cypherpunk] .foot{font-size:.875rem;line-height:1.8;display:block}
   body{padding:20px 12px 80px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* ── THE WHOLE ROOM, dressed on skaists (../skaists.css): the three authored presentations above
+   keep their shapes and their words; their colours, faces and corners now resolve to the design
+   system's tokens per register. The stage keeps its black: the art is drawn on black. ── */
+body[data-reg]{--danger:var(--sk-guard);--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);--on:var(--sk-on-primary);background-color:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] input,body[data-reg] button{border-radius:var(--sk-radius,12px)}
+body[data-reg] input[type=range]{border-radius:0}
+body[data-reg] canvas#stage{background:var(--sk-bg-card)}
+body[data-reg] .open-room{border-radius:var(--sk-radius,12px);background:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg] details.tool{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .seed-label{min-height:var(--sk-control-min,44px);display:flex;align-items:center;margin:0}
+body[data-reg] .chip{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .honesty em{border-radius:var(--sk-radius-pill,999px)}
+body[data-reg] #room-bar #peers{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+body[data-reg] .crumb a{min-width:var(--sk-control-min,44px);justify-content:center}
+body[data-reg=bee]{--dim:var(--sk-ink-mut);--accent:var(--sk-sovereign);--hot:var(--sk-sovereign);--font:var(--sk-font-bee-sans)}
+body[data-reg=bee] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg=bee] canvas#stage{box-shadow:none}
+body[data-reg=raver]{--dim:var(--sk-ink-soft);--accent:var(--sk-sovereign-soft);--hot:var(--sk-you);--font:var(--sk-font-raver-body);font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg=raver] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg=raver] :is(.lead,.honesty,#room-status,#err,.tool p,.foot,summary,label.ctl span,.seed-label,.open-room,input,button){font-size:14px}
+body[data-reg=raver] :is(.crumb,.honesty em,#room-bar,.chip,#meta,label.ctl){font-size:13px}
+body[data-reg=raver] :is(input,button,.open-room,details.tool){border-radius:var(--sk-radius-pill,999px)}
+body[data-reg=raver] details.tool{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg=raver] input[type=range]{border-radius:0}
+body[data-reg=raver] .open-room{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg=raver] canvas#stage{border-color:var(--sk-sovereign);border-radius:var(--sk-radius-xl,18px);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg=raver] button:hover{color:var(--sk-on-primary)}
+body[data-reg=cypherpunk]{--dim:var(--sk-ink-soft);--accent:var(--sk-ai);--hot:var(--sk-ai);--font:var(--sk-font-mono);--mono:var(--sk-font-mono);font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg=cypherpunk] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+body[data-reg=cypherpunk] :is(.lead,.honesty,#room-status,#err,.tool p,.foot,summary,label.ctl span,.seed-label,.open-room,input,button){font-size:13px}
+body[data-reg=cypherpunk] :is(.crumb,.honesty em,#room-bar,.chip,#meta,label.ctl){font-size:12px}
+body[data-reg=cypherpunk] :is(canvas#stage,details.tool,input,button,.chip,.open-room,.honesty em){border-radius:var(--sk-radius-sm,6px)}
+body[data-reg=cypherpunk] input[type=range]{border-radius:0}
+</style>
+<link rel="stylesheet" href="../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Sizes that matter carry their token's own value as a fallback. ── */
+#eternal{margin:0 0 var(--sk-s2,12px);text-align:start}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button,#eternal input{font:inherit;color:inherit;letter-spacing:normal;text-transform:none;box-shadow:none;margin:0}
+#eternal svg,#eternal canvas{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal p{margin:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#etArchive.et-archive-h{margin:var(--sk-s5,36px) 0 var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;text-shadow:none;background:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3,18px);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:normal}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:0 var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none;box-sizing:border-box}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row,a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform .26s}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);border-radius:var(--sk-radius-lg,16px);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-decoration:none;cursor:pointer}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min,44px);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-said{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-said:empty{display:none}
+.et-b-addr{display:block;margin-top:var(--sk-s1,6px);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+
+/* RAVER — the data is the art; the gesture is physical; motion under 3 Hz, pausable, still when asked */
+.et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px);margin-top:var(--sk-s2,12px)}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{display:block;font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4,24px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+.et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 13px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1,6px) var(--sk-s2,12px);margin-top:var(--sk-s2,12px)}
+.et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-note:empty{display:none}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:var(--sk-s2,12px) 0 0;font:400 12px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+.et-r-legend b{font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 13px/1.4 var(--sk-font-raver-body);cursor:pointer;opacity:.7;transition:opacity .26s}
+.et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+.et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:normal;text-transform:none;border:0;padding:0;background:none}
+.et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)}
+.et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .ai{color:var(--sk-ai)}
+.et-c-in{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ai)!important;font:400 13px/1.45 var(--sk-font-mono)!important;box-sizing:border-box}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-pipe li.fail{border-color:var(--sk-info)}.et-c-pipe li.fail b{color:var(--sk-info)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-decoration:none;cursor:pointer}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .ai{color:var(--sk-ai)}
+.et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+.et-c-verify ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s1,6px);counter-reset:v}
+.et-c-verify li{counter-increment:v}
+.et-c-verify li::before{content:counter(v) ". ";color:var(--sk-ink-mut)}
+.et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-said{margin-top:var(--sk-s2,12px);color:var(--sk-ink-soft);word-break:break-all}
+.et-c-said:empty{display:none}
+
+/* the two-tab room — the vitrine and one knob (bee), six seats round the field (raver), the shared doc (cypherpunk) */
+#eternal a{text-transform:none}
+.et-b-frame{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+.et-b-frame canvas{width:100%;aspect-ratio:820/440;height:auto;margin:0;border:0;border-radius:0;background:var(--sk-ink)}
+.et-b-knob{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s3,18px);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-knob input{width:100%;min-height:var(--sk-control-min,44px);margin:0;padding:0;border:0;border-radius:0;background:transparent;accent-color:var(--sk-primary)}
+.et-b-status{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-status.off{color:var(--sk-guard)}
+.et-r-seats{width:100%;max-width:330px;margin:var(--sk-s3,18px) auto 0}
+.et-r-seats svg{width:100%;height:auto;overflow:visible}
+.et-r-seats .seat polygon{stroke-width:1.5;transition:fill .26s,opacity .26s}
+.et-r-seats .seat.me polygon{fill:var(--sk-you);stroke:var(--sk-you)}
+.et-r-seats .seat.peer polygon{fill:var(--sk-sovereign);stroke:var(--sk-sovereign-strong)}
+.et-r-seats .seat.open polygon{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign-soft);stroke-dasharray:5 5}
+.et-r-seats .seat.off polygon{fill:var(--sk-guard-wash);stroke:var(--sk-guard);stroke-dasharray:2 6}
+.et-r-seats text{font:600 13px/1.4 var(--sk-font-raver-body);text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.et-r-seats .seat.me text{fill:var(--sk-on-primary)}
+.et-r-seats .seat.peer text{fill:var(--sk-bg)}
+.et-r-seats .seat.open text{fill:var(--sk-sovereign-strong)}
+.et-r-seats .seat.off text{fill:var(--sk-guard)}
+.et-r-seats a{cursor:pointer}
+.et-r-seats a:focus-visible polygon{stroke:var(--sk-ink);stroke-width:3}
+.et-r-pad{width:100%;margin:var(--sk-s3,18px) auto 0}
+.et-r-pad canvas{width:100%;aspect-ratio:820/440;height:auto;margin:0;border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);box-shadow:var(--sk-glow-sovereign);background:var(--sk-bg);touch-action:none;cursor:crosshair}
+.et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+.et-r-tile{touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-tile{border-radius:var(--sk-radius-xl,18px)}
+.et-r-tile svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-tile:disabled{cursor:not-allowed;opacity:.5}
+.et-c-render{width:100%;aspect-ratio:820/440;height:auto;margin:var(--sk-s2,12px) 0 0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg)}
+.et-c-params{table-layout:fixed}
+.et-c-params th:first-child{width:96px}
+.et-c-tab td.inp{padding:0 var(--sk-s1,6px)}
+#eternal .et-c-in{margin:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ai)!important;font:400 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg=cypherpunk] #eternal :is(input,button,a,canvas){border-radius:var(--sk-radius-sm,6px)}
+#eternal button:hover{border-color:currentColor}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom">
 <div class="wrap">
 <p class="crumb"><a href="../" data-i18n="social.arrival.home">Home</a> · <a href="./">Forge</a></p>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the room module's own state, read through window.__forgeRoom, and
+     the page's own controls) drives all three, so the facts cannot drift. Every front writes INTO
+     the room's own controls, so an edit travels exactly as a knob turn does; the one real action is
+     opening a second tab. No front claims sharing unless the room module says it is sharing. -->
+<section id="eternal" aria-label="the two-tab room">
+
+  <!-- NEW BEE — a calm room: the picture, one knob, the one thing to do -->
+  <div class="et-b">
+    <div class="et-b-mark">bBuzz forge</div>
+    <h2 class="et-b-h" data-etk="et.room.beeH">play in two tabs.</h2>
+    <p class="et-b-lede" data-i18n="room.beeLead">Open a second tab. Turn a knob. Watch it move.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-i18n="room.unsaved">Changes live in these tabs and are not saved.</span></div>
+    <div class="et-b-frame">
+      <canvas id="etRmBee" role="img" aria-label="the shared field, as this tab draws it"></canvas>
+      <label class="et-b-knob"><span data-etk="et.room.beeKnob">how many hexagons</span><input id="etRmBeeDensity" type="range" min="6" max="18" step="1" value="11" disabled></label>
+    </div>
+    <div class="et-b-status" id="etRmBeeStatus" role="status"></div>
+    <div class="et-b-rows" id="etRmRows">
+      <div class="et-b-row"><span data-i18n="room.tabs">Tabs in this room</span><small id="etRmBeeTabs"></small></div>
+      <div class="et-b-row"><span data-etk="et.room.bSeed">the shared word</span><small id="etRmBeeSeed"></small></div>
+      <div class="et-b-row"><span data-etk="et.room.bCells">places in the field</span><small id="etRmBeeCells"></small></div>
+    </div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etRmBeeOpen" href="room.html" target="_blank" rel="noopener noreferrer" data-i18n="room.open">Open a second tab</a>
+      <button type="button" class="et-b-link" id="etRmBeeRoll" data-i18n="room.roll" disabled>Try a new seed</button>
+      <p class="et-b-foot" data-etk="et.room.beeFoot">the second tab opens beside this one. it only shares with tabs in this browser.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the room is a hive: you at the heart, six seats for other tabs, the field under every hand -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-i18n="room.raverTitle">Jam the field.</h2><span class="et-r-hint" id="etRmHint" aria-live="polite"></span></div>
+    <div class="et-r-seats"><svg id="etRmSeats" viewBox="0 0 330 262" role="group" aria-label="the room as a hive: you at the heart, six seats for other tabs"></svg></div>
+    <div class="et-r-pad"><canvas id="etRmPad" tabindex="0" aria-label="the shared field as a pad: slide sideways for the hue, up and down for the density; arrow keys work too" aria-describedby="etRmLegend"></canvas></div>
+    <div class="et-r-legend" id="etRmLegend" aria-live="polite"></div>
+    <div class="et-r-tiles">
+      <button type="button" class="et-r-tile" id="etRmMirror" aria-pressed="true" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M9 6 4 12l5 6M15 6l5 6-5 6"/></svg><span data-etk="et.room.rMirror">mirror</span></button>
+      <button type="button" class="et-r-tile" id="etRmDrift" aria-pressed="false" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/></svg><span data-etk="et.room.rDrift">hold · drift</span></button>
+      <button type="button" class="et-r-tile" id="etRmRoll" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/></svg><span data-etk="et.room.rRoll">roll</span></button>
+    </div>
+    <a class="et-r-pill" id="etRmRaverOpen" href="room.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.room.raverOpen">open another hand ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    <div class="et-r-note" id="etRmRaverNote"></div>
+  </div>
+
+  <!-- CYPHERPUNK — the bench: the shared doc live, the transport as a pipeline, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etRmPath">y.doc://bBuzz-forge-room</div>
+    <div class="et-c-chips" id="etRmChips"></div>
+    <div class="et-c-guard"><span data-etk="et.room.cGuard">reach = this browser · persistence = none</span><b data-etk="et.room.cGuardB">no server, no remote transport</b></div>
+    <h3 class="et-c-h" data-etk="et.room.cDocH">y.map · the shared composition</h3>
+    <table class="et-c-tab et-c-params"><thead><tr><th>key</th><th>value · bound to the room</th></tr></thead><tbody>
+      <tr><td>seed</td><td class="inp"><input class="et-c-in" id="etRmInSeed" type="text" autocomplete="off" spellcheck="false" aria-label="seed" disabled></td></tr>
+      <tr><td>density</td><td class="inp"><input class="et-c-in" id="etRmInDensity" type="number" min="6" max="18" step="1" aria-label="density, 6 to 18" disabled></td></tr>
+      <tr><td>hueBase</td><td class="inp"><input class="et-c-in" id="etRmInHue" type="number" min="0" max="360" step="1" aria-label="hueBase, 0 to 360" disabled></td></tr>
+      <tr><td>hueDrift</td><td class="inp"><input class="et-c-in" id="etRmInDrift" type="number" min="0" max="180" step="1" aria-label="hueDrift, 0 to 180" disabled></td></tr>
+      <tr><td>symmetry</td><td class="inp"><input class="et-c-in" id="etRmInSym" type="number" min="0" max="1" step="1" aria-label="symmetry, 0 or 1" disabled></td></tr>
+    </tbody></table>
+    <canvas class="et-c-render" id="etRmCy" role="img" aria-label="this tab's local render of the shared field, 820 by 440"></canvas>
+    <h3 class="et-c-h" data-etk="et.room.cPipeH">transport · in order</h3>
+    <ul class="et-c-pipe" id="etRmPipe"></ul>
+    <a class="et-c-primary" id="etRmCyOpen" href="room.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.room.cOpen">open room.html in a new tab</span></a>
+    <h3 class="et-c-h" data-etk="et.room.cRcptH">receipt · this tab</h3>
+    <table class="et-c-kv" id="etRmReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.room.cVerifyH">verify · no trust in this page needed</div>
+      <ul class="et-c-steps">
+        <li><code>cd forge/visual/test &amp;&amp; npm ci &amp;&amp; node --test room.test.mjs</code> <span data-etk="et.room.cV1">· real Yjs, an asynchronous channel bus: late join, convergence, the fallback</span></li>
+        <li data-etk="et.room.cV2">open two tabs · turn density in one · both receipts show the same doc</li>
+        <li data-etk="et.room.cV3">close every tab · open again · the defaults are back: nothing was stored</li>
+      </ul>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/forge/visual/MULTIPLAYER-SEAM.md" target="_blank" rel="noopener noreferrer"><span data-etk="et.room.cSeam">the seam ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/forge/room.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.room.cFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.room.archive">the whole room</h2>
 <h1>
   <span data-view="bee" data-i18n="room.title">The two-tab room</span>
   <span data-view="raver" data-i18n="room.raverTitle">Jam the field.</span>
@@ -304,7 +569,191 @@ async function startRoom(){
 window.addEventListener('pagehide',event=>{visible=false;++startup;stopChannels();if(!event.persisted){offUpdates?.();piece?.destroy();piece=null;}});
 window.addEventListener('pageshow',event=>{if(!event.persisted)return;visible=true;if(piece){try{connect();render(piece.state());setControls(false);}catch{localFallback();}}else if(localOnly){render(localState);setControls(false);}else startRoom();});
 document.addEventListener('blang',()=>{if(pres)paintPeers();});
+// the ETERNAL front reads the room through this one door: the state, the mode, this tab and the tabs seen
+window.__forgeRoom={state:()=>current(),mode:()=>piece?'shared':localOnly?'local':'starting',me:ME,peers:()=>[...seen.keys()],buildArt};
 startRoom();
+</script>
+<script data-et="front">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts come from the room
+   module below, read through the one door it opens (window.__forgeRoom: its state, its mode, this
+   tab's id and the tabs its presence channel has seen) and from the room's own controls. Every front
+   writes INTO those controls (#seed, #roll, #pDensity, #pHue, #pDrift, #pSym), so a front's edit
+   travels to other tabs exactly as a knob turn does. The fronts re-read whenever the room renders
+   or its status, peers or controls change. No front says "sharing" unless the module is sharing. */
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var KN=[['density','pDensity','etRmInDensity'],['hueBase','pHue','etRmInHue'],['hueDrift','pDrift','etRmInDrift'],['symmetry','pSym','etRmInSym']];
+  var D={ready:false,mode:'starting',live:false,me:'',peers:[],tabs:1,seed:'',params:{},cells:0,drawn:0,rests:0,palette:'',err:''};
+  var R={drifting:false};
+  var art=null,seedTimer=0,driftTimer=0;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fill(s,o){return String(s).replace(/\{(\w+)\}/g,function(_,k){return o[k]==null?'':o[k];});}
+  function keyed(){document.querySelectorAll('[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  /* a corpus-keyed line: the key rides on the element (lang.js re-reads it), the words through T */
+  function say(el,key,en){el.dataset.i18n=key;el.dataset.i18nEn=en;el.textContent=T(key,en);}
+  function tok(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();}
+  function short(id){return String(id).replace(/^tab-/,'').slice(0,4);}
+
+  /* ── THE ONE DATA LAYER ── */
+  function read(){
+    var F=window.__forgeRoom;if(!F)return false;
+    var st=F.state()||{};
+    D.mode=F.mode();D.me=F.me;D.peers=F.peers().slice().sort();
+    D.tabs=D.mode==='shared'?Math.max(1,D.peers.length):1;
+    D.live=!$('pDensity').disabled;
+    D.seed=st.seed||'hive-1000';D.params={};
+    KN.forEach(function(k){D.params[k[0]]=+$(k[1]).value;});
+    D.err=getComputedStyle($('err')).display!=='none'?$('err').textContent:'';
+    art=F.buildArt(D.seed,D.params);
+    D.cells=art.meta.cells;D.palette=art.meta.palette;D.drawn=art.hexes.filter(function(h){return h.gate;}).length;D.rests=D.cells-D.drawn;
+    D.ready=true;return true;
+  }
+  function brush(cv){
+    var r=cv.getBoundingClientRect();if(!r.width||!art)return null;
+    var dpr=Math.min(2,window.devicePixelRatio||1),W=Math.round(r.width*dpr),H=Math.round(r.height*dpr);
+    if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+    var c=cv.getContext('2d'),k=W/820;c.setTransform(k,0,0,k,0,0);c.fillStyle=art.bg;c.fillRect(0,0,820,440);
+    art.hexes.forEach(function(hx){if(!hx.gate)return;var s=art.size*0.86*hx.pulse;c.beginPath();
+      for(var j=0;j<6;j++){var a=Math.PI/180*(60*j-30+hx.rot*15),x=hx.x+s*Math.cos(a),y=hx.y+s*Math.sin(a);j?c.lineTo(x,y):c.moveTo(x,y);}
+      c.closePath();c.fillStyle=hx.fill;c.fill();if(hx.stroke){c.strokeStyle=hx.stroke;c.lineWidth=1.4;c.stroke();}});
+    return c;
+  }
+  function tabsWord(){
+    if(D.mode==='starting')return T('et.room.tabsStarting','1 · starting');
+    if(D.mode==='local')return T('et.room.tabsLocal','1 · this tab alone');
+    return D.tabs===1?T('et.room.tabsOne','1 · this one'):fill(T('et.room.tabsMany','{n} · this one and {m} more'),{n:D.tabs,m:D.tabs-1});
+  }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etRmBeeTabs').textContent=tabsWord();
+    $('etRmBeeSeed').textContent='“'+D.seed+'”';
+    $('etRmBeeCells').textContent=String(D.cells);
+    var s=$('etRmBeeStatus');
+    if(D.mode==='local'){say(s,'room.loadError','Sharing is unavailable. You can still change the field in this tab.');s.className='et-b-status off';}
+    else if(D.mode==='shared'){say(s,'room.ready','Sharing changes with other tabs in this browser.');s.className='et-b-status';}
+    else{say(s,'room.loading','Starting the room…');s.className='et-b-status';}
+    var k=$('etRmBeeDensity');k.disabled=!D.live;if(document.activeElement!==k)k.value=D.params.density;
+    $('etRmBeeRoll').disabled=!D.live;
+    brush($('etRmBee'));
+  }
+
+  /* ── RAVER ── */
+  function seats(){
+    var cx=165,cy=131,Rr=50,Rd=46,h='',others=D.mode==='shared'?D.peers.filter(function(id){return id!==D.me;}):[];
+    function hex(x,y){var p=[];for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-90);p.push((x+Rd*Math.cos(a)).toFixed(1)+','+(y+Rd*Math.sin(a)).toFixed(1));}return p.join(' ');}
+    function seat(cls,x,y,label,aria,link){
+      var g='<g class="seat '+cls+'"'+(link?'':' role="img" aria-label="'+esc(aria)+'"')+'><polygon points="'+hex(x,y)+'"/><text x="'+x+'" y="'+y+'">'+esc(label)+'</text></g>';
+      return link?'<a href="room.html" target="_blank" rel="noopener noreferrer" aria-label="'+esc(aria)+'">'+g+'</a>':g;
+    }
+    h+=seat('me',cx,cy,T('et.room.you','you'),T('et.room.youAria','you, this tab')+' · '+short(D.me),false);
+    for(var i=0;i<6;i++){
+      var a=Math.PI/180*(180+60*i),x=cx+Math.sqrt(3)*Rr*Math.cos(a),y=cy+Math.sqrt(3)*Rr*Math.sin(a);
+      if(D.mode!=='shared')h+=seat('off',x,y,T('et.room.off','off'),T('et.room.offAria','a seat, closed: sharing is off here'),false);
+      else if(others[i]){var more=i===5&&others.length>6;h+=seat('peer',x,y,more?'+'+(others.length-5):short(others[i]),more?fill(T('et.room.moreAria','{n} more tabs'),{n:others.length-5}):T('et.room.peerAria','another tab')+' · '+short(others[i]),false);}
+      else h+=seat('open',x,y,'+',T('et.room.openAria','an open seat: open a second tab (opens a new tab)'),true);
+    }
+    $('etRmSeats').innerHTML=h;
+  }
+  function raver(){
+    $('etRmHint').textContent=D.mode==='shared'?fill(T(D.tabs===1?'et.room.hintOne':'et.room.hintMany',D.tabs===1?'1 hand · sharing in this browser':'{n} hands · sharing in this browser'),{n:D.tabs}):D.mode==='local'?T('et.room.hintLocal','one hand · sharing is off here'):T('et.room.hintStarting','the room is starting');
+    seats();
+    $('etRmLegend').innerHTML='<span>'+esc(T('et.room.rSeed','seed'))+' <b>“'+esc(D.seed)+'”</b></span><span>'+esc(T('et.room.rHue','hue'))+' <b>'+D.params.hueBase+'°</b></span><span>'+esc(T('et.room.rDensity','density'))+' <b>'+D.params.density+'</b></span><span>'+esc(T('et.room.rDriftL','drift'))+' <b>'+D.params.hueDrift+'</b></span>';
+    ['etRmMirror','etRmDrift','etRmRoll'].forEach(function(id){$(id).disabled=!D.live;});
+    $('etRmMirror').setAttribute('aria-pressed',D.params.symmetry?'true':'false');
+    $('etRmDrift').setAttribute('aria-pressed',R.drifting?'true':'false');
+    $('etRmRaverNote').textContent=D.mode==='local'?T('et.room.rLocal','the sharing layer did not load in this browser · this tab still plays, nothing is lost'):D.mode==='shared'?T('et.room.rShared','every tab is a hand on the same instrument · tap an open seat'):'';
+    pad();
+  }
+  function pad(){
+    var c=brush($('etRmPad'));if(!c)return;
+    var cv=$('etRmPad'),W=cv.width,H=cv.height,px=D.params.hueBase/360*W,py=(18-D.params.density)/12*H;
+    c.setTransform(1,0,0,1,0,0);c.lineWidth=Math.max(2,W/200);
+    c.beginPath();c.arc(px,py,H/12,0,2*Math.PI);c.strokeStyle=tok('ink');c.stroke();
+    c.beginPath();c.arc(px,py,H/34,0,2*Math.PI);c.fillStyle=tok('you');c.fill();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etRmPath').textContent='y.doc://bBuzz-forge-room/'+(D.me||'tab');
+    $('etRmChips').innerHTML='<span class="'+(D.mode==='shared'?'ok':'on')+'">mode '+esc(D.mode)+'</span><span>yjs 13.6.20</span><span>shared.js v2</span><span>persistence none</span>';
+    if(document.activeElement!==$('etRmInSeed'))$('etRmInSeed').value=D.seed;
+    KN.forEach(function(k){var el=$(k[2]);el.disabled=!D.live;if(document.activeElement!==el)el.value=D.params[k[0]];});
+    $('etRmInSeed').disabled=!D.live;
+    var sh=D.mode==='shared',lo=D.mode==='local',nr=T('et.room.cNotReached','not reached · sharing is unavailable in this browser');
+    var steps=[
+      ['import · yjs@13.6.20 (jsDelivr) + forge/visual/shared.js?v=2',sh?T('et.room.cImportOk','loaded · raced against a 10 s timeout'):lo?T('et.room.cImportFail','did not load · the room fell back to this tab alone'):T('et.room.cImportNow','loading · a 10 s timeout guards it'),sh?'done':lo?'fail':'todo'],
+      ['piece · createSharedPiece({ Y, transport })',sh?T('et.room.cPieceOk','a Y.Doc: seed + params, merged per key'):lo?nr:T('et.room.cWaiting','waiting on the import'),sh?'done':'todo'],
+      ["wire · BroadcastChannel('bBuzz-forge-room')",sh?T('et.room.cWireOk','open · updates travel as Yjs bytes'):lo?nr:T('et.room.cWaiting','waiting on the import'),sh?'done':'todo'],
+      ["presence · BroadcastChannel('bBuzz-forge-room-presence')",sh?fill(T('et.room.cPresenceOk','a beat every 4 s · a tab expires after 9 s · {n} seen'),{n:D.tabs}):lo?nr:T('et.room.cWaiting','waiting on the import'),sh?'done':'todo'],
+      ['join · state-request → a peer\'s snapshot',sh?T('et.room.cJoinOk','asked on arrival · a tab already here answers with its whole state; a joining tab never writes a default'):lo?nr:T('et.room.cWaiting','waiting on the import'),sh?'done':'todo'],
+      ['render · the hexfield CORE, locally',D.cells+' cells · '+D.palette+' · '+D.drawn+' painted','done']
+    ];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    if(lo)now=-1;
+    $('etRmPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etRmReceipt').innerHTML=[
+      ['mode',sh?'<span class="yes">'+esc(T('et.room.cModeShared','shared · this browser'))+'</span>':lo?'<span class="no">'+esc(T('et.room.cModeLocal','local · this tab only'))+'</span>':'<span class="no">'+esc(T('et.room.cModeStarting','starting'))+'</span>'],
+      ['tab',esc(D.me)],
+      ['tabs seen',sh?D.tabs+' · '+esc(D.peers.join(' · ')):'<span class="no">'+esc(T('et.room.cNone','none · presence is closed'))+'</span>'],
+      ['seed',esc(JSON.stringify(D.seed))],
+      ['params',KN.map(function(k){return k[0]+' '+D.params[k[0]];}).join(' · ')],
+      ['cells',D.cells+' · painted '+D.drawn+' · rests '+D.rests],
+      ['palette',esc(D.palette)],
+      ['persistence','<span class="no">'+esc(T('et.room.cPersist','none · closing every tab discards the room'))+'</span>'],
+      ['reach',esc(T('et.room.cReach','this browser profile and origin · no remote transport here'))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    brush($('etRmCy'));
+  }
+  function paint(){if(!read())return;bee();raver();cy();}
+
+  /* ── writes go INTO the room's own controls; the module carries them to every tab ── */
+  function setKnob(name,v){
+    if(!D.live)return;
+    var k=KN.filter(function(x){return x[0]===name;})[0],el=$(k[1]);
+    v=Math.round(Math.max(+el.min,Math.min(+el.max,+v)));if(isNaN(v)||+el.value===v)return;
+    el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function setSeed(v){clearTimeout(seedTimer);seedTimer=setTimeout(function(){if(!D.live||v===D.seed)return;var s=$('seed');s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));},160);}
+  function wire(){
+    var mo=new MutationObserver(function(){paint();});
+    ['meta','room-status','peers','err'].forEach(function(id){mo.observe($(id),{childList:true,characterData:true,subtree:true,attributes:true});});
+    mo.observe($('pDensity'),{attributes:true,attributeFilter:['disabled']});
+    $('etRmBeeDensity').addEventListener('input',function(){setKnob('density',this.value);});
+    $('etRmBeeRoll').addEventListener('click',function(){if(D.live)$('roll').click();});
+    $('etRmRoll').addEventListener('click',function(){if(D.live)$('roll').click();});
+    $('etRmMirror').addEventListener('click',function(){setKnob('symmetry',D.params.symmetry?0:1);});
+    $('etRmInSeed').addEventListener('input',function(){setSeed(this.value);});
+    KN.forEach(function(k){$(k[2]).addEventListener('change',function(){setKnob(k[0],this.value);this.value=D.params[k[0]];});});
+    var cv=$('etRmPad'),drag=false;
+    function at(e){var r=cv.getBoundingClientRect();setKnob('hueBase',Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*360);setKnob('density',18-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))*12);}
+    cv.addEventListener('pointerdown',function(e){if(!D.live)return;drag=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}at(e);e.preventDefault();});
+    cv.addEventListener('pointermove',function(e){if(drag)at(e);});
+    ['pointerup','pointercancel'].forEach(function(t){cv.addEventListener(t,function(){drag=false;});});
+    cv.addEventListener('keydown',function(e){var m={ArrowLeft:['hueBase',-10],ArrowRight:['hueBase',10],ArrowUp:['density',1],ArrowDown:['density',-1]}[e.key];if(!m)return;e.preventDefault();setKnob(m[0],D.params[m[0]]+m[1]);});
+    var hb=$('etRmDrift');
+    function driftOn(e){if(e&&e.preventDefault)e.preventDefault();if(R.drifting||!D.live)return;R.drifting=true;raver();driftTimer=setInterval(function(){setKnob('hueDrift',(D.params.hueDrift+6)%181);},125);}
+    function driftOff(){if(!R.drifting)return;R.drifting=false;clearInterval(driftTimer);raver();}
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}driftOn(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,driftOff);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat)driftOn(e);});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')driftOff();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    document.addEventListener('bregister',function(){setTimeout(paint,0);});
+    document.addEventListener('blang',function(){keyed();paint();});
+    addEventListener('resize',paint);
+    addEventListener('pageshow',function(){setTimeout(paint,0);});
+  }
+  var tries=0;
+  function boot(){
+    if(!window.__forgeRoom){if(++tries<200)return setTimeout(boot,50);return;}
+    keyed();wire();paint();
+  }
+  window.__eternal={data:D,raver:R};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
 </script>
 </div></body>
 </html>

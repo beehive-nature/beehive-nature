@@ -12,7 +12,8 @@
   var css=document.createElement('style');
   css.textContent=`
     #adOrb,#adWin,#adWin *{box-sizing:border-box}
-    #adOrb{position:fixed;left:16px;bottom:66px;z-index:9999;width:52px;height:52px;min-height:44px;padding:0;margin:0;border:1px solid #729889;border-radius:50%;background:#0e1b19;color:#8cdae0;font:26px/1 system-ui;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 16px #0002}
+    #adOrb{position:fixed;left:16px;bottom:66px;z-index:9999;width:52px;height:52px;min-height:44px;padding:0;margin:0;border:1px solid #729889;border-radius:50%;background:#0e1b19;color:#8cdae0;font:26px/1 system-ui;display:grid;place-items:center;cursor:grab;box-shadow:0 3px 16px #0002;touch-action:none;user-select:none;-webkit-user-select:none;transition:left .26s ease,right .26s ease,bottom .26s ease}
+    #adOrb.ad-drag{cursor:grabbing;transition:none;box-shadow:0 8px 28px #0005;transform:scale(1.06)}
     #adWin{--ad-bg:#10191c;--ad-panel:#18252a;--ad-ink:#eef7f2;--ad-dim:#b8ccc7;--ad-line:#526e72;--ad-accent:#b9a4f5;--ad-on:#18132b;--ad-font:system-ui,-apple-system,'Segoe UI',sans-serif;position:fixed;left:12px;bottom:82px;z-index:10000;width:min(520px,calc(100% - 24px));height:min(680px,calc(100dvh - 96px));min-height:0;display:none;flex-direction:column;margin:0;padding:0;overflow:hidden;border:1px solid var(--ad-line);border-radius:18px;background:var(--ad-bg);color:var(--ad-ink);font:16px/1.5 var(--ad-font);text-align:start;letter-spacing:normal;box-shadow:0 16px 50px #0004;color-scheme:dark}
     #adWin.on{display:flex}#adWin.is-expanded{width:min(920px,calc(100% - 24px))}#adWin [hidden]{display:none!important}
     #adWin button,#adWin textarea,#adWin a{font:inherit;letter-spacing:normal;text-transform:none;box-shadow:none}
@@ -45,7 +46,7 @@
   `;
   document.head.appendChild(css);
   function make(tag,id){var el=document.createElement(tag);if(id)el.id=id;return el;}
-  var orb=make('button','adOrb');orb.type='button';orb.textContent='⚙';orb.title='Agent dock · Alt+/';orb.setAttribute('aria-label','Open the agent dock');orb.setAttribute('aria-controls','adWin');orb.setAttribute('aria-expanded','false');
+  var orb=make('button','adOrb');orb.type='button';orb.textContent='⚙';orb.title='Agent dock · Alt+/ · drag, or arrow keys, to move it';orb.setAttribute('aria-label','Open the agent dock');orb.setAttribute('aria-controls','adWin');orb.setAttribute('aria-expanded','false');
   var win=make('div','adWin');win.setAttribute('role','dialog');win.setAttribute('aria-labelledby','adTitle');
   win.innerHTML='<div id="adHead"><h2 id="adTitle">Agent dock</h2><button id="adHelpButton" type="button" aria-pressed="false">Help</button><button id="adExpand" type="button" aria-pressed="false" aria-label="Expand the agent dock">Expand</button><button id="adClose" type="button" aria-label="Close the agent dock">✕</button></div><div id="adAgents" role="group" aria-label="Choose an agent"></div><div id="adBody"></div><div id="adContext"><span id="adNote"></span><a id="adOpenPage" target="_blank" rel="noopener noreferrer">Open page ↗ (new tab)</a></div><form id="adFoot"><textarea id="adPrompt" rows="2" maxlength="4000" aria-label="Message" aria-describedby="adStatus" placeholder="What would you like to explore?"></textarea><button id="adSend" type="submit">Send</button></form><p id="adStatus" role="status" aria-live="polite">Conversations stay in this page until you leave or reload.</p>';
   document.body.appendChild(orb);document.body.appendChild(win);
@@ -105,7 +106,7 @@
   });}
   function suspend(s,inactive){var f=s.frame&&expectedFrame(s);if(f&&typeof f.window.bnrDockSuspend==='function')f.window.bnrDockSuspend(inactive);}
   function prepareFrame(s,loaded){
-    var f=expectedFrame(s);s.ready=!!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
+    var f=expectedFrame(s);s.ready=!!f;s.openFailed=!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
     var d=f.document;d.documentElement.classList.add('ad-embedded');d.documentElement.setAttribute('data-ad-view',document.body.getAttribute('data-reg')||'bee');d.body.setAttribute('data-reg',document.body.getAttribute('data-reg')||'bee');
     if(!d.getElementById('adReading')){
       var st=d.createElement('style');st.id='adReading';st.textContent=frameCss;d.head.appendChild(st);
@@ -131,7 +132,7 @@
     var s=sessions[current.id];if(!s)return;foot.hidden=helpOpen||current.id==='baigents';$('adSend').disabled=!!current.src&&!s.ready;$('adSend').textContent=current.id==='bloverai'?'Build handoff':'Send';
     prompt.setAttribute('aria-label',current.id==='bloverai'?'Question for your handoff':'Message '+current.name);prompt.placeholder=current.id==='bloverai'?'What would you like to ask your AI?':'Ask '+current.name+'…';
     $('adNote').textContent=current.note;$('adOpenPage').hidden=!current.src;$('adOpenPage').href=current.src||R+'bmeshasi.html';
-    notice(s.status||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
+    notice(s.status||s.staged||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
   }
   function showCurrent(){
     session(current);Object.keys(sessions).forEach(function(id){var s=sessions[id];s.panel.hidden=helpOpen||id!==current.id;suspend(s,s.panel.hidden||!win.classList.contains('on'));});
@@ -141,9 +142,9 @@
     b.onclick=function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;current=a;helpOpen=false;showCurrent();prompt.value=sessions[a.id].draft;
       $('adAgents').querySelectorAll('.adAg').forEach(function(chip){chip.setAttribute('aria-pressed',String(chip.getAttribute('data-agent')===a.id));});};$('adAgents').appendChild(b);
   });
-  function setOpen(open){
+  function setOpen(open,quiet){
     win.classList.toggle('on',open);orb.setAttribute('aria-expanded',String(open));orb.setAttribute('aria-label',open?'Close the agent dock':'Open the agent dock');
-    if(open){showCurrent();if(!foot.hidden)prompt.focus();else $('adClose').focus();}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
+    if(open){showCurrent();if(!quiet){if(!foot.hidden)prompt.focus();else $('adClose').focus();}}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
   }
   orb.onclick=function(){setOpen(!win.classList.contains('on'));};$('adClose').onclick=function(){setOpen(false);};$('adHelpButton').onclick=function(){helpOpen=!helpOpen;showCurrent();};
   $('adExpand').onclick=function(){expanded=!expanded;this.textContent=expanded?'Restore':'Expand';win.classList.toggle('is-expanded',expanded);this.setAttribute('aria-pressed',String(expanded));this.setAttribute('aria-label',expanded?'Restore the agent dock size':'Expand the agent dock');fitDock();};
@@ -163,14 +164,14 @@
   }
   function send(){
     var s=session(current),v=prompt.value.trim();if(!v||current.id==='baigents')return;s.draft=prompt.value;
-    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';helpOpen=true;showCurrent();return;}
+    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';s.staged='';s.lastStaged='';helpOpen=true;showCurrent();return;}
     if(current.src){var f=s.ready&&expectedFrame(s);if(!f){s.status='Your message was not sent. The agent is not ready; your draft is kept.';s.error=true;updateComposer();return;}
       try{f.document.getElementById('q').value=v;f.window.ask();}catch(e){s.status='The agent could not accept your message. Your draft is kept; check the conversation before trying again.';s.error=true;updateComposer();return;}
       s.status='Message received by '+current.name+'.';
     }else{buildHandoff(s,v);s.status='Handoff prepared here. Copy it when you are ready.';}
-    s.error=false;prompt.value='';s.draft='';updateComposer();prompt.focus();
+    s.error=false;s.staged='';s.lastStaged='';prompt.value='';s.draft='';updateComposer();prompt.focus();
   }
-  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;});
+  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){var s=sessions[current.id];if(s){s.draft=prompt.value;s.lastStaged='';if(s.staged){s.staged='';updateComposer();}}});
   prompt.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();send();}});
   function shortcut(e){if(e.isComposing)return;if(e.key==='Escape'&&win.classList.contains('on')){e.preventDefault();setOpen(false);return;}if(!e.altKey)return;var k=e.key.toLowerCase();
     if(k==='/'||k==='m'){e.preventDefault();setOpen(!win.classList.contains('on'));}else if(k==='h'){e.preventDefault();setOpen(true);}else if(/^[1-4]$/.test(k)){e.preventDefault();$('adAgents').querySelectorAll('.adAg')[Number(k)-1].click();setOpen(true);}
@@ -183,70 +184,64 @@
     var bar=$('tbar'),rect=bar&&getComputedStyle(bar).position==='fixed'?bar.getBoundingClientRect():null;
     var h=rect&&rect.height>0&&rect.bottom>0&&rect.top<window.innerHeight?Math.ceil(window.innerHeight-Math.max(0,rect.top)):0;
     var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));
-    if(!seated)orb.style.bottom=(keyboard+bottom)+'px';
+    if(!seated&&!dragging){var lift=Math.max(0,Math.min((spot&&spot.lift)||0,vh-bottom-64));orb.style.bottom=(keyboard+bottom+lift)+'px';}
     var tight=window.innerWidth<=520||vh<=600,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
     win.style.bottom=(keyboard+dialogBottom)+'px';win.style.height=Math.max(0,Math.min(expanded?vh:680,vh-dialogBottom-12))+'px';
     var need=h?h+22:0;
     /* floating on a phone with no fixed bar: reserve the orb's corner zone so
        the last content can always scroll clear of it */
     if(!h&&window.innerWidth<=520&&!seated)need=Math.max(need,140);
+    /* a phone with the fixed bar: the floating orb rests just above it, so the page end
+       scrolls clear of the orb too (bar + 10 + orb + a breath) */
+    if(h&&window.innerWidth<=520)need=Math.max(need,h+78);
     if(need){var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
   };
-  /* THE MOBILE SEAT (founder order 2026-09-13): the floating orb covered the
-     bottom-left corner of the content column on phones — wallet's chain
-     matrix had its 🐜 Autonomi ANT card 87% hidden at first paint. On mobile
-     the orb now RIDES the fixed tour bar's reserved row (geometry inline,
-     colors keep the register stylesheet) — it covers nothing and stays one
-     tap away. Where the bar is inline (hub, profile: a closed directory),
-     the orb floats bottom-RIGHT and fitDock reserves scroll-end room.
-     Desktop keeps the classic bottom-left float. */
-  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null,seated=null;
-  function unseat(){
-    if(seated){orb.style.cssText='';if(orb.parentElement!==document.body)document.body.appendChild(orb);}
-    seated=null;
-  }
-  function seatOrb(){
-    var mobile=!!(seatMq&&seatMq.matches);
-    var bar=$('tbar');
-    var barFixed=!!(bar&&getComputedStyle(bar).position==='fixed');
-    if(mobile&&barFixed){
-      if(seated!=='bar'){
-        unseat();seated='bar';
-        orb.style.cssText='position:static;width:44px;height:44px;min-width:44px;min-height:44px;flex:0 0 44px;margin:0 6px 0 0;font:22px/1 system-ui;box-sizing:border-box';
-        bar.insertBefore(orb,bar.firstChild);
-      }
-    }else if(mobile){
-      /* inline tour host (hub, profile): the closed directory cannot host the
-         orb, so it rides the directory's VISIBLE summary row — in-flow chrome,
-         covers nothing. The register bar is the fallback; a bare right-float
-         with the fitDock reservation is the last resort. */
-      var host=document.querySelector('[data-tour-host]');
-      var sum=host&&host.closest('details')?host.closest('details').querySelector('summary'):document.querySelector('details.room-navigation>summary');
-      if(sum){
-        if(seated!=='summary'){
-          unseat();seated='summary';
-          orb.style.cssText='position:relative;z-index:3;display:inline-block;vertical-align:middle;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 10px;font:22px/1 system-ui;box-sizing:border-box';
-          sum.insertBefore(orb,sum.firstChild);
-        }
-      }else{
-        var regbar=document.getElementById('bregbar')||document.querySelector('[data-register-host]');
-        if(regbar){
-          if(seated!=='reg'){
-            unseat();seated='reg';
-            orb.style.cssText='position:relative;z-index:3;width:44px;height:44px;min-width:44px;min-height:44px;margin:8px 0 0 2px;font:22px/1 system-ui;box-sizing:border-box';
-            regbar.appendChild(orb);
-          }
-        }else{
-          unseat();
-          orb.style.left='auto';orb.style.right='16px';
-        }
-      }
-    }else{
-      unseat();
-      orb.style.left='';orb.style.right='';
+  /* THE MOVABLE ORB (founder 2026-09-26: "the AI glob … I like better … should be moveable?").
+     The orb floats again on every screen: the 2026-09-13 seat inside the tour bar made it one more
+     cramped strip item, and the founder prefers the orb. What the seat solved (the orb resting on
+     content) is solved by the reader instead: drag it anywhere; on release it settles against the
+     nearer side, never lower than just above the tour bar, and the spot is remembered estate-wide
+     (localStorage bnr.orb = {side, lift}). A tap opens the dock; a drag never does. With focus,
+     arrow keys move it (up/down lift it, left/right change side). Phones rest it bottom-right,
+     desktops bottom-left, until the reader chooses. */
+  var seated=null,dragging=false,spot={};
+  try{spot=JSON.parse(localStorage.getItem('bnr.orb')||'{}')||{};}catch(e){spot={};}
+  function keep(){try{localStorage.setItem('bnr.orb',JSON.stringify({side:spot.side,lift:Math.round(spot.lift||0)}));}catch(e){}}
+  function sideOf(){return spot.side||(seatMq&&seatMq.matches?'right':'left');}
+  function applySide(){var s=sideOf();orb.style.left=s==='left'?'16px':'auto';orb.style.right=s==='right'?'16px':'auto';}
+  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null;
+  function seatOrb(){if(orb.parentElement!==document.body)document.body.appendChild(orb);orb.style.position='';applySide();fitDock();}
+  var grab=null,justDragged=false;
+  function restBottom(){var b=parseFloat(orb.style.bottom)||0;return b-(spot.lift||0);}
+  orb.addEventListener('pointerdown',function(e){if(e.button)return;var r=orb.getBoundingClientRect();grab={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,rest:restBottom()};
+    /* capture at the press, not at the threshold: a quick flick leaves the 52 px orb before it has moved 6 px, and the moves went elsewhere */
+    try{orb.setPointerCapture(e.pointerId);}catch(x){}});
+  orb.addEventListener('pointermove',function(e){
+    if(!grab||e.pointerId!==grab.id)return;
+    if(!dragging){if(Math.hypot(e.clientX-grab.x,e.clientY-grab.y)<6)return;dragging=true;orb.classList.add('ad-drag');}
+    e.preventDefault();
+    var W=window.innerWidth,H=window.innerHeight,sz=orb.offsetWidth||52;
+    var x=Math.max(8,Math.min(W-sz-8,e.clientX-grab.dx)),top=e.clientY-grab.dy;
+    var bottom=Math.max(grab.rest,Math.min(H-sz-8,H-top-sz));
+    orb.style.right='auto';orb.style.left=x+'px';orb.style.bottom=bottom+'px';
+  });
+  function drop(e){
+    if(!grab||(e&&e.pointerId!==grab.id))return;
+    if(dragging){
+      var r=orb.getBoundingClientRect(),W=window.innerWidth;
+      spot.side=(r.left+r.width/2)<W/2?'left':'right';spot.lift=Math.max(0,(parseFloat(orb.style.bottom)||0)-grab.rest);keep();
+      dragging=false;orb.classList.remove('ad-drag');justDragged=true;setTimeout(function(){justDragged=false;},0);
+      applySide();fitDock();
     }
-    fitDock();
+    grab=null;
   }
+  orb.addEventListener('pointerup',drop);orb.addEventListener('pointercancel',drop);
+  orb.addEventListener('click',function(e){if(justDragged){e.stopImmediatePropagation();e.preventDefault();justDragged=false;}},true);
+  orb.addEventListener('keydown',function(e){
+    var k=e.key;if(e.altKey||e.ctrlKey||e.metaKey)return;
+    if(k==='ArrowUp'||k==='ArrowDown'){e.preventDefault();spot.lift=Math.max(0,(spot.lift||0)+(k==='ArrowUp'?32:-32));keep();fitDock();}
+    else if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();spot.side=k==='ArrowLeft'?'left':'right';keep();applySide();}
+  });
   fitDock();addEventListener('resize',fitDock);if(window.visualViewport){window.visualViewport.addEventListener('resize',fitDock);window.visualViewport.addEventListener('scroll',fitDock);}
   var bar=$('tbar');if(bar&&window.ResizeObserver)new ResizeObserver(fitDock).observe(bar);
   if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();seatOrb();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}
@@ -255,4 +250,44 @@
   var seatSafe=function(){try{seatOrb();}catch(e){}};
   seatSafe();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',seatSafe);setTimeout(seatSafe,700);setTimeout(seatSafe,1800);
   if(seatMq){try{seatMq.addEventListener('change',seatSafe);}catch(e){try{seatMq.addListener(seatSafe);}catch(e2){}}}
+  /* WebMCP (W3C Web Machine Learning CG draft, document.modelContext): the dock describes itself
+     to a browser agent. Progressive only: with no API, nothing registers and nothing changes.
+     No tool sends, copies or leaves the page. Staging places words in the composer and the
+     person reads them and presses Send; a person's unsent draft is kept, never replaced, and the
+     dock opens without taking focus, so a keystroke meant elsewhere cannot send the draft. */
+  var mc=document.modelContext;
+  if(mc&&typeof mc.registerTool==='function'){
+    var reply=function(t){return {content:[{type:'text',text:t}]};};
+    var offer=function(t){try{Promise.resolve(mc.registerTool(t)).catch(function(){});}catch(e){}};
+    offer({name:'bnr_list_agents',title:'List the BNR dock agents',
+      description:'List the agents in this page’s BNR agent dock: what each one is for and whether it accepts a message.',
+      inputSchema:{type:'object',properties:{}},annotations:{readOnlyHint:true},
+      execute:function(){return Promise.resolve(reply(JSON.stringify(agents.map(function(a){
+        return {id:a.id,name:a.name,purpose:a.label,note:a.note,acceptsMessage:a.id!=='baigents',page:a.src?new URL(a.src,location.href).href:null};}))));}});
+    offer({name:'bnr_stage_message',title:'Stage a message in the BNR dock',
+      description:'Open the BNR agent dock on one agent and place a draft in its composer. This does not send. The person reads the draft and presses Send.',
+      inputSchema:{type:'object',properties:{
+        agent:{type:'string',enum:['queen','hearth','bloverai'],description:'queen answers from BNR’s written knowledge; hearth routes creative ideas; bloverai builds a handoff for an AI the person chooses.'},
+        message:{type:'string',maxLength:4000,description:'The draft to place. It is appended after any unsent draft already there; the composer holds 4000 characters in all.'}},required:['agent','message']},
+      execute:function(input){
+        var id=input&&input.agent,v=String((input&&input.message)||'').trim(),a=agents.filter(function(x){return x.id===id&&x.id!=='baigents';})[0];
+        if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
+        if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
+        /* the person's draft is kept byte for byte; only a separator is added, and only as much as it lacks */
+        var had=String((sessions[a.id]&&sessions[a.id].draft)||''),kept=had?had+(/\n[ \t]*\n[ \t]*$/.test(had)?'':/\n[ \t]*$/.test(had)?'\n':'\n\n'):'';
+        /* lastStaged is cleared by any edit or send, so while it is set the draft still ends with that stage */
+        if(sessions[a.id]&&sessions[a.id].lastStaged===v)return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
+        if(kept.length+v.length>4000)return Promise.resolve(reply('Not staged. The person’s unsent draft leaves room for '+Math.max(0,4000-kept.length)+' characters; this message has '+v.length+'.'));
+        /* if the person is in the composer or on Send, the composer is about to change under them: move focus
+           to the dock title, which cannot submit; focus anywhere else on the page is left alone */
+        var f=document.activeElement;if(f===prompt||f===$('adSend')){$('adTitle').setAttribute('tabindex','-1');$('adTitle').focus();}
+        Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
+        var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;s.lastStaged=v;
+        /* an old receipt or send failure (including "not ready" while loading) must not hide the notice;
+           only a frame that loaded and failed to open keeps its error */
+        if(!s.openFailed){s.status='';s.error=false;}
+        s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
+        return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
+      }});
+  }
 })();

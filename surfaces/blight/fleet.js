@@ -19,11 +19,21 @@
     if (document.getElementById('fleet-nav') || /off/.test(document.body.dataset.fleet||'')) return;
     const css = document.createElement('style');
     css.textContent =
-      '#fleet-nav{margin-top:56px;padding-top:18px;border-top:1px solid #242433;'+
-      'display:flex;flex-wrap:wrap;gap:6px 22px;font:11px ui-monospace,Menlo,Consolas,monospace}'+
-      '#fleet-nav a{color:#7e8c85;text-decoration:none;letter-spacing:.05em}'+
-      '#fleet-nav a:hover{color:#f1df29}#fleet-nav a.here{color:#16edf5}'+
-      '#fleet-nav .tag{color:#3d3d52;margin-right:6px}';
+      /* THE CLOSING ROW (founder review 2026-09-26: the bottom half of every surface). Was 11px grey
+         mono at 1.4–3.3:1 with 18px targets; now a readable row of 44px pills, dressed per register. */
+      '#fleet-nav{margin:56px auto 0;max-width:900px;padding-top:20px;border-top:1px solid rgba(127,127,127,.3);'+
+      'display:flex;flex-wrap:wrap;gap:8px;font:15px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif}'+
+      '#fleet-nav a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:1px solid rgba(160,170,165,.4);'+
+      'border-radius:999px;color:#d7dcd9;text-decoration:none}'+
+      '#fleet-nav a:hover{border-color:#f1df29;color:#f1df29}#fleet-nav a.here{color:#16edf5;border-color:#16edf5}'+
+      '#fleet-nav .tag{color:inherit;opacity:.7}'+
+      /* bee takes its colours FROM the page: several blight pages stay dark in bee, and a paper
+         pill on a dark page read as a pasted sticker (lead review 2026-09-26) */
+      'body[data-reg="bee"] #fleet-nav a{color:inherit;background:transparent;border-color:color-mix(in srgb,currentColor 38%,transparent)}'+
+      'body[data-reg="bee"] #fleet-nav a.here{font-weight:700;border-color:currentColor}'+
+      'body[data-reg="bee"] #fleet-nav a:hover{border-color:currentColor;text-decoration:underline;text-underline-offset:3px}'+
+      'body[data-reg="cypherpunk"] #fleet-nav{font:13px/1.3 ui-monospace,Menlo,Consolas,monospace}'+
+      'body[data-reg="cypherpunk"] #fleet-nav a{border-radius:4px}';
     document.head.appendChild(css);
     const nav = document.createElement('nav');
     nav.id = 'fleet-nav';

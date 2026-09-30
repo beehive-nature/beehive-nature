@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "13 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "13 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "21TQ-44N",
+    "id": "p3f7efff099",
+    "name": "Lars Olofsson",
     "evidence": "walked provider link"
    },
    {
-    "id": "LC7T-3CW",
+    "id": "pd2743276c9",
+    "name": "Cecilia Jochimsdotter",
     "evidence": "walked provider link"
    }
   ],
@@ -56,7 +58,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/K2FR-YMB",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 13,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

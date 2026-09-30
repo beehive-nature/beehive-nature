@@ -139,7 +139,7 @@ test("R2 class A — death before birth: a CONTRADICTION localised to ONE record
 });
 
 test("R3 class B — a HEURISTIC threshold, and it must not read as a defect list", () => {
-  assert.equal(classB.length, 175, "class B count at the chosen threshold");
+  assert.equal(classB.length, 177, "class B count at the chosen threshold");
   assert.equal(B_THRESHOLD_YEARS, 110, "the threshold is a named chosen constant, not a law");
   // improbable is not impossible: the discriminating assertion is that B is NOT
   // a subset of the provable class. If every B row were also an A row, B would
@@ -150,8 +150,8 @@ test("R3 class B — a HEURISTIC threshold, and it must not read as a defect lis
 });
 
 test("R4 class C — judged on BIRTH years, because that is what the question needs", () => {
-  assert.equal(classC.length, 275, "class C count on the birth-year denominator");
-  assert.equal(cDenomBirth, 9505, "edges judgeable on birth years alone");
+  assert.equal(classC.length, 277, "class C count on the birth-year denominator");
+  assert.equal(cDenomBirth, 10266, "edges judgeable on birth years alone");
   // THE FILTER LAW, as an assertion. Requiring a death year at both ends is a
   // filter chosen by what parses rather than by what a birth-order question
   // asks, and it silently discards judgeable edges AND the violations in them.
@@ -195,8 +195,8 @@ test("R6 ordering: the date class outranks the edge class, and the report says s
 });
 
 test("R7 class D — the child was born after the parent died, judged with a GENDERED grace year", () => {
-  assert.equal(dDenom, 7045, "edges judgeable child-birth vs parent-death");
-  assert.equal(classD.length, 191, "class D count under the gendered rule");
+  assert.equal(dDenom, 7683, "edges judgeable child-birth vs parent-death");
+  assert.equal(classD.length, 193, "class D count under the gendered rule");
   // NON-VACUITY: both parent genders must actually be present, or "gendered"
   // is a term that never fires and the rule is uniform by accident.
   assert.ok(dParentsFemale > 100, `female parents in the denominator: ${dParentsFemale}`);
@@ -205,6 +205,6 @@ test("R7 class D — the child was born after the parent died, judged with a GEN
   // one-year grace gives a DIFFERENT answer, so this row cannot be passing by
   // accident on a rule that ignores the distinction.
   assert.notEqual(dUniformGrace, classD.length, "a uniform grace year gives a different count");
-  assert.equal(dUniformGrace, 186, "uniform +1 forgives the five impossible maternal rows");
+  assert.equal(dUniformGrace, 188, "uniform +1 forgives the impossible maternal rows");
   for (const r of classD) assert.ok(P[r.child] && P[r.parent], "every row names two real records");
 });

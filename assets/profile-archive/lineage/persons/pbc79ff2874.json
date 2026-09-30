@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbc79ff2874",
+ "bnr": "bnr://skaists.dev/blood/pbc79ff2874",
+ "identity": {
+  "name": "Abigail Parsons",
+  "lifespan": "1699–1745",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV5F-K6W"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p6c69108094",
+    "name": "John Davis"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV5F-K6W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

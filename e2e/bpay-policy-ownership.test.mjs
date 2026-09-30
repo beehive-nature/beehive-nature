@@ -65,7 +65,9 @@ test('a View change in a stale wallet tab cannot erase newer founder policy (the
   const ctx = await guarded(await browser.newContext({ viewport: { width: 390, height: 844 } }));
   // Tab B FIRST — the wallet, booted with pristine (audience:null) state
   const tabB = await ctx.newPage();
-  await tabB.goto(origin + '/wallet.html', { waitUntil: 'load' });
+  // the bPay panel is deep-linked, as a reader arriving for it would be: new bee
+  // lands in the task that holds it (the three grammars, 2026-09-26)
+  await tabB.goto(origin + '/wallet.html#bpay-sec', { waitUntil: 'load' });
   await tabB.waitForTimeout(1200);
   assert.ok((() => { const k = null; return true; })(), 'premise helper');
   const bootKey = await readKey(tabB);
@@ -113,7 +115,7 @@ test('the wallet\'s OWN gesture path still records policy — merged, never clob
   await page.addInitScript(() => {
     localStorage.setItem('bpay-policy-v1', JSON.stringify({ audience: null, selectedAt: null, inspection: 'newbee', bridge: 'http://127.0.0.1:9999' }));
   });
-  await page.goto(origin + '/wallet.html', { waitUntil: 'load' });
+  await page.goto(origin + '/wallet.html#bpay-sec', { waitUntil: 'load' });
   await page.waitForTimeout(1200);
   await page.click('[data-audience="public"]');
   await page.waitForTimeout(300);

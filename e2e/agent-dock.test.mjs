@@ -9,7 +9,7 @@ import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../surfaces/agent-dock.js',import.meta.url),'utf8');
 
 function dock({height=650,width=1100,position='static',barHeight=540,viewport=null,
-  href='https://bnr.test/surfaces/index.html',clipboard='ok'}={}) {
+  href='https://bnr.test/surfaces/index.html',clipboard='ok',modelContext=null}={}) {
   const frames=[],observers=[];
   const decode=s=>String(s).replace(/&(?:amp|lt|gt|quot|#39);/g,m=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'"}[m]));
   class Events {
@@ -102,7 +102,7 @@ function dock({height=650,width=1100,position='static',barHeight=540,viewport=nu
     observe(target,options){this.target=target;this.options=options;this.active=true;}
     disconnect(){this.active=false;}
   }
-  const document=new Document(href);document.body.setAttribute('data-reg','bee');
+  const document=new Document(href);document.body.setAttribute('data-reg','bee');if(modelContext)document.modelContext=modelContext;
   const bar=position===null?null:document.createElement('nav');
   if(bar){bar.id='tbar';bar.getBoundingClientRect=()=>({height:barHeight,top:height-barHeight,bottom:height});document.body.appendChild(bar);}
   const window=new Events(),copies=[],copyRequests=[];
@@ -366,4 +366,161 @@ test('the shipped Hearth keeps hidden song text while stopping and releasing its
   assert.equal(engine.document.scrolledElement,engine.document.getElementById('chat').lastChild);
   assert.equal(engine.document.scrollOptions.block,'start');
   assert.match(engine.document.scrolledElement.textContent,/route creative prompts/);
+});
+
+/* WebMCP: a recording document.modelContext stands in for the browser. Whether a real
+   Chromium agent discovers and calls these tools still requires browser verification. */
+function modelContext({fail=null}={}){
+  const tools=[];return {tools,registerTool(t){if(fail==='throw')throw new Error('refused');if(fail==='reject')return Promise.reject(new Error('refused'));tools.push(t);return Promise.resolve();}};
+}
+const toolText=r=>{assert.equal(r.content[0].type,'text');return r.content[0].text;};
+
+test('without document.modelContext the dock registers nothing and invents no API',()=>{
+  const d=dock();assert.equal('modelContext' in d.document,false);d.open();d.submit('still works');
+});
+
+test('WebMCP offers two tools; only the list is read-only, and it names who accepts a message',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  assert.deepEqual(mc.tools.map(t=>t.name),['bnr_list_agents','bnr_stage_message']);
+  assert.equal(mc.tools[0].annotations.readOnlyHint,true);assert.equal(mc.tools[1].annotations,undefined);
+  const list=JSON.parse(toolText(await mc.tools[0].execute({})));
+  assert.deepEqual(list.map(a=>[a.id,a.acceptsMessage]),[['queen',true],['hearth',true],['baigents',false],['bloverai',true]]);
+  assert.equal(list[0].page,'https://bnr.test/surfaces/bqueenbee-live.html?dock=8');assert.equal(list[3].page,null);
+  assert.equal(d.win.classList.contains('on'),false);
+});
+
+test('staging opens the chosen agent with the draft and never sends it',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));d.$('adClose').click();
+  const r=toolText(await mc.tools[1].execute({agent:'queen',message:'  What is BNR?  '}));
+  assert.equal(d.win.classList.contains('on'),true);assert.equal(d.chip('queen').getAttribute('aria-pressed'),'true');
+  assert.equal(d.$('adPrompt').value,'What is BNR?');assert.deepEqual(queen.calls,[]);
+  assert.match(r,/Nothing was sent/);assert.match(d.$('adStatus').textContent,/press Send/);
+  d.$('adSend').click();assert.deepEqual(queen.calls,['What is BNR?']);
+});
+
+test('staging keeps the person’s unsent draft and follows the chosen agent',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.choose('bloverai');d.type('my own words');d.choose('queen');
+  const r=toolText(await mc.tools[1].execute({agent:'bloverai',message:'agent words'}));
+  assert.equal(d.$('adPrompt').value,'my own words\n\nagent words');assert.match(r,/after the person/);
+  assert.match(d.$('adStatus').textContent,/press Build handoff/);
+  d.choose('queen');d.choose('bloverai');assert.equal(d.$('adPrompt').value,'my own words\n\nagent words');
+});
+
+test('staging refuses bAigents, unknown agents and empty text without opening the dock',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  for(const input of [{agent:'baigents',message:'hi'},{agent:'nobody',message:'hi'},{agent:'queen',message:'   '},undefined]){
+    assert.match(toolText(await mc.tools[1].execute(input)),/^Not staged/);
+  }
+  assert.equal(d.win.classList.contains('on'),false);assert.equal(d.$('adPrompt').value,'');
+});
+
+test('a registry that throws or rejects never breaks the dock',async()=>{
+  for(const fail of ['throw','reject']){const d=dock({modelContext:modelContext({fail})});await nextTick();d.open();const q=d.load(frameFor(d,'queen'));d.submit('fine');assert.deepEqual(q.calls,['fine']);}
+});
+
+/* Review findings on fc096d959, each pinned: focus, a notice that survives the frame, room, repeats. */
+test('staging opens the dock without taking focus, so a stray Enter cannot send',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc}),field=d.document.createElement('input');d.body.appendChild(field);field.focus();
+  await mc.tools[1].execute({agent:'queen',message:'read me first'});
+  assert.equal(d.win.classList.contains('on'),true);assert.equal(d.document.activeElement,field);
+});
+
+test('the staged-by-an-agent notice survives the frame loading and clears when the person types',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'queen',message:'before load'});
+  const queen=d.load(frameFor(d,'queen'));assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  d.choose('hearth');d.choose('queen');assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  d.type('before load, edited');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+  assert.deepEqual(queen.calls,[]);
+});
+
+test('staging refuses rather than truncating when the person’s draft leaves no room',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const mine='x'.repeat(3990);d.type(mine);
+  const r=toolText(await mc.tools[1].execute({agent:'queen',message:'this will not fit'}));
+  assert.match(r,/^Not staged\. .*room for 8 characters; this message has 17/);assert.equal(d.$('adPrompt').value,mine);
+});
+
+test('repeating the same stage does not pile text up',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'});
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Not staged again/);
+  assert.equal(d.$('adPrompt').value,'grow a mushroom');
+});
+
+/* Re-review findings on 6338711e7: the repeat check was a bare tail match, and the notice hid behind "Opening". */
+test('only a repeat of the agent’s own last stage is refused, never a match with the person’s words',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.type('book');
+  assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'ok'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'book\n\nok');
+  d.choose('hearth');d.type('grow a mushroom');
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'grow a mushroom\n\ngrow a mushroom');
+  assert.match(toolText(await mc.tools[1].execute({agent:'hearth',message:'grow a mushroom'})),/^Not staged again/);
+});
+
+test('the staged notice shows while the agent is still opening, and sending clears it',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});
+  await mc.tools[1].execute({agent:'queen',message:'first stage'});
+  assert.equal(d.$('adSend').disabled,true);assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  const queen=d.load(frameFor(d,'queen'));d.$('adSend').click();
+  assert.deepEqual(queen.calls,['first stage']);assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+  /* "Message received" outranks the notice, so prove the clear where status empties: a later frame load. */
+  d.load(frameFor(d,'queen'));assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+});
+
+/* Codex review of e238cb682 (P2 x4), each pinned. */
+test('an old receipt or send failure does not hide the staged notice; an agent that cannot open keeps its error',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));d.submit('first');
+  assert.match(d.$('adStatus').textContent,/received by bQueenBee/);
+  await mc.tools[1].execute({agent:'queen',message:'second'});assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);
+  assert.equal(d.$('adStatus').getAttribute('data-error'),'false');assert.deepEqual(queen.calls,['first']);
+  const e=dock({modelContext:modelContext()});e.open();e.load(frameFor(e,'queen'),{ask:'throw'});e.submit('refused');
+  assert.equal(e.$('adStatus').getAttribute('data-error'),'true');
+  await e.window.document.modelContext.tools[1].execute({agent:'queen',message:'next'});assert.match(e.$('adStatus').textContent,/browser agent placed a draft/);
+  const u=dock({modelContext:modelContext()});u.open();u.load(frameFor(u,'queen'),{missingInput:true});
+  await u.window.document.modelContext.tools[1].execute({agent:'queen',message:'cannot open'});
+  assert.match(u.$('adStatus').textContent,/could not open here/);assert.equal(u.$('adStatus').getAttribute('data-error'),'true');
+});
+
+test('the person’s draft is kept byte for byte, trailing spaces and newlines included',async()=>{
+  for(const [mine,expected] of [['line one\n','line one\n\nx'],['spaced  ','spaced  \n\nx'],['para\n\n','para\n\nx'],['tabbed\n\t','tabbed\n\t\nx'],['   ','   \n\nx']]){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.type(mine);
+    assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'x'})),/^Draft staged/);
+    assert.equal(d.$('adPrompt').value,expected);assert.ok(d.$('adPrompt').value.startsWith(mine));
+  }
+});
+
+test('staging moves focus off the composer or Send, never leaving a submit control under the person',async()=>{
+  for(const target of ['adPrompt','adSend']){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.load(frameFor(d,'queen'));d.type('my queen draft');d.$(target).focus();
+    await mc.tools[1].execute({agent:'hearth',message:'staged for hearth'});
+    assert.equal(d.document.activeElement,d.$('adTitle'));assert.equal(d.$('adTitle').getAttribute('tabindex'),'-1');
+  }
+});
+
+test('deduplication expires once the person edits or sends, so their own identical words can be staged after',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();const queen=d.load(frameFor(d,'queen'));
+  await mc.tools[1].execute({agent:'queen',message:'same'});d.$('adSend').click();assert.deepEqual(queen.calls,['same']);
+  d.type('same');assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'same'})),/^Draft staged/);
+  assert.equal(d.$('adPrompt').value,'same\n\nsame');
+  d.type(d.$('adPrompt').value+' edited');assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:'same'})),/^Draft staged/);
+});
+
+/* Codex review of 0a14c780a (P2 x2): a transient "not ready" is not a failed open; slash commands consume a stage too. */
+test('an Enter pressed while the agent loads leaves a transient error that the staged notice replaces',async()=>{
+  const mc=modelContext(),d=dock({modelContext:mc});d.open();d.submit('too early');
+  assert.match(d.$('adStatus').textContent,/not sent/);assert.equal(d.$('adStatus').getAttribute('data-error'),'true');
+  await mc.tools[1].execute({agent:'queen',message:'staged while loading'});
+  assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);assert.equal(d.$('adStatus').getAttribute('data-error'),'false');
+  const queen=d.load(frameFor(d,'queen'));assert.match(d.$('adStatus').textContent,/browser agent placed a draft/);assert.deepEqual(queen.calls,[]);
+});
+
+test('a staged /help or /install that the person sends clears the stage like any other send',async()=>{
+  for(const cmd of ['/help','/install']){
+    const mc=modelContext(),d=dock({modelContext:mc});d.open();d.load(frameFor(d,'queen'));
+    await mc.tools[1].execute({agent:'queen',message:cmd});d.$('adSend').click();
+    assert.equal(d.$('adHelp').hidden,false);assert.equal(d.$('adPrompt').value,'');
+    d.choose('queen');assert.doesNotMatch(d.$('adStatus').textContent,/browser agent/);
+    assert.match(toolText(await mc.tools[1].execute({agent:'queen',message:cmd})),/^Draft staged/);
+  }
 });

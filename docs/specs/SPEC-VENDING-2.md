@@ -53,11 +53,21 @@ is not the mechanism.
   key per mint, `winc: 0` measured repeatedly. This minted the receipted
   certificate.
 - **Ed25519 door (the target shape)**: `SolanaSigner`, 64-byte secret =
-  **pub(32) ‖ seed(32)** (Solana layout — the arbundles class signs with the
-  LAST 32 and publishes the FIRST 32 as owner; built wrong it silently puts
-  the SEED in the owner field — trap receipted). Worked at 06:0xZ, then the
-  door began refusing with `Invalid Data Item`/503 (free-tier throttling
-  per-IP across many probe uploads). Both doors re-read at build time; the
+  **seed(32) ‖ public(32)** (the arbundles class signs with the FIRST 32 and
+  publishes the LAST 32 as owner; built public-first it puts the SEED in the
+  owner field and the item fails its own signature. Corrected 2026-09-28:
+  this line had the order backwards; ar-upload.cjs now refuses before any
+  upload unless the owner is the public key) (source: @dha-team/arbundles 1.0.4 `build/node/cjs/src/signing/chains/SolanaSigner.js`, the
+  constructor: first 32 bytes become `_key`, which SolanaSigner.js's `key` getter
+  decodes for `keys/curve25519.js` `sign()`; last 32 become `pk`, which
+  SolanaSigner.js's `publicKey` getter returns as the owner.
+  The guard is `contracts/vending/tool/ar-upload.cjs` `memberSigner()`; the failed-
+  signature claim is checked by `contracts/vending/tool/arweave-owner-audit.mjs`
+  `verifyEd25519Item()`; both held by `e2e/ar-upload-signer.test.mjs`). Worked at 06:0xZ, then the
+  door began refusing with `Invalid Data Item`/503 (read then as free-tier
+  throttling; a reversed-order item fails signature verification, so the
+  cause is unproven. UNVERIFIED: the upload door's response to such an item
+  was never captured). Both doors re-read at build time; the
   mint takes whichever is open, the certificate records which one signed.
 
 ## §contract — `vending` (contracts/vending/src/vending.cpp, CDT 4.x)

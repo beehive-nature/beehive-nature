@@ -15,14 +15,14 @@
   }
  ],
  "evidence": {
-  "era": "recorded",
+  "era": "saga",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "recorded"
+  "class": "saga"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"

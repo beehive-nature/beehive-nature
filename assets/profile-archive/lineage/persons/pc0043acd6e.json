@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc0043acd6e",
+ "bnr": "bnr://skaists.dev/blood/pc0043acd6e",
+ "identity": {
+  "name": "Joehan Conrad Philabaum",
+  "lifespan": "1693–1782",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GDTM-9FP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "no attached sources harvested for this person; era-heuristic only"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p91d9f66290",
+    "name": "Johann Adam Fellenbaum"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GDTM-9FP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p255df061b2",
  "identity": {
   "name": "Klavdia Kosnelia",
-  "lifespan": "0700–0660",
+  "lifespan": "0660–0700",
   "gender": "FEMALE",
   "living": false
  },
@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"

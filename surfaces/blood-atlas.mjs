@@ -927,6 +927,7 @@ export async function createAtlas(opts) {
     world.classList.remove("lod-far", "lod-mid", "lod-near");
     world.classList.add("lod-" + lod);
     world.setAttribute("data-lod", lod);
+    world.style.setProperty("--atlas-k", String(transform.k)); // label counter-scale (blood-atlas.css)
   }
 
   // pointer: pan + pinch + wheel zoom-to-cursor; a drag NEVER selects.

@@ -1,0 +1,56 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2e784d26a0",
+ "bnr": "bnr://skaists.dev/blood/p2e784d26a0",
+ "identity": {
+  "name": "Henry Saunders",
+  "lifespan": "1675–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC7H-YBT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "10 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "10 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p123c599164",
+    "name": "Christian Sanders"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC7H-YBT",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 10,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

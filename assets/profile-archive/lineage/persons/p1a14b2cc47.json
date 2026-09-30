@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1a14b2cc47",
+ "bnr": "bnr://skaists.dev/blood/p1a14b2cc47",
+ "identity": {
+  "name": "John Dawley III",
+  "lifespan": "1709–1755",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZK1-BN5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "14 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "14 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf8e48fb601",
+    "name": "John Dawley Jr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7b80be4801",
+    "name": "Lydia Armstrong",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5af0281cfd",
+    "name": "Lydia Dawley"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZK1-BN5",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 14,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

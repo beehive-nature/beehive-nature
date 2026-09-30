@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4083363db9",
+ "bnr": "bnr://skaists.dev/blood/p4083363db9",
+ "identity": {
+  "name": "Amity Hawes",
+  "lifespan": "1709–1796",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4JL-B2K"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "25 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "25 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc9ccbfb7de",
+    "name": "James Hawes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe03b5a64b0",
+    "name": "Damaris Bird",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8f1ccb2ef4",
+    "name": "George Bradley"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4JL-B2K",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 25,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

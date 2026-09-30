@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "21 FamilySearch sources (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "21 attached FamilySearch sources (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "L8RL-HT5",
+    "id": "p5a6c99af69",
+    "name": "Joshua Kendall",
     "evidence": "walked provider link"
    },
    {
-    "id": "LTM7-V79",
+    "id": "pa3f321b758",
+    "name": "Susanna Harrington",
     "evidence": "walked provider link"
    }
   ],
@@ -56,7 +58,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/LZF9-W32",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 21,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],
