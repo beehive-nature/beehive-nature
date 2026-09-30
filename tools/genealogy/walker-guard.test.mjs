@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure } from "./walker-guard.mjs";
+import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure, recordObservation } from "./walker-guard.mjs";
 
 function fixtures() {
   const dir = mkdtempSync(join(tmpdir(), "walker-guard-"));
@@ -82,13 +82,11 @@ test("walker failures are REJECTED as record outcomes and stay retryable (founde
   for (const bad of ["eval-err", "stitch-err", "v3-err"]) {
     assert.throws(() => checkpointState("BBBB-2222", { state: bad }, opts), /REJECT walker-failure/);
   }
-  // site answers ARE record outcomes
+  // explicit site denials ARE record outcomes (09-29i keeps these)
   assert.equal(assertRecordOutcome("xml-403"), true);
   assert.equal(assertRecordOutcome("xml-404"), true);
-  assert.equal(assertRecordOutcome("binding-403"), true);
-  assert.equal(assertRecordOutcome("no-deepzoom-traffic"), true);
-  assert.equal(assertRecordOutcome("no-tiles"), true);
   assert.equal(assertRecordOutcome("downloaded"), true);
+  // binding-* / no-* / timeout moved to the retryable class by 09-29i (asserted in the 09-29i test below)
 });
 
 test("recordWalkerFailure logs to the retryable side log and the ark STAYS pending", async () => {
@@ -102,4 +100,24 @@ test("recordWalkerFailure logs to the retryable side log and the ark STAYS pendi
   // still pending: nextPending keeps handing it out
   const { nextPending: np } = await import("./walker-guard.mjs");
   assert.ok(np(10, opts).some((p) => p.ark === "BBBB-2222"));
+});
+
+test("retryable observations (missing traffic/tiles, binding failures) are REJECTED as outcomes (founder order 09-29i)", () => {
+  const { opts } = fixtures();
+  for (const obs of ["no-deepzoom-traffic", "no-tiles", "binding-403", "timeout"]) {
+    assert.throws(() => checkpointState("CCCC-3333", { state: obs }, opts), /REJECT retryable-observation/);
+  }
+  // explicit site denials for the bound apid remain valid outcomes
+  assert.equal(assertRecordOutcome("xml-403"), true);
+  assert.equal(assertRecordOutcome("xml-404"), true);
+});
+
+test("recordObservation side-logs the absence-observation and the ark STAYS pending", async () => {
+  const { opts } = fixtures();
+  recordObservation("CCCC-3333", "no-deepzoom-traffic", "viewer rendered, zero deepzoom this session", opts);
+  const man = JSON.parse(readFileSync(new URL(opts.manifestPath), "utf8"));
+  assert.equal(man.images["CCCC-3333"], undefined, "no outcome recorded");
+  assert.equal(man.retryableObservations["CCCC-3333"].length, 1);
+  const { nextPending: np } = await import("./walker-guard.mjs");
+  assert.ok(np(10, opts).some((p) => p.ark === "CCCC-3333"));
 });

@@ -87,6 +87,34 @@ export function assertRecordOutcome(state) {
     throw new Error(
       "REJECT walker-failure as record outcome: '" + state + "' — use recordWalkerFailure(); the ark stays pending and retryable",
     );
+  if (isRetryableObservation(state))
+    throw new Error(
+      "REJECT retryable-observation as record outcome: '" + state + "' — silence is not proof (founder order 09-29i); use recordObservation(); the ark stays pending",
+    );
+  return true;
+}
+
+// ── RETRYABLE-OBSERVATION CLASS (founder order 2026-09-29i: timeouts,
+//    missing traffic, missing tiles, and binding failures remain RETRYABLE
+//    unless explicit record-specific evidence establishes an outcome;
+//    silence is not proof that no image exists) ──
+// Only explicit site denials for the BOUND apid (xml-403/xml-404 etc.) and
+// completed downloads are record outcomes. Everything observed by absence
+// stays retryable.
+export function isRetryableObservation(state) {
+  if (typeof state !== "string") return false;
+  return /^(no-deepzoom-traffic|no-tiles|binding-\d+|timeout.*)$/i.test(state.trim());
+}
+
+// Absence-observations go to manifest.retryableObservations (side log,
+// never images) — the ark stays pending. Silence is not proof.
+export function recordObservation(ark, kind, detail, opts = {}) {
+  const { manifestUrl, manifest } = loadState(opts);
+  manifest.retryableObservations = manifest.retryableObservations || {};
+  (manifest.retryableObservations[ark] = manifest.retryableObservations[ark] || []).push({
+    ts: new Date().toISOString(), kind, detail: String(detail).slice(0, 200),
+  });
+  writeFileSync(manifestUrl, JSON.stringify(manifest, null, 1));
   return true;
 }
 
