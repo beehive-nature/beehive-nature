@@ -111,8 +111,14 @@ try {
     const go = page.locator('#fund-go');
     ok('launch disabled', (await go.getAttribute('aria-disabled')) === 'true');
     ok('launch href=#', (await go.getAttribute('href')) === '#');
-    const banner = await page.locator('#fund-stat').innerText();
-    ok('unconfigured banner visible', banner.includes('funding not configured'));
+    // not available yet is PROSE, never a dead button (the design law; PR #237 review):
+    // unset, the launch and the fields that only feed it are not rendered at all
+    ok('no dead buy button renders (launch, asset select and address field all unrendered)',
+      !(await go.isVisible()) && !(await page.locator('#fund-asset').isVisible()) && !(await page.locator('#fund-addr').isVisible()));
+    const banner = await page.locator('#fund-off').innerText();
+    ok('unconfigured state said in words with its reason', await page.locator('#fund-off').isVisible() &&
+      banner.includes('funding not configured') && banner.includes('no buy button') && banner.includes('public checkout key'), banner);
+    ok('the panel says it is a separate card route not wired to bPay', (await page.locator('#fund-apart').innerText()).includes('not wired to bPay yet'));
     // bee and raver fold the engineering (key names, environment, host) one tap
     // away, behind the section's own toggle: the reader's tap, then the same text
     if (REG !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); }
