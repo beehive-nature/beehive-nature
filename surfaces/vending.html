@@ -1333,6 +1333,41 @@ async function mintInPage(door) {
   words(); wire(); all(true);
 })();
 </script>
+<script>
+/*WEBMCP-START*/
+/* WebMCP — ONE read-only tool, the WEBML raid's S4 prototype (docs/raids/WEBML-SORT-2026-09-30.md
+   §8; founder order 2026-09-30 "get it all done"). An outside agent that speaks WebMCP (origin
+   trial Chrome 149 / Edge 150; ChatGPT Desktop already calls tools this way) may read this
+   machine's public price sheet. LAWS: nothing member-facing rests on it (WebKit opposes; the
+   trial ends when the vendor says); the payload is a FIXED WHITELIST — the reader's typed name
+   never crosses a machine door (opacity law, bMAIL doorbell pattern); absent API → inert. */
+(function(root){
+  'use strict';
+  var doc=root.document;
+  if(!doc||!('modelContext' in doc)||typeof doc.modelContext.registerTool!=='function') return;
+  var ALLOWED=['updated','count','max','basisTxt','basisA','ramA','titheBp','titheA','totalA',
+               'totalUsd','price','priceKind','chainRead','lawRead','certs'];
+  function snapshot(){
+    var src=(root.__eternal&&typeof root.__eternal.data==='function')?root.__eternal.data()
+            :(root.__vending||{});
+    var out={};
+    ALLOWED.forEach(function(k){ if(src&&typeof src[k]!=='undefined'&&src[k]!==null) out[k]=src[k]; });
+    out.note=out.lawRead?'the page\'s own live state, read-only':'not read yet — the chain has not answered';
+    return out;
+  }
+  try{
+    doc.modelContext.registerTool({
+      name:'read_vending_state',
+      description:'Read this vending machine\'s public name-law sheet (price basis, tithe, count/max, live price state). Read-only; it cannot mint, reserve, or touch the reader\'s input.',
+      inputSchema:{type:'object',properties:{},additionalProperties:false,required:[]},
+      async execute(){
+        return {content:[{type:'text',text:JSON.stringify(snapshot(),null,1)}]};
+      }
+    }).catch(function(){ /* a refusal (e.g. Permissions-Policy: tools=()) is silence, not an error */ });
+  }catch(e){ /* registration refused: the page is unchanged */ }
+})(typeof window==='object'?window:globalThis);
+/*WEBMCP-END*/
+</script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

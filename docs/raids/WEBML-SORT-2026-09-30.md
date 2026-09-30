@@ -239,7 +239,17 @@ the vendor's binary, page brings prompts); the estate built **the page as
 runtime custodian** (weights estate-mirrored, sha256-gated before a byte
 runs). Neither replaces the other; §8 is the exchange.
 
-## 8 · WHAT LANDS — the slices, named, none built
+## 8 · WHAT LANDS — the slices
+
+> **RIDER 2026-09-30 (founder order "get it all done", same branch):** S1, S3
+> and S4 are **EXECUTED** — `surfaces/browser-translate.js` + `surfaces/index.html`
+> + lang.js census chrome (`#brtrctl`); `docs/RULINGS-2026-09-30.md` (W1–W6);
+> one read-only WebMCP tool in `surfaces/vending.html`. Tests:
+> `e2e/browser-translate.test.mjs` (5) + `e2e/webmcp-vending.test.mjs` (5),
+> vm-executed; regression suites green. The founder's WebMCP question — "WE
+> ALREADY HAVE PUT IN WEBMCP IN ONE SURFACE ALREADY?" — answered by grep at
+> build time: zero surfaces before, exactly one now. S2/S5/S6 stay banked
+> triggers/patterns.
 
 | # | the gap (fact) | the slice (one sentence) | owner |
 |---|---|---|---|

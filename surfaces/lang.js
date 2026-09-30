@@ -19,7 +19,9 @@
     // The unit remains a laid-out leaf with lettered text, including short labels.
     // This is not a census of attributes, canvas/iframe content or direct text
     // alongside child elements. Do not turn this scoped count into a full-page claim.
-    var chrome='#tbar,#adOrb,#adPanel,#adWin,#tbarMore,#railsbadge,#bregbar,#bregctl,#blangctl,#veil,#bandwrap';
+    var chrome='#tbar,#adOrb,#adPanel,#adWin,#tbarMore,#railsbadge,#bregbar,#bregctl,#blangctl,#brtrctl,#veil,#bandwrap';
+    // #brtrctl = the browser-translate rider (WEBML raid S1): the browser's offer wears the
+    // browser's words, so its control is chrome beside #blangctl, never an estate string.
     var out={visible:0,keyed:0,keys:[],unkeyedSamples:[]};
     doc.querySelectorAll('body *').forEach(function(n){
       if(n.children.length || n.closest(chrome)) return;
