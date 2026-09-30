@@ -371,6 +371,18 @@ jobs:
       - name: Funnel broadcast selftest (vectors + sign/recover)
         if: always()
         run: node scripts/funnel/broadcast.mjs --selftest
+      # the ed25519 upload door (contracts/vending/tool/ar-upload.cjs) puts the
+      # member's PUBLIC key in the item's owner field, never the seed; a signer
+      # whose owner would be the seed is refused before any upload. The real
+      # library is installed at pinned versions for this step only (--no-save:
+      # the tool declares no dependency on it; axios is pinned because arbundles
+      # requires it in FileDataItem.js without declaring it), so the live tests
+      # run in CI.
+      - name: Vending upload door — owner is the public key, never the seed
+        if: always()
+        run: |
+          npm install --prefix contracts/vending/tool --no-save --no-package-lock --ignore-scripts @dha-team/arbundles@1.0.4 bs58@6.0.0 axios@1.20.0
+          node --test e2e/ar-upload-signer.test.mjs
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).
