@@ -501,7 +501,7 @@ function show(i){
 window.__show=show;
 function walk(){if(walking&&pieces.length)show(idx+1);}
 
-const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="a calm garden piece"><rect width="240" height="240" fill="#efe9dd"/><circle cx="120" cy="118" r="78" fill="#e4d6f5"/><circle cx="120" cy="118" r="52" fill="#c9a7f5"/><circle cx="120" cy="118" r="26" fill="#6e3fb8"/><circle cx="96" cy="96" r="10" fill="#fbf7f0" opacity=".9"/><path d="M120 168c-18 22-40 34-40 34s8-24 22-40c8-9 18-16 18-16s10 7 18 16c14 16 22 40 22 40s-22-12-40-34z" fill="#4a5f55" opacity=".55"/></svg>';
+const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="a calm garden piece"><rect width="240" height="240" fill="#efe9dd"/><circle cx="120" cy="118" r="78" fill="#eadff8"/><circle cx="120" cy="118" r="52" fill="#865fb8"/><circle cx="120" cy="118" r="26" fill="#6e3fb8"/><circle cx="96" cy="96" r="10" fill="#fbf7f0"/><path d="M120 168c-18 22-40 34-40 34s8-24 22-40c8-9 18-16 18-16s10 7 18 16c14 16 22 40 22 40s-22-12-40-34z" fill="#4a5f55" opacity=".55"/></svg>';
 function silentSeedGarden(){
   if(pieces.length)return false;
   clearInterval(timer); timer=null; walking=false; // no auto-walk of a seed — user starts the tour
