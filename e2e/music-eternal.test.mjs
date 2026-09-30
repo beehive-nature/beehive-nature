@@ -73,7 +73,7 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
       const D = window.__eternal.data, t = s => (document.querySelector(s) || {}).textContent || '';
       return {
         d: [D.channel, D.epoch, D.sequence, D.items.map(i => i.kind + ':' + i.size), D.creator, D.admission.payment, D.admission.approval, D.joined, D.doors],
-        beeRows: [...document.querySelectorAll('#etBeeRows .et-b-row')].map(r => r.textContent.replace(/\s+/g, ' ').trim()),
+        beeSheet: !!document.getElementById('etBeeRows'), beeNow: (document.getElementById('etBeeNow')||{}).textContent||'',
         planets: document.querySelectorAll('#etSky .planet').length, epochs: document.querySelectorAll('#etSky .epoch').length, ticks: document.querySelectorAll('#etSky .tick').length,
         hint: t('#etRaverHint'), env: t('#etEnvelope'), items: [...document.querySelectorAll('#etItems tr')].slice(1).map(r => r.children[0].textContent),
         pageFacts: [t('#f-channel'), t('#f-epoch'), t('#f-sequence'), t('#f-items'), t('#g-payment')],
@@ -87,9 +87,9 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
   assert.deepEqual(a.d.slice(0, 5), [ENV.channel, ENV.epoch, ENV.sequence, ENV.encrypted_items.map(i => i.kind + ':' + i.ref.size), ENV.credits.creator[0].display_name]);
   assert.deepEqual(a.pageFacts, [ENV.channel, String(ENV.epoch), String(ENV.sequence), String(ENV.encrypted_items.length), ENV.admission.payment]);
   assert.equal(a.d[7], false, 'nobody is in the room on arrival');
-  // each register draws the same room its own way
-  assert.match(a.beeRows[0], new RegExp(ENV.credits.creator[0].display_name)); assert.match(a.beeRows[1], /4 pieces/);
-  assert.match(a.beeRows[2], /no track attached yet/); assert.match(a.beeRows[3], /2 places/);
+  // New bee: no four-row status sheet — one primary only (Floor A). Facts still live in __eternal.data + Raver/Cypherpunk.
+  assert.equal(a.beeSheet, false, 'New bee has no etBeeRows status sheet');
+  assert.match(a.beeNow, /the room is open/i);
   assert.equal(facts.raver.planets, 4, 'one planet per encrypted item'); assert.equal(facts.raver.epochs, ENV.epoch, 'one ring per epoch'); assert.equal(facts.raver.ticks, ENV.sequence, 'one tick per sequence');
   assert.match(facts.raver.hint, /plur · epoch 3 · seq 12/);
   assert.ok(facts.cypherpunk.env.includes(ENV.checkpoint.id) && facts.cypherpunk.env.includes('payment disabled · approval trezor'), 'cypherpunk shows the checkpoint whole and the gate');
@@ -102,7 +102,7 @@ test('bee: the one action hands off to the room\'s join; the words follow the mo
   await p.click('#etBeeJoin');
   await p.waitForFunction(() => window.musicRoom.joined === true);
   assert.equal(await p.textContent('#join'), 'leave preview', 'the room\'s own control changed state');
-  assert.match(await p.textContent('#etBeeNow'), /you are in the room, on this device only/);
+  assert.match(await p.textContent('#etBeeNow'), /you are in\. nothing left this device/);
   assert.match(await p.textContent('#eventlog'), /local participant joined/);
   await p.click('#etBeeJoin');
   await p.waitForFunction(() => window.musicRoom.joined === false);
@@ -115,7 +115,7 @@ test('bee: a refused envelope keeps the step off and says so plainly', async () 
   const { ctx, p } = await open('bee', { query: '?manifest=/fixtures/does-not-exist.json' });
   assert.equal(await p.$eval('#etBeeJoin', b => b.disabled), true);
   assert.match(await p.textContent('#etBeeNow'), /could not be read/);
-  assert.match(await p.textContent('#etBeeRows'), /not read/);
+  assert.equal(await p.evaluate(() => !!document.getElementById('etBeeRows')), false);
   await ctx.close();
 });
 
