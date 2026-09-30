@@ -159,3 +159,23 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
     await ctx.close();
   }
 });
+
+test('New bee art stage is cream well (music.html light), not ink', async () => {
+  const { ctx, p } = await open('bee');
+  const colors = await p.evaluate(() => {
+    const mat = document.createElement('span');
+    mat.className = 'art-mat';
+    document.body.appendChild(mat);
+    return {
+      stage: getComputedStyle(document.getElementById('stage')).backgroundColor,
+      mat: getComputedStyle(mat).backgroundColor,
+      ink: getComputedStyle(document.body).getPropertyValue('--sk-ink').trim(),
+      well: getComputedStyle(document.body).getPropertyValue('--sk-bg-well').trim(),
+    };
+  });
+  assert.equal(colors.well, '#efe9dd');
+  assert.equal(colors.ink, '#0c1412');
+  assert.equal(colors.stage, 'rgb(239, 233, 221)', 'stage uses --sk-bg-well, not --sk-ink');
+  assert.equal(colors.mat, 'rgb(239, 233, 221)', 'art-mat uses --sk-bg-well, not --sk-ink');
+  await ctx.close();
+});

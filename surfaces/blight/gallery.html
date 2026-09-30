@@ -178,7 +178,9 @@ body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-
    (../skaists.css). The viewer, its ids and its three-view layout are unchanged. ── */
 body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--accent:var(--sk-sovereign);--info:var(--sk-link);--warning:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink)}
 body[data-reg] #stage,body[data-reg] .art-mat{background:var(--sk-bg-well)}
-body[data-reg="bee"] #stage,body[data-reg="bee"] .art-mat{background:var(--sk-ink)}
+/* New bee stage stays on the cream well (music.html gold): never flip to --sk-ink.
+   That override left cream chrome around a near-black art stage. Raver/cypherpunk
+   keep a dark well from the register tokens. Artwork SVG bytes are untouched. */
 body[data-reg] #stage{box-shadow:none;border:1px solid var(--sk-line)}
 body[data-reg] #bPlay{background:var(--sk-ink);border-color:var(--sk-ink);color:var(--sk-bg)}
 body[data-reg] .room-facts{border-radius:var(--sk-radius)}
