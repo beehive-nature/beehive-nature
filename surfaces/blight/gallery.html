@@ -499,6 +499,7 @@ function walk(){if(walking&&pieces.length)show(idx+1);}
 const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="seeded garden"><rect width="200" height="200" fill="#efe9dd"/><circle cx="100" cy="100" r="48" fill="#c9a7f5" opacity=".85"/><circle cx="100" cy="100" r="22" fill="#6e3fb8"/><text x="100" y="178" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#4a5f55">seeded garden</text></svg>';
 function silentSeedGarden(){
   if(pieces.length)return false;
+  clearInterval(timer); timer=null; walking=false; // no auto-walk of a seed — user starts the tour
   pieces=[{svg:SEED_SVG,sym:'SEED',seed:1,lvln:1,chain:'local',contract:'seeded',seeded:true}];
   window.__garden=pieces; window.__seeded=true;
   $('frame').innerHTML=''; $('dots').replaceChildren();
