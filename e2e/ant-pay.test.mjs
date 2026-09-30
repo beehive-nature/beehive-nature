@@ -24,7 +24,7 @@ const prepareOf = (n, amt = 1000n, extra = {}) => ({ upload_id: 'up-1', payment_
 const authOf = (p, ceiling) => ({ id: 'auth-1', state: 'authorized-for-signing', upload_id: p.upload_id, ant_ceiling_atto: String(ceiling ?? p.total_atto) });
 
 function world(o = {}) {
-  const log = { sends: [], finalize: [], states: [], urls: [], order: [], swallowed: 0 }, mem = new Map(), hex = (v) => '0x' + BigInt(v).toString(16);
+  const log = { sends: [], finalize: [], states: [], urls: [], order: [], receipts: [], swallowed: 0 }, mem = new Map(), hex = (v) => '0x' + BigInt(v).toString(16);
   const fetch = async (url, init) => {
     log.urls.push(url);
     const json = (status, body) => ({ ok: status < 400, status, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
@@ -41,7 +41,9 @@ function world(o = {}) {
     if (method === 'eth_call') { log.urls.push('rpc:' + params[0].to); return params[0].data.startsWith('0x70a08231') ? hex(o.ant ?? 10n ** 24n) : hex(o.allowance ?? 0n); }
     /* revertHashes: the chain refused THAT transaction and confirmed the others — per-hash, because
        a kept payment and the payment being made now are not the same transaction. */
-    if (method === 'eth_getTransactionReceipt') return { status: (o.revert || (o.revertHashes || []).includes(params[0])) ? '0x0' : '0x1' };
+    /* pending: the chain has no receipt for THAT hash yet. receipts: every hash the chain was asked about. */
+    if (method === 'eth_getTransactionReceipt') { log.receipts.push(params[0]); if (o.receiptThrows) throw new Error(o.receiptThrows); if ((o.pending || []).includes(params[0])) return null;
+      return { status: (o.revert || (o.revertHashes || []).includes(params[0])) ? '0x0' : '0x1' }; }
     throw new Error('unexpected rpc ' + method);
   };
   const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send');
@@ -79,7 +81,7 @@ function world(o = {}) {
     mem.set(k, v); log.order.push('persist'); } };
   /* throwOnState: the surface's own renderer blows up on that phase — a caller's failure, not this page's. */
   const onState = (s) => { log.states.push(s); if (o.throwOnState === s.phase) throw new Error('the surface’s renderer blew up'); };
-  const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState });
+  const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState, now: () => (o.now ? o.now() : Date.now()) });
   return { payer, log, mem };
 }
 const refused = async (promise, code) => { await assert.rejects(promise, (e) => { assert.equal(e.refusal, code, e.message); return true; }); };
@@ -179,7 +181,9 @@ test('settle pays and hands back the pairs without calling the door; the hashes 
   assert.deepEqual(w.log.urls.filter((u) => !u.startsWith('rpc:')), [], 'settle never calls the door: the surface’s own adapter finalizes');
   const kept = JSON.parse(w.mem.get('ant-pay.paid.up-1')); assert.equal(kept.finalized, false); assert.equal(Object.keys(kept.txHashes).length, 5);
   assert.equal(w.log.states.at(-1).phase, 'paid');
-  const n = w.log.sends.length; await refused(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'already-paid'); assert.equal(w.log.sends.length, n, 'never pays twice');
+  /* the second settle is no longer REFUSED — that refusal was the dead end (see the rows under
+     'a paid file can be finished'). It still never pays twice, which is what this line is for. */
+  const n = w.log.sends.length; assert.deepEqual(await w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), txs); assert.equal(w.log.sends.length, n, 'never pays twice');
 });
 
 test('paid but not finished: the pairs are kept and named, a second pay is refused, resume finalizes without signing again', async () => {
@@ -744,6 +748,148 @@ test('the two signers: an injected wallet on the wrong chain is refused by name;
   const no = AntPay.trezorSigner({ ...connect, ethereumSignTransaction: async () => ({ success: false, payload: { error: 'Cancelled' } }) }, { rpc }); await no.address(); await refused(no.send({ to: VAULT, data: '0x' }), 'wallet-declined');
   assert.throws(() => AntPay.trezorSigner(null, { rpc }), (e) => e.refusal === 'no-wallet');
   await refused(AntPay.loadTrezorConnect({}, null), 'no-wallet');
+});
+
+/* ── #211 REPAIR (bFUzZ's FAIL of 2026-09-29, rows ruled by bee-laborer a8b43af6 / a75e4de2) ──
+   A PAID FILE CAN BE FINISHED. settle() is the entry for a surface whose own adapter finalizes; such
+   a surface has no resume(). Before this, a payment that went through followed by a door that failed
+   left settle() answering already-paid on every retry of the same bytes, for ever.
+   THE SIGNER IN THE SECOND WORLD THROWS ON EVERY CALL, so 'it never signs' is not a count that could
+   be zero for another reason: reaching address() or send() at all fails the row by name. */
+const noSigner = { name: 'a wallet that must not be asked', address: async () => { throw new Error('the signer was asked for an address'); }, send: async () => { throw new Error('the signer was asked to send'); } };
+test('a paid file can be finished: settle confirms the kept hashes on chain and returns the pairs, asking no wallet', async () => {
+  const p1 = prepareOf(3), o = { allowance: 10n ** 20n }, w = world(o);
+  const first = await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  assert.equal(w.log.sends.length, 1, 'precondition: one payment left the wallet');
+  /* the door failed; the same bytes are priced again, under a new upload_id and the same quote hashes */
+  const p2 = { ...p1, upload_id: 'up-2' }, w2 = world({ signer: noSigner });
+  w.mem.forEach((v, k) => w2.mem.set(k, v));
+  let asked = 0;
+  const again = await w2.payer.settle({ prepare: p2, authorization: authOf(p2), confirmPlan: async () => { asked++; return true; } });
+  assert.deepEqual(again, first, 'the pairs for finalize carry the kept hash, per quote');
+  assert.ok(again.every((x) => x.tx_hash === TX(1)), 'and it is the hash that paid');
+  assert.equal(asked, 0, 'no plan is put to the person: there is nothing to sign');
+  assert.deepEqual(w2.log.receipts, [TX(1)], 'the kept hash was confirmed ON CHAIN before it was handed back, once per transaction');
+  assert.deepEqual(w2.log.states.map((s) => s.phase), ['kept', 'paid']);
+  assert.deepEqual(w2.log.states[0].txs, [TX(1)], 'and the surface was told which payment it is finishing on');
+  /* CONTROL: pay() keeps its refusal — its surface has resume(), and resume is what it is sent to. */
+  const w3 = world({ signer: noSigner }); w.mem.forEach((v, k) => w3.mem.set(k, v));
+  await refused(w3.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
+});
+
+test('a kept payment the chain refused is unwound by settle, and the next settle signs for it again', async () => {
+  const p1 = prepareOf(2), o = { allowance: 10n ** 20n }, w = world(o);
+  await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  assert.equal(w.mem.size, 3, 'precondition: the upload record and one key per quote');
+  const p2 = { ...p1, upload_id: 'up-2' };
+  o.revertHashes = [TX(1)];
+  await assert.rejects(w.payer.settle({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message); assert.equal(e.detail.tx, TX(1));
+    assert.doesNotMatch(e.message, SAYS_ALREADY_PAID); assert.doesNotMatch(e.message, SAYS_RESUME); return true; });
+  assert.equal(w.log.sends.length, 1, 'the refusal itself signed nothing');
+  assert.ok(p1.quotes.every((x) => !w.mem.get('ant-pay.paid.quote.' + x.quote_hash)), 'the index no longer names the refused transaction');
+  assert.ok(!w.mem.get('ant-pay.paid.up-1'), 'nor does the record it was written under — up-1, not this prepare’s id');
+  o.revertHashes = [];
+  const txs = await w.payer.settle({ prepare: p2, authorization: authOf(p2), confirmPlan: yes });
+  assert.equal(w.log.sends.length, 2, 'so the price can be signed for again');
+  assert.ok(txs.every((x) => x.tx_hash === TX(2)));
+});
+
+test('a kept payment the chain has not confirmed is waited on, not handed to finalize: stopping says the hash is kept, and it is', async () => {
+  const p1 = prepareOf(1), o = { allowance: 10n ** 20n }, w = world(o);
+  await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  o.pending = [TX(1)]; const stop = new AbortController(); let polls = 0; o.now = () => { if (++polls > 2) stop.abort(); return polls; };
+  const p2 = { ...p1, upload_id: 'up-2' };
+  await assert.rejects(w.payer.settle({ prepare: p2, authorization: authOf(p2), confirmPlan: yes, signal: stop.signal }), (e) => {
+    assert.equal(e.refusal, 'stopped-waiting', e.message); assert.match(e.message, /its hash is kept/); return true; });
+  assert.equal(JSON.parse(w.mem.get('ant-pay.paid.quote.' + p1.quotes[0].quote_hash)).tx_hash, TX(1), 'and the sentence is true: the hash is still held');
+  assert.equal(w.log.states.at(-1).phase, 'refused'); assert.equal(w.log.states.filter((s) => s.phase === 'paid').length, 1, 'the one "paid" is the first settle’s: no pairs were handed back for a payment the chain has not confirmed');
+});
+
+/* THE KEPT PATH ASKS NO WALLET, SO ITS UNNAMED FAILURE IS NOT THE WALLET'S. A raw error on the way
+   to confirming a kept hash has no refusal name of its own and takes settle()'s fallback. The
+   CONTROL is the same payer on the charging path, where a wallet that says no is still the wallet's. */
+test('an unnamed failure while confirming a kept payment is reported as network, never as a wallet that declined', async () => {
+  const p1 = prepareOf(1), o = { allowance: 10n ** 20n }, w = world(o);
+  await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  const p2 = { ...p1, upload_id: 'up-2' }, w2 = world({ signer: noSigner, receiptThrows: 'socket hang up' });
+  w.mem.forEach((v, k) => w2.mem.set(k, v));
+  await assert.rejects(w2.payer.settle({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'network', e.message); assert.match(e.message, /socket hang up/); return true; });
+  assert.deepEqual(w2.log.receipts, [TX(1)], 'precondition: it failed on the kept hash, not before it');
+  assert.equal(JSON.parse(w2.mem.get('ant-pay.paid.quote.' + p1.quotes[0].quote_hash)).tx_hash, TX(1), 'and the kept hash is still held');
+  const ctl = world({ allowance: 10n ** 20n, decline: true }), p3 = prepareOf(1);
+  await assert.rejects(ctl.payer.settle({ prepare: p3, authorization: authOf(p3), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'wallet-declined', e.message); return true; });
+});
+
+/* NO FALSE SENTENCE. An approve is not a payment and nothing is written down for it; both waitFor
+   sentences were the payment's and were printed for the approve too. Each arm asserts the store is
+   EMPTY beside the sentence, because the sentence is only false if nothing is held. The payment's own
+   sentence is the CONTROL: there a hash IS kept, and it still says so. */
+test('an approve that never confirms does not claim a kept hash: nothing is held, and the sentence says so', async () => {
+  const p = prepareOf(1);
+  let t = 0; const w = world({ pending: [TX(1)], now: () => (t += 700000) });
+  await assert.rejects(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'stopped-waiting'); assert.match(e.message, /of the approve/); assert.match(e.message, /keeps nothing for it/);
+    assert.doesNotMatch(e.message, /hash is kept/); assert.doesNotMatch(e.message, /resume/); return true; });
+  assert.equal(w.log.sends.length, 1, 'precondition: the approve, and only the approve, left the wallet'); assert.equal(w.log.sends[0].to, TOKEN);
+  assert.equal(w.mem.size, 0, 'precondition: this device holds nothing for it');
+
+  const stop = new AbortController(), w2 = world({ pending: [TX(1)] });
+  await assert.rejects(w2.payer.settle({ prepare: p, authorization: authOf(p), signal: stop.signal, confirmPlan: async () => { stop.abort(); return true; } }), (e) => {
+    assert.equal(e.refusal, 'stopped-waiting'); assert.match(e.message, /stopped waiting on the approve/); assert.match(e.message, /keeps nothing for it/); assert.doesNotMatch(e.message, /hash is kept/); return true; });
+  assert.equal(w2.mem.size, 0);
+
+  let t3 = 0; const ctl = world({ allowance: 10n ** 20n, pending: [TX(1)], now: () => (t3 += 700000) });
+  await assert.rejects(ctl.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'stopped-waiting'); assert.match(e.message, /the hash is kept/); assert.doesNotMatch(e.message, /approve/); return true; });
+  assert.equal(JSON.parse(ctl.mem.get('ant-pay.paid.quote.' + p.quotes[0].quote_hash)).tx_hash, TX(1), 'CONTROL: for a PAYMENT the hash is kept, and the sentence that says so is true');
+});
+
+/* RULED INTO ROW 2 (a75e4de2): a store that THROWS after the send reached the caller as
+   wallet-declined "storage denied". The person has paid, reads "declined", and pays again. */
+test('a store that throws after the payment is sent is refused by its own name, never as a wallet that declined', async () => {
+  const p = prepareOf(2), w = world({ storeThrows: true, allowance: 10n ** 20n });
+  await assert.rejects(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'record-not-kept', e.message); assert.equal(e.detail.tx, TX(1));
+    assert.ok(e.message.includes(TX(1)), 'the sentence carries the payment id'); assert.match(e.message, /left the wallet/); assert.match(e.message, /did not decline/);
+    assert.doesNotMatch(e.message, /nothing was (paid|signed)/); return true; });
+  assert.equal(w.log.sends.filter((t) => t.to === VAULT).length, 1, 'precondition: a payment did leave the wallet');
+  assert.equal(w.mem.size, 0, 'precondition: the store kept nothing');
+  assert.equal(w.log.states.at(-1).code, 'record-not-kept', 'and the surface is told the same name');
+  /* the same on pay(): both entries shared the fallback that renamed it */
+  const w2 = world({ storeThrows: true, allowance: 10n ** 20n });
+  await refused(w2.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'record-not-kept');
+  /* CONTROL: a wallet that really declines is still called that, so the name was not simply retired. */
+  const ctl = world({ decline: true, allowance: 10n ** 20n });
+  await refused(ctl.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'wallet-declined');
+});
+
+/* THE CHAIN IS CHECKED BEFORE EVERY SEND. switchAt: the ordinal of the eth_chainId read from which
+   the wallet answers 0x1. 1 is the read at connect (the old check, the control for the old gate);
+   2 is the read before the first send; 3 the read before the second. */
+const switching = (switchAt) => { const calls = []; let reads = 0; return { calls, request: async (a) => { calls.push(a.method);
+  if (a.method === 'eth_requestAccounts') return [PAYER]; if (a.method === 'eth_chainId') return ++reads >= switchAt ? '0x1' : '0xa4b1';
+  if (a.method === 'eth_sendTransaction') return TX(calls.filter((m) => m === 'eth_sendTransaction').length); throw new Error('unexpected ' + a.method); } }; };
+test('the chain is read again before every send: a wallet that leaves Arbitrum One after connecting is refused before it signs', async () => {
+  const p = prepareOf(1), sendsOf = (eth) => eth.calls.filter((m) => m === 'eth_sendTransaction').length;
+  /* switched while the plan sheet was open: allowance covers the price, so the payment is the first send */
+  let eth = switching(2), w = world({ signer: AntPay.injectedSigner(eth), allowance: 10n ** 20n });
+  await assert.rejects(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'wrong-chain', e.message); assert.deepEqual(e.detail, { have: '0x1', need: '0xa4b1' }); assert.match(e.message, /not sent to the wallet/); return true; });
+  assert.equal(sendsOf(eth), 0, 'nothing was sent to the wallet'); assert.equal(w.mem.size, 0, 'and no quote is marked paid');
+
+  /* switched after the approve landed: the approve is sent, the payment is not */
+  eth = switching(3); w = world({ signer: AntPay.injectedSigner(eth) });
+  await refused(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'wrong-chain');
+  assert.equal(sendsOf(eth), 1, 'the approve went; the payment did not'); assert.equal(w.mem.size, 0, 'and no quote is marked paid under a hash Arbitrum never sees');
+
+  /* CONTROL: the wallet that stays is paid through, and the chain was read once per send plus once at connect */
+  eth = switching(99); w = world({ signer: AntPay.injectedSigner(eth) });
+  await w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes });
+  assert.equal(sendsOf(eth), 2); assert.equal(eth.calls.filter((m) => m === 'eth_chainId').length, 3);
+  assert.deepEqual(eth.calls.slice(-2), ['eth_chainId', 'eth_sendTransaction'], 'the read is the last thing before the send');
 });
 
 test('the file keeps its laws: the door’s wire only, no bridge route, no verify it cannot do, no key, no unlimited approve', () => {

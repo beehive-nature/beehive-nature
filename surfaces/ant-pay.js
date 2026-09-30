@@ -23,7 +23,9 @@
    - contract addresses are read from upstream evmlib at a pinned tag, file:line below. the door names none,
      and nothing a server answers can move them.
    - transaction hashes are persisted BEFORE finalize, and they are indexed BY QUOTE HASH. a
-     paid-but-unfinalized upload resumes; it never pays twice.
+     paid-but-unfinalized upload resumes; it never pays twice. settle() — the entry for a surface
+     whose own adapter finalizes, which therefore has no resume — finishes such an upload itself
+     when every priced quote has a kept hash: it confirms them on chain and returns the pairs.
      THE IDENTITY OF A PAYMENT IS THE QUOTE HASH, NOT THE upload_id. the door's own README says
      identical bytes re-prepare to the same quote HASHES (:62-63); it says nothing of the kind about
      upload_id. keying the guard on upload_id therefore paid the same quotes twice, demonstrated:
@@ -98,7 +100,20 @@
           return from;
         });
       },
-      send: function (tx) { return eth.request({ method: 'eth_sendTransaction', params: [{ from: from, to: tx.to, data: tx.data, value: '0x0' }] }); }
+      /* THE CHAIN IS READ AGAIN BEFORE EVERY SEND. address() read it once, at connect, and a wallet
+         can be switched at any moment after that — while the plan sheet is open, or after the
+         approve lands. The send itself names no chain, so the payment went wherever the wallet then
+         was and the quote was marked paid under a hash Arbitrum never sees. Measured before this
+         line: connect on 0xa4b1, switch to 0x1, one eth_sendTransaction, two store keys written.
+         WHAT THIS DOES NOT CLOSE, named: the read and the send are two requests, so a switch that
+         lands between them is still unseen here. It narrows the window from minutes to one
+         round-trip; it is not a statement that the window is shut. */
+      send: function (tx) {
+        return eth.request({ method: 'eth_chainId' }).then(function (c) {
+          if (String(c).toLowerCase() !== CHAIN_HEX) throw refusal('wrong-chain', 'the wallet moved to chain ' + c + ' before this step; Autonomi is paid on Arbitrum One (' + CHAIN_ID + '). this step was not sent to the wallet', { have: c, need: CHAIN_HEX });
+          return eth.request({ method: 'eth_sendTransaction', params: [{ from: from, to: tx.to, data: tx.data, value: '0x0' }] });
+        });
+      }
     };
   }
   function trezorSigner(connect, opts) {
@@ -298,11 +313,21 @@
     function waitFor(hash, label, signal) {
       var started = now();
       return (function poll() {
-        if (signal && signal.aborted) throw refusal('stopped-waiting', 'you stopped waiting. the transaction may still land; its hash is kept and nothing will be paid twice', { tx: hash });
+        /* AN APPROVE KEEPS NOTHING, SO ITS SENTENCE MUST NOT SAY A HASH IS KEPT. Both sentences
+           below were written for the payment and printed for the approve as well: measured, an
+           approve that never confirms ended "the hash is kept; resume when the chain has it" with
+           ZERO store keys held, and resume answered nothing-to-resume. The record is written for a
+           payment only (charge(), after the vault send), so the label decides the sentence. */
+        var isApprove = label === 'approve';
+        if (signal && signal.aborted) throw refusal('stopped-waiting', isApprove
+          ? 'you stopped waiting on the approve. it may still land; an approve moves no ANT and this device keeps nothing for it'
+          : 'you stopped waiting. the transaction may still land; its hash is kept and nothing will be paid twice', { tx: hash });
         return rpc('eth_getTransactionReceipt', [hash]).then(function (r) {
           if (r && r.status) { if (r.status !== '0x1') throw refusal('tx-reverted', 'the ' + label + ' transaction was refused by the chain', { tx: hash }); return r; }
           var secs = Math.round((now() - started) / 1000);
-          if (secs > 600) throw refusal('stopped-waiting', 'ten minutes without a confirmation. the hash is kept; resume when the chain has it', { tx: hash });
+          if (secs > 600) throw refusal('stopped-waiting', isApprove
+            ? 'ten minutes without a confirmation of the approve. an approve moves no ANT and this device keeps nothing for it — ask for the price again'
+            : 'ten minutes without a confirmation. the hash is kept; come back to this price when the chain has it', { tx: hash });
           tell({ phase: 'waiting', what: label, tx: hash, seconds: secs });
           return sleep(3000).then(poll);
         });
@@ -346,6 +371,7 @@
            here too. A PARTIAL overlap is not refused: the unpaid quotes are paid and the kept
            hashes ride along into finalize, which is what a crash between batches leaves behind. */
         if (!plan.owed.length && plan.settledCount) throw refusal('already-paid', 'every quote in this price was already paid from this device — resume it instead of paying again');
+        if (plan.settledCount) tellKept(prepare, plan);
         if (!signer) throw refusal('no-wallet', 'no wallet is connected to this page');
         return signer.address();
       }).then(function (a) {
@@ -385,8 +411,18 @@
                  come before anything is sent, and 'waiting'/'finalizing'/'done'/'refused' come
                  after both writes. */
               try { tell({ phase: 'sent', what: 'payment', tx: h }); } catch (e) { /* the surface's own rendering is not this page's payment */ }
-              store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
-              markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
+              /* A STORE THAT THROWS HERE IS NOT A WALLET THAT DECLINED. The payment has left the
+                 wallet by this line. A raw throw fell through to the callers' generic fallback and
+                 reached the person as wallet-declined "storage denied": a wallet that did not
+                 decline, and no word that money moved. They read "declined" and pay again. It is
+                 refused by its own name, with the hash, and it says which of the two facts is
+                 which: the payment went; the record of it did not. */
+              try {
+                store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
+                markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
+              } catch (e) {
+                throw refusal('record-not-kept', 'the payment left the wallet (' + h + ') and this device could not write its record of it (' + String(e && e.message || e).slice(0, 120) + '). the wallet did not decline. keep that payment id: this device will not remember it, so it cannot stop a second payment for this file', { tx: h });
+              }
               return waitFor(h, 'payment', input.signal).catch(function (e) {
                 if (e && e.refusal === 'tx-reverted')
                   throw reverted(e, unwind(h, batch.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }), prepare.upload_id, { txHashes: txHashes, finalized: false }));
@@ -398,9 +434,52 @@
       }).then(function () { return { prepare: prepare, plan: plan, payer: payer, txHashes: txHashes, started: started }; });
     }
     /* pay on chain and hand the per-quote pairs back: for a surface whose own door adapter finalizes. */
+    /* A PAID FILE CAN BE FINISHED. charge() refuses 'already-paid — resume it' when nothing is
+       owed, which is right for pay(): its surface has resume(). A surface that settles has no
+       resume — its own adapter finalizes — so on MY SPACE a payment that went through and a door
+       that then failed left a file that could never be stored: identical bytes re-prepare to the
+       same quote hashes (ops/ant-writedoor/README.md:62-63), every retry met this refusal, and
+       the only ways out paid a second time. So when NOTHING is owed and EVERY priced quote has a
+       kept hash, settle() does the chain half of what resume() does: waits on each kept hash,
+       unwinds one the chain refused, and hands back the pairs for the adapter's finalize. It
+       never reaches the signer — there is no address() and no send() on this path.
+       A PARTIAL overlap is still charge()'s: the unpaid quotes are signed for and the kept hashes
+       ride along UNCONFIRMED, exactly as before this change. That is named, not repaired here.
+       The fallback is 'network' on the kept path, as resume()'s is: nothing there asks a wallet,
+       so 'wallet-declined' would name a wallet that was never asked. */
+    function tellKept(prepare, plan) {
+      var hashes = Object.keys(plan.settled).map(function (h) { return plan.settled[h]; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
+      tell({ phase: 'kept', upload_id: prepare.upload_id, txs: hashes });
+      return hashes;
+    }
+    function confirmKept(input, plan) {
+      var prepare = input.prepare, covered = pairs(plan, {});
+      return tellKept(prepare, plan).reduce(function (ch, h) {
+        return ch.then(function () {
+          return waitFor(h, 'payment', input.signal).catch(function (e) {
+            if (!e || e.refusal !== 'tx-reverted') throw e;
+            /* the record this hash was written under is found through the index, because it
+               belongs to whichever upload paid it and not to this prepare. One that is missing or
+               cannot be read is LEFT AS IT IS — the index entry is what stands between this page
+               and the refusal above, and that is cleared either way. */
+            var id = null, rec = null;
+            covered.some(function (x) { if (x.tx_hash !== h) return false; id = paidFor(x.quote_hash).upload_id; return true; });
+            try { rec = JSON.parse(store.get(KEY(id)) || 'null'); } catch (e2) { rec = null; }
+            if (!rec || !rec.txHashes) rec = { txHashes: {}, finalized: true };
+            throw reverted(e, unwind(h, covered, id, rec));
+          });
+        });
+      }, Promise.resolve()).then(function () { return covered; });
+    }
     function settle(input) {
-      return charge(input).then(function (r) { var txs = pairs(r.plan, r.txHashes); tell({ phase: 'paid', upload_id: r.prepare.upload_id, txs: txs }); return txs; })
-        .catch(function (e) { return refused(e, 'wallet-declined'); });
+      var fallback = 'wallet-declined';
+      return Promise.resolve().then(function () {
+        var plan = readPlan(input && input.prepare, input && input.authorization);
+        if (plan.owed.length || !plan.settledCount) return charge(input).then(function (r) { return pairs(r.plan, r.txHashes); });
+        fallback = 'network';
+        return confirmKept(input, plan);
+      }).then(function (txs) { tell({ phase: 'paid', upload_id: input.prepare.upload_id, txs: txs }); return txs; })
+        .catch(function (e) { return refused(e, fallback); });
     }
     /* pay on chain, then finalize at the door. */
     function pay(input) {

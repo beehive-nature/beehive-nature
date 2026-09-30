@@ -1350,7 +1350,7 @@ try {
 
   // The door, mocked. `open:false` answers the ceiling probe the way the live
   // door does today — refused — so the closed-door row is the live page's case.
-  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n, finalizeStatus = 200 }) {
+  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n, finalizeStatus = 200, finalizeFailFirst = 0 }) {
     const log = { ceiling: 0, prepare: [], finalize: [], read: 0 };
     const held = new Map();
     await ctx.route(/^https:\/\/relay\.skaists\.dev\/ant\/v1\//, async route => {
@@ -1383,6 +1383,8 @@ try {
         const up = held.get(body.upload_id);
         if (!up) return route.fulfill({ status: 404, headers: cors, body: '{}' });
         if (finalizeStatus !== 200) return route.fulfill({ status: finalizeStatus, headers: cors, contentType: 'application/json', body: JSON.stringify({ error: 'gateway' }) });
+        // finalizeFailFirst: the door is down for its first N finalizes and back after — a door that gets FIXED
+        if (log.finalize.length <= finalizeFailFirst) return route.fulfill({ status: 502, headers: cors, contentType: 'application/json', body: JSON.stringify({ error: 'gateway' }) });
         up.stored = true;
         return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ data_map_address: up.addr }) });
       }
@@ -1408,8 +1410,10 @@ try {
   const RPC_URL = 'https://arb1.arbitrum.io/rpc';
   const EVM_TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684';   // evmlib v0.9.1 src/lib.rs:64-65
   const EVM_VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26';   // evmlib v0.9.1 src/lib.rs:71-72
-  async function mockWallet(ctx, { chain = '0xa4b1', decline = false, absent = false } = {}) {
-    await ctx.addInitScript(({ chain, decline, absent, addr }) => {
+  // switchAt: from the Nth eth_chainId read on, the wallet answers 0x1 — it was switched after
+  // connecting. 1 is the read at connect; 2 is the read before the first send; 3 before the second.
+  async function mockWallet(ctx, { chain = '0xa4b1', decline = false, absent = false, switchAt = 0 } = {}) {
+    await ctx.addInitScript(({ chain, decline, absent, addr, switchAt }) => {
       window.__walletCalls = [];
       // A SPY on the payer's front door, not a stand-in for it: ant-pay.js runs
       // unmodified; this records the authorization the shell hands to settle().
@@ -1419,12 +1423,12 @@ try {
           settle(input) { window.__settleAuth = JSON.parse(JSON.stringify(input.authorization)); return p.settle(input); } }); } });
       } });
       if (absent) return;
-      let n = 0;
+      let n = 0, chainReads = 0;
       window.ethereum = {
         request: async ({ method, params }) => {
           window.__walletCalls.push({ method, params: params || [] });
           if (method === 'eth_requestAccounts') return [addr];
-          if (method === 'eth_chainId') return chain;
+          if (method === 'eth_chainId') { chainReads += 1; return switchAt && chainReads >= switchAt ? '0x1' : chain; }
           if (method === 'eth_sendTransaction') {
             if (decline) { const e = new Error('User rejected the request.'); e.code = 4001; throw e; }
             n += 1; return '0x' + 'c'.repeat(62) + String(n).padStart(2, '0');
@@ -1432,11 +1436,13 @@ try {
           throw new Error('mock wallet: unexpected ' + method);
         }
       };
-    }, { chain, decline, absent, addr: WALLET_ADDR });
+    }, { chain, decline, absent, addr: WALLET_ADDR, switchAt });
     return () => ctx.pages()[0].evaluate(() => window.__walletCalls);
   }
-  async function mockChain(ctx, { ant = 10n ** 21n, eth = 10n ** 15n, allowance = 0n, receipt = 'ok' } = {}) {
+  // downAfter: the chain answers the first N asks about a PAYMENT's receipt and is unreachable after.
+  async function mockChain(ctx, { ant = 10n ** 21n, eth = 10n ** 15n, allowance = 0n, receipt = 'ok', downAfter = null } = {}) {
     const log = [];
+    let paymentAsks = 0;
     const hex = v => '0x' + BigInt(v).toString(16);
     await ctx.route(RPC_URL, async route => {
       const req = route.request();
@@ -1449,7 +1455,8 @@ try {
       else if (method === 'eth_getTransactionReceipt') {
         // the approve (the token's tx) always lands; `receipt` shapes only the payment's
         const isPayment = params[0] !== '0x' + 'c'.repeat(62) + '01';
-        if (isPayment && receipt === 'down') return route.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*' }, body: 'unavailable' });
+        if (isPayment) paymentAsks += 1;
+        if (isPayment && (receipt === 'down' || (downAfter !== null && paymentAsks > downAfter))) return route.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*' }, body: 'unavailable' });
         result = { status: isPayment && receipt === 'reverted' ? '0x0' : '0x1' };
       }
       else return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, error: { code: -32601, message: 'mock chain: ' + method } }) });
@@ -1739,7 +1746,10 @@ try {
   // wallet, the estate's one payer. Nothing is planted in the shell here: the
   // wallet and the chain are mocked (above) and everything on the page runs as
   // shipped. Each case is one change from the (k1) CONTROL, which is stored.
-  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register } = {}) {
+  // again: a SECOND try at the same file, in the same page — same bytes, so the door prices it with
+  // the same quote hashes. plant: localStorage entries written before the first try. keys: what the
+  // payer holds in this browser when the case ends.
+  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register, again, plant } = {}) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const wire = [];
     offBox(ctx, wire);
@@ -1749,7 +1759,12 @@ try {
     const walletOf = await mockWallet(ctx, wallet);
     const { page, errs } = await antPage(ctx);
     if (register) await wearRegister(page, register);
-    const r = await addPaying(page, name, answers, chainLog);
+    if (plant) await page.evaluate(kv => { for (const k of Object.keys(kv)) localStorage.setItem(k, kv[k]); }, plant);
+    let r = await addPaying(page, name, answers, chainLog);
+    const first = again ? { said: r.said, sends: (await walletOf()).filter(c => c.method === 'eth_sendTransaction').length, finalize: doorLog.finalize.length } : null;
+    if (again) r = { ...(await addPaying(page, name, again, chainLog)), first };
+    const keys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('ant-pay.') && localStorage.getItem(k)));
+    r = { ...r, keys };
     const calls = await walletOf();
     const auth = await page.evaluate(() => window.__settleAuth || null);
     await ctx.close();
@@ -1833,6 +1848,67 @@ try {
   ok('(k12) a payment the chain REVERTED moved no ANT: the page says the chain refused it and never prints it as paid',
     k12.sends.length === 2 && !k12.stored && /refused by the chain/.test(k12.said || '') && !/You paid/.test(k12.said || ''),
     JSON.stringify({ said: k12.said }));
+
+  // ── #211 REPAIR (bFUzZ's FAIL 2026-09-29; rows ruled a8b43af6 / a75e4de2) ────────────────
+  // (k13) A PAID FILE CAN BE FINISHED. The visitor pays; the door's finalize answers 502; the door
+  // is fixed; the visitor tries THE SAME FILE again in THE SAME BROWSER. Before the repair every
+  // retry was refused "already paid — resume it" on a page that has no resume, and the only ways
+  // out paid a second time.
+  const k13 = await payCase('finish.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['price', true]] });
+  ok('(k13) PRECONDITION — the first try PAID and was not stored: two sends, one refused finalize, and the page printed the payment id',
+    k13.first.sends === 2 && k13.first.finalize === 1 && (k13.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify(k13.first));
+  ok('(k13) the second try at the same file ends STORED, on the ANT rail',
+    k13.stored, JSON.stringify({ said: k13.said, rows: k13.rows.map(x => [x.purpose, x.addr && x.addr.scheme]) }));
+  ok('(k13) with ZERO new sends: the wallet was asked to sign nothing the second time',
+    k13.sends.length === 2, JSON.stringify(k13.calls.map(c => c.method)));
+  ok('(k13) and the finalize that stored it carried the KEPT hash, for the quote the door gave',
+    k13.door.finalize.length === 2 && k13.door.finalize[1].txs.length === 1 && k13.door.finalize[1].txs[0].quote_hash === QUOTE_HASH &&
+    k13.door.finalize[1].txs[0].tx_hash === WALLET_TX(2),
+    JSON.stringify(k13.door.finalize));
+  ok('(k13) the second try showed the price and no plan sheet — there was nothing to sign — and said nothing about being already paid',
+    k13.sheets.length === 1 && k13.sheets[0].stage === 'price' && !/already paid|resume/i.test(k13.said || ''),
+    JSON.stringify({ sheets: k13.sheets.map(s => s.stage), said: k13.said }));
+  ok('(k13) the kept hash was confirmed ON CHAIN before it was handed to the door: two receipt asks about the payment, one per try',
+    k13.chain.filter(m => m === 'eth_getTransactionReceipt').length === 3, JSON.stringify(k13.chain));
+  ok('(k13) no page errors across pay, refused finalize, and the finish', k13.errs.length === 0, k13.errs.join(' | '));
+
+  // (k14) THE SAME, WITH THE CHAIN UNREACHABLE ON THE SECOND TRY. The kept payment cannot be
+  // confirmed, so it is not handed to the door — and the page must still name it as paid.
+  const k14 = await payCase('finish-chaindown.txt', { door: { finalizeFailFirst: 1 }, chain: { downAfter: 1 }, answers: [['price', true], ['plan', true]], again: [['price', true]] });
+  ok('(k14) a kept payment the chain cannot confirm is not sent to the door, signs nothing, and is still printed as PAID — never "nothing was paid"',
+    !k14.stored && k14.sends.length === 2 && k14.door.finalize.length === 1 && (k14.said || '').includes('You paid (' + WALLET_TX(2) + ')') &&
+    !/nothing was paid/.test(k14.said || ''),
+    JSON.stringify({ said: k14.said, sends: k14.sends.length, finalize: k14.door.finalize.length }));
+
+  // (k15) NO FALSE SENTENCE. The payer stops on this phone's own payment record before it can name
+  // a payment id. The page used to finish that refusal with "nothing was stored and nothing was paid".
+  const k15 = await payCase('unreadable.txt', { plant: { ['ant-pay.paid.quote.' + QUOTE_HASH]: 'not a record' }, answers: [['price', true]] });
+  ok('(k15) stopped on this phone\'s own payment record: the page does NOT say nothing was paid, and says why it will not',
+    !k15.stored && k15.sends.length === 0 && !/nothing was paid/.test(k15.said || '') && /holds a payment record/.test(k15.said || '') &&
+    /cannot read it back/.test(k15.said || ''),
+    JSON.stringify({ said: k15.said }));
+  ok('(k15) CONTROL — a plain NO at the price still says nothing was paid, so the sentence was not simply removed',
+    /nothing was stored and nothing was paid/.test(k2.said || ''), JSON.stringify({ said: k2.said }));
+
+  // (k16) THE CHAIN IS CHECKED BEFORE EVERY SEND. The wallet is on Arbitrum One when it connects
+  // and is switched to 0x1 afterwards — while the plan sheet is open (switchAt 2), or after the
+  // approve lands (switchAt 3).
+  const k16 = await payCase('switched.txt', { wallet: { switchAt: 2 }, answers: [['price', true], ['plan', true]] });
+  ok('(k16) PRECONDITION — the wallet connected on Arbitrum One: the plan sheet was reached, which a wrong chain at connect never reaches (k5)',
+    k16.sheets.length === 2 && k16.sheets[1].stage === 'plan', JSON.stringify(k16.sheets.map(s => s.stage)));
+  ok('(k16) a wallet switched to 0x1 after connecting is refused by name BEFORE it signs: zero sends, nothing finalized, no quote marked paid',
+    k16.sends.length === 0 && k16.door.finalize.length === 0 && !k16.stored && k16.keys.length === 0 &&
+    /moved to chain 0x1/.test(k16.said || '') && /Arbitrum One/.test(k16.said || '') && !/You paid/.test(k16.said || ''),
+    JSON.stringify({ said: k16.said, sends: k16.sends.length, keys: k16.keys }));
+  const k17 = await payCase('switched-late.txt', { wallet: { switchAt: 3 }, answers: [['price', true], ['plan', true]] });
+  ok('(k17) switched after the approve landed: the approve went, the PAYMENT did not, and no quote is marked paid',
+    k17.sends.length === 1 && k17.sends[0].params[0].to.toLowerCase() === EVM_TOKEN && !k17.stored && k17.keys.length === 0 &&
+    /moved to chain 0x1/.test(k17.said || '') && !/You paid/.test(k17.said || ''),
+    JSON.stringify({ said: k17.said, sends: k17.sends.map(s => s.params[0].to), keys: k17.keys }));
+  ok('(k16/k17) CONTROL — the wallet that stays (k1) was asked its chain once at connect and once before each send',
+    k1.calls.filter(c => c.method === 'eth_chainId').length === 3 && k1.stored,
+    JSON.stringify(k1.calls.map(c => c.method)));
 
   const k9 = await payCase('cypher.txt', { register: 'cypherpunk', answers: [['price', true], ['plan', true]] });
   ok('(k9) cypherpunk: the price sheet prints total_atto to the atto and the plan names the approve and the vault',

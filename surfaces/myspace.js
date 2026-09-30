@@ -378,7 +378,8 @@
   }
 
   /* Where the payer keeps a payment's hashes before it waits on the chain, so a
-     paid-but-unstored file is never paid twice from this phone. */
+     paid-but-unstored file is never paid twice from this phone — and so the next
+     try at the same file finishes on that payment instead of being refused. */
   var payStore = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage denied: the hashes still reach the visitor on the error, from `sent` */ } }
@@ -397,6 +398,9 @@
         store: payStore,
         onState: function (s) {
           if (s.phase === 'sent' && sent.indexOf(s.tx) < 0) sent.push(s.tx);
+          /* payments this phone made on an earlier try for the same file: the payer finishes on
+             them without asking the wallet again, and they are the visitor's receipt if it cannot */
+          if (s.phase === 'kept') { s.txs.forEach(function (h) { if (sent.indexOf(h) < 0) sent.push(h); }); setStatus(t('working'), false, true); }
           if (s.phase === 'signing' || s.phase === 'waiting') setStatus(t('paying'), false, true);
         }
       });
@@ -410,6 +414,8 @@
          transaction moved no ANT, so it is never printed as a payment */
       if (e.refusal === 'tx-reverted' && e.detail) sent = sent.filter(function (h) { return h !== e.detail.tx; });
       if (sent.length) e.paid = sent;
+      /* the payer stopped on this phone's OWN payment record, before it could name a payment id */
+      if (e.refusal === 'already-paid' || e.refusal === 'unreadable-record') e.record = true;
       throw e;
     }
   }
@@ -451,6 +457,9 @@
      the visitor's receipt for it, so they are printed, not summarised. */
   function leftSaying(e) {
     if (e.paid) return ' You paid (' + e.paid.join(', ') + ') and the file was not confirmed as stored; keep those payment ids.';
+    /* "nothing was paid" is a claim about the wallet, and it is not this page's to make when the
+       payer stopped on a payment record this phone holds. */
+    if (e.record) return ' The estate\'s door saw the file to price it and nothing was stored. This phone holds a payment record for it, so this page will not say whether anything was paid.';
     if (e.sent) return ' The estate\'s door saw the file to price it; nothing was stored and nothing was paid.';
     return '';
   }
