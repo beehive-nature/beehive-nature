@@ -240,11 +240,12 @@ export function importSourceWalk(model, raw, { date = null } = {}) {
   return { upgraded };
 }
 
-// The harvest record importSourceWalk writes, or null. `sources` is not only
-// ever that record: a correction patch spreads its own `sources` — an ARRAY of
-// cited documents — onto the person, and the harvest leaves it standing when it
-// found nothing attached. Reading .count/.harvested off that array published
-// "undefined attached FamilySearch sources (harvested undefined)". Ask the SHAPE.
+// The harvest record importSourceWalk writes, or null. `sources` once carried
+// two meanings: a correction patch spread its own `sources` — an ARRAY of cited
+// documents — onto the person, and reading .count/.harvested off that array
+// published "undefined attached FamilySearch sources (harvested undefined)".
+// Cited documents now live in `cited` (applyCorrection refuses a patch writing
+// `sources`), but the published archive is read here too, so still ask the SHAPE.
 export function harvestRecord(p) {
   const s = p && p.sources;
   if (!s || typeof s !== "object" || Array.isArray(s)) return null;
@@ -258,7 +259,7 @@ export function harvestRecord(p) {
 export function researchBasis(p) {
   const h = harvestRecord(p);
   if (h) return `${h.count} attached FamilySearch source${h.count === 1 ? "" : "s"} (harvested ${h.harvested})`;
-  const cited = Array.isArray(p && p.sources) ? p.sources.length : 0;
+  const cited = Array.isArray(p && p.cited) ? p.cited.length : 0;
   if (cited) return `no FamilySearch harvest count recorded; ${cited} source${cited === 1 ? "" : "s"} cited on this record`;
   return "no attached sources harvested for this person; era-heuristic only";
 }

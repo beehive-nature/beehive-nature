@@ -7,7 +7,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseEntityRefs, parseSourceDescriptions, publicSourceRecord, importSourceWalk, harvestRecord, researchBasis } from "./fs-adapter.mjs";
-import { createModel, addPerson } from "./model.mjs";
+import { createModel, addPerson, applyCorrection } from "./model.mjs";
 
 const FSID = /^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/;
 const fakePid = (tag) => {
@@ -138,17 +138,17 @@ test("harvestRecord reads only the record importSourceWalk writes — a correcti
   const pC = fakePid("corrected");
   addPerson(model, { id: pH, name: "H", lifespan: "1800–1850", source: "familysearch", sourceId: pH });
   addPerson(model, { id: pC, name: "C", lifespan: "1900–1990", source: "familysearch", sourceId: pC });
-  /* the correction layer spreads its patch first: its sources are documents */
-  model.persons[pC].sources = [{ title: "an obituary", read: "2026-09-22" }];
+  /* the correction layer applies first: the documents it cites land in `cited` */
+  model.persons[pC] = applyCorrection(model.persons[pC], { patch: { cited: [{ title: "an obituary", read: "2026-09-22" }] } });
   const raw = { refs: {
     [pH]: { sources: [{ id: fakePid("s1") }, { id: fakePid("s2") }, { id: fakePid("s3") }] },
     [pC]: { sources: [] }, /* nothing attached on the provider: the harvest leaves pC alone */
   } };
   importSourceWalk(model, raw, { date: "2026-09-18" });
 
-  /* PRECONDITION: the collision is really in the fixture — pC still carries the
-   * array, so a truthiness test on p.sources would take the harvest branch. */
-  assert.ok(Array.isArray(model.persons[pC].sources) && model.persons[pC].sources.length === 1);
+  /* PRECONDITION: pC really carries cited documents and no harvest record. */
+  assert.ok(Array.isArray(model.persons[pC].cited) && model.persons[pC].cited.length === 1);
+  assert.equal(model.persons[pC].sources, undefined);
 
   assert.deepEqual(harvestRecord(model.persons[pH]), { count: 3, harvested: "2026-09-18", provider: "familysearch" });
   assert.equal(researchBasis(model.persons[pH]), "3 attached FamilySearch sources (harvested 2026-09-18)");
@@ -169,4 +169,41 @@ test("harvestRecord refuses a half-formed record by shape, not by truthiness", (
   }
   /* control: the well-formed record is accepted, singular form included */
   assert.equal(researchBasis({ sources: { count: 1, harvested: "2026-09-18" } }), "1 attached FamilySearch source (harvested 2026-09-18)");
+});
+
+/* The pipeline applies corrections FIRST and the harvest AFTER (pipeline.mjs).
+ * When `sources` carried both meanings, a harvest that found anything for a
+ * corrected person replaced the correction's cited-document array with the
+ * harvest record, and the cited documents left the person entirely. */
+test("a corrected person with cited documents gets a harvest and keeps both", () => {
+  const model = createModel({ root: fakePid("root") });
+  const pC = fakePid("corrected-and-harvested");
+  addPerson(model, { id: pC, name: "C", lifespan: "1931–2025", source: "familysearch", sourceId: pC });
+  const doc = { title: "an obituary", url: "https://example.invalid/obit", supports: ["death 2025"] };
+  model.persons[pC] = applyCorrection(model.persons[pC], { patch: { living: false, cited: [doc] }, attested: "founder" });
+  importSourceWalk(model, { refs: { [pC]: { sources: [{ id: fakePid("s1") }, { id: fakePid("s2") }] } } }, { date: "2026-09-29" });
+
+  /* PRECONDITION: the harvest really ran for this person, so it had the chance to overwrite */
+  assert.equal(model.persons[pC].evidence.basis.includes("2 FamilySearch sources (harvested 2026-09-29)"), true);
+  assert.deepEqual(model.persons[pC].cited, [doc], "the correction's cited documents were lost to the harvest");
+  assert.deepEqual(harvestRecord(model.persons[pC]), { count: 2, harvested: "2026-09-29", provider: "familysearch" });
+  assert.equal(researchBasis(model.persons[pC]), "2 attached FamilySearch sources (harvested 2026-09-29)");
+});
+
+test("applyCorrection refuses a patch that writes `sources`, by name, whatever its shape", () => {
+  const base = { name: "P", lifespan: "1931–2025", living: true, evidence: { era: "living", class: "living", support: "unsourced-entry", basis: "b" } };
+  for (const sources of [[{ title: "an obituary" }], [], { count: 1, harvested: "2026-09-18" }, null, undefined]) {
+    let err = null;
+    try { applyCorrection(base, { patch: { living: false, sources } }); } catch (e) { err = e; }
+    assert.ok(err, `accepted a patch writing sources=${JSON.stringify(sources)}`);
+    assert.ok(err instanceof Error && !(err instanceof TypeError), `crashed instead of refusing: ${err}`);
+    assert.match(err.message, /may not write `sources`/);
+    assert.match(err.message, /`cited`/);
+  }
+  /* control: the same patch without `sources` applies, and the era is recomputed */
+  const fixed = applyCorrection(base, { patch: { living: false, cited: [] }, attested: "founder", note: "n" });
+  assert.equal(fixed.living, false);
+  assert.equal(fixed.evidence.era, "recorded");
+  assert.deepEqual(fixed.corrected, { attested: "founder", note: "n" });
+  assert.equal(base.living, true, "the walked person was mutated in place");
 });
