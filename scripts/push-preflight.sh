@@ -166,7 +166,7 @@ _exec_bit_probe() {
 }
 
 hooks_check() {
-  _hbad=0; _hn=0
+  _hbad=0; _hn=0; _hnamed=0
   _hd=$(git rev-parse --git-path hooks 2>/dev/null)
   if [ -z "${_hd:-}" ]; then
     echo "HOOKS — FAIL: git cannot name a hooks directory. That is 'unknown',"
@@ -220,6 +220,39 @@ hooks_check() {
       fi
       _hbad=$((_hbad + 1)); continue
     fi
+    # A NAME IN THE FILE IS NOT A GATE THAT RUNS (bFUzZ's attack on this PR, 2026-09-29).
+    # The grep below finds the gate's name anywhere in the hook, so `exit 0` as line 2, `&&`
+    # turned into `;`, or the name surviving only in a comment each read "wired" at rc=0 while
+    # a planted 64-hex COMMITTED. Reading the text for the name is a resolving read. So a
+    # TRACKED hook is judged by what it is, not by what it mentions: its content on disk must
+    # hash to HEAD's blob for the same path, which is the hook the selftest below makes fire.
+    # hash-object applies the same filters git add does, so a CRLF checkout is not a false
+    # MODIFIED. The mode is not part of this compare on purpose; the arms below judge the bit.
+    # Every value is captured on its own, never through a pipe, so a git that cannot answer
+    # reads UNKNOWN and refuses, instead of reading as a match.
+    _hpath=$(git ls-files --full-name -- "$_hf" 2>/dev/null) || _hpath=''
+    if [ -n "$_hpath" ]; then
+      _hdisk=$(git hash-object -- "$_hf" 2>/dev/null) || _hdisk=''
+      if [ -z "$_hdisk" ]; then
+        echo "   UNKNOWN  $_hh — git hash-object could not read $_hf, so whether it is the"
+        echo "            tracked hook is not known. Refusing rather than assuming."
+        _hbad=$((_hbad + 1)); continue
+      fi
+      _hhead=$(git rev-parse -q --verify "HEAD:$_hpath" 2>/dev/null) || _hhead=''
+      if [ "$_hdisk" != "$_hhead" ]; then
+        if [ -n "$_hhead" ]; then
+          _hwhy="disk blob $(printf %.8s "$_hdisk"), HEAD blob $(printf %.8s "$_hhead")"
+        else
+          _hwhy="HEAD has no file at that path"
+        fi
+        echo "   MODIFIED $_hh — the file on disk is not HEAD's tracked $_hpath ($_hwhy)."
+        echo "            Whether it still runs $_hgate is NOT judged from its text: the name"
+        echo "            can sit in a comment or after an exit. See what changed with"
+        echo "              git diff HEAD -- $_hpath"
+        echo "            and put the reviewed hook back with  git checkout HEAD -- $_hpath"
+        _hbad=$((_hbad + 1)); continue
+      fi
+    fi
     if ! grep -qF "$_hgate" "$_hf"; then
       echo "   INERT    $_hh — installed but never runs $_hgate"; _hbad=$((_hbad + 1)); continue
     fi
@@ -259,9 +292,13 @@ hooks_check() {
         _hbad=$((_hbad + 1))
       fi
     elif [ -x "$_hf" ]; then
-      echo "   ok(weak) $_hh — runs $_hgate; outside the tree, so the portable index"
-      echo "            mode is unavailable and only the filesystem bit was read."
-      echo "            Under Git for Windows that bit is fabricated and proves nothing."
+      # Outside the tree there is no reviewed copy to compare with, so the only thing
+      # known is that the text NAMES the gate. That is never called "wired".
+      echo "   names    $_hh — names $_hgate, and nothing more is known. It is outside"
+      echo "            the tree, so there is no tracked hook to compare it with: its"
+      echo "            content was NOT checked, and neither is whether it runs the gate."
+      echo "            Only the filesystem bit was read, which Git for Windows fabricates."
+      _hnamed=$((_hnamed + 1))
     else
       echo "   DEAD     $_hh — runs $_hgate but is not executable and is not tracked"; _hbad=$((_hbad + 1))
     fi
@@ -270,7 +307,12 @@ hooks_check() {
   # measurements depending on the box, and saying only the word is how the
   # index-only reading passed for the stronger one.
   if [ "$_hcarry" = yes ]; then _hword="executable on disk"; else _hword="executable by index mode"; fi
-  echo "   $((_hn - _hbad)) of $_hn required hooks installed, wired and $_hword"
+  # "wired" is said only of a hook whose content is HEAD's tracked hook. A hook that
+  # merely names its gate is counted apart, and the line says its content was not checked.
+  echo "   $((_hn - _hbad - _hnamed)) of $_hn required hooks installed, wired (content = HEAD's tracked hook) and $_hword"
+  if [ "$_hnamed" -ne 0 ]; then
+    echo "   $_hnamed of $_hn only NAME their gate: outside the tree, content NOT checked"
+  fi
   if [ "$_hbad" -ne 0 ]; then
     echo "HOOKS BLOCKED — this box has no complete local gate. Remedy, from the repo root:"
     echo "     git config --local core.hooksPath .githooks"
@@ -370,7 +412,15 @@ if [ "${1:-}" = "--selftest" ]; then
       cp "$SELF" scripts/push-preflight.sh
       cp "$(dirname "$SELF")/secret-scan.sh" scripts/secret-scan.sh 2>/dev/null || true
       cp "$(dirname "$SELF")/keyshape.sh" scripts/keyshape.sh 2>/dev/null || true
-      git add scripts 2>/dev/null
+      # The hooks go into the BASE commit, so HEAD carries them: the HOOKS row calls a hook
+      # wired only when its content is HEAD's tracked hook, and a hook that is merely staged
+      # reads MODIFIED. They are switched on (core.hooksPath) only after the fixture commits
+      # below, so the rig's own commits stay unhooked, and HEAD~1..HEAD is still the fixture.
+      mkdir -p .githooks
+      cp "$(dirname "$SELF")/../.githooks/pre-commit" .githooks/pre-commit 2>/dev/null
+      cp "$(dirname "$SELF")/../.githooks/commit-msg" .githooks/commit-msg 2>/dev/null
+      git add scripts .githooks 2>/dev/null
+      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m base 2>/dev/null || exit 1
@@ -379,16 +429,10 @@ if [ "${1:-}" = "--selftest" ]; then
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m fixture 2>/dev/null || exit 1
-      # The HOOKS row added below now refuses a box with no local gate, so this
-      # rig must look like a seat's box or P11 would fail on the precondition
-      # instead of on check 3. Installed AFTER the fixture commits on purpose:
-      # P11's subject is the DELTA, and hooking the rig's own commits would
-      # change what P11 tests rather than leave it alone.
-      mkdir -p .githooks
-      cp "$(dirname "$SELF")/../.githooks/pre-commit" .githooks/pre-commit 2>/dev/null
-      cp "$(dirname "$SELF")/../.githooks/commit-msg" .githooks/commit-msg 2>/dev/null
-      git add .githooks >/dev/null 2>&1
-      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
+      # The HOOKS row refuses a box with no local gate, so this rig must look like
+      # a seat's box or P11 would fail on the precondition instead of on check 3.
+      # Switched on AFTER the fixture commits on purpose: P11's subject is the
+      # DELTA, and hooking the rig's own commits would change what P11 tests.
       git config core.hooksPath .githooks
       sh scripts/push-preflight.sh HEAD~1 > "$T/out" 2>&1
       echo "$?" > "$T/rc"
@@ -421,6 +465,11 @@ if [ "${1:-}" = "--selftest" ]; then
   #                                                  refuses by name
   #   P14 known-BAD   hook present but mode 644   -> --hooks refuses naming it
   #       known-GOOD  same hook at mode 755       -> --hooks passes
+  #   P17 known-BAD   tracked hook edited, name kept -> --hooks refuses naming it
+  #                   (bFUzZ M1-M3), and the edit really lets a key commit
+  #       CONTROL     restored byte-equal         -> --hooks passes
+  #       known-WEAK  hooks outside the tree       -> permitted, said to NAME the
+  #                                                  gate, never called wired
   #
   # P13's rise is what makes P12's block mean anything: without it, "blocked"
   # could be any failure at all. P14 is the arm for the WRONG ANSWER rather than
@@ -433,7 +482,7 @@ if [ "${1:-}" = "--selftest" ]; then
   # make every §7 arm below refuse for the wrong reason and read as a catch.
   if [ -z "$_fn" ] || [ -z "$_fe" ]; then
     echo "  P12-P14 -> could not read the founder identity out of identity-check.sh; arms not run"; st=1
-    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f"
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f P17a P17b P17c P17d P17e"
   else
   # Generated here, never copied: 8 x 8 chars = a 64-run, and no 48+ literal
   # ever appears in this source (which would make this file block itself).
@@ -468,7 +517,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   fi
   if [ -z "$H" ]; then
     echo "  P12-P14 -> no usable throwaway directory; arms not run"; st=1
-    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f"
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f P17a P17b P17c P17d P17e"
   else
     (
       cd "$H" && git init -q r 2>/dev/null && cd r && mkdir -p scripts .githooks || exit 1
@@ -552,6 +601,56 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       chmod 700 .githooks 2>/dev/null
       # read AFTER the mode is restored — inside a 0600 directory this test cannot answer.
       if [ -s .githooks/commit-msg ] && [ -x .githooks/commit-msg ]; then echo yes > i.present; else echo no > i.present; fi
+
+      # j-l: bFUzZ's M1-M3 on the TRACKED pre-commit, each written from a byte copy and put
+      # back from it. Each one keeps the gate's NAME in the file, so a name search reads it
+      # as wired. Each arm also commits a planted 64-hex under the mutation: the refusal only
+      # means something if the mutated hook really lets the key through.
+      cp .githooks/pre-commit pc.orig
+      _mut() {  # $1 = arm letter; the mutated hook is already on disk
+        wc -c < .githooks/pre-commit > "$1.bytes"
+        sh scripts/push-preflight.sh --hooks > "$1.out" 2>&1; echo "$?" > "$1.rc"
+        git rev-list --count HEAD > "$1.n0"
+        printf 'planted under %s: %s\n' "$1" "$_hex" > "bad$1.txt"; git add "bad$1.txt" >/dev/null 2>&1
+        GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+        GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+          git commit -m "$_msg_c" > "$1.commit" 2>&1
+        git rev-list --count HEAD > "$1.n1"
+        git rm -q --cached "bad$1.txt" >/dev/null 2>&1; rm -f "bad$1.txt"
+        cp pc.orig .githooks/pre-commit
+      }
+      # M1: `exit 0` as line 2. Landed = line 2 is exactly that and line 3 is the old line 2.
+      { sed -n 1p pc.orig; echo 'exit 0'; sed 1d pc.orig; } > .githooks/pre-commit
+      if [ "$(sed -n 2p .githooks/pre-commit)" = 'exit 0' ] \
+         && [ "$(sed -n 3p .githooks/pre-commit)" = "$(sed -n 2p pc.orig)" ]; then echo yes > j.landed; else echo no > j.landed; fi
+      _mut j
+      # M2: the one `&&` before the identity check becomes `;`. Landed = the copy has exactly
+      # one `&& S7_STAGED`, the mutant has none, and exactly one `; S7_STAGED`.
+      sed 's/ && S7_STAGED=1 / ; S7_STAGED=1 /' pc.orig > .githooks/pre-commit
+      if [ "$(grep -c ' && S7_STAGED=1 ' pc.orig)" = 1 ] && [ "$(grep -c ' && S7_STAGED=1 ' .githooks/pre-commit)" = 0 ] \
+         && [ "$(grep -c ' ; S7_STAGED=1 ' .githooks/pre-commit)" = 1 ]; then echo yes > k.landed; else echo no > k.landed; fi
+      _mut k
+      # M3: the gate's name survives only in a comment. Landed = the copy has exactly one line
+      # opening with the scan, the mutant has none, and exactly one commented copy of it.
+      sed 's|^sh scripts/secret-scan\.sh|# sh scripts/secret-scan.sh|' pc.orig > .githooks/pre-commit
+      if [ "$(grep -c '^sh scripts/secret-scan\.sh' pc.orig)" = 1 ] && [ "$(grep -c '^sh scripts/secret-scan\.sh' .githooks/pre-commit)" = 0 ] \
+         && [ "$(grep -c '^# sh scripts/secret-scan\.sh' .githooks/pre-commit)" = 1 ]; then echo yes > l.landed; else echo no > l.landed; fi
+      _mut l
+      # m: the CONTROL. Restored from the byte copy, the same row must permit the same box.
+      if cmp -s pc.orig .githooks/pre-commit; then echo yes > m.restored; else echo no > m.restored; fi
+      sh scripts/push-preflight.sh --hooks > m.out 2>&1; echo "$?" > m.rc
+
+      # n: hooks OUTSIDE the tree. No tracked copy exists to compare with, so the row may say
+      # the hook NAMES its gate and must never say it is wired. The rig's own read of the bit
+      # decides constructibility: an untracked hook that is not executable here is DEAD for a
+      # different reason and cannot judge this sentence.
+      mkdir -p .outside && cp pc.orig .outside/pre-commit && cp .githooks/commit-msg .outside/commit-msg
+      chmod +x .outside/pre-commit .outside/commit-msg 2>/dev/null
+      if [ -x .outside/pre-commit ] && [ -x .outside/commit-msg ] \
+         && [ -z "$(git ls-files -- .outside)" ]; then echo yes > n.built; else echo no > n.built; fi
+      git config core.hooksPath .outside
+      sh scripts/push-preflight.sh --hooks > n.out 2>&1; echo "$?" > n.rc
+      git config core.hooksPath .githooks
     )
     _R="$H/r"
     _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
@@ -647,6 +746,57 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       echo "  P14f known-BAD  hooks dir UNSEARCHABLE, hooks installed and executable -> refused rc=1 naming UNREADABLE, and NOT claiming nothing is installed (correct)"
     else
       echo "  P14f known-BAD  hooks dir UNSEARCHABLE -> rc=$_irc, hooks-present-afterwards=$_ipr. Either the refusal still says MISSING about a hook that is installed, or it does not name the directory as the cause"; st=1
+    fi
+    # P17a-c — bFUzZ's M1-M3: a tracked hook edited so it no longer runs the scan, with the
+    # gate's name still in it. Each must be refused BY NAME as MODIFIED, and each must be
+    # shown to be a real hazard: under the same mutation a planted 64-hex COMMITS. A mutation
+    # that did not land is a failure of the arm, never a pass. Each arm line is a literal,
+    # because an arm printed from a variable is invisible to P16 and to CI's inventory.
+    _mjudge() {  # 0 = refused by name AND the hazard shown; 2 = mutation did not land; 1 = else
+      _mrc=$(_rd "$1.rc"); _mn0=$(_rd "$1.n0"); _mn1=$(_rd "$1.n1")
+      [ "$(_rd "$1.landed")" = yes ] || return 2
+      [ "$_mrc" = 1 ] && grep -q "MODIFIED pre-commit" "$_R/$1.out" 2>/dev/null \
+        && ! grep -qE "^   ok[^ ]* +pre-commit" "$_R/$1.out" 2>/dev/null \
+        && [ "$_mn1" = "$((${_mn0:-0} + 1))" ] && return 0
+      return 1
+    }
+    _mjudge j; case $? in
+      0) echo "  P17a known-BAD  tracked pre-commit, exit 0 as line 2 -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17a known-BAD  exit 0 as line 2 -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17a known-BAD  exit 0 as line 2 -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mjudge k; case $? in
+      0) echo "  P17b known-BAD  tracked pre-commit, && turned into ; -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17b known-BAD  && turned into ; -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17b known-BAD  && turned into ; -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mjudge l; case $? in
+      0) echo "  P17c known-BAD  tracked pre-commit, scan name only in a comment -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17c known-BAD  scan name only in a comment -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17c known-BAD  scan name only in a comment -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mres=$(_rd m.restored); _mrc=$(_rd m.rc)
+    if [ "$_mres" = yes ] && [ "$_mrc" = 0 ] && grep -q "2 of 2 required hooks installed, wired" "$_R/m.out" 2>/dev/null \
+       && ! grep -q "MODIFIED" "$_R/m.out" 2>/dev/null; then
+      echo "  P17d CONTROL    pre-commit restored byte-equal from the copy -> 2 of 2 wired, permitted, so P17a-c refuse the EDIT and not the rig (correct)"
+    else
+      echo "  P17d CONTROL    restored pre-commit -> byte-equal=$_mres rc=$_mrc. The row refuses the tracked hook itself, so P17a-c's refusals are unattributed"; st=1
+    fi
+    # P17e — outside the tree the row can know only that a hook names its gate.
+    _nbuilt=$(_rd n.built); _nrc=$(_rd n.rc)
+    if [ "$_nbuilt" != yes ]; then
+      _skipped="$_skipped P17e"
+      echo "  P17e NOT CONSTRUCTIBLE HERE — the rig's own read says chmod +x did not take on an"
+      echo "            untracked hook copy on this filesystem, so an executable hook outside the"
+      echo "            tree cannot be built. Runs for real on every POSIX seat and in CI."
+    elif [ "$_nrc" = 0 ] && grep -q "names    pre-commit" "$_R/n.out" 2>/dev/null \
+         && grep -q "names    commit-msg" "$_R/n.out" 2>/dev/null \
+         && grep -q "0 of 2 required hooks installed, wired" "$_R/n.out" 2>/dev/null \
+         && grep -q "2 of 2 only NAME their gate" "$_R/n.out" 2>/dev/null \
+         && ! grep -q "^   ok" "$_R/n.out" 2>/dev/null; then
+      echo "  P17e known-WEAK hooks outside the tree -> permitted, each said to NAME its gate, 0 of 2 called wired (correct)"
+    else
+      echo "  P17e known-WEAK hooks outside the tree -> rc=$_nrc. A hook with no tracked copy was called wired, or was not reported as naming its gate"; st=1
     fi
     rm -rf "$H"
     if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
@@ -763,7 +913,8 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     do, and why they are invisible to both counters. This was the file's practice and not its
   #     stated rule, so a second line at two spaces was refused with no remedy named; it is
   #     written down here and named in tests.yml's own refusal.
-  _armfloor=59
+  # 59 -> 73 with P17 (bFUzZ M1-M3 on #215): P17a-c three lines each, P17d two, P17e three.
+  _armfloor=73
   _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
   if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
     echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
