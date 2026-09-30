@@ -1485,26 +1485,49 @@ try {
     if (!/^\d+$/.test(raw0 || '')) throw new Error('addPaying(): no data-busy-seq');
     const seq0 = Number(raw0);
     await page.setInputFiles('#picker', { name, mimeType: 'text/plain', buffer: Buffer.from(FOREVER, 'utf8') });
-    const sheets = [];
-    for (const [stage, yes] of answers) {
-      await page.waitForFunction(s => document.body.getAttribute('data-state') === 'pay' &&
-        document.getElementById('payYes').getAttribute('data-stage') === s, stage, { timeout: 15000 })
-        .catch(async () => { throw new Error(`addPaying(${name}): no ${stage} sheet; status: ` + await page.textContent('#status')); });
-      sheets.push(await page.evaluate(() => ({
+    /* Each sheet the page puts up takes the next answer. A stage of '*' answers whichever sheet is
+       up, so a row can judge WHICH sheet the page chose instead of dying on a wait for the one it
+       expected. A sheet that arrives after the answers run out is recorded in `unasked` and
+       answered NO — a sheet nobody planned for is never paid through. An answer carrying a third
+       element 'if-asked' may go unused; any other unused answer fails the walk. The walk ends when
+       the page is idle with no sheet up. */
+    const sheets = [], unasked = [], queue = answers.slice();
+    for (;;) {
+      const at = await page.waitForFunction(s => {
+        if (document.body.getAttribute('data-state') === 'pay') return 'sheet';
+        const el = document.getElementById('status');
+        return Number(document.body.getAttribute('data-busy-seq')) > s && document.body.getAttribute('data-busy') === '0' &&
+          el && !el.hidden && el.textContent ? 'done' : false;
+      }, seq0, { timeout: 20000 }).then(h => h.jsonValue());
+      if (at === 'done') break;
+      const sheet = await page.evaluate(() => ({
         stage: document.getElementById('payYes').getAttribute('data-stage'),
         title: document.getElementById('pay-title').textContent, body: document.getElementById('pay-body').textContent,
         yes: document.getElementById('payYes').textContent, no: document.getElementById('payNo').textContent,
         walletSoFar: window.__walletCalls.map(c => c.method)
-      })));
-      sheets[sheets.length - 1].chainSoFar = chainLog.length;   // chain reads BY THE TIME this sheet was on screen
+      }));
+      sheet.chainSoFar = chainLog.length;   // chain reads BY THE TIME this sheet was on screen
+      if (!queue.length) {
+        unasked.push(sheet);
+        await page.click('#payNo');
+        await page.waitForFunction(was => document.body.getAttribute('data-state') !== 'pay' ||
+          document.getElementById('payYes').getAttribute('data-stage') + '|' + document.getElementById('pay-title').textContent !== was,
+        sheet.stage + '|' + sheet.title, { timeout: 15000 });
+        continue;
+      }
+      const [stage, yes] = queue.shift();
+      if (stage !== '*' && stage !== sheet.stage) throw new Error(`addPaying(${name}): wanted the ${stage} sheet, the page showed ${sheet.stage}: ` + sheet.title);
+      sheets.push(sheet);
       await page.click(yes ? '#payYes' : '#payNo');
+      /* this answer is taken when the sheet goes down or a different one is up; until then the
+         walk would read the same sheet twice */
+      await page.waitForFunction(was => document.body.getAttribute('data-state') !== 'pay' ||
+        document.getElementById('payYes').getAttribute('data-stage') + '|' + document.getElementById('pay-title').textContent !== was,
+      sheet.stage + '|' + sheet.title, { timeout: 15000 });
     }
-    await page.waitForFunction(s => {
-      const el = document.getElementById('status');
-      return Number(document.body.getAttribute('data-busy-seq')) > s && document.body.getAttribute('data-busy') === '0' &&
-        document.body.getAttribute('data-state') !== 'pay' && el && !el.hidden && el.textContent;
-    }, seq0, { timeout: 20000 });
-    return { sheets, rows: await page.evaluate(() => window.__myspace.rows()), said: await page.textContent('#status') };
+    const owed = queue.filter(a => a[2] !== 'if-asked');
+    if (owed.length) throw new Error(`addPaying(${name}): the page finished with ${owed.length} answer(s) unused; status: ` + await page.textContent('#status'));
+    return { sheets, unasked, rows: await page.evaluate(() => window.__myspace.rows()), said: await page.textContent('#status') };
   }
 
   async function antPage(ctx) {
@@ -1749,7 +1772,7 @@ try {
   // again: a SECOND try at the same file, in the same page — same bytes, so the door prices it with
   // the same quote hashes. plant: localStorage entries written before the first try. keys: what the
   // payer holds in this browser when the case ends.
-  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register, again, plant } = {}) {
+  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register, again, plant, deny } = {}) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const wire = [];
     offBox(ctx, wire);
@@ -1757,6 +1780,11 @@ try {
     const doorLog = await mockAntDoor(ctx, { open: true, ...door });
     const chainLog = await mockChain(ctx, chain);
     const walletOf = await mockWallet(ctx, wallet);
+    /* deny: this browser refuses localStorage writes — 'all' of them, as a full store or a locked-down
+       profile does, or only the payer's record keys ('paid'), a store that takes a small write and
+       refuses the record. QuotaExceededError is what a real browser throws. */
+    if (deny) await ctx.addInitScript(which => { const put = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k, v) { if (which === 'all' || String(k).startsWith('ant-pay.paid.')) throw new DOMException('the quota has been exceeded', 'QuotaExceededError'); return put.call(this, k, v); }; }, deny);
     const { page, errs } = await antPage(ctx);
     if (register) await wearRegister(page, register);
     if (plant) await page.evaluate(kv => { for (const k of Object.keys(kv)) localStorage.setItem(k, kv[k]); }, plant);
@@ -1854,7 +1882,7 @@ try {
   // is fixed; the visitor tries THE SAME FILE again in THE SAME BROWSER. Before the repair every
   // retry was refused "already paid — resume it" on a page that has no resume, and the only ways
   // out paid a second time.
-  const k13 = await payCase('finish.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['price', true]] });
+  const k13 = await payCase('finish.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['*', true]] });
   ok('(k13) PRECONDITION — the first try PAID and was not stored: two sends, one refused finalize, and the page printed the payment id',
     k13.first.sends === 2 && k13.first.finalize === 1 && (k13.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
     JSON.stringify(k13.first));
@@ -1866,16 +1894,16 @@ try {
     k13.door.finalize.length === 2 && k13.door.finalize[1].txs.length === 1 && k13.door.finalize[1].txs[0].quote_hash === QUOTE_HASH &&
     k13.door.finalize[1].txs[0].tx_hash === WALLET_TX(2),
     JSON.stringify(k13.door.finalize));
-  ok('(k13) the second try showed the price and no plan sheet — there was nothing to sign — and said nothing about being already paid',
-    k13.sheets.length === 1 && k13.sheets[0].stage === 'price' && !/already paid|resume/i.test(k13.said || ''),
-    JSON.stringify({ sheets: k13.sheets.map(s => s.stage), said: k13.said }));
+  ok('(k13) the second try showed no price and no plan sheet — there was nothing to pay or sign — but the sheet that says the file is already paid, naming the payment',
+    k13.sheets.length === 1 && k13.sheets[0].stage === 'kept' && (k13.sheets[0].body || '').includes(WALLET_TX(2)) && !/ANT/.test(k13.sheets[0].yes || ''),
+    JSON.stringify({ sheets: k13.sheets, said: k13.said }));
   ok('(k13) the kept hash was confirmed ON CHAIN before it was handed to the door: two receipt asks about the payment, one per try',
     k13.chain.filter(m => m === 'eth_getTransactionReceipt').length === 3, JSON.stringify(k13.chain));
   ok('(k13) no page errors across pay, refused finalize, and the finish', k13.errs.length === 0, k13.errs.join(' | '));
 
   // (k14) THE SAME, WITH THE CHAIN UNREACHABLE ON THE SECOND TRY. The kept payment cannot be
   // confirmed, so it is not handed to the door — and the page must still name it as paid.
-  const k14 = await payCase('finish-chaindown.txt', { door: { finalizeFailFirst: 1 }, chain: { downAfter: 1 }, answers: [['price', true], ['plan', true]], again: [['price', true]] });
+  const k14 = await payCase('finish-chaindown.txt', { door: { finalizeFailFirst: 1 }, chain: { downAfter: 1 }, answers: [['price', true], ['plan', true]], again: [['*', true]] });
   ok('(k14) a kept payment the chain cannot confirm is not sent to the door, signs nothing, and is still printed as PAID — never "nothing was paid"',
     !k14.stored && k14.sends.length === 2 && k14.door.finalize.length === 1 && (k14.said || '').includes('You paid (' + WALLET_TX(2) + ')') &&
     !/nothing was paid/.test(k14.said || ''),
@@ -1883,13 +1911,61 @@ try {
 
   // (k15) NO FALSE SENTENCE. The payer stops on this phone's own payment record before it can name
   // a payment id. The page used to finish that refusal with "nothing was stored and nothing was paid".
-  const k15 = await payCase('unreadable.txt', { plant: { ['ant-pay.paid.quote.' + QUOTE_HASH]: 'not a record' }, answers: [['price', true]] });
+  const k15 = await payCase('unreadable.txt', { plant: { ['ant-pay.paid.quote.' + QUOTE_HASH]: 'not a record' }, answers: [['price', true, 'if-asked']] });
   ok('(k15) stopped on this phone\'s own payment record: the page does NOT say nothing was paid, and says why it will not',
-    !k15.stored && k15.sends.length === 0 && !/nothing was paid/.test(k15.said || '') && /holds a payment record/.test(k15.said || '') &&
+    !k15.stored && k15.sends.length === 0 && k15.sheets.length === 0 && k15.unasked.length === 0 && !/nothing was paid/.test(k15.said || '') && /holds a payment record/.test(k15.said || '') &&
     /cannot read it back/.test(k15.said || ''),
     JSON.stringify({ said: k15.said }));
   ok('(k15) CONTROL — a plain NO at the price still says nothing was paid, so the sentence was not simply removed',
     /nothing was stored and nothing was paid/.test(k2.said || ''), JSON.stringify({ said: k2.said }));
+
+  // (k18) A PAID FILE, DECLINED AT THE SHEET. Pay, the door answers 502, then the same file again, and
+  // the visitor says NO. The page used to ask the price before the payer read this phone's record,
+  // so the sheet offered a payment that would never be made and the NO ended "nothing was paid"
+  // while the phone held the record. '*' answers whichever sheet the page chose, so the row judges it.
+  const k18 = await payCase('declined-kept.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['*', false]] });
+  ok('(k18) PRECONDITION — the first try PAID and was not stored, and the page printed the payment id',
+    k18.first.sends === 2 && k18.first.finalize === 1 && (k18.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify(k18.first));
+  ok('(k18) the second try put up no price: its one sheet says the file is already paid, names that payment, and offers no payment',
+    k18.sheets.length === 1 && k18.sheets[0].stage === 'kept' && (k18.sheets[0].body || '').includes(WALLET_TX(2)) &&
+    !/ANT/.test(k18.sheets[0].yes || '') && !/costs/.test(k18.sheets[0].title || ''),
+    JSON.stringify(k18.sheets));
+  ok('(k18) a NO there prints the payment id again and never says nothing was paid; nothing new was signed or stored',
+    !k18.stored && k18.sends.length === 2 && k18.door.finalize.length === 1 && (k18.said || '').includes('You paid (' + WALLET_TX(2) + ')') &&
+    !/nothing was paid/.test(k18.said || ''),
+    JSON.stringify({ said: k18.said, sends: k18.sends.length, finalize: k18.door.finalize.length }));
+  ok('(k18) and the phone still holds the payment record the NO left alone',
+    k18.keys.includes('ant-pay.paid.quote.' + QUOTE_HASH.toLowerCase()), JSON.stringify(k18.keys));
+
+  // (k19) A BROWSER THAT WILL NOT KEEP THE RECORD. Every localStorage write throws QuotaExceededError.
+  // The page used to swallow the payer's record write, so the payer's own refusal never fired: the
+  // first try paid and was not stored, the page invited a retry, and the retry paid the vault again.
+  // The answers are 'if-asked': the row judges what the page asks, not the walk.
+  const k19 = await payCase('denied.txt', { deny: 'all', door: { finalizeFailFirst: 1 },
+    answers: [['*', true, 'if-asked'], ['*', true, 'if-asked']], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  const vaultSends19 = k19.sends.filter(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT).length;
+  ok('(k19) ONE QUOTE IS PAID AT MOST ONCE: over both tries the vault was paid ' + vaultSends19 + ' time(s)',
+    vaultSends19 <= 1, JSON.stringify({ sends: k19.sends.map(c => c.params[0].to), finalize: k19.door.finalize.length, first: k19.first }));
+  ok('(k19) a browser that refuses the record is refused BEFORE any sheet, on both tries: no price, no plan, nothing signed',
+    k19.first.sends === 0 && k19.sends.length === 0 && k19.sheets.length === 0 && k19.unasked.length === 0 && k19.door.finalize.length === 0 && !k19.stored,
+    JSON.stringify({ first: k19.first, sheets: k19.sheets.map(s => s.stage), sends: k19.sends.length }));
+  ok('(k19) and it says why, and says truly that nothing was paid',
+    /keep a record of the payment/.test(k19.said || '') && /nothing was paid/.test(k19.said || '') && !/You paid/.test(k19.said || ''),
+    JSON.stringify({ said: k19.said }));
+
+  // (k20) A BROWSER THAT TAKES A SMALL WRITE AND REFUSES THE RECORD. Only the payer's record keys
+  // throw, so the page's check before the price passes and the payment is made. The payer's own
+  // refusal must reach the visitor, not be swallowed into a finish the phone cannot remember.
+  const k20 = await payCase('record-refused.txt', { deny: 'paid', answers: [['price', true], ['plan', true]] });
+  ok('(k20) PRECONDITION — the check before the price passed: both sheets were shown and the payment left the wallet',
+    k20.sheets.length === 2 && k20.sends.length === 2, JSON.stringify({ sheets: k20.sheets.map(s => s.stage), sends: k20.sends.length }));
+  ok('(k20) the record the phone could not write is named: the payment id is printed, the page says it cannot stop a second payment, and it does not invite a retry',
+    !k20.stored && (k20.said || '').includes('You paid (' + WALLET_TX(2) + ')') && /cannot stop a second payment/.test(k20.said || '') &&
+    !/try again/.test(k20.said || '') && !/nothing was paid/.test(k20.said || ''),
+    JSON.stringify({ said: k20.said, stored: k20.stored }));
+  ok('(k19/k20) CONTROL — the same flow with storage allowed (k13) paid the vault once and finished on that payment',
+    k13.stored && k13.sends.filter(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT).length === 1, JSON.stringify(k13.sends.map(c => c.params[0].to)));
 
   // (k16) THE CHAIN IS CHECKED BEFORE EVERY SEND. The wallet is on Arbitrum One when it connects
   // and is switched to 0x1 afterwards — while the plan sheet is open (switchAt 2), or after the

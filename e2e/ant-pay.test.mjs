@@ -777,6 +777,32 @@ test('a paid file can be finished: settle confirms the kept hashes on chain and 
   await refused(w3.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
 });
 
+/* A SURFACE ASKS BEFORE IT PRICES. MY SPACE put the price up before settle() read this device's
+   record, so a file already paid was offered a payment that would never be made, and a NO there
+   ended "nothing was paid". owing() is that read, alone: it signs nothing, asks no wallet, and
+   refuses an unreadable record by the same name settle() would. */
+test('what this device already holds for a price is read before anyone is asked, and reading it signs nothing', async () => {
+  const p1 = prepareOf(3), w = world({ allowance: 10n ** 20n });
+  assert.deepEqual(w.payer.owing({ prepare: p1, authorization: authOf(p1) }),
+    { owed_atto: '3000', quotes_owed: 3, quotes_kept: 0, kept_txs: [] }, 'a fresh price: every quote owed, nothing kept');
+  await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  const p2 = { ...p1, upload_id: 'up-2' }, w2 = world({ signer: noSigner });
+  w.mem.forEach((v, k) => w2.mem.set(k, v));
+  assert.deepEqual(w2.payer.owing({ prepare: p2, authorization: authOf(p2) }),
+    { owed_atto: '0', quotes_owed: 0, quotes_kept: 3, kept_txs: [TX(1)] }, 'the same bytes again: nothing owed, and the payment that kept them');
+  assert.deepEqual(w2.log.states, [], 'reading is not settling: the surface is told nothing');
+  assert.deepEqual(w2.log.receipts, [], 'and the chain is not asked');
+  /* a PARTIAL overlap is reported as one: the kept quote and its payment, and only the rest owed */
+  const w3 = world({ signer: noSigner });
+  w3.mem.set('ant-pay.paid.quote.' + q(2).toLowerCase(), JSON.stringify({ upload_id: 'up-0', tx_hash: TX(7) }));
+  assert.deepEqual(w3.payer.owing({ prepare: p1, authorization: authOf(p1) }),
+    { owed_atto: '2000', quotes_owed: 2, quotes_kept: 1, kept_txs: [TX(7)] });
+  /* an unreadable record is refused by name, never read as "not paid" */
+  const w4 = world({ signer: noSigner });
+  w4.mem.set('ant-pay.paid.quote.' + q(1).toLowerCase(), 'not a record');
+  assert.throws(() => w4.payer.owing({ prepare: p1, authorization: authOf(p1) }), (e) => { assert.equal(e.refusal, 'unreadable-record', e.message); return true; });
+});
+
 test('a kept payment the chain refused is unwound by settle, and the next settle signs for it again', async () => {
   const p1 = prepareOf(2), o = { allowance: 10n ** 20n }, w = world(o);
   await w.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });

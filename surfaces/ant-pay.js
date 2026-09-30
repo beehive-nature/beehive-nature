@@ -471,6 +471,16 @@
         });
       }, Promise.resolve()).then(function () { return covered; });
     }
+    /* WHAT THIS DEVICE HOLDS FOR A PRICE, read before the person is asked anything. MY SPACE put its
+       price up before settle() read the record, so a file already paid was offered a payment that
+       would never be made, and a NO there ended "nothing was paid" while this device held the
+       payment. This is that read alone: it signs nothing, asks no wallet and no chain, tells the
+       surface nothing, and refuses an unreadable record by the same name settle() would. */
+    function owing(input) {
+      var plan = readPlan(input && input.prepare, input && input.authorization);
+      var kept = Object.keys(plan.settled).map(function (h) { return plan.settled[h]; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
+      return { owed_atto: plan.owedTotal.toString(), quotes_owed: plan.owed.length, quotes_kept: plan.settledCount, kept_txs: kept };
+    }
     function settle(input) {
       var fallback = 'wallet-declined';
       return Promise.resolve().then(function () {
@@ -525,7 +535,7 @@
           .then(function () { return finalize(prepare, kept.txHashes, plan, null, started); });
       }).catch(function (e) { return refused(e, 'network'); });
     }
-    return { pay: pay, settle: settle, resume: resume };
+    return { pay: pay, settle: settle, resume: resume, owing: owing };
   }
 
   var api = { create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID, CONTRACTS: CONTRACTS,
