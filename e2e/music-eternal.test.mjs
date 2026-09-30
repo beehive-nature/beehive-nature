@@ -73,7 +73,7 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
       const D = window.__eternal.data, t = s => (document.querySelector(s) || {}).textContent || '';
       return {
         d: [D.channel, D.epoch, D.sequence, D.items.map(i => i.kind + ':' + i.size), D.creator, D.admission.payment, D.admission.approval, D.joined, D.doors],
-        beeSheet: !!document.getElementById('etBeeRows'), beeNow: (document.getElementById('etBeeNow')||{}).textContent||'',
+        beeSheet: !!document.getElementById('etBeeRows'), beeRows: document.querySelectorAll('#eternal > .et-b .et-b-row').length, beeInner: (document.querySelector('#eternal > .et-b')||{}).innerText||'', beeNow: (document.getElementById('etBeeNow')||{}).textContent||'',
         planets: document.querySelectorAll('#etSky .planet').length, epochs: document.querySelectorAll('#etSky .epoch').length, ticks: document.querySelectorAll('#etSky .tick').length,
         hint: t('#etRaverHint'), env: t('#etEnvelope'), items: [...document.querySelectorAll('#etItems tr')].slice(1).map(r => r.children[0].textContent),
         pageFacts: [t('#f-channel'), t('#f-epoch'), t('#f-sequence'), t('#f-items'), t('#g-payment')],
@@ -89,6 +89,8 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
   assert.equal(a.d[7], false, 'nobody is in the room on arrival');
   // New bee: no four-row status sheet — one primary only (Floor A). Facts still live in __eternal.data + Raver/Cypherpunk.
   assert.equal(a.beeSheet, false, 'New bee has no etBeeRows status sheet');
+  assert.equal(a.beeRows, 0, 'New bee has no .et-b-row status rows');
+  assert.ok(!/in the set|who made it/i.test(a.beeInner), 'dead status sheet labels gone from New bee');
   assert.match(a.beeNow, /the room is open/i);
   assert.equal(facts.raver.planets, 4, 'one planet per encrypted item'); assert.equal(facts.raver.epochs, ENV.epoch, 'one ring per epoch'); assert.equal(facts.raver.ticks, ENV.sequence, 'one tick per sequence');
   assert.match(facts.raver.hint, /plur · epoch 3 · seq 12/);
@@ -115,7 +117,7 @@ test('bee: a refused envelope keeps the step off and says so plainly', async () 
   const { ctx, p } = await open('bee', { query: '?manifest=/fixtures/does-not-exist.json' });
   assert.equal(await p.$eval('#etBeeJoin', b => b.disabled), true);
   assert.match(await p.textContent('#etBeeNow'), /could not be read/);
-  assert.equal(await p.evaluate(() => !!document.getElementById('etBeeRows')), false);
+  assert.equal(await p.evaluate(() => document.querySelectorAll('#eternal > .et-b .et-b-row').length), 0);
   await ctx.close();
 });
 
