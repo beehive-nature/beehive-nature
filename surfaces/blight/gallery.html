@@ -84,6 +84,10 @@ body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-
 #eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans)}
 #eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
 #eternal .et-b-note{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stage{margin-top:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-well);overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center}
+#eternal .et-b-mat{width:100%;max-width:280px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:var(--sk-s3);background:var(--sk-bg-well)}
+#eternal .et-b-mat svg{width:100%;height:100%;display:block;border-radius:var(--sk-radius)}
+#eternal .et-b-stage[data-empty="1"]{min-height:0;border:0;background:transparent}
 #eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
 #eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
 #eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
@@ -229,7 +233,8 @@ body[data-reg="cypherpunk"] [data-experience-nav] a{border-radius:var(--sk-radiu
     <h2 class="et-b-h" data-etk="et.gallery.beeH">a garden of living art</h2>
     <p class="et-b-lede" data-etk="et.gallery.beeLede">art held in one wallet, drawn fresh each time you look. take your time.</p>
     <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.gallery.beeGuard">this page only looks. it never signs or buys.</span></div>
-    <!-- no status sheet · no fail card — guidance + one action -->
+    <!-- cream wall in view — same piece as #stage (silent seed or live) -->
+    <div class="et-b-stage" id="etGaBeeStage" aria-label="art on the wall" data-empty="1"><div class="et-b-mat art-mat" id="etGaBeeMat"></div></div>
     <div class="et-b-rows" id="etGaBeeRows" hidden></div>
     <div class="et-b-card" id="etGaBeeCard" hidden aria-live="polite"></div>
     <div class="et-b-act">
@@ -496,7 +501,7 @@ function show(i){
 window.__show=show;
 function walk(){if(walking&&pieces.length)show(idx+1);}
 
-const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="seeded garden"><rect width="200" height="200" fill="#efe9dd"/><circle cx="100" cy="100" r="48" fill="#c9a7f5" opacity=".85"/><circle cx="100" cy="100" r="22" fill="#6e3fb8"/><text x="100" y="178" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#4a5f55">seeded garden</text></svg>';
+const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="a calm garden piece"><rect width="240" height="240" fill="#efe9dd"/><circle cx="120" cy="118" r="78" fill="#e4d6f5"/><circle cx="120" cy="118" r="52" fill="#c9a7f5"/><circle cx="120" cy="118" r="26" fill="#6e3fb8"/><circle cx="96" cy="96" r="10" fill="#fbf7f0" opacity=".9"/><path d="M120 168c-18 22-40 34-40 34s8-24 22-40c8-9 18-16 18-16s10 7 18 16c14 16 22 40 22 40s-22-12-40-34z" fill="#4a5f55" opacity=".55"/></svg>';
 function silentSeedGarden(){
   if(pieces.length)return false;
   clearInterval(timer); timer=null; walking=false; // no auto-walk of a seed — user starts the tour
@@ -508,6 +513,8 @@ function silentSeedGarden(){
   galleryStatus('A calm garden to look at while the live wall wakes.');
   $('plaque').textContent='seeded garden';
   updateTransport(); renderCollections();
+  try{ if(window.__eternal&&window.__eternal.paint) window.__eternal.paint(); }catch(x){}
+  try{ if(window.__eternal){ /* paint runs via MO on plaque/stage */ } }catch(x){}
   return true;
 }
 async function start(value,wing){
@@ -602,11 +609,18 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
   var famOpen=false;
   function bee(){
     var n=D.pieces.length, st=state();
-    // no status sheet, no fail card (founder law) — guidance lives in lede/guard/foot
     $('etGaBeeRows').innerHTML=''; $('etGaBeeRows').hidden=true;
     var card=$('etGaBeeCard'); card.innerHTML=''; card.hidden=true;
+    // Put the current piece ON the New bee cream wall (in view) — utility, not a lecture
+    var mat=$('etGaBeeMat'), stage=$('etGaBeeStage');
+    var list=(typeof pieces!=='undefined'&&pieces&&pieces.length)?pieces:(window.__garden||[]);
+    var i=(typeof idx==='number'&&list[idx])?idx:0;
+    var piece=list[i]||list[0];
+    if(mat&&stage){
+      if(piece&&piece.svg){ mat.innerHTML=piece.svg; stage.dataset.empty='0'; stage.hidden=false; }
+      else { mat.innerHTML=''; stage.dataset.empty='1'; }
+    }
     var tour=$('etGaBeeTour');
-    // primary always works: tour when art is here; otherwise visit another collection
     if(n){
       tour.disabled=false; tour.dataset.mode='tour';
       tour.textContent=(typeof walking!=='undefined'&&walking)?K('b.pause','pause the tour'):K('b.tour','start the tour');
@@ -699,7 +713,7 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
     document.addEventListener('blang',all); document.addEventListener('bregister',function(){raver();});
   }
   wire(); all();
-  window.__eternal={data:D,raver:R};
+  window.__eternal={data:D,raver:R,paint:paint};
 })();
 </script>
 <script src="../tour.js?v=42"></script>

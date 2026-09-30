@@ -162,6 +162,29 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
   }
 });
 
+
+test('New bee shows art on the cream wall after silent seed (utility in view)', async () => {
+  const { ctx, p } = await open('bee');
+  const d = await p.evaluate(() => {
+    const mat = document.getElementById('etGaBeeMat');
+    const stage = document.getElementById('etGaBeeStage');
+    const svg = mat && mat.querySelector('svg');
+    return {
+      empty: stage && stage.dataset.empty,
+      hasSvg: !!svg,
+      well: stage && getComputedStyle(stage).backgroundColor,
+      pieces: window.__eternal.data.pieces.length,
+      failCopy: /could not|try again|did not load|unavailable/i.test((document.querySelector('#eternal > .et-b') || {}).innerText || ''),
+    };
+  });
+  assert.ok(d.pieces >= 1, 'silent seed keeps pieces');
+  assert.equal(d.hasSvg, true, 'New bee mat draws the piece in view');
+  assert.equal(d.empty, '0');
+  assert.equal(d.well, 'rgb(239, 233, 221)', 'cream well on the wall');
+  assert.equal(d.failCopy, false);
+  await ctx.close();
+});
+
 test('New bee art stage is cream well (music.html light), not ink', async () => {
   const { ctx, p } = await open('bee');
   const colors = await p.evaluate(() => {
