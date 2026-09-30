@@ -66,6 +66,24 @@ seam). Full evidence:
 
 **Standing (no ceremony):** AV-11's CI step — live now.
 
+**Attempt record 2 — ceremony rerun (2026-09-17, after the F1 repair):**
+the deadlock was repaired on main (PR #95, `5d4d7569`; RED-first, D-5
+exclusivity intact), the binary was rebuilt/restaged from that main
+(NEW sha `f251550210b6f4fc80d1289e98c070873a8918a2f3df0160aa0ddf8e2859a298` PUBLIC-CONSTANT; the prior sha `830b0613…6dfc71` SUPERSEDED), and the door
+**booted live for the first time** — listening line printed, `:18042`
+bound, recovery under the exclusive hold, and kill-9 → restart → listening
+(D-5 crash-release live). The multi-leg beat then **stopped at the door's
+wire boundary**: the door's leg extraction rejects the REAL x402 v2 payer
+wire for every scheme (flat `payload.from` expected vs upstream's nested
+`authorization.*`/`permit2Authorization.*` — disjoint; live-proven on a
+fresh exact leg, the prior pass's on-chain-validated stored leg, and an
+upto leg). New finding **IF-5** (broadens IF-1) routed to Astra. No leg
+executed, no nonce consumed, no promotion; journal pristine; the signature
+boundary stays at its static-verification tier. **Gesture D: BLOCKED_INTERNAL
+at the IF-5 seam; D(testnet) still not earned; next owner Astra
+(architecture reconciliation), Gesture-D seat WAIT.** Full evidence:
+[receipt](../dispatches/2026-09-17-gesture-d-rerun-wire-boundary-stop.md).
+
 ## 3 · Smallest ordered plan
 
 1. **Now (done this pass):** R5 audit wired into CI (the only zero-decision
