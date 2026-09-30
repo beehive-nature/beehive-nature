@@ -958,9 +958,14 @@ jobs:
         working-directory: e2e
         env:
           BADGE_SIGNING_SEED_B64U: ${{ secrets.BADGE_SIGNING_SEED_B64U }}
-        run: node sign-badges.mjs --stage ../stage --out ../signed --expect-sha "$GITHUB_SHA"
+        run: |
+          node sign-badges.mjs --stage ../stage --out ../signed --expect-sha "$GITHUB_SHA" --expect-run-id "$GITHUB_RUN_ID" --expect-run-attempt "$GITHUB_RUN_ATTEMPT"
+          # a later step's if: cannot read THIS step's env: block (GitHub scopes
+          # step env to the step), so the "something was signed" signal travels
+          # via GITHUB_ENV — reviewed repair of the independent review's P1
+          if [ -n "$(ls -A ../signed 2>/dev/null)" ]; then echo "BADGE_SIGNED=1" >> "$GITHUB_ENV"; fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: env.BADGE_SIGNING_SEED_B64U != ''   # nothing signed when no key is stored — nothing to publish
+        if: env.BADGE_SIGNED == '1'   # nothing signed (no key stored, or named skip) — nothing to publish
         with:
           name: badge-signed
           path: signed

@@ -150,8 +150,11 @@ committed, printed, or persisted beyond the removed scratch dir):
 | signed doc stripped of its signature | FAIL `origin ci requires a signature` |
 | signature on a local-origin document | FAIL `origin local documents are unsigned by definition` |
 | broken verifier binary | FAIL `gave no verdict` (fails closed) |
-| malformed trust file / revoked-not-pinned | whole check REFUSES |
+| malformed trust file | whole check REFUSES |
+| backdated signing time below `measured_at` | FAIL `before the measurement it attests` |
+| trust row whose key_id does not derive from its own pinned key | whole check REFUSES |
 | signing job: revision ≠ run's head | REFUSES, signs nothing |
+| signing job: run id/attempt ≠ the run's own | REFUSES, signs nothing |
 | signing job: key not pinned in trust | REFUSES |
 | signing job: already-signed document | REFUSES to re-sign |
 | signing job: no seed in environment | skips BY NAME, exit 0 |
@@ -159,6 +162,53 @@ committed, printed, or persisted beyond the removed scratch dir):
 Two pre-existing probes' failure WORDING changed with the new gate (the old
 strings named the pre-card placeholder state); both still fail for their
 forgery.
+
+## Independent review (2026-09-30): REQUEST_CHANGES, repaired
+
+A fresh agent that wrote none of this reviewed the first head `19895cfdf` (it
+runs under the authoring session's attribution; its independence is recorded
+here as a caveat, not claimed outright — same treatment as the #250 reviews).
+It ran the suites plus its own 14-forgery battery on disposable keys. Verdict:
+the cryptographic core held (signature swap, key reorder, kind_min edit,
+envelope extra fields, empty trust, svg tamper, hand-written staged docs,
+double signing — all correctly refused or benign); four findings repaired:
+
+1. **P1 — the `badge-signed` artifact was never uploaded.** The upload step's
+   `if: env.BADGE_SIGNING_SEED_B64U != ''` cannot see another step's `env:`
+   block (GitHub scopes step env to the step), so the condition was always
+   false and every signed run would have silently discarded its output. The
+   sign step now writes a `BADGE_SIGNED=1` marker to `$GITHUB_ENV` when the
+   output directory is non-empty, and the upload gates on that marker.
+2. **F6b — `signed_at_ms` is not signed.** The envelope's signing time sits
+   outside the ML-DSA signature (which covers the canonical bytes only), so
+   an out-of-window signature can be dressed in-window by editing the field —
+   the reviewer demonstrated it. Repair, honestly scoped: the gate now refuses
+   any signature whose claimed time PREDATES the measurement it attests
+   (`measured_at`), the PASS line says "key window covers the **claimed**
+   signing time" instead of implying attested time, and the residual boundary
+   is stated rather than papered over: a leaked seed whose window is still
+   open can backdate within `[measured_at, now]`; that exposure is what the
+   revocation list is for, and the rotation procedure says so. Folding the
+   timestamp into the signed bytes would change `bheart.signature/1`
+   semantics for every user of the envelope (x402 included) — a separate
+   card if the estate wants it.
+3. **F11 — run binding was enforced by workflow wiring only.** The reviewer
+   hand-edited a staged document to claim `run 777 attempt 42` and the signer
+   signed it (only the revision was checked). `sign-badges.mjs` now REQUIRES
+   `--expect-run-id` and `--expect-run-attempt` and refuses any mismatch —
+   the run ids sit inside the signed bytes, so the signature now binds run,
+   attempt and revision together, which is what the gate's PASS line claims.
+4. **P3s.** The dispatch's claim that a revoked-but-unpinned entry makes the
+   whole check REFUSE was wrong (it is inert — such signatures already fail
+   "not in the trust configuration"); the probe table above is corrected. A
+   trust row pinning one key's material under another key's id is now refused
+   at load: the gate restates `derive_key_id` (sha3-256 over alg id ‖ public
+   key, first 16 b64url chars, `bheart-` prefix) and requires the pin's id to
+   derive from its own pinned key. The decoded env seed's intermediate `Vec`
+   in `bsigner` is now wiped with `zeroize` after the `Zeroizing` copy.
+
+New probes cover all of it: backdated signing time, mislabeled trust row,
+run-id mismatch refusal (39/39 total).
 
 ## Key rotation procedure (the card's item 6)
 
@@ -203,8 +253,9 @@ forgery.
   (`load_dsa`/`load_kem` signatures, untouched by this card; CI gates fmt, not
   clippy, on the workspace). Not fixed here to keep this diff scoped; recorded
   for whoever owns the next bsigner lane.
-- `node --test render-badges.test.mjs` → 36/36 (21 carried, 2 reworded, 13
-  new; disposable-key rig built and destroyed inside the suite).
+- `node --test render-badges.test.mjs` → 39/39 (21 carried, 2 reworded, 16
+  new; disposable-key rig built and destroyed inside the suite; the three
+  post-review probes are marked with their finding numbers).
 - `node render-badges.mjs --check` → 1/1 PASS on the committed (local,
   unsigned) badge with the shipped empty trust file.
 - End-to-end local trial (off-repo scratch): keygen → trust pin → stage

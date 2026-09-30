@@ -30,17 +30,23 @@
 //                 (no run to bind it to). origin "ci" must carry run_id and
 //                 run_attempt, and its proof is the CI-attestation signature
 //                 (step 8): the signing job refuses any document whose revision
-//                 differs from the run's own head_sha, so a valid signature over
-//                 an origin-ci document IS the run-to-revision binding.
+//                 differs from the run's own head_sha or whose run ids are not
+//                 the run's own — and the run ids and revision all sit inside
+//                 the signed bytes, so a valid signature over an origin-ci
+//                 document IS the run-to-revision binding.
 //   8 SIGNATURE   the unsigned representation is exactly `null` — for origin
 //                 "local" only. An origin-ci document must be signed. A
 //                 signature is a bheart.signature/1 envelope (bsigner, ML-DSA)
 //                 verified against the keys pinned in docs/badge-trust.json —
 //                 never a key carried inside the document — with key id,
-//                 validity at signing time and revocation all checked. The
-//                 signed byte string is the canonical serialization of the
-//                 document with the signature field set to null (canonicalBytes
-//                 below); the envelope's digest and byte count must match it.
+//                 validity over the CLAIMED signing time, revocation, and a
+//                 claim not to predate the measurement all checked. The signed
+//                 byte string is the canonical serialization of the document
+//                 with the signature field set to null (canonicalBytes below);
+//                 the envelope's digest and byte count must match it. The
+//                 signing time itself is the envelope's claim (it sits outside
+//                 the ML-DSA signature); a leaked seed with an open window can
+//                 backdate within that window — detected only by revocation.
 //                 Without a verifier binary the check fails closed.
 //   9 SVG         the committed SVG is byte-identical to render(document).
 //
@@ -91,6 +97,14 @@ const B64U = /^[A-Za-z0-9_-]+$/;
 const TRUST_KEY_FIELDS = ['key_id', 'alg', 'verifying_key_b64u', 'valid_from', 'valid_until', 'purpose', 'note'];
 const TRUST_PURPOSE = 'ci-attestation';
 const b64uBytes = s => { if (typeof s !== 'string' || !B64U.test(s)) return -1; try { return Buffer.from(s, 'base64url').length; } catch { return -1; } };
+// keys.rs derive_key_id, restated so the gate can check a pin's key_id really
+// derives from its own public material: 'bheart-' + first 16 chars of
+// b64url(sha3-256(utf8(alg id) || verifying key bytes))
+const deriveKeyId = (algId, vkB64u) => {
+  const vk = Buffer.from(vkB64u, 'base64url');
+  const d = createHash('sha3-256').update(Buffer.from(algId, 'utf8')).update(vk).digest();
+  return 'bheart-' + d.toString('base64url').slice(0, 16);
+};
 // strict loader: every field exact, every id well-formed, no duplicate or
 // contradictory rows — a trust file this refuses is a configuration error,
 // never a reason to fall back to trusting documents
@@ -120,6 +134,9 @@ export function loadTrust(path) {
     if (typeof k.alg !== 'string' || !Object.hasOwn(SIG_ALGS, k.alg)) why(`alg ${JSON.stringify(k.alg)} is not in bsigner's signature registry`);
     else if (b64uBytes(k.verifying_key_b64u) !== SIG_ALGS[k.alg]) why(`verifying key is ${b64uBytes(k.verifying_key_b64u)} bytes, ${k.alg} encodes ${SIG_ALGS[k.alg]}`);
     if (typeof k.verifying_key_b64u !== 'string' || !B64U.test(k.verifying_key_b64u)) why('verifying_key_b64u is not base64url');
+    // the id must derive from the pinned public material itself — a row that
+    // borrows the estate's key_id over some other key is a mislabel, refused
+    else if (typeof k.key_id === 'string' && typeof k.alg === 'string' && Object.hasOwn(SIG_ALGS, k.alg) && b64uBytes(k.verifying_key_b64u) === SIG_ALGS[k.alg] && deriveKeyId(k.alg, k.verifying_key_b64u) !== k.key_id) why('key_id does not derive from the pinned verifying key (keys.rs derive_key_id)');
     for (const w of ['valid_from', 'valid_until']) if (!canonicalTime(k[w])) why(`${w} is not a canonical ISO-8601 UTC timestamp`);
     if (canonicalTime(k.valid_from) && canonicalTime(k.valid_until) && Date.parse(k.valid_from) > Date.parse(k.valid_until)) why('valid_from is after valid_until');
     if (k.purpose !== TRUST_PURPOSE) why(`purpose is ${JSON.stringify(k.purpose)}, want "${TRUST_PURPOSE}"`);
@@ -309,6 +326,15 @@ function verifySignature(doc, trust) {
   if (sig.alg !== key.alg) f.push(`signature alg ${sig.alg} disagrees with the trusted key's ${key.alg}`);
   const signedAt = sig.signed_at_ms, from = Date.parse(key.valid_from), until = Date.parse(key.valid_until);
   if (signedAt < from || signedAt > until) f.push(`signature key ${sig.key_id} was not valid at signing time (signed ${new Date(signedAt).toISOString()}, key valid ${key.valid_from} .. ${key.valid_until})`);
+  // the envelope's signing time is a CLAIM: it sits outside the ML-DSA
+  // signature, which covers the document's canonical bytes only (independent
+  // review F6b, 2026-09-30 — an out-of-window signature can be dressed
+  // in-window by editing signed_at_ms). One lie it cannot tell is attesting a
+  // measurement before the measurement existed; backdating below measured_at
+  // fails here. Backdating inside [measured_at, now] remains possible for a
+  // LEAKED seed whose window is still open — that is revocation's job, and
+  // the boundary is stated in the dispatch rather than papered over.
+  if (canonicalTime(doc.measured_at) && signedAt < Date.parse(doc.measured_at)) f.push(`signature claims ${new Date(signedAt).toISOString()}, before the measurement it attests (${doc.measured_at})`);
   // the math: bsigner verifies the envelope over the canonical bytes
   const verifier = resolveVerifier();
   if (!verifier) return [...f, 'signature verifier unavailable: build bsigner (cargo build --locked -p bsigner) and pass --verifier PATH or set PROOF_LIGHTS_VERIFIER (fails closed)'];
@@ -447,7 +473,7 @@ if (mode === '--check') {
     if (why.length) { fail++; console.log(`FAIL ${f}: ${head}\n  - ${why.join('\n  - ')}`); }
     else {
       const provenance = doc.measurement.origin === 'ci'
-        ? `origin ci (run ${doc.measurement.run_id} attempt ${doc.measurement.run_attempt}; the CI-attestation signature binds them to ${doc.revision.slice(0, 7)}) · signed by ${doc.signature.key_id} (${doc.signature.alg}, valid at signing time, not revoked)`
+        ? `origin ci (run ${doc.measurement.run_id} attempt ${doc.measurement.run_attempt}; the CI-attestation signature binds them to ${doc.revision.slice(0, 7)}) · signed by ${doc.signature.key_id} (${doc.signature.alg}, key window covers the claimed signing time, not revoked)`
         : `origin ${doc.measurement.origin} (revision asserted by the measurer, not attested) · unsigned (stated)`;
       console.log(`PASS ${f}: ${head} · re-derived from ${doc.fronts} evidence rows at ${doc.revision.slice(0, 7)} · source blob + sha3-256 match · svg == render(json) · ${provenance}`);
     }

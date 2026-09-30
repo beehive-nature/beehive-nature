@@ -50,6 +50,7 @@ mod pq;
 mod x402;
 
 use serde_json::{json, Value};
+use zeroize::Zeroize;
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -195,13 +196,14 @@ fn cmd_sign(args: &[String]) -> i32 {
                     return fail(format!("env var {var} is not set — the seed is env-delivered, never an argument, never a file"))
                 }
             };
-            let seed_vec = match b64::b64u_decode(b64seed.trim()) {
+            let mut seed_vec = match b64::b64u_decode(b64seed.trim()) {
                 Some(v) if v.len() == 32 => v,
                 Some(v) => return fail(format!("seed in {var} is {} bytes, want 32", v.len())),
                 None => return fail(format!("seed in {var} is not base64url")),
             };
             let mut seed = zeroize::Zeroizing::new([0u8; 32]);
             seed.copy_from_slice(&seed_vec);
+            seed_vec.zeroize(); // the decoded intermediate is wiped too (pq.rs: zeroized in memory after use)
             let vk = match pq::dsa_public_from_seed(alg, &seed) {
                 Ok(v) => v,
                 Err(e) => return fail(e),

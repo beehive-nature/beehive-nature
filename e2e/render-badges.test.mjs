@@ -254,6 +254,7 @@ const stageDir = join(rigDir, 'stage'), signedDir = join(rigDir, 'signed');
     '--revision', REV, '--origin', 'ci', '--run-id', '4242', '--run-attempt', '1', '--stage', stageDir]);
   assert.equal(st.status, 0, `staging the ci document failed:\n${st.stdout}${st.stderr}`);
   const sg = run2(process.execPath, ['sign-badges.mjs', '--stage', stageDir, '--out', signedDir, '--expect-sha', REV,
+    '--expect-run-id', '4242', '--expect-run-attempt', '1',
     '--trust', trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env: { ...process.env, PROBE_SEED: await seedOf(keyA.key_id) } });
   assert.equal(sg.status, 0, `signing the staged document failed:\n${sg.stdout}${sg.stderr}`);
 }
@@ -265,7 +266,17 @@ const probeSigned = (forge, opts = {}) => probe(forge, { signed: signedDir, trus
 test('control: a properly signed ci-origin badge passes with the signature provenance', async () => {
   const r = await probeSigned(() => {});
   assert.equal(r.code, 0, r.out);
-  assert.match(r.out, /PASS skaists-meter\.json: .*origin ci \(run 4242 attempt 1; the CI-attestation signature binds them to 7d6808d\) · signed by \S+ \(ml-dsa-65, valid at signing time, not revoked\)/, r.out);
+  assert.match(r.out, /PASS skaists-meter\.json: .*origin ci \(run 4242 attempt 1; the CI-attestation signature binds them to 7d6808d\) · signed by \S+ \(ml-dsa-65, key window covers the claimed signing time, not revoked\)/, r.out);
+});
+
+test('a backdated signing time cannot predate the measurement it attests (independent review F6b)', async () => {
+  // signed_at_ms sits OUTSIDE the ML-DSA signature; editing it is free. The
+  // window check alone can be dressed in-window — but not below measured_at:
+  // an attestation of a measurement that did not exist yet is a named lie
+  refused(await probeSigned(async ({ doc, put }) => {
+    doc.signature.signed_at_ms = Date.parse('2022-06-01T00:00:00.000Z');
+    await put(doc);
+  }, { trust: trustExpired }), /signature claims 2022-06-01T00:00:00.000Z, before the measurement it attests/);
 });
 
 test('a signature by a key the trust does not pin fails (wrong key)', async () => {
@@ -328,19 +339,35 @@ test('a malformed trust configuration refuses the whole check, not one badge', a
   assert.match(r.out, /REFUSING — trust configuration .* does not validate/, r.out);
 });
 
+test('a trust row whose key_id does not derive from its own public key is refused (independent review P3)', async () => {
+  // borrow keyA's verifying key under a fabricated id: the pin is a mislabel,
+  // and the gate restates derive_key_id to catch it without running bsigner
+  const mislabeled = await trustFile('trust-mislabeled.json', [{ ...pin(keyA, ...WIDE), key_id: 'bheart-AAAAAAAAAAAAAAAA' }]);
+  const r = await probeSigned(() => {}, { trust: mislabeled });
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /REFUSING — trust configuration [\s\S]*key_id does not derive from the pinned verifying key/, r.out);
+});
+
 /* ---- the signing job's own refusals (e2e/sign-badges.mjs) -------------------- */
 
 const signRun = async (opts = {}) => {
   const env = { ...process.env };
   if (opts.noSeed) delete env.PROBE_SEED; else env.PROBE_SEED = await seedOf(keyA.key_id);
   return run2(process.execPath, ['sign-badges.mjs', '--stage', stageDir, '--out', join(rigDir, 'out-' + Math.random().toString(36).slice(2)),
-    '--expect-sha', opts.expectSha || REV, '--trust', opts.trust || trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env });
+    '--expect-sha', opts.expectSha || REV, '--expect-run-id', String(opts.expectRun || 4242), '--expect-run-attempt', String(opts.expectAttempt || 1),
+    '--trust', opts.trust || trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env });
 };
 
 test('the signing job refuses a document whose revision is not the run\'s head_sha', async () => {
   const r = await signRun({ expectSha: '0123456789abcdef0123456789abcdef01234567' });
   assert.notEqual(r.status, 0, `signed a revision the run did not check out:\n${r.stdout}${r.stderr}`);
   assert.match(r.stderr, /REFUSING — .*revision \S+ is not the run's head/, r.stderr);
+});
+
+test('the signing job refuses a document claiming a run that is not this one (independent review F11)', async () => {
+  const r = await signRun({ expectRun: 777 });
+  assert.notEqual(r.status, 0, `signed a run-id the run never had:\n${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /REFUSING — .*claims run 4242 attempt 1, this is run 777 attempt 1/, r.stderr);
 });
 
 test('the signing job refuses to sign with a key the trust does not pin', async () => {
@@ -350,9 +377,10 @@ test('the signing job refuses to sign with a key the trust does not pin', async 
 });
 
 test('the signing job refuses an already-signed document', async () => {
-  // stage a second unsigned doc set? simpler: point --stage at the SIGNED dir
+  // point --stage at the SIGNED dir: re-signing an attestation is refused
   const r = run2(process.execPath, ['sign-badges.mjs', '--stage', signedDir, '--out', join(rigDir, 'out-resign'),
-    '--expect-sha', REV, '--trust', trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN],
+    '--expect-sha', REV, '--expect-run-id', '4242', '--expect-run-attempt', '1',
+    '--trust', trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN],
     { env: { ...process.env, PROBE_SEED: await seedOf(keyA.key_id) } });
   assert.notEqual(r.status, 0, `re-signed an already-signed document:\n${r.stdout}${r.stderr}`);
   assert.match(r.stderr, /REFUSING — .*already carries a signature/, r.stderr);

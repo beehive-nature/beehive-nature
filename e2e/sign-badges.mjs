@@ -3,17 +3,20 @@
 // Signs STAGED origin-ci status documents with the estate's own signer
 // (bsigner, ML-DSA-65), inside the protected badge-signing environment, on
 // pushes to main only — the workflow's job-level `if` keeps untrusted PR
-// content away from the key, and this script adds its own three refusals so
-// the property does not depend on the workflow alone:
+// content away from the key, and this script adds its own four refusals so
+// the properties do not depend on the workflow alone:
 //   1. HEAD BINDING   a document is signed only if its revision equals the
 //                     --expect-sha the caller states (in CI: github.sha, the
-//                     run's own head). The signature therefore binds run id,
-//                     attempt and revision together — exactly what the gate's
-//                     origin-ci check needs to stop being a fail-closed TODO.
-//   2. TRUST FIRST    the seed's own key must be pinned, valid NOW and not
+//                     run's own head).
+//   2. RUN BINDING    run_id and run_attempt must equal --expect-run-id and
+//                     --expect-run-attempt (in CI: this run's own ids). The
+//                     run ids and the revision all sit INSIDE the canonical
+//                     bytes, so together with 1 the signature binds run,
+//                     attempt and revision into one attestation.
+//   3. TRUST FIRST    the seed's own key must be pinned, valid NOW and not
 //                     revoked in docs/badge-trust.json, or nothing is signed.
 //                     A key the gate would refuse never produces signatures.
-//   3. GATE BEFORE INK  each staged document passes the full gate (evidence,
+//   4. GATE BEFORE INK  each staged document passes the full gate (evidence,
 //                     coverage, derivation, manifest) BEFORE it is signed;
 //                     after signing, the signed document is verified again —
 //                     a signature can authenticate an attestation, it cannot
@@ -24,7 +27,7 @@
 // reads it from the process environment, derives the public key in memory,
 // and emits only public material.
 //
-//   node sign-badges.mjs --stage <dir> --expect-sha <sha> --out <dir> [--trust <file>] [--verifier <path>] [--seed-env VAR]
+//   node sign-badges.mjs --stage <dir> --expect-sha <sha> --out <dir> --expect-run-id N --expect-run-attempt M [--trust <file>] [--verifier <path>] [--seed-env VAR]
 //
 // Exit 0 = signed, or the NAMED SKIP (no seed in the environment — the founder
 // gesture outstanding; nothing to sign is not a failure). Exit 1 = refusal.
@@ -39,13 +42,18 @@ import { canonicalBytes, serialise, render, loadTrust, resolveVerifier, verify }
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const STAGE = arg('stage'), OUT = arg('out'), EXPECT_SHA = arg('expect-sha');
+const EXPECT_RUN = Number(arg('expect-run-id', '')), EXPECT_ATTEMPT = Number(arg('expect-run-attempt', ''));
 const TRUST_PATH = arg('trust', join(ROOT, 'docs', 'badge-trust.json'));
 const SEED_ENV = arg('seed-env', 'BADGE_SIGNING_SEED_B64U');
 const ALG = 'ml-dsa-65';
 const refuse = why => { console.error(`sign-badges: REFUSING — ${why}`); process.exit(1); };
 
 if (!STAGE || !OUT || !/^[0-9a-f]{40}$/.test(EXPECT_SHA || '')) {
-  console.error('usage: sign-badges.mjs --stage <dir> --out <dir> --expect-sha <40-hex sha> [--trust <file>] [--verifier <path>] [--seed-env VAR]');
+  console.error('usage: sign-badges.mjs --stage <dir> --out <dir> --expect-sha <40-hex sha> --expect-run-id N --expect-run-attempt M [--trust <file>] [--verifier <path>] [--seed-env VAR]');
+  process.exit(2);
+}
+if (!Number.isInteger(EXPECT_RUN) || EXPECT_RUN <= 0 || !Number.isInteger(EXPECT_ATTEMPT) || EXPECT_ATTEMPT <= 0) {
+  console.error('--expect-run-id N and --expect-run-attempt M are required (positive integers): the signer binds the run it actually is, never a run a document claims');
   process.exit(2);
 }
 
@@ -90,10 +98,13 @@ try {
     const doc = JSON.parse(await readFile(join(STAGE, f), 'utf8'));
     // 1 HEAD BINDING: the run's own sha is the only revision this run can attest
     if (doc.revision !== EXPECT_SHA) refuse(`${f}: revision ${doc.revision} is not the run's head ${EXPECT_SHA} — refusing to bind a run to a revision it did not check out`);
-    // 2 origin ci only: a local-origin document is an assertion, never attested
+    // 2 RUN BINDING: run id and attempt sit inside the signed bytes; they must
+    // be THIS run's, or the signature would attest a run that never happened
+    if (doc.measurement.run_id !== EXPECT_RUN || doc.measurement.run_attempt !== EXPECT_ATTEMPT) refuse(`${f}: measurement claims run ${doc.measurement.run_id} attempt ${doc.measurement.run_attempt}, this is run ${EXPECT_RUN} attempt ${EXPECT_ATTEMPT} — refusing to attest a run that is not this one`);
+    // 3 origin ci only: a local-origin document is an assertion, never attested
     if (!doc.measurement || doc.measurement.origin !== 'ci') refuse(`${f}: measurement origin is not ci — the signing job attests CI measurements only`);
     if (doc.signature !== null) refuse(`${f}: already carries a signature — refusing to re-sign`);
-    // 3 GATE BEFORE INK: the unsigned document must already pass everything else
+    // 4 GATE BEFORE INK: the unsigned document must already pass everything else
     const why = (await verify(doc, join(STAGE, f.replace(/\.json$/, '.source.json')), join(STAGE, f.replace(/\.json$/, '.svg')), { trust, ciUnsignedOk: true }))
       .filter(w => !/^svg /.test(w));
     if (why.length) refuse(`${f} fails the gate unsigned:\n  - ${why.join('\n  - ')}`);
