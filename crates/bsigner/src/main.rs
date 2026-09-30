@@ -21,7 +21,16 @@
 //!   bsigner keygen --alg ml-dsa-65 [--keydir DIR]
 //!   bsigner keygen --alg ml-kem-768 [--keydir DIR]
 //!   bsigner sign --key-id ID --file PATH [--keydir DIR] [--out PATH]
+//!   bsigner sign --seed-env VAR --alg ml-dsa-65 --file PATH [--out PATH]
+//!     (env-delivered seed for CI attestation: the seed is read from the
+//!      environment variable NAMED by --seed-env — never an argument, never
+//!      written to disk; the key_id is derived from the seed's own public
+//!      key, so the envelope names the identity it signed under)
 //!   bsigner verify --key-id ID --file PATH --envelope PATH [--keydir DIR]
+//!   bsigner verify-env --file PATH --envelope PATH --verifying-key-file PATH
+//!     (verification with an EXPLICIT public key — one line of base64url —
+//!      so a verifier that pins trust in its own reviewed configuration,
+//!      like the proof-lights gate, never needs the private keyset)
 //!   bsigner list [--keydir DIR]
 //!   bsigner kemtest --key-id ID [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
 //!   bsigner x402pay --key-id ID --offer PATH --policy PATH [--keydir DIR] [--out PATH]
@@ -48,6 +57,7 @@ fn main() {
         Some("keygen") => cmd_keygen(&args[1..]),
         Some("sign") => cmd_sign(&args[1..]),
         Some("verify") => cmd_verify(&args[1..]),
+        Some("verify-env") => cmd_verify_env(&args[1..]),
         Some("list") => cmd_list(&args[1..]),
         Some("kemtest") => cmd_kemtest(&args[1..]),
         Some("x402pay") => cmd_x402pay(&args[1..]),
@@ -76,6 +86,8 @@ struct Opts {
     out: Option<String>,
     offer: Option<String>,
     policy: Option<String>,
+    seed_env: Option<String>,
+    verifying_key_file: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -88,6 +100,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         out: None,
         offer: None,
         policy: None,
+        seed_env: None,
+        verifying_key_file: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -104,6 +118,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--out" => o.out = Some(val),
             "--offer" => o.offer = Some(val),
             "--policy" => o.policy = Some(val),
+            "--seed-env" => o.seed_env = Some(val),
+            "--verifying-key-file" => o.verifying_key_file = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -144,18 +160,60 @@ fn cmd_sign(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(e) => return fail(e),
     };
-    let (Some(kid), Some(file)) = (o.key_id.as_deref(), o.file.as_deref()) else {
-        return fail("sign needs --key-id and --file".into());
+    let Some(file) = o.file.as_deref() else {
+        return fail("sign needs --file".into());
     };
     let msg = match std::fs::read(file) {
         Ok(m) => m,
         Err(e) => return fail(format!("read {file}: {e}")),
     };
-    let (alg, seed, _vk) = match keys::load_dsa(kid, o.keydir.clone()) {
-        Ok(x) => x,
-        Err(e) => return fail(e),
+    // Exactly one source for the signing key: an on-disk keyset (--key-id),
+    // or an env-delivered seed (--seed-env + --alg, the CI-attestation path:
+    // the seed never becomes an argument and never touches disk).
+    let (alg, kid, seed) = match (o.key_id.as_deref(), o.seed_env.as_deref()) {
+        (Some(_), Some(_)) => return fail("--key-id and --seed-env are mutually exclusive".into()),
+        (Some(kid), None) => {
+            let (a, s, _vk) = match keys::load_dsa(kid, o.keydir.clone()) {
+                Ok(x) => x,
+                Err(e) => return fail(e),
+            };
+            (a, kid.to_string(), s)
+        }
+        (None, Some(var)) => {
+            let Some(alg_id) = o.alg.as_deref() else {
+                return fail("sign --seed-env also needs --alg (e.g. --alg ml-dsa-65)".into());
+            };
+            let alg = match alg::SigAlg::parse(alg_id) {
+                Ok(a) => a,
+                Err(e) => return fail(e),
+            };
+            // the VALUE is read from the process environment; only its NAME
+            // ever appears in argv, logs, or error text
+            let b64seed = match std::env::var(var) {
+                Ok(v) => v,
+                Err(_) => {
+                    return fail(format!("env var {var} is not set — the seed is env-delivered, never an argument, never a file"))
+                }
+            };
+            let seed_vec = match b64::b64u_decode(b64seed.trim()) {
+                Some(v) if v.len() == 32 => v,
+                Some(v) => return fail(format!("seed in {var} is {} bytes, want 32", v.len())),
+                None => return fail(format!("seed in {var} is not base64url")),
+            };
+            let mut seed = zeroize::Zeroizing::new([0u8; 32]);
+            seed.copy_from_slice(&seed_vec);
+            let vk = match pq::dsa_public_from_seed(alg, &seed) {
+                Ok(v) => v,
+                Err(e) => return fail(e),
+            };
+            (alg, keys::derive_key_id(alg.id(), &vk), seed)
+        }
+        (None, None) => return fail(
+            "sign needs --key-id (on-disk keyset) or --seed-env VAR --alg ID (env-delivered seed)"
+                .into(),
+        ),
     };
-    match envelope::sign_envelope(alg, kid, &seed, &msg) {
+    match envelope::sign_envelope(alg, &kid, &seed, &msg) {
         Ok(env) => {
             let text = serde_json::to_string_pretty(&env).unwrap();
             match o.out {
@@ -209,6 +267,57 @@ fn cmd_verify(args: &[String]) -> i32 {
             println!(
                 "{}",
                 json!({ "verified": true, "key_id": kid, "alg": env["alg"] })
+            );
+            0
+        }
+        Err(e) => {
+            println!("{}", json!({ "verified": false, "reason": e }));
+            1
+        }
+    }
+}
+
+/// verify-env — verification against an EXPLICIT public key. The caller
+/// (e.g. the proof-lights gate) pins trust in its own reviewed
+/// configuration, hands the pinned verifying key over as a one-line
+/// base64url file, and keeps the private keyset out of the picture entirely.
+fn cmd_verify_env(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(file), Some(env_path), Some(vk_file)) = (
+        o.file.as_deref(),
+        o.envelope.as_deref(),
+        o.verifying_key_file.as_deref(),
+    ) else {
+        return fail("verify-env needs --file, --envelope, and --verifying-key-file".into());
+    };
+    let msg = match std::fs::read(file) {
+        Ok(m) => m,
+        Err(e) => return fail(format!("read {file}: {e}")),
+    };
+    let env_text = match std::fs::read_to_string(env_path) {
+        Ok(t) => t,
+        Err(e) => return fail(format!("read {env_path}: {e}")),
+    };
+    let env: Value = match serde_json::from_str(&env_text) {
+        Ok(v) => v,
+        Err(e) => return fail(format!("envelope parse: {e}")),
+    };
+    let vk_text = match std::fs::read_to_string(vk_file) {
+        Ok(t) => t,
+        Err(e) => return fail(format!("read {vk_file}: {e}")),
+    };
+    let vk = match b64::b64u_decode(vk_text.trim()) {
+        Some(v) => v,
+        None => return fail(format!("{vk_file} is not one line of base64url")),
+    };
+    match envelope::verify_envelope(&env, &vk, &msg) {
+        Ok(()) => {
+            println!(
+                "{}",
+                json!({ "verified": true, "alg": env["alg"], "key_id": env["key_id"] })
             );
             0
         }
@@ -366,6 +475,8 @@ fn cmd_selftest() -> i32 {
             let env = envelope::sign_envelope(a, &kid, &seed, b"selftest").unwrap();
             ok &= envelope::verify_envelope(&env, &vk, b"selftest").is_ok();
             ok &= envelope::verify_envelope(&env, &vk, b"tamper").is_err();
+            // the env-delivered-seed path derives the same public key
+            ok &= pq::dsa_public_from_seed(a, &seed).unwrap() == vk;
         }
     }
     for alg in ["ml-kem-512", "ml-kem-768", "ml-kem-1024"] {

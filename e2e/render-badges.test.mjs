@@ -7,10 +7,11 @@
 // only as honest as the weakest link in revision -> evidence -> document -> SVG,
 // so each link has a probe that must turn the per-badge line to FAIL and the exit
 // nonzero. The control proves the probes fail for their forgery, not for the harness.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { cp, mkdtemp, readFile, writeFile, rm, readdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -23,10 +24,10 @@ const DOC = 'skaists-meter.json', EV = 'skaists-meter.source.json', SVG = 'skais
 const blobId = b => createHash('sha1').update(`blob ${b.length}\0`).update(b).digest('hex');
 const sha3 = b => createHash('sha3-256').update(b).digest('hex');
 
-async function probe(forge) {
+async function probe(forge, opts = {}) {
   const dir = await mkdtemp(join(tmpdir(), 'proof-lights-'));
   try {
-    await cp(STATUS, dir, { recursive: true });
+    await cp(opts.signed ? opts.signed : STATUS, dir, { recursive: true });
     const doc = JSON.parse(await readFile(join(dir, DOC), 'utf8'));
     const put = d => writeFile(join(dir, DOC), JSON.stringify(d, null, 1) + '\n');
     // re-seal the evidence the way a forger would: new bytes, matching blob id and digest
@@ -36,7 +37,11 @@ async function probe(forge) {
       doc.source_digest = { ...doc.source_digest, value: sha3(bytes) };
     };
     await forge({ dir, doc, put, reseal });
-    const r = spawnSync(process.execPath, [join(HERE, 'render-badges.mjs'), '--check', '--dir', dir], { encoding: 'utf8' });
+    const args = [join(HERE, 'render-badges.mjs'), '--check', '--dir', dir];
+    if (opts.trust) args.push('--trust', opts.trust);
+    if (opts.verifier) args.push('--verifier', opts.verifier);
+    const env = { ...process.env, ...(opts.env || {}) };
+    const r = spawnSync(process.execPath, args, { encoding: 'utf8', env });
     return { code: r.status, out: r.stdout + r.stderr };
   } finally { await rm(dir, { recursive: true, force: true }); }
 }
@@ -72,7 +77,7 @@ test('a well-formed but nonexistent revision fails: forty hex chars are not a co
 });
 
 test('a supplied signature fails as unverified and does not hide the unsigned state', async () => {
-  refused(await probe(({ doc, put }) => put({ ...doc, signature: { alg: 'rot13', value: 'trust me' } })), /signature supplied but no verifier exists: UNVERIFIED/);
+  refused(await probe(({ doc, put }) => put({ ...doc, signature: { alg: 'rot13', value: 'trust me' } })), /origin local documents are unsigned by definition/);
 });
 
 test('non-JSON evidence fails even with its blob id and digest updated to match', async () => {
@@ -109,8 +114,8 @@ test('a malformed row fails the evidence schema', async () => {
   }), /evidence row 5: score is not the six kinds/);
 });
 
-test('a CI-origin claim fails until something binds run id + attempt to the revision', async () => {
-  refused(await probe(({ doc, put }) => put({ ...doc, measurement: { origin: 'ci', run_id: 1, run_attempt: 1 } })), /origin ci .* not verifiable yet/);
+test('a CI-origin claim without a signature fails: the run binding is unproven', async () => {
+  refused(await probe(({ doc, put }) => put({ ...doc, measurement: { origin: 'ci', run_id: 1, run_attempt: 1 } })), /measurement origin ci requires a signature/);
 });
 
 test('forged fixed metadata fails: the renderer and the law are exactly what derive writes', async () => {
@@ -190,4 +195,171 @@ test('zero status documents fail closed', async () => {
   const r = await probe(async ({ dir }) => { for (const f of await readdir(dir)) await rm(join(dir, f)); });
   assert.notEqual(r.code, 0);
   assert.match(r.out, /REFUSING — no status documents/);
+});
+
+/* ---- the CI-signing card's probes (2026-09-30) ------------------------------ */
+//
+// The card (docs/dispatches/2026-09-27-proof-lights-gate-repair.md, "The
+// CI-signing card") names six negative probes — wrong key, unknown key id,
+// expired key, revoked key, a signature over altered bytes, a CI run whose
+// head_sha differs from the document's revision — plus the controls. Everything
+// here runs on DISPOSABLE keys generated at test time by the estate's own
+// signer (bsigner keygen, ml-dsa-65): no private key material is committed,
+// printed, or written anywhere but the scratch dir, which is removed. The seed
+// travels process-env to child processes only (the same delivery law as
+// production, minus the secret).
+//
+// The rig is built ONCE (keygen x2, stage, sign — all fast) and shared; each
+// probe copies the SIGNED trio into its own scratch dir, forges one thing, and
+// runs the real --check with a forged or variant trust file.
+const BIN = join(HERE, '..', 'target', 'debug', process.platform === 'win32' ? 'bsigner.exe' : 'bsigner');
+const run2 = (cmd, args, opts = {}) => spawnSync(cmd, args, { encoding: 'utf8', cwd: HERE, ...opts });
+assert.ok(existsSync(BIN),
+  `the signature probes need the estate's signer built first: cargo build --locked -p bsigner (looked for ${BIN}). A missing verifier is a dependency gap to name, never a probe to skip.`);
+
+const REV = '7d6808d87c6b78343e2471aa38581146f5aa6c03';   // the revision the committed evidence measured
+const rigDir = await mkdtemp(join(tmpdir(), 'proof-lights-signing-'));
+const keysDir = join(rigDir, 'keys');
+const keygenOf = alg => {
+  const r = run2(BIN, ['keygen', '--alg', alg, '--keydir', keysDir]);
+  assert.equal(r.status, 0, `keygen ${alg}: ${r.stdout}${r.stderr}`);
+  return JSON.parse(r.stdout);
+};
+const keyA = keygenOf('ml-dsa-65');   // the trusted signer
+const keyB = keygenOf('ml-dsa-65');   // the wrong key
+const seedOf = async kid => JSON.parse(await readFile(join(keysDir, `${kid}.json`), 'utf8')).seed_b64u;
+const trustFile = async (name, keys, revoked = []) => {
+  const p = join(rigDir, name);
+  await writeFile(p, JSON.stringify({
+    schema: 'proof-lights/trust/1',
+    keys,
+    revoked,
+    law: 'probe trust — disposable keys, generated and destroyed by render-badges.test.mjs',
+  }, null, 1) + '\n');
+  return p;
+};
+const pin = (k, from, until) => ({ key_id: k.key_id, alg: 'ml-dsa-65', verifying_key_b64u: k.verifying_key_b64u,
+  valid_from: from, valid_until: until, purpose: 'ci-attestation', note: 'disposable probe key' });
+const WIDE = ['2020-01-01T00:00:00.000Z', '2040-01-01T00:00:00.000Z'];
+const trustGood = await trustFile('trust-good.json', [pin(keyA, ...WIDE)]);
+const trustWrong = await trustFile('trust-wrong.json', [pin(keyB, ...WIDE)]);
+const trustRevoked = await trustFile('trust-revoked.json', [pin(keyA, ...WIDE)], [keyA.key_id]);
+const trustExpired = await trustFile('trust-expired.json', [pin(keyA, '2020-01-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z')]);
+const trustFuture = await trustFile('trust-future.json', [pin(keyA, '2030-01-01T00:00:00.000Z', '2040-01-01T00:00:00.000Z')]);
+
+// stage the unsigned ci document from the committed evidence, then sign it with keyA
+const stageDir = join(rigDir, 'stage'), signedDir = join(rigDir, 'signed');
+{
+  const st = run2(process.execPath, ['render-badges.mjs', 'meter', '--from', '../docs/status/skaists-meter.source.json',
+    '--revision', REV, '--origin', 'ci', '--run-id', '4242', '--run-attempt', '1', '--stage', stageDir]);
+  assert.equal(st.status, 0, `staging the ci document failed:\n${st.stdout}${st.stderr}`);
+  const sg = run2(process.execPath, ['sign-badges.mjs', '--stage', stageDir, '--out', signedDir, '--expect-sha', REV,
+    '--trust', trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env: { ...process.env, PROBE_SEED: await seedOf(keyA.key_id) } });
+  assert.equal(sg.status, 0, `signing the staged document failed:\n${sg.stdout}${sg.stderr}`);
+}
+// the rig is checked at teardown; probes below only read from it
+after(() => rm(rigDir, { recursive: true, force: true }));
+
+const probeSigned = (forge, opts = {}) => probe(forge, { signed: signedDir, trust: trustGood, ...opts });
+
+test('control: a properly signed ci-origin badge passes with the signature provenance', async () => {
+  const r = await probeSigned(() => {});
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /PASS skaists-meter\.json: .*origin ci \(run 4242 attempt 1; the CI-attestation signature binds them to 7d6808d\) · signed by \S+ \(ml-dsa-65, valid at signing time, not revoked\)/, r.out);
+});
+
+test('a signature by a key the trust does not pin fails (wrong key)', async () => {
+  refused(await probeSigned(() => {}, { trust: trustWrong }), /signature key_id \S+ is not in the trust configuration/);
+});
+
+test('an unknown key id fails, whatever bytes the signature carries', async () => {
+  refused(await probeSigned(async ({ dir, doc, put }) => {
+    doc.signature.key_id = 'bheart-0000000000000000';
+    await put(doc);
+  }), /signature key_id bheart-0000000000000000 is not in the trust configuration/);
+});
+
+test('an expired key fails: validity is judged at signing time', async () => {
+  refused(await probeSigned(() => {}, { trust: trustExpired }), /was not valid at signing time/);
+});
+
+test('a key that is not valid yet fails the same way', async () => {
+  refused(await probeSigned(() => {}, { trust: trustFuture }), /was not valid at signing time/);
+});
+
+test('a revoked key fails absolutely', async () => {
+  refused(await probeSigned(() => {}, { trust: trustRevoked }), /signature key \S+ is revoked/);
+});
+
+test('a signature over altered bytes fails on the digest mismatch', async () => {
+  // measured_at is not derived from evidence, so ONLY the signature can catch
+  // this edit: one millisecond of drift and the signed canonical bytes differ
+  refused(await probeSigned(async ({ doc, put }) => {
+    doc.measured_at = '2026-09-27T05:13:54.467Z';
+    await put(doc);
+  }), /signature does not verify \(content digest mismatch/);
+});
+
+test('a signed document stripped of its signature fails: origin ci requires one', async () => {
+  refused(await probeSigned(async ({ doc, put }) => {
+    doc.signature = null;
+    await put(doc);
+  }), /measurement origin ci requires a signature/);
+});
+
+test('a signature on a local-origin document fails: assertions are never attested', async () => {
+  refused(await probeSigned(async ({ doc, put }) => {
+    doc.measurement = { origin: 'local', run_id: null, run_attempt: null };
+    await put(doc);
+  }), /origin local documents are unsigned by definition/);
+});
+
+test('a broken verifier binary fails closed, it does not pass unchecked', async () => {
+  const notAnExe = join(rigDir, 'not-an-executable.txt');
+  await writeFile(notAnExe, 'this exists but cannot verify anything\n');
+  refused(await probeSigned(() => {}, { verifier: notAnExe }), /signature does not verify \(bsigner verify-env gave no verdict\)/);
+});
+
+test('a malformed trust configuration refuses the whole check, not one badge', async () => {
+  const bad = join(rigDir, 'trust-bad.json');
+  await writeFile(bad, '{ "schema": "proof-lights/trust/1", "keys": "not-an-array" }\n');
+  const r = await probeSigned(() => {}, { trust: bad });
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /REFUSING — trust configuration .* does not validate/, r.out);
+});
+
+/* ---- the signing job's own refusals (e2e/sign-badges.mjs) -------------------- */
+
+const signRun = async (opts = {}) => {
+  const env = { ...process.env };
+  if (opts.noSeed) delete env.PROBE_SEED; else env.PROBE_SEED = await seedOf(keyA.key_id);
+  return run2(process.execPath, ['sign-badges.mjs', '--stage', stageDir, '--out', join(rigDir, 'out-' + Math.random().toString(36).slice(2)),
+    '--expect-sha', opts.expectSha || REV, '--trust', opts.trust || trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env });
+};
+
+test('the signing job refuses a document whose revision is not the run\'s head_sha', async () => {
+  const r = await signRun({ expectSha: '0123456789abcdef0123456789abcdef01234567' });
+  assert.notEqual(r.status, 0, `signed a revision the run did not check out:\n${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /REFUSING — .*revision \S+ is not the run's head/, r.stderr);
+});
+
+test('the signing job refuses to sign with a key the trust does not pin', async () => {
+  const r = await signRun({ trust: trustWrong });
+  assert.notEqual(r.status, 0, `signed with an unpinned key:\n${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /REFUSING — the environment's key \S+ is not pinned/, r.stderr);
+});
+
+test('the signing job refuses an already-signed document', async () => {
+  // stage a second unsigned doc set? simpler: point --stage at the SIGNED dir
+  const r = run2(process.execPath, ['sign-badges.mjs', '--stage', signedDir, '--out', join(rigDir, 'out-resign'),
+    '--expect-sha', REV, '--trust', trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN],
+    { env: { ...process.env, PROBE_SEED: await seedOf(keyA.key_id) } });
+  assert.notEqual(r.status, 0, `re-signed an already-signed document:\n${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /REFUSING — .*already carries a signature/, r.stderr);
+});
+
+test('without a seed in the environment the signing job skips BY NAME, exit 0', async () => {
+  const r = await signRun({ noSeed: true });
+  assert.equal(r.status, 0, `${r.stdout}${r.stderr}`);
+  assert.match(r.stdout, /no PROBE_SEED in the environment — nothing to sign/, r.stdout);
 });
