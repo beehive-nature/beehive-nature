@@ -46,8 +46,10 @@ predates it and is superseded.
   revocation; fails closed without a verifier), and the `badge-signing` CI job (pushes to main only,
   protected environment, PR content never signed, signed trio published as an artifact). Independent
   review at the first head REQUEST_CHANGES (4 findings incl. a dead artifact upload and an unbound
-  run id) — all repaired in the follow-up commit; probes `node --test render-badges.test.mjs` →
-  39/39 on disposable keys; `cargo test --locked -p bsigner` → 36; `--check` → 1/1 on the committed
+  run id) — all repaired; RENEWED review APPROVE at `047a4c71b`; its two P3 notes (forward-dressed
+  signing time, crash-instead-of-named-refusal) repaired in the follow-up commit; probes
+  `node --test render-badges.test.mjs` → 41/41 on disposable keys; `cargo test --locked -p bsigner`
+  → 36; `--check` → 1/1 on the committed
   unsigned badge; `lint-ci-shape` 102/102; secret-scan clean. Production key pair + environment
   secret remain the founder's gesture (procedure in the dispatch). Dispatch:
   `docs/dispatches/2026-09-30-proof-lights-ci-signing.md`.

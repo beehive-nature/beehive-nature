@@ -182,16 +182,19 @@ double signing — all correctly refused or benign); four findings repaired:
 2. **F6b — `signed_at_ms` is not signed.** The envelope's signing time sits
    outside the ML-DSA signature (which covers the canonical bytes only), so
    an out-of-window signature can be dressed in-window by editing the field —
-   the reviewer demonstrated it. Repair, honestly scoped: the gate now refuses
-   any signature whose claimed time PREDATES the measurement it attests
-   (`measured_at`), the PASS line says "key window covers the **claimed**
-   signing time" instead of implying attested time, and the residual boundary
-   is stated rather than papered over: a leaked seed whose window is still
-   open can backdate within `[measured_at, now]`; that exposure is what the
-   revocation list is for, and the rotation procedure says so. Folding the
-   timestamp into the signed bytes would change `bheart.signature/1`
-   semantics for every user of the envelope (x402 included) — a separate
-   card if the estate wants it.
+   the reviewer demonstrated it. Repair, honestly scoped: the gate refuses
+   any signature whose claimed time predates the measurement it attests
+   (`measured_at`) or exceeds clock skew of the check itself (5 minutes; the
+   renewed review showed forward-dressing into a future window otherwise
+   passes — F6c). The enforced acceptance region for the claimed signing time
+   is exactly `[measured_at, now + skew] ∩ key window`, the PASS line says
+   "key window covers the **claimed** signing time", and the residual
+   boundary is stated rather than papered over: a leaked seed whose window
+   covers part of that region can still dress time inside it — that exposure
+   is what the revocation list is for, and the rotation procedure says so.
+   Folding the timestamp into the signed bytes would change
+   `bheart.signature/1` semantics for every user of the envelope (x402
+   included) — a separate card if the estate wants it.
 3. **F11 — run binding was enforced by workflow wiring only.** The reviewer
    hand-edited a staged document to claim `run 777 attempt 42` and the signer
    signed it (only the revision was checked). `sign-badges.mjs` now REQUIRES
@@ -209,6 +212,27 @@ double signing — all correctly refused or benign); four findings repaired:
 
 New probes cover all of it: backdated signing time, mislabeled trust row,
 run-id mismatch refusal (39/39 total).
+
+## Renewed review (2026-09-30): APPROVE at `047a4c71b`
+
+The same reviewer re-ran its battery against the repairs (F6b and F11
+re-attacked, the marker-based upload logic simulated under `bash -e`, the
+`deriveKeyId` restatement proven equivalent to Rust's on real keys) and
+approved. Two new P3 notes, both fail-closed, both repaired in the follow-up
+commit anyway:
+
+- **F6c — forward-dating.** The first repair bounded only the lower end of
+  the claimed signing time; a signature dressed into a FUTURE window passed.
+  The upper end is now `now + 5 minutes` (clock-skew allowance); the
+  acceptance region is stated exactly above and probed.
+- **P3-2 — a staged document with `measurement: null` crashed the signer**
+  with a TypeError before the named guard (fail-closed, but unnamed). The
+  measurement guard now precedes the run-binding dereference; a probe
+  requires the named refusal and the absence of a TypeError.
+
+The verdict and its caveat: the reviewer wrote none of the code, but ran
+under the authoring session's attribution — recorded, not hidden, same as
+every review in this lane.
 
 ## Key rotation procedure (the card's item 6)
 
@@ -253,8 +277,8 @@ run-id mismatch refusal (39/39 total).
   (`load_dsa`/`load_kem` signatures, untouched by this card; CI gates fmt, not
   clippy, on the workspace). Not fixed here to keep this diff scoped; recorded
   for whoever owns the next bsigner lane.
-- `node --test render-badges.test.mjs` → 39/39 (21 carried, 2 reworded, 16
-  new; disposable-key rig built and destroyed inside the suite; the three
+- `node --test render-badges.test.mjs` → 41/41 (21 carried, 2 reworded, 18
+  new; disposable-key rig built and destroyed inside the suite; the five
   post-review probes are marked with their finding numbers).
 - `node render-badges.mjs --check` → 1/1 PASS on the committed (local,
   unsigned) badge with the shipped empty trust file.

@@ -329,12 +329,17 @@ function verifySignature(doc, trust) {
   // the envelope's signing time is a CLAIM: it sits outside the ML-DSA
   // signature, which covers the document's canonical bytes only (independent
   // review F6b, 2026-09-30 — an out-of-window signature can be dressed
-  // in-window by editing signed_at_ms). One lie it cannot tell is attesting a
-  // measurement before the measurement existed; backdating below measured_at
-  // fails here. Backdating inside [measured_at, now] remains possible for a
-  // LEAKED seed whose window is still open — that is revocation's job, and
-  // the boundary is stated in the dispatch rather than papered over.
+  // in-window by editing signed_at_ms). Two lies it cannot tell: attesting a
+  // measurement before it existed, and claiming a time beyond clock skew of
+  // the check itself (renewed review F6c: forward-dating into a future window
+  // otherwise passes). The enforced acceptance region is therefore
+  // [measured_at, now + skew] ∩ key window. Backdating or forward-dating
+  // inside that region remains possible for a LEAKED seed whose window
+  // covers it — that is revocation's job, and the boundary is stated in the
+  // dispatch rather than papered over.
+  const SKEW_MS = 5 * 60 * 1000;   // signer (CI) and checker clocks may differ; five minutes is generous
   if (canonicalTime(doc.measured_at) && signedAt < Date.parse(doc.measured_at)) f.push(`signature claims ${new Date(signedAt).toISOString()}, before the measurement it attests (${doc.measured_at})`);
+  if (signedAt > Date.now() + SKEW_MS) f.push(`signature claims ${new Date(signedAt).toISOString()}, in the future beyond clock skew (now ${new Date().toISOString()})`);
   // the math: bsigner verifies the envelope over the canonical bytes
   const verifier = resolveVerifier();
   if (!verifier) return [...f, 'signature verifier unavailable: build bsigner (cargo build --locked -p bsigner) and pass --verifier PATH or set PROOF_LIGHTS_VERIFIER (fails closed)'];

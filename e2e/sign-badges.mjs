@@ -98,11 +98,13 @@ try {
     const doc = JSON.parse(await readFile(join(STAGE, f), 'utf8'));
     // 1 HEAD BINDING: the run's own sha is the only revision this run can attest
     if (doc.revision !== EXPECT_SHA) refuse(`${f}: revision ${doc.revision} is not the run's head ${EXPECT_SHA} — refusing to bind a run to a revision it did not check out`);
-    // 2 RUN BINDING: run id and attempt sit inside the signed bytes; they must
+    // 2 origin ci only: a local-origin document is an assertion, never attested
+    // (and a missing measurement is a named refusal, never a dereference crash)
+    if (!doc.measurement || typeof doc.measurement !== 'object') refuse(`${f}: measurement provenance is missing — nothing to attest`);
+    if (doc.measurement.origin !== 'ci') refuse(`${f}: measurement origin is not ci — the signing job attests CI measurements only`);
+    // 3 RUN BINDING: run id and attempt sit inside the signed bytes; they must
     // be THIS run's, or the signature would attest a run that never happened
     if (doc.measurement.run_id !== EXPECT_RUN || doc.measurement.run_attempt !== EXPECT_ATTEMPT) refuse(`${f}: measurement claims run ${doc.measurement.run_id} attempt ${doc.measurement.run_attempt}, this is run ${EXPECT_RUN} attempt ${EXPECT_ATTEMPT} — refusing to attest a run that is not this one`);
-    // 3 origin ci only: a local-origin document is an assertion, never attested
-    if (!doc.measurement || doc.measurement.origin !== 'ci') refuse(`${f}: measurement origin is not ci — the signing job attests CI measurements only`);
     if (doc.signature !== null) refuse(`${f}: already carries a signature — refusing to re-sign`);
     // 4 GATE BEFORE INK: the unsigned document must already pass everything else
     const why = (await verify(doc, join(STAGE, f.replace(/\.json$/, '.source.json')), join(STAGE, f.replace(/\.json$/, '.svg')), { trust, ciUnsignedOk: true }))

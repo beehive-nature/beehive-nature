@@ -279,6 +279,15 @@ test('a backdated signing time cannot predate the measurement it attests (indepe
   }, { trust: trustExpired }), /signature claims 2022-06-01T00:00:00.000Z, before the measurement it attests/);
 });
 
+test('a forward-dressed signing time cannot exceed clock skew of the check (renewed review F6c)', async () => {
+  // the mirror of F6b: a not-yet-valid window dressed into by claiming a
+  // FUTURE signing time — the acceptance region's upper end is now + skew
+  refused(await probeSigned(async ({ doc, put }) => {
+    doc.signature.signed_at_ms = Date.parse('2031-06-01T00:00:00.000Z');
+    await put(doc);
+  }, { trust: trustFuture }), /signature claims 2031-06-01T00:00:00.000Z, in the future beyond clock skew/);
+});
+
 test('a signature by a key the trust does not pin fails (wrong key)', async () => {
   refused(await probeSigned(() => {}, { trust: trustWrong }), /signature key_id \S+ is not in the trust configuration/);
 });
@@ -350,10 +359,10 @@ test('a trust row whose key_id does not derive from its own public key is refuse
 
 /* ---- the signing job's own refusals (e2e/sign-badges.mjs) -------------------- */
 
-const signRun = async (opts = {}) => {
+const signRun = async (opts = {}, stage = stageDir) => {
   const env = { ...process.env };
   if (opts.noSeed) delete env.PROBE_SEED; else env.PROBE_SEED = await seedOf(keyA.key_id);
-  return run2(process.execPath, ['sign-badges.mjs', '--stage', stageDir, '--out', join(rigDir, 'out-' + Math.random().toString(36).slice(2)),
+  return run2(process.execPath, ['sign-badges.mjs', '--stage', stage, '--out', join(rigDir, 'out-' + Math.random().toString(36).slice(2)),
     '--expect-sha', opts.expectSha || REV, '--expect-run-id', String(opts.expectRun || 4242), '--expect-run-attempt', String(opts.expectAttempt || 1),
     '--trust', opts.trust || trustGood, '--seed-env', 'PROBE_SEED', '--verifier', BIN], { env });
 };
@@ -368,6 +377,19 @@ test('the signing job refuses a document claiming a run that is not this one (in
   const r = await signRun({ expectRun: 777 });
   assert.notEqual(r.status, 0, `signed a run-id the run never had:\n${r.stdout}${r.stderr}`);
   assert.match(r.stderr, /REFUSING — .*claims run 4242 attempt 1, this is run 777 attempt 1/, r.stderr);
+});
+
+test('a staged document with no measurement is a named refusal, not a crash (renewed review P3-2)', async () => {
+  const brokenStage = join(rigDir, 'stage-nomeasurement');
+  await cp(stageDir, brokenStage, { recursive: true });
+  const p = join(brokenStage, DOC);
+  const doc = JSON.parse(await readFile(p, 'utf8'));
+  doc.measurement = null;
+  await writeFile(p, JSON.stringify(doc, null, 1) + '\n');
+  const r = await signRun({}, brokenStage);
+  assert.notEqual(r.status, 0, `signed a document with no measurement:\n${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /REFUSING — .*measurement provenance is missing/, r.stderr);
+  assert.doesNotMatch(r.stderr, /TypeError/, `the refusal is a crash, not a name:\n${r.stderr}`);
 });
 
 test('the signing job refuses to sign with a key the trust does not pin', async () => {
