@@ -15,18 +15,15 @@
   },
   "mission-room.html [bee]": {
    "CAPS": 3,
-   "SMALL": 104,
-   "UNDER": 1
+   "SMALL": 103
   },
   "mission-room.html [cypherpunk]": {
    "CAPS": 3,
-   "SMALL": 104,
-   "UNDER": 1
+   "SMALL": 104
   },
   "mission-room.html [raver]": {
    "CAPS": 3,
-   "SMALL": 103,
-   "UNDER": 1
+   "SMALL": 103
   },
   "missions.html [bee]": {
    "CAPS": 3,
@@ -35,12 +32,11 @@
   },
   "missions.html [cypherpunk]": {
    "CAPS": 2,
-   "SMALL": 28,
-   "TINY": 2
+   "SMALL": 28
   },
   "missions.html [raver]": {
-   "CAPS": 3,
-   "SMALL": 28,
+   "CAPS": 2,
+   "SMALL": 27,
    "TINY": 3
   },
   "receipts.html [bee]": {
@@ -50,13 +46,13 @@
   },
   "receipts.html [cypherpunk]": {
    "CAPS": 1,
-   "JUNK": 22,
-   "SMALL": 144
+   "JUNK": 23,
+   "SMALL": 146
   },
   "receipts.html [raver]": {
    "CAPS": 1,
    "JUNK": 20,
-   "SMALL": 133
+   "SMALL": 134
   }
  }
 }

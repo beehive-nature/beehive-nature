@@ -43,12 +43,12 @@ Worktree law was strictly followed: no commits were made from `C:\Users\travi\be
 ### B. Node Job: University Smoke (Review Deck Surface Count)
 - **CI Failure:** `FAIL review deck covers every surface (108) and lists the university — deck lists 105, tree holds 108`.
 - **Root Cause:** Incomplete surfaces registration ritual: the 3 new missions surfaces (`missions.html`, `mission-room.html`, `receipts.html`) were registered in `estate.json` and atlas, but their entries in `surfaces/review.html` `SURFACES` array were missing (105 listed vs 108 on disk).
-- **Heal:** Added `'missions.html','mission-room.html','receipts.html'` to `SURFACES` in `surfaces/review.html`. Verified `e2e/university-smoke.mjs` PASS (87/0, deck covers 108).
+- **Heal (commit `d85b5fc03`):** Added `'missions.html','mission-room.html','receipts.html'` to `SURFACES` in `surfaces/review.html`. Verified `e2e/university-smoke.mjs` PASS (87/0, deck covers 108). Confirmed green in GitHub CI on commit `d85b5fc03`.
 
 ### C. Eternal Job: Bottom Half Ratchet Baseline
-- **CI Failure:** `ratchet: 23 worse · 0 better than footer-audit.baseline.json`.
-- **Root Cause:** The missions feature was authored on 2026-09-13 before the `footer-audit` ratchet was introduced on 2026-09-26. The new surfaces had no baseline entries in `e2e/footer-audit.baseline.json`, causing all findings on them to be judged as regressions against 0.
-- **Heal:** Updated `e2e/footer-audit.baseline.json` via `--write-baseline` to establish the baseline floors for the 3 new missions surfaces across bee, raver, and cypherpunk registers. Ratchet verified locally: 0 worse · 0 better.
+- **CI Failure:** `ratchet: 3 worse · 3 better than footer-audit.baseline.json` on `receipts.html`.
+- **Root Cause:** The missions feature (authored 2026-09-13) predated the 2026-09-26 footer ratchet. When initially baselined in commit `d85b5fc03`, counts were sampled from Windows Chromium. Due to font metric differences between Windows and Ubuntu Linux (Playwright runner), 1–2 borderline findings diverged on `receipts.html` (e.g. SMALL 144 vs 146, JUNK 22 vs 23).
+- **Heal:** Updated `e2e/footer-audit.baseline.json` to the exact floors measured by the CI Linux runner across all 9 views for `receipts.html`, `mission-room.html`, and `missions.html`.
 
 ## 5. Verification & CI Receipts (Local Tree)
 
@@ -59,7 +59,6 @@ Worktree law was strictly followed: no commits were made from `C:\Users\travi\be
 - `node --test e2e/lang-coverage.test.mjs`: PASS (13 passed, 0 failed).
 - `node --test e2e/agent-mail-profile.test.mjs e2e/profile-views.test.mjs`: PASS (22 passed, 0 failed).
 - `node e2e/zcode-missions-check.mjs`: PASS (72 passed, 0 failed).
-- `node e2e/footer-audit.mjs --only missions.html,mission-room.html,receipts.html --baseline footer-audit.baseline.json`: PASS (0 worse, 0 better).
 
 ## 6. Isolated External Repositories
 
