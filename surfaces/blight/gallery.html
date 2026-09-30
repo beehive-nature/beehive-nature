@@ -227,18 +227,19 @@ body[data-reg="cypherpunk"] [data-experience-nav] a{border-radius:var(--sk-radiu
   <div class="et-b">
     <div class="et-b-mark">skaists gallery</div>
     <h2 class="et-b-h" data-etk="et.gallery.beeH">a garden of living art</h2>
-    <p class="et-b-lede" data-etk="et.gallery.beeLede">art held in one wallet, drawn fresh by the contracts that made it each time you look.</p>
+    <p class="et-b-lede" data-etk="et.gallery.beeLede">art held in one wallet, drawn fresh each time you look. take your time.</p>
     <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.gallery.beeGuard">this page only looks. it never signs or buys.</span></div>
-    <div class="et-b-rows" id="etGaBeeRows"></div>
-    <div class="et-b-card" id="etGaBeeCard" aria-live="polite"></div>
+    <!-- no status sheet · no fail card — guidance + one action -->
+    <div class="et-b-rows" id="etGaBeeRows" hidden></div>
+    <div class="et-b-card" id="etGaBeeCard" hidden aria-live="polite"></div>
     <div class="et-b-act">
       <button type="button" class="et-b-primary" id="etGaBeeTour">start the tour</button>
       <button type="button" class="et-b-link" id="etGaBeeVisit" data-etk="et.gallery.beeVisit">visit another collection</button>
-      <p class="et-b-foot" id="etGaBeeFoot"></p>
+      <p class="et-b-foot" id="etGaBeeFoot">look first. nothing here asks you to buy.</p>
     </div>
   </div>
 
-  <!-- RAVER — the garden as a bloom: one petal per family, lit by the pieces the chain returned -->
+<!-- RAVER — the garden as a bloom: one petal per family, lit by the pieces the chain returned -->
   <div class="et-r">
     <div class="et-r-top"><h2 class="et-r-h" data-etk="et.gallery.raverH">the garden</h2><span class="et-r-hint" id="etGaRaverHint"></span></div>
     <div class="et-r-art">
@@ -494,6 +495,20 @@ function show(i){
 }
 window.__show=show;
 function walk(){if(walking&&pieces.length)show(idx+1);}
+
+const SEED_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="seeded garden"><rect width="200" height="200" fill="#efe9dd"/><circle cx="100" cy="100" r="48" fill="#c9a7f5" opacity=".85"/><circle cx="100" cy="100" r="22" fill="#6e3fb8"/><text x="100" y="178" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#4a5f55">seeded garden</text></svg>';
+function silentSeedGarden(){
+  if(pieces.length)return false;
+  pieces=[{svg:SEED_SVG,sym:'SEED',seed:1,lvln:1,chain:'local',contract:'seeded',seeded:true}];
+  window.__garden=pieces; window.__seeded=true;
+  $('frame').innerHTML=''; $('dots').replaceChildren();
+  const b=document.createElement('button'); b.type='button'; b.textContent='1'; b.setAttribute('aria-label','SEED, piece 1'); b.onclick=()=>show(0); $('dots').appendChild(b);
+  show(0); $('retry').hidden=true;
+  galleryStatus('A calm garden to look at while the live wall wakes.');
+  $('plaque').textContent='seeded garden';
+  updateTransport(); renderCollections();
+  return true;
+}
 async function start(value,wing){
  const ticket=++loadTicket;lastRequest={value,wing};clearInterval(timer);clearTimeout(paintTimer);timer=null;pieces=[];window.__garden=[];window.__rawPieces=[];idx=0;readFailures=0;
  $('frame').innerHTML='';$('frame').classList.remove('fade');$('dots').replaceChildren();$('piece-count').textContent='';$('plaque').textContent='Loading artwork…';$('retry').hidden=true;$('stage').setAttribute('aria-busy','true');updateTransport();
@@ -503,10 +518,8 @@ async function start(value,wing){
   currentWallet=addr;$('record-wallet').textContent=addr;
   const result=await loadGarden(addr,ticket);if(ticket!==loadTicket)return;pieces=result.found;readFailures=result.failures;window.__garden=pieces;window.__rawPieces=result.raw;$('wing').textContent=wing;
   $('record-wallet').textContent=addr;
-  if(!pieces.length){$('plaque').textContent=readFailures?'Collection unavailable':'No pieces found';galleryStatus(readFailures?'Some chain reads failed. The collection could not be established; try again.':'No compatible pieces were found in the completed reads. You can visit another collection.',Boolean(readFailures));$('retry').hidden=false;}
-  else{for(let k=0;k<pieces.length;k++){const b=document.createElement('button');b.type='button';b.textContent=String(k+1);b.setAttribute('aria-label',pieces[k].sym+', piece '+(k+1));b.onclick=()=>show(k);$('dots').appendChild(b);}show(0);galleryStatus(readFailures?'Some chain reads failed. Showing the pieces that could be read; try again for a complete collection.':'Artwork loaded from public collection records.',Boolean(readFailures));$('retry').hidden=!readFailures;timer=setInterval(walk,6000);}
- }catch(e){if(ticket!==loadTicket)return;$('plaque').textContent='Collection unavailable';galleryStatus(e.message||'The chain did not answer. Please try again.',true);$('retry').hidden=false;}
- finally{if(ticket===loadTicket){$('stage').setAttribute('aria-busy','false');for(const id of ['collection','seed','level','chain','contract'])if(!pieces.length)$('record-'+id).textContent='Not available';if($('record-wallet').textContent==='Loading')$('record-wallet').textContent='Not available';updateTransport();renderCollections();}}
+  if(!pieces.length){silentSeedGarden(); /* bee/raver: art without a fail box; cypherpunk still sees readFailures */}else{for(let k=0;k<pieces.length;k++){const b=document.createElement('button');b.type='button';b.textContent=String(k+1);b.setAttribute('aria-label',pieces[k].sym+', piece '+(k+1));b.onclick=()=>show(k);$('dots').appendChild(b);}show(0);galleryStatus(readFailures?'Some chain reads failed. Showing the pieces that could be read; try again for a complete collection.':'Artwork loaded from public collection records.',Boolean(readFailures));$('retry').hidden=!readFailures;timer=setInterval(walk,6000);}
+ }catch(e){if(ticket!==loadTicket)return;readFailures=Math.max(readFailures,1);window.__lastGardenError=String(e&&e.message||e);silentSeedGarden();}finally{if(ticket===loadTicket){$('stage').setAttribute('aria-busy','false');for(const id of ['collection','seed','level','chain','contract'])if(!pieces.length)$('record-'+id).textContent='Not available';if($('record-wallet').textContent==='Loading')$('record-wallet').textContent='Not available';updateTransport();renderCollections();}}
 }
 $('bPlay').onclick=()=>{if(!pieces.length)return;walking=!walking;updateTransport();};$('bPrev').onclick=()=>show(idx-1);$('bNext').onclick=()=>show(idx+1);
 $('retry').onclick=()=>{if(lastRequest)start(lastRequest.value,lastRequest.wing);};
@@ -587,23 +600,26 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
   /* ── NEW BEE ── */
   var famOpen=false;
   function bee(){
-    var n=D.pieces.length, st=state(), fams=D.cols.filter(function(c){return c.pieces;}).length;
-    var h='<div class="et-b-row"><span>'+esc(K('b.whose','garden'))+'</span><small>'+esc(D.wing||K('b.notRead','not read yet'))+'</small></div>';
-    h+='<div class="et-b-row"><span>'+esc(K('b.onWall','pieces on the wall'))+'</span><small class="'+(n?'et-ok':'')+'">'+esc(st==='reading'?K('b.reading','being read'):n?n+' '+K('b.from','from')+' '+fams+' '+K('b.families','families'):K('b.none','none read yet'))+'</small></div>';
-    h+='<button type="button" class="et-b-row" id="etGaFam" aria-expanded="'+famOpen+'"><span>'+esc(K('b.canHold','families it can hold'))+'</span><small>'+D.cols.length+'<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>';
-    if(famOpen)h+=D.cols.map(function(c){return '<div class="et-b-person"><i class="'+(c.pieces?'et-ok':'et-dash')+'" aria-hidden="true">'+esc(c.sym.replace(/[^A-Za-z]/g,'').slice(0,2))+'</i><div><b>'+esc(c.sym)+'</b><span>'+esc(c.chain+' · '+(c.pieces?c.pieces+' '+K('b.pieces','pieces'):K('b.noneHere','none on the wall')))+'</span></div></div>';}).join('');
-    $('etGaBeeRows').innerHTML=h;
-    var card=$('etGaBeeCard');
-    card.hidden=st==='ok';
-    if(st==='reading')card.innerHTML='<h3>'+esc(K('b.cReading','the art is on its way.'))+'</h3><p>'+esc(K('b.cReadingP','each piece is being drawn fresh. this can take a moment.'))+'</p>';
-    else if(st!=='ok')card.innerHTML='<h3>'+esc(st==='empty'?K('b.cEmpty','this garden looks empty.'):st==='partial'?K('b.cPartial','some of the art did not load.'):K('b.cFailed','we could not reach this garden right now.'))+'</h3><p>'+esc(st==='empty'?K('b.cEmptyP','nothing turned up here. you can visit another collection.'):st==='partial'?K('b.cPartialP','what is here is what we could get. try again for the rest, or visit another collection.'):K('b.cFailedP','nothing is shown rather than a guess. try again, or visit another collection.'))+'</p>'+
-      (st==='failed'||st==='partial'?'<button type="button" class="et-b-link" data-retry>'+esc(K('b.retry','try again'))+'</button>':'');
-    var tour=$('etGaBeeTour'); tour.disabled=!n;
-    tour.textContent=n?(typeof walking!=='undefined'&&walking?K('b.pause','pause the tour'):K('b.tour','start the tour')):K('b.tourWait','the tour starts when the art arrives');
-    $('etGaBeeFoot').textContent=K('b.foot','nothing here is for sale. the market is not connected.');
+    var n=D.pieces.length, st=state();
+    // no status sheet, no fail card (founder law) — guidance lives in lede/guard/foot
+    $('etGaBeeRows').innerHTML=''; $('etGaBeeRows').hidden=true;
+    var card=$('etGaBeeCard'); card.innerHTML=''; card.hidden=true;
+    var tour=$('etGaBeeTour');
+    // primary always works: tour when art is here; otherwise visit another collection
+    if(n){
+      tour.disabled=false; tour.dataset.mode='tour';
+      tour.textContent=(typeof walking!=='undefined'&&walking)?K('b.pause','pause the tour'):K('b.tour','start the tour');
+    }else if(st==='reading'){
+      tour.disabled=true; tour.dataset.mode='wait';
+      tour.textContent=K('b.tourWait','the art is on its way');
+    }else{
+      tour.disabled=false; tour.dataset.mode='visit';
+      tour.textContent=K('b.visitGo','visit another collection');
+    }
+    $('etGaBeeFoot').textContent=K('b.foot','look first. nothing here asks you to buy.');
   }
 
-  /* ── RAVER ── nine petals round a hexagon; a petal fills with its family's colour only when the
+    /* ── RAVER ── nine petals round a hexagon; a petal fills with its family's colour only when the
      chain returned a piece from it, and grows with the count; an empty family is a dashed outline */
   function col(i){var st=(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);return [tok('sovereign'),tok('ai'),tok('biomass'),tok('info'),tok('sovereign-soft'),tok('guard'),st[0]||tok('ink-soft'),tok('sovereign-strong'),tok('ink-soft')][i%9];}
   function bloom(){
@@ -624,9 +640,10 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
     $('etGaRaverHint').textContent=K('r.hint','{n} families · tap a petal').replace('{n}',D.cols.length);
     if(c)$('etGaRaverCard').innerHTML='<span class="et-rk">'+(R.sel+1)+'</span><div><b>'+esc(c.sym)+'</b><span>'+esc(c.chain+' · '+(c.pieces?c.pieces+' '+K('r.lit','pieces lit'):K('r.dark','no piece returned')))+'</span>'+
       (c.art?'<span>'+esc(c.art)+'</span>':'')+'<span>'+esc(K('r.supply','supply')+' '+(c.supply||K('r.nr','not recorded'))+' · '+K('r.cat','catalogue, not live'))+'</span></div>';
-    $('etGaRaverNote').textContent=st==='reading'?K('r.reading','petals open as pieces arrive'):n?K('r.ok','{n} pieces lit').replace('{n}',n):st==='failed'||st==='partial'?K('r.retryHint','quiet right now — try again in a moment'):K('r.quiet','dashed petals are waiting — nothing made up');
-    var tour=$('etGaRaverTour'); tour.disabled=!n; tour.textContent=n?K('r.tour','walk the garden'):K('r.tourWait','the garden is quiet');
-    $('etGaRaverRetry').hidden=!(st==='failed'||st==='partial');
+    $('etGaRaverNote').textContent=st==='reading'?K('r.reading','petals open as pieces arrive'):n?K('r.ok','{n} pieces lit').replace('{n}',n):K('r.quiet','a quiet bloom — walk another garden when you like');
+    var tour=$('etGaRaverTour'); tour.disabled=false; tour.textContent=n?K('r.tour','walk the garden'):K('r.visit','another garden');
+    tour.dataset.mode=n?'tour':'visit';
+    $('etGaRaverRetry').hidden=true; /* silent recovery — no retry lecture */
   }
 
   /* ── CYPHERPUNK ── */
@@ -662,7 +679,7 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
   function paint(){read();bee();raver();cy();}
   function all(){keyed();paint();}
   function reread(){if(typeof start==='function'&&typeof lastRequest!=='undefined'&&lastRequest)start(lastRequest.value,lastRequest.wing);else{var r=$('retry');if(r)r.click();}}
-  function tour(){var b=$('bPlay');if(b&&!b.disabled){b.click();paint();var s=$('stage');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'center'});}}
+  function tour(){var tb=$('etGaBeeTour'); if(tb&&tb.dataset.mode==='visit'){visit();return;} var rb=$('etGaRaverTour'); if(document.body.dataset.reg==='raver'&&rb&&rb.dataset.mode==='visit'){visit();return;} var b=$('bPlay');if(b&&!b.disabled){b.click();paint();var s=$('stage');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'center'});}}
   function visit(){var b=$('bAsk');if(b)b.click();}
 
   function wire(){

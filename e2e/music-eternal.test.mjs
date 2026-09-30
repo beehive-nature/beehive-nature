@@ -73,7 +73,7 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
       const D = window.__eternal.data, t = s => (document.querySelector(s) || {}).textContent || '';
       return {
         d: [D.channel, D.epoch, D.sequence, D.items.map(i => i.kind + ':' + i.size), D.creator, D.admission.payment, D.admission.approval, D.joined, D.doors],
-        beeSheet: !!document.getElementById('etBeeRows'), beeRows: document.querySelectorAll('#eternal > .et-b .et-b-row').length, beeInner: (document.querySelector('#eternal > .et-b')||{}).innerText||'', beeNow: (document.getElementById('etBeeNow')||{}).textContent||'',
+        beeSheet: !!document.getElementById('etBeeRows'), beeRows: document.querySelectorAll('#eternal > .et-b .et-b-row').length, beeInner: (document.querySelector('#eternal > .et-b')||{}).innerText||'', beeNow: (document.getElementById('etBeeNow')||{}).textContent||'', beePrimary: (document.getElementById('etBeeJoin')||{}).textContent||'', beeDisabled: !!(document.getElementById('etBeeJoin')||{}).disabled,
         planets: document.querySelectorAll('#etSky .planet').length, epochs: document.querySelectorAll('#etSky .epoch').length, ticks: document.querySelectorAll('#etSky .tick').length,
         hint: t('#etRaverHint'), env: t('#etEnvelope'), items: [...document.querySelectorAll('#etItems tr')].slice(1).map(r => r.children[0].textContent),
         pageFacts: [t('#f-channel'), t('#f-epoch'), t('#f-sequence'), t('#f-items'), t('#g-payment')],
@@ -90,33 +90,38 @@ test('the same facts in all three: the channel, the set, the creator, the gate',
   // New bee: no four-row status sheet — one primary only (Floor A). Facts still live in __eternal.data + Raver/Cypherpunk.
   assert.equal(a.beeSheet, false, 'New bee has no etBeeRows status sheet');
   assert.equal(a.beeRows, 0, 'New bee has no .et-b-row status rows');
-  assert.ok(!/in the set|who made it/i.test(a.beeInner), 'dead status sheet labels gone from New bee');
-  assert.match(a.beeNow, /the room is open/i);
+  assert.ok(!/in the set|who made it|could not|try again/i.test(a.beeInner), 'no status sheet or fail copy on New bee');
+  assert.match(a.beePrimary, /listen now/i);
+  assert.equal(a.beeDisabled, false, 'listen primary always works');
   assert.equal(facts.raver.planets, 4, 'one planet per encrypted item'); assert.equal(facts.raver.epochs, ENV.epoch, 'one ring per epoch'); assert.equal(facts.raver.ticks, ENV.sequence, 'one tick per sequence');
   assert.match(facts.raver.hint, /plur · epoch 3 · seq 12/);
   assert.ok(facts.cypherpunk.env.includes(ENV.checkpoint.id) && facts.cypherpunk.env.includes('payment disabled · approval trezor'), 'cypherpunk shows the checkpoint whole and the gate');
   assert.deepEqual(facts.cypherpunk.items, ENV.encrypted_items.map(i => i.kind));
 });
 
-test('bee: the one action hands off to the room\'s join; the words follow the module', async () => {
+test('bee: the one action opens a listen place (utility, not a status lesson)', async () => {
   const { ctx, p, errs, writes } = await open('bee');
-  assert.match(await p.textContent('#etBeeNow'), /the room is open/);
-  await p.click('#etBeeJoin');
-  await p.waitForFunction(() => window.musicRoom.joined === true);
-  assert.equal(await p.textContent('#join'), 'leave preview', 'the room\'s own control changed state');
-  assert.match(await p.textContent('#etBeeNow'), /you are in\. nothing left this device/);
-  assert.match(await p.textContent('#eventlog'), /local participant joined/);
-  await p.click('#etBeeJoin');
-  await p.waitForFunction(() => window.musicRoom.joined === false);
-  await p.click('.et-b-link[data-go="listen"]');
-  await p.waitForFunction(() => { const r = document.querySelector('.source-panel').getBoundingClientRect(); return r.top >= -2 && r.top < 200; });
+  assert.equal(await p.$eval('#etBeeJoin', b => b.disabled), false);
+  assert.match(await p.textContent('#etBeeJoin'), /listen now/i);
+  assert.ok(!(await p.textContent('#eternal > .et-b')).match(/could not|try again|did not load/i));
+  // click should activate an external door (new tab) or scroll to sources — popup listener
+  const [popup] = await Promise.all([
+    p.waitForEvent('popup', { timeout: 3000 }).catch(() => null),
+    p.click('#etBeeJoin'),
+  ]);
+  if (popup) await popup.close();
+  else {
+    // fallback: scrolled to source panel
+    await p.waitForFunction(() => { const r = document.querySelector('.source-panel').getBoundingClientRect(); return r.top >= -2 && r.top < 400; });
+  }
   assert.deepEqual(writes, [], 'nothing was written'); assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });
 
-test('bee: a refused envelope keeps the step off and says so plainly', async () => {
+test('bee: a refused envelope stays silent — listen primary still works', async () => {
   const { ctx, p } = await open('bee', { query: '?manifest=/fixtures/does-not-exist.json' });
-  assert.equal(await p.$eval('#etBeeJoin', b => b.disabled), true);
-  assert.match(await p.textContent('#etBeeNow'), /could not be read/);
+  assert.equal(await p.$eval('#etBeeJoin', b => b.disabled), false, 'listen still available');
+  const beeText = await p.textContent('#eternal > .et-b');
+  assert.equal(/could not|try again|did not load|unavailable/i.test(beeText), false, 'zero fail copy on New bee');
   assert.equal(await p.evaluate(() => document.querySelectorAll('#eternal > .et-b .et-b-row').length), 0);
   await ctx.close();
 });
