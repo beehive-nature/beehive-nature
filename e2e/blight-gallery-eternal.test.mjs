@@ -103,7 +103,8 @@ test('the same facts in all three: nine families, the live garden, the failure s
   assert.deepEqual(facts.raver.petals, a.cols.map(c => c.split('|')[0])); assert.equal(facts.raver.dashed, 9, 'every family dark, said as a dashed petal');
   assert.deepEqual(facts.cypherpunk.cy, a.cols.map(c => c.split('|')[0]));
   assert.match(facts.cypherpunk.chip, /state failed.*pieces 0.*failed reads \d+/);
-  assert.match(a.bee, /the chain is quiet right now/);
+  assert.match(a.bee, /we could not reach this garden right now/i);
+  assert.equal(/chain|question/i.test(a.bee), false, 'New bee fail wall stays human — no chain jargon');
   assert.equal(a.tourBee, true); assert.equal(facts.raver.tourRaver, true, 'no tour of nothing');
 });
 

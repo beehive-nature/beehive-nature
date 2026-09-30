@@ -248,7 +248,7 @@ body[data-reg="cypherpunk"] [data-experience-nav] a{border-radius:var(--sk-radiu
     <div class="et-r-card" id="etGaRaverCard" aria-live="polite"></div>
     <p class="et-r-note" id="etGaRaverNote"></p>
     <button type="button" class="et-r-pill" id="etGaRaverTour">walk the garden</button>
-    <button type="button" class="et-r-ghost" id="etGaRaverRetry" data-etk="et.gallery.raverRetry">ask the chain again</button>
+    <button type="button" class="et-r-ghost" id="etGaRaverRetry" data-etk="et.gallery.raverRetry">try again</button>
   </div>
 
   <!-- CYPHERPUNK — the instrument: every family, every call, the live outcome -->
@@ -595,8 +595,8 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
     $('etGaBeeRows').innerHTML=h;
     var card=$('etGaBeeCard');
     card.hidden=st==='ok';
-    if(st==='reading')card.innerHTML='<h3>'+esc(K('b.cReading','the art is on its way.'))+'</h3><p>'+esc(K('b.cReadingP','each piece is being drawn by its own contract. this can take a moment.'))+'</p>';
-    else if(st!=='ok')card.innerHTML='<h3>'+esc(st==='empty'?K('b.cEmpty','this garden is empty.'):st==='partial'?K('b.cPartial','some pieces did not arrive.'):K('b.cFailed','the chain is quiet right now.'))+'</h3><p>'+esc(st==='empty'?K('b.cEmptyP','the reads finished and found no pieces here. you can visit another collection.'):K('b.cFailedP','the chain did not answer every question, so nothing is shown in its place. no old copies, no guesses.'))+'</p>'+
+    if(st==='reading')card.innerHTML='<h3>'+esc(K('b.cReading','the art is on its way.'))+'</h3><p>'+esc(K('b.cReadingP','each piece is being drawn fresh. this can take a moment.'))+'</p>';
+    else if(st!=='ok')card.innerHTML='<h3>'+esc(st==='empty'?K('b.cEmpty','this garden looks empty.'):st==='partial'?K('b.cPartial','some of the art did not load.'):K('b.cFailed','we could not reach this garden right now.'))+'</h3><p>'+esc(st==='empty'?K('b.cEmptyP','nothing turned up here. you can visit another collection.'):st==='partial'?K('b.cPartialP','what is here is what we could get. try again for the rest, or visit another collection.'):K('b.cFailedP','nothing is shown rather than a guess. try again, or visit another collection.'))+'</p>'+
       (st==='failed'||st==='partial'?'<button type="button" class="et-b-link" data-retry>'+esc(K('b.retry','try again'))+'</button>':'');
     var tour=$('etGaBeeTour'); tour.disabled=!n;
     tour.textContent=n?(typeof walking!=='undefined'&&walking?K('b.pause','pause the tour'):K('b.tour','start the tour')):K('b.tourWait','the tour starts when the art arrives');
@@ -624,7 +624,7 @@ start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','The founder’s garden · bl
     $('etGaRaverHint').textContent=K('r.hint','{n} families · tap a petal').replace('{n}',D.cols.length);
     if(c)$('etGaRaverCard').innerHTML='<span class="et-rk">'+(R.sel+1)+'</span><div><b>'+esc(c.sym)+'</b><span>'+esc(c.chain+' · '+(c.pieces?c.pieces+' '+K('r.lit','pieces lit'):K('r.dark','no piece returned')))+'</span>'+
       (c.art?'<span>'+esc(c.art)+'</span>':'')+'<span>'+esc(K('r.supply','supply')+' '+(c.supply||K('r.nr','not recorded'))+' · '+K('r.cat','catalogue, not live'))+'</span></div>';
-    $('etGaRaverNote').textContent=st==='reading'?K('r.reading','the petals open as the chain answers'):n?K('r.ok','{n} pieces lit from the chain').replace('{n}',n):K('r.quiet','a dashed petal is a quiet chain, never a stored copy');
+    $('etGaRaverNote').textContent=st==='reading'?K('r.reading','petals open as pieces arrive'):n?K('r.ok','{n} pieces lit').replace('{n}',n):st==='failed'||st==='partial'?K('r.retryHint','quiet right now — try again in a moment'):K('r.quiet','dashed petals are waiting — nothing made up');
     var tour=$('etGaRaverTour'); tour.disabled=!n; tour.textContent=n?K('r.tour','walk the garden'):K('r.tourWait','the garden is quiet');
     $('etGaRaverRetry').hidden=!(st==='failed'||st==='partial');
   }
