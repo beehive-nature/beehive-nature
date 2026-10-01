@@ -62,6 +62,7 @@ button[type=submit]:active{transform:scale(.97)}
 .saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
+.playback-route{margin:12px 0}.playback-route label{display:block}.playback-route select{width:100%;min-height:44px;font:inherit;background:var(--screen);color:var(--fg);border:1px solid currentColor;border-radius:8px;padding:8px}.playback-route p{font-size:14px;line-height:1.5}
 #frame-hold{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;background:var(--screen)}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
 progress{display:block;width:100%;height:6px;appearance:none;border:0;background:var(--sk-line);accent-color:var(--act)}
@@ -241,6 +242,11 @@ document.addEventListener('DOMContentLoaded',function(){
             <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
+          <div class="playback-route"><label for="playback-route">Playback route</label>
+            <select id="playback-route"><option value="relay">Relay</option><option value="direct">Direct Autonomi + relay fallback</option></select>
+            <p>Direct connects to storage nodes without a wallet. Applies when you press Watch. The relay remains the default while we compare playback.</p>
+            <p id="playback-status" role="status" aria-live="polite"></p>
+          </div>
           <details class="my-videos" id="my-videos">
             <summary>My videos <span id="saved-count">(0)</span></summary>
             <p>Videos you play are remembered here. Save an address now, give it a name, or remove it whenever you like.</p>
@@ -560,6 +566,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   async function goSound(my) {
     if (my !== job) return;
+    if (restorePause) { v.pause(); return; }
     v.muted = false; v.volume = 1; if (tap) tap.hidden = true;
     try { await v.play(); if (my === job) { playing = my; say(null); } }
     catch { if (my === job && tap) { tap.hidden = false; say(null); } }
@@ -1323,23 +1330,130 @@ document.addEventListener('DOMContentLoaded',function(){
     const ok = await finishBinary(parts, bytes, state, my, a);
     if (my === job && !ok && !playing) say('s-fail');
   }
-  async function view(raw) {
+  // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
+  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.0/';
+  let directPool = null, directSession = null, restorePause = false;
+  const routeStatus = text => { $('playback-status').textContent = text; };
+  const stopDirect = () => {
+    const session = directSession; directSession = null;
+    if (session) { session.dispose(); session.source?.close(); }
+  };
+  const closePool = () => {
+    const pool = directPool; directPool = null;
+    if (pool) pool.then(client => client.close()).catch(() => {});
+  };
+  addEventListener('pagehide', () => { stopDirect(); closePool(); });
+  async function bounded(work, signal, milliseconds) {
+    let timer, aborted;
+    try {
+      return await Promise.race([work, new Promise((_, reject) => {
+        aborted = () => reject(new DOMException('Cancelled', 'AbortError'));
+        signal.addEventListener('abort', aborted, { once: true });
+        if (signal.aborted) aborted();
+        timer = setTimeout(() => reject(new Error('Direct startup timed out')), milliseconds);
+      })]);
+    } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
+  }
+  async function tryDirect(address, signal, my) {
+    let reader, source, session, deadline;
+    const failed = new AbortController();
+    const cancelled = () => failed.abort();
+    signal.addEventListener('abort', cancelled, { once: true });
+    deadline = setTimeout(() => failed.abort(), 45000);
+    try {
+      if (!isSecureContext || !('serviceWorker' in navigator) || !('RTCPeerConnection' in window)) throw new Error('Direct playback is unavailable in this browser');
+      routeStatus('Connecting directly to Autonomi. The relay is available if this fails.');
+      metrics.path = 'webrtc-connecting'; paintNerd();
+      const sdk = await bounded(import(SDK_ROOT + 'index.js'), failed.signal, 45000);
+      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, 45000);
+      if (my !== job || signal.aborted) return true;
+      if (!directPool) {
+        const pending = sdk.AutonomiClient.connect({ signal: failed.signal });
+        directPool = pending;
+        pending.catch(() => { if (directPool === pending) directPool = null; });
+      }
+      const client = await bounded(directPool, failed.signal, 45000);
+      if (my !== job || signal.aborted) return true;
+      reader = await bounded(client.openFile(address, { signal: failed.signal }), failed.signal, 45000);
+      const bridge = new MediaBridge();
+      session = { my, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => bridge.close() };
+      // Count completed plaintext ranges, never infer wire bytes from lookup counters.
+      const trackedReader = {
+        address: reader.address, name: reader.name, size: reader.size, contentType: reader.contentType,
+        close: () => reader.close(),
+        read: async (start, length) => {
+          const bytes = await reader.read(start, length, { signal });
+          if (my === job && !signal.aborted) {
+            const sorted = [...session.ranges, [start, start + bytes.length]].sort((a,b) => a[0]-b[0]);
+            const merged = [];
+            for (const range of sorted) { const tail=merged[merged.length-1]; if(tail && range[0]<=tail[1]) tail[1]=Math.max(tail[1],range[1]); else merged.push([...range]); }
+            session.ranges = merged; session.bytes = merged.reduce((n,r) => n+r[1]-r[0],0);
+            metrics.bytes = session.bytes;
+            if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now()-metrics.t0;
+            if (session.bytes === session.size && metrics.doneMs == null) metrics.doneMs = performance.now()-metrics.t0;
+            paintNerd();
+          }
+          return bytes;
+        }
+      };
+      source = await bounded(bridge.attach(trackedReader, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal }), failed.signal, 45000);
+      if (my !== job || signal.aborted) { source.close(); bridge.close(); return true; }
+      clearTimeout(deadline);
+      session.source = source; directSession = session;
+      metrics.path = 'webrtc'; metrics.acceptRanges = 'local range bridge';
+      routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
+      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, 45000);
+      if (my !== job || signal.aborted) return true;
+      if (!ok) throw new Error('Direct media did not produce a frame');
+      playing=my; markFirstFrame(); say(null); await goSound(my);
+      // A stopped decoder or a network stall falls back once, preserving the playhead.
+      let stallTimer = null;
+      const fallback = reason => {
+        if (my !== job || directSession !== session) return;
+        const at=v.currentTime||0, paused=v.paused;
+        view(address, { relay:true, resumeAt:at, paused, reason });
+      };
+      const ready = () => { clearTimeout(stallTimer); session.stalled=false; session.sounded=true; pub(); };
+      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); clearTimeout(stallTimer); stallTimer=setTimeout(() => fallback('Direct playback stalled'),15000); };
+      const error = () => fallback('Direct media error');
+      const paused = () => { clearTimeout(stallTimer); };
+      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused);
+      session.sounded=!v.paused;
+      session.dispose=() => { clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); bridge.close(); };
+      pub(); return true;
+    } catch (error) {
+      if (directSession === session) stopDirect();
+      source?.close(); reader?.close(); session?.dispose();
+      if (my !== job || signal.aborted) return true;
+      closePool();
+      metrics.path=''; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
+      routeStatus('Direct playback could not start. Using the relay.');
+      note('direct fallback · ' + (error.name === 'AbortError' ? 'startup timeout' : error.message));
+      return false;
+    } finally { clearTimeout(deadline); signal.removeEventListener('abort',cancelled); }
+  }
+  async function view(raw, options = {}) {
+    if (options.relay && options.reason) holdDecodedFrame();
     const a = parse(raw), my = ++job;
+    if (options.relay && options.reason && !heldFrame.hidden) savedFrameJob = my;
+    restorePause = !!options.paused;
+    stopDirect();
     v.pause();
-    clearHeldFrame();
-    savedFrameJob = null;
+    if (options.relay && options.reason) holdDecodedFrame();
+    else { clearHeldFrame(); savedFrameJob = null; }
     if (ctl) ctl.abort();
     ctl = new AbortController();
     const signal = ctl.signal;
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
-    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
+    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = options.resumeAt || 0; resetRate();
     feed = null; waitS = 0; $('s-rough').hidden = true; $('veil').hidden = true; $('flow').hidden = true;
     delete $('s-wait').dataset.s; $('log').textContent = ''; $('dec').textContent = notYet(); metrics.dec = null;
     resetMetrics(); paintNerd();
     if (!a) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
-    note('open · GET …/data/public/<address>/stream');
+    routeStatus(options.reason ? options.reason + '. Continuing through the relay.' : '');
+    note('open · ' + (options.relay ? 'relay fallback' : $('playback-route').value));
     $('out').dataset.addr = 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     const hit = await cacheGet(a);
@@ -1353,6 +1467,14 @@ document.addEventListener('DOMContentLoaded',function(){
         if (my === job) { playing = my; say(null); markFirstFrame(); await goSound(my); }
         return;
       }
+    }
+    if (!options.relay && $('playback-route').value === 'direct' && await tryDirect(a, signal, my)) return;
+    if (my !== job || signal.aborted) return;
+    if (options.relay || $('playback-route').value === 'relay') closePool();
+    if (options.resumeAt > 0 || options.paused) {
+      const restore = () => { if (my !== job) return; if (options.resumeAt > 0 && Number.isFinite(v.duration)) v.currentTime=Math.min(options.resumeAt,Math.max(0,v.duration-0.05)); if (options.paused) v.pause(); revealDecodedFrame(options.resumeAt || 0); };
+      signal.addEventListener('abort', () => v.removeEventListener('loadeddata', restore), {once:true});
+      v.addEventListener('loadeddata', restore, {once:true});
     }
     frameGen++;
     v.removeAttribute('src'); v.load();
@@ -1369,15 +1491,16 @@ document.addEventListener('DOMContentLoaded',function(){
   // ETERNAL FRONT: a read-only snapshot of the engine for the three renderers (docs/design/eternal).
   // The facts on every front come from here and from nowhere else; it never writes to the engine.
   window.__bviewEngine = () => {
-    const st = feed, pl = st && st.plan;
+    const ds = directSession && directSession.my === job ? directSession : null;
+    const st = feed, pl = st && st.plan || (ds && Number.isFinite(v.duration) && v.duration > 0 ? {dur:v.duration,m0:0,m1:ds.size,w:v.videoWidth,h:v.videoHeight,codec:'browser decoder',fps:0} : null);
     return {
       door: DOOR, cache: CACHE, rule: { safety: SAFETY, margin: MARGIN, ahead: AHEAD, probeMs: STREAM_PROBE, stubBytes: STUB_CL },
       has: !!metrics.addr, bad: !$('s-bad').hidden, fail: !$('s-fail').hidden, slow: !$('s-slow').hidden,
-      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: metrics.cl || (pl && pl.m1) || 0,
+      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: ds ? ds.size : metrics.cl || (pl && pl.m1) || 0,
       rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
       dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
-      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: ds ? ds.sounded : !!(st && st.sounded), stalled: ds ? ds.stalled : !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
     };
   };
@@ -1407,6 +1530,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function read(){
     var E=window.__bviewEngine?window.__bviewEngine():null; if(!E) return;
     var u=new URL(E.door); D.door.host=u.host; D.door.base=u.pathname; D.rule=E.rule; D.cache=E.cache; D.live=E;
+    if(E.path==='webrtc' || E.path==='webrtc-connecting'){D.door.host='storage nodes (WebRTC)';D.door.base='range reader';}
     var s=!E.has?(E.bad?'refused':'idle'):E.fail?'failed':E.doneMs!=null?'done':E.stalled?'stalled':(E.waitS&&!(E.sounded&&!E.stalled))?'waiting':(E.sounded?'playing':'fetching');
     var pl=E.plan, flowX=pl&&E.rateBps?E.rateBps/((pl.m1-pl.m0)/pl.dur):null;
     D.view={
@@ -1433,11 +1557,13 @@ document.addEventListener('DOMContentLoaded',function(){
   /* ── NEW BEE: plain rows, one line each, one tap opens a plain sentence ── */
   function bee(){
     var box=$('etBeeRows'); if(!box) return;
+    var direct=D.view.path==='webrtc' || D.view.path==='webrtc-connecting';
+    document.querySelector('.et-b-foot').textContent=direct?'Public video: anyone with the address can watch. Direct playback keeps session ranges; My videos remembers the address.':T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
     var rows=[
-      ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.')],
-      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.')],
+      ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',(D.view.path==='webrtc'?'This video comes directly from Autonomi storage nodes over WebRTC. This browser is not seeding it to other viewers.':T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.'))],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'The browser requests verified ranges as needed. A sustained stall switches to the relay.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
-      ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
+      ['next',T('et.bview.b.next','next time'),esc(direct?'address remembered':T('et.bview.b.nextV','opens at once')),(D.view.path==='webrtc'?'Direct playback keeps bounded ranges during this session; it does not save a complete offline copy. Your saved address remains in My videos.':T('et.bview.b.nextSay','this device keeps a copy of what you watched.'))]
     ];
     box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
       return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
@@ -1462,6 +1588,7 @@ document.addEventListener('DOMContentLoaded',function(){
       '<circle class="core" r="68"/><text class="mid" y="6" text-anchor="middle">'+esc(pct)+'</text><text class="sub" y="32" text-anchor="middle">'+esc(cap)+'</text></g>';
   }
   function raver(){
+    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi. Session ranges stay warm; your saved address remains in My videos.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
     var hint=$('etRaverHint'); if(hint) hint.textContent=w('raver');
     ring();
     var t=$('etTiles'); if(!t) return;
