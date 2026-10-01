@@ -52,6 +52,14 @@ button[type=submit]{min-height:var(--sk-control-primary);padding:0 var(--sk-s4);
 button[type=submit]:active{transform:scale(.97)}
 .say{padding:var(--sk-s2) var(--sk-s3);border:1.5px dashed var(--sk-guard);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-ink);font:400 var(--fs)/1.45 var(--font)}
 #etDock{display:flex;flex-direction:column;gap:var(--sk-s2)}
+.my-videos{border:1px solid var(--line);border-radius:var(--ctl);padding:var(--sk-s2)}
+.my-videos summary{cursor:pointer;min-height:var(--sk-control-min);display:list-item}
+.my-videos p{color:var(--dim);margin:var(--sk-s2) 0}
+.my-videos button{min-height:var(--sk-control-row);padding:var(--sk-s2);border:1px solid var(--edge);border-radius:var(--ctl);background:var(--well);color:var(--ink)}
+#saved-videos{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--sk-s2);margin-top:var(--sk-s2)}
+.saved-video{display:flex;flex-wrap:wrap;gap:var(--sk-s2);border-top:1px solid var(--line);padding-top:var(--sk-s2)}
+.saved-video input{flex:1 1 100%;font-family:var(--font)}
+.saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
@@ -232,6 +240,15 @@ document.addEventListener('DOMContentLoaded',function(){
             <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
+          <details class="my-videos" id="my-videos">
+            <summary>My videos <span id="saved-count">(0)</span></summary>
+            <p>Videos you play are remembered here. Save an address now, give it a name, or remove it whenever you like.</p>
+            <p>Personal to this browser on this device. Clearing site data removes this list. Wallet sync is not connected yet.</p>
+            <button type="button" id="save-video">Save this address</button>
+            <p id="saved-status" role="status" aria-live="polite"></p>
+            <p id="saved-empty">Your saved videos will appear here.</p>
+            <ul id="saved-videos" aria-label="Saved videos"></ul>
+          </details>
           <p class="say" id="s-bad" data-i18n="bview.badOne" hidden>That is not a video address: after autonomi:// come 64 letters and numbers.</p>
           <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
           <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
@@ -382,6 +399,80 @@ document.addEventListener('DOMContentLoaded',function(){
   const pub = () => { try { if (window.__eternalPaint) window.__eternalPaint(); } catch (_) {} };
   const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; pub(); };
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
+  // A versioned, address-only browser record. No wallet secrets or identity claims.
+  // Future bData sync can consume this schema without coupling playback to a signer.
+  const PLAYLIST = 'bnr.bview.playlist.v1';
+  let savedVideos = [], recordedJob = null;
+  const savedStatus = message => { $('saved-status').textContent = message; };
+  function readVideos() {
+    const raw = localStorage.getItem(PLAYLIST);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    if (data.version !== 1 || !Array.isArray(data.videos)) throw new Error('unsupported playlist');
+    const seen = new Set();
+    return data.videos.filter(row => {
+      if (!row || !parse(row.address) || seen.has(parse(row.address))) return false;
+      seen.add(parse(row.address)); return true;
+    }).map(row => ({ address: parse(row.address), name: typeof row.name === 'string' ? row.name.slice(0, 160) : '' }));
+  }
+  function changeVideos(change, message) {
+    try {
+      // Refresh before editing so another tab's most recent save is retained.
+      const next = change(readVideos());
+      localStorage.setItem(PLAYLIST, JSON.stringify({ version: 1, videos: next }));
+      savedVideos = next; renderVideos(); savedStatus(message); return true;
+    } catch {
+      savedStatus('Could not save your list. Browser storage may be unavailable, full, or contain an unreadable list.');
+      return false;
+    }
+  }
+  function saveVideo(address) {
+    return changeVideos(rows => rows.some(row => row.address === address) ? rows : [{ address, name: '' }, ...rows], 'Saved in this browser.');
+  }
+  function renderVideos() {
+    const list = $('saved-videos'); list.replaceChildren();
+    $('saved-count').textContent = '(' + savedVideos.length + ')';
+    $('saved-empty').hidden = savedVideos.length > 0;
+    savedVideos.forEach((row, index) => {
+      const li = document.createElement('li'); li.className = 'saved-video';
+      const name = document.createElement('input'); name.type = 'text'; name.maxLength = 160;
+      name.value = row.name; name.placeholder = 'Give this video a name';
+      name.setAttribute('aria-label', 'Name for saved video ' + (index + 1));
+      name.addEventListener('change', () => changeVideos(rows => rows.map(item => item.address === row.address ? { ...item, name: name.value.trim().slice(0, 160) } : item), 'Video name saved.'));
+      const address = document.createElement('code'); address.textContent = 'autonomi://' + row.address;
+      address.setAttribute('translate', 'no'); address.dir = 'ltr';
+      const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Play';
+      play.setAttribute('aria-label', 'Play ' + (row.name || 'saved video ' + (index + 1)));
+      play.addEventListener('click', () => { $('addr').value = 'autonomi://' + row.address; history.replaceState(null, '', '#' + row.address); view(row.address); });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', 'Remove ' + (row.name || 'saved video ' + (index + 1)));
+      remove.addEventListener('click', () => {
+        if (changeVideos(rows => rows.filter(item => item.address !== row.address), 'Removed from your list.')) {
+          // A source swap or resume during this play must not undo an explicit removal.
+          if (metrics.addr === row.address) recordedJob = job;
+          const focus = $('saved-videos').querySelector('button') || $('save-video'); focus.focus();
+        }
+      });
+      li.append(name, address, play, remove); list.append(li);
+    });
+  }
+  try { savedVideos = readVideos(); } catch { savedStatus('Your saved list could not be read. Browser storage may be unavailable or contain an unreadable list.'); }
+  renderVideos();
+  $('save-video').addEventListener('click', () => {
+    const address = parse($('addr').value);
+    if (!address) { savedStatus('Enter a complete Autonomi video address first.'); return; }
+    saveVideo(address);
+  });
+  // Record actual playback, rather than failed downloads or malformed addresses.
+  $('v').addEventListener('playing', () => {
+    if (!metrics.addr || $('v').paused || $('v').readyState < 2 || recordedJob === job) return;
+    recordedJob = job; saveVideo(metrics.addr);
+  });
+  addEventListener('storage', event => {
+    if (event.key !== PLAYLIST && event.key !== null) return;
+    try { savedVideos = readVideos(); renderVideos(); savedStatus('List updated from this browser.'); }
+    catch { savedStatus('Your saved list could not be read.'); }
+  });
   const v = $('v'), pg = $('pg');
   const tap = $('tap');
   const CACHE = 'ant-bview-v1';
@@ -1174,6 +1265,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   async function view(raw) {
     const a = parse(raw), my = ++job;
+    v.pause();
     if (ctl) ctl.abort();
     ctl = new AbortController();
     const signal = ctl.signal;
