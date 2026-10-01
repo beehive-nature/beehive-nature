@@ -38,6 +38,16 @@ body[data-experience="watch"] [data-view]{display:none}body[data-experience="wat
 .foot a,.privacy-sources a{display:inline-flex;align-items:center;min-height:44px}
 .privacy-sources{row-gap:0}
 .foot+details>summary{min-height:44px;padding-block:10px;box-sizing:border-box;cursor:pointer}
+.my-videos{max-width:640px;margin:var(--sk-s3) 0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-lg);padding:var(--sk-s3);background:var(--sk-bg-card);color:var(--sk-ink)}
+.my-videos summary{cursor:pointer;min-height:var(--sk-control-min)}
+.my-videos p{margin:var(--sk-s2) 0;color:var(--sk-ink-mut)}
+.my-videos input{display:block;width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-lg);color:var(--sk-ink);background:var(--sk-bg)}
+.my-videos label{display:block;margin:var(--sk-s2) 0}
+.my-videos button{min-height:var(--sk-control-row);margin-top:var(--sk-s2);background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-line)}
+#saved-videos{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--sk-s2)}
+.saved-video{display:flex;flex-wrap:wrap;gap:var(--sk-s2);border-top:1px solid var(--sk-line);padding-top:var(--sk-s2)}
+.saved-video input,.saved-video code{flex:1 1 100%}
+.saved-video code{overflow-wrap:anywhere;font:400 12px/1.5 var(--sk-font-mono)}
 </style>
 <style>
 /* ── ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three products around ONE room.
@@ -242,6 +252,15 @@ body[data-reg="cypherpunk"] main :is(summary,strong,b,span,.no-room,p,small,.sta
 </div>
 </div>
 </section>
+          <details class="my-videos" id="my-videos">
+            <summary>My videos <span id="saved-count">(0)</span></summary>
+            <p>The same saved Autonomi videos as bViEw. Play opens bViEw in this tab. Room passes stay separate.</p>
+            <p>Personal to this browser on this device. Clearing site data removes this list. Wallet sync is not connected yet.</p>
+            <label for="addr">Autonomi video address</label><input id="addr" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…"><button type="button" id="save-video">Save this address</button>
+            <p id="saved-status" role="status" aria-live="polite"></p>
+            <p id="saved-empty">Your saved videos will appear here.</p>
+            <ul id="saved-videos" aria-label="Saved videos"></ul>
+          </details>
 <h2 class="et-archive-h" id="etArchive" data-et-t="et.watch.archive">the whole room</h2>
 <section class="intro"><div><p class="eyebrow">SKAISTS · SOCIAL / MEDIA</p><h1 data-i18n="watch.title">Watch together</h1><p class="view-lead" data-view="bee" data-i18n="watch.beeLead">A shared screen. Good company.</p><p class="view-lead" data-view="raver" data-i18n="watch.raverLead">Find your people. Press play.</p><p class="view-lead" data-view="cypherpunk" data-i18n="watch.cypherLead">Inspect the stream, session and checkpoint.</p></div><div class="status" role="status"><span class="dot" id="dot"></span><span id="st" data-i18n="watch.checking">Checking connection</span></div></section>
 <div class="stage">
@@ -737,6 +756,81 @@ litAudit(null);
   try{if(localStorage.getItem('bnr.motion.paused')==='1')document.body.setAttribute('data-motion-paused','');}catch(e){}
   words(); place(); wire(); paint();
   window.__eternal={data:D,raver:R,paint:paint};
+})();
+</script>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
+  // A versioned, address-only browser record. No wallet secrets or identity claims.
+  // Future bData sync can consume this schema without coupling playback to a signer.
+  const PLAYLIST = 'bnr.bview.playlist.v1';
+  let savedVideos = [];
+  const savedStatus = message => { $('saved-status').textContent = message; };
+  function readVideos() {
+    const raw = localStorage.getItem(PLAYLIST);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    if (data.version !== 1 || !Array.isArray(data.videos)) throw new Error('unsupported playlist');
+    const seen = new Set();
+    return data.videos.filter(row => {
+      if (!row || !parse(row.address) || seen.has(parse(row.address))) return false;
+      seen.add(parse(row.address)); return true;
+    }).map(row => ({ address: parse(row.address), name: typeof row.name === 'string' ? row.name.slice(0, 160) : '' }));
+  }
+  function changeVideos(change, message) {
+    try {
+      // Refresh before editing so another tab's most recent save is retained.
+      const next = change(readVideos());
+      localStorage.setItem(PLAYLIST, JSON.stringify({ version: 1, videos: next }));
+      savedVideos = next; renderVideos(); savedStatus(message); return true;
+    } catch {
+      savedStatus('Could not save your list. Browser storage may be unavailable, full, or contain an unreadable list.');
+      return false;
+    }
+  }
+  function saveVideo(address) {
+    return changeVideos(rows => rows.some(row => row.address === address) ? rows : [{ address, name: '' }, ...rows], 'Saved in this browser.');
+  }
+  function renderVideos() {
+    const list = $('saved-videos'); list.replaceChildren();
+    $('saved-count').textContent = '(' + savedVideos.length + ')';
+    $('saved-empty').hidden = savedVideos.length > 0;
+    savedVideos.forEach((row, index) => {
+      const li = document.createElement('li'); li.className = 'saved-video';
+      const name = document.createElement('input'); name.type = 'text'; name.maxLength = 160;
+      name.value = row.name; name.placeholder = 'Give this video a name';
+      name.setAttribute('aria-label', 'Name for saved video ' + (index + 1));
+      name.addEventListener('change', () => changeVideos(rows => rows.map(item => item.address === row.address ? { ...item, name: name.value.trim().slice(0, 160) } : item), 'Video name saved.'));
+      const address = document.createElement('code'); address.textContent = 'autonomi://' + row.address;
+      address.setAttribute('translate', 'no'); address.dir = 'ltr';
+      const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Play';
+      play.setAttribute('aria-label', 'Play ' + (row.name || 'saved video ' + (index + 1)));
+      play.addEventListener('click', () => { location.assign('bview.html#' + row.address); });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', 'Remove ' + (row.name || 'saved video ' + (index + 1)));
+      remove.addEventListener('click', () => {
+        if (changeVideos(rows => rows.filter(item => item.address !== row.address), 'Removed from your list.')) {
+          const focus = $('saved-videos').querySelector('button') || $('save-video'); focus.focus();
+        }
+      });
+      li.append(name, address, play, remove); list.append(li);
+    });
+  }
+  try { savedVideos = readVideos(); } catch { savedStatus('Your saved list could not be read. Browser storage may be unavailable or contain an unreadable list.'); }
+  renderVideos();
+  $('save-video').addEventListener('click', () => {
+    const address = parse($('addr').value);
+    if (!address) { savedStatus('Enter a complete Autonomi video address first.'); return; }
+    saveVideo(address);
+  });
+  addEventListener('storage', event => {
+    if (event.key !== PLAYLIST && event.key !== null) return;
+    try { savedVideos = readVideos(); renderVideos(); savedStatus('List updated from this browser.'); }
+    catch { savedStatus('Your saved list could not be read.'); }
+  });
+
 })();
 </script>
 <script src="tour.js?v=42"></script>

@@ -52,8 +52,18 @@ button[type=submit]{min-height:var(--sk-control-primary);padding:0 var(--sk-s4);
 button[type=submit]:active{transform:scale(.97)}
 .say{padding:var(--sk-s2) var(--sk-s3);border:1.5px dashed var(--sk-guard);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-ink);font:400 var(--fs)/1.45 var(--font)}
 #etDock{display:flex;flex-direction:column;gap:var(--sk-s2)}
+.my-videos{border:1px solid var(--line);border-radius:var(--ctl);padding:var(--sk-s2)}
+.my-videos summary{cursor:pointer;min-height:var(--sk-control-min);display:list-item}
+.my-videos p{color:var(--dim);margin:var(--sk-s2) 0}
+.my-videos button{min-height:var(--sk-control-row);padding:var(--sk-s2);border:1px solid var(--edge);border-radius:var(--ctl);background:var(--well);color:var(--ink)}
+#saved-videos{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--sk-s2);margin-top:var(--sk-s2)}
+.saved-video{display:flex;flex-wrap:wrap;gap:var(--sk-s2);border-top:1px solid var(--line);padding-top:var(--sk-s2)}
+.saved-video input{flex:1 1 100%;font-family:var(--font)}
+.saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
+.playback-route{margin:12px 0}.playback-route label{display:block}.playback-route select{width:100%;min-height:44px;font:inherit;background:var(--screen);color:var(--fg);border:1px solid currentColor;border-radius:var(--ctl);padding:8px}.playback-route p{font-size:14px;line-height:1.5}
+#frame-hold{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;background:var(--screen)}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
 progress{display:block;width:100%;height:6px;appearance:none;border:0;background:var(--sk-line);accent-color:var(--act)}
 progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progress-value{background:var(--act)}
@@ -232,12 +242,27 @@ document.addEventListener('DOMContentLoaded',function(){
             <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
+          <div class="playback-route"><label for="playback-route">Playback route</label>
+            <select id="playback-route"><option value="relay">Relay</option><option value="direct">Direct Autonomi + relay fallback</option></select>
+            <p>Direct connects to storage nodes without a wallet. Applies when you press Watch. The relay remains the default while we compare playback.</p>
+            <p id="playback-status" role="status" aria-live="polite"></p>
+          </div>
+          <details class="my-videos" id="my-videos">
+            <summary>My videos <span id="saved-count">(0)</span></summary>
+            <p>Videos you play are remembered here. Save an address now, give it a name, or remove it whenever you like.</p>
+            <p>Personal to this browser on this device. Clearing site data removes this list. Wallet sync is not connected yet.</p>
+            <button type="button" id="save-video">Save this address</button>
+            <p id="saved-status" role="status" aria-live="polite"></p>
+            <p id="saved-empty">Your saved videos will appear here.</p>
+            <ul id="saved-videos" aria-label="Saved videos"></ul>
+          </details>
           <p class="say" id="s-bad" data-i18n="bview.badOne" hidden>That is not a video address: after autonomi:// come 64 letters and numbers.</p>
           <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
           <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
           <section id="out" aria-live="polite" hidden>
             <div class="stage">
               <video id="v" controls playsinline preload="auto"></video>
+              <canvas id="frame-hold" aria-hidden="true" hidden></canvas>
               <div class="veil" id="veil" hidden>
                 <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ring" cx="60" cy="60" r="52"/></svg>
                 <p class="count"><span><b id="count" translate="no" dir="ltr"></b><br><span class="till" data-reg="raver" data-i18n="bview.raver.till">till it plays</span></span></p>
@@ -273,7 +298,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- CYPHERPUNK — the instrument: the path, the pipeline, the byte map, the rule, the receipt -->
     <div class="et-c">
-      <div class="et-c-path" translate="no" dir="ltr">GET <span id="etDoor">relay.skaists.dev/ant/v1/data/public/</span>{address}/stream</div>
+      <div class="et-c-path" translate="no" dir="ltr"><span id="etMethod">GET </span><span id="etDoor">relay.skaists.dev/ant/v1/data/public/</span><span id="etTail">{address}/stream</span></div>
       <p class="et-c-lede" data-i18n="bview.cypherLead">Your file — honest client and door metrics only. Nothing invented.</p>
       <div class="et-c-chips" id="etChips"></div>
       <div class="et-slot" data-slot="cypherpunk"></div>
@@ -361,20 +386,20 @@ document.addEventListener('DOMContentLoaded',function(){
    read, bitrate = mdat bytes / duration; playback starts (and resumes
    after running dry) only when the rest of the media, at the measured
    rate, lands before the playhead needs it. Until then the viewer sees
-   "ready to play in ~N s". No MSE: the playing Blob is swapped for a
-   bigger one shortly before it runs dry (a brief hiccup, not a freeze).
+   "ready to play in ~N s". No MSE: never reassign video.src mid-play
+   (that was the rapid flicker). Hold the playhead at the Blob edge; one paint resumes, or finishBinary closes.
    Three-temp progressive disclosure (register.js / data-reg): New bee =
    calm paste->Open->video; Raver = softer pulse copy; Cypherpunk =
    Autonomi-class instrument sheet — honest client/door metrics only. */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
-  const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
-  const EARLY_MDAT = 256 << 10, STUB_CL = 128 << 10;
+  const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000, BLOB_WAIT_FULL = 120000;
+  const EARLY_MDAT = 2 << 20, STUB_CL = 128 << 10;
   // Time-based start (replaces the fixed 12 MiB PLAY_MIN, ~1-2 s of 8K): go once the rest of the
   // media, at the measured rate with SAFETY slack, lands MARGIN seconds before the playhead needs
-  // it, with AHEAD seconds already local past the playhead. While playing, a bigger Blob replaces
-  // the running one only when the playhead is within EXTEND_LEAD (+10%) of its end and the
-  // download holds EXTEND_GAIN more seconds (the 2 MiB refreshes of 2026-09-21 thrashed decode).
+  // it, with AHEAD seconds already local past the playhead. While playing, NEVER replace the
+  // Blob (src thrash = flicker). Hold at EXTEND_LEAD; one stalled-resume paint or finishBinary.
+  // (Removed mid-play extend->setBlob->v.src thrash that flashed the stage every few seconds.)
   const SAFETY = 1.15, MARGIN = 2, AHEAD = 1, EXTEND_LEAD = 1.5, EXTEND_GAIN = 2;
   const WAIT_EN = 'Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.';
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-wait', 's-fail'];
@@ -382,6 +407,80 @@ document.addEventListener('DOMContentLoaded',function(){
   const pub = () => { try { if (window.__eternalPaint) window.__eternalPaint(); } catch (_) {} };
   const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; pub(); };
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
+  // A versioned, address-only browser record. No wallet secrets or identity claims.
+  // Future bData sync can consume this schema without coupling playback to a signer.
+  const PLAYLIST = 'bnr.bview.playlist.v1';
+  let savedVideos = [], recordedJob = null;
+  const savedStatus = message => { $('saved-status').textContent = message; };
+  function readVideos() {
+    const raw = localStorage.getItem(PLAYLIST);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    if (data.version !== 1 || !Array.isArray(data.videos)) throw new Error('unsupported playlist');
+    const seen = new Set();
+    return data.videos.filter(row => {
+      if (!row || !parse(row.address) || seen.has(parse(row.address))) return false;
+      seen.add(parse(row.address)); return true;
+    }).map(row => ({ address: parse(row.address), name: typeof row.name === 'string' ? row.name.slice(0, 160) : '' }));
+  }
+  function changeVideos(change, message) {
+    try {
+      // Refresh before editing so another tab's most recent save is retained.
+      const next = change(readVideos());
+      localStorage.setItem(PLAYLIST, JSON.stringify({ version: 1, videos: next }));
+      savedVideos = next; renderVideos(); savedStatus(message); return true;
+    } catch {
+      savedStatus('Could not save your list. Browser storage may be unavailable, full, or contain an unreadable list.');
+      return false;
+    }
+  }
+  function saveVideo(address) {
+    return changeVideos(rows => rows.some(row => row.address === address) ? rows : [{ address, name: '' }, ...rows], 'Saved in this browser.');
+  }
+  function renderVideos() {
+    const list = $('saved-videos'); list.replaceChildren();
+    $('saved-count').textContent = '(' + savedVideos.length + ')';
+    $('saved-empty').hidden = savedVideos.length > 0;
+    savedVideos.forEach((row, index) => {
+      const li = document.createElement('li'); li.className = 'saved-video';
+      const name = document.createElement('input'); name.type = 'text'; name.maxLength = 160;
+      name.value = row.name; name.placeholder = 'Give this video a name';
+      name.setAttribute('aria-label', 'Name for saved video ' + (index + 1));
+      name.addEventListener('change', () => changeVideos(rows => rows.map(item => item.address === row.address ? { ...item, name: name.value.trim().slice(0, 160) } : item), 'Video name saved.'));
+      const address = document.createElement('code'); address.textContent = 'autonomi://' + row.address;
+      address.setAttribute('translate', 'no'); address.dir = 'ltr';
+      const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Play';
+      play.setAttribute('aria-label', 'Play ' + (row.name || 'saved video ' + (index + 1)));
+      play.addEventListener('click', () => { $('addr').value = 'autonomi://' + row.address; history.replaceState(null, '', '#' + row.address); view(row.address); });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', 'Remove ' + (row.name || 'saved video ' + (index + 1)));
+      remove.addEventListener('click', () => {
+        if (changeVideos(rows => rows.filter(item => item.address !== row.address), 'Removed from your list.')) {
+          // A source swap or resume during this play must not undo an explicit removal.
+          if (metrics.addr === row.address) recordedJob = job;
+          const focus = $('saved-videos').querySelector('button') || $('save-video'); focus.focus();
+        }
+      });
+      li.append(name, address, play, remove); list.append(li);
+    });
+  }
+  try { savedVideos = readVideos(); } catch { savedStatus('Your saved list could not be read. Browser storage may be unavailable or contain an unreadable list.'); }
+  renderVideos();
+  $('save-video').addEventListener('click', () => {
+    const address = parse($('addr').value);
+    if (!address) { savedStatus('Enter a complete Autonomi video address first.'); return; }
+    saveVideo(address);
+  });
+  // Record actual playback, rather than failed downloads or malformed addresses.
+  $('v').addEventListener('playing', () => {
+    if (!metrics.addr || $('v').paused || $('v').readyState < 2 || recordedJob === job) return;
+    recordedJob = job; saveVideo(metrics.addr);
+  });
+  addEventListener('storage', event => {
+    if (event.key !== PLAYLIST && event.key !== null) return;
+    try { savedVideos = readVideos(); renderVideos(); savedStatus('List updated from this browser.'); }
+    catch { savedStatus('Your saved list could not be read.'); }
+  });
   const v = $('v'), pg = $('pg');
   const tap = $('tap');
   const CACHE = 'ant-bview-v1';
@@ -391,29 +490,36 @@ document.addEventListener('DOMContentLoaded',function(){
   const notYet = () => lang('bview.notYet', 'not yet');
   const metrics = {
     addr: '', path: '', cl: null, acceptRanges: null, firstChunk: null,
-    ttfbMs: null, ttffMs: null, bytes: 0, rateMbs: null, sha: null, t0: 0, doneMs: null
+    ttfbMs: null, ttffMs: null, bytes: 0, rateMbs: null, sha: null, t0: 0, doneMs: null, direct: null, srcStart: 0
   };
   const resetMetrics = () => {
     metrics.addr = ''; metrics.path = ''; metrics.cl = null; metrics.acceptRanges = null;
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
+    metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0;
   };
   const fmtMs = ms => ms == null ? notYet() : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
   const fmtMb = n => n == null ? notYet() : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
+  const videoFacts = () => {
+    const buffered = []; let ahead = 0;
+    for(let i=0;i<v.buffered.length;i++){const start=v.buffered.start(i),end=v.buffered.end(i);buffered.push([start,end]);if(start<=v.currentTime&&end>=v.currentTime)ahead=end-v.currentTime;}
+    let quality=null;try{const q=v.getVideoPlaybackQuality?.();if(q)quality={total:q.totalVideoFrames,dropped:q.droppedVideoFrames};}catch{}
+    return {duration:Number.isFinite(v.duration)?v.duration:null,width:v.videoWidth,height:v.videoHeight,buffered,ahead,quality,paused:v.paused,ended:v.ended,srcChanges:(window.__bviewSrcAssigns||0)-metrics.srcStart};
+  };
   const paintNerd = () => {
     const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
-    const ny = notYet(), pl = feed && feed.plan, d = metrics.dec;
+    const ny = notYet(), pl = feed && feed.plan, d = metrics.dec, vf=videoFacts(), direct=metrics.path==='webrtc';
     set('n-size', metrics.bytes ? fmtMb(metrics.bytes) : ny);
-    set('n-rate', metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
-    set('n-dur', pl ? pl.dur.toFixed(2) + ' s' : ny);
-    set('n-bps', pl ? (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s' : ny);
+    set('n-rate', direct?'wire rate not measured':metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
+    set('n-dur', pl ? pl.dur.toFixed(2) + ' s' : direct&&vf.duration!=null ? vf.duration.toFixed(2)+' s' : ny);
+    set('n-bps', pl ? (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s' : direct&&vf.duration&&metrics.direct?.size ? (8*metrics.direct.size/vf.duration/1e6).toFixed(1)+' Mb/s · file average' : ny);
     set('n-codec', pl && pl.codec || ny);
-    set('n-frame', pl && pl.w ? pl.w + '×' + pl.h + (pl.fps ? ' · ' + (+pl.fps.toFixed(2)) + ' fps' : '') : ny);
+    set('n-frame', pl && pl.w ? pl.w + '×' + pl.h + (pl.fps ? ' · ' + (+pl.fps.toFixed(2)) + ' fps' : '') : direct&&vf.width ? vf.width+'×'+vf.height : ny);
     set('n-dec', d ? 'supported ' + d.supported + ' · smooth ' + d.smooth : ny);
     if (!d) set('dec', ny);
-    set('n-blob', feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
-    set('n-cl', metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
-    set('n-chunk', metrics.firstChunk || ny);
+    set('n-blob', direct?'session ranges · no Blob':feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
+    set('n-cl', direct?'not applicable · direct reader':metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
+    set('n-chunk', direct?'not exposed by SDK':metrics.firstChunk || ny);
     set('n-ranges', metrics.acceptRanges || ny);
     set('n-ttfb', fmtMs(metrics.ttfbMs));
     set('n-ttff', fmtMs(metrics.ttffMs));
@@ -424,7 +530,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (done) {
       if (metrics.doneMs != null) {
         done.hidden = false;
-        done.textContent = lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
+        done.textContent = direct ? 'All plaintext ranges read in '+(metrics.doneMs/1000).toFixed(2)+' s · session only' : lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
       } else { done.hidden = true; done.textContent = ''; }
     }
   };
@@ -467,6 +573,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   async function goSound(my) {
     if (my !== job) return;
+    if (restorePause) { v.pause(); return; }
     v.muted = false; v.volume = 1; if (tap) tap.hidden = true;
     try { await v.play(); if (my === job) { playing = my; say(null); } }
     catch { if (my === job && tap) { tap.hidden = false; say(null); } }
@@ -477,19 +584,23 @@ document.addEventListener('DOMContentLoaded',function(){
   // The live download (one per job): its parts, the time plan read from moov, and where the
   // playing Blob ends. Media-element events reach it here; a newer job replaces it.
   let feed = null;
+  const needsFinalTail = st => !!(st && st.done && st.plan && st.paintedAt < st.plan.m1);
   const newFeed = my => (feed = {
     my, parts: [], bytes: 0, mime: '', early: false, me: 0, plan: null, planless: false,
-    preview: false, sounded: false, stalled: false, busy: false, done: false,
+    preview: false, previewTried: false, srcLocked: false, sounded: false, stalled: false, busy: false, done: false,
     acc: null, folded: 0, accBytes: 0, paintedAt: 0, retryAt: 0,
   });
   // Early Blob carries full moov duration but short mdat: past its last byte Chrome errors out
   // or races currentTime to the end. Hold a real playhead while the download bar is still up.
   let keepAt = 0;
-  const rateClock = { t0: 0, b0: 0, f0: 0, fb: 0, bps: 0 };
-  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; rateClock.f0 = 0; rateClock.fb = 0; rateClock.bps = 0; };
+  const rateClock = { t0: 0, b0: 0, f0: 0, fb: 0, bps: 0, lastAt: 0, lastBytes: 0, lastBps: 0 };
+  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; rateClock.f0 = 0; rateClock.fb = 0; rateClock.bps = 0; rateClock.lastAt = 0; rateClock.lastBytes = 0; rateClock.lastBps = 0; };
   const showGot = (bytes) => {
     const el = $('got');
     if (!el) return;
+    const now = performance.now(), gap = (now - rateClock.lastAt) / 1000;
+    if (rateClock.lastAt && bytes > rateClock.lastBytes && gap > 0) rateClock.lastBps = (bytes - rateClock.lastBytes) / gap;
+    rateClock.lastAt = now; rateClock.lastBytes = bytes;
     if (!rateClock.f0) { rateClock.f0 = performance.now(); rateClock.fb = bytes; }
     const mb = bytes / 1048576;
     const dt = (performance.now() - rateClock.t0) / 1000;
@@ -512,32 +623,35 @@ document.addEventListener('DOMContentLoaded',function(){
   const rateBps = () => {
     const live = rateClock.bps, dt = (performance.now() - rateClock.f0) / 1000;
     if (!(live > 0) || !rateClock.f0 || dt < 0.5) return 0;
-    return Math.min(live, (metrics.bytes - rateClock.fb) / dt);
+    // A slower arriving chunk is evidence now, not after the rolling window
+    // forgets the earlier fast burst. This keeps a run-dry ETA conservative.
+    return Math.min(live, rateClock.lastBps || live, (metrics.bytes - rateClock.fb) / dt);
   };
   // The running Blob ran dry before the download did (this Chromium: MEDIA_ERR_DECODE at the last
   // byte; others race currentTime to the end). Hold the last real playhead and let steer() decide,
   // by time, when to go on — the viewer sees "ready to play in ~N s", never a silent freeze.
-  // Once the last byte is in (done) only the stall is noted: finishBinary's full Blob resumes it.
+  // If the full file arrived during playback, the partial Blob still needs
+  // its final handoff at the media edge, even though the progress bar is gone.
   const dry = () => {
     const st = feed;
-    if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || pg.hidden) return false;
+    if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || (pg.hidden && !needsFinalTail(st))) return false;
     st.stalled = true;
     note('ran dry at ' + keepAt.toFixed(2) + ' s: holding until the rule allows');
     try { v.pause(); } catch {}
-    if (!st.done) steer(st);
+    if (!st.done || needsFinalTail(st)) steer(st);
     return true;
   };
   v.addEventListener('error', () => { if (dry()) return; if (playing && playing === job && pg.hidden) say('s-fail'); });
   v.addEventListener('timeupdate', () => {
     if (playing !== job) return;
     const st = feed, t = v.currentTime;
-    if (st && st.my === job && st.plan && !pg.hidden) {
+    if (st && st.my === job && st.plan && (!pg.hidden || needsFinalTail(st))) {
       if (st.busy || st.stalled) return;
       // Past what the running Blob can hold = Chrome's end-of-data yank, never the viewer's playhead.
       if (t > mediaAt(st.plan, st.paintedAt) + 1) { try { v.currentTime = keepAt; } catch {} dry(); return; }
       if (t > 0.05) keepAt = t;
       renderInst();
-      if (!st.done) steer(st);
+      if (!st.done || needsFinalTail(st)) steer(st);
       return;
     }
     if (!pg.hidden && v.buffered.length) {
@@ -552,7 +666,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (v.currentTime > 0.05 && !(dur > 0 && v.currentTime > dur - 0.75)) keepAt = v.currentTime;
   });
   v.addEventListener('ended', () => {
-    if (playing !== job || pg.hidden) return;
+    if (playing !== job || (pg.hidden && !needsFinalTail(feed))) return;
     const st = feed;
     if (st && st.my === job && st.plan) {
       if (st.paintedAt >= st.plan.m1) return;   // every media byte was in this Blob: a real end
@@ -565,7 +679,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // The viewer pressed play themselves (on the first-frame preview, or during a wait): honour it.
   v.addEventListener('play', () => {
     const st = feed;
-    if (!st || st.my !== job || !st.preview || st.busy || st.done) return;
+    if (!st || st.my !== job || !st.preview || st.busy || (st.done && !needsFinalTail(st))) return;
     st.sounded = true;
     if (!$('s-wait').hidden) say(null);
     if (st.stalled) { st.stalled = false; extend(st, keepAt, true); }
@@ -762,32 +876,112 @@ document.addEventListener('DOMContentLoaded',function(){
   paintMotion();
   document.addEventListener('visibilitychange', () => document.body.toggleAttribute('data-tab-hidden', document.hidden));
   let frameGen = 0;
+  const heldFrame = $('frame-hold'), stage = v.parentElement;
+  let frameCallback = null, holdGeneration = 0, savedFrameJob = null;
+  function clearHeldFrame() {
+    holdGeneration++;
+    if (frameCallback !== null && v.cancelVideoFrameCallback) v.cancelVideoFrameCallback(frameCallback);
+    frameCallback = null; heldFrame.hidden = true; stage.style.aspectRatio = '';
+  }
+  function captureDecodedFrame() {
+    if (!heldFrame.hidden || v.readyState < 2 || !v.videoWidth) return;
+    try {
+      // Cap the copy at 1080p even when the source is 8K. This is a temporary
+      // presentation frame, never a new rendition or a cached media object.
+      const scale = Math.min(1, 1920 / v.videoWidth, 1080 / v.videoHeight);
+      heldFrame.width = Math.round(v.videoWidth * scale); heldFrame.height = Math.round(v.videoHeight * scale);
+      heldFrame.getContext('2d').drawImage(v, 0, 0, heldFrame.width, heldFrame.height);
+      savedFrameJob = job;
+    } catch { /* A frame cannot be copied on this device; retain normal playback. */ }
+  }
+  function holdDecodedFrame() {
+    captureDecodedFrame();
+    if (savedFrameJob !== job) return;
+    stage.style.aspectRatio = heldFrame.width + ' / ' + heldFrame.height;
+    heldFrame.hidden = false;
+  }
+  // A truncated Blob can empty the decoder before `ended` fires. Bank the
+  // last real frame near its edge while pixels are still available.
+  v.addEventListener('timeupdate', () => {
+    const st = feed;
+    if (st && st.plan && st.sounded && mediaAt(st.plan, st.paintedAt) - v.currentTime < 2) captureDecodedFrame();
+  });
+  function revealDecodedFrame(at) {
+    if (heldFrame.hidden) return;
+    const generation = holdGeneration;
+    const ready = mediaTime => generation === holdGeneration && !v.seeking && v.readyState >= 2 && Math.abs(mediaTime - at) < 1;
+    if (v.requestVideoFrameCallback) {
+      const reveal = (_, frame) => {
+        if (generation !== holdGeneration) return;
+        if (ready(frame.mediaTime)) clearHeldFrame();
+        else frameCallback = v.requestVideoFrameCallback(reveal);
+      };
+      frameCallback = v.requestVideoFrameCallback(reveal);
+    } else {
+      // Older browsers: seek completion plus two paint turns. Never unveil an
+      // unloaded element merely because metadata arrived.
+      const reveal = () => {
+        if (generation !== holdGeneration) return;
+        if (ready(v.currentTime)) requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (ready(v.currentTime)) clearHeldFrame();
+        }));
+      };
+      v.addEventListener('seeked', reveal, { once: true });
+      reveal();
+    }
+  }
   const paintSrc = (assign, ms) => {
     frameGen++;
     const gen = frameGen;
     return new Promise(done => {
-      const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('error', no); done(ok); };
-      const yes = () => { if (gen === frameGen) end(true); };
-      const no = () => { if (gen === frameGen) end(false); };
+      const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('loadedmetadata', yes); v.removeEventListener('canplay', yes); v.removeEventListener('error', no); done(ok); };
+      const yes = () => { if (gen === frameGen && v.videoWidth > 0 && v.readyState >= 2) end(true); };
+      const no = () => {
+        if (gen !== frameGen) return;
+        try { window.__bviewMediaErr = v.error ? (v.error.code + ':' + (v.error.message || '')) : 'error-event'; } catch {}
+        end(false);
+      };
       const t = setTimeout(() => end(false), ms);
       v.addEventListener('loadeddata', yes);
+      v.addEventListener('loadedmetadata', yes);
+      v.addEventListener('canplay', yes);
       v.addEventListener('error', no);
       assign();
       if (gen === frameGen && v.readyState >= 2 && v.videoWidth > 0) end(true);
     });
   };
-  const setBlob = blob => {
+  // Count real media-element src assigns (proof: flicker = this climbing every chunk).
+  window.__bviewSrcAssigns = window.__bviewSrcAssigns || 0;
+  const setBlob = (blob, st) => {
+    // Refuse a no-growth repaint: same bytes already on the element = thrash with no new mdat.
+    if (st && st.paintedAt > 0 && st.accBytes > 0 && st.accBytes <= st.paintedAt) return false;
+    holdDecodedFrame();
     if (blobUrl) URL.revokeObjectURL(blobUrl);
+    // Drop the old src without load() — load() on an empty src fires error and aborts paintSrc
+    // before the new Blob URL is attached (DEMUXER_ERROR / instant end(false)).
+    try { v.removeAttribute('src'); v.removeAttribute('srcObject'); } catch {}
     blobUrl = URL.createObjectURL(blob);
-    v.src = blobUrl; v.load();
+    window.__bviewSrcAssigns++;
+    v.src = blobUrl;
+    try { v.load(); } catch {}
+    return true;
   };
-  const paintBlob = (blob, ms) => paintSrc(() => setBlob(blob), ms);
+  const paintBlob = (blob, ms, st) => {
+    let refused = false;
+    return paintSrc(() => {
+      if (setBlob(blob, st) === false) { refused = true; return; }
+    }, ms).then(ok => {
+      if (refused) return v.videoWidth > 0; // already on element
+      return ok;
+    });
+  };
   const prefixOf = (parts, bytes, need) => {
     const n = Math.min(bytes, need), u = new Uint8Array(n); let o = 0;
     for (const p of parts) { const k = Math.min(p.length, n - o); u.set(p.subarray(0, k), o); o += k; if (o >= n) break; }
     return u;
   };
   const markFirstFrame = () => {
+    captureDecodedFrame();
     if (metrics.ttffMs == null && metrics.t0) {
       metrics.ttffMs = performance.now() - metrics.t0;
       note('first frame');
@@ -808,13 +1002,15 @@ document.addEventListener('DOMContentLoaded',function(){
     st.busy = true;
     try {
       const blob = snap(st), n = st.accBytes;
-      const ok = await paintBlob(blob, BLOB_WAIT);
+      if (n <= st.paintedAt) return false;   // nothing new to put on the element
+      const ok = await paintBlob(blob, (n > (32 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), st);
       if (st.my !== job) return false;
       if (!ok) { st.retryAt = bytesAt(st.plan, mediaAt(st.plan, st.bytes) + EXTEND_GAIN); return false; }
       st.paintedAt = n;
       note((st.sounded ? 'swap' : 'start') + ' · playing copy ' + fmtMb(n) + ' (' + mediaAt(st.plan, n).toFixed(1) + ' s) from ' + at.toFixed(2) + ' s');
       paintNerd();
       try { v.currentTime = at; } catch {}
+      revealDecodedFrame(at);
       keepAt = at;
       if (go) { try { await v.play(); } catch {} }
       return true;
@@ -822,35 +1018,63 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   // Time-based playback, called per chunk and from the media element's own events: start, and
   // resume after running dry, only once waitFor() says the download will stay ahead; while
-  // playing, extend the Blob shortly before the playhead reaches its end.
+  // playing, hold the playhead — never mid-play src thrash.
   async function steer(st) {
     const pl = st.plan, my = st.my;
-    if (my !== job || !pl || !st.preview || st.busy || st.done || st.bytes < st.retryAt) return;
+    if (my !== job || !pl || !st.preview || st.busy || (st.done && !needsFinalTail(st)) || st.bytes < st.retryAt) return;
     if (!st.sounded || st.stalled) {
       // A resume after running dry wants a longer run of local media, so a tail that drifts
       // (VBR, interleave) cannot flicker play/stop/play.
       const w = waitFor(pl, st.bytes, keepAt, st.stalled ? AHEAD + EXTEND_GAIN : AHEAD);
       if (w === null) return;                  // no rate yet: the bar and MB counter speak
       if (w > 0) { showWait(w); return; }
-      if (!(await extend(st, keepAt, st.sounded))) return;
+      // Floor A: at most ONE src assign for start (or one for resume after hold).
+      if (st.srcLocked && !st.stalled) return;
+      // Huge files: wait for a real first-frame budget (>=32MiB) before the one paint.
+      if (!st.stalled && metrics.cl && metrics.cl > (48 << 20) && st.bytes < (32 << 20)) {
+        showWait(Math.max(1, Math.ceil(((32 << 20) - st.bytes) / Math.max(rateBps(), 1))));
+        return;
+      }
+      if (!(await extend(st, keepAt, st.sounded))) {
+        // extend set retryAt two media seconds ahead. Retry only at that
+        // budget, not on every chunk; one incomplete frame cannot lock a
+        // small video out of progressive playback for the whole download.
+        st.srcLocked = false;
+        note('start paint needs more media; retry after the bounded media budget');
+        return;
+      }
+      st.srcLocked = true;
+      if (!(v.videoWidth > 0)) {
+        note('start paint has no frame yet; holding until full file (no src thrash)');
+        return;
+      }
       st.stalled = false; waitS = 0; paintFlow(); renderInst();
       if (!st.sounded) { st.sounded = true; playing = my; say(null); await goSound(my); }
       else say(null);
       return;
     }
-    if (v.paused || st.paintedAt >= pl.m1) return;   // the viewer's own pause; or nothing left to add
-    // Near the (estimated, ~10% optimistic) end of the running Blob, swap once the download holds
-    // EXTEND_GAIN more seconds -- or, closer in, at least what is left to play of this Blob (0.5 s
-    // floor), so a download only just ahead is followed instead of running dry.
+    if (v.paused || st.paintedAt >= pl.m1) return;   // the viewer own pause; or nothing left to add
+    // Near the end of the running Blob: HOLD the playhead — never reassign video.src mid-play.
+    // Mid-download src swaps (extend -> setBlob -> v.src= + load) were the rapid flicker.
     const edge = mediaAt(pl, st.paintedAt), left = edge - 0.1 * edge - v.currentTime;
     if (left > EXTEND_LEAD) return;
-    if (st.bytes < pl.m1 && mediaAt(pl, st.bytes) - edge < Math.min(EXTEND_GAIN, Math.max(0.5, left))) return;
-    await extend(st, v.currentTime, true);
+    if (v.currentTime > 0.05) keepAt = v.currentTime;
+    st.stalled = true;
+    try { v.pause(); } catch {}
+    note('hold playhead at ' + keepAt.toFixed(2) + ' s: one paint when the rule allows (no mid-play src thrash)');
+    const w = waitFor(pl, st.bytes, keepAt, AHEAD + EXTEND_GAIN);
+    if (w === null) return;
+    if (w > 0) { showWait(w); return; }
+    if (st.bytes <= st.paintedAt) return;
+    st.srcLocked = false; // allow exactly one resume paint
+    if (!(await extend(st, keepAt, true))) { st.srcLocked = true; return; }
+    st.srcLocked = true;
+    st.stalled = false; waitS = 0; paintFlow(); renderInst(); say(null);
   }
   // Per chunk: find moov, read the time plan, paint the first frame, then steer() by time.
   async function flushEarlyPaint(parts, bytes, state, my) {
     state.parts = parts; state.bytes = bytes;
-    if (my !== job || bytes < 32 || state.busy || state.me < 0) return;
+    if (my !== job || bytes < 32 || state.busy || state.me < 0 || bytes < (state.retryAt || 0)) return;
     if (!state.me) {
       const head = prefixOf(parts, bytes, Math.min(bytes, 1 << 20));
       const me = moovEnd(head);
@@ -862,33 +1086,60 @@ document.addEventListener('DOMContentLoaded',function(){
       state.me = state.mime ? me : -1;
       if (!state.mime) return;
     }
-    if (bytes < state.me + EARLY_MDAT) return;
+    // The time plan needs moov and the next box header, not a first-frame
+    // budget. A video smaller than EARLY_MDAT must still get its countdown
+    // and device verdict while it arrives.
+    if (bytes < state.me + 16) return;
     if (!state.plan && !state.planless) {
       state.plan = planOf(prefixOf(parts, bytes, state.me + EARLY_MDAT), state.me);
       const pl = state.plan;
       if (pl) note('moov read: ' + state.me + ' B, mdat ' + pl.m0 + '..' + pl.m1);
       else note('no time plan (no duration, fragmented or moov-last): plays when the whole file is in');
-      if (pl) checkSmooth(pl, my); else state.planless = true;
+      if (pl) checkSmooth(pl, my);
+      else if (bytes < state.me + EARLY_MDAT) return; // more headers may follow padding
+      else state.planless = true;
       paintNerd();
     }
 
-    // Phase A -- first frame only (paused at 0). Never autoplay a short-mdat Blob (moov duration yank).
+    // Phase A -- at most ONE early paint. Skip on huge CL (8K): first frame needs MiBs of mdat.
+    if (!state.preview && metrics.cl && metrics.cl > (48 << 20)) {
+      state.previewTried = true;
+      state.preview = true;
+      state.early = false;
+      note('early frame skipped (large file): one paint at start/finish');
+      return;
+    }
+    // About one second of media, bounded by the large-file budget. Keep the
+    // single-attempt preview rule; a small video need not download 2 MiB.
+    const previewMdat = state.plan
+      ? Math.min(EARLY_MDAT, Math.max(256 << 10, (state.plan.m1 - state.plan.m0) / state.plan.dur))
+      : EARLY_MDAT;
+    if (!state.preview && bytes < state.me + previewMdat) return;
+    // Phase A -- at most ONE early paint. 8K needs far more than EARLY_MDAT for a
+    // decodable first frame; retrying every chunk (clearing or reassigning src) was the
+    // rapid flicker (live: __bviewSrcAssigns 220 in 8s, videoWidth stuck at 0).
     if (!state.preview) {
+      if (state.previewTried) return;
+      state.previewTried = true;
       state.busy = true;
       let ok = false;
-      try { ok = await paintBlob(snap(state), BLOB_WAIT); } finally { state.busy = false; }
-      if (!(my === job && ok && v.videoWidth > 0)) {
-        if (my === job) { frameGen++; v.removeAttribute('src'); v.load(); }
+      try { ok = await paintBlob(snap(state), BLOB_WAIT, state); } finally { state.busy = false; }
+      if (my === job && ok && v.videoWidth > 0) {
+        state.preview = true;
+        state.early = true;
+        state.paintedAt = state.accBytes;
+        // A fallback may be waiting for media at a saved playhead. Preview
+        // pixels must not reset that target before the start budget arrives.
+        try { v.pause(); } catch {}
+        playing = my;
+        markFirstFrame();
+        say(null);
         return;
       }
+      // Defer pixels to the one start paint in Phase B / finishBinary. Never strip src in a loop.
       state.preview = true;
-      state.early = true;
-      state.paintedAt = state.accBytes;
-      try { v.pause(); v.currentTime = 0; } catch {}
-      keepAt = 0;
-      playing = my;
-      markFirstFrame();
-      say(null); // clear "Fetching…" — frame is up; bar + rate still show progress
+      state.early = false;
+      note('early frame deferred: one paint at start (no src thrash)');
       return;
     }
 
@@ -909,36 +1160,52 @@ document.addEventListener('DOMContentLoaded',function(){
     for (const until = performance.now() + BLOB_WAIT; state.busy && performance.now() < until;) await new Promise(r => setTimeout(r, 50));
     if (my !== job) return true;
     const full = snap(state);
-    await cachePut(a, full);
     metrics.bytes = bytes;
     metrics.doneMs = metrics.t0 ? performance.now() - metrics.t0 : null;
-    metrics.sha = await hashBlob(full);
-    note('all ' + fmtMb(bytes) + ' in · sha256 ' + (metrics.sha || 'unavailable'));
+    note('all ' + fmtMb(bytes) + ' in');
     paintNerd(); renderInst();
-    if (my !== job) return true;   // a new address arrived while this one was hashed
-    // Resume where the viewer is NOW (hashing a large file takes seconds of playback). With a time
-    // plan keepAt only ever holds a playhead the running Blob could reach; without one, a playhead
-    // past 15 s is an end-of-data yank, discarded.
+    if (my !== job) return true;
+    // Hash AFTER paint so a 200MB SHA does not delay the one src assign.
+    // Resume where the viewer is NOW. With a time plan keepAt only ever holds a playhead the
+    // running Blob could reach; without one, a playhead past 15 s is an end-of-data yank, discarded.
     let t0 = keepAt || 0;
     if (!state.plan && t0 > 15) t0 = 0;
     if (playing === my || state.preview) {
       const resume = state.stalled || !v.paused;   // ran dry, or playing: go on; the viewer's own pause stays
+      // Already painting from the one start Blob: do NOT reassign src here (that black-flashed
+      // mid-play on live). Grow via the stalled-resume path when the playhead nears the edge.
+      if (state.sounded && v.videoWidth > 0 && !state.stalled) {
+        state.done = true;
+        note('full file in · keep playing copy (no finish src thrash)');
+        cachePut(a, full);
+        hashBlob(full).then(sha => { if (my === job) { metrics.sha = sha; note('sha256 ' + (sha || 'unavailable')); paintNerd(); } });
+        say(null);
+        return true;
+      }
       state.busy = true;
       let ok = false;
-      try { ok = await paintBlob(full, BLOB_WAIT); } finally { state.busy = false; }
+      state.paintedAt = 0; // allow the final src assign even if a deferred start painted nothing useful
+      try { ok = await paintBlob(full, (bytes > (48 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), state); } finally { state.busy = false; }
       if (my !== job) return true;
-      if (ok) {
-        state.paintedAt = bytes; state.stalled = false;
+      if (ok || (v.videoWidth > 0)) {
+        state.paintedAt = bytes; state.stalled = false; state.srcLocked = true;
         try { v.currentTime = t0; } catch {}
+        revealDecodedFrame(t0);
         keepAt = t0;
         playing = my; say(null);
         markFirstFrame();
         if (!state.sounded) { state.sounded = true; await goSound(my); }
         else if (resume) { try { await v.play(); } catch {} }
-      } else say(null);
+        cachePut(a, full);
+        hashBlob(full).then(sha => { if (my === job) { metrics.sha = sha; note('sha256 ' + (sha || 'unavailable')); paintNerd(); } });
+      } else {
+        note('full paint produced no frame');
+        say('s-fail');
+        cachePut(a, full);
+      }
       return true;
     }
-    const ok = await paintBlob(full, BLOB_WAIT);
+    const ok = await paintBlob(full, (bytes > (48 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), state);
     if (my === job) { if (ok) { playing = my; say(null); markFirstFrame(); await goSound(my); } else say('s-fail'); }
     return true;
   }
@@ -1071,20 +1338,146 @@ document.addEventListener('DOMContentLoaded',function(){
     const ok = await finishBinary(parts, bytes, state, my, a);
     if (my === job && !ok && !playing) say('s-fail');
   }
-  async function view(raw) {
+  // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
+  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.0/';
+  let directPool = null, directSession = null, restorePause = false;
+  const routeStatus = text => { $('playback-status').textContent = text; };
+  const stopDirect = () => {
+    const session = directSession; directSession = null;
+    if (session) { session.dispose(); session.source?.close(); }
+  };
+  const closePool = () => {
+    const pool = directPool; directPool = null;
+    if (pool) pool.then(client => client.close()).catch(() => {});
+  };
+  addEventListener('pagehide', () => { stopDirect(); closePool(); });
+  async function bounded(work, signal, milliseconds) {
+    let timer, aborted;
+    try {
+      return await Promise.race([work, new Promise((_, reject) => {
+        aborted = () => reject(new DOMException('Cancelled', 'AbortError'));
+        signal.addEventListener('abort', aborted, { once: true });
+        if (signal.aborted) aborted();
+        timer = setTimeout(() => reject(new Error('Direct startup timed out')), milliseconds);
+      })]);
+    } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
+  }
+  async function tryDirect(address, signal, my) {
+    let reader, source, session, deadline;
+    const failed = new AbortController();
+    const cancelled = () => failed.abort();
+    signal.addEventListener('abort', cancelled, { once: true });
+    deadline = setTimeout(() => failed.abort(), 45000);
+    try {
+      metrics.direct={sdk:'0.1.0',reused:!!directPool,connectMs:null,openMs:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
+      if (!isSecureContext || !('serviceWorker' in navigator) || !('RTCPeerConnection' in window)) throw new Error('Direct playback is unavailable in this browser');
+      routeStatus('Connecting directly to Autonomi. The relay is available if this fails.');
+      metrics.path = 'webrtc-connecting'; paintNerd();
+      const sdk = await bounded(import(SDK_ROOT + 'index.js'), failed.signal, 45000);
+      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, 45000);
+      if (my !== job || signal.aborted) return true;
+      const connectAt=performance.now();
+      if (!directPool) {
+        const pending = sdk.AutonomiClient.connect({ signal: failed.signal });
+        directPool = pending;
+        pending.catch(() => { if (directPool === pending) directPool = null; });
+      }
+      const client = await bounded(directPool, failed.signal, 45000);
+      if (my !== job || signal.aborted) return true;
+      metrics.direct.connectMs=performance.now()-connectAt;
+      const openAt=performance.now();
+      reader = await bounded(client.openFile(address, { signal: failed.signal }), failed.signal, 45000);
+      if(my!==job||signal.aborted){reader.close();return true;}
+      metrics.direct.openMs=performance.now()-openAt;metrics.direct.size=reader.size;
+      const bridge = new MediaBridge();
+      session = { my, receipt:metrics.direct, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => bridge.close() };
+      // Count completed plaintext ranges, never infer wire bytes from lookup counters.
+      const trackedReader = {
+        address: reader.address, name: reader.name, size: reader.size, contentType: reader.contentType,
+        close: () => reader.close(),
+        read: async (start, length) => {
+          const receipt=session.receipt, readAt=performance.now();receipt.requests++;
+          let bytes;
+          try{bytes=await reader.read(start,length,{signal});}catch(error){if(my===job&&!signal.aborted){receipt.failed++;paintNerd();}throw error;}
+          if (my === job && !signal.aborted) {
+            receipt.completed++;receipt.readBytes+=bytes.length;receipt.readMs+=performance.now()-readAt;
+            const sorted = [...session.ranges, [start, start + bytes.length]].sort((a,b) => a[0]-b[0]);
+            const merged = [];
+            for (const range of sorted) { const tail=merged[merged.length-1]; if(tail && range[0]<=tail[1]) tail[1]=Math.max(tail[1],range[1]); else merged.push([...range]); }
+            session.ranges = merged; session.bytes = merged.reduce((n,r) => n+r[1]-r[0],0);
+            metrics.bytes = session.bytes;
+            receipt.uniqueBytes=session.bytes;
+            if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now()-metrics.t0;
+            if(receipt.firstReadMs==null)receipt.firstReadMs=metrics.ttfbMs;
+            if (session.bytes === session.size && metrics.doneMs == null) metrics.doneMs = performance.now()-metrics.t0;
+            paintNerd();
+          }
+          return bytes;
+        }
+      };
+      source = await bounded(bridge.attach(trackedReader, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal }), failed.signal, 45000);
+      if (my !== job || signal.aborted) { source.close(); bridge.close(); return true; }
+      clearTimeout(deadline);
+      session.source = source; directSession = session;
+      metrics.path = 'webrtc'; metrics.acceptRanges = 'local range bridge';
+      routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
+      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, 45000);
+      if (my !== job || signal.aborted) return true;
+      if (!ok) throw new Error('Direct media did not produce a frame');
+      playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null); await goSound(my);
+      // A stopped decoder or a network stall falls back once, preserving the playhead.
+      let stallTimer = null, progressedAt = v.currentTime || 0;
+      const fallback = reason => {
+        if (my !== job || directSession !== session) return;
+        const at=v.currentTime||0, paused=v.paused;
+        const result=reason + ' at ' + at.toFixed(1) + ' s' + (metrics.ttffMs == null ? '' : ' (first frame ' + (metrics.ttffMs/1000).toFixed(1) + ' s)');
+        const directReceipt={...metrics.direct,fallback:reason,playhead:at};
+        view(address, { relay:true, resumeAt:at, paused, reason:result, directReceipt });
+      };
+      const ready = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; session.sounded=true; progressedAt=v.currentTime||0; pub(); };
+      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); if (stallTimer === null) stallTimer=setTimeout(() => fallback('Direct playback stalled'),15000); };
+      const error = () => fallback('Direct media error');
+      const paused = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; pub(); };
+      const progressed = () => { if(!v.paused && !v.seeking && v.currentTime > progressedAt + 0.01) ready(); };
+      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
+      session.sounded=!v.paused;
+      session.dispose=() => { clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); bridge.close(); };
+      pub(); return true;
+    } catch (error) {
+      if (directSession === session) stopDirect();
+      source?.close(); reader?.close(); session?.dispose();
+      if (my !== job || signal.aborted) return true;
+      closePool();
+      metrics.direct.fallback=error.name==='AbortError'?'startup timeout':error.message;
+      metrics.path=''; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
+      routeStatus('Direct playback could not start. Using the relay.');
+      note('direct fallback · ' + (error.name === 'AbortError' ? 'startup timeout' : error.message));
+      return false;
+    } finally { clearTimeout(deadline); signal.removeEventListener('abort',cancelled); }
+  }
+  async function view(raw, options = {}) {
+    if (options.relay && options.reason) holdDecodedFrame();
     const a = parse(raw), my = ++job;
+    if (options.relay && options.reason && !heldFrame.hidden) savedFrameJob = my;
+    restorePause = !!options.paused;
+    stopDirect();
+    v.pause();
+    if (options.relay && options.reason) holdDecodedFrame();
+    else { clearHeldFrame(); savedFrameJob = null; }
     if (ctl) ctl.abort();
     ctl = new AbortController();
     const signal = ctl.signal;
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
-    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
+    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = options.resumeAt || 0; resetRate();
     feed = null; waitS = 0; $('s-rough').hidden = true; $('veil').hidden = true; $('flow').hidden = true;
     delete $('s-wait').dataset.s; $('log').textContent = ''; $('dec').textContent = notYet(); metrics.dec = null;
     resetMetrics(); paintNerd();
+    if(options.directReceipt)metrics.direct=options.directReceipt;
     if (!a) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
-    note('open · GET …/data/public/<address>/stream');
+    routeStatus(options.reason ? options.reason + '. Continuing through the relay.' : '');
+    note('open · ' + (options.relay ? 'relay fallback' : $('playback-route').value));
     $('out').dataset.addr = 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     const hit = await cacheGet(a);
@@ -1094,10 +1487,18 @@ document.addEventListener('DOMContentLoaded',function(){
       metrics.sha = await hashBlob(hit);
       metrics.doneMs = performance.now() - metrics.t0;
       paintNerd();
-      if (await paintBlob(hit, BLOB_WAIT)) {
+      if (await paintBlob(hit, BLOB_WAIT, null)) {
         if (my === job) { playing = my; say(null); markFirstFrame(); await goSound(my); }
         return;
       }
+    }
+    if (!options.relay && $('playback-route').value === 'direct' && await tryDirect(a, signal, my)) return;
+    if (my !== job || signal.aborted) return;
+    if (options.relay || $('playback-route').value === 'relay') closePool();
+    if (options.resumeAt > 0 || options.paused) {
+      const restore = () => { if (my !== job) return; if (options.resumeAt > 0 && Number.isFinite(v.duration)) v.currentTime=Math.min(options.resumeAt,Math.max(0,v.duration-0.05)); if (options.paused) v.pause(); revealDecodedFrame(options.resumeAt || 0); };
+      signal.addEventListener('abort', () => v.removeEventListener('loadeddata', restore), {once:true});
+      v.addEventListener('loadeddata', restore, {once:true});
     }
     frameGen++;
     v.removeAttribute('src'); v.load();
@@ -1114,21 +1515,24 @@ document.addEventListener('DOMContentLoaded',function(){
   // ETERNAL FRONT: a read-only snapshot of the engine for the three renderers (docs/design/eternal).
   // The facts on every front come from here and from nowhere else; it never writes to the engine.
   window.__bviewEngine = () => {
-    const st = feed, pl = st && st.plan;
+    const ds = directSession && directSession.my === job ? directSession : null;
+    const st = feed, pl = st && st.plan || (ds && Number.isFinite(v.duration) && v.duration > 0 ? {dur:v.duration,m0:0,m1:ds.size,w:v.videoWidth,h:v.videoHeight,codec:'browser decoder',fps:0} : null);
     return {
       door: DOOR, cache: CACHE, rule: { safety: SAFETY, margin: MARGIN, ahead: AHEAD, probeMs: STREAM_PROBE, stubBytes: STUB_CL },
       has: !!metrics.addr, bad: !$('s-bad').hidden, fail: !$('s-fail').hidden, slow: !$('s-slow').hidden,
-      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: metrics.cl || (pl && pl.m1) || 0,
+      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: ds ? ds.size : metrics.cl || (pl && pl.m1) || 0,
       rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
       dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
-      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: ds ? ds.sounded : !!(st && st.sounded), stalled: ds ? ds.stalled : !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
+      direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
     };
   };
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
   paintNerd(); renderInst();
+  for(const event of ['timeupdate','progress','loadedmetadata','playing','pause','ended','seeked'])v.addEventListener(event,paintNerd);
   addEventListener('hashchange', fromHash); fromHash();
 })();
 </script>
@@ -1152,6 +1556,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function read(){
     var E=window.__bviewEngine?window.__bviewEngine():null; if(!E) return;
     var u=new URL(E.door); D.door.host=u.host; D.door.base=u.pathname; D.rule=E.rule; D.cache=E.cache; D.live=E;
+    if(E.path==='webrtc' || E.path==='webrtc-connecting'){D.door.host='Autonomi storage nodes';D.door.base='';}
     var s=!E.has?(E.bad?'refused':'idle'):E.fail?'failed':E.doneMs!=null?'done':E.stalled?'stalled':(E.waitS&&!(E.sounded&&!E.stalled))?'waiting':(E.sounded?'playing':'fetching');
     var pl=E.plan, flowX=pl&&E.rateBps?E.rateBps/((pl.m1-pl.m0)/pl.dur):null;
     D.view={
@@ -1159,7 +1564,7 @@ document.addEventListener('DOMContentLoaded',function(){
       arrived:E.bytes?mb(E.bytes)+(E.size?' '+T('et.bview.of','of')+' '+mb(E.size):''):T('et.bview.nothingYet','nothing yet'),
       frac:E.size?Math.min(1,E.bytes/E.size):(E.doneMs!=null?1:0),
       copy:E.size&&E.paintedAt?Math.min(1,E.paintedAt/E.size):0,
-      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s':T('et.bview.notRead','not read yet'),
+      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s'+(E.path==='webrtc'?' file average':''):T('et.bview.notRead','not read yet'),
       time:pl&&E.sounded?Math.min(1,E.playhead/pl.dur):0,
       flowX:flowX,
       flow:flowX!=null?flowX.toFixed(flowX<1?2:1)+'× '+T('et.bview.asFast','as fast as it plays'):T('et.bview.notMeasured','not measured yet'),
@@ -1178,11 +1583,13 @@ document.addEventListener('DOMContentLoaded',function(){
   /* ── NEW BEE: plain rows, one line each, one tap opens a plain sentence ── */
   function bee(){
     var box=$('etBeeRows'); if(!box) return;
+    var direct=D.view.path==='webrtc' || D.view.path==='webrtc-connecting';
+    document.querySelector('.et-b-foot').textContent=direct?'Public video: anyone with the address can watch. Direct playback keeps session ranges; My videos remembers the address.':T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
     var rows=[
-      ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.')],
-      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.')],
+      ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',(D.view.path==='webrtc'?'This video comes directly from Autonomi storage nodes over WebRTC. This browser is not seeding it to other viewers.':T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.'))],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'The browser requests verified ranges as needed. A sustained stall switches to the relay.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
-      ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
+      ['next',T('et.bview.b.next','next time'),esc(direct?'address remembered':T('et.bview.b.nextV','opens at once')),(D.view.path==='webrtc'?'Direct playback keeps bounded ranges during this session; it does not save a complete offline copy. Your saved address remains in My videos.':T('et.bview.b.nextSay','this device keeps a copy of what you watched.'))]
     ];
     box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
       return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
@@ -1207,6 +1614,7 @@ document.addEventListener('DOMContentLoaded',function(){
       '<circle class="core" r="68"/><text class="mid" y="6" text-anchor="middle">'+esc(pct)+'</text><text class="sub" y="32" text-anchor="middle">'+esc(cap)+'</text></g>';
   }
   function raver(){
+    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi. Session ranges stay warm; your saved address remains in My videos.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
     var hint=$('etRaverHint'); if(hint) hint.textContent=w('raver');
     ring();
     var t=$('etTiles'); if(!t) return;
@@ -1221,6 +1629,9 @@ document.addEventListener('DOMContentLoaded',function(){
   /* ── CYPHERPUNK: chips, the numbered pipeline, the receipt ── */
   function cy(){
     var E=D.live, V=D.view; if(!E) return;
+    var direct=E.path==='webrtc'||E.path==='webrtc-connecting', dr=E.direct, vf=E.video;
+    $('etMethod').textContent=direct?'WebRTC · ':'GET ';
+    $('etTail').textContent=direct?' · plaintext ranges':'{address}/stream';
     var door=$('etDoor'); if(door) door.textContent=D.door.host+D.door.base;
     $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>';
     var r=D.rule, pl=E.plan;
@@ -1233,19 +1644,53 @@ document.addEventListener('DOMContentLoaded',function(){
       ['start rule','rest ÷ rate × '+r.safety+' + '+r.margin+' s ≤ time left → '+esc(WORD.cy[V.state]),E.sounded||E.doneMs!=null?'done':'todo'],
       ['sha256 · whole file',E.sha?E.sha:'hashed when the last byte is in',E.sha?'done':'todo']
     ];
+    if(direct)steps=[
+      ['parse · 64 hex','public read · no wallet required',E.has?'done':'todo'],
+      ['cache · '+D.cache,'whole-file cache miss · session range reader selected',E.has?'done':'todo'],
+      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.0'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
+      ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
+      ['service worker · native ranges','one media URL · seekable session ranges · no progressive Blob swaps',E.path==='webrtc'?'done':'todo'],
+      ['browser playback',E.sounded?'decoded frames · '+E.playhead.toFixed(2)+' s':'waiting for a decoded frame',E.sounded?'done':'todo'],
+      ['relay recovery','startup failure, decoder error or 15 s without playback progress · retain playhead and pause intent','todo'],
+      ['whole-file SHA-256','not computed for direct range playback · range reads are not a whole-file hash','skip']
+    ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
     var now=steps.findIndex(function(s){return s[2]==='todo';});
     $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now&&E.has?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
     var no=function(t){return '<span class="no">'+esc(t)+'</span>';};
-    $('etReceipt').innerHTML=[
+    var rows=[
       ['door','<span data-et="network">'+esc(D.door.host+' · '+D.door.network)+'</span>'],
       ['path',V.path?esc(V.path):no('not yet')],
       ['arrived','<span data-et="arrived">'+esc(V.arrived)+'</span>'],
       ['length',esc(V.length)],
       ['flow',esc(V.flow)],
-      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no('not yet · hashed when the last byte is in')],
+      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no(direct?'not computed · range playback':'not yet · hashed when the last byte is in')],
       ['done',V.done?'<span class="yes">'+esc(V.done)+'</span>':no('not yet')]
-    ].map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('');
+    ];
+    var ms=function(n){return n==null?'not yet':(n/1000).toFixed(2)+' s';};
+    rows.push(['first response',esc((direct?'first plaintext range · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    if(vf){
+      rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
+        ['picture',esc(vf.width?vf.width+'×'+vf.height:'not yet')],
+        ['buffer ahead',esc(vf.ahead.toFixed(2)+' s · browser media buffer')],
+        ['buffer ranges',esc(vf.buffered.length?vf.buffered.map(function(r){return r[0].toFixed(2)+'–'+r[1].toFixed(2)+' s';}).join(', '):'none yet')],
+        ['frames',esc(vf.quality?vf.quality.total+' total · '+vf.quality.dropped+' dropped · current media source':'not available in this browser')],
+        ['source changes',esc(vf.srcChanges+' · current route attempt')]);
+    }
+    if(dr)rows.push(
+      ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
+      ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
+      ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
+      ['range calls',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
+      ['range payload',esc(dr.readBytes+' B · includes repeated ranges')],
+      ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
+      ['read latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · calls may overlap')],
+      ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
+      ['fallback',esc(dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
+      ['wire traffic',no('not measured · plaintext bytes are not network bandwidth')],
+      ['viewer seeding',no('not provided · this browser retrieves ranges')]
+    );
+    $('etReceipt').innerHTML=rows.map(function(x){return '<tr><th>'+esc(x[0])+'</th><td>'+x[1]+'</td></tr>';}).join('');
   }
 
   /* ── the dock: ONE form and ONE stage, carried into the front that is showing ── */

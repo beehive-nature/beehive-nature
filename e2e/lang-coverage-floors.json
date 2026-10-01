@@ -83,5 +83,8 @@
  "wallet.html": 23,
  "vending.html": 47,
  "or-board.html": 55,
- "watch.html": 44
+ "watch.html": 44,
+ "missions.html": 8,
+ "mission-room.html": 9,
+ "receipts.html": 10
 }
