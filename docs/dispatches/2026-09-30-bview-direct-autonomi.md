@@ -96,3 +96,16 @@ and keeps the first stall deadline despite repeated waiting events. Expanded
 real-media policy acceptance: 4/4, 0 failed/cancelled/skipped, exit 0,
 52284.2585 ms. It proves pause cancellation, continued buffered playback does
 not fall back, and zero-progress playback with repeated waiting does fall back.
+
+CI run 36811662179: static, node, wallet, test and eternal passed; meter failed
+on the route select's hard-coded 8px radius (bee 99.2%, raver 99.5%, cypherpunk
+99.8%). This was this lane's regression, not inherited main. Replaced it with
+the existing --ctl register token. Local final-tree bViEw meter: all three
+registers 100%, all six categories 100%, exit 0 (130/199/403 checks).
+
+Synced current main da75846c3, preserving the concurrent bData translation
+work and workflow tests. The first merge commit attempt was rejected because
+its generated message lacked the required Co-authored-by trailer; completed
+with the parsed seat trailer. No force push, baseline weakening or shared
+checkout changes. Complete hosted final-tree CI and deployment receipts follow
+in the PR.

@@ -622,6 +622,12 @@ jobs:
         if: always()
         working-directory: e2e
         run: node bdata-surface.mjs
+      # bData Phase E (Chief LoVis, 2026-09-30): pay-with-wallet after Authorized
+      # (ant-pay mock signer) + Add to manifest (picker + sha256 + mock intake).
+      - name: bData Phase E — pay-with-wallet + Add to manifest (mock bridge + mock signer)
+        if: always()
+        working-directory: e2e
+        run: node bdata-phase-e.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
