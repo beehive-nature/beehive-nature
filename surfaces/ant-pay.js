@@ -163,13 +163,50 @@
          An instrument that cannot read its own record says so; it does not answer in the expensive
          direction. Absent is a different answer from unreadable, and only absent means 'not paid'. */
       var ptr = null; try { ptr = JSON.parse(raw); } catch (e) { ptr = null; }
+      /* A PENDING MARK: written before the wallet was asked, and never updated with the hash. The
+         payment may have left the wallet or may not, and this device cannot tell which, so every
+         reader refuses by name rather than reading it as unpaid. */
+      if (ptr && ptr.pending === true && ptr.upload_id && !ptr.tx_hash)
+        throw refusal('payment-pending', 'this device started a payment for one of these quotes and has no record of whether it left the wallet, so it will not pay for it again. nothing was signed now. look in your wallet’s history for a payment to the Autonomi vault; if there is none, clear this site’s stored data and ask for the price again', { key: QKEY(quoteHash), quote: quoteHash });
       if (!ptr || !ptr.upload_id || !isH32(ptr.tx_hash))
         throw refusal('unreadable-record', 'this device kept a payment record for one of these quotes and cannot read it back, so it cannot say whether that quote is already paid. nothing was signed. clear this site’s stored data and ask for the price again', { key: QKEY(quoteHash), quote: quoteHash });
       return ptr;
     }
-    function markPaid(uploadId, txHashes) {
-      Object.keys(txHashes).forEach(function (h) { store.set(QKEY(h), JSON.stringify({ upload_id: uploadId, tx_hash: txHashes[h] })); });
+    /* confirmed: the chain answered this hash 0x1 while this device waited. owing() reads it, so a
+       sheet never says "already paid" about a payment only this device has seen leave. */
+    function markPaid(uploadId, txHashes, confirmed) {
+      Object.keys(txHashes).forEach(function (h) {
+        var v = { upload_id: uploadId, tx_hash: txHashes[h] }; if (confirmed) v.confirmed = true;
+        store.set(QKEY(h), JSON.stringify(v));
+      });
     }
+    /* best effort: a store that refuses leaves the entry unconfirmed, which only makes a sheet say less */
+    function markConfirmed(uploadId, quoteHashes, hash) {
+      quoteHashes.forEach(function (qh) { try { store.set(QKEY(qh), JSON.stringify({ upload_id: uploadId, tx_hash: hash, confirmed: true })); } catch (e) { /* stays unconfirmed */ } });
+    }
+    /* THE RECORD IS WRITTEN BEFORE THE WALLET IS ASKED (bee-laborer cec532a1). A store that passed the
+       surface's probe and then refused the record AFTER the send left nothing for the next try to read,
+       and the retry paid again. So a pending mark goes down first, keyed on each quote, and is read
+       back; if it cannot be kept the wallet is never asked. After the send the mark is overwritten
+       with the hash in place, so a refused update still leaves a mark every reader refuses on. */
+    function markPending(uploadId, batch) {
+      var v = JSON.stringify({ upload_id: uploadId, pending: true }), bad = null;
+      batch.forEach(function (p) {
+        if (bad) return;
+        try { store.set(QKEY(p.quote_hash), v); if (store.get(QKEY(p.quote_hash)) !== v) bad = 'it did not read back'; } catch (e) { bad = String(e && e.message || e).slice(0, 120); }
+      });
+      if (!bad) return;
+      clearPending(batch);
+      throw refusal('record-refused', 'this device could not write its record of the payment before asking the wallet (' + bad + '), so it could not stop a second payment for this file. the wallet was not asked for this payment');
+    }
+    function clearPending(batch) {
+      batch.forEach(function (p) {
+        try { var raw = store.get(QKEY(p.quote_hash)), r = raw && JSON.parse(raw); if (r && r.pending === true) store.set(QKEY(p.quote_hash), ''); } catch (e) { /* a mark left behind refuses the next try by name */ }
+      });
+    }
+    /* only these two mean the payment did not leave: EIP-1193 4001 (the person refused in the wallet)
+       and this file's own chain check before the send. Anything else may have been sent, so the mark stays. */
+    function nothingSent(e) { return !!e && (e.code === 4001 || e.refusal === 'wrong-chain'); }
     /* THE CHAIN REFUSED IT, SO NOTHING MOVED. The index entries are written BEFORE the wait —
        deliberately, so a crash keeps what did leave the wallet — and until now nothing cleared
        them when the receipt came back 0x0. The quotes then read paid-forever on a device that
@@ -300,15 +337,15 @@
          each of them. owed = the priced quotes this device has NOT already paid; settled = the rest,
          with the hash that paid them. A quote already paid is not paid again, by KEY and not by id. */
       var priced = all.filter(function (p) { return BigInt(p.amount_atto) > 0n; });
-      var owed = [], settled = {}, owedTotal = 0n;
+      var owed = [], settled = {}, unconfirmed = [], owedTotal = 0n;
       priced.forEach(function (p) {
         var kept = paidFor(p.quote_hash);
-        if (kept) { settled[p.quote_hash] = kept.tx_hash; return; }
+        if (kept) { settled[p.quote_hash] = kept.tx_hash; if (kept.confirmed !== true && unconfirmed.indexOf(kept.tx_hash) < 0) unconfirmed.push(kept.tx_hash); return; }
         owed.push(p); owedTotal += big(p.amount_atto, 'a payment');
       });
       var batches = [];
       for (var i = 0; i < owed.length; i += MAX_PER_TX) batches.push(owed.slice(i, i + MAX_PER_TX));
-      return { total: total, owedTotal: owedTotal, priced: priced, owed: owed, settled: settled, settledCount: Object.keys(settled).length, batches: batches };
+      return { total: total, owedTotal: owedTotal, priced: priced, owed: owed, settled: settled, settledCount: Object.keys(settled).length, unconfirmed: unconfirmed, batches: batches };
     }
     function waitFor(hash, label, signal) {
       var started = now();
@@ -354,7 +391,7 @@
           quotes_paid: plan.priced.length, quotes_already_paid: plan.settledCount, ant_atto: plan.total.toString(), ant_paid_now_atto: plan.owedTotal.toString(),
           payer: payer, txs: txs, seconds: Math.round((now() - started) / 1000), finished_at: new Date(now()).toISOString() };
         store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: true, receipt: receipt }));
-        markPaid(prepare.upload_id, txHashes);
+        markPaid(prepare.upload_id, txHashes, true); /* finalize runs after every hash was waited on */
         tell({ phase: 'done', receipt: receipt }); return receipt;
       }, function (e) {
         throw refusal('paid-not-finalized', 'the payment is on chain but the upload did not finish: ' + e.message + '. nothing is lost — ask for the price again so the door recovers this plan, then resume; you will not be charged twice', { txs: txs, door: e.detail && e.detail.door });
@@ -364,7 +401,7 @@
 
     /* the chain half only: read, show, sign, wait. the hashes are kept before this returns. */
     function charge(input) {
-      var started = now(), prepare = input && input.prepare, plan, c = CONTRACTS, payer, signer = cfg.signer, txHashes = {};
+      var started = now(), prepare = input && input.prepare, plan, c = CONTRACTS, payer, signer = cfg.signer, txHashes = {}, attempted = 0;
       return Promise.resolve().then(function () {
         plan = readPlan(prepare, input.authorization);
         /* keyed on the quote set, so a re-prepare of the same bytes under a new upload_id lands
@@ -390,15 +427,20 @@
         tell({ phase: 'plan', plan: shown });
         if (typeof input.confirmPlan !== 'function') throw refusal('not-confirmed', 'the surface offered no button to confirm this plan');
         return Promise.resolve(input.confirmPlan(shown)).then(function (yes) {
-          if (yes !== true) throw refusal('not-confirmed', 'you did not confirm — nothing was signed, nothing was paid');
+          /* "nothing was paid" is false beside a kept payment the surface is about to print (bFUzZ G3) */
+          if (yes !== true) throw refusal('not-confirmed', plan.settledCount ? 'you did not confirm — nothing more was signed or paid' : 'you did not confirm — nothing was signed, nothing was paid');
+          /* every mark goes down before the wallet is asked for anything, the approve included, and a
+             store that will not keep them is refused here (cec532a1) */
+          markPending(prepare.upload_id, plan.owed);
           if (!needApprove) return null;
           tell({ phase: 'signing', what: 'approve', of: shown.wallet_confirmations, n: 1 });
           return signer.send({ to: c.token, data: encodeApprove(c.vault, plan.owedTotal) }).then(function (h) { if (!isH32(h)) throw refusal('wallet-declined', 'the wallet returned no transaction hash'); return waitFor(h, 'approve', input.signal); });
         }).then(function () {
           return plan.batches.reduce(function (chain, batch, i) {
             return chain.then(function () {
+              attempted = i + 1;
               tell({ phase: 'signing', what: 'payment', of: shown.wallet_confirmations, n: (needApprove ? 2 : 1) + i });
-              return signer.send({ to: c.vault, data: encodePayForQuotes(batch) });
+              return signer.send({ to: c.vault, data: encodePayForQuotes(batch) }).catch(function (e) { if (nothingSent(e)) clearPending(batch); throw e; });
             }).then(function (h) {
               if (!isH32(h)) throw refusal('wallet-declined', 'the wallet returned no transaction hash');
               batch.forEach(function (p) { txHashes[p.quote_hash] = h; });
@@ -421,15 +463,22 @@
                 store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
                 markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
               } catch (e) {
-                throw refusal('record-not-kept', 'the payment left the wallet (' + h + ') and this device could not write its record of it (' + String(e && e.message || e).slice(0, 120) + '). the wallet did not decline. keep that payment id: this device will not remember it, so it cannot stop a second payment for this file', { tx: h });
+                throw refusal('record-not-kept', 'the payment left the wallet (' + h + ') and this device could not write its record of it (' + String(e && e.message || e).slice(0, 120) + '). the wallet did not decline. keep that payment id: this device kept only a mark that a payment was started, so it will not pay for this file again, and it cannot finish storing it on that payment', { tx: h });
               }
-              return waitFor(h, 'payment', input.signal).catch(function (e) {
+              return waitFor(h, 'payment', input.signal).then(function (r) {
+                markConfirmed(prepare.upload_id, batch.map(function (p) { return p.quote_hash; }), h); return r;
+              }, function (e) {
                 if (e && e.refusal === 'tx-reverted')
                   throw reverted(e, unwind(h, batch.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }), prepare.upload_id, { txHashes: txHashes, finalized: false }));
                 throw e;
               });
             });
           }, Promise.resolve());
+        }).catch(function (e) {
+          /* a batch never handed to the wallet was never sent, so its mark goes; the batch that was
+             in the wallet's hands keeps its mark unless nothingSent() cleared it above */
+          plan.batches.slice(attempted).forEach(clearPending);
+          throw e;
         });
       }).then(function () { return { prepare: prepare, plan: plan, payer: payer, txHashes: txHashes, started: started }; });
     }
@@ -456,7 +505,9 @@
       var prepare = input.prepare, covered = pairs(plan, {});
       return tellKept(prepare, plan).reduce(function (ch, h) {
         return ch.then(function () {
-          return waitFor(h, 'payment', input.signal).catch(function (e) {
+          return waitFor(h, 'payment', input.signal).then(function (r) {
+            covered.forEach(function (x) { if (x.tx_hash !== h) return; try { markConfirmed(paidFor(x.quote_hash).upload_id, [x.quote_hash], h); } catch (e) { /* stays unconfirmed */ } }); return r;
+          }, function (e) {
             if (!e || e.refusal !== 'tx-reverted') throw e;
             /* the record this hash was written under is found through the index, because it
                belongs to whichever upload paid it and not to this prepare. One that is missing or
@@ -479,7 +530,7 @@
     function owing(input) {
       var plan = readPlan(input && input.prepare, input && input.authorization);
       var kept = Object.keys(plan.settled).map(function (h) { return plan.settled[h]; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
-      return { owed_atto: plan.owedTotal.toString(), quotes_owed: plan.owed.length, quotes_kept: plan.settledCount, kept_txs: kept };
+      return { owed_atto: plan.owedTotal.toString(), quotes_owed: plan.owed.length, quotes_kept: plan.settledCount, kept_txs: kept, kept_unconfirmed: plan.unconfirmed.slice() };
     }
     function settle(input) {
       var fallback = 'wallet-declined';

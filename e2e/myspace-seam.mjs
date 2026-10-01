@@ -1782,9 +1782,11 @@ try {
     const walletOf = await mockWallet(ctx, wallet);
     /* deny: this browser refuses localStorage writes — 'all' of them, as a full store or a locked-down
        profile does, or only the payer's record keys ('paid'), a store that takes a small write and
-       refuses the record. QuotaExceededError is what a real browser throws. */
+       refuses the record. QuotaExceededError is what a real browser throws. 'after-send': the payer's keys are
+       refused only when the value names a transaction, so the pending mark written before the wallet lands
+       and the record written after the send does not (cec532a1). */
     if (deny) await ctx.addInitScript(which => { const put = Storage.prototype.setItem;
-      Storage.prototype.setItem = function (k, v) { if (which === 'all' || String(k).startsWith('ant-pay.paid.')) throw new DOMException('the quota has been exceeded', 'QuotaExceededError'); return put.call(this, k, v); }; }, deny);
+      Storage.prototype.setItem = function (k, v) { if (which === 'all' || (which === 'paid' && String(k).startsWith('ant-pay.paid.')) || (which === 'after-send' && String(k).startsWith('ant-pay.paid.') && /"tx_hash"|"txHashes"/.test(String(v)))) throw new DOMException('the quota has been exceeded', 'QuotaExceededError'); return put.call(this, k, v); }; }, deny);
     const { page, errs } = await antPage(ctx);
     if (register) await wearRegister(page, register);
     if (plant) await page.evaluate(kv => { for (const k of Object.keys(kv)) localStorage.setItem(k, kv[k]); }, plant);
@@ -1799,6 +1801,37 @@ try {
     return { ...r, door: doorLog, chain: chainLog, calls, auth, sends: calls.filter(c => c.method === 'eth_sendTransaction'), wire, errs,
       stored: r.rows.some(x => x.purpose === 'forever' && x.addr && x.addr.scheme === 'ant') };
   }
+  /* payCaseBetween: one context, two (or three) tries at THE SAME FILE, with `between` changing the
+     browser after try 1. Taken from bFUzZ's round-3 probe (WORK_LOGS/2026-09-30_BFUZZ_ATTACK_211_R3.md,
+     probe-block.mjs), so the round-4 rows judge the exact paths that attack found. */
+  async function payCaseBetween(name, { door = {}, chain = {}, answers, again, third, between } = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const wire = [];
+    offBox(ctx, wire);
+    await mockHive(ctx);
+    const doorLog = await mockAntDoor(ctx, { open: true, ...door });
+    const chainLog = await mockChain(ctx, chain);
+    await mockWallet(ctx, {});
+    const { page, errs } = await antPage(ctx);
+    const r1 = await addPaying(page, name, answers, chainLog);
+    const calls1 = await page.evaluate(() => (window.__walletCalls || []).slice());
+    const first = { said: r1.said, sheets: r1.sheets.map(s => s.stage), sends: calls1.filter(c => c.method === 'eth_sendTransaction').length, finalize: doorLog.finalize.length };
+    const note = between ? await between(page, ctx) : null;
+    const walk = async answersN => {
+      try {
+        const r = await addPaying(page, name, answersN, chainLog);
+        const calls = await page.evaluate(() => (window.__walletCalls || []).slice());
+        return { sheets: r.sheets.map(s => ({ stage: s.stage, title: s.title, body: s.body, yes: s.yes })), unasked: r.unasked.map(s => s.stage), said: r.said,
+          stored: r.rows.some(x => x.purpose === 'forever' && x.addr && x.addr.scheme === 'ant'), sendsSoFar: calls.filter(c => c.method === 'eth_sendTransaction').length };
+      } catch (e) { return { walkErr: String(e.message).slice(0, 400) }; }
+    };
+    const second = await walk(again);
+    const thirdR = third ? await walk(third) : null;
+    const keys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('ant-pay.') && localStorage.getItem(k)));
+    await ctx.close();
+    return { first, note, second, third: thirdR, keys, finalize: doorLog.finalize.length, errs };
+  }
+  const KEPT_KEY = 'ant-pay.paid.quote.' + QUOTE_HASH.toLowerCase();
   const QUOTED_ANT = '1.5';
   const approveData = '0x095ea7b3' + EVM_VAULT.slice(2).padStart(64, '0') + BigInt(QUOTED_ATTO).toString(16).padStart(64, '0');
 
@@ -1955,17 +1988,112 @@ try {
     JSON.stringify({ said: k19.said }));
 
   // (k20) A BROWSER THAT TAKES A SMALL WRITE AND REFUSES THE RECORD. Only the payer's record keys
-  // throw, so the page's check before the price passes and the payment is made. The payer's own
-  // refusal must reach the visitor, not be swallowed into a finish the phone cannot remember.
-  const k20 = await payCase('record-refused.txt', { deny: 'paid', answers: [['price', true], ['plan', true]] });
-  ok('(k20) PRECONDITION — the check before the price passed: both sheets were shown and the payment left the wallet',
-    k20.sheets.length === 2 && k20.sends.length === 2, JSON.stringify({ sheets: k20.sheets.map(s => s.stage), sends: k20.sends.length }));
-  ok('(k20) the record the phone could not write is named: the payment id is printed, the page says it cannot stop a second payment, and it does not invite a retry',
-    !k20.stored && (k20.said || '').includes('You paid (' + WALLET_TX(2) + ')') && /cannot stop a second payment/.test(k20.said || '') &&
-    !/try again/.test(k20.said || '') && !/nothing was paid/.test(k20.said || ''),
-    JSON.stringify({ said: k20.said, stored: k20.stored }));
-  ok('(k19/k20) CONTROL — the same flow with storage allowed (k13) paid the vault once and finished on that payment',
+  // throw, so the page's check before the price passes. The payer writes its record BEFORE the wallet
+  // is asked (cec532a1), so the refusal comes there: nothing is sent, not even the approve, and the
+  // retry sends nothing either. Before round 4 this row PAID and could only name the payment.
+  const k20 = await payCase('record-refused.txt', { deny: 'paid', answers: [['price', true], ['plan', true]], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  ok('(k20) PRECONDITION — the check before the price passed: the first try showed both sheets',
+    (k20.first.said || '').length > 0 && k20.sends.length === 0, JSON.stringify({ first: k20.first, sends: k20.sends.length }));
+  ok('(k20) a record the phone cannot write is refused BEFORE the wallet is asked: zero sends over both tries, nothing paid, and it says why',
+    k20.first.sends === 0 && k20.sends.length === 0 && !k20.stored && /before asking the wallet/.test(k20.first.said || '') && /before asking the wallet/.test(k20.said || '') &&
+    !/You paid/.test(k20.said || ''),
+    JSON.stringify({ first: k20.first, said: k20.said }));
+
+  // (k20b) cec532a1 ONE STEP ON: the record write is refused only AFTER the send. The store keeps the
+  // pending mark (it names no transaction) and refuses every write that names one. The payment leaves,
+  // its record is refused, and the retry reads the pending mark and sends nothing.
+  const k20b = await payCase('record-after-send.txt', { deny: 'after-send', answers: [['price', true], ['plan', true]], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  ok('(k20b) PRECONDITION — the first try paid (approve + payment) and its record was refused by name, with the payment id',
+    k20b.first.sends === 2 && (k20b.first.said || '').includes('You paid (' + WALLET_TX(2) + ')') && /could not write its record/.test(k20b.first.said || ''),
+    JSON.stringify(k20b.first));
+  ok('(k20b) the retry sends NOTHING: the pending mark stops it, by name, and the page does not say nothing was paid',
+    k20b.sends.length === 2 && !k20b.stored && /started a payment/.test(k20b.said || '') && /holds a payment record/.test(k20b.said || '') && !/nothing was paid/.test(k20b.said || ''),
+    JSON.stringify({ said: k20b.said, sends: k20b.sends.length }));
+  ok('(k19/k20/k20b) CONTROL — the same flow with storage allowed (k13) paid the vault once and finished on that payment',
     k13.stored && k13.sends.filter(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT).length === 1, JSON.stringify(k13.sends.map(c => c.params[0].to)));
+
+  // (k21) G1 (bFUzZ round 3): after a kept payment, the browser fills its storage to the REAL quota
+  // (no patched API). The kept record still reads. The page used to run the storage probe before it
+  // read the record, refuse, and end "nothing was paid" with no id.
+  const k21 = await payCaseBetween('g1-quota.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]],
+    again: [['*', true, 'if-asked'], ['*', true, 'if-asked']],
+    between: page => page.evaluate(k => {
+      let n = 0, size = 1 << 20;
+      while (size >= 1) { try { localStorage.setItem('fill-' + n, 'x'.repeat(size)); n++; } catch (e) { size = Math.floor(size / 2); } }
+      let small; try { localStorage.setItem('fill-last', 'y'); small = true; localStorage.removeItem('fill-last'); } catch (e) { small = String(e.name); }
+      return { oneCharWrite: small, keptReadable: !!localStorage.getItem(k) }; }, KEPT_KEY) });
+  ok('(k21) PRECONDITION — try 1 paid and kept its record; the fill leaves no room for a one-char write, and the record still reads',
+    k21.first.sends === 2 && k21.note.oneCharWrite === 'QuotaExceededError' && k21.note.keptReadable === true, JSON.stringify({ first: k21.first, note: k21.note }));
+  ok('(k21) G1 — storage full AFTER a kept payment: the refusal prints the kept payment id and never says nothing was paid, and sends nothing',
+    (k21.second.said || '').includes(WALLET_TX(2)) && !/nothing was paid/.test(k21.second.said || '') && /keep a record of the payment/.test(k21.second.said || '') && k21.second.sendsSoFar === 2,
+    JSON.stringify({ second: k21.second }));
+
+  // (k22) G2: the visitor comes back with NO injected wallet. The kept sheet says the wallet is not
+  // asked; YES used to fail 'no-wallet', because the page built the signer before the payer chose a path.
+  const k22 = await payCaseBetween('g2-nowallet.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]],
+    again: [['*', true]],
+    between: async (page, ctx) => {
+      await ctx.addInitScript(() => { delete window.ethereum; });
+      await page.reload({ waitUntil: 'load' });
+      await settle(page);
+      await page.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
+      return { ethereum: await page.evaluate(() => typeof window.ethereum), keptReadable: await page.evaluate(k => !!localStorage.getItem(k), KEPT_KEY) };
+    } });
+  ok('(k22) PRECONDITION — try 1 paid and kept its record; after the reload there is no wallet; try 2 showed the kept sheet naming the payment',
+    k22.first.sends === 2 && k22.note.ethereum === 'undefined' && k22.note.keptReadable === true && (k22.second.sheets || []).length === 1 &&
+    k22.second.sheets[0].stage === 'kept' && (k22.second.sheets[0].body || '').includes(WALLET_TX(2)),
+    JSON.stringify({ first: k22.first, note: k22.note, sheets: k22.second.sheets }));
+  ok('(k22) G2 — YES on the kept sheet with NO wallet finishes storing the file, with zero new sends',
+    k22.second.stored === true && k22.second.sendsSoFar === 0 && k22.finalize === 2, JSON.stringify({ said: k22.second.said, stored: k22.second.stored, sends: k22.second.sendsSoFar }));
+  ok('(k22) CONTROL — the same flow WITH a wallet (k13) also stored on the kept payment with zero new sends',
+    k13.stored && k13.sends.length === 2, JSON.stringify({ sends: k13.sends.length }));
+
+  // (k23) G3: a PARTIAL kept payment (one of two quotes), then every stop the page can reach after it
+  // read that record. No line may say "nothing was paid" while it shows the kept id.
+  const PART = { [KEPT_KEY]: JSON.stringify({ upload_id: 'up-earlier1', tx_hash: WALLET_TX(9) }) };
+  const k23stops = [
+    ['plan NO', await payCase('g3-plan-no.txt', { door: { twoQuotes: true }, plant: PART, answers: [['price', true], ['plan', false]] })],
+    ['price NO', await payCase('g3-price-no.txt', { door: { twoQuotes: true }, plant: PART, answers: [['price', false]] })],
+    ['no wallet', await payCase('g3-nowallet.txt', { door: { twoQuotes: true }, plant: PART, wallet: { absent: true }, answers: [['price', true]] })],
+    ['short ANT', await payCase('g3-short.txt', { door: { twoQuotes: true }, plant: PART, chain: { ant: 1n }, answers: [['price', true]] })],
+    ['wrong chain', await payCase('g3-wrongchain.txt', { door: { twoQuotes: true }, plant: PART, wallet: { chain: '0x1' }, answers: [['price', true]] })],
+    ['wallet declines', await payCase('g3-declined.txt', { door: { twoQuotes: true }, plant: PART, wallet: { decline: true }, answers: [['price', true], ['plan', true]] })],
+  ];
+  const k23bad = k23stops.filter(([, r]) => !(r.said || '').includes(WALLET_TX(9)) || /nothing was paid/.test(r.said || '') || r.stored);
+  ok('(k23) G3 — after a partial kept payment, each of ' + k23stops.length + ' stops prints the kept id and none says nothing was paid',
+    k23bad.length === 0 && k23stops.every(([, r]) => !r.sends.some(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT)),
+    JSON.stringify(k23stops.map(([w, r]) => [w, r.said])));
+  ok('(k23) CONTROL — the same plan NO with nothing kept (k3) still says nothing was paid, so the sentence was not simply removed',
+    /nothing was paid/.test(k3.said || ''), JSON.stringify({ said: k3.said }));
+
+  // (k24) G4: try 1 sent the payment and the chain could not be asked about it, so this phone never
+  // saw it confirmed. The kept sheet must not say "already paid"; it says sent, not confirmed. Between
+  // the tries the chain refuses the payment (0x0), so the finish ends on the chain's verdict.
+  const k24 = await payCaseBetween('g4-unconfirmed.txt', { chain: { receipt: 'down' }, answers: [['price', true], ['plan', true]],
+    again: [['*', true]], third: [['*', false, 'if-asked']],
+    between: async (page, ctx) => {
+      await ctx.route(RPC_URL, async route => {
+        const req = route.request();
+        if (req.method() !== 'POST') return route.fallback();
+        const { id, method, params } = JSON.parse(req.postData() || '{}');
+        if (method === 'eth_getTransactionReceipt' && params[0] !== WALLET_TX(1))
+          return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, result: { status: '0x0' } }) });
+        return route.fallback();
+      });
+      return 'the chain now answers the payment receipt with status 0x0';
+    } });
+  ok('(k24) PRECONDITION — try 1 sent the payment, the chain could not be asked, and the page printed the id',
+    k24.first.sends === 2 && (k24.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'), JSON.stringify(k24.first));
+  const k24sheet = (k24.second.sheets || [])[0] || {};
+  ok('(k24) G4 — the kept sheet for a payment this phone never saw confirmed says SENT, NOT CONFIRMED, and never "already paid"',
+    k24sheet.stage === 'kept' && !/already paid/.test(k24sheet.title || '') && /not confirmed/.test(k24sheet.title || '') && /not yet seen the chain confirm/.test(k24sheet.body || '') &&
+    (k24sheet.body || '').includes(WALLET_TX(2)),
+    JSON.stringify({ sheet: k24sheet, said: k24.second.said }));
+  ok('(k24) and the finish ends on the chain refusing it, then the next try is priced again: nothing paid twice',
+    /refused by the chain/.test(k24.second.said || '') && k24.second.sendsSoFar === 2 && (((k24.third || {}).sheets || [])[0] || {}).stage === 'price',
+    JSON.stringify({ said: k24.second.said, third: k24.third && k24.third.sheets && k24.third.sheets.map(s => s.stage) }));
+  ok('(k24) CONTROL — a kept payment the chain DID confirm to this phone (k13, k18) still says already paid',
+    /already paid/.test((k18.sheets[0] || {}).title || ''), JSON.stringify(k18.sheets[0]));
 
   // (k16) THE CHAIN IS CHECKED BEFORE EVERY SEND. The wallet is on Arbitrum One when it connects
   // and is switched to 0x1 afterwards — while the plan sheet is open (switchAt 2), or after the

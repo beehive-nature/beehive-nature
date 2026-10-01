@@ -397,26 +397,39 @@
   async function payByWallet(plan) {
     var AP = window.AntPay;
     if (!AP) throw new Error(t('pay-no-payer'));
-    /* THE RECORD COMES BEFORE THE PRICE: a browser that will not keep it cannot stop a second
-       payment for this file, so it is refused here, before any sheet and before any wallet. */
-    if (!payStore.keeps()) throw new Error(t('pay-no-record'));
     var price = { ant: antText(plan.total_atto), atto: plan.total_atto, quotes: plan.quotes.length, chunks: plan.chunks };
     var authorization = { state: 'authorized-for-signing', upload_id: plan.upload_id, ant_ceiling_atto: plan.total_atto };
     var sent = [];
     try {
       /* what this phone already holds for this price, read BEFORE anything is asked: a file
          already paid in full is offered the finish, never a price it would not pay. The read
-         needs no wallet, so it is made with none: the wallet is still first reached after a yes. */
-      var held = AP.create({ store: payStore }).owing({ prepare: plan, authorization: authorization });
+         needs no wallet, so it is made with none: the wallet is still first reached after a yes.
+         It is read BEFORE the storage probe, because a full store still answers reads, and a
+         refusal that cannot name the payment this phone holds says "nothing was paid" about it. */
+      var held = null, heldErr = null;
+      try { held = AP.create({ store: payStore }).owing({ prepare: plan, authorization: authorization }); } catch (e) { heldErr = e; }
+      /* THE RECORD COMES BEFORE THE PRICE: a browser that will not keep it cannot stop a second
+         payment for this file, so it is refused here, before any sheet and before any wallet. */
+      if (!payStore.keeps()) {
+        var nr = new Error(t('pay-no-record'));
+        if (held && held.kept_txs.length) nr.paid = held.kept_txs.slice();
+        if (heldErr && (heldErr.refusal === 'unreadable-record' || heldErr.refusal === 'payment-pending')) nr.record = true;
+        throw nr;
+      }
+      if (heldErr) throw heldErr;
       var whole = held.quotes_kept > 0 && held.quotes_owed === 0;
-      if (!(await askPay(whole ? 'kept' : 'price', whole ? { txs: held.kept_txs, quotes: held.quotes_kept } : price))) {
+      if (!(await askPay(whole ? 'kept' : 'price', whole ? { txs: held.kept_txs, quotes: held.quotes_kept, confirmed: held.kept_unconfirmed.length === 0 } : price))) {
         var no = new Error(t(whole ? 'pay-kept-declined' : 'pay-declined'));
         /* a NO leaves this phone's earlier payments where they were; they are still the visitor's receipt */
         if (held.kept_txs.length) no.paid = held.kept_txs.slice();
         throw no;
       }
+      /* the wallet is reached only by a send. A file already paid is finished without one, so a
+         missing wallet is the payer's refusal at the moment a send needs it, never a refusal here. */
+      var signer = null;
+      try { signer = AP.injectedSigner(window.ethereum); } catch (e) { if (e.refusal !== 'no-wallet') throw e; }
       var payer = AP.create({
-        signer: AP.injectedSigner(window.ethereum),
+        signer: signer,
         store: payStore,
         onState: function (s) {
           if (s.phase === 'sent' && sent.indexOf(s.tx) < 0) sent.push(s.tx);
@@ -437,7 +450,7 @@
       if (e.refusal === 'tx-reverted' && e.detail) sent = sent.filter(function (h) { return h !== e.detail.tx; });
       if (sent.length) e.paid = sent;
       /* the payer stopped on this phone's OWN payment record, before it could name a payment id */
-      if (e.refusal === 'already-paid' || e.refusal === 'unreadable-record') e.record = true;
+      if (e.refusal === 'already-paid' || e.refusal === 'unreadable-record' || e.refusal === 'payment-pending') e.record = true;
       throw e;
     }
   }
@@ -542,8 +555,8 @@
       'pay-plan-title': function (d) { return d.shown.wallet_confirmations === 1 ? 'Your wallet will ask you once.' : 'Your wallet will ask you ' + d.shown.wallet_confirmations + ' times.'; },
       'pay-plan-body': function (d) { return (d.shown.approve_exact_atto ? 'First, to let Autonomi\'s payment vault take exactly ' + d.ant + ' ANT and not a coin more. ' : '') + 'Then to pay ' + d.ant + ' ANT.'; },
       'pay-plan-yes': function () { return 'Open my wallet'; },
-      'pay-kept-title': function () { return 'This file is already paid for.'; },
-      'pay-kept-body': function (d) { return 'This phone paid for it on an earlier try (' + d.txs.join(', ') + '). Finishing asks the estate\'s door to store it on that payment. Nothing more is paid, and your wallet is not asked.'; },
+      'pay-kept-title': function (d) { return d.confirmed ? 'This file is already paid for.' : 'This file\'s payment was sent, and is not confirmed yet.'; },
+      'pay-kept-body': function (d) { return (d.confirmed ? 'This phone paid for it on an earlier try (' + d.txs.join(', ') + '). Finishing asks the estate\'s door to store it on that payment.' : 'This phone sent a payment for it on an earlier try (' + d.txs.join(', ') + ') and has not yet seen the chain confirm it. Finishing asks the chain first, then the estate\'s door to store it on that payment.') + ' Nothing more is paid, and your wallet is not asked.'; },
       'pay-kept-yes': function () { return 'Finish storing it'; },
       'pay-no': 'Not now',
       'pay-declined': 'you did not accept the price',
@@ -586,8 +599,8 @@
       'pay-plan-title': function (d) { return d.shown.wallet_confirmations === 1 ? 'one tap in your wallet.' : d.shown.wallet_confirmations + ' taps in your wallet.'; },
       'pay-plan-body': function (d) { return (d.shown.approve_exact_atto ? 'first: let the vault take exactly ' + d.ant + ' ANT. ' : '') + 'then: pay ' + d.ant + ' ANT.'; },
       'pay-plan-yes': function () { return 'open my wallet'; },
-      'pay-kept-title': function () { return 'already paid.'; },
-      'pay-kept-body': function (d) { return 'this phone paid on an earlier try (' + d.txs.join(', ') + '). finishing stores it on that. nothing more to pay, wallet stays shut.'; },
+      'pay-kept-title': function (d) { return d.confirmed ? 'already paid.' : 'payment sent, not confirmed yet.'; },
+      'pay-kept-body': function (d) { return (d.confirmed ? 'this phone paid on an earlier try (' + d.txs.join(', ') + '). finishing stores it on that.' : 'this phone sent a payment on an earlier try (' + d.txs.join(', ') + '), not confirmed on chain yet. finishing checks the chain, then stores it on that.') + ' nothing more to pay, wallet stays shut.'; },
       'pay-kept-yes': function () { return 'finish it'; },
       'pay-no': 'not now',
       'pay-declined': 'you passed on the price',
@@ -624,7 +637,7 @@
       'pay-plan-title': function (d) { return 'PLAN · ' + d.shown.wallet_confirmations + ' wallet confirmation(s)'; },
       'pay-plan-body': function (d) { return (d.shown.approve_exact_atto ? 'approve(' + d.shown.spender + ', ' + d.shown.approve_exact_atto + ') on ' + d.shown.token + ' · ' : '') + 'payForQuotes x' + d.shown.payment_calls + ' → ' + d.shown.spender + ' · payer ' + d.shown.payer; },
       'pay-plan-yes': function () { return 'SIGN'; },
-      'pay-kept-title': function (d) { return 'KEPT · ' + d.quotes + ' quote(s) paid from this device'; },
+      'pay-kept-title': function (d) { return 'KEPT · ' + d.quotes + ' quote(s) ' + (d.confirmed ? 'paid from this device' : 'sent from this device · UNCONFIRMED'); },
       'pay-kept-body': function (d) { return 'tx ' + d.txs.join(', ') + ' · settle() confirms on chain, then finalize · no signature, no send.'; },
       'pay-kept-yes': function () { return 'FINALIZE'; },
       'pay-no': 'abort',
