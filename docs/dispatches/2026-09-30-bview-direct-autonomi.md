@@ -86,3 +86,13 @@ entered the relay fallback. Exact first-frame/playhead timing was not captured
 in that initial observation. Fallback status now retains those timings for
 subsequent attempts, rather than discarding them during the relay reset. This
 negative field result is another reason the default remains Relay.
+
+Watchdog correction before landing: an HTML media `stalled` event describes
+fetching and does not by itself prove frozen playback. The first large-video
+fallback observation above was from that earlier event-only watchdog, so it
+must not be interpreted as measured 15 seconds of playhead starvation.
+The final watchdog cancels on actual playhead progress, respects viewer pause,
+and keeps the first stall deadline despite repeated waiting events. Expanded
+real-media policy acceptance: 4/4, 0 failed/cancelled/skipped, exit 0,
+52284.2585 ms. It proves pause cancellation, continued buffered playback does
+not fall back, and zero-progress playback with repeated waiting does fall back.

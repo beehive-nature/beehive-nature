@@ -85,7 +85,10 @@ test('a sustained direct stall falls back, but a viewer pause cancels the stall 
     await page.evaluate(async()=>{const v=document.querySelector('#v');v.muted=true;v.playbackRate=0.1;await v.play();v.dispatchEvent(new Event('waiting'));v.pause();});
     await page.waitForTimeout(15500);
     assert.equal(relay.length,0,'the viewer pause must never trigger fallback');
-    await page.evaluate(async()=>{const v=document.querySelector('#v');await v.play();v.dispatchEvent(new Event('waiting'));});
+    await page.evaluate(async()=>{const v=document.querySelector('#v');await v.play();v.dispatchEvent(new Event('stalled'));});
+    await page.waitForTimeout(15500);
+    assert.equal(relay.length,0,'buffered playback progress must cancel a network-stalled event');
+    await page.evaluate(async()=>{const v=document.querySelector('#v');v.playbackRate=0;await v.play();v.dispatchEvent(new Event('waiting'));window.stallNoise=setInterval(()=>v.dispatchEvent(new Event('waiting')),3000);});
     await page.waitForFunction(()=>window.__bviewEngine().path==='stream',null,{timeout:20000});
     assert.equal(relay.length,1); assert.match(await page.locator('#playback-status').textContent(),/Direct playback stalled/); assert.deepEqual(errors,[]);
   } finally {await ctx.close();}

@@ -1407,20 +1407,21 @@ document.addEventListener('DOMContentLoaded',function(){
       if (!ok) throw new Error('Direct media did not produce a frame');
       playing=my; markFirstFrame(); say(null); await goSound(my);
       // A stopped decoder or a network stall falls back once, preserving the playhead.
-      let stallTimer = null;
+      let stallTimer = null, progressedAt = v.currentTime || 0;
       const fallback = reason => {
         if (my !== job || directSession !== session) return;
         const at=v.currentTime||0, paused=v.paused;
         const result=reason + ' at ' + at.toFixed(1) + ' s' + (metrics.ttffMs == null ? '' : ' (first frame ' + (metrics.ttffMs/1000).toFixed(1) + ' s)');
         view(address, { relay:true, resumeAt:at, paused, reason:result });
       };
-      const ready = () => { clearTimeout(stallTimer); session.stalled=false; session.sounded=true; pub(); };
-      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); clearTimeout(stallTimer); stallTimer=setTimeout(() => fallback('Direct playback stalled'),15000); };
+      const ready = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; session.sounded=true; progressedAt=v.currentTime||0; pub(); };
+      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); if (stallTimer === null) stallTimer=setTimeout(() => fallback('Direct playback stalled'),15000); };
       const error = () => fallback('Direct media error');
-      const paused = () => { clearTimeout(stallTimer); };
-      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused);
+      const paused = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; pub(); };
+      const progressed = () => { if(!v.paused && !v.seeking && v.currentTime > progressedAt + 0.01) ready(); };
+      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
       session.sounded=!v.paused;
-      session.dispose=() => { clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); bridge.close(); };
+      session.dispose=() => { clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); bridge.close(); };
       pub(); return true;
     } catch (error) {
       if (directSession === session) stopDirect();
