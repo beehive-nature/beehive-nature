@@ -12,6 +12,11 @@ let browser;
 const server = createServer(async (req, res) => {
   const path = new URL(req.url, ORIGIN).pathname;
   try {
+    if (path === '/slow.mp4') {
+      res.writeHead(200, {'content-type':'video/mp4','content-length':String(MEDIA.length),'access-control-allow-origin':'*'});
+      for(let at=0;at<MEDIA.length&&!res.destroyed;at+=65536){res.write(MEDIA.subarray(at,at+65536));await new Promise(r=>setTimeout(r,85));}
+      res.end();return;
+    }
     const body = path === '/media.mp4' ? MEDIA : await readFile(ROOT + path);
     res.writeHead(200, { 'content-type': path.endsWith('.js') ? 'text/javascript' : path.endsWith('.html') ? 'text/html' : path.endsWith('.css') ? 'text/css' : 'application/octet-stream' }); res.end(body);
   } catch { res.writeHead(404); res.end(); }
@@ -27,13 +32,13 @@ const mockSDK = `let client; export class AutonomiClient {
     let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length){if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
   }} }
 }`;
-async function open(reject = false) {
+async function open(reject = false, slow = false) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(reject => { window.rejectDirect=reject; localStorage.setItem('blang','en'); localStorage.setItem('bregister','bee'); }, reject);
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
   await ctx.route('**/vendor/ant-browser-sdk/0.1.0/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
-  await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(MEDIA.length)},body:MEDIA}); });
+  await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(MEDIA.length)},body:MEDIA}); });
   await page.goto(ORIGIN+'/surfaces/bview.html');
   await page.selectOption('#playback-route','direct'); await page.fill('#addr',ADDRESS); await page.click('button[type=submit]');
   return {ctx,page,errors,relay};
@@ -67,13 +72,14 @@ test('direct setup rejection automatically uses the existing relay', async()=>{
   } finally {await ctx.close();}
 });
 test('a direct decoder error falls back once and retains the playhead',async()=>{
-  const {ctx,page,errors,relay}=await open();
+  const {ctx,page,errors,relay}=await open(false,true);
   try {
     await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0 && window.__bviewEngine().path==='webrtc');
     await page.evaluate(async()=>{const v=document.querySelector('#v');v.muted=true;await v.play();v.currentTime=4;});
     await page.waitForFunction(()=>document.querySelector('#v').currentTime>=4 && !document.querySelector('#v').seeking);
-    await page.evaluate(()=>document.querySelector('#v').dispatchEvent(new Event('error')));
-    await page.waitForFunction(()=>window.__bviewEngine().path==='stream' && document.querySelector('#v').currentTime>=4,null,{timeout:20000});
+    await page.evaluate(()=>{const v=document.querySelector('#v');v.addEventListener('playing',()=>{if(window.__bviewEngine().path==='stream'&&window.firstRelayPlayhead===undefined)window.firstRelayPlayhead=v.currentTime;});v.dispatchEvent(new Event('error'));});
+    await page.waitForFunction(()=>window.firstRelayPlayhead!==undefined,null,{timeout:20000});
+    assert.ok(await page.evaluate(()=>window.firstRelayPlayhead>=4),'the first resumed frame must retain the playhead, not restart and eventually reach it');
     assert.equal(relay.length,1); assert.match(await page.locator('#playback-status').textContent(),/Continuing through the relay/); assert.deepEqual(errors,[]);
   } finally {await ctx.close();}
 });

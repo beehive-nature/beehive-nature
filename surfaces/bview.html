@@ -1121,8 +1121,9 @@ document.addEventListener('DOMContentLoaded',function(){
         state.preview = true;
         state.early = true;
         state.paintedAt = state.accBytes;
-        try { v.pause(); v.currentTime = 0; } catch {}
-        keepAt = 0;
+        // A fallback may be waiting for media at a saved playhead. Preview
+        // pixels must not reset that target before the start budget arrives.
+        try { v.pause(); } catch {}
         playing = my;
         markFirstFrame();
         say(null);
