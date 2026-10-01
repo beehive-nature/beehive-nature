@@ -1145,14 +1145,22 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   # scripts/secret-scan.sh over it. The judge is the scanner's own BLOCKED line AND its rc, and
   # each arm first asserts the thing it set took. At d79f246a's scanner C1-C4 and B1-B2 read
   # "clean"; with the four diff flags and no -a, A1-A2 read "clean" (receipt). P19g is the
-  # control for A: a real binary from this tree, alone, is read and is not red.
+  # control for A: a real binary from this tree, alone, is skipped BY COUNT and is not red.
+  # P19l-s (#215 round 5, ruled 07:22Z/07:25Z): ONE binary rule in both modes, a NUL in the first
+  # 8000 bytes. P19l/P19o: a key after a late NUL is read, tree and diff. P19m/P19p: THE KNOWN GAP,
+  # a key before an early NUL is skipped - those two arms judge that the skip is COUNTED, never
+  # that the key is caught. P19q: a real tracked JPEG carrying a 48+ hex metadata id, staged
+  # alone, is clean (round 4 BLOCKED it). P19r: a NUL on a hex line past byte 8000 must not blind
+  # the filters that read tree mode's hits, so a real key in a later file is still named; P19s is
+  # its control.
   _p19s=$(dirname "$SELF"); _p19top=$(cd "$_p19s/.." && pwd)
   _p19png="$_p19top/assets/house/house-achievement.png"
+  _p19jpg="$_p19top/assets/bnature-logo.jpg"
   _p19t=$(mktemp -d 2>/dev/null) || _p19t=''
-  if [ -z "$_p19t" ] || [ ! -f "$_p19png" ]; then
-    echo "  P19a-P19k NOT CONSTRUCTIBLE HERE — no throwaway directory, or the named PNG"
-    echo "     (assets/house/house-achievement.png) is not in this checkout"
-    _skipped="$_skipped P19a P19b P19c P19d P19e P19f P19g P19h P19i P19j P19k"
+  if [ -z "$_p19t" ] || [ ! -f "$_p19png" ] || [ ! -f "$_p19jpg" ]; then
+    echo "  P19a-P19s NOT CONSTRUCTIBLE HERE — no throwaway directory, or a named binary"
+    echo "     (assets/house/house-achievement.png, assets/bnature-logo.jpg) is not in this checkout"
+    _skipped="$_skipped P19a P19b P19c P19d P19e P19f P19g P19h P19i P19j P19k P19l P19m P19n P19o P19p P19q P19r P19s"
   else
     printf '[color]\n\tui = always\n' > "$_p19t/global.cfg"
     _p19hex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
@@ -1165,6 +1173,11 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
           a1) printf 'k = %s\n' "$_p19hex" > a-hex.txt; printf 'x\000y\n' > z.bin ;;
           a2) printf 'k = %s\n' "$_p19hex" > z-hex.txt; printf 'x\000y\n' > a.bin ;;
           png) cp "$_p19png" house.png || exit 9 ;;
+          nlate|nlated|nctl) { head -c 9000 /dev/zero | tr '\000' x; printf '\n'; if [ "$1" = nctl ]; then printf ' '; else printf '\000'; fi; printf '\nk = %s\n' "$_p19hex"; } > y.txt ;;
+          nearly|nearlyd) { printf 'k = %s\n' "$_p19hex"; printf 'x\000y\n'; } > y.txt ;;
+          jpg) cp "$_p19jpg" logo.jpg || exit 9 ;;
+          r7) { head -c 9000 /dev/zero | tr '\000' x; printf '\nk = %s\000z\n' "$_p19hex"; } > a.txt; printf 'k = %s\n' "$_p19hex" > b.txt ;;
+          r7ctl) printf 'k = %s\n' "$_p19hex" > b.txt ;;
           *) printf 'k = %s\n' "$_p19hex" > y.txt ;;
         esac
         case $1 in
@@ -1173,6 +1186,11 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
           c3) printf '* -diff\n' > .git/info/attributes; git check-attr diff -- y.txt | grep -q ': unset$' || exit 8 ;;
           c4) [ "$(GIT_CONFIG_GLOBAL="$_p19t/global.cfg" git config color.ui)" = always ] || exit 8 ;;
           a1|a2) od -An -c ./*.bin | grep -q '\\0' || exit 8 ;;
+          nlate|nlated) [ "$(tr -dc '\000' < y.txt | wc -c | tr -d ' ')" = 1 ] && [ "$(head -c 8000 y.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 0 ] || exit 8 ;;
+          jpg) [ "$(head -c 8000 logo.jpg | tr -dc '\000' | wc -c | tr -d ' ')" -gt 0 ] && [ "$(LC_ALL=C tr -d '\000' < logo.jpg | LC_ALL=C grep -acE '[0-9a-fA-F]{48,}')" -gt 0 ] || exit 8 ;;
+          r7) [ "$(head -c 8000 a.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 0 ] && [ "$(sed -n 2p a.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 1 ] || exit 8 ;;
+          nearly|nearlyd) [ "$(head -c 8000 y.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 1 ] || exit 8 ;;
+          nctl) [ "$(tr -dc '\000' < y.txt | wc -c | tr -d ' ')" = 0 ] || exit 8 ;;
         esac
         git add -A >/dev/null 2>&1 || exit 9
         if [ "$2" = tree ]; then
@@ -1194,8 +1212,14 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       [ "$(cat "$_p19t/$1.rc" 2>/dev/null)" = 1 ] && grep -q '^BLOCKED: 48+ char hex' "$_p19t/$1.out" 2>/dev/null && return 0
       return 1
     }
-    for _k in c1 c2 c3 c4 a1 a2 png ctl; do _p19 "$_k" diff; done
-    for _k in b1 b2 tctl; do _p19 "$_k" tree; done
+    # 0 = built, rc=0, clean, and exactly $2 binaries skipped BY COUNT; 2 = not built; 1 = else
+    _p19c() {
+      [ "$(cat "$_p19t/$1.built" 2>/dev/null)" = yes ] || return 2
+      [ "$(cat "$_p19t/$1.rc" 2>/dev/null)" = 0 ] && grep -qE "^secret-scan: clean - (diff|tree) mode, [0-9]+ (added lines|tracked files) scanned, $2 (staged )?binary file\(s\) skipped$" "$_p19t/$1.out" 2>/dev/null && return 0
+      return 1
+    }
+    for _k in c1 c2 c3 c4 a1 a2 png ctl nlated nearlyd jpg; do _p19 "$_k" diff; done
+    for _k in b1 b2 tctl nlate nearly nctl r7 r7ctl; do _p19 "$_k" tree; done
     _p19j c1; case $? in
       0) echo "  P19a known-BAD  color.diff=always on the box, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
       *) echo "  P19a known-BAD  color.diff=always -> not BLOCKED, or not built (rc=$(cat "$_p19t/c1.rc" 2>/dev/null)). Color escapes hid every added line from the scan"; st=1 ;;
@@ -1220,12 +1244,10 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       0) echo "  P19f known-BAD  64-hex staged with a NUL-bearing binary sorting BEFORE it -> BLOCKED rc=1 (correct)" ;;
       *) echo "  P19f known-BAD  64-hex beside a binary (before) -> not BLOCKED, or not built (rc=$(cat "$_p19t/a2.rc" 2>/dev/null)). One NUL in the stream made grep read nothing"; st=1 ;;
     esac
-    _pgn=$(sed -n 's/^secret-scan: clean - diff mode, \([0-9][0-9]*\) added lines scanned$/\1/p' "$_p19t/png.out" 2>/dev/null)
-    if [ "$(cat "$_p19t/png.built" 2>/dev/null)" = yes ] && [ "$(cat "$_p19t/png.rc" 2>/dev/null)" = 0 ] && [ "${_pgn:-0}" -gt 0 ]; then
-      echo "  P19g CONTROL    assets/house/house-achievement.png staged ALONE -> clean rc=0, $_pgn lines read as text, so P19e/f are the key and not the binary (correct)"
-    else
-      echo "  P19g CONTROL    a tracked PNG staged alone -> rc=$(cat "$_p19t/png.rc" 2>/dev/null), lines read '$_pgn'. A real binary is red, or was not read at all"; st=1
-    fi
+    _p19c png 1; case $? in
+      0) echo "  P19g CONTROL    assets/house/house-achievement.png staged ALONE -> clean rc=0, 1 staged binary skipped BY COUNT, so P19e/f are the key and not the binary (correct)" ;;
+      *) echo "  P19g CONTROL    a tracked PNG staged alone -> rc=$(cat "$_p19t/png.rc" 2>/dev/null), not clean with 1 binary skipped. A real binary is red, or its skip went uncounted"; st=1 ;;
+    esac
     _p19j b1; case $? in
       0) echo "  P19h known-BAD  untracked .gitattributes '*.txt -diff', 64-hex committed, tree mode -> BLOCKED rc=1 (correct)" ;;
       *) echo "  P19h known-BAD  .gitattributes -diff, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/b1.rc" 2>/dev/null)). An attribute took the file out of the tree scan"; st=1 ;;
@@ -1242,6 +1264,37 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       0) echo "  P19k CONTROL    nothing set, 64-hex committed, tree mode -> BLOCKED rc=1, the tree rig is sound (correct)" ;;
       *) echo "  P19k CONTROL    nothing set, tree mode -> not BLOCKED (rc=$(cat "$_p19t/tctl.rc" 2>/dev/null)). The rig, not the attribute, decides P19h-i"; st=1 ;;
     esac
+    # P19l-n (bFUzZ round 4, ruled 07:10Z): grep -I stopped reading at the buffer holding a NUL.
+    _p19j nlate; case $? in
+      0) echo "  P19l known-BAD  64-hex on the line after ONE NUL past byte 8000, committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19l known-BAD  key after a late NUL, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/nlate.rc" 2>/dev/null)). The scan stopped reading at the NUL"; st=1 ;;
+    esac
+    _p19c nearly 1; case $? in
+      0) echo "  P19m KNOWN GAP  64-hex followed by a NUL in the first 8000 bytes, committed, tree mode -> skipped as binary and COUNTED (1 skipped), as on main; the key is NOT read (correct)" ;;
+      *) echo "  P19m KNOWN GAP  key before an early NUL, tree mode -> rc=$(cat "$_p19t/nearly.rc" 2>/dev/null), not clean with 1 binary skipped. The binary rule moved, or its skip went uncounted"; st=1 ;;
+    esac
+    _p19j nctl; case $? in
+      0) echo "  P19n CONTROL    P19l's file with its NUL replaced by a space (same length), tree mode -> BLOCKED rc=1, so P19l is the NUL (correct)" ;;
+      *) echo "  P19n CONTROL    P19l's file without the NUL -> not BLOCKED (rc=$(cat "$_p19t/nctl.rc" 2>/dev/null)). The rig, not the NUL, decides P19l"; st=1 ;;
+    esac
+    _p19j nlated; case $? in
+      0) echo "  P19o known-BAD  64-hex on the line after ONE NUL past byte 8000, staged, diff mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19o known-BAD  key after a late NUL, diff mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/nlated.rc" 2>/dev/null)). A text file was skipped as binary"; st=1 ;;
+    esac
+    _p19c nearlyd 1; case $? in
+      0) echo "  P19p KNOWN GAP  64-hex followed by a NUL in the first 8000 bytes, staged, diff mode -> skipped as binary and COUNTED (1 skipped), as on main; the key is NOT read (correct)" ;;
+      *) echo "  P19p KNOWN GAP  key before an early NUL, diff mode -> rc=$(cat "$_p19t/nearlyd.rc" 2>/dev/null), not clean with 1 binary skipped. The binary rule moved, or its skip went uncounted"; st=1 ;;
+    esac
+    _p19c jpg 1; case $? in
+      0) echo "  P19q known-GOOD assets/bnature-logo.jpg (a NUL in its first 8000 bytes, a 48+ hex metadata id) staged ALONE, diff mode -> clean rc=0, 1 binary skipped (correct)" ;;
+      *) echo "  P19q known-GOOD a real tracked JPEG staged alone -> rc=$(cat "$_p19t/jpg.rc" 2>/dev/null), not clean with 1 binary skipped. An image commit is refused again"; st=1 ;;
+    esac
+    if _p19j r7 && grep -q '^b\.txt:1: \[REDACTED' "$_p19t/r7.out" 2>/dev/null; then
+      echo "  P19r known-BAD  a.txt: a NUL on a 64-hex line past byte 8000; b.txt after it: a 64-hex. tree mode -> BLOCKED rc=1 naming b.txt:1 (correct)"
+    else echo "  P19r known-BAD  NUL on a hit line, then a key in a later file -> rc=$(cat "$_p19t/r7.rc" 2>/dev/null), b.txt:1 not named. One NUL in tree mode's hits blinded the filters"; st=1; fi
+    if _p19j r7ctl && grep -q '^b\.txt:1: \[REDACTED' "$_p19t/r7ctl.out" 2>/dev/null; then
+      echo "  P19s CONTROL    b.txt ALONE, tree mode -> BLOCKED rc=1 naming b.txt:1, so P19r's verdict is a.txt's NUL (correct)"
+    else echo "  P19s CONTROL    b.txt alone -> rc=$(cat "$_p19t/r7ctl.rc" 2>/dev/null), b.txt:1 not named. The rig, not the NUL, decides P19r"; st=1; fi
     rm -rf "$_p19t"
   fi
 
@@ -1358,7 +1411,9 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   # 73 -> 92 with P18 (bFUzZ F1 on #215 round 2): P18a-c three lines each, P18d two, P18e two, P18f three, P18g three.
   # 92 -> 118 with P19/P20 (bFUzZ #215 round 3, ruled 06:27Z/06:31Z): P19a-k two lines each and
   # one NOT CONSTRUCTIBLE notice (23), P20 three. Measured: grep -cE over this file, 118.
-  _armfloor=118
+  # 118 -> 124 with P19l-n (bFUzZ #215 round 4, ruled 07:10Z): two lines each. Measured, 124.
+  # 124 -> 134 with P19o-s (#215 round 5, ruled 07:22Z/07:25Z): two lines each. Measured, 134.
+  _armfloor=134
   _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
   if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
     echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
