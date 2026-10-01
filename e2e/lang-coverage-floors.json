@@ -2,7 +2,7 @@
  "attest.html": 1,
  "b4b.html": 5,
  "bantfarm.html": 7,
- "bdata.html": 59,
+ "bdata.html": 62,
  "bearth.html": 10,
  "bfactory.html": 6,
  "bfood.html": 13,
@@ -80,8 +80,11 @@
  "royalguard.html": 0,
  "stack.html": 118,
  "university/index.html": 11,
- "wallet.html": 42,
+ "wallet.html": 23,
  "vending.html": 47,
- "or-board.html": 94,
- "watch.html": 44
+ "or-board.html": 55,
+ "watch.html": 44,
+ "missions.html": 8,
+ "mission-room.html": 9,
+ "receipts.html": 10
 }

@@ -12,9 +12,20 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
 installer="$root/scripts/install-hooks.sh"
 scanner="$root/scripts/secret-scan.sh"
+# secret-scan.sh SOURCES this at :82 ("one implementation, two enforcers"). A rig
+# that copies the scanner without it produces a scanner that refuses the
+# environment - three rows pass and the fourth dies on ". : cannot open
+# keyshape.sh", which reads like a code defect and is a missing file in the rig.
+# Found 2026-09-23 the first time anything ran this file; push-preflight.sh's own
+# selftest, written later, copies all three, so the lesson was learned twice.
+keyshape="$root/scripts/keyshape.sh"
 
 if [ ! -f "$installer" ]; then
   echo "FAIL hooks contract: $installer does not exist - the documented pre-commit law cannot be wired (SS-2)." >&2
+  exit 1
+fi
+if [ ! -f "$keyshape" ]; then
+  echo "FAIL hooks contract: $keyshape does not exist - the scanner sources it, so a rig without it tests a scanner that cannot run." >&2
   exit 1
 fi
 
@@ -28,6 +39,7 @@ git config user.name probe
 mkdir -p scripts
 cp "$installer" scripts/install-hooks.sh
 cp "$scanner" scripts/secret-scan.sh
+cp "$keyshape" scripts/keyshape.sh
 
 # RED half (deliberate, documented): before wiring, the vector commits.
 # This is the invisible-absence state SS-2 exists to kill - the test

@@ -19,7 +19,9 @@
     // The unit remains a laid-out leaf with lettered text, including short labels.
     // This is not a census of attributes, canvas/iframe content or direct text
     // alongside child elements. Do not turn this scoped count into a full-page claim.
-    var chrome='#tbar,#adOrb,#adPanel,#adWin,#tbarMore,#railsbadge,#bregbar,#bregctl,#blangctl,#veil,#bandwrap';
+    var chrome='#tbar,#adOrb,#adPanel,#adWin,#tbarMore,#railsbadge,#bregbar,#bregctl,#blangctl,#brtrctl,#veil,#bandwrap';
+    // #brtrctl = the browser-translate rider (WEBML raid S1): the browser's offer wears the
+    // browser's words, so its control is chrome beside #blangctl, never an estate string.
     var out={visible:0,keyed:0,keys:[],unkeyedSamples:[]};
     doc.querySelectorAll('body *').forEach(function(n){
       if(n.children.length || n.closest(chrome)) return;
@@ -198,19 +200,19 @@ if(typeof document!=='undefined') (function(){
        page exercises the select/span hole today — closed before one does.
        The tour bar is nobody's element selector. */
     var wrap=document.createElement('span'); wrap.id='blangctl';
-    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin:0 0 0 10px;flex-shrink:0;'
-      +'padding-left:10px;border-left:1px solid #243026;vertical-align:middle;'
+    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin:0;flex-shrink:0;'
+      +'padding-left:6px;border-left:1px solid #243026;vertical-align:middle;'
       +'min-height:0;height:auto;box-sizing:border-box';
     var sel=document.createElement('select'); sel.id='blangsel';
     sel.setAttribute('aria-label','language');
     sel.style.cssText='background:#0d1410;color:#8a9a8a;border:1px solid #243026;'
-      +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px;'
-      +'margin:0;min-height:0;height:auto;box-sizing:border-box';
+      +'border-radius:8px;font:13px ui-sans-serif,system-ui,sans-serif;padding:0 6px;max-width:104px;'
+      +'margin:0;min-height:44px;height:44px;box-sizing:border-box';
     sel.innerHTML='<option value="" disabled>🌐</option>'+LANGS.map(function(L){
       return '<option value="'+L[0]+'"'+(L[2]?' title="'+L[2]+'"':'')+'>'+L[1]+'</option>'; }).join('');
     sel.addEventListener('change',function(){ setPref(sel.value); });
     var note=document.createElement('span'); note.id='blangnote';
-    note.style.cssText='font:9px "IBM Plex Mono",monospace;color:#FFD700;white-space:nowrap;'
+    note.style.cssText='font:12px ui-monospace,monospace;color:#e8c95a;white-space:nowrap;'
       +'margin:0;min-height:0;height:auto;box-sizing:border-box';
     wrap.appendChild(sel); wrap.appendChild(note);
     if(host) host.appendChild(wrap); else document.body.appendChild(wrap);
@@ -244,7 +246,7 @@ if(typeof document!=='undefined') (function(){
         if(bundled&&bundled.strings&&bundled._meta){acceptCorpus(bundled,cb);return;}
       }catch(e){} // malformed bundle uses the normal loader/fallback
     }
-    fetch(R+'lang-corpus.json?v=27').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=29').then(function(r){return r.json()})
       .then(function(j){ acceptCorpus(j,cb); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }

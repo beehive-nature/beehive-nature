@@ -1319,6 +1319,16 @@
    "label": "Vending machine"
   },
   {
+   "id": "vending-deck",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/vending-deck.html",
+   "state": "LIVE",
+   "gloss": "the value deck — what a minted agent carries, card by card, every card a door asked live",
+   "org": "beehive-nature",
+   "label": "Value deck"
+  },
+  {
    "id": "privacy-lens",
    "family": "beehivenature",
    "home": "skaists.dev",
@@ -1380,20 +1390,61 @@
    "org": "beehive-nature",
    "label": "bGenealogy · the blood fractal",
    "descriptionKey": "s.blood"
+  },
+  {
+   "id": "austras-koks",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/austras-koks.html",
+   "state": "LIVE",
+   "gloss": "austras koks: the family line as the latvian tree of life, climbed branch by branch; living people stay out",
+   "org": "beehive-nature",
+   "label": "austras koks · the tree of life",
+   "descriptionKey": "s.austraskoks"
+  },
+  {
+   "id": "missions",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/missions.html",
+   "state": "LIVE",
+   "gloss": "the mission desk — proposals, ceilings and human levers for supervised autonomy",
+   "org": "skaists",
+   "label": "the LOVErnment mission desk"
+  },
+  {
+   "id": "mission-room",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/mission-room.html",
+   "state": "LIVE",
+   "gloss": "the Buzz mission room — work units, receipts, evaluator and treasury in one open room",
+   "org": "skaists",
+   "label": "the LOVErnment mission room"
+  },
+  {
+   "id": "receipts",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/receipts.html",
+   "state": "LIVE",
+   "gloss": "the receipt ledger — hash-chained and machine-readable, every meaningful action on one line",
+   "org": "skaists",
+   "label": "the LOVErnment receipt ledger"
   }
  ],
  "counts": {
-  "surfaces": 103,
-  "listed": 112,
+  "surfaces": 108,
+  "listed": 117,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 42,
+   "beehivenature": 44,
    "plur": 7,
-   "skaists": 25,
+   "skaists": 28,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1401,11 +1452,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 112
+   "LIVE": 117
   },
   "byOrg": {
-   "beehive-nature": 59,
-   "skaists": 39,
+   "beehive-nature": 61,
+   "skaists": 42,
    "beehive-biomass": 5
   }
  },

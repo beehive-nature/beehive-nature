@@ -534,7 +534,7 @@ const hub = head('beehive nature · the surfaces — six domains, one organism',
   + '    run();\n'
   + '  });\n'
   + '})();\n</' + 'script>\n'
-  + '<script src="agent-dock.js?v=5"></' + 'script>\n'
+  + '<script src="agent-dock.js?v=10"></' + 'script>\n'
   + '<script src="tour.js?v=42"></' + 'script>\n</body>\n</html>\n';
 
 writeFileSync(join(OUT, 'index.html'), hub);

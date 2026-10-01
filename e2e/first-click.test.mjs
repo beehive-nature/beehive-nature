@@ -115,18 +115,28 @@ test('studio remembers manual panel choices for each view',()=>{
  const b=music();b.ids.get('sound-panel').open=true;b.view('raver');b.ids.get('save-panel').open=true;b.view('bee');assert.equal(b.ids.get('sound-panel').open,true);b.view('raver');assert.equal(b.ids.get('save-panel').open,true);
 });
 test('gallery empty reads are safe to navigate and each collection uses its own chain',async()=>{
- const b=await gallery();assert.equal(b.ids.get('bNext').disabled,true);assert.doesNotThrow(()=>b.run('show(-1);show(0);walk()'));
- assert.equal(b.ids.get('stage').getAttribute('aria-busy'),'false');assert.match(b.ids.get('gallery-status').textContent,/completed reads/);
+ const b=await gallery();
+ // silent seed keeps art on the wall — navigate stays safe; no fail lecture
+ assert.ok(b.run('pieces.length')>=1,'silent seed when the chain returns nothing');
+ assert.equal(b.ids.get('retry').hidden,true);
+ assert.doesNotThrow(()=>b.run('show(-1);show(0);walk()'));
+ assert.equal(b.ids.get('stage').getAttribute('aria-busy'),'false');
+ assert.match(b.ids.get('gallery-status').textContent,/calm garden|completed reads|Artwork loaded/i);
  const eth=b.requests.filter(r=>r.calls.some(c=>c.params[0].to==='0x3103cD1602d5fa8f4b9283F9D5a7fa2290795d51'));
  assert.ok(eth.length);assert.ok(eth.every(r=>r.url.includes('ethereum')));
 });
 test('RPC batch results follow request ids instead of server response order',async()=>{
  const b=await gallery();b.context.fetch=async()=>({json:async()=>[{id:1,result:'second'},{id:0,result:'first'}]});
- assert.deepEqual(plain(await b.run("rpc([{to:'a'},{to:'b'}])")),['first','second']);assert.equal(b.timers.size,0);
+ assert.deepEqual(plain(await b.run("rpc([{to:'a'},{to:'b'}])")),['first','second']); assert.equal([...b.timers.values()].filter(t=>t.interval).length,0,'silent seed may keep a one-shot paint timeout; no walk interval');
 });
 test('failed collection reads remain distinct from a verified empty collection',async()=>{
  const b=await gallery();b.context.fetch=async()=>{throw Error('offline');};await b.run('start("'+address+'","Test garden")');
- assert.match(b.ids.get('gallery-status').textContent,/failed|still loading/);assert.equal(b.ids.get('retry').hidden,false);assert.equal(b.ids.get('record-wallet').textContent,address);
+ // New bee/Raver: silent recovery — art seeds, no fail banner; failures still counted for cypherpunk
+ assert.match(b.ids.get('gallery-status').textContent,/calm garden/i);
+ assert.equal(b.ids.get('retry').hidden,true);
+ assert.ok(b.run('readFailures>0'));
+ assert.ok(b.run('pieces.some(p=>p.seeded)'));
+ assert.equal(b.ids.get('record-wallet').textContent,address);
  b.run('resolveName=async()=>null');await b.run('start("unknown.name","Unknown")');assert.equal(b.ids.get('record-wallet').textContent,'Not available');
 });
 test('superseded gallery reads cannot overwrite the new collection; partial results retain exact artwork',async()=>{

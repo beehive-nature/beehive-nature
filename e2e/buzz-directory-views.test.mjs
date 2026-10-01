@@ -149,8 +149,10 @@ test('routine New bee labels read at 14px minimum, bee-scoped only (F4)', () => 
   assert.match(page, /body\[data-reg="bee"\] \.listing \.chip\{font-size:\.875rem\}/);
   // the override is scoped: the compact instrument register survives for Cypherpunk
   assert.doesNotMatch(page, /body\[data-reg="cypherpunk"\][^{]*\.lrelay/);
-  assert.match(page, /\.listing \.lrelay\{font-size:10\.5px/);
-  assert.match(page, /\.listing \.chip\{display:inline-flex[^}]*font-size:9\.5px/);
+  // ...its authored density kept, under the estate's 12px floor (lower-half pass 2026-09-26):
+  // max(<authored>, var(--fmin,12px)) — bee/raver raise --fmin to 14px, cypherpunk never drops under 12px
+  assert.match(page, /\.listing \.lrelay\{font-size:max\(10\.5px,var\(--fmin,12px\)\)/);
+  assert.match(page, /\.listing \.chip\{display:inline-flex[^}]*font-size:max\(9\.5px,var\(--fmin,12px\)\)/);
 });
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {

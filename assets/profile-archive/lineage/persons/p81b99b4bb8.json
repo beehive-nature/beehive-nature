@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p81b99b4bb8",
+ "bnr": "bnr://skaists.dev/blood/p81b99b4bb8",
+ "identity": {
+  "name": "Niels Hujmand Rasmussen",
+  "lifespan": "1692–1782",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMDP-ZSW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "9 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "9 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p06d6d221ad",
+    "name": "Rasmus Hjulmand Nielsen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa5526c6446",
+    "name": "Kiersten Nielsdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p56a2fbf9b4",
+    "name": "Kiersten Nielsdatter"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMDP-ZSW",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 9,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

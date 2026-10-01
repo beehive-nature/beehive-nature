@@ -13,7 +13,7 @@
 //  - Unsupported private audiences stay VISIBLY UNAVAILABLE with reasons.
 //  - Nothing here can spend. Phase C adds ONE founder-reviewed authorization
 //    object (an intent to sign, bound to the exact quote + invoice lineage);
-//    there is still no pay route and no signing path — those are Phase E's.
+//    Phase E wires pay-with-wallet (ant-pay.js) after Authorized, and Add to manifest (picker + in-page sha256 + mock intake). Agents never hold keys; the person's wallet signs.
 //
 // THE A+ REBUILD (founder, 2026-09-18: "D+ — buttons don't even work"):
 //  - EVERY PRESS ANSWERS. The screen is DERIVED from state (policy key + st +
@@ -33,6 +33,9 @@
   'use strict';
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
+  var WAVE_CHUNK = 4190208;
+  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
   var RETRY_MS = 3000;
@@ -128,7 +131,9 @@
   var INV = null, invState = 'loading';   // loading | ready | empty | failed
   var FINV = null;     // the CURRENT founder invoice — the authorization binds THIS lineage
   var review = false;  // the review is open (a reader's tap; closes when the price it was for is gone)
-  var authBusy = false, authErr = null;
+  var authBusy = false;
+  var pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:null, ticker:null };
+  var intake = { file:null, name:'', bytes:0, sha256:null, hashing:false, err:null, result:null, tooLarge:false }, authErr = null;
   var ask = null;      // THE one in-flight ask: { id, startedAt, attempt, phase:'asking'|'retrying', ... }
   var fail = null;     // the last ask's failure: { cls, detail, secs }
   var notice = null;   // 'nostore' | null
@@ -217,6 +222,9 @@
       // no quotes at all is a price only when every chunk is already stored
       if (!payments.length && !(Number(prepare.total_chunks) > 0 && Number(prepare.already_stored) === Number(prepare.total_chunks))) throw problem('refused', 'the answer carried no quotes');
       return { obtainedAt: new Date().toISOString(), totalAtto: sum, count: payments.length, shape: String(prepare.payment_type || ''), uploadId: String(prepare.upload_id || ''),
+               payments: payments.map(function(p){ return { quote_hash: String(p.quote_hash||''), rewards_address: String(p.rewards_address||''), amount_atto: String(p.amount_atto||'') }; }),
+               payment_type: String(prepare.payment_type || ''), data_map_address: prepare.data_map_address ? String(prepare.data_map_address) : '',
+               total_chunks: Number(prepare.total_chunks)||payments.length, already_stored: Number(prepare.already_stored)||0,
                artifact: my.artifact, audience: my.sel.audience, selectedAt: my.sel.selectedAt, bridge: my.bridge };
     }).then(function(q){
       clearTimeout(my.deadline);
@@ -228,7 +236,7 @@
       if (!save({ freshQuote: q })) notice = 'nostore';
       note({ kind:'quote', totalAtto: q.totalAtto, count: q.count, uploadId: q.uploadId });
       render({ focus: 'price' });
-      say(antStr(q.totalAtto) + ' ANT. ' + T('wl.bpay.nothingpaid', 'Nothing has been paid.'));
+      say(antStr(q.totalAtto) + ' ANT. ' + T('bd.paid.scope', 'Nothing has been paid from this page.'));
     }).catch(function(e){
       clearTimeout(my.deadline);
       if (ask !== my) return;
@@ -336,6 +344,24 @@
     h += '<div class="head"><div><h2 id="obj-h">' + esc((d.media && d.media.title) || a.name) + '</h2><div class="sub">' + esc((d.media && d.media.creator) || '') + '</div></div><span class="tag">' + tx('bd.registered', 'registered intake') + '</span></div>';
     h += '<div class="meta sub"><span><bdi>' + esc(a.name) + '</bdi> · <bdi data-bdata-bytes="' + esc(a.bytes) + '">' + Number(a.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span><span class="mono">sha256 ' + esc(String(a.sha256).slice(0, 16)) + '…</span></div>';
 
+    /* THE STORE RECEIPT — one unmarked block, so EVERY register shows it:
+       ✓ Stored on Autonomi, the whole address, and a Watch link (bee-address
+       law: the address whole, never an ellipsis). Unreadable receipt = a
+       named failure with a real Try again; a mismatch renders exactly as
+       before — the page never shows STORED on evidence it cannot check. */
+    var sv = storedVerdict();
+    if (sv.state === 'stored') {
+      var bare = bareHex(sv.receipt.data_map_address);
+      h += '<div class="stored" data-bdata-stored="1">';
+      h += '<div><span class="badge">✓ ' + tx('bd.stored.on', 'Stored on Autonomi') + '</span></div>';
+      h += '<div class="meta sub"><span class="mono" data-bdata-stored-address="' + esc(bare) + '"><bdi>' + esc(bare) + '</bdi></span></div>';
+      h += '<div class="actions"><a class="btn" data-bdata-watch="1" href="bview.html#' + esc(bare) + '">▶ ' + tx('bd.stored.watch', 'Watch') + '</a></div>';
+      h += '</div>';
+    } else if (sv.state === 'unreadable') {
+      h += '<div class="alert note" data-bdata-stored-err="1"><b>' + tx('bd.stored.err', 'the store receipt could not be read') + '</b><bdi class="mono">' + esc(sv.why) + '</bdi></div>';
+      h += '<div class="actions"><button type="button" class="btn" data-act="reload-stored" data-fk="reload-stored">' + tx('bd.price.again', 'Try again') + '</button></div>';
+    }
+
     /* 1 · WHO — THE ORIGIN (advisor law, 2026-09-17): the desire to make
        something public belongs HERE; bPay receives the already-resolved
        operation. One live choice is a button; what cannot be chosen yet is
@@ -364,15 +390,16 @@
     /* 3 · AUTHORIZE (Phase C) — locked prose until a price stands; then one
        founder-reviewed intent to sign. Never a pay route, never a signing path. */
     h += authStep(sel);
+    h += payStep(sel);
     h += '</section>';
-    return h;
+    return addManifestCard() + h;
   }
 
   function priceStep(sel, ref){
     var state = priceState(sel), q = sel ? usableQuote(sel) : null;
     var h = '<div class="step" data-bdata-price-state="' + state + '"' + (ask || state === 'elsewhere' ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="price-h" tabindex="-1" data-fk="price"><span class="num" aria-hidden="true">2</span>' + tx('bd.price.h', 'What does it cost now?') + '</h3>';
     var refHtml = ref ? '<div class="sub while">' + tx('bd.price.reference', 'reference (machine, not chosen by you)') + ': <bdi>' + esc(antStr(ref.amountAtto)) + ' ANT</bdi></div>' : '';
-    var nothing = '<div><span class="badge" data-bdata-nothing-paid="1">' + tx('wl.bpay.nothingpaid', 'Nothing has been paid.') + '</span></div>';
+    var nothing = '<div><span class="badge" data-bdata-nothing-paid="1">' + tx('bd.paid.scope', 'Nothing has been paid from this page.') + '</span></div>';
     function earlier(){ return '<div class="while"><div class="sub">' + tx('bd.price.earlier', 'earlier price — caused by your choice') + ' · ' + when(q.obtainedAt) + '</div>' + antHtml(q.totalAtto, true) + '</div>'; }
 
     if (state === 'waiting') {
@@ -433,7 +460,7 @@
     var auth = authFor(q);
     var h = '<div class="step" data-bdata-review="1"' + (authBusy ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="auth-h" tabindex="-1" data-fk="auth">' + num + tx('bd.auth.h', 'What you are authorizing') + '</h3>';
     if (auth && auth.state === 'authorized-for-signing') {
-      h += '<p data-bdata-auth-state="authorized"><b><span aria-hidden="true">🔑 </span>' + tx('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E') + '</b></p>';
+      h += '<p data-bdata-auth-state="authorized"><b><span aria-hidden="true">🔑 </span>' + tx('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; pay with your wallet is next') + '</b></p>';
       h += '<p class="sub note"><bdi class="mono">' + esc(auth.id) + '</bdi> · ' + tx('bd.auth.cancelnote', 'cancellation is always lawful before a signature exists') + '</p>';
       if (authErr) h += '<div class="alert note"><bdi class="mono">' + esc(authErr) + '</bdi></div>';
       h += authBusy ? '<div class="busy note"><span class="spin" aria-hidden="true"></span><div class="sub">' + tx('bd.auth.cancel', 'Cancel authorization') + '…</div></div>'
@@ -455,13 +482,276 @@
     var stops = (FINV.authorization && Array.isArray(FINV.authorization.stopConditions) && FINV.authorization.stopConditions.length) ? FINV.authorization.stopConditions.map(function(x){ return '<bdi>' + esc(x) + '</bdi>'; }) : [tx('bd.auth.stopquote', 'quote set superseded or consumed'), tx('bd.auth.stopartifact', 'artifact identity mismatch')];
     h += row(tx('bd.auth.stops', 'stop conditions'), stops.join(' · '));
     h += '</div>';
-    h += '<p class="sub note"><b>' + tx('wl.bpay.nothingpaid', 'Nothing has been paid.') + '</b> ' + tx('bd.auth.noroute', 'This press creates a bounded intent to sign — it cannot move value; signing is Phase E and starts only from this authorization.') + '</p>';
+    h += '<p class="sub note"><b>' + tx('bd.paid.scope', 'Nothing has been paid from this page.') + '</b> ' + tx('bd.auth.noroute', 'This press creates a bounded intent to sign — it cannot move value; signing is Phase E and starts only from this authorization.') + '</p>';
     if (authErr) h += '<div class="alert note" data-bdata-auth-err="1"><bdi class="mono">' + esc(authErr) + '</bdi></div>';
     // while the quote service is being asked there is no authorize button at all
     h += authBusy ? '<div class="busy note"><span class="spin" aria-hidden="true"></span><div class="sub">' + tx('bd.auth.go', 'I authorize this') + '…</div></div>'
                   : '<div class="actions"><button type="button" class="btn primary" data-bdata-auth-go="1" data-act="auth-go" data-fk="auth-go">🔑 ' + tx('bd.auth.go', 'I authorize this') + '</button></div>';
     return h + '</div>';
   }
+
+  
+  /* ── PHASE E-2: Add to manifest (picker + in-page sha256 + mock intake) ──
+     Two witnesses: the page hashes BEFORE anything is sent; the bridge hashes
+     while writing. Files over the wave limit are prose — never a dead button.
+     Live bridge /v1/intake is founder-hand (E-0); this page is mock-gated first. */
+  function addManifestCard(){
+    var h = '<section class="card" data-bdata-add-manifest="1" aria-labelledby="add-h">';
+    h += '<div class="head"><div><h2 id="add-h">' + tx('bd.add.h', 'Add to manifest') + '</h2>';
+    h += '<p class="sub">' + tx('bd.add.sub', 'choose a file on this device — the page hashes it here; nothing leaves until you pay') + '</p></div></div>';
+    if (intake.result) {
+      h += '<div class="badge" data-bdata-intake-ok="1">✓ ' + tx('bd.add.ok', 'on the local intake shelf') + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
+      h += '<div class="meta sub"><span><bdi>' + esc(intake.result.name) + '</bdi> · <bdi>' + Number(intake.result.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      h += '<p class="law">' + tx('bd.add.next', 'audience → price → authorize → pay with your wallet — same chain as the registered object below') + '</p>';
+      h += '</section>';
+      return h;
+    }
+    h += '<div class="drop" data-bdata-drop="1" tabindex="0" role="button" aria-label="' + esc(T('bd.add.drop', 'Drop a file here, or browse')) + '">';
+    h += '<p><b>' + tx('bd.add.drop', 'Drop a file here, or browse') + '</b></p>';
+    h += '<p class="sub">' + tx('bd.add.local', 'local only — the bridge copies bytes on this machine; agents never upload your wallet') + '</p>';
+    h += '<div class="actions"><label class="btn primary" data-bdata-browse-label="1" style="cursor:pointer"><input type="file" data-bdata-file="1" data-act="file-pick" hidden>📁 ' + tx('bd.add.browse', 'Browse…') + '</label></div>';
+    h += '</div>';
+    if (intake.hashing) h += '<div class="busy" data-bdata-hashing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.add.hashing', 'hashing on this page…') + '</b></div></div>';
+    if (intake.sha256 && !intake.tooLarge) {
+      h += '<div class="review" data-bdata-intake-preview="1">';
+      h += '<div class="rv"><span class="sub">' + tx('bd.add.name', 'name') + '</span><span><bdi>' + esc(intake.name) + '</bdi></span></div>';
+      h += '<div class="rv"><span class="sub">' + tx('bd.add.size', 'size') + '</span><span><bdi>' + Number(intake.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      h += '<div class="rv"><span class="sub">sha256</span><span class="mono" data-bdata-intake-sha="' + esc(intake.sha256) + '"><bdi>' + esc(intake.sha256) + '</bdi></span></div>';
+      h += '</div>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-intake-go="1" data-act="intake-go" data-fk="intake-go">➜ ' + tx('bd.add.go', 'Add to manifest') + '</button></div>';
+    }
+    if (intake.tooLarge) {
+      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.large', 'Not available yet') + '</span><span class="desc">' + tx('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(WAVE_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
+    }
+    if (intake.err) h += '<div class="alert note" data-bdata-intake-err="1"><b>' + esc(intake.err) + '</b></div>';
+    h += '</section>';
+    return h;
+  }
+  function hexOf(buf){
+    var u = new Uint8Array(buf), o = '';
+    for (var i = 0; i < u.length; i++) o += u[i].toString(16).padStart(2, '0');
+    return o;
+  }
+  function hashFile(file){
+    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, err:null, result:null, tooLarge:file.size > WAVE_MAX_BYTES };
+    render();
+    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent')); return; }
+    // incremental SHA-256 (WebCrypto cannot stream a File directly on every browser — chunked digest)
+    var chunk = 1024 * 1024, offset = 0, acc = [];
+    function step(){
+      if (offset >= file.size) {
+        return crypto.subtle.digest('SHA-256', concat(acc)).then(function(d){
+          intake.hashing = false; intake.sha256 = hexOf(d); render({ focus:'intake-go' });
+          say(intake.name + ' · sha256 ' + intake.sha256.slice(0, 12) + '…');
+        }).catch(function(e){ intake.hashing = false; intake.err = String((e&&e.message)||e).slice(0,160); render(); });
+      }
+      var slice = file.slice(offset, Math.min(offset + chunk, file.size));
+      offset += chunk;
+      return slice.arrayBuffer().then(function(ab){ acc.push(new Uint8Array(ab)); return step(); });
+    }
+    function concat(parts){
+      var n = 0; parts.forEach(function(p){ n += p.length; });
+      var out = new Uint8Array(n), at = 0;
+      parts.forEach(function(p){ out.set(p, at); at += p.length; });
+      return out.buffer;
+    }
+    step();
+  }
+  function intakeGo(){
+    if (!intake.file || !intake.sha256 || intake.tooLarge || intake.hashing) { render(); return; }
+    if (navigator.webdriver && trimBridge(st.bridge) === DEFAULT_BRIDGE) { intake.err = T('bd.price.automation', 'An automated browser may not ask the live quote service — that press belongs to a person.'); render(); return; }
+    var bridge = trimBridge(st.bridge);
+    intake.err = null; render();
+    fetch(bridge + '/v1/intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream', 'X-BData-Name': encodeURIComponent(intake.name), 'X-BData-Sha256': intake.sha256 },
+      body: intake.file
+    }).then(function(r){
+      if (r.status === 409) return r.text().then(function(t){ throw new Error(T('bd.add.mismatch', 'hash mismatch — the bridge refused this intake') + (t ? ' — ' + String(t).slice(0,120) : '')); });
+      if (!r.ok) return r.text().then(function(t){ throw new Error('HTTP ' + r.status + (t ? ' — ' + String(t).slice(0,120) : '')); });
+      return r.json();
+    }).then(function(rec){
+      if (!rec || String(rec.sha256||'').toLowerCase() !== intake.sha256.toLowerCase()) throw new Error(T('bd.add.mismatch', 'hash mismatch — the bridge refused this intake'));
+      intake.result = { name: String(rec.name||intake.name), bytes: Number(rec.bytes||intake.bytes), sha256: String(rec.sha256) };
+      note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes });
+      render();
+      say(T('bd.add.ok', 'on the local intake shelf'));
+    }).catch(function(e){
+      intake.err = e instanceof TypeError
+        ? T('bd.add.local-unreachable', 'The local file shelf could not be reached. Start the local bridge and allow this site’s local-network connection in your browser, then retry. Nothing was uploaded to Autonomi.')
+        : String((e&&e.message)||e).slice(0,200);
+      render(); say(intake.err);
+    });
+  }
+
+  /* ── PHASE E-1: pay with your wallet after Authorized (ant-pay.js) ─────────
+     Mock-first: e2e injects a mock signer + bridge /health.evm. Live bridge
+     without evm refuses no-contracts — honest prose, never a fake receipt. */
+  function refusalWords(code){
+    var map = {
+      'no-quote': ['bd.pay.noquote', 'there is no price yet — ask Autonomi first'],
+      'merkle-not-built': ['bd.pay.merkle', 'files this large need batch payments, which are not built'],
+      'quote-sum': ['bd.pay.quotesum', 'the payments do not add up to the quoted total'],
+      'bad-plan': ['bd.pay.badplan', 'the payment plan is malformed'],
+      'not-authorized': ['bd.pay.notauth', 'this price has not been authorized for signing'],
+      'over-ceiling': ['bd.pay.over', 'the price is above the ceiling you authorized'],
+      'no-wallet': ['bd.pay.nowallet', 'no wallet is connected to this page'],
+      'wrong-chain': ['bd.pay.wrongchain', 'the wallet is not on Arbitrum One'],
+      'no-contracts': ['bd.pay.nocontracts', 'the bridge did not name the ANT token and payment vault — until /health carries evm, nothing can be paid from this page'],
+      'short-ant': ['bd.pay.shortant', 'this wallet holds less ANT than the price'],
+      'no-gas': ['bd.pay.nogas', 'this wallet holds no ETH on Arbitrum One for gas'],
+      'not-confirmed': ['bd.pay.notconfirmed', 'you did not confirm — nothing was signed, nothing was paid'],
+      'wallet-declined': ['bd.pay.declined', 'you declined in the wallet — nothing was paid'],
+      'tx-reverted': ['bd.pay.reverted', 'the chain refused the transaction'],
+      'stopped-waiting': ['bd.pay.stopped', 'you stopped waiting — the hash is kept; nothing will be paid twice'],
+      'paid-not-finalized': ['bd.pay.paidnf', 'paid on chain but the upload did not finish — resume later'],
+      'already-paid': ['bd.pay.alreadypaid', 'this price was already paid from this device'],
+      'partial-store': ['bd.pay.partial', 'only some pieces were stored'],
+      'network': ['bd.pay.network', 'the network did not answer'],
+      'bridge-refused': ['bd.pay.bridgerefuse', 'the bridge refused']
+    };
+    var row = map[code] || ['bd.pay.refused', 'payment refused'];
+    return T(row[0], row[1]);
+  }
+  function payPrepare(q){
+    if (!q || !q.uploadId) return null;
+    return {
+      upload_id: q.uploadId,
+      payment_type: q.payment_type || q.shape || 'wave_batch',
+      payments: Array.isArray(q.payments) ? q.payments : [],
+      total_amount_atto: q.totalAtto,
+      data_map_address: q.data_map_address || undefined,
+      total_chunks: q.total_chunks, already_stored: q.already_stored
+    };
+  }
+  function payStep(sel){
+    var q = (sel && priceState(sel) === 'priced') ? usableQuote(sel) : null;
+    var auth = authFor(q);
+    var num = '<span class="num" aria-hidden="true">4</span>';
+    if (!auth || auth.state !== 'authorized-for-signing') {
+      return '<div class="step"><p class="locked" data-bdata-pay-next="1">' + num + '<span><span aria-hidden="true">🔒 </span>' + tx('bd.pay.next', 'Pay with your wallet — unlocks after you authorize') + '</span></p></div>';
+    }
+    var h = '<div class="step" data-bdata-pay="1"' + (pay.phase && pay.phase !== 'done' && pay.phase !== 'refused' && pay.phase !== 'plan' ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3>';
+    if (pay.receipt) {
+      h += '<div class="badge" data-bdata-pay-done="1">✓ ' + tx('bd.pay.done', 'Paid and stored') + '</div>';
+      h += '<div class="review" data-bdata-pay-receipt="1">';
+      function prow(k,v){ return '<div class="rv"><span class="sub">' + k + '</span><span>' + v + '</span></div>'; }
+      h += prow(tx('bd.pay.address', 'address'), '<bdi class="mono">' + esc(pay.receipt.address || '') + '</bdi>');
+      h += prow(tx('bd.pay.pieces', 'pieces'), esc(String(pay.receipt.chunks != null ? pay.receipt.chunks : '')) + ' · ' + esc(String(pay.receipt.quotes_paid != null ? pay.receipt.quotes_paid : '')) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
+      h += prow(tx('bd.pay.ant', 'ANT'), antHtml(String(pay.receipt.ant_atto || ''), true));
+      h += prow(tx('bd.pay.payer', 'payer'), '<bdi class="mono">' + esc(pay.receipt.payer || '') + '</bdi>');
+      if (pay.receipt.at) h += prow(tx('bd.pay.when', 'when'), esc(when(pay.receipt.at)));
+      h += '</div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'plan' && pay.plan) {
+      var pl = pay.plan;
+      h += '<div class="review" data-bdata-pay-plan="1">';
+      function row(k,v){ return '<div class="rv"><span class="sub">' + k + '</span><span>' + v + '</span></div>'; }
+      h += row(tx('bd.pay.token', 'token'), '<bdi class="mono">' + esc(pl.token) + '</bdi>');
+      h += row(tx('bd.pay.spender', 'spender (vault)'), '<bdi class="mono">' + esc(pl.spender) + '</bdi>');
+      h += row(tx('bd.auth.ceiling', 'ANT ceiling'), antHtml(String(pl.ant_total_atto), true) + ' <span class="sub">' + tx('bd.auth.exact', 'exact, never above') + '</span>');
+      h += row(tx('bd.pay.confirms', 'wallet confirmations'), '<b>' + esc(String(pl.wallet_confirmations)) + '</b> · ' + esc(String(pl.payment_calls)) + ' ' + tx('bd.pay.calls', 'payment call(s)') + ' · ' + esc(String(pl.quotes)) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
+      h += '</div>';
+      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — this page never holds a key') + '</p>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-confirm="1" data-act="pay-confirm" data-fk="pay-confirm">✓ ' + tx('bd.pay.confirm', 'Confirm and pay') + '</button>';
+      h += '<button type="button" class="btn" data-bdata-pay-abort="1" data-act="pay-abort" data-fk="pay-abort">✕ ' + tx('bd.pay.abort', 'Not now') + '</button></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'signing') {
+      h += '<div class="busy" data-bdata-pay-signing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.pay.signing', 'waiting on your wallet…') + '</b><div class="sub">' + esc(String(pay.secs || '')) + '</div></div></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'waiting') {
+      h += '<div class="busy" data-bdata-pay-waiting="1"><span class="spin" aria-hidden="true"></span><div><b>' + fill(T('bd.pay.waiting', 'waiting on the chain — {s} s'), { s: String(pay.secs||0) }) + '</b>';
+      h += '<div class="actions"><button type="button" class="btn" data-bdata-pay-stop="1" data-act="pay-stop" data-fk="pay-stop">' + tx('bd.price.stop', 'Stop waiting') + '</button></div></div></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'finalizing') {
+      h += '<div class="busy" data-bdata-pay-finalizing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.pay.finalizing', 'finalizing the upload…') + '</b></div></div>';
+      return h + '</div>';
+    }
+    if (pay.refusal) {
+      h += '<div class="alert note" data-bdata-pay-refused="' + esc(pay.refusal.code || '') + '"><b>' + esc(refusalWords(pay.refusal.code)) + '</b>';
+      if (pay.refusal.message) h += '<div class="sub"><bdi class="mono">' + esc(String(pay.refusal.message).slice(0,180)) + '</bdi></div>';
+      h += '</div>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-open="1" data-act="pay-open" data-fk="pay-open">↻ ' + tx('bd.pay.retry', 'Try pay again') + '</button></div>';
+      return h + '</div>';
+    }
+    // idle authorized — one primary
+    if (!window.AntPay) {
+      h += '<p class="law" data-bdata-pay-missing="1">' + tx('bd.pay.missing', 'ant-pay.js did not load — pay cannot start') + '</p>';
+      return h + '</div>';
+    }
+    h += '<p class="sub note">' + tx('bd.pay.intro', 'your wallet will show the exact ANT total and confirmation count before anything is signed') + '</p>';
+    h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-open="1" data-act="pay-open" data-fk="pay-open">💳 ' + tx('bd.pay.go', 'Pay with your wallet') + '</button></div>';
+    return h + '</div>';
+  }
+  function pickSigner(){
+    var AP = window.AntPay;
+    if (!AP) throw Object.assign(new Error('ant-pay missing'), { refusal:'no-wallet' });
+    // e2e / founder mock: window.__bdataMockSigner is a full AntPay signer
+    if (window.__bdataMockSigner) return window.__bdataMockSigner;
+    if (window.ethereum) return AP.injectedSigner(window.ethereum);
+    throw Object.assign(new Error(T('bd.pay.nowallet', 'no wallet is connected to this page')), { refusal:'no-wallet' });
+  }
+  function payOpen(){
+    var sel = chosen(), q = sel ? usableQuote(sel) : null, auth = authFor(q), fl = founderLine();
+    if (!q || !auth || auth.state !== 'authorized-for-signing' || !fl) { render(); return; }
+    if (pay.phase && pay.phase !== 'refused' && pay.phase !== 'done' && pay.confirmResolve) { render(); return; }
+    var AP = window.AntPay;
+    if (!AP) { pay.refusal = { code:'no-wallet', message:'ant-pay.js missing' }; pay.phase = 'refused'; render(); return; }
+    var prepare = payPrepare(q);
+    var authorization = { id: auth.id, state: auth.state, upload_id: auth.upload_id || q.uploadId, ant_ceiling_atto: auth.ant_ceiling_atto || fl.amountAtto };
+    var storeMem = {};
+    var store = { get: function(k){ return storeMem[k] || null; }, set: function(k,v){ storeMem[k] = v; } };
+    var ctl = new AbortController();
+    pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:ctl, ticker:null };
+    var signer;
+    try { signer = pickSigner(); } catch(e){ pay.phase='refused'; pay.refusal={ code:e.refusal||'no-wallet', message:String(e.message||e) }; render(); say(refusalWords(pay.refusal.code)); return; }
+    var payer = AP.create({
+      bridge: trimBridge(st.bridge),
+      rpc: 'https://arb1.arbitrum.io/rpc',
+      signer: signer,
+      store: store,
+      onState: function(stt){
+        if (!stt || !stt.phase) return;
+        if (stt.phase === 'plan') { pay.phase = 'plan'; pay.plan = stt; render({ focus:'pay-confirm' }); }
+        else if (stt.phase === 'signing') { pay.phase = 'signing'; pay.secs = stt.n != null ? (String(stt.n) + ' / ' + String(stt.m||'?')) : ''; render(); }
+        else if (stt.phase === 'waiting') { pay.phase = 'waiting'; pay.secs = stt.seconds || 0; render(); }
+        else if (stt.phase === 'finalizing') { pay.phase = 'finalizing'; render(); }
+        else if (stt.phase === 'done') { /* handled by pay() resolve */ }
+        else if (stt.phase === 'refused') { pay.phase = 'refused'; pay.refusal = { code: stt.code, message: stt.message }; render(); }
+      }
+    });
+    render();
+    payer.pay({
+      prepare: prepare,
+      authorization: authorization,
+      signal: ctl.signal,
+      confirmPlan: function(plan){
+        pay.phase = 'plan'; pay.plan = plan; render({ focus:'pay-confirm' });
+        return new Promise(function(resolve){ pay.confirmResolve = resolve; });
+      }
+    }).then(function(receipt){
+      pay.phase = 'done';
+      pay.receipt = Object.assign({ at: new Date().toISOString() }, receipt);
+      pay.confirmResolve = null;
+      note({ kind:'paid', address: receipt.address, ant_atto: receipt.ant_atto, chunks: receipt.chunks });
+      render({ focus:'pay' });
+      say(T('bd.pay.done', 'Paid and stored'));
+    }).catch(function(e){
+      pay.phase = 'refused';
+      pay.refusal = { code: (e && e.refusal) || 'network', message: String((e && e.message) || e).slice(0,200) };
+      pay.confirmResolve = null;
+      render({ focus:'pay-open' });
+      say(refusalWords(pay.refusal.code));
+    });
+  }
+  function payConfirm(){ if (typeof pay.confirmResolve === 'function') { var r = pay.confirmResolve; pay.confirmResolve = null; r(true); } }
+  function payAbort(){ if (typeof pay.confirmResolve === 'function') { var r = pay.confirmResolve; pay.confirmResolve = null; r(false); } else { pay.phase = null; pay.plan = null; render(); } }
+  function payStop(){ try { if (pay.abort) pay.abort.abort(); } catch(e){} }
+
 
   function authCall(path, body, done){
     // the same wall as the price ask: an automated browser never reaches the live quote service
@@ -494,12 +784,13 @@
       stop_conditions: (FINV.authorization && FINV.authorization.stopConditions) || [],
       gesture: 'founder press in My Data @ ' + new Date().toISOString()
     }, function(rec){
-      st.authorization = { id: rec.authorization_id, state: rec.state, quoteAt: q.obtainedAt };
+      st.authorization = { id: rec.authorization_id, state: rec.state, quoteAt: q.obtainedAt, upload_id: q.uploadId, ant_ceiling_atto: fl.amountAtto };
       if (!save({ authorization: st.authorization })) notice = 'nostore';
       note({ kind:'auth', id: rec.authorization_id });
       review = false;
-      render({ focus: 'auth-cancel' });
-      say(T('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E'));
+      pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:null, ticker:null };
+      render({ focus: 'pay-open' });
+      say(T('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; pay with your wallet is next'));
     });
   }
   function cancelPress(){
@@ -539,12 +830,12 @@
   function histText(e){
     if (typeof e.what === 'string') return e.what;
     if (e.kind === 'audience.chosen') return T('bd.hist.audience', 'audience policy: chosen 🌐 Public by the founder — originated in My Data; supersedes the machine reference binding (new quote required); the reference plan remains as history');
-    if (e.kind === 'audience.undone') return T('bd.hist.undo', 'audience policy: the 🌐 Public choice was withdrawn in My Data — the earlier plan remains as history') + (e.quote ? ' · ' + fill(T('bd.hist.quote', 'storage price obtained: {ant} ANT · {count} chunk quotes — nothing has been paid'), { ant: antStr(e.quote.totalAtto), count: e.quote.count }) : '');
+    if (e.kind === 'audience.undone') return T('bd.hist.undo', 'audience policy: the 🌐 Public choice was withdrawn in My Data — the earlier plan remains as history') + (e.quote ? ' · ' + fill(T('bd.hist.quote', 'storage price obtained: {ant} ANT · {count} chunk quotes — nothing has been paid from this page'), { ant: antStr(e.quote.totalAtto), count: e.quote.count }) : '');
     if (e.kind === 'auto.mode') return fill(T('bd.hist.mode', 'automation policy: {from} → {to} — governs future decisions; prior operations unchanged'), { from: modeLabel(e.from), to: modeLabel(e.to) + (e.bound ? ' (' + e.bound + ' ANT)' : '') });
     if (e.kind === 'auto.bound') return fill(T('bd.hist.bound2', 'automation bound: {from} → {to} ANT — governs future decisions; prior operations unchanged'), { from: e.from, to: e.to });
     if (e.kind === 'auth') return T('bd.hist.auth', 'authorization ') + e.id + ' — ' + T('bd.hist.authnote', 'founder press in My Data; authorized-for-signing; nothing signed/paid/uploaded');
     if (e.kind === 'auth.cancelled') return T('bd.hist.authcancel', 'authorization ') + e.id + ' — ' + T('bd.hist.authcancelnote', 'cancelled by the founder before any signature existed; no paid or uploaded state exists');
-    if (e.kind === 'quote') return fill(T('bd.hist.quote', 'storage price obtained: {ant} ANT · {count} chunk quotes — nothing has been paid'), { ant: antStr(e.totalAtto), count: e.count }) + (e.uploadId ? ' · ' + e.uploadId : '');
+    if (e.kind === 'quote') return fill(T('bd.hist.quote', 'storage price obtained: {ant} ANT · {count} chunk quotes — nothing has been paid from this page'), { ant: antStr(e.totalAtto), count: e.count }) + (e.uploadId ? ' · ' + e.uploadId : '');
     return String(e.kind || '');
   }
 
@@ -555,13 +846,20 @@
     function S(k, en, body){ return '<div class="sect"><b>' + tx(k, en) + '</b> — ' + body + '</div>'; }
     h += S('bd.cyber.s.payload', 'Payload', '<bdi>' + esc(a.name) + '</bdi> · <bdi>' + Number(a.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + ' · <span class="mono">sha256 ' + esc(a.sha256) + '</span> (' + tx('bd.cyber.orig', 'the original, never re-encoded') + ')');
     h += S('bd.cyber.s.audience', 'Audience', tx('bd.cyber.resolved', 'resolved') + ': <b>' + esc((sel && sel.audience) || aud.selected || 'public') + '</b> — <bdi>' + esc(aud.access || pol.access || '') + '</bdi>' + (sel ? ' · ' + (originHere(sel) ? tx('bd.cyber.origin.here', 'origin: My Data (this surface)') : tx('bd.cyber.origin.else', 'origin: not recorded on this surface')) + ' · <span class="mono">' + esc(utc(sel.selectedAt)) + '</span>' : '') + ' · ' + UNAVAIL.map(function(u){ return '🔒 ' + tx(u.label[0], u.label[1]) + ': ' + tx(u.tech[0], u.tech[1]); }).join(' · ') + ' · ' + tx('bd.cyber.audnote', 'adjustable before commitment; after commitment a change supersedes (new quote), never mutates'));
-    h += S('bd.cyber.s.storage', 'Storage', tx('bd.cyber.adapter', 'adapter: Autonomi (production network, keyless prepare proven) · deterministic address once stored') + ': <span class="mono">' + esc(d.data_map_address || '—') + '</span> · ' + tx('bd.cyber.statelbl', 'state') + ': <b>' + tx('bd.cyber.state', 'NOT STORED — nothing has been paid') + '</b>');
+    var svC = storedVerdict();
+    var storedBare = svC.state === 'stored' ? bareHex(svC.receipt.data_map_address) : null;
+    var stateHtml = storedBare
+      ? '<b data-bdata-stored="1">✓ ' + tx('bd.stored.on', 'Stored on Autonomi') + '</b> · <a class="btn" data-bdata-watch="1" href="bview.html#' + esc(storedBare) + '">' + tx('bd.stored.watch', 'Watch') + '</a>'
+      : '<b>' + tx('bd.cyber.state', 'NOT STORED — nothing has been paid from this page') + '</b>';
+    h += S('bd.cyber.s.storage', 'Storage', tx('bd.cyber.adapter', 'adapter: Autonomi (production network, keyless prepare proven) · deterministic address once stored') + ': <span class="mono">' + esc(storedBare || d.data_map_address || '—') + '</span> · ' + tx('bd.cyber.statelbl', 'state') + ': ' + stateHtml);
     h += S('bd.cyber.s.authority', 'Authority', tx('bd.cyber.auth', 'the founder gesture alone changes policy or spends; agents prepare and verify; chat text is never canonical'));
     h += S('bd.cyber.s.automation', 'Automation', '<b>' + esc(modeLabel(st.automation.mode)) + '</b>' + (st.automation.mode === 'auto' ? ' (' + esc(fill(T('bd.cyber.bound', 'bound {ant} ANT per operation'), { ant: st.automation.boundAnt })) + ')' : '') + ' — ' + tx('bd.cyber.future', 'governs future decisions only'));
     h += S('bd.cyber.s.value', 'Value', (line.amountAtto ? tx('bd.cyber.refcommit', 'reference commitment') + ' <span class="mono">' + esc((INV.commitment && INV.commitment.digest) || '') + '</span> · ' + tx('bd.ceiling', 'ceiling') + ' <bdi>' + esc(antStr(line.amountAtto)) + ' ANT</bdi>' : tx('bd.cyber.nopriced', 'no priced obligation yet')) + (q ? ' · ' + tx('wl.bpay.fresh', 'quote obtained') + ' <span class="mono">' + esc(utc(q.obtainedAt)) + '</span> <bdi>' + esc(antStr(q.totalAtto)) + ' ANT</bdi>' + (q.uploadId ? ' <span class="mono">' + esc(q.uploadId) + '</span>' : '') : '') + ' · ' + tx('bd.cyber.value', 'bPay (wallet) holds the obligation when economics are required'));
-    h += S('bd.cyber.s.evidence', 'Evidence', tx('bd.cyber.evidence', 'live quote receipt banked in-tree (docs/receipts/); no payment evidence yet — quote ≠ purchased ≠ uploaded ≠ retrieved'));
+    h += S('bd.cyber.s.evidence', 'Evidence', storedBare
+      ? tx('bd.stored.evidence', 'stored: receipt bdata-stored-bux-try-autonomi.json — purchased · uploaded · retrieved, each citing its source; identity pin: invoice bpay-invoice.json')
+      : tx('bd.cyber.evidence', 'live quote receipt banked in-tree (docs/receipts/); no payment evidence yet — quote ≠ purchased ≠ uploaded ≠ retrieved'));
     h += '<div class="sect"><b>' + tx('bd.cyber.s.history', 'History') + '</b> — ' + tx('bd.cyber.hist', 'append-only policy editions; supersede, never rewrite');
-    if (!st.history.length) h += '<div class="hist">—</div>';
+    if (!st.history.length) h += '<div class="hist">' + tx('flow.st.notyet', 'not yet') + '</div>';
     st.history.forEach(function(e){ h += '<div class="hist" data-bdata-history="' + esc(e.kind || 'legacy') + '"><span class="mono">' + esc(utc(e.at)) + '</span> · ' + esc(histText(e)) + '</div>'; });
     h += '</div>';
     // the quote-service address: reachable BEFORE any gesture and in EVERY register —
@@ -580,10 +878,10 @@
     var active = document.activeElement, had = (active && active.getAttribute && active.getAttribute('data-fk')) || null;
     // a requested focus move happens only when the reader is nowhere or already in this ceremony —
     // an answer landing a minute later never pulls them out of a field, a disclosure or the top bar
-    var free = !active || active === document.body || /^(ask|stop|price|public|undo|reload-inv|review|auth|auth-go|auth-cancel)$/.test(had || '');
+    var free = !active || active === document.body || /^(ask|stop|price|public|undo|reload-inv|review|auth|auth-go|auth-cancel|pay|pay-open|pay-confirm|pay-abort|pay-stop|intake-go)$/.test(had || '');
     var fk = (opts && opts.focus && free) ? opts.focus : had;
     // a press that replaces its own button hands focus to what took its place
-    var NEXT = { ask:['ask','stop','price'], stop:['stop','ask','price'], undo:['undo','public'], price:['price'], 'reload-inv':['reload-inv','public'], review:['auth-go','review','auth'], 'auth-go':['auth-cancel','auth-go','auth'], 'auth-cancel':['review','auth-cancel','auth'] };
+    var NEXT = { ask:['ask','stop','price'], stop:['stop','ask','price'], undo:['undo','public'], price:['price'], 'reload-inv':['reload-inv','public'], 'reload-stored':['reload-stored','public'], review:['auth-go','review','auth'], 'auth-go':['pay-open','auth-cancel','auth-go','auth'], 'auth-cancel':['review','auth-cancel','auth'], 'pay-open':['pay-confirm','pay-open','pay'], 'pay-confirm':['pay','pay-confirm'], 'pay-abort':['pay-open','pay'], 'intake-go':['intake-go'] };
     // text being typed right now survives the redraw, caret and all
     var typing = (active && (active.id === 'bdata-bound' || active.id === 'bdata-bridge')) ? { id: active.id, v: active.value, s: active.selectionStart, e: active.selectionEnd } : null;
     // a reader's own disclosure taps survive every redraw
@@ -609,7 +907,225 @@
     clearTimeout(freshTimer); freshTimer = null;
     var sel = chosen(), q = sel && !ask ? usableQuote(sel) : null, left = q ? FRESH_MS - (Date.now() - new Date(q.obtainedAt).getTime()) : 0;
     if (left > 0) freshTimer = setTimeout(render, left + 250);
+    eternal();
   }
+
+  /* ══ ETERNAL FRONT — one data layer, three renderers (docs/design/eternal, founder 2026-09-26) ══
+     The facts are the SAME state this whole page is drawn from: the reference invoice
+     (bpay-invoice.json), the store receipt (bdata-stored-bux-try-autonomi.json, believed only
+     when storeVerify() passes), the shared audience policy and this device's automation policy.
+     "stored" is drawn only on that verdict; nothing on this front pays, signs, uploads or
+     changes a policy. The only gestures are reading, lighting and handing off: "watch it"
+     opens bview.html at the receipt's address; "who can get it" hands off to the real
+     chooser below. Exposed as window.__eternal so tests read the same object. */
+  var ED = { ready: false }, ES = { open: {}, sel: 0, lit: {}, verified: null };
+  function atto2(x){ var s = antStr(x); return s === null ? null : s; }
+  function leadTail(s){ var i = s.indexOf('.'); if (i < 0 || s.length - i - 1 <= 4) return [s, '']; return [s.slice(0, i + 5), s.slice(i + 5)]; }
+  function tok(n){ return getComputedStyle(document.body).getPropertyValue('--sk-' + n).trim(); }
+  function etData(){
+    var D = { ready: invState === 'ready', invState: invState };
+    if (!D.ready) return D;
+    var d = INV.domain, a = d.artifact, pol = d.policy || {}, aud = pol.audience || {}, line = refLine() || {}, sel = chosen();
+    var sv = storedVerdict();
+    D.title = (d.media && d.media.title) || a.name; D.creator = (d.media && d.media.creator) || '';
+    D.name = a.name; D.bytes = Number(a.bytes); D.sha256 = String(a.sha256); D.network = d.network || '';
+    D.mb = Math.round(D.bytes / 1e6);
+    D.chunks = (d.chunks && Number(d.chunks.total)) || ((line.quotes || []).length) || 0;
+    D.quotes = (line.quotes || []).map(function(q){ return String(q.amount_atto); });
+    D.quoteHashes = (line.quotes || []).map(function(q){ return String(q.quote_hash || ''); });
+    D.refAtto = line.amountAtto ? String(line.amountAtto) : null;
+    try { D.quoteSum = D.quotes.reduce(function(s, q){ return s + BigInt(q); }, 0n).toString(); } catch(e){ D.quoteSum = null; }
+    D.quoteAt = (d.quote && d.quote.obtained_at) || '';
+    D.shape = d.payment_type || '';
+    D.access = aud.access || pol.access || '';
+    D.forget = pol.forgettability || '';
+    D.audience = (sel && sel.audience) || aud.selected || 'public';
+    D.audienceBy = sel ? (originHere(sel) ? 'you, in My Data' : 'you, elsewhere') : 'the machine reference';
+    D.unavailable = UNAVAIL.map(function(u){ return u.id; });
+    D.automation = st.automation.mode; D.bound = st.automation.boundAnt;
+    D.storedState = sv.state; D.stored = sv.state === 'stored';
+    D.address = D.stored ? bareHex(sv.receipt.data_map_address) : null;
+    D.evidence = [];
+    if (D.stored) {
+      D.evidence = sv.receipt.evidence.map(function(e){ return { state: e.state, at: String(e.at || ''), what: String(e.what || ''), source: String(e.source || ''), tx: e.tx ? String(e.tx) : '' }; });
+      var pur = D.evidence.filter(function(e){ return e.state === 'purchased'; })[0] || {}, up = D.evidence.filter(function(e){ return e.state === 'uploaded'; })[0] || {};
+      var m = /(\d+) atto/.exec(pur.what || ''); D.paidAtto = m ? m[1] : null;
+      var g = /gas ([\d.]+) ETH/.exec(pur.what || ''); D.gasEth = g ? g[1] : null;
+      D.tx = pur.tx || '';
+      var c = /(\d+) of (\d+) chunks stored/.exec(up.what || ''); D.storedChunks = c ? [Number(c[1]), Number(c[2])] : null;
+      D.storedAt = up.at || '';
+    }
+    return D;
+  }
+  function day(iso){ var dt = new Date(iso); if (isNaN(dt)) return ''; try { return new Intl.DateTimeFormat(lang(), { day:'numeric', month:'short', year:'numeric' }).format(dt); } catch(e){ return String(iso).slice(0, 10); } }
+  function setHTML(id, h){ var el = document.getElementById(id); if (el && el.innerHTML !== h) el.innerHTML = h; }
+  function chev(){ return '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>'; }
+
+  /* ── NEW BEE ── one file, four plain questions, one action */
+  function etBee(D){
+    if (!D.ready) { setHTML('etBeeRows', '<div class="et-b-wait">' + esc(D.invState === 'failed' ? T('et.bdata.b.fail', 'your files did not load. the whole page below can try again.') : T('et.bdata.b.wait', 'reading your files…')) + '</div>'); return; }
+    var paid = D.stored && D.paidAtto ? atto2(D.paidAtto) : null;
+    var rows = [
+      ['who', T('et.bdata.b.who', 'who can get it'), D.audience === 'public' ? T('et.bdata.b.whoV', 'anyone with the address') : esc(D.audience), '',
+        '<p>' + esc(T('et.bdata.b.whoOpen', 'it is public: anyone who has its address can open it. that is what keeps it free to share.')) + '</p>' +
+        '<p class="out">' + esc(T('et.bdata.b.onlyme', 'only me: not ready yet, so not offered.')) + '</p>' +
+        '<p class="out">' + esc(T('et.bdata.b.picked', 'people you pick: not ready yet, so not offered.')) + '</p>' +
+        '<p class="mut">' + esc(T('et.bdata.b.whoBy', 'chosen by {by}.').replace('{by}', D.audienceBy === 'the machine reference' ? T('et.bdata.b.byRef', 'the setup, not by you yet') : T('et.bdata.b.byYou', 'you'))) + '</p>'],
+      ['where', T('et.bdata.b.where', 'where it is kept'), D.stored ? '✓ ' + esc(T('et.bdata.b.whereV', 'on Autonomi')) : esc(T('et.bdata.b.whereNo', 'not stored yet')), D.stored ? 'ok' : '',
+        D.stored ? '<p>' + esc(T('et.bdata.b.whereOpen', 'kept on the Autonomi network since {day}: {n} of {m} pieces stored, then downloaded back and checked against the original.').replace('{day}', day(D.storedAt)).replace('{n}', D.storedChunks ? D.storedChunks[0] : D.chunks).replace('{m}', D.storedChunks ? D.storedChunks[1] : D.chunks)) + '</p>'
+                 : '<p>' + esc(T('et.bdata.b.whereNot', 'there is no store receipt this page can check, so it does not say stored.')) + '</p>'],
+      ['cost', T('et.bdata.b.cost', 'what it cost'), paid ? esc(T('et.bdata.b.costV', 'paid once')) : esc(T('et.bdata.b.costNo', 'nothing paid yet')), '',
+        paid ? '<p class="et-b-fig"><bdi>' + esc(leadTail(paid)[0]) + '<span>' + esc(leadTail(paid)[1]) + '</span> ANT</bdi></p>' +
+               '<p class="mut">' + esc(T('et.bdata.b.costOpen', 'one payment, no subscription. network gas was paid on the side, not folded in.')) + '</p>' +
+               '<p class="mut">' + esc(T('et.bdata.b.forever', 'forever means it cannot be taken down later.')) + '</p>'
+             : '<p>' + esc(T('et.bdata.b.costNot', 'the price is asked from the network only when you choose to keep it.')) + '</p>'],
+      ['helpers', T('et.bdata.b.help', 'your helpers may'), esc(D.automation === 'ask' ? T('et.bdata.b.ask', 'ask you first') : D.automation === 'auto' ? T('et.bdata.b.auto', 'act within your limit') : T('et.bdata.b.never', 'never spend')), '',
+        '<p>' + esc(D.automation === 'ask' ? T('et.bdata.b.askOpen', 'every payment asks you first, here on this page.') : D.automation === 'auto' ? T('et.bdata.b.autoOpen', 'they may keep things within {b} ANT each time. anything above asks you.').replace('{b}', D.bound) : T('et.bdata.b.neverOpen', 'nothing spends unless you press it yourself.')) + '</p>' +
+        '<p class="mut">' + esc(T('et.bdata.b.change', 'you can change this in the whole page below.')) + '</p>']
+    ];
+    var h = '<div class="et-b-file"><i aria-hidden="true">▶</i><div><b>' + esc(D.title) + '</b><span>' + esc(D.creator ? D.creator.split(' · ')[0] + ' · ' : '') + esc(T('et.bdata.b.video', 'a video')) + ' · ' + D.mb + ' MB</span></div></div>';
+    rows.forEach(function(r){
+      var open = !!ES.open[r[0]];
+      h += '<button type="button" class="et-b-row" data-ek="b-' + r[0] + '" aria-expanded="' + open + '"><span>' + esc(r[1]) + '</span><small' + (r[3] ? ' class="' + r[3] + '"' : '') + '>' + r[2] + chev() + '</small></button>';
+      h += '<div class="et-b-open" data-open="' + r[0] + '"' + (open ? '' : ' hidden') + '>' + r[4] + '</div>';
+    });
+    setHTML('etBeeRows', h);
+    var go = document.getElementById('etBeeGo');
+    if (D.stored) { go.setAttribute('href', 'bview.html#' + D.address); go.textContent = T('et.bdata.b.watch', 'watch it'); go.removeAttribute('data-handoff'); }
+    else { go.setAttribute('href', '#aud-h'); go.textContent = T('et.bdata.b.choose', 'choose who can get it'); go.setAttribute('data-handoff', 'who'); }
+    document.getElementById('etBeeTitle').textContent = D.stored ? T('et.bdata.b.h', 'your files, kept') : T('et.bdata.b.hNo', 'your files');
+  }
+
+  /* ── RAVER ── the video as a bloom: one petal per stored piece, its length its quoted price */
+  // a teardrop petal: narrow at the heart, widest two-thirds out, a point at its price
+  function petal(r0, r1, a0, a1){
+    var c = (a0 + a1) / 2, w = (a1 - a0) / 2, rm = r0 + (r1 - r0) * .62;
+    var p = function(r, a){ return (r * Math.cos(a)).toFixed(2) + ' ' + (r * Math.sin(a)).toFixed(2); };
+    return 'M' + p(r0, c) + 'Q' + p(rm, c - w * 1.9) + ' ' + p(r1, c) + 'Q' + p(rm, c + w * 1.9) + ' ' + p(r0, c) + 'Z';
+  }
+  function bands(D){
+    var v = D.quotes.map(function(q){ return Number(BigInt(q) / 1000000000000n) / 1e6; }).slice().sort(function(a, b){ return a - b; });
+    var q = function(f){ return v[Math.min(v.length - 1, Math.floor(f * v.length))]; };
+    return [q(.25), q(.5), q(.75)];
+  }
+  function band(x, B){ return x <= B[0] ? 0 : x <= B[1] ? 1 : x <= B[2] ? 2 : 3; }
+  function etRaver(D){
+    var svg = document.getElementById('etBloom'); if (!svg) return;
+    if (!D.ready || !D.quotes.length) { svg.innerHTML = ''; setHTML('etRaverCard', '<div><b>' + esc(T('et.bdata.r.wait', 'reading the pieces…')) + '</b></div>'); return; }
+    var n = D.quotes.length, vals = D.quotes.map(function(q){ return Number(BigInt(q) / 1000000000000n) / 1e6; });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), B = bands(D);
+    var RN = (tok('rainbow').match(/#[0-9a-f]{6}/gi) || []);
+    var kept = [RN[1], RN[2], RN[3], RN[4]];   // the kept palette, rim to centre: biomass, ai, info, sovereign
+    var h = '', step = 2 * Math.PI / n;
+    for (var i = 0; i < n; i++) {
+      var a0 = -Math.PI / 2 + i * step + 0.012, a1 = a0 + step - 0.024;
+      var r1 = 96 + (hi > lo ? (vals[i] - lo) / (hi - lo) : .5) * 92;
+      var sel = ES.sel === i, lit = !!ES.lit[i];
+      var fill = D.stored ? kept[band(vals[i], B)] : tok('sovereign-wash');
+      if (sel) fill = tok('sovereign-strong');
+      h += '<path class="pt" data-i="' + i + '" d="' + petal(66, r1, a0, a1) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : (D.stored ? .78 : .9)) + '"' + (D.stored ? '' : ' stroke="' + tok('sovereign') + '" stroke-width="1"') + '/>';
+    }
+    h += '<circle r="58" fill="' + tok('bg-card') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
+    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">' + D.mb + ' MB</text>';
+    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-raver-body)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
+    if (D.stored) h += '<circle r="196" fill="none" stroke="' + RN[0] + '" stroke-width="2" stroke-dasharray="2 6"/>';
+    svg.innerHTML = h;
+    var litN = Object.keys(ES.lit).length;
+    document.getElementById('etRaverTitle').textContent = n + ' ' + T('et.bdata.r.pieces', 'pieces');
+    document.getElementById('etRaverHint').textContent = D.stored ? T('et.bdata.r.hint', 'tap a petal · each one is stored') : T('et.bdata.r.hintNo', 'tap a petal · none stored yet');
+    var legend = document.getElementById('etLegend');
+    var fmt = function(x){ return x.toFixed(2); };
+    legend.innerHTML = [['≤ ' + fmt(B[0]), kept[0]], ['≤ ' + fmt(B[1]), kept[1]], ['≤ ' + fmt(B[2]), kept[2]], ['> ' + fmt(B[2]), kept[3]]].map(function(x){ return '<span><i style="background:' + (D.stored ? x[1] : tok('sovereign-wash')) + '"></i>' + esc(x[0]) + '</span>'; }).join('');
+    var i2 = ES.sel, hash = D.quoteHashes[i2] || '';
+    setHTML('etRaverCard', '<span class="rk">' + (i2 + 1) + '</span><div><b>' + esc(T('et.bdata.r.piece', 'piece {i} of {n}').replace('{i}', i2 + 1).replace('{n}', n)) + ' · ' + esc(vals[i2].toFixed(4)) + ' ANT</b><span>' + esc(D.stored ? T('et.bdata.r.stored', 'stored') : T('et.bdata.r.notStored', 'not stored yet')) + ' · ' + esc(T('et.bdata.r.quote', 'quote')) + ' ' + esc(hash.slice(0, 10)) + '…</span></div>');
+    document.getElementById('etRaverNote').textContent = litN + ' ' + T('et.bdata.r.lit', 'of {n} lit').replace('{n}', n) + ' · ' + (D.stored ? T('et.bdata.r.keptNote', 'colour = kept · petal length = its quoted price') : T('et.bdata.r.dimNote', 'dim = not stored · petal length = its quoted price'));
+    var go = document.getElementById('etRaverGo');
+    if (D.stored) { go.setAttribute('href', 'bview.html#' + D.address); go.textContent = T('et.bdata.r.watch', 'watch it'); go.removeAttribute('data-handoff'); }
+    else { go.setAttribute('href', '#aud-h'); go.textContent = T('et.bdata.r.choose', 'who can get it'); go.setAttribute('data-handoff', 'who'); }
+  }
+
+  /* ── CYPHERPUNK ── the object, the pipeline, the receipt, and a check you can run here */
+  function verifyHere(D){
+    var out = [], sv = storedVerdict(), r = sv.receipt || STO || {}, a = (INV && INV.domain && INV.domain.artifact) || {};
+    var ok = function(k, pass, got){ out.push({ k: k, pass: !!pass, got: got }); };
+    ok('receipt.artifact.name == invoice', r.artifact && r.artifact.name === a.name, (r.artifact && r.artifact.name) || T('et.bdata.c.absent', 'absent'));
+    ok('receipt.artifact.sha256 == invoice', r.artifact && r.artifact.sha256 === a.sha256, r.artifact ? String(r.artifact.sha256).slice(0, 16) + '…' : T('et.bdata.c.absent', 'absent'));
+    ok('receipt.artifact.bytes == invoice', r.artifact && Number(r.artifact.bytes) === Number(a.bytes), r.artifact ? String(r.artifact.bytes) : T('et.bdata.c.absent', 'absent'));
+    ok('receipt.data_map_address == invoice', bareHex(r.data_map_address) && bareHex(r.data_map_address) === bareHex(INV && INV.domain.data_map_address), bareHex(r.data_map_address).slice(0, 16) + (r.data_map_address ? '…' : T('et.bdata.c.absent', 'absent')));
+    ok('evidence cites purchased · uploaded · retrieved', Array.isArray(r.evidence) && ['purchased', 'uploaded', 'retrieved'].every(function(s){ return r.evidence.some(function(e){ return e && e.state === s && e.source; }); }), Array.isArray(r.evidence) ? r.evidence.length + ' rows' : T('et.bdata.c.absent', 'absent'));
+    ok('sum(' + D.quotes.length + ' quotes) == invoice line', D.quoteSum && D.quoteSum === D.refAtto, D.quoteSum ? atto2(D.quoteSum) + ' ANT' : T('et.bdata.c.unread', 'unread'));
+    return { at: new Date().toISOString(), rows: out, pass: out.every(function(x){ return x.pass; }) };
+  }
+  function etCy(D){
+    if (!D.ready) { setHTML('etCyPath', esc(T('et.bdata.c.wait', 'bdata://… reading bpay-invoice.json'))); return; }
+    setHTML('etCyPath', 'autonomi://' + esc(D.address || T('et.bdata.c.noaddr', 'no-address-until-stored')));
+    setHTML('etChips', '<span class="' + (D.stored ? 'ok' : '') + '">state ' + (D.stored ? 'stored ✓' : esc(D.storedState)) + '</span><span class="on">audience ' + esc(D.audience) + '</span><span>' + (D.stored ? 'immutable' : 'mutable') + '</span><span>' + esc(D.network) + '</span>');
+    setHTML('etCyGuard', '<span>audience only-me · selected-people</span><b>' + esc(T('et.bdata.c.refused', 'not qualified · not offered')) + '</b>');
+    var kv = [
+      ['name', esc(D.name)],
+      ['bytes', esc(D.bytes.toLocaleString('en-US')) + ' (' + D.mb + ' MB)'],
+      ['sha256', esc(D.sha256)],
+      ['address', D.address ? esc(D.address) : '<span class="no">' + esc(T('et.bdata.c.noStore', 'none · no verified store receipt')) + '</span>'],
+      ['access', esc(D.access)],
+      ['forget', esc(D.forget)],
+      ['automation', esc(D.automation) + (D.automation === 'auto' ? ' · bound ' + esc(D.bound) + ' ANT/op' : '') + ' · this device']
+    ];
+    setHTML('etObject', kv.map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join(''));
+    var ev = function(s){ return D.evidence.filter(function(e){ return e.state === s; })[0]; };
+    var pur = ev('purchased'), up = ev('uploaded'), ret = ev('retrieved');
+    var auth = st.authorization;
+    var steps = [
+      ['intake · registered', D.name + ' · ' + D.chunks + ' chunks · ' + D.shape, 'done'],
+      ['audience · ' + D.audience, 'bound by ' + D.audienceBy + ' · only-me / selected-people not qualified', D.audienceBy === 'the machine reference' ? 'done' : 'done you'],
+      ['quote · ' + D.quotes.length + ' chunk quotes', 'reference ' + (D.refAtto ? atto2(D.refAtto) : '?') + ' ANT · obtained ' + utc(D.quoteAt) + ' · gas separate (Arbitrum ETH)', 'done'],
+      ['authorize · phase C intent', auth ? auth.state + ' · ' + auth.id : (D.stored ? 'not used · the owner paid by hand (see purchased) · signing from this page is phase E' : 'no authorization on this device · signing is phase E'), auth ? 'done' : (D.stored ? 'skip' : 'todo')],
+      ['purchased', pur ? (D.paidAtto ? atto2(D.paidAtto) + ' ANT' : '') + (D.gasEth ? ' + gas ' + D.gasEth + ' ETH' : '') + ' · ' + utc(pur.at) + (pur.tx ? ' · tx ' + pur.tx : '') : 'not yet · no receipt row', pur ? 'done' : 'todo'],
+      ['uploaded', up ? up.what + ' · ' + utc(up.at) : 'not yet', up ? 'done' : 'todo'],
+      ['retrieved · hash-checked', ret ? ret.what + ' · ' + utc(ret.at) : 'not yet', ret ? 'done' : 'todo']
+    ];
+    var nowAt = steps.findIndex(function(s){ return s[2] === 'todo'; });
+    setHTML('etPipe', steps.map(function(s, i){ return '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc(s[0]) + '</b><p>' + esc(s[1]) + '</p></li>'; }).join(''));
+    var sources = D.evidence.length ? D.evidence.map(function(e){ return e.state + ' ← ' + e.source.split(' — ')[0]; }) : [];
+    setHTML('etSources', sources.length ? sources.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('') : '<li>' + esc(T('et.bdata.c.noSources', 'no store receipt verified · nothing to cite')) + '</li>');
+    var V = ES.verified;
+    setHTML('etVerify', V ? V.rows.map(function(r){ return '<li class="' + (r.pass ? 'yes' : 'no') + '">' + (r.pass ? '✓ ' : '✗ ') + esc(r.k) + ' · <code>' + esc(r.got) + '</code></li>'; }).join('') + '<li>' + esc('ran here · ' + utc(V.at)) + '</li>' : '<li>' + esc(T('et.bdata.c.notRun', 'not run yet')) + '</li>');
+    setHTML('etByHand', D.address ? '<li><code>ant file download ' + esc(D.address) + ' out.mp4</code></li><li><code>sha256sum out.mp4</code> == <code>' + esc(D.sha256) + '</code></li>' : '<li>' + esc(T('et.bdata.c.noHand', 'nothing is stored yet, so there is nothing to fetch')) + '</li>');
+    var w = document.getElementById('etCyWatch');
+    if (D.address) { w.hidden = false; w.setAttribute('href', 'bview.html#' + D.address); } else w.hidden = true;
+  }
+
+  // the front's static words ride the same T(key, english) law: the English of record is kept once
+  function etWords(){ document.querySelectorAll('[data-etk]').forEach(function(el){ if (!el.hasAttribute('data-eten')) el.setAttribute('data-eten', el.textContent); el.textContent = T(el.getAttribute('data-etk'), el.getAttribute('data-eten')); }); }
+  function eternal(){
+    try {
+      etWords();
+      ED = etData();
+      if (ED.ready && ES.verified == null && stoState !== 'loading') ES.verified = verifyHere(ED);
+      etBee(ED); etRaver(ED); etCy(ED);
+      window.__eternal = { data: ED, ui: ES, verify: function(){ ES.verified = verifyHere(etData()); eternal(); return ES.verified; } };
+    } catch(e) { /* the front never takes the page down with it */ if (window.console) console.warn('eternal front', e); }
+  }
+  (function wireEternal(){
+    var ev = document.getElementById('eternal'); if (!ev) return;
+    ev.addEventListener('click', function(e){
+      var row = e.target.closest('.et-b-row[data-ek]');
+      if (row) { var k = row.getAttribute('data-ek').slice(2); ES.open[k] = !ES.open[k]; row.setAttribute('aria-expanded', String(ES.open[k])); var p = ev.querySelector('.et-b-open[data-open="' + k + '"]'); if (p) p.hidden = !ES.open[k]; return; }
+      var pt = e.target.closest('#etBloom .pt');
+      if (pt) { var i = +pt.getAttribute('data-i'); ES.sel = i; ES.lit[i] = true; etRaver(ED); return; }
+      var stp = e.target.closest('[data-step]');
+      if (stp && ED.quotes && ED.quotes.length) { var n = ED.quotes.length; ES.sel = (ES.sel + (+stp.getAttribute('data-step')) + n) % n; ES.lit[ES.sel] = true; etRaver(ED); return; }
+      var ho = e.target.closest('[data-handoff="who"]');
+      if (ho) {   // the one hand-off: the real audience chooser below owns the choice
+        e.preventDefault();
+        var real = document.querySelector('#shelf [data-act="public"]');
+        var h3 = document.getElementById('aud-h');
+        if (h3) h3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (real) { try { real.focus({ preventScroll: true }); } catch(x){} }
+        return;
+      }
+      if (e.target.closest('#etCyVerify')) { ES.verified = verifyHere(etData()); etCy(ED); say(ES.verified.pass ? T('et.bdata.c.pass', 'every check passed') : T('et.bdata.c.failSay', 'a check did not pass')); }
+    });
+  })();
 
   /* ---------- listeners: delegated ONCE on the stable page, so no redraw can lose them ---------- */
   var root = document.getElementById('bdata') || document.body;
@@ -623,9 +1139,26 @@
     else if (act === 'stop') { stopAsk(); render({ focus: 'ask' }); say(''); }
     else if (act === 'mode') setMode(b.getAttribute('data-bdata-auto'));
     else if (act === 'reload-inv') loadInvoice();
+    else if (act === 'reload-stored') loadStored();
     else if (act === 'review') { review = true; authErr = null; render(); }
     else if (act === 'auth-go') authorizePress();
     else if (act === 'auth-cancel') cancelPress();
+    else if (act === 'pay-open') payOpen();
+    else if (act === 'pay-confirm') payConfirm();
+    else if (act === 'pay-abort') payAbort();
+    else if (act === 'pay-stop') payStop();
+    else if (act === 'intake-go') intakeGo();
+  });
+  root.addEventListener('change', function(ev){
+    var t = ev.target; if (!t) return;
+    if (t.getAttribute && t.getAttribute('data-bdata-file') === '1' && t.files && t.files[0]) hashFile(t.files[0]);
+  }, true);
+  root.addEventListener('dragover', function(ev){ if (ev.target.closest && ev.target.closest('[data-bdata-drop]')) { ev.preventDefault(); } });
+  root.addEventListener('drop', function(ev){
+    var z = ev.target.closest && ev.target.closest('[data-bdata-drop]');
+    if (!z) return; ev.preventDefault();
+    var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f) hashFile(f);
   });
   root.addEventListener('change', function(ev){
     var t = ev.target; if (!t) return;
@@ -651,6 +1184,57 @@
   };
   window.addEventListener('pagehide', function(){ if (ask) mark(null); });
 
+  /* ---------- the store receipt (founder order 2026-09-25) ----------
+     The Bux video IS on Autonomi mainnet — the founder paid and uploaded by
+     his own hand (RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21). This page may say
+     STORED only when the receipt on file verifies against the invoice line
+     by line: name, sha256, bytes, data-map address, network, audience and
+     all three evidence rows (purchased / uploaded / retrieved), each citing
+     its source. Anything less renders exactly as before — the page claims
+     only what its own evidence shows (measured-states economics law). */
+  var STO = null, stoState = 'loading', stoErr = '';   // loading | ready | absent | unreadable
+  function bareHex(v){ return String(v || '').replace(/^0x/i, '').toLowerCase(); }
+  function storeVerify(r){
+    if (!INV || !INV.domain || !INV.domain.artifact) return 'no-invoice';
+    var a = INV.domain.artifact, d = INV.domain, aud = (d.policy && d.policy.audience) || {};
+    if (!r || typeof r !== 'object' || Array.isArray(r) || r.schema !== 'bdata.store-receipt/1') return 'shape';
+    if (!r.artifact || typeof r.artifact !== 'object' || r.artifact.name !== a.name || r.artifact.sha256 !== a.sha256 || Number(r.artifact.bytes) !== Number(a.bytes)) return 'artifact';
+    if (!/^[0-9a-f]{64}$/.test(bareHex(r.data_map_address)) || bareHex(r.data_map_address) !== bareHex(d.data_map_address)) return 'address';
+    if (r.network !== d.network) return 'network';
+    if (r.audience !== aud.selected) return 'audience';
+    if (!Array.isArray(r.evidence)) return 'evidence';
+    var need = ['purchased', 'uploaded', 'retrieved'];
+    for (var i = 0; i < need.length; i++) {
+      var row = r.evidence.filter(function(e){ return e && e.state === need[i]; })[0];
+      if (!row || typeof row.source !== 'string' || !row.source.trim()) return 'evidence';
+    }
+    return 'stored';
+  }
+  // the verdict for THIS render: the receipt only speaks when the invoice it
+  // must match is on the page; a mismatch renders exactly as before
+  function storedVerdict(){
+    if (invState === 'loading' || stoState === 'loading') return { state: 'loading' };
+    if (stoState === 'unreadable') return { state: 'unreadable', why: stoErr };
+    if (stoState !== 'ready' || invState !== 'ready') return { state: 'absent' };
+    var v = storeVerify(STO);
+    return v === 'stored' ? { state: 'stored', receipt: STO } : { state: 'mismatch', why: v };
+  }
+  function loadStored(){
+    stoState = 'loading'; stoErr = ''; render();
+    fetch('bdata-stored-bux-try-autonomi.json').then(function(r){
+      if (r.status === 404) { STO = null; stoState = 'absent'; return null; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json().catch(function(){ throw new Error('the answer was not JSON'); });
+    }).then(function(rec){
+      if (stoState === 'absent') return;
+      if (!rec || typeof rec !== 'object' || Array.isArray(rec)) throw new Error('empty answer');
+      STO = rec; stoState = 'ready';
+    }).catch(function(e){
+      STO = null; stoState = 'unreadable';
+      stoErr = String((e && e.message) || e).slice(0, 160);
+    }).then(function(){ render(); });
+  }
+
   function loadInvoice(){
     invState = 'loading'; render();
     fetch('bpay-invoice.json').then(function(r){
@@ -665,6 +1249,7 @@
     }).catch(function(){ INV = null; invState = 'failed'; say(T('bd.inv.fail', 'Your data list did not load.')); }).then(function(){ render(); });
   }
   loadInvoice();
+  loadStored();
   // without the current founder invoice the authorization step stays locked, in words
   fetch('bpay-invoice-founder.json').then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function(finv){ if (finv && finv.identity && finv.commitment && finv.domain && finv.domain.artifact) { FINV = finv; render(); } })

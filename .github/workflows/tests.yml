@@ -97,7 +97,7 @@ jobs:
         run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/ans104.test.mjs
       # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
       # run one of them. That is why a real regression sat on an open, mergeable
       # PR for three days with nothing red naming it: the gate was not weak, it
@@ -119,6 +119,9 @@ jobs:
           fi
           echo "genealogy: running $n suite(s)"
           node --test $(ls tools/genealogy/*.test.mjs)
+      - name: bData local intake — real disk bytes, hash refusal and restart persistence
+        if: always()
+        run: node --test tools/antd-bridge/intake-server.test.mjs
       - name: Forge room — pinned Yjs convergence, late join and usable fallback
         if: always()
         working-directory: forge/visual/test
@@ -179,6 +182,13 @@ jobs:
           python3 scripts/buzz-mail/test_outbound.py
           python3 scripts/buzz-mail/test_bech32id.py
           python3 scripts/buzz-mail/test_import_from_triage.py
+          # These two sat in this directory, beside eight suites this step already
+          # names, and were never added to the list — not excluded, forgotten. They
+          # guard PRODUCTION mail behaviour: the KNOWN-roster single source (#164)
+          # and the maildir mode heal (#181). Measured green before wiring, 2026-09-23:
+          # known_roster OK (drove 11 locals through RCPT+DATA), maildir_modes 6 tests OK.
+          python3 scripts/buzz-mail/test_sink_known_roster.py
+          python3 scripts/buzz-mail/test_sink_maildir_modes.py
       - name: bMAILroom native notice adapter (pinned nostr-tools, disabled seam)
         if: always()
         run: |
@@ -193,6 +203,27 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # Two more suites that existed and were named nowhere. Census on ab2d8fb3:
+      # 90 test-shaped files, 63 named, 14 matched by #212's glob, NINE named
+      # nowhere at all. These are the two of those nine that were already green
+      # by hand — the rest need a repair or a dependency decision first and are
+      # recorded in the channel rather than wired blind.
+      # NOT WIRED, and the reason is recorded so nobody re-discovers it: the x0x-622
+      # runner needs the blake3 module. It passed by hand under WSL python3 3.14.4
+      # (34 proofs, 0 failed) and failed in CI on this job at 01:39:43Z with
+      # "ModuleNotFoundError: No module named 'blake3'" — T1 and T1b fail, the other
+      # 32 pass. Same shape as tests/r6/test_sig.py needing pynacl. Decide the
+      # dependency (install it here, or exempt those arms BY NAME with this reason),
+      # then wire it. GREEN ON MY BOX IS NOT GREEN IN CI when a suite has a dependency:
+      # the dependency set is part of what "measured green before wiring" must cover.
+      # SS-2's own contract test. Its rig copied secret-scan.sh without
+      # keyshape.sh — which the scanner SOURCES at :82 — so three rows passed and
+      # the fourth died on ". : cannot open keyshape.sh". Nothing ran this file,
+      # so nobody saw it; push-preflight.sh's later selftest copies all three and
+      # had to learn the same lesson from scratch. Fixed in this commit, then wired.
+      - name: Hooks contract — the installer wires a pre-commit that REFUSES a key
+        if: always()
+        run: bash e2e/hooks-installed.test.sh
       # AV-1 serve-bridge battery (zCode, 2026-09-16): meter.py serve under a
       # temp BUZZ_METER_DIR on an ephemeral port — SIGKILL-mid-settle
       # exactly-once, concurrent mixed load (chain + conservation + coherent
@@ -343,6 +374,18 @@ jobs:
       - name: Funnel broadcast selftest (vectors + sign/recover)
         if: always()
         run: node scripts/funnel/broadcast.mjs --selftest
+      # the ed25519 upload door (contracts/vending/tool/ar-upload.cjs) puts the
+      # member's PUBLIC key in the item's owner field, never the seed; a signer
+      # whose owner would be the seed is refused before any upload. The real
+      # library is installed at pinned versions for this step only (--no-save:
+      # the tool declares no dependency on it; axios is pinned because arbundles
+      # requires it in FileDataItem.js without declaring it), so the live tests
+      # run in CI.
+      - name: Vending upload door — owner is the public key, never the seed
+        if: always()
+        run: |
+          npm install --prefix contracts/vending/tool --no-save --no-package-lock --ignore-scripts @dha-team/arbundles@1.0.4 bs58@6.0.0 axios@1.20.0
+          node --test e2e/ar-upload-signer.test.mjs
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).
@@ -433,12 +476,11 @@ jobs:
         run: sh scripts/identity-check.sh
 
   node:
-    # latent hardening (z3.2, 2026-09-03): this job's whole history is 3–15 min
-    # (worst = cold npm/Playwright install); a 20-min cap bounds any future
-    # real hang at a third of the runner's 6h default, so a wedged battery can
-    # never again sit unnoticed for hours. No battery misbehaves today — this
-    # is the cap, not a fix.
-    timeout-minutes: 20
+    # HARDENING (2026-09-30): per-step timeout-minutes enforce bounds with >=25% headroom over measured maxima.
+    # Measurement window: 199 workflow runs (195 non-scratch) from 2026-09-29T02:41:58Z to 2026-09-30T21:40:17Z
+    # (events: push, pull_request; excluded: bgemini/scratch-* and proof branches).
+    # Job caps for node, eternal and meter were raised from 20m and act as outer backstops.
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       # Full history: the §7 pushed-range check needs origin/main..HEAD
@@ -451,6 +493,7 @@ jobs:
       # The 26 include the pinned cross-implementation vector any Rust port
       # must reproduce byte-identically (prf 0x01×32 → master_prk d54134a6…).
       - name: Key-build engine unit tests (26, incl. pinned vector)
+        timeout-minutes: 5 # measured: max 6s in run 36514555000 (+4900% headroom)
         if: always()
         working-directory: key-build/bdid-key
         run: |
@@ -470,6 +513,7 @@ jobs:
       # dependency — visible and attributable, never skipped. The only
       # exempt step in the workflow; lint-ci-shape.mjs knows its name.
       - name: shared setup — install (exempt from always())
+        timeout-minutes: 10 # measured: max 426s in run 36741935893 (+41% headroom)
         working-directory: e2e
         run: |
           npm ci
@@ -484,6 +528,7 @@ jobs:
       # without voices) and the tutor's honest unavailable state; all
       # external requests are intercepted and never delivered.
       - name: W@tch + PLUR manifest adapters — read-only browser proofs
+        timeout-minutes: 1 # measured: max 24s in run 36529675114 (+150% headroom)
         if: always()
         run: |
           node e2e/plur-views.mjs
@@ -492,26 +537,32 @@ jobs:
           node e2e/zcode-music-views-check.mjs
           node e2e/zcode-watch-manifest-check.mjs
       - name: Reading rooms — first actions, view retention and translated layouts
+        timeout-minutes: 10 # measured: max 408s in run 36766133113 (+47% headroom)
         if: always()
         working-directory: e2e
         run: node reading-rooms.browser.mjs
       - name: Kandi — gift reliability and failure recovery
+        timeout-minutes: 1 # measured: max 26s in run 36750280593 (+131% headroom)
         if: always()
         working-directory: e2e
         run: node kandi-gift.mjs
       - name: Kandi — arm placement and legacy migration
+        timeout-minutes: 1 # measured: max 8s in run 36513809705 (+650% headroom)
         if: always()
         working-directory: e2e
         run: node kandi-arms.mjs
       - name: Kandi — two local handoffs
+        timeout-minutes: 1 # measured: max 8s in run 36514662984 (+650% headroom)
         if: always()
         working-directory: e2e
         run: node kandi-crossing.mjs
       - name: Kandi — preview and explicit keep
+        timeout-minutes: 1 # measured: max 7s in run 36514637807 (+757% headroom)
         if: always()
         working-directory: e2e
         run: node kandi-arrival.mjs
       - name: Kandi — bead composition
+        timeout-minutes: 1 # measured: max 4s in run 36514641477 (+1400% headroom)
         if: always()
         working-directory: e2e
         run: node kandi-thread.mjs
@@ -523,6 +574,7 @@ jobs:
       # bytes the author's phone put there. The rail is mocked in-process; no
       # request leaves the runner.
       - name: MY SPACE — storage adapter seam
+        timeout-minutes: 2 # measured: max 46s in run 36771442384 (+161% headroom)
         if: always()
         working-directory: e2e
         run: node myspace-seam.mjs
@@ -533,6 +585,7 @@ jobs:
       # resolution has no other gate; the static job counts anchors, it does
       # not follow them.
       - name: Doors — rendered at 390px, every listed link resolves
+        timeout-minutes: 1 # measured: max 31s in run 36750205672 (+94% headroom)
         if: always()
         working-directory: e2e
         run: node doors.mjs
@@ -545,6 +598,7 @@ jobs:
       # the artifact is surfaces/bpay-invoice.json (built from the banked
       # live quote receipt, never hand-typed).
       - name: bPay Phase A gate — real invoice rendered, nothing spendable
+        timeout-minutes: 1 # measured: max 3s in run 36516069295 (+1900% headroom)
         if: always()
         working-directory: e2e
         run: node bpay-invoice-phase-a.mjs
@@ -559,6 +613,7 @@ jobs:
       # ever simulates the founder's real acceptance — that ceremony belongs
       # to the founder against the real keyless bridge.
       - name: bPay Phase B gate — the chooser (mock bridge; founder keeps the real acceptance)
+        timeout-minutes: 1 # measured: max 4s in run 36513809705 (+1400% headroom)
         if: always()
         working-directory: e2e
         run: node bpay-phase-b-chooser.mjs
@@ -579,19 +634,29 @@ jobs:
       # re-words the JS-drawn page. No context can reach the live quote
       # service (:8807 aborted at the browser, touches asserted zero).
       - name: bData gate — My Data owns policy, bPay holds the economics
+        timeout-minutes: 1 # measured: max 23s in run 36525334346 (+161% headroom)
         if: always()
         working-directory: e2e
         run: node bdata-surface.mjs
+      # bData Phase E (Chief LoVis, 2026-09-30): pay-with-wallet after Authorized
+      # (ant-pay mock signer) + Add to manifest (picker + sha256 + mock intake).
+      - name: bData Phase E — pay-with-wallet + Add to manifest (mock bridge + mock signer)
+        if: always()
+        working-directory: e2e
+        run: node bdata-phase-e.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
+        timeout-minutes: 1 # measured: max 1s in run 36513809705 (+5900% headroom)
         if: always()
         working-directory: e2e
         run: node e2e.mjs
       - name: University smoke (browser suite — see Chromium note above)
+        timeout-minutes: 1 # measured: max 10s in run 36780905751 (+500% headroom)
         working-directory: e2e
         if: always()   # a sibling suite's red must not SKIP this one — every
                        # suite fires every run, or a red stops being attributable
         run: node university-smoke.mjs
       - name: No page errors anywhere (the helper-missing gate — the T_ class)
+        timeout-minutes: 2 # measured: max 64s in run 36525334346 (+88% headroom)
         if: always()
         working-directory: e2e
         run: node no-page-errors.mjs
@@ -601,6 +666,7 @@ jobs:
       # replay, broken-candidate fallback to last good, cache-never-authority,
       # attribute-flip fork visibility, P3/P4/P5/P9 budgets per the PROVE ruling.
       - name: bUi daily art - manifest engine gate (24 cells + budgets)
+        timeout-minutes: 1 # measured: max 30s in run 36525334346 (+100% headroom)
         if: always()
         working-directory: e2e
         run: node bui-daily-art-gate.mjs
@@ -613,10 +679,12 @@ jobs:
       # The 240-key deep backlog stays a recorded number, not a demand:
       # floors hold, they never require.
       - name: Language — coverage gate selftest (checker-silence law)
+        timeout-minutes: 1 # measured: max 1s in run 36513809705 (+5900% headroom)
         if: always()
         working-directory: e2e
         run: node i18n-coverage.mjs --selftest
       - name: Language — coverage measure on the arrival set, floors enforced
+        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
         if: always()
         working-directory: e2e
         run: node i18n-coverage.mjs --set lang-coverage-set.json ru --floors
@@ -626,6 +694,7 @@ jobs:
       # record of origin. Rendered-side proof: corpus-exact cells per
       # register, corpus-ridden dynamic statuses, RTL, honest fallback.
       - name: Profile — three-mode translation regression (rendered)
+        timeout-minutes: 1 # measured: max 4s in run 36523415892 (+1400% headroom)
         if: always()
         working-directory: e2e
         run: node profile-i18n.mjs
@@ -637,6 +706,7 @@ jobs:
       # bnr-language-bundle — scripts/build-watch-languages.mjs must be
       # re-run whenever its keys change (stale bundles read English).
       - name: Polish — five-door translation + one-click regression (rendered)
+        timeout-minutes: 1 # measured: max 12s in run 36513812949 (+400% headroom)
         if: always()
         working-directory: e2e
         run: node polish-i18n.mjs
@@ -645,6 +715,7 @@ jobs:
       # U0001F41C ANT card was 87% covered at first paint. Proofs: seat opens from
       # every seat, desktop float untouched, rotate both ways.
       - name: Orb — mobile seat regression (no content covered)
+        timeout-minutes: 1 # measured: max 21s in run 36513809705 (+186% headroom)
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
@@ -656,6 +727,7 @@ jobs:
       # sheet → keep), the published height on fixed and in-flow hosts, and a
       # native <dialog>. Ran 3/3 red on the pre-fix tour.js.
       - name: Tour bar — clearance regression (no page action row covered)
+        timeout-minutes: 1 # measured: max 17s in run 36513809705 (+253% headroom)
         if: always()
         working-directory: e2e
         run: node --test tour-bar-clearance.test.mjs
@@ -664,6 +736,7 @@ jobs:
       # disclosure summary sit clear of #tbar at 390x844. Limit is innerHeight
       # minus --tbar-h; empty --tbar-h fails closed.
       - name: Law of the Sea — first screen clears the tour bar
+        timeout-minutes: 1 # measured: max 3s in run 36513812949 (+1900% headroom)
         if: always()
         working-directory: e2e
         run: node --test law-of-the-sea-fold.test.mjs
@@ -672,11 +745,16 @@ jobs:
       # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
       # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
       # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
-      # relay is touched zero times.
+      # relay is touched zero times. WHEN to play is by time, not bytes (2026-09-26, VP9 fixture
+      # fixtures/bview/ — this Chromium has no H.264): a door at half the bitrate gets an honest
+      # "ready to play in ~N s" and no play before the computed threshold, then no freeze; twice
+      # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
+      # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
+        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs
+        run: node --test bview.test.mjs bview-direct.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
@@ -689,6 +767,7 @@ jobs:
       # fields). Orthogonality law, proven in the product — not by tab
       # discipline.
       - name: bPay/bData — shared-policy field ownership (stale-tab repair)
+        timeout-minutes: 1 # measured: max 10s in run 36514913506 (+500% headroom)
         if: always()
         working-directory: e2e
         run: node --test bpay-policy-ownership.test.mjs
@@ -697,6 +776,7 @@ jobs:
       # cypherpunk, a reader’s own tap survives register switches, the full
       # text is never removed, ru renders corpus-exact, 44px touch floor.
       - name: Comprehension — disclosure + touch regression (rendered)
+        timeout-minutes: 2 # measured: max 46s in run 36514637807 (+161% headroom)
         if: always()
         working-directory: e2e
         run: node --test comprehension.test.mjs
@@ -706,6 +786,7 @@ jobs:
       # reduced-motion paths, mechanically-derived evidence card vs the intake
       # receipt, honest degrade, ru corpus render, 390px + touch floor.
       - name: Engineflow — data-loop register inertness + evidence card (rendered)
+        timeout-minutes: 1 # measured: max 10s in run 36513809705 (+500% headroom)
         if: always()
         working-directory: e2e
         run: node engineflow.browser.mjs
@@ -715,10 +796,12 @@ jobs:
       # cross origin severs silently). Both run against surfaces/fleet-hosted,
       # repo-relative; the originals under surfaces/fleet/ are never touched.
       - name: Fleet pixels — the art draws, not just loads
+        timeout-minutes: 1 # measured: max 3s in run 36514637807 (+1900% headroom)
         working-directory: e2e
         if: always()
         run: node fleet-pixels.mjs
       - name: Fleet bus — the localStorage bus, both directions
+        timeout-minutes: 1 # measured: max 2s in run 36513812949 (+2900% headroom)
         working-directory: e2e
         if: always()
         run: node fleet-bus.mjs
@@ -727,3 +810,140 @@ jobs:
       # Annotation (if:always()) is something the next person must remember;
       # a job a suite red cannot reach is something they cannot forget.
       # Their new home: the static job, below, with the same comments.
+
+  # ETERNAL + SKAISTS (2026-09-26): its own job, in parallel with node. Wave 1 put 31 three-UI fronts
+  # (≈200 browser cases + the meter at 3 registers × 31 pages) behind the gate, which pushed the node
+  # job past its 20-min hang cap (run 36234571171: every step green, cancelled at the cap mid-battery).
+  wallet:
+    # THE WALLET, IN ALL THREE REGISTERS (2026-09-27). Until this job, none of
+    # the wallet's browser suites ran in CI: the six pipeline batteries and the
+    # three-grammars gate were green only where a seat ran them by hand. A
+    # register never changes what a person may do, so every battery runs once
+    # per register (WALLET_REG, e2e/wallet-register-pin.mjs): cypherpunk with
+    # the pipeline open at once, new bee and raver in the reader's own
+    # "everything" view. Each step runs all six and fails at the end, so one red
+    # battery never hides the others.
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        timeout-minutes: 10 # measured: max 464s in run 36742856991 (+29% headroom)
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
+        if: always()
+        run: node e2e/wallet-registers.mjs
+  eternal:
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        timeout-minutes: 12 # measured: max 541s in run 36738703961 (+33% headroom)
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      # ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): bGENEaLOGy is three products in
+      # one surface. At 390 px each register shows only its own front in its own dress (paper +
+      # Instrument Serif / black-green + Unbounded mandala / Plex Mono instrument); all three carry
+      # the same facts (the line walked from the model, the living guard, the storage receipt); the
+      # gestures are honest (bee consent box, raver four terms + a full hold, cypherpunk sign) and
+      # every one hands off to the preservation flow — "kept" is drawn only from the receipt.
+      - name: ETERNAL fronts — three products, one set of facts (bGENEaLOGy + the reading rooms)
+        timeout-minutes: 12 # measured: max 491s in run 36755721413 (+47% headroom)
+        if: always()
+        working-directory: e2e
+        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
+      # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
+      # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
+      # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
+      # colour a token of that register, every size on its type scale, every corner a radius token,
+      # every target >= 44 px, text >= 4.5:1 (WCAG 2.2 AA), no text-transform.
+      - name: Skaists — the design system is compiled, not hand-copied
+        timeout-minutes: 1 # measured: max 1s in run 36514913506 (+5900% headroom)
+        if: always()
+        run: node scripts/build-skaists.mjs --check
+      # (moved here from the node job 2026-09-26: node ran 19m09s of its 20-min cap on c013f2e1, and
+      # this audit grows with every front the rollout lands.)
+      # THE BOTTOM HALF OF EVERY SURFACE (founder order 2026-09-26: "EVERYTHING BOTTOM HALF OF
+      # EVERY SURFACE NEEDS TO BE CHECKED AND FIXED"): every counted surface x bee/raver/cypherpunk
+      # at 390x844, scrolled to the end — the bar (cut items, 44 px targets, the page end under the
+      # bar, sideways scroll, a widened layout viewport) and the lower half (type under 12 px, text
+      # under 4.5:1, forced capitals, a dash or NaN shown as a value, text drawn over text, broken
+      # images, cut text). A RATCHET against e2e/footer-audit.baseline.json: a page x register may
+      # only lose findings; layout kinds get 2 of slack for runner font wrap. After a fix, record
+      # the smaller floor with --write-baseline and commit it.
+      - name: Bottom half — every surface x three registers at 390 px (ratchet)
+        timeout-minutes: 5 # measured: max 191s in run 36755721413 (+57% headroom)
+        if: always()
+        working-directory: e2e
+        run: node footer-audit.mjs --baseline footer-audit.baseline.json
+
+  meter:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        timeout-minutes: 10 # measured: max 424s in run 36777899581 (+42% headroom)
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      - name: Skaists — the standards meter (three-UI fronts score 100%)
+        timeout-minutes: 21 # measured: max 873s in run 36515263333 (+44% headroom)
+        if: always()
+        working-directory: e2e
+        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html,doors/index.html,doors/beehivenature.html,doors/skaists.html,doors/plur.html,doors/bnature-social.html,doors/bnature-bio.html,doors/beehivebiomass.html,doors/beehivenature-buzz.html,doors/skaists-buzz.html,ant-door.html,forge/index.html,forge/hexfield.html,forge/huddle.html,forge/room.html,comb.html,recover.html,keys/addresses.html,royalguard.html,privacy-lens.html,attest.html,fleet-hosted/lab/blend-lab.html,fleet-hosted/lab/edible-tracker.html,fleet-hosted/lab/flower-lab.html,fleet-hosted/lab/intake-tracker.html,fleet-hosted/lab/spliff-lab.html,dock.html,fieldnotes.html,law-of-the-sea.html,design-system.html,blight/c1-aid.html,blight/coop.html,blight/farmers.html,blight/hearth.html,blight/profile.html,blight/pulse.html,biq.html,bqueenbee-live.html,local-agent/index.html,or-board.html,devroom.html,bset.html,bsymposium.html,btranslated.html,buzz-studio.html,record.html,blight/demo.html,blight/qrroses.html,blight/qrroses-smil.html,blight/qrtree.html,blight/vaulta-reader.html,blight/workbench.html,b4b.html,bantfarm.html,bfactory.html,bmeshasi.html,dao-dashboard/index.html --min 100
+      # PROOF LIGHTS (founder go, 2026-09-27): a badge is a projection of a status document a check
+      # already produced, rendered OFFLINE by Shields' own badge-maker and committed as a static SVG
+      # under docs/status/. Same-origin, so design-acceptance I1 holds and a page saying TELEMETRY NONE
+      # does not phone a badge CDN to say so. This step re-renders every docs/status/*.json and fails if
+      # the committed SVG differs: derived, not typed. Unsigned documents say so in their own field.
+      - name: Proof lights — every badge is exactly what its status document renders
+        timeout-minutes: 1 # measured: max 10s in run 36520267475 (+500% headroom)
+        if: always()
+        working-directory: e2e
+        run: node render-badges.mjs --check
+      # The gate's own negative probes (review of #250, 2026-09-27): deleted evidence, inflated counts
+      # with a matching SVG, a forty-zero revision, a bogus signature, non-JSON evidence, a SHA-1-only
+      # rebind, a duplicated row, a CI-origin claim — each passed the first gate and must now FAIL.
+      - name: Proof lights — the gate refuses every known forgery
+        timeout-minutes: 1 # measured: max 6s in run 36741273029 (+900% headroom)
+        if: always()
+        working-directory: e2e
+        run: node --test render-badges.test.mjs

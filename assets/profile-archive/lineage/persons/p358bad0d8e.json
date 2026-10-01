@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p358bad0d8e",
+ "bnr": "bnr://skaists.dev/blood/p358bad0d8e",
+ "identity": {
+  "name": "Enoch Sanborn",
+  "lifespan": "1685–1760",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHFY-4FQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "12 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "12 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8817a23bf7",
+    "name": "John Sanborn II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6f6ab77b0d",
+    "name": "Judith Coffin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe497ca350a",
+    "name": "Ebenezer Sanborn I"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHFY-4FQ",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 12,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -3,6 +3,7 @@
 // null-deref or a WebCrypto call that only fails in a browser; this can.
 // Run:  cd e2e && node wallet-vault.mjs
 import { chromium } from 'playwright';
+import { pinRegister } from './wallet-register-pin.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,8 @@ const t = (name, v, detail) => {
 };
 
 const browser = await chromium.launch({ args:['--no-sandbox'] });
+// the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
+pinRegister(browser);
 const ctx = await browser.newContext();
 const page = await ctx.newPage();
 

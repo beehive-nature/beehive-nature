@@ -1,0 +1,200 @@
+{
+ "schema": "skaists.search-evidence/1",
+ "generated": "2026-09-18",
+ "layer": "SEARCH-DERIVED record evidence — distinct from the ATTACHED-source layer (index.json/records.json): these records were found by historical-records search (service/search/hr/v2/personas) keyed to documented facts, because the tree profiles are living-flagged private-space and carry zero attached sources. Evidence layers never merge silently.",
+ "method": "records search keyed to name + birth year + parents/household match; matches filtered by father-head household match (Fuller Remington / Hyrum D Lowry)",
+ "order": "founder 2026-09-18: both grandparents definitely dead; grandma Marilyn the church matriarch and master genealogist — scrape everything, especially Lowry/Rockwood",
+ "corrections": {
+  "LNQ5-BSG": "documentary dates replace founder-recalled approximates: d. 27 May 2025 (recall said June-ish — the obituary published 11 June 2025)",
+  "LNQ5-BSF": "documentary dates replace founder-recalled approximates: d. 9 January 2023 (recall said December-ish a year before Don — record says 9 Jan 2023, ~2.4y before Don)"
+ },
+ "privacy": "public projection — obituary/census households (living family) redacted to the private tier only",
+ "persons": {
+  "don": {
+   "fsid": "LNQ5-BSG",
+   "name": "Don Ray Remington",
+   "documentaryBirth": "24 June 1931, Vernal, Utah, United States",
+   "documentaryDeath": "27 May 2025; burial Millcreek, Salt Lake, Utah",
+   "records": [
+    {
+     "recordId": "X3JC-YY2X",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:X3JC-YY2X",
+     "collection": "United States, GenealogyBank Obituaries, Births, and Marriages, 1980-2015",
+     "principalFacts": [
+      "Birth: 24 June 1931",
+      "Death: 27 May 2025",
+      "Obituary published: 11 June 2025 @ Salt Lake City, Salt Lake, Utah"
+     ],
+     "matchBasis": "parents Fuller + Edith Remington and wife Marilyn Lowry named in obituary household — exact match to tree",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "X3J8-NKKT",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:X3J8-NKKT",
+     "collection": "United States, GenealogyBank Obituaries, Births, and Marriages, 1980-2015",
+     "principalFacts": [
+      "Birth: 24 June 1931",
+      "Death: 27 May 2025",
+      "Obituary published: 11 June 2025 @ Salt Lake City, Salt Lake, Utah"
+     ],
+     "matchBasis": "second index of the same obituary",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "X3TK-D49C",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:X3TK-D49C",
+     "collection": "Find a Grave Index",
+     "principalFacts": [
+      "Birth: 24 Jun 1931",
+      "Death: 27 May 2025",
+      "Burial: Millcreek, Salt Lake, Utah, United States"
+     ],
+     "matchBasis": "name + exact birth/death dates",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "VT4H-CJJ",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:VT4H-CJJ",
+     "collection": "United States Census, 1940",
+     "principalFacts": [
+      "Birth: 1931 @ Utah",
+      "Residence 1935: same house"
+     ],
+     "matchBasis": "household of Fuller Remington — father-head match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "8ZXD-LQPZ",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:8ZXD-LQPZ",
+     "collection": "LDS Church Census Records (Worldwide), 1914-1960",
+     "principalFacts": [
+      "Census: 1935 @ Uintah Utah Stake",
+      "Birth: 1931 @ Vernal, Utah"
+     ],
+     "matchBasis": "birth place+year match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "8ZV8-31T2",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:8ZV8-31T2",
+     "collection": "LDS Church Census Records (Worldwide), 1914-1960",
+     "principalFacts": [
+      "Census: 1940",
+      "Birth: 1931 @ Vernal, Utah"
+     ],
+     "matchBasis": "household of Fuller R Remington — father-head match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "KRMS-HNJ",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:KRMS-HNJ",
+     "collection": "United States, Public Records, 1970-2009",
+     "principalFacts": [
+      "Birth: 23 Jun 1931",
+      "Residences: Salt Lake City / Brighton, Utah 1993-2009"
+     ],
+     "matchBasis": "POSSIBLE-VARIANT: indexed \"Dawn R Remington\" — birth day off by one (23 vs 24 Jun 1931), same Utah places; flagged, not asserted",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    }
+   ],
+   "notFound": [
+    "1950 US census entry for Don did not surface in the standard search",
+    "no marriage record (Don Remington x Marilyn Lowry) surfaced in these collections"
+   ]
+  },
+  "marilyn": {
+   "fsid": "LNQ5-BSF",
+   "name": "Marilyn Lowry Remington",
+   "documentaryBirth": "16 March 1932",
+   "documentaryDeath": "9 January 2023; burial Millcreek, Salt Lake, Utah",
+   "records": [
+    {
+     "recordId": "6K1Y-RH56",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:6K1Y-RH56",
+     "collection": "Find a Grave Index",
+     "principalFacts": [
+      "Birth: 16 Mar 1932",
+      "Death: 09 Jan 2023",
+      "Burial: Millcreek, Salt Lake, Utah, United States"
+     ],
+     "matchBasis": "name + exact dates; same cemetery as Don",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "6VR2-NWV3",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:6VR2-NWV3",
+     "collection": "United States, GenealogyBank Obituaries, Births, and Marriages, 1980-2015",
+     "principalFacts": [
+      "Birth: 16 March 1932",
+      "Death: 9 January 2023",
+      "Obituary published: 11 January 2023 @ Salt Lake City"
+     ],
+     "matchBasis": "mother Ardella Lowry named in obituary — exact family match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "6VRJ-QMHX",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:6VRJ-QMHX",
+     "collection": "United States, GenealogyBank Obituaries, Births, and Marriages, 1980-2015",
+     "principalFacts": [
+      "Birth: 16 March 1932",
+      "Death: 9 January 2023",
+      "Obituary published: 11 January 2023 @ Utah"
+     ],
+     "matchBasis": "second index of the same obituary (names great-grandchildren)",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "XM26-X62M",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:XM26-X62M",
+     "collection": "United States, Obituary Records, 2014-2023",
+     "principalFacts": [
+      "Birth: 16 March 1932",
+      "Death: 9 January 2023",
+      "Obituary published: 10 January 2023 @ Millcreek, Salt Lake, Utah"
+     ],
+     "matchBasis": "third obituary index",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "VT4N-C3H",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:VT4N-C3H",
+     "collection": "United States Census, 1940",
+     "principalFacts": [
+      "Birth: 1932 @ Utah",
+      "Census: 1940 @ Salt Lake City Ward 6, Salt Lake, Utah",
+      "Residence 1935: same house"
+     ],
+     "matchBasis": "household of Hyrum D Lowry — father-head match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    },
+    {
+     "recordId": "6XKM-HBHF",
+     "arkUrl": "https://www.familysearch.org/ark:/61903/1:1:6XKM-HBHF",
+     "collection": "United States Census, 1950",
+     "principalFacts": [
+      "Census: 6 April 1950 @ Salt Lake City, Salt Lake, Utah"
+     ],
+     "matchBasis": "household of Hyrum D Lowry — father-head match",
+     "provider": "familysearch",
+     "retrieved": "2026-09-18"
+    }
+   ],
+   "notFound": [
+    "no marriage record surfaced in these collections"
+   ]
+  }
+ }
+}

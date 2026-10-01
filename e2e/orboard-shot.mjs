@@ -52,7 +52,7 @@ const live = await page.evaluate(() => {
 });
 ok('feed answered live — seats rendered from the relay', live.chips.length >= 5 && !!live.b,
   `${live.chips.length} seats · ${live.gen}`);
-ok('BClaUDE PRESENT FROM THE RELAY — capped + profiled + his own #general post',
+ok('BClaUDE PRESENT FROM THE RELAY — capped + profiled + their own #general post',
   live.b?.comb === 'capped' && live.b?.agent === 'profiled' && live.b?.last_general === 'bClaude present.',
   JSON.stringify(live.b?.last_general) + ' @ ' + live.b?.last_general_at);
 ok('the presence post renders in the seat row', live.seatTxt.includes('bClaude present.'));

@@ -179,13 +179,272 @@ main{max-width:462px;margin:0 auto}
 .dotted{border-bottom:1px dashed var(--faint)}
 @media (max-width:390px){.cell .s{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live,.sep{animation:none}}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The metered-session
+   panel (drawn by x402-meter.js with inline 9.5–11 px sizes, forced capitals
+   and --faint timestamps at 4.2:1) and the footer ran under the floor; the
+   ledger's tx links were 12 px tall. This page lifts them without touching
+   the shared engine: floor 12 px everywhere (cypherpunk keeps its density),
+   14 px for New bee and raver; no text-transform; --faint lifts to --dim.
+   The footer's three register lines stand as their own lines. */
+.crumbs,.hd small,.step,.field label,.tx .k,.cert .t,.res .head,#plan .bar,#plan h3{text-transform:none;letter-spacing:.04em}
+#x402body{font-size:12px}
+#x402body [style*="font-size:9"],#x402body [style*="font-size:10"],#x402body [style*="font-size:11px"]{font-size:12px!important}
+#x402body [style*="text-transform:uppercase"]{text-transform:none!important;letter-spacing:.04em!important}
+#x402body [style*="color:var(--faint)"]{color:var(--dim)!important}
+#x402body a{padding-block:12px;border-bottom:0!important;text-decoration:underline dashed;text-underline-offset:3px}
+.lawline,.line span small,.line b .a,.total .sub,.tx,.tx .k,.checked,.cert .t,.kv,.kv b,.res .head,.foot,.rail .rd,#doorstate code,.cell .s{font-size:12px}
+.lawline,.line span small,.line b .a,.total .sub,.tx .k,.tx .when,.checked,.kv,.res li .m,.foot,.rail .rd,.cell .s{color:var(--dim)}
+.foot p+p{margin-top:8px}
+.foot a{padding-block:12px;color:var(--gold)}
+.foot{padding-bottom:12px}
+@media (max-width:390px){.cell .s{font-size:12px}}
+body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:9"],body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:10"],body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:11px"]{font-size:14px!important}
+body:not([data-reg="cypherpunk"]) :is(.lawline,.tx,.checked,.kv,.foot,.rail .rd,#x402body){font-size:14px}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value below is a
+   skaists token (surfaces/skaists.css): no hand-picked hex, size or corner. One register shows
+   at a time; new bee is the default. The data layer is the page's own live state (window.__vending),
+   so the three fronts cannot disagree with it or with each other. ── */
+#eternal{margin:0 0 var(--sk-s2)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{font:inherit;color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal p{margin:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: name it, one price, one action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-file{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-file i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-file b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-file span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-rows>.et-b-row:last-of-type{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-row small.ok{color:var(--sk-verified);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-open p{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open p.mut{color:var(--sk-ink-mut)}
+#eternal .et-b-open .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-open .et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open p.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-wait{padding:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: the name's key as a bloom */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-bloom{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;cursor:pointer}
+#eternal .et-r-bloom .pt{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal .et-r-step{display:flex;justify-content:center;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-r-step button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);text-align:center}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-bloom .pt,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: the name law, the key, the law rows, the pipeline */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);color:var(--sk-sovereign-strong);background:var(--sk-sovereign-wash)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:92px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere}
+#eternal .et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .out{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;overflow-wrap:anywhere}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.skip p{color:var(--sk-ink-mut)}.et-c-pipe li.skip{border-style:dashed}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify li.yes{color:var(--sk-verified)}.et-c-verify li.no{color:var(--sk-guard)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost.wide{grid-column:1/-1}
+
+/* vending: the name is typed on the front itself and mirrored into the real field (#vname) */
+#eternal .et-b-field{display:grid;gap:var(--sk-s1);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-field label{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field :is(input,select){width:100%;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-field small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field small.ok{color:var(--sk-verified);font-weight:600}
+#eternal .et-b-field small.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-row.static{cursor:default}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-why{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-r-name{display:flex;gap:var(--sk-s2);margin:var(--sk-s3) 0 0}
+#eternal .et-r-name :is(input,select){min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;min-width:0}
+#eternal .et-r-name input{flex:1 1 60%}
+#eternal .et-r-name select{flex:1 1 40%;font:600 14px/1.25 var(--sk-font-raver-body);letter-spacing:0}
+#eternal .et-r-key{width:100%;max-width:340px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-key .ring{cursor:pointer}
+#eternal .et-r-key .ring:focus{outline:none}
+#eternal .et-r-key .ring:focus-visible .bit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-key .bit{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal .et-r-comb{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2);margin:var(--sk-s3) 0 0;text-align:center}
+#eternal .et-r-comb i{display:block;width:44px;height:50px;margin:0 auto var(--sk-s1);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--sk-sovereign-wash)}
+#eternal .et-r-comb .past i{background:var(--sk-biomass)}
+#eternal .et-r-comb b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-comb span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-price{display:flex;justify-content:center;align-items:center;gap:var(--sk-s2);margin:var(--sk-s3) auto;padding:var(--sk-s1) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);width:max-content;max-width:100%;min-height:var(--sk-control-min);flex-wrap:wrap}
+#eternal .et-r-price b{font:700 15px/1.2 var(--sk-font-raver-display)}#eternal .et-r-price span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:0 auto}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#etHold{position:absolute;inset:22px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#etHold b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}#etHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#etHold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-c-in{display:grid;grid-template-columns:92px 1fr;gap:var(--sk-s1) var(--sk-s2);align-items:center;margin:var(--sk-s2) 0}
+#eternal .et-c-in label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in :is(input,select){min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-ink-dim);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);min-width:0;width:100%}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-card);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-ink-dim);cursor:not-allowed}
+#eternal .et-c-kv .ok{color:var(--sk-verified)}
+#eternal :is(.et-b-field,.et-c-in) label{display:flex;align-items:center;min-height:var(--sk-control-min)}
+#eternal .et-c-verify a{display:inline-flex;align-items:center;min-height:var(--sk-control-min);color:var(--sk-link)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own tokens.css variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-well);--well:var(--sk-bg-well);--line:var(--sk-line);--line-hi:var(--sk-ink-dim);
+ --ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--gold:var(--sk-primary);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);
+ --ok:var(--sk-verified);--flag:var(--sk-guard);--glow-gold:none;--r-lg:var(--sk-radius-xl);--r-md:var(--sk-radius);color-scheme:light;background:var(--sk-bg);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] :is(.btn,.btn2,#plan .approve,#plan .refuse,.field input,.field select){font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] .hd h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .btn{color:var(--sk-on-primary);border-radius:var(--sk-radius-lg)}
+body[data-reg="bee"] #plan{background:var(--sk-bg)}
+body[data-reg="raver"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-well);--well:var(--sk-bg-well);--line:var(--sk-line);
+ --ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--gold:var(--sk-primary);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);
+ --ok:var(--sk-biomass);--flag:var(--sk-guard);--glow-gold:var(--sk-glow-sovereign);--r-lg:var(--sk-radius-xl);--r-md:var(--sk-radius);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] :is(.btn,.btn2,#plan .approve,#plan .refuse,.field input,.field select){font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] .hd h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] :is(.btn,.btn2){border-radius:var(--sk-radius-pill);color:var(--sk-on-primary)}
+body[data-reg="raver"] .btn2{color:var(--sk-primary)}
+body[data-reg="cypherpunk"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-well);--well:var(--sk-bg-well);--line:var(--sk-line);
+ --ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--gold:var(--sk-ai);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);
+ --ok:var(--sk-biomass);--flag:var(--sk-guard);--glow-gold:none;--r-lg:var(--sk-radius-sm);--r-md:var(--sk-radius-sm);background:var(--sk-bg);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .hd h1{font:600 15px/1.45 var(--sk-font-mono)}
+/* brought into the lower half by the front above (footer audit): the reading floor, 12 px dense, 14 px elsewhere */
+.step,.note{font-size:12px}
+body:not([data-reg="cypherpunk"]) :is(.step,.note){font-size:14px}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body>
+<script>
+/* first paint in the reader's own register — register.js re-asserts on mount */
+(function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}document.body.setAttribute('data-reg',r);})();
+</script>
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="v.crumb">the vending machine</span>
 </nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the page's own live state, window.__vending, and its own name
+     law: canonicalName + fnv1a64) drives all three, so the facts cannot drift. Each front types
+     into the real name field (#vname); every "mint" hands off to the real mint button, which
+     opens the plan screen where nothing moves before approve. -->
+<section id="eternal" aria-label="mint your agent">
+
+  <!-- NEW BEE — a calm room: name it, see the price, see the plan -->
+  <div class="et-b">
+    <div class="et-b-mark">skaists</div>
+    <h2 class="et-b-h" data-etk="et.vend.b.h">make an agent that is yours</h2>
+    <p class="et-b-lede" data-etk="et.vend.b.lede">give it a name and a language. it gets a home of its own, and it belongs to you, not to us.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.vend.b.guard">nothing moves until you approve the plan.</span></div>
+    <div class="et-b-rows">
+      <div class="et-b-field"><label for="etBeeName" data-etk="et.vend.b.name">its name</label><input id="etBeeName" type="text" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="etBeeNameNote"><small id="etBeeNameNote"></small></div>
+      <div class="et-b-field"><label for="etBeeTongue" data-etk="et.vend.b.tongue">it speaks</label><select id="etBeeTongue"></select></div>
+      <div class="et-b-row static"><span data-etk="et.vend.b.price">what it costs</span><small id="etBeePrice"></small></div>
+      <div class="et-b-row static"><span data-etk="et.vend.b.keep">what you keep</span><small data-etk="et.vend.b.keepV">a birth certificate, forever</small></div>
+    </div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.vend.b.go">see the plan</button>
+      <p class="et-b-why" id="etBeeWhy"></p>
+      <a class="et-b-link" href="#etArchive" data-etk="et.vend.b.more">every detail, below</a>
+      <p class="et-b-foot" data-etk="et.vend.b.foot">today is a rehearsal: practice money, real rules.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the data is the art: the name's own key as a four-ring bloom that re-forms as you type -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.vend.r.h">your agent</h2><span class="et-r-hint" data-etk="et.vend.r.hint">type a name · its key blooms</span></div>
+    <div class="et-r-name"><input id="etRaverName" type="text" maxlength="64" autocomplete="off" spellcheck="false" aria-label="its name"><select id="etRaverTongue" aria-label="it speaks"></select></div>
+    <svg class="et-r-key" id="etKey" viewBox="-200 -200 400 400" role="group" aria-label="the name's 64-bit key as four rings of sixteen"></svg>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-price"><b id="etRaverPrice"></b><span id="etRaverBasis"></span></div>
+    <div class="et-r-hold">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etHoldProg"/></svg>
+      <button type="button" id="etHold" disabled aria-describedby="etHoldHint"><b data-etk="et.vend.r.hold">hold</b><span data-etk="et.vend.r.toMint">to mint</span></button>
+    </div>
+    <p class="et-r-note" id="etHoldHint"></p>
+    <div class="et-r-comb" id="etComb" aria-live="polite"></div>
+    <a class="et-r-ghost" href="#etArchive" data-etk="et.vend.r.more">the whole machine</a>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the name law, the key, the law rows, the pipeline -->
+  <div class="et-c">
+    <div class="et-c-path" id="etCyPath">bnrapolltest::certs/…</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-in"><label for="etCyName">name</label><input id="etCyName" type="text" maxlength="64" autocomplete="off" spellcheck="false"><label for="etCyTongue">tongue</label><select id="etCyTongue"></select></div>
+    <h3 class="et-c-h" data-etk="et.vend.c.key">name law · SPEC-A-NAMES-1</h3>
+    <table class="et-c-kv" id="etNameKv"></table>
+    <h3 class="et-c-h" data-etk="et.vend.c.law">law rows · jungle4 · read live</h3>
+    <table class="et-c-kv" id="etLawKv"></table>
+    <button type="button" class="et-c-primary" id="etCyGo" data-etk="et.vend.c.go">open the plan · approve before anything moves</button>
+    <h3 class="et-c-h" data-etk="et.vend.c.pipe">mint pipeline · rail A rehearsal</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.vend.c.verify">verify · no trust in this page needed</div>
+      <ol id="etByHand"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#x402-sec" data-etk="et.vend.c.meter">the meter's receipt</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/contracts/vending" target="_blank" rel="noopener noreferrer"><span data-etk="et.vend.c.fork">fork the template ↗</span> <span class="et-sr" data-etk="et.newtab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.vend.archive">the whole vending machine</h2>
 
 <header class="hd">
   <div class="r" aria-hidden="true">⚘</div>
@@ -232,11 +491,7 @@ main{max-width:462px;margin:0 auto}
   <div class="line"><span><span data-i18n="v.l.cert">its birth certificate</span><small data-i18n="v.l.certsub">Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
   <div class="total"><span class="sub" id="v-total-sub" data-i18n="v.total">you pay, once</span><span class="big" id="v-total">—</span></div>
   <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
-  <p class="note" data-i18n="v.note2">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
-  (<b>USDC on Base, PYUSD on its official chains</b>) are <b>held</b> until the founder names
-  the machine's payment seat. <b>Card and PayPal are not available</b> — no card processor is
-  wired, and nothing here touches a PayPal account (PYUSD is PayPal-issued, but it rides its
-  own chains). Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
+  <p class="note" data-i18n="v.note2">Rehearsal is free today — nothing is paid. When the founder names the machine's seat, the price above is paid through <b>bPay</b>, the estate's one payment door, and nothing else. Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
 </section>
 
 <!-- ── 3 · WATCH IT LAND ───────────────────────────────────────── -->
@@ -263,9 +518,9 @@ main{max-width:462px;margin:0 auto}
     <div class="t" id="vcert-t"><span data-i18n="v.cert.t">birth certificate</span> · agent-birth-certificate v1</div>
     <h2 id="vcert-name">—<span class="sep" aria-hidden="true"></span>a</h2>
     <div class="q" id="vcert-q">"—"</div>
-    <div class="kv"><span data-i18n="v.kv.owner">owner</span><b id="vcert-owner">—</b></div>
-    <div class="kv"><span data-i18n="v.kv.certificate">certificate</span><b id="vcert-ar">—</b></div>
-    <div class="kv"><span data-i18n="v.kv.fingerprint">fingerprint</span><b id="vcert-hash">—</b></div>
+    <div class="kv"><span data-i18n="v.kv.owner">owner</span><b id="vcert-owner">not read yet</b></div>
+    <div class="kv"><span data-i18n="v.kv.certificate">certificate</span><b id="vcert-ar">not read yet</b></div>
+    <div class="kv"><span data-i18n="v.kv.fingerprint">fingerprint</span><b id="vcert-hash">not read yet</b></div>
     <div class="kv"><span data-i18n="v.kv.memory">memory</span><b><span data-i18n="v.kv.memoryv">autonomi · your key · deletable</span></b></div>
     <button class="btn2" id="vrebuild" data-i18n="v.rebuild">Rebuild it without us ↻</button>
     <div class="res" id="vres">
@@ -291,18 +546,18 @@ main{max-width:462px;margin:0 auto}
   (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/contracts/vending/tool/x402audit.mjs">tool/x402audit.mjs</a>,
   held to this page's engine by a parity gate). Tap a cell to see each of the four
   verifier states demonstrated, not asserted.</p>
-  <div id="x402body" aria-live="polite" style="color:var(--dim);font-size:11px">reading the meter session…</div>
+  <div id="x402body" aria-live="polite" style="color:var(--dim)">reading the meter session…</div>
 </section>
 
 <footer class="foot">
-  <b data-i18n="v.care.bee">new bee:</b> <span data-i18n="v.care.bees">you just made an AI that's yours.</span> ·
-  <b data-i18n="v.care.raver">raver:</b> <span data-i18n="v.care.ravers">it speaks your tongue and lives in the hive.</span> ·
-  <b data-i18n="v.care.cypher">cypherpunk:</b> <span data-i18n="v.care.cyphers">Arweave record, ed25519 owner, sha256 over canonical JSON, pointer derived not stored</span> —
-  <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest" data-i18n="v.verify">verify it yourself</a>.<br>
-  law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
+  <p><b data-i18n="v.care.bee">new bee:</b> <span data-i18n="v.care.bees">you just made an AI that's yours.</span></p>
+  <p><b data-i18n="v.care.raver">raver:</b> <span data-i18n="v.care.ravers">it speaks your tongue and lives in the hive.</span></p>
+  <p><b data-i18n="v.care.cypher">cypherpunk:</b> <span data-i18n="v.care.cyphers">Arweave record, ed25519 owner, sha256 over canonical JSON, pointer derived not stored</span> —
+  <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest" data-i18n="v.verify">verify it yourself</a>.</p>
+  <p class="src">law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
   net) · A price <span id="vpricedate">live</span> · spec
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md" data-i18n="v.spec">SPEC-VENDING-1/2 in the estate tree</a> ·
-  the meter receipt <a href="#x402-sec" data-i18n="v.audited">audited in your page</a>
+  the meter receipt <a href="#x402-sec" data-i18n="v.audited">audited in your page</a></p>
 </footer>
 </main>
 
@@ -327,10 +582,13 @@ main{max-width:462px;margin:0 auto}
       <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
       <h3>what happens after you approve</h3>
       <div class="what">
-        <div>you pay the total above — <b>one tap in your wallet</b>; nothing is
-        charged, signed, or sent before this approval</div>
-        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) under
-        your own name-key — collision ⇒ refused, never hijacked</div>
+        <div>on the jungle4 rehearsal <b>nothing is paid</b>; your new key is made in
+        this page and signs your certificate. the money rails open when the founder
+        names the seat</div>
+        <div>your row on Vaulta (jungle4 rehearsal today) is written later by the
+        machine seat, which alone can sign it, under your own member key; until
+        then your key finds your certificate. a name held by another key is
+        refused, never hijacked</div>
         <div>the birth certificate goes to Arweave, permanent, carrying the recipe</div>
         <div>your agent stands: .a house, your tongue, your key — watch it land
         below, then keep it forever</div>
@@ -338,25 +596,21 @@ main{max-width:462px;margin:0 auto}
       <h3>the door</h3>
       <div class="rails" id="vrails">
         <label class="rail pick"><input type="radio" name="vrail" value="a" checked>
-          <span><span class="rn">A · Vaulta — the rehearsal rail, live today</span>
-          <span class="rd">jungle4 testnet A to the machine's own public seat
-          <b>bnrapolltest</b>, memo-bound — <b>the memo is the binding</b>.
-          Testnet money, real law rows.</span></span></label>
-        <label class="rail"><input type="radio" name="vrail" value="usdc">
-          <span><span class="rn">USDC · Base — <b>held</b> until the founder names the seat</span>
-          <span class="rd">native USDC on Base, one tap when the seat is named. PayPal's PYUSD is
-          <b>not issued on Base</b> (read at docs.paxos.com, 2026-09-03 — Ethereum,
-          Arbitrum, Polygon, X Layer only); on Base the door takes USDC.</span></span></label>
-        <label class="rail"><input type="radio" name="vrail" value="pyusd">
-          <span><span class="rn">PYUSD — <b>held</b> until the founder names the seat</span>
-          <span class="rd">PYUSD rides Ethereum, Arbitrum, Polygon or X Layer —
-          Paxos-issued, address cited in-source. Not a PayPal checkout: the stablecoin,
-          not the account.</span></span></label>
+          <span><span class="rn">the rehearsal rail — live today, nothing to pay</span>
+          <span class="rd">your key is made here, your certificate goes to the permaweb from
+          this page, and your agent wakes in your tab. the chain row is not written by
+          this page; the machine seat writes it later, and until then your key finds the
+          certificate. the law rows above are real; the money is not asked for yet.</span></span></label>
+        <label class="rail"><input type="radio" name="vrail" value="bpay" disabled>
+          <span><span class="rn">bPay — <b>held</b> until the founder names the seat</span>
+          <span class="rd">the one payment door of the estate. when the seat is named, the
+          price above is paid through bPay and nothing else; until then this row holds and
+          says so.</span></span></label>
       </div>
       <div id="doorstate"></div>
       <div class="btns">
         <button class="refuse" id="prefuse">refuse — nothing moves</button>
-        <button class="approve" id="papprove">approve · pay</button>
+        <button class="approve" id="papprove">approve · mint</button>
       </div>
     </div>
   </div>
@@ -372,18 +626,11 @@ const CONTRACT = 'bnrapolltest';                    // TESTNET-ONLY jungle4 rehe
 const MONITOR_TX = 'https://monitor.jungletestnet.io/#accountActions:';
 const AR = 'https://arweave.net';
 const CG = 'https://api.coingecko.com/api/v3/simple/price?ids=vaulta&vs_currencies=usd';
-/* money-rail constants — each cited at source, none invented */
-const USDC_BASE   = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // PUBLIC-CONSTANT native USDC on Base (chain-confirmed, wallet.html rail)
-const PYUSD_ETH   = '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8'; // PUBLIC-CONSTANT PYUSD on Ethereum (Paxos docs)
-const PYUSD_ARB   = '0x46850aD61C2B7d64d08c9C754F45254596696984'; // PUBLIC-CONSTANT PYUSD on Arbitrum One (Paxos docs)
-const CHAINS = { 1:'Ethereum', 42161:'Arbitrum One', 8453:'Base', 137:'Polygon PoS', 914:'X Layer' };
-const CHAIN_HEX = { 1:'0x1', 42161:'0xa4b1', 8453:'0x2105', 137:'0x89', 914:'0x392' };
 /* the machine's money seat on the paid rails is a FOUNDER CEREMONY
    (SPEC-VENDING-2 §money: the first paid mint is the door's first receipt).
    The rail's own law: unbound senders never auto-credit — so the door holds
    until the founder names the seat. The e2e harness may set one to exercise
    the one-tap path. */
-const PAY_SEAT = window.__VENDING_PAY_SEAT || null;
 const RAM_BASIS_A = 0.16;   /* cert row ≈ 462 B ≈ 0.16 A — SPEC-VENDING-2 §sizing,
                                read 2026-09-01; storage moves, the basis is cited */
 const PRICE_FALLBACK = 0.074832; /* A→USD measured 2026-09-01 (SPEC-VENDING-2 §sizing) — used only if the live price is unreachable, and then labeled */
@@ -451,8 +698,8 @@ function renderPrice() {
   const titU  = mintU != null ? mintU * L.titheBp / 10000 : null;
   const totU  = mintU != null ? mintU + ramU + titU : null;
   $('l-mint-sub').classList.remove('dotted'); $('l-tithe-sub').classList.remove('dotted');
-  $('l-mint-sub').textContent = `rate ${L.basisTxt} A · Vaulta · read live ${L.updated.slice(0, 10)}`;
-  $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${L.basisTxt} A</span>`;
+  $('l-mint-sub').textContent = `rate ${L.basisTxt} · Vaulta · read live ${L.updated.slice(0, 10)}`;
+  $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${esc(L.basisTxt)}</span>`;
   $('l-ram-sub').textContent = '≈ 462 B row · refundable if released · basis SPEC-VENDING-2 §sizing';
   $('v-ram').innerHTML = ramU == null ? 'n/m' : `${fmt$(ramU)} <span class="a">0.16 A</span>`;
   $('l-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · keeps the machine running · read live`;
@@ -556,7 +803,7 @@ function renderLand() {
   if (!m) {
     $('c-honey-s').textContent = $('c-capped-s').textContent = '—';
     $('vtx').textContent = state.certs.length
-      ? 'the ledger has rows but the history walk found no mint yet — re-walking'
+      ? `${state.certs.length} row(s) on chain; the history door (v1/history/get_actions) is not answering, so no transaction id can be shown — the rows above are the truth`
       : 'no mints yet — the machine is brand new';
     return;
   }
@@ -608,7 +855,8 @@ const verifyCert = async r => (!r || r.record !== 'agent-birth-certificate')
 /* the 11 gates of contracts/vending/tool/resurrect.mjs, client-side, live */
 async function resurrect() {
   const list = $('vres-list'); list.innerHTML = ''; $('vres-sum').textContent = 'running…';
-  let pass = 0, fail = 0;
+  const KEY_WAITS = 'The key road waits on Arweave\'s index. ';
+  let pass = 0, fail = 0, ways = 'three ways', keyRoad = 'Found from your key alone. ';
   const li = (name, ok, detail) => {
     const el = document.createElement('li');
     el.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? 'ok' : 'FAIL'}</span> ${esc(name)}` +
@@ -617,22 +865,39 @@ async function resurrect() {
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
     ok ? pass++ : fail++;
     $('vres-sum').innerHTML = fail === 0
-      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> Found from your key alone. Fingerprint matched three ways. A forged copy was refused.`
+      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> ${keyRoad}Fingerprint matched ${ways}. A forged copy was refused.`
       : `<span class="fail">${fail} failed</span> — the record did not prove itself; look at the lines above.`;
   };
+  /* a fresh in-page mint the gateways or the index have not caught up with
+     is waiting, not failing: said as such, and the check stops there */
+  const waits = (name, detail) => {
+    const el = document.createElement('li');
+    el.innerHTML = `<span class="m">waits</span> ${esc(name)}` + (detail ? ` <span class="m">— ${esc(detail)}</span>` : '');
+    list.appendChild(el); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  };
+  const seeding = why => { waits('gateway: ' + why, 'a fresh certificate seeds to the gateways within minutes; press rebuild to check again');
+    if (fail === 0) $('vres-sum').innerHTML = `<span class="m">waiting</span> — ${pass} checks passed, 0 failed so far; the gateways have not caught up with this certificate yet.`;
+    state.resurrected = { pass, fail, waiting: true }; };
   const name = state.cert?.agent_name; if (!name) { li('a certificate to test', false, 'no ledger row visible'); return; }
-  /* 1 · the name road */
-  const row = state.certs.find(r => r.agent_name === name);
-  li('name road: name → chain row → ar id (jungle4, public state)', !!row, row ? 'row ' + row.id : 'not found');
-  if (!row) return;
+  /* 1 · the name road. A certificate minted in this page has no chain row
+     until the machine seat writes it: that is said as waiting, not failure,
+     and the checks go on by the certificate's own id and key */
+  const onChain = state.certs.find(r => r.agent_name === name);
+  if (onChain) li('name road: name → chain row → ar id (jungle4, public state)', true, 'row ' + onChain.id);
+  else if (state.cert.ar_id) {
+    ways = 'two ways (the chain row is not written yet)';
+    waits('name road: the chain row is not written yet', 'the machine seat writes it; checking by the certificate\'s id and key instead');
+  } else { li('name road: name → chain row → ar id (jungle4, public state)', false, 'not found'); return; }
+  const row = onChain || state.cert;
   /* 2 · shape */
   li('ar id is a 43-char data item', row.ar_id.length === 43, row.ar_id.slice(0, 10) + '…');
   /* 3 · fetch */
   let text = '';
   try { const res = await fetch(`${AR}/${row.ar_id}`, { signal: AbortSignal.timeout(30000) });
+    if (!res.ok && !onChain) { seeding('not seeded yet (HTTP ' + res.status + ')'); return; }
     li('gateway returned the bytes over public HTTPS', res.ok, 'HTTP ' + res.status);
     text = await res.text();
-  } catch (e) { li('gateway returned the bytes over public HTTPS', false, String(e).slice(0, 60)); return; }
+  } catch (e) { if (!onChain) { seeding('not reachable yet'); return; } li('gateway returned the bytes over public HTTPS', false, String(e).slice(0, 60)); return; }
   /* 4 · json */
   let cert; try { cert = JSON.parse(text); } catch { }
   li('certificate is JSON', !!cert); if (!cert) return;
@@ -641,8 +906,10 @@ async function resurrect() {
   li('content hash verifies (re-derive · re-hash · compare)', v.ok,
     (v.ok ? (await contentHash(cert)).slice(0, 12) + '…' : v.reason));
   /* 6 · three-way */
-  li('chain row hash agrees — three-way match', row.content_hash === cert.hash?.value,
+  if (onChain) li('chain row hash agrees — three-way match', row.content_hash === cert.hash?.value,
     row.content_hash.slice(0, 12) + '…');
+  else li('the hash minted in this page agrees with the permaweb copy (two ways; the chain makes three once its row is written)',
+    row.content_hash === cert.hash?.value, row.content_hash.slice(0, 12) + '…');
   /* 7 · recipe */
   li('recipe carried (the species survives the estate)',
     !!cert.recipe?.layers && Array.isArray(cert.recipe?.restand_steps));
@@ -660,11 +927,14 @@ async function resurrect() {
       body: JSON.stringify({ query: `query{transactions(tags:[{name:"Member-Key",values:["${mk}"]}]){edges{node{id owner{address}}}}}` }),
       signal: AbortSignal.timeout(30000) });
     const edges = g.ok ? ((await g.json())?.data?.transactions?.edges || []) : [];
+    if (!onChain && !edges.some(e => e.node.id === row.ar_id)) { keyRoad = KEY_WAITS; waits('key road: Arweave\'s index has not listed this certificate yet', 'the tag search catches up within minutes; press rebuild to check again'); }
+    else {
     li('key road: your key alone finds it on Arweave (tag search)',
       edges.some(e => e.node.id === row.ar_id), edges.length + ' hit(s) — your whole mint history');
     li('record discoverable · owner recorded', edges.length > 0,
       edges[0]?.node?.owner?.address ? 'owner ' + edges[0].node.owner.address.slice(0, 10) + '…' : '');
-  } catch (e) { li('key road reachable', false, String(e).slice(0, 60)); }
+    }
+  } catch (e) { if (!onChain) { keyRoad = KEY_WAITS; waits('key road: Arweave\'s index not reachable yet', 'press rebuild to check again'); } else li('key road reachable', false, String(e).slice(0, 60)); }
   /* 10 · the negative proof, run live on the fetched record */
   const forged = structuredClone(cert);
   forged.answers.who_owns_it.vaulta_account = 'attacker';
@@ -689,13 +959,15 @@ function openPlan() {
   $('p-canonform').textContent = n;
   $('p-tongue').textContent = TONGUES.find(t => t[0] === $('vtongue').value)?.[1] || $('vtongue').value;
   $('p-line').textContent = $('vline').selectedOptions[0].textContent;
-  $('p-mint-sub').textContent = `rate ${L.basisTxt} A · read live`;
-  $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${L.basisTxt} A</span>` : 'n/m';
+  $('p-mint-sub').textContent = `rate ${L.basisTxt} · read live`;
+  $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${esc(L.basisTxt)}</span>` : 'n/m';
   $('p-ram').innerHTML = p != null ? `${fmt$(RAM_BASIS_A * p)} <span class="a">0.16 A</span>` : 'n/m';
   $('p-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · shown, never buried`;
   $('p-tithe-v').innerHTML = p != null ? `${fmt$(L.basisA * L.titheBp / 10000 * p)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>` : 'n/m';
   $('p-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
   $('doorstate').classList.remove('show');
+  $('papprove').disabled = mintedHere.has(n);
+  if (mintedHere.has(n)) { $('doorstate').innerHTML = `<span class="held">${esc(n)}.a was minted in this tab already</span> as <a href="${AR}/${esc(mintedHere.get(n))}" target="_blank" rel="noopener">ar://${esc(mintedHere.get(n))}</a>. keep your key and wake it below; approving again would make a second key and a second certificate, so approve rests for this name.`; $('doorstate').classList.add('show'); }
   plan.classList.add('open');
   document.body.style.overflow = 'hidden';
   plan.querySelector('.refuse').focus();
@@ -705,63 +977,130 @@ const closePlan = msg => { plan.classList.remove('open'); document.body.style.ov
     el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 8000); } };
 $('vmintbtn').addEventListener('click', openPlan);
 $('prefuse').addEventListener('click', () => closePlan('refused — nothing moved, nothing was ever built'));
-plan.addEventListener('click', e => { if (e.target === plan) closePlan('dismissed — nothing moved'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open')) closePlan('dismissed — nothing moved'); });
+/* while a mint runs the plan stays open: closing it would not stop the upload.
+   a name minted in this tab is not minted again under a second key */
+let minting = false;
+const mintState = { uploaded: false }, mintedHere = new Map();
+plan.addEventListener('click', e => { if (e.target === plan && !minting) closePlan('dismissed — nothing moved'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open') && !minting) closePlan('dismissed — nothing moved'); });
 
-const erc20Transfer = (to, units) =>   // selector(4) + address(32) + amount(32)
-  '0xa9059cbb' + to.replace(/^0x/, '').toLowerCase().padStart(64, '0') + units.toString(16).padStart(64, '0');
 const payTotal = () => { const L = state.law, p = state.price;
   return (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * (p || PRICE_FALLBACK); };
 
-/* the one-tap door. Rail A = rehearsal (testnet, memo-bound). USDC/PYUSD =
-   the money rails: EIP-681 one-tap + injected-wallet path when the seat is
-   named; until the founder names it the door HOLDS and says so. */
+/* the door: the rehearsal rail mints in the page; bPay holds until the seat is named */
 $('papprove').addEventListener('click', async () => {
   const rail = document.querySelector('input[name=vrail]:checked').value;
   const door = $('doorstate'); door.classList.add('show');
   const hold = why => door.innerHTML = `<span class="held">the door held — nothing moved.</span><br>${why}`;
   const total = payTotal();
   if (rail === 'a') {
-    door.innerHTML = `<span class="held">rehearsal rail armed — testnet A, the memo is the binding.</span><br>
-      send <code>${((state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000).toFixed(4))} A</code>
-      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc(state.canonName)}</code> —
-      the poller below will catch your mint the moment it lands in a block.`;
-    /* watching mode: the nectar cell lives while we wait for the member's mint */
-    const hexN = document.querySelector('#c-nectar .hex');
-    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + (state.canonName || 'your mint');
-    const was = state.mints.map(m => m.trx);
-    const watch = setInterval(async () => {
-      await walkMints().catch(() => {});
-      const fresh = state.mints.find(m => !was.includes(m.trx));
-      if (fresh) { clearInterval(watch); hexN.classList.remove('live'); renderLand(); }
-    }, 12000);
+    /* THE MACHINE, IN THE PAGE (2026-09-26): approve mints. The member's
+       ed25519 key is made here; the a1 genesis and the birth certificate are
+       composed here (vending-cert.js, held to cert.mjs's hash); the
+       certificate goes to the permaweb as an ANS-104 item signed by that key
+       (ans104.js, held to the reference library), through Turbo's free door,
+       with no server between the member and Arweave; then it is read back
+       from a gateway and re-hashed. The one thing this page cannot do is
+       sign the chain's pointer row — that needs the machine seat's key, and
+       the seat writes it later (scripts/vending-machine.mjs --row); the key
+       road (owner = member key, Member-Key tag) finds the certificate
+       without it. The agent is handed over at the end: a mind in your tab,
+       wearing this certificate. */
+    if (minting || mintedHere.has(state.canonName)) return;
+    minting = true; mintState.uploaded = false; $('papprove').disabled = true; $('prefuse').disabled = true;
+    try { await mintInPage(door); mintedHere.set(state.canonName, state.cert.ar_id); }
+    catch (e) {
+      /* once the upload was attempted the item may already be permanent; the
+         key offered above is its owner, so say that instead of "nothing kept" */
+      const after = e.step === 'arweave' || mintState.uploaded;
+      door.innerHTML = (e.step === 'name' ? '' : door.innerHTML + '<br>') + `<span class="held">the mint stopped at <b>${esc(String(e.step || 'unknown'))}</b></span> — <i>${esc(String(e.message || e).slice(0, 160))}</i>. ` +
+        (after ? 'the certificate may have reached the permaweb anyway; the key offered above is its owner, keep it.' : 'nothing was uploaded and nothing partial was kept.');
+    }
+    finally { minting = false; $('papprove').disabled = mintedHere.has(state.canonName); $('prefuse').disabled = false; }
     return;
   }
-  if (!PAY_SEAT) {
-    hold(`the machine's payment seat on the money rails is named by the founder at the
-      first paid mint (SPEC-VENDING-2 §money — the rail's own law: unbound senders
-      never auto-credit). Your plan stands: <b>$${total.toFixed(2)}</b>. Nothing was
-      charged, nothing signed.`);
-    return;
-  }
-  const cfg = rail === 'usdc'
-    ? { chain: 8453, token: USDC_BASE, decimals: 6, label: 'USDC on Base' }
-    : { chain: 1, token: PYUSD_ETH, decimals: 18, label: 'PYUSD on Ethereum' };
-  const units = BigInt(Math.round(total * 10 ** cfg.decimals));
-  const data = erc20Transfer(PAY_SEAT, units);
-  /* the one-tap link works in any mobile wallet, no dapp browser needed */
-  door.innerHTML = `one tap: <a class="code" style="color:var(--gold)" href="ethereum:${cfg.token}@${cfg.chain}/transfer?address=${PAY_SEAT}&uint256=${units}">open ${cfg.label} in your wallet →</a><br>sending <b>$${total.toFixed(2)}</b> to the machine seat <code>${PAY_SEAT.slice(0, 10)}…</code>`;
-  const eth = window.ethereum;
-  if (!eth) { door.innerHTML += '<br><span class="held">no injected wallet on this page — the link above is the door on your phone.</span>'; return; }
-  try {
-    await eth.request({ method: 'wallet_switchEthereumChain',
-      params: [{ chainId: CHAIN_HEX[cfg.chain] }] });
-    const tx = await eth.request({ method: 'eth_sendTransaction', params: [{
-      from: (await eth.request({ method: 'eth_accounts' }))[0],
-      to: cfg.token, value: '0x0', data }] });
-    door.innerHTML += `<br><span class="moved">sent — ${esc(String(tx).slice(0, 20))}…</span> the machine is watching for your mint to land.`;
-  } catch (e) { hold('the wallet refused or was unavailable — <i>' + esc(String(e.message || e).slice(0, 90)) + '</i>'); }
+  /* every other door is bPay, held until the founder names the seat (founder
+     law 2026-09-26: no payment rail but bPay, ever) */
+  hold('bPay is the only payment door of this estate, and its seat is not named yet. your plan stands: <b>$'+total.toFixed(2)+'</b>. nothing was charged, nothing signed.');
 });
+
+/* ── the mint, in the page ── */
+const GATEWAYS = ['https://arweave.net'];
+async function mintInPage(door) {
+  const A = window.ANS104, C = window.VendingCert;
+  const step = (s, e) => { e.step = s; return e; };
+  const name = state.canonName, tongue = $('vtongue').value || 'latvian', template = $('vline').value || 'bqueenbee-genesis-1';
+  if (!name) throw step('name', new Error('name the agent first'));
+  const hexN = document.querySelector('#c-nectar .hex'); hexN.classList.add('live');
+  const say = html => { door.innerHTML = html; };
+  const cells = (n, h, c) => { if (n) $('c-nectar-s').textContent = n; if (h) $('c-honey-s').textContent = h; if (c) $('c-capped-s').textContent = c; };
+  ['c-nectar', 'c-honey', 'c-capped'].forEach(id => $(id).classList.remove('past'));
+  cells('making your key', '—', '—');
+  say('<span class="held">minting — nothing to pay on the rehearsal rail.</span><br>1 · your key');
+  /* 1 · the member's key, made here, handed to them below */
+  let key; try { key = await A.generateKey(); } catch (e) { throw step('key', new Error('this browser cannot make an Ed25519 key (WebCrypto): ' + e.message)); }
+  /* the key is offered before anything is uploaded: if this tab closes
+     mid-mint, a certificate already on the permaweb still has its owner */
+  const keyBlob = extra => URL.createObjectURL(new Blob([JSON.stringify(Object.assign({ agent: name + '.a', member_key_ed25519_hex: key.publicHex, seed_hex: A.hex(key.seed) }, extra), null, 2)], { type: 'application/json' }));
+  say(door.innerHTML + ` ✓ · <a class="code" style="color:var(--gold)" href="${keyBlob({ note: 'your key, made in your browser. keep it; the machine does not have a copy. the certificate id is added to the file offered when the mint finishes.' })}" download="${esc(name)}.a.key.json">↓ keep your key now</a>`);
+  /* 2 · memory genesis + the certificate */
+  const genesis = await C.genesisRevision({ agent: name, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: key.privateKey });
+  const binding = C.storeBinding(genesis, await C.hashRevision(genesis));
+  const mintedIso = new Date().toISOString();
+  const record = await C.composeCertificate({ agentName: name, house: 'a', tongue, template, memberKeyHex: key.publicHex, memberAccount: CONTRACT, mintedIso, storeBinding: binding });
+  const bytes = new TextEncoder().encode(C.canonicalJson(record));
+  say(door.innerHTML + ` ✓<br>2 · certificate · ${bytes.length} B · sha256 ${esc(record.hash.value.slice(0, 12))}…`);
+  cells('it was signed', 'uploading…', null); $('c-nectar').classList.add('past');
+  /* 3 · sign as an ANS-104 item with the member key as owner, and upload */
+  let item, up;
+  try { item = await A.sign(key, bytes, C.certTags({ agentName: name, memberKeyHex: key.publicHex, spec: 'SPEC-VENDING-1' })); }
+  catch (e) { throw step('sign', e); }
+  try { up = await A.upload(item); } catch (e) { throw step('arweave', e); }
+  mintState.uploaded = true;
+  say(door.innerHTML + ` ✓<br>3 · on the permaweb · <a href="${AR}/${esc(up.id)}" target="_blank" rel="noopener">ar://${esc(up.id)}</a>`);
+  cells(null, 'permaweb id ' + up.id.slice(0, 8) + '…', 'reading it back…'); $('c-honey').classList.add('past');
+  /* 4 · the door's own status (CORS-open), then a gateway read-back with the
+     hash re-derived — the resurrection gate. A fresh item is CONFIRMED at the
+     door within seconds and seeds to arweave.net over minutes; both are said. */
+  let status = null, verified = null;
+  try { const r = await fetch(`https://upload.ardrive.io/v1/tx/${up.id}/status`, { signal: AbortSignal.timeout(8000), cache: 'no-store' }); if (r.ok) status = (await r.json()).status || null; } catch (e) {}
+  if (status) cells(null, null, 'door says ' + status + ' · reading it back…');
+  const t0 = Date.now();
+  for (let i = 0; i < 6 && !verified; i++) {
+    cells(null, null, `reading it back · try ${i + 1} of 6 · ${Math.round((Date.now() - t0) / 1000)} s`);
+    for (const g of GATEWAYS) {
+      try { const r = await fetch(`${g}/${up.id}`, { signal: AbortSignal.timeout(8000), cache: 'no-store' });
+        if (!r.ok) continue; const back = await r.json(); const v = await C.verifyCertificate(back);
+        if (v.ok && v.hash === record.hash.value) { verified = g; break; } } catch (e) {}
+    }
+    if (!verified) await new Promise(r => setTimeout(r, 5000));
+  }
+  if (verified) { cells(null, null, 'read back from ' + verified.replace('https://', '') + ' · hash true'); $('c-capped').classList.add('past'); $('c-capped-l').innerHTML = 'final <span class="tick">✓</span>'; }
+  else if (status) { cells(null, null, 'the door says ' + status + ' · gateways seed it within minutes'); $('c-capped').classList.add('past'); }
+  else cells(null, null, 'not readable from a gateway yet — the id is yours, gateways seed within minutes');
+  hexN.classList.remove('live');
+  /* 5 · the chain row is not written by this page (it cannot sign it); the
+     seat writes it with one line, and until then the key road finds it.
+     The record itself rides to the agent page in this browser, so the agent
+     wakes now — gateways seed the permaweb copy over minutes, and the agent
+     page still re-hashes whichever copy it reads */
+  try { localStorage.setItem('agent.cert.' + up.id, C.canonicalJson(record)); } catch (e) {}
+  $('vtx').innerHTML = `certificate landed · the chain row is not written yet; the machine seat writes it with <code>node scripts/vending-machine.mjs --row "${esc(name)}" ${esc(up.id)}</code>. until then your key finds it: owner <code>${esc(up.owner)}</code>`;
+  /* 6 · yours to keep: the certificate card, the key file, the agent */
+  state.cert = { agent_name: name, member_key: key.publicHex, ar_id: up.id, content_hash: record.hash.value, minted: mintedIso, template_id: template, tongue };
+  renderCert(); $('vcert-q').textContent = '"' + record.answers.what_is_this + '"';
+  const keyUrl = keyBlob({ certificate: 'ar://' + up.id, content_hash: record.hash.value, minted: mintedIso, note: 'your key. the certificate\'s owner. keep it; the machine does not have a copy.' });
+  const agentUrl = `local-agent/index.html?agent=${encodeURIComponent(name)}&cert=${encodeURIComponent(up.id)}`;
+  say(door.innerHTML + ` ✓<br>4 · ${verified ? 'read back and hash-true' : 'id issued'}<br><br>
+    <a class="code" style="color:var(--gold)" href="${keyUrl}" download="${esc(name)}.a.key.json">↓ keep your key (${esc(name)}.a.key.json)</a> · the certificate's owner; the machine keeps no copy<br>
+    <a class="code" style="color:var(--gold)" href="${agentUrl}">⏵ wake your agent — a mind in your tab wearing this certificate</a>`);
+  const wake = document.createElement('a'); wake.className = 'btn2'; wake.href = agentUrl; wake.textContent = '⏵ wake ' + name + '.a'; wake.style.marginTop = '8px';
+  $('vrebuild').insertAdjacentElement('beforebegin', wake);
+  const keep = document.createElement('a'); keep.className = 'btn2'; keep.href = keyUrl; keep.download = name + '.a.key.json'; keep.textContent = '↓ keep your key'; keep.style.marginTop = '8px';
+  $('vrebuild').insertAdjacentElement('beforebegin', keep);
+  closePlan('minted — ' + name + '.a is on the permaweb; keep your key, then wake it');
+  document.getElementById('vcert-name').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 /* ── boot: everything reads live; failures degrade to named n/m states ── */
 (async () => {
@@ -779,6 +1118,8 @@ $('papprove').addEventListener('click', async () => {
    answers, and the pure 9-check audit runs either way — keylessly. Failure
    degrades to a named state, never a fake verdict. */
 </script>
+<script src="ans104.js?v=1"></script>
+<script src="vending-cert.js?v=1"></script>
 <script src="x402-meter.js?v=1"></script>
 <script>
 (async () => {
@@ -794,6 +1135,238 @@ $('papprove').addEventListener('click', async () => {
       esc(String(e.message || e)) + ') — the panel rests rather than guess</span>';
   }
 })();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the page's
+   OWN live state (window.__vending: law rows, price, certs, mints, read from jungle4 and CoinGecko
+   at load) and its OWN name law (canonicalName + fnv1a64, above). Nothing is stored or guessed:
+   a value the chain has not given says "not read yet". Each front types into the real name field
+   (#vname) and every mint gesture presses the real mint button, which only opens the plan screen,
+   where nothing moves before approve. Exposed as window.__eternal for the tests. */
+(function(){
+  'use strict';
+  var $e = function(id){ return document.getElementById(id); };
+  var T = function(k, f){ var t = window.BNRLanguage && window.BNRLanguage.text; return t ? t(k, f) : f; };
+  var esc2 = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var tok = function(n){ return getComputedStyle(document.body).getPropertyValue('--sk-' + n).trim(); };
+  var ES = { ring: 1, snap: '' };
+  var D = {};
+
+  function data(){
+    var raw = $e('vname').value, tongue = $e('vtongue').value, r = canonicalName(raw, tongue);
+    var L = state.law, p = state.price;
+    var d = {
+      raw: raw, tongue: tongue, tongueName: (TONGUES.find(function(t){ return t[0] === tongue; }) || [0, tongue])[1],
+      locale: TONGUE_LOCALE[tongue] || '', canonical: r.error ? '' : r.canonical, changed: !r.error && r.changed, error: r.error || (r.canonical ? '' : 'a name is needed'),
+      chainRead: !!(state.info || state.law), lawRead: !!L, certs: state.certs.length,
+      price: p, priceKind: state.priceKind, ramA: RAM_BASIS_A,
+      canMint: !$e('vmintbtn').disabled, mint: state.mint, cert: state.cert, resurrected: state.resurrected || null
+    };
+    d.key = d.canonical ? fnv1a64(d.canonical) : null;
+    d.keyHex = d.key ? BigInt(d.key).toString(16).padStart(16, '0') : null;
+    d.taken = d.canonical ? nameTaken() : false;
+    if (L) {
+      d.basisTxt = L.basisTxt; d.basisA = L.basisA; d.titheBp = L.titheBp; d.titheDest = L.titheDest; d.updated = String(L.updated || '').slice(0, 10);
+      d.count = L.count; d.max = L.max;
+      d.titheA = L.basisA * L.titheBp / 10000; d.totalA = L.basisA + RAM_BASIS_A + d.titheA;
+      d.totalUsd = p != null ? d.totalA * p : null;
+    } else { d.totalA = null; d.totalUsd = null; }
+    return d;
+  }
+  var usd = function(x){ return '$' + x.toFixed(2); };
+  function priceWords(d){
+    if (d.totalA == null) return T('et.vend.notRead', 'not read yet');
+    return (d.totalUsd != null ? usd(d.totalUsd) + ' · ' : '') + d.totalA.toFixed(4) + ' A';
+  }
+  function basisWords(d){
+    if (d.totalA == null) return d.chainRead ? T('et.vend.lawUnread', 'the chain answered, the price rows did not') : T('et.vend.chainUnread', 'the chain has not answered yet');
+    return d.priceKind === 'live' ? T('et.vend.live', 'once · read live') : T('et.vend.measured', 'once · dollars at the rate measured 2026-09-01, the live rate is unreachable');
+  }
+  function why(d){
+    if (d.error) return d.error === 'a name is needed' ? T('et.vend.needName', 'give it a name first.') : d.error;
+    if (d.taken) return T('et.vend.taken', 'that name is already minted. the chain refuses a second one, so does this page.');
+    if (d.totalA == null) return T('et.vend.noPrice', 'the price has not been read from the chain yet, so nothing can be minted.');
+    return '';
+  }
+  function nameNote(d){
+    if (d.error) return ['out', d.error === 'a name is needed' ? T('et.vend.needName', 'give it a name first.') : d.error];
+    if (d.taken) return ['out', T('et.vend.takenShort', 'already minted')];
+    var cls = d.lawRead ? 'ok' : '';
+    var t = d.lawRead ? T('et.vend.free', 'free to mint') : T('et.vend.freeUnread', 'the ledger has not been read yet, so a clash is not ruled out');
+    if (d.changed) t = T('et.vend.minted', 'minted as') + ' ' + d.canonical + ' · ' + t;
+    return [cls, t];
+  }
+  function mirror(id, v){ var el = $e(id); if (el && document.activeElement !== el && el.value !== v) el.value = v; }
+
+  /* ── NEW BEE ── */
+  function bee(d){
+    mirror('etBeeName', d.raw); mirror('etBeeTongue', d.tongue);
+    var n = nameNote(d), note = $e('etBeeNameNote'); note.className = n[0]; note.textContent = n[1];
+    $e('etBeePrice').textContent = d.totalA == null ? T('et.vend.notRead', 'not read yet') : (d.totalUsd != null ? usd(d.totalUsd) : d.totalA.toFixed(4) + ' A') + ' ' + T('et.vend.b.once', 'once');
+    $e('etBeeGo').disabled = !d.canMint; $e('etBeeWhy').textContent = d.canMint ? T('et.vend.b.next', 'the next screen shows every cost. you can refuse there.') : why(d);
+  }
+
+  /* ── RAVER ── the key as four rings of sixteen bits, re-formed on every keystroke */
+  var RAD = { 1: [62, 92], 2: [98, 128], 3: [134, 162], 4: [168, 194] };
+  function arc(r0, r1, a0, a1){
+    var p = function(r, a){ return (r * Math.cos(a)).toFixed(2) + ' ' + (r * Math.sin(a)).toFixed(2); };
+    return 'M' + p(r1, a0) + 'A' + r1 + ' ' + r1 + ' 0 0 1 ' + p(r1, a1) + 'L' + p(r0, a1) + 'A' + r0 + ' ' + r0 + ' 0 0 0 ' + p(r0, a0) + 'Z';
+  }
+  function word(d, ring){ return d.keyHex ? d.keyHex.slice((ring - 1) * 4, ring * 4) : null; }
+  function raver(d){
+    mirror('etRaverName', d.raw); mirror('etRaverTongue', d.tongue);
+    var svg = $e('etKey'), RN = (tok('rainbow').match(/#[0-9a-f]{6}/gi) || []), col = { 1: RN[4], 2: RN[3], 3: RN[2], 4: RN[1] }, h = '';
+    var bits = d.key ? BigInt(d.key).toString(2).padStart(64, '0') : null;
+    for (var g = 1; g <= 4; g++) {
+      var r = RAD[g], sel = ES.ring === g, w = word(d, g), on = w ? parseInt(w, 16).toString(2).split('').filter(function(x){ return x === '1'; }).length : 0;
+      h += '<g class="ring" data-g="' + g + '" role="button" tabindex="0" aria-pressed="' + sel + '" aria-label="' + esc2(T('et.vend.r.ringA', 'ring {g}').replace('{g}', g) + (w ? ': ' + w + ', ' + on + ' of 16 lit' : ': no key yet')) + '">';
+      for (var i = 0; i < 16; i++) {
+        var a0 = -Math.PI / 2 + i * Math.PI / 8 + .03, a1 = a0 + Math.PI / 8 - .06, lit = bits && bits[(g - 1) * 16 + i] === '1';
+        var fill = lit ? (sel ? tok('sovereign-strong') : col[g]) : tok('sovereign-wash');
+        h += '<path class="bit" d="' + arc(r[0], r[1], a0, a1) + '" fill="' + fill + '" opacity="' + (lit ? (sel ? 1 : .85) : .9) + '"' + (bits ? '' : ' stroke="' + tok('guard') + '" stroke-width="1" stroke-dasharray="3 4"') + '/>';
+      }
+      h += '</g>';
+    }
+    h += '<circle r="54" fill="' + tok('bg-card') + '"/><circle r="46" fill="none" stroke="' + tok('you') + '" stroke-dasharray="3 4"/>';
+    var nm = d.canonical || '?', fs = nm.length > 9 ? 14 : 15;
+    h += '<text y="' + (nm.length > 9 ? 0 : 2) + '" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 ' + fs + 'px/1.2 var(--sk-font-raver-display)">' + esc2(nm.length > 12 ? nm.slice(0, 11) + '…' : nm) + '</text>';
+    h += '<text y="24" text-anchor="middle" fill="' + tok('you') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">.a</text>';
+    svg.innerHTML = h;
+    var w2 = word(d, ES.ring);
+    $e('etRaverCard').innerHTML = '<span class="rk">r' + ES.ring + '</span><div><b>' + esc2(w2 ? T('et.vend.r.word', 'bits {a}–{b} · {w}').replace('{a}', (ES.ring - 1) * 16).replace('{b}', ES.ring * 16 - 1).replace('{w}', w2) : T('et.vend.r.noKey', 'no key until the name is whole')) + '</b><span>' + esc2(d.error || d.taken ? why(d) : nameNote(d)[1]) + '</span></div>';
+    $e('etRaverPrice').textContent = priceWords(d);
+    $e('etRaverBasis').textContent = basisWords(d);
+    if (!hold.raf) $e('etHold').disabled = !d.canMint;
+    $e('etHoldHint').textContent = d.canMint ? T('et.vend.r.consent', 'your hold opens the plan · nothing moves before approve') : why(d);
+    var m = d.mint, cells = [
+      [T('et.vend.r.sent', 'sent'), m ? T('et.vend.r.sentV', 'it was sent') : (d.chainRead ? T('et.vend.r.noMint', 'no mint seen') : T('et.vend.notRead', 'not read yet')), !!m],
+      [T('et.vend.r.block', 'in a block'), m ? String(m.block || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : (d.chainRead ? T('et.vend.r.noMint', 'no mint seen') : T('et.vend.notRead', 'not read yet')), !!m && m.irrev],
+      [T('et.vend.r.final', 'final'), m ? (m.irrev ? T('et.vend.r.irrev', 'irreversible') : T('et.vend.r.sealing', 'sealing')) : (d.chainRead ? T('et.vend.r.noMint', 'no mint seen') : T('et.vend.notRead', 'not read yet')), !!m && m.irrev]
+    ];
+    $e('etComb').innerHTML = cells.map(function(c){ return '<div class="' + (c[2] ? 'past' : '') + '"><i aria-hidden="true"></i><b>' + esc2(c[0]) + '</b><span>' + esc2(c[1]) + '</span></div>'; }).join('');
+  }
+  var hold = { t0: 0, raf: 0 };
+  function holdStart(e){
+    if ($e('etHold').disabled || hold.raf) return; if (e && e.preventDefault) e.preventDefault();
+    var prog = $e('etHoldProg'); hold.t0 = performance.now();
+    (function tick(now){ var f = Math.min(1, (now - hold.t0) / 1200); prog.style.strokeDashoffset = String(578 * (1 - f));
+      if (f >= 1) { hold.raf = 0; prog.style.strokeDashoffset = '578'; handoff(); return; } hold.raf = requestAnimationFrame(tick); })(hold.t0);
+  }
+  function holdStop(){ if (!hold.raf) return; cancelAnimationFrame(hold.raf); hold.raf = 0; $e('etHoldProg').style.strokeDashoffset = '578'; }
+
+  /* ── CYPHERPUNK ── */
+  function cy(d){
+    mirror('etCyName', d.raw); mirror('etCyTongue', d.tongue);
+    $e('etCyPath').textContent = CONTRACT + '::certs/' + (d.key || T('et.vend.c.noKey', 'no-key-yet'));
+    $e('etChips').innerHTML = '<span class="' + (d.chainRead ? 'ok' : '') + '">chain ' + (d.chainRead ? 'answered' : 'not read') + '</span><span class="on">rail A · jungle4 · testnet</span><span>price ' + esc2(d.priceKind || 'not read') + '</span>';
+    var nn = nameNote(d);
+    $e('etNameKv').innerHTML = [
+      ['typed', '<bdi>' + esc2(d.raw) + '</bdi>'],
+      ['canonical', d.canonical ? '<bdi>' + esc2(d.canonical) + '</bdi>' + (d.changed ? ' <span class="no">normalized</span>' : '') : '<span class="out">' + esc2(d.error) + '</span>'],
+      ['tongue', esc2(d.tongue) + ' · locale ' + esc2(d.locale || 'none')],
+      ['fnv1a-64', d.key ? esc2(d.key) + ' <span class="no">0x' + esc2(d.keyHex) + '</span>' : '<span class="no">' + esc2(T('et.vend.c.noKey2', 'no key without a name')) + '</span>'],
+      ['collision', d.taken ? '<span class="out">taken · refused</span>' : '<span class="' + (nn[0] === 'ok' ? 'ok' : 'no') + '">' + esc2(d.lawRead ? 'free · checked against ' + d.certs + ' cert rows' : 'ledger not read · not ruled out') + '</span>']
+    ].map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join('');
+    var nr = '<span class="no">' + esc2(T('et.vend.notRead', 'not read yet')) + '</span>';
+    $e('etLawKv').innerHTML = [
+      ['rate', d.lawRead ? esc2(d.basisTxt) + ' · vaulta · ' + esc2(d.updated) : nr],
+      ['room', '0.16 A · ≈ 462 B row · refundable · SPEC-VENDING-2 §sizing'],
+      ['tithe', d.lawRead ? (d.titheBp / 100).toFixed(2) + '% → ' + esc2(d.titheDest) + ' · ' + d.titheA.toFixed(4) + ' A' : nr],
+      ['cert', '$0.00 · Arweave · Turbo free tier'],
+      ['total', d.totalA != null ? d.totalA.toFixed(4) + ' A' + (d.totalUsd != null ? ' ≈ ' + usd(d.totalUsd) + ' @ ' + esc2(d.price) + ' ' + esc2(d.priceKind) : '') : nr],
+      ['capacity', d.lawRead ? esc2(d.count) + '/' + esc2(d.max) + ' (cap 6⁵)' : nr],
+      ['head', state.info ? esc2(state.info.head_block_num) + ' · lib ' + esc2(state.info.last_irreversible_block_num) : nr]
+    ].map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join('');
+    $e('etCyGo').disabled = !d.canMint;
+    var m = d.mint;
+    var steps = [
+      ['canonicalize', d.canonical ? 'NFC · trim · fold spaces · lowercase(' + (d.locale || 'root') + ') → ' + d.canonical : 'refused · ' + d.error, d.canonical ? 'done' : 'todo'],
+      ['key · fnv1a-64', d.key ? d.key : 'waits on the name', d.key ? 'done' : 'todo'],
+      ['collision · certs table', d.taken ? 'taken · refused' : (d.lawRead ? 'free against ' + d.certs + ' rows' : 'ledger not read'), d.taken ? 'todo' : (d.lawRead && d.key ? 'done' : 'todo')],
+      ['plan · approve or refuse', 'the plan screen itemizes every cost · nothing charged, signed or sent before approve', 'todo'],
+      ['key + certificate · in page', 'your ed25519 key is made in this page and signs the certificate · nothing to pay on the rehearsal rail', d.cert && d.cert.agent_name === d.canonical ? 'done' : 'todo'],
+      ['certificate · Arweave', d.cert && d.cert.agent_name === d.canonical ? 'ar://' + d.cert.ar_id : 'not yet for this name', d.cert && d.cert.agent_name === d.canonical ? 'done' : 'todo'],
+      ['row · jungle4', m && m.name === d.canonical ? 'landed · block ' + m.block + (m.irrev ? ' · irreversible' : '') : 'not written yet · the machine seat writes it', m && m.name === d.canonical ? 'done' : 'todo']
+    ];
+    var nowAt = steps.findIndex(function(s){ return s[2] === 'todo'; });
+    $e('etPipe').innerHTML = steps.map(function(s, i){ return '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc2(s[0]) + '</b><p>' + esc2(s[1]) + '</p></li>'; }).join('');
+    $e('etByHand').innerHTML = [
+      'fnv1a-64 over the utf-8 bytes of the canonical name: offset 0xcbf29ce484222325, prime 0x100000001b3, mod 2⁶⁴' + (d.key ? ' = ' + d.key : ''),
+      'get_table_rows code=' + CONTRACT + ' table=rates|tithe|certs on any jungle4 node',
+      'each certificate: fetch ar://id, re-hash canonical JSON with hash.value removed, compare to the chain row (section 4 runs it in this page)' + (d.resurrected ? ' · ran here: ' + d.resurrected.pass + ' passed, ' + d.resurrected.fail + ' failed' : ''),
+    ].map(function(t){ return '<li><code>' + esc2(t) + '</code></li>'; }).join('') + '<li><a href="' + MONITOR_TX.replace('accountActions:', 'accountOverview:') + CONTRACT + '" target="_blank" rel="noopener noreferrer">' + esc2(T('et.vend.c.monitor', 'the machine on the public monitor ↗')) + ' <span class="et-sr">' + esc2(T('et.newtab', '(opens in a new tab)')) + '</span></a></li>';
+  }
+
+  /* ── the one hand-off: the page's own mint button owns the plan screen ── */
+  function handoff(){ var b = $e('vmintbtn'); if (b && !b.disabled) { ES.handed = (ES.handed || 0) + 1; b.click(); } }
+
+  function words(){ document.querySelectorAll('#eternal [data-etk], #etArchive').forEach(function(el){ if (!el.hasAttribute('data-etk')) return; if (!el.hasAttribute('data-eten')) el.setAttribute('data-eten', el.textContent); el.textContent = T(el.getAttribute('data-etk'), el.getAttribute('data-eten')); }); }
+  function all(force){
+    D = data();
+    var snap = JSON.stringify([D, ES.ring, document.body.getAttribute('data-reg')]);
+    if (!force && snap === ES.snap) return; ES.snap = snap;
+    try { bee(D); raver(D); cy(D); } catch(e){ if (window.console) console.warn('eternal front', e); }
+    window.__eternal = { data: D, ui: ES };
+  }
+  function type(v){ var n = $e('vname'); n.value = v; n.dispatchEvent(new Event('input', { bubbles: true })); all(); }
+  function tongue(v){ var s = $e('vtongue'); s.value = v; s.dispatchEvent(new Event('change', { bubbles: true })); all(); }
+
+  function wire(){
+    var opts = $e('vtongue').innerHTML;
+    ['etBeeTongue', 'etRaverTongue', 'etCyTongue'].forEach(function(id){ $e(id).innerHTML = opts; $e(id).addEventListener('change', function(){ tongue(this.value); }); });
+    ['etBeeName', 'etRaverName', 'etCyName'].forEach(function(id){ $e(id).addEventListener('input', function(){ type(this.value); }); });
+    $e('vname').addEventListener('input', function(){ all(); }); $e('vtongue').addEventListener('change', function(){ all(); });
+    $e('etBeeGo').addEventListener('click', handoff); $e('etCyGo').addEventListener('click', handoff);
+    var ev = $e('eternal');
+    ev.addEventListener('click', function(e){ var r = e.target.closest('#etKey .ring'); if (r) { ES.ring = +r.getAttribute('data-g'); all(true); } });
+    ev.addEventListener('keydown', function(e){ if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('#etKey .ring')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+    var hb = $e('etHold');
+    hb.addEventListener('pointerdown', function(e){ try { hb.setPointerCapture(e.pointerId); } catch(x){} holdStart(e); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ hb.addEventListener(t, holdStop); });
+    hb.addEventListener('keydown', function(e){ if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); holdStart(e); } });
+    hb.addEventListener('keyup', function(e){ if (e.key === ' ' || e.key === 'Enter') holdStop(); });
+    hb.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    document.addEventListener('blang', function(){ words(); all(true); });
+    document.addEventListener('bregister', function(){ all(true); });
+    setInterval(function(){ all(); }, 1000);   // the live reads land when they land; the front follows
+  }
+  words(); wire(); all(true);
+})();
+</script>
+<script>
+/*WEBMCP-START*/
+/* WebMCP — ONE read-only tool, the WEBML raid's S4 prototype (docs/raids/WEBML-SORT-2026-09-30.md
+   §8; founder order 2026-09-30 "get it all done"). An outside agent that speaks WebMCP (origin
+   trial Chrome 149 / Edge 150; ChatGPT Desktop already calls tools this way) may read this
+   machine's public price sheet. LAWS: nothing member-facing rests on it (WebKit opposes; the
+   trial ends when the vendor says); the payload is a FIXED WHITELIST — the reader's typed name
+   never crosses a machine door (opacity law, bMAIL doorbell pattern); absent API → inert. */
+(function(root){
+  'use strict';
+  var doc=root.document;
+  if(!doc||!('modelContext' in doc)||typeof doc.modelContext.registerTool!=='function') return;
+  var ALLOWED=['updated','count','max','basisTxt','basisA','ramA','titheBp','titheA','totalA',
+               'totalUsd','price','priceKind','chainRead','lawRead','certs'];
+  function snapshot(){
+    var src=(root.__eternal&&typeof root.__eternal.data==='function')?root.__eternal.data()
+            :(root.__vending||{});
+    var out={};
+    ALLOWED.forEach(function(k){ if(src&&typeof src[k]!=='undefined'&&src[k]!==null) out[k]=src[k]; });
+    out.note=out.lawRead?'the page\'s own live state, read-only':'not read yet — the chain has not answered';
+    return out;
+  }
+  try{
+    doc.modelContext.registerTool({
+      name:'read_vending_state',
+      description:'Read this vending machine\'s public name-law sheet (price basis, tithe, count/max, live price state). Read-only; it cannot mint, reserve, or touch the reader\'s input.',
+      inputSchema:{type:'object',properties:{},additionalProperties:false,required:[]},
+      async execute(){
+        return {content:[{type:'text',text:JSON.stringify(snapshot(),null,1)}]};
+      }
+    }).catch(function(){ /* a refusal (e.g. Permissions-Policy: tools=()) is silence, not an error */ });
+  }catch(e){ /* registration refused: the page is unchanged */ }
+})(typeof window==='object'?window:globalThis);
+/*WEBMCP-END*/
 </script>
 <script src="tour.js?v=42"></script>
 </body>

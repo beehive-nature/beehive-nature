@@ -85,7 +85,10 @@ test('missing/truncated/corrupt stored data never exposes a partial restored his
   await c.publish(getPublicKey(f.alice), f.message(f.alice));
   const cp = JSON.parse(await readFile(path.join(f.root, c.pin.ref.address)));
   const ref = JSON.parse(cp.content).data; const file = path.join(f.root, ref.address); const original = await readFile(file);
-  for (const bad of [Buffer.alloc(0), original.subarray(0, original.length - 1), Buffer.from(original).fill(42, 0, 1)]) {
+  const corrupted = Buffer.from(original);
+  corrupted[0] ^= 0xff;
+  assert(!corrupted.equals(original));
+  for (const bad of [Buffer.alloc(0), original.subarray(0, original.length - 1), corrupted]) {
     await writeFile(file, bad); const reader = f.create({ writer: undefined });
     await assert.rejects(reader.restore(c.pin), /object-integrity/);
     assert.equal(reader.pin, null); assert.deepEqual(reader.query(getPublicKey(f.alice), [{ '#h': [f.channel] }]), []);
