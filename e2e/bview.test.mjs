@@ -119,6 +119,77 @@ async function hasCodec(p) {
 const done = () => { const f = id => !document.getElementById(id).hidden; return f('s-fail') || (!f('s-slow') && !(document.getElementById('pg') && f('pg')) && document.getElementById('v').videoWidth > 0); };
 const framed = () => document.getElementById('v').videoWidth > 0;
 
+test('personal videos: save, name, deduplicate across reloads and tabs, then remove', async () => {
+  const { ctx, p, errs, hits } = await open({ stream: () => 'abort', json: () => 'abort' });
+  try {
+    await p.goto(ORIGIN + '/bview.html');
+    await p.locator('#my-videos summary').click();
+    await p.fill('#addr', 'bad address'); await p.click('#save-video');
+    assert.equal(await p.locator('#saved-videos li').count(), 0);
+    assert.match(await p.locator('#saved-status').textContent(), /complete Autonomi/);
+    await p.fill('#addr', 'autonomi://' + A1.toUpperCase()); await p.click('#save-video');
+    const label = '<img src=x onerror=alert(1)> my first video';
+    await p.locator('.saved-video input').fill(label); await p.locator('.saved-video input').press('Tab');
+    await p.fill('#addr', A1); await p.click('#save-video');
+    assert.equal(await p.locator('#saved-videos li').count(), 1);
+    await p.reload(); await p.locator('#my-videos summary').click();
+    assert.equal(await p.locator('.saved-video input').inputValue(), label);
+    assert.equal(await p.locator('.saved-video code').textContent(), 'autonomi://' + A1);
+    assert.equal(await p.locator('#saved-videos img').count(), 0);
+    const other = await ctx.newPage(); await other.goto(ORIGIN + '/bview.html');
+    await other.locator('#my-videos summary').click(); await other.fill('#addr', A2); await other.click('#save-video');
+    await p.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 2);
+    await p.getByRole('button', { name: 'Remove ' + label, exact: true }).click();
+    await other.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 1);
+    await p.reload(); await p.locator('#my-videos summary').click();
+    assert.equal(await p.locator('.saved-video code').textContent(), 'autonomi://' + A2);
+    assert.equal(hits.stream.length + hits.json.length, 0, 'saving does not fetch a video');
+    assert.deepEqual(errs, []);
+  } finally { await ctx.close(); }
+});
+
+test('personal videos: actual playback is recorded; replay works; removal survives resume', async () => {
+  const video = await readFile(join(HERE, '..', 'fixtures/bview/vp9-opus-10s-faststart.mp4'));
+  const { ctx, p, errs } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'video/mp4', 'content-length': String(video.length) }, body: video }),
+    json: () => 'abort',
+  });
+  try {
+    await p.goto(ORIGIN + '/bview.html');
+    await p.evaluate(() => { document.getElementById('v').muted = true; });
+    await watch(p, A1);
+    await p.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 1);
+    await p.locator('#my-videos summary').click();
+    await p.locator('.saved-video').getByRole('button', { name: /^Remove / }).click();
+    await p.evaluate(async () => { const v = document.getElementById('v'); v.pause(); await v.play(); });
+    assert.equal(await p.locator('#saved-videos li').count(), 0, 'resume must respect an explicit removal');
+    await p.click('#save-video');
+    await p.locator('.saved-video').getByRole('button', { name: /^Play / }).click();
+    await p.waitForFunction(() => document.getElementById('v').currentTime > 0.2);
+    assert.equal(await p.locator('#saved-videos li').count(), 1, 'replay does not duplicate');
+    assert.equal((await state(p)).shown, 'autonomi://' + A1);
+    assert.deepEqual(errs, []);
+  } finally { await ctx.close(); }
+});
+
+test('personal videos: blocked and unreadable storage never claim a successful save', async () => {
+  for (const unreadable of [false, true]) {
+    const { ctx, p, errs } = await open({ stream: () => 'abort', json: () => 'abort' });
+    try {
+      await ctx.addInitScript(broken => {
+        if (broken) localStorage.setItem('bnr.bview.playlist.v1', '{unreadable');
+        else Storage.prototype.setItem = () => { throw new DOMException('blocked', 'SecurityError'); };
+      }, unreadable);
+      await p.goto(ORIGIN + '/bview.html'); await p.locator('#my-videos summary').click();
+      await p.fill('#addr', A1); await p.click('#save-video');
+      assert.match(await p.locator('#saved-status').textContent(), /Could not save/);
+      assert.equal(await p.locator('#saved-videos li').count(), 0);
+      if (unreadable) assert.equal(await p.evaluate(() => localStorage.getItem('bnr.bview.playlist.v1')), '{unreadable');
+      assert.deepEqual(errs, []);
+    } finally { await ctx.close(); }
+  }
+});
+
 test('antd 0.12.0 door: stub /stream aborts fast, envelope plays, full decode still finishes', async () => {
   const { ctx, p, errs, hits } = await open({
     stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(CUT) }, body: MP4.subarray(0, CUT) }),
