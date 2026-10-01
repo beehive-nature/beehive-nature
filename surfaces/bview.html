@@ -62,6 +62,7 @@ button[type=submit]:active{transform:scale(.97)}
 .saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
+#frame-hold{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;background:var(--screen)}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
 progress{display:block;width:100%;height:6px;appearance:none;border:0;background:var(--sk-line);accent-color:var(--act)}
 progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progress-value{background:var(--act)}
@@ -255,6 +256,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <section id="out" aria-live="polite" hidden>
             <div class="stage">
               <video id="v" controls playsinline preload="auto"></video>
+              <canvas id="frame-hold" aria-hidden="true" hidden></canvas>
               <div class="veil" id="veil" hidden>
                 <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ring" cx="60" cy="60" r="52"/></svg>
                 <p class="count"><span><b id="count" translate="no" dir="ltr"></b><br><span class="till" data-reg="raver" data-i18n="bview.raver.till">till it plays</span></span></p>
@@ -860,6 +862,60 @@ document.addEventListener('DOMContentLoaded',function(){
   paintMotion();
   document.addEventListener('visibilitychange', () => document.body.toggleAttribute('data-tab-hidden', document.hidden));
   let frameGen = 0;
+  const heldFrame = $('frame-hold'), stage = v.parentElement;
+  let frameCallback = null, holdGeneration = 0, savedFrameJob = null;
+  function clearHeldFrame() {
+    holdGeneration++;
+    if (frameCallback !== null && v.cancelVideoFrameCallback) v.cancelVideoFrameCallback(frameCallback);
+    frameCallback = null; heldFrame.hidden = true; stage.style.aspectRatio = '';
+  }
+  function captureDecodedFrame() {
+    if (!heldFrame.hidden || v.readyState < 2 || !v.videoWidth) return;
+    try {
+      // Cap the copy at 1080p even when the source is 8K. This is a temporary
+      // presentation frame, never a new rendition or a cached media object.
+      const scale = Math.min(1, 1920 / v.videoWidth, 1080 / v.videoHeight);
+      heldFrame.width = Math.round(v.videoWidth * scale); heldFrame.height = Math.round(v.videoHeight * scale);
+      heldFrame.getContext('2d').drawImage(v, 0, 0, heldFrame.width, heldFrame.height);
+      savedFrameJob = job;
+    } catch { /* A frame cannot be copied on this device; retain normal playback. */ }
+  }
+  function holdDecodedFrame() {
+    captureDecodedFrame();
+    if (savedFrameJob !== job) return;
+    stage.style.aspectRatio = heldFrame.width + ' / ' + heldFrame.height;
+    heldFrame.hidden = false;
+  }
+  // A truncated Blob can empty the decoder before `ended` fires. Bank the
+  // last real frame near its edge while pixels are still available.
+  v.addEventListener('timeupdate', () => {
+    const st = feed;
+    if (st && st.plan && st.sounded && mediaAt(st.plan, st.paintedAt) - v.currentTime < 2) captureDecodedFrame();
+  });
+  function revealDecodedFrame(at) {
+    if (heldFrame.hidden) return;
+    const generation = holdGeneration;
+    const ready = mediaTime => generation === holdGeneration && !v.seeking && v.readyState >= 2 && Math.abs(mediaTime - at) < 1;
+    if (v.requestVideoFrameCallback) {
+      const reveal = (_, frame) => {
+        if (generation !== holdGeneration) return;
+        if (ready(frame.mediaTime)) clearHeldFrame();
+        else frameCallback = v.requestVideoFrameCallback(reveal);
+      };
+      frameCallback = v.requestVideoFrameCallback(reveal);
+    } else {
+      // Older browsers: seek completion plus two paint turns. Never unveil an
+      // unloaded element merely because metadata arrived.
+      const reveal = () => {
+        if (generation !== holdGeneration) return;
+        if (ready(v.currentTime)) requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (ready(v.currentTime)) clearHeldFrame();
+        }));
+      };
+      v.addEventListener('seeked', reveal, { once: true });
+      reveal();
+    }
+  }
   const paintSrc = (assign, ms) => {
     frameGen++;
     const gen = frameGen;
@@ -885,6 +941,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const setBlob = (blob, st) => {
     // Refuse a no-growth repaint: same bytes already on the element = thrash with no new mdat.
     if (st && st.paintedAt > 0 && st.accBytes > 0 && st.accBytes <= st.paintedAt) return false;
+    holdDecodedFrame();
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     // Drop the old src without load() — load() on an empty src fires error and aborts paintSrc
     // before the new Blob URL is attached (DEMUXER_ERROR / instant end(false)).
@@ -910,6 +967,7 @@ document.addEventListener('DOMContentLoaded',function(){
     return u;
   };
   const markFirstFrame = () => {
+    captureDecodedFrame();
     if (metrics.ttffMs == null && metrics.t0) {
       metrics.ttffMs = performance.now() - metrics.t0;
       note('first frame');
@@ -938,6 +996,7 @@ document.addEventListener('DOMContentLoaded',function(){
       note((st.sounded ? 'swap' : 'start') + ' · playing copy ' + fmtMb(n) + ' (' + mediaAt(st.plan, n).toFixed(1) + ' s) from ' + at.toFixed(2) + ' s');
       paintNerd();
       try { v.currentTime = at; } catch {}
+      revealDecodedFrame(at);
       keepAt = at;
       if (go) { try { await v.play(); } catch {} }
       return true;
@@ -1116,6 +1175,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if (ok || (v.videoWidth > 0)) {
         state.paintedAt = bytes; state.stalled = false; state.srcLocked = true;
         try { v.currentTime = t0; } catch {}
+        revealDecodedFrame(t0);
         keepAt = t0;
         playing = my; say(null);
         markFirstFrame();
@@ -1266,6 +1326,8 @@ document.addEventListener('DOMContentLoaded',function(){
   async function view(raw) {
     const a = parse(raw), my = ++job;
     v.pause();
+    clearHeldFrame();
+    savedFrameJob = null;
     if (ctl) ctl.abort();
     ctl = new AbortController();
     const signal = ctl.signal;

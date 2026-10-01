@@ -45,6 +45,37 @@ async function open(reg, host) {
 }
 const FRONT = { bee: '.et-b', raver: '.et-r', cypherpunk: '.et-c' };
 
+test('My videos is shared with bViEw: save, name, reload, cross-tab removal and same-tab play', async () => {
+  const { ctx, p, errs } = await open('bee', false);
+  try {
+    const address = 'ab'.repeat(32);
+    await p.locator('#my-videos summary').click();
+    await p.fill('#addr', 'bad address'); await p.click('#save-video');
+    assert.equal(await p.locator('#saved-videos li').count(), 0);
+    await p.fill('#addr', 'autonomi://' + address.toUpperCase()); await p.click('#save-video');
+    await p.locator('.saved-video input').fill('My shared video'); await p.locator('.saved-video input').press('Tab');
+    await p.reload(); await p.locator('#my-videos summary').click();
+    assert.equal(await p.locator('.saved-video input').inputValue(), 'My shared video');
+    const view = await ctx.newPage(); await view.goto(ORIGIN + '/surfaces/bview.html');
+    await view.locator('#my-videos summary').click();
+    assert.equal(await view.locator('.saved-video input').inputValue(), 'My shared video');
+    await view.getByRole('button', { name: 'Remove My shared video', exact: true }).click();
+    await p.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 0);
+    await p.fill('#addr', address);
+    await p.click('#save-video');
+    for (const reg of ['bee', 'raver', 'cypherpunk']) {
+      await p.evaluate(r => { document.body.dataset.reg = r; document.dispatchEvent(new Event('bregister')); }, reg);
+      assert.ok(await p.locator('#save-video').isVisible(), reg + ': saved videos remain available');
+      assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), reg + ': no overflow');
+    }
+    await p.locator('.saved-video').getByRole('button', { name: /^Play / }).click();
+    await p.waitForURL(ORIGIN + '/surfaces/bview.html#' + address);
+    assert.equal(ctx.pages().length, 2, 'Play uses this tab rather than creating a new tab');
+    assert.equal(await p.locator('.saved-video code').textContent(), 'autonomi://' + address);
+    assert.deepEqual(errs, []);
+  } finally { await ctx.close(); }
+});
+
 test('one front per register, each in its own dress, the room pass inside it', async () => {
   const want = {
     bee: { bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
