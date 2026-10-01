@@ -477,6 +477,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // The live download (one per job): its parts, the time plan read from moov, and where the
   // playing Blob ends. Media-element events reach it here; a newer job replaces it.
   let feed = null;
+  const needsFinalTail = st => !!(st && st.done && st.plan && st.paintedAt < st.plan.m1);
   const newFeed = my => (feed = {
     my, parts: [], bytes: 0, mime: '', early: false, me: 0, plan: null, planless: false,
     preview: false, previewTried: false, srcLocked: false, sounded: false, stalled: false, busy: false, done: false,
@@ -485,11 +486,14 @@ document.addEventListener('DOMContentLoaded',function(){
   // Early Blob carries full moov duration but short mdat: past its last byte Chrome errors out
   // or races currentTime to the end. Hold a real playhead while the download bar is still up.
   let keepAt = 0;
-  const rateClock = { t0: 0, b0: 0, f0: 0, fb: 0, bps: 0 };
-  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; rateClock.f0 = 0; rateClock.fb = 0; rateClock.bps = 0; };
+  const rateClock = { t0: 0, b0: 0, f0: 0, fb: 0, bps: 0, lastAt: 0, lastBytes: 0, lastBps: 0 };
+  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; rateClock.f0 = 0; rateClock.fb = 0; rateClock.bps = 0; rateClock.lastAt = 0; rateClock.lastBytes = 0; rateClock.lastBps = 0; };
   const showGot = (bytes) => {
     const el = $('got');
     if (!el) return;
+    const now = performance.now(), gap = (now - rateClock.lastAt) / 1000;
+    if (rateClock.lastAt && bytes > rateClock.lastBytes && gap > 0) rateClock.lastBps = (bytes - rateClock.lastBytes) / gap;
+    rateClock.lastAt = now; rateClock.lastBytes = bytes;
     if (!rateClock.f0) { rateClock.f0 = performance.now(); rateClock.fb = bytes; }
     const mb = bytes / 1048576;
     const dt = (performance.now() - rateClock.t0) / 1000;
@@ -512,32 +516,35 @@ document.addEventListener('DOMContentLoaded',function(){
   const rateBps = () => {
     const live = rateClock.bps, dt = (performance.now() - rateClock.f0) / 1000;
     if (!(live > 0) || !rateClock.f0 || dt < 0.5) return 0;
-    return Math.min(live, (metrics.bytes - rateClock.fb) / dt);
+    // A slower arriving chunk is evidence now, not after the rolling window
+    // forgets the earlier fast burst. This keeps a run-dry ETA conservative.
+    return Math.min(live, rateClock.lastBps || live, (metrics.bytes - rateClock.fb) / dt);
   };
   // The running Blob ran dry before the download did (this Chromium: MEDIA_ERR_DECODE at the last
   // byte; others race currentTime to the end). Hold the last real playhead and let steer() decide,
   // by time, when to go on — the viewer sees "ready to play in ~N s", never a silent freeze.
-  // Once the last byte is in (done) only the stall is noted: finishBinary's full Blob resumes it.
+  // If the full file arrived during playback, the partial Blob still needs
+  // its final handoff at the media edge, even though the progress bar is gone.
   const dry = () => {
     const st = feed;
-    if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || pg.hidden) return false;
+    if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || (pg.hidden && !needsFinalTail(st))) return false;
     st.stalled = true;
     note('ran dry at ' + keepAt.toFixed(2) + ' s: holding until the rule allows');
     try { v.pause(); } catch {}
-    if (!st.done) steer(st);
+    if (!st.done || needsFinalTail(st)) steer(st);
     return true;
   };
   v.addEventListener('error', () => { if (dry()) return; if (playing && playing === job && pg.hidden) say('s-fail'); });
   v.addEventListener('timeupdate', () => {
     if (playing !== job) return;
     const st = feed, t = v.currentTime;
-    if (st && st.my === job && st.plan && !pg.hidden) {
+    if (st && st.my === job && st.plan && (!pg.hidden || needsFinalTail(st))) {
       if (st.busy || st.stalled) return;
       // Past what the running Blob can hold = Chrome's end-of-data yank, never the viewer's playhead.
       if (t > mediaAt(st.plan, st.paintedAt) + 1) { try { v.currentTime = keepAt; } catch {} dry(); return; }
       if (t > 0.05) keepAt = t;
       renderInst();
-      if (!st.done) steer(st);
+      if (!st.done || needsFinalTail(st)) steer(st);
       return;
     }
     if (!pg.hidden && v.buffered.length) {
@@ -552,7 +559,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (v.currentTime > 0.05 && !(dur > 0 && v.currentTime > dur - 0.75)) keepAt = v.currentTime;
   });
   v.addEventListener('ended', () => {
-    if (playing !== job || pg.hidden) return;
+    if (playing !== job || (pg.hidden && !needsFinalTail(feed))) return;
     const st = feed;
     if (st && st.my === job && st.plan) {
       if (st.paintedAt >= st.plan.m1) return;   // every media byte was in this Blob: a real end
@@ -565,7 +572,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // The viewer pressed play themselves (on the first-frame preview, or during a wait): honour it.
   v.addEventListener('play', () => {
     const st = feed;
-    if (!st || st.my !== job || !st.preview || st.busy || st.done) return;
+    if (!st || st.my !== job || !st.preview || st.busy || (st.done && !needsFinalTail(st))) return;
     st.sounded = true;
     if (!$('s-wait').hidden) say(null);
     if (st.stalled) { st.stalled = false; extend(st, keepAt, true); }
@@ -767,7 +774,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const gen = frameGen;
     return new Promise(done => {
       const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('loadedmetadata', yes); v.removeEventListener('canplay', yes); v.removeEventListener('error', no); done(ok); };
-      const yes = () => { if (gen === frameGen && (v.videoWidth > 0 || v.readyState >= 2)) end(true); };
+      const yes = () => { if (gen === frameGen && v.videoWidth > 0 && v.readyState >= 2) end(true); };
       const no = () => {
         if (gen !== frameGen) return;
         try { window.__bviewMediaErr = v.error ? (v.error.code + ':' + (v.error.message || '')) : 'error-event'; } catch {}
@@ -779,7 +786,7 @@ document.addEventListener('DOMContentLoaded',function(){
       v.addEventListener('canplay', yes);
       v.addEventListener('error', no);
       assign();
-      if (gen === frameGen && v.readyState >= 1 && v.videoWidth > 0) end(true);
+      if (gen === frameGen && v.readyState >= 2 && v.videoWidth > 0) end(true);
     });
   };
   // Count real media-element src assigns (proof: flicker = this climbing every chunk).
@@ -850,7 +857,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // playing, hold the playhead — never mid-play src thrash.
   async function steer(st) {
     const pl = st.plan, my = st.my;
-    if (my !== job || !pl || !st.preview || st.busy || st.done || st.bytes < st.retryAt) return;
+    if (my !== job || !pl || !st.preview || st.busy || (st.done && !needsFinalTail(st)) || st.bytes < st.retryAt) return;
     if (!st.sounded || st.stalled) {
       // A resume after running dry wants a longer run of local media, so a tail that drifts
       // (VBR, interleave) cannot flicker play/stop/play.
@@ -865,8 +872,11 @@ document.addEventListener('DOMContentLoaded',function(){
         return;
       }
       if (!(await extend(st, keepAt, st.sounded))) {
-        st.srcLocked = true;
-        note('start paint deferred to full file (no src thrash)');
+        // extend set retryAt two media seconds ahead. Retry only at that
+        // budget, not on every chunk; one incomplete frame cannot lock a
+        // small video out of progressive playback for the whole download.
+        st.srcLocked = false;
+        note('start paint needs more media; retry after the bounded media budget');
         return;
       }
       st.srcLocked = true;
@@ -912,13 +922,18 @@ document.addEventListener('DOMContentLoaded',function(){
       state.me = state.mime ? me : -1;
       if (!state.mime) return;
     }
-    if (bytes < state.me + EARLY_MDAT) return;
+    // The time plan needs moov and the next box header, not a first-frame
+    // budget. A video smaller than EARLY_MDAT must still get its countdown
+    // and device verdict while it arrives.
+    if (bytes < state.me + 16) return;
     if (!state.plan && !state.planless) {
       state.plan = planOf(prefixOf(parts, bytes, state.me + EARLY_MDAT), state.me);
       const pl = state.plan;
       if (pl) note('moov read: ' + state.me + ' B, mdat ' + pl.m0 + '..' + pl.m1);
       else note('no time plan (no duration, fragmented or moov-last): plays when the whole file is in');
-      if (pl) checkSmooth(pl, my); else state.planless = true;
+      if (pl) checkSmooth(pl, my);
+      else if (bytes < state.me + EARLY_MDAT) return; // more headers may follow padding
+      else state.planless = true;
       paintNerd();
     }
 
@@ -930,6 +945,12 @@ document.addEventListener('DOMContentLoaded',function(){
       note('early frame skipped (large file): one paint at start/finish');
       return;
     }
+    // About one second of media, bounded by the large-file budget. Keep the
+    // single-attempt preview rule; a small video need not download 2 MiB.
+    const previewMdat = state.plan
+      ? Math.min(EARLY_MDAT, Math.max(256 << 10, (state.plan.m1 - state.plan.m0) / state.plan.dur))
+      : EARLY_MDAT;
+    if (!state.preview && bytes < state.me + previewMdat) return;
     // Phase A -- at most ONE early paint. 8K needs far more than EARLY_MDAT for a
     // decodable first frame; retrying every chunk (clearing or reassigning src) was the
     // rapid flicker (live: __bviewSrcAssigns 220 in 8s, videoWidth stuck at 0).
