@@ -55,9 +55,20 @@ test('direct: real frames, a stable range URL, seek and connection reuse; record
     await page.waitForFunction(()=>document.querySelector('#v').currentTime>7.2 && !document.querySelector('#v').seeking);
     assert.equal(await page.locator('#v').getAttribute('src'),src);
     assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('bnr.bview.playlist.v1')).videos.length),1);
+    await page.evaluate(()=>{document.body.dataset.reg='cypherpunk';document.dispatchEvent(new Event('bregister'));});
+    await page.waitForFunction(()=>document.querySelector('#etMethod').textContent.includes('WebRTC'));
+    const facts=await page.evaluate(()=>{const e=window.__bviewEngine();return {direct:e.direct,video:e.video,receipt:document.querySelector('#etReceipt').textContent,pipe:document.querySelector('#etPipe').textContent,wide:document.documentElement.scrollWidth,vw:innerWidth};});
+    assert.ok(facts.direct.completed>0);assert.ok(facts.direct.requests>=facts.direct.completed);
+    assert.ok(facts.direct.readBytes>=facts.direct.uniqueBytes);assert.equal(facts.direct.size,MEDIA.length);
+    assert.ok(facts.direct.firstReadMs>=0);assert.ok(facts.direct.firstFrameMs>=0);assert.equal(facts.video.srcChanges,1);
+    assert.ok(facts.video.width>0);assert.ok(facts.video.ahead>=0);assert.ok(facts.video.quality.total>0);
+    assert.match(facts.receipt,/unique plaintext/);assert.match(facts.receipt,/not measured · plaintext bytes are not network bandwidth/);
+    assert.match(facts.pipe,/native ranges/);assert.doesNotMatch(facts.pipe,/rest ÷ rate/);
+    assert.ok(facts.wide<=facts.vw+1,'direct metrics must fit the mobile cypherpunk front');
     await page.fill('#addr','cd'.repeat(32)); await page.click('button[type=submit]');
     await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0 && window.__bviewEngine().path==='webrtc');
     assert.equal(await page.evaluate(()=>window.connections),1);
+    assert.equal(await page.evaluate(()=>window.__bviewEngine().direct.reused),true);
     assert.ok(await page.evaluate(()=>window.closedReaders>=1));
     assert.equal(relay.length,0); assert.deepEqual(errors,[]);
     console.log('# direct range playback: frames advanced, seek >7.2s, stable src, one connection across two addresses, old reader closed, no relay');
@@ -80,6 +91,8 @@ test('a direct decoder error falls back once and retains the playhead',async()=>
     await page.evaluate(()=>{const v=document.querySelector('#v');v.addEventListener('playing',()=>{if(window.__bviewEngine().path==='stream'&&window.firstRelayPlayhead===undefined)window.firstRelayPlayhead=v.currentTime;});v.dispatchEvent(new Event('error'));});
     await page.waitForFunction(()=>window.firstRelayPlayhead!==undefined,null,{timeout:20000});
     assert.ok(await page.evaluate(()=>window.firstRelayPlayhead>=4),'the first resumed frame must retain the playhead, not restart and eventually reach it');
+    const receipt=await page.evaluate(()=>window.__bviewEngine().direct);
+    assert.equal(receipt.fallback,'Direct media error');assert.ok(receipt.playhead>=4);assert.ok(receipt.firstFrameMs>=0);assert.ok(receipt.uniqueBytes>0);
     assert.equal(relay.length,1); assert.match(await page.locator('#playback-status').textContent(),/Continuing through the relay/); assert.deepEqual(errors,[]);
   } finally {await ctx.close();}
 });
