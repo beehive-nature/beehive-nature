@@ -1041,19 +1041,26 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key: derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
+  <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
+  Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
+  never invents one; connect an injected Arweave wallet or bind a public address.
   Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
   </details>
-  <div class="chips" id="forge-chips" data-wl-tech>
+  <!-- forge chips + quick-adds stay visible in bee register: public hive/ar
+       cards are the New-bee path. Custom context typing stays available too. -->
+  <div class="chips" id="forge-chips">
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
-  <div class="row" data-wl-tech>
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · anything:anything" spellcheck="false">
+  <div class="row">
+    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
     <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
+    <button id="forge-hive" style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
+    <button id="forge-ar" style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
 </section>
@@ -2337,11 +2344,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function ensureCtx(c){ if(CONTEXTS.indexOf(c)<0){CONTEXTS.push(c);saveContexts()} }
   function seedContexts(){
     if(!SOUL)return;
-    /* one soul, every rail — the four value rails plus comms, all from the
-       same masterPRK, all present the moment the keychain connects */
+    /* one soul, every rail — value rails + comms from masterPRK, plus the two
+       public-only rails (hive account name, arweave address binding). AR never
+       pretends RSA falls out of the PRK. */
     ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
+    ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
     $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
+    if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
   function npubFromSeed(seed){ // NIP-19: bech32('npub', x-only pubkey of the secp256k1 pair)
@@ -2349,7 +2359,54 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pub=BN.secp.getPublicKey(seed,true); // 33B compressed — x-only = [1..33]
     return BN.bech32.encode('npub',BN.bech32.toWords(pub.slice(1,33)));
   }
+  /* Public-only forge rails. hive: is the account name (balances already use
+     SOUL). ar: is an Arweave address (43-char base64url) — never a private JWK,
+     never invented RSA from masterPRK. Bound address lives in localStorage. */
+  function hiveNameOf(ctx){
+    var n=(ctx||'').replace(/^hive:/,'');
+    return n||SOUL||'';
+  }
+  function arBindKey(ctx){ return 'bnr_ar_pub:'+(ctx||('ar:'+(SOUL||''))) }
+  function loadArPublic(ctx){
+    try{ var v=localStorage.getItem(arBindKey(ctx)); return (v&&v.length===43)?v:null }catch(e){ return null }
+  }
+  function saveArPublic(ctx, addr){
+    try{ if(addr) localStorage.setItem(arBindKey(ctx), addr); else localStorage.removeItem(arBindKey(ctx)) }catch(e){}
+  }
+  function vaultArPublic(){
+    try{
+      if(!window.BNRVAULT||!BNRVAULT.isUnlocked()) return null;
+      var e=BNRVAULT.list().filter(function(x){ return x.type==='arweave'&&x.meta&&x.meta.address })[0];
+      return e?e.meta.address:null;
+    }catch(e){ return null }
+  }
+  function isArAddress(s){ return typeof s==='string'&&s.length===43&&/^[A-Za-z0-9_-]{43}$/.test(s) }
+  async function connectArweaveInject(ctx){
+    var w=window.arweaveWallet;
+    if(!w||typeof w.getActiveAddress!=='function'){
+      throw new Error('no Arweave wallet injected — open Wander / arweave.app style extension, or bind a public address');
+    }
+    if(typeof w.connect==='function'){
+      try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e){ /* older injects skip connect */ }
+    }
+    var addr=await w.getActiveAddress();
+    if(!isArAddress(addr)) throw new Error('injected wallet returned no 43-char Arweave address');
+    saveArPublic(ctx, addr);
+    return addr;
+  }
   function deriveFor(ctx){
+    /* hive: public account name — no private material, works without MPRK */
+    if(/^hive:/.test(ctx)){
+      var hn=hiveNameOf(ctx);
+      if(!hn) return null;
+      return {kind:'Hive account', value:hn, publicOnly:true};
+    }
+    /* ar: public address only — RSA-JWK cannot derive from masterPRK */
+    if(/^ar:/.test(ctx)){
+      var addr=loadArPublic(ctx)||vaultArPublic();
+      if(addr&&isArAddress(addr)) return {kind:'Arweave address', value:addr, publicOnly:true, source:loadArPublic(ctx)?'bound':'vault-meta'};
+      return {kind:'Arweave address', value:null, publicOnly:true, needsConnect:true};
+    }
     if(!MPRK)return null;
     /* sol: is the one context on a DIFFERENT curve — a Solana address is an
        ed25519 key, so it takes deriveRecordKey, not deriveK1Key. Handled first
@@ -2384,13 +2441,57 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pk=BN.PrivateKey.fromString(w);
     return {kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:pk.getPublicKey().toLegacyString(), pubK1:pk.getPublicKey().toString()};
   }
+  function forgeChipNote(d){
+    if(!d) return 'context saved, key never stored';
+    if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
+    if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
+    if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
+    if(d.kind==='Solana') return 'ed25519 base58';
+    if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
+    if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
+    if(d.kind==='Vaulta K1'||d.kind==='K1') return 'eosio public key';
+    return 'public material only';
+  }
+  function renderArConnectChip(box, c){
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
+    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Arweave address</span></div>'+
+      '<div class="cv" style="color:var(--ink)">connect a public AR address</div>'+
+      '<div class="cx" style="margin-top:6px">RSA-JWK cannot derive from masterPRK — public only</div>'+
+      '<div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap">'+
+        '<button type="button" class="gold" data-ar-inject style="font-size:10px;min-height:32px">connect Arweave wallet</button>'+
+        '<input data-ar-pub class="small" placeholder="or paste 43-char public address" spellcheck="false" autocomplete="off" style="flex:1;min-width:160px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px">'+
+        '<button type="button" data-ar-bind style="font-size:10px;min-height:32px">bind public</button>'+
+      '</div>'+
+      '<div class="cx" data-ar-stat style="margin-top:4px;min-height:14px">extension inject if present · else public address field · never a private JWK</div>';
+    var inj=el.querySelector('[data-ar-inject]');
+    var inp=el.querySelector('[data-ar-pub]');
+    var bind=el.querySelector('[data-ar-bind]');
+    var st=el.querySelector('[data-ar-stat]');
+    inj.onclick=function(ev){
+      ev.stopPropagation();
+      st.textContent='asking the injected Arweave wallet…';
+      connectArweaveInject(c).then(function(addr){
+        st.textContent='✓ bound '+addr.slice(0,10)+'…';
+        renderForge();
+        if(typeof readArBound==='function') readArBound(addr);
+      }).catch(function(err){ st.textContent=err.message||String(err); st.style.color='var(--amber)' });
+    };
+    bind.onclick=function(ev){
+      ev.stopPropagation();
+      var a=(inp.value||'').trim();
+      if(!isArAddress(a)){ st.textContent='need a 43-char Arweave address (public only)'; st.style.color='var(--amber)'; return }
+      saveArPublic(c, a);
+      st.textContent='✓ public address bound';
+      renderForge();
+      if(typeof readArBound==='function') readArBound(a);
+    };
+    inp.onclick=function(ev){ ev.stopPropagation() };
+    inp.onkeydown=function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); bind.click() } };
+    box.appendChild(el);
+  }
   function renderForge(){
     var box=$('forge-chips');
     if(!CONTEXTS.length){box.innerHTML='<div class="law">no contexts yet — forge one below</div>';return}
-    if(!MPRK){
-      box.innerHTML=CONTEXTS.map(function(c){return '<div class="chip"><div class="cc">'+c+'</div><div class="cv" style="color:var(--faint)">derives when keychain connects</div><div class="cx">context saved, key never stored</div></div>'}).join('');
-      return;
-    }
     box.innerHTML='';
     CONTEXTS.forEach(function(c){
       /* PER-CONTEXT ISOLATION. One rail that cannot derive must not take the
@@ -2409,12 +2510,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         box.appendChild(bad);
         return;
       }
+      if(!d){
+        var wait=document.createElement('div'); wait.className='chip';
+        wait.innerHTML='<div class="cc">'+esc(c)+'</div><div class="cv" style="color:var(--faint)">derives when keychain connects</div><div class="cx">context saved, key never stored</div>';
+        box.appendChild(wait);
+        return;
+      }
+      if(d.needsConnect){ renderArConnectChip(box, c); return }
+      var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
-      el.innerHTML='<div class="cc">'+c+' <span style="color:var(--faint)">· '+d.kind+'</span></div>'+
-        '<div class="cv">'+d.value+'</div>'+
-        '<div class="cx">'+(d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key')+'</div>';
+      el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
+        '<div class="cv">'+esc(d.value)+'</div>'+
+        '<div class="cx">'+esc(note)+'</div>';
       el.onclick=function(){
-        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key'},1200)}catch(e){}
+        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=note},1200)}catch(e){}
       };
       box.appendChild(el);
       if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
@@ -2423,6 +2532,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $('ethnode').removeAttribute('stroke-dasharray');
         readEvm(EVMADDR);
       }
+      if(/^ar:/.test(c)&&d.value&&typeof readArBound==='function') readArBound(d.value);
     });
   }
   $('forge-go').onclick=function(){
@@ -2436,6 +2546,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+SOUL+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
+  $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
+  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before
@@ -5341,13 +5453,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
   }
 
+  /* AR public balance from a bound forge address — no JWK paste required for reads */
+  async function readArBound(addr){
+    if(!isArAddress(addr)) return;
+    var balEl=$('ar-bal'), statEl=$('ar-stat'), infoEl=$('ar-info');
+    try{
+      if(infoEl) infoEl.textContent='public forge address '+addr.slice(0,10)+'… — reads stay keyless';
+      if(statEl){ statEl.textContent='reading…'; statEl.className='stat' }
+      var winston=null;
+      if(window.BNRAR&&typeof BNRAR.balance==='function') winston=await BNRAR.balance(addr);
+      else {
+        var r=await fetchT('https://arweave.net/wallet/'+encodeURIComponent(addr)+'/balance');
+        winston=await r.text();
+      }
+      var ar=(Number(winston)/1e12);
+      if(balEl) balEl.textContent=(isFinite(ar)?ar.toFixed(6):'?')+' AR';
+      if(statEl){ statEl.textContent='✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
+      $('ch-arweave').classList.add('connected');
+    }catch(e){
+      if(statEl){ statEl.textContent='AR read failed'; statEl.className='stat err'; wlRead(statEl,false) }
+    }
+  }
+
   async function readAll(){
     if(!SOUL)return;
     /* the soul is known and the reads are in flight: say so NOW, not after the round-trip */
     document.body.setAttribute('data-wl-soul','true');
     ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
-    await Promise.all([readVaulta(SOUL), readHive(SOUL)]);
+    var arCtx='ar:'+SOUL;
+    var arPub=loadArPublic(arCtx)||vaultArPublic();
+    await Promise.all([readVaulta(SOUL), readHive(SOUL), arPub?readArBound(arPub):Promise.resolve()]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
     $('sum-soul').textContent=SOUL+'.b';document.body.setAttribute('data-wl-soul','true');
     $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
@@ -5361,6 +5497,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
     acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
     if(K1)deriveK1();
+    seedContexts(); renderForge();
     readAll();
   };
   $('wq').addEventListener('keydown',function(e){if(e.key==='Enter')$('wgo').click()});
@@ -5398,7 +5535,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
