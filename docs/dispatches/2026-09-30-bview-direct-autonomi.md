@@ -72,3 +72,10 @@ explicit opt-in useful viewer upload with bounded x0x discovery and WebRTC
 chunk delivery, verify hashes and availability, measure departures/admission
 bursts, and retire relay capacity only after reliable field evidence. Identity
 and private personal-data persistence belong to the shared bzDiD/bData lane.
+
+Commit provenance: implementation was performed by Codex. The first commit
+inherited the worktree's founder author AND committer settings; the hook therefore
+labelled it founder-typed. That label is not evidence the founder typed the code.
+The Co-authored-by Codex trailer identifies the seat. This correction is a
+normal descendant commit with the seat's committer identity; no pushed history
+was rewritten.
