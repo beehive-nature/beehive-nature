@@ -79,3 +79,10 @@ labelled it founder-typed. That label is not evidence the founder typed the code
 The Co-authored-by Codex trailer identifies the seat. This correction is a
 normal descendant commit with the seat's committer identity; no pushed history
 was rewritten.
+
+Additional real-network comparison: the founder's current 214 MB video reached
+the sustained-stall condition on the direct candidate, then automatically
+entered the relay fallback. Exact first-frame/playhead timing was not captured
+in that initial observation. Fallback status now retains those timings for
+subsequent attempts, rather than discarding them during the relay reset. This
+negative field result is another reason the default remains Relay.

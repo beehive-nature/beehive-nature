@@ -1411,7 +1411,8 @@ document.addEventListener('DOMContentLoaded',function(){
       const fallback = reason => {
         if (my !== job || directSession !== session) return;
         const at=v.currentTime||0, paused=v.paused;
-        view(address, { relay:true, resumeAt:at, paused, reason });
+        const result=reason + ' at ' + at.toFixed(1) + ' s' + (metrics.ttffMs == null ? '' : ' (first frame ' + (metrics.ttffMs/1000).toFixed(1) + ' s)');
+        view(address, { relay:true, resumeAt:at, paused, reason:result });
       };
       const ready = () => { clearTimeout(stallTimer); session.stalled=false; session.sounded=true; pub(); };
       const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); clearTimeout(stallTimer); stallTimer=setTimeout(() => fallback('Direct playback stalled'),15000); };
