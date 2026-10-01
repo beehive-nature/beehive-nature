@@ -153,6 +153,8 @@ await page.waitForTimeout(800);
 // ── E-2 Add to manifest ──────────────────────────────────────────────────
 check('Add to manifest card is present', !!(await page.$('[data-bdata-add-manifest]')));
 check('drop zone + browse control present', !!(await page.$('[data-bdata-drop]')) && !!(await page.$('[data-bdata-file]')));
+check('wallet card is on the same surface', !!(await page.$('[data-bdata-wallet]')));
+check('Load wallet control is present (or ready/missing honest state)', !!(await page.$('[data-bdata-wal-go], [data-bdata-wal-ok], [data-bdata-wal-miss]')));
 
 // too-large prose (synthetic File via input)
 const tooLargeOk = await page.evaluate(async (max) => {
@@ -191,6 +193,32 @@ const mismatch = await page.evaluate(async (bridge) => {
   return r.status;
 }, bridge);
 check('mock intake refuses hash mismatch with 409', mismatch === 409);
+
+// -- E-2b unreachable shelf -> honest browser-local receipt (no fail box) --
+await page.goto(origin + '/bdata.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('[data-bdata-add-manifest]', { timeout: 10000 });
+await page.evaluate(() => localStorage.setItem('bregister', 'bee'));
+// setBridge via the (often-hidden) bridge field — init script must not overwrite
+await page.waitForFunction(() => !!document.getElementById('bdata-bridge'), { timeout: 10000 });
+await page.evaluate(() => {
+  const el = document.getElementById('bdata-bridge');
+  el.value = 'http://127.0.0.1:8807';
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+});
+await page.waitForTimeout(200);
+const pointed = await page.evaluate(() => document.getElementById('bdata-bridge').value);
+check('bridge field points at live loopback for unreachable path', pointed === 'http://127.0.0.1:8807');
+const browserPayload = 'phase-e-browser-shelf-v1';
+await page.setInputFiles('[data-bdata-file]', { name: 'shelf.txt', mimeType: 'text/plain', buffer: Buffer.from(browserPayload) });
+await page.waitForSelector('[data-bdata-intake-preview]', { timeout: 8000 });
+const intakeBefore = hits.intake;
+await tap('[data-bdata-intake-go]');
+await page.waitForSelector('[data-bdata-intake-ok]', { timeout: 10000 });
+const shelfKind = await page.getAttribute('[data-bdata-intake-ok]', 'data-bdata-intake-shelf');
+check('unreachable live shelf falls back to browser receipt', shelfKind === 'browser' && hits.intake === intakeBefore, 'shelf=' + shelfKind);
+check('New bee paints no intake fail box on unreachable shelf', !(await page.$('[data-bdata-intake-err]')) && !(await page.$('[data-bdata-fail]')));
+const okWords = await words('[data-bdata-intake-ok]');
+check('honest browser copy does not claim Autonomi', /kept on this device/i.test(okWords) && !/Nothing was uploaded to Autonomi/i.test(okWords), okWords.slice(0, 120));
 
 // ── E-1 pay-with-wallet after Authorized ─────────────────────────────────
 await page.goto(origin + '/bdata.html', { waitUntil: 'domcontentloaded' });
