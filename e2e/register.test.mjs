@@ -164,6 +164,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
        2026-09-21): no shell, one hop, the destination's shell loads. No gate
        follows this redirect yet. */
     if(p==='surfaces/watch-ant.html')continue;
+    /* onboarding.html is the same kind of shim, to onboarding/index.html
+       (chief/onboarding-link-wire, 2026-10-01): no shell, one hop, the
+       ceremony's shell loads. Proven by e2e/onboarding-link-wire.mjs. */
+    if(p==='surfaces/onboarding.html')continue;
     const tags=[...read(p).matchAll(/<script\b[^>]*\bsrc=["']([^"']*\b(?:tour|register)\.js(?:\?[^"']*)?)["'][^>]*>/gi)];
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
