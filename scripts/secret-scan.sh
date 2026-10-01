@@ -191,14 +191,23 @@ diff)
     # appended a key rode past the scan (rc=0). ACMR + --no-renames: renames
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
-    names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
-        grep '^+' | grep -v '^+++')
-    hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
-    pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
-    wif=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$WIF_RE" | while IFS= read -r lh; do
+    # THE SCAN READS NO CONFIG AND NO ATTRIBUTES (bFUzZ #215 r3 C1-C3, ruled 06:27Z 2026-10-01).
+    # A porcelain diff obeys the repo and the user: color.diff/color.ui=always put escapes
+    # before every "+", diff.external hands the diff to another program, and `* -diff` in
+    # .git/info/attributes makes every file binary. Each left this mode at "0 added lines
+    # scanned" while a planted key committed. These four flags take all three away.
+    # --text puts a staged binary's bytes in the stream, and a grep that meets a NUL calls the
+    # whole input binary and prints no line (bFUzZ A1/A2, ruled 06:31Z): one PNG beside a key
+    # and the scan read 0 lines. So every grep below that reads this stream is -a, and the
+    # NULs are dropped before the stream is kept.
+    names=$(git diff --cached --no-color --no-ext-diff --no-textconv --text --name-only --diff-filter=ACMR --no-renames | grep -aEi "$NAME_RE")
+    added=$(git diff --cached --no-color --no-ext-diff --no-textconv --text --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
+        grep -a '^+' | grep -av '^+++' | tr -d '\000')
+    hex=$(printf '%s\n' "$added" | grep -avF -e "$MARK" -e "$MARK2" | grep -avE "$PROPTEST_RE" | grep -anE "$HEX_RE")
+    pem=$(printf '%s\n' "$added" | grep -anE "$PEM_RE")
+    wif=$(printf '%s\n' "$added" | grep -avF -e "$MARK" -e "$MARK2" | grep -anE "$WIF_RE" | while IFS= read -r lh; do
         aln=${lh%%:*}; acontent=${lh#*:}
-        for tok in $(printf '%s\n' "$acontent" | grep -oE "$WIF_RE"); do
+        for tok in $(printf '%s\n' "$acontent" | grep -aoE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")
           case "$cls" in
             VALID*) echo "added-line $aln: [REDACTED key-shaped checksum-VALID]" ;;
@@ -210,9 +219,18 @@ diff)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
-    pem=$(git grep -InE "$PEM_RE")
-    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+    # BINARY IS DECIDED BY CONTENT, NEVER BY ATTRIBUTES (bFUzZ B1/B2, ruled 06:31Z 2026-10-01).
+    # `git grep -I` skips every path an attribute marks -diff or binary: a tracked or untracked
+    # .gitattributes, or .git/info/attributes, emptied this scan, and main's own .gitattributes
+    # had kept two SVGs out of it since they were added. info/attributes cannot be overridden
+    # inside git (--attr-source, GIT_ATTR_SOURCE, core.attributesFile=/dev/null: all still 0),
+    # so git only LISTS the files, with the same pathspec excludes, and grep reads them: -I
+    # under LC_ALL=C skips a file that holds a NUL and nothing else decides. No color either,
+    # since this grep is not git's. -s: a tracked file deleted from the work tree is not a hit.
+    tgrep() { _tp=$1; shift; git ls-files -z -- "$@" | LC_ALL=C xargs -0 grep -IsnHE -e "$_tp" --; }
+    hex=$(tgrep "$HEX_RE" ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    pem=$(tgrep "$PEM_RE")
+    wif=$(tgrep "$WIF_RE" ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
         tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
         for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")
@@ -283,7 +301,7 @@ fi
 # content. A silent exit 0 is indistinguishable from a scan that never ran -
 # the WSL/worktree vacuity class this guard family closes.
 if [ "$mode" = "diff" ]; then
-    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -c .) added lines scanned"
+    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -ac .) added lines scanned"
 else
     echo "secret-scan: clean - tree mode, $(git ls-files | wc -l) tracked files scanned"
 fi

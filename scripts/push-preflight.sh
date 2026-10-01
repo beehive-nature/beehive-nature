@@ -184,7 +184,8 @@ _exec_bit_probe() {
 # row read "wired" rc=0, and a planted 64-hex committed. A list of those scripts would miss
 # the next one somebody adds, and keyshape.sh is SOURCED through $(dirname "$0"), which no
 # search for "scripts/" in the hook would find. So the row runs this box's own hook file, from
-# this checkout's top, the way git runs it, against a THROWAWAY git dir whose work tree is this
+# this checkout's top, BY PATH as git does (so its line 1 decides what runs, bFUzZ F2 on round 3),
+# against a THROWAWAY git dir whose work tree is this
 # checkout. Every file the hook reaches, at any depth, is the one on this disk. The real index,
 # objects and refs are not touched: the planted blob is written into the throwaway only.
 # Each hook must refuse its planted cases AND name the gate that caught them — an rc from a
@@ -225,10 +226,13 @@ Co-authored-by: preflight hook probe <probe@invalid>"
       GIT_COMMITTER_NAME='preflight hook probe'; GIT_COMMITTER_EMAIL='probe@invalid'
       export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
       if [ -n "$5" ]; then
-        printf '%s\n' "$5" > "$_ft/$1.msg"; sh "$_ff" "$_ft/$1.msg"
+        printf '%s\n' "$5" > "$_ft/$1.msg"
+        if [ -x "$_ff" ]; then "$_ff" "$_ft/$1.msg"; else sh "$_ff" "$_ft/$1.msg"; fi
       else
-        sh "$_ff"
+        if [ -x "$_ff" ]; then "$_ff"; else sh "$_ff"; fi
       fi
+      # A file that is not executable here is read with sh instead: git would not run it at all,
+      # and the mode rows below name it DEAD. Firing it by sh only judges what it would do.
     ) > "$_ft/$1.out" 2>&1
     echo "$?" > "$_ft/$1.rc"
   }
@@ -880,6 +884,32 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
          && git -c core.fileMode=false diff --quiet HEAD -- .githooks/pre-commit; then
         echo yes > u.landed; else echo no > u.landed; fi
       sh scripts/push-preflight.sh --hooks > u.out 2>&1; echo "$?" > u.rc
+
+      # z: the hook COMMITTED with only line 1 changed, to #!/bin/true (bFUzZ F2, round 3). Its
+      # text still runs the scan under sh, so a row that fires it with sh reads it wired; git
+      # execs it and runs /bin/true. Landed = line 1 is that, every other line is the copy's,
+      # mode 100755 in the index, and the work tree equals HEAD. The hazard is then committed.
+      git config core.hooksPath .nohooks
+      { echo '#!/bin/true'; sed 1d pc.orig; } > .githooks/pre-commit
+      git add .githooks/pre-commit >/dev/null 2>&1
+      git update-index --chmod=+x .githooks/pre-commit >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > z.commit 2>&1
+      git config core.hooksPath .githooks
+      chmod +x .githooks/pre-commit 2>/dev/null
+      _zl1=$(sed -n 1p .githooks/pre-commit); _zrest=$(sed 1d .githooks/pre-commit); _zorig=$(sed 1d pc.orig)
+      if [ "$_zl1" = '#!/bin/true' ] && [ "$_zrest" = "$_zorig" ] \
+         && [ "$(git ls-files -s -- .githooks/pre-commit | cut -c1-6)" = 100755 ] \
+         && git -c core.fileMode=false diff --quiet HEAD -- .githooks/pre-commit; then
+        echo yes > z.landed; else echo no > z.landed; fi
+      sh scripts/push-preflight.sh --hooks > z.out 2>&1; echo "$?" > z.rc
+      git rev-list --count HEAD > z.n0
+      printf 'planted under z: %s\n' "$_hex" > badz.txt; git add badz.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > z.hazard 2>&1
+      git rev-list --count HEAD > z.n1
     )
     _R="$H/r"
     _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
@@ -1092,10 +1122,127 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
     else
       echo "  P18g known-BAD  refuse-everything hook -> rc=$_urc. A hook that refuses every commit was called wired, or was refused for another reason"; st=1
     fi
+    # P20 — line 1 decides: a committed hook whose shebang runs /bin/true is refused, and git
+    # really does run /bin/true for it (the hazard commits). Before the row fired by path it
+    # read this hook "2 of 2 wired".
+    _zrc=$(_rd z.rc); _zn0=$(_rd z.n0); _zn1=$(_rd z.n1)
+    if [ "$(_rd z.landed)" != yes ]; then
+      echo "  P20 known-BAD  #!/bin/true hook -> it did NOT land as HEAD's hook, so this arm judged nothing"; st=1
+    elif [ "$_zrc" = 1 ] && grep -q "FIRED    pre-commit" "$_R/z.out" 2>/dev/null && [ "$_zn1" = "$((${_zn0:-0} + 1))" ]; then
+      echo "  P20 known-BAD  hook COMMITTED with line 1 = #!/bin/true -> refused rc=1 naming FIRED pre-commit, and a planted 64-hex COMMITTED under it ($_zn0 -> $_zn1) (correct)"
+    else
+      echo "  P20 known-BAD  #!/bin/true hook -> rc=$_zrc, count $_zn0 -> $_zn1. The row ran the hook's text instead of what git runs, or git did not run /bin/true"; st=1
+    fi
     rm -rf "$H"
     if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
     else echo "  P12-P14 cleanup -> throwaway tree removed (correct)"; fi
   fi
+  fi
+
+  # ── P19: THE SCANNER READS NO CONFIG AND NO ATTRIBUTES (bFUzZ #215 round 3 C1-C3, A, B;
+  # ruled by bee-laborer 06:27Z and 06:31Z 2026-10-01). Each arm builds a throwaway repo, sets ONE
+  # thing on that box, stages (diff) or commits (tree) a planted 64-hex, and runs THIS checkout's
+  # scripts/secret-scan.sh over it. The judge is the scanner's own BLOCKED line AND its rc, and
+  # each arm first asserts the thing it set took. At d79f246a's scanner C1-C4 and B1-B2 read
+  # "clean"; with the four diff flags and no -a, A1-A2 read "clean" (receipt). P19g is the
+  # control for A: a real binary from this tree, alone, is read and is not red.
+  _p19s=$(dirname "$SELF"); _p19top=$(cd "$_p19s/.." && pwd)
+  _p19png="$_p19top/assets/house/house-achievement.png"
+  _p19t=$(mktemp -d 2>/dev/null) || _p19t=''
+  if [ -z "$_p19t" ] || [ ! -f "$_p19png" ]; then
+    echo "  P19a-P19k NOT CONSTRUCTIBLE HERE — no throwaway directory, or the named PNG"
+    echo "     (assets/house/house-achievement.png) is not in this checkout"
+    _skipped="$_skipped P19a P19b P19c P19d P19e P19f P19g P19h P19i P19j P19k"
+  else
+    printf '[color]\n\tui = always\n' > "$_p19t/global.cfg"
+    _p19hex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
+    _p19() {  # $1 kind, $2 diff|tree
+      (
+        unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CONFIG_GLOBAL
+        R="$_p19t/$1"; git init -q "$R" >/dev/null 2>&1 || exit 9; cd "$R" || exit 9
+        git config core.autocrlf false; git config user.name p19; git config user.email p19@invalid
+        case $1 in
+          a1) printf 'k = %s\n' "$_p19hex" > a-hex.txt; printf 'x\000y\n' > z.bin ;;
+          a2) printf 'k = %s\n' "$_p19hex" > z-hex.txt; printf 'x\000y\n' > a.bin ;;
+          png) cp "$_p19png" house.png || exit 9 ;;
+          *) printf 'k = %s\n' "$_p19hex" > y.txt ;;
+        esac
+        case $1 in
+          c1) git config color.diff always; [ "$(git config color.diff)" = always ] || exit 8 ;;
+          c2) git config diff.external true; [ "$(git config diff.external)" = true ] || exit 8 ;;
+          c3) printf '* -diff\n' > .git/info/attributes; git check-attr diff -- y.txt | grep -q ': unset$' || exit 8 ;;
+          c4) [ "$(GIT_CONFIG_GLOBAL="$_p19t/global.cfg" git config color.ui)" = always ] || exit 8 ;;
+          a1|a2) od -An -c ./*.bin | grep -q '\\0' || exit 8 ;;
+        esac
+        git add -A >/dev/null 2>&1 || exit 9
+        if [ "$2" = tree ]; then
+          git -c core.hooksPath=/dev/null commit -q -m base >/dev/null 2>&1 || exit 9
+          case $1 in
+            b1) printf '*.txt -diff\n' > .gitattributes; git check-attr diff -- y.txt | grep -q ': unset$' || exit 8 ;;
+            b2) printf 'y.txt binary\n' > .git/info/attributes; git check-attr binary -- y.txt | grep -q ': set$' || exit 8 ;;
+          esac
+        fi
+        echo yes > "$_p19t/$1.built"
+        if [ "$1" = c4 ]; then GIT_CONFIG_GLOBAL="$_p19t/global.cfg" sh "$_p19s/secret-scan.sh" "$2"
+        else sh "$_p19s/secret-scan.sh" "$2"; fi
+      ) > "$_p19t/$1.out" 2>&1
+      echo "$?" > "$_p19t/$1.rc"
+    }
+    # 0 = built and BLOCKED by the scan; 2 = not built; 1 = else
+    _p19j() {
+      [ "$(cat "$_p19t/$1.built" 2>/dev/null)" = yes ] || return 2
+      [ "$(cat "$_p19t/$1.rc" 2>/dev/null)" = 1 ] && grep -q '^BLOCKED: 48+ char hex' "$_p19t/$1.out" 2>/dev/null && return 0
+      return 1
+    }
+    for _k in c1 c2 c3 c4 a1 a2 png ctl; do _p19 "$_k" diff; done
+    for _k in b1 b2 tctl; do _p19 "$_k" tree; done
+    _p19j c1; case $? in
+      0) echo "  P19a known-BAD  color.diff=always on the box, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19a known-BAD  color.diff=always -> not BLOCKED, or not built (rc=$(cat "$_p19t/c1.rc" 2>/dev/null)). Color escapes hid every added line from the scan"; st=1 ;;
+    esac
+    _p19j c2; case $? in
+      0) echo "  P19b known-BAD  diff.external=true on the box, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19b known-BAD  diff.external=true -> not BLOCKED, or not built (rc=$(cat "$_p19t/c2.rc" 2>/dev/null)). An external diff took the stream away from the scan"; st=1 ;;
+    esac
+    _p19j c3; case $? in
+      0) echo "  P19c known-BAD  '* -diff' in .git/info/attributes, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19c known-BAD  '* -diff' in info/attributes -> not BLOCKED, or not built (rc=$(cat "$_p19t/c3.rc" 2>/dev/null)). An attribute made the key's file binary to the scan"; st=1 ;;
+    esac
+    _p19j c4; case $? in
+      0) echo "  P19d known-BAD  color.ui=always in a GLOBAL config, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19d known-BAD  global color.ui=always -> not BLOCKED, or not built (rc=$(cat "$_p19t/c4.rc" 2>/dev/null)). A seat's own ~/.gitconfig blinded the scan"; st=1 ;;
+    esac
+    _p19j a1; case $? in
+      0) echo "  P19e known-BAD  64-hex staged with a NUL-bearing binary sorting AFTER it -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19e known-BAD  64-hex beside a binary (after) -> not BLOCKED, or not built (rc=$(cat "$_p19t/a1.rc" 2>/dev/null)). One NUL in the stream made grep read nothing"; st=1 ;;
+    esac
+    _p19j a2; case $? in
+      0) echo "  P19f known-BAD  64-hex staged with a NUL-bearing binary sorting BEFORE it -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19f known-BAD  64-hex beside a binary (before) -> not BLOCKED, or not built (rc=$(cat "$_p19t/a2.rc" 2>/dev/null)). One NUL in the stream made grep read nothing"; st=1 ;;
+    esac
+    _pgn=$(sed -n 's/^secret-scan: clean - diff mode, \([0-9][0-9]*\) added lines scanned$/\1/p' "$_p19t/png.out" 2>/dev/null)
+    if [ "$(cat "$_p19t/png.built" 2>/dev/null)" = yes ] && [ "$(cat "$_p19t/png.rc" 2>/dev/null)" = 0 ] && [ "${_pgn:-0}" -gt 0 ]; then
+      echo "  P19g CONTROL    assets/house/house-achievement.png staged ALONE -> clean rc=0, $_pgn lines read as text, so P19e/f are the key and not the binary (correct)"
+    else
+      echo "  P19g CONTROL    a tracked PNG staged alone -> rc=$(cat "$_p19t/png.rc" 2>/dev/null), lines read '$_pgn'. A real binary is red, or was not read at all"; st=1
+    fi
+    _p19j b1; case $? in
+      0) echo "  P19h known-BAD  untracked .gitattributes '*.txt -diff', 64-hex committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19h known-BAD  .gitattributes -diff, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/b1.rc" 2>/dev/null)). An attribute took the file out of the tree scan"; st=1 ;;
+    esac
+    _p19j b2; case $? in
+      0) echo "  P19i known-BAD  'y.txt binary' in .git/info/attributes, 64-hex committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19i known-BAD  info/attributes binary, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/b2.rc" 2>/dev/null)). An attribute took the file out of the tree scan"; st=1 ;;
+    esac
+    _p19j ctl; case $? in
+      0) echo "  P19j CONTROL    nothing set, 64-hex staged -> BLOCKED rc=1, the diff rig is sound (correct)" ;;
+      *) echo "  P19j CONTROL    nothing set, diff mode -> not BLOCKED (rc=$(cat "$_p19t/ctl.rc" 2>/dev/null)). The rig, not the setting, decides P19a-f"; st=1 ;;
+    esac
+    _p19j tctl; case $? in
+      0) echo "  P19k CONTROL    nothing set, 64-hex committed, tree mode -> BLOCKED rc=1, the tree rig is sound (correct)" ;;
+      *) echo "  P19k CONTROL    nothing set, tree mode -> not BLOCKED (rc=$(cat "$_p19t/tctl.rc" 2>/dev/null)). The rig, not the attribute, decides P19h-i"; st=1 ;;
+    esac
+    rm -rf "$_p19t"
   fi
 
   # P15 — the throwaway-dir guard's OTHER branch: git cannot name a toplevel.
@@ -1209,7 +1356,9 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     written down here and named in tests.yml's own refusal.
   # 59 -> 73 with P17 (bFUzZ M1-M3 on #215): P17a-c three lines each, P17d two, P17e three.
   # 73 -> 92 with P18 (bFUzZ F1 on #215 round 2): P18a-c three lines each, P18d two, P18e two, P18f three, P18g three.
-  _armfloor=92
+  # 92 -> 118 with P19/P20 (bFUzZ #215 round 3, ruled 06:27Z/06:31Z): P19a-k two lines each and
+  # one NOT CONSTRUCTIBLE notice (23), P20 three. Measured: grep -cE over this file, 118.
+  _armfloor=118
   _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
   if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
     echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
