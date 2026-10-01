@@ -1910,7 +1910,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
       <span class="fund-coin" aria-hidden="true" style="background:radial-gradient(circle at 35% 30%,#c8f4ff,var(--cyan) 62%,#003a44);border-color:#1d4655"></span>
       <button type="button" id="arw-connect" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔌 connect Arweave wallet</button>
-      <span id="arw-addr" class="law" style="font:11px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
+      <span id="arw-addr" class="law" style="font:14px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
     </div>
     <div class="row" style="align-items:center;flex-wrap:wrap;margin-top:8px">
       <select id="arw-what" title="what to publish" style="max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
@@ -1919,10 +1919,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
     </div>
     <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">…</div>
-    <details id="arw-jwk-scaffold" style="margin-top:10px;opacity:.78">
-      <summary style="font-size:11px;cursor:pointer;color:var(--faint)">advanced · vault JWK scaffold (optional — not required for New-bee)</summary>
-      <div class="law" style="font-size:11px;margin-top:6px;color:var(--dim)">Labs / offline only: seal an Arweave JWK in
-      <a href="#vault-sec">the vault</a>. Prefer <b>connect Arweave wallet</b> above — never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
+    <details id="arw-jwk-scaffold" style="margin-top:10px">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">advanced · vault JWK scaffold (optional — not required for New-bee)</summary>
+      <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / offline only: seal an Arweave JWK in
+      <a href="#vault-sec">the vault</a>. Prefer <b>connect Arweave wallet</b> on this panel — never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
     </details>
   </div>
   <script>
@@ -4540,7 +4540,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign via window.arweaveWallet inject (primary) or a vault-held JWK scaffold — none available');
       var s = await window.BNRAR.signRaw(opts.jwk, payload);
-      return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk-scaffold' };
+      return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
     }
     var digestBytes = hexB(digest);
     if (opts && opts.wif) {                                  // Jungle4 rehearsal: pasted TESTNET key, memory-only
