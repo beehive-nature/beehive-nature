@@ -543,6 +543,7 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   await p.waitForFunction(() => window.__plays.length > 0, null, { timeout: 30000, polling: 50 });
   const first = await p.evaluate(() => window.__plays[0]);
   console.log(`# fast: page played at ${(first.fed / 1024).toFixed(0)} KiB of ${(FIX.length / 1024).toFixed(0)}`);
+  if (!first.bar || first.fed >= FIX.length / 2) console.log('# fast diagnostic:', await p.evaluate(() => ({ engine: window.__bviewEngine(), log: document.getElementById('log').textContent, mediaError: window.__bviewMediaErr, assigns: window.__bviewSrcAssigns })));
   assert.ok(first.bar && first.fed < FIX.length / 2, `plays with under half the file in (${first.fed} of ${FIX.length} B)`);
   await p.waitForFunction(() => document.getElementById('v').currentTime > 0.5, null, { timeout: 10000 });
   const { dec, out, rough } = await p.evaluate(() => ({ dec: window.__dec, out: window.__decOut, rough: !(document.getElementById('s-rough')?.hidden ?? true) }));
@@ -555,6 +556,10 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   assert.ok(Math.abs(dec[0].video.bitrate - bps) < 1000, `bitrate = media bytes / duration (${dec[0].video.bitrate} vs ${Math.round(bps)})`);
   assert.equal(out[0].bar, true, 'asked while the download was still running');
   assert.equal(rough, out[0].smooth === false, `the warning row follows what this device answered (smooth=${out[0].smooth})`);
+  // finishBinary must preserve current playback and still deliver the tail
+  // of the full file once the running partial Blob reaches its edge.
+  await p.waitForFunction(d => { const v = document.getElementById('v'); return v.ended || v.currentTime >= d - 0.3; }, PLAN.dur, { timeout: 25000, polling: 100 });
+  assert.equal(await p.evaluate(() => document.getElementById('s-fail').hidden), true, 'finishing the download does not strand a partial playing Blob');
   assert.equal(hits.json.length, 0); assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });
