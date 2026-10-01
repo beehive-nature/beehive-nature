@@ -959,13 +959,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
     <div class="law" style="margin-top:14px;color:var(--ink)"><b>② Put a secret in.</b>
     Paste it and the type is detected for you — the phrase is checksum-verified, the key is
-    checksum-verified and curve-checked, before anything is sealed.</div>
+    checksum-verified and curve-checked, before anything is sealed.
+    <span style="color:var(--faint);font-size:11px">Arweave publish prefers the injected wallet on the Arweave panel — JWK paste here is scaffold only, not required for New-bee.</span></div>
     <div class="row">
       <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="auto" selected>detect type</option>
         <option value="seed">seed phrase</option>
         <option value="vaulta">Vaulta active key</option>
-        <option value="arweave">Arweave JWK</option>
+        <option value="arweave">Arweave JWK (scaffold · advanced)</option>
         <option value="note">plain note</option>
       </select>
       <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
@@ -1098,8 +1099,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
       <div class="cb" id="ar-bal"></div>
-      <div class="cd" id="ar-info">of the vault-held JWK: the address is public metadata, reads stay keyless</div>
-      <div class="stat" id="ar-stat">vault holds no arweave key</div>
+      <div class="cd" id="ar-info">of a bound public AR address (forge inject or public bind) — reads stay keyless</div>
+      <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
     </div>
   </div>
 </section>
@@ -1891,30 +1892,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </script>
 </section>
 
-<!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
+<!-- ══ ARWEAVE — publish & anchor (inject-first · vault JWK scaffold) ══ -->
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
   <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: built and signed inside this page</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: inject signs, this page builds and posts</summary>
   <div class="law">Another adapter on the wallet shell, with balance, receive address, send, and
-  one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
-  with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
-  posted to <b>public gateways picked at random per call</b>, so no single operator learns who
-  anchors what. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling): we dropped
-  the free tier to keep the rail first-party. The JWK lives in <b>the vault</b>, sealed
-  under your keypass, structurally verified before sealing, revealed only into the signing
-  call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
+  one new capability: <b>PUBLISH</b>. <b>Primary path:</b> connect an injected Arweave wallet
+  (<code>window.arweaveWallet</code> — Wander / arweave.app style). The extension holds the RSA
+  key; this page builds the format-2 tx from the <b>public</b> key only, asks the extension to
+  sign, and posts to <b>public gateways picked at random per call</b>. Agents never see private
+  keys. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling). Vault JWK paste is a
+  secondary scaffold for labs — New-bee never needs it to publish.</div>
   </details>
-  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built and signed in
-  your browser; with scripting off this panel stays asleep.</div></noscript>
+  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built here and signed
+  by your Arweave extension; with scripting off this panel stays asleep.</div></noscript>
   <div id="arw-js" hidden>
-    <div class="row" style="align-items:center;flex-wrap:wrap">
+    <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
       <span class="fund-coin" aria-hidden="true" style="background:radial-gradient(circle at 35% 30%,#c8f4ff,var(--cyan) 62%,#003a44);border-color:#1d4655"></span>
+      <button type="button" id="arw-connect" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔌 connect Arweave wallet</button>
+      <span id="arw-addr" class="law" style="font:11px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
+    </div>
+    <div class="row" style="align-items:center;flex-wrap:wrap;margin-top:8px">
       <select id="arw-what" title="what to publish" style="max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="orbit-anchor">the orbit-manifest anchor · forge/orbit-manifests.md (1,926 B)</option>
       </select>
       <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
     </div>
     <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">…</div>
+    <details id="arw-jwk-scaffold" style="margin-top:10px;opacity:.78">
+      <summary style="font-size:11px;cursor:pointer;color:var(--faint)">advanced · vault JWK scaffold (optional — not required for New-bee)</summary>
+      <div class="law" style="font-size:11px;margin-top:6px;color:var(--dim)">Labs / offline only: seal an Arweave JWK in
+      <a href="#vault-sec">the vault</a>. Prefer <b>connect Arweave wallet</b> above — never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
+    </details>
   </div>
   <script>
     (function () {
@@ -1922,16 +1931,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       try {
         var $ = function (id) { return document.getElementById(id); };
         var box = $('arw-js'), go = $('arw-go'), stat = $('arw-stat');
+        var conn = $('arw-connect'), addrEl = $('arw-addr');
         if (!box || !go || !stat) return;
-        /* the committed-blob law, runtime side: the payload is fetched from the
-           deployment and its sha256 is checked against the PINNED hash before
-           anything is signed — a drifted file can never be anchored by mistake.
-           The profile (path, pin, tags, label) is KIT DATA — WALLET_PROFILE.anchor. */
         var ORBIT = (window.WALLET_PROFILE && WALLET_PROFILE.anchor) || { path: '', sha256: '', tags: [] };
         var optLabel = document.querySelector('#arw-what option[value="orbit-anchor"]');
         if (optLabel && ORBIT.label) optLabel.textContent = ORBIT.label;
         function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-        function arEntry() {
+        function paint(msg, color) {
+          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+        }
+        function arInject() { return window.BNRWALLET && BNRWALLET.arInject; }
+        function vaultArEntry() {
           if (!window.BNRVAULT || !BNRVAULT.isUnlocked()) return null;
           return BNRVAULT.list().filter(function (e) { return e.type === 'arweave'; })[0] || null;
         }
@@ -1939,42 +1949,82 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var h = await crypto.subtle.digest('SHA-256', bytes);
           return Array.prototype.map.call(new Uint8Array(h), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
         }
-        function paint(msg, color) {
-          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+        async function resolveAddr() {
+          var inj = arInject();
+          if (inj && inj.present && inj.present()) {
+            try { return await inj.activeAddress(); } catch (e) { /* fall */ }
+          }
+          if (inj && typeof inj.boundAddress === 'function') {
+            var b = inj.boundAddress();
+            if (b) return b;
+          }
+          var e = vaultArEntry();
+          return (e && e.meta && e.meta.address) || null;
         }
         async function refresh() {
           var A = window.BNRAR;
           if (!A) { paint('the arweave adapter did not load', 'var(--amber)'); return; }
-          var e = arEntry();
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
-          if (!e) {
+          var inj = arInject();
+          var hasInj = !!(inj && inj.present && inj.present());
+          var addr = null;
+          try { addr = await resolveAddr(); } catch (e) { addr = null; }
+          if (addrEl) {
+            addrEl.textContent = addr ? addr : (hasInj ? 'extension present — tap connect' : 'no extension — install Wander, or bind public address on the forge ar: card');
+            addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
+          }
+          if (conn) conn.textContent = addr && hasInj ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
+          if (!addr) {
             if (balEl) balEl.textContent = '';
-            if (statEl) statEl.textContent = 'vault holds no arweave key';
-            paint('no arweave key in the vault yet: seal your JWK in <a href="#vault-sec">the vault</a> (paste it; the type is detected), then this panel wakes', 'var(--ink)');
+            if (statEl) { statEl.textContent = hasInj ? 'extension ready — tap connect' : 'connect Arweave wallet or bind a public address'; statEl.className = 'stat'; }
+            paint(hasInj
+              ? 'Arweave extension detected — tap <b>connect Arweave wallet</b> to bind your public address and publish. No JWK paste required.'
+              : 'No Arweave extension yet — install <b>Wander</b> (or an arweave.app-style wallet), then tap connect. Or bind a 43-char public address on the forge <b>ar:</b> card for keyless reads. Vault JWK paste is optional scaffold only.');
+            go.disabled = true;
             return;
           }
-          var addr = e.meta && e.meta.address;
-          if (statEl) statEl.textContent = 'reading ' + (addr || '…');
+          if (statEl) statEl.textContent = 'reading ' + addr.slice(0, 10) + '…';
           paint('reading ' + addr + '…');
           try {
             var bal = await A.balance(addr);
             var fee = await A.fee(1926);
             var spot = null;
-            try { spot = await A.spotPrice(); } catch (e2) { /* optional — a dead price source never kills the panel */ }
+            try { spot = await A.spotPrice(); } catch (e2) { /* optional */ }
             var winston = parseInt(bal, 10) || 0, need = parseInt(fee, 10) || 0;
             if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
             if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
                         statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + ((need - winston) / 1e12) + ' AR for the anchor';
             paint('address ' + addr + ' · balance ' + (winston / 1e12) + ' AR · anchor fee ' +
               (need / 1e12) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
-              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready'));
+              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
+              (hasInj ? ' · sign via extension' : ' · sign via vault scaffold if publishing'));
             go.disabled = winston < need;
-            wlRead(statEl, true);   /* a read that SUCCEEDED, even when short of the anchor fee */
+            if (typeof wlRead === 'function') wlRead(statEl, true);
           } catch (err) {
-            if (statEl) { statEl.textContent = 'read failed'; wlRead(statEl, false); }
+            if (statEl) { statEl.textContent = 'read failed'; if (typeof wlRead === 'function') wlRead(statEl, false); }
             paint('gateway read failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           }
         }
+        if (conn) conn.addEventListener('click', async function () {
+          var inj = arInject();
+          if (!inj || !inj.connect) {
+            paint('wallet shell still loading — try again in a moment', 'var(--amber)');
+            return;
+          }
+          if (!inj.present()) {
+            paint('No Arweave extension injected. Install <b>Wander</b> (Chrome/Firefox), reload this page, then tap connect. Or open the forge <b>ar:</b> card and bind a public address for reads.', 'var(--ink)');
+            return;
+          }
+          conn.disabled = true;
+          paint('asking the injected Arweave wallet…');
+          try {
+            var a = await inj.connect();
+            paint('✓ connected ' + a + ' — public only; private key stays in the extension');
+            await refresh();
+          } catch (err) {
+            paint(esc(err && err.message ? err.message : String(err)), 'var(--amber)');
+          } finally { conn.disabled = false; }
+        });
         go.addEventListener('click', async function () {
           var W = window.BNRWALLET, V = window.BNRVAULT;
           if (!W) { paint('the wallet shell did not load', 'var(--amber)'); return; }
@@ -1990,19 +2040,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
               return;
             }
-            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — the contract path: the worker builds, the vault signs, the outbox persists…');
-            var jwk = null, e = V && arEntry();
-            if (e) {
-              jwk = JSON.parse(V.reveal(e.id).secret);      // the vault's key, revealed only into the signing call
-            } else {
-              // demo lane: a RUNTIME-generated JWK, never stored, never funded —
-              // the gateway's verdict on it is the honest one, and the actual
-              // anchor waits for the founder loading a funded JWK (stated)
-              paint('no vault JWK — generating a runtime TEST key (unfunded, memory-only)…');
-              var kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
-              jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+            var inj = arInject();
+            var useInject = !!(inj && inj.present && inj.present());
+            var jwk = null;
+            if (!useInject) {
+              var e = vaultArEntry();
+              if (e && V) jwk = JSON.parse(V.reveal(e.id).secret);
             }
-            var r = await W.walletPublish(bytes, ORBIT.tags, { jwk: jwk });
+            if (!useInject && !jwk) {
+              paint('Connect an Arweave wallet to publish (primary), or seal a JWK in the vault scaffold (advanced). No private key is invented from masterPRK.', 'var(--ink)');
+              return;
+            }
+            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — ' +
+              (useInject ? 'extension signs (inject path)…' : 'vault JWK scaffold signs…'));
+            var r = await W.walletPublish(bytes, ORBIT.tags, useInject ? { inject: true } : { jwk: jwk });
             if (r && r.phase === 'confirmed') {
               paint('⚓ ANCHORED — read back from the gateway: ' + (r.evidence && r.evidence.read));
               var a = document.createElement('a');
@@ -2015,22 +2066,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             } else if (r && r.phase === 'failed' && /verification|fund/i.test(JSON.stringify(r.evidence || {}))) {
               paint('the gateway rejected the tx — for an UNFUNDED key this is the expected verdict ' +
                 '(arweave-js gets the identical answer): everything is proven except the money. ' +
-                'The signed anchor sits in the outbox; fund this address (or seal a funded JWK in the vault) and tap again.', 'var(--amber)');
+                'The signed anchor sits in the outbox; fund this address and tap again.', 'var(--amber)');
             }
-            // every other phase already spoke through tx-out (refused / submitted / faulted — all honest)
           } catch (err) {
             paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           } finally {
-            go.disabled = false; // state re-syncs on the 45s interval / vault hooks — never overwrite a verdict
+            go.disabled = false;
           }
         });
         box.hidden = false;
         paint('…');
         setInterval(function () { if (!go.disabled) refresh(); }, 45000);
-        setTimeout(refresh, 600);
+        setTimeout(refresh, 700);
         var vsec = document.getElementById('vault-sec');
-        if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); }); // unlock/seal wakes the panel
+        if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); });
         document.addEventListener('vault-unlocked', refresh, true);
+        document.addEventListener('ar-inject-connected', refresh, true);
       } catch (err) {
         var s = document.getElementById('arw-stat');
         var b = document.getElementById('arw-js');
@@ -2039,6 +2090,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     })();
   </script>
+</section>
+
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
@@ -2381,18 +2434,80 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){ return null }
   }
   function isArAddress(s){ return typeof s==='string'&&s.length===43&&/^[A-Za-z0-9_-]{43}$/.test(s) }
+  var AR_INJECT_PERMS=['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY','SIGNATURE','SIGN_TRANSACTION'];
+  function arInjectPresent(){
+    return !!(window.arweaveWallet && typeof window.arweaveWallet.getActiveAddress==='function');
+  }
   async function connectArweaveInject(ctx){
     var w=window.arweaveWallet;
     if(!w||typeof w.getActiveAddress!=='function'){
-      throw new Error('no Arweave wallet injected — open Wander / arweave.app style extension, or bind a public address');
+      throw new Error('no Arweave wallet injected — install Wander (or arweave.app style), reload, then connect — or bind a public address on the forge ar: card');
     }
     if(typeof w.connect==='function'){
-      try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e){ /* older injects skip connect */ }
+      try{ await w.connect(AR_INJECT_PERMS) }
+      catch(e){
+        try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e2){ /* older injects skip connect */ }
+      }
     }
     var addr=await w.getActiveAddress();
     if(!isArAddress(addr)) throw new Error('injected wallet returned no 43-char Arweave address');
-    saveArPublic(ctx, addr);
+    if(ctx) saveArPublic(ctx, addr);
+    else if(SOUL) saveArPublic('ar:'+SOUL, addr);
+    try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:addr}})) }catch(e3){}
     return addr;
+  }
+  async function arInjectPublicJwk(){
+    var w=window.arweaveWallet;
+    if(!w||typeof w.getActivePublicKey!=='function')
+      throw new Error('injected wallet has no getActivePublicKey — need ACCESS_PUBLIC_KEY');
+    if(typeof w.connect==='function'){
+      try{ await w.connect(AR_INJECT_PERMS) }catch(e){
+        try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e2){}
+      }
+    }
+    var n=await w.getActivePublicKey();
+    if(!n||typeof n!=='string'||n.length<80) throw new Error('injected wallet returned no public modulus');
+    return {kty:'RSA', n:n, e:'AQAB'};
+  }
+  function arSigBytes(sig){
+    if(sig instanceof Uint8Array) return sig;
+    if(sig instanceof ArrayBuffer) return new Uint8Array(sig);
+    if(Array.isArray(sig)) return new Uint8Array(sig);
+    if(sig && typeof sig === 'object' && sig.data) return new Uint8Array(sig.data);
+    throw new Error('extension returned unrecognized signature shape');
+  }
+  async function arInjectSignRaw(sigData){
+    var w=window.arweaveWallet;
+    if(!w) throw new Error('no Arweave wallet injected');
+    if(typeof w.connect==='function'){
+      try{ await w.connect(AR_INJECT_PERMS) }catch(e){}
+    }
+    var sigBytes=null, by='arweaveWallet';
+    if(typeof w.signature==='function'){
+      /* RSA-PSS over deepHash output — same shape vault signRaw uses (agents never see d) */
+      sigBytes=arSigBytes(await w.signature(sigData, {name:'RSA-PSS', saltLength:32}));
+      by='arweaveWallet.signature';
+    } else if(typeof w.sign==='function'){
+      var shim={
+        format:2, data:'', data_size:'0', data_root:'', quantity:'0', target:'', reward:'0', last_tx:'', owner:'', tags:[],
+        chunks:{data_root:''},
+        get:function(k){ return this[k] },
+        set:function(k,v){ this[k]=v },
+        getSignatureData:async function(){ return sigData }
+      };
+      var signed=await w.sign(shim);
+      if(!signed||!signed.signature) throw new Error('extension sign() returned no signature');
+      return {signature:signed.signature, id:signed.id, by:'arweaveWallet.sign'};
+    } else {
+      throw new Error('injected wallet cannot sign (no signature/sign API)');
+    }
+    var signature=window.BNRAR.b64u(sigBytes);
+    var idBytes=new Uint8Array(await crypto.subtle.digest('SHA-256', sigBytes));
+    return {signature:signature, id:window.BNRAR.b64u(idBytes), by:by};
+  }
+  function arInjectBoundAddress(){
+    if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
+    return vaultArPublic();
   }
   function deriveFor(ctx){
     /* hive: public account name — no private material, works without MPRK */
@@ -4418,10 +4533,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var payload = b64ToBytes(intent.unsigned_bytes);
     var digest = hexS(BN.sha256(payload));   // BN.sha256 gives bytes; hexS is the byte-wise hex
     if (digest !== intent.digest) throw new Error('vault refused: digest mismatch (intent says ' + intent.digest.slice(0, 12) + '…, bytes hash ' + digest.slice(0, 12) + '…)');
-    if (intent.rail === 'arweave') {                         // B3: the JWK signs the deepHash output — RSA-PSS, vault-held
-      if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign with a vault-held JWK — none was revealed');
+    if (intent.rail === 'arweave') {                         // B3: inject OR vault JWK signs deepHash — RSA-PSS; agents never see d
+      if (opts && opts.inject) {
+        var sInj = await arInjectSignRaw(payload);
+        return { signatures: [sInj.signature], ar_id: sInj.id, by: sInj.by };
+      }
+      if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign via window.arweaveWallet inject (primary) or a vault-held JWK scaffold — none available');
       var s = await window.BNRAR.signRaw(opts.jwk, payload);
-      return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
+      return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk-scaffold' };
     }
     var digestBytes = hexB(digest);
     if (opts && opts.wif) {                                  // Jungle4 rehearsal: pasted TESTNET key, memory-only
@@ -4586,10 +4705,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   spawnAdapter('hive', 'wallet-adapter-hive.js');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js');
 
-  /* ── walletPublish() — the Arweave anchor seam (B3, closes Rail 2 as
-     wallet feature work): the adapter builds from the JWK's PUBLIC parts,
-     the vault signs the deepHash output with the private JWK, the outbox
-     persists before submit, and confirm reads the gateway back. */
+  /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
+     window.arweaveWallet inject (public key + extension sign). Vault JWK is
+     secondary scaffold only. Never invent RSA from masterPRK; agents never
+     see private keys. Adapter builds from PUBLIC parts; outbox persists
+     before submit; confirm reads the gateway back. */
   async function walletPublish(bytes, tags, opts) {
     opts = opts || {};
     var out = $('tx-out');
@@ -4601,11 +4721,34 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">buildPublish is not declared by the arweave adapter</b> — the call path does not exist. Nothing was dispatched.'; }
       return null;
     }
-    if (!opts.jwk || !opts.jwk.d) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">no signing JWK</b> — seal one in <a href="#vault-sec">the vault</a>, or run the demo lane which generates a runtime TEST key (unfunded — the gateway verdict will say so honestly).'; }
-      return null;
+    var publicJwk = null, signOpts = null;
+    var wantInject = opts.inject === true || (opts.inject !== false && arInjectPresent() && !opts.jwk);
+    if (wantInject || opts.inject === true) {
+      try {
+        if (!arInjectPresent()) throw new Error('no Arweave wallet injected');
+        publicJwk = await arInjectPublicJwk();
+        var injAddr = await window.arweaveWallet.getActiveAddress();
+        if (isArAddress(injAddr)) {
+          if (SOUL) saveArPublic('ar:'+SOUL, injAddr);
+          try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:injAddr}})) }catch(e0){}
+        }
+        signOpts = { inject: true };
+      } catch (ie) {
+        if (opts.inject === true && !(opts.jwk && opts.jwk.d)) {
+          if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">inject sign unavailable:</b> ' + (ie && ie.message || ie) + ' — install/connect Wander, or use the vault JWK scaffold.'; }
+          return null;
+        }
+        publicJwk = null; signOpts = null;
+      }
     }
-    var publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
+    if (!publicJwk) {
+      if (!opts.jwk || !opts.jwk.d) {
+        if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--ink)">connect an Arweave wallet</b> (primary — <code>window.arweaveWallet</code>) to publish. Vault JWK paste is optional scaffold only — New-bee never needs it. RSA is never invented from masterPRK.'; }
+        return null;
+      }
+      publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
+      signOpts = { jwk: opts.jwk };
+    }
     var b64in = btoa(String.fromCharCode.apply(null, bytes.length > 30000 ? bytes.subarray(0, 30000) : bytes));
     if (bytes.length > 30000) throw new Error('payload over 30 KB — chunked upload is a later lane; the anchor payload is small');
     var intent;
@@ -4616,9 +4759,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     var sgn;
-    try { sgn = await vaultSign(intent, { jwk: opts.jwk }) }
+    try { sgn = await vaultSign(intent, signOpts) }
     catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + (e && e.message || e); }
       return null;
     }
     var entry = {
@@ -4729,6 +4872,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     capGate: capGate,
     capRecord: capRecord,
     capLoad: capLoad,
+    arInject: {
+      present: arInjectPresent,
+      connect: function () { return connectArweaveInject(SOUL ? ('ar:'+SOUL) : null); },
+      activeAddress: async function () {
+        if (!arInjectPresent()) return arInjectBoundAddress();
+        try {
+          if (typeof window.arweaveWallet.connect === 'function') {
+            try { await window.arweaveWallet.connect(AR_INJECT_PERMS); } catch (e) {}
+          }
+          var a = await window.arweaveWallet.getActiveAddress();
+          return isArAddress(a) ? a : arInjectBoundAddress();
+        } catch (e) { return arInjectBoundAddress(); }
+      },
+      boundAddress: arInjectBoundAddress,
+      publicJwk: arInjectPublicJwk,
+      signRaw: arInjectSignRaw
+    },
     _telemetry: TELEMETRY,
     _crash: crash
   };
