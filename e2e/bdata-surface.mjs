@@ -89,7 +89,7 @@ const server = createServer(async (req, res) => {
       upload_id: 'up-MOCK', artifact_sha256: refInvoice.domain.artifact.sha256, artifact_bytes: refInvoice.domain.artifact.bytes,
       total_chunks: 3, already_stored: 0, payment_type: 'wave_batch',
       total_amount_atto: MOCK_TOTAL,
-      payments: founderLine.quotes.map(q => ({ quote_hash: q.quote_hash, amount_atto: q.amount_atto })),
+      payments: founderLine.quotes.map(q => ({ quote_hash: q.quote_hash, rewards_address: '0x' + String(q.quote_hash).replace(/^0x/i,'').slice(0,40).padEnd(40,'0'), amount_atto: q.amount_atto })),
       policy: { audience: 'public', binding: 'founder-selected:public' },
       note: 'MOCK-SYNTHETIC — never a network quote',
     }));
