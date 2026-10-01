@@ -119,6 +119,9 @@ jobs:
           fi
           echo "genealogy: running $n suite(s)"
           node --test $(ls tools/genealogy/*.test.mjs)
+      - name: bData local intake — real disk bytes, hash refusal and restart persistence
+        if: always()
+        run: node --test tools/antd-bridge/intake-server.test.mjs
       - name: Forge room — pinned Yjs convergence, late join and usable fallback
         if: always()
         working-directory: forge/visual/test

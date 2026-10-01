@@ -576,7 +576,12 @@
       note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes });
       render();
       say(T('bd.add.ok', 'on the local intake shelf'));
-    }).catch(function(e){ intake.err = String((e&&e.message)||e).slice(0,200); render(); say(intake.err); });
+    }).catch(function(e){
+      intake.err = e instanceof TypeError
+        ? T('bd.add.local-unreachable', 'The local file shelf could not be reached. Start the local bridge and allow this site’s local-network connection in your browser, then retry. Nothing was uploaded to Autonomi.')
+        : String((e&&e.message)||e).slice(0,200);
+      render(); say(intake.err);
+    });
   }
 
   /* ── PHASE E-1: pay with your wallet after Authorized (ant-pay.js) ─────────
