@@ -609,6 +609,18 @@ test('slow door (0.5x bitrate): an honest countdown, no play before the computed
 
 test('fast door (2x bitrate): plays early, long before the file is in; decodingInfo asked with the moov facts', async () => {
   const { ctx, p, errs, hits, vp9 } = await paced(2);
+  await p.evaluate(() => {
+    window.__handoffs = [];
+    const v = document.getElementById('v'); let previousHeight = 0;
+    const sample = () => { if (v.readyState >= 2) previousHeight = v.getBoundingClientRect().height; requestAnimationFrame(sample); };
+    requestAnimationFrame(sample);
+    new MutationObserver(() => {
+      if ((window.__bviewSrcAssigns || 0) < 2) return;
+      const held = document.getElementById('frame-hold');
+      const pixel = held && !held.hidden ? [...held.getContext('2d').getImageData(0, 0, held.width, held.height).data].some((n, i) => i % 4 !== 3 && n > 0) : false;
+      window.__handoffs.push({ covered: !!held && !held.hidden, pixel, previousHeight, height: held?.getBoundingClientRect().height || 0 });
+    }).observe(v, { attributes: true, attributeFilter: ['src'] });
+  });
   if (!vp9) { await ctx.close(); return; }
   await watch(p, A1);
   await p.waitForFunction(() => window.__plays.length > 0, null, { timeout: 30000, polling: 50 });
@@ -631,6 +643,12 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   // of the full file once the running partial Blob reaches its edge.
   await p.waitForFunction(d => { const v = document.getElementById('v'); return v.ended || v.currentTime >= d - 0.3; }, PLAN.dur, { timeout: 25000, polling: 100 });
   assert.equal(await p.evaluate(() => document.getElementById('s-fail').hidden), true, 'finishing the download does not strand a partial playing Blob');
+  const handoffs = await p.evaluate(() => window.__handoffs);
+  console.log('# progressive handoffs:', JSON.stringify(handoffs));
+  assert.ok(handoffs.length > 0, 'the test actually crosses a progressive Blob handoff');
+  assert.ok(handoffs.every(h => h.covered && h.pixel), 'every source reset keeps a real decoded frame visible');
+  assert.ok(handoffs.every(h => Math.abs(h.height - h.previousHeight) < 2), 'the player retains its height while the replacement loads');
+  assert.equal(await p.evaluate(() => document.getElementById('frame-hold').hidden), true, 'the real replacement frame is revealed after the seek');
   assert.equal(hits.json.length, 0); assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });
