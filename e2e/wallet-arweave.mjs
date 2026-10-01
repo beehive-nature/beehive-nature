@@ -201,6 +201,122 @@ try {
     ok('no page errors through the whole flow', errors.length === 0, errors.join(' | ').slice(0, 120));
     await ctx.close();
   }
+/* ── E · inject path (window.arweaveWallet mock) — Gold move #1 primary ── */
+  console.log('E · inject publish (mocked arweaveWallet + gateway):');
+  {
+    const posted = [];
+    const ctx = await browser.newContext();
+    mockGateways(ctx, null, { status: 400, obj: { error: 'Transaction verification failed.' } });
+    ctx.route(GW_RE, async route => {
+      if (route.request().method() === 'POST' && new URL(route.request().url()).pathname.endsWith('/tx'))
+        posted.push(JSON.parse(route.request().postData()));
+      await route.fallback();
+    });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(() => {
+      let _jwk = null, _addr = null, _key = null;
+      const b64uDec = (s) => {
+        s = String(s).replace(/-/g, '+').replace(/_/g, '/');
+        while (s.length % 4) s += '=';
+        return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+      };
+      const b64uEnc = (bytes) => {
+        const B64U = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        let out = '';
+        for (let i = 0; i < bytes.length; i += 3) {
+          const b0 = bytes[i], b1 = i + 1 < bytes.length ? bytes[i + 1] : NaN, b2 = i + 2 < bytes.length ? bytes[i + 2] : NaN;
+          out += B64U[b0 >> 2];
+          out += B64U[((b0 & 3) << 4) | (isNaN(b1) ? 0 : b1 >> 4)];
+          if (!isNaN(b1)) out += B64U[((b1 & 15) << 2) | (isNaN(b2) ? 0 : b2 >> 6)];
+          if (!isNaN(b2)) out += B64U[b2 & 63];
+        }
+        return out;
+      };
+      window.__arInjectBoot = async () => {
+        const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
+          publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
+        _jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+        _key = kp.privateKey;
+        const dig = await crypto.subtle.digest('SHA-256', b64uDec(_jwk.n));
+        _addr = b64uEnc(new Uint8Array(dig));
+      };
+      window.arweaveWallet = {
+        connect: async () => {},
+        getActiveAddress: async () => { if (!_addr) await window.__arInjectBoot(); return _addr; },
+        getActivePublicKey: async () => { if (!_jwk) await window.__arInjectBoot(); return _jwk.n; },
+        signature: async (data, alg) => {
+          if (!_key) await window.__arInjectBoot();
+          const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
+          return new Uint8Array(await crypto.subtle.sign(
+            { name: 'RSA-PSS', saltLength: (alg && alg.saltLength) || 32 }, _key, u8));
+        }
+      };
+    });
+    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
+    ok('arInject API exposed on BNRWALLET', await page.evaluate(() =>
+      !!(BNRWALLET.arInject && BNRWALLET.arInject.present && BNRWALLET.arInject.present())));
+    await page.waitForFunction(() => {
+      const t = document.getElementById('arw-stat').textContent || '';
+      return t && t !== '…';
+    }, null, { timeout: 8000 }).catch(() => {});
+    ok('honest path when inject present (no vault-JWK wall)', await page.evaluate(() => {
+      const t = document.getElementById('arw-stat').textContent || '';
+      return /extension|connect|Arweave|address|reading|AR/i.test(t) && !/seal your JWK/i.test(t);
+    }), await page.locator('#arw-stat').innerText().then(t => t.slice(0, 100)));
+    await page.locator('#arw-connect').click();
+    await page.waitForFunction(() => {
+      const a = document.getElementById('arw-addr');
+      return a && /^[A-Za-z0-9_-]{43}$/.test((a.textContent || '').trim());
+    }, null, { timeout: 20000 });
+    const addr = (await page.locator('#arw-addr').innerText()).trim();
+    ok('connect binds 43-char public address', /^[A-Za-z0-9_-]{43}$/.test(addr), addr);
+    ok('scaffold details demoted (present)', await page.locator('#arw-jwk-scaffold').count().then(n => n === 1));
+    await page.waitForFunction(() => /short by|funded|reading|AR/.test(document.getElementById('arw-stat').textContent || ''), null, { timeout: 12000 }).catch(() => {});
+    await ctx.route(GW_RE, async route => {
+      const u = new URL(route.request().url());
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' } });
+      if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
+      await route.fallback();
+    });
+    await page.locator('#arw-go').evaluate(b => { b.disabled = false; });
+    await page.locator('#arw-go').click();
+    await page.waitForFunction(() => {
+      const a = document.getElementById('arw-stat').textContent || '';
+      const o = (document.getElementById('tx-out') || {}).textContent || '';
+      return /expected verdict|ANCHORED|signed|outbox|verification|FAILED|SUBMITTED|arweaveWallet/i.test(a + o);
+    }, null, { timeout: 25000 }).catch(() => {});
+    ok('inject path POSTed a signed tx (no vault JWK)', posted.length >= 1, 'posted=' + posted.length);
+    if (posted[0]) {
+      ok('inject-signed tx format 2', posted[0].format === 2);
+      ok('inject signature 512-byte RSA-PSS', unb64len(posted[0].signature) === 512);
+      ok('inject id 43-char', /^[A-Za-z0-9_-]{43}$/.test(posted[0].id));
+    }
+    const txOut = await page.locator('#tx-out').innerText().catch(() => '');
+    const arwStat = await page.locator('#arw-stat').innerText();
+    ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
+    ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
+    ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    await ctx.close();
+  }
+
+  /* ── F · honest empty path (no inject, no vault) — one clear connect, no fail-box wall ── */
+  console.log('F · honest empty connect path:');
+  {
+    const ctx = await browser.newContext();
+    mockGateways(ctx);
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1000);
+    const t = await page.locator('#arw-stat').innerText();
+    ok('empty path names connect / Wander / public bind', /Wander|connect|public address|forge/i.test(t), t.slice(0, 120));
+    ok('empty path does not demand vault JWK as required', !/seal your JWK|paste it; the type is detected/i.test(t), t.slice(0, 120));
+    ok('connect button is the primary control', await page.locator('#arw-connect').isVisible());
+    ok('JWK scaffold is in a demoted details', await page.locator('#arw-jwk-scaffold summary').innerText().then(x => /scaffold|optional|advanced/i.test(x)));
+    await ctx.close();
+  }
   function b64(s) { return Buffer.from(s, 'utf8').toString('base64url'); }
   function unb64len(s) { return Buffer.from(s, 'base64url').length; }
 } finally {
