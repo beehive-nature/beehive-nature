@@ -45,6 +45,8 @@ const claimKey = (url, writerId) => url.href + "\n" + writerId;
 const BINDING_URL_FOR = (ark) =>
   "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:" + ark + "/name?namespace=apid";
 const normalizeApid = (s) => String(s ?? "").trim().replace(/^apid:/, "");
+const IMAGE_XML_URL_FOR = (apid) =>
+  "https://sg30p0.familysearch.org/service/records/storage/deepzoomcloud/dz/v1/apid:" + normalizeApid(apid) + "/image.xml";
 
 // Atomic replace: write a sibling temp file, then rename over the target.
 // rename is the atomic step on both POSIX and Windows (MoveFileEx with
@@ -106,12 +108,38 @@ function readClaim(url) {
 function withLockMutation(lockUrl, writerId, mutate) {
   const mutationUrl = new URL(lockUrl.href + ".mutation");
   const mutation = JSON.stringify({ schema: "skaists.writer-lock-mutation/1", writerId, claimedAt: new Date().toISOString() });
-  if (!exclusiveCreate(mutationUrl, mutation))
-    throw new Error("REFUSED: lock mutation already in progress; stand down");
+  if (!exclusiveCreate(mutationUrl, mutation)) {
+    const observed = readClaim(mutationUrl);
+    if (!observed) throw new Error("REFUSED: mutation claim vanished during inspection; retry");
+    const claimedMs = observed.parsed ? Date.parse(observed.parsed.claimedAt) : observed.mtimeMs;
+    if (Number.isFinite(claimedMs) && Date.now() - claimedMs < LOCK_STALE_MS)
+      throw new Error("REFUSED: lock mutation already in progress; stand down");
+    // Crash recovery for an abandoned mutation claim. Quarantine the exact
+    // bytes inspected, then re-claim with O_EXCL. The canonical writer lock
+    // remains present throughout; a contender that wins the re-claim makes
+    // this caller stand down.
+    const quarantine = new URL(mutationUrl.href + ".stale-" + randomUUID().slice(0, 8));
+    try { renameSync(mutationUrl, quarantine); }
+    catch { throw new Error("REFUSED: mutation claim changed before stale recovery; stand down"); }
+    const actual = readFileSync(quarantine, "utf8");
+    if (actual !== observed.text) {
+      if (!existsSync(mutationUrl)) {
+        try { renameSync(quarantine, mutationUrl); } catch { /* another claimant now owns the mutation path */ }
+      }
+      throw new Error("REFUSED: mutation identity changed before stale recovery; stand down");
+    }
+    if (!exclusiveCreate(mutationUrl, mutation)) {
+      try { unlinkSync(quarantine); } catch { /* best effort */ }
+      throw new Error("REFUSED: another writer won stale mutation recovery; stand down");
+    }
+    try { unlinkSync(quarantine); } catch { /* recovered claim is already authoritative */ }
+  }
   try {
     return mutate();
   } finally {
-    try { unlinkSync(mutationUrl); } catch { /* a surviving mutation claim fails future operations closed */ }
+    try {
+      if (readFileSync(mutationUrl, "utf8") === mutation) unlinkSync(mutationUrl);
+    } catch { /* an unreadable/replaced claim fails future operations closed */ }
   }
 }
 
@@ -303,9 +331,17 @@ export function checkpointState(ark, entry, opts = {}) {
     const binding = await authoritativeBinding(ark, opts);
     if (normalizeApid(binding.response) !== normalizeApid(entry.apid))
       throw new Error("REJECT authoritative binding response does not normalize to the negative outcome apid: " + ark);
-    const { binding: ignoredCallerBinding, ...safeEntry } = entry;
+    const statusMatch = String(entry.state).match(/^xml-(403|404)/);
+    const denial = await authoritativeDenial(entry.apid, Number(statusMatch[1]), opts);
+    const { binding: ignoredCallerBinding, denial: ignoredCallerDenial, ...safeEntry } = entry;
     void ignoredCallerBinding;
-    return saveEntry(ark, { ...safeEntry, binding, bindingVerified: "ark-bound negative: guard-fetched das/v2 response matches this ark" }, opts);
+    void ignoredCallerDenial;
+    return saveEntry(ark, {
+      ...safeEntry,
+      binding,
+      denial,
+      bindingVerified: "ark-bound negative: guard fetched both the das/v2 binding and matching live image.xml denial",
+    }, opts);
   })();
 }
 
@@ -317,6 +353,16 @@ async function authoritativeBinding(ark, opts) {
   if (!response || response.ok !== true || typeof response.text !== "function")
     throw new Error("REJECT authoritative binding request for " + ark + " (status " + (response?.status ?? "unknown") + ")");
   return { url, response: await response.text(), status: response.status };
+}
+
+async function authoritativeDenial(apid, expectedStatus, opts) {
+  const url = IMAGE_XML_URL_FOR(apid);
+  const fetcher = opts.fetchImageXml || globalThis.fetch;
+  if (typeof fetcher !== "function") throw new Error("REJECT XML denial verification unavailable: no fetch implementation");
+  const response = await fetcher(url, { method: "GET", redirect: "error", credentials: "include" });
+  if (!response || response.status !== expectedStatus)
+    throw new Error("REJECT live image.xml status does not match claimed denial: expected=" + expectedStatus + " actual=" + (response?.status ?? "unknown"));
+  return { url, status: response.status, verifiedAt: new Date().toISOString() };
 }
 
 // Save-side guard for a DOWNLOAD: bytes without identity never land. The

@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bankUploadReceipt, editionGate, isDirectExecution, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
+import { bankUploadReceipt, editionGate, isDirectExecution, receiptPathForArtifact, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
@@ -126,8 +126,22 @@ test("revalidateApproval refuses revocation and any approval-shape change immedi
 
 test("bankUploadReceipt appends a durable upload row when an older edition has none", () => {
   const receipt = { uploadedAt: "2026-10-02T00:00:00Z", result: { address: "public" }, artifactSha256: "a".repeat(64) };
-  const edition = { progression: [{ state: "quoted" }] };
+  const edition = { artifact: { tarSha256: "a".repeat(64) }, progression: [{ state: "quoted" }] };
   bankUploadReceipt(edition, receipt);
   assert.equal(edition.progression.filter((p) => p.state === "uploaded").length, 1);
   assert.equal(edition.progression.at(-1).artifactSha256, receipt.artifactSha256);
+});
+
+test("edition-specific receipts never overwrite or absorb another artifact's receipt", () => {
+  const root = join(tmpdir(), "receipt-root");
+  const a = "a".repeat(64);
+  const b = "b".repeat(64);
+  assert.notEqual(receiptPathForArtifact(a, root), receiptPathForArtifact(b, root));
+  assert.throws(() => receiptPathForArtifact("bad", root), /sha256 is invalid/);
+  const receipt = { uploadedAt: "2026-10-02T00:00:00Z", result: {}, artifactSha256: a };
+  assert.throws(() => bankUploadReceipt({ artifact: { tarSha256: b }, progression: [] }, receipt), /cross-edition/);
+  const created = bankUploadReceipt(null, receipt, GATE_SCHEMA("APPROVED", a));
+  assert.equal(created.schema, "skaists.eternalization-receipt/2");
+  assert.equal(created.artifact.tarSha256, a);
+  assert.equal(created.progression[0].state, "uploaded");
 });

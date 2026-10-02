@@ -22,7 +22,7 @@
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync, existsSync, writeFileSync, copyFileSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, copyFileSync, mkdtempSync, rmSync, renameSync, unlinkSync } from "node:fs";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
@@ -30,7 +30,7 @@ import { basename, join, resolve } from "node:path";
 
 const exec = promisify(execFile);
 const PORT = parseInt(process.argv[2] || "8794", 10);
-const RECEIPT_PATH = "C:/Users/travi/family-lineage/ETERNALIZATION-RECEIPT.json";
+const RECEIPT_ROOT = "C:/Users/travi/family-lineage";
 const DEFAULT_GATE = fileURLToPath(new URL("../../ETERNALIZATION-EDITION-V2.json", import.meta.url));
 // The approved artifact is identified by HASH, not by filename — the gate
 // names the tar sha; whichever candidate matches is the spendable artifact.
@@ -137,7 +137,26 @@ export function revalidateApproval(gatePath, initialRaw, artifactSha, quote) {
   return check.ok ? { ok: true, gate: fresh, check } : check;
 }
 
-export function bankUploadReceipt(edition, receipt) {
+export function receiptPathForArtifact(artifactSha, root = RECEIPT_ROOT) {
+  if (!/^[0-9a-f]{64}$/.test(artifactSha || "")) throw new Error("receipt artifact sha256 is invalid");
+  return join(root, "ETERNALIZATION-RECEIPT-" + artifactSha + ".json");
+}
+
+export function bankUploadReceipt(existing, receipt, rawGate = {}) {
+  if (existing?.artifact?.tarSha256 && existing.artifact.tarSha256 !== receipt.artifactSha256)
+    throw new Error("receipt artifact binding mismatch; refusing cross-edition update");
+  const edition = existing || {
+    schema: "skaists.eternalization-receipt/2",
+    createdAt: receipt.uploadedAt,
+    artifact: { tarSha256: receipt.artifactSha256, tarBytes: rawGate?.artifact?.tarBytes ?? null },
+    approval: {
+      statusAtUpload: rawGate?.spendingApprovalGate?.status ?? "unknown",
+      storageMaxAnt: rawGate?.separatedCeilings?.storageMaxAnt ?? null,
+      gasMaxEth: rawGate?.separatedCeilings?.gasMaxEth ?? null,
+      chunkCount: rawGate?.quote?.chunkCount ?? null,
+    },
+    progression: [],
+  };
   const progression = Array.isArray(edition.progression) ? edition.progression : [];
   let updated = false;
   edition.progression = progression.map((p) => {
@@ -147,6 +166,13 @@ export function bankUploadReceipt(edition, receipt) {
   });
   if (!updated) edition.progression.push({ state: "uploaded", at: receipt.uploadedAt, result: receipt.result, artifactSha256: receipt.artifactSha256 });
   return edition;
+}
+
+function writeReceiptAtomic(path, edition) {
+  const temp = path + ".tmp-" + process.pid + "-" + Date.now();
+  writeFileSync(temp, JSON.stringify(edition, null, 1), "utf8");
+  try { renameSync(temp, path); }
+  catch (error) { try { unlinkSync(temp); } catch { /* best effort */ } throw error; }
 }
 
 function gateRefusal(gate) {
@@ -258,14 +284,12 @@ function startService() {
         // Return the irreversible result even if the local progression file
         // cannot be updated; the response names that banking failure.
         try {
-          if (existsSync(RECEIPT_PATH)) {
-            const E = JSON.parse(readFileSync(RECEIPT_PATH, "utf8"));
-            bankUploadReceipt(E, receipt);
-            writeFileSync(RECEIPT_PATH, JSON.stringify(E, null, 1), "utf8");
-            receipt.receiptBank = "recorded";
-          } else {
-            receipt.receiptBank = "local progression file absent; receipt returned in this response";
-          }
+          const receiptPath = receiptPathForArtifact(frozen.sha);
+          const existing = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, "utf8")) : null;
+          const editionReceipt = bankUploadReceipt(existing, receipt, finalApproval.gate.raw);
+          writeReceiptAtomic(receiptPath, editionReceipt);
+          receipt.receiptBank = "recorded in edition-specific receipt";
+          receipt.receiptPath = receiptPath;
         } catch (bankError) {
           receipt.receiptBank = "FAILED: " + String(bankError.message || bankError).slice(0, 120);
         }

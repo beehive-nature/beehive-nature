@@ -9,7 +9,7 @@
     "unpackedBytes": 87941767,
     "manifestSha256": "0959d0627ea837187795f58c68cba8e27da3f5de986dad9702d19d560f99db67", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
     "tarBytes": 108441600,
-    "tarSha256": "199c380f95c5894423e520430502f1ed060e17d010891cc9ec1196c9a8530fcb", "hexLawNote2": "PUBLIC-CONSTANT tar digest",
+    "tarSha256": "199c380f95c5894423e520430502f1ed060e17d010891cc9ec1196c9a8530fcb", "hexLawNote2": "PUBLIC-CONSTANT; UNVERIFIED digest because the one-off tar build/hash command was not banked as a source file and function",
     "hexLawNote": "PUBLIC-CONSTANT eternalization edition v2 artifact digests",
     "privateBytesExcluded": "the 307 record images are PRIVATE-TIER and NEVER enter the bundle (archive-copyright law); the bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },

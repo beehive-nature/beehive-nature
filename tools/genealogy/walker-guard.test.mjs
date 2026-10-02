@@ -31,6 +31,7 @@ function fixtures() {
 const bindingOpts = (opts, response, status = 200) => ({
   ...opts,
   fetchBinding: async () => ({ ok: status >= 200 && status < 300, status, text: async () => response }),
+  fetchImageXml: async () => ({ ok: false, status: 403, text: async () => "denied" }),
 });
 
 test("nextPending yields only unresolved queue members, in queue order", () => {
@@ -122,9 +123,24 @@ test("P1 ark↔apid binding: guard fetches the canonical URL and rejects a neigh
   }, guarded), /negative outcome apid/);
 });
 
+test("P1 terminal denial is fetched by the guard from the bound APID and must match the claimed status", async () => {
+  const { opts } = fixtures();
+  const calls = [];
+  const guarded = {
+    ...bindingOpts(opts, "TH-3-3-3-3-3"),
+    fetchImageXml: async (url) => { calls.push(url); return { status: 200, ok: true, text: async () => "xml" }; },
+  };
+  await assert.rejects(checkpointState("BBBB-2222", {
+    state: "xml-403", apid: "apid:TH-3-3-3-3-3", denial: { status: 403 },
+  }, guarded), /live image\.xml status/);
+  assert.deepEqual(calls, ["https://sg30p0.familysearch.org/service/records/storage/deepzoomcloud/dz/v1/apid:TH-3-3-3-3-3/image.xml"]);
+});
+
 test("P2 atomic manifest replace: saves leave no temp residue and the manifest always parses", async () => {
   const { opts, manifestPath } = fixtures();
-  await checkpointState("BBBB-2222", { state: "xml-404", apid: "apid:TH-4-4-4-4-4", ts: new Date().toISOString() }, bindingOpts(opts, "TH-4-4-4-4-4"));
+  await checkpointState("BBBB-2222", { state: "xml-404", apid: "apid:TH-4-4-4-4-4", ts: new Date().toISOString() }, {
+    ...bindingOpts(opts, "TH-4-4-4-4-4"), fetchImageXml: async () => ({ status: 404, ok: false, text: async () => "missing" }),
+  });
   recordObservation("CCCC-3333", "no-tiles", "probe", opts);
   recordWalkerFailure("CCCC-3333", "probe failure", opts); // CCCC stays pending after the observation
   const dir = manifestPath.replace(/[/\\][^/\\]+$/, "");
@@ -186,6 +202,20 @@ test("P2 heartbeat refresh keeps the canonical lock visible and serializes conte
   });
   assert.equal(inspected, true);
   assert.equal(refreshed.writerId, "refresh-A");
+});
+
+test("P2 abandoned mutation claims refuse while fresh and recover after the stale interval", () => {
+  const { opts } = fixtures();
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock-mutation-recovery.json");
+  const mutationUrl = new URL(lockPath + ".mutation");
+  writeFileSync(mutationUrl, JSON.stringify({ schema: "skaists.writer-lock-mutation/1", writerId: "crashed", claimedAt: new Date().toISOString() }));
+  assert.throws(() => acquireWriterLock("recovery-A", { ...opts, lockPath }), /mutation already in progress/);
+  writeFileSync(mutationUrl, JSON.stringify({
+    schema: "skaists.writer-lock-mutation/1", writerId: "crashed", claimedAt: new Date(Date.now() - 11 * 60 * 1000).toISOString(),
+  }));
+  const recovered = acquireWriterLock("recovery-A", { ...opts, lockPath });
+  assert.equal(recovered.writerId, "recovery-A");
+  assert.equal(readFileSync(new URL(lockPath), "utf8").includes("recovery-A"), true);
 });
 
 test("P1 conditional takeover: a takeover cannot steal a FRESH claim, and takeovers leave no quarantine residue", async () => {
