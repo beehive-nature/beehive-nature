@@ -1,0 +1,47 @@
+{
+  "schema": "skaists.eternalization-edition/2",
+  "generated": "2026-10-02T01:30:00.000Z",
+  "supersedes": "the September edition (pkg3.tar, 20,537 files, tar sha256 fec5fba8..., quote era 2.01-3.11 ANT) — package AND quote both superseded by founder order 2026-10-02",
+  "edition": "complete genealogy archive v2 — merged relationship audit + 13,249-record source-harvest public layer + public image evidence (307 hash-verified images represented as counts/sha256/ark pointers)",
+  "artifact": {
+    "preparedFrom": "zcode/imgqueue-owner @c5752b22a (preserve.mjs prepare; declared objects incl. the five evidence-layer files — absence fails prepare, tested)",
+    "files": 22107,
+    "unpackedBytes": 87941767,
+    "manifestSha256": "0959d0627ea837187795f58c68cba8e27da3f5de986dad9702d19d560f99db67", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
+    "tarBytes": 108441600,
+    "tarSha256": "199c380f95c5894423e520430502f1ed060e17d010891cc9ec1196c9a8530fcb", "hexLawNote2": "PUBLIC-CONSTANT tar digest",
+    "hexLawNote": "PUBLIC-CONSTANT eternalization edition v2 artifact digests",
+    "privateBytesExcluded": "the 307 record images are PRIVATE-TIER and NEVER enter the bundle (archive-copyright law); the bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
+  },
+  "quote": {
+    "captured": "2026-10-02 (live, `ant --json file cost` on pkg4.tar — keyless, no payment, no wallet touched)",
+    "chunkCount": 29,
+    "storageCostAnt": "1.482927234375",
+    "estimatedGasEth": "0.00015",
+    "confidence": "priced_sample",
+    "usdNotQuoted": "no live ANT/ETH USD rate captured this session — the atto/wei figures above are the actual obligations"
+  },
+  "separatedCeilings": {
+    "law": "two assets, never collapsed into one dollar figure",
+    "storageMaxAnt": 1.6,
+    "gasMaxEth": 0.0002,
+    "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change"
+  },
+  "spendingApprovalGate": {
+    "status": "AWAITING FOUNDER APPROVAL",
+    "rule": "NO payment occurs until the founder approves THIS artifact (tar sha256 199c380f...) under THESE ceilings; approval binds the exact hash and ceilings, never 'go upload the genealogy' (the standing ceremony law)",
+    "afterApproval": "founder-gated settlement lane (Trezor/antd-bridge ceremony per the bPay evidence layer) -> fresh retrieval -> hash-verify vs 199c380f... -> restoration proof -> receipt"
+  },
+  "progression": [
+    "preserved: YES (pkg4, declared-object verified)",
+    "approved: NOT YET (founder gesture)",
+    "quoted: YES (live, priced_sample)",
+    "spend-authorized: NOT YET",
+    "purchased: NOT YET",
+    "uploaded: NOT YET",
+    "retrieved: NOT YET",
+    "hash-verified: NOT YET",
+    "restoration-verified: NOT YET"
+  ],
+  "openFrontier": "image queue 364/366 (99.5%): two short-form ARKs (3QS7-89WB, 3QSQ-G983) pending on persistent binding-400 — retryable, never outcomes; evidence boundary per readback 09-30d: possible lost foreign manifest entries remain unresolved pending the other session's log"
+}
