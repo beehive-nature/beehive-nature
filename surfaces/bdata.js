@@ -14,8 +14,9 @@
 //  - Nothing here can spend. Phase C adds ONE founder-reviewed authorization
 //    object (an intent to sign, bound to the exact quote + invoice lineage);
 //    Phase E wires pay-with-wallet (ant-pay.js) after Authorized, and Add to manifest (picker + in-page sha256 + live/local intake).
-//    Wallet load lives ON this surface (injected ethereum / eth_requestAccounts). Agents never hold keys; the person's wallet signs.
-//    Unreachable loopback shelf falls back to an honest browser-local receipt — never a New-bee fail wall, never a fake Autonomi claim.
+//    Wallet load lives ON this surface. connectWallet calls eth_requestAccounts and eth_chainId only.
+//    Signing is surfaces/ant-pay.js injectedSigner (eth_requestAccounts, eth_chainId, eth_sendTransaction) — those functions take no key parameter.
+//    Unreachable loopback shelf falls back to a browser-local receipt only after an IndexedDB read-back. Metadata-only is not kept. Pay is withheld while a kept file is not the priced object.
 //
 // THE A+ REBUILD (founder, 2026-09-18: "D+ — buttons don't even work"):
 //  - EVERY PRESS ANSWERS. The screen is DERIVED from state (policy key + st +
@@ -256,7 +257,13 @@
       ask = null; mark(null);
       fail = { cls: f.cls, detail: String(f.message || ''), secs: Math.round((Date.now() - my.startedAt) / 1000) };
       render({ focus: 'price' });
-      say(failHead(fail));
+      // New bee: never announce scare words into the live region
+      if (isNewBee()) {
+        var kept = usableQuote(chosen());
+        say(kept ? (antStr(kept.totalAtto) + ' ANT. ' + T('bd.paid.scope', 'Nothing has been paid from this page.')) : '');
+      } else {
+        say(failHead(fail));
+      }
     });
   }
 
@@ -423,13 +430,24 @@
       h += q ? earlier() : refHtml;
       h += nothing;
     } else if (state === 'failed') {
-      h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
-      if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
-      if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
-      h += '</div>';
-      if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
-      if (q) h += earlier();
-      h += nothing;
+      // New bee is art/play: one path, no fail boxes, no HTTP/JSON, no Try again.
+      // Raver/cypherpunk keep the honest named failure.
+      if (isNewBee()) {
+        if (q) h += earlier();
+        else {
+          h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
+          h += refHtml;
+        }
+        h += nothing;
+      } else {
+        h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
+        if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
+        if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
+        h += '</div>';
+        if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
+        if (q) h += earlier();
+        h += nothing;
+      }
     } else if (state === 'idle') {
       h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
       h += '<p class="sub note" data-bdata-price-hint="1">' + tx('bd.price.askingnote', 'one press asks the live network; it can take up to a minute') + '</p>';
@@ -501,11 +519,11 @@
   function shortAddr(a){ a = String(a || ''); return a.length > 12 ? (a.slice(0, 6) + '…' + a.slice(-4)) : a; }
 
   /* ── Wallet on THIS surface (same UI as Add to manifest / pay) ──
-     Injected provider only. Never holds, derives, or stores a private key. */
+     Injected provider only. connectWallet calls eth_requestAccounts and eth_chainId. pickSigner uses ant-pay.js injectedSigner (eth_sendTransaction). No key parameter. */
   function walletCard(){
     var h = '<section class="card" data-bdata-wallet="1" aria-labelledby="wal-h">';
     h += '<div class="head"><div><h2 id="wal-h">' + tx('bd.wal.h', 'Your wallet') + '</h2>';
-    h += '<p class="sub">' + tx('bd.wal.sub', 'load it here — same page as your files; this page never holds a key') + '</p></div></div>';
+    h += '<p class="sub">' + tx('bd.wal.sub', 'load it here — same page as your files. connectWallet only calls eth_requestAccounts') + '</p></div></div>';
     if (wallet.connecting) {
       h += '<div class="busy" data-bdata-wal-busy="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.wal.connecting', 'opening your wallet…') + '</b></div></div>';
       return h + '</section>';
@@ -513,7 +531,7 @@
     if (wallet.address) {
       h += '<div class="badge" data-bdata-wal-ok="1">✓ ' + tx('bd.wal.ready', 'wallet ready') + ' · <bdi class="mono" data-bdata-wal-addr="' + esc(wallet.address) + '">' + esc(shortAddr(wallet.address)) + '</bdi></div>';
       if (wallet.chainId && String(wallet.chainId).toLowerCase() !== '0xa4b1') {
-        h += '<p class="sub" data-bdata-wal-chain="1">' + tx('bd.wal.switch', 'when you pay, your wallet will ask to use Arbitrum One') + '</p>';
+        h += '<p class="sub" data-bdata-wal-chain="1">' + tx('bd.wal.switch', 'this wallet is not on Arbitrum One — switch to it before you pay') + '</p>';
       }
       h += '<div class="actions"><button type="button" class="btn" data-act="wal-connect" data-fk="wal-connect" data-bdata-wal-go="1">↻ ' + tx('bd.wal.again', 'Use a different account') + '</button></div>';
     } else if (window.ethereum && typeof window.ethereum.request === 'function') {
@@ -571,38 +589,67 @@
       req.onerror = function(){ reject(req.error || new Error('idb open failed')); };
     });
   }
+  function idbClose(db){ try { if (db) db.close(); } catch (e) {} }
+  function idbReq(req){
+    return new Promise(function(resolve, reject){
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('idb request failed')); };
+    });
+  }
+  function shelfMeta(file, sha, name){
+    var key = 'bdata-shelf-meta';
+    var list = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(function(r){ return r && r.sha256 !== sha; });
+    list.push({ sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser-meta', at: new Date().toISOString() });
+    localStorage.setItem(key, JSON.stringify(list.slice(-40)));
+    return { sha256: sha, bytes: file.size || 0, name: name, shelf: 'meta' };
+  }
   function shelfLocal(file, sha, name){
     return file.arrayBuffer().then(function(ab){
-      var rec = { sha256: sha, bytes: file.size || ab.byteLength, name: name, shelf: 'browser', at: new Date().toISOString(), blob: new Blob([ab], { type: file.type || 'application/octet-stream' }) };
+      var rec = { sha256: sha, bytes: ab.byteLength, name: name, shelf: 'browser', at: new Date().toISOString(), blob: new Blob([ab], { type: file.type || 'application/octet-stream' }) };
       return idbOpen().then(function(db){
         return new Promise(function(resolve, reject){
           var tx = db.transaction(IDB_STORE, 'readwrite');
           tx.objectStore(IDB_STORE).put(rec);
-          tx.oncomplete = function(){ resolve({ sha256: rec.sha256, bytes: rec.bytes, name: rec.name, shelf: 'browser' }); };
+          tx.oncomplete = function(){ resolve(db); };
           tx.onerror = function(){ reject(tx.error || new Error('idb put failed')); };
-        });
+        }).then(function(){
+          var tx = db.transaction(IDB_STORE, 'readonly');
+          return idbReq(tx.objectStore(IDB_STORE).get(sha)).then(function(got){
+            idbClose(db);
+            if (!got || !got.blob || typeof got.blob.size !== 'number') throw new Error('idb read-back empty');
+            if (got.blob.size !== rec.bytes || String(got.sha256) !== String(sha)) throw new Error('idb read-back mismatch');
+            return { sha256: sha, bytes: got.blob.size, name: got.name || name, shelf: 'browser', blob: got.blob, at: got.at || rec.at };
+          });
+        }).catch(function(err){ idbClose(db); throw err; });
       }).catch(function(){
-        // last-resort: metadata-only (tiny files may fit localStorage — never claim bytes on Autonomi)
-        try {
-          var key = 'bdata-shelf-meta';
-          var list = JSON.parse(localStorage.getItem(key) || '[]');
-          if (!Array.isArray(list)) list = [];
-          list = list.filter(function(r){ return r && r.sha256 !== sha; });
-          list.push({ sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser-meta', at: new Date().toISOString() });
-          localStorage.setItem(key, JSON.stringify(list.slice(-40)));
-          return { sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser' };
-        } catch(e){ throw e; }
+        try { return shelfMeta(file, sha, name); }
+        catch (e) { throw e; }
       });
     });
   }
+  function intakeVoice(shelfName){
+    if (shelfName === 'browser') return T('bd.add.ok.browser', 'kept on this device');
+    if (shelfName === 'meta') return T('bd.add.ok.meta', 'not kept — only the name and hash');
+    return T('bd.add.ok', 'on the local intake shelf');
+  }
+  function pricedArtifact(){
+    return (INV && INV.domain && INV.domain.artifact) ? INV.domain.artifact : null;
+  }
+  function browserFileBlocksPay(){
+    if (!intake.result || intake.result.shelf !== 'browser') return false;
+    if (!intake.result.blob) return true;
+    var a = pricedArtifact();
+    if (!a || !a.sha256) return true;
+    return String(intake.result.sha256).toLowerCase() !== String(a.sha256).toLowerCase() || Number(intake.result.bytes) !== Number(a.bytes);
+  }
   function finishIntake(rec, voice){
-    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge' };
+    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge', blob: rec.blob || null, at: rec.at || null };
     intake.err = null; intake.soft = null; intake.placing = false;
     note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes, shelf: intake.result.shelf });
     render();
-    say(voice || (intake.result.shelf === 'browser'
-      ? T('bd.add.ok.browser', 'kept on this device')
-      : T('bd.add.ok', 'on the local intake shelf')));
+    say(voice || intakeVoice(intake.result.shelf));
   }
 
   /* ── PHASE E-2: Add to manifest (picker + in-page sha256 + live/local intake) ──
@@ -615,13 +662,17 @@
     h += '<div class="head"><div><h2 id="add-h">' + tx('bd.add.h', 'Add to manifest') + '</h2>';
     h += '<p class="sub">' + tx('bd.add.sub', 'choose a file on this device — the page hashes it here; nothing leaves until you pay') + '</p></div></div>';
     if (intake.result) {
-      var okVoice = intake.result.shelf === 'browser'
-        ? T('bd.add.ok.browser', 'kept on this device')
-        : T('bd.add.ok', 'on the local intake shelf');
-      h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">✓ ' + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
+      var okVoice = intakeVoice(intake.result.shelf);
+      h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">' + (intake.result.shelf === 'meta' ? '' : '✓ ') + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
       h += '<div class="meta sub"><span><bdi>' + esc(intake.result.name) + '</bdi> · <bdi>' + Number(intake.result.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
       if (intake.result.shelf === 'browser') {
-        h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'on this browser only — Autonomi storage starts when you pay with your wallet') + '</p>';
+        h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'still in this browser, not on Autonomi') + '</p>';
+        if (browserFileBlocksPay()) {
+          h += '<p class="law" data-bdata-intake-pay="held">' + tx('bd.add.payheld', 'the price below is for a different file') + '</p>';
+          h += '<div class="actions"><button type="button" class="btn" data-act="intake-clear" data-fk="intake-clear" data-bdata-intake-clear="1">' + tx('bd.add.clear', 'Clear this kept file') + '</button></div>';
+        }
+      } else if (intake.result.shelf === 'meta') {
+        h += '<p class="law" data-bdata-intake-honest="1" data-bdata-intake-meta="1">' + tx('bd.add.meta', 'the file itself was not saved') + '</p>';
       }
       h += '<p class="law">' + tx('bd.add.next', 'audience → price → authorize → pay with your wallet — same chain as the registered object below') + '</p>';
       h += '</section>';
@@ -707,7 +758,7 @@
     }
     (skipLive ? viaBrowser() : viaBridge()).catch(function(e){
       var unreachable = (e instanceof TypeError) || (e && e.name === 'TypeError');
-      if (unreachable || (e && e.cls === 'http' && /Failed to fetch/i.test(String(e.message||'')))) {
+      if (unreachable || (e && e.cls === 'http')) {
         // ONE path that just works: browser-local receipt, no scare panel, no Autonomi claim
         return viaBrowser().catch(function(e2){
           intake.placing = false;
@@ -779,6 +830,9 @@
     if (!auth || auth.state !== 'authorized-for-signing') {
       return '<div class="step"><p class="locked" data-bdata-pay-next="1">' + num + '<span><span aria-hidden="true">🔒 </span>' + tx('bd.pay.next', 'Pay with your wallet — unlocks after you authorize') + '</span></p></div>';
     }
+    if (browserFileBlocksPay()) {
+      return '<div class="step" data-bdata-pay-held="1"><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3><p class="law">' + tx('bd.pay.held', 'pay waits — the kept file is not this priced object') + '</p></div>';
+    }
     var h = '<div class="step" data-bdata-pay="1"' + (pay.phase && pay.phase !== 'done' && pay.phase !== 'refused' && pay.phase !== 'plan' ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3>';
     if (pay.receipt) {
       h += '<div class="badge" data-bdata-pay-done="1">✓ ' + tx('bd.pay.done', 'Paid and stored') + '</div>';
@@ -801,7 +855,7 @@
       h += row(tx('bd.auth.ceiling', 'ANT ceiling'), antHtml(String(pl.ant_total_atto), true) + ' <span class="sub">' + tx('bd.auth.exact', 'exact, never above') + '</span>');
       h += row(tx('bd.pay.confirms', 'wallet confirmations'), '<b>' + esc(String(pl.wallet_confirmations)) + '</b> · ' + esc(String(pl.payment_calls)) + ' ' + tx('bd.pay.calls', 'payment call(s)') + ' · ' + esc(String(pl.quotes)) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
       h += '</div>';
-      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — this page never holds a key') + '</p>';
+      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — ant-pay.js injectedSigner takes no key (eth_sendTransaction)') + '</p>';
       h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-confirm="1" data-act="pay-confirm" data-fk="pay-confirm">✓ ' + tx('bd.pay.confirm', 'Confirm and pay') + '</button>';
       h += '<button type="button" class="btn" data-bdata-pay-abort="1" data-act="pay-abort" data-fk="pay-abort">✕ ' + tx('bd.pay.abort', 'Not now') + '</button></div>';
       return h + '</div>';
@@ -855,6 +909,7 @@
   function payOpen(){
     var sel = chosen(), q = sel ? usableQuote(sel) : null, auth = authFor(q), fl = founderLine();
     if (!q || !auth || auth.state !== 'authorized-for-signing' || !fl) { render(); return; }
+    if (browserFileBlocksPay()) { render(); return; }
     if (pay.phase && pay.phase !== 'refused' && pay.phase !== 'done' && pay.confirmResolve) { render(); return; }
     var AP = window.AntPay;
     if (!AP) { pay.refusal = { code:'no-wallet', message:'ant-pay.js missing' }; pay.phase = 'refused'; render(); return; }
@@ -1305,6 +1360,7 @@
     else if (act === 'pay-abort') payAbort();
     else if (act === 'pay-stop') payStop();
     else if (act === 'intake-go') intakeGo();
+    else if (act === 'intake-clear') intakeClear();
     else if (act === 'wal-connect') connectWallet();
   });
   root.addEventListener('change', function(ev){
@@ -1415,8 +1471,61 @@
       INV = inv; invState = 'ready';
     }).catch(function(){ INV = null; invState = 'failed'; say(T('bd.inv.fail', 'Your data list did not load.')); }).then(function(){ render(); });
   }
+  function restoreMeta(){
+    if (intake.result || intake.file || intake.hashing || intake.placing) return;
+    try {
+      var list = JSON.parse(localStorage.getItem('bdata-shelf-meta') || '[]');
+      if (!Array.isArray(list) || !list.length) return;
+      var got = list[list.length - 1];
+      if (!got || !got.sha256) return;
+      intake.result = { name: String(got.name || 'file'), bytes: Number(got.bytes) || 0, sha256: String(got.sha256), shelf: 'meta', blob: null, at: got.at || null };
+      render();
+    } catch (e) {}
+  }
+  function restoreShelf(){
+    if (!window.indexedDB) { restoreMeta(); return; }
+    idbOpen().then(function(db){
+      var store = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE);
+      var readAll = (typeof store.getAll === 'function') ? idbReq(store.getAll()) : new Promise(function(resolve, reject){
+        var out = [];
+        var cur = store.openCursor();
+        cur.onsuccess = function(){ var c = cur.result; if (!c) { resolve(out); return; } out.push(c.value); c.continue(); };
+        cur.onerror = function(){ reject(cur.error || new Error('idb cursor failed')); };
+      });
+      return readAll.then(function(rows){ idbClose(db); return rows || []; }, function(err){ idbClose(db); throw err; });
+    }).then(function(rows){
+      if (intake.result || intake.file || intake.hashing || intake.placing) return;
+      var kept = (rows || []).filter(function(r){ return r && r.blob && r.sha256 && typeof r.blob.size === 'number'; });
+      kept.sort(function(a, b){ return String(b.at || '').localeCompare(String(a.at || '')); });
+      if (!kept.length) { restoreMeta(); return; }
+      var got = kept[0];
+      intake.result = { name: String(got.name || 'file'), bytes: got.blob.size, sha256: String(got.sha256), shelf: 'browser', blob: got.blob, at: got.at || null };
+      render();
+    }).catch(function(){ restoreMeta(); });
+  }
+  function intakeClear(){
+    var sha = intake.result && intake.result.sha256;
+    intake = { file:null, name:'', bytes:0, sha256:null, hashing:false, placing:false, err:null, soft:null, result:null, tooLarge:false };
+    render();
+    if (!sha) return;
+    try {
+      var key = 'bdata-shelf-meta';
+      var list = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(list)) localStorage.setItem(key, JSON.stringify(list.filter(function(r){ return r && r.sha256 !== sha; })));
+    } catch (e) {}
+    if (!window.indexedDB) return;
+    idbOpen().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(sha);
+        tx.oncomplete = function(){ idbClose(db); resolve(); };
+        tx.onerror = function(){ idbClose(db); resolve(); };
+      });
+    }).catch(function(){});
+  }
   loadInvoice();
   loadStored();
+  restoreShelf();
   // without the current founder invoice the authorization step stays locked, in words
   fetch('bpay-invoice-founder.json').then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function(finv){ if (finv && finv.identity && finv.commitment && finv.domain && finv.domain.artifact) { FINV = finv; render(); } })
