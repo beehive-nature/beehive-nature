@@ -21,3 +21,9 @@ Browser verification on the served preview: opened Don Ray, clicked his own rela
 Corrected the host SVG height override so the Tree-of-Life branch and hit layers fill the same stage as the relatives. Renamed the existing fractal toggle to fan chart and kept controls sticky. Switching back to Latvian tree now synchronizes the atlas root and selection; initial deep links and whole-line return synchronize roots too. View switching collapses the research drawer so the chart is visible.
 
 Browser verified fan toggle selects atlas data-view fractal; Latvian-tree toggle restores the tree; measured branch SVG 558.67px inside the 560px bordered stage (previous height:auto mismatch removed). The prior preview tab's browser connection timed out, so a fresh preview was opened and preserved. Public deployment remains pending PR #305.
+
+## At least 44 generations
+
+Added generation navigation over the whole published graph using shortest parent-path BFS, independent of the small visible tree window and 42-generation highlighted spine. Generation 44 has 36 published people; maximum shortest recorded distance is 143. These are graph coverage counts, not proof ratings. Selector deliberately waits for a named choice and displays the connecting path with per-person research available. Route strip remains visible in Tree-of-Life mode.
+
+Browser verification: generation 44 reports 36; selecting Berthe de Burgondie yields data-route-len 44 and the Latvian tree focuses on Berthe. Preview preserved. No ancestry invented or records changed.
