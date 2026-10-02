@@ -15,3 +15,9 @@ The spouse row said "marriage — affinity, never blood", describing a pairwise 
 A repeated click on the selected person returned without visible feedback; the drawer retained its prior scroll position. The person panel now uses the actual drawer scroll container, returns to the top on navigation (including selecting the same person), and puts branch walking/full research actions immediately after the name. Family links precede the long relationship explanation. Tree nodes now have a visible green-dot legend.
 
 Browser verification on the served preview: opened Don Ray, clicked his own relationship-path endpoint, observed drawer scrollTop 0 and matching Don Ray heading; clicked walk this branch and observed climbing from Don Ray Remington; clicked open full research and observed his dedicated archive heading and record. Preview retained for founder testing. This is a focused interaction improvement, not a claim of completing the wider next-generation UX vision.
+
+## Latvian skeleton and fan-chart toggle
+
+Corrected the host SVG height override so the Tree-of-Life branch and hit layers fill the same stage as the relatives. Renamed the existing fractal toggle to fan chart and kept controls sticky. Switching back to Latvian tree now synchronizes the atlas root and selection; initial deep links and whole-line return synchronize roots too. View switching collapses the research drawer so the chart is visible.
+
+Browser verified fan toggle selects atlas data-view fractal; Latvian-tree toggle restores the tree; measured branch SVG 558.67px inside the 560px bordered stage (previous height:auto mismatch removed). The prior preview tab's browser connection timed out, so a fresh preview was opened and preserved. Public deployment remains pending PR #305.

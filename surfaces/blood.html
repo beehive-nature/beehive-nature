@@ -156,6 +156,8 @@ body.gux #atlas{display:block}
 .life-mode .zoombar{display:none!important}
 .life-mode #cards,.life-mode #routestrip{display:none!important}
 #treeoflife .tol-stage{min-height:440px}
+#treeoflife svg.tol-art,#treeoflife svg.tol-hit{height:100%;cursor:default}
+.controls{position:sticky;top:0;z-index:30;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
 #treeoflife .tol-note{line-height:1.6}
 @media(max-width:640px){.life-intro{grid-template-columns:1fr}.life-key{text-align:left}.life-loading{min-height:520px}#treeoflife{padding:7px}}
 /* one search box (the page's #q) and ONE history (the atlas's back): the
@@ -503,9 +505,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div class="controls">
   <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
   <div class="viewswitch" role="group" aria-label="view">
-    <button id="viewlife" type="button" aria-pressed="true">austras koks</button>
+    <button id="viewlife" type="button" aria-pressed="true">Latvian tree of life</button>
     <button id="viewped" type="button" aria-pressed="false">pedigree</button>
-    <button id="viewfan" type="button" aria-pressed="false">fractal</button>
+    <button id="viewfan" type="button" aria-pressed="false">fan chart</button>
     <button id="viewtree" type="button" aria-pressed="false">tree</button>
   </div>
   <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
@@ -1684,9 +1686,10 @@ try {
     closePerson() { /* the research drawer keeps the last read person in reach */ },
     onContext(ctx, reason) {
       if (reason === "mount" || syncing || !atlas) return;
-      if (ctx.f && ctx.f !== treeFocus) {
-        treeFocus = ctx.f;
-        syncing = true; atlas.reroot(ctx.f); syncing = false;
+      const nextRoot = ctx.f || corpus.root;
+      if (nextRoot !== treeFocus) {
+        treeFocus = nextRoot;
+        syncing = true; atlas.reroot(nextRoot); syncing = false;
       }
       if (ctx.p && ctx.p !== atlas.getContext().selection) {
         syncing = true; atlas.select(ctx.p); syncing = false;
@@ -1694,9 +1697,20 @@ try {
       }
     },
   });
-  $("viewlife").addEventListener("click", () => setWorld("life"));
+  syncing = true;
+  try { treeHandle.go({ f: init.root === corpus.root ? null : init.root, p: init.selection || null }, { push: false }); }
+  finally { syncing = false; }
+  $("viewlife").addEventListener("click", () => {
+    const ctx = atlas.getContext();
+    treeFocus = ctx.root;
+    syncing = true;
+    try { treeHandle.go({ f: ctx.root === corpus.root ? null : ctx.root, p: ctx.selection || null }, { push: false }); }
+    finally { syncing = false; }
+    setWorld("life");
+    $("detail").classList.remove("open");
+  });
   for (const [id, view] of [["viewped", "pedigree"], ["viewfan", "fractal"], ["viewtree", "tree"]]) {
-    $(id).addEventListener("click", () => setWorld("atlas", view));
+    $(id).addEventListener("click", () => { setWorld("atlas", view); $("detail").classList.remove("open"); });
   }
   $("resetbtn").addEventListener("click", () => {
     if (activeWorld === "life" && treeHandle) { treeFocus = init.root; treeHandle.go({ f: null, p: null }, { push: false }); }
