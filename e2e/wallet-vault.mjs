@@ -90,6 +90,7 @@ t('slot shows the E2 floor', /E2/.test(await page.textContent('#vlt-devices')));
 
 console.log('\n── live validation ──');
 const A = n => Array(n).fill('abandon').join(' ');
+await page.locator('#vlt-secret-scaffold').evaluate(el => { el.open = true; });
 await page.fill('#vlt-secret', `${A(11)} about`);
 await page.waitForTimeout(350);
 t('valid 12-word phrase recognised', /valid BIP-39/.test(await page.textContent('#vlt-check')));
@@ -116,6 +117,7 @@ console.log('\n── reveal + send to bridge ──');
 await page.locator('#vlt-list .chip button[data-act="reveal"]').first().click();
 await page.waitForTimeout(300);
 t('reveal shows the secret', /KwDiBf89/.test(await page.textContent('#vlt-revealed')));
+await page.locator('#br-wif-scaffold').evaluate(el => { el.open = true; });
 await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
 await page.waitForTimeout(300);
 t('key handed to the bridge field',
@@ -187,6 +189,19 @@ const guarded = await page.evaluate(() => {
 t('#kc-create is inside the auto-connect hands-off set', guarded);
 t('vault section is inside it too', await page.evaluate(() =>
   !!document.getElementById('vlt-secret').closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec')));
+
+console.log('\n── paste-secret demoted to scaffold · recovery ──');
+t('kc-rec scaffold present', await page.locator('#kc-rec-scaffold').count().then(n => n === 1));
+t('kc-rec summary names scaffold · recovery', await page.locator('#kc-rec-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
+t('vlt-secret scaffold present', await page.locator('#vlt-secret-scaffold').count().then(n => n === 1));
+t('vlt-secret summary names scaffold · recovery', await page.locator('#vlt-secret-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
+t('br-wif scaffold present', await page.locator('#br-wif-scaffold').count().then(n => n === 1));
+t('seed option labeled scaffold', await page.locator('#vlt-type option[value="seed"]').textContent().then(x => /scaffold/i.test(x)));
+t('vaulta option labeled scaffold', await page.locator('#vlt-type option[value="vaulta"]').textContent().then(x => /scaffold/i.test(x)));
+t('arweave option still scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(x => /scaffold/i.test(x)));
+t('arw-jwk-scaffold still demoted', await page.locator('#arw-jwk-scaffold').count().then(n => n === 1));
+t('primary keychain CTA is passkey connect (not paste)', await page.locator('#kc-pass').isVisible());
+t('paste fields remain in DOM (recovery capability kept)', await page.locator('#kc-rec,#vlt-secret,#br-wif').count().then(n => n === 3));
 
 console.log('\n── no runtime noise ──');
 const realErrors = consoleErrors.filter(e =>
