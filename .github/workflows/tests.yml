@@ -858,6 +858,9 @@ jobs:
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
         run: node e2e/wallet-registers.mjs
+      - name: Soul chrome truth — live bzDiD removes connect/create from rails footer
+        if: always()
+        run: node e2e/soul-chrome.mjs
   eternal:
     timeout-minutes: 25
     runs-on: ubuntu-latest
