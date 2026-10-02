@@ -19,6 +19,7 @@ This repair invalidates the first pkg4 candidate and closes the later PR #296 re
 - `prepare` validates the private record schema, requires a nonempty record map, and reconciles every record ID and count against both the source index and manifest before projecting public bytes.
 - The service re-reads the edition gate immediately before the paid command and refuses any revocation or change to the approved hash, ceilings, or chunk count. Upload banking appends a durable progression row when an older receipt has none, and snapshot cleanup is best-effort after a paid result.
 - The public image summary marks the earlier one-off byte-audit claim `UNVERIFIED`; no banked source file/function exists for that audit, so the archive no longer overstates its proof boundary.
+- The superseded edition ledger carries the same `UNVERIFIED` boundary and no longer names its forbidden old tar hash in dormant after-approval instructions.
 
 Verification after merging the repaired evidence stack from main: focused walker/preservation suites 46/46; full `node --test tools/genealogy/*.test.mjs` 458/458; `git diff --check` clean.
 

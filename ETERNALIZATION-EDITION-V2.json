@@ -2,7 +2,7 @@
   "schema": "skaists.eternalization-edition/2",
   "generated": "2026-10-02T01:30:00.000Z",
   "supersedes": "the September edition (pkg3.tar, 20,537 files, tar sha256 fec5fba8..., quote era 2.01-3.11 ANT) — package AND quote both superseded by founder order 2026-10-02",
-  "edition": "complete genealogy archive v2 — merged relationship audit + 13,249-record source-harvest public layer + public image evidence (307 hash-verified images represented as counts/sha256/ark pointers)",
+  "edition": "SUPERSEDED genealogy archive v2 — merged relationship audit + 13,249-record source-harvest public layer + public image evidence (307 private-tier images represented as counts/sha256/ark pointers; the one-off byte-audit claim is UNVERIFIED because no source file/function was banked)",
   "artifact": {
     "preparedFrom": "zcode/imgqueue-owner @c5752b22a (preserve.mjs prepare; declared objects incl. the five evidence-layer files — absence fails prepare, tested)",
     "files": 22107,
@@ -30,7 +30,7 @@
   "spendingApprovalGate": {
     "status": "REBUILD REQUIRED — PRIVACY PROJECTION CHANGED",
     "rule": "NO payment occurs against this superseded artifact. The privacy-safe records projection changes package bytes; rebuild, re-hash, re-quote with ant 0.3.9, then obtain founder approval of the successor exact hash and ceilings.",
-    "afterApproval": "founder-gated settlement lane (Trezor/antd-bridge ceremony per the bPay evidence layer) -> fresh retrieval -> hash-verify vs 199c380f... -> restoration proof -> receipt"
+    "afterApproval": "DISABLED FOR THIS EDITION. A successor must bind its own exact tar hash and separated ceilings before the founder-gated settlement lane can run."
   },
   "progression": [
     "preserved: SUPERSEDED (pkg4 included raw transcription values; never approve or upload)",
