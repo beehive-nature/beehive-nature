@@ -771,8 +771,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
   onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
   and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
-  more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase:
-  same soul, same keys.</div>
+  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b> — never paste a secret.
+  A recovery phrase paste stays under <b>scaffold · recovery</b> for import only (same soul, same keys).</div>
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
       <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
@@ -858,14 +858,19 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       automatically: no "which passkey?" picker ever again.
       <b>Passkeys are origin-bound:</b> one made at another site (an Anchor/wallet passkey for your
       account, say) can never connect here: it signs at its own site only. Your account's existing
-      key still bridges you in: paste it once below.
-      <b>Already hold a bzDiD elsewhere? Don't create a second. Import it with your recovery phrase
-      instead (a new passkey = a new soul).</b></div>
+      key still bridges you in via the bridge scaffold (not the New-bee primary path).
+      <b>Already hold a bzDiD elsewhere? Don't create a second.</b> Prefer connecting the existing
+      passkey; recovery-phrase import lives under <b>scaffold · recovery</b> (a new passkey = a new soul).</div>
   </details>
-      <div class="row">
-        <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
-        <button id="kc-recgo">recover</button>
-      </div>
+      <details id="kc-rec-scaffold" style="margin-top:10px">
+        <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+        <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
+        Prefer <b>connect keychain (passkey)</b> above — New-bee never needs to paste.</div>
+        <div class="row" style="margin-top:8px">
+          <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+          <button id="kc-recgo">recover</button>
+        </div>
+      </details>
       <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">keychain not connected</div>
       <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
         <div class="keycard" style="flex:1 1 100%">
@@ -890,7 +895,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
   <h2>🔐 the vault: <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold: formats, and how they get sealed</summary>
-  <div class="law">The keys you already hold, <b>seed phrases</b> from any wallet
+  <div class="law">Gold path is connect / inject / derive / passkey — paste is scaffold · recovery only.
+  The keys you already hold, <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
   (5K… · L… · K… · PVT_K1_…), are sealed under a single <b>keypass</b> so you never handle
   them raw again. Sealed with <b>PBKDF2-SHA-256 ×600 000 → AES-256-GCM</b>, header
@@ -957,33 +963,38 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <button id="vlt-lock" style="font-size:10px;padding:6px 12px;min-height:32px">🔒 lock now</button>
     </div>
 
-    <div class="law" style="margin-top:14px;color:var(--ink)"><b>② Put a secret in.</b>
-    Paste it and the type is detected for you — the phrase is checksum-verified, the key is
-    checksum-verified and curve-checked, before anything is sealed.
-    <span style="color:var(--faint);font-size:11px">Arweave publish prefers the injected wallet on the Arweave panel — JWK paste here is scaffold only, not required for New-bee.</span></div>
-    <div class="row">
-      <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
-        <option value="auto" selected>detect type</option>
-        <option value="seed">seed phrase</option>
-        <option value="vaulta">Vaulta active key</option>
-        <option value="arweave">Arweave JWK (scaffold · advanced)</option>
-        <option value="note">plain note</option>
-      </select>
-      <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
-    </div>
-    <div class="row">
-      <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
-        style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
-    </div>
-    <div class="row">
-      <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
-      <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
-    <div class="row">
-      <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
-      <button id="vlt-clear" style="font-size:11px">clear</button>
-    </div>
+    <div class="law" style="margin-top:14px;color:var(--dim);font-size:11px">Gold path for secrets: <b>connect / inject / derive / passkey</b> — not paste.
+    Sealing a pasted seed or key is <b>scaffold · recovery</b> only (capability kept; never required for New-bee).</div>
+    <details id="vlt-secret-scaffold" style="margin-top:10px">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+      <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)"><b>② Put a secret in (recovery).</b>
+      Paste it and the type is detected for you — the phrase is checksum-verified, the key is
+      checksum-verified and curve-checked, before anything is sealed.
+      Prefer inject/connect on each rail; Arweave JWK paste remains scaffold · advanced.</div>
+      <div class="row" style="margin-top:8px">
+        <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+          <option value="auto" selected>detect type</option>
+          <option value="seed">seed phrase (scaffold · recovery)</option>
+          <option value="vaulta">Vaulta active key (scaffold · recovery)</option>
+          <option value="arweave">Arweave JWK (scaffold · advanced)</option>
+          <option value="note">plain note</option>
+        </select>
+        <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
+      </div>
+      <div class="row">
+        <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
+          style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
+      </div>
+      <div class="row">
+        <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
+        <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
+      <div class="row">
+        <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
+        <button id="vlt-clear" style="font-size:11px">clear</button>
+      </div>
+    </details>
 
     <div class="law" style="margin-top:16px;color:var(--ink)"><b>③ What is inside.</b>
     Secrets stay hidden until you ask for one. <span id="vlt-count">0 entries</span></div>
@@ -1107,11 +1118,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
   <h2>🌉 the bridge: one time, then never manual again</h2>
-  <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
-  <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> your bzDiD keys
-  alongside every key already on your account (nothing removed, threshold 1: <b>the derived key
-  AND the account passkey can both sign</b>), sign with your old key, broadcast, and this field
-  disappears from your life. The old key stays in tab memory only and is scrubbed the moment the
+  <div class="law">Your bzDiD-derived K1 key is not on your account yet.
+  <b>Gold:</b> connect / inject / derive enrolls the key — New-bee never pastes a private key.
+  <b>While finalizing:</b> the recovery scaffold below can paste your existing <b>active</b> key
+  <b>once</b> to build an updateauth that <b>adds</b> your bzDiD keys alongside every key already
+  on your account (nothing removed, threshold 1: <b>the derived key AND the account passkey can
+  both sign</b>). The pasted key stays in tab memory only and is scrubbed the moment the
   transaction is sent.</div>
   <div class="row">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
@@ -1119,11 +1131,16 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       also enroll an account passkey on this origin (PUB_WA at threshold 1 — touch/passkey can sign too)
     </label>
   </div>
-  <div class="row">
-    <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
-    <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
-  </div>
-  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">waiting for your existing key</div>
+  <details id="br-wif-scaffold" style="margin-top:10px">
+    <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+    <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / migration only: paste the account's existing ACTIVE private key to bridge your derived bzDiD.
+    Prefer connect/inject when available — this paste is never required for New-bee.</div>
+    <div class="row" style="margin-top:8px">
+      <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
+      <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
+    </div>
+  </details>
+  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">connect / derive first — paste scaffold only if recovering</div>
   <pre id="br-out" style="display:none"></pre>
 </section>
 
@@ -2135,8 +2152,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <button id="tx-abi" class="green" style="font-size:11px">📥 load ABI</button>
   </div>
   <div class="row" id="tx-j4row" style="display:none">
-    <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
-    <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+    <details id="tx-j4-scaffold" style="flex:1 1 100%">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · Jungle4 test key (TESTNET-ONLY — gold mainnet never pastes)</summary>
+      <div class="row" style="margin-top:8px">
+        <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
+        <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+      </div>
+    </details>
   </div>
   <div id="tx-fields" style="display:none;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--well)">
     <div style="font-size:9.5px;color:var(--violet);letter-spacing:.09em;margin-bottom:7px" id="tx-fields-title">FIELDS — from the live ABI</div>

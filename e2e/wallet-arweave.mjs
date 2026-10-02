@@ -315,6 +315,9 @@ try {
     ok('empty path does not demand vault JWK as required', !/seal your JWK|paste it; the type is detected/i.test(t), t.slice(0, 120));
     ok('connect button is the primary control', await page.locator('#arw-connect').isVisible());
     ok('JWK scaffold is in a demoted details', await page.locator('#arw-jwk-scaffold summary').innerText().then(x => /scaffold|optional|advanced/i.test(x)));
+    ok('kc-rec demoted to scaffold', await page.locator('#kc-rec-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
+    ok('vlt-secret demoted to scaffold', await page.locator('#vlt-secret-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
+    ok('br-wif demoted to scaffold', await page.locator('#br-wif-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
     await ctx.close();
   }
   function b64(s) { return Buffer.from(s, 'utf8').toString('base64url'); }

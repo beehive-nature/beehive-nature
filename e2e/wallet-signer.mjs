@@ -135,6 +135,7 @@ async function connectedPage(ctx, mutate) {
   await page.evaluate(() => {
     const mprk = new Uint8Array(32).fill(0x2a);          // TEST-ONLY masterPRK
     const code = window.BZDIDKEY.encodeRecoveryCode(mprk);
+    const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
     document.getElementById('kc-rec').value = code;
     document.getElementById('kc-recgo').click();
   });

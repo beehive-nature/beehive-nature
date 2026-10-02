@@ -168,7 +168,9 @@ try {
       els.map(e => e.getAttribute('data-fn') + ':' + e.getAttribute('data-ft')));
     ok('seven ABI fields rendered, typed (vendored eosjs serializes IN the worker)',
       fields.length === 7 && fields[0] === 'committer:name' && fields[6] === 'forced_watermark:uint64', fields.join(' '));
+    await page.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
     await page.fill('#tx-j4actor', 'banchor22222');
+    await page.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
     await page.fill('#tx-j4key', J4_WIF);
     await page.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
     await page.click('#tx-go');
@@ -243,7 +245,9 @@ try {
     await p6.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
     await p6.selectOption('#tx-net', 'j4');
     await p6.fill('#tx-contract', 'banchor22222'); await p6.fill('#tx-action', 'commit');
-    await p6.fill('#tx-j4actor', 'banchor22222'); await p6.fill('#tx-j4key', J4_WIF);
+    await p6.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await p6.fill('#tx-j4actor', 'banchor22222'); await p6.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await p6.fill('#tx-j4key', J4_WIF);
     await p6.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
     await p6.click('#tx-go');
     await p6.waitForFunction(() => /submit faulted|resubmit the identical|CONFIRMED|FAILED/i.test(document.getElementById('tx-out').textContent), null, { timeout: 30000 });
@@ -273,7 +277,9 @@ try {
     await p7.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
     await p7.selectOption('#tx-net', 'j4');
     await p7.fill('#tx-contract', 'banchor22222'); await p7.fill('#tx-action', 'commit');
-    await p7.fill('#tx-j4actor', 'banchor22222'); await p7.fill('#tx-j4key', J4_WIF);
+    await p7.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await p7.fill('#tx-j4actor', 'banchor22222'); await p7.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await p7.fill('#tx-j4key', J4_WIF);
     await p7.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
     await p7.click('#tx-go');
     await p7.waitForFunction(() => /not visible yet|reading again/i.test(document.getElementById('tx-out').textContent), null, { timeout: 20000 });
