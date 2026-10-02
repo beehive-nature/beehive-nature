@@ -1061,6 +1061,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
   Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
   never invents one; connect an injected Arweave wallet or bind a public address.
+  <b>pq:ml-dsa-65</b> and <b>pq:ml-kem-768</b> are public cards for the bsigner registry
+  (FIPS 204 / 203): when the keychain is connected <b>and</b> bsigner WASM is armed, the
+  forge shows a short public fingerprint derived from your masterPRK; until that WASM is
+  browser-ready the card stays an honest stub — never a fake PQ key from nothing.
   Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
@@ -1071,13 +1075,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
   <div class="row">
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name" spellcheck="false">
+    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
     <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
     <button id="forge-hive" style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
     <button id="forge-ar" style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
+    <button id="forge-pq-dsa" style="font-size:11px">+ pq:ml-dsa-65:<span id="fs6">soul</span></button>
+    <button id="forge-pq-kem" style="font-size:11px">+ pq:ml-kem-768:<span id="fs7">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
 </section>
@@ -2257,6 +2263,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var BRIDGED=null;       // true/false/unknown
   var BN=null;            // BnrSign bundle (vendored eosjs lane)
   var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
+  var BSIGNER=null;       // bsigner PQ WASM (ml-dsa / ml-kem) — armed only when browser-ready; never invent PQ
 
   // nothing freezes silently: surface any stray handler error in the page
   window.addEventListener('error',function(ev){
@@ -2430,8 +2437,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
     ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
+    ensureCtx('pq:ml-dsa-65:'+SOUL); ensureCtx('pq:ml-kem-768:'+SOUL);
     $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
     if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL;
+    if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
   function npubFromSeed(seed){ // NIP-19: bech32('npub', x-only pubkey of the secp256k1 pair)
@@ -2536,7 +2545,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
     return vaultArPublic();
   }
+  function parsePqCtx(ctx){
+    var m=/^pq:(ml-dsa-65|ml-kem-768)(?::(.{1,48}))?$/.exec(ctx||'');
+    if(!m) return null;
+    var alg=m[1], name=(m[2]||SOUL||'').trim();
+    return {
+      alg:alg,
+      name:name,
+      kind:alg==='ml-dsa-65'?'ML-DSA-65 (FIPS 204)':'ML-KEM-768 (FIPS 203)',
+      registryId:alg
+    };
+  }
+  function bsignerArmed(){
+    return !!(BSIGNER && typeof BSIGNER.publicFingerprint==='function');
+  }
   function deriveFor(ctx){
+    /* pq: public cards — ML-DSA-65 / ML-KEM-768 beside classical contexts.
+       Persist context names only. Derive from masterPRK only when bsigner WASM
+       is armed; otherwise honest stub (never invent a PQ pubkey from nothing). */
+    if(/^pq:/.test(ctx)){
+      var pq=parsePqCtx(ctx);
+      if(!pq) return {kind:'PQ (unknown alg)', value:null, publicOnly:true, needsWasm:true, alg:'?'};
+      if(!MPRK) return null; /* chip: derives when keychain connects */
+      if(bsignerArmed()){
+        try{
+          var pub=BSIGNER.publicFingerprint(MPRK, pq.alg, pq.name||'');
+          if(pub && pub.short){
+            return {kind:pq.kind, value:pub.short, fingerprint:pub.fp||pub.short, publicOnly:true, derived:true, alg:pq.alg};
+          }
+        }catch(e){ /* fall through to honest stub — never fake */ }
+      }
+      return {kind:pq.kind, value:null, publicOnly:true, needsWasm:true, alg:pq.alg};
+    }
     /* hive: public account name — no private material, works without MPRK */
     if(/^hive:/.test(ctx)){
       var hn=hiveNameOf(ctx);
@@ -2588,11 +2628,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
     if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
     if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
+    if(d.needsWasm) return 'bsigner registry · core derives when WASM armed — never a fake PQ key';
+    if(d.derived && /^ML-DSA|^ML-KEM/.test(d.kind||'')) return 'public fingerprint only · seed never stored';
     if(d.kind==='Solana') return 'ed25519 base58';
     if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
     if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
     if(d.kind==='Vaulta K1'||d.kind==='K1') return 'eosio public key';
     return 'public material only';
+  }
+  function renderPqWasmChip(box, c, d){
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
+    el.setAttribute('data-pq-card', (d&&d.alg)||'pq');
+    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc((d&&d.kind)||'PQ')+'</span></div>'+
+      '<div class="cv" style="color:var(--ink)">core derives when WASM armed</div>'+
+      '<div class="cx" style="margin-top:6px">bsigner registry <b>'+esc((d&&d.alg)||'')+'</b> · public card only · never invent PQ from nothing · private seed never stored</div>';
+    box.appendChild(el);
   }
   function renderArConnectChip(box, c){
     var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
@@ -2659,6 +2709,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return;
       }
       if(d.needsConnect){ renderArConnectChip(box, c); return }
+      if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
       var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
       el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
@@ -2690,6 +2741,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
+  $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-dsa-65 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
+  $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-kem-768 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before
@@ -4922,6 +4975,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       publicJwk: arInjectPublicJwk,
       signRaw: arInjectSignRaw
     },
+    forgePq: {
+      contexts: function(){ return CONTEXTS.filter(function(c){ return /^pq:/.test(c) }) },
+      count: function(){ return CONTEXTS.filter(function(c){ return /^pq:/.test(c) }).length },
+      armed: bsignerArmed,
+      parse: parsePqCtx,
+      derive: function(ctx){ return deriveFor(ctx) },
+      registry: ['ml-dsa-65','ml-kem-768']
+    },
     _telemetry: TELEMETRY,
     _crash: crash
   };
@@ -5726,9 +5787,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     });
   }
+  /* bsigner PQ WASM — optional. Estate has crates/bsigner (CLI) today; browser
+     arming lands when a WASM/worker is loadable. Until then forge pq: cards are
+     honest stubs. Never invent PQ material in JS. */
+  if(window.BNRBSIGNER && typeof window.BNRBSIGNER.then==='function'){
+    window.BNRBSIGNER.then(function(b){
+      if(b && typeof b.publicFingerprint==='function'){
+        BSIGNER=b;
+        if(MPRK) renderForge();
+      }
+    }).catch(function(){ /* absent = honest stub residual */ });
+  } else if(window.BNRBSIGNER && typeof window.BNRBSIGNER.publicFingerprint==='function'){
+    BSIGNER=window.BNRBSIGNER;
+  }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
