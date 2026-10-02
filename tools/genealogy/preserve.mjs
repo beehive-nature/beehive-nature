@@ -172,14 +172,31 @@ function declaredContents() {
 function verifyPackage(dir, manifestPath) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const problems = [];
-  let ok = 0;
+  let ok = 0, actualTotal = 0, declaredTotal = 0;
   for (const [f, meta] of Object.entries(manifest.files)) {
     const p = join(dir, f);
+    const declaredSizeValid = Number.isSafeInteger(meta.bytes) && meta.bytes >= 0;
+    if (declaredSizeValid) declaredTotal += meta.bytes;
+    else problems.push([f, "invalid declared byte size"]);
     if (!existsSync(p)) { problems.push([f, "missing"]); continue; }
-    if (sha256(readFileSync(p)) === meta.sha256) ok++; else problems.push([f, "hash mismatch"]);
+    const buf = readFileSync(p);
+    actualTotal += buf.length;
+    const sizeMatches = declaredSizeValid && buf.length === meta.bytes;
+    const hashMatches = sha256(buf) === meta.sha256;
+    if (!sizeMatches) problems.push([f, `byte size mismatch (declared ${meta.bytes}, actual ${buf.length})`]);
+    if (!hashMatches) problems.push([f, "hash mismatch"]);
+    if (sizeMatches && hashMatches) ok++;
+  }
+  if (!Number.isSafeInteger(manifest.totalBytes) || manifest.totalBytes < 0)
+    problems.push(["(manifest)", "invalid totalBytes"]);
+  else {
+    if (manifest.totalBytes !== declaredTotal)
+      problems.push(["(manifest)", `totalBytes does not equal declared file sizes (${manifest.totalBytes} != ${declaredTotal})`]);
+    if (manifest.totalBytes !== actualTotal)
+      problems.push(["(manifest)", `totalBytes does not equal package bytes (${manifest.totalBytes} != ${actualTotal})`]);
   }
   const digest = sha256(Buffer.from(JSON.stringify(manifest.files)));
-  return { manifest, problems, ok, digest };
+  return { manifest, problems, ok, digest, actualTotal, declaredTotal };
 }
 
 // path safety: reject absolute, traversal, and anything resolving outside root

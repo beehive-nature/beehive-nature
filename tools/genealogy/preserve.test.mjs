@@ -113,6 +113,31 @@ test("probe 2: approval refuses altered bytes", () => {
   assert.match(r.stderr, /blood\.html: hash mismatch/);
 });
 
+test("verification checks every file byte count and the manifest total", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  assert.equal(run(["prepare", pkg, "test destination"], { cwd: root }).code, 0);
+  const manifestPath = join(pkg, "manifest.json");
+  let manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  manifest.files["surfaces/blood.html"].bytes += 1;
+  manifest.totalBytes += 1;
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  let r = run(["verify", pkg], { cwd: root });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stdout, /byte size mismatch/);
+
+  const root2 = buildFixture();
+  const pkg2 = join(root2, "pkg");
+  assert.equal(run(["prepare", pkg2, "test destination"], { cwd: root2 }).code, 0);
+  const manifestPath2 = join(pkg2, "manifest.json");
+  manifest = JSON.parse(readFileSync(manifestPath2, "utf8"));
+  manifest.totalBytes += 1;
+  writeFileSync(manifestPath2, JSON.stringify(manifest, null, 2));
+  r = run(["verify", pkg2], { cwd: root2 });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stdout, /totalBytes does not equal/);
+});
+
 test("probe 3: manifest substitution after approval fails verification", () => {
   const root = buildFixture();
   const pkg = join(root, "pkg");
