@@ -71,11 +71,91 @@ test("checkpointDownload ACCEPTS a fully-identified download for a queue member 
   const ok = checkpointDownload("CCCC-3333", {
     state: "downloaded", apid: "apid:TH-2-2-2-2-2", w: 100, h: 200, level: 11, maxLevel: 12,
     tiles: 4, edgeSkips: 0, bytes: 1234, sha256: "a".repeat(64), ts: "2026-09-29T00:00:00.000Z",
+    binding: {
+      url: "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:CCCC-3333/name?namespace=apid",
+      response: "TH-2-2-2-2-2", // bare apid (the BARE-APID gotcha) — normalization must accept it
+    },
   }, opts);
   assert.equal(ok, true);
   const man = JSON.parse(readFileSync(new URL(opts.manifestPath), "utf8"));
   assert.equal(man.images["CCCC-3333"].state, "downloaded");
   assert.match(man.images["CCCC-3333"].guard, /queue-member verified/);
+  assert.match(man.images["CCCC-3333"].bindingVerified, /ark-bound/);
+});
+
+// ── PR #296 review fixes (2026-10-02) ─────────────────────────────────────
+
+test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognized states (no denylist bypass)", () => {
+  const { opts } = fixtures();
+  assert.throws(() => checkpointState("BBBB-2222", { state: "downloaded", apid: "apid:TH-1-1-1-1-1", sha256: "0".repeat(64) }, opts),
+    /'downloaded' via checkpointState/);
+  for (const bad of ["xml-4o3", "xml-", "403", "denied", undefined, null, "xml-403-all-typo"]) {
+    assert.throws(() => checkpointState("BBBB-2222", { state: bad }, opts), /REJECT/);
+  }
+  // the explicit site-denial class stays valid
+  assert.equal(checkpointState("BBBB-2222", { state: "xml-403" }, opts), true);
+  assert.equal(checkpointState("BBBB-2222", { state: "xml-403-all" }, opts), true);
+});
+
+test("P1 ark↔apid binding: checkpointDownload REJECTS missing/mismatched binding evidence (neighbor filmstrip apid never lands)", () => {
+  const { opts } = fixtures();
+  const URL_FOR = (a) => "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:" + a + "/name?namespace=apid";
+  // missing evidence entirely
+  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64) }, opts),
+    /without binding evidence/);
+  // evidence URL for a DIFFERENT ark
+  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
+    binding: { url: URL_FOR("CCCC-3333"), response: "TH-3-3-3-3-3" } }, opts), /binding evidence URL mismatch/);
+  // response normalizes to a DIFFERENT apid (the neighbor-image case: bytes hash fine, identity does not)
+  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
+    binding: { url: URL_FOR("BBBB-2222"), response: "apid:TH-9-9-9-9-9" } }, opts), /binding response does not normalize/);
+});
+
+test("P2 atomic manifest replace: saves leave no temp residue and the manifest always parses", async () => {
+  const { opts, manifestPath } = fixtures();
+  checkpointState("BBBB-2222", { state: "xml-404", ts: new Date().toISOString() }, opts);
+  recordObservation("CCCC-3333", "no-tiles", "probe", opts);
+  recordWalkerFailure("CCCC-3333", "probe failure", opts); // CCCC stays pending after the observation
+  const dir = manifestPath.replace(/[/\\][^/\\]+$/, "");
+  const { readdirSync } = await import("node:fs");
+  const residue = readdirSync(dir).filter((f) => f.includes(".tmp-"));
+  assert.deepEqual(residue, [], "no temp files may survive an atomic save");
+  const man = JSON.parse(readFileSync(manifestPath, "utf8"));
+  assert.equal(man.images["BBBB-2222"].state, "xml-404");
+});
+
+test("P2 retry logs assert queue membership: the 2026-09-29c stray ark is rejected from observations and walker-failures too", () => {
+  const { opts, manifestPath } = fixtures();
+  const before = readFileSync(manifestPath, "utf8");
+  assert.throws(() => recordObservation("33SQ-GBSF-9FTG", "no-tiles", "stray probe", opts), /REJECT out-of-queue/);
+  assert.throws(() => recordWalkerFailure("33SQ-GBSF-9FTG", "stray probe", opts), /REJECT out-of-queue/);
+  assert.equal(readFileSync(manifestPath, "utf8"), before, "manifest must be untouched by the rejected retry-log writes");
+});
+
+test("P1 atomic lock claims: fresh claims are exclusive; refresh keeps acquiredAt; a takeover race loser refuses", async () => {
+  const { opts, manifestPath } = fixtures();
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock2.json");
+  const lockUrl = new URL(lockPath);
+  const { readdirSync } = await import("node:fs");
+  // fresh claim creates the lock exclusively
+  const A1 = acquireWriterLock("race-A", { ...opts, lockPath });
+  assert.equal(A1.writerId, "race-A");
+  // loser of the create race (lock fresh) refuses
+  assert.throws(() => acquireWriterLock("race-B", { ...opts, lockPath }), /REFUSED: exclusive writer lock held by race-A/);
+  // holder refresh keeps acquiredAt and bumps heartbeat
+  await new Promise((r) => setTimeout(r, 15));
+  const A2 = acquireWriterLock("race-A", { ...opts, lockPath });
+  assert.equal(A2.acquiredAt, A1.acquiredAt);
+  assert.notEqual(A2.heartbeat, A1.heartbeat);
+  // refresh is atomic: no temp residue beside the lock
+  const dir = manifestPath.replace(/[/\\][^/\\]+$/, "");
+  assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".tmp-")), []);
+  // stale foreign → takeover with audit trail (exclusive re-claim)
+  const aged = JSON.parse(readFileSync(lockUrl, "utf8"));
+  aged.heartbeat = new Date(Date.now() - 11 * 60 * 1000).toISOString();
+  writeFileSync(lockUrl, JSON.stringify(aged));
+  const B = acquireWriterLock("race-B", { ...opts, lockPath });
+  assert.equal(B.previousWriter.writerId, "race-A");
 });
 
 test("walker failures are REJECTED as record outcomes and stay retryable (founder order 09-29h)", () => {
