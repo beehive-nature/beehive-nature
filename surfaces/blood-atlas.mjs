@@ -1055,6 +1055,12 @@ export async function createAtlas(opts) {
   mount.setAttribute("tabindex", "0");
 
   paint();
+  // The atlas can boot inside a hidden view. Re-anchor when it becomes visible
+  // or its panel resizes, preserving the user's saved pan and zoom offsets.
+  const stageObserver = typeof ResizeObserver === "function" ? new ResizeObserver(() => {
+    if (stage.clientWidth && stage.clientHeight) applyTransform();
+  }) : null;
+  stageObserver?.observe(stage);
   const api = {
     model, core,
     getContext: () => core.getContext(),
@@ -1070,6 +1076,7 @@ export async function createAtlas(opts) {
     ghostCount: (iid) => model.ghostCount(iid),
     repaint: paint,
     destroy() {
+      stageObserver?.disconnect();
       mount.removeEventListener("keydown", keyNav);
       stage.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointermove", onMove);
