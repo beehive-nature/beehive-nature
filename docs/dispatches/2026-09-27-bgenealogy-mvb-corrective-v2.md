@@ -18,7 +18,7 @@ New read (FMG Valoignes chapter) establishes the surrounding family **from prima
 - **H1′ (provider, revised):** Walter = son of the last earl × Christine. The earl is recorded d.s.p.; his widow's 1233 livery and the 1234/35 heir structure show the estate flowing to Valoignes-line heirs, weighing against a surviving son — but that is context, not proof; the phrase's scope in ITS sources (CP basis still unread) is the open read. An unrecorded child remains a **possibility, not supporting evidence**.
 - **H2 (fusion — now documentary):** the corpus's "Walter de Mandeville" fuses the attested **Walter FitzRobert (Christine's BROTHER**, Bracton 1234/35) with Christine's Mandeville marriage. Under H2 the g25←g26 edge mis-files a brother as a son-in-law-line.
 - **H3 (cadet):** unattached Mandeville cadet; no affirmative evidence.
-**Verdict: g25←g26 UNRESOLVED-C** (affirmative parentage evidence for Walter missing); g24←g25 rides on Walter. The method note stands: nothing here is accepted or rejected on the d.s.p. phrase alone.
+**Verdict: g25←g26 UNRESOLVED-C** (affirmative parentage evidence for Walter missing); g24←g25 rides on Walter. The method note stands: nothing here is accepted or rejected on the d.s.p. phrase alone. The branch's defensible descent already stops at the earlier unresolved **g21→g22** edge; this is a later defect, not the first frontier.
 
 ## 3. JOAN de BODRUGAN — corrected classification, stated as a revised conclusion
 
@@ -27,7 +27,7 @@ v1 said "same conclusion, right reason" — **withdrawn. The classification genu
 ## 4. DNA WORDING — qualified
 
 **Withdrawn:** v1's "mismatch ⇒ the Bath-origin tradition is contradicted for that tested line."
-**Corrected:** a mismatch **could challenge the proposed shared paternal line**, but it could equally be explained by **a documentary error in either tested line's documented descent, or an unexpected parentage event (NPE) anywhere along either line**. The prior (≈1.5%/gen, [[genealogy-npe-baseline-prior]]) is exactly why a single mismatch is not a verdict about the 17th century. Match: consistent with shared patriline (not proof of the specific edge). All consent/privacy terms unchanged; question-first discipline unchanged; no test solicited.
+**Corrected:** a mismatch **could challenge the proposed shared paternal line**, but it could equally be explained by **a documentary error in either tested line's documented descent, or an unexpected parentage event (NPE) anywhere along either line**. No numeric NPE prior is asserted here because this repository does not yet carry a resolvable source for one. A single mismatch is therefore not a verdict about the 17th century. Match: consistent with shared patriline (not proof of the specific edge). All consent/privacy terms unchanged; question-first discipline unchanged; no test solicited.
 
 ## 5. VALOGNES RUN UPGRADE (from the same read — supported, now with primary citations)
 

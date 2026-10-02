@@ -1,16 +1,16 @@
 # SPINE SUB-TRUNK AUDIT — the Norse-side trunk (g15→g41), trunk-reuse pass #1
 
 **Date:** 2026-09-27 · **Seat:** zCode (bGenealogy) · **Mode:** autonomous labor per standing doctrine ([[bgenealogy-pipeline-doctrine]] — the one un-receipted sub-trunk; one pass unlocks the whole Norse spine)
-**Corpus:** current `origin/main` (`remington-bloodline.json`, generated 2026-09-23, 10,259 persons — fresh-read per the concurrency law; spine gens 15–41 identical to the R1-audited copy)
+**Corpus:** historical snapshot `53116c460` (`remington-bloodline.json`, generated 2026-09-23, 10,259 persons). This receipt records the corpus actually read by the original audit; reconstruction onto newer `main` does not silently retarget its findings.
 **Read-only:** no corpus mutations, no model/pipeline files, no FS corrections.
 
 ---
 
 ## VERDICT SUMMARY
 
-The spine sub-trunk (diverging from the universal trunk at **g15 Margaret Trethurfee**, where the Ramesses route follows Edward Courtenay II) holds up **visitiation/Inq-grade (B) from g15 through g20**, then degrades: **one chronology-broken edge (g22→g23, C/X)**, a **Norman knot with a documented sister-swap (g32←g33, C/X)**, and the expected **saga/legendary tail (g34–g41, D/E)** — the tail the corpus's own packs already label honestly. No new breakpoint for the spine's own claims below g11→g12 (the universal gate E stands for both sub-trunks); the sub-trunk's *own* frontier of defensible descent runs out at **g22→g23**.
+The spine sub-trunk (diverging from the universal trunk at **g15 Margaret Trethurfee**, where the Ramesses route follows Edward Courtenay II) holds up **visitation/Inq-grade (B) from g15 through g20**, then degrades: the first unsupported edge is **g21→g22 (C)**; **g22→g23** carries the later Bodrugan/Bloyou identity defect; **g32←g33** is a documented sister-swap; and **g34–g41** is the expected saga/legendary tail. The universal g11→g12 gate still governs both sub-trunks. For this branch, defensible descent stops before **g21→g22** unless affirmative evidence for Alice Tynten ← Elizabeth Bloyou is supplied.
 
-**Tally (27 edges):** A-: 2 · B/B-: 6 · C: 5 · X-class: 2 (one impossible chronology, one sister-swap) · D: 7 · E: 5
+**Matrix tally (27 rows, exact labels):** A-: 2 · B/B+/B-: 6 · C: 8 · C/X: 1 · X: 1 · C/E: 1 · C/D: 1 · D: 4 · E: 2 · D/E: 1. Mixed labels stay mixed; they are not flattened to inflate or hide a class.
 
 ## MATRIX (child ← parent; verdict classifies the EDGE)
 
@@ -47,7 +47,7 @@ The spine sub-trunk (diverging from the universal trunk at **g15 Margaret Trethu
 ## KEY FINDINGS
 
 1. **The Cornish gentry run is genuinely strong (g14→g20, B-band throughout).** The Trethurffe succession is Inquisition-cited (1529, 1510), and the #222-era Vivian read cross-confirms. The sub-trunk's first weakness is Bloyou.
-2. **g22→g23 is the sub-trunk's own breakpoint-equivalent:** the Bodrugan×Bloyou marriage is real but belongs in **1241**; the spine compresses three generations into a mother-edge that its own dates make impossible (Joan 83 at Elizabeth's birth). Everything above it (Mandeville/Valognes run) inherits the displacement.
+2. **g21→g22 is the first unsupported edge:** Alice Tynten ← Elizabeth Bloyou rests on derivative trees. The later **g22→g23** Bodrugan×Bloyou identity defect remains important, but it is not the first defensible frontier.
 3. **The Norman knot's sister-swap (g32←g33):** documentary chronicle says **Duvelina**, not Wevia, mothered Humphrey de Vieilles; Wevia belongs to the **Bolbec** marriage — the corpus carries both sisters but wires them into each other's lines. Same inversion class as the R1 finds; correctable only provider-side (we record, we don't "correct" FS).
 4. **The tail is honestly saga-tier already:** the corpus's own packs label Ragnar and the tradition candidly; the spine's `t:"saga"` labels are accurate here (unlike the Ramesses tail's mislabeled "medieval").
 5. **Trunk-reuse confirmed working:** gens 0–14 were receipted once (R1/#222-era) and cost zero this pass; only 27 new edges were audited to unlock the entire Norse spine target set (Ragnar, Sigurd Ring, Randver, Olof, and everything hanging off them in the 10,259-person corpus).
