@@ -20,6 +20,6 @@ This repair invalidates the first pkg4 candidate and closes the later PR #296 re
 - The service re-reads the edition gate immediately before the paid command and refuses any revocation or change to the approved hash, ceilings, or chunk count. Upload banking appends a durable progression row when an older receipt has none, and snapshot cleanup is best-effort after a paid result.
 - The public image summary marks the earlier one-off byte-audit claim `UNVERIFIED`; no banked source file/function exists for that audit, so the archive no longer overstates its proof boundary.
 
-Verification after the second review repair: focused walker/preservation suites 46/46; `git diff --check` clean. The merged-main full-suite receipt is recorded in the follow-up merge commit.
+Verification after merging the repaired evidence stack from main: focused walker/preservation suites 46/46; full `node --test tools/genealogy/*.test.mjs` 458/458; `git diff --check` clean.
 
 Live read-only wire proof on this seat: Node fetched the exact guard-derived URL for already resolved queue ARK `33S7-9R48-CFZ`; FamilySearch returned HTTP 200 with the bare-APID response shape, and the normalized response exactly matched the APID already banked in the byte-audited manifest. No manifest write and no credential were involved.
