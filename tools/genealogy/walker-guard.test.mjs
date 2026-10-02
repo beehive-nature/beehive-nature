@@ -60,7 +60,7 @@ test("assertQueueMember ACCEPTS a pending queue member", () => {
 test("checkpointState REJECTS saving an out-of-queue ark and leaves the manifest unchanged", () => {
   const { opts, manifestPath } = fixtures();
   const before = readFileSync(manifestPath, "utf8");
-  assert.throws(() => checkpointState("33SQ-GBSF-9FTG", { state: "xml-403" }, opts), /REJECT SAVE out-of-queue/);
+  assert.throws(() => checkpointState("33SQ-GBSF-9FTG", { state: "xml-403" }, opts), /REJECT out-of-queue/);
   assert.equal(readFileSync(manifestPath, "utf8"), before, "manifest must be untouched by the rejected save");
 });
 
@@ -89,7 +89,7 @@ test("checkpointDownload ACCEPTS only the guard's authoritative binding response
 
 // ── PR #296 review fixes (2026-10-02) ─────────────────────────────────────
 
-test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognized states (no denylist bypass)", () => {
+test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognized states (no denylist bypass)", async () => {
   const { opts } = fixtures();
   assert.throws(() => checkpointState("BBBB-2222", { state: "downloaded", apid: "apid:TH-1-1-1-1-1", sha256: "0".repeat(64) }, opts),
     /'downloaded' via checkpointState/);
@@ -97,8 +97,8 @@ test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognize
     assert.throws(() => checkpointState("BBBB-2222", { state: bad }, opts), /REJECT/);
   }
   // the explicit site-denial class stays valid (one outcome per ark — finality)
-  assert.equal(checkpointState("BBBB-2222", { state: "xml-403" }, opts), true);
-  assert.equal(checkpointState("CCCC-3333", { state: "xml-403-all" }, opts), true);
+  assert.equal(await checkpointState("BBBB-2222", { state: "xml-403", apid: "apid:TH-4-4-4-4-4" }, bindingOpts(opts, "TH-4-4-4-4-4")), true);
+  assert.equal(await checkpointState("CCCC-3333", { state: "xml-403-all", apid: "apid:TH-5-5-5-5-5" }, bindingOpts(opts, "TH-5-5-5-5-5")), true);
 });
 
 test("P1 ark↔apid binding: guard fetches the canonical URL and rejects a neighbor response regardless of caller evidence", async () => {
@@ -117,11 +117,14 @@ test("P1 ark↔apid binding: guard fetches the canonical URL and rejects a neigh
   await assert.rejects(checkpointDownload("BBBB-2222", {
     state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
   }, bindingOpts(opts, "denied", 503)), /authoritative binding request/);
+  await assert.rejects(checkpointState("BBBB-2222", {
+    state: "xml-403", apid: "apid:TH-3-3-3-3-3", binding: { response: "TH-3-3-3-3-3" },
+  }, guarded), /negative outcome apid/);
 });
 
 test("P2 atomic manifest replace: saves leave no temp residue and the manifest always parses", async () => {
   const { opts, manifestPath } = fixtures();
-  checkpointState("BBBB-2222", { state: "xml-404", ts: new Date().toISOString() }, opts);
+  await checkpointState("BBBB-2222", { state: "xml-404", apid: "apid:TH-4-4-4-4-4", ts: new Date().toISOString() }, bindingOpts(opts, "TH-4-4-4-4-4"));
   recordObservation("CCCC-3333", "no-tiles", "probe", opts);
   recordWalkerFailure("CCCC-3333", "probe failure", opts); // CCCC stays pending after the observation
   const dir = manifestPath.replace(/[/\\][^/\\]+$/, "");
@@ -166,6 +169,25 @@ test("P1 atomic lock claims: fresh claims are exclusive; refresh keeps acquiredA
   assert.equal(B.previousWriter.writerId, "race-A");
 });
 
+test("P2 heartbeat refresh keeps the canonical lock visible and serializes contenders", async () => {
+  const { opts } = fixtures();
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock-refresh.json");
+  acquireWriterLock("refresh-A", { ...opts, lockPath });
+  let inspected = false;
+  const refreshed = acquireWriterLock("refresh-A", {
+    ...opts,
+    lockPath,
+    beforeLockReplace: (lockUrl) => {
+      inspected = true;
+      assert.equal(new URL(lockUrl).protocol, "file:");
+      assert.equal(JSON.parse(readFileSync(lockUrl, "utf8")).writerId, "refresh-A", "canonical lock remains present during refresh");
+      assert.throws(() => acquireWriterLock("refresh-B", { ...opts, lockPath }), /lock mutation already in progress/);
+    },
+  });
+  assert.equal(inspected, true);
+  assert.equal(refreshed.writerId, "refresh-A");
+});
+
 test("P1 conditional takeover: a takeover cannot steal a FRESH claim, and takeovers leave no quarantine residue", async () => {
   const { opts, manifestPath } = fixtures();
   const { readdirSync } = await import("node:fs");
@@ -194,11 +216,11 @@ test("P2 outcomes are final: an already-resolved ark is never overwritten by a l
   }, bindingOpts(opts, "TH-7-7-7-7-7"));
   const before = readFileSync(manifestPath, "utf8");
   // a late negative for the same ark must not erase the download's identity
-  assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, opts), /REJECT SAVE already-resolved/);
+  assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, opts), /REJECT already-resolved/);
   // a late duplicate download must not overwrite either
-  await assert.rejects(checkpointDownload("CCCC-3333", {
+  assert.throws(() => checkpointDownload("CCCC-3333", {
     state: "downloaded", apid: "apid:TH-8-8-8-8-8", sha256: "d".repeat(64),
-  }, bindingOpts(opts, "TH-8-8-8-8-8")), /REJECT SAVE already-resolved/);
+  }, bindingOpts(opts, "TH-8-8-8-8-8")), /REJECT already-resolved/);
   assert.equal(readFileSync(manifestPath, "utf8"), before, "manifest must be untouched by rejected overwrites");
 });
 
@@ -281,12 +303,13 @@ test("EXCLUSIVE WRITER LOCK: a second writer is REFUSED while the lock is fresh 
   assert.throws(() => checkpointState("BBBB-2222", { state: "xml-403" }, { ...lockOpts, writer: "writer-B/other-session" }), /REFUSED: exclusive writer lock held by/);
 });
 
-test("lock: the holder may save; stale locks allow takeover with audit trail; release works", () => {
+test("lock: the holder may save; stale locks allow takeover with audit trail; release works", async () => {
   const { opts, manifestPath } = fixtures();
   const lockOpts = { ...opts, lockPath: opts.manifestPath.replace("images-manifest.json", ".writer-lock.json") };
   acquireWriterLock("writer-A/imgqueue-owner", lockOpts);
   // holder saves fine
-  checkpointState("BBBB-2222", { state: "xml-403", ts: new Date().toISOString() }, { ...lockOpts, writer: "writer-A/imgqueue-owner" });
+  await checkpointState("BBBB-2222", { state: "xml-403", apid: "apid:TH-6-6-6-6-6", ts: new Date().toISOString() },
+    bindingOpts({ ...lockOpts, writer: "writer-A/imgqueue-owner" }, "TH-6-6-6-6-6"));
   // age the heartbeat → takeover by B allowed, previousWriter recorded
   const lockUrl = new URL(lockOpts.lockPath);
   const aged = JSON.parse(readFileSync(lockUrl, "utf8"));

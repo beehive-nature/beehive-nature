@@ -45,8 +45,10 @@ function buildFixture() {
   file("assets/profile-archive/lineage/identity-registry.json", JSON.stringify({ schema: "skaists.identity-registry/1", issued: {}, aliases: {} }));
   file("assets/profile-archive/lineage/staging-inventory.json", JSON.stringify({ publicStaged: 2, privateStaged: 0, sumCheck: true }));
   // evidence layer (founder order 2026-10-02): the six declared public source files
-  file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1" }));
-  file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({ schema: "skaists.sources/1", persons: {} }));
+  file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 1 }));
+  file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({
+    schema: "skaists.sources/1", persons: { pa1: { sources: [{ id: "rec1" }] } },
+  }));
   file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({
     schema: "skaists.sources-records/1", generated: "fixture", records: {
       rec1: { id: "rec1", title: "Public title", citation: "Public citation", redactedLiving: false,
@@ -190,4 +192,20 @@ test("privacy-safe edition projects source records without raw transcription val
   assert.doesNotMatch(JSON.stringify(projected), /PRIVATE TRANSCRIPTION/);
   const original = readFileSync(join(root, "assets/profile-archive/lineage/sources/records.json"), "utf8");
   assert.match(original, /PRIVATE TRANSCRIPTION/, "prepare projects package bytes without mutating the research source");
+});
+
+test("privacy projection refuses missing or unreconciled source records", () => {
+  const root = buildFixture();
+  const recordsPath = join(root, "assets/profile-archive/lineage/sources/records.json");
+  writeFileSync(recordsPath, JSON.stringify({ schema: "skaists.sources-records/1" }));
+  let r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /with records/);
+
+  const root2 = buildFixture();
+  const manifestPath = join(root2, "assets/profile-archive/lineage/sources/manifest.json");
+  writeFileSync(manifestPath, JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 2 }));
+  r = run(["prepare", join(root2, "pkg"), "test"], { cwd: root2 });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /reconciliation failed/);
 });

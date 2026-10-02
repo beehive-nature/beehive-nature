@@ -14,8 +14,9 @@
 //
 // PR #296 review hardening (2026-10-02, founder-ordered fixes):
 //   · P1 lock acquisition is ATOMIC — fresh claims take the lock via
-//     exclusive create (O_EXCL); refresh and stale takeover first quarantine
-//     the exact observed bytes, then re-claim exclusively; lost races REFUSE;
+//     exclusive create (O_EXCL); every refresh, takeover, and release is
+//     serialized by a separate O_EXCL mutation claim, so the canonical lock
+//     never disappears while a fresh holder still owns it;
 //   · P1 checkpointState enforces an outcome ALLOWLIST — 'downloaded' must
 //     come through checkpointDownload; unrecognized states are rejected,
 //     not denylisted around;
@@ -86,10 +87,6 @@ function exclusiveCreate(url, text) {
   return true;
 }
 
-function safeReadJson(url) {
-  try { return JSON.parse(readFileSync(url, "utf8")); } catch { return null; }
-}
-
 function readClaim(url) {
   try {
     const text = readFileSync(url, "utf8");
@@ -100,43 +97,22 @@ function readClaim(url) {
   }
 }
 
-// Serialize refresh and takeover through an atomic rename. The replacement is
-// allowed only when the quarantined bytes exactly equal those this caller
-// inspected. A contender may create a new claim while the canonical path is
-// absent; in that case exclusiveCreate loses and this caller stands down.
-function replaceClaimIfUnchanged(lockUrl, expectedText, replacementText) {
-  const quarantine = new URL(lockUrl.href + ".claim-" + randomUUID().slice(0, 8));
-  try { renameSync(lockUrl, quarantine); }
-  catch { throw new Error("REFUSED: lock changed before conditional claim; stand down"); }
-  const actualText = readFileSync(quarantine, "utf8");
-  if (actualText !== expectedText) {
-    if (!existsSync(lockUrl)) {
-      try { renameSync(quarantine, lockUrl); } catch { /* another claimant owns the canonical path */ }
-    }
-    throw new Error("REFUSED: lock identity changed before conditional claim; stand down");
+// Lock mutations need a primitive separate from the canonical ownership file.
+// The old quarantine design briefly removed the canonical path during a
+// heartbeat refresh, making a fresh lock look unheld. This O_EXCL sidecar
+// serializes the short synchronous mutation while the canonical path remains
+// continuously present. A crashed mutation fails closed and needs deliberate
+// operator recovery; it can never make a second writer look authorized.
+function withLockMutation(lockUrl, writerId, mutate) {
+  const mutationUrl = new URL(lockUrl.href + ".mutation");
+  const mutation = JSON.stringify({ schema: "skaists.writer-lock-mutation/1", writerId, claimedAt: new Date().toISOString() });
+  if (!exclusiveCreate(mutationUrl, mutation))
+    throw new Error("REFUSED: lock mutation already in progress; stand down");
+  try {
+    return mutate();
+  } finally {
+    try { unlinkSync(mutationUrl); } catch { /* a surviving mutation claim fails future operations closed */ }
   }
-  if (!exclusiveCreate(lockUrl, replacementText)) {
-    try { unlinkSync(quarantine); } catch { /* best effort */ }
-    throw new Error("REFUSED: another writer won the conditional claim; stand down");
-  }
-  try { unlinkSync(quarantine); } catch { /* the canonical claim is already complete */ }
-}
-
-// Conditional release uses the same quarantine/byte-identity primitive as a
-// refresh or takeover. An unconditional unlink can erase a contender's fresh
-// claim when the old holder races a stale takeover (PR #296 review P1).
-function removeClaimIfUnchanged(lockUrl, expectedText) {
-  const quarantine = new URL(lockUrl.href + ".release-" + randomUUID().slice(0, 8));
-  try { renameSync(lockUrl, quarantine); }
-  catch { throw new Error("REFUSED: lock changed before conditional release; stand down"); }
-  const actualText = readFileSync(quarantine, "utf8");
-  if (actualText !== expectedText) {
-    if (!existsSync(lockUrl)) {
-      try { renameSync(quarantine, lockUrl); } catch { /* another claimant owns the canonical path */ }
-    }
-    throw new Error("REFUSED: lock identity changed before conditional release; stand down");
-  }
-  unlinkSync(quarantine);
 }
 
 // ── EXCLUSIVE WRITER LOCK (founder order 2026-09-30c: another session
@@ -146,41 +122,40 @@ function removeClaimIfUnchanged(lockUrl, expectedText) {
 export function acquireWriterLock(writerId, opts = {}) {
   if (!writerId) throw new Error("writerId required");
   const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
-  const now = new Date().toISOString();
-  let prev = null;
-  let observed = null;
-  if (existsSync(lockUrl)) {
-    observed = readClaim(lockUrl);
-    if (!observed) throw new Error("REFUSED: lock vanished while being inspected; retry acquisition");
-    prev = observed.parsed;
-    const heartbeatMs = prev ? Date.parse(prev.heartbeat) : observed.mtimeMs;
-    const fresh = Number.isFinite(heartbeatMs) && (Date.now() - heartbeatMs) < LOCK_STALE_MS;
-    const ownedToken = OWNED_CLAIMS.get(claimKey(lockUrl, writerId));
-    if (prev && prev.writerId === writerId && prev.claimId && ownedToken === prev.claimId) {
-      // Holder heartbeat refresh is itself a conditional claim. It never
-      // replaces whatever happens to be at the path after the initial read.
-      const refreshed = { ...prev, schema: "skaists.writer-lock/1", writerId, heartbeat: now };
-      replaceClaimIfUnchanged(lockUrl, observed.text, JSON.stringify(refreshed, null, 1));
-      return refreshed;
+  return withLockMutation(lockUrl, writerId, () => {
+    const now = new Date().toISOString();
+    const observed = existsSync(lockUrl) ? readClaim(lockUrl) : null;
+    if (existsSync(lockUrl) && !observed)
+      throw new Error("REFUSED: lock vanished while being inspected; retry acquisition");
+    if (observed) {
+      const prev = observed.parsed;
+      const heartbeatMs = prev ? Date.parse(prev.heartbeat) : observed.mtimeMs;
+      const fresh = Number.isFinite(heartbeatMs) && (Date.now() - heartbeatMs) < LOCK_STALE_MS;
+      const ownedToken = OWNED_CLAIMS.get(claimKey(lockUrl, writerId));
+      if (prev && prev.writerId === writerId && prev.claimId && ownedToken === prev.claimId) {
+        if (!fresh) throw new Error("REFUSED: owned writer lock heartbeat is stale; stand down and acquire a new claim");
+        const refreshed = { ...prev, schema: "skaists.writer-lock/1", writerId, heartbeat: now };
+        if (typeof opts.beforeLockReplace === "function") opts.beforeLockReplace(lockUrl);
+        atomicReplace(lockUrl, JSON.stringify(refreshed, null, 1));
+        return refreshed;
+      }
+      if (fresh) throw new Error("REFUSED: exclusive writer lock held by " + (prev?.writerId || "an initializing writer") + " (heartbeat " + (prev?.heartbeat || new Date(observed.mtimeMs).toISOString()) + ") — a second writer may not run");
+      const claimId = randomUUID();
+      const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now,
+        previousWriter: prev ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now }
+          : { writerId: "unreadable-claim", heartbeat: new Date(observed.mtimeMs).toISOString(), takenOverAt: now } };
+      if (typeof opts.beforeLockReplace === "function") opts.beforeLockReplace(lockUrl);
+      atomicReplace(lockUrl, JSON.stringify(lock, null, 1));
+      OWNED_CLAIMS.set(claimKey(lockUrl, writerId), claimId);
+      return lock;
     }
-    if (fresh) throw new Error("REFUSED: exclusive writer lock held by " + (prev?.writerId || "an initializing writer") + " (heartbeat " + (prev?.heartbeat || new Date(observed.mtimeMs).toISOString()) + ") — a second writer may not run");
-    // Stale valid or unreadable claim: replace only the exact bytes inspected.
     const claimId = randomUUID();
-    const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now,
-      previousWriter: prev ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now }
-        : { writerId: "unreadable-claim", heartbeat: new Date(observed.mtimeMs).toISOString(), takenOverAt: now } };
-    replaceClaimIfUnchanged(lockUrl, observed.text, JSON.stringify(lock, null, 1));
+    const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now, previousWriter: null };
+    if (!exclusiveCreate(lockUrl, JSON.stringify(lock, null, 1)))
+      throw new Error("REFUSED: another writer created the lock during acquisition; stand down");
     OWNED_CLAIMS.set(claimKey(lockUrl, writerId), claimId);
     return lock;
-  }
-  const claimId = randomUUID();
-  const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now, previousWriter: null };
-  if (!exclusiveCreate(lockUrl, JSON.stringify(lock, null, 1))) {
-    const winner = safeReadJson(lockUrl);
-    throw new Error("REFUSED: exclusive writer lock held by " + (winner ? winner.writerId : "another writer") + " (heartbeat " + (winner ? winner.heartbeat : "unknown") + ") — a second writer may not run");
-  }
-  OWNED_CLAIMS.set(claimKey(lockUrl, writerId), claimId);
-  return lock;
+  });
 }
 
 export function assertWriterLock(writerId, opts = {}) {
@@ -199,20 +174,23 @@ export function assertWriterLock(writerId, opts = {}) {
 
 export function releaseWriterLock(writerId, opts = {}) {
   const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
-  if (!existsSync(lockUrl)) return true;
-  const observed = readClaim(lockUrl);
-  if (!observed?.parsed) throw new Error("REFUSED: cannot release an unreadable lock claim");
-  const lock = observed.parsed;
-  if (lock.writerId !== writerId)
-    throw new Error("REFUSED: cannot release a lock held by " + lock.writerId);
-  if (!lock.claimId || OWNED_CLAIMS.get(claimKey(lockUrl, writerId)) !== lock.claimId)
-    throw new Error("REFUSED: cannot release a lock this process does not own");
-  // Deterministic race hook for the adversarial test; production callers do
-  // not supply it. The conditional removal must preserve a replacement claim.
-  if (typeof opts.beforeConditionalRelease === "function") opts.beforeConditionalRelease();
-  removeClaimIfUnchanged(lockUrl, observed.text);
-  OWNED_CLAIMS.delete(claimKey(lockUrl, writerId));
-  return true;
+  return withLockMutation(lockUrl, writerId, () => {
+    if (!existsSync(lockUrl)) return true;
+    const observed = readClaim(lockUrl);
+    if (!observed?.parsed) throw new Error("REFUSED: cannot release an unreadable lock claim");
+    const lock = observed.parsed;
+    if (lock.writerId !== writerId)
+      throw new Error("REFUSED: cannot release a lock held by " + lock.writerId);
+    if (!lock.claimId || OWNED_CLAIMS.get(claimKey(lockUrl, writerId)) !== lock.claimId)
+      throw new Error("REFUSED: cannot release a lock this process does not own");
+    if (typeof opts.beforeConditionalRelease === "function") opts.beforeConditionalRelease();
+    const current = readClaim(lockUrl);
+    if (!current || current.text !== observed.text)
+      throw new Error("REFUSED: lock identity changed before conditional release; stand down");
+    unlinkSync(lockUrl);
+    OWNED_CLAIMS.delete(claimKey(lockUrl, writerId));
+    return true;
+  });
 }
 
 export function loadState(opts = {}) {
@@ -317,7 +295,18 @@ export function checkpointState(ark, entry, opts = {}) {
     throw new Error(
       "REJECT unrecognized record outcome: " + JSON.stringify(entry?.state) + " — outcomes are the explicit site-denial class xml-NNN(-all) only ('downloaded' arrives via checkpointDownload)",
     );
-  return saveEntry(ark, entry, opts);
+  assertQueueMember(ark, opts);
+  assertWriterLock(opts.writer, opts);
+  if (!entry?.apid || !/^apid:TH-/.test(entry.apid))
+    throw new Error("REJECT negative outcome without binding apid: " + ark);
+  return (async () => {
+    const binding = await authoritativeBinding(ark, opts);
+    if (normalizeApid(binding.response) !== normalizeApid(entry.apid))
+      throw new Error("REJECT authoritative binding response does not normalize to the negative outcome apid: " + ark);
+    const { binding: ignoredCallerBinding, ...safeEntry } = entry;
+    void ignoredCallerBinding;
+    return saveEntry(ark, { ...safeEntry, binding, bindingVerified: "ark-bound negative: guard-fetched das/v2 response matches this ark" }, opts);
+  })();
 }
 
 async function authoritativeBinding(ark, opts) {
@@ -340,6 +329,8 @@ export function checkpointDownload(ark, entry, opts = {}) {
     throw new Error("REJECT download without binding apid: " + ark);
   if (!/^[0-9a-f]{64}$/.test(entry.sha256 || ""))
     throw new Error("REJECT download without sha256: " + ark);
+  assertQueueMember(ark, opts);
+  assertWriterLock(opts.writer, opts);
   return (async () => {
     const binding = await authoritativeBinding(ark, opts);
     if (normalizeApid(binding.response) !== normalizeApid(entry.apid))

@@ -115,6 +115,40 @@ export function validateQuoteAgainstGate(q, rawGate) {
   }
 }
 
+export function revalidateApproval(gatePath, initialRaw, artifactSha, quote) {
+  const fresh = editionGate(gatePath);
+  if (fresh.status !== "APPROVED" || fresh.raw?.artifact?.tarSha256 !== artifactSha)
+    return { ok: false, error: "approval was revoked or the approved artifact changed" };
+  const initialShape = JSON.stringify({
+    tarSha256: initialRaw?.artifact?.tarSha256,
+    storageMaxAnt: initialRaw?.separatedCeilings?.storageMaxAnt,
+    gasMaxEth: initialRaw?.separatedCeilings?.gasMaxEth,
+    chunkCount: initialRaw?.quote?.chunkCount,
+  });
+  const freshShape = JSON.stringify({
+    tarSha256: fresh.raw?.artifact?.tarSha256,
+    storageMaxAnt: fresh.raw?.separatedCeilings?.storageMaxAnt,
+    gasMaxEth: fresh.raw?.separatedCeilings?.gasMaxEth,
+    chunkCount: fresh.raw?.quote?.chunkCount,
+  });
+  if (freshShape !== initialShape)
+    return { ok: false, error: "approval hash, ceilings, or chunk count changed during the request" };
+  const check = validateQuoteAgainstGate(quote, fresh.raw);
+  return check.ok ? { ok: true, gate: fresh, check } : check;
+}
+
+export function bankUploadReceipt(edition, receipt) {
+  const progression = Array.isArray(edition.progression) ? edition.progression : [];
+  let updated = false;
+  edition.progression = progression.map((p) => {
+    if (p?.state !== "uploaded") return p;
+    updated = true;
+    return { ...p, at: receipt.uploadedAt, result: receipt.result, artifactSha256: receipt.artifactSha256 };
+  });
+  if (!updated) edition.progression.push({ state: "uploaded", at: receipt.uploadedAt, result: receipt.result, artifactSha256: receipt.artifactSha256 });
+  return edition;
+}
+
 function gateRefusal(gate) {
   return {
     error: "EDITION NOT APPROVED FOR SPEND",
@@ -207,6 +241,9 @@ function startService() {
         const q = await antCmd(["file", "cost", frozen.path]);
         const check = validateQuoteAgainstGate(q, gate.raw);
         if (!check.ok) return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: check.error, quote: q });
+        const finalApproval = revalidateApproval(DEFAULT_GATE, gate.raw, frozen.sha, q);
+        if (!finalApproval.ok)
+          return json(res, 409, { error: "UPLOAD REFUSED: APPROVAL CHANGED DURING REQUEST", reason: finalApproval.error });
         // THE UPLOAD — the service holds the key in env; the UI never sees it.
         const result = await antCmd(["file", "upload", frozen.path]);
         const receipt = {
@@ -223,8 +260,7 @@ function startService() {
         try {
           if (existsSync(RECEIPT_PATH)) {
             const E = JSON.parse(readFileSync(RECEIPT_PATH, "utf8"));
-            E.progression = (E.progression || []).map(p =>
-              p.state === "uploaded" ? { ...p, at: receipt.uploadedAt, result } : p);
+            bankUploadReceipt(E, receipt);
             writeFileSync(RECEIPT_PATH, JSON.stringify(E, null, 1), "utf8");
             receipt.receiptBank = "recorded";
           } else {
@@ -235,7 +271,7 @@ function startService() {
         }
         return json(res, 200, receipt);
       } finally {
-        frozen.cleanup();
+        try { frozen.cleanup(); } catch { /* paid result and response must survive best-effort cleanup failure */ }
       }
     }
 

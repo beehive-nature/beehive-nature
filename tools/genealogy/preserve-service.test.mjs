@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { editionGate, isDirectExecution, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
+import { bankUploadReceipt, editionGate, isDirectExecution, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
@@ -110,4 +110,24 @@ test("validateQuoteAgainstGate enforces the approved chunk count", () => {
   assert.match(validateQuoteAgainstGate({ ...GOOD_QUOTE, chunk_count: 30 }, gate).error, /chunk count changed/);
   assert.equal(validateQuoteAgainstGate({ ...GOOD_QUOTE, chunk_count: undefined }, gate).ok, false);
   assert.equal(validateQuoteAgainstGate(GOOD_QUOTE, { ...gate, quote: {} }).ok, false);
+});
+
+test("revalidateApproval refuses revocation and any approval-shape change immediately before upload", () => {
+  const dir = mkdtempSync(join(tmpdir(), "gate-revalidate-"));
+  const gatePath = join(dir, "gate.json");
+  const initial = GATE_SCHEMA("APPROVED", "a".repeat(64));
+  writeFileSync(gatePath, JSON.stringify(initial));
+  assert.equal(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).ok, true);
+  writeFileSync(gatePath, JSON.stringify({ ...initial, spendingApprovalGate: { status: "REVOKED" } }));
+  assert.match(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).error, /revoked/);
+  writeFileSync(gatePath, JSON.stringify({ ...initial, separatedCeilings: { ...initial.separatedCeilings, storageMaxAnt: 1.5 } }));
+  assert.match(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).error, /changed/);
+});
+
+test("bankUploadReceipt appends a durable upload row when an older edition has none", () => {
+  const receipt = { uploadedAt: "2026-10-02T00:00:00Z", result: { address: "public" }, artifactSha256: "a".repeat(64) };
+  const edition = { progression: [{ state: "quoted" }] };
+  bankUploadReceipt(edition, receipt);
+  assert.equal(edition.progression.filter((p) => p.state === "uploaded").length, 1);
+  assert.equal(edition.progression.at(-1).artifactSha256, receipt.artifactSha256);
 });

@@ -66,8 +66,21 @@ const fail = (msg) => { console.error("FAILED: " + msg); process.exit(1); };
 // stricter source-harvest boundary: citations, ARKs, event metadata and the
 // affected fact classes may leave; raw transcription values may not. Keep the
 // package path stable while deterministically projecting its bytes.
-export function publicSourceRecords(buf) {
+export function publicSourceRecords(buf, expected = {}) {
   const source = JSON.parse(Buffer.isBuffer(buf) ? buf.toString("utf8") : String(buf));
+  if (source?.schema !== "skaists.sources-records/1" || !source.records || Array.isArray(source.records) || typeof source.records !== "object")
+    throw new Error("source records must be a skaists.sources-records/1 object with records");
+  const sourceIds = Object.keys(source.records);
+  if (sourceIds.length === 0) throw new Error("source records must not be empty");
+  if (expected.count !== undefined && sourceIds.length !== expected.count)
+    throw new Error("source records count mismatch: records=" + sourceIds.length + " declared=" + expected.count);
+  if (expected.ids) {
+    const sourceSet = new Set(sourceIds);
+    const missing = [...expected.ids].filter((id) => !sourceSet.has(id));
+    const extra = sourceIds.filter((id) => !expected.ids.has(id));
+    if (missing.length || extra.length)
+      throw new Error("source record id reconciliation failed: missing=" + missing.length + " extra=" + extra.length);
+  }
   const records = {};
   for (const [id, record] of Object.entries(source.records || {})) {
     records[id] = {
@@ -146,6 +159,22 @@ if (cmd === "prepare") {
   // CLEAN package dir: stale files from earlier publications cannot slip in
   if (existsSync(out)) rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
+  const sourceManifest = JSON.parse(readFileSync(join(REPO, LINEAGE, "sources/manifest.json"), "utf8"));
+  const sourceIndex = JSON.parse(readFileSync(join(REPO, LINEAGE, "sources/index.json"), "utf8"));
+  if (sourceManifest?.schema !== "skaists.sources-manifest/1" || !Number.isSafeInteger(sourceManifest.uniqueRecords) || sourceManifest.uniqueRecords < 1)
+    fail("source manifest must declare a positive integer uniqueRecords count");
+  if (sourceIndex?.schema !== "skaists.sources/1" || !sourceIndex.persons || Array.isArray(sourceIndex.persons))
+    fail("source index must be a skaists.sources/1 persons object");
+  const indexedRecordIds = new Set();
+  for (const person of Object.values(sourceIndex.persons)) {
+    if (!Array.isArray(person?.sources)) fail("source index person is missing sources[]");
+    for (const source of person.sources) {
+      if (!source?.id) fail("source index contains a source without an id");
+      indexedRecordIds.add(source.id);
+    }
+  }
+  if (indexedRecordIds.size !== sourceManifest.uniqueRecords)
+    fail("source index/manifest reconciliation failed: index=" + indexedRecordIds.size + " manifest=" + sourceManifest.uniqueRecords);
   const manifest = {
     schema: "skaists.preservation/1",
     status: "prepared",
@@ -158,7 +187,9 @@ if (cmd === "prepare") {
   };
   for (const f of declared.files) {
     const sourceBuf = readFileSync(join(REPO, f));
-    const buf = f === LINEAGE + "/sources/records.json" ? publicSourceRecords(sourceBuf) : sourceBuf;
+    const buf = f === LINEAGE + "/sources/records.json"
+      ? publicSourceRecords(sourceBuf, { count: sourceManifest.uniqueRecords, ids: indexedRecordIds })
+      : sourceBuf;
     mkdirSync(dirname(join(out, f)), { recursive: true });
     writeFileSync(join(out, f), buf);
     manifest.files[f] = { sha256: sha256(buf), bytes: buf.length };
