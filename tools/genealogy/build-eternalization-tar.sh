@@ -82,10 +82,25 @@ verify_reproducible_eternalization_tar() {
   local output_tar="$2"
   local first_tar="${output_tar}.candidate-a-$$"
   local repeat_tar="${output_tar}.candidate-b-$$"
+  local snapshot
+  snapshot="$(mktemp -d "${TMPDIR:-/tmp}/genealogy-eternalization-snapshot-XXXXXX")"
 
-  build_eternalization_tar "$source_dir" "$first_tar"
-  build_eternalization_tar "$source_dir" "$repeat_tar"
+  # Copy once into a private directory, then validate and archive only that
+  # stable snapshot. A writer racing the source copy can at worst make the
+  # snapshot fail its manifest checks; it cannot alter bytes between
+  # validation and tar reads.
+  if ! cp -a -- "$source_dir/." "$snapshot/"; then
+    rm -rf "$snapshot"
+    return 1
+  fi
+  if ! build_eternalization_tar "$snapshot" "$first_tar" ||
+     ! build_eternalization_tar "$snapshot" "$repeat_tar"; then
+    rm -rf "$snapshot"
+    rm -f "$first_tar" "$repeat_tar"
+    return 1
+  fi
   cmp --silent "$first_tar" "$repeat_tar" || {
+    rm -rf "$snapshot"
     rm -f "$first_tar" "$repeat_tar"
     echo "FAILED: independent tar constructions differ" >&2
     return 1
@@ -94,6 +109,7 @@ verify_reproducible_eternalization_tar() {
   local sha bytes
   sha="$(sha256sum "$first_tar" | awk '{print $1}')"
   bytes="$(stat -c '%s' "$first_tar")"
+  rm -rf "$snapshot"
   rm -f "$repeat_tar"
   mv -f "$first_tar" "$output_tar"
   printf '{"tar":"%s","bytes":%s,"sha256":"%s","reproduced":true}\n' "$output_tar" "$bytes" "$sha"

@@ -60,6 +60,17 @@ function buildFixture() {
   file("assets/profile-archive/lineage/sources/search-evidence.json", JSON.stringify({ schema: "skaists.search-evidence/1", observations: [] }));
   file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
   file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
+  file("assets/profile-archive/lineage/zblood-storage-economics.json", JSON.stringify({
+    schema: "zblood.storage-economics/1",
+    quotes: { autonomi: {
+      route: "fixture quote route",
+      queriedAt: "2026-10-02T00:00:00Z",
+      raw: { storage_cost_atto: "999" },
+      computed: { storageANT: "999" },
+      ceilings: { storageMaxANT: 2.5, gasMaxETH: 0.0002, enforceableByClient: false },
+    } },
+    states: { prepared: true, quoted: true },
+  }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
   file("assets/profile-archive/lineage/persons/pa2.json", '{"internalId":"pa2"}');
   file("assets/profile-archive/lineage/evidence/pack-a.json", '{"schema":"skaists.evidence/1"}');
@@ -178,6 +189,23 @@ test("public search-evidence is present in a prepared edition", () => {
   assert.equal(existsSync(join(pkg, "assets/profile-archive/lineage/sources/search-evidence.json")), true);
   const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
   assert.ok(manifest.files["assets/profile-archive/lineage/sources/search-evidence.json"]);
+});
+
+test("prepared edition carries package-safe status without a self-referential quote", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  const statusPath = join(pkg, "assets/profile-archive/lineage/zblood-storage-economics.json");
+  const status = JSON.parse(readFileSync(statusPath, "utf8"));
+  assert.equal(status.schema, "zblood.storage-economics-package/1");
+  assert.equal(status.quotes.autonomi.computed, null, "the archive cannot embed a quote for its own bytes");
+  assert.equal(status.quotes.autonomi.ceilings.storageMaxANT, 2.5);
+  assert.equal(status.quotes.autonomi.ceilings.gasMaxETH, 0.0002);
+  assert.equal(status.states.prepared, true);
+  assert.equal(status.states.quoted, false);
+  const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
+  assert.ok(manifest.files["assets/profile-archive/lineage/zblood-storage-economics.json"]);
 });
 
 test("privacy-safe edition projects source records without raw transcription values", () => {

@@ -163,3 +163,45 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
     await ctx.close();
   }
 });
+
+test('cached economics without ceilings fails closed instead of crashing the front', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => localStorage.setItem('bregister', 'cypherpunk'));
+  await ctx.route('**/zblood-storage-economics.json', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({
+      artifact: { files: 1 },
+      quotes: { autonomi: { route: 'cached client', queriedAt: '2026-09-01', raw: { confidence: 'stale' }, computed: { storageANT: '1', gasETH: '0.0001' } } },
+      states: { prepared: true, quoted: true, purchased: false, uploaded: false },
+    }),
+  }));
+  const p = await ctx.newPage(); const errs = [];
+  p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${ORIGIN}/surfaces/blood.html`, { waitUntil: 'load' });
+  await p.waitForFunction(() => window.__eternal && window.__eternal.data.E);
+  assert.equal(errs.length, 0, errs.join(' | '));
+  assert.match(await p.textContent('#etPipe'), /required ceiling data unavailable/);
+  assert.match(await p.textContent('[data-et="beeQuote"]'), /payment disabled/);
+  await ctx.close();
+});
+
+test('package-safe status keeps the restored archive truthful without embedding its quote', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => localStorage.setItem('bregister', 'bee'));
+  await ctx.route('**/zblood-storage-economics.json', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({
+      schema: 'zblood.storage-economics-package/1', artifact: { name: 'privacy-safe edition' },
+      quotes: { autonomi: { route: 'package-safe status', raw: null, computed: null, ceilings: { storageMaxANT: 2.5, gasMaxETH: 0.0002 } } },
+      states: { prepared: true, quoted: false, purchased: false, uploaded: false },
+    }),
+  }));
+  const p = await ctx.newPage(); const errs = [];
+  p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${ORIGIN}/surfaces/blood.html`, { waitUntil: 'load' });
+  await p.waitForFunction(() => window.__eternal && window.__eternal.data.E);
+  assert.equal(errs.length, 0, errs.join(' | '));
+  assert.match(await p.textContent('#eternal'), /fresh quote required/);
+  await p.click('#preservebtn');
+  assert.match(await p.textContent('#preserve-step'), /no self-referential quote/);
+  assert.match(await p.textContent('#preserve-step'), /cannot enforce the 2.5 ANT and 0.0002 ETH ceilings atomically/);
+  await ctx.close();
+});
