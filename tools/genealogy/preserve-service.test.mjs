@@ -10,13 +10,13 @@ import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bankUploadReceipt, editionGate, isDirectExecution, receiptPathForArtifact, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
+import { bankUploadReceipt, editionGate, isDirectExecution, receiptPathForArtifact, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateClientVersion, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
   artifact: { tarSha256: tarSha, tarBytes: 10 },
   separatedCeilings: { storageMaxAnt: 1.6, gasMaxEth: 0.0002 },
-  quote: { chunkCount: 29 },
+  quote: { chunkCount: 29, clientVersion: "ant 0.3.9" },
   spendingApprovalGate: { status },
 });
 
@@ -112,6 +112,13 @@ test("validateQuoteAgainstGate enforces the approved chunk count", () => {
   assert.equal(validateQuoteAgainstGate(GOOD_QUOTE, { ...gate, quote: {} }).ok, false);
 });
 
+test("validateClientVersion binds the paid rerun to the quoted ant client", () => {
+  const gate = GATE_SCHEMA("APPROVED", "a".repeat(64));
+  assert.equal(validateClientVersion("ant 0.3.9", gate).ok, true);
+  assert.match(validateClientVersion("ant 0.4.0", gate).error, /client version changed/);
+  assert.equal(validateClientVersion("ant 0.3.9", { ...gate, quote: { chunkCount: 29 } }).ok, false);
+});
+
 test("revalidateApproval refuses revocation and any approval-shape change immediately before upload", () => {
   const dir = mkdtempSync(join(tmpdir(), "gate-revalidate-"));
   const gatePath = join(dir, "gate.json");
@@ -121,6 +128,8 @@ test("revalidateApproval refuses revocation and any approval-shape change immedi
   writeFileSync(gatePath, JSON.stringify({ ...initial, spendingApprovalGate: { status: "REVOKED" } }));
   assert.match(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).error, /revoked/);
   writeFileSync(gatePath, JSON.stringify({ ...initial, separatedCeilings: { ...initial.separatedCeilings, storageMaxAnt: 1.5 } }));
+  assert.match(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).error, /changed/);
+  writeFileSync(gatePath, JSON.stringify({ ...initial, quote: { ...initial.quote, clientVersion: "ant 0.4.0" } }));
   assert.match(revalidateApproval(gatePath, initial, "a".repeat(64), GOOD_QUOTE).error, /changed/);
 });
 

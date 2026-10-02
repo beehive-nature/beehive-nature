@@ -1,47 +1,58 @@
 {
   "schema": "skaists.eternalization-edition/2",
-  "generated": "2026-10-02T01:30:00.000Z",
-  "supersedes": "the September edition (pkg3.tar, 20,537 files, tar sha256 fec5fba8..., quote era 2.01-3.11 ANT) — package AND quote both superseded by founder order 2026-10-02",
-  "edition": "SUPERSEDED genealogy archive v2 — merged relationship audit + 13,249-record source-harvest public layer + public image evidence (307 private-tier images represented as counts/sha256/ark pointers; the one-off byte-audit claim is UNVERIFIED because no source file/function was banked)",
+  "generated": "2026-10-02T05:24:12.000Z",
+  "supersedes": "the rejected privacy-unsafe pkg4 candidate and every earlier genealogy edition and quote",
+  "edition": "privacy-safe genealogy archive v2 — merged relationship audit + 13,249-record public source projection + public image evidence (307 private-tier images represented only by counts, sha256 digests, and ark pointers)",
   "artifact": {
-    "preparedFrom": "zcode/imgqueue-owner @c5752b22a (preserve.mjs prepare; declared objects incl. the five evidence-layer files — absence fails prepare, tested)",
-    "files": 22107,
-    "unpackedBytes": 87941767,
-    "manifestSha256": "0959d0627ea837187795f58c68cba8e27da3f5de986dad9702d19d560f99db67", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
-    "tarBytes": 108441600,
-    "tarSha256": "199c380f95c5894423e520430502f1ed060e17d010891cc9ec1196c9a8530fcb", "hexLawNote2": "PUBLIC-CONSTANT; UNVERIFIED digest because the one-off tar build/hash command was not banked as a source file and function",
-    "hexLawNote": "PUBLIC-CONSTANT eternalization edition v2 artifact digests",
-    "privateBytesExcluded": "the 307 record images are PRIVATE-TIER and NEVER enter the bundle (archive-copyright law); the bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
+    "preparedFrom": "main merge commit 974d7559b56adef07b941ae2e045d6376a747d66 (PR #296 merged; preserve.mjs prepare)",
+    "declaredFiles": 22107,
+    "unpackedDeclaredBytes": 86337400,
+    "manifestSha256": "f0ab56074fa07025ac19828b447dc18019661b9f67f62ac50522c071fdc6d337", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
+    "tarBytes": 106844160,
+    "tarSha256": "2538275c3f5f7a775769d5f2907cbba447a0df01c71f478a94b78d4e4059047f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced by two independent deterministic tar constructions",
+    "deterministicTarRecipe": "GNU tar --sort=name --mtime=2026-10-02T00:00:00Z --owner=0 --group=0 --numeric-owner --format=posix --pax-option=delete=atime,delete=ctime",
+    "privacyAudit": {
+      "projectedRecords": 13249,
+      "evidenceDescriptors": 49342,
+      "rawEvidenceValueFields": 0,
+      "searchEvidenceIncluded": true
+    },
+    "privateBytesExcluded": "the 307 record images remain PRIVATE-TIER and do not enter the bundle; the public bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },
   "quote": {
-    "captured": "2026-10-02 (live, `ant --json file cost` on pkg4.tar — keyless, no payment, no wallet touched)",
+    "captured": "2026-10-02T05:24:12Z (live ant 0.3.9, ant --json file cost on the exact pkg4.tar; keyless, no payment, no wallet touched)",
+    "clientVersion": "ant 0.3.9",
+    "fileSize": 106844160,
     "chunkCount": 29,
-    "storageCostAnt": "1.482927234375",
-    "estimatedGasEth": "0.00015",
+    "storageCostAtto": "2432547952148437500",
+    "storageCostAnt": "2.432547952148437500",
+    "estimatedGasCostWei": "150000000000000",
+    "estimatedGasEth": "0.000150000000000000",
+    "paymentMode": "single",
     "confidence": "priced_sample",
-    "usdNotQuoted": "no live ANT/ETH USD rate captured this session — the atto/wei figures above are the actual obligations"
+    "networkNote": "the client logged several peer connection warnings, then exited 0 with the quoted JSON"
   },
   "separatedCeilings": {
     "law": "two assets, never collapsed into one dollar figure",
-    "storageMaxAnt": 1.6,
+    "storageMaxAnt": 2.5,
     "gasMaxEth": 0.0002,
-    "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change"
+    "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change, client version change"
   },
   "spendingApprovalGate": {
-    "status": "REBUILD REQUIRED — PRIVACY PROJECTION CHANGED",
-    "rule": "NO payment occurs against this superseded artifact. The privacy-safe records projection changes package bytes; rebuild, re-hash, re-quote with ant 0.3.9, then obtain founder approval of the successor exact hash and ceilings.",
-    "afterApproval": "DISABLED FOR THIS EDITION. A successor must bind its own exact tar hash and separated ceilings before the founder-gated settlement lane can run."
+    "status": "AWAITING FOUNDER APPROVAL",
+    "rule": "NO payment or upload occurs until the founder approves this exact tar sha256, the 2.5 ANT storage ceiling, the 0.0002 ETH gas ceiling, and 29 chunks.",
+    "afterApproval": "Change only this status to APPROVED in a reviewed commit. The service re-hashes a frozen snapshot, re-quotes with ant 0.3.9, re-reads this gate immediately before upload, and refuses every mismatch or ceiling breach."
   },
   "progression": [
-    "preserved: SUPERSEDED (pkg4 included raw transcription values; never approve or upload)",
+    "preserved: YES (privacy-safe public projection, local bytes verified 22107/22107)",
     "approved: NOT YET (founder gesture)",
-    "quoted: YES (live, priced_sample)",
+    "quoted: YES (ant 0.3.9 live priced_sample)",
     "spend-authorized: NOT YET",
     "purchased: NOT YET",
     "uploaded: NOT YET",
     "retrieved: NOT YET",
-    "hash-verified: NOT YET",
+    "hash-verified from storage: NOT YET",
     "restoration-verified: NOT YET"
   ],
-  "openFrontier": "image queue 364/366 (99.5%): two short-form ARKs (3QS7-89WB, 3QSQ-G983) pending on persistent binding-400 — retryable, never outcomes; evidence boundary per readback 09-30d: possible lost foreign manifest entries remain unresolved pending the other session's log"
+  "openFrontier": "image queue 364/366 (99.5%): two short-form ARKs (3QS7-89WB, 3QSQ-G983) remain retryable after persistent binding-400; possible lost foreign manifest entries remain unresolved pending the other session's log"
 }

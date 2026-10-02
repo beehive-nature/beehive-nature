@@ -115,6 +115,15 @@ export function validateQuoteAgainstGate(q, rawGate) {
   }
 }
 
+export function validateClientVersion(clientVersion, rawGate) {
+  const approved = rawGate?.quote?.clientVersion;
+  if (typeof approved !== "string" || !approved.trim())
+    return { ok: false, error: "gate.quote.clientVersion must name the approved ant client" };
+  if (clientVersion !== approved)
+    return { ok: false, error: "ant client version changed: actual=" + clientVersion + " approved=" + approved };
+  return { ok: true, clientVersion };
+}
+
 export function revalidateApproval(gatePath, initialRaw, artifactSha, quote) {
   const fresh = editionGate(gatePath);
   if (fresh.status !== "APPROVED" || fresh.raw?.artifact?.tarSha256 !== artifactSha)
@@ -124,15 +133,17 @@ export function revalidateApproval(gatePath, initialRaw, artifactSha, quote) {
     storageMaxAnt: initialRaw?.separatedCeilings?.storageMaxAnt,
     gasMaxEth: initialRaw?.separatedCeilings?.gasMaxEth,
     chunkCount: initialRaw?.quote?.chunkCount,
+    clientVersion: initialRaw?.quote?.clientVersion,
   });
   const freshShape = JSON.stringify({
     tarSha256: fresh.raw?.artifact?.tarSha256,
     storageMaxAnt: fresh.raw?.separatedCeilings?.storageMaxAnt,
     gasMaxEth: fresh.raw?.separatedCeilings?.gasMaxEth,
     chunkCount: fresh.raw?.quote?.chunkCount,
+    clientVersion: fresh.raw?.quote?.clientVersion,
   });
   if (freshShape !== initialShape)
-    return { ok: false, error: "approval hash, ceilings, or chunk count changed during the request" };
+    return { ok: false, error: "approval hash, ceilings, chunk count, or client version changed during the request" };
   const check = validateQuoteAgainstGate(quote, fresh.raw);
   return check.ok ? { ok: true, gate: fresh, check } : check;
 }
@@ -154,6 +165,7 @@ export function bankUploadReceipt(existing, receipt, rawGate = {}) {
       storageMaxAnt: rawGate?.separatedCeilings?.storageMaxAnt ?? null,
       gasMaxEth: rawGate?.separatedCeilings?.gasMaxEth ?? null,
       chunkCount: rawGate?.quote?.chunkCount ?? null,
+      clientVersion: rawGate?.quote?.clientVersion ?? null,
     },
     progression: [],
   };
@@ -261,7 +273,12 @@ function startService() {
         // cannot turn a successful paid upload into a 500 afterward.
         let clientVersion;
         try { clientVersion = await antVersion(); }
-        catch (versionError) { clientVersion = "unavailable before upload: " + String(versionError.message || versionError).slice(0, 120); }
+        catch (versionError) {
+          return json(res, 409, { error: "UPLOAD REFUSED: ANT CLIENT VERSION UNAVAILABLE", reason: String(versionError.message || versionError).slice(0, 120) });
+        }
+        const versionCheck = validateClientVersion(clientVersion, gate.raw);
+        if (!versionCheck.ok)
+          return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: versionCheck.error });
         // Fresh quote immediately before upload; both commands read the same
         // frozen, independently hash-verified snapshot.
         const q = await antCmd(["file", "cost", frozen.path]);
