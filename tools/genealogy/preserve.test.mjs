@@ -44,6 +44,22 @@ function buildFixture() {
   file("assets/profile-archive/lineage/reconstructions.json", JSON.stringify({ current: {}, versions: [] }));
   file("assets/profile-archive/lineage/identity-registry.json", JSON.stringify({ schema: "skaists.identity-registry/1", issued: {}, aliases: {} }));
   file("assets/profile-archive/lineage/staging-inventory.json", JSON.stringify({ publicStaged: 2, privateStaged: 0, sumCheck: true }));
+  // evidence layer (founder order 2026-10-02): the six declared public source files
+  file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 1 }));
+  file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({
+    schema: "skaists.sources/1", persons: { pa1: { sources: [{ id: "rec1" }] } },
+  }));
+  file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({
+    schema: "skaists.sources-records/1", generated: "fixture", records: {
+      rec1: { id: "rec1", title: "Public title", citation: "Public citation", redactedLiving: false,
+        urls: ["https://example.test/ark"], event: { factType: "Census", place: "Somewhere" },
+        evidence: [{ factType: "Name", fieldType: "Original", value: "PRIVATE TRANSCRIPTION" }],
+        retrieved: "2026-10-02", provider: "fixture" },
+    },
+  }));
+  file("assets/profile-archive/lineage/sources/search-evidence.json", JSON.stringify({ schema: "skaists.search-evidence/1", observations: [] }));
+  file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
+  file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
   file("assets/profile-archive/lineage/persons/pa2.json", '{"internalId":"pa2"}');
   file("assets/profile-archive/lineage/evidence/pack-a.json", '{"schema":"skaists.evidence/1"}');
@@ -143,4 +159,53 @@ test("prepare builds clean packages: stale files cannot slip in", () => {
     "stale file from an earlier publication must not enter the new package");
   assert.ok(!existsSync(join(pkg, "assets/profile-archive/lineage/persons/STALE-from-old-publication.json")),
     "prepare cleaned the package directory");
+});
+
+test("EVIDENCE LAYER declared: all six public source files are mandatory and missing ones fail prepare", () => {
+  const root = buildFixture();
+  // delete one declared evidence file → prepare must fail, no silent omission
+  rmSync(join(root, "assets/profile-archive/lineage/sources/relationship-audit.json"));
+  const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0, "prepare must fail when a declared evidence file is missing");
+  assert.match(r.stderr, /relationship-audit/);
+});
+
+test("public search-evidence is present in a prepared edition", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(existsSync(join(pkg, "assets/profile-archive/lineage/sources/search-evidence.json")), true);
+  const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
+  assert.ok(manifest.files["assets/profile-archive/lineage/sources/search-evidence.json"]);
+});
+
+test("privacy-safe edition projects source records without raw transcription values", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  const projected = JSON.parse(readFileSync(join(pkg, "assets/profile-archive/lineage/sources/records.json"), "utf8"));
+  assert.equal(projected.schema, "skaists.sources-records-public/1");
+  assert.equal(projected.records.rec1.citation, "Public citation");
+  assert.deepEqual(projected.records.rec1.evidence, [{ factType: "Name", fieldType: "Original" }]);
+  assert.doesNotMatch(JSON.stringify(projected), /PRIVATE TRANSCRIPTION/);
+  const original = readFileSync(join(root, "assets/profile-archive/lineage/sources/records.json"), "utf8");
+  assert.match(original, /PRIVATE TRANSCRIPTION/, "prepare projects package bytes without mutating the research source");
+});
+
+test("privacy projection refuses missing or unreconciled source records", () => {
+  const root = buildFixture();
+  const recordsPath = join(root, "assets/profile-archive/lineage/sources/records.json");
+  writeFileSync(recordsPath, JSON.stringify({ schema: "skaists.sources-records/1" }));
+  let r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /with records/);
+
+  const root2 = buildFixture();
+  const manifestPath = join(root2, "assets/profile-archive/lineage/sources/manifest.json");
+  writeFileSync(manifestPath, JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 2 }));
+  r = run(["prepare", join(root2, "pkg"), "test"], { cwd: root2 });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /reconciliation failed/);
 });
