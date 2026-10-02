@@ -132,11 +132,13 @@ test('cypherpunk: the instrument is complete at first paint and verifiable', asy
   const d = await p.evaluate(() => ({
     rows: document.querySelectorAll('#etManifest tr.pick').length, steps: document.querySelectorAll('#etPipe li').length,
     now: (document.querySelector('#etPipe li.now b') || {}).textContent, receipt: document.querySelectorAll('#etReceipt tr').length,
+    pipeline: document.querySelector('#etPipe').textContent,
     path: document.querySelector('#eternal [data-et="bdata"]').textContent,
   }));
   assert.equal(d.rows, 7); assert.equal(d.steps, 6); assert.equal(d.receipt, 7);
-  assert.match(d.now, /settle/, 'the pipeline points at the first step not yet done');
-  assert.match(d.path, /^bData:\/\/genealogy\/[0-9a-f]{6,}/);
+  assert.match(d.now, /consent/, 'the pipeline points at the first step not yet done');
+  assert.match(d.pipeline, /payment client cannot enforce both ceilings/, 'settlement reports the client capability stop');
+  assert.equal(d.path, 'bData://genealogy/unsealed', 'no storage address is claimed before a paid upload');
   await p.click('.et-c-tab tr.pick[data-g="4"]');
   assert.equal(await p.$eval('.et-c-tab tr.names[data-g="4"]', e => e.hidden), false, 'a generation opens to its people');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();

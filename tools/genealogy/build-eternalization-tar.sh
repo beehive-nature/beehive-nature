@@ -7,6 +7,40 @@ build_eternalization_tar() {
   local source_dir="$1"
   local output_tar="$2"
   local temp_tar="${output_tar}.tmp-$$-${RANDOM}"
+  local file_list="${output_tar}.files-$$-${RANDOM}"
+  if ! python3 - "$source_dir" "$file_list" <<'PY'
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+manifest_path = root / "manifest.json"
+manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+declared = set(manifest.get("files", {}).keys())
+expected = declared | {"manifest.json"}
+actual = set()
+for path in root.rglob("*"):
+    rel = path.relative_to(root).as_posix()
+    if path.is_symlink():
+        raise SystemExit("FAILED: symlink in prepared package: " + rel)
+    if path.is_file():
+        actual.add(rel)
+missing = sorted(expected - actual)
+extras = sorted(actual - expected)
+if missing or extras:
+    if missing:
+        print("FAILED: manifest files missing: " + ", ".join(missing[:10]), file=sys.stderr)
+    if extras:
+        print("FAILED: undeclared files present: " + ", ".join(extras[:10]), file=sys.stderr)
+    raise SystemExit(1)
+with open(sys.argv[2], "wb") as out:
+    for rel in sorted(expected):
+        out.write(rel.encode("utf-8") + b"\0")
+PY
+  then
+    rm -f "$file_list"
+    return 1
+  fi
   if ! tar \
     --sort=name \
     --mtime='2026-10-02T00:00:00Z' \
@@ -16,31 +50,37 @@ build_eternalization_tar() {
     --format=posix \
     --pax-option=delete=atime,delete=ctime \
     -C "$source_dir" \
+    --no-recursion \
+    --null \
+    --files-from="$file_list" \
     -cf "$temp_tar" \
-    .; then
-    rm -f "$temp_tar"
+    ; then
+    rm -f "$temp_tar" "$file_list"
     return 1
   fi
+  rm -f "$file_list"
   mv -f "$temp_tar" "$output_tar"
 }
 
 verify_reproducible_eternalization_tar() {
   local source_dir="$1"
   local output_tar="$2"
-  local repeat_tar="${output_tar}.repeat-$$"
+  local first_tar="${output_tar}.candidate-a-$$"
+  local repeat_tar="${output_tar}.candidate-b-$$"
 
-  build_eternalization_tar "$source_dir" "$output_tar"
+  build_eternalization_tar "$source_dir" "$first_tar"
   build_eternalization_tar "$source_dir" "$repeat_tar"
-  cmp --silent "$output_tar" "$repeat_tar" || {
-    rm -f "$repeat_tar"
+  cmp --silent "$first_tar" "$repeat_tar" || {
+    rm -f "$first_tar" "$repeat_tar"
     echo "FAILED: independent tar constructions differ" >&2
     return 1
   }
 
   local sha bytes
-  sha="$(sha256sum "$output_tar" | awk '{print $1}')"
-  bytes="$(stat -c '%s' "$output_tar")"
+  sha="$(sha256sum "$first_tar" | awk '{print $1}')"
+  bytes="$(stat -c '%s' "$first_tar")"
   rm -f "$repeat_tar"
+  mv -f "$first_tar" "$output_tar"
   printf '{"tar":"%s","bytes":%s,"sha256":"%s","reproduced":true}\n' "$output_tar" "$bytes" "$sha"
 }
 
