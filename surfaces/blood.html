@@ -30,6 +30,15 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .viewswitch button{border:0;border-radius:0;min-height:40px}
 .controls .viewswitch button[aria-pressed="true"]{background:var(--gold);color:var(--bg);font-weight:650} /* was out-ranked by .controls button[aria-pressed] and drew gold on gold: a label-less block */
 .entrance{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.entrance>section{grid-column:1/-1;min-width:0;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.entrance>section h2{font-size:clamp(20px,4vw,28px);line-height:1.2;margin:0 0 12px}
+.entrance>section p{max-width:75ch;line-height:1.6;margin:10px 0;overflow-wrap:anywhere}
+.entrance>section label{display:block;margin:12px 0;min-width:0}
+.entrance>section input,.entrance>section select{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;margin-top:6px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--well);color:var(--ink);font:inherit}
+.entrance>section button{padding:12px 16px;min-height:44px;margin:6px 8px 6px 0;border:1px solid var(--violet);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
+.entrance>section button:disabled{opacity:.5;cursor:default}
+.entrance>section a{display:inline-block;margin-top:8px;max-width:100%;overflow-wrap:anywhere}
+.entrance [hidden]{display:none!important}
 .econcard{margin-top:12px;border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px 14px;
  background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(0,229,255,.04));font-size:max(11px,var(--fmin,12px));color:var(--dim);line-height:1.8}
 .econcard b{color:var(--gold)} .econcard .states{color:var(--faint);font-size:max(10px,var(--fmin,12px))}
