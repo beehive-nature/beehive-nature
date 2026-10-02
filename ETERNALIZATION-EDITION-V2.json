@@ -1,16 +1,16 @@
 {
   "schema": "skaists.eternalization-edition/2",
-  "generated": "2026-10-02T05:24:12.000Z",
+  "generated": "2026-10-02T06:05:51.000Z",
   "supersedes": "the rejected privacy-unsafe pkg4 candidate and every earlier genealogy edition and quote",
   "edition": "privacy-safe genealogy archive v2 — merged relationship audit + 13,249-record public source projection + public image evidence (307 private-tier images represented only by counts, sha256 digests, and ark pointers)",
   "artifact": {
-    "preparedFrom": "main merge commit 974d7559b56adef07b941ae2e045d6376a747d66 (PR #296 merged; preserve.mjs prepare)",
+    "preparedFrom": "corrective commit 79f442f43872ae5d831f8aa815ad9c9bc632ba7b (PR #296 and #302 already merged; preserve.mjs prepare after product-flow capability stop)",
     "declaredFiles": 22107,
-    "unpackedDeclaredBytes": 86337400,
-    "manifestSha256": "f0ab56074fa07025ac19828b447dc18019661b9f67f62ac50522c071fdc6d337", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
-    "tarBytes": 106844160,
-    "tarSha256": "2538275c3f5f7a775769d5f2907cbba447a0df01c71f478a94b78d4e4059047f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced by two independent deterministic tar constructions",
-    "deterministicTarRecipe": "GNU tar --sort=name --mtime=2026-10-02T00:00:00Z --owner=0 --group=0 --numeric-owner --format=posix --pax-option=delete=atime,delete=ctime",
+    "unpackedDeclaredBytes": 86331532,
+    "manifestSha256": "123ff6c5befadcc1dee6b71a4ad3c7109ba70fa3aa26ad810b202198f7d4b0f4", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
+    "tarBytes": 106833920,
+    "tarSha256": "960045b2f32cf2988041b235c3588d92cfd93b318e2672dae72c41f4f20b6c2f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+    "deterministicTarRecipe": "tools/genealogy/build-eternalization-tar.sh::build_eternalization_tar",
     "privacyAudit": {
       "projectedRecords": 13249,
       "evidenceDescriptors": 49342,
@@ -20,9 +20,9 @@
     "privateBytesExcluded": "the 307 record images remain PRIVATE-TIER and do not enter the bundle; the public bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },
   "quote": {
-    "captured": "2026-10-02T05:24:12Z (live ant 0.3.9, ant --json file cost on the exact pkg4.tar; keyless, no payment, no wallet touched)",
+    "captured": "2026-10-02T06:05:51Z (live ant 0.3.9, ant --json file cost on the exact pkg4.tar; keyless, no payment, no wallet touched)",
     "clientVersion": "ant 0.3.9",
-    "fileSize": 106844160,
+    "fileSize": 106833920,
     "chunkCount": 29,
     "storageCostAtto": "2432547952148437500",
     "storageCostAnt": "2.432547952148437500",
@@ -38,14 +38,21 @@
     "gasMaxEth": 0.0002,
     "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change, client version change"
   },
+  "paymentClientCapability": {
+    "clientVersion": "ant 0.3.9",
+    "atomicStorageCeiling": false,
+    "atomicGasCeiling": false,
+    "uploadEnabled": false,
+    "evidence": "ant file upload --help exposes no storage-price or gas ceiling option"
+  },
   "spendingApprovalGate": {
-    "status": "AWAITING FOUNDER APPROVAL",
-    "rule": "NO payment or upload occurs until the founder approves this exact tar sha256, the 2.5 ANT storage ceiling, the 0.0002 ETH gas ceiling, and 29 chunks.",
-    "afterApproval": "Change only this status to APPROVED in a reviewed commit. The service re-hashes a frozen snapshot, re-quotes with ant 0.3.9, re-reads this gate immediately before upload, and refuses every mismatch or ceiling breach."
+    "status": "PAYMENT CLIENT CAPABILITY REQUIRED",
+    "rule": "NO approval, payment, or upload occurs while ant 0.3.9 cannot apply both the 2.5 ANT storage ceiling and 0.0002 ETH gas ceiling atomically to the paid operation.",
+    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and separated ceilings. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
   },
   "progression": [
     "preserved: YES (privacy-safe public projection, local bytes verified 22107/22107)",
-    "approved: NOT YET (founder gesture)",
+    "approved: BLOCKED (payment client lacks atomic ceilings)",
     "quoted: YES (ant 0.3.9 live priced_sample)",
     "spend-authorized: NOT YET",
     "purchased: NOT YET",
