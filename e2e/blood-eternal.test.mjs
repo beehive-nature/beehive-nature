@@ -201,6 +201,7 @@ test('package-safe status keeps the restored archive truthful without embedding 
   assert.equal(errs.length, 0, errs.join(' | '));
   assert.match(await p.textContent('#eternal'), /fresh quote required/);
   await p.click('#preservebtn');
+  await p.waitForFunction(() => document.getElementById('preserve-step')?.textContent.includes('no self-referential quote'));
   assert.match(await p.textContent('#preserve-step'), /no self-referential quote/);
   assert.match(await p.textContent('#preserve-step'), /cannot enforce the 2.5 ANT and 0.0002 ETH ceilings atomically/);
   await ctx.close();
