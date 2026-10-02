@@ -3,14 +3,14 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood privacy-safe public preservation edition v2",
-  "manifestSha256": "3fa60a646b7e790b74bef09f2ae666e74881d4c62c5f60626f2494713d13d534", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-02T07:58:37.449Z",
+  "manifestSha256": "d8f782183f75c16b455abcc0c25ce23c0f1b98e121643c39c979a12854d6c063", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-02T09:10:38.128Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": false,
   "files": 22108,
-  "bytes": 86333443,
+  "bytes": 86333642,
   "GiB": 0.080404,
   "personObjects": 11041,
   "evidencePacks": 3,
@@ -18,8 +18,8 @@
   "uploadObject": {
    "form": "tar",
    "bytes": 106833920,
-   "sha256": "db959a4e756594ea1fcb5d008a0100785025d0ab4efd3af965cc74490ac36fd3", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-02T08:05:29.341Z"
+   "sha256": "34511423f0be81a1ca5004b514436e5c7792fe4391d91845b1235bedf773fab5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-02T09:17:35.399Z"
   }
  },
  "quotes": {
@@ -61,23 +61,23 @@
   "autonomi": {
    "state": "quoted above standing storage ceiling; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-02T08:05:55.897Z",
+   "queriedAt": "2026-10-02T09:18:22.319Z",
    "raw": {
     "file_size": 106833920,
     "chunk_count": 29,
-    "storage_cost_atto": "3626846484375000000",
+    "storage_cost_atto": "2825569772460937500",
     "estimated_gas_cost_wei": "150000000000000",
     "payment_mode": "single",
     "confidence": "priced_sample"
    },
    "qualifications": [
     "keyless live estimate from a private byte-verified snapshot; no payment, wallet mutation, or upload",
-    "3.626846484375000000 ANT exceeds the standing 2.5 ANT storage ceiling",
+    "2.825569772460937500 ANT exceeds the standing 2.5 ANT storage ceiling",
     "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
     "storage and gas are separate obligations"
    ],
    "computed": {
-    "storageANT": "3.626846484375000000",
+    "storageANT": "2.825569772460937500",
     "gasETH": "0.000150000000000000",
     "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
@@ -151,7 +151,7 @@
  "states": {
   "prepared": true,
   "approved": false,
-  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; 3.626846484375000000 ANT exceeds 2.5 ANT ceiling; payment capability required",
+  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; 2.825569772460937500 ANT exceeds 2.5 ANT ceiling; payment capability required",
   "purchased": false,
   "uploaded": false,
   "retrieved": false,
@@ -168,7 +168,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-02T08:05:55.897Z",
+ "generatedAt": "2026-10-02T09:18:22.319Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",
