@@ -521,6 +521,24 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <label>Choose a relative <select id="generationPerson"><option value="">choose a recorded ancestor</option></select></label>
     <p>Counts use the shortest recorded parent path from the founder. A recorded path can contain disputed or legendary links; open each relative to examine the evidence.</p>
   </section>
+  <section id="charlemagneShowcase" hidden aria-label="Charlemagne family journey">
+    <h2>Walk the recorded line to Charlemagne</h2>
+    <p id="charlemagneDistance"></p>
+    <p>Explore the relatives connecting the founder to Charlemagne, then inspect the evidence behind each relationship.</p>
+    <p id="charlemagneSupport"></p>
+    <button id="charlemagneWalk" type="button">walk this recorded line</button>
+    <a href="../assets/profile-archive/lineage/persons/p1790a81049.html">open Charlemagne’s research</a>
+  </section>
+  <section id="nobleCollection" hidden aria-label="Noble family research collection">
+    <h2>Noble family research wiki</h2>
+    <p id="nobleCount"></p>
+    <p>Start with recorded royal and noble titles on the founder’s ancestral paths. This title-based index is a research queue; untitled entries and other spellings may need adding after review.</p>
+    <label>Find a relative <input id="nobleSearch" type="search" placeholder="name, title, or house"></label>
+    <label>Choose a page <select id="noblePerson"></select></label>
+    <p id="nobleSelected" aria-live="polite"></p>
+    <a id="noblePage" hidden>open this relative’s wiki page</a>
+    <button id="nobleWalk" type="button" disabled>walk the recorded relationship</button>
+  </section>
   <a data-ent="family"><b>family</b><span>the founder's house — living redacted, the personal entrance stays on the profile page</span></a>
   <a data-ent="records"><b>records</b><span>documents and evidence packs — claims cited, attribution preserved</span></a>
   <a data-ent="mythology"><b>mythology</b><span>the sagas and the crest's own symbolism — meaning, equal in standing, distinct in kind</span></a>
@@ -1698,6 +1716,51 @@ try {
   });
   $("generationExplorer").hidden = false;
   browseGeneration();
+  const nobleTitle = /\b(king|queen|emperor|empress|prince|princess|duke|duchess|earl|count|countess|baron|baroness|marquess|marquis|viscount|comte|comtesse|duc|duquesa|konig|könig)\b/i;
+  const nobleIds = generationQueue.filter(id => !atlas.person(id).living && nobleTitle.test(atlas.person(id).name));
+  nobleIds.sort((a,b) => atlas.person(a).name.localeCompare(atlas.person(b).name));
+  function renderNobleChoices() {
+    const query = $("nobleSearch").value.trim().toLocaleLowerCase();
+    const ids = nobleIds.filter(id => atlas.person(id).name.toLocaleLowerCase().includes(query));
+    $("noblePerson").replaceChildren(new Option("choose a relative", ""));
+    for (const id of ids) $("noblePerson").add(new Option(atlas.person(id).name, id));
+    $("nobleCount").textContent = ids.length + " matching research pages · " + nobleIds.length + " title-indexed ancestors in this edition.";
+    $("noblePage").hidden = true;
+    $("nobleWalk").disabled = true;
+    $("nobleSelected").textContent = "";
+  }
+  $("nobleSearch").addEventListener("input", renderNobleChoices);
+  $("noblePerson").addEventListener("change", () => {
+    const id = $("noblePerson").value;
+    $("noblePage").hidden = !id;
+    $("nobleWalk").disabled = !id;
+    if (!id) { $("nobleSelected").textContent = ""; return; }
+    $("noblePage").href = archiveUrl(id);
+    $("nobleSelected").textContent = generationDistance.get(id) + " generations from the founder · current support: " + archive.getPerson(id).support;
+  });
+  $("nobleWalk").addEventListener("click", () => {
+    const id = $("noblePerson").value;
+    if (!id) return;
+    atlas.reroot(id); atlas.select(id); showRoute(corpus.root, id);
+    $("detail").classList.remove("open");
+    $("routestrip").scrollIntoView({ block: "center" });
+  });
+  $("nobleCollection").hidden = false;
+  renderNobleChoices();
+  const charlemagneId = "p1790a81049";
+  if (generationDistance.has(charlemagneId)) {
+    $("charlemagneDistance").textContent = generationDistance.get(charlemagneId) + " generations along the shortest recorded parent path.";
+    const entry = archive.getPerson(charlemagneId);
+    $("charlemagneSupport").textContent = "Current archive support: " + entry.support + ". Inspect the connecting records before treating this recorded lineage as established.";
+    $("charlemagneShowcase").hidden = false;
+    $("charlemagneWalk").addEventListener("click", () => {
+      atlas.reroot(charlemagneId);
+      atlas.select(charlemagneId);
+      showRoute(corpus.root, charlemagneId);
+      $("detail").classList.remove("open");
+      $("routestrip").scrollIntoView({ block: "center" });
+    });
+  }
   setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
   globalThis.__guxInit = init; // journey seam: the URL-derived initial context
   document.body.classList.add("gux");
