@@ -1,15 +1,15 @@
 {
   "schema": "skaists.eternalization-edition/2",
-  "generated": "2026-10-02T07:32:07.614Z",
+  "generated": "2026-10-02T08:05:55.897Z",
   "supersedes": "the rejected privacy-unsafe pkg4 candidate and every earlier genealogy edition and quote",
   "edition": "privacy-safe genealogy archive v2 — merged relationship audit + 13,249-record public source projection + public image evidence (307 private-tier images represented only by counts, sha256 digests, and ark pointers)",
   "artifact": {
-    "preparedFrom": "corrective commit 18888a3042308431015bc7d9c7c9a2e523ef394d (PUBLIC-CONSTANT source commit; PR #296 and #302 already merged; exact source includes the manifest-content verifier, normalized-mode reproducible builder, immutable quote snapshot, and banked-status UI)",
-    "declaredFiles": 22107,
-    "unpackedDeclaredBytes": 86331420,
-    "manifestSha256": "8a2338da5ece75f5a2e302325212fe7a872f82fc7b01554b2575dfe8ecb2efbd", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
-    "tarBytes": 106823680,
-    "tarSha256": "679429a6fcb23ea2189d6e611771404de0fda6b6a9fe2a72a2669238ff9cd837", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+    "preparedFrom": "corrective commit 18683c9d956b0728134f076cbbb683fc9f7b07dc (PUBLIC-CONSTANT source commit; PR #296 and #302 already merged; exact source includes the private package snapshot, manifest-content verifier, normalized-mode reproducible builder, package-safe status projection, immutable quote snapshot, and banked-status UI)",
+    "declaredFiles": 22108,
+    "unpackedDeclaredBytes": 86333443,
+    "manifestSha256": "3fa60a646b7e790b74bef09f2ae666e74881d4c62c5f60626f2494713d13d534", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
+    "tarBytes": 106833920,
+    "tarSha256": "db959a4e756594ea1fcb5d008a0100785025d0ab4efd3af965cc74490ac36fd3", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
     "deterministicTarRecipe": "tools/genealogy/build-eternalization-tar.sh::build_eternalization_tar",
     "privacyAudit": {
       "projectedRecords": 13249,
@@ -20,9 +20,9 @@
     "privateBytesExcluded": "the 307 record images remain PRIVATE-TIER and do not enter the bundle; the public bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },
   "quote": {
-    "captured": "2026-10-02T07:32:07.614Z (tools/genealogy/capture-ant-quote.mjs::captureAntQuote; live ant 0.3.9 on a private byte-verified snapshot of the exact pkg4.tar; keyless, no payment, no wallet touched)",
+    "captured": "2026-10-02T08:05:55.897Z (tools/genealogy/capture-ant-quote.mjs::captureAntQuote; live ant 0.3.9 on a private byte-verified snapshot of the exact pkg4.tar; keyless, no payment, no wallet touched)",
     "clientVersion": "ant 0.3.9",
-    "fileSize": 106823680,
+    "fileSize": 106833920,
     "chunkCount": 29,
     "storageCostAtto": "3626846484375000000",
     "storageCostAnt": "3.626846484375000000",
@@ -51,7 +51,7 @@
     "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, obtain a quote within founder-approved separated ceilings, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and bounds. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
   },
   "progression": [
-    "preserved: YES (privacy-safe public projection, local bytes verified 22107/22107)",
+    "preserved: YES (privacy-safe public projection, local bytes verified 22108/22108)",
     "approved: BLOCKED (quote exceeds storage ceiling; payment client also lacks atomic ceilings)",
     "quoted: YES (ant 0.3.9 live priced_sample; 3.626846484375000000 ANT > 2.5 ANT ceiling)",
     "spend-authorized: NOT YET",
