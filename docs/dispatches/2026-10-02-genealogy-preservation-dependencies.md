@@ -87,26 +87,30 @@ closed. No new mesh measurement or upstream reply is claimed by this lane.
 
 ## Exact edition and fresh quotes
 
-Final edition v3 is local `C:/Users/travi/family-lineage/pkg6-public`, prepared
-at 2026-10-02T22:28:35.780Z: 22,153 files, 87,261,925 content bytes, 11,041
+Final edition v3 is `C:/Users/travi/family-lineage/pkg7.tar`; its expanded build
+is in WSL `/var/tmp/genealogy-pkg7-work-hIAZdE/public`, prepared
+at 2026-10-02T22:48:09.109Z: 22,153 files, 87,261,920 content bytes, 11,041
 person objects and three evidence packs. The reviewed declaration supplies
 44 runtime files; its own declaration is also preserved. Local manifest
 verification passed all 22,153 entries with no mismatches and no approval.
 
-- Manifest digest: `3c97337a2cc7650234bddc6f33a9c54a2bcea2b40cc49a6d22259f459c60c85e` (PUBLIC-CONSTANT; `preserve.mjs::verifyPackage`).
-- Final `pkg6.tar`: 107,796,480 bytes; digest `da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5` (PUBLIC-CONSTANT; `build-eternalization-tar.sh::verify_reproducible_eternalization_tar`).
-- Two GNU tar constructions were byte-identical. A temporary Windows tar
-  transported the verified package into WSL; it was not the quoted artifact.
+- Manifest digest: `cde5d07c9a0486ede86b535bc902179694dd04433567287fd81dbf3a49af31de` (PUBLIC-CONSTANT; `preserve.mjs::verifyPackage`).
+- Final `pkg7.tar`: 107,796,480 bytes; digest `5b46c228ac2d5fb39859bb09be110df43c0ee046f61aa9d210450cba2c09b309` (PUBLIC-CONSTANT; `build-eternalization-tar.sh::verify_reproducible_eternalization_tar`).
+- Two GNU tar constructions were byte-identical. The previous verified edition
+  supplied the unchanged allowlisted files on WSL. The builder re-ran its
+  public source-record projection and package checks with current source
+  inputs. Manifest comparison proves only `surfaces/blood.html` changed
+  (five bytes smaller); all other 22,152 file digests match pkg6.
 - Fresh extraction loaded all six runtime modules, resolved the 39-hop
   Charlemagne route, counted 36 people at generation 44 and reached 143
   generations. Its 13,249 source records contained zero raw evidence values.
   This is local restoration, not storage-network retrieval or browser proof.
-- ANT capture at 2026-10-02T22:35:23.498Z: 29 chunks, `priced_sample`,
+- ANT capture at 2026-10-02T22:49:09.984Z: 29 chunks, `priced_sample`,
   3.645898464843750000 ANT storage plus 0.000150000000000000 ETH gas.
   Source: `capture-ant-quote.mjs::captureAntQuote`, ant 0.3.9, private
   byte-verified snapshot. Storage exceeds the standing 2.5 ANT ceiling;
   estimated gas is within 0.0002 ETH. Paid upload remains code-disabled.
-- AR capture at 2026-10-02T22:35:05.019Z: 1350464003759 winston,
+- AR capture at 2026-10-02T22:48:51.033Z: 1350464003759 winston,
   1.350464003759 AR for the same tar size. Source: `surfaces/arweave.js::fee`,
   public size-based price GET, HTTP 200. No USD conversion inferred.
 
@@ -114,7 +118,7 @@ Raw quote inputs, timestamps, artifact binding and false progression states
 are committed in `docs/receipts/genealogy-edition-v3-2026-10-02.json` and the
 public storage-economics record. The package-safe economics projection is
 byte-identical after publishing the new quote, avoiding a self-reference.
-Earlier pkg3, pkg4/v2 and pkg5 quotes do not price this final artifact.
+Earlier pkg3, pkg4/v2, pkg5 and pkg6 quotes do not price this final artifact.
 No approval, purchase, upload, network retrieval or storage hash verification
 is claimed. The historical economics scenarios are explicitly separated.
 
@@ -133,6 +137,16 @@ starting snapshot and remain byte-identical and unstaged. The hook installer
 refused to replace the existing shared hook; its secret-scan/identity delegates
 were retained, the hook fixture battery passed, and commits passed both hooks.
 
-PR #308 contains the publication changes. At this receipt commit, its final
-merge and Pages deployment are pending; #305–#307 deployment is verified above.
+PR #308 merged as `e4b497b81` at 2026-10-02T22:38:52Z. Its Pages run
+37073603970 was canceled when #309 advanced main; the descendant deployment
+includes these genealogy changes. No canceled deployment is counted as live.
 The public browser remains open for verification after GitHub Pages publishes.
+
+The completed ETERNAL browser acceptance step passed on PR #308. Its broader
+footer ratchet failed with exactly three findings: blood.html CAPS 0 to 1 in
+bee, raver and cypherpunk. The same failures already existed on #307 main run
+37066537601; source is `.life-mark { text-transform:uppercase }`, introduced
+with the Latvian tree. The follow-up changes that rule to `none` and does not
+relax the audit baseline. This five-byte CSS correction caused the final pkg7
+rebuild and fresh quote above. Final follow-up CI and Pages checks are pending
+at this receipt commit; no all-green CI claim is made.
