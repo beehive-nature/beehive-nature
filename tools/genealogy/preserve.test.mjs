@@ -44,7 +44,7 @@ function buildFixture() {
   file("assets/profile-archive/lineage/reconstructions.json", JSON.stringify({ current: {}, versions: [] }));
   file("assets/profile-archive/lineage/identity-registry.json", JSON.stringify({ schema: "skaists.identity-registry/1", issued: {}, aliases: {} }));
   file("assets/profile-archive/lineage/staging-inventory.json", JSON.stringify({ publicStaged: 2, privateStaged: 0, sumCheck: true }));
-  // evidence layer (founder order 2026-10-02): the five declared sources files
+  // evidence layer (founder order 2026-10-02): the six declared public source files
   file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1" }));
   file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({ schema: "skaists.sources/1", persons: {} }));
   file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({
@@ -55,6 +55,7 @@ function buildFixture() {
         retrieved: "2026-10-02", provider: "fixture" },
     },
   }));
+  file("assets/profile-archive/lineage/sources/search-evidence.json", JSON.stringify({ schema: "skaists.search-evidence/1", observations: [] }));
   file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
   file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
@@ -158,13 +159,23 @@ test("prepare builds clean packages: stale files cannot slip in", () => {
     "prepare cleaned the package directory");
 });
 
-test("EVIDENCE LAYER declared (founder order 2026-10-02): the five sources files are mandatory and missing ones fail prepare", () => {
+test("EVIDENCE LAYER declared: all six public source files are mandatory and missing ones fail prepare", () => {
   const root = buildFixture();
   // delete one declared evidence file → prepare must fail, no silent omission
   rmSync(join(root, "assets/profile-archive/lineage/sources/relationship-audit.json"));
   const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
   assert.notEqual(r.code, 0, "prepare must fail when a declared evidence file is missing");
   assert.match(r.stderr, /relationship-audit/);
+});
+
+test("public search-evidence is present in a prepared edition", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(existsSync(join(pkg, "assets/profile-archive/lineage/sources/search-evidence.json")), true);
+  const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
+  assert.ok(manifest.files["assets/profile-archive/lineage/sources/search-evidence.json"]);
 });
 
 test("privacy-safe edition projects source records without raw transcription values", () => {

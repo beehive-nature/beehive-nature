@@ -22,9 +22,11 @@
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync, existsSync, writeFileSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, copyFileSync, mkdtempSync, rmSync } from "node:fs";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { tmpdir } from "node:os";
+import { basename, join, resolve } from "node:path";
 
 const exec = promisify(execFile);
 const PORT = parseInt(process.argv[2] || "8794", 10);
@@ -56,6 +58,24 @@ export function resolveApprovedTar(candidates, expectedSha) {
     if (sha === expectedSha) return { path: p, sha };
   }
   return null;
+}
+
+// Freeze the already hash-approved bytes under a private random directory.
+// Both the last quote and the paid upload consume this same snapshot, so a
+// rebuild/replacement of pkg4.tar cannot swap bytes between those operations.
+export function snapshotApprovedTar(artifact, expectedSha) {
+  const dir = mkdtempSync(join(tmpdir(), "zblood-approved-"));
+  const path = join(dir, basename(artifact.path));
+  try {
+    copyFileSync(artifact.path, path);
+    const sha = createHash("sha256").update(readFileSync(path)).digest("hex");
+    if (sha !== expectedSha || sha !== artifact.sha)
+      throw new Error("approved artifact changed while freezing upload bytes");
+    return { path, sha, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+  } catch (error) {
+    rmSync(dir, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 function decimalToUnits(value, decimals, label) {
@@ -123,7 +143,10 @@ async function antVersion() {
 
 // The server only starts when this file is run directly — importing it (the
 // tests, the preserve suite) must not bind a port.
-const isMain = process.argv[1] && import.meta.url === new URL("file:///" + process.argv[1].replace(/\\/g, "/")).href;
+export function isDirectExecution(argvPath = process.argv[1], moduleUrl = import.meta.url) {
+  return !!argvPath && resolve(argvPath) === resolve(fileURLToPath(moduleUrl));
+}
+const isMain = isDirectExecution();
 
 function startService() {
   createServer(async (req, res) => {
@@ -172,31 +195,48 @@ function startService() {
       if (!approved) return json(res, 409, gateRefusal(gate));
       const artifact = resolveApprovedTar(CANDIDATE_TARS, gate.raw.artifact.tarSha256);
       if (!artifact) return json(res, 409, { error: "APPROVED ARTIFACT NOT ON DISK", expectedSha: gate.raw.artifact.tarSha256, action: "STOP — the exact approved bytes must be present before any spend" });
-      // fresh quote immediately before upload; enforce the gate's ceilings
-      const q = await antCmd(["file", "cost", artifact.path]);
-      const check = validateQuoteAgainstGate(q, gate.raw);
-      if (!check.ok) return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: check.error, quote: q });
-      // THE UPLOAD — the service holds the key in env; the UI never sees it;
-      // the bytes uploaded are the gate-approved artifact or nothing
-      const result = await antCmd(["file", "upload", artifact.path]);
-      // bank the receipt automatically
-      const receipt = {
-        uploadedAt: new Date().toISOString(),
-        clientVersion: await antVersion(),
-        result,
-        quote: q,
-        artifactSha256: artifact.sha,
-        editionGateStatusAtUpload: gate.status,
-        serviceNote: "uploaded through the edition-gated preservation service — no terminal, no manual receipt transfer",
-      };
-      // append to the eternalization receipt (never overwrite)
-      if (existsSync(RECEIPT_PATH)) {
-        const E = JSON.parse(readFileSync(RECEIPT_PATH, "utf8"));
-        E.progression = (E.progression || []).map(p =>
-          p.state === "uploaded" ? { ...p, at: receipt.uploadedAt, result } : p);
-        writeFileSync(RECEIPT_PATH, JSON.stringify(E, null, 1), "utf8");
+      const frozen = snapshotApprovedTar(artifact, gate.raw.artifact.tarSha256);
+      try {
+        // Optional metadata is captured before the irreversible operation and
+        // cannot turn a successful paid upload into a 500 afterward.
+        let clientVersion;
+        try { clientVersion = await antVersion(); }
+        catch (versionError) { clientVersion = "unavailable before upload: " + String(versionError.message || versionError).slice(0, 120); }
+        // Fresh quote immediately before upload; both commands read the same
+        // frozen, independently hash-verified snapshot.
+        const q = await antCmd(["file", "cost", frozen.path]);
+        const check = validateQuoteAgainstGate(q, gate.raw);
+        if (!check.ok) return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: check.error, quote: q });
+        // THE UPLOAD — the service holds the key in env; the UI never sees it.
+        const result = await antCmd(["file", "upload", frozen.path]);
+        const receipt = {
+          uploadedAt: new Date().toISOString(),
+          clientVersion,
+          result,
+          quote: q,
+          artifactSha256: frozen.sha,
+          editionGateStatusAtUpload: gate.status,
+          serviceNote: "uploaded from an immutable hash-verified snapshot through the edition-gated preservation service",
+        };
+        // Return the irreversible result even if the local progression file
+        // cannot be updated; the response names that banking failure.
+        try {
+          if (existsSync(RECEIPT_PATH)) {
+            const E = JSON.parse(readFileSync(RECEIPT_PATH, "utf8"));
+            E.progression = (E.progression || []).map(p =>
+              p.state === "uploaded" ? { ...p, at: receipt.uploadedAt, result } : p);
+            writeFileSync(RECEIPT_PATH, JSON.stringify(E, null, 1), "utf8");
+            receipt.receiptBank = "recorded";
+          } else {
+            receipt.receiptBank = "local progression file absent; receipt returned in this response";
+          }
+        } catch (bankError) {
+          receipt.receiptBank = "FAILED: " + String(bankError.message || bankError).slice(0, 120);
+        }
+        return json(res, 200, receipt);
+      } finally {
+        frozen.cleanup();
       }
-      return json(res, 200, receipt);
     }
 
     return json(res, 404, { error: "not found" });

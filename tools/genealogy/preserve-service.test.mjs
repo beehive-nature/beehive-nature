@@ -5,11 +5,12 @@
 // fixtures only; no server spawn, no ant CLI, CI-safe.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { editionGate, resolveApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
+import { fileURLToPath } from "node:url";
+import { editionGate, isDirectExecution, resolveApprovedTar, snapshotApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
@@ -61,6 +62,28 @@ test("resolveApprovedTar: only the candidate whose bytes hash to the gate's sha 
   // a hash no candidate carries = nothing is spendable
   assert.equal(resolveApprovedTar([wrong, right], "0".repeat(64)), null);
   assert.equal(resolveApprovedTar([join(dir, "absent.tar")], approvedSha), null);
+});
+
+test("snapshotApprovedTar freezes the approved bytes away from later source replacement", () => {
+  const dir = mkdtempSync(join(tmpdir(), "tar-freeze-"));
+  const source = join(dir, "pkg4.tar");
+  writeFileSync(source, "approved bytes");
+  const sha = createHash("sha256").update("approved bytes").digest("hex");
+  const frozen = snapshotApprovedTar({ path: source, sha }, sha);
+  try {
+    writeFileSync(source, "replacement after approval");
+    assert.equal(readFileSync(frozen.path, "utf8"), "approved bytes");
+    assert.equal(frozen.sha, sha);
+  } finally {
+    frozen.cleanup();
+  }
+  assert.equal(existsSync(frozen.path), false);
+});
+
+test("direct-execution detection compares normalized filesystem paths without hand-built file URLs", () => {
+  const here = fileURLToPath(new URL("preserve-service.mjs", import.meta.url));
+  assert.equal(isDirectExecution(here, new URL("preserve-service.mjs", import.meta.url).href), true);
+  assert.equal(isDirectExecution(here + ".other", new URL("preserve-service.mjs", import.meta.url).href), false);
 });
 
 test("validateQuoteAgainstGate accepts only the approved chunk shape within both ceilings", () => {

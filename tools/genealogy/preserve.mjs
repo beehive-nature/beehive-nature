@@ -53,6 +53,7 @@ const MANDATORY = [
   LINEAGE + "/sources/manifest.json",
   LINEAGE + "/sources/index.json",
   LINEAGE + "/sources/records.json",
+  LINEAGE + "/sources/search-evidence.json",
   LINEAGE + "/sources/images-summary.json",
   LINEAGE + "/sources/relationship-audit.json",
 ];

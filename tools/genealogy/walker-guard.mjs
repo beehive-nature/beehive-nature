@@ -19,9 +19,9 @@
 //   · P1 checkpointState enforces an outcome ALLOWLIST — 'downloaded' must
 //     come through checkpointDownload; unrecognized states are rejected,
 //     not denylisted around;
-//   · P1 checkpointDownload verifies the apid is bound to THIS ark — the
-//     binding evidence {url, response} must match the das/v2 name binding
-//     for the ark exactly (a neighboring filmstrip apid no longer passes);
+//   · P1 checkpointDownload verifies the apid is bound to THIS ark by
+//     fetching the canonical das/v2 binding itself (caller evidence cannot
+//     authenticate itself; a neighboring filmstrip apid no longer passes);
 //   · P2 every manifest write goes through atomic temp+replace — a crash
 //     cannot leave the authoritative manifest truncated;
 //   · P2 recordObservation/recordWalkerFailure assert queue membership too
@@ -122,6 +122,23 @@ function replaceClaimIfUnchanged(lockUrl, expectedText, replacementText) {
   try { unlinkSync(quarantine); } catch { /* the canonical claim is already complete */ }
 }
 
+// Conditional release uses the same quarantine/byte-identity primitive as a
+// refresh or takeover. An unconditional unlink can erase a contender's fresh
+// claim when the old holder races a stale takeover (PR #296 review P1).
+function removeClaimIfUnchanged(lockUrl, expectedText) {
+  const quarantine = new URL(lockUrl.href + ".release-" + randomUUID().slice(0, 8));
+  try { renameSync(lockUrl, quarantine); }
+  catch { throw new Error("REFUSED: lock changed before conditional release; stand down"); }
+  const actualText = readFileSync(quarantine, "utf8");
+  if (actualText !== expectedText) {
+    if (!existsSync(lockUrl)) {
+      try { renameSync(quarantine, lockUrl); } catch { /* another claimant owns the canonical path */ }
+    }
+    throw new Error("REFUSED: lock identity changed before conditional release; stand down");
+  }
+  unlinkSync(quarantine);
+}
+
 // ── EXCLUSIVE WRITER LOCK (founder order 2026-09-30c: another session
 //    reported saving images during this walker's run, contradicting the
 //    sole-writer claim — every walker entry point now shares ONE lock, and
@@ -183,12 +200,17 @@ export function assertWriterLock(writerId, opts = {}) {
 export function releaseWriterLock(writerId, opts = {}) {
   const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
   if (!existsSync(lockUrl)) return true;
-  const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
+  const observed = readClaim(lockUrl);
+  if (!observed?.parsed) throw new Error("REFUSED: cannot release an unreadable lock claim");
+  const lock = observed.parsed;
   if (lock.writerId !== writerId)
     throw new Error("REFUSED: cannot release a lock held by " + lock.writerId);
   if (!lock.claimId || OWNED_CLAIMS.get(claimKey(lockUrl, writerId)) !== lock.claimId)
     throw new Error("REFUSED: cannot release a lock this process does not own");
-  unlinkSync(lockUrl);
+  // Deterministic race hook for the adversarial test; production callers do
+  // not supply it. The conditional removal must preserve a replacement claim.
+  if (typeof opts.beforeConditionalRelease === "function") opts.beforeConditionalRelease();
+  removeClaimIfUnchanged(lockUrl, observed.text);
   OWNED_CLAIMS.delete(claimKey(lockUrl, writerId));
   return true;
 }
@@ -288,7 +310,7 @@ function saveEntry(ark, entry, opts) {
 export function checkpointState(ark, entry, opts = {}) {
   if (entry?.state === "downloaded")
     throw new Error(
-      "REJECT 'downloaded' via checkpointState: " + ark + " — downloads must pass checkpointDownload (binding evidence + sha256 enforced there)",
+      "REJECT 'downloaded' via checkpointState: " + ark + " — downloads must pass checkpointDownload (authoritative binding request + sha256 enforced there)",
     );
   assertRecordOutcome(entry?.state);
   if (!isRecordOutcome(entry?.state))
@@ -298,27 +320,34 @@ export function checkpointState(ark, entry, opts = {}) {
   return saveEntry(ark, entry, opts);
 }
 
-// Save-side guard for a DOWNLOAD: bytes without identity never land, and
-// the identity must be THIS ark's (PR #296 review P1): the walker supplies
-// binding evidence {url, response} from the das/v2 name binding it fetched,
-// and the guard reconstructs the binding URL from the ark and requires the
-// response to normalize to the entry's apid — a neighboring filmstrip apid
-// no longer passes (a sha256 over the wrong image's bytes proves nothing
-// about ark↔image identity).
+async function authoritativeBinding(ark, opts) {
+  const url = BINDING_URL_FOR(ark);
+  const fetcher = opts.fetchBinding || globalThis.fetch;
+  if (typeof fetcher !== "function") throw new Error("REJECT binding verification unavailable: no fetch implementation");
+  const response = await fetcher(url, { method: "GET", redirect: "error" });
+  if (!response || response.ok !== true || typeof response.text !== "function")
+    throw new Error("REJECT authoritative binding request for " + ark + " (status " + (response?.status ?? "unknown") + ")");
+  return { url, response: await response.text(), status: response.status };
+}
+
+// Save-side guard for a DOWNLOAD: bytes without identity never land. The
+// guard itself fetches the canonical ark binding URL and compares that live
+// response with the claimed apid; caller-supplied binding fields are discarded
+// and cannot authenticate themselves (PR #296 review P1).
 export function checkpointDownload(ark, entry, opts = {}) {
   if (entry?.state !== "downloaded") throw new Error("checkpointDownload requires state:'downloaded'");
   if (!entry.apid || !/^apid:TH-/.test(entry.apid))
     throw new Error("REJECT download without binding apid: " + ark);
   if (!/^[0-9a-f]{64}$/.test(entry.sha256 || ""))
     throw new Error("REJECT download without sha256: " + ark);
-  const binding = entry?.binding;
-  if (!binding || typeof binding.url !== "string" || typeof binding.response !== "string")
-    throw new Error("REJECT download without binding evidence {url, response} from the das/v2 name binding for THIS ark: " + ark);
-  if (binding.url !== BINDING_URL_FOR(ark))
-    throw new Error("REJECT binding evidence URL mismatch for " + ark + " — expected exactly " + BINDING_URL_FOR(ark));
-  if (normalizeApid(binding.response) !== normalizeApid(entry.apid))
-    throw new Error("REJECT binding response does not normalize to the entry apid — the apid may belong to a different image: " + ark);
-  return saveEntry(ark, { ...entry, bindingVerified: "ark-bound: das/v2 url + response match this ark" }, opts);
+  return (async () => {
+    const binding = await authoritativeBinding(ark, opts);
+    if (normalizeApid(binding.response) !== normalizeApid(entry.apid))
+      throw new Error("REJECT authoritative binding response does not normalize to the entry apid — the apid may belong to a different image: " + ark);
+    const { binding: ignoredCallerBinding, ...safeEntry } = entry;
+    void ignoredCallerBinding;
+    return saveEntry(ark, { ...safeEntry, binding, bindingVerified: "ark-bound: guard-fetched das/v2 response matches this ark" }, opts);
+  })();
 }
 
 // Absence-observations go to manifest.retryableObservations (side log,

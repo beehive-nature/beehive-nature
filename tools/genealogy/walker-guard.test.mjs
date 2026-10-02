@@ -28,6 +28,11 @@ function fixtures() {
   return { opts: { queuePath: "file:///" + queuePath.replace(/\\/g, "/"), manifestPath: "file:///" + manifestPath.replace(/\\/g, "/"), writer: "test-writer", lockPath }, manifestPath };
 }
 
+const bindingOpts = (opts, response, status = 200) => ({
+  ...opts,
+  fetchBinding: async () => ({ ok: status >= 200 && status < 300, status, text: async () => response }),
+});
+
 test("nextPending yields only unresolved queue members, in queue order", () => {
   const { opts } = fixtures();
   const pending = nextPending(10, opts);
@@ -66,16 +71,15 @@ test("checkpointDownload REJECTS downloads without binding apid or sha256 (bytes
   assert.throws(() => checkpointDownload("BBBB-2222", { state: "xml-403" }, opts), /state:'downloaded'/);
 });
 
-test("checkpointDownload ACCEPTS a fully-identified download for a queue member and stamps the guard", () => {
+test("checkpointDownload ACCEPTS only the guard's authoritative binding response and stamps it", async () => {
   const { opts } = fixtures();
-  const ok = checkpointDownload("CCCC-3333", {
+  const ok = await checkpointDownload("CCCC-3333", {
     state: "downloaded", apid: "apid:TH-2-2-2-2-2", w: 100, h: 200, level: 11, maxLevel: 12,
     tiles: 4, edgeSkips: 0, bytes: 1234, sha256: "a".repeat(64), ts: "2026-09-29T00:00:00.000Z",
-    binding: {
-      url: "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:CCCC-3333/name?namespace=apid",
-      response: "TH-2-2-2-2-2", // bare apid (the BARE-APID gotcha) — normalization must accept it
-    },
-  }, opts);
+    // Caller evidence is deliberately wrong. The guard discards it and uses
+    // its own request below, which returns the bare-apid wire shape.
+    binding: { url: "https://neighbor.invalid", response: "TH-9-9-9-9-9" },
+  }, bindingOpts(opts, "TH-2-2-2-2-2"));
   assert.equal(ok, true);
   const man = JSON.parse(readFileSync(new URL(opts.manifestPath), "utf8"));
   assert.equal(man.images["CCCC-3333"].state, "downloaded");
@@ -97,18 +101,22 @@ test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognize
   assert.equal(checkpointState("CCCC-3333", { state: "xml-403-all" }, opts), true);
 });
 
-test("P1 ark↔apid binding: checkpointDownload REJECTS missing/mismatched binding evidence (neighbor filmstrip apid never lands)", () => {
+test("P1 ark↔apid binding: guard fetches the canonical URL and rejects a neighbor response regardless of caller evidence", async () => {
   const { opts } = fixtures();
   const URL_FOR = (a) => "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:" + a + "/name?namespace=apid";
-  // missing evidence entirely
-  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64) }, opts),
-    /without binding evidence/);
-  // evidence URL for a DIFFERENT ark
-  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
-    binding: { url: URL_FOR("CCCC-3333"), response: "TH-3-3-3-3-3" } }, opts), /binding evidence URL mismatch/);
-  // response normalizes to a DIFFERENT apid (the neighbor-image case: bytes hash fine, identity does not)
-  assert.throws(() => checkpointDownload("BBBB-2222", { state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
-    binding: { url: URL_FOR("BBBB-2222"), response: "apid:TH-9-9-9-9-9" } }, opts), /binding response does not normalize/);
+  let requested = "";
+  const guarded = { ...opts, fetchBinding: async (url) => {
+    requested = url;
+    return { ok: true, status: 200, text: async () => "apid:TH-9-9-9-9-9" };
+  } };
+  await assert.rejects(checkpointDownload("BBBB-2222", {
+    state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
+    binding: { url: URL_FOR("BBBB-2222"), response: "TH-3-3-3-3-3" },
+  }, guarded), /authoritative binding response does not normalize/);
+  assert.equal(requested, URL_FOR("BBBB-2222"));
+  await assert.rejects(checkpointDownload("BBBB-2222", {
+    state: "downloaded", apid: "apid:TH-3-3-3-3-3", sha256: "b".repeat(64),
+  }, bindingOpts(opts, "denied", 503)), /authoritative binding request/);
 });
 
 test("P2 atomic manifest replace: saves leave no temp residue and the manifest always parses", async () => {
@@ -179,21 +187,18 @@ test("P1 conditional takeover: a takeover cannot steal a FRESH claim, and takeov
   assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".claim-") || f.includes(".tmp-")), [], "no quarantine/temp residue from takeover or refusal");
 });
 
-test("P2 outcomes are final: an already-resolved ark is never overwritten by a later save (review fix)", () => {
+test("P2 outcomes are final: an already-resolved ark is never overwritten by a later save (review fix)", async () => {
   const { opts, manifestPath } = fixtures();
-  const URL_FOR = (a) => "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:" + a + "/name?namespace=apid";
-  checkpointDownload("CCCC-3333", {
+  await checkpointDownload("CCCC-3333", {
     state: "downloaded", apid: "apid:TH-7-7-7-7-7", sha256: "c".repeat(64), bytes: 99,
-    binding: { url: URL_FOR("CCCC-3333"), response: "TH-7-7-7-7-7" },
-  }, opts);
+  }, bindingOpts(opts, "TH-7-7-7-7-7"));
   const before = readFileSync(manifestPath, "utf8");
   // a late negative for the same ark must not erase the download's identity
   assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, opts), /REJECT SAVE already-resolved/);
   // a late duplicate download must not overwrite either
-  assert.throws(() => checkpointDownload("CCCC-3333", {
+  await assert.rejects(checkpointDownload("CCCC-3333", {
     state: "downloaded", apid: "apid:TH-8-8-8-8-8", sha256: "d".repeat(64),
-    binding: { url: URL_FOR("CCCC-3333"), response: "TH-8-8-8-8-8" },
-  }, opts), /REJECT SAVE already-resolved/);
+  }, bindingOpts(opts, "TH-8-8-8-8-8")), /REJECT SAVE already-resolved/);
   assert.equal(readFileSync(manifestPath, "utf8"), before, "manifest must be untouched by rejected overwrites");
 });
 
@@ -294,4 +299,18 @@ test("lock: the holder may save; stale locks allow takeover with audit trail; re
   releaseWriterLock("writer-B/other-session", lockOpts);
   // released → no lock → saves refused again (must re-acquire)
   assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, { ...lockOpts, writer: "writer-B/other-session" }), /no writer lock exists/);
+});
+
+test("conditional release preserves a contender's replacement claim", () => {
+  const { opts } = fixtures();
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock-release-race.json");
+  const lockUrl = new URL(lockPath);
+  acquireWriterLock("release-A", { ...opts, lockPath });
+  const contender = { schema: "skaists.writer-lock/1", writerId: "release-B", claimId: "fresh-B", acquiredAt: new Date().toISOString(), heartbeat: new Date().toISOString() };
+  assert.throws(() => releaseWriterLock("release-A", {
+    ...opts,
+    lockPath,
+    beforeConditionalRelease: () => writeFileSync(lockUrl, JSON.stringify(contender, null, 1)),
+  }), /lock identity changed before conditional release/);
+  assert.deepEqual(JSON.parse(readFileSync(lockUrl, "utf8")), contender, "release must restore and preserve the replacement claim");
 });
