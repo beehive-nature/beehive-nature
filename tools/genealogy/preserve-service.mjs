@@ -39,6 +39,19 @@ const CANDIDATE_TARS = [
   "C:/Users/travi/family-lineage/pkg3.tar",
 ];
 
+// ant 0.3.9 can quote both obligations, but `ant file upload --help` exposes
+// no storage-price or gas ceiling flags. A preflight quote therefore cannot
+// atomically limit the later payment. Keep the paid endpoint code-disabled;
+// enabling it requires a client/API that accepts both bounds on the payment
+// operation itself, plus a reviewed implementation that passes them.
+export const PAYMENT_CLIENT_CAPABILITY = Object.freeze({
+  uploadEnabled: false,
+  clientVersion: "ant 0.3.9",
+  atomicStorageCeiling: false,
+  atomicGasCeiling: false,
+  reason: "ant 0.3.9 file upload has no atomic storage or gas ceiling options",
+});
+
 // Pure, testable: read the canonical edition gate.
 export function editionGate(gatePath = DEFAULT_GATE) {
   if (!existsSync(gatePath)) return { status: "NO-EDITION-GATE", raw: null };
@@ -240,6 +253,7 @@ function startService() {
         keyInEnv: hasKey, // boolean only — never the key
         wallet,
         editionGate: { status: gate.status, approvedTarOnDisk: !!artifact, ceilings: gate.raw?.separatedCeilings ?? null },
+        paymentClientCapability: PAYMENT_CLIENT_CAPABILITY,
         candidates: CANDIDATE_TARS.map((p) => ({ path: p, exists: existsSync(p) })),
       });
     }
@@ -260,60 +274,11 @@ function startService() {
     }
 
     if (url === "/api/preserve/upload" && req.method === "POST") {
-      if (!process.env.SECRET_KEY) {
-        return json(res, 503, { error: "PRESERVATION SERVICE NOT STARTED",
-          hint: "The founder starts the service with SECRET_KEY in its environment — the key never enters chat, the repo, or a form. Start: SECRET_KEY=<key> node tools/genealogy/preserve-service.mjs" });
-      }
-      if (!approved) return json(res, 409, gateRefusal(gate));
-      const artifact = resolveApprovedTar(CANDIDATE_TARS, gate.raw.artifact.tarSha256);
-      if (!artifact) return json(res, 409, { error: "APPROVED ARTIFACT NOT ON DISK", expectedSha: gate.raw.artifact.tarSha256, action: "STOP — the exact approved bytes must be present before any spend" });
-      const frozen = snapshotApprovedTar(artifact, gate.raw.artifact.tarSha256);
-      try {
-        // Optional metadata is captured before the irreversible operation and
-        // cannot turn a successful paid upload into a 500 afterward.
-        let clientVersion;
-        try { clientVersion = await antVersion(); }
-        catch (versionError) {
-          return json(res, 409, { error: "UPLOAD REFUSED: ANT CLIENT VERSION UNAVAILABLE", reason: String(versionError.message || versionError).slice(0, 120) });
-        }
-        const versionCheck = validateClientVersion(clientVersion, gate.raw);
-        if (!versionCheck.ok)
-          return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: versionCheck.error });
-        // Fresh quote immediately before upload; both commands read the same
-        // frozen, independently hash-verified snapshot.
-        const q = await antCmd(["file", "cost", frozen.path]);
-        const check = validateQuoteAgainstGate(q, gate.raw);
-        if (!check.ok) return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: check.error, quote: q });
-        const finalApproval = revalidateApproval(DEFAULT_GATE, gate.raw, frozen.sha, q);
-        if (!finalApproval.ok)
-          return json(res, 409, { error: "UPLOAD REFUSED: APPROVAL CHANGED DURING REQUEST", reason: finalApproval.error });
-        // THE UPLOAD — the service holds the key in env; the UI never sees it.
-        const result = await antCmd(["file", "upload", frozen.path]);
-        const receipt = {
-          uploadedAt: new Date().toISOString(),
-          clientVersion,
-          result,
-          quote: q,
-          artifactSha256: frozen.sha,
-          editionGateStatusAtUpload: gate.status,
-          serviceNote: "uploaded from an immutable hash-verified snapshot through the edition-gated preservation service",
-        };
-        // Return the irreversible result even if the local progression file
-        // cannot be updated; the response names that banking failure.
-        try {
-          const receiptPath = receiptPathForArtifact(frozen.sha);
-          const existing = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, "utf8")) : null;
-          const editionReceipt = bankUploadReceipt(existing, receipt, finalApproval.gate.raw);
-          writeReceiptAtomic(receiptPath, editionReceipt);
-          receipt.receiptBank = "recorded in edition-specific receipt";
-          receipt.receiptPath = receiptPath;
-        } catch (bankError) {
-          receipt.receiptBank = "FAILED: " + String(bankError.message || bankError).slice(0, 120);
-        }
-        return json(res, 200, receipt);
-      } finally {
-        try { frozen.cleanup(); } catch { /* paid result and response must survive best-effort cleanup failure */ }
-      }
+      return json(res, 409, {
+        error: "UPLOAD DISABLED: PAYMENT CLIENT CANNOT ENFORCE APPROVED CEILINGS",
+        capability: PAYMENT_CLIENT_CAPABILITY,
+        action: "Use a reviewed client/API that applies both ANT and ETH maxima atomically to the payment operation, then rebuild this endpoint. A founder approval or SECRET_KEY cannot bypass this code-level refusal.",
+      });
     }
 
     return json(res, 404, { error: "not found" });

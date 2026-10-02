@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bankUploadReceipt, editionGate, isDirectExecution, receiptPathForArtifact, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateClientVersion, validateQuoteAgainstGate } from "./preserve-service.mjs";
+import { PAYMENT_CLIENT_CAPABILITY, bankUploadReceipt, editionGate, isDirectExecution, receiptPathForArtifact, revalidateApproval, resolveApprovedTar, snapshotApprovedTar, validateClientVersion, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
@@ -21,6 +21,16 @@ const GATE_SCHEMA = (status, tarSha) => ({
 });
 
 const GOOD_QUOTE = { storage_cost_atto: "1482927234375000000", estimated_gas_cost_wei: "150000000000000", chunk_count: 29 };
+
+test("ant 0.3.9 paid upload stays code-disabled because neither asset ceiling is atomic", () => {
+  assert.deepEqual(PAYMENT_CLIENT_CAPABILITY, {
+    uploadEnabled: false,
+    clientVersion: "ant 0.3.9",
+    atomicStorageCeiling: false,
+    atomicGasCeiling: false,
+    reason: "ant 0.3.9 file upload has no atomic storage or gas ceiling options",
+  });
+});
 
 test("editionGate: missing gate file = fail-closed (NO spend authority without a gate)", () => {
   const g = editionGate(join(tmpdir(), "definitely-absent-gate-" + Date.now() + ".json"));

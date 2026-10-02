@@ -56,6 +56,10 @@ const MANDATORY = [
   LINEAGE + "/sources/search-evidence.json",
   LINEAGE + "/sources/images-summary.json",
   LINEAGE + "/sources/relationship-audit.json",
+  // The deployed estate carries an exact artifact/quote receipt at this path.
+  // prepare projects it to a package-safe capability record so the archived
+  // blood surface remains truthful without creating a self-referential quote.
+  LINEAGE + "/zblood-storage-economics.json",
 ];
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
@@ -105,6 +109,49 @@ export function publicSourceRecords(buf, expected = {}) {
   }, null, 1) + "\n");
 }
 
+export function packageSafeStorageEconomics(buf) {
+  const source = JSON.parse(Buffer.isBuffer(buf) ? buf.toString("utf8") : String(buf));
+  const ant = source?.quotes?.autonomi;
+  const ceilings = ant?.ceilings;
+  if (source?.schema !== "zblood.storage-economics/1")
+    throw new Error("storage economics must use zblood.storage-economics/1");
+  if (!ceilings || typeof ceilings.storageMaxANT !== "number" || !Number.isFinite(ceilings.storageMaxANT) || ceilings.storageMaxANT < 0 ||
+      typeof ceilings.gasMaxETH !== "number" || !Number.isFinite(ceilings.gasMaxETH) || ceilings.gasMaxETH < 0)
+    throw new Error("storage economics must declare separate ANT and ETH ceilings");
+  return Buffer.from(JSON.stringify({
+    schema: "zblood.storage-economics-package/1",
+    law: "package-safe status only; a fresh exact-artifact quote is required before any approval or payment",
+    artifact: { name: "zBlood privacy-safe public preservation edition v2" },
+    quotes: {
+      autonomi: {
+        state: "quote intentionally omitted from the archive because embedding its own price would change the quoted artifact",
+        route: ant.route,
+        queriedAt: null,
+        raw: null,
+        computed: null,
+        ceilings: {
+          storageMaxANT: ceilings.storageMaxANT,
+          gasMaxETH: ceilings.gasMaxETH,
+          enforceableByClient: false,
+        },
+        qualifications: [
+          "fresh quote required for the exact restored artifact",
+          "payment disabled because the client cannot enforce both ceilings atomically",
+        ],
+      },
+    },
+    states: {
+      prepared: true,
+      approved: false,
+      quoted: false,
+      purchased: false,
+      uploaded: false,
+      retrieved: false,
+      hashVerifiedFromStorage: false,
+    },
+  }, null, 1) + "\n");
+}
+
 // DECLARED contents: the archive says what it contains — persons from the
 // corpus, evidence from the pack index + overlay references, fixtures' pages.
 function declaredContents() {
@@ -125,14 +172,31 @@ function declaredContents() {
 function verifyPackage(dir, manifestPath) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const problems = [];
-  let ok = 0;
+  let ok = 0, actualTotal = 0, declaredTotal = 0;
   for (const [f, meta] of Object.entries(manifest.files)) {
     const p = join(dir, f);
+    const declaredSizeValid = Number.isSafeInteger(meta.bytes) && meta.bytes >= 0;
+    if (declaredSizeValid) declaredTotal += meta.bytes;
+    else problems.push([f, "invalid declared byte size"]);
     if (!existsSync(p)) { problems.push([f, "missing"]); continue; }
-    if (sha256(readFileSync(p)) === meta.sha256) ok++; else problems.push([f, "hash mismatch"]);
+    const buf = readFileSync(p);
+    actualTotal += buf.length;
+    const sizeMatches = declaredSizeValid && buf.length === meta.bytes;
+    const hashMatches = sha256(buf) === meta.sha256;
+    if (!sizeMatches) problems.push([f, `byte size mismatch (declared ${meta.bytes}, actual ${buf.length})`]);
+    if (!hashMatches) problems.push([f, "hash mismatch"]);
+    if (sizeMatches && hashMatches) ok++;
+  }
+  if (!Number.isSafeInteger(manifest.totalBytes) || manifest.totalBytes < 0)
+    problems.push(["(manifest)", "invalid totalBytes"]);
+  else {
+    if (manifest.totalBytes !== declaredTotal)
+      problems.push(["(manifest)", `totalBytes does not equal declared file sizes (${manifest.totalBytes} != ${declaredTotal})`]);
+    if (manifest.totalBytes !== actualTotal)
+      problems.push(["(manifest)", `totalBytes does not equal package bytes (${manifest.totalBytes} != ${actualTotal})`]);
   }
   const digest = sha256(Buffer.from(JSON.stringify(manifest.files)));
-  return { manifest, problems, ok, digest };
+  return { manifest, problems, ok, digest, actualTotal, declaredTotal };
 }
 
 // path safety: reject absolute, traversal, and anything resolving outside root
@@ -189,7 +253,9 @@ if (cmd === "prepare") {
     const sourceBuf = readFileSync(join(REPO, f));
     const buf = f === LINEAGE + "/sources/records.json"
       ? publicSourceRecords(sourceBuf, { count: sourceManifest.uniqueRecords, ids: indexedRecordIds })
-      : sourceBuf;
+      : f === LINEAGE + "/zblood-storage-economics.json"
+        ? packageSafeStorageEconomics(sourceBuf)
+        : sourceBuf;
     mkdirSync(dirname(join(out, f)), { recursive: true });
     writeFileSync(join(out, f), buf);
     manifest.files[f] = { sha256: sha256(buf), bytes: buf.length };

@@ -1,16 +1,16 @@
 {
   "schema": "skaists.eternalization-edition/2",
-  "generated": "2026-10-02T05:24:12.000Z",
+  "generated": "2026-10-02T09:18:22.319Z",
   "supersedes": "the rejected privacy-unsafe pkg4 candidate and every earlier genealogy edition and quote",
   "edition": "privacy-safe genealogy archive v2 — merged relationship audit + 13,249-record public source projection + public image evidence (307 private-tier images represented only by counts, sha256 digests, and ark pointers)",
   "artifact": {
-    "preparedFrom": "main merge commit 974d7559b56adef07b941ae2e045d6376a747d66 (PR #296 merged; preserve.mjs prepare)",
-    "declaredFiles": 22107,
-    "unpackedDeclaredBytes": 86337400,
-    "manifestSha256": "f0ab56074fa07025ac19828b447dc18019661b9f67f62ac50522c071fdc6d337", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
-    "tarBytes": 106844160,
-    "tarSha256": "2538275c3f5f7a775769d5f2907cbba447a0df01c71f478a94b78d4e4059047f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced by two independent deterministic tar constructions",
-    "deterministicTarRecipe": "GNU tar --sort=name --mtime=2026-10-02T00:00:00Z --owner=0 --group=0 --numeric-owner --format=posix --pax-option=delete=atime,delete=ctime",
+    "preparedFrom": "corrective commit 5e73c8237d340e7e4c04c841fb40bb720958b103 (PUBLIC-CONSTANT source commit; exact source includes strict separated-ceiling validation, file and total byte verification, the private package snapshot, normalized-mode reproducible builder, package-safe status projection, immutable quote snapshot, and banked-status UI)",
+    "declaredFiles": 22108,
+    "unpackedDeclaredBytes": 86333642,
+    "manifestSha256": "d8f782183f75c16b455abcc0c25ce23c0f1b98e121643c39c979a12854d6c063", "hexLawNote": "PUBLIC-CONSTANT manifest digest; tools/genealogy/preserve.mjs::verifyPackage",
+    "tarBytes": 106833920,
+    "tarSha256": "34511423f0be81a1ca5004b514436e5c7792fe4391d91845b1235bedf773fab5", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+    "deterministicTarRecipe": "tools/genealogy/build-eternalization-tar.sh::build_eternalization_tar",
     "privacyAudit": {
       "projectedRecords": 13249,
       "evidenceDescriptors": 49342,
@@ -20,17 +20,17 @@
     "privateBytesExcluded": "the 307 record images remain PRIVATE-TIER and do not enter the bundle; the public bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },
   "quote": {
-    "captured": "2026-10-02T05:24:12Z (live ant 0.3.9, ant --json file cost on the exact pkg4.tar; keyless, no payment, no wallet touched)",
+    "captured": "2026-10-02T09:18:22.319Z (tools/genealogy/capture-ant-quote.mjs::captureAntQuote; live ant 0.3.9 on a private byte-verified snapshot of the exact pkg4.tar; keyless, no payment, no wallet touched)",
     "clientVersion": "ant 0.3.9",
-    "fileSize": 106844160,
+    "fileSize": 106833920,
     "chunkCount": 29,
-    "storageCostAtto": "2432547952148437500",
-    "storageCostAnt": "2.432547952148437500",
+    "storageCostAtto": "2825569772460937500",
+    "storageCostAnt": "2.825569772460937500",
     "estimatedGasCostWei": "150000000000000",
     "estimatedGasEth": "0.000150000000000000",
     "paymentMode": "single",
     "confidence": "priced_sample",
-    "networkNote": "the client logged several peer connection warnings, then exited 0 with the quoted JSON"
+    "networkNote": "the banked capture function hashed a private snapshot before and after the cost call, verified the returned file_size, and exited 0 with the quoted JSON"
   },
   "separatedCeilings": {
     "law": "two assets, never collapsed into one dollar figure",
@@ -38,15 +38,22 @@
     "gasMaxEth": 0.0002,
     "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change, client version change"
   },
+  "paymentClientCapability": {
+    "clientVersion": "ant 0.3.9",
+    "atomicStorageCeiling": false,
+    "atomicGasCeiling": false,
+    "uploadEnabled": false,
+    "evidence": "ant file upload --help exposes no storage-price or gas ceiling option"
+  },
   "spendingApprovalGate": {
-    "status": "AWAITING FOUNDER APPROVAL",
-    "rule": "NO payment or upload occurs until the founder approves this exact tar sha256, the 2.5 ANT storage ceiling, the 0.0002 ETH gas ceiling, and 29 chunks.",
-    "afterApproval": "Change only this status to APPROVED in a reviewed commit. The service re-hashes a frozen snapshot, re-quotes with ant 0.3.9, re-reads this gate immediately before upload, and refuses every mismatch or ceiling breach."
+    "status": "QUOTE EXCEEDS CEILING + PAYMENT CLIENT CAPABILITY REQUIRED",
+    "rule": "NO approval, payment, or upload occurs: the 2.825569772460937500 ANT quote exceeds the standing 2.5 ANT storage ceiling, and ant 0.3.9 cannot apply both the storage and 0.0002 ETH gas ceilings atomically to the paid operation.",
+    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, obtain a quote within founder-approved separated ceilings, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and bounds. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
   },
   "progression": [
-    "preserved: YES (privacy-safe public projection, local bytes verified 22107/22107)",
-    "approved: NOT YET (founder gesture)",
-    "quoted: YES (ant 0.3.9 live priced_sample)",
+    "preserved: YES (privacy-safe public projection, local bytes verified 22108/22108)",
+    "approved: BLOCKED (quote exceeds storage ceiling; payment client also lacks atomic ceilings)",
+    "quoted: YES (ant 0.3.9 live priced_sample; 2.825569772460937500 ANT > 2.5 ANT ceiling)",
     "spend-authorized: NOT YET",
     "purchased: NOT YET",
     "uploaded: NOT YET",

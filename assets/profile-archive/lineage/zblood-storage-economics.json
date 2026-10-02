@@ -2,29 +2,29 @@
  "schema": "zblood.storage-economics/1",
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
-  "name": "zBlood first approved public preservation snapshot",
-  "manifestSha256": "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", "hexLawNote": "PUBLIC-CONSTANT public chain data",
-  "preparedAt": "2026-09-16T22:35:14.111Z",
-  "approvedAt": "2026-09-16T22:36:15.152Z",
-  "approvedBy": "founder (bounded preservation repair acceptance)",
-  "approvedDestination": "bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)",
-  "bindingIntact": true,
-  "files": 20537,
-  "bytes": 62139972,
-  "GiB": 0.057872,
-  "personObjects": 10259,
+  "name": "zBlood privacy-safe public preservation edition v2",
+  "manifestSha256": "d8f782183f75c16b455abcc0c25ce23c0f1b98e121643c39c979a12854d6c063", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-02T09:10:38.128Z",
+  "approvedAt": null,
+  "approvedBy": null,
+  "approvedDestination": null,
+  "bindingIntact": false,
+  "files": 22108,
+  "bytes": 86333642,
+  "GiB": 0.080404,
+  "personObjects": 11041,
   "evidencePacks": 3,
-  "uploadForm": "tar (deterministic: --sort=name, fixed mtime 2026-09-16T22:35:14Z, numeric owner) — pkg3.tar, 80,998,400 bytes, sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b, built 2026-09-16T23:27:22Z; no zstd on this seat — UNCOMPRESSED tar is the measured upload object; a compressed form would be a new object requiring new quotes", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+  "uploadForm": "deterministic public tar; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
   "uploadObject": {
    "form": "tar",
-   "bytes": 80998400,
-   "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
-   "builtAt": "2026-09-16T23:27:22Z"
+   "bytes": 106833920,
+   "sha256": "34511423f0be81a1ca5004b514436e5c7792fe4391d91845b1235bedf773fab5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-02T09:17:35.399Z"
   }
  },
  "quotes": {
   "arweave": {
-   "state": "quoted",
+   "state": "historical superseded quote — not priced for edition v2",
    "route": "https://arweave.net/price/{bytes} (public Arweave price route)",
    "queriedAt": "2026-09-16T22:40Z",
    "raw": [
@@ -59,48 +59,35 @@
    "note": "QUOTE ONLY — no purchase, no upload, no transaction. Arweave is a one-time endowment: storage is prepaid at upload; retrievals are served by the network at no marginal cost to the uploader."
   },
   "autonomi": {
-   "state": "quoted (client-side estimate — display-only)",
-   "route": "ant 0.3.1 (released client installed on this seat) — ant --json file cost pkg3.tar; no payment, no wallet, no spending key, no node migration, no ant update run",
-   "queriedAt": "2026-09-16T23:28Z",
+   "state": "quoted above standing storage ceiling; payment disabled",
+   "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
+   "queriedAt": "2026-10-02T09:18:22.319Z",
    "raw": {
-    "file_size": 80998400,
-    "chunk_count": 23,
-    "storage_cost_atto": "3106827489257812500",
+    "file_size": 106833920,
+    "chunk_count": 29,
+    "storage_cost_atto": "2825569772460937500",
     "estimated_gas_cost_wei": "150000000000000",
     "payment_mode": "single",
     "confidence": "priced_sample"
    },
-   "rawPreservedAt": "C:/Users/travi/family-lineage/ant-cost-output.json (local; raw line also in this file)",
    "qualifications": [
-    "upstream marks the estimate display-only: true cost reconciles at payment time",
-    "confidence class priced_sample — a sampled estimate, not a finalized price",
-    "storage and gas are SEPARATE line items: 3.106827 ANT storage + 0.00015 ETH gas",
-    "gas denominated in ETH wei by the client"
-   ],
-   "tokenReferences": [
-    {
-     "pair": "ANT/USD",
-     "value": 0.03466683,
-     "source": "coingecko simple/price",
-     "queriedAt": "2026-09-16T22:40Z"
-    },
-    {
-     "pair": "ETH/USD",
-     "value": 2411.39,
-     "source": "coingecko simple/price",
-     "queriedAt": "2026-09-16T23:28:12Z"
-    }
+    "keyless live estimate from a private byte-verified snapshot; no payment, wallet mutation, or upload",
+    "2.825569772460937500 ANT exceeds the standing 2.5 ANT storage ceiling",
+    "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
+    "storage and gas are separate obligations"
    ],
    "computed": {
-    "storageANT": 3.106827,
-    "storageUSD": 0.1077,
-    "gasETH": 0.00015,
-    "gasUSD": 0.3617,
-    "totalUSD": 0.4694,
-    "perGiBTarBasis": 1.428,
-    "formula": "storage_atto/1e18 × ANT/USD ; gas_wei/1e18 × ETH/USD ; perGiB = storageUSD / (80998400/2^30)"
+    "storageANT": "2.825569772460937500",
+    "gasETH": "0.000150000000000000",
+    "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
-   "priorRESTClaimCorrected": "the earlier \"no public pricing REST exists\" claim is WITHDRAWN as unestablished — four probes from this seat failed, the .com endpoint remains unverified here, and the released client cost command was the direct route (now used successfully)"
+   "ceilings": {
+    "storageMaxANT": 2.5,
+    "gasMaxETH": 0.0002,
+    "enforceableByClient": false,
+    "storageWithinCeiling": false,
+    "gasWithinCeiling": true
+   }
   }
  },
  "economicsExperiment": {
@@ -150,7 +137,8 @@
    ],
    "actuallyTested": 0
   },
-  "billingAllowances": "CloudFront pay-as-you-go includes 1 TB/month transfer + 10M requests — spread vs concentrated months change the bill; B2 free egress up to 3x average monthly storage; R2 free egress with 10 GB-month free storage tier. Gross list-price AND after-allowance figures both shown, documented 2026-09-16, NOT measured."
+  "billingAllowances": "CloudFront pay-as-you-go includes 1 TB/month transfer + 10M requests — spread vs concentrated months change the bill; B2 free egress up to 3x average monthly storage; R2 free egress with 10 GB-month free storage tier. Gross list-price AND after-allowance figures both shown, documented 2026-09-16, NOT measured.",
+  "scope": "historical pkg3 scenarios retained for comparison; not measurements of edition v2"
  },
  "arSplitRouteAnalysis": {
   "question": "Is Arweave better used for the compact permanent provenance/root manifest while ANT carries the archive payload?",
@@ -162,8 +150,8 @@
  },
  "states": {
   "prepared": true,
-  "approved": "manifest 440b502a… + destination bound",
-  "quoted": "Arweave YES (live 22:40Z); Autonomi YES client-side estimate 23:28Z (display-only, priced_sample)",
+  "approved": false,
+  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; 2.825569772460937500 ANT exceeds 2.5 ANT ceiling; payment capability required",
   "purchased": false,
   "uploaded": false,
   "retrieved": false,
@@ -180,7 +168,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-09-16T23:35Z",
+ "generatedAt": "2026-10-02T09:18:22.319Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",
