@@ -461,6 +461,10 @@ body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-re
 .wlb-un a{display:inline-flex;align-items:center;min-height:44px;font-size:16px}
 .wlb-stat{display:block;font-size:16px;color:var(--dim)}
 body[data-wl-soul="true"] .wlb-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
+/* FOUNDER BUG 2026-10-01: when a .b soul is live, remove connect / create bzDiD
+   CTAs from the wallet shell — show the live identity only. */
+body[data-wl-soul="true"] .wl-create-bzdid,body[data-wl-soul="true"] .wl-connect-cta{display:none!important}
+body:not([data-wl-soul="true"]) .wl-soul-live{display:none!important}
 body[data-reg] #fund-sec .fund-coin{background:radial-gradient(circle at 35% 30%,#dbeafb,#6fa9e0 62%,#29628f);border-color:#29628f;animation:none}
 body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
 .wlb-stale{font-size:14px;color:var(--dim);margin-top:4px}
@@ -754,9 +758,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
   <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
-  <div class="law">Connect your soul (your .b name or account). New here?
+  <div class="law wl-create-bzdid">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
-  <div class="row">
+  <div class="law wl-soul-live" id="wl-soul-live">live as <b id="wl-soul-name" style="color:var(--leaf)">…</b> — your name and short addr ride the bottom rails bar.</div>
+  <div class="row wl-connect-cta">
     <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
@@ -3468,6 +3473,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     MPRK=id.masterPrk.slice();
     id.masterPrk.fill&&id.masterPrk.fill(0);
     deriveK1();
+    if(SOUL) publishSoul(SOUL);
     $('kc-soul-fp').textContent=(id.fingerprint&&id.fingerprint.words)||'—';
     $('kc-soul-pub').textContent='ed25519: '+Array.from(id.record.publicKey).slice(0,8).map(function(b){return b.toString(16).padStart(2,'0')}).join('')+'…';
     $('kc-soul-name').textContent=SOUL||'…';
@@ -4019,9 +4025,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }));
     return found;
   }
+  function publishSoul(name){
+    try{ if(name) localStorage.setItem('bnr_soul',name); else localStorage.removeItem('bnr_soul'); }catch(e){}
+    try{ document.dispatchEvent(new CustomEvent('bnr-soul',{detail:{soul:name||null}})); }catch(e2){}
+    var live=$('wl-soul-name'); if(live) live.textContent=name?name+'.b':'…';
+  }
   async function setSoul(name){
     SOUL=name;
-    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    publishSoul(SOUL);
     $('wq').value=SOUL;
     if(K1&&MPRK)deriveK1();
     readAll();
@@ -5676,7 +5687,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
     if(!v){ $('wstat').textContent='type your name first'; return; }
     SOUL=v;
-    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    publishSoul(SOUL);
     acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
     if(K1)deriveK1();
     seedContexts(); renderForge();
@@ -5717,7 +5728,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
