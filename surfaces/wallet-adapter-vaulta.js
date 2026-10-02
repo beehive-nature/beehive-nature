@@ -32,6 +32,15 @@ var J4 = {
 var MAIN_CHAIN_ID = 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906'; // PUBLIC-CONSTANT: Vaulta mainnet chain id
 var RPC_TIMEOUT = 9000;
 
+/* RPC account rows still use the historical EOS symbol on Vaulta. Keep the
+   numeric text exactly as returned; only the display unit belongs to this UI. */
+function displayA(raw) {
+  var s = String(raw || '').trim();
+  if (!s) return '0.0000 A';
+  if (/\s*EOS$/i.test(s)) return s.replace(/\s*EOS$/i, ' A');
+  return /\sA$/i.test(s) ? s : s + ' A';
+}
+
 // estate error codes (spec §6: a coded error object, never a bare string,
 // never partial success)
 var E = {
@@ -216,7 +225,7 @@ var METHODS = {
     if (!p || !p.address) throw bad('balance needs {address}');
     var d = await railPost(p.network === 'jungle4' ? 'jungle4' : 'mainnet', '/v1/chain/get_account', { account_name: p.address });
     if (!d || d.error) { var e = new Error('account ' + p.address + ' unreadable'); e.code = E.NOT_FOUND; throw e }
-    return { unit: 'A', quantity: d.core_liquid_balance || '0.0000 A' };
+    return { unit: 'A', quantity: displayA(d.core_liquid_balance) };
   },
   buildSend: async function (p) {
     p = p || {};

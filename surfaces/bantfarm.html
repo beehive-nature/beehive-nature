@@ -800,6 +800,12 @@ async function vpost(path,body){
   return null;
 }
 function kb(n){ return n>1048576?(n/1048576).toFixed(2)+' MB':(n/1024).toFixed(1)+' kB'; }
+function displayA(raw){
+  var s=String(raw||'').trim();
+  if(!s)return '0.0000 A';
+  if(/\s*EOS$/i.test(s))return s.replace(/\s*EOS$/i,' A');
+  return /\sA$/i.test(s)?s:s+' A';
+}
 function setBar(bar,txt,used,max,label){
   var pct=max>0?Math.min(100,100*used/max):0;
   $(bar).style.width=pct.toFixed(1)+'%';
@@ -820,7 +826,7 @@ async function readVaulta(acct){
   var b1=await vpost('/v1/chain/get_currency_balance',{code:'core.vaulta',account:acct,symbol:'A'});
   var b2=(b1&&b1.length)?null:await vpost('/v1/chain/get_currency_balance',{code:'eosio.token',account:acct});
   var bal=(b1&&b1.length)?b1[0]:((b2&&b2.length)?b2[0]:null);
-  if(bal){ $('vbal').textContent=bal; $('vbal').classList.remove('nm');
+  if(bal){ $('vbal').textContent=displayA(bal); $('vbal').classList.remove('nm');
     $('vbalsrc').textContent='get_currency_balance · '+((b1&&b1.length)?'core.vaulta':'eosio.token (legacy)'); }
   else { $('vbal').innerHTML='<span class="nm">no liquid balance row — absent, not zero</span>'; }
 }
