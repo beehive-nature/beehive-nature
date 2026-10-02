@@ -2,7 +2,7 @@
 // docs/design/eternal). Proves at 390 px: exactly one front per register; each has its own
 // dress, structure and gesture; all three carry the SAME facts (the line walked from the model,
 // the living guard, the storage receipt); and no gesture pays or claims "kept" on its own —
-// every keep-forever hands off to the page's preservation flow, and "kept" is drawn only when the
+// every keep-forever gesture opens the page's banked preservation status, and "kept" is drawn only when the
 // receipt says uploaded. Run: node --test e2e/blood-eternal.test.mjs
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -91,7 +91,7 @@ test('the same facts in all three: the line, the guard, the price, the receipt',
   assert.match(facts.cypherpunk.receipt, /paid\s*not yet/); assert.match(facts.cypherpunk.receipt, /address\s*not yet/);
 });
 
-test('bee: consent before the one action; the action hands off, it never pays', async () => {
+test('bee: consent before the one action; the action opens status, it never pays', async () => {
   const { ctx, p, errs } = await open('bee');
   await p.click('.et-b [data-go="keep"]');
   assert.equal(await p.$eval('#etBeePay', b => b.disabled), true, 'no pay before consent');
@@ -104,7 +104,7 @@ test('bee: consent before the one action; the action hands off, it never pays', 
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });
 
-test('raver: light all four, then the hold is the consent — a short hold does nothing', async () => {
+test('raver: light all four, then hold to view status — a short hold does nothing', async () => {
   const { ctx, p, errs } = await open('raver');
   await p.click('.ring[data-g="3"] .seg');
   assert.match(await p.textContent('#etRaverCard'), /ring 3 · great · 8 of 8 found/);
@@ -122,7 +122,7 @@ test('raver: light all four, then the hold is the consent — a short hold does 
   assert.equal(await p.$eval('#preservepanel', e => e.hidden), true);
   await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up(); await p.waitForTimeout(400);
   assert.equal(await p.evaluate(() => window.__eternal.raver.mode), 'asked');
-  assert.equal(await p.$eval('#preservepanel', e => e.hidden), false, 'the full hold opens the real flow');
+  assert.equal(await p.$eval('#preservepanel', e => e.hidden), false, 'the full hold opens the banked status');
   assert.notEqual(await p.textContent('#etRaverTitle'), 'kept', '"kept" is never claimed by a gesture');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });

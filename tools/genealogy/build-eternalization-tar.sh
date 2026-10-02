@@ -10,6 +10,7 @@ build_eternalization_tar() {
   local file_list="${output_tar}.files-$$-${RANDOM}"
   if ! python3 - "$source_dir" "$file_list" <<'PY'
 import json
+import hashlib
 import pathlib
 import sys
 
@@ -33,6 +34,19 @@ if missing or extras:
     if extras:
         print("FAILED: undeclared files present: " + ", ".join(extras[:10]), file=sys.stderr)
     raise SystemExit(1)
+bad = []
+for rel, meta in manifest.get("files", {}).items():
+    path = root / rel
+    size = path.stat().st_size
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    if size != meta.get("bytes") or digest.hexdigest() != meta.get("sha256"):
+        bad.append(rel)
+if bad:
+    print("FAILED: manifest content mismatch: " + ", ".join(sorted(bad)[:10]), file=sys.stderr)
+    raise SystemExit(1)
 with open(sys.argv[2], "wb") as out:
     for rel in sorted(expected):
         out.write(rel.encode("utf-8") + b"\0")
@@ -47,6 +61,7 @@ PY
     --owner=0 \
     --group=0 \
     --numeric-owner \
+    --mode='0644' \
     --format=posix \
     --pax-option=delete=atime,delete=ctime \
     -C "$source_dir" \

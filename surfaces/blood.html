@@ -363,8 +363,8 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
      one surface. ONE data layer below (the archive's own model + the storage receipt) drives all
      three, so the facts cannot drift; each register has its own layout, graphic, gesture and voice.
-     Nothing here pays: every "keep forever" hands off to the preservation flow further down
-     (#preservebtn), where the live quote and the wallet's own screen are the gate. -->
+     Nothing here pays: every "keep forever" opens the banked preservation status further down
+     (#preservebtn), where the current capability and quote gates are stated. -->
 <section id="eternal" aria-label="your family line">
 
   <!-- NEW BEE — a calm library: a list of the people you come from, one choice, plain words -->
@@ -397,14 +397,14 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
       </div>
       <label class="et-b-consent"><input type="checkbox" id="etBeeOk"> <span>i understand, and i choose this.</span></label>
       <div class="et-b-act">
-        <button type="button" class="et-b-primary" id="etBeePay" disabled>pay once and keep forever</button>
-        <p class="et-b-foot">until you pay, nothing is kept forever.</p>
+        <button type="button" class="et-b-primary" id="etBeePay" disabled>review eternalization status</button>
+        <p class="et-b-foot">this opens the banked status. payment remains unavailable.</p>
       </div>
     </div>
     <div class="et-b-step" data-step="asked" hidden>
       <div class="et-b-tick" aria-hidden="true">⬡</div>
-      <h2 class="et-b-h et-center">one step left.</h2>
-      <p class="et-b-lede et-center">a fresh price is being asked from the network below. nothing is paid until your wallet shows the amount and you confirm it there.</p>
+      <h2 class="et-b-h et-center">preservation status.</h2>
+      <p class="et-b-lede et-center">the banked archive quote and its stop conditions are open below. this action does not request a price, open a wallet, or begin payment.</p>
       <div class="et-b-act"><button type="button" class="et-b-link" data-go="line">back to your family line</button></div>
     </div>
     <div class="et-b-step" data-step="kept" hidden>
@@ -434,7 +434,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
       <div class="et-r-price"><b data-et="antShort">…</b> <span data-et="raverQuote">estimate</span></div>
       <div class="et-r-hold">
         <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etHoldProg"/></svg>
-        <button type="button" id="etHold" disabled aria-describedby="etSealHint"><b>hold</b><span>to seal</span></button>
+        <button type="button" id="etHold" disabled aria-describedby="etSealHint"><b>hold</b><span>to view status</span></button>
       </div>
       <p class="et-r-note" id="etSealHint">light all four</p>
       <button type="button" class="et-r-ghost" data-go="line">back to the line</button>
@@ -443,7 +443,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
       <div class="et-r-big" id="etRaverBig">kept</div>
       <p class="et-r-note" id="etKeptNote"></p>
     </div>
-    <button type="button" class="et-r-pill" id="etRaverGo">seal the line</button>
+    <button type="button" class="et-r-pill" id="etRaverGo">review eternalization</button>
   </div>
 
   <!-- CYPHERPUNK — the instrument: the manifest, the pipeline, the receipt, all at once, verifiable -->
@@ -454,7 +454,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <table class="et-c-tab"><thead><tr><th>gen</th><th>rel</th><th>slots</th><th>state</th></tr></thead><tbody id="etManifest"></tbody></table>
     <h3 class="et-c-h">seal pipeline · public path</h3>
     <ol class="et-c-pipe" id="etPipe"></ol>
-    <button type="button" class="et-c-primary" id="etCySign">sign consent + settle</button>
+    <button type="button" class="et-c-primary" id="etCySign">view eternalization status</button>
     <h3 class="et-c-h">receipt</h3>
     <table class="et-c-kv" id="etReceipt"></table>
     <div class="et-c-verify">
@@ -521,7 +521,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer">cancel (voids this plan)</button>
   </div>
   <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:max(11px,var(--fmin,12px))">
-    <span style="color:var(--gold)">⬡</span> uploading to the Autonomi network… <span id="pv-upload-note" style="color:var(--faint)">(the service handles the transaction; no terminal, no manual steps)</span>
+    <span style="color:var(--gold)">⬡</span> payment unavailable <span id="pv-upload-note" style="color:var(--faint)">(the quote must fit and the client must enforce both ceilings)</span>
   </div>
   <div id="preserve-receipt" hidden style="margin-top:12px">
     <div style="color:var(--verified);font-size:max(12px,var(--fmin,12px));font-weight:600">⬡ your family archive survived the machine</div>
@@ -784,19 +784,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     document.getElementById("preservepanel").hidden = true;
   });
   document.getElementById("pv-approve").addEventListener("click", function() {
-    if (!PV.plan) return;
     pvShow("preserve-progress");
-    document.getElementById("pv-upload-note").innerHTML =
-      "the wallet review is the next step — the device screen is the gate.<br>" +
-      "<span style='color:var(--faint)'>this is where the Trezor confirms: " +
-      (parseInt(PV.plan.total_amount_atto)/1e18).toFixed(6) + " ANT for 24 storage chunks. " +
-      "The bridge holds the archive; the wallet holds the money; the device holds the signature.</span>";
-    // TODO: wire Trezor Connect here (the bantfarm pattern)
-    // For now, honestly show what comes next
-    setTimeout(function() {
-      document.getElementById("pv-upload-note").innerHTML +=
-        "<br><br><b style='color:var(--gold)'>→ wallet integration is the active build</b> — the payment plan is real, persisted, and downloadable as an invoice; the device signing is the remaining wire";
-    }, 2000);
+    document.getElementById("pv-upload-note").textContent =
+      "no wallet review or upload plan exists while the quote exceeds its ceiling and the client lacks atomic bounds.";
   });
   function renderEconCard(){
     fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){
@@ -1615,8 +1605,8 @@ try {
 /* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the
    archive's own model (BloodComb.S, rooted at the founder) and the committed storage receipt
    (zblood-storage-economics.json). "kept" is drawn ONLY when the receipt says uploaded; every
-   keep-forever gesture opens the preservation flow below, where the live quote and the wallet's
-   own screen are the gate. Nothing on this front pays, signs or uploads. */
+   keep-forever gesture opens the banked preservation status below. Nothing on this front requests
+   a quote, opens a wallet, pays, signs or uploads. */
 (function(){
   var $=function(id){return document.getElementById(id);};
   var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
@@ -1703,18 +1693,18 @@ try {
   function raver(){
     var root=document.querySelector('#eternal .et-r'); if(!root) return;
     var seal=R.mode==='seal', kept=R.mode==='kept', asked=R.mode==='asked';
-    $('etRaverTitle').textContent=kept?T('et.r.kept','kept'):seal?T('et.r.seal','seal it'):asked?T('et.r.asked','asked'):T('et.r.line','your line');
-    $('etRaverHint').textContent=kept?T('et.r.hKept','colour = kept'):seal?T('et.r.hSeal','light all four'):asked?T('et.r.hAsked','the network step is open below'):D.gens.slice(0,5).length+' '+T('et.r.hLine','rings · tap a ring · tap you to seal');
+    $('etRaverTitle').textContent=kept?T('et.r.kept','kept'):seal?T('et.r.seal','review it'):asked?'status':T('et.r.line','your line');
+    $('etRaverHint').textContent=kept?T('et.r.hKept','colour = kept'):seal?T('et.r.hSeal','light all four'):asked?'the banked status is open below':D.gens.slice(0,5).length+' '+T('et.r.hLine','rings · tap a ring · tap you to review');
     root.querySelector('.et-r-seal').hidden=!seal;
     root.querySelector('.et-r-kept').hidden=!kept;
     $('etRaverCard').hidden=seal;
     $('etLegend').hidden=seal;
     var go=$('etRaverGo'); go.hidden=seal||kept;
-    go.textContent=asked?T('et.r.back','back to the line'):T('et.r.go','seal the line');
+    go.textContent=asked?T('et.r.back','back to the line'):'review eternalization';
     var n=[1,2,3,4].filter(function(k){return R.lit[k];}).length;
     document.querySelectorAll('#etTiles button').forEach(function(b){b.setAttribute('aria-pressed',R.lit[b.getAttribute('data-t')]?'true':'false');});
     $('etHold').disabled=n<4;
-    $('etSealHint').textContent=n<4?n+' '+T('et.r.lit','of 4 lit'):T('et.r.consent','one payment · your hold is your consent');
+    $('etSealHint').textContent=n<4?n+' '+T('et.r.lit','of 4 lit'):'hold to open the banked status';
     mandala(); raverCard();
   }
   var hold={t0:0,raf:0};
@@ -1761,10 +1751,10 @@ try {
       ['retrieved',yn(st.retrieved)],
       ['verified',yn(st.hashVerifiedFromStorage,'hash-verified from storage')]
     ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
-    var sign=$('etCySign'); sign.textContent=st.uploaded?'kept · receipt above':(D.asked?'open · the network step is below':'sign consent + settle'); sign.disabled=!!st.uploaded;
+    var sign=$('etCySign'); sign.textContent=st.uploaded?'kept · receipt above':(D.asked?'status open below':'view eternalization status'); sign.disabled=!!st.uploaded;
   }
 
-  /* ── the one hand-off: the preservation flow below owns every real step ── */
+  /* ── the one hand-off: the banked preservation status below owns the truth ── */
   function preserve(from){
     D.asked=true;
     if(from==='bee')beeStep('asked');
