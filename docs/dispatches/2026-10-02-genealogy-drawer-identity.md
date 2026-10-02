@@ -27,3 +27,7 @@ Browser verified fan toggle selects atlas data-view fractal; Latvian-tree toggle
 Added generation navigation over the whole published graph using shortest parent-path BFS, independent of the small visible tree window and 42-generation highlighted spine. Generation 44 has 36 published people; maximum shortest recorded distance is 143. These are graph coverage counts, not proof ratings. Selector deliberately waits for a named choice and displays the connecting path with per-person research available. Route strip remains visible in Tree-of-Life mode.
 
 Browser verification: generation 44 reports 36; selecting Berthe de Burgondie yields data-route-len 44 and the Latvian tree focuses on Berthe. Preview preserved. No ancestry invented or records changed.
+
+## Live release and homepage wiring
+
+Founder approved publication. Replaced the homepage genealogy placeholder with a same-tab link to the registered blood surface, updated the registry title/description, regenerated the atlas homepage, and revised its old placeholder test contract. Existing review registration already contains blood.html; no surface added or moved. Focused release check: node --test e2e/atlas.test.mjs e2e/blood-tree-of-life.test.mjs — 16/16 passed.

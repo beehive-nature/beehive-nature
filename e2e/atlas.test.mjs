@@ -121,19 +121,18 @@ test('the tree of life carries exactly the registry — one cell per counted sur
   assert.ok(caption.includes('<b>'+estate.counts.surfaces+'</b>'));
   for(const [org,n] of Object.entries(estate.counts.byOrg)) assert.ok(caption.includes(escape(org)+' <b>'+n+'</b>'),org+' is named in words beside its colour');
 });
-test('the keep rows promise only what their destinations say, and bGENEaLOGy stays a plain row until it is registered', () => {
+test('the keep rows include a working registered genealogy destination', () => {
   const corpus=JSON.parse(read('surfaces/lang-corpus.json')).strings;
   const keeps=[...html.matchAll(/<a class="keep-link [^>]*>[\s\S]*?<\/a>/g)].map(m=>m[0]);
-  assert.equal(keeps.length,2);
+  assert.equal(keeps.length,3);
   for(const [i,[id,action,help]] of [['bdata','bd.h1','bd.lead'],['watch','watch.title','watch.beeLead']].entries()){
     assert.ok(keeps[i].includes('href="'+estate.surfaces.find(s=>s.id===id).path.replace(/^surfaces\//,'')+'"'),id);
     for(const key of [action,help]) assert.ok(keeps[i].includes('data-i18n="'+key+'">'+escape(corpus[key].en)+'<'),id+' speaks with '+key);
   }
-  const plain=html.match(/<div class="keep-plain line">[\s\S]*?<\/div><\/div>/)?.[0]||'';
+  const plain=keeps[2];
   assert.ok(plain.includes('<strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong>'),'the founder casing, exactly');
-  assert.doesNotMatch(plain,/<a[\s>]|<button\b|disabled/,'not yet open is prose with its reason — never a dead link or a disabled button');
-  assert.ok(plain.includes('data-i18n="hub.keep.line.state"'));
-  assert.equal(estate.surfaces.some(s=>/genealogy/i.test(s.id+s.path)),false,'once registered, the builder refuses this row');
+  assert.ok(plain.includes('href="'+estate.surfaces.find(s=>s.id==='blood').path.replace(/^surfaces\//,'')+'"'));
+  assert.doesNotMatch(plain,/keep-state|disabled/);
   const langs=['en',...JSON.parse(read('surfaces/lang-corpus.json'))._meta.langs];
   for(const key of Object.keys(corpus).filter(k=>k.startsWith('hub.keep.'))) for(const l of langs) assert.ok(corpus[key][l]?.trim(),key+'/'+l);
 });
