@@ -16,3 +16,5 @@ This repair invalidates the first pkg4 candidate and closes the later PR #296 re
 - Direct service execution compares normalized filesystem paths through `fileURLToPath` and `resolve`, so the documented command starts on POSIX as well as Windows.
 
 Verification at the final repair head: focused walker/preservation suites 42/42; full `node --test tools/genealogy/*.test.mjs` 454/454; `git diff --check` clean.
+
+Live read-only wire proof on this seat: Node fetched the exact guard-derived URL for already resolved queue ARK `33S7-9R48-CFZ`; FamilySearch returned HTTP 200 with the bare-APID response shape, and the normalized response exactly matched the APID already banked in the byte-audited manifest. No manifest write and no credential were involved.
