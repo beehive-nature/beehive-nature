@@ -1,19 +1,19 @@
 {
   "schema": "skaists.public-edition-quote-receipt/1",
-  "edition": "v3 / pkg6",
-  "preparedAt": "2026-10-02T22:28:35.780Z",
-  "manifestSha256": "3c97337a2cc7650234bddc6f33a9c54a2bcea2b40cc49a6d22259f459c60c85e", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
+  "edition": "v3 / pkg7",
+  "preparedAt": "2026-10-02T22:48:09.109Z",
+  "manifestSha256": "cde5d07c9a0486ede86b535bc902179694dd04433567287fd81dbf3a49af31de", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
   "files": 22153,
-  "contentBytes": 87261925,
+  "contentBytes": 87261920,
   "tar": {
-    "tar": "/mnt/c/Users/travi/family-lineage/pkg6.tar",
+    "tar": "/mnt/c/Users/travi/family-lineage/pkg7.tar",
     "bytes": 107796480,
-    "sha256": "da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
+    "sha256": "5b46c228ac2d5fb39859bb09be110df43c0ee046f61aa9d210450cba2c09b309", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
     "reproduced": true
   },
   "ant": {
     "schema": "skaists.ant-quote-capture/1",
-    "capturedAt": "2026-10-02T22:35:23.498Z",
+    "capturedAt": "2026-10-02T22:49:09.984Z",
     "command": [
       "ant",
       "--json",
@@ -23,9 +23,9 @@
     ],
     "clientVersion": "ant 0.3.9",
     "artifact": {
-      "path": "C:\\Users\\travi\\family-lineage\\pkg6.tar",
+      "path": "C:\\Users\\travi\\family-lineage\\pkg7.tar",
       "bytes": 107796480,
-      "sha256": "da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
+      "sha256": "5b46c228ac2d5fb39859bb09be110df43c0ee046f61aa9d210450cba2c09b309", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
     },
     "quote": {
       "file_size": 107796480,
@@ -39,11 +39,11 @@
   },
   "ar": {
     "schema": "skaists.ar-quote-capture/1",
-    "capturedAt": "2026-10-02T22:35:05.019Z",
+    "capturedAt": "2026-10-02T22:48:51.033Z",
     "source": "surfaces/arweave.js::fee",
     "artifact": {
       "bytes": 107796480,
-      "sha256": "da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
+      "sha256": "5b46c228ac2d5fb39859bb09be110df43c0ee046f61aa9d210450cba2c09b309", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
     },
     "winston": "1350464003759",
     "requests": [

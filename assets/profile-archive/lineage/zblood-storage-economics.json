@@ -3,14 +3,14 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood interactive public preservation edition v3",
-  "manifestSha256": "3c97337a2cc7650234bddc6f33a9c54a2bcea2b40cc49a6d22259f459c60c85e", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-02T22:28:35.780Z",
+  "manifestSha256": "cde5d07c9a0486ede86b535bc902179694dd04433567287fd81dbf3a49af31de", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-02T22:48:09.109Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": false,
   "files": 22153,
-  "bytes": 87261925,
+  "bytes": 87261920,
   "GiB": 0.081269,
   "personObjects": 11041,
   "evidencePacks": 3,
@@ -18,15 +18,15 @@
   "uploadObject": {
    "form": "tar",
    "bytes": 107796480,
-   "sha256": "da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-02T22:34:39.025Z"
+   "sha256": "5b46c228ac2d5fb39859bb09be110df43c0ee046f61aa9d210450cba2c09b309", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-02T22:48:16.373Z"
   }
  },
  "quotes": {
   "arweave": {
    "state": "fresh size-based quote only; no transaction",
    "route": "surfaces/arweave.js::fee via https://arweave.net/price/{bytes}",
-   "queriedAt": "2026-10-02T22:35:05.019Z",
+   "queriedAt": "2026-10-02T22:48:51.033Z",
    "raw": [
     {
      "bytes": 107796480,
@@ -42,7 +42,7 @@
   "autonomi": {
    "state": "quoted; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-02T22:35:23.498Z",
+   "queriedAt": "2026-10-02T22:49:09.984Z",
    "raw": {
     "file_size": 107796480,
     "chunk_count": 29,
@@ -150,7 +150,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-02T22:35:23.498Z",
+ "generatedAt": "2026-10-02T22:49:09.984Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",
