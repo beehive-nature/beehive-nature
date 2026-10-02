@@ -363,6 +363,13 @@ body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
 .wlb-card{background:var(--panel);border-radius:20px;padding:22px 20px;box-shadow:0 0 0 1px var(--line2)}
 .wlb-cap{font-size:14px;color:var(--dim)}
 .wlb-fig{font:700 clamp(38px,11vw,56px)/1.1 var(--reg-font-title);color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wlb-total,.va-total{display:flex;align-items:baseline;gap:10px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:start;cursor:pointer}
+.wlb-total{min-height:0!important}.wlb-total .wlb-fig{flex:1}.wlb-total-caret,.va-total-caret{font:700 24px/1 var(--reg-font-body);color:var(--reg-link);transition:transform .18s ease}
+[data-vaulta-toggle][aria-expanded="true"] .wlb-total-caret,[data-vaulta-toggle][aria-expanded="true"] .va-total-caret{transform:rotate(180deg)}
+.wlb-rollup-hint{font-size:14px;color:var(--dim);margin-top:8px}.va-breakdown{margin-top:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--well)}
+.va-breakdown-head{font-size:14px;color:var(--dim);margin-bottom:6px}.va-rollup-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line2)}
+.va-rollup-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.va-rollup-label b{font-size:14px}.va-rollup-label small{font-size:14px;color:var(--dim);overflow-wrap:anywhere}.va-rollup-row strong{font-size:15px;white-space:nowrap}.va-rollup-empty{font-size:14px;color:var(--dim)}
+.va-total{min-height:0!important}.va-total .cb{flex:1;text-align:start}
 .wlb-un{font-size:16px;color:var(--dim);margin-top:6px;line-height:1.6}
 .wlb-un b{font:700 22px/1.3 var(--reg-font-title);color:var(--ink);display:block}
 #wl-bee .wlb-q{font:700 22px/1.3 var(--reg-font-title);letter-spacing:-.01em;margin:30px 4px 12px;display:block}
@@ -645,7 +652,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-bee" data-reg="bee">
   <div class="wlb-card" data-wl-card data-wl-stat="v-stat">
     <div class="wlb-cap" data-i18n="wl.bee.fig">on Vaulta, your home chain</div>
-    <div class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></div>
+    <button type="button" class="wlb-total" data-vaulta-toggle aria-expanded="false" aria-controls="wlb-vaulta-breakdown">
+      <span class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wlb-total-caret" aria-hidden="true">⌄</span>
+    </button>
+    <div class="wlb-rollup-hint">tap the total for adapter · chain · account</div>
+    <div class="va-breakdown" id="wlb-vaulta-breakdown" data-vaulta-breakdown hidden>
+      <div class="va-breakdown-head">A held on Vaulta</div>
+      <div data-vaulta-rows></div>
+    </div>
     <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" class="wlb-connect" data-i18n="wl.bee.connect">connect your name or account to read it</a><span class="wlb-stat" data-wl-src="v-stat"></span></div>
     <div class="wlb-stale wl-stale" data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</div>
   </div>
@@ -1096,12 +1110,18 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
-      <div class="cb" id="v-bal" data-hero-number></div>
+      <button type="button" class="va-total" data-vaulta-toggle aria-expanded="false" aria-controls="vaulta-breakdown">
+        <span class="cb" id="v-bal" data-hero-number></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      </button>
+      <div class="va-breakdown" id="vaulta-breakdown" data-vaulta-breakdown hidden>
+        <div class="va-breakdown-head">A held on Vaulta</div>
+        <div data-vaulta-rows></div>
+      </div>
       <div class="cd" id="v-info">core balance + RAM + resources</div>
       <div class="stat" id="v-stat">waiting…</div>
     </div>
     <div class="chain" id="ch-hive">
-      <div class="cn">🐝 Hive <span class="badge">HIVE/HP</span></div>
+      <div class="cn">🐝 Hive <span class="badge">HB/Hive</span></div>
       <div class="cb" id="h-bal"></div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
       <div class="stat" id="h-stat">waiting…</div>
@@ -4228,7 +4248,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('ac-cost').textContent=p!==null?('RAM: ≈'+(p*bytes).toFixed(4)+' A for '+bytes+' B (live rammarket — draws from liquid)'):'RAM cost: rammarket unreadable';
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
-    var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)||'—';
+    var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):'—';
     $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+cpuAvail+'μs · '+
       (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
       'liquid '+liquid+' covers the RAM purchase';
@@ -5290,7 +5310,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   function svRefresh(){
-    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)||null;
+    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):null;
     $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'<a href="#bal-sec">not read yet</a>')+'</b>'+
       (BRIDGED?' · bridge ✓ (K1 signs)':!K1?' · <b style="color:var(--amber)">not connected — <a href="#kc-sec">your keychain</a> comes first</b>':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
   }
@@ -5679,11 +5699,47 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
 
   /* ── balances (keyless, unchanged lane) ───────────────────── */
+  var VAULTA_BALANCES=[];
+  function assetNumber(raw){
+    var m=String(raw||'').match(/-?\d+(?:\.\d+)?/);
+    return m?parseFloat(m[0]):0;
+  }
+  function aAmount(n){ return (isFinite(n)?n:0).toFixed(4)+' A'; }
+  function renderVaultaRollups(){
+    var total=VAULTA_BALANCES.reduce(function(sum,row){return sum+row.amount},0);
+    var v=$('v-bal'); if(v) v.textContent=aAmount(total);
+    document.querySelectorAll('[data-vaulta-rows]').forEach(function(list){
+      list.textContent='';
+      if(!VAULTA_BALANCES.length){
+        var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent='read an account to see its A row'; list.appendChild(empty); return;
+      }
+      VAULTA_BALANCES.forEach(function(row){
+        var item=document.createElement('div'); item.className='va-rollup-row';
+        var label=document.createElement('span'); label.className='va-rollup-label';
+        var source=document.createElement('b'); source.textContent=row.adapter; label.appendChild(source);
+        var path=document.createElement('small'); path.textContent=row.chain+' · '+row.account; label.appendChild(path);
+        var value=document.createElement('strong'); value.textContent=aAmount(row.amount);
+        item.appendChild(label); item.appendChild(value); list.appendChild(item);
+      });
+    });
+  }
+  function upsertVaultaBalance(acct,raw){
+    var next={adapter:'Vaulta adapter',chain:'Vaulta',account:acct,amount:assetNumber(raw)};
+    var at=VAULTA_BALANCES.findIndex(function(row){return row.account===acct});
+    if(at<0)VAULTA_BALANCES.push(next); else VAULTA_BALANCES[at]=next;
+    renderVaultaRollups();
+  }
+  document.querySelectorAll('[data-vaulta-toggle]').forEach(function(toggle){
+    toggle.addEventListener('click',function(){
+      var id=toggle.getAttribute('aria-controls'), panel=$(id), open=toggle.getAttribute('aria-expanded')==='true';
+      toggle.setAttribute('aria-expanded',String(!open)); if(panel)panel.hidden=open;
+    });
+  });
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
     if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; wlRead($('v-stat'),false); return; }
     LAST_ACC=d;
-    $('v-bal').textContent=d.core_liquid_balance||'0.0000';
+    upsertVaultaBalance(acct,d.core_liquid_balance);
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
     $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
@@ -5699,7 +5755,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(d.result&&d.result[0]){
         var a=d.result[0];
         var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
-        $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HIVE';
+        $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HB/Hive';
         $('h-info').textContent=hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
         $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
         $('ch-hive').classList.add('connected');
