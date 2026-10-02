@@ -2,82 +2,63 @@
  "schema": "zblood.storage-economics/1",
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
-  "name": "zBlood privacy-safe public preservation edition v2",
-  "manifestSha256": "d8f782183f75c16b455abcc0c25ce23c0f1b98e121643c39c979a12854d6c063", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-02T09:10:38.128Z",
+  "name": "zBlood interactive public preservation edition v3",
+  "manifestSha256": "3c97337a2cc7650234bddc6f33a9c54a2bcea2b40cc49a6d22259f459c60c85e", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-02T22:28:35.780Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": false,
-  "files": 22108,
-  "bytes": 86333642,
-  "GiB": 0.080404,
+  "files": 22153,
+  "bytes": 87261925,
+  "GiB": 0.081269,
   "personObjects": 11041,
   "evidencePacks": 3,
   "uploadForm": "deterministic public tar; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
   "uploadObject": {
    "form": "tar",
-   "bytes": 106833920,
-   "sha256": "34511423f0be81a1ca5004b514436e5c7792fe4391d91845b1235bedf773fab5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-02T09:17:35.399Z"
+   "bytes": 107796480,
+   "sha256": "da1b983d43fef73835dbd3cd6e8c74176420728a2f86258b501b1db4ab7d23a5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-02T22:34:39.025Z"
   }
  },
  "quotes": {
   "arweave": {
-   "state": "historical superseded quote — not priced for edition v2",
-   "route": "https://arweave.net/price/{bytes} (public Arweave price route)",
-   "queriedAt": "2026-09-16T22:40Z",
+   "state": "fresh size-based quote only; no transaction",
+   "route": "surfaces/arweave.js::fee via https://arweave.net/price/{bytes}",
+   "queriedAt": "2026-10-02T22:35:05.019Z",
    "raw": [
     {
-     "bytes": 62139972,
-     "winston": 809313015684
-    },
-    {
-     "bytes": 621399720,
-     "winston": 8062152722158,
-     "note": "10x sanity point — near-linear, quote consistent",
-     "queriedAt": "2026-09-16T22:41Z"
-    },
-    {
-     "bytes": 3614894,
-     "winston": 37444936280,
-     "note": "manifest-only (the compact provenance/root object for the split-route analysis)"
+     "bytes": 107796480,
+     "winston": "1350464003759"
     }
    ],
-   "tokenReference": {
-    "pair": "AR/USD",
-    "value": 2.51,
-    "source": "coingecko simple/price",
-    "queriedAt": "2026-09-16T22:40Z"
-   },
    "computed": {
-    "fullArchiveUSD": 2.0314,
-    "fullArchiveAR": 0.8093,
-    "manifestOnlyUSD": 0.094,
-    "formula": "winston / 1e12 × AR/USD"
+    "fullArchiveAR": "1.350464003759",
+    "formula": "winston / 1e12"
    },
-   "note": "QUOTE ONLY — no purchase, no upload, no transaction. Arweave is a one-time endowment: storage is prepaid at upload; retrievals are served by the network at no marginal cost to the uploader."
+   "note": "public size-based fee estimate only; no wallet, signing or upload"
   },
   "autonomi": {
-   "state": "quoted above standing storage ceiling; payment disabled",
+   "state": "quoted; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-02T09:18:22.319Z",
+   "queriedAt": "2026-10-02T22:35:23.498Z",
    "raw": {
-    "file_size": 106833920,
+    "file_size": 107796480,
     "chunk_count": 29,
-    "storage_cost_atto": "2825569772460937500",
+    "storage_cost_atto": "3645898464843750000",
     "estimated_gas_cost_wei": "150000000000000",
     "payment_mode": "single",
     "confidence": "priced_sample"
    },
    "qualifications": [
-    "keyless live estimate from a private byte-verified snapshot; no payment, wallet mutation, or upload",
-    "2.825569772460937500 ANT exceeds the standing 2.5 ANT storage ceiling",
+    "keyless quote on a private byte-verified snapshot; no wallet access, payment, or upload",
+    "3.645898464843750000 ANT exceeds the standing 2.5 ANT storage ceiling",
     "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
     "storage and gas are separate obligations"
    ],
    "computed": {
-    "storageANT": "2.825569772460937500",
+    "storageANT": "3.645898464843750000",
     "gasETH": "0.000150000000000000",
     "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
@@ -91,7 +72,7 @@
   }
  },
  "economicsExperiment": {
-  "question": "Does Beehive Nature marginal storage/egress obligation for this already-purchased immutable archive remain effectively unchanged as independent retrieval count rises?",
+  "question": "Historical model: how would uploader storage/egress obligations vary with retrieval count after a future purchase?",
   "headline": "STRUCTURALLY YES for ANT/AR on the uploader side (one-time prepaid; network serves retrievals) — but TWO PROOFS are required and NEITHER is done: (1) archive retrieved+restored from storage, (2) family experience delivered WITHOUT our box carrying the payload. Until (2), our estate-operated serving (box/relay) scales egress with every view.",
   "scenarios": {
    "fullArchiveRetrievals": {
@@ -138,7 +119,7 @@
    "actuallyTested": 0
   },
   "billingAllowances": "CloudFront pay-as-you-go includes 1 TB/month transfer + 10M requests — spread vs concentrated months change the bill; B2 free egress up to 3x average monthly storage; R2 free egress with 10 GB-month free storage tier. Gross list-price AND after-allowance figures both shown, documented 2026-09-16, NOT measured.",
-  "scope": "historical pkg3 scenarios retained for comparison; not measurements of edition v2"
+  "scope": "Historical pkg3 scenarios only; neither measurements nor quotes for edition v3. No archive has been purchased or uploaded."
  },
  "arSplitRouteAnalysis": {
   "question": "Is Arweave better used for the compact permanent provenance/root manifest while ANT carries the archive payload?",
@@ -146,12 +127,13 @@
    "manifestOnlyARUSD": 0.094,
    "fullArchiveARUSD": 2.0314
   },
-  "finding": "BOTH are within pocket change at this archive's size; the split becomes meaningful at scale (a 60 GB archive would cost ~$1,966 on AR vs a ~$0.09 manifest root + ANT payload at its own rate). Recommendation: quote BOTH routes at upload time and decide with live numbers; AR's manifest-root pattern (permanent, tiny, address-stable) pairs naturally with ANT's payload economics — but no duplication happens until both live quotes exist and the founder rules."
+  "finding": "BOTH are within pocket change at this archive's size; the split becomes meaningful at scale (a 60 GB archive would cost ~$1,966 on AR vs a ~$0.09 manifest root + ANT payload at its own rate). Recommendation: quote BOTH routes at upload time and decide with live numbers; AR's manifest-root pattern (permanent, tiny, address-stable) pairs naturally with ANT's payload economics — but no duplication happens until both live quotes exist and the founder rules.",
+  "scope": "Historical pkg3 size/prices and hypothetical scaling only; superseded for the current edition by the exact-artifact quotes above."
  },
  "states": {
   "prepared": true,
   "approved": false,
-  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; 2.825569772460937500 ANT exceeds 2.5 ANT ceiling; payment capability required",
+  "quoted": "ANT and AR estimates captured for edition v3; no approval, purchase or upload",
   "purchased": false,
   "uploaded": false,
   "retrieved": false,
@@ -168,7 +150,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-02T09:18:22.319Z",
+ "generatedAt": "2026-10-02T22:35:23.498Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",

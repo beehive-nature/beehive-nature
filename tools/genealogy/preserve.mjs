@@ -22,6 +22,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join, dirname, isAbsolute, resolve, sep } from "node:path";
+import { checkRuntimeDependencies } from "./preservation-runtime.mjs";
 
 // test override: adversarial suites run this tool against synthetic fixture
 // estates via BNR_PRESERVE_ROOT (never the real archive)
@@ -121,7 +122,7 @@ export function packageSafeStorageEconomics(buf) {
   return Buffer.from(JSON.stringify({
     schema: "zblood.storage-economics-package/1",
     law: "package-safe status only; a fresh exact-artifact quote is required before any approval or payment",
-    artifact: { name: "zBlood privacy-safe public preservation edition v2" },
+    artifact: { name: "zBlood interactive public preservation edition v3" },
     quotes: {
       autonomi: {
         state: "quote intentionally omitted from the archive because embedding its own price would change the quoted artifact",
@@ -155,6 +156,8 @@ export function packageSafeStorageEconomics(buf) {
 // DECLARED contents: the archive says what it contains — persons from the
 // corpus, evidence from the pack index + overlay references, fixtures' pages.
 function declaredContents() {
+  const runtimePath = "tools/genealogy/preservation-runtime.json";
+  const runtime = JSON.parse(readFileSync(join(REPO, runtimePath), "utf8"));
   const corpus = JSON.parse(readFileSync(join(REPO, LINEAGE, "remington-bloodline.json"), "utf8"));
   const overlay = JSON.parse(readFileSync(join(REPO, LINEAGE, "attested-overlays.json"), "utf8"));
   const packs = new Set(Object.values(corpus.meta?.packs || {}));
@@ -163,7 +166,8 @@ function declaredContents() {
   const personPages = readdirSync(join(REPO, LINEAGE, "persons"))
     .filter((f) => f.endsWith(".html")).map((f) => LINEAGE + "/persons/" + f);
   return {
-    files: [...new Set([...MANDATORY, ...persons, ...[...packs].map((p) => LINEAGE + "/" + p), ...personPages])],
+    files: [...new Set([...MANDATORY, runtimePath, ...runtime.files, ...persons, ...[...packs].map((p) => LINEAGE + "/" + p), ...personPages])],
+    runtime,
     expectedPersons: persons.length,
     expectedPacks: packs.size,
   };
@@ -220,6 +224,7 @@ if (cmd === "prepare") {
     missing.forEach((f) => console.error("  - " + f));
     process.exit(1);
   }
+  checkRuntimeDependencies(REPO, declared.files, declared.runtime);
   // CLEAN package dir: stale files from earlier publications cannot slip in
   if (existsSync(out)) rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });

@@ -665,6 +665,8 @@ if(location.protocol==='file:'){
   function addChild(p,c){var a=S.children[p]=S.children[p]||[];if(a.indexOf(c)<0)a.push(c);} // dedup: corpus pass + overlay pass both feed this (ORDER5-R2 item 2)
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
+    // Pipeline and generation-depth acceptance bind this to the full corpus.
+    // The classic comb must still boot when ES module loading is unavailable.
     S.stats=(c.meta&&c.meta.stats)||{};
     S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
     S.couples=c.couples||{}; // kept whole for the shared archive resolver (one resolver, two environments)
@@ -888,10 +890,10 @@ if(location.protocol==='file:'){
     }).catch(function(){/* card simply stays hidden if the receipt is absent */});
   }
   function renderDyn(){
-    document.getElementById('stats').textContent=langText('blood.stats',
-      '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
+    document.getElementById('stats').textContent=langText('blood.stats.depth',
+      '{w} walked · {d} deceased published · {l} living redacted · recorded ancestry reaches {g} generations (shortest parent paths; not proof)')
       .replace('{w}',S.stats.personsWalked).replace('{d}',S.stats.deceasedPublished)
-      .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.spineGenerations);
+      .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.maxGenerations);
     if(S.atlas)document.getElementById('atlasstats').textContent=langText('blood.atlasstats',
       'atlas honesty: {p} people in this published atlas · {b} parentward bloodline members represented · {f} frontier references where ancestry continues beyond the published archive')
       .replace('{p}',S.atlas.published).replace('{b}',S.atlas.bloodline).replace('{f}',S.atlas.frontier);
@@ -1508,7 +1510,7 @@ import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
 import { fetchArchive } from "./person-panel-corpus.mjs";
 import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
 import { mountTreeOfLife } from "./tree-of-life.mjs";
-import { SCHEMA as LIFE_SCHEMA, lineLabel, emergence, validate as validateLife } from "../tools/genealogy/model.mjs";
+import { SCHEMA as LIFE_SCHEMA, lineLabel, emergence, validate as validateLife, depths } from "../tools/genealogy/model.mjs";
 
 const $ = (id) => document.getElementById(id);
 const esc = (v) => ppEsc(v);
@@ -1687,18 +1689,9 @@ try {
   globalThis.__guxAtlas = atlas;
   // Full-archive generation navigation is independent of the small viewport
   // window. BFS counts each person at their shortest recorded parent distance.
-  const generationDistance = new Map([[corpus.root, 0]]);
-  const generationQueue = [corpus.root];
-  for (let i = 0; i < generationQueue.length; i++) {
-    const child = generationQueue[i];
-    for (const parent of atlas.model.parentOf(child)) {
-      if (atlas.person(parent) && !generationDistance.has(parent)) {
-        generationDistance.set(parent, generationDistance.get(child) + 1);
-        generationQueue.push(parent);
-      }
-    }
-  }
-  const generationMax = Math.max(...generationDistance.values());
+  const generationDistance = new Map(Object.entries(depths(corpus)));
+  const generationQueue = [...generationDistance.keys()];
+  const generationMax = Math.max(0, ...generationDistance.values());
   $("generationDepth").max = generationMax;
   function browseGeneration() {
     const depth = Number($("generationDepth").value);
@@ -1922,7 +1915,7 @@ try {
       h+='<div class="et-b-people" data-g="'+G.g+'" hidden>'+G.people.slice(0,6).map(function(p){return '<div class="et-b-person"><i>'+esc(initials(p.name))+'</i><div><b>'+esc(p.name)+'</b><span>'+esc(p.years)+'</span></div></div>';}).join('')+
         (G.people.length>6?'<div class="et-b-more">'+esc(T('et.b.more','and {n} more in the archive below').replace('{n}',G.people.length-6))+'</div>':'')+'</div>';
     });
-    h+='<div class="et-b-more">'+esc(T('et.b.deep','the line goes {n} generations deep. the whole archive is below.').replace('{n}',D.spine))+'</div>';
+    h+='<div class="et-b-more">'+esc(T('et.b.depth','recorded ancestry reaches {n} generations. These paths include disputed and legendary links; explore their evidence below.').replace('{n}',D.spine))+'</div>';
     box.innerHTML=h;
   }
   function beeStep(s){document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
@@ -2088,7 +2081,7 @@ try {
   function boot(){
     var B=window.BloodComb, S=B&&B.S;
     if(!S||!S.root||!S.persons[S.root]||!Object.keys(S.edges).length){return setTimeout(boot,250);}
-    D.gens=walk(S); D.living=(S.stats&&S.stats.livingRedacted)||0; D.spine=(S.stats&&S.stats.spineGenerations)||D.gens.length;
+    D.gens=walk(S); D.living=(S.stats&&S.stats.livingRedacted)||0; D.spine=(S.stats&&S.stats.maxGenerations)||0;
     all();
     fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){D.E=E;D.st=E.states||{};all();}).catch(function(){all();});
   }

@@ -1,0 +1,64 @@
+{
+  "schema": "skaists.preservation-runtime/1",
+  "scope": "Existing genealogy resolver, person panel, Latvian tree, pedigree/fan chart, research collection, shared chrome and fonts. External navigation and live chain/service calls are not offline dependencies.",
+  "dynamicDependencies": {
+    "surfaces/tour.js": [
+      "surfaces/lang.js",
+      "surfaces/register.js",
+      "surfaces/rails-badge.js"
+    ],
+    "surfaces/lang.js": [
+      "surfaces/lang-corpus.json"
+    ],
+    "surfaces/register.js": [
+      "surfaces/fonts/eternal-fonts.css",
+      "surfaces/fonts/burti.woff2"
+    ]
+  },
+  "files": [
+    "surfaces/skaists.css",
+    "surfaces/blood-atlas.css",
+    "surfaces/tree-of-life.css",
+    "surfaces/person-panel.css",
+    "surfaces/blood-atlas.mjs",
+    "surfaces/blood-nav.mjs",
+    "surfaces/person-panel.mjs",
+    "surfaces/person-panel-corpus.mjs",
+    "surfaces/tree-of-life.mjs",
+    "surfaces/archive-core.mjs",
+    "tools/genealogy/model.mjs",
+    "tools/genealogy/lifespan.mjs",
+    "surfaces/rails-badge.js",
+    "surfaces/fonts/eternal-fonts.css",
+    "assets/seals/house-crest-von-zutphen-DESIGN.svg",
+    "docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing-poster.jpg",
+    "docs/BLAZON.md",
+    "surfaces/fonts/eternal/instrument-serif-latin-400.woff2",
+    "surfaces/fonts/eternal/instrument-serif-latin-ext-400.woff2",
+    "surfaces/fonts/eternal/instrument-sans-latin-400-600.woff2",
+    "surfaces/fonts/eternal/instrument-sans-latin-ext-400-600.woff2",
+    "surfaces/fonts/eternal/unbounded-latin-500-700.woff2",
+    "surfaces/fonts/eternal/unbounded-latin-ext-500-700.woff2",
+    "surfaces/fonts/eternal/unbounded-cyrillic-500-700.woff2",
+    "surfaces/fonts/eternal/unbounded-cyrillic-ext-500-700.woff2",
+    "surfaces/fonts/eternal/unbounded-vietnamese-500-700.woff2",
+    "surfaces/fonts/eternal/sora-latin-400-600.woff2",
+    "surfaces/fonts/eternal/sora-latin-ext-400-600.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-400.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-500.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-600.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-ext-400.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-ext-500.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-latin-ext-600.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-400.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-500.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-600.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-ext-400.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-ext-500.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-cyrillic-ext-600.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-400.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-500.woff2",
+    "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-600.woff2",
+    "surfaces/fonts/burti.woff2"
+  ]
+}
