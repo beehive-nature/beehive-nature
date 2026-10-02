@@ -9,8 +9,8 @@ release-artifact or fleet verification was run in this lane.**
 The update reports that `try.autonomi` is live from the main site and can fetch
 network files in a browser without an app, account or wallet. It also reports
 in-browser streaming work that pulls chunks ahead to reduce stalls and
-time-to-first-play, and publication of `ant-browser-sdk` on npm for direct
-browser application development.
+time-to-first-play, and publication of `@withautonomi/ant-browser-sdk` on npm
+for direct browser application development.
 
 This aligns with the estate's already-landed bViEw direction: the official
 browser SDK 0.1.0 is pinned locally and bViEw has one recorded public-network
@@ -22,11 +22,14 @@ comparison still required before changing the default playback path.
 ## New data-model watch: Pointers
 
 The update says Pointers are shipping across the network as paid mutable
-references with one immutable owner. It also describes a prototype for moving
-ownership through Pointers themselves. Treat these as two different states:
+references. Its claims that each Pointer has one immutable owner and that a
+Pointer can move ownership are **UNVERIFIED**: this lane inspected no
+implementing source file or function. Treat the reported states separately:
 
 - Pointer rollout is **source-reported shipped/rolling out**.
-- ownership transfer is **source-reported prototype**, not shipped behavior.
+- immutable-owner authorization is **UNVERIFIED**.
+- ownership transfer is a **source-reported prototype** and **UNVERIFIED**, not
+  shipped behavior.
 
 This is the first source signal in the current lane that the mutable-reference
 gap described in `docs/storage-substrate-split.md` is closing. A follow-up must
@@ -60,9 +63,13 @@ URL was supplied to this seat.
 
 No runtime action is triggered tonight. The separate x0x provenance procedure
 remains gated on a published v0.46.0 tag and verification that its gossip pin is
-at least 0.5.83. When that trigger lands, run the already-armed signed-binary
-300-second capture with the same configuration and compare it with the
-source-build receipt (`474ef34` / `94c1a59e` / 59.36 MB/min).
+at least 0.5.83. The supplied digest names a source-build comparison as
+`474ef34` / `94c1a59e` / 59.36 MB/min, but those identifiers and that result do
+not resolve to a durable receipt in this repository or the checked evidence
+trees. Do not treat that shorthand as a reproducible baseline. Before the
+tag-triggered run, recover and link the original evidence path containing the
+exact configuration, artifact identity, measurement method and raw 300-second
+capture; then run the signed release binary with that same procedure.
 
 For Autonomi, the next bounded read-only pass is:
 
