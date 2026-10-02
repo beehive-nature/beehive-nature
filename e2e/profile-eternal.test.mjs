@@ -86,7 +86,10 @@ test('the same facts in all three: the houses, their holders, the living guard, 
   assert.equal(a.living, STATS.livingRedacted);
   assert.match(a.guard, new RegExp(STATS.livingRedacted + ' people are held back'));
   assert.match(facts.cypherpunk.cyGuard, new RegExp(STATS.livingRedacted + ' living redacted'));
-  assert.ok(facts.cypherpunk.manifest.includes(STATS.personsWalked.toLocaleString('en-US')) && facts.cypherpunk.manifest.includes('spine ' + STATS.spineGenerations + ' gens'));
+  assert.ok(facts.cypherpunk.manifest.includes(STATS.personsWalked.toLocaleString('en-US')));
+  assert.ok(STATS.maxGenerations >= 44);
+  assert.ok(facts.cypherpunk.manifest.includes('recorded ancestry reaches ' + STATS.maxGenerations + ' generations'));
+  assert.ok(facts.cypherpunk.manifest.includes('selected spine → ' + STATS.spineReaches));
 });
 
 test('honest: the share action is the page’s own, and the front repeats only what it reports', async () => {
