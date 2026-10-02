@@ -249,6 +249,21 @@ impl VaultaAdapter {
         )
     }
 }
+fn display_a(raw: Option<&str>) -> String {
+    let value = raw.unwrap_or("").trim();
+    if value.is_empty() {
+        return "0.0000 A".to_owned();
+    }
+    if let Some(number) = value.strip_suffix("EOS") {
+        return format!("{} A", number.trim_end());
+    }
+    if value.ends_with('A') {
+        value.to_owned()
+    } else {
+        format!("{} A", value)
+    }
+}
+
 impl RailAdapter for VaultaAdapter {
     fn rail(&self) -> &str {
         "vaulta"
@@ -272,7 +287,7 @@ impl RailAdapter for VaultaAdapter {
                 .unwrap_or_default();
         Ok(
             serde_json::json!({ "v": 1, "self_desc": {"algo":"secp256k1","encoding":"base58"}, "rail": "vaulta",
-            "address": address, "liquid_balance": parsed.pointer("/core_liquid_balance").and_then(|v| v.as_str()).unwrap_or("0"),
+            "address": address, "liquid_balance": display_a(parsed.pointer("/core_liquid_balance").and_then(|v| v.as_str())),
             "cpu_available": parsed.pointer("/cpu_limit/available").and_then(|v| v.as_u64()).unwrap_or(0),
             "net_available": parsed.pointer("/net_limit/available").and_then(|v| v.as_u64()).unwrap_or(0),
             "ram_usage_bytes": parsed.pointer("/ram_usage").and_then(|v| v.as_u64()).unwrap_or(0),

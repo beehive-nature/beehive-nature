@@ -363,6 +363,13 @@ body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
 .wlb-card{background:var(--panel);border-radius:20px;padding:22px 20px;box-shadow:0 0 0 1px var(--line2)}
 .wlb-cap{font-size:14px;color:var(--dim)}
 .wlb-fig{font:700 clamp(38px,11vw,56px)/1.1 var(--reg-font-title);color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wlb-total,.va-total{display:flex;align-items:baseline;gap:10px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:start;cursor:pointer}
+.wlb-total{min-height:0!important}.wlb-total .wlb-fig{flex:1}.wlb-total-caret,.va-total-caret{font:700 24px/1 var(--reg-font-body);color:var(--reg-link);transition:transform .18s ease}
+[data-vaulta-toggle][aria-expanded="true"] .wlb-total-caret,[data-vaulta-toggle][aria-expanded="true"] .va-total-caret{transform:rotate(180deg)}
+.wlb-rollup-hint{font-size:14px;color:var(--dim);margin-top:8px}.va-breakdown{margin-top:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--well)}
+.va-breakdown-head{font-size:14px;color:var(--dim);margin-bottom:6px}.va-rollup-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line2)}
+.va-rollup-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.va-rollup-label b{font-size:14px}.va-rollup-label small{font-size:14px;color:var(--dim);overflow-wrap:anywhere}.va-rollup-row strong{font-size:15px;white-space:nowrap}.va-rollup-empty{font-size:14px;color:var(--dim)}
+.va-total{min-height:0!important}.va-total .cb{flex:1;text-align:start}
 .wlb-un{font-size:16px;color:var(--dim);margin-top:6px;line-height:1.6}
 .wlb-un b{font:700 22px/1.3 var(--reg-font-title);color:var(--ink);display:block}
 #wl-bee .wlb-q{font:700 22px/1.3 var(--reg-font-title);letter-spacing:-.01em;margin:30px 4px 12px;display:block}
@@ -645,7 +652,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-bee" data-reg="bee">
   <div class="wlb-card" data-wl-card data-wl-stat="v-stat">
     <div class="wlb-cap" data-i18n="wl.bee.fig">on Vaulta, your home chain</div>
-    <div class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></div>
+    <button type="button" class="wlb-total" data-vaulta-toggle aria-expanded="false" aria-controls="wlb-vaulta-breakdown">
+      <span class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wlb-total-caret" aria-hidden="true">⌄</span>
+    </button>
+    <div class="wlb-rollup-hint">tap the total for adapter · chain · account</div>
+    <div class="va-breakdown" id="wlb-vaulta-breakdown" data-vaulta-breakdown hidden>
+      <div class="va-breakdown-head">A held on Vaulta</div>
+      <div data-vaulta-rows></div>
+    </div>
     <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" class="wlb-connect" data-i18n="wl.bee.connect">connect your name or account to read it</a><span class="wlb-stat" data-wl-src="v-stat"></span></div>
     <div class="wlb-stale wl-stale" data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</div>
   </div>
@@ -1061,6 +1075,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
   Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
   never invents one; connect an injected Arweave wallet or bind a public address.
+  <b>pq:ml-dsa-65</b> and <b>pq:ml-kem-768</b> are public cards for the bsigner registry
+  (FIPS 204 / 203): when the keychain is connected <b>and</b> bsigner WASM is armed, the
+  forge shows a short public fingerprint derived from your masterPRK; until that WASM is
+  browser-ready the card stays an honest stub — never a fake PQ key from nothing.
   Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
@@ -1071,13 +1089,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
   <div class="row">
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name" spellcheck="false">
+    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
     <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
     <button id="forge-hive" style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
     <button id="forge-ar" style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
+    <button id="forge-pq-dsa" style="font-size:11px">+ pq:ml-dsa-65:<span id="fs6">soul</span></button>
+    <button id="forge-pq-kem" style="font-size:11px">+ pq:ml-kem-768:<span id="fs7">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
 </section>
@@ -1090,12 +1110,18 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
-      <div class="cb" id="v-bal" data-hero-number></div>
+      <button type="button" class="va-total" data-vaulta-toggle aria-expanded="false" aria-controls="vaulta-breakdown">
+        <span class="cb" id="v-bal" data-hero-number></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      </button>
+      <div class="va-breakdown" id="vaulta-breakdown" data-vaulta-breakdown hidden>
+        <div class="va-breakdown-head">A held on Vaulta</div>
+        <div data-vaulta-rows></div>
+      </div>
       <div class="cd" id="v-info">core balance + RAM + resources</div>
       <div class="stat" id="v-stat">waiting…</div>
     </div>
     <div class="chain" id="ch-hive">
-      <div class="cn">🐝 Hive <span class="badge">HIVE/HP</span></div>
+      <div class="cn">🐝 Hive <span class="badge">HB/Hive</span></div>
       <div class="cb" id="h-bal"></div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
       <div class="stat" id="h-stat">waiting…</div>
@@ -2257,6 +2283,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var BRIDGED=null;       // true/false/unknown
   var BN=null;            // BnrSign bundle (vendored eosjs lane)
   var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
+  var BSIGNER=null;       // bsigner PQ WASM (ml-dsa / ml-kem) — armed only when browser-ready; never invent PQ
 
   // nothing freezes silently: surface any stray handler error in the page
   window.addEventListener('error',function(ev){
@@ -2430,8 +2457,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
     ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
+    ensureCtx('pq:ml-dsa-65:'+SOUL); ensureCtx('pq:ml-kem-768:'+SOUL);
     $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
     if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL;
+    if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
   function npubFromSeed(seed){ // NIP-19: bech32('npub', x-only pubkey of the secp256k1 pair)
@@ -2536,7 +2565,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
     return vaultArPublic();
   }
+  function parsePqCtx(ctx){
+    var m=/^pq:(ml-dsa-65|ml-kem-768)(?::(.{1,48}))?$/.exec(ctx||'');
+    if(!m) return null;
+    var alg=m[1], name=(m[2]||SOUL||'').trim();
+    return {
+      alg:alg,
+      name:name,
+      kind:alg==='ml-dsa-65'?'ML-DSA-65 (FIPS 204)':'ML-KEM-768 (FIPS 203)',
+      registryId:alg
+    };
+  }
+  function bsignerArmed(){
+    return !!(BSIGNER && typeof BSIGNER.publicFingerprint==='function');
+  }
   function deriveFor(ctx){
+    /* pq: public cards — ML-DSA-65 / ML-KEM-768 beside classical contexts.
+       Persist context names only. Derive from masterPRK only when bsigner WASM
+       is armed; otherwise honest stub (never invent a PQ pubkey from nothing). */
+    if(/^pq:/.test(ctx)){
+      var pq=parsePqCtx(ctx);
+      if(!pq) return {kind:'PQ (unknown alg)', value:null, publicOnly:true, needsWasm:true, alg:'?'};
+      if(!MPRK) return null; /* chip: derives when keychain connects */
+      if(bsignerArmed()){
+        try{
+          var pub=BSIGNER.publicFingerprint(MPRK, pq.alg, pq.name||'');
+          if(pub && pub.short){
+            return {kind:pq.kind, value:pub.short, fingerprint:pub.fp||pub.short, publicOnly:true, derived:true, alg:pq.alg};
+          }
+        }catch(e){ /* fall through to honest stub — never fake */ }
+      }
+      return {kind:pq.kind, value:null, publicOnly:true, needsWasm:true, alg:pq.alg};
+    }
     /* hive: public account name — no private material, works without MPRK */
     if(/^hive:/.test(ctx)){
       var hn=hiveNameOf(ctx);
@@ -2588,11 +2648,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
     if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
     if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
+    if(d.needsWasm) return 'bsigner registry · core derives when WASM armed — never a fake PQ key';
+    if(d.derived && /^ML-DSA|^ML-KEM/.test(d.kind||'')) return 'public fingerprint only · seed never stored';
     if(d.kind==='Solana') return 'ed25519 base58';
     if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
     if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
     if(d.kind==='Vaulta K1'||d.kind==='K1') return 'eosio public key';
     return 'public material only';
+  }
+  function renderPqWasmChip(box, c, d){
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
+    el.setAttribute('data-pq-card', (d&&d.alg)||'pq');
+    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc((d&&d.kind)||'PQ')+'</span></div>'+
+      '<div class="cv" style="color:var(--ink)">core derives when WASM armed</div>'+
+      '<div class="cx" style="margin-top:6px">bsigner registry <b>'+esc((d&&d.alg)||'')+'</b> · public card only · never invent PQ from nothing · private seed never stored</div>';
+    box.appendChild(el);
   }
   function renderArConnectChip(box, c){
     var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
@@ -2659,6 +2729,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return;
       }
       if(d.needsConnect){ renderArConnectChip(box, c); return }
+      if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
       var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
       el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
@@ -2690,6 +2761,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
+  $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-dsa-65 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
+  $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-kem-768 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before
@@ -4175,7 +4248,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('ac-cost').textContent=p!==null?('RAM: ≈'+(p*bytes).toFixed(4)+' A for '+bytes+' B (live rammarket — draws from liquid)'):'RAM cost: rammarket unreadable';
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
-    var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)||'—';
+    var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):'—';
     $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+cpuAvail+'μs · '+
       (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
       'liquid '+liquid+' covers the RAM purchase';
@@ -4922,6 +4995,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       publicJwk: arInjectPublicJwk,
       signRaw: arInjectSignRaw
     },
+    forgePq: {
+      contexts: function(){ return CONTEXTS.filter(function(c){ return /^pq:/.test(c) }) },
+      count: function(){ return CONTEXTS.filter(function(c){ return /^pq:/.test(c) }).length },
+      armed: bsignerArmed,
+      parse: parsePqCtx,
+      derive: function(ctx){ return deriveFor(ctx) },
+      registry: ['ml-dsa-65','ml-kem-768']
+    },
     _telemetry: TELEMETRY,
     _crash: crash
   };
@@ -5229,7 +5310,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   function svRefresh(){
-    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)||null;
+    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):null;
     $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'<a href="#bal-sec">not read yet</a>')+'</b>'+
       (BRIDGED?' · bridge ✓ (K1 signs)':!K1?' · <b style="color:var(--amber)">not connected — <a href="#kc-sec">your keychain</a> comes first</b>':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
   }
@@ -5618,11 +5699,47 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
 
   /* ── balances (keyless, unchanged lane) ───────────────────── */
+  var VAULTA_BALANCES=[];
+  function assetNumber(raw){
+    var m=String(raw||'').match(/-?\d+(?:\.\d+)?/);
+    return m?parseFloat(m[0]):0;
+  }
+  function aAmount(n){ return (isFinite(n)?n:0).toFixed(4)+' A'; }
+  function renderVaultaRollups(){
+    var total=VAULTA_BALANCES.reduce(function(sum,row){return sum+row.amount},0);
+    var v=$('v-bal'); if(v) v.textContent=aAmount(total);
+    document.querySelectorAll('[data-vaulta-rows]').forEach(function(list){
+      list.textContent='';
+      if(!VAULTA_BALANCES.length){
+        var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent='read an account to see its A row'; list.appendChild(empty); return;
+      }
+      VAULTA_BALANCES.forEach(function(row){
+        var item=document.createElement('div'); item.className='va-rollup-row';
+        var label=document.createElement('span'); label.className='va-rollup-label';
+        var source=document.createElement('b'); source.textContent=row.adapter; label.appendChild(source);
+        var path=document.createElement('small'); path.textContent=row.chain+' · '+row.account; label.appendChild(path);
+        var value=document.createElement('strong'); value.textContent=aAmount(row.amount);
+        item.appendChild(label); item.appendChild(value); list.appendChild(item);
+      });
+    });
+  }
+  function upsertVaultaBalance(acct,raw){
+    var next={adapter:'Vaulta adapter',chain:'Vaulta',account:acct,amount:assetNumber(raw)};
+    var at=VAULTA_BALANCES.findIndex(function(row){return row.account===acct});
+    if(at<0)VAULTA_BALANCES.push(next); else VAULTA_BALANCES[at]=next;
+    renderVaultaRollups();
+  }
+  document.querySelectorAll('[data-vaulta-toggle]').forEach(function(toggle){
+    toggle.addEventListener('click',function(){
+      var id=toggle.getAttribute('aria-controls'), panel=$(id), open=toggle.getAttribute('aria-expanded')==='true';
+      toggle.setAttribute('aria-expanded',String(!open)); if(panel)panel.hidden=open;
+    });
+  });
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
     if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; wlRead($('v-stat'),false); return; }
     LAST_ACC=d;
-    $('v-bal').textContent=d.core_liquid_balance||'0.0000';
+    upsertVaultaBalance(acct,d.core_liquid_balance);
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
     $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
@@ -5638,7 +5755,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(d.result&&d.result[0]){
         var a=d.result[0];
         var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
-        $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HIVE';
+        $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HB/Hive';
         $('h-info').textContent=hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
         $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
         $('ch-hive').classList.add('connected');
@@ -5726,9 +5843,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     });
   }
+  /* bsigner PQ WASM — optional. Estate has crates/bsigner (CLI) today; browser
+     arming lands when a WASM/worker is loadable. Until then forge pq: cards are
+     honest stubs. Never invent PQ material in JS. */
+  if(window.BNRBSIGNER && typeof window.BNRBSIGNER.then==='function'){
+    window.BNRBSIGNER.then(function(b){
+      if(b && typeof b.publicFingerprint==='function'){
+        BSIGNER=b;
+        if(MPRK) renderForge();
+      }
+    }).catch(function(){ /* absent = honest stub residual */ });
+  } else if(window.BNRBSIGNER && typeof window.BNRBSIGNER.publicFingerprint==='function'){
+    BSIGNER=window.BNRBSIGNER;
+  }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
