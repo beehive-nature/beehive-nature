@@ -365,7 +365,7 @@ body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
 .wlb-fig{font:700 clamp(38px,11vw,56px)/1.1 var(--reg-font-title);color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .wlb-total,.va-total{display:flex;align-items:baseline;gap:10px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:start;cursor:pointer}
 .wlb-total{min-height:0!important}.wlb-total .wlb-fig{flex:1}.wlb-total-caret,.va-total-caret{font:700 24px/1 var(--reg-font-body);color:var(--reg-link);transition:transform .18s ease}
-[data-vaulta-toggle][aria-expanded="true"] .wlb-total-caret,[data-vaulta-toggle][aria-expanded="true"] .va-total-caret{transform:rotate(180deg)}
+.wlb-total[aria-expanded="true"] .wlb-total-caret,.va-total[aria-expanded="true"] .va-total-caret{transform:rotate(180deg)}
 .wlb-rollup-hint{font-size:14px;color:var(--dim);margin-top:8px}.va-breakdown{margin-top:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--well)}
 .va-breakdown-head{font-size:14px;color:var(--dim);margin-bottom:6px}.va-rollup-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line2)}
 .va-rollup-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.va-rollup-label b{font-size:14px}.va-rollup-label small{font-size:14px;color:var(--dim);overflow-wrap:anywhere}.va-rollup-row strong{font-size:15px;white-space:nowrap}.va-rollup-empty{font-size:14px;color:var(--dim)}
@@ -1122,7 +1122,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <div class="chain" id="ch-hive">
       <div class="cn">🐝 Hive <span class="badge">HB/Hive</span></div>
-      <div class="cb" id="h-bal"></div>
+      <button type="button" class="va-total" data-hive-toggle aria-expanded="false" aria-controls="hive-breakdown">
+        <span class="cb" id="h-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      </button>
+      <div class="va-breakdown" id="hive-breakdown" data-hive-breakdown hidden>
+        <div class="va-breakdown-head">HB/Hive held</div>
+        <div data-hive-rows></div>
+      </div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
       <div class="stat" id="h-stat">waiting…</div>
     </div>
@@ -1134,13 +1140,25 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <div class="chain" id="ch-autonomi">
       <div class="cn">🐜 Autonomi <span class="badge">ANT</span></div>
-      <div class="cb" id="ant-bal"></div>
+      <button type="button" class="va-total" data-ant-toggle aria-expanded="false" aria-controls="ant-breakdown">
+        <span class="cb" id="ant-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      </button>
+      <div class="va-breakdown" id="ant-breakdown" data-ant-breakdown hidden>
+        <div class="va-breakdown-head">ANT held</div>
+        <div data-ant-rows></div>
+      </div>
       <div class="cd" id="ant-info">ANT on Arbitrum, of your derived 0x address</div>
       <div class="stat" id="ant-stat">connect keychain to derive</div>
     </div>
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
-      <div class="cb" id="ar-bal"></div>
+      <button type="button" class="va-total" data-ar-toggle aria-expanded="false" aria-controls="ar-breakdown">
+        <span class="cb" id="ar-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      </button>
+      <div class="va-breakdown" id="ar-breakdown" data-ar-breakdown hidden>
+        <div class="va-breakdown-head">AR held</div>
+        <div data-ar-rows></div>
+      </div>
       <div class="cd" id="ar-info">of a bound public AR address (forge inject or public bind) — reads stay keyless</div>
       <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
     </div>
@@ -2023,7 +2041,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           }
           if (conn) conn.textContent = addr && hasInj ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
           if (!addr) {
-            if (balEl) balEl.textContent = '';
+            if (window.wlClearRollup) window.wlClearRollup('ar');
+            else if (balEl) balEl.textContent = '';
             if (statEl) { statEl.textContent = hasInj ? 'extension ready — tap connect' : 'connect Arweave wallet or bind a public address'; statEl.className = 'stat'; }
             paint(hasInj
               ? 'Arweave extension detected — tap <b>connect Arweave wallet</b> to bind your public address and publish. No JWK paste required.'
@@ -2039,7 +2058,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var spot = null;
             try { spot = await A.spotPrice(); } catch (e2) { /* optional */ }
             var winston = parseInt(bal, 10) || 0, need = parseInt(fee, 10) || 0;
-            if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
+            if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, winston / 1e12);
+            else if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
             if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
                         statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + ((need - winston) / 1e12) + ' AR for the anchor';
             paint('address ' + addr + ' · balance ' + (winston / 1e12) + ' AR · anchor fee ' +
@@ -2800,7 +2820,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var bal=await evmCall('eth_call',[{to:ANT,data:'0x70a08231'+'0'.repeat(24)+addr.slice(2)},'latest']);
     if(bal!==null&&/^0x[0-9a-f]+$/i.test(bal)){
       var ant=parseInt(bal,16)/1e18;
-      $('ant-bal').textContent=ant.toFixed(4)+' ANT';
+      upsertAntBalance(addr,ant);
       $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';wlRead($('ant-stat'),true);
       $('ch-autonomi').classList.add('connected');
     } else { $('ant-stat').textContent='ANT read failed';$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
@@ -5699,42 +5719,88 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
 
   /* ── balances (keyless, unchanged lane) ───────────────────── */
-  var VAULTA_BALANCES=[];
   function assetNumber(raw){
     var m=String(raw||'').match(/-?\d+(?:\.\d+)?/);
     return m?parseFloat(m[0]):0;
   }
-  function aAmount(n){ return (isFinite(n)?n:0).toFixed(4)+' A'; }
-  function renderVaultaRollups(){
-    var total=VAULTA_BALANCES.reduce(function(sum,row){return sum+row.amount},0);
-    var v=$('v-bal'); if(v) v.textContent=aAmount(total);
-    document.querySelectorAll('[data-vaulta-rows]').forEach(function(list){
-      list.textContent='';
-      if(!VAULTA_BALANCES.length){
-        var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent='read an account to see its A row'; list.appendChild(empty); return;
-      }
-      VAULTA_BALANCES.forEach(function(row){
-        var item=document.createElement('div'); item.className='va-rollup-row';
-        var label=document.createElement('span'); label.className='va-rollup-label';
-        var source=document.createElement('b'); source.textContent=row.adapter; label.appendChild(source);
-        var path=document.createElement('small'); path.textContent=row.chain+' · '+row.account; label.appendChild(path);
-        var value=document.createElement('strong'); value.textContent=aAmount(row.amount);
-        item.appendChild(label); item.appendChild(value); list.appendChild(item);
+  function makeAssetRollup(cfg){
+    var rows=[];
+    function format(n){ return cfg.format(isFinite(n)?n:0); }
+    function render(){
+      var total=rows.reduce(function(sum,row){return sum+row.amount},0);
+      var el=$(cfg.balId); if(el) el.textContent=format(total);
+      document.querySelectorAll(cfg.rowsSel).forEach(function(list){
+        list.textContent='';
+        if(!rows.length){
+          var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent=cfg.empty; list.appendChild(empty); return;
+        }
+        rows.forEach(function(row){
+          var item=document.createElement('div'); item.className='va-rollup-row';
+          var label=document.createElement('span'); label.className='va-rollup-label';
+          var source=document.createElement('b'); source.textContent=row.adapter; label.appendChild(source);
+          var path=document.createElement('small'); path.textContent=row.chain+' · '+row.account; label.appendChild(path);
+          var value=document.createElement('strong'); value.textContent=format(row.amount);
+          item.appendChild(label); item.appendChild(value); list.appendChild(item);
+        });
+      });
+    }
+    function upsert(acct,raw){
+      var next={adapter:cfg.adapter,chain:cfg.chain,account:acct,amount:assetNumber(raw)};
+      var at=rows.findIndex(function(row){return row.account===acct});
+      if(at<0)rows.push(next); else rows[at]=next;
+      render();
+    }
+    function clear(){
+      rows.length=0;
+      var el=$(cfg.balId); if(el) el.textContent='';
+      document.querySelectorAll(cfg.rowsSel).forEach(function(list){
+        list.textContent='';
+        var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent=cfg.empty; list.appendChild(empty);
+      });
+    }
+    document.querySelectorAll(cfg.toggleSel).forEach(function(toggle){
+      toggle.addEventListener('click',function(){
+        var id=toggle.getAttribute('aria-controls'), panel=$(id), open=toggle.getAttribute('aria-expanded')==='true';
+        toggle.setAttribute('aria-expanded',String(!open)); if(panel)panel.hidden=open;
       });
     });
+    return {upsert:upsert,render:render,clear:clear,rows:rows};
   }
-  function upsertVaultaBalance(acct,raw){
-    var next={adapter:'Vaulta adapter',chain:'Vaulta',account:acct,amount:assetNumber(raw)};
-    var at=VAULTA_BALANCES.findIndex(function(row){return row.account===acct});
-    if(at<0)VAULTA_BALANCES.push(next); else VAULTA_BALANCES[at]=next;
-    renderVaultaRollups();
-  }
-  document.querySelectorAll('[data-vaulta-toggle]').forEach(function(toggle){
-    toggle.addEventListener('click',function(){
-      var id=toggle.getAttribute('aria-controls'), panel=$(id), open=toggle.getAttribute('aria-expanded')==='true';
-      toggle.setAttribute('aria-expanded',String(!open)); if(panel)panel.hidden=open;
-    });
+  var VAULTA_ROLLUP=makeAssetRollup({
+    balId:'v-bal', rowsSel:'[data-vaulta-rows]', toggleSel:'[data-vaulta-toggle]',
+    adapter:'Vaulta adapter', chain:'Vaulta', empty:'read an account to see its A row',
+    format:function(n){ return n.toFixed(4)+' A'; }
   });
+  var HIVE_ROLLUP=makeAssetRollup({
+    balId:'h-bal', rowsSel:'[data-hive-rows]', toggleSel:'[data-hive-toggle]',
+    adapter:'Hive adapter', chain:'Hive', empty:'read an account to see its HB/Hive row',
+    format:function(n){ return n.toFixed(3)+' HB/Hive'; }
+  });
+  var ANT_ROLLUP=makeAssetRollup({
+    balId:'ant-bal', rowsSel:'[data-ant-rows]', toggleSel:'[data-ant-toggle]',
+    adapter:'Autonomi adapter', chain:'Arbitrum', empty:'read an account to see its ANT row',
+    format:function(n){ return n.toFixed(4)+' ANT'; }
+  });
+  var AR_ROLLUP=makeAssetRollup({
+    balId:'ar-bal', rowsSel:'[data-ar-rows]', toggleSel:'[data-ar-toggle]',
+    adapter:'Arweave adapter', chain:'Arweave', empty:'read an account to see its AR row',
+    format:function(n){ return n.toFixed(6)+' AR'; }
+  });
+  var VAULTA_BALANCES=VAULTA_ROLLUP.rows;
+  function aAmount(n){ return (isFinite(n)?n:0).toFixed(4)+' A'; }
+  function renderVaultaRollups(){ VAULTA_ROLLUP.render(); }
+  function upsertVaultaBalance(acct,raw){ VAULTA_ROLLUP.upsert(acct,raw); }
+  function upsertHiveBalance(acct,raw){ HIVE_ROLLUP.upsert(acct,raw); }
+  function upsertAntBalance(acct,raw){ ANT_ROLLUP.upsert(acct,raw); }
+  function upsertArBalance(acct,raw){ AR_ROLLUP.upsert(acct,raw); }
+  window.wlUpsertRollup=function(key,acct,raw){
+    var m={vaulta:VAULTA_ROLLUP,hive:HIVE_ROLLUP,ant:ANT_ROLLUP,ar:AR_ROLLUP};
+    if(m[key]) m[key].upsert(acct,raw);
+  };
+  window.wlClearRollup=function(key){
+    var m={vaulta:VAULTA_ROLLUP,hive:HIVE_ROLLUP,ant:ANT_ROLLUP,ar:AR_ROLLUP};
+    if(m[key]) m[key].clear();
+  };
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
     if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; wlRead($('v-stat'),false); return; }
@@ -5755,7 +5821,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(d.result&&d.result[0]){
         var a=d.result[0];
         var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
-        $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HB/Hive';
+        upsertHiveBalance(acct,a.balance);
         $('h-info').textContent=hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
         $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
         $('ch-hive').classList.add('connected');
@@ -5777,7 +5843,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         winston=await r.text();
       }
       var ar=(Number(winston)/1e12);
-      if(balEl) balEl.textContent=(isFinite(ar)?ar.toFixed(6):'?')+' AR';
+      if(isFinite(ar)) upsertArBalance(addr,ar);
+      else if(balEl) balEl.textContent='? AR';
       if(statEl){ statEl.textContent='✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
       $('ch-arweave').classList.add('connected');
     }catch(e){
