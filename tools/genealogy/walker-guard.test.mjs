@@ -92,9 +92,9 @@ test("P1 outcome allowlist: checkpointState REJECTS 'downloaded' and unrecognize
   for (const bad of ["xml-4o3", "xml-", "403", "denied", undefined, null, "xml-403-all-typo"]) {
     assert.throws(() => checkpointState("BBBB-2222", { state: bad }, opts), /REJECT/);
   }
-  // the explicit site-denial class stays valid
+  // the explicit site-denial class stays valid (one outcome per ark — finality)
   assert.equal(checkpointState("BBBB-2222", { state: "xml-403" }, opts), true);
-  assert.equal(checkpointState("BBBB-2222", { state: "xml-403-all" }, opts), true);
+  assert.equal(checkpointState("CCCC-3333", { state: "xml-403-all" }, opts), true);
 });
 
 test("P1 ark↔apid binding: checkpointDownload REJECTS missing/mismatched binding evidence (neighbor filmstrip apid never lands)", () => {
@@ -156,6 +156,45 @@ test("P1 atomic lock claims: fresh claims are exclusive; refresh keeps acquiredA
   writeFileSync(lockUrl, JSON.stringify(aged));
   const B = acquireWriterLock("race-B", { ...opts, lockPath });
   assert.equal(B.previousWriter.writerId, "race-A");
+});
+
+test("P1 conditional takeover: a takeover cannot steal a FRESH claim, and takeovers leave no quarantine residue", async () => {
+  const { opts, manifestPath } = fixtures();
+  const { readdirSync } = await import("node:fs");
+  const dir = manifestPath.replace(/[/\\][^/\\]+$/, "");
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock3.json");
+  const lockUrl = new URL(lockPath);
+  // a stale lock ages out; race-A takes it over (fresh claim now on disk)
+  acquireWriterLock("race-A", { ...opts, lockPath });
+  const aged = JSON.parse(readFileSync(lockUrl, "utf8"));
+  aged.heartbeat = new Date(Date.now() - 11 * 60 * 1000).toISOString();
+  writeFileSync(lockUrl, JSON.stringify(aged));
+  const B1 = acquireWriterLock("late-B", { ...opts, lockPath });
+  assert.equal(B1.previousWriter.writerId, "race-A");
+  // a contender who ALSO judged the old stale lock now arrives: it must read
+  // the FRESH B1 lock and refuse BEFORE touching anything — B1's lock intact
+  const before = readFileSync(lockUrl, "utf8");
+  assert.throws(() => acquireWriterLock("late-C", { ...opts, lockPath }), /REFUSED: exclusive writer lock held by late-B/);
+  assert.equal(readFileSync(lockUrl, "utf8"), before, "a refused contender must leave the holder's lock byte-unchanged");
+  assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".takeover-") || f.includes(".tmp-")), [], "no quarantine/temp residue from takeover or refusal");
+});
+
+test("P2 outcomes are final: an already-resolved ark is never overwritten by a later save (review fix)", () => {
+  const { opts, manifestPath } = fixtures();
+  const URL_FOR = (a) => "https://sg30p0.familysearch.org/service/records/storage/dascloud/das/v2/3:1:" + a + "/name?namespace=apid";
+  checkpointDownload("CCCC-3333", {
+    state: "downloaded", apid: "apid:TH-7-7-7-7-7", sha256: "c".repeat(64), bytes: 99,
+    binding: { url: URL_FOR("CCCC-3333"), response: "TH-7-7-7-7-7" },
+  }, opts);
+  const before = readFileSync(manifestPath, "utf8");
+  // a late negative for the same ark must not erase the download's identity
+  assert.throws(() => checkpointState("CCCC-3333", { state: "xml-403" }, opts), /REJECT SAVE already-resolved/);
+  // a late duplicate download must not overwrite either
+  assert.throws(() => checkpointDownload("CCCC-3333", {
+    state: "downloaded", apid: "apid:TH-8-8-8-8-8", sha256: "d".repeat(64),
+    binding: { url: URL_FOR("CCCC-3333"), response: "TH-8-8-8-8-8" },
+  }, opts), /REJECT SAVE already-resolved/);
+  assert.equal(readFileSync(manifestPath, "utf8"), before, "manifest must be untouched by rejected overwrites");
 });
 
 test("walker failures are REJECTED as record outcomes and stay retryable (founder order 09-29h)", () => {

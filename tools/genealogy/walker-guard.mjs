@@ -111,9 +111,31 @@ export function acquireWriterLock(writerId, opts = {}) {
         throw new Error("REFUSED: lock takeover raced the heartbeat refresh — " + (back ? back.writerId : "unknown") + " now holds it; stand down");
       return refreshed;
     }
-    // Stale foreign lock: clear the way, then claim EXCLUSIVELY — the
-    // unlink→create race has exactly one winner; every loser refuses.
-    try { unlinkSync(lockUrl); } catch { /* already gone */ }
+    // Stale foreign lock: takeover must be CONDITIONAL on the stale identity
+    // still being on disk at claim time (PR #296 review P1). Protocol: RENAME
+    // the lock into a quarantine name — atomic, and it succeeds for exactly
+    // ONE of N contenders (the rest fail or find the lock gone). If the
+    // quarantined content is NOT the stale identity this writer judged (a
+    // fresh claim landed between read and rename), RESTORE it and refuse.
+    // Only after the quarantine provably holds the judged-stale identity is
+    // the fresh exclusive claim made — and a lost create race still refuses.
+    const quarantine = new URL(lockUrl.href + ".takeover-" + randomUUID().slice(0, 8));
+    try {
+      renameSync(lockUrl, quarantine);
+    } catch { /* the lock vanished — another contender quarantined it; the exclusive claim below settles the winner */ }
+    if (existsSync(quarantine)) {
+      const stolen = safeReadJson(quarantine);
+      if (!prev || !stolen || stolen.writerId !== prev.writerId || stolen.heartbeat !== prev.heartbeat) {
+        // we renamed somebody's FRESH lock — restore it and stand down
+        if (!existsSync(lockUrl)) {
+          try { renameSync(quarantine, lockUrl); } catch { /* restore raced a new claim — that claimant owns the file */ }
+        }
+        const winner = safeReadJson(lockUrl);
+        throw new Error("REFUSED: takeover raced a fresh claim — " + (winner ? winner.writerId : "another writer") + " holds it; stand down");
+      }
+      // genuinely the stale identity we judged: drop the quarantine copy and claim
+      try { unlinkSync(quarantine); } catch { /* best effort */ }
+    }
   }
   const lock = { schema: "skaists.writer-lock/1", writerId, acquiredAt: now, heartbeat: now,
     previousWriter: prev && prev.writerId !== writerId ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now } : (prev && prev.previousWriter) || null };
@@ -221,11 +243,16 @@ export function isRecordOutcome(state) {
 }
 
 // Shared save path: membership + holder lock + ATOMIC manifest replace.
+// Outcomes are FINAL (PR #296 review P2): an ark already present in
+// manifest.images is never overwritten — a late or duplicate save cannot
+// replace a download's apid/hash/binding with a lesser state.
 function saveEntry(ark, entry, opts) {
   assertWriterLock(opts.writer, opts);
-  const { memberArks, manifestUrl, manifest } = loadState(opts);
+  const { memberArks, manifestUrl, manifest, states } = loadState(opts);
   if (!memberArks.has(ark))
     throw new Error("REJECT SAVE out-of-queue ark: " + ark + " — nothing may be recorded for it");
+  if (states.has(ark))
+    throw new Error("REJECT SAVE already-resolved ark: " + ark + " (state=" + states.get(ark).state + ") — outcomes are final; no overwrite, no transition");
   manifest.images[ark] = { ...entry, guard: "queue-member verified " + new Date().toISOString() };
   atomicReplace(manifestUrl, JSON.stringify(manifest, null, 1));
   return true;
