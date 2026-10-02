@@ -154,8 +154,10 @@ body.gux #atlas{display:block}
 .life-loading .twig{stroke:var(--violet);stroke-width:3}
 .life-loading p{z-index:1;align-self:end;margin:0 16px 24px;padding:7px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);color:var(--dim);text-align:center}
 .life-mode .zoombar{display:none!important}
-.life-mode #cards,.life-mode #routestrip{display:none!important}
+.life-mode #cards{display:none!important}
 #treeoflife .tol-stage{min-height:440px}
+#treeoflife svg.tol-art,#treeoflife svg.tol-hit{height:100%;cursor:default}
+.controls{position:sticky;top:0;z-index:30;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
 #treeoflife .tol-note{line-height:1.6}
 @media(max-width:640px){.life-intro{grid-template-columns:1fr}.life-key{text-align:left}.life-loading{min-height:520px}#treeoflife{padding:7px}}
 /* one search box (the page's #q) and ONE history (the atlas's back): the
@@ -503,15 +505,22 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div class="controls">
   <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
   <div class="viewswitch" role="group" aria-label="view">
-    <button id="viewlife" type="button" aria-pressed="true">austras koks</button>
+    <button id="viewlife" type="button" aria-pressed="true">Latvian tree of life</button>
     <button id="viewped" type="button" aria-pressed="false">pedigree</button>
-    <button id="viewfan" type="button" aria-pressed="false">fractal</button>
+    <button id="viewfan" type="button" aria-pressed="false">fan chart</button>
     <button id="viewtree" type="button" aria-pressed="false">tree</button>
   </div>
   <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
   <button id="resetbtn" type="button" data-i18n="blood.reset">back to the founder</button>
 </div>
 <div class="entrance" id="entrance">
+  <section id="generationExplorer" hidden aria-label="Explore by generation">
+    <label>Generation from the founder <input id="generationDepth" type="number" min="1" value="44" style="width:6em"></label>
+    <button id="generationBrowse" type="button">explore generation</button>
+    <p id="generationSummary" aria-live="polite"></p>
+    <label>Choose a relative <select id="generationPerson"><option value="">choose a recorded ancestor</option></select></label>
+    <p>Counts use the shortest recorded parent path from the founder. A recorded path can contain disputed or legendary links; open each relative to examine the evidence.</p>
+  </section>
   <a data-ent="family"><b>family</b><span>the founder's house — living redacted, the personal entrance stays on the profile page</span></a>
   <a data-ent="records"><b>records</b><span>documents and evidence packs — claims cited, attribution preserved</span></a>
   <a data-ent="mythology"><b>mythology</b><span>the sagas and the crest's own symbolism — meaning, equal in standing, distinct in kind</span></a>
@@ -1521,6 +1530,8 @@ try {
   const { archive } = await fetchArchive(BASE);
   const panel = mountPersonPanel($("ppanel"), archive, {
     root: init.root,
+    founderRoot: corpus.root,
+    scrollContainer: $("detail"),
     onreroot(id) {
       // "stand here (re-root)" - the panel ASKS, the engine re-roots (one
       // world, one root on screen; review d6ca5958 finding 5). Loop-guarded:
@@ -1529,6 +1540,11 @@ try {
       syncing = true; try { atlas.reroot(id); } finally { syncing = false; }
     },
     onnavigate(s) {
+      // The drawer labels the rendered research view, including guarded
+      // programmatic opens. The retired comb selection is not its identity.
+      const drawerName = $("drawer-name");
+      const heading = $("ppanel").querySelector(".pp-name");
+      if (drawerName) drawerName.textContent = heading ? heading.textContent : "family research";
       if (syncing || !atlas) return;
       const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
       if (id && id !== panelAt) { panelAt = id; syncing = true; atlas.select(id); syncing = false; }
@@ -1554,7 +1570,7 @@ try {
   }
 
   function openPanelPerson(id) {
-    if (syncing || !panel || !id || panelAt === id) return;
+    if (syncing || !panel || !id) return;
     syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
     const d = $("detail"); if (d) d.classList.add("open");
   }
@@ -1642,6 +1658,46 @@ try {
     }
   });
   globalThis.__guxAtlas = atlas;
+  // Full-archive generation navigation is independent of the small viewport
+  // window. BFS counts each person at their shortest recorded parent distance.
+  const generationDistance = new Map([[corpus.root, 0]]);
+  const generationQueue = [corpus.root];
+  for (let i = 0; i < generationQueue.length; i++) {
+    const child = generationQueue[i];
+    for (const parent of atlas.model.parentOf(child)) {
+      if (atlas.person(parent) && !generationDistance.has(parent)) {
+        generationDistance.set(parent, generationDistance.get(child) + 1);
+        generationQueue.push(parent);
+      }
+    }
+  }
+  const generationMax = Math.max(...generationDistance.values());
+  $("generationDepth").max = generationMax;
+  function browseGeneration() {
+    const depth = Number($("generationDepth").value);
+    const select = $("generationPerson");
+    select.replaceChildren(new Option("choose a recorded ancestor", ""));
+    if (!Number.isInteger(depth) || depth < 1 || depth > generationMax) {
+      $("generationSummary").textContent = "Choose a generation from 1 to " + generationMax + ".";
+      return;
+    }
+    const ids = generationQueue.filter(id => generationDistance.get(id) === depth && !atlas.person(id).living);
+    ids.sort((a, b) => atlas.person(a).name.localeCompare(atlas.person(b).name));
+    for (const id of ids) select.add(new Option(atlas.person(id).name, id));
+    $("generationSummary").textContent = ids.length + " published people at generation " + depth + "; recorded paths reach " + generationMax + " generations across this archive.";
+  }
+  $("generationBrowse").addEventListener("click", browseGeneration);
+  $("generationPerson").addEventListener("change", () => {
+    const id = $("generationPerson").value;
+    if (!id) return;
+    atlas.reroot(id);
+    atlas.select(id);
+    showRoute(corpus.root, id);
+    $("detail").classList.remove("open");
+    $("routestrip").scrollIntoView({ block: "center" });
+  });
+  $("generationExplorer").hidden = false;
+  browseGeneration();
   setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
   globalThis.__guxInit = init; // journey seam: the URL-derived initial context
   document.body.classList.add("gux");
@@ -1677,19 +1733,31 @@ try {
     closePerson() { /* the research drawer keeps the last read person in reach */ },
     onContext(ctx, reason) {
       if (reason === "mount" || syncing || !atlas) return;
-      if (ctx.f && ctx.f !== treeFocus) {
-        treeFocus = ctx.f;
-        syncing = true; atlas.reroot(ctx.f); syncing = false;
+      const nextRoot = ctx.f || corpus.root;
+      if (nextRoot !== treeFocus) {
+        treeFocus = nextRoot;
+        syncing = true; atlas.reroot(nextRoot); syncing = false;
       }
-      if (ctx.p && ctx.p !== panelAt) {
+      if (ctx.p && ctx.p !== atlas.getContext().selection) {
         syncing = true; atlas.select(ctx.p); syncing = false;
         openPanelPerson(ctx.p);
       }
     },
   });
-  $("viewlife").addEventListener("click", () => setWorld("life"));
+  syncing = true;
+  try { treeHandle.go({ f: init.root === corpus.root ? null : init.root, p: init.selection || null }, { push: false }); }
+  finally { syncing = false; }
+  $("viewlife").addEventListener("click", () => {
+    const ctx = atlas.getContext();
+    treeFocus = ctx.root;
+    syncing = true;
+    try { treeHandle.go({ f: ctx.root === corpus.root ? null : ctx.root, p: ctx.selection || null }, { push: false }); }
+    finally { syncing = false; }
+    setWorld("life");
+    $("detail").classList.remove("open");
+  });
   for (const [id, view] of [["viewped", "pedigree"], ["viewfan", "fractal"], ["viewtree", "tree"]]) {
-    $(id).addEventListener("click", () => setWorld("atlas", view));
+    $(id).addEventListener("click", () => { setWorld("atlas", view); $("detail").classList.remove("open"); });
   }
   $("resetbtn").addEventListener("click", () => {
     if (activeWorld === "life" && treeHandle) { treeFocus = init.root; treeHandle.go({ f: null, p: null }, { push: false }); }
