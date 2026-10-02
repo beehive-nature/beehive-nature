@@ -663,9 +663,11 @@ if(location.protocol==='file:'){
     trail:[],staged:[],viewMode:"ped",retrieved:null,symbolicLinks:[]};
   var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
   function addChild(p,c){var a=S.children[p]=S.children[p]||[];if(a.indexOf(c)<0)a.push(c);} // dedup: corpus pass + overlay pass both feed this (ORDER5-R2 item 2)
-  Promise.all([fetch(CORPUS_URL).then(r=>r.json()), import("../tools/genealogy/model.mjs")]).then(([c, model])=>{
+  fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
-    S.stats=Object.assign({}, (c.meta&&c.meta.stats)||{}, model.generationStats(c));
+    // Pipeline and generation-depth acceptance bind this to the full corpus.
+    // The classic comb must still boot when ES module loading is unavailable.
+    S.stats=(c.meta&&c.meta.stats)||{};
     S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
     S.couples=c.couples||{}; // kept whole for the shared archive resolver (one resolver, two environments)
     // GUX-01 atlas honesty (founder order 996e9b6c): three counts derived from

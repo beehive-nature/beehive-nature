@@ -103,6 +103,19 @@ test('new transitive import refuses silent omission from the reviewed allowlist'
   assert.notEqual(result.code, 0);
   assert.match(result.stderr, /Undeclared interactive dependencies/);
   assert.match(result.stderr, /new-tree-helper\.mjs/);
+  writeFileSync(join(root, 'surfaces/tree-of-life.mjs'), 'import {\n helper\n} from "./multiline-helper.mjs";');
+  const multiline = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(multiline.code, 0);
+  assert.match(multiline.stderr, /multiline-helper\.mjs/);
+});
+
+test('string CSS imports and both video dependencies must be declared', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'surfaces/tree-of-life.css'), '@import "missing-theme.css";');
+  writeFileSync(join(root, 'surfaces/blood.html'), '<video src="missing-video.webm" poster="missing-poster.jpg"></video>');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  for (const name of ['missing-theme.css', 'missing-video.webm', 'missing-poster.jpg']) assert.ok(result.stderr.includes(name));
 });
 
 test("probe 0 (control): crest-missing refusal stays", () => {

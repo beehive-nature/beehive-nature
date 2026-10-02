@@ -54,7 +54,9 @@ blood relatives: a versioned record for each relative, citations and separately
 labeled relationship claims, plus a root manifest. Hive's documented `comment`
 operation supports text and metadata and updates by author/permlink. This is a
 design proposal, not a delivered signer, publisher or Hive bIndexer integration.
-Source: https://developers.hive.io/apidefinitions/broadcast-ops.html .
+Source: <a href="https://developers.hive.io/apidefinitions/broadcast-ops.html" target="_blank" rel="noopener noreferrer">Hive API documentation (opens in a new tab)</a>.
+Implementation-source verification of these Hive semantics is UNVERIFIED;
+the citation establishes documented API behavior, not a tested integration.
 
 Larger documents, images and snapshots belong behind ANT/AR pointers. Each
 pointer should carry scheme/address, SHA-256, byte size, media type, source
