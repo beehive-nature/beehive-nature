@@ -9,3 +9,9 @@ Verification: served the working tree with Node on 127.0.0.1:8994 and clicked Ja
 ## Founder clarification: Donna Ruth
 
 The spouse row said "marriage — affinity, never blood", describing a pairwise marriage edge in language that could be mistaken for exclusion from the founder's ancestry. Replace that with the named spouse relationship and an independently computed founder ancestry label. Jack's card now reads: Donna Ruth Lawton — spouse of Jack Benedum Sutphen; also a direct blood ancestor of the founder. Shared ancestry between spouses remains attributed to the archive. Browser readback on the Node preview confirmed this exact row. No ancestry was added or removed.
+
+## Don Ray navigation and person-view usability
+
+A repeated click on the selected person returned without visible feedback; the drawer retained its prior scroll position. The person panel now uses the actual drawer scroll container, returns to the top on navigation (including selecting the same person), and puts branch walking/full research actions immediately after the name. Family links precede the long relationship explanation. Tree nodes now have a visible green-dot legend.
+
+Browser verification on the served preview: opened Don Ray, clicked his own relationship-path endpoint, observed drawer scrollTop 0 and matching Don Ray heading; clicked walk this branch and observed climbing from Don Ray Remington; clicked open full research and observed his dedicated archive heading and record. Preview retained for founder testing. This is a focused interaction improvement, not a claim of completing the wider next-generation UX vision.

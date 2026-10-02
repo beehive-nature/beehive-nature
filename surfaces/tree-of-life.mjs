@@ -367,6 +367,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
 
     host.innerHTML = `
       <nav class="tol-lines" aria-label="${esc(words.lines)}">${tabs}</nav>
+      <p class="tol-note">Green dot: sourced language or culture details. Choose a name to open their research; choose a branch to climb.</p>
       ${focusLine}
       <div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>
       <div class="tol-guard" role="note"><span class="tol-lock" aria-hidden="true"></span><span>${esc(heldText(view.line.bridge, words))}</span></div>
