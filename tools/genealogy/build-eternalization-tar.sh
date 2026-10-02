@@ -17,7 +17,21 @@ import sys
 root = pathlib.Path(sys.argv[1]).resolve()
 manifest_path = root / "manifest.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-declared = set(manifest.get("files", {}).keys())
+files = manifest.get("files")
+if not isinstance(files, dict):
+    raise SystemExit("FAILED: manifest files must be an object")
+declared_total = 0
+for rel, meta in files.items():
+    if not isinstance(meta, dict) or type(meta.get("bytes")) is not int or meta["bytes"] < 0:
+        raise SystemExit("FAILED: invalid declared byte size: " + rel)
+    declared_total += meta["bytes"]
+if manifest.get("totalBytes") != declared_total:
+    raise SystemExit("FAILED: manifest totalBytes does not match declared file sizes")
+files_json = json.dumps(files, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+files_digest = hashlib.sha256(files_json).hexdigest()
+if manifest.get("manifestSha256") != files_digest:
+    raise SystemExit("FAILED: manifestSha256 does not match manifest files")
+declared = set(files.keys())
 expected = declared | {"manifest.json"}
 actual = set()
 for path in root.rglob("*"):
@@ -35,7 +49,7 @@ if missing or extras:
         print("FAILED: undeclared files present: " + ", ".join(extras[:10]), file=sys.stderr)
     raise SystemExit(1)
 bad = []
-for rel, meta in manifest.get("files", {}).items():
+for rel, meta in files.items():
     path = root / rel
     size = path.stat().st_size
     digest = hashlib.sha256()
@@ -89,7 +103,16 @@ verify_reproducible_eternalization_tar() {
   # stable snapshot. A writer racing the source copy can at worst make the
   # snapshot fail its manifest checks; it cannot alter bytes between
   # validation and tar reads.
-  if ! cp -a -- "$source_dir/." "$snapshot/"; then
+  # Copy only the source directory's entries, not its root metadata: copying
+  # `source/.` with cp -a would replace mktemp's 0700 mode with a commonly
+  # world-readable 0755/0777 mode while undeclared entries are being checked.
+  if ! (
+    umask 077
+    shopt -s dotglob nullglob
+    entries=("$source_dir"/*)
+    ((${#entries[@]} > 0)) || exit 1
+    cp -a -- "${entries[@]}" "$snapshot/"
+  ); then
     rm -rf "$snapshot"
     return 1
   fi
