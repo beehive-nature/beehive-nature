@@ -281,8 +281,7 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; });
-    await page.locator('#arw-go').click();
+    await page.locator('#arw-go').evaluate(b => { b.disabled = false; b.click(); });
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';
