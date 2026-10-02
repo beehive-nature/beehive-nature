@@ -761,9 +761,10 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     try {
       var E=await fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();});
       var A=E.artifact, Q=E.quotes.autonomi, C=Q.ceilings;
+      var storageOver=Number(Q.computed.storageANT)>Number(C.storageMaxANT);
       var first=document.createTextNode("the privacy-safe edition is prepared and quoted: "+A.files.toLocaleString()+" files · "+Q.raw.chunk_count+" chunks · "+Q.computed.storageANT+" ANT + "+Q.computed.gasETH+" ETH estimated gas.");
       var detail=document.createElement("span");detail.style.color="var(--faint)";
-      detail.textContent="payment is paused because "+Q.route.replace('tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ','')+" cannot enforce the "+C.storageMaxANT+" ANT and "+C.gasMaxETH+" ETH ceilings atomically on upload. source: "+Q.route+". No invoice, wallet review, or upload plan can be created until the payment client gains both limits.";
+      detail.textContent=(storageOver?"the quote exceeds the standing "+C.storageMaxANT+" ANT storage ceiling. ":"")+"payment is paused because "+Q.route.replace('tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ','')+" cannot enforce the "+C.storageMaxANT+" ANT and "+C.gasMaxETH+" ETH ceilings atomically on upload. source: "+Q.route+". No invoice, wallet review, or upload plan can be created until the quote is within bounds and the payment client gains both limits.";
       step.replaceChildren(first,document.createElement("br"),detail);
     } catch (e) {
       step.textContent="the canonical preservation economics record is unavailable; payment remains disabled.";
@@ -803,7 +804,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
       var an=E.quotes&&E.quotes.autonomi, st=E.states||{};
       var line;
       if(st.uploaded){line='preservation receipt available';}
-      else if(an&&an.computed)line='quote to preserve this privacy-safe archive — <b>'+an.computed.storageANT+' ANT</b> storage + <b>'+an.computed.gasETH+' ETH</b> estimated gas ('+an.raw.confidence+' @ '+an.queriedAt.slice(0,10)+') — payment disabled: client cannot enforce both ceilings';
+      else if(an&&an.computed)line='quote to preserve this privacy-safe archive — <b>'+an.computed.storageANT+' ANT</b> storage + <b>'+an.computed.gasETH+' ETH</b> estimated gas ('+an.raw.confidence+' @ '+an.queriedAt.slice(0,10)+') — payment disabled: '+(Number(an.computed.storageANT)>Number(an.ceilings.storageMaxANT)?'quote exceeds the standing storage ceiling; ':'')+'client cannot enforce both ceilings';
       else {line='preservation quote unavailable — payment disabled';}
       line+=' · retrievals tested: <b>'+(st.retrievalsTested||0)+'</b> · developer egress bill: <b>'+(st.developerEgressUSD!=null?'$'+st.developerEgressUSD:'serving from our own box until network publication — our egress scales until then')+'</b>';
       document.getElementById('econ-line').innerHTML=line;
@@ -1745,7 +1746,7 @@ try {
       ['guard · living = exclude',D.living+' records refused · they never reach the manifest','guard'],
       ['consent · '+(st.approved?'bound':'not yet'),st.approved?String(st.approved):'no manifest bound yet',st.approved?'consent':'todo'],
       ['quote · Autonomi',an&&an.computed?('storage '+an.computed.storageANT+' ANT + gas '+an.computed.gasETH+' ETH · '+(an.raw&&an.raw.confidence||'estimate')+' @ '+date(an.queriedAt)+' · source '+an.route):'not quoted yet',st.quoted?'done':'todo'],
-      ['settle · ANT · pay once',st.purchased?'settled':'blocked · payment client cannot enforce both ceilings',st.purchased?'done':'todo'],
+      ['settle · ANT · pay once',st.purchased?'settled':'blocked · '+(an&&an.computed&&Number(an.computed.storageANT)>Number(an.ceilings.storageMaxANT)?'quote exceeds ceiling · ':'')+'payment client cannot enforce both ceilings',st.purchased?'done':'todo'],
       ['address · immutable · public',st.uploaded?'uploaded':'not yet · anyone fetches → hashes → compares',st.uploaded?'done':'todo']
     ];
     var nowAt=steps.findIndex(function(s){return s[2]==='todo';});
@@ -1776,7 +1777,7 @@ try {
     if(an&&an.computed){
       set('ant',fmtAnt(an.computed.storageANT)+'<br>ANT');
       set('antShort',fmtAnt(an.computed.storageANT)+' ANT');
-      set('beeQuote',esc('+ '+an.computed.gasETH+' ETH estimated gas · quoted '+String(an.queriedAt||'').slice(0,10)+' · payment disabled until both ceilings are atomic'));
+      set('beeQuote',esc('+ '+an.computed.gasETH+' ETH estimated gas · quoted '+String(an.queriedAt||'').slice(0,10)+(Number(an.computed.storageANT)>Number(an.ceilings.storageMaxANT)?' · storage quote exceeds ceiling':'')+' · payment disabled until both ceilings are atomic'));
       set('raverQuote',esc('estimate · payment capability required'));
     } else {
       set('ant',esc(T('et.b.noQuote','price asked when you choose')));set('antShort',esc(T('et.b.noQuoteShort','price asked live')));

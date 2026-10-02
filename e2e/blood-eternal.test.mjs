@@ -84,7 +84,7 @@ test('the same facts in all three: the line, the guard, the price, the receipt',
   // the guard and the price, from the same sources
   for (const reg of ['bee', 'raver', 'cypherpunk']) assert.ok(facts[reg].living.every(x => x === '5'), reg + ' living guard');
   const ant = RECEIPT.quotes.autonomi.computed.storageANT;
-  assert.equal(a.ant, ant.toFixed(2) + ' ANT');
+  assert.equal(a.ant, Number(ant).toFixed(2) + ' ANT');
   assert.match(facts.cypherpunk.pipe, new RegExp(String(ant).replace('.', '\\.') + ' ANT'));
   // the receipt says what is true: nothing purchased, nothing uploaded
   assert.equal(RECEIPT.states.purchased, false); assert.equal(RECEIPT.states.uploaded, false);
