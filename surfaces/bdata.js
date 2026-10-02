@@ -257,7 +257,13 @@
       ask = null; mark(null);
       fail = { cls: f.cls, detail: String(f.message || ''), secs: Math.round((Date.now() - my.startedAt) / 1000) };
       render({ focus: 'price' });
-      say(failHead(fail));
+      // New bee: never announce scare words into the live region
+      if (isNewBee()) {
+        var kept = usableQuote(chosen());
+        say(kept ? (antStr(kept.totalAtto) + ' ANT. ' + T('bd.paid.scope', 'Nothing has been paid from this page.')) : '');
+      } else {
+        say(failHead(fail));
+      }
     });
   }
 
@@ -424,13 +430,24 @@
       h += q ? earlier() : refHtml;
       h += nothing;
     } else if (state === 'failed') {
-      h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
-      if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
-      if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
-      h += '</div>';
-      if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
-      if (q) h += earlier();
-      h += nothing;
+      // New bee is art/play: one path, no fail boxes, no HTTP/JSON, no Try again.
+      // Raver/cypherpunk keep the honest named failure.
+      if (isNewBee()) {
+        if (q) h += earlier();
+        else {
+          h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
+          h += refHtml;
+        }
+        h += nothing;
+      } else {
+        h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
+        if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
+        if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
+        h += '</div>';
+        if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
+        if (q) h += earlier();
+        h += nothing;
+      }
     } else if (state === 'idle') {
       h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
       h += '<p class="sub note" data-bdata-price-hint="1">' + tx('bd.price.askingnote', 'one press asks the live network; it can take up to a minute') + '</p>';
