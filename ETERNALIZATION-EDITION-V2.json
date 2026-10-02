@@ -1,15 +1,15 @@
 {
   "schema": "skaists.eternalization-edition/2",
-  "generated": "2026-10-02T06:05:51.000Z",
+  "generated": "2026-10-02T06:48:06.311Z",
   "supersedes": "the rejected privacy-unsafe pkg4 candidate and every earlier genealogy edition and quote",
   "edition": "privacy-safe genealogy archive v2 — merged relationship audit + 13,249-record public source projection + public image evidence (307 private-tier images represented only by counts, sha256 digests, and ark pointers)",
   "artifact": {
-    "preparedFrom": "corrective commit 79f442f43872ae5d831f8aa815ad9c9bc632ba7b (PR #296 and #302 already merged; preserve.mjs prepare after product-flow capability stop)",
+    "preparedFrom": "corrective commit 82c41f702d2c36c745d440842d96c03c07798ff7 (PUBLIC-CONSTANT source commit; PR #296 and #302 already merged; exact source includes the manifest-allowlist builder and over-ceiling UI)",
     "declaredFiles": 22107,
-    "unpackedDeclaredBytes": 86331532,
-    "manifestSha256": "123ff6c5befadcc1dee6b71a4ad3c7109ba70fa3aa26ad810b202198f7d4b0f4", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
-    "tarBytes": 106833920,
-    "tarSha256": "960045b2f32cf2988041b235c3588d92cfd93b318e2672dae72c41f4f20b6c2f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+    "unpackedDeclaredBytes": 86332167,
+    "manifestSha256": "15cf467b2cd4111590651c77de099e67e01f2549a90b6f53c264864072d3dc2b", "hexLawNote": "PUBLIC-CONSTANT manifest digest",
+    "tarBytes": 106823680,
+    "tarSha256": "a8150407e319e1c90585edb774b66fc31fb244c737002fc231840ba8fe26843f", "hexLawNote2": "PUBLIC-CONSTANT tar digest reproduced and banked by tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
     "deterministicTarRecipe": "tools/genealogy/build-eternalization-tar.sh::build_eternalization_tar",
     "privacyAudit": {
       "projectedRecords": 13249,
@@ -20,17 +20,17 @@
     "privateBytesExcluded": "the 307 record images remain PRIVATE-TIER and do not enter the bundle; the public bundle carries their counts, sha256 digests, and ark pointers via sources/images-summary.json"
   },
   "quote": {
-    "captured": "2026-10-02T06:05:51Z (live ant 0.3.9, ant --json file cost on the exact pkg4.tar; keyless, no payment, no wallet touched)",
+    "captured": "2026-10-02T06:48:06.311Z (tools/genealogy/capture-ant-quote.mjs::captureAntQuote; live ant 0.3.9 on the exact pkg4.tar; keyless, no payment, no wallet touched)",
     "clientVersion": "ant 0.3.9",
-    "fileSize": 106833920,
+    "fileSize": 106823680,
     "chunkCount": 29,
-    "storageCostAtto": "2432547952148437500",
-    "storageCostAnt": "2.432547952148437500",
+    "storageCostAtto": "4397741334960937500",
+    "storageCostAnt": "4.397741334960937500",
     "estimatedGasCostWei": "150000000000000",
     "estimatedGasEth": "0.000150000000000000",
     "paymentMode": "single",
     "confidence": "priced_sample",
-    "networkNote": "the client logged several peer connection warnings, then exited 0 with the quoted JSON"
+    "networkNote": "the banked capture function verified the quoted file_size against the hashed artifact and exited 0 with the quoted JSON"
   },
   "separatedCeilings": {
     "law": "two assets, never collapsed into one dollar figure",
@@ -46,14 +46,14 @@
     "evidence": "ant file upload --help exposes no storage-price or gas ceiling option"
   },
   "spendingApprovalGate": {
-    "status": "PAYMENT CLIENT CAPABILITY REQUIRED",
-    "rule": "NO approval, payment, or upload occurs while ant 0.3.9 cannot apply both the 2.5 ANT storage ceiling and 0.0002 ETH gas ceiling atomically to the paid operation.",
-    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and separated ceilings. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
+    "status": "QUOTE EXCEEDS CEILING + PAYMENT CLIENT CAPABILITY REQUIRED",
+    "rule": "NO approval, payment, or upload occurs: the 4.397741334960937500 ANT quote exceeds the standing 2.5 ANT storage ceiling, and ant 0.3.9 cannot apply both the storage and 0.0002 ETH gas ceilings atomically to the paid operation.",
+    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, obtain a quote within founder-approved separated ceilings, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and bounds. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
   },
   "progression": [
     "preserved: YES (privacy-safe public projection, local bytes verified 22107/22107)",
-    "approved: BLOCKED (payment client lacks atomic ceilings)",
-    "quoted: YES (ant 0.3.9 live priced_sample)",
+    "approved: BLOCKED (quote exceeds storage ceiling; payment client also lacks atomic ceilings)",
+    "quoted: YES (ant 0.3.9 live priced_sample; 4.397741334960937500 ANT > 2.5 ANT ceiling)",
     "spend-authorized: NOT YET",
     "purchased: NOT YET",
     "uploaded: NOT YET",

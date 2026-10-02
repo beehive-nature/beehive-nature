@@ -3,23 +3,23 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood privacy-safe public preservation edition v2",
-  "manifestSha256": "123ff6c5befadcc1dee6b71a4ad3c7109ba70fa3aa26ad810b202198f7d4b0f4", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-02T06:01:00Z",
+  "manifestSha256": "15cf467b2cd4111590651c77de099e67e01f2549a90b6f53c264864072d3dc2b", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-02T06:38:22.237Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": true,
   "files": 22107,
-  "bytes": 86331532,
+  "bytes": 86332167,
   "GiB": 0.080403,
   "personObjects": 11041,
   "evidencePacks": 3,
   "uploadForm": "deterministic public tar; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
   "uploadObject": {
    "form": "tar",
-   "bytes": 106833920,
-   "sha256": "960045b2f32cf2988041b235c3588d92cfd93b318e2672dae72c41f4f20b6c2f", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-02T06:05:00Z"
+   "bytes": 106823680,
+   "sha256": "a8150407e319e1c90585edb774b66fc31fb244c737002fc231840ba8fe26843f", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-02T06:47:38.660Z"
   }
  },
  "quotes": {
@@ -59,31 +59,34 @@
    "note": "QUOTE ONLY — no purchase, no upload, no transaction. Arweave is a one-time endowment: storage is prepaid at upload; retrievals are served by the network at no marginal cost to the uploader."
   },
   "autonomi": {
-   "state": "quoted (client-side estimate; payment disabled)",
+   "state": "quoted above standing storage ceiling; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-02T06:05:51Z",
+   "queriedAt": "2026-10-02T06:48:06.311Z",
    "raw": {
-    "file_size": 106833920,
+    "file_size": 106823680,
     "chunk_count": 29,
-    "storage_cost_atto": "2432547952148437500",
+    "storage_cost_atto": "4397741334960937500",
     "estimated_gas_cost_wei": "150000000000000",
     "payment_mode": "single",
     "confidence": "priced_sample"
    },
    "qualifications": [
     "keyless live estimate only; no payment, wallet mutation, or upload",
+    "4.397741334960937500 ANT exceeds the standing 2.5 ANT storage ceiling",
     "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
     "storage and gas are separate obligations"
    ],
    "computed": {
-    "storageANT": "2.432547952148437500",
+    "storageANT": "4.397741334960937500",
     "gasETH": "0.000150000000000000",
     "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
    "ceilings": {
     "storageMaxANT": 2.5,
     "gasMaxETH": 0.0002,
-    "enforceableByClient": false
+    "enforceableByClient": false,
+    "storageWithinCeiling": false,
+    "gasWithinCeiling": true
    }
   }
  },
@@ -148,7 +151,7 @@
  "states": {
   "prepared": true,
   "approved": false,
-  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; payment capability required",
+  "quoted": "Autonomi YES — ant 0.3.9 priced_sample; 4.397741334960937500 ANT exceeds 2.5 ANT ceiling; payment capability required",
   "purchased": false,
   "uploaded": false,
   "retrieved": false,
@@ -165,7 +168,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-02T06:05:51Z",
+ "generatedAt": "2026-10-02T06:48:06.311Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",

@@ -137,6 +137,7 @@ test('cypherpunk: the instrument is complete at first paint and verifiable', asy
   }));
   assert.equal(d.rows, 7); assert.equal(d.steps, 6); assert.equal(d.receipt, 7);
   assert.match(d.now, /consent/, 'the pipeline points at the first step not yet done');
+  assert.match(d.pipeline, /quote exceeds ceiling/, 'settlement reports the over-ceiling quote');
   assert.match(d.pipeline, /payment client cannot enforce both ceilings/, 'settlement reports the client capability stop');
   assert.equal(d.path, 'bData://genealogy/unsealed', 'no storage address is claimed before a paid upload');
   await p.click('.et-c-tab tr.pick[data-g="4"]');
