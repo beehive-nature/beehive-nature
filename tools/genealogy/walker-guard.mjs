@@ -14,19 +14,19 @@
 //
 // PR #296 review hardening (2026-10-02, founder-ordered fixes):
 //   · P1 lock acquisition is ATOMIC — fresh claims take the lock via
-//     exclusive create (O_EXCL); a lost race REFUSES instead of silently
-//     double-holding; holder refreshes replace atomically and re-read;
+//     exclusive create (O_EXCL); refresh and stale takeover first quarantine
+//     the exact observed bytes, then re-claim exclusively; lost races REFUSE;
 //   · P1 checkpointState enforces an outcome ALLOWLIST — 'downloaded' must
 //     come through checkpointDownload; unrecognized states are rejected,
 //     not denylisted around;
 //   · P1 checkpointDownload verifies the apid is bound to THIS ark — the
 //     binding evidence {url, response} must match the das/v2 name binding
 //     for the ark exactly (a neighboring filmstrip apid no longer passes);
-//   · P2 every manifest/lock write goes through atomic temp+replace — a
-//     crash can never leave the authoritative manifest truncated;
+//   · P2 every manifest write goes through atomic temp+replace — a crash
+//     cannot leave the authoritative manifest truncated;
 //   · P2 recordObservation/recordWalkerFailure assert queue membership too
 //     (the stray-ark class could re-enter through the retry logs).
-import { readFileSync, writeFileSync, existsSync, unlinkSync, openSync, closeSync, renameSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync, openSync, closeSync, renameSync, statSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 
 // Default paths = the live private tier. CI/tests inject fixtures via opts.
@@ -34,6 +34,8 @@ const DEFAULT_QUEUE = "file:///C:/Users/travi/family-lineage/images-harvest/swee
 const DEFAULT_MANIFEST = "file:///C:/Users/travi/family-lineage/images-harvest/images-manifest.json";
 const DEFAULT_LOCK = "file:///C:/Users/travi/family-lineage/images-harvest/.writer-lock.json";
 const LOCK_STALE_MS = 10 * 60 * 1000; // heartbeat older than this = takeover allowed
+const OWNED_CLAIMS = new Map();
+const claimKey = (url, writerId) => url.href + "\n" + writerId;
 
 // THE canonical ark→apid binding wire (the only other home of this URL is
 // sweep-walker.mjs; the fs-adapter note elides the prefix). The guard
@@ -88,6 +90,38 @@ function safeReadJson(url) {
   try { return JSON.parse(readFileSync(url, "utf8")); } catch { return null; }
 }
 
+function readClaim(url) {
+  try {
+    const text = readFileSync(url, "utf8");
+    return { text, parsed: JSON.parse(text), mtimeMs: statSync(url).mtimeMs };
+  } catch {
+    try { return { text: readFileSync(url, "utf8"), parsed: null, mtimeMs: statSync(url).mtimeMs }; }
+    catch { return null; }
+  }
+}
+
+// Serialize refresh and takeover through an atomic rename. The replacement is
+// allowed only when the quarantined bytes exactly equal those this caller
+// inspected. A contender may create a new claim while the canonical path is
+// absent; in that case exclusiveCreate loses and this caller stands down.
+function replaceClaimIfUnchanged(lockUrl, expectedText, replacementText) {
+  const quarantine = new URL(lockUrl.href + ".claim-" + randomUUID().slice(0, 8));
+  try { renameSync(lockUrl, quarantine); }
+  catch { throw new Error("REFUSED: lock changed before conditional claim; stand down"); }
+  const actualText = readFileSync(quarantine, "utf8");
+  if (actualText !== expectedText) {
+    if (!existsSync(lockUrl)) {
+      try { renameSync(quarantine, lockUrl); } catch { /* another claimant owns the canonical path */ }
+    }
+    throw new Error("REFUSED: lock identity changed before conditional claim; stand down");
+  }
+  if (!exclusiveCreate(lockUrl, replacementText)) {
+    try { unlinkSync(quarantine); } catch { /* best effort */ }
+    throw new Error("REFUSED: another writer won the conditional claim; stand down");
+  }
+  try { unlinkSync(quarantine); } catch { /* the canonical claim is already complete */ }
+}
+
 // ── EXCLUSIVE WRITER LOCK (founder order 2026-09-30c: another session
 //    reported saving images during this walker's run, contradicting the
 //    sole-writer claim — every walker entry point now shares ONE lock, and
@@ -97,52 +131,38 @@ export function acquireWriterLock(writerId, opts = {}) {
   const lockUrl = new URL(opts.lockPath || DEFAULT_LOCK);
   const now = new Date().toISOString();
   let prev = null;
+  let observed = null;
   if (existsSync(lockUrl)) {
-    prev = safeReadJson(lockUrl);
-    if (prev && prev.writerId !== writerId && (Date.now() - Date.parse(prev.heartbeat)) < LOCK_STALE_MS)
-      throw new Error("REFUSED: exclusive writer lock held by " + prev.writerId + " (heartbeat " + prev.heartbeat + ") — a second writer may not run");
-    if (prev && prev.writerId === writerId) {
-      // Holder heartbeat refresh: atomic replace, then RE-READ — if a
-      // takeover raced the refresh, this writer stands down (P1).
+    observed = readClaim(lockUrl);
+    if (!observed) throw new Error("REFUSED: lock vanished while being inspected; retry acquisition");
+    prev = observed.parsed;
+    const heartbeatMs = prev ? Date.parse(prev.heartbeat) : observed.mtimeMs;
+    const fresh = Number.isFinite(heartbeatMs) && (Date.now() - heartbeatMs) < LOCK_STALE_MS;
+    const ownedToken = OWNED_CLAIMS.get(claimKey(lockUrl, writerId));
+    if (prev && prev.writerId === writerId && prev.claimId && ownedToken === prev.claimId) {
+      // Holder heartbeat refresh is itself a conditional claim. It never
+      // replaces whatever happens to be at the path after the initial read.
       const refreshed = { ...prev, schema: "skaists.writer-lock/1", writerId, heartbeat: now };
-      atomicReplace(lockUrl, JSON.stringify(refreshed, null, 1));
-      const back = safeReadJson(lockUrl);
-      if (!back || back.writerId !== writerId)
-        throw new Error("REFUSED: lock takeover raced the heartbeat refresh — " + (back ? back.writerId : "unknown") + " now holds it; stand down");
+      replaceClaimIfUnchanged(lockUrl, observed.text, JSON.stringify(refreshed, null, 1));
       return refreshed;
     }
-    // Stale foreign lock: takeover must be CONDITIONAL on the stale identity
-    // still being on disk at claim time (PR #296 review P1). Protocol: RENAME
-    // the lock into a quarantine name — atomic, and it succeeds for exactly
-    // ONE of N contenders (the rest fail or find the lock gone). If the
-    // quarantined content is NOT the stale identity this writer judged (a
-    // fresh claim landed between read and rename), RESTORE it and refuse.
-    // Only after the quarantine provably holds the judged-stale identity is
-    // the fresh exclusive claim made — and a lost create race still refuses.
-    const quarantine = new URL(lockUrl.href + ".takeover-" + randomUUID().slice(0, 8));
-    try {
-      renameSync(lockUrl, quarantine);
-    } catch { /* the lock vanished — another contender quarantined it; the exclusive claim below settles the winner */ }
-    if (existsSync(quarantine)) {
-      const stolen = safeReadJson(quarantine);
-      if (!prev || !stolen || stolen.writerId !== prev.writerId || stolen.heartbeat !== prev.heartbeat) {
-        // we renamed somebody's FRESH lock — restore it and stand down
-        if (!existsSync(lockUrl)) {
-          try { renameSync(quarantine, lockUrl); } catch { /* restore raced a new claim — that claimant owns the file */ }
-        }
-        const winner = safeReadJson(lockUrl);
-        throw new Error("REFUSED: takeover raced a fresh claim — " + (winner ? winner.writerId : "another writer") + " holds it; stand down");
-      }
-      // genuinely the stale identity we judged: drop the quarantine copy and claim
-      try { unlinkSync(quarantine); } catch { /* best effort */ }
-    }
+    if (fresh) throw new Error("REFUSED: exclusive writer lock held by " + (prev?.writerId || "an initializing writer") + " (heartbeat " + (prev?.heartbeat || new Date(observed.mtimeMs).toISOString()) + ") — a second writer may not run");
+    // Stale valid or unreadable claim: replace only the exact bytes inspected.
+    const claimId = randomUUID();
+    const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now,
+      previousWriter: prev ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now }
+        : { writerId: "unreadable-claim", heartbeat: new Date(observed.mtimeMs).toISOString(), takenOverAt: now } };
+    replaceClaimIfUnchanged(lockUrl, observed.text, JSON.stringify(lock, null, 1));
+    OWNED_CLAIMS.set(claimKey(lockUrl, writerId), claimId);
+    return lock;
   }
-  const lock = { schema: "skaists.writer-lock/1", writerId, acquiredAt: now, heartbeat: now,
-    previousWriter: prev && prev.writerId !== writerId ? { writerId: prev.writerId, heartbeat: prev.heartbeat, takenOverAt: now } : (prev && prev.previousWriter) || null };
+  const claimId = randomUUID();
+  const lock = { schema: "skaists.writer-lock/1", writerId, claimId, acquiredAt: now, heartbeat: now, previousWriter: null };
   if (!exclusiveCreate(lockUrl, JSON.stringify(lock, null, 1))) {
     const winner = safeReadJson(lockUrl);
     throw new Error("REFUSED: exclusive writer lock held by " + (winner ? winner.writerId : "another writer") + " (heartbeat " + (winner ? winner.heartbeat : "unknown") + ") — a second writer may not run");
   }
+  OWNED_CLAIMS.set(claimKey(lockUrl, writerId), claimId);
   return lock;
 }
 
@@ -153,6 +173,8 @@ export function assertWriterLock(writerId, opts = {}) {
   const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
   if (lock.writerId !== writerId)
     throw new Error("REFUSED: exclusive writer lock held by " + lock.writerId + ", not " + writerId);
+  if (!lock.claimId || OWNED_CLAIMS.get(claimKey(lockUrl, writerId)) !== lock.claimId)
+    throw new Error("REFUSED: writer identity does not own this process claim — re-acquire");
   if (Date.now() - Date.parse(lock.heartbeat) >= LOCK_STALE_MS)
     throw new Error("REFUSED: writer lock heartbeat stale (since " + lock.heartbeat + ") — re-acquire");
   return true;
@@ -164,7 +186,10 @@ export function releaseWriterLock(writerId, opts = {}) {
   const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
   if (lock.writerId !== writerId)
     throw new Error("REFUSED: cannot release a lock held by " + lock.writerId);
+  if (!lock.claimId || OWNED_CLAIMS.get(claimKey(lockUrl, writerId)) !== lock.claimId)
+    throw new Error("REFUSED: cannot release a lock this process does not own");
   unlinkSync(lockUrl);
+  OWNED_CLAIMS.delete(claimKey(lockUrl, writerId));
   return true;
 }
 
@@ -239,7 +264,7 @@ export function isRetryableObservation(state) {
 //    allowlist, not a denylist, so a typo or a novel state can never land
 //    as if it were the site's answer. ──
 export function isRecordOutcome(state) {
-  return typeof state === "string" && /^xml-\d{3}(-all)?$/.test(state.trim());
+  return typeof state === "string" && /^xml-(403|404)(-all)?$/.test(state.trim());
 }
 
 // Shared save path: membership + holder lock + ATOMIC manifest replace.

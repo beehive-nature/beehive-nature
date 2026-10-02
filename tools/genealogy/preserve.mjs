@@ -47,8 +47,9 @@ const MANDATORY = [
   // EVIDENCE LAYER (founder order 2026-10-02: the eternalization edition
   // contains the merged relationship audit, the 13,249-record source
   // harvest public layer, and the public image evidence — the approved
-  // treatment of private image bytes is that they NEVER enter the bundle;
-  // these five carry counts/digests/pointers only)
+  // treatment of private image bytes is that they NEVER enter the bundle.
+  // records.json is projected during prepare: citation/pointer metadata stays,
+  // while raw evidence[].value transcription strings never enter the bundle.)
   LINEAGE + "/sources/manifest.json",
   LINEAGE + "/sources/index.json",
   LINEAGE + "/sources/records.json",
@@ -58,6 +59,37 @@ const MANDATORY = [
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
 const fail = (msg) => { console.error("FAILED: " + msg); process.exit(1); };
+
+// The repository source layer retains research data needed for correlation,
+// including transcription values. The eternalized PUBLIC edition follows the
+// stricter source-harvest boundary: citations, ARKs, event metadata and the
+// affected fact classes may leave; raw transcription values may not. Keep the
+// package path stable while deterministically projecting its bytes.
+export function publicSourceRecords(buf) {
+  const source = JSON.parse(Buffer.isBuffer(buf) ? buf.toString("utf8") : String(buf));
+  const records = {};
+  for (const [id, record] of Object.entries(source.records || {})) {
+    records[id] = {
+      id: record.id,
+      title: record.title,
+      citation: record.citation,
+      redactedLiving: !!record.redactedLiving,
+      urls: Array.isArray(record.urls) ? record.urls : [],
+      event: record.event ?? null,
+      evidence: Array.isArray(record.evidence)
+        ? record.evidence.map((fact) => ({ factType: fact?.factType ?? null, fieldType: fact?.fieldType ?? null }))
+        : [],
+      retrieved: record.retrieved,
+      provider: record.provider,
+    };
+  }
+  return Buffer.from(JSON.stringify({
+    schema: "skaists.sources-records-public/1",
+    generated: source.generated,
+    projection: "public citation and fact-class metadata; raw evidence values excluded",
+    records,
+  }, null, 1) + "\n");
+}
 
 // DECLARED contents: the archive says what it contains — persons from the
 // corpus, evidence from the pack index + overlay references, fixtures' pages.
@@ -124,7 +156,8 @@ if (cmd === "prepare") {
     files: {},
   };
   for (const f of declared.files) {
-    const buf = readFileSync(join(REPO, f));
+    const sourceBuf = readFileSync(join(REPO, f));
+    const buf = f === LINEAGE + "/sources/records.json" ? publicSourceRecords(sourceBuf) : sourceBuf;
     mkdirSync(dirname(join(out, f)), { recursive: true });
     writeFileSync(join(out, f), buf);
     manifest.files[f] = { sha256: sha256(buf), bytes: buf.length };

@@ -58,6 +58,43 @@ export function resolveApprovedTar(candidates, expectedSha) {
   return null;
 }
 
+function decimalToUnits(value, decimals, label) {
+  const text = String(value ?? "").trim();
+  if (!/^(0|[1-9]\d*)(\.\d+)?$/.test(text)) throw new Error(label + " must be a finite nonnegative decimal");
+  const [whole, fraction = ""] = text.split(".");
+  if (fraction.length > decimals && /[1-9]/.test(fraction.slice(decimals)))
+    throw new Error(label + " exceeds supported precision");
+  return BigInt(whole) * (10n ** BigInt(decimals)) + BigInt((fraction.slice(0, decimals) + "0".repeat(decimals)).slice(0, decimals));
+}
+
+// Pure spend boundary: malformed/missing quote data and malformed gate limits
+// fail closed; the fresh quote must match the approved chunk count and remain
+// within both independently approved asset ceilings.
+export function validateQuoteAgainstGate(q, rawGate) {
+  try {
+    const storageAtto = decimalToUnits(q?.storage_cost_atto, 0, "quote.storage_cost_atto");
+    const gasWei = decimalToUnits(q?.estimated_gas_cost_wei, 0, "quote.estimated_gas_cost_wei");
+    const storageMaxAtto = decimalToUnits(rawGate?.separatedCeilings?.storageMaxAnt, 18, "gate.storageMaxAnt");
+    const gasMaxWei = decimalToUnits(rawGate?.separatedCeilings?.gasMaxEth, 18, "gate.gasMaxEth");
+    const actualChunks = Number(q?.chunk_count ?? q?.chunkCount);
+    const approvedChunks = Number(rawGate?.quote?.chunkCount);
+    if (!Number.isSafeInteger(actualChunks) || actualChunks < 0) throw new Error("quote.chunk_count must be a nonnegative safe integer");
+    if (!Number.isSafeInteger(approvedChunks) || approvedChunks < 0) throw new Error("gate.quote.chunkCount must be a nonnegative safe integer");
+    if (actualChunks !== approvedChunks) throw new Error("chunk count changed: quote=" + actualChunks + " approved=" + approvedChunks);
+    if (storageAtto > storageMaxAtto) throw new Error("storage quote exceeds approved ANT ceiling");
+    if (gasWei > gasMaxWei) throw new Error("gas quote exceeds approved ETH ceiling");
+    return {
+      ok: true,
+      storageANT: Number(storageAtto) / 1e18,
+      gasETH: Number(gasWei) / 1e18,
+      chunkCount: actualChunks,
+      bounds: { maxStorageANT: Number(rawGate.separatedCeilings.storageMaxAnt), maxGasETH: Number(rawGate.separatedCeilings.gasMaxEth), chunkCount: approvedChunks },
+    };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+}
+
 function gateRefusal(gate) {
   return {
     error: "EDITION NOT APPROVED FOR SPEND",
@@ -77,6 +114,11 @@ async function antCmd(args) {
     timeout: 300000,
   });
   return JSON.parse(stdout.trim().split("\n").pop());
+}
+
+async function antVersion() {
+  const { stdout } = await exec("ant", ["--version"], { env: { ...process.env }, timeout: 30000 });
+  return stdout.trim();
 }
 
 // The server only starts when this file is run directly — importing it (the
@@ -111,16 +153,13 @@ function startService() {
       if (!approved) return json(res, 409, gateRefusal(gate));
       const artifact = resolveApprovedTar(CANDIDATE_TARS, gate.raw.artifact.tarSha256);
       if (!artifact) return json(res, 409, { error: "APPROVED ARTIFACT NOT ON DISK", expectedSha: gate.raw.artifact.tarSha256, candidates: CANDIDATE_TARS });
-      const bounds = { maxStorageANT: gate.raw.separatedCeilings.storageMaxAnt, maxGasETH: gate.raw.separatedCeilings.gasMaxEth };
       const q = await antCmd(["file", "cost", artifact.path]);
-      const storageANT = parseInt(q.storage_cost_atto) / 1e18;
-      const gasETH = parseInt(q.estimated_gas_cost_wei) / 1e18;
-      // ENFORCED: refuse if the quote already exceeds the gate's ceilings
-      if (storageANT > bounds.maxStorageANT || gasETH > bounds.maxGasETH) {
-        return json(res, 409, { error: "QUOTE EXCEEDS THE EDITION GATE'S CEILINGS", quote: q, bounds,
+      const check = validateQuoteAgainstGate(q, gate.raw);
+      if (!check.ok) {
+        return json(res, 409, { error: "QUOTE REFUSED BY THE EDITION GATE", reason: check.error, quote: q,
           action: "STOP and requote/reapprove — the interface does not proceed on exceeded bounds" });
       }
-      return json(res, 200, { quote: q, storageANT, gasETH, bounds, artifact: { path: artifact.path, sha256: artifact.sha },
+      return json(res, 200, { quote: q, storageANT: check.storageANT, gasETH: check.gasETH, bounds: check.bounds, artifact: { path: artifact.path, sha256: artifact.sha },
         timestamp: new Date().toISOString(), confidence: q.confidence,
         qualifications: "display-only estimate; true cost reconciles at payment; storage and gas are separate obligations" });
     }
@@ -133,21 +172,17 @@ function startService() {
       if (!approved) return json(res, 409, gateRefusal(gate));
       const artifact = resolveApprovedTar(CANDIDATE_TARS, gate.raw.artifact.tarSha256);
       if (!artifact) return json(res, 409, { error: "APPROVED ARTIFACT NOT ON DISK", expectedSha: gate.raw.artifact.tarSha256, action: "STOP — the exact approved bytes must be present before any spend" });
-      const bounds = { maxStorageANT: gate.raw.separatedCeilings.storageMaxAnt, maxGasETH: gate.raw.separatedCeilings.gasMaxEth };
       // fresh quote immediately before upload; enforce the gate's ceilings
       const q = await antCmd(["file", "cost", artifact.path]);
-      const storageANT = parseInt(q.storage_cost_atto) / 1e18;
-      const gasETH = parseInt(q.estimated_gas_cost_wei) / 1e18;
-      if (storageANT > bounds.maxStorageANT || gasETH > bounds.maxGasETH) {
-        return json(res, 409, { error: "QUOTE EXCEEDED THE EDITION GATE'S CEILINGS AT UPLOAD TIME", quote: q, bounds });
-      }
+      const check = validateQuoteAgainstGate(q, gate.raw);
+      if (!check.ok) return json(res, 409, { error: "UPLOAD REFUSED BY THE EDITION GATE", reason: check.error, quote: q });
       // THE UPLOAD — the service holds the key in env; the UI never sees it;
       // the bytes uploaded are the gate-approved artifact or nothing
       const result = await antCmd(["file", "upload", artifact.path]);
       // bank the receipt automatically
       const receipt = {
         uploadedAt: new Date().toISOString(),
-        clientVersion: "ant 0.3.1",
+        clientVersion: await antVersion(),
         result,
         quote: q,
         artifactSha256: artifact.sha,

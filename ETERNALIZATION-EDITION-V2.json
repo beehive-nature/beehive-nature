@@ -28,12 +28,12 @@
     "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change"
   },
   "spendingApprovalGate": {
-    "status": "AWAITING FOUNDER APPROVAL",
-    "rule": "NO payment occurs until the founder approves THIS artifact (tar sha256 199c380f...) under THESE ceilings; approval binds the exact hash and ceilings, never 'go upload the genealogy' (the standing ceremony law)",
+    "status": "REBUILD REQUIRED — PRIVACY PROJECTION CHANGED",
+    "rule": "NO payment occurs against this superseded artifact. The privacy-safe records projection changes package bytes; rebuild, re-hash, re-quote with ant 0.3.9, then obtain founder approval of the successor exact hash and ceilings.",
     "afterApproval": "founder-gated settlement lane (Trezor/antd-bridge ceremony per the bPay evidence layer) -> fresh retrieval -> hash-verify vs 199c380f... -> restoration proof -> receipt"
   },
   "progression": [
-    "preserved: YES (pkg4, declared-object verified)",
+    "preserved: SUPERSEDED (pkg4 included raw transcription values; never approve or upload)",
     "approved: NOT YET (founder gesture)",
     "quoted: YES (live, priced_sample)",
     "spend-authorized: NOT YET",

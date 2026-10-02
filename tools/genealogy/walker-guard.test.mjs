@@ -3,7 +3,7 @@
 // from the 2026-09-29c incident. Synthetic fixtures only; CI-safe.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { nextPending, assertQueueMember, checkpointState, checkpointDownload, assertRecordOutcome, recordWalkerFailure, recordObservation, acquireWriterLock, releaseWriterLock } from "./walker-guard.mjs";
@@ -176,7 +176,7 @@ test("P1 conditional takeover: a takeover cannot steal a FRESH claim, and takeov
   const before = readFileSync(lockUrl, "utf8");
   assert.throws(() => acquireWriterLock("late-C", { ...opts, lockPath }), /REFUSED: exclusive writer lock held by late-B/);
   assert.equal(readFileSync(lockUrl, "utf8"), before, "a refused contender must leave the holder's lock byte-unchanged");
-  assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".takeover-") || f.includes(".tmp-")), [], "no quarantine/temp residue from takeover or refusal");
+  assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".claim-") || f.includes(".tmp-")), [], "no quarantine/temp residue from takeover or refusal");
 });
 
 test("P2 outcomes are final: an already-resolved ark is never overwritten by a later save (review fix)", () => {
@@ -231,6 +231,26 @@ test("retryable observations (missing traffic/tiles, binding failures) are REJEC
   // explicit site denials for the bound apid remain valid outcomes
   assert.equal(assertRecordOutcome("xml-403"), true);
   assert.equal(assertRecordOutcome("xml-404"), true);
+});
+
+test("transient XML responses never become terminal outcomes", () => {
+  const { opts } = fixtures();
+  for (const transient of ["xml-429", "xml-500", "xml-502", "xml-503", "xml-429-all"]) {
+    assert.throws(() => checkpointState("CCCC-3333", { state: transient }, opts), /REJECT unrecognized record outcome/);
+  }
+});
+
+test("unreadable lock claims refuse while fresh and recover after the stale interval", () => {
+  const { opts } = fixtures();
+  const lockPath = opts.manifestPath.replace("images-manifest.json", ".writer-lock-unreadable.json");
+  const lockUrl = new URL(lockPath);
+  writeFileSync(lockUrl, "{partial");
+  assert.throws(() => acquireWriterLock("recovery-writer", { ...opts, lockPath }), /initializing writer/);
+  const old = new Date(Date.now() - 11 * 60 * 1000);
+  utimesSync(lockUrl, old, old);
+  const recovered = acquireWriterLock("recovery-writer", { ...opts, lockPath });
+  assert.equal(recovered.previousWriter.writerId, "unreadable-claim");
+  assert.equal(JSON.parse(readFileSync(lockUrl, "utf8")).claimId, recovered.claimId);
 });
 
 test("recordObservation side-logs the absence-observation and the ark STAYS pending", async () => {

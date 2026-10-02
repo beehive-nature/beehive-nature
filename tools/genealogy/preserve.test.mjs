@@ -47,7 +47,14 @@ function buildFixture() {
   // evidence layer (founder order 2026-10-02): the five declared sources files
   file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1" }));
   file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({ schema: "skaists.sources/1", persons: {} }));
-  file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({ schema: "skaists.sources-records/1", records: {} }));
+  file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({
+    schema: "skaists.sources-records/1", generated: "fixture", records: {
+      rec1: { id: "rec1", title: "Public title", citation: "Public citation", redactedLiving: false,
+        urls: ["https://example.test/ark"], event: { factType: "Census", place: "Somewhere" },
+        evidence: [{ factType: "Name", fieldType: "Original", value: "PRIVATE TRANSCRIPTION" }],
+        retrieved: "2026-10-02", provider: "fixture" },
+    },
+  }));
   file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
   file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
@@ -158,4 +165,18 @@ test("EVIDENCE LAYER declared (founder order 2026-10-02): the five sources files
   const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
   assert.notEqual(r.code, 0, "prepare must fail when a declared evidence file is missing");
   assert.match(r.stderr, /relationship-audit/);
+});
+
+test("privacy-safe edition projects source records without raw transcription values", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  const projected = JSON.parse(readFileSync(join(pkg, "assets/profile-archive/lineage/sources/records.json"), "utf8"));
+  assert.equal(projected.schema, "skaists.sources-records-public/1");
+  assert.equal(projected.records.rec1.citation, "Public citation");
+  assert.deepEqual(projected.records.rec1.evidence, [{ factType: "Name", fieldType: "Original" }]);
+  assert.doesNotMatch(JSON.stringify(projected), /PRIVATE TRANSCRIPTION/);
+  const original = readFileSync(join(root, "assets/profile-archive/lineage/sources/records.json"), "utf8");
+  assert.match(original, /PRIVATE TRANSCRIPTION/, "prepare projects package bytes without mutating the research source");
 });

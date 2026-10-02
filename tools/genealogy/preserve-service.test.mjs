@@ -9,14 +9,17 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { editionGate, resolveApprovedTar } from "./preserve-service.mjs";
+import { editionGate, resolveApprovedTar, validateQuoteAgainstGate } from "./preserve-service.mjs";
 
 const GATE_SCHEMA = (status, tarSha) => ({
   schema: "skaists.eternalization-edition/2",
   artifact: { tarSha256: tarSha, tarBytes: 10 },
   separatedCeilings: { storageMaxAnt: 1.6, gasMaxEth: 0.0002 },
+  quote: { chunkCount: 29 },
   spendingApprovalGate: { status },
 });
+
+const GOOD_QUOTE = { storage_cost_atto: "1482927234375000000", estimated_gas_cost_wei: "150000000000000", chunk_count: 29 };
 
 test("editionGate: missing gate file = fail-closed (NO spend authority without a gate)", () => {
   const g = editionGate(join(tmpdir(), "definitely-absent-gate-" + Date.now() + ".json"));
@@ -58,4 +61,30 @@ test("resolveApprovedTar: only the candidate whose bytes hash to the gate's sha 
   // a hash no candidate carries = nothing is spendable
   assert.equal(resolveApprovedTar([wrong, right], "0".repeat(64)), null);
   assert.equal(resolveApprovedTar([join(dir, "absent.tar")], approvedSha), null);
+});
+
+test("validateQuoteAgainstGate accepts only the approved chunk shape within both ceilings", () => {
+  const gate = GATE_SCHEMA("APPROVED", "a".repeat(64));
+  const result = validateQuoteAgainstGate(GOOD_QUOTE, gate);
+  assert.equal(result.ok, true);
+  assert.equal(result.chunkCount, 29);
+});
+
+test("validateQuoteAgainstGate fails closed on missing, nonnumeric, negative, or excessive values", () => {
+  const gate = GATE_SCHEMA("APPROVED", "a".repeat(64));
+  for (const quote of [
+    { ...GOOD_QUOTE, storage_cost_atto: undefined },
+    { ...GOOD_QUOTE, storage_cost_atto: "NaN" },
+    { ...GOOD_QUOTE, estimated_gas_cost_wei: "-1" },
+    { ...GOOD_QUOTE, storage_cost_atto: "1600000000000000001" },
+    { ...GOOD_QUOTE, estimated_gas_cost_wei: "200000000000001" },
+  ]) assert.equal(validateQuoteAgainstGate(quote, gate).ok, false);
+  assert.equal(validateQuoteAgainstGate(GOOD_QUOTE, { ...gate, separatedCeilings: { ...gate.separatedCeilings, gasMaxEth: "bad" } }).ok, false);
+});
+
+test("validateQuoteAgainstGate enforces the approved chunk count", () => {
+  const gate = GATE_SCHEMA("APPROVED", "a".repeat(64));
+  assert.match(validateQuoteAgainstGate({ ...GOOD_QUOTE, chunk_count: 30 }, gate).error, /chunk count changed/);
+  assert.equal(validateQuoteAgainstGate({ ...GOOD_QUOTE, chunk_count: undefined }, gate).ok, false);
+  assert.equal(validateQuoteAgainstGate(GOOD_QUOTE, { ...gate, quote: {} }).ok, false);
 });
