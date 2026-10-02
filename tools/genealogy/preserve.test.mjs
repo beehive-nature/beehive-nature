@@ -44,6 +44,12 @@ function buildFixture() {
   file("assets/profile-archive/lineage/reconstructions.json", JSON.stringify({ current: {}, versions: [] }));
   file("assets/profile-archive/lineage/identity-registry.json", JSON.stringify({ schema: "skaists.identity-registry/1", issued: {}, aliases: {} }));
   file("assets/profile-archive/lineage/staging-inventory.json", JSON.stringify({ publicStaged: 2, privateStaged: 0, sumCheck: true }));
+  // evidence layer (founder order 2026-10-02): the five declared sources files
+  file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1" }));
+  file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({ schema: "skaists.sources/1", persons: {} }));
+  file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({ schema: "skaists.sources-records/1", records: {} }));
+  file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
+  file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
   file("assets/profile-archive/lineage/persons/pa2.json", '{"internalId":"pa2"}');
   file("assets/profile-archive/lineage/evidence/pack-a.json", '{"schema":"skaists.evidence/1"}');
@@ -143,4 +149,13 @@ test("prepare builds clean packages: stale files cannot slip in", () => {
     "stale file from an earlier publication must not enter the new package");
   assert.ok(!existsSync(join(pkg, "assets/profile-archive/lineage/persons/STALE-from-old-publication.json")),
     "prepare cleaned the package directory");
+});
+
+test("EVIDENCE LAYER declared (founder order 2026-10-02): the five sources files are mandatory and missing ones fail prepare", () => {
+  const root = buildFixture();
+  // delete one declared evidence file → prepare must fail, no silent omission
+  rmSync(join(root, "assets/profile-archive/lineage/sources/relationship-audit.json"));
+  const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0, "prepare must fail when a declared evidence file is missing");
+  assert.match(r.stderr, /relationship-audit/);
 });

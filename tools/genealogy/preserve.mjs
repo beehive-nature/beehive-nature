@@ -44,6 +44,16 @@ const MANDATORY = [
   LINEAGE + "/reconstructions.json",
   LINEAGE + "/identity-registry.json",
   LINEAGE + "/staging-inventory.json",
+  // EVIDENCE LAYER (founder order 2026-10-02: the eternalization edition
+  // contains the merged relationship audit, the 13,249-record source
+  // harvest public layer, and the public image evidence — the approved
+  // treatment of private image bytes is that they NEVER enter the bundle;
+  // these five carry counts/digests/pointers only)
+  LINEAGE + "/sources/manifest.json",
+  LINEAGE + "/sources/index.json",
+  LINEAGE + "/sources/records.json",
+  LINEAGE + "/sources/images-summary.json",
+  LINEAGE + "/sources/relationship-audit.json",
 ];
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
