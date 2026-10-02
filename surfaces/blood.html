@@ -1529,6 +1529,11 @@ try {
       syncing = true; try { atlas.reroot(id); } finally { syncing = false; }
     },
     onnavigate(s) {
+      // The drawer labels the rendered research view, including guarded
+      // programmatic opens. The retired comb selection is not its identity.
+      const drawerName = $("drawer-name");
+      const heading = $("ppanel").querySelector(".pp-name");
+      if (drawerName) drawerName.textContent = heading ? heading.textContent : "family research";
       if (syncing || !atlas) return;
       const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
       if (id && id !== panelAt) { panelAt = id; syncing = true; atlas.select(id); syncing = false; }
@@ -1681,7 +1686,7 @@ try {
         treeFocus = ctx.f;
         syncing = true; atlas.reroot(ctx.f); syncing = false;
       }
-      if (ctx.p && ctx.p !== panelAt) {
+      if (ctx.p && ctx.p !== atlas.getContext().selection) {
         syncing = true; atlas.select(ctx.p); syncing = false;
         openPanelPerson(ctx.p);
       }
