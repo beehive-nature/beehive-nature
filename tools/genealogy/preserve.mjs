@@ -115,7 +115,8 @@ export function packageSafeStorageEconomics(buf) {
   const ceilings = ant?.ceilings;
   if (source?.schema !== "zblood.storage-economics/1")
     throw new Error("storage economics must use zblood.storage-economics/1");
-  if (!ceilings || !Number.isFinite(Number(ceilings.storageMaxANT)) || !Number.isFinite(Number(ceilings.gasMaxETH)))
+  if (!ceilings || typeof ceilings.storageMaxANT !== "number" || !Number.isFinite(ceilings.storageMaxANT) || ceilings.storageMaxANT < 0 ||
+      typeof ceilings.gasMaxETH !== "number" || !Number.isFinite(ceilings.gasMaxETH) || ceilings.gasMaxETH < 0)
     throw new Error("storage economics must declare separate ANT and ETH ceilings");
   return Buffer.from(JSON.stringify({
     schema: "zblood.storage-economics-package/1",

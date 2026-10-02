@@ -710,7 +710,8 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
   var PV = { service: "http://127.0.0.1:8798" };
   function pvCeilings(quote) {
     var c=quote&&quote.ceilings;
-    return c&&Number.isFinite(Number(c.storageMaxANT))&&Number.isFinite(Number(c.gasMaxETH))?c:null;
+    return c&&typeof c.storageMaxANT==="number"&&Number.isFinite(c.storageMaxANT)&&c.storageMaxANT>=0&&
+      typeof c.gasMaxETH==="number"&&Number.isFinite(c.gasMaxETH)&&c.gasMaxETH>=0?c:null;
   }
   function pvShow(id) {
     ["preserve-step", "preserve-review", "preserve-progress", "preserve-receipt", "preserve-error"].forEach(function(s) {
@@ -1626,7 +1627,11 @@ try {
   var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
   var RAIN=function(){var st=(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);return {5:st[1],4:st[2],3:st[3],2:st[4],1:st[4],rim:st[0]};};
   var D={gens:[],living:0,spine:0,E:null,st:{},asked:false};
-  function econCeilings(quote){var c=quote&&quote.ceilings;return c&&Number.isFinite(Number(c.storageMaxANT))&&Number.isFinite(Number(c.gasMaxETH))?c:null;}
+  function econCeilings(quote){
+    var c=quote&&quote.ceilings;
+    return c&&typeof c.storageMaxANT==="number"&&Number.isFinite(c.storageMaxANT)&&c.storageMaxANT>=0&&
+      typeof c.gasMaxETH==="number"&&Number.isFinite(c.gasMaxETH)&&c.gasMaxETH>=0?c:null;
+  }
   var R={mode:'line',sel:4,lit:{}};
 
   function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}

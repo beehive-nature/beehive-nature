@@ -30,7 +30,8 @@ async function open(reg) {
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/surfaces/blood.html`, { waitUntil: 'load' });
-  await p.waitForFunction(() => window.__eternal && window.__eternal.data.gens.length && window.__eternal.data.E, null, { timeout: 20000 });
+  await p.waitForFunction(() => window.__eternal && window.__eternal.data.gens.length && window.__eternal.data.E, null, { timeout: 20000 })
+    .catch(e => { throw new Error(`${e.message}; page errors: ${errs.join(' | ') || 'none'}`); });
   return { ctx, p, errs };
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
@@ -171,6 +172,26 @@ test('cached economics without ceilings fails closed instead of crashing the fro
     status: 200, contentType: 'application/json', body: JSON.stringify({
       artifact: { files: 1 },
       quotes: { autonomi: { route: 'cached client', queriedAt: '2026-09-01', raw: { confidence: 'stale' }, computed: { storageANT: '1', gasETH: '0.0001' } } },
+      states: { prepared: true, quoted: true, purchased: false, uploaded: false },
+    }),
+  }));
+  const p = await ctx.newPage(); const errs = [];
+  p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${ORIGIN}/surfaces/blood.html`, { waitUntil: 'load' });
+  await p.waitForFunction(() => window.__eternal && window.__eternal.data.E);
+  assert.equal(errs.length, 0, errs.join(' | '));
+  assert.match(await p.textContent('#etPipe'), /required ceiling data unavailable/);
+  assert.match(await p.textContent('[data-et="beeQuote"]'), /payment disabled/);
+  await ctx.close();
+});
+
+test('cached economics with null or empty ceilings fails closed', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => localStorage.setItem('bregister', 'bee'));
+  await ctx.route('**/zblood-storage-economics.json', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({
+      artifact: { files: 1 },
+      quotes: { autonomi: { route: 'cached client', queriedAt: '2026-09-01', raw: { confidence: 'stale' }, computed: { storageANT: '1', gasETH: '0.0001' }, ceilings: { storageMaxANT: null, gasMaxETH: '' } } },
       states: { prepared: true, quoted: true, purchased: false, uploaded: false },
     }),
   }));

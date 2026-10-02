@@ -208,6 +208,19 @@ test("prepared edition carries package-safe status without a self-referential qu
   assert.ok(manifest.files["assets/profile-archive/lineage/zblood-storage-economics.json"]);
 });
 
+test("package-safe status rejects null and empty ceiling values", () => {
+  for (const [field, value] of [["storageMaxANT", null], ["gasMaxETH", ""]]) {
+    const root = buildFixture();
+    const statusPath = join(root, "assets/profile-archive/lineage/zblood-storage-economics.json");
+    const status = JSON.parse(readFileSync(statusPath, "utf8"));
+    status.quotes.autonomi.ceilings[field] = value;
+    writeFileSync(statusPath, JSON.stringify(status));
+    const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+    assert.notEqual(r.code, 0, `${field}=${JSON.stringify(value)} must fail closed`);
+    assert.match(r.stderr, /separate ANT and ETH ceilings/);
+  }
+});
+
 test("privacy-safe edition projects source records without raw transcription values", () => {
   const root = buildFixture();
   const pkg = join(root, "pkg");
