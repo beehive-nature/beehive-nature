@@ -257,8 +257,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const REVIEWED = [
     ['the glyphs above open each part', 'raver stage: the dock sits above it'],
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-    ['paste it once below', 'within the keychain'],
-    ['Any device in the list above', 'within the vault'],
+        ['Any device in the list above', 'within the vault'],
     ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
     ['rge new ones below', 'within the key forge'],
     ['(live price below)', 'within the account forge'],

@@ -865,7 +865,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <details id="kc-rec-scaffold" style="margin-top:10px">
         <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
         <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
-        Prefer <b>connect keychain (passkey)</b> above — New-bee never needs to paste.</div>
+        Prefer <b>connect keychain (passkey)</b> — New-bee never needs to paste.</div>
         <div class="row" style="margin-top:8px">
           <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
           <button id="kc-recgo">recover</button>
@@ -1120,7 +1120,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <h2>🌉 the bridge: one time, then never manual again</h2>
   <div class="law">Your bzDiD-derived K1 key is not on your account yet.
   <b>Gold:</b> connect / inject / derive enrolls the key — New-bee never pastes a private key.
-  <b>While finalizing:</b> the recovery scaffold below can paste your existing <b>active</b> key
+  <b>While finalizing:</b> open <b>scaffold · recovery</b> to paste your existing <b>active</b> key
   <b>once</b> to build an updateauth that <b>adds</b> your bzDiD keys alongside every key already
   on your account (nothing removed, threshold 1: <b>the derived key AND the account passkey can
   both sign</b>). The pasted key stays in tab memory only and is scrubbed the moment the
