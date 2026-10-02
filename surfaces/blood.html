@@ -498,7 +498,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div class="econcard" id="econcard" hidden>
   <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
   <span class="states" id="econ-states">…</span><br>
-  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ preserve this archive on Autonomi</button>
+  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ view Autonomi eternalization status</button>
 </div>
 <div id="preservepanel" hidden style="margin-top:12px;border:1px solid var(--gold);border-radius:14px;padding:16px;background:var(--panel)">
   <div style="font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--gold)">preserve this family archive</div>
@@ -517,7 +517,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
         <div id="pv-detail" style="margin-top:6px;font-size:max(9.5px,var(--fmin,12px));color:var(--faint);line-height:1.7"></div>
       </details>
     </div>
-    <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">review with wallet →</button>
+    <button id="pv-approve" type="button" disabled title="ant 0.3.9 cannot apply both approved ceilings atomically" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:not-allowed">wallet review unavailable — payment caps required</button>
     <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace;cursor:pointer">cancel (voids this plan)</button>
   </div>
   <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:max(11px,var(--fmin,12px))">
@@ -718,52 +718,11 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(hashes.join("\n")));
     return "sha256:" + [...new Uint8Array(buf)].map(function(b){return b.toString(16).padStart(2,"0");}).join("");
   }
-  async function pvBuildInvoice(plan) {
-    // mirrors tools/genealogy/bpay.mjs buildInvoice — same schema, same laws
-    var d = await pvPlanDigest(plan);
-    var ceilingAntAtto = 32 * 10 ** 17; // 3.2 ANT
-    if (parseInt(plan.total_amount_atto) > ceilingAntAtto) return null; // the bridge already refused; belt+braces
-    return {
-      schema: "skaists.bpay-invoice/1",
-      invoiceId: "inv-" + plan.upload_id,
-      issuedAt: new Date().toISOString(),
-      issuer: { service: "antd-bridge (keyless prepare)", planSource: "live Autonomi network prepare" },
-      buyer: { role: "founder (Trezor custody)", note: "the paying address is never embedded in artifacts" },
-      subject: { archive: {
-        name: "zBlood first public preservation snapshot",
-        manifestSha256: "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", // PUBLIC-CONSTANT public chain data
-        files: 20537, contentBytes: 62139972,
-        uploadObject: { name: "pkg3.tar", bytes: 80998400,
-          sha256: "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b" } }, // PUBLIC-CONSTANT public chain data
-        encryptedChunks: plan.total_chunks, alreadyStoredChunks: plan.already_stored || 0 },
-      service: { network: "Autonomi", route: "ANT", visibility: "public",
-        destination: "Autonomi network storage — public DataMap address " + (plan.data_map_address || "(pending)") },
-      quote: { state: "quoted (live node quotes — not purchased)",
-        lineItems: [
-          { kind: "network storage", asset: "ANT", amountAtto: plan.total_amount_atto, payments: (plan.payments||[]).length, paymentType: plan.payment_type },
-          { kind: "gas (authorized ceiling, settled at payment)", asset: "ETH", ceilingAtto: "200000000000000" } ],
-        planIdentity: { uploadId: plan.upload_id, dataMapAddress: plan.data_map_address || null,
-          digest: d, artifactSha256: plan.artifact_sha256, artifactBytes: plan.artifact_bytes },
-        persistence: plan.recovered_from
-          ? { law: "RECOVERED — identical quote hashes to the original prepare (bridge-death proof)", recoveredFrom: plan.recovered_from }
-          : { law: "persisted at prepare; survives bridge death (P1 recovery)" },
-        expiration: { model: "job-bound, not clock-bound",
-          note: "the plan is bound to upload_id and persisted by the bridge; a force_fresh re-quote is a NEW plan" } },
-      authorization: { ceiling: { maxStorageANT: "3.2", maxGasETH: "0.0002" },
-        authorizedBy: "founder order 2026-09-17 (separated bounds)",
-        stopConditions: ["sha256(pkg3.tar) ≠ fec5fba8… at upload time","actual storage charge > 3.2 ANT","actual gas > 0.0002 ETH","different artifact or chunk count"],
-        quoteWithinCeiling: true },
-      walletAction: { requested: [
-          { tx: "ERC-20 approve", token: "ANT", spender: "Autonomi payment vault" },
-          { tx: "payForQuotes", contract: "Autonomi payment vault" } ],
-        signer: "founder Trezor — device custody; neither blood.html nor antd-bridge ever holds a key",
-        clearSigning: { erc20Approve: "likely covered — not yet device-observed",
-          payForQuotes: "UNVERIFIED — do NOT claim clear signing until device-tested" } },
-      states: { quote: plan.recovered_from ? "quoted (recovered original)" : "quoted", invoice: "issued",
-        authorization: "ceiling-recorded", settlement: "not-yet", receipt: "not-yet", reconciliation: "not-yet" },
-      state: "issued"
-    };
-  }
+  // Invoice construction is deliberately unavailable while ant 0.3.9 cannot
+  // apply the approved ANT and ETH maxima atomically to `file upload`.
+  // Quoting is banked in ETERNALIZATION-EDITION-V2.json; this surface must not
+  // turn that estimate into a spendable plan.
+  async function pvBuildInvoice() { return null; }
   function pvDownload(name, obj) {
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" }));
@@ -777,7 +736,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     var ant = (BigInt(receipt.paid.totalSettledAtto) / 1000000000000000000n).toString();
     host.innerHTML =
       '<div style="color:var(--verified);font-weight:650;font-size:max(12px,var(--fmin,12px))">Family Archive Preserved</div>' +
-      '<div>20,537 files · 62.1 MB · paid ' + ant + ' ANT · ' + receipt.settledAt + '</div>' +
+      '<div>' + (receipt.archive.files || 22107) + ' files · paid ' + ant + ' ANT · ' + receipt.settledAt + '</div>' +
       '<div style="color:var(--faint);font-size:max(10px,var(--fmin,12px))">reference ' + receipt.archive.dataMapAddress + ' · ' + receipt.paid.route + '</div>' +
       '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">' +
       '<button id="pv-viewpay" type="button">View payment details</button>' +
@@ -794,54 +753,13 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     document.getElementById("pv-dlinv2").addEventListener("click", function() { if (invoice) pvDownload(invoice.invoiceId + ".json", invoice); });
     document.getElementById("pv-dlrec2").addEventListener("click", function() { pvDownload(receipt.receiptId + ".json", receipt); });
   }
-  document.getElementById("preservebtn").addEventListener("click", async function() {
+  document.getElementById("preservebtn").addEventListener("click", function() {
     document.getElementById("preservepanel").hidden = false;
     document.getElementById("preservepanel").scrollIntoView({ behavior: "smooth" });
     pvShow("preserve-step");
-    document.getElementById("preserve-step").textContent = "connecting to the Autonomi network…";
-    try {
-      const st = await fetch(PV.service + "/health").then(r => r.json());
-      if (!st.connected) {
-        document.getElementById("preserve-step").innerHTML = "the Autonomi network is not reachable from this machine.<br><span style='color:var(--faint)'>the bridge connects keylessly — no credential needed, just network access</span>";
-        return;
-      }
-      // fetch a REAL payment plan from the live network
-      document.getElementById("preserve-step").textContent = "preparing the archive on the network (this encrypts 24 chunks and queries live storage nodes)…";
-      const plan = await fetch(PV.service + "/v1/upload/prepare", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "C:/Users/travi/family-lineage/pkg3.tar" })
-      }).then(r => r.json());
-      if (plan.error) { pvShow("preserve-error"); document.getElementById("preserve-error").textContent = plan.error; return; }
-      // display the ceremony
-      document.getElementById("pv-edition").textContent = "20,537 family archive files · 62.1 MB";
-      document.getElementById("pv-chunks").textContent = plan.total_chunks;
-      const antAmt = (parseInt(plan.total_amount_atto) / 1e18).toFixed(6);
-      document.getElementById("pv-cost").textContent = antAmt + " ANT";
-      document.getElementById("pv-bound").textContent = "3.2";
-      document.getElementById("pv-gasbound").textContent = "0.0002";
-      PV.invoice = await pvBuildInvoice(plan);
-      var d = PV.invoice ? PV.invoice.quote.planIdentity.digest.slice(0, 26) + "…" : "—";
-      document.getElementById("pv-bpay").innerHTML =
-        "bPay evidence chain — <span style='color:var(--verified)'>QUOTE ✓</span> · " +
-        "<span style='color:var(--verified)'>INVOICE issued</span> · <span style='color:var(--verified)'>AUTHORIZATION ≤3.2 ANT / ≤0.0002 ETH</span> · " +
-        "SETTLEMENT not-yet · RECEIPT not-yet · RECONCILIATION not-yet" +
-        (plan.recovered_from ? "<br><span style='color:var(--gold)'>recovered plan — the original authorization survived the bridge (fresh quotes discarded)</span>" : "");
-      document.getElementById("pv-detail").innerHTML =
-        "upload_id: " + plan.upload_id + "<br>" +
-        "data_map_address: " + (plan.data_map_address || "pending") + "<br>" +
-        "payment_type: " + plan.payment_type + " · " + (plan.payments ? plan.payments.length : 0) + " node payments<br>" +
-        "plan digest: " + d + "<br>" +
-        "artifact: " + (plan.artifact_sha256 || "?").slice(0, 24) + "… (" + plan.artifact_bytes + " bytes)<br>" +
-        "persistence: " + (PV.invoice ? PV.invoice.quote.persistence.law : "—") + "<br>" +
-        "already_stored: " + plan.already_stored + "<br>" +
-        "<em>no key was used to produce this plan; neither this page nor the bridge can ever hold one</em>";
-      PV.plan = plan;
-      pvShow("preserve-review");
-    } catch (e) {
-      document.getElementById("preserve-step").innerHTML =
-        "the antd-bridge is not running.<br><span style='color:var(--faint)'>it runs keylessly on this machine: tools/antd-bridge/target/release/antd-bridge.exe</span>";
-    }
+    document.getElementById("preserve-step").innerHTML =
+      "the privacy-safe edition is prepared and quoted: 22,107 files · 29 chunks · 2.432547952148437500 ANT + 0.000150000000000000 ETH estimated gas.<br>" +
+      "<span style='color:var(--faint)'>payment is paused because ant 0.3.9 cannot enforce the 2.5 ANT and 0.0002 ETH ceilings atomically on upload. No invoice, wallet review, or upload plan can be created until the payment client gains both limits.</span>";
   });
   document.getElementById("pv-dlinv").addEventListener("click", function() {
     if (PV.invoice) pvDownload(PV.invoice.invoiceId + ".json", PV.invoice);
