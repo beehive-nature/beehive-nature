@@ -210,6 +210,12 @@ function deck(){ return { tab:'dash', reading:null, base:null, quote:null }; }
   }
   poll(); setInterval(poll,15000);
   /* wallet floor */
+  function displayA(raw){
+    var s=String(raw||'').trim();
+    if(!s)return '0.0000 A';
+    if(/\s*EOS$/i.test(s))return s.replace(/\s*EOS$/i,' A');
+    return /\sA$/i.test(s)?s:s+' A';
+  }
   function card(k,v,s){return '<div class="cell"><div class="k">'+k+'</div><div class="v" style="font-size:14px">'+v+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>';}
   $('wgo').onclick=async function(){
     var q=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,''); if(!q)return;
@@ -222,7 +228,7 @@ function deck(){ return { tab:'dash', reading:null, base:null, quote:null }; }
     var age=Math.max(0,Math.floor((Date.now()-new Date(acct.created+'Z'))/86400000));
     $('wcards').innerHTML=
       card('IDENTITY',named?'✓ '+esc(q)+'.b':'✗ unnamed',named?('expires '+named.expires.slice(0,10)+' · owner '+esc(named.owner)):'no registry row')+
-      card('ACCOUNT',esc(soul),age.toLocaleString()+' days · '+(acct.core_liquid_balance||'—'))+
+      card('ACCOUNT',esc(soul),age.toLocaleString()+' days · '+(displayA(acct.core_liquid_balance||'0.0000 A')))+
       card('RAM',((acct.ram_usage||0)/1024).toFixed(1)+' KB','of '+((acct.ram_quota||0)/1024).toFixed(0)+' KB')+
       card('PERMS',(acct.permissions||[]).map(function(p){return p.perm_name}).join('/'),'first-party read');
     $('wout').innerHTML=named?'✓ live sovereign — '+esc(q)+'.b → '+esc(soul):'· real account, unnamed';

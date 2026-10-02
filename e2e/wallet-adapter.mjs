@@ -92,6 +92,10 @@ function mockChain(ctx, opts = {}) {
     }
     const isJ4Host = /jungle4/.test(u.host);
     const chain = opts.mainAsJ4 ? MAIN_CHAIN : (isJ4Host ? J4_CHAIN : MAIN_CHAIN);
+    if (u.pathname.endsWith('/get_account')) {
+      const account = JSON.parse(route.request().postData()).account_name;
+      return json({ core_liquid_balance: account === 'emptyacct' ? null : '12.3456 EOS' });
+    }
     if (u.pathname.endsWith('/get_abi')) {
       const want = JSON.parse(route.request().postData()).account_name;
       return json(want === 'banchor22222' ? COMMIT_ABI : BNAME_ABI);
@@ -153,6 +157,12 @@ try {
     const h = await page.evaluate(() => BNRWALLET.adapters.hive.caps);
     ok('hive describes: read rail, balance only', h.rail === 'hive' && JSON.stringify(h.capabilities) === '["balance"]', JSON.stringify(h));
     ok('adapter states painted in the composer', /vaulta ✓/.test(await page.locator('#adapter-states').innerText()));
+    const balance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'banchor22222' }));
+    ok('Vaulta RPC EOS unit is normalized to A without changing digits',
+      balance.unit === 'A' && balance.quantity === '12.3456 A', JSON.stringify(balance));
+    const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }));
+    ok('Vaulta missing liquid defaults to 0.0000 A',
+      emptyBalance.unit === 'A' && emptyBalance.quantity === '0.0000 A', JSON.stringify(emptyBalance));
   }
 
   /* ── 2 · the pipeline on the mock: build → sign → OUTBOX PERSISTED →
@@ -212,8 +222,8 @@ try {
   console.log('4 · redaction wall mutation (§9.3):');
   {
     const c3 = await browser.newContext(); mockChain(c3);
-    mutateVaulta(c3, "return { unit: 'A', quantity: d.core_liquid_balance || '0.0000 A' };",
-      "return { unit: 'A', quantity: d.core_liquid_balance || '0.0000 A', memo_hint: '" + J4_WIF + "' };");
+    mutateVaulta(c3, "return { unit: 'A', quantity: displayA(d.core_liquid_balance) };",
+      "return { unit: 'A', quantity: displayA(d.core_liquid_balance), memo_hint: '" + J4_WIF + "' };");
     const p3 = await c3.newPage();
     await p3.goto(WALLET, { waitUntil: 'load' });
     await p3.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
