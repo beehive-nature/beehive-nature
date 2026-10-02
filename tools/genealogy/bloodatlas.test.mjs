@@ -30,7 +30,30 @@ import {
   lodFor,
   search,
   createCore,
+  fitCellLabel,
 } from "../../surfaces/blood-atlas.mjs";
+
+test("map captions fit glyph widths and preserve full names when two lines suffice", () => {
+  const measure = s => [...s].reduce((n, c) => n + (c === "W" ? 12 : c === " " ? 3 : 7), 0);
+  const name = "E Anna Tum DE LAGASH";
+  const lines = fitCellLabel(name, 88, measure);
+  assert.equal(lines.join(" "), name);
+  assert.equal(lines.length, 2);
+  for (const s of [name, "WWWWWWWWWWWWWWWW", "阿史那公主長姓名", "Queen Alexandra of a very distant recorded branch"]) {
+    for (const width of [12, 28, 48, 88]) {
+      const fitted = fitCellLabel(s, width, measure);
+      assert.ok(fitted.length <= 2);
+      assert.ok(fitted.every(line => measure(line) <= width), `${s} at ${width}`);
+    }
+  }
+  assert.deepEqual(fitCellLabel(name, 5, measure), []);
+  assert.deepEqual(fitCellLabel("Éva", 88, measure), ["Éva"]);
+});
+
+test("map caption truncation keeps graphemes intact", () => {
+  const measure = s => [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(s)].length * 10;
+  assert.deepEqual(fitCellLabel("A\u0304A\u0304A\u0304A\u0304", 30, measure, 1), ["A\u0304A\u0304…"]);
+});
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CORPUS_PATH = join(HERE, "../../assets/profile-archive/lineage/remington-bloodline.json");
