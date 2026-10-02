@@ -545,9 +545,13 @@ export function mountPersonPanel (host, archive, opts) {
         const sp = archive.getPerson(sid);
         const pairRel = archive.relationship(p.id, sid);
         const cousins = !!(pairRel && pairRel.blood && pairRel.affinity);
+        const founderRel = o.founderRoot ? archive.relationship(sid, o.founderRoot) : null;
+        const founderAncestor = founderRel && founderRel.blood && founderRel.blood.mode === 'ancestor-of-root';
         h += '<button type="button" class="pp-row" data-pprel="' + esc(p.id) + '|' + esc(sid) + '">' +
           '<span class="pp-row-name">⚭ ' + esc(sp ? sp.name : sid) + (sp && sp.lifespan ? ' · ' + esc(sp.lifespan) : '') + '</span>' +
-          '<span class="pp-row-ev">' + esc(T('pp.spouse.ev', 'marriage — affinity, never blood')) + (cousins ? ' · ' + esc(T('pp.spouse.cousins', 'married cousins — blood also present')) : '') + '</span></button>';
+          '<span class="pp-row-ev">' + esc(T('pp.spouse.named', 'spouse of {name}').replace('{name}', p.name)) +
+          (founderAncestor ? ' · ' + esc(T('pp.spouse.founderAncestor', 'also a direct blood ancestor of the founder')) : '') +
+          (cousins ? ' · ' + esc(T('pp.spouse.sharedAncestry', 'the archive also records shared ancestry between these spouses')) : '') + '</span></button>';
       }
     }
     if (!p.parents.length && !p.children.length && !p.spouses.length) {

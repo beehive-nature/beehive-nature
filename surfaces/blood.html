@@ -1521,6 +1521,7 @@ try {
   const { archive } = await fetchArchive(BASE);
   const panel = mountPersonPanel($("ppanel"), archive, {
     root: init.root,
+    founderRoot: corpus.root,
     onreroot(id) {
       // "stand here (re-root)" - the panel ASKS, the engine re-roots (one
       // world, one root on screen; review d6ca5958 finding 5). Loop-guarded:
