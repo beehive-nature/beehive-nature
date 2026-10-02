@@ -81,8 +81,13 @@ async function openJourney(width, height, hash = "") {
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(PAGE_URL + hash, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("body.gux", { timeout: 40000 });
-  await page.waitForSelector('#atlas .atlas-world, #atlas .atlas-listview', { timeout: 20000 });
-  await page.waitForSelector('#ppanel[data-pp-mounted="1"]', { timeout: 20000 });
+  await page.waitForSelector('#atlas .atlas-world, #atlas .atlas-listview', { state: "attached", timeout: 20000 });
+  await page.waitForSelector('#ppanel[data-pp-mounted="1"]', { state: "attached", timeout: 20000 });
+  // Austras koks is now the cold public entrance. This legacy atlas journey
+  // explicitly enters the dense pedigree before exercising atlas semantics.
+  const bootView = await page.evaluate(() => globalThis.__guxAtlas.getContext().view);
+  await page.click(bootView === "fractal" ? "#viewfan" : bootView === "tree" ? "#viewtree" : "#viewped");
+  await page.waitForSelector('#atlas .atlas-world', { state: "visible", timeout: 20000 });
   await page.waitForSelector('#cards[data-cards]:not([hidden])', { timeout: 20000 });
   return { ctx, page, errors };
 }
@@ -111,7 +116,7 @@ try {
     const { ctx, page, errors } = await openJourney(1280, 800);
     const ctx0 = await state(page);
     ok("cold load: engine world + rail + panel mounted, incumbent comb retired", await page.evaluate(() => getComputedStyle(document.getElementById("comb")).display === "none" && !!document.querySelector("#atlas .atlas-world")));
-    ok("cold: standing root is the public entrance (never a synthesized default)", ctx0.root === APR, "root=" + ctx0.root);
+    ok("cold: standing root is the private founder stub shown by Austras koks", ctx0.root === corpus.root, "root=" + ctx0.root);
     ok("contextual rail: derives from the standing root", await page.getAttribute("#cards", "data-rail-root") === ctx0.root);
     ok("one explanation: incumbent detail internals hidden, panel speaks", await page.evaluate(() => getComputedStyle(document.getElementById("dbody")).display === "none" && document.querySelector("#ppanel .pp-view").innerText.trim().length > 0));
     await shot(page, "cold-desktop");

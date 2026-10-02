@@ -9,6 +9,7 @@
      const tree = mountTreeOfLife(hostEl, corpus, {
        openPerson(id){...},   // the existing person explanation (person panel)
        closePerson(){...},    // optional: the state holds no open person
+       onContext(state, why){...}, // optional: mirror navigation into a host
        words: {...},          // optional: this surface's tongue (see WORDS)
        depth: n,              // optional: fixed generations above the focus;
                               //   default picks from the host's width
@@ -311,6 +312,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     }
     render();
     follow();
+    if (opts.onContext) opts.onContext(Object.assign({}, st), 'go');
   }
 
   // the host's person explanation follows the state both ways, so Back
@@ -416,9 +418,10 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   st = normalize(useHistory ? decodeState(location.hash) : {});
   render();
   follow();
+  if (opts.onContext) opts.onContext(Object.assign({}, st), 'mount');
 
   return {
-    go: (s) => go(s),
+    go: (s, options) => go(s, options),
     state: () => Object.assign({}, st),
     destroy() {
       host.removeEventListener('click', onClick);
