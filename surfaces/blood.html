@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="dark">
-<title>the blood comb — BNR genesis · fractal archive</title>
+<title>austras koks — walk the family tree · BNR genesis</title>
 <style>
 :root{--bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#869686;--line:#243026;
 --cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--verified:#86CC72;--info:#6FA9E0;--rose:#C41E3A}
@@ -138,6 +138,26 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 body.gux #comb,body.gux #treeview,body.gux #trail,body.gux #spinebtn{display:none!important}
 body.gux .zoombar{z-index:30} /* above the engine's tree listview (journey-caught) */
 body.gux #atlas{display:block}
+/* The blood archive's front door is Austras koks, the Latvian Tree of Life.
+   The atlas remains one click away for dense pedigree, fractal and list study. */
+#treeoflife{display:block;padding:clamp(10px,2vw,22px)}
+#treeoflife[hidden],#atlas[hidden]{display:none!important}
+.life-intro{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin:0 0 14px}
+.life-mark{color:var(--violet);font-size:max(10px,var(--fmin,12px));letter-spacing:.12em;text-transform:uppercase}
+.life-intro h2{margin:3px 0 2px;font-size:clamp(21px,3.8vw,32px);line-height:1.1;color:var(--ink)}
+.life-intro p{margin:0;max-width:72ch;color:var(--dim);font-size:max(12px,var(--fmin,12px));line-height:1.7}
+.life-key{align-self:center;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:right}
+.life-key b{color:var(--verified)}
+.life-loading{min-height:clamp(420px,60vh,680px);display:grid;place-items:center;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:radial-gradient(circle at 50% 82%,rgba(134,204,114,.14),transparent 44%),var(--well)}
+.life-loading svg{position:absolute;inset:7% 12% 14%;width:76%;height:79%;opacity:.5}
+.life-loading path{fill:none;stroke:var(--verified);stroke-width:5;stroke-linecap:round}
+.life-loading .twig{stroke:var(--violet);stroke-width:3}
+.life-loading p{z-index:1;align-self:end;margin:0 16px 24px;padding:7px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);color:var(--dim);text-align:center}
+.life-mode .zoombar{display:none!important}
+.life-mode #cards,.life-mode #routestrip{display:none!important}
+#treeoflife .tol-stage{min-height:440px}
+#treeoflife .tol-note{line-height:1.6}
+@media(max-width:640px){.life-intro{grid-template-columns:1fr}.life-key{text-align:left}.life-loading{min-height:520px}#treeoflife{padding:7px}}
 /* one search box (the page's #q) and ONE history (the atlas's back): the
    panel's own search + back affordances are structurally retired here */
 #ppanel .pp-search{display:none!important}
@@ -353,6 +373,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 </style>
 <link rel="stylesheet" href="skaists.css">
 <link rel="stylesheet" href="blood-atlas.css?v=1">
+<link rel="stylesheet" href="tree-of-life.css?v=1">
 <link rel="stylesheet" href="person-panel.css?v=1">
 </head>
 <body>
@@ -472,9 +493,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
   <a class="crestanchor" href="profile.html#house-archive" title="the founder-created house crest — part of the work itself">
     <img src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="the founder-created von Zutphen house crest: paired serpents, crowned bee and heart, sun and star, the motto in many tongues">
   </a>
-  <div class="kicker">bnr genesis · the fractal blood archive</div>
-  <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
-  <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
+  <div class="kicker">bnr genesis · the Latvian tree of life</div>
+  <h1>austras koks — walk the family tree</h1>
+  <p class="lede">Climb the archive branch by branch. Touch a relative to read the evidence, follow their parents to keep walking, or switch to the research maps for the dense pedigree. The tree stops where the records stop; living people stay held and unnamed.</p>
   <p class="statsbar" id="stats"></p>
 <p class="statsbar" id="atlasstats"></p>
 </header>
@@ -482,7 +503,8 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div class="controls">
   <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
   <div class="viewswitch" role="group" aria-label="view">
-    <button id="viewped" type="button" aria-pressed="true">pedigree</button>
+    <button id="viewlife" type="button" aria-pressed="true">austras koks</button>
+    <button id="viewped" type="button" aria-pressed="false">pedigree</button>
     <button id="viewfan" type="button" aria-pressed="false">fractal</button>
     <button id="viewtree" type="button" aria-pressed="false">tree</button>
   </div>
@@ -542,6 +564,16 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div id="cards" class="guxrail" hidden aria-label="discovery — what this archive can show you"></div>
 <div id="routestrip" class="guxroute" hidden aria-label="the route this card walks"></div>
 <div class="combwrap">
+  <section id="treeoflife" aria-label="austras koks — the interactive Latvian tree of life">
+    <div class="life-intro">
+      <div><div class="life-mark">austras koks · the tree of life</div><h2>choose a branch. meet a relative. keep climbing.</h2><p>Each fork is a published parent relationship with its own evidence standing. A name opens the research card; “follow this branch” makes that relative the new trunk.</p></div>
+      <div class="life-key"><b id="lifePeople">…</b> published people<br>evidence and uncertainty travel with every name</div>
+    </div>
+    <div id="lifeTree" class="tol life-loading" aria-busy="true">
+      <svg viewBox="0 0 600 560" aria-hidden="true"><path d="M300 535V430M300 455Q220 390 165 315M300 455Q380 390 435 315M165 315Q110 250 78 155M165 315Q205 238 245 155M435 315Q395 238 355 155M435 315Q490 250 522 155"/><path class="twig" d="M78 155Q54 105 38 40M78 155Q102 98 125 40M245 155Q214 94 188 40M245 155Q274 92 298 40M355 155Q328 92 306 40M355 155Q388 94 414 40M522 155Q493 98 470 40M522 155Q548 104 565 40"/></svg>
+      <p id="lifeLoadingText">reading the public family archive…</p>
+    </div>
+  </section>
   <div id="atlas" hidden></div>
   <svg id="comb" tabindex="0" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
     <g id="world"></g>
@@ -553,6 +585,12 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <button id="zfit" type="button" aria-label="fit">⌂</button>
   </div>
 </div>
+<script>
+if(location.protocol==='file:'){
+  var lifeMsg=document.getElementById('lifeLoadingText');
+  if(lifeMsg) lifeMsg.textContent='the tree is intact — open this page through the local site server so its 11,041-person archive can be read';
+}
+</script>
 <div class="breadcrumb" id="trail" aria-label="exploration trail"></div>
 
 <details class="listview">
@@ -1433,6 +1471,8 @@ import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesP
 import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
 import { fetchArchive } from "./person-panel-corpus.mjs";
 import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
+import { mountTreeOfLife } from "./tree-of-life.mjs";
+import { SCHEMA as LIFE_SCHEMA, lineLabel, emergence, validate as validateLife } from "../tools/genealogy/model.mjs";
 
 const $ = (id) => document.getElementById(id);
 const esc = (v) => ppEsc(v);
@@ -1462,6 +1502,10 @@ try {
     }
   } catch (e) { /* private mode: hash context still applies */ }
   const init = initialFromCtx(hctx, boot.apr);
+  // The Tree of Life is the cold front door, so its anonymous founder stub is
+  // also the engine's true boot/home root. Explicit person/root deep links
+  // retain the previously serialized public-atlas context.
+  if (!hctx.p && !hctx.r) init.root = corpus.root;
   if (hctx.myth && boot.mythRoot && !hctx.r) init.root = boot.mythRoot; // #myth doorway keeps its meaning
 
   let syncing = false;   // loop guard: one wiring echo per gesture
@@ -1469,6 +1513,9 @@ try {
   let railRoot = init.root;   // the root the discovery rail was last derived for
   let panelRoot = init.root;  // the root the PANEL last stood on (kept equal to the engine root - ONE root on screen)
   let atlas = null;
+  let treeHandle = null;
+  let treeFocus = init.root;
+  let activeWorld = "life";
 
   // the panel (zGenePerson's organ) — the ONE explanation surface
   const { archive } = await fetchArchive(BASE);
@@ -1491,6 +1538,20 @@ try {
       window.location.href = archiveUrl(id); // same-origin stays in tab; the one-shot return brings the context back
     }
   });
+
+  function setWorld(which, view) {
+    activeWorld = which;
+    const life = $("treeoflife"), map = $("atlas"), zoom = document.querySelector(".zoombar");
+    document.body.classList.toggle("life-mode", which === "life");
+    if (life) life.hidden = which !== "life";
+    if (map) map.hidden = which === "life";
+    if (zoom) zoom.hidden = which === "life";
+    const modes = { viewlife: "life", viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
+    for (const id in modes) {
+      const el = $(id);
+      if (el) el.setAttribute("aria-pressed", String(which === "life" ? id === "viewlife" : modes[id] === view));
+    }
+  }
 
   function openPanelPerson(id) {
     if (syncing || !panel || !id || panelAt === id) return;
@@ -1551,8 +1612,7 @@ try {
     initial: init,
     onContext(ctx, reason) {
       syncEngineHash(ctx, reason); // blood-nav's ONE-history law: push fresh navigations, echo engine walks, replace selects (review d6ca5958 finding 1)
-      const vb = { viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
-      for (const id in vb) { const el = $(id); if (el) el.setAttribute("aria-pressed", String(ctx.view === vb[id])); }
+      if (activeWorld !== "life") setWorld("atlas", ctx.view);
       try { boot.S.curRoot = ctx.root; if (ctx.selection) boot.S.sel = ctx.selection; } catch (e) {}
       if (railRoot !== ctx.root) {
         railRoot = ctx.root;
@@ -1573,12 +1633,68 @@ try {
         openPanelPerson(ctx.selection);
         if (reason === "home" && !ctx.selection && panelAt !== ctx.root) { panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false; }
       }
+      if (treeHandle && activeWorld === "life" && !syncing && (reason === "reroot" || reason === "home" || reason === "restore" || reason === "back" || reason === "select")) {
+        syncing = true;
+        treeFocus = ctx.root;
+        treeHandle.go({ f: ctx.root === init.root ? null : ctx.root, p: ctx.selection || null }, { push: false });
+        syncing = false;
+      }
     }
   });
   globalThis.__guxAtlas = atlas;
   setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
   globalThis.__guxInit = init; // journey seam: the URL-derived initial context
   document.body.classList.add("gux");
+
+  // Austras koks is the public entrance to the same archive. This is the
+  // already-shipped TreeOfLife component from surfaces/austras-koks.html,
+  // mounted here against the same resolver and privacy validation as the
+  // research atlas. It is a navigation layer, never a second genealogy.
+  const lifePersons = Object.assign({}, corpus.persons || {}, (overlay && overlay.persons) || {});
+  const lifeEdges = {};
+  for (const id of Object.keys(lifePersons)) {
+    const person = archive.getPerson(id);
+    const parents = person && person.parents ? person.parents.map((p) => p.id).filter((pid) => lifePersons[pid]) : [];
+    if (parents.length) lifeEdges[id] = parents;
+  }
+  const lifeCorpus = {
+    schema: LIFE_SCHEMA,
+    root: corpus.root,
+    persons: lifePersons,
+    edges: lifeEdges,
+    couples: corpus.couples || {},
+    lines: [{ key: "founder", label: lineLabel("founder"), root: corpus.root, ...emergence({ persons: lifePersons, edges: lifeEdges }, corpus.root) }],
+  };
+  $("lifePeople").textContent = Object.keys(lifePersons).length.toLocaleString("en-US");
+  const lifePrivacy = validateLife(lifeCorpus, { public: true }).filter((p) => /living|leak|cultureClaims|unsourced|roots|lines\[/.test(p));
+  if (lifePrivacy.length) throw new Error("tree-of-life privacy validation refused the mount: " + lifePrivacy.length);
+  const lifeHost = $("lifeTree");
+  lifeHost.classList.remove("life-loading");
+  lifeHost.removeAttribute("aria-busy");
+  treeHandle = mountTreeOfLife(lifeHost, lifeCorpus, {
+    history: false,
+    openPerson(id) { openPanelPerson(id); },
+    closePerson() { /* the research drawer keeps the last read person in reach */ },
+    onContext(ctx, reason) {
+      if (reason === "mount" || syncing || !atlas) return;
+      if (ctx.f && ctx.f !== treeFocus) {
+        treeFocus = ctx.f;
+        syncing = true; atlas.reroot(ctx.f); syncing = false;
+      }
+      if (ctx.p && ctx.p !== panelAt) {
+        syncing = true; atlas.select(ctx.p); syncing = false;
+        openPanelPerson(ctx.p);
+      }
+    },
+  });
+  $("viewlife").addEventListener("click", () => setWorld("life"));
+  for (const [id, view] of [["viewped", "pedigree"], ["viewfan", "fractal"], ["viewtree", "tree"]]) {
+    $(id).addEventListener("click", () => setWorld("atlas", view));
+  }
+  $("resetbtn").addEventListener("click", () => {
+    if (activeWorld === "life" && treeHandle) { treeFocus = init.root; treeHandle.go({ f: null, p: null }, { push: false }); }
+  });
+  setWorld("life");
   // ONE history, one visible affordance: back joins the zoombar (B on the
   // engine stage does the same); the incumbent trail is retired under gux.
   // Back walks the stack; at the bottom, back returns EXACTLY home — the
@@ -1600,7 +1716,6 @@ try {
       zb.insertBefore(bb, zb.firstChild);
     }
   } catch (e) { failQuiet("back button " + (e && e.message)); }
-  $("atlas").hidden = false;
   $("ppanel").hidden = false;
   $("ppanel").setAttribute("data-pp-mounted", "1");
   renderRail(atlas.getContext().root);
