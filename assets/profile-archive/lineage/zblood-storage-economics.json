@@ -8,7 +8,7 @@
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
-  "bindingIntact": true,
+  "bindingIntact": false,
   "files": 22108,
   "bytes": 86333443,
   "GiB": 0.080404,
