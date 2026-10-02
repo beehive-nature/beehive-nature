@@ -85,6 +85,8 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
   margin-block-end:var(--s2);transition:transform .06s,filter .15s}
 .btn:active{transform:translateY(1px)}
 .btn.primary{background:var(--primary);color:#150512;border:none}
+a.btn{display:flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
+a.btn.primary{color:#150512}
 .btn.primary:hover{filter:brightness(1.08)}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn.ghost:hover{border-color:var(--ink-dim)}
@@ -1021,8 +1023,9 @@ const SCREENS = {
 
       <p class="muted">Climb anytime: add a spare phone, a key, or a Trezor. Same wallet, same you — the lock just gets stronger.</p>
     </div>
-    <button class="btn primary" onclick="alert('→ hands off to the dashboard surface (crates/wallet-relay/src/dashboard.html)')">Enter dashboard →</button>
-    <button class="btn link" onclick="APP.restart()">Start the walkthrough over</button>
+    <a class="btn primary" href="../wallet.html" data-onb-next="wallet">Open wallet ?</a>
+    <a class="btn link" href="../bdata.html" data-onb-next="bdata" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin-top:var(--s2)">My Data � Load wallet &amp; Add to manifest ?</a>
+    <button class="btn link" onclick="APP.restart()" style="margin-top:var(--s2)">Start the walkthrough over</button>
   `; },
 
   netlaw(){ return `

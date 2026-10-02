@@ -119,6 +119,77 @@ async function hasCodec(p) {
 const done = () => { const f = id => !document.getElementById(id).hidden; return f('s-fail') || (!f('s-slow') && !(document.getElementById('pg') && f('pg')) && document.getElementById('v').videoWidth > 0); };
 const framed = () => document.getElementById('v').videoWidth > 0;
 
+test('personal videos: save, name, deduplicate across reloads and tabs, then remove', async () => {
+  const { ctx, p, errs, hits } = await open({ stream: () => 'abort', json: () => 'abort' });
+  try {
+    await p.goto(ORIGIN + '/bview.html');
+    await p.locator('#my-videos summary').click();
+    await p.fill('#addr', 'bad address'); await p.click('#save-video');
+    assert.equal(await p.locator('#saved-videos li').count(), 0);
+    assert.match(await p.locator('#saved-status').textContent(), /complete Autonomi/);
+    await p.fill('#addr', 'autonomi://' + A1.toUpperCase()); await p.click('#save-video');
+    const label = '<img src=x onerror=alert(1)> my first video';
+    await p.locator('.saved-video input').fill(label); await p.locator('.saved-video input').press('Tab');
+    await p.fill('#addr', A1); await p.click('#save-video');
+    assert.equal(await p.locator('#saved-videos li').count(), 1);
+    await p.reload(); await p.locator('#my-videos summary').click();
+    assert.equal(await p.locator('.saved-video input').inputValue(), label);
+    assert.equal(await p.locator('.saved-video code').textContent(), 'autonomi://' + A1);
+    assert.equal(await p.locator('#saved-videos img').count(), 0);
+    const other = await ctx.newPage(); await other.goto(ORIGIN + '/bview.html');
+    await other.locator('#my-videos summary').click(); await other.fill('#addr', A2); await other.click('#save-video');
+    await p.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 2);
+    await p.getByRole('button', { name: 'Remove ' + label, exact: true }).click();
+    await other.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 1);
+    await p.reload(); await p.locator('#my-videos summary').click();
+    assert.equal(await p.locator('.saved-video code').textContent(), 'autonomi://' + A2);
+    assert.equal(hits.stream.length + hits.json.length, 0, 'saving does not fetch a video');
+    assert.deepEqual(errs, []);
+  } finally { await ctx.close(); }
+});
+
+test('personal videos: actual playback is recorded; replay works; removal survives resume', async () => {
+  const video = await readFile(join(HERE, '..', 'fixtures/bview/vp9-opus-10s-faststart.mp4'));
+  const { ctx, p, errs } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'video/mp4', 'content-length': String(video.length) }, body: video }),
+    json: () => 'abort',
+  });
+  try {
+    await p.goto(ORIGIN + '/bview.html');
+    await p.evaluate(() => { document.getElementById('v').muted = true; });
+    await watch(p, A1);
+    await p.waitForFunction(() => document.querySelectorAll('#saved-videos li').length === 1);
+    await p.locator('#my-videos summary').click();
+    await p.locator('.saved-video').getByRole('button', { name: /^Remove / }).click();
+    await p.evaluate(async () => { const v = document.getElementById('v'); v.pause(); await v.play(); });
+    assert.equal(await p.locator('#saved-videos li').count(), 0, 'resume must respect an explicit removal');
+    await p.click('#save-video');
+    await p.locator('.saved-video').getByRole('button', { name: /^Play / }).click();
+    await p.waitForFunction(() => document.getElementById('v').currentTime > 0.2);
+    assert.equal(await p.locator('#saved-videos li').count(), 1, 'replay does not duplicate');
+    assert.equal((await state(p)).shown, 'autonomi://' + A1);
+    assert.deepEqual(errs, []);
+  } finally { await ctx.close(); }
+});
+
+test('personal videos: blocked and unreadable storage never claim a successful save', async () => {
+  for (const unreadable of [false, true]) {
+    const { ctx, p, errs } = await open({ stream: () => 'abort', json: () => 'abort' });
+    try {
+      await ctx.addInitScript(broken => {
+        if (broken) localStorage.setItem('bnr.bview.playlist.v1', '{unreadable');
+        else Storage.prototype.setItem = () => { throw new DOMException('blocked', 'SecurityError'); };
+      }, unreadable);
+      await p.goto(ORIGIN + '/bview.html'); await p.locator('#my-videos summary').click();
+      await p.fill('#addr', A1); await p.click('#save-video');
+      assert.match(await p.locator('#saved-status').textContent(), /Could not save/);
+      assert.equal(await p.locator('#saved-videos li').count(), 0);
+      if (unreadable) assert.equal(await p.evaluate(() => localStorage.getItem('bnr.bview.playlist.v1')), '{unreadable');
+      assert.deepEqual(errs, []);
+    } finally { await ctx.close(); }
+  }
+});
+
 test('antd 0.12.0 door: stub /stream aborts fast, envelope plays, full decode still finishes', async () => {
   const { ctx, p, errs, hits } = await open({
     stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(CUT) }, body: MP4.subarray(0, CUT) }),
@@ -538,11 +609,24 @@ test('slow door (0.5x bitrate): an honest countdown, no play before the computed
 
 test('fast door (2x bitrate): plays early, long before the file is in; decodingInfo asked with the moov facts', async () => {
   const { ctx, p, errs, hits, vp9 } = await paced(2);
+  await p.evaluate(() => {
+    window.__handoffs = [];
+    const v = document.getElementById('v'); let previousHeight = 0;
+    const sample = () => { if (v.readyState >= 2) previousHeight = v.getBoundingClientRect().height; requestAnimationFrame(sample); };
+    requestAnimationFrame(sample);
+    new MutationObserver(() => {
+      if ((window.__bviewSrcAssigns || 0) < 2) return;
+      const held = document.getElementById('frame-hold');
+      const pixel = held && !held.hidden ? [...held.getContext('2d').getImageData(0, 0, held.width, held.height).data].some((n, i) => i % 4 !== 3 && n > 0) : false;
+      window.__handoffs.push({ covered: !!held && !held.hidden, pixel, previousHeight, height: held?.getBoundingClientRect().height || 0 });
+    }).observe(v, { attributes: true, attributeFilter: ['src'] });
+  });
   if (!vp9) { await ctx.close(); return; }
   await watch(p, A1);
   await p.waitForFunction(() => window.__plays.length > 0, null, { timeout: 30000, polling: 50 });
   const first = await p.evaluate(() => window.__plays[0]);
   console.log(`# fast: page played at ${(first.fed / 1024).toFixed(0)} KiB of ${(FIX.length / 1024).toFixed(0)}`);
+  if (!first.bar || first.fed >= FIX.length / 2) console.log('# fast diagnostic:', await p.evaluate(() => ({ engine: window.__bviewEngine(), log: document.getElementById('log').textContent, mediaError: window.__bviewMediaErr, assigns: window.__bviewSrcAssigns })));
   assert.ok(first.bar && first.fed < FIX.length / 2, `plays with under half the file in (${first.fed} of ${FIX.length} B)`);
   await p.waitForFunction(() => document.getElementById('v').currentTime > 0.5, null, { timeout: 10000 });
   const { dec, out, rough } = await p.evaluate(() => ({ dec: window.__dec, out: window.__decOut, rough: !(document.getElementById('s-rough')?.hidden ?? true) }));
@@ -555,6 +639,16 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   assert.ok(Math.abs(dec[0].video.bitrate - bps) < 1000, `bitrate = media bytes / duration (${dec[0].video.bitrate} vs ${Math.round(bps)})`);
   assert.equal(out[0].bar, true, 'asked while the download was still running');
   assert.equal(rough, out[0].smooth === false, `the warning row follows what this device answered (smooth=${out[0].smooth})`);
+  // finishBinary must preserve current playback and still deliver the tail
+  // of the full file once the running partial Blob reaches its edge.
+  await p.waitForFunction(d => { const v = document.getElementById('v'); return v.ended || v.currentTime >= d - 0.3; }, PLAN.dur, { timeout: 25000, polling: 100 });
+  assert.equal(await p.evaluate(() => document.getElementById('s-fail').hidden), true, 'finishing the download does not strand a partial playing Blob');
+  const handoffs = await p.evaluate(() => window.__handoffs);
+  console.log('# progressive handoffs:', JSON.stringify(handoffs));
+  assert.ok(handoffs.length > 0, 'the test actually crosses a progressive Blob handoff');
+  assert.ok(handoffs.every(h => h.covered && h.pixel), 'every source reset keeps a real decoded frame visible');
+  assert.ok(handoffs.every(h => Math.abs(h.height - h.previousHeight) < 2), 'the player retains its height while the replacement loads');
+  assert.equal(await p.evaluate(() => document.getElementById('frame-hold').hidden), true, 'the real replacement frame is revealed after the seek');
   assert.equal(hits.json.length, 0); assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });

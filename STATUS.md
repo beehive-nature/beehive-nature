@@ -30,8 +30,109 @@ choice is deliberate:
   weaker than a proof a reviewer can re-run, and are labelled so no reader
   mistakes one for the other.
 Counts follow the same rule: a number is stated as the command that produces
-it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
+it. The current **workspace** count is `cargo test --workspace --locked` →
+**1225 passed, 0 failed, 4 ignored** (bnr-seal lane, 2026-09-27). Per-suite counts
+in later entries (for example the proof-lights probes, 21/21) measure one suite and
+do not replace it. The earlier `cargo test --workspace` → 179 passed; 1 ignored
+predates it and is superseded.
 
+- `2026-09-29` — **#250 merged; #247 brought level with `main`.** #250 landed as `eeafc5b`
+  (independent review APPROVE at `093c9d1`, CI green at that head). This merge of `main` into
+  #247 keeps both sides of the only conflict, these ledger lines, newest first, and
+  rewords the count header so the newest per-suite figure is not read as the workspace
+  count. #247 needs renewed approval and CI on its new head before it merges.
+- `2026-09-29` — **#247: Codex review reconciled.** Twenty-eight findings over nine rounds
+  (`cf3887a`, `6849dab`, `a0eeafd`, `856a528`, `2b0675e`, `0fcc524`, `26707d9`, `1d58dac`, `594d1ad`); 27 correct, one not applicable (round 9's link rule). Rounds 1–4 and 6–9 are documentation
+  and accuracy fixes. Round 5 changes runtime behaviour and the public API (below):
+  - the x0x AEAD claim now cites a function and marks key handling UNVERIFIED;
+  - `OpenError`'s indistinguishability is narrowed to what `open` does;
+  - the handset dispatch records the §6 rulings;
+  - the count header is reconciled;
+  - the Shields remote-fetch wording is corrected;
+  - the handset docket keeps the bounded E4 device key and gives each verifier its own TOFU pin.
+  - round 3 swept the whole diff for remaining copies: §4a, the bnr-seal ledger entry, the dispatch's tamper wording, and the not-yet-derived SEAL and LICENSE badges.
+  - round 4: the original proof-lights dispatch is marked superseded; planned signing and the NIST remark are marked UNVERIFIED; the #250-only paths are named with the PR link.
+  - round 5 (**behaviour and API change**): `seal` and `SealKey::generate` return `SealError::Rng` instead of panicking when the OS RNG fails. `SealError` goes from a unit struct to an enum (`Rng`, `Encrypt`), and `SealKey::generate` now returns `Result<SealKey, SealError>`. The original proof-lights milestone is marked superseded.
+  - round 6: the ledger separates the round-5 API change; the handset facts are marked founder-verified except the AI-storage reclaim; OEM unlocking is recommended setup, not an E4 condition (the ladder defines E4); the `open`/`Authentication` wording is capped and cited.
+  - round 7: the nonce-soundness argument is marked UNVERIFIED, domain separation states its assumption (a `SealKey` is for bnr-seal only), and the AEAD error cites upstream. The independent review's non-blocking points are also carried: the `4 ignored` count, and the interim verifier marked as not yet existing.
+  - round 8: E4 tier standing needs scheduled re-attestation through our verifier (T3 §2). A second phone alone gives local assurance only, so the handset holds no E4 standing until the verifier lane lands.
+  - round 9: badge publication is the README only today, with surfaces as future work (the §3 table, §5.2 and the amendment note). The #250 files are now cited as landed (`eeafc5b`), so the docket has no external links.
+  Dispatch: `docs/dispatches/2026-09-29-codex-review-247.md`.
+- `2026-09-29` — **#250: Codex review reconciled (four rounds).** The gate now refuses:
+  - forged `renderer` and `law` values (before, they were only required to be present);
+  - inherited property names as badge names (`constructor` crashed the checker);
+  - non-canonical `measured_at` (`Date.parse` accepted `0`, and `2026-02-31` rolled into March).
+  The probe assertions are scoped to the forged badge. Each new probe fails against the
+  previous gate. A malformed or throwing document is now its own FAIL, and the check
+  continues past it. An all-clear row must have every kind at 100, and a status file
+  must carry its document's name. The independent review at `048f98c` found that `null`
+  evidence skipped the derivation. A PASS now requires the derivation to have run, and
+  orphan SVG and evidence files fail. `node --test e2e/render-badges.test.mjs` → 21/21. The SHA-1 remark
+  in the gate-repair dispatch is marked UNVERIFIED. Aikido's two file-read flags are
+  verified false positives: every path comes from `readdir` of the operator's `--dir`.
+  Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
+- `2026-09-29` — **Proof lights handed off: #250 (with #253 folded in), #247
+  and the unstarted CI-signing card.** Both PRs need independent review
+  before `main`. The only landing conflict is this file. Carried forward from
+  the founder's correction: never force-push, not even with a lease; repairs
+  are new commits. Dispatch: `docs/dispatches/2026-09-29-proof-lights-handoff.md`.
+- `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
+  Founder review corrected the docket in two places. The Shields switch
+  removes only the Dynamic and Endpoint routes (`core/server/server.js`);
+  other services, such as github-license, still fetch, so "Shields fetches
+  nothing" was wrong. The public-Endpoint and self-hosted phases are
+  withdrawn in favour of: measure, validate evidence, derive, verify, render
+  locally, publish same-origin. Adds historical measurement versus live
+  status, and the git blob as locator versus a sha3-256 commitment. Records
+  the founder rulings: a dedicated CI-attestation key, no badge server,
+  text first. Dispatch: `docs/dispatches/2026-09-27-proof-lights-docket-amendment.md`.
+- `2026-09-27` — **Proof-lights docket: badges derived from signed state.**
+  **Superseded the same day by the amendment above:** P0 and P1 are withdrawn
+  in favour of offline, same-origin rendering with no badge server. Do not
+  implement from this entry. The original read:
+  `dockets/PROOF_LIGHTS_shields_badges.md` makes status badges a projection of
+  a signed, expiring, per-commit status document in which every claim names
+  its source run. Built in three phases:
+  - P0: public Shields.io.
+  - P1: self-hosted Shields with Dynamic/Endpoint badges off. A verifier
+    checks the signature and expiry, then redirects to static badges. Source
+    shows a single switch disables both badge families.
+  - P2: claims derived from signed receipts.
+  Only machine-derived badges are allowed. Shields facts are pinned to
+  badges/shields@0a0ac0e. No code.
+  Dispatch: `docs/dispatches/2026-09-27-proof-lights-docket.md`.
+- `2026-09-27` — **Handset docket: Pixel 10a, GrapheneOS, three profiles.**
+  `dockets/HANDSET_pixel10a_three_profile.md` sets up one phone to earn E4
+  (relocked bootloader, Auditor pairing) and splits it into three profiles:
+  sovereign core, normal world with sandboxed Play, and a Beehive/Buzz lab.
+  Adds no tier. The phone stops at T4, and root keys stay on the E5 signer.
+  The GrapheneOS and Pixel 10a facts were UNVERIFIED by this seat, because
+  grapheneos.org was unreachable from the sandbox. The founder then verified
+  all of them against grapheneos.org on 2026-09-27 (docket §5), except the
+  AI-storage reclaim, which stays UNVERIFIED. No code.
+  Dispatch: `docs/dispatches/2026-09-27-handset-docket.md`.
+- `2026-09-27` — **`bnr-seal`: private storage envelope for signed receipts.**
+  Adds one mechanism: an allowlisted AEAD suite (XChaCha20-Poly1305: the same
+  crate, major version and primitive as x0x `a42b5d9`
+  `GssKvSecureContext::seal_snapshot`/`open` in `src/groups/kv_context.rs`;
+  key derivation and AAD format UNVERIFIED as equivalent) with a versioned header and an opaque
+  32-byte scope bound as associated data. It encrypts bytes that are already
+  signed and establishes no authority. Issuer, delegation, expiry and replay
+  stay with BNRoSe. `cargo test -p bnr-seal` → 14 passed. Two mutations were
+  caught: dropping the scope from the associated data, and a fixed nonce.
+  `cargo test --workspace --locked` → 1225 passed, 0 failed. Key custody and
+  rotation are not built. Dispatch: `docs/dispatches/2026-09-27-bnr-seal.md`.
+- `2026-09-27` — **Proof lights: the badge gate re-derives, it no longer re-reads.**
+  Review of #250 found `render-badges.mjs --check` passed forged documents:
+  deleted evidence, 999/999 counts with a matching SVG, a forty-zero
+  revision, a bogus signature, non-JSON evidence. `--check` now requires
+  readable, schema-valid evidence (git blob id plus sha3-256), a revision
+  that is a commit, coverage of the meter's page list at that revision, and
+  every derived field recomputed. A supplied signature or a CI-origin claim
+  fails as unverifiable until the CI-signing card (owner and scope recorded
+  in the dispatch, 2026-09-29). The badge is unchanged.
+  `node --test e2e/render-badges.test.mjs` → 13/13; 10 of them fail against
+  the old gate. Dispatch: `docs/dispatches/2026-09-27-proof-lights-gate-repair.md`.
 - `2026-09-06` — **Founder promotes Astra to lead; zCode review reconciled.**
   The ten-minute leash was delegated to Bash, not removed; review found the
   override ceiling too permissive and reduced both entry points to 600 seconds.

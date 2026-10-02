@@ -106,7 +106,7 @@
   });}
   function suspend(s,inactive){var f=s.frame&&expectedFrame(s);if(f&&typeof f.window.bnrDockSuspend==='function')f.window.bnrDockSuspend(inactive);}
   function prepareFrame(s,loaded){
-    var f=expectedFrame(s);s.ready=!!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
+    var f=expectedFrame(s);s.ready=!!f;s.openFailed=!f;if(!f){s.status='This agent could not open here. Your draft is kept. Use Open page to continue.';s.error=true;return;}
     var d=f.document;d.documentElement.classList.add('ad-embedded');d.documentElement.setAttribute('data-ad-view',document.body.getAttribute('data-reg')||'bee');d.body.setAttribute('data-reg',document.body.getAttribute('data-reg')||'bee');
     if(!d.getElementById('adReading')){
       var st=d.createElement('style');st.id='adReading';st.textContent=frameCss;d.head.appendChild(st);
@@ -132,7 +132,7 @@
     var s=sessions[current.id];if(!s)return;foot.hidden=helpOpen||current.id==='baigents';$('adSend').disabled=!!current.src&&!s.ready;$('adSend').textContent=current.id==='bloverai'?'Build handoff':'Send';
     prompt.setAttribute('aria-label',current.id==='bloverai'?'Question for your handoff':'Message '+current.name);prompt.placeholder=current.id==='bloverai'?'What would you like to ask your AI?':'Ask '+current.name+'…';
     $('adNote').textContent=current.note;$('adOpenPage').hidden=!current.src;$('adOpenPage').href=current.src||R+'bmeshasi.html';
-    notice(s.status||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
+    notice(s.status||s.staged||(current.src&&!s.ready?'Opening '+current.name+'… You can write while it loads.':'Kept in this page only · Enter sends · Shift+Enter adds a line.'),s.error);
   }
   function showCurrent(){
     session(current);Object.keys(sessions).forEach(function(id){var s=sessions[id];s.panel.hidden=helpOpen||id!==current.id;suspend(s,s.panel.hidden||!win.classList.contains('on'));});
@@ -142,9 +142,9 @@
     b.onclick=function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;current=a;helpOpen=false;showCurrent();prompt.value=sessions[a.id].draft;
       $('adAgents').querySelectorAll('.adAg').forEach(function(chip){chip.setAttribute('aria-pressed',String(chip.getAttribute('data-agent')===a.id));});};$('adAgents').appendChild(b);
   });
-  function setOpen(open){
+  function setOpen(open,quiet){
     win.classList.toggle('on',open);orb.setAttribute('aria-expanded',String(open));orb.setAttribute('aria-label',open?'Close the agent dock':'Open the agent dock');
-    if(open){showCurrent();if(!foot.hidden)prompt.focus();else $('adClose').focus();}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
+    if(open){showCurrent();if(!quiet){if(!foot.hidden)prompt.focus();else $('adClose').focus();}}else{Object.keys(sessions).forEach(function(id){suspend(sessions[id],true);});orb.focus();}
   }
   orb.onclick=function(){setOpen(!win.classList.contains('on'));};$('adClose').onclick=function(){setOpen(false);};$('adHelpButton').onclick=function(){helpOpen=!helpOpen;showCurrent();};
   $('adExpand').onclick=function(){expanded=!expanded;this.textContent=expanded?'Restore':'Expand';win.classList.toggle('is-expanded',expanded);this.setAttribute('aria-pressed',String(expanded));this.setAttribute('aria-label',expanded?'Restore the agent dock size':'Expand the agent dock');fitDock();};
@@ -164,14 +164,14 @@
   }
   function send(){
     var s=session(current),v=prompt.value.trim();if(!v||current.id==='baigents')return;s.draft=prompt.value;
-    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';helpOpen=true;showCurrent();return;}
+    if(v==='/help'||v==='/install'){prompt.value='';s.draft='';s.staged='';s.lastStaged='';helpOpen=true;showCurrent();return;}
     if(current.src){var f=s.ready&&expectedFrame(s);if(!f){s.status='Your message was not sent. The agent is not ready; your draft is kept.';s.error=true;updateComposer();return;}
       try{f.document.getElementById('q').value=v;f.window.ask();}catch(e){s.status='The agent could not accept your message. Your draft is kept; check the conversation before trying again.';s.error=true;updateComposer();return;}
       s.status='Message received by '+current.name+'.';
     }else{buildHandoff(s,v);s.status='Handoff prepared here. Copy it when you are ready.';}
-    s.error=false;prompt.value='';s.draft='';updateComposer();prompt.focus();
+    s.error=false;s.staged='';s.lastStaged='';prompt.value='';s.draft='';updateComposer();prompt.focus();
   }
-  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){if(sessions[current.id])sessions[current.id].draft=prompt.value;});
+  foot.addEventListener('submit',function(e){e.preventDefault();send();});prompt.addEventListener('input',function(){var s=sessions[current.id];if(s){s.draft=prompt.value;s.lastStaged='';if(s.staged){s.staged='';updateComposer();}}});
   prompt.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();send();}});
   function shortcut(e){if(e.isComposing)return;if(e.key==='Escape'&&win.classList.contains('on')){e.preventDefault();setOpen(false);return;}if(!e.altKey)return;var k=e.key.toLowerCase();
     if(k==='/'||k==='m'){e.preventDefault();setOpen(!win.classList.contains('on'));}else if(k==='h'){e.preventDefault();setOpen(true);}else if(/^[1-4]$/.test(k)){e.preventDefault();$('adAgents').querySelectorAll('.adAg')[Number(k)-1].click();setOpen(true);}
@@ -250,4 +250,44 @@
   var seatSafe=function(){try{seatOrb();}catch(e){}};
   seatSafe();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',seatSafe);setTimeout(seatSafe,700);setTimeout(seatSafe,1800);
   if(seatMq){try{seatMq.addEventListener('change',seatSafe);}catch(e){try{seatMq.addListener(seatSafe);}catch(e2){}}}
+  /* WebMCP (W3C Web Machine Learning CG draft, document.modelContext): the dock describes itself
+     to a browser agent. Progressive only: with no API, nothing registers and nothing changes.
+     No tool sends, copies or leaves the page. Staging places words in the composer and the
+     person reads them and presses Send; a person's unsent draft is kept, never replaced, and the
+     dock opens without taking focus, so a keystroke meant elsewhere cannot send the draft. */
+  var mc=document.modelContext;
+  if(mc&&typeof mc.registerTool==='function'){
+    var reply=function(t){return {content:[{type:'text',text:t}]};};
+    var offer=function(t){try{Promise.resolve(mc.registerTool(t)).catch(function(){});}catch(e){}};
+    offer({name:'bnr_list_agents',title:'List the BNR dock agents',
+      description:'List the agents in this page’s BNR agent dock: what each one is for and whether it accepts a message.',
+      inputSchema:{type:'object',properties:{}},annotations:{readOnlyHint:true},
+      execute:function(){return Promise.resolve(reply(JSON.stringify(agents.map(function(a){
+        return {id:a.id,name:a.name,purpose:a.label,note:a.note,acceptsMessage:a.id!=='baigents',page:a.src?new URL(a.src,location.href).href:null};}))));}});
+    offer({name:'bnr_stage_message',title:'Stage a message in the BNR dock',
+      description:'Open the BNR agent dock on one agent and place a draft in its composer. This does not send. The person reads the draft and presses Send.',
+      inputSchema:{type:'object',properties:{
+        agent:{type:'string',enum:['queen','hearth','bloverai'],description:'queen answers from BNR’s written knowledge; hearth routes creative ideas; bloverai builds a handoff for an AI the person chooses.'},
+        message:{type:'string',maxLength:4000,description:'The draft to place. It is appended after any unsent draft already there; the composer holds 4000 characters in all.'}},required:['agent','message']},
+      execute:function(input){
+        var id=input&&input.agent,v=String((input&&input.message)||'').trim(),a=agents.filter(function(x){return x.id===id&&x.id!=='baigents';})[0];
+        if(!a)return Promise.resolve(reply('Not staged. Choose queen, hearth or bloverai.'));
+        if(!v)return Promise.resolve(reply('Not staged. The message was empty.'));
+        /* the person's draft is kept byte for byte; only a separator is added, and only as much as it lacks */
+        var had=String((sessions[a.id]&&sessions[a.id].draft)||''),kept=had?had+(/\n[ \t]*\n[ \t]*$/.test(had)?'':/\n[ \t]*$/.test(had)?'\n':'\n\n'):'';
+        /* lastStaged is cleared by any edit or send, so while it is set the draft still ends with that stage */
+        if(sessions[a.id]&&sessions[a.id].lastStaged===v)return Promise.resolve(reply('Not staged again. That text is already the end of the '+a.name+' draft.'));
+        if(kept.length+v.length>4000)return Promise.resolve(reply('Not staged. The person’s unsent draft leaves room for '+Math.max(0,4000-kept.length)+' characters; this message has '+v.length+'.'));
+        /* if the person is in the composer or on Send, the composer is about to change under them: move focus
+           to the dock title, which cannot submit; focus anywhere else on the page is left alone */
+        var f=document.activeElement;if(f===prompt||f===$('adSend')){$('adTitle').setAttribute('tabindex','-1');$('adTitle').focus();}
+        Array.prototype.filter.call($('adAgents').querySelectorAll('.adAg'),function(b){return b.getAttribute('data-agent')===a.id;})[0].click();setOpen(true,true);
+        var s=sessions[a.id];prompt.value=kept+v;s.draft=prompt.value;s.lastStaged=v;
+        /* an old receipt or send failure (including "not ready" while loading) must not hide the notice;
+           only a frame that loaded and failed to open keeps its error */
+        if(!s.openFailed){s.status='';s.error=false;}
+        s.staged='A browser agent placed a draft for '+a.name+'. Read it, then press '+(a.id==='bloverai'?'Build handoff':'Send')+'.';updateComposer();
+        return Promise.resolve(reply('Draft staged for '+a.name+(kept?' after the person’s unsent draft':'')+'. Nothing was sent. The person decides whether to send it.'));
+      }});
+  }
 })();

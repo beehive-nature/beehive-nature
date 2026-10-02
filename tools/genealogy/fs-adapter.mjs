@@ -240,6 +240,30 @@ export function importSourceWalk(model, raw, { date = null } = {}) {
   return { upgraded };
 }
 
+// The harvest record importSourceWalk writes, or null. `sources` once carried
+// two meanings: a correction patch spread its own `sources` — an ARRAY of cited
+// documents — onto the person, and reading .count/.harvested off that array
+// published "undefined attached FamilySearch sources (harvested undefined)".
+// Cited documents now live in `cited` (applyCorrection refuses a patch writing
+// `sources`), but the published archive is read here too, so still ask the SHAPE.
+export function harvestRecord(p) {
+  const s = p && p.sources;
+  if (!s || typeof s !== "object" || Array.isArray(s)) return null;
+  if (!Number.isInteger(s.count) || typeof s.harvested !== "string") return null;
+  return s;
+}
+
+// research.basis: a sentence about what the harvest recorded for this person.
+// A person carrying cited documents but no harvest record gets a sentence that
+// claims no FamilySearch count at all, rather than one filled with missing values.
+export function researchBasis(p) {
+  const h = harvestRecord(p);
+  if (h) return `${h.count} attached FamilySearch source${h.count === 1 ? "" : "s"} (harvested ${h.harvested})`;
+  const cited = Array.isArray(p && p.cited) ? p.cited.length : 0;
+  if (cited) return `no FamilySearch harvest count recorded; ${cited} source${cited === 1 ? "" : "s"} cited on this record`;
+  return "no attached sources harvested for this person; era-heuristic only";
+}
+
 // browser-side source walker (string — runs inside the signed-in tab; the
 // agent passes the payload JSON: { cohort:[{pid,dep}], danglers:[{pid,dep}],
 // known:[fsid…] }). State on window.__zb; poll it; pull with __zbDump().

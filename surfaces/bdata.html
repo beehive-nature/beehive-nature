@@ -66,6 +66,8 @@ button.opt{appearance:none;cursor:pointer;transition:transform .08s ease,border-
 .opt.na .name{font-weight:500}
 .opt.na .soon{font-size:.875rem}
 .chose{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:10px}
+.drop{margin-top:12px;padding:18px;border:1px dashed var(--line);border-radius:12px;background:var(--well);text-align:center}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
 .amount{display:block;font-size:2rem;font-weight:700;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
 .amount.small{font-size:1.25rem}
@@ -342,6 +344,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div id="bdata-live" class="sr-only" role="status" aria-live="polite"></div>
 </main>
 <script src="tour.js?v=42"></script>
-<script src="bdata.js?v=5" defer></script>
+<script src="ant-pay.js?v=1"></script>
+<script src="bdata.js?v=7" defer></script>
 </body>
 </html>

@@ -234,7 +234,7 @@
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=assetBase+'register.js?v=12';
+    s.src=assetBase+'register.js?v=13';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();
@@ -243,7 +243,7 @@
      LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
   if(!document.getElementById('railsbadge')){
     var s3=document.createElement('script');
-    s3.src=assetBase+'rails-badge.js?v=4';
+    s3.src=assetBase+'rails-badge.js?v=5';
     document.body.appendChild(s3);
   }
 })();

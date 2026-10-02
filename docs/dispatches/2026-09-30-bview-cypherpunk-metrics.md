@@ -1,0 +1,15 @@
+# bViEw: direct playback in the cypherpunk receipt
+
+The founder asked to show the new direct route's metrics in the cypherpunk UI. The old front kept rendering the relay pipeline during WebRTC playback, and the archive read media facts only from the relay's moov plan.
+
+The direct pipeline now names SDK 0.1.0, connection reuse, file-open timing, the native service-worker range source and the fallback rule. The receipt reads the existing engine snapshot and adds first-response/frame times, native playhead and duration, decoded resolution, buffer ranges/ahead, native total/dropped frames and source assignments. Native frame counters describe the current media source, not the entire watch across source changes.
+
+The adapter counts requested/completed/failed reader calls, returned plaintext payload including overlaps, unique plaintext coverage, mean and summed completed-call latency, connection wait and file-open time. Calls may overlap: summed latency is not elapsed wall time or a bandwidth denominator. Direct first-read/frame measurements survive relay fallback as a separate receipt with reason and saved playhead. Reader call counters are not ANT chunk counts. Plaintext bytes are not wire traffic. No network peer counts, lookup counters, cost savings or viewer seeding are invented. The SDK bytes remain untouched.
+
+The file sheet uses actual native duration/resolution in direct mode. File bitrate is labelled file average. HTTP Content-Length, relay chunk headers, Blob size and wire rate are explicitly inapplicable or unexposed. Direct whole-file SHA-256 is not claimed; completing all plaintext ranges is session coverage, not an offline cache receipt.
+
+Acceptance: the initial combined direct/front run was 7/8, exit 1: the old front test asserted exactly seven receipt rows and observed fifteen. The direct cases all passed, including actual vendored worker/range/VP9 playback, 390px layout, metrics provenance and retained fallback measurements. The old count was replaced with assertions for every original and new required field; the front suite then passed 4/4, zero failures/cancellations/skips, exit 0, 15597.6072 ms. A focused earlier playback run passed 3/3, exit 0, 32314.9839 ms. Final copy refinements are gated by hosted CI.
+
+Targeted standards meter: 100% in COLOUR, TYPE, RADIUS, TARGET, CONTRAST and CASE for bee/raver/cypherpunk, exit 0, 130/199/487 checks. No threshold weakened. New field assertions cover the first resumed relay playhead, real range counts and bytes, native quality availability, source stability, connection reuse and mobile width.
+
+Upstream priority checked: dirvine's latest #504 reply folds #622/#952 into the delivered/published measurement work; #505 is closed. This surface receipt does not purport to satisfy those mesh measurements or modify their lanes. Work starts from merged main f613149a5 in the owned wt-codex-bview-ci checkout. CI, exact Pages artifact bytes and a production cypherpunk receipt observation will be recorded in the PR before completion.

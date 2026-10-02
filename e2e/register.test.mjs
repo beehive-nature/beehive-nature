@@ -77,7 +77,10 @@ test('duplicate script execution before or after DOM readiness mounts once',()=>
   const p=page({loading:true});p.run();assert.equal(p.ids.has('bregctl'),false);p.ready();p.run();p.ready();
   assert.equal(p.ids.get('bregctl').children.length,3);
   assert.equal(p.body.children.filter(c=>c.id==='bregbar').length,1);
-  assert.equal(p.document.head.children.length,1);
+  /* head: the register's own style plus the kit-faces wiring (#257 follow-through)
+     — #bkitfonts link + #bkitburti style, each appended exactly once across re-runs */
+  assert.equal(p.document.head.children.filter(c=>c.id==='bkitfonts').length,1);
+  assert.equal(p.document.head.children.filter(c=>c.id==='bkitburti').length,1);
 });
 test('native buttons cannot submit a surrounding form; labels use existing corpus keys',()=>{
   const p=page({host:true});const corpus=JSON.parse(read('surfaces/lang-corpus.json')).strings;
@@ -161,6 +164,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
        2026-09-21): no shell, one hop, the destination's shell loads. No gate
        follows this redirect yet. */
     if(p==='surfaces/watch-ant.html')continue;
+    /* onboarding.html is the same kind of shim, to onboarding/index.html
+       (chief/onboarding-link-wire, 2026-10-01): no shell, one hop, the
+       ceremony's shell loads. Proven by e2e/onboarding-link-wire.mjs. */
+    if(p==='surfaces/onboarding.html')continue;
     const tags=[...read(p).matchAll(/<script\b[^>]*\bsrc=["']([^"']*\b(?:tour|register)\.js(?:\?[^"']*)?)["'][^>]*>/gi)];
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
@@ -175,7 +182,7 @@ test('tour language bootstrap waits for view labels, with a script-error fallbac
   const tour=read('surfaces/tour.js');
   assert.match(tour,/s\.onload=loadLanguage; s\.onerror=loadLanguage/);
   assert.match(tour,/else loadLanguage\(\)/);
-  assert.match(tour,/assetBase\+'register\.js\?v=12'/);
+  assert.match(tour,/assetBase\+'register\.js\?v=13'/);
   assert.match(tour,/assetBase\+'lang\.js\?v=26'/);
   assert.match(read('surfaces/lang.js'),/#bregbar,#bregctl/);
 });

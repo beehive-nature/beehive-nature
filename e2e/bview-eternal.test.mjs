@@ -147,8 +147,9 @@ test('honest gestures: rows, ring and tiles read the data; they never fetch, pla
   await c2.close();
 
   const { ctx: c3, p: y3 } = await open('cypherpunk');
-  const d = await y3.evaluate(() => ({ steps: document.querySelectorAll('#etPipe li').length, done: document.querySelectorAll('#etPipe li.done').length, receipt: document.querySelectorAll('#etReceipt tr').length, panes: document.querySelectorAll('.et-c #inst .pane').length, sha: document.querySelector('#etReceipt').textContent }));
-  assert.equal(d.steps, 7); assert.equal(d.done, 0, 'no step is done before an address'); assert.equal(d.receipt, 7); assert.equal(d.panes, 4, 'byte map, rule, decodingInfo, receipts at first paint');
+  const d = await y3.evaluate(() => ({ steps: document.querySelectorAll('#etPipe li').length, done: document.querySelectorAll('#etPipe li.done').length, receipt: [...document.querySelectorAll('#etReceipt th')].map(e=>e.textContent), panes: document.querySelectorAll('.et-c #inst .pane').length, sha: document.querySelector('#etReceipt').textContent }));
+  assert.equal(d.steps, 7); assert.equal(d.done, 0, 'no step is done before an address'); assert.equal(d.panes, 4, 'byte map, rule, decodingInfo, receipts at first paint');
+  for(const field of ['door','path','arrived','length','flow','sha256','done','first response','first frame','playhead','picture','buffer ahead','buffer ranges','frames','source changes'])assert.ok(d.receipt.includes(field),'receipt exposes '+field);
   assert.match(d.sha, /sha256\s*not yet/, 'no hash is claimed before the last byte');
   assert.equal(await y3.$eval('.et-c a[target="_blank"]', a => a.rel), 'noopener noreferrer', 'the fork link opens a new tab safely');
   await c3.close();

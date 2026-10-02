@@ -1,0 +1,601 @@
+<!doctype html>
+<!-- mission-room.html — THE BUZZ MISSION ROOM (execution station). The team
+     works here: planner routes work units, agents hand off, every meaningful
+     action lands a receipt, the evaluator continues / pauses / escalates,
+     the treasury releases milestones inside the approved ceiling, and the
+     founder's stop / change-order reaches the room at any moment.
+     Companion stations: missions.html (files & approves), receipts.html
+     (keeps the chain), or-board.html (the hive roster, live).
+     Off-chain first rail: local-first ledger over a deterministic seed; the
+     Buzz relay wire (real rooms carrying these envelopes) is designed, not
+     claimed — no relay connection exists on this page.
+     THREE VIEWS, ONE SET OF FACTS (founder canon 2026-08-28): the room, the
+     roster, the costs and the verdicts are identical in every register; only
+     the temperature changes. BNR COLOR LAW: purple = humans, teal = Ai,
+     green = biomass/law. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<title>the mission room · Buzz</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  :root {
+    --human:#9C6FD6; --human-soft:#B79FE0; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#070D0A; --panel:#0F1713; --well:#0B120F; --line:#1E2B25; --line-hi:#31463C;
+    --ink:#E9F2EC; --dim:#8FA79C; --dimmer:#5B7368; --void:#070D0A; --lift:#16211C;
+    --ember:#E25822;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body { min-height:100vh; color:var(--ink); background:var(--bg); font:14px/1.65 var(--mono);
+    padding-bottom:70px; }
+  a { color:var(--ai); text-decoration:none; }
+  a:hover { color:var(--human-soft); }
+  a:focus-visible, button:focus-visible, select:focus-visible { outline:3px solid var(--ai); outline-offset:3px; }
+  button, select { font:600 12px var(--mono); }
+  .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
+
+  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
+  .eyebrow { position:relative; color:var(--human-soft); letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
+  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 var(--sans); letter-spacing:-.055em; }
+  h1 span { color:var(--ai); }
+  .lead { position:relative; max-width:44ch; margin-top:17px; font:600 clamp(1.05rem,2.6vw,1.5rem)/1.35 var(--sans);
+    letter-spacing:-.015em; color:var(--ink); }
+  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:14px; }
+  .intro b { color:var(--ink); }
+  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
+  .nav a, button.pill { border:1px solid var(--line-hi); border-radius:999px; padding:11px 15px; color:var(--ink);
+    background:var(--panel); font:600 11px var(--mono); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
+  .nav a:hover, button.pill:hover { border-color:var(--human); background:var(--lift); }
+  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
+  .dot.ok { background:var(--biomass); box-shadow:0 0 13px var(--biomass); }
+  .dot.bad { background:var(--ember); box-shadow:0 0 13px var(--ember); }
+  .fx { border:1px dashed var(--gold); border-radius:99px; padding:2px 9px; color:var(--gold); font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  .picker { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:18px; }
+  .picker label { color:var(--dim); font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
+  .picker select { padding:10px 12px; border:1px solid var(--line-hi); border-radius:9px; background:var(--well);
+    color:var(--ink); min-height:42px; max-width:min(420px, 100%); }
+
+  main { padding-top:24px; }
+  .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .card.half { grid-column:span 6; }
+  .card.third { grid-column:span 4; }
+  .card h2 { color:var(--human-soft); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
+  .sub { color:var(--dim); font-size:11px; margin-top:6px; }
+  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
+
+  .roomart { display:none; }
+  #motion { display:none; }
+  #motion[aria-pressed="true"] { color:var(--human-soft); border-color:var(--human); }
+
+  .colorlaw { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
+    padding:11px 14px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:10.5px; }
+  .colorlaw .sw { display:inline-flex; align-items:center; gap:5px; }
+  .colorlaw .sw i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
+  .colorlaw .sw.biomass i { background:var(--biomass); }
+
+  /* the room itself */
+  .room { min-height:210px; display:flex; flex-direction:column; justify-content:space-between; padding:20px;
+    border:1px solid rgba(156,111,214,.45); border-radius:12px;
+    background:linear-gradient(135deg,rgba(156,111,214,.14),rgba(69,194,220,.05)); }
+  .roomtop { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .roomtop h2 { color:var(--ink); font:800 22px var(--sans); letter-spacing:-.02em; text-transform:none; }
+  .pill { border:1px solid var(--biomass); border-radius:999px; color:var(--biomass); padding:3px 8px; font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  .pill.warn { border-color:var(--gold); color:var(--gold); }
+  .pill.bad { border-color:var(--ember); color:var(--ember); }
+  .roomfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .roomfoot small { color:var(--dim); font-size:10px; }
+
+  /* roster */
+  .roster { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .member { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line);
+    border-radius:10px; background:var(--well); }
+  .avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:var(--human);
+    color:#140B1E; font-weight:800; flex:none; font-size:12px; }
+  .avatar.ai { background:var(--ai); }
+  .avatar.law { background:var(--biomass); }
+  .member b { color:var(--ink); font-size:12px; }
+  .member small { display:block; color:var(--dim); font-size:10px; }
+  .member .role { margin-left:auto; font-size:9px; color:var(--dimmer); border:1px solid var(--line);
+    border-radius:99px; padding:2px 8px; white-space:nowrap; }
+
+  /* work units */
+  .units { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .unit { display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; padding:11px 12px;
+    border:1px solid var(--line); border-radius:10px; background:var(--well); }
+  .unit .uid { color:var(--dimmer); font-size:10px; letter-spacing:.1em; }
+  .unit b { color:var(--ink); font-size:12px; font-weight:600; }
+  .unit small { display:block; color:var(--dim); font-size:10px; overflow-wrap:anywhere; }
+  .uchip { font-size:9px; padding:2px 8px; border-radius:99px; border:1px solid var(--line-hi); color:var(--dim);
+    letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
+  .uchip.done { color:var(--biomass); border-color:rgba(134,204,114,.5); }
+  .uchip.active { color:var(--ai); border-color:rgba(69,194,220,.45); }
+  .uchip.blocked { color:var(--ember); border-color:rgba(226,88,34,.5); }
+
+  /* the feed */
+  .feed { display:flex; flex-direction:column; gap:7px; margin-top:12px; max-height:420px; overflow:auto; }
+  .event { display:flex; gap:10px; align-items:baseline; padding:8px 10px; border-left:2px solid var(--ai);
+    background:var(--well); color:var(--dim); font-size:10px; }
+  .event b { color:var(--ai); font-size:9px; letter-spacing:.08em; white-space:nowrap; }
+  .event .who { color:var(--human-soft); white-space:nowrap; }
+  .event .cost { color:var(--gold); white-space:nowrap; margin-left:auto; }
+  .event.human { border-left-color:var(--human); }
+  .event.human b { color:var(--human-soft); }
+  .event.law { border-left-color:var(--biomass); }
+  .event.law b { color:var(--biomass); }
+  .event .when { color:var(--dimmer); white-space:nowrap; }
+
+  /* evaluator + treasury */
+  .verdict { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; padding:13px;
+    border:1px solid var(--line-hi); border-radius:10px; background:var(--well); }
+  .verdict .word { font:800 16px var(--sans); letter-spacing:-.01em; }
+  .verdict .word.continue, .verdict .word.complete { color:var(--biomass); }
+  .verdict .word.pause, .verdict .word.await_human { color:var(--gold); }
+  .verdict .word.escalate, .verdict .word.stopped { color:var(--ember); }
+  .verdict small { color:var(--dim); font-size:10px; flex-basis:100%; }
+  .bar { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; margin-top:8px; }
+  .bar i { display:block; height:100%; background:var(--ai); }
+  .bar i.hot { background:var(--gold); } .bar i.over { background:var(--ember); }
+  .mrowt { display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; margin-top:8px;
+    padding:10px 12px; border:1px solid var(--line); border-radius:9px; background:var(--well); font-size:11px; }
+  .mrowt .st { font-size:9px; padding:2px 8px; border-radius:99px; border:1px solid var(--line-hi); color:var(--dim);
+    letter-spacing:.1em; text-transform:uppercase; }
+  .mrowt .st.released, .mrowt .st.funded { color:var(--biomass); border-color:rgba(134,204,114,.5); }
+  .mrowt .num { font-variant-numeric:tabular-nums; color:var(--ink); }
+  .primary { color:#140B1E; border:1px solid var(--human); background:var(--human-soft); border-radius:999px;
+    min-height:44px; padding:11px 18px; cursor:pointer; }
+  .primary:hover { background:var(--human); color:#140B1E; }
+  .primary:disabled { opacity:.5; cursor:not-allowed; }
+
+  .levers { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .lever { border:1px solid var(--line-hi); border-radius:99px; padding:9px 14px; background:var(--panel); color:var(--ink);
+    font:600 11px var(--mono); cursor:pointer; min-height:40px; }
+  .lever:hover { border-color:var(--human); }
+  .lever.danger { border-color:rgba(226,88,34,.55); color:var(--ember); }
+  .lever:disabled { opacity:.45; cursor:not-allowed; }
+
+  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:10.5px; }
+  .boundary-dl dt { color:var(--ai); }
+  .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
+  @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; } }
+
+  .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-left:2px solid var(--biomass);
+    border-radius:10px; color:var(--dim); font-size:10.5px; line-height:1.8; }
+  .law b { color:var(--ink); }
+  footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line);
+    color:var(--dimmer); font-size:10px; line-height:1.8; }
+  footer a { color:var(--dim); }
+
+  /* ═══ NEW BEE — the calm first minute ═══════════════════════════════ */
+  body[data-reg="bee"] {
+    --human:#65509A; --human-soft:#65509A; --ai:#176879; --biomass:#326b39; --gold:#855b0b;
+    --bg:#f6f7f2; --panel:#fff; --well:#edf2eb; --line:#ccd7cf; --line-hi:#a9bcad;
+    --ink:#18362a; --dim:#435f4e; --dimmer:#52695b; --void:#f6f7f2; --lift:#e2eadf; --ember:#9f362c;
+    font-family:var(--sans); font-size:15px; color-scheme:light;
+  }
+  body[data-reg="bee"] header { background:linear-gradient(180deg,#eef2e9,#f6f7f2); }
+  body[data-reg="bee"] h1 span { color:var(--human); }
+  body[data-reg="bee"] .dot.bad { box-shadow:none; }
+  body[data-reg="bee"] .card h2 { color:var(--human); }
+  body[data-reg="bee"] .roomtop h2 { font-family:var(--sans); }
+  body[data-reg="bee"] .avatar { color:#fff; }
+  body[data-reg="bee"] .primary { color:#fff; background:var(--human); }
+  body[data-reg="bee"] .primary:hover { background:#54407f; color:#fff; }
+  body[data-reg="bee"] .room { background:linear-gradient(135deg,rgba(101,80,154,.08),rgba(23,104,121,.05));
+    border-color:rgba(101,80,154,.35); }
+  body[data-reg="bee"] .explainer { display:grid; gap:8px; margin-top:12px; }
+  body[data-reg="bee"] .explainer div { display:flex; gap:10px; align-items:baseline; color:var(--dim); font-size:12.5px; line-height:1.7; }
+  body[data-reg="bee"] .explainer div::before { content:'◆'; color:var(--biomass); font-size:9px; align-self:center; }
+
+  /* ═══ RAVER — the room at full feeling ══════════════════════════════ */
+  body[data-reg="raver"] {
+    --human:#9C6FD6; --human-soft:#C9A7F5; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#0E0817; --panel:#1A1226; --well:#140E1F; --line:#3A2C4E; --line-hi:#544070;
+    --ink:#F5EFFA; --dim:#C4B9D5; --dimmer:#9C8FB8; --void:#0E0817; --lift:#241A35;
+  }
+  body[data-reg="raver"] header { padding:0; border-bottom:0; }
+  body[data-reg="raver"] .hero-open { position:relative; min-height:min(62vh,560px); display:flex; flex-direction:column;
+    justify-content:center; padding:84px 0 54px; overflow:hidden;
+    background:
+      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.28), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(69,194,220,.16), transparent 60%),
+      radial-gradient(ellipse 80% 40% at 50% 108%, rgba(134,204,114,.14), transparent 66%),
+      linear-gradient(180deg,#0E0817,#150C24 58%,#0E0817); }
+  body[data-reg="raver"] .hero-open .wrap { position:relative; }
+  body[data-reg="raver"] .eyebrow { color:var(--human-soft); }
+  body[data-reg="raver"] h1 { font-size:clamp(2.6rem,10vw,6.8rem); }
+  body[data-reg="raver"] h1 span {
+    background:linear-gradient(94deg,#C9A7F5,#45C2DC 55%,#86CC72);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  body[data-reg="raver"] .lead { font:500 clamp(1.5rem,4.2vw,2.7rem)/1.14 var(--sans);
+    letter-spacing:-.035em; max-width:20ch; margin-top:22px; text-wrap:balance; }
+  body[data-reg="raver"] .intro { max-width:52ch; font-size:13px; }
+  body[data-reg="raver"] .nav { margin-top:30px; }
+  body[data-reg="raver"] .statusline { margin-top:26px; }
+  body[data-reg="raver"] .roomart { display:block; position:absolute; inset:auto -3% -4% auto; width:min(56%,600px);
+    pointer-events:none; }
+  body[data-reg="raver"] #motion { display:inline-flex; }
+  body[data-reg="raver"] .card { border-radius:18px; }
+  body[data-reg="raver"] .room { border-radius:16px; border-color:rgba(201,167,245,.4); }
+  body[data-reg="raver"] .primary { font-size:13px; padding:13px 22px; color:#12081F;
+    background-color:#9C6FD6; background-image:linear-gradient(96deg,#C9A7F5,#9C6FD6);
+    box-shadow:0 8px 30px rgba(156,111,214,.35); }
+  .roomart .orbit { transform-box:view-box; transform-origin:360px 215px; animation:orbitspin 34s linear infinite; }
+  .roomart .sat { animation:satpulse 5.2s ease-in-out infinite; }
+  .roomart .sat.s2 { animation-delay:1.2s; } .roomart .sat.s3 { animation-delay:2.4s; }
+  .roomart .sat.s4 { animation-delay:3.6s; }
+  @keyframes orbitspin { to { transform:rotate(360deg); } }
+  @keyframes satpulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  /* ═══ CYPHERPUNK — the room terminal ════════════════════════════════ */
+  body[data-reg="cypherpunk"] {
+    --human:#C9A7F5; --human-soft:#C9A7F5; --ai:#80CDDD; --biomass:#8CD98C; --gold:#E8B54B;
+    --bg:#0E141A; --panel:#151E26; --well:#101820; --line:#3F5260; --line-hi:#58707F;
+    --ink:#D8F0D9; --dim:#A4C0A8; --dimmer:#8AA690; --void:#0E141A; --lift:#1B2833; --ember:#E25822;
+    font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  }
+  body[data-reg="cypherpunk"] header { padding:40px 0 26px; }
+  body[data-reg="cypherpunk"] h1 { font:700 clamp(1.5rem,3.4vw,2.3rem)/1.1 inherit; letter-spacing:-.02em; }
+  body[data-reg="cypherpunk"] h1 span { color:var(--biomass); }
+  body[data-reg="cypherpunk"] .lead { font:600 1rem/1.5 inherit; max-width:78ch; }
+  body[data-reg="cypherpunk"] .nav a, body[data-reg="cypherpunk"] button.pill { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card, body[data-reg="cypherpunk"] .member, body[data-reg="cypherpunk"] .unit,
+  body[data-reg="cypherpunk"] .event, body[data-reg="cypherpunk"] .mrowt, body[data-reg="cypherpunk"] .law,
+  body[data-reg="cypherpunk"] .colorlaw, body[data-reg="cypherpunk"] .fx, body[data-reg="cypherpunk"] .picker select { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card h2 { color:var(--ai); }
+  body[data-reg="cypherpunk"] .primary { border-radius:3px; background:var(--human); color:#140B1E; }
+  body[data-reg="cypherpunk"] .grid { display:flex; flex-direction:column; }
+  body[data-reg="cypherpunk"] #boundary-card { order:-1; }
+
+  body[data-motion-paused="true"] .orbit, body[data-motion-paused="true"] .sat { animation-play-state:paused; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    .orbit, .sat { animation:none; }
+  }
+</style>
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+
+<header>
+  <div class="hero-open">
+  <div class="wrap">
+    <div class="eyebrow" data-i18n="missionroom.eyebrow">Buzz · the mission room</div>
+    <h1>the mission <span>room</span></h1>
+
+    <p class="lead" data-reg="bee" data-i18n="missionroom.beeLead">The team works in the open. Every action leaves a receipt.</p>
+    <p class="lead" data-reg="raver" data-i18n="missionroom.raverLead">The set is running. Watch the decks.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="missionroom.cypherLead">Work units, handoffs, costs — the room, logged.</p>
+
+    <p class="intro" data-reg="bee" data-i18n="missionroom.beeIntro">Pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. Costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.</p>
+    <p class="intro" data-reg="raver" data-i18n="missionroom.raverIntro">One deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. When something leaves the envelope, the music stops and asks you. That pause is the safety, not the failure.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="missionroom.cypherIntro">This room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. The relay wire for live rooms is designed, not built — nothing on this page opens a socket.</p>
+
+    <div class="explainer" data-reg="bee" aria-label="how the room works">
+      <div>The planner routes the work into bounded units; agents pick them up and hand them off.</div>
+      <div>A separate reviewer verifies outputs before any milestone can release.</div>
+      <div>The evaluator continues, pauses, or escalates — production access and secrets stay behind your word.</div>
+    </div>
+
+    <nav class="nav" aria-label="mission room links">
+      <a href="missions.html">the mission desk</a>
+      <a href="receipts.html">the receipt ledger</a>
+      <a href="or-board.html">who is here, live — the OR board</a>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+    </nav>
+
+    <div class="picker">
+      <label for="mission-pick">mission</label>
+      <select id="mission-pick" aria-label="choose a mission"></select>
+      <span class="statusline" style="margin-top:0"><span class="dot" id="status-dot"></span><span id="status">loading the ledger…</span><span class="fx" data-i18n="missions.fixture">seed ledger · fixture figures</span></span>
+    </div>
+  </div>
+
+  <!-- the room at full feeling — the crew orbits the mission core; the
+       evaluator ring holds gold. Decorative; static outside Raver, stopped
+       by prefers-reduced-motion and the pause control. -->
+  <svg class="roomart" viewBox="0 0 720 430" fill="none" aria-hidden="true" focusable="false">
+    <circle cx="360" cy="215" r="52" stroke="#86CC72" stroke-opacity=".7" stroke-width="2"/>
+    <circle cx="360" cy="215" r="30" stroke="#86CC72" stroke-opacity=".3" stroke-width="1.4"/>
+    <text x="360" y="212" font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#86CC72" text-anchor="middle" letter-spacing="2">MISSION</text>
+    <text x="360" y="228" font-family="ui-monospace,Consolas,monospace" font-size="8.5" fill="#86CC72" fill-opacity=".7" text-anchor="middle">envelope</text>
+    <g class="orbit">
+      <ellipse cx="360" cy="215" rx="150" ry="86" stroke="#45C2DC" stroke-opacity=".35" stroke-width="1.4" stroke-dasharray="6 8"/>
+      <g class="sat"><circle cx="210" cy="215" r="9" fill="#9C6FD6"/><text x="210" y="245" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#C9A7F5" text-anchor="middle">LEAD</text></g>
+      <g class="sat s2"><circle cx="360" cy="129" r="8" fill="#45C2DC"/><text x="360" y="114" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#45C2DC" text-anchor="middle">ASTRA</text></g>
+      <g class="sat s3"><circle cx="510" cy="215" r="8" fill="#45C2DC"/><text x="510" y="245" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#45C2DC" text-anchor="middle">GLM</text></g>
+      <g class="sat s4"><circle cx="435" cy="290" r="7" fill="#45C2DC"/><text x="435" y="316" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#45C2DC" text-anchor="middle">GROK</text></g>
+      <g class="sat s2"><circle cx="285" cy="290" r="7" fill="#45C2DC"/><text x="285" y="316" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#45C2DC" text-anchor="middle">FABLE</text></g>
+    </g>
+    <ellipse cx="360" cy="215" rx="252" ry="146" stroke="#E8B54B" stroke-opacity=".4" stroke-width="1.4" stroke-dasharray="3 7"/>
+    <text x="612" y="72" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#E8B54B">EVALUATOR</text>
+  </svg>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="colorlaw" aria-label="the BNR color law">
+    <span class="sw human"><i aria-hidden="true"></i><span data-i18n="missions.lawHuman">purple = humans</span></span>
+    <span class="sw ai"><i aria-hidden="true"></i><span data-i18n="missions.lawAi">teal = Ai</span></span>
+    <span class="sw biomass"><i aria-hidden="true"></i><span data-i18n="missions.lawBiomass">green = biomass · the law that holds</span></span>
+  </div>
+
+  <div class="grid" style="margin-top:14px">
+    <section class="card hero" style="grid-column:span 12" aria-label="the room">
+      <div class="room">
+        <div class="roomtop">
+          <div>
+            <h2 id="room-title">—</h2>
+            <p class="sub" id="room-sub">—</p>
+          </div>
+          <span class="pill" id="room-state">—</span>
+        </div>
+        <div class="roomfoot">
+          <small id="room-foot">—</small>
+          <div class="levers" style="margin-top:0">
+            <button class="primary" id="release" type="button" data-i18n="missionroom.releaseNext">release next milestone</button>
+            <button class="lever danger" id="stop" type="button" data-i18n="missions.lvStop">stop mission</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card third" id="boundary-card" data-reg="cypherpunk">
+      <h2>boundary · what this room does</h2>
+      <p class="sub">Named by the code that runs it.</p>
+      <dl class="boundary-dl">
+        <dt>engine</dt><dd>surfaces/mission-core.js — evaluate() recomputes every verdict from the receipts; applyControl() is the only state-changing door and it always appends a chained receipt</dd>
+        <dt>releases</dt><dd>blocked unless state is funded/active, the ceiling holds, and no escalation is open — try the button on an escalated room and it refuses</dd>
+        <dt>roster</dt><dd>local ledger only; live presence is the OR board's job (keyless relay read door), linked beside — this page opens no socket</dd>
+        <dt>money</dt><dd>testnet accounting, fixture figures; no token, wallet, or chain is touched from this surface</dd>
+      </dl>
+    </section>
+
+    <section class="card third">
+      <h2>the team · who holds what</h2>
+      <p class="sub">Humans purple, Ai teal — the law that holds, green.</p>
+      <div class="roster" id="roster"></div>
+    </section>
+
+    <section class="card third">
+      <h2>work units · the planner's board</h2>
+      <p class="sub">Bounded units; artifacts named where they landed.</p>
+      <div class="units" id="units"></div>
+    </section>
+
+    <section class="card half">
+      <h2>the receipt feed · every meaningful action</h2>
+      <p class="sub">Newest first; the full chain lives on the ledger surface.</p>
+      <div class="feed" id="feed" aria-live="polite"></div>
+    </section>
+
+    <section class="card half">
+      <h2>the milestone evaluator</h2>
+      <p class="sub">A pure function of the ledger — continue, pause, or escalate.</p>
+      <div class="verdict" id="verdict"></div>
+      <h2 style="margin-top:16px">treasury · milestone releases</h2>
+      <div id="treasury"></div>
+      <p class="sub" id="treasury-note" style="margin-top:8px"></p>
+    </section>
+  </div>
+
+  <div class="law"><b>Room law.</b> <span>The agents never silently expand scope, never spend beyond the approved ceiling, never expose secrets, never publish unverified claims, never deploy irreversible changes. Inside the envelope they continue autonomously — and every task, handoff, artifact and tool cost lands in the receipt ledger before the evaluator will move.</span></div>
+</main>
+
+<footer>the mission room · Buzz station · roster and presence live on the OR board · every figure is a testnet-accounting fixture · <a href="receipts.html">verify the chain</a></footer>
+
+<script src="mission-seed.js"></script>
+<script src="mission-core.js"></script>
+<script>
+'use strict';
+(function () {
+  var M = window.BNRMissions, $ = function (i) { return document.getElementById(i); };
+  var state = { ledger: null, ver: null, id: null };
+  function T(key, fallback) { return M.T(key, fallback); }
+
+  var motion = { reduced: matchMedia('(prefers-reduced-motion: reduce)'), paused: false };
+  try { motion.paused = localStorage.getItem('bnr.motion.paused') === 'true'; } catch (e) {}
+  function motionOff() { return motion.reduced.matches || motion.paused; }
+  function syncMotion() {
+    document.body.setAttribute('data-motion-paused', String(motionOff()));
+    var b = $('motion');
+    b.hidden = false; b.disabled = motion.reduced.matches;
+    b.setAttribute('aria-pressed', String(motion.reduced.matches || motion.paused));
+    var key = motion.reduced.matches ? 'ux.still' : (motion.paused ? 'ux.resume' : 'ux.pause');
+    var fb = motion.reduced.matches ? 'Still image' : (motion.paused ? 'Resume motion' : 'Pause motion');
+    b.textContent = T(key, fb);
+  }
+  $('motion').addEventListener('click', function () {
+    motion.paused = !motion.paused;
+    try { localStorage.setItem('bnr.motion.paused', String(motion.paused)); } catch (e) {}
+    syncMotion();
+  });
+  motion.reduced.addEventListener('change', syncMotion);
+  window.addEventListener('storage', function (e) { if (e.key === 'bnr.motion.paused') { motion.paused = e.newValue === 'true'; syncMotion(); } });
+  document.addEventListener('blang', syncMotion);
+
+  function esc(s) { return M.esc(s); }
+
+  function pickMission(id) {
+    var sel = $('mission-pick');
+    sel.replaceChildren();
+    state.ledger.missions.forEach(function (m) {
+      var o = document.createElement('option');
+      o.value = m.mission.id;
+      o.textContent = m.mission.id + ' · ' + m.mission.title + ' · ' + m.state;
+      sel.appendChild(o);
+    });
+    if (id) sel.value = id;
+    state.id = sel.value || state.ledger.missions[0] && state.ledger.missions[0].mission.id;
+    sel.value = state.id;
+  }
+
+  function render() {
+    var m = M.findMission(state.ledger, state.id);
+    if (!m) { $('room-title').textContent = T('missionroom.noMission', 'no such mission'); return; }
+    var ev = M.evaluate(m, state.ledger.receipts);
+
+    $('room-title').textContent = m.mission.title;
+    $('room-sub').textContent = m.mission.id + ' · ' + T('missionroom.leadBy', 'lead') + ' ' + m.team.lead + ' · ' + M.fmtTs(m.review ? m.review.ts : '');
+    var st = $('room-state');
+    st.textContent = m.state;
+    st.className = 'pill' + (m.state === 'escalated' || m.state === 'stopped' ? ' bad' : (m.state === 'paused' || m.state === 'review' ? ' warn' : ''));
+    $('room-foot').textContent = T('missionroom.spendOf', 'spend') + ' ' + M.fmtUSD(ev.spend) + (ev.ceiling > 0 ? ' / ' + M.fmtUSD(ev.ceiling) : '') + ' · ' + T('missions.fixture', 'seed ledger · fixture figures');
+    $('status-dot').className = 'dot ' + (state.ver && state.ver.ok ? 'ok' : 'bad');
+    $('status').textContent = state.ver && state.ver.ok
+      ? T('missions.stOk', 'ledger loaded') + ' · ' + state.ver.count + ' ' + T('missionroom.receipts', 'receipts')
+      : T('missions.stBroken', 'receipt chain broken');
+
+    /* roster — humans purple, Ai teal, the evaluator law green */
+    var roster = $('roster');
+    roster.replaceChildren();
+    function member(initials, name, role, cls) {
+      var d = document.createElement('div'); d.className = 'member';
+      var a = document.createElement('div'); a.className = 'avatar' + (cls ? ' ' + cls : ''); a.setAttribute('aria-hidden', 'true'); a.textContent = initials;
+      var box = document.createElement('div');
+      var b = document.createElement('b'); b.textContent = name;
+      var s = document.createElement('small'); s.textContent = role;
+      box.append(b, s);
+      d.append(a, box);
+      roster.appendChild(d);
+    }
+    member(m.team.human_attending.split(' ')[0].slice(0, 2).toUpperCase(), m.team.human_attending, T('missionroom.rHuman', 'attending human — approvals, ceiling, stop'), '');
+    member('◆', m.team.lead, T('missionroom.rLead', 'mission lead — planner & task router'), 'ai');
+    m.team.agents.forEach(function (a) { member(a.model.slice(0, 2).toUpperCase(), a.model, a.role, 'ai'); });
+    member('⬡', T('missionroom.rEvaluator', 'milestone evaluator'), T('missionroom.rEvaluatorRole', 'continue · pause · escalate — a pure function of the receipts'), 'law');
+
+    /* work units */
+    var units = $('units');
+    units.replaceChildren();
+    (m.work_units || []).forEach(function (u) {
+      var d = document.createElement('div'); d.className = 'unit';
+      var id = document.createElement('span'); id.className = 'uid'; id.textContent = u.id;
+      var box = document.createElement('div');
+      var b = document.createElement('b'); b.textContent = u.title;
+      var s = document.createElement('small');
+      s.textContent = u.agent + (u.artifacts.length ? ' · ' + u.artifacts.join(' · ') : '');
+      box.append(b, s);
+      var chip = document.createElement('span'); chip.className = 'uchip ' + u.state; chip.textContent = u.state;
+      d.append(id, box, chip);
+      units.appendChild(d);
+    });
+
+    /* the feed — every receipt for this mission, newest first */
+    var feed = $('feed');
+    feed.replaceChildren();
+    state.ledger.receipts.filter(function (r) { return r.mission === state.id; }).reverse().forEach(function (r) {
+      var d = document.createElement('div');
+      d.className = 'event' + (r.actor.indexOf('founder') >= 0 ? ' human' : (r.kind.indexOf('evaluator') === 0 || r.kind === 'report.final' || r.kind === 'rep.update' ? ' law' : ''));
+      var k = document.createElement('b'); k.textContent = r.kind;
+      var who = document.createElement('span'); who.className = 'who'; who.textContent = r.actor;
+      var msg = document.createElement('span'); msg.textContent = r.summary;
+      var cost = document.createElement('span'); cost.className = 'cost'; cost.textContent = r.cost_usd > 0 ? M.fmtUSD(r.cost_usd) : '';
+      var when = document.createElement('span'); when.className = 'when'; when.textContent = M.fmtTs(r.ts);
+      d.append(k, who, msg, cost, when);
+      feed.appendChild(d);
+    });
+
+    /* the evaluator verdict */
+    var v = $('verdict');
+    v.replaceChildren();
+    var word = document.createElement('span'); word.className = 'word ' + ev.verdict;
+    var words = { continue: T('missionroom.vContinue', 'CONTINUE'), pause: T('missionroom.vPause', 'PAUSE'), escalate: T('missionroom.vEscalate', 'ESCALATE'), await_human: T('missionroom.vAwait', 'AWAITING YOU'), complete: T('missionroom.vComplete', 'COMPLETE'), stopped: T('missionroom.vStopped', 'STOPPED') };
+    word.textContent = words[ev.verdict] || ev.verdict;
+    var util = document.createElement('span');
+    util.textContent = ev.ceiling > 0 ? Math.round(ev.utilization * 100) + '% ' + T('missionroom.ofCeiling', 'of ceiling') : T('missions.noCeiling', 'no ceiling yet — review pending');
+    v.append(word, util);
+    var bar = document.createElement('div'); bar.className = 'bar'; bar.style.flexBasis = '100%';
+    var fill = document.createElement('i');
+    var pct = ev.ceiling > 0 ? Math.min(100, Math.round(ev.utilization * 100)) : 0;
+    fill.style.width = pct + '%';
+    fill.className = pct > 100 ? 'over' : (pct >= 80 ? 'hot' : '');
+    bar.appendChild(fill); v.appendChild(bar);
+    var why = document.createElement('small');
+    var verdictNotes = {
+      continue: T('missionroom.nContinue', 'verification passed; the envelope holds — the next milestone may release'),
+      pause: T('missionroom.nPause', 'something left the envelope — work pauses until it is answered'),
+      escalate: T('missionroom.nEscalate', 'a human decision is required before anything moves again'),
+      await_human: T('missionroom.nAwait', 'the proposal waits at the desk for your ceiling'),
+      complete: T('missionroom.nComplete', 'final report filed; reputation updated from delivery'),
+      stopped: T('missionroom.nStopped', 'stopped by the attending human — nothing releases from here')
+    };
+    why.textContent = verdictNotes[ev.verdict] || '';
+    if (ev.reasons.length) why.textContent += ' · ' + ev.reasons.join(' · ');
+    v.appendChild(why);
+
+    /* treasury */
+    var tr = $('treasury');
+    tr.replaceChildren();
+    (m.milestones || []).forEach(function (ms) {
+      var d = document.createElement('div'); d.className = 'mrowt';
+      var box = document.createElement('div');
+      var b = document.createElement('b'); b.style.color = 'var(--ink)'; b.textContent = ms.id + ' · ' + ms.title;
+      box.appendChild(b);
+      var num = document.createElement('span'); num.className = 'num'; num.textContent = M.fmtUSD(ms.release_usd);
+      var chip = document.createElement('span'); chip.className = 'st ' + ms.state; chip.textContent = ms.state;
+      d.append(box, num, chip);
+      tr.appendChild(d);
+    });
+    var tn = $('treasury-note');
+    if (ev.can_release_next && ev.next) {
+      tn.textContent = T('missionroom.tnCan', 'evaluator will release') + ' ' + ev.next.id + ' — ' + M.fmtUSD(ev.next.release_usd) + ' · ' + T('missionroom.tnInside', 'inside the ceiling') + ' (' + M.fmtUSD(ev.spend) + ' → ' + M.fmtUSD(round2n(ev.spend + ev.next.release_usd)) + ')';
+    } else if (ev.verdict === 'await_human') {
+      tn.textContent = T('missionroom.tnReview', 'no ceiling yet — approve one at the desk before anything funds');
+    } else if (ev.verdict === 'complete') {
+      tn.textContent = T('missionroom.tnDone', 'all milestones delivered — the treasury is closed for this mission');
+    } else if (ev.verdict === 'stopped') {
+      tn.textContent = T('missionroom.tnStopped', 'stopped — the treasury is frozen');
+    } else {
+      tn.textContent = T('missionroom.tnEscalated', 'releases frozen until the escalation is resolved by you');
+    }
+    $('release').disabled = !ev.can_release_next;
+    $('stop').disabled = (m.state === 'stopped' || m.state === 'complete');
+  }
+  function round2n(x) { return Math.round(x * 100) / 100; }
+
+  $('mission-pick').addEventListener('change', function () {
+    state.id = $('mission-pick').value;
+    location.hash = '#/m/' + encodeURIComponent(state.id);
+    render();
+  });
+  $('release').addEventListener('click', function () {
+    var res = M.applyControl(state.ledger, state.id, 'release_next', {});
+    if (res.error) { alert(res.error); return; }
+    state.ver = M.verifyChain(state.ledger.receipts);
+    render();
+  });
+  $('stop').addEventListener('click', function () {
+    if (!confirm(T('missions.stopConfirm', 'human stop — all autonomous work halts and no further milestone releases. Leave a note?'))) return;
+    var res = M.applyControl(state.ledger, state.id, 'stop', { note: '' });
+    if (res.error) { alert(res.error); return; }
+    state.ver = M.verifyChain(state.ledger.receipts);
+    render();
+  });
+
+  function route() {
+    var h = location.hash || '';
+    var mm = h.match(/^#\/m\/(.+)$/);
+    if (mm) { state.id = decodeURIComponent(mm[1]); $('mission-pick').value = state.id; }
+    render();
+  }
+  window.addEventListener('hashchange', route);
+
+  try { state.ledger = M.loadLedger(); } catch (e) { state.ledger = { missions: [], receipts: [] }; }
+  if (state.ledger.receipts.length) state.ver = M.verifyChain(state.ledger.receipts);
+  pickMission(null);
+  syncMotion();
+  route();
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

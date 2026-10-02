@@ -420,7 +420,7 @@ body[data-reg="bee"] #sky{display:none}
       <button id="soul-go">connect</button>
       <button id="soul-out" style="display:none">disconnect</button>
       <span id="soul-chip" class="badge" style="align-self:center;font-size:max(10px,var(--fmin,12px))">not connected</span>
-    <a href="./onboarding/" style="align-self:center;font-size:max(10px,var(--fmin,12px));color:var(--cyan);margin-left:6px;text-decoration:none">+ create your bzDiD</a>
+    <a id="soul-create" href="./onboarding/" style="align-self:center;font-size:max(10px,var(--fmin,12px));color:var(--cyan);margin-left:6px;text-decoration:none">+ create your bzDiD</a>
     </div>
   </div>
 </section>
@@ -527,7 +527,7 @@ body[data-reg="bee"] #sky{display:none}
   static · keyless · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/bnames.html ·
   the registry rows themselves are the receipt
 </footer>
-<script src="agent-dock.js?v=5"></script>
+<script src="agent-dock.js?v=10"></script>
 <script src="tour.js?v=42"></script>
 <script>
 (function(){
@@ -923,12 +923,15 @@ body[data-reg="bee"] #sky{display:none}
   var SOUL=null;
   function soulStrip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
   function soulApply(){
-    var chip=$('soul-chip'), out=$('soul-out');
+    var chip=$('soul-chip'), out=$('soul-out'), go=$('soul-go'), create=$('soul-create');
     if(SOUL){ chip.textContent='connected · '+SOUL+'.b'; chip.style.color='var(--leaf)';
-      out.style.display=''; $('creg').value=SOUL; $('ctgt').value=SOUL;
+      out.style.display=''; if(go) go.style.display='none'; if(create) create.style.display='none';
+      $('creg').value=SOUL; $('ctgt').value=SOUL;
       try{localStorage.setItem('bnr_soul',SOUL);}catch(e){}
     } else { chip.textContent='not connected'; chip.style.color=''; out.style.display='none';
+      if(go) go.style.display=''; if(create) create.style.display='';
       try{localStorage.removeItem('bnr_soul');}catch(e){} }
+    try{ document.dispatchEvent(new CustomEvent('bnr-soul',{detail:{soul:SOUL||null}})); }catch(e3){}
     drawConst(); if(live.rows.length){ ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); }); }
     /* SOUL just changed — connect, disconnect, or the deferred restore from
        localStorage in the async init below, which all funnel through here.

@@ -85,6 +85,18 @@
     var dot = document.getElementById('rb-dot'), txt = document.getElementById('rb-txt');
     if (!dot || !txt) return;
     var soul = null; try { soul = localStorage.getItem('bnr_soul'); } catch (e) {}
+    /* Equivalent truth already painted (wallet data-wl-soul + name field): same
+       as a stored soul for chrome — never leave connect/create up beside a live .b. */
+    if (!soul) {
+      try {
+        var painted = document.body && document.body.getAttribute('data-wl-soul') === 'true';
+        var wq = document.getElementById('wq') || document.getElementById('soul-in');
+        var typed = wq && (wq.value || '').trim().toLowerCase().replace(/\.b$/, '');
+        if (painted && typed) soul = typed;
+      } catch (e2) {}
+    }
+    if (soul) soul = String(soul).trim().toLowerCase().replace(/\.b$/, '');
+    if (!soul) soul = null;
     /* NO FETCH HERE. The verdict is the bake unless a reader asked. */
     var when = justAsked ? 'just now' : 'verified ' + BAKED.at;
     var alive = true;
@@ -102,7 +114,8 @@
     var ox = '0x' + fp.slice(0, 6) + '…' + fp.slice(-4);
     dot.style.background = '#7ddf8f';
     dot.style.cssText += ';box-shadow:0 0 8px rgba(125,223,143,.8);animation:rbPulse 2.6s ease-in-out infinite';
-    var st = document.createElement('style');
+    var st = document.getElementById('rb-pulse-style') || document.createElement('style');
+    st.id = 'rb-pulse-style';
     st.textContent = '@keyframes rbPulse{0%,100%{box-shadow:0 0 4px rgba(125,223,143,.5)}50%{box-shadow:0 0 11px rgba(125,223,143,.95)}}';
     document.head.appendChild(st);
     /* TOFU — the https-lock law: origin-bound fingerprint, pinned on first verified
@@ -157,6 +170,15 @@
       ].join('\n');
       alert(L);
     };  }
+  function refresh() { return boot(false); }
+  /* Same-tab soul changes do NOT fire storage events — wallet/bnames dispatch
+     bnr-soul after writing bnr_soul. Cross-tab still rides storage. */
+  document.addEventListener('bnr-soul', function () { refresh(); });
+  window.addEventListener('storage', function (ev) {
+    if (ev && ev.key && ev.key !== 'bnr_soul') return;
+    refresh();
+  });
+  try { window.__bnrRailsRefresh = refresh; } catch (e) {}
   /* No deferral needed any more — nothing is fetched on load, so there is no
      load-window noise to dodge. The badge paints from the bake immediately. */
   setTimeout(pill, 200);

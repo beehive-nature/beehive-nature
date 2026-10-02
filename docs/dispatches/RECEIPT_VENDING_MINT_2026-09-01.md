@@ -112,11 +112,25 @@ Autonomi write remains gated on the ANT custody review
 - **Arweave free tier, RSA door** (operational): throwaway RSA-4096 per mint,
   `winc: 0` receipted repeatedly. **Ed25519 door** (owner = member key, the
   target shape): receipted working at 06:0xZ (`F8f2GF_ToN4oRZbohhHGiaIo7MXZ-RdVPOje3jAZ7U4`, winc 0),
-  then throttled (`Invalid Data Item`/503) after a morning of probe uploads
+  then refused with `Invalid Data Item`/503 after a morning of probe uploads
   from the box IP. Both doors documented in SPEC-VENDING-2 §ar-doors.
-- **Turbo upload layout trap** (receipted so no future seat trips it):
-  arbundles `SolanaSigner` 64-byte secret is **pub(32) ‖ seed(32)** — built
-  seed-first, the class silently publishes the SEED as the item owner.
+  (Corrected 2026-09-28: `F8f2GF…` is a valid item, so it was not built by the
+  committed ar-upload.cjs, which could only produce seed-owned items that fail
+  verification (its pre-fix lines 15-19: the public key taken from an SPKI wrap of
+  the seed, then packed public-first; see docs/dispatches/2026-09-28-ar-upload-key-order.md); its builder is not in the tree. An item built in the reversed key order fails signature verification, so it
+  could plausibly be refused the same way (UNVERIFIED: the upload door's
+  response to such an item was never captured); "throttling" was never proven.)
+- **Turbo upload key order** (corrected 2026-09-28; the line written here on
+  2026-09-01 had it backwards and is deleted): arbundles `SolanaSigner` reads
+  its 64-byte secret as **seed(32) ‖ public(32)**; the first half signs, the
+  second half is the owner. Built public-first, the SEED goes in the owner
+  field and the item fails its own signature (source: @dha-team/arbundles 1.0.4 `build/node/cjs/src/signing/chains/SolanaSigner.js`, the
+  constructor: first 32 bytes become `_key`, which SolanaSigner.js's `key` getter
+  decodes for `keys/curve25519.js` `sign()`; last 32 become `pk`, which
+  SolanaSigner.js's `publicKey` getter returns as the owner.
+  The guard is `contracts/vending/tool/ar-upload.cjs` `memberSigner()`; the failed-
+  signature claim is checked by `contracts/vending/tool/arweave-owner-audit.mjs`
+  `verifyEd25519Item()`; both held by `e2e/ar-upload-signer.test.mjs`).
 - **Jungle4 A-paralysis** (probed exhaustively): Greymass Fuel carries
   ordinary actions INCLUDING setcode/setabi (reached the RAM check — the
   deploy would fly) but blocks every resource action (delegatebw, buyram*).
@@ -143,9 +157,12 @@ Probe uploads from door-testing, all throwaway keys, all free tier:
 `HnATcTfkdS…` (RSA probe), `Xf2lwOsUJY…` (RSA door check), `1Fg2arClLo…`
 (first mint's cert — its chain row never landed; superseded by the re-mint),
 `3Hcqk6wv13…` (placeholder-genesis cert, superseded in-place by
-`vending::update`). The `F8f2GF_ToN4…` ed25519 probe item carries its own
-seed as owner (the trap above) — throwaway in-memory key, harmless, kept as
-the trap's receipt.
+`vending::update`). The `F8f2GF_ToN4…` ed25519 probe item has its PUBLIC key as
+owner: re-checked on Arweave 2026-09-28, owner = its Member-Key tag and the
+signature verifies under that owner (source: `contracts/vending/tool/arweave-owner-audit.mjs`,
+`audit()` / `verifyEd25519Item()`; reproduce with `node contracts/vending/tool/arweave-owner-audit.mjs`,
+receipt in `docs/dispatches/2026-09-28-ar-upload-key-order.md`). (The line here said it "carries its own
+seed as owner"; that was false and is deleted.)
 
 ## The one-line
 

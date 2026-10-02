@@ -257,8 +257,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const REVIEWED = [
     ['the glyphs above open each part', 'raver stage: the dock sits above it'],
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-    ['paste it once below', 'within the keychain'],
-    ['Any device in the list above', 'within the vault'],
+        ['Any device in the list above', 'within the vault'],
     ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
     ['rge new ones below', 'within the key forge'],
     ['(live price below)', 'within the account forge'],
@@ -332,7 +331,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // has nothing to tap (every section is open). Per section, three measures:
 // the visible words, the visible controls, and any engineering left showing.
 {
-  const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'fund-sec', 'peer-sec'],
+  const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'peer-sec'],
     keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
   const measure = (page, id) => page.evaluate(i => {
     // shown = it has boxes AND no closed <details> folds it (this Chromium keeps boxes for a closed note's content)
@@ -412,12 +411,12 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     pressed: [...document.querySelectorAll('#wl-dock [aria-pressed="true"]')].map(b => b.dataset.wlGo),
   }));
   ok('raver: the "add" glyph deals its parts as glyph cards, each with its word, and no section yet (not bee’s form under a dock)',
-    deck.view === 'add' && deck.sections.length === 0 && deck.cards.join() === 'voucher-sec,fund-sec,peer-sec' && deck.words && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
-  await page.click('#wl-cards [data-wl-card-for="fund-sec"]'); await page.waitForTimeout(500);
-  const card = await page.evaluate(() => ({ open: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id), lit: document.querySelector('[data-wl-card-for="fund-sec"]').getAttribute('aria-pressed') }));
+    deck.view === 'add' && deck.sections.length === 0 && deck.cards.join() === 'voucher-sec,peer-sec' && deck.words && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
+  await page.click('#wl-cards [data-wl-card-for="peer-sec"]'); await page.waitForTimeout(500);
+  const card = await page.evaluate(() => ({ open: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id), lit: document.querySelector('[data-wl-card-for="peer-sec"]').getAttribute('aria-pressed') }));
   await page.click('#wl-cards [data-wl-card-for="voucher-sec"]'); await page.waitForTimeout(400);
   const swap = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
-  ok('raver: a card opens its ONE section; another card swaps it (one part at a time)', card.open.join() === 'fund-sec' && card.lit === 'true' && swap.join() === 'voucher-sec', JSON.stringify(card) + ' → ' + swap.join());
+  ok('raver: a card opens its ONE section; another card swaps it (one part at a time)', card.open.join() === 'peer-sec' && card.lit === 'true' && swap.join() === 'voucher-sec', JSON.stringify(card) + ' → ' + swap.join());
   // EVERY deck, on a phone: the first thing under the dock is art, never a section
   const leads = {};
   for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
@@ -688,6 +687,8 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     return { drift };
   });
   ok('the first-paint task map and the sections\' own data-wl-task attributes agree (no drift)', map.drift.length === 0, map.drift.join(', '));
+  const heldMap = await page.evaluate(() => ({ dom: [...document.querySelectorAll('main>section[data-wl-held]')].map(s => s.id).sort().join(), early: Object.keys(window.WL_HELD || {}).sort().join() }));
+  ok('the first-paint held map and the sections\' own data-wl-held attributes agree (the card route, and only it)', heldMap.dom === 'fund-sec' && heldMap.early === heldMap.dom, JSON.stringify(heldMap));
   const ring = await page.evaluate(() => ({ words: [...document.querySelectorAll('#kc-sec svg text')].map(t => t.textContent.trim()).filter(t => /[a-z]{2,}/i.test(t)), key: document.querySelectorAll('#kc-sec .ring-key li').length }));
   ok('the keychain ring carries numerals only; its words are a text key beneath it (no words inside art)', ring.words.length === 0 && ring.key === 5, JSON.stringify(ring));
   await ctx.close();
@@ -729,13 +730,16 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // every colour, font, radius, shadow and animation forced to one value). One tap into
 // "add money" and the footer, per register, and the actual engineering strings checked:
 // bee and raver keep them folded (one tap away), cypherpunk shows them; the plain facts
-// (the balance, the memo warning, the buy button, the checkout state) show everywhere.
+// (the balance, the memo warning, the card route's own reason, the checkout state) show
+// everywhere. The card route (fund) is HELD out of bee's and raver's "add money" (founder
+// direction 2026-09-28, bPay only; the held law itself is 4i): there it is read in "show me
+// everything", the one view that shows it, its engineering one tap further behind its toggle.
 {
   const STRIP = '*,*::before,*::after{color:#000!important;background:#fff!important;font-family:Arial!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important;border-color:#000!important} svg *{fill:#000!important;stroke:#000!important}';
   const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
     spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
   const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
-  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['buy USDC', 'card checkout is not switched on here yet'], footer: ['the BNR wallet', 'how this page is built'] };
+  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['the BNR wallet', 'how this page is built'] };
   const seen = (page, sel) => page.evaluate(sel => {
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
     const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
@@ -764,7 +768,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     if (reg === 'bee') await page.click('#wl-bee [data-wl-go="add"]');
     if (reg === 'raver') await page.click('#wl-dock [data-wl-go="add"]');
     await page.waitForTimeout(350);
-    for (const [part, id] of [['voucher', 'voucher-sec'], ['fund', 'fund-sec']]) {
+    for (const [part, id] of [['voucher', 'voucher-sec']]) {
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
       if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
       r[part] = await seen(page, '#' + id);
@@ -781,11 +785,19 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
     // receipts: the add task one tap deep, stripped and in colour (to tell a real overlap from a strip artefact)
-    if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="fund-sec"]'); await page.waitForTimeout(300); }
+    if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="peer-sec"]'); await page.waitForTimeout(300); }
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: join(here, 'shots-wallet-registers', `wallet-${W}-${reg}-add-stripped.png`) });
     await page.evaluate(el => el.remove(), strip); await page.waitForTimeout(300);
     await page.screenshot({ path: join(here, 'shots-wallet-registers', `wallet-${W}-${reg}-add-colour.png`) });
+    // the card route, dress stripped again: cypherpunk reads it in the open pipeline; bee and
+    // raver in "show me everything" (bee: back, then its row; raver: the "all" glyph)
+    await page.addStyleTag({ content: STRIP }); await page.waitForTimeout(150);
+    if (reg === 'bee') { await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350); await page.click('#wl-bee [data-wl-go="all"]'); }
+    if (reg === 'raver') await page.click('#wl-dock [data-wl-go="all"]');
+    await page.waitForTimeout(350);
+    r.fund = await seen(page, '#fund-sec');
+    if (reg !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); r.fundTap = await seen(page, '#fund-sec'); }
     await ctx.close();
   }
   }
@@ -810,7 +822,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
     vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
-  ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
+  ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the card route\'s own "not wired to bPay", the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }
 
@@ -854,7 +866,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await ctx.close();
   }
   ok('new bee\'s opening copy, dress stripped at 390 and 1280: every section a task opens reads with no capitals-as-shout, no dash and none of the machine words (heading and the intro under it)',
-    found.length === 0 && seenOpen.length >= 2 * 18, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
+    // 17 sections per width, EXACTLY: the 18 the pipeline shows, less the card route, held out of
+    // bee's tasks (4i reads it, in "show me everything"); the bridge waits hidden until needed
+    found.length === 0 && seenOpen.length === 2 * 17 && !seenOpen.some(s => s.endsWith(':fund-sec')), found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
 }
 
 // 4g · THE HEADINGS READ AS WORDS: no visible section heading shouts in capitals, in
@@ -884,6 +898,118 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const row = corpus.strings['wl.bpay.law'];
   const stale = Object.entries(row).filter(([l, v]) => l !== 'en' && (/(^|[^\p{L}])[AА]([^\p{L}]|$)/u.test(v) || v === row.en)).map(([l]) => l);
   ok('the bPay law line follows its English in every tongue: no stale "Phase A" label, no English fallback', Object.keys(row).length === 29 && stale.length === 0, stale.join(' ') || `${Object.keys(row).length} cells`);
+}
+
+// 4i · THE CARD ROUTE LEAVES NEW BEE'S "ADD MONEY" (founder direction 2026-09-28 under the
+// standing bPay-only order; the reviewer's criteria: PR #237 comment 5882215580). Meld buys
+// USDC on Base or Ethereum, bPay spends ANT with Arbitrum gas, and nothing turns one into the
+// other, so the card route is no step of bee's (or raver's) "add money". Every check reads
+// CONTENT: the visible text, the visible fields and the visible controls, dress stripped, at
+// 390 and 1280. Never text length. A negative control proves each detector can fire.
+{
+  const STRIP = '*,*::before,*::after{color:#000!important;background:#fff!important;font-family:Arial!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important;border-color:#000!important} svg *{fill:#000!important;stroke:#000!important}';
+  // what the card route would put on screen
+  const MELD = ['Meld', 'USDC', 'buy USDC', 'card checkout', 'separate card route', '.eth name', 'checkout key'];
+  const CHAIN = /\b(Base|Ethereum|Arbitrum|Vaulta|Hive|Arweave|Solana|Bitcoin|Zano|Optimism|Polygon)\b/;
+  // the visible words of every section the view shows, grouped by the block that holds them
+  // (a sentence is read whole across its inline <b> and <a>); field placeholders are words too
+  const read = page => page.evaluate(() => {
+    const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
+    const vis = e => !!e && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden' && !folded(e);
+    const blockOf = el => { for (let n = el; n; n = n.parentElement) { if (!/^inline/.test(getComputedStyle(n).display) || n.matches('button,summary,select,option')) return n; } return el; };
+    const secs = [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length);
+    const blocks = new Map();
+    for (const s of secs) {
+      const w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); let n;
+      while ((n = w.nextNode())) { const p = n.parentElement; if (!p || p.closest('script,style') || !vis(p) || !n.textContent.trim()) continue; const b = blockOf(p); blocks.set(b, (blocks.get(b) || '') + n.textContent); }
+      for (const i of s.querySelectorAll('input,textarea')) if (vis(i) && i.placeholder) blocks.set(i, i.placeholder);
+    }
+    const main = document.querySelector('main');
+    return {
+      sections: secs.map(s => s.id),
+      blocks: [...blocks.values()].map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean),
+      fundParts: [...document.querySelectorAll('#fund-sec, #fund-sec *')].filter(vis).length,
+      selects: [...main.querySelectorAll('main>section select')].filter(vis).map(e => e.id),
+      buyLinks: [...main.querySelectorAll('a[href]')].filter(a => vis(a) && (/meld/i.test(a.href) || /buy USDC/.test(a.textContent) || a.id === 'fund-go')).map(a => a.id || a.textContent.trim()),
+      // a greyed control that would BUY (the card route's, or any "buy" press): the other
+      // sections' own waiting states (a sign button before a keychain) are theirs, not this law's
+      dead: [...main.querySelectorAll('[aria-disabled="true"], button:disabled')].filter(e => vis(e) && (e.closest('#fund-sec') || /\bbuy\b/i.test(e.textContent))).map(e => (e.id || e.tagName) + ' "' + e.textContent.trim().slice(0, 30) + '"'),
+      step: { words: vis(document.querySelector('#voucher-sec [data-reg="bee"]')) ? document.querySelector('#voucher-sec [data-reg="bee"]').textContent.trim() : '', field: vis(document.getElementById('vc-key')), go: vis(document.getElementById('vc-go')) && !document.getElementById('vc-go').disabled },
+      cards: [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).map(c => c.dataset.wlCardFor),
+    };
+  });
+  // tickers and acronyms own their capitals; every other sentence starts lowercase
+  const OWNS = /^[A-Z0-9]{2,}$/;
+  const capStarts = blocks => blocks.flatMap(b => b.split(/(?<=[.!?])\s+/).map(x => x.replace(/^[^\p{L}\p{N}]+/u, ''))
+    .filter(x => /^\p{Lu}/u.test(x) && !OWNS.test(x.split(/[^\p{L}\p{N}]/u)[0])).map(x => '‹' + x.slice(0, 44) + '›'));
+  const machine = blocks => blocks.filter(b => /0x[0-9a-f]{2,}/i.test(b) || CHAIN.test(b) || /[—–]|\s-\s/.test(b)).map(b => '‹' + b.slice(0, 50) + '›');
+  const meld = blocks => blocks.filter(b => MELD.some(m => b.includes(m))).map(b => '‹' + b.slice(0, 50) + '›');
+  const at = {};
+  for (const W of [390, 1280]) {
+    at[W] = {};
+    for (const reg of REGS) {
+      const { ctx, page } = await open(reg, { width: W, height: W === 390 ? 844 : 900 });
+      await page.addStyleTag({ content: STRIP }); await page.waitForTimeout(150);
+      if (reg === 'bee') await page.click('#wl-bee [data-wl-go="add"]');
+      if (reg === 'raver') await page.click('#wl-dock [data-wl-go="add"]');
+      await page.waitForTimeout(400);
+      const r = at[W][reg] = { add: await read(page) };
+      // raver: every card its add deck deals, opened one at a time
+      if (reg === 'raver') {
+        r.opened = [];
+        for (const id of r.add.cards) { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); r.opened.push(await read(page)); await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
+      }
+      // "show me everything": the one bee and raver view that still shows the card route
+      if (reg === 'bee') { await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350); await page.click('#wl-bee [data-wl-go="all"]'); }
+      if (reg === 'raver') await page.click('#wl-dock [data-wl-go="all"]');
+      await page.waitForTimeout(400);
+      r.all = await read(page);
+      r.fundAll = await page.evaluate(() => document.getElementById('fund-sec').innerText.replace(/\s+/g, ' '));
+      await ctx.close();
+    }
+  }
+  const both = f => [390, 1280].flatMap(W => f(at[W]).map(x => W + ' ' + x));
+  // 1 · out of bee's add, a working next step left
+  const beeMeld = both(a => [...meld(a.bee.add.blocks), ...(a.bee.add.fundParts ? ['fund-sec parts visible: ' + a.bee.add.fundParts] : []), ...a.bee.add.selects.map(s => 'select #' + s), ...a.bee.add.buyLinks.map(l => 'buy link ' + l)]);
+  ok('1 · bee\'s "add money" shows NO card route at 390 and 1280: no fund part, no Meld, no USDC, no chain select, no 0x field, no buy link (by visible content)',
+    beeMeld.length === 0 && [390, 1280].every(W => !at[W].bee.add.sections.includes('fund-sec') && at[W].bee.add.sections.length >= 1), beeMeld.slice(0, 4).join(' · ') || [390, 1280].map(W => W + ': ' + at[W].bee.add.sections.join(',')).join(' · '));
+  ok('1 · bee\'s "add money" still leaves a working next step: "prepay for compute", its field and its "look up"',
+    [390, 1280].every(W => /prepay for compute/.test(at[W].bee.add.step.words) && at[W].bee.add.step.field && at[W].bee.add.step.go), JSON.stringify(at[390].bee.add.step));
+  const rvMeld = both(a => [...meld(a.raver.add.blocks), ...a.raver.opened.flatMap(o => [...meld(o.blocks), ...(o.fundParts ? ['fund-sec parts visible'] : []), ...o.buyLinks])]);
+  ok('1 · raver\'s "add money" deck deals no card for the card route (voucher and money in only), and no card it deals opens it',
+    [390, 1280].every(W => at[W].raver.add.cards.join() === 'voucher-sec,peer-sec' && at[W].raver.opened.every(o => !o.sections.includes('fund-sec'))) && rvMeld.length === 0,
+    [390, 1280].map(W => W + ': ' + at[W].raver.add.cards.join(',')).join(' · ') + (rvMeld.length ? ' · ' + rvMeld.slice(0, 3).join(' · ') : ''));
+  // 2 · moved, not deleted; a reason in words, never a dead button
+  const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
+  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC (opens Meld)', 'transactionType'].filter(m => !src.includes(m));
+  ok('2 · the card route\'s code and words stay in the file (moved, not deleted)', kept.length === 0, kept.join(', ') || 'launch, asset, address, key config, note, label, checkout builder all present');
+  const says = both(a => ['cypherpunk', 'bee', 'raver'].filter(r => !(r === 'cypherpunk' ? a[r].add : a[r].all).sections.includes('fund-sec') || !a[r].fundAll.includes('not wired to bPay yet') || !a[r].fundAll.includes('card checkout is not switched on here yet')));
+  ok('2 · wherever the card route still shows (cypherpunk\'s pipeline, bee\'s and raver\'s "show me everything") it says it is a separate card route not wired to bPay yet, and why checkout is off, in words',
+    says.length === 0, says.join(' · ') || 'said in all three');
+  const dead = both(a => REGS.flatMap(r => ['add', 'all'].filter(v => a[r][v]).flatMap(v => [...a[r][v].dead, ...a[r][v].buyLinks].map(x => r + '/' + v + ': ' + x))));
+  ok('2 · no dead or greyed buy button renders anywhere (every register, "add money" and "show me everything", key unset as on main)', dead.length === 0, dead.slice(0, 4).join(' · ') || 'none rendered');
+  // the prose is a STATE, not a deletion: with a key armed the same panel renders its buy link
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
+    await ctx.route(url => !url.href.startsWith(origin), r => r.abort());
+    await ctx.route(/\/wallet\.html$/, async route => { const resp = await route.fetch(); await route.fulfill({ response: resp, body: (await resp.text()).replace('data-meld-public-key=""', 'data-meld-public-key="GATE-PUBLIC-PLACEHOLDER"') }); });
+    const page = await ctx.newPage();
+    await page.goto(origin + '/wallet.html', { waitUntil: 'load' }); await page.waitForTimeout(600);
+    const armed = await page.evaluate(() => ({ go: document.getElementById('fund-go').getClientRects().length > 0, off: document.getElementById('fund-off').getClientRects().length > 0, dis: document.getElementById('fund-go').getAttribute('aria-disabled') }));
+    ok('2 · control: with a public key armed, the same panel renders its live buy link and drops the "not switched on" sentence', armed.go && !armed.off && armed.dis === 'false', JSON.stringify(armed));
+    await ctx.close();
+  }
+  // 3 · casing, 4 · folding: bee's add at rest; the same detectors must FIRE on cypherpunk's open pipeline
+  const beeCaps = both(a => capStarts(a.bee.add.blocks));
+  ok('3 · nothing bee shows in "add money" starts a sentence with a capital (tickers and acronyms own theirs), buttons, notes and field hints included',
+    beeCaps.length === 0, beeCaps.slice(0, 4).join(' · ') || at[390].bee.add.blocks.length + ' blocks read');
+  const beeMachine = both(a => machine(a.bee.add.blocks));
+  ok('4 · bee\'s "add money" shows no 0x, no chain name and no dash-glued technical line before "show the details"',
+    beeMachine.length === 0, beeMachine.slice(0, 4).join(' · ') || 'none');
+  const cy = at[390].cypherpunk.add.blocks;
+  ok('negative control: the same detectors fire on cypherpunk\'s open "add" pipeline (capitals, 0x or chain, card route words), so a clean bee is not a blind probe',
+    capStarts(cy).length > 0 && machine(cy).length > 0 && meld(cy).length > 0, `caps ${capStarts(cy).length} · machine ${machine(cy).length} · card route ${meld(cy).length}`);
 }
 
 // 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work
@@ -942,10 +1068,22 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await page.waitForTimeout(600);
     return { ctx, page };
   })();
-  ok('#fund-sec paints in "add money" at FIRST paint (no flash of the home screen)', await b.page.evaluate(() => window.__firstView) === 'add', await b.page.evaluate(() => String(window.__firstView)));
+  // the card route is held out of bee's "add money" (4i): its deep link lands on "show me
+  // everything", the one bee view that shows it, never on a task that hides its target
+  ok('#fund-sec paints in "show me everything" at FIRST paint (held out of "add money"; no flash of the home screen)', await b.page.evaluate(() => window.__firstView) === 'all', await b.page.evaluate(() => String(window.__firstView)));
   const f = await b.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('fund-sec').getClientRects().length > 0 }));
-  ok('#fund-sec opens bee on "add money" with fund in view', f.view === 'add' && f.shown, JSON.stringify(f));
+  ok('#fund-sec opens bee on "show me everything" with fund in view', f.view === 'all' && f.shown, JSON.stringify(f));
   await b.ctx.close();
+  // a #fund-sec link clicked inside bee's "add money" lands on "show me everything" too
+  {
+    const c = await open('bee', { fixture: false });
+    await c.page.click('#wl-bee [data-wl-go="add"]'); await c.page.waitForTimeout(350);
+    await c.page.evaluate(() => { const a = document.createElement('a'); a.href = '#fund-sec'; a.id = 'gate-fund'; a.textContent = 'the card route'; document.getElementById('voucher-sec').appendChild(a); });
+    await c.page.click('#gate-fund'); await c.page.waitForTimeout(500);
+    const g = await c.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('fund-sec').getClientRects().length > 0 }));
+    ok('bee: a link to the held card route lands on "show me everything" with it in view, never on a task that hides it', g.view === 'all' && g.shown, JSON.stringify(g));
+    await c.ctx.close();
+  }
 }
 
 // 11 · persistence, casing, receipts at desktop width

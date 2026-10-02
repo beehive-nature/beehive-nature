@@ -342,7 +342,7 @@ body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
 body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
 body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm room: who made it, what is in it, one plain step */
+/* NEW BEE — one calm room, one plain step (no status sheet) */
 .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
 .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
 .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
@@ -479,27 +479,21 @@ body[data-reg] .dot.bad{background:var(--sk-guard);box-shadow:none}
      room module says joined. Joining is a local event: no write, no socket, no payment. -->
 <section id="eternal" aria-label="the music room">
 
-  <!-- NEW BEE — a calm room: who made it, what is in it, one plain step -->
+  <!-- NEW BEE — one calm room, one plain step (Floor A: no four-row status sheet) -->
   <div class="et-b">
     <div class="et-b-mark">SKAISTS mUsiC</div>
     <h2 class="et-b-h" data-t="et.music.b.title">the music room</h2>
-    <p class="et-b-lede" data-t="et.music.b.lede">a calm room on the PLUR channel. nothing plays here yet; the ways to listen are one tap away.</p>
-    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.music.b.guard">nothing to sign, nothing to pay. stepping in stays on this device.</span></div>
-    <div class="et-b-rows" id="etBeeRows">
-      <div class="et-b-row"><span data-t="et.music.b.who">who made it</span><small data-et="creator">reading the room…</small></div>
-      <div class="et-b-row"><span data-t="et.music.b.set">in the set</span><small data-et="beeSet">reading the room…</small></div>
-      <div class="et-b-row"><span data-t="et.music.b.here">play here</span><small data-t="et.music.b.hereV">no track attached yet</small></div>
-      <button type="button" class="et-b-row" data-go="listen"><span data-t="et.music.b.elsewhere">listen elsewhere</span><small><span data-et="beeElse">…</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>
-    </div>
-    <p class="et-b-now" id="etBeeNow" aria-live="polite">opening the room…</p>
+    <p class="et-b-lede" data-t="et.music.b.lede">a calm room on the PLUR channel. listening lives one tap away.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.music.b.guard">nothing to sign, nothing to pay. this page only points the way.</span></div>
+    <!-- guidance + one working listen action — no status sheet, no fail lecture -->
+    <p class="et-b-now" id="etBeeNow" hidden aria-hidden="true"></p>
     <div class="et-b-act">
-      <button type="button" class="et-b-primary" id="etBeeJoin" disabled>step into the room</button>
-      <button type="button" class="et-b-link" data-go="listen" data-t="et.music.b.where">where can i listen?</button>
-      <p class="et-b-foot" data-t="et.music.b.foot">nothing plays here until an artist attaches a track.</p>
+      <button type="button" class="et-b-primary" id="etBeeJoin">listen now</button>
+      <p class="et-b-foot" data-t="et.music.b.foot">opens a listen place in its own tab. this room stays here for the company.</p>
     </div>
   </div>
 
-  <!-- RAVER — the room is a sky: the set orbits the checkpoint; hold to step in -->
+<!-- RAVER — the room is a sky: the set orbits the checkpoint; hold to step in -->
   <div class="et-r">
     <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the room</h2><span class="et-r-hint" id="etRaverHint">reading the sky…</span></div>
     <svg class="et-r-sky" id="etSky" viewBox="-200 -200 400 400" role="group" aria-label="the room as a sky: the set orbits the checkpoint"></svg>
@@ -916,17 +910,14 @@ loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='
 
   /* ── NEW BEE ── */
   function bee(){
-    set('creator',D.ready?(D.creator||T('et.music.b.unnamed','not named')):D.error?T('et.music.b.notRead','not read'):T('et.music.b.reading','reading the room…'));
-    set('beeSet',D.ready?D.items.length+' '+T('et.music.b.pieces','pieces, all kept private'):D.error?T('et.music.b.notRead','not read'):T('et.music.b.reading','reading the room…'));
-    set('beeElse',D.doors+' '+T('et.music.b.places','places · new tab'));
-    $('etBeeNow').textContent=D.error?T('et.music.b.error','the room could not be read just now, so stepping in is off. the ways to listen still work.')
-      :!D.ready?T('et.music.b.opening','opening the room…')
-      :D.joined?T('et.music.b.in','you are in the room, on this device only. nothing was sent.')
-      :T('et.music.b.ready','the room is open. step in when it feels right.');
-    var b=$('etBeeJoin'); b.disabled=!D.ready; b.textContent=D.joined?T('et.music.b.leave','leave the room'):T('et.music.b.join','step into the room');
+    // New bee: no status lecture, no fail copy. Primary always offers listen.
+    var now=$('etBeeNow'); if(now){now.textContent=''; now.hidden=true;}
+    var b=$('etBeeJoin');
+    b.disabled=false;
+    b.textContent=T('et.music.b.listen','listen now');
   }
 
-  /* ── RAVER ── */
+    /* ── RAVER ── */
   var built=false;
   function sky(){
     var svg=$('etSky'); if(!svg)return;
@@ -998,7 +989,15 @@ loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='
 
   /* ── the hand-offs: the room module owns every real step ── */
   function join(){var b=$('join');if(b&&!b.disabled)b.click();}
-  function listen(){var sp=document.querySelector('.source-panel');if(sp){sp.setAttribute('tabindex','-1');sp.scrollIntoView({block:'start'});sp.focus({preventScroll:true});}}
+  function listenUseful(){
+    // Prefer play-here when an authorized track exists; else first external listen door; else listening room.
+    var play=$('play-here');
+    if(play&&!play.disabled){play.click();return;}
+    var a=document.querySelector('.source-panel a[target="_blank"]')||document.querySelector('.source-panel a[href]');
+    if(a){a.click();return;}
+    listen();
+  }
+function listen(){var sp=document.querySelector('.source-panel');if(sp){sp.setAttribute('tabindex','-1');sp.scrollIntoView({block:'start'});sp.focus({preventScroll:true});}}
   var hold={t0:0,raf:0};
   function holdStart(e){
     if(hold.raf||$('etStepHold').disabled)return; if(e&&e.preventDefault)e.preventDefault();
@@ -1014,7 +1013,7 @@ loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='
 
   function wire(){
     var ev=$('eternal'); if(!ev)return;
-    $('etBeeJoin').addEventListener('click',join);
+    $('etBeeJoin').addEventListener('click',listenUseful);
     $('etCyJoin').addEventListener('click',join);
     $('etCyVerify').addEventListener('click',function(){var b=$('verify-store');if(b&&!b.disabled)b.click();});
     $('etMotion').addEventListener('click',function(){var m=$('motion');if(m&&!m.disabled)m.click();motionLabel();});

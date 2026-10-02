@@ -321,6 +321,10 @@ body:not([data-reg="cypherpunk"]) main :is([style*="font-size:8"],[style*="font-
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="keep"]) main>section[data-wl-task="keep"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="key"]) main>section[data-wl-task="key"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="proof"]) main>section[data-wl-task="proof"]{display:none!important}
+/* a section HELD out of its task (data-wl-held: the Meld card route, which bPay
+   cannot spend; founder direction 2026-09-28) is no step of that task in new bee
+   or raver. "show me everything" still shows it, with the sentence that says why */
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]) main>section[data-wl-held]{display:none!important}
 body:not([data-wl-view="home"]) #wl-bee,body:not([data-wl-view="home"]):not([data-wl-view="have"]) #wl-rave,
 body:is([data-wl-view="home"],[data-wl-view="have"]) #wl-deck{display:none!important}
 body[data-wl-view="home"] #wl-bar{display:none!important}
@@ -457,6 +461,10 @@ body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-re
 .wlb-un a{display:inline-flex;align-items:center;min-height:44px;font-size:16px}
 .wlb-stat{display:block;font-size:16px;color:var(--dim)}
 body[data-wl-soul="true"] .wlb-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
+/* FOUNDER BUG 2026-10-01: when a .b soul is live, remove connect / create bzDiD
+   CTAs from the wallet shell — show the live identity only. */
+body[data-wl-soul="true"] .wl-create-bzdid,body[data-wl-soul="true"] .wl-connect-cta{display:none!important}
+body:not([data-wl-soul="true"]) .wl-soul-live{display:none!important}
 body[data-reg] #fund-sec .fund-coin{background:radial-gradient(circle at 35% 30%,#dbeafb,#6fa9e0 62%,#29628f);border-color:#29628f;animation:none}
 body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
 .wlb-stale{font-size:14px;color:var(--dim);margin-top:4px}
@@ -601,7 +609,11 @@ var w='home',own=null;try{own=history.state&&history.state.wlView;w=own||session
    own task at FIRST paint; the gate proves it equals the data-wl-task attributes */
 var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','insc-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
 window.WL_TASK_OF=T;
-if(!own){if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';else if(T[location.hash.slice(1)])w=T[location.hash.slice(1)];}
+/* the sections HELD out of their task in bee and raver (data-wl-held): a deep
+   link to one lands on "show me everything", the one view there that shows it */
+var H={'fund-sec':1};
+window.WL_HELD=H;
+if(!own){var h=location.hash.slice(1);if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';else if(T[h])w=(H[h]&&r!=='cypherpunk')?'all':T[h];}
 document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|proof)$/.test(w)?w:'home');})();
 /* a message that sends the reader to another part of the wallet NAMES it as a
    link, never by direction ("above", "below"): bee and raver show one task at a
@@ -667,7 +679,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, three ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -746,9 +758,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
   <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
-  <div class="law">Connect your soul (your .b name or account). New here?
+  <div class="law wl-create-bzdid">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
-  <div class="row">
+  <div class="law wl-soul-live" id="wl-soul-live">live as <b id="wl-soul-name" style="color:var(--leaf)">…</b> — your name and short addr ride the bottom rails bar.</div>
+  <div class="row wl-connect-cta">
     <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
@@ -763,8 +776,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
   onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
   and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
-  more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase:
-  same soul, same keys.</div>
+  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b> — never paste a secret.
+  A recovery phrase paste stays under <b>scaffold · recovery</b> for import only (same soul, same keys).</div>
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
       <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
@@ -850,14 +863,19 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       automatically: no "which passkey?" picker ever again.
       <b>Passkeys are origin-bound:</b> one made at another site (an Anchor/wallet passkey for your
       account, say) can never connect here: it signs at its own site only. Your account's existing
-      key still bridges you in: paste it once below.
-      <b>Already hold a bzDiD elsewhere? Don't create a second. Import it with your recovery phrase
-      instead (a new passkey = a new soul).</b></div>
+      key still bridges you in via the bridge scaffold (not the New-bee primary path).
+      <b>Already hold a bzDiD elsewhere? Don't create a second.</b> Prefer connecting the existing
+      passkey; recovery-phrase import lives under <b>scaffold · recovery</b> (a new passkey = a new soul).</div>
   </details>
-      <div class="row">
-        <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
-        <button id="kc-recgo">recover</button>
-      </div>
+      <details id="kc-rec-scaffold" style="margin-top:10px">
+        <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+        <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
+        Prefer <b>connect keychain (passkey)</b> — New-bee never needs to paste.</div>
+        <div class="row" style="margin-top:8px">
+          <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+          <button id="kc-recgo">recover</button>
+        </div>
+      </details>
       <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">keychain not connected</div>
       <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
         <div class="keycard" style="flex:1 1 100%">
@@ -882,7 +900,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
   <h2>🔐 the vault: <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold: formats, and how they get sealed</summary>
-  <div class="law">The keys you already hold, <b>seed phrases</b> from any wallet
+  <div class="law">Gold path is connect / inject / derive / passkey — paste is scaffold · recovery only.
+  The keys you already hold, <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
   (5K… · L… · K… · PVT_K1_…), are sealed under a single <b>keypass</b> so you never handle
   them raw again. Sealed with <b>PBKDF2-SHA-256 ×600 000 → AES-256-GCM</b>, header
@@ -949,32 +968,38 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <button id="vlt-lock" style="font-size:10px;padding:6px 12px;min-height:32px">🔒 lock now</button>
     </div>
 
-    <div class="law" style="margin-top:14px;color:var(--ink)"><b>② Put a secret in.</b>
-    Paste it and the type is detected for you — the phrase is checksum-verified, the key is
-    checksum-verified and curve-checked, before anything is sealed.</div>
-    <div class="row">
-      <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
-        <option value="auto" selected>detect type</option>
-        <option value="seed">seed phrase</option>
-        <option value="vaulta">Vaulta active key</option>
-        <option value="arweave">Arweave JWK</option>
-        <option value="note">plain note</option>
-      </select>
-      <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
-    </div>
-    <div class="row">
-      <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
-        style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
-    </div>
-    <div class="row">
-      <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
-      <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
-    <div class="row">
-      <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
-      <button id="vlt-clear" style="font-size:11px">clear</button>
-    </div>
+    <div class="law" style="margin-top:14px;color:var(--dim);font-size:11px">Gold path for secrets: <b>connect / inject / derive / passkey</b> — not paste.
+    Sealing a pasted seed or key is <b>scaffold · recovery</b> only (capability kept; never required for New-bee).</div>
+    <details id="vlt-secret-scaffold" style="margin-top:10px">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+      <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)"><b>② Put a secret in (recovery).</b>
+      Paste it and the type is detected for you — the phrase is checksum-verified, the key is
+      checksum-verified and curve-checked, before anything is sealed.
+      Prefer inject/connect on each rail; Arweave JWK paste remains scaffold · advanced.</div>
+      <div class="row" style="margin-top:8px">
+        <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+          <option value="auto" selected>detect type</option>
+          <option value="seed">seed phrase (scaffold · recovery)</option>
+          <option value="vaulta">Vaulta active key (scaffold · recovery)</option>
+          <option value="arweave">Arweave JWK (scaffold · advanced)</option>
+          <option value="note">plain note</option>
+        </select>
+        <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
+      </div>
+      <div class="row">
+        <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
+          style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
+      </div>
+      <div class="row">
+        <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
+        <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
+      <div class="row">
+        <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
+        <button id="vlt-clear" style="font-size:11px">clear</button>
+      </div>
+    </details>
 
     <div class="law" style="margin-top:16px;color:var(--ink)"><b>③ What is inside.</b>
     Secrets stay hidden until you ask for one. <span id="vlt-count">0 entries</span></div>
@@ -1033,19 +1058,26 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key: derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
+  <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
+  Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
+  never invents one; connect an injected Arweave wallet or bind a public address.
   Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
   </details>
-  <div class="chips" id="forge-chips" data-wl-tech>
+  <!-- forge chips + quick-adds stay visible in bee register: public hive/ar
+       cards are the New-bee path. Custom context typing stays available too. -->
+  <div class="chips" id="forge-chips">
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
-  <div class="row" data-wl-tech>
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · anything:anything" spellcheck="false">
+  <div class="row">
+    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
     <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
+    <button id="forge-hive" style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
+    <button id="forge-ar" style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
 </section>
@@ -1083,19 +1115,20 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
       <div class="cb" id="ar-bal"></div>
-      <div class="cd" id="ar-info">of the vault-held JWK: the address is public metadata, reads stay keyless</div>
-      <div class="stat" id="ar-stat">vault holds no arweave key</div>
+      <div class="cd" id="ar-info">of a bound public AR address (forge inject or public bind) — reads stay keyless</div>
+      <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
     </div>
   </div>
 </section>
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
   <h2>🌉 the bridge: one time, then never manual again</h2>
-  <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
-  <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> your bzDiD keys
-  alongside every key already on your account (nothing removed, threshold 1: <b>the derived key
-  AND the account passkey can both sign</b>), sign with your old key, broadcast, and this field
-  disappears from your life. The old key stays in tab memory only and is scrubbed the moment the
+  <div class="law">Your bzDiD-derived K1 key is not on your account yet.
+  <b>Gold:</b> connect / inject / derive enrolls the key — New-bee never pastes a private key.
+  <b>While finalizing:</b> open <b>scaffold · recovery</b> to paste your existing <b>active</b> key
+  <b>once</b> to build an updateauth that <b>adds</b> your bzDiD keys alongside every key already
+  on your account (nothing removed, threshold 1: <b>the derived key AND the account passkey can
+  both sign</b>). The pasted key stays in tab memory only and is scrubbed the moment the
   transaction is sent.</div>
   <div class="row">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
@@ -1103,11 +1136,16 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       also enroll an account passkey on this origin (PUB_WA at threshold 1 — touch/passkey can sign too)
     </label>
   </div>
-  <div class="row">
-    <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
-    <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
-  </div>
-  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">waiting for your existing key</div>
+  <details id="br-wif-scaffold" style="margin-top:10px">
+    <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+    <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / migration only: paste the account's existing ACTIVE private key to bridge your derived bzDiD.
+    Prefer connect/inject when available — this paste is never required for New-bee.</div>
+    <div class="row" style="margin-top:8px">
+      <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
+      <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
+    </div>
+  </details>
+  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">connect / derive first — paste scaffold only if recovering</div>
   <pre id="br-out" style="display:none"></pre>
 </section>
 
@@ -1414,8 +1452,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="receiptsBody" style="margin-top:12px;--sa-figure:var(--ink);--sa-care:var(--amber);--sa-care-line:var(--line2)"></div>
 </section>
 
-<!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
-<section id="fund-sec" data-wl-task="add" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
+<!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══
+     HELD OUT of new bee's and raver's "add money" (data-wl-held; founder direction
+     2026-09-28 under the standing bPay-only order): Meld buys USDC on Base or
+     Ethereum, bPay spends ANT with Arbitrum gas, and no code turns one into the
+     other. Moved, never deleted: cypherpunk shows it in the pipeline, bee and raver
+     in "show me everything", each time with the sentence that says it is a
+     separate card route not wired to bPay. Review thread: PR #237. -->
+<section id="fund-sec" data-wl-task="add" data-wl-held style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
     #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
      background:radial-gradient(circle at 35% 30%,#ffeaa6,var(--gold) 62%,#6e5300);
@@ -1442,7 +1486,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </style>
   <h2 data-wl-tech>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
   <h2 data-reg="bee">💳 <span data-i18n="wl.bee.h.fund">buy USDC with a card</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works: who holds what at each step</summary>
+  <div class="law" id="fund-apart" data-i18n="wl.fund.apart">this is a separate card route and it is not wired to bPay yet: bPay cannot spend what it buys.</div>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">how the card checkout works: who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b>: it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
@@ -1460,7 +1505,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
   this page renders fine.</div></noscript>
   <div id="fund-js" hidden>
-    <div class="row" style="align-items:center;flex-wrap:wrap">
+    <div class="law" id="fund-off" hidden data-i18n="wl.fund.off">funding not configured: card checkout is not switched on here yet, so there is no buy button to press. it switches on when this site sets its public checkout key.</div>
+    <div class="row" id="fund-row" style="align-items:center;flex-wrap:wrap">
       <span class="fund-coin" aria-hidden="true"></span>
       <select id="fund-asset" title="destination asset" style="max-width:230px;flex:0 1 230px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="USDC_BASE">USDC · Base</option>
@@ -1477,8 +1523,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
        put it in the data-meld-public-key attribute on the fund-sec section
        element above, or set window.BNR_MELD_PUBLIC_KEY in an earlier
        script. Empty ⇒
-       this panel shows "funding not configured" and the launch control stays
-       disabled — visible, never silent, never a throw. PUBLIC key only: a
+       this panel says "funding not configured" in words, with its reason, and
+       renders NO buy control at all (the design law: "not available yet is
+       prose, never a dead button"): never silent, never a throw. PUBLIC key only: a
        secret/BASIC key must never appear here or anywhere client-side. */
     const BNR_MELD_PUBLIC_KEY = String(
       window.BNR_MELD_PUBLIC_KEY ||
@@ -1503,7 +1550,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         };
         var $ = function (id) { return document.getElementById(id); };
         var box = $('fund-js'), pick = $('fund-asset'), addr = $('fund-addr'),
-            go = $('fund-go'), stat = $('fund-stat');
+            go = $('fund-go'), stat = $('fund-stat'), off = $('fund-off'), row = $('fund-row');
         if (!box || !pick || !addr || !go || !stat) return; // panel markup absent — nothing to wire
         var keyOk = BNR_MELD_PUBLIC_KEY.length > 0;
 
@@ -1631,15 +1678,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         }
         function paint() {
           if (!keyOk) {
+            /* not available yet is PROSE, never a dead button: the controls that
+               could only build a buy that cannot launch are not rendered, and the
+               keyed sentence (#fund-off) says why. The launch keeps its inert
+               attributes, so nothing can open even if a style ever showed it. */
             go.setAttribute('aria-disabled', 'true');
             go.setAttribute('href', '#');
-            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b>: card checkout is not switched on here yet. ' +
-              'The button stays asleep until it is; nothing else on this page is affected.' +
-              '<span data-wl-tech> Why: the public Meld Checkout key is not set on this deployment ' +
-              '(BNR_MELD_PUBLIC_KEY / data-meld-public-key). Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
-              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') + '.</span>';
+            if (row) row.style.display = 'none';
+            if (off) off.hidden = false;
+            stat.innerHTML = '<span data-wl-tech>why: the public Meld Checkout key is not set on this deployment ' +
+              '(BNR_MELD_PUBLIC_KEY / data-meld-public-key). environment selected: <b>' + BNR_MELD_ENV + '</b>' +
+              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') +
+              '. nothing else on this page is affected.</span>';
             return;
           }
+          if (row) row.style.display = '';
+          if (off) off.hidden = true;
           var a = addr.value.trim();
           go.setAttribute('href', buildUrl().href);
           go.setAttribute('aria-disabled', 'false');
@@ -1724,7 +1778,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
   <h2 data-wl-tech>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <h2 data-reg="bee">🏧 <span data-i18n="wl.bee.h.peer">money in, person to person</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role: the estate sells, it never operates</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">the fiat funnel’s role: the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base). it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
@@ -1736,17 +1790,17 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   tithe in a single payment: the fallback, SPEC §receive). settlement finality is one vendor
   signature until the estate's own witness set exists, priced as such, never hidden.</p>
   </details>
-  <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
+  <div class="row" data-wl-tech style="align-items:center;flex-wrap:wrap;gap:8px">
     <span class="law">receive address (bare <b>to</b>):</span>
     <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
     <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
   </div>
   <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
     <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
-    <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span>
+    <span class="law" id="peer-stat" style="flex:2;min-width:200px"><span data-wl-tech>the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span></span>
   </div>
   <div id="peer-rows" class="law" style="margin-top:10px"></div>
-  <details style="margin-top:10px">
+  <details data-wl-tech style="margin-top:10px">
     <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">the intent shape: tithe attached at signal time</summary>
     <div class="law" style="margin-top:6px">the customer's <code>signalIntent</code> carries the split itself (≤10 referral
     recipients, ≤50%, paid from the release before the net lands: <code>ReferralFeeLib</code>, read at source):
@@ -1860,30 +1914,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </script>
 </section>
 
-<!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
+<!-- ══ ARWEAVE — publish & anchor (inject-first · vault JWK scaffold) ══ -->
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
   <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: built and signed inside this page</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: inject signs, this page builds and posts</summary>
   <div class="law">Another adapter on the wallet shell, with balance, receive address, send, and
-  one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
-  with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
-  posted to <b>public gateways picked at random per call</b>, so no single operator learns who
-  anchors what. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling): we dropped
-  the free tier to keep the rail first-party. The JWK lives in <b>the vault</b>, sealed
-  under your keypass, structurally verified before sealing, revealed only into the signing
-  call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
+  one new capability: <b>PUBLISH</b>. <b>Primary path:</b> connect an injected Arweave wallet
+  (<code>window.arweaveWallet</code> — Wander / arweave.app style). The extension holds the RSA
+  key; this page builds the format-2 tx from the <b>public</b> key only, asks the extension to
+  sign, and posts to <b>public gateways picked at random per call</b>. Agents never see private
+  keys. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling). Vault JWK paste is a
+  secondary scaffold for labs — New-bee never needs it to publish.</div>
   </details>
-  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built and signed in
-  your browser; with scripting off this panel stays asleep.</div></noscript>
+  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built here and signed
+  by your Arweave extension; with scripting off this panel stays asleep.</div></noscript>
   <div id="arw-js" hidden>
-    <div class="row" style="align-items:center;flex-wrap:wrap">
+    <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
       <span class="fund-coin" aria-hidden="true" style="background:radial-gradient(circle at 35% 30%,#c8f4ff,var(--cyan) 62%,#003a44);border-color:#1d4655"></span>
+      <button type="button" id="arw-connect" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔌 connect Arweave wallet</button>
+      <span id="arw-addr" class="law" style="font:14px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
+    </div>
+    <div class="row" style="align-items:center;flex-wrap:wrap;margin-top:8px">
       <select id="arw-what" title="what to publish" style="max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="orbit-anchor">the orbit-manifest anchor · forge/orbit-manifests.md (1,926 B)</option>
       </select>
       <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
     </div>
     <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">…</div>
+    <details id="arw-jwk-scaffold" style="margin-top:10px">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">advanced · vault JWK scaffold (optional — not required for New-bee)</summary>
+      <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / offline only: seal an Arweave JWK in
+      <a href="#vault-sec">the vault</a>. Prefer <b>connect Arweave wallet</b> on this panel — never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
+    </details>
   </div>
   <script>
     (function () {
@@ -1891,16 +1953,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       try {
         var $ = function (id) { return document.getElementById(id); };
         var box = $('arw-js'), go = $('arw-go'), stat = $('arw-stat');
+        var conn = $('arw-connect'), addrEl = $('arw-addr');
         if (!box || !go || !stat) return;
-        /* the committed-blob law, runtime side: the payload is fetched from the
-           deployment and its sha256 is checked against the PINNED hash before
-           anything is signed — a drifted file can never be anchored by mistake.
-           The profile (path, pin, tags, label) is KIT DATA — WALLET_PROFILE.anchor. */
         var ORBIT = (window.WALLET_PROFILE && WALLET_PROFILE.anchor) || { path: '', sha256: '', tags: [] };
         var optLabel = document.querySelector('#arw-what option[value="orbit-anchor"]');
         if (optLabel && ORBIT.label) optLabel.textContent = ORBIT.label;
         function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-        function arEntry() {
+        function paint(msg, color) {
+          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+        }
+        function arInject() { return window.BNRWALLET && BNRWALLET.arInject; }
+        function vaultArEntry() {
           if (!window.BNRVAULT || !BNRVAULT.isUnlocked()) return null;
           return BNRVAULT.list().filter(function (e) { return e.type === 'arweave'; })[0] || null;
         }
@@ -1908,42 +1971,82 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var h = await crypto.subtle.digest('SHA-256', bytes);
           return Array.prototype.map.call(new Uint8Array(h), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
         }
-        function paint(msg, color) {
-          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+        async function resolveAddr() {
+          var inj = arInject();
+          if (inj && inj.present && inj.present()) {
+            try { return await inj.activeAddress(); } catch (e) { /* fall */ }
+          }
+          if (inj && typeof inj.boundAddress === 'function') {
+            var b = inj.boundAddress();
+            if (b) return b;
+          }
+          var e = vaultArEntry();
+          return (e && e.meta && e.meta.address) || null;
         }
         async function refresh() {
           var A = window.BNRAR;
           if (!A) { paint('the arweave adapter did not load', 'var(--amber)'); return; }
-          var e = arEntry();
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
-          if (!e) {
+          var inj = arInject();
+          var hasInj = !!(inj && inj.present && inj.present());
+          var addr = null;
+          try { addr = await resolveAddr(); } catch (e) { addr = null; }
+          if (addrEl) {
+            addrEl.textContent = addr ? addr : (hasInj ? 'extension present — tap connect' : 'no extension — install Wander, or bind public address on the forge ar: card');
+            addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
+          }
+          if (conn) conn.textContent = addr && hasInj ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
+          if (!addr) {
             if (balEl) balEl.textContent = '';
-            if (statEl) statEl.textContent = 'vault holds no arweave key';
-            paint('no arweave key in the vault yet: seal your JWK in <a href="#vault-sec">the vault</a> (paste it; the type is detected), then this panel wakes', 'var(--ink)');
+            if (statEl) { statEl.textContent = hasInj ? 'extension ready — tap connect' : 'connect Arweave wallet or bind a public address'; statEl.className = 'stat'; }
+            paint(hasInj
+              ? 'Arweave extension detected — tap <b>connect Arweave wallet</b> to bind your public address and publish. No JWK paste required.'
+              : 'No Arweave extension yet — install <b>Wander</b> (or an arweave.app-style wallet), then tap connect. Or bind a 43-char public address on the forge <b>ar:</b> card for keyless reads. Vault JWK paste is optional scaffold only.');
+            go.disabled = true;
             return;
           }
-          var addr = e.meta && e.meta.address;
-          if (statEl) statEl.textContent = 'reading ' + (addr || '…');
+          if (statEl) statEl.textContent = 'reading ' + addr.slice(0, 10) + '…';
           paint('reading ' + addr + '…');
           try {
             var bal = await A.balance(addr);
             var fee = await A.fee(1926);
             var spot = null;
-            try { spot = await A.spotPrice(); } catch (e2) { /* optional — a dead price source never kills the panel */ }
+            try { spot = await A.spotPrice(); } catch (e2) { /* optional */ }
             var winston = parseInt(bal, 10) || 0, need = parseInt(fee, 10) || 0;
             if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
             if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
                         statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + ((need - winston) / 1e12) + ' AR for the anchor';
             paint('address ' + addr + ' · balance ' + (winston / 1e12) + ' AR · anchor fee ' +
               (need / 1e12) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
-              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready'));
+              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
+              (hasInj ? ' · sign via extension' : ' · sign via vault scaffold if publishing'));
             go.disabled = winston < need;
-            wlRead(statEl, true);   /* a read that SUCCEEDED, even when short of the anchor fee */
+            if (typeof wlRead === 'function') wlRead(statEl, true);
           } catch (err) {
-            if (statEl) { statEl.textContent = 'read failed'; wlRead(statEl, false); }
+            if (statEl) { statEl.textContent = 'read failed'; if (typeof wlRead === 'function') wlRead(statEl, false); }
             paint('gateway read failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           }
         }
+        if (conn) conn.addEventListener('click', async function () {
+          var inj = arInject();
+          if (!inj || !inj.connect) {
+            paint('wallet shell still loading — try again in a moment', 'var(--amber)');
+            return;
+          }
+          if (!inj.present()) {
+            paint('No Arweave extension injected. Install <b>Wander</b> (Chrome/Firefox), reload this page, then tap connect. Or open the forge <b>ar:</b> card and bind a public address for reads.', 'var(--ink)');
+            return;
+          }
+          conn.disabled = true;
+          paint('asking the injected Arweave wallet…');
+          try {
+            var a = await inj.connect();
+            paint('✓ connected ' + a + ' — public only; private key stays in the extension');
+            await refresh();
+          } catch (err) {
+            paint(esc(err && err.message ? err.message : String(err)), 'var(--amber)');
+          } finally { conn.disabled = false; }
+        });
         go.addEventListener('click', async function () {
           var W = window.BNRWALLET, V = window.BNRVAULT;
           if (!W) { paint('the wallet shell did not load', 'var(--amber)'); return; }
@@ -1959,19 +2062,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
               return;
             }
-            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — the contract path: the worker builds, the vault signs, the outbox persists…');
-            var jwk = null, e = V && arEntry();
-            if (e) {
-              jwk = JSON.parse(V.reveal(e.id).secret);      // the vault's key, revealed only into the signing call
-            } else {
-              // demo lane: a RUNTIME-generated JWK, never stored, never funded —
-              // the gateway's verdict on it is the honest one, and the actual
-              // anchor waits for the founder loading a funded JWK (stated)
-              paint('no vault JWK — generating a runtime TEST key (unfunded, memory-only)…');
-              var kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
-              jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+            var inj = arInject();
+            var useInject = !!(inj && inj.present && inj.present());
+            var jwk = null;
+            if (!useInject) {
+              var e = vaultArEntry();
+              if (e && V) jwk = JSON.parse(V.reveal(e.id).secret);
             }
-            var r = await W.walletPublish(bytes, ORBIT.tags, { jwk: jwk });
+            if (!useInject && !jwk) {
+              paint('Connect an Arweave wallet to publish (primary), or seal a JWK in the vault scaffold (advanced). No private key is invented from masterPRK.', 'var(--ink)');
+              return;
+            }
+            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — ' +
+              (useInject ? 'extension signs (inject path)…' : 'vault JWK scaffold signs…'));
+            var r = await W.walletPublish(bytes, ORBIT.tags, useInject ? { inject: true } : { jwk: jwk });
             if (r && r.phase === 'confirmed') {
               paint('⚓ ANCHORED — read back from the gateway: ' + (r.evidence && r.evidence.read));
               var a = document.createElement('a');
@@ -1984,22 +2088,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             } else if (r && r.phase === 'failed' && /verification|fund/i.test(JSON.stringify(r.evidence || {}))) {
               paint('the gateway rejected the tx — for an UNFUNDED key this is the expected verdict ' +
                 '(arweave-js gets the identical answer): everything is proven except the money. ' +
-                'The signed anchor sits in the outbox; fund this address (or seal a funded JWK in the vault) and tap again.', 'var(--amber)');
+                'The signed anchor sits in the outbox; fund this address and tap again.', 'var(--amber)');
             }
-            // every other phase already spoke through tx-out (refused / submitted / faulted — all honest)
           } catch (err) {
             paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           } finally {
-            go.disabled = false; // state re-syncs on the 45s interval / vault hooks — never overwrite a verdict
+            go.disabled = false;
           }
         });
         box.hidden = false;
         paint('…');
         setInterval(function () { if (!go.disabled) refresh(); }, 45000);
-        setTimeout(refresh, 600);
+        setTimeout(refresh, 700);
         var vsec = document.getElementById('vault-sec');
-        if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); }); // unlock/seal wakes the panel
+        if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); });
         document.addEventListener('vault-unlocked', refresh, true);
+        document.addEventListener('ar-inject-connected', refresh, true);
       } catch (err) {
         var s = document.getElementById('arw-stat');
         var b = document.getElementById('arw-js');
@@ -2008,6 +2112,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     })();
   </script>
+</section>
+
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
@@ -2051,8 +2157,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <button id="tx-abi" class="green" style="font-size:11px">📥 load ABI</button>
   </div>
   <div class="row" id="tx-j4row" style="display:none">
-    <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
-    <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+    <details id="tx-j4-scaffold" style="flex:1 1 100%">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · Jungle4 test key (TESTNET-ONLY — gold mainnet never pastes)</summary>
+      <div class="row" style="margin-top:8px">
+        <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
+        <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+      </div>
+    </details>
   </div>
   <div id="tx-fields" style="display:none;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--well)">
     <div style="font-size:9.5px;color:var(--violet);letter-spacing:.09em;margin-bottom:7px" id="tx-fields-title">FIELDS — from the live ABI</div>
@@ -2120,7 +2231,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · this page: surfaces/wallet.html
   </details>
 </footer>
-<script src="agent-dock.js?v=5"></script>
+<script src="agent-dock.js?v=10"></script>
 <script src="tour.js?v=42"></script>
 <script src="onboarding/bzdid-key.js"></script>
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
@@ -2313,11 +2424,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function ensureCtx(c){ if(CONTEXTS.indexOf(c)<0){CONTEXTS.push(c);saveContexts()} }
   function seedContexts(){
     if(!SOUL)return;
-    /* one soul, every rail — the four value rails plus comms, all from the
-       same masterPRK, all present the moment the keychain connects */
+    /* one soul, every rail — value rails + comms from masterPRK, plus the two
+       public-only rails (hive account name, arweave address binding). AR never
+       pretends RSA falls out of the PRK. */
     ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
+    ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
     $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
+    if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
   function npubFromSeed(seed){ // NIP-19: bech32('npub', x-only pubkey of the secp256k1 pair)
@@ -2325,7 +2439,116 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pub=BN.secp.getPublicKey(seed,true); // 33B compressed — x-only = [1..33]
     return BN.bech32.encode('npub',BN.bech32.toWords(pub.slice(1,33)));
   }
+  /* Public-only forge rails. hive: is the account name (balances already use
+     SOUL). ar: is an Arweave address (43-char base64url) — never a private JWK,
+     never invented RSA from masterPRK. Bound address lives in localStorage. */
+  function hiveNameOf(ctx){
+    var n=(ctx||'').replace(/^hive:/,'');
+    return n||SOUL||'';
+  }
+  function arBindKey(ctx){ return 'bnr_ar_pub:'+(ctx||('ar:'+(SOUL||''))) }
+  function loadArPublic(ctx){
+    try{ var v=localStorage.getItem(arBindKey(ctx)); return (v&&v.length===43)?v:null }catch(e){ return null }
+  }
+  function saveArPublic(ctx, addr){
+    try{ if(addr) localStorage.setItem(arBindKey(ctx), addr); else localStorage.removeItem(arBindKey(ctx)) }catch(e){}
+  }
+  function vaultArPublic(){
+    try{
+      if(!window.BNRVAULT||!BNRVAULT.isUnlocked()) return null;
+      var e=BNRVAULT.list().filter(function(x){ return x.type==='arweave'&&x.meta&&x.meta.address })[0];
+      return e?e.meta.address:null;
+    }catch(e){ return null }
+  }
+  function isArAddress(s){ return typeof s==='string'&&s.length===43&&/^[A-Za-z0-9_-]{43}$/.test(s) }
+  var AR_INJECT_PERMS=['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY','SIGNATURE','SIGN_TRANSACTION'];
+  function arInjectPresent(){
+    return !!(window.arweaveWallet && typeof window.arweaveWallet.getActiveAddress==='function');
+  }
+  async function connectArweaveInject(ctx){
+    var w=window.arweaveWallet;
+    if(!w||typeof w.getActiveAddress!=='function'){
+      throw new Error('no Arweave wallet injected — install Wander (or arweave.app style), reload, then connect — or bind a public address on the forge ar: card');
+    }
+    if(typeof w.connect==='function'){
+      try{ await w.connect(AR_INJECT_PERMS) }
+      catch(e){
+        try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e2){ /* older injects skip connect */ }
+      }
+    }
+    var addr=await w.getActiveAddress();
+    if(!isArAddress(addr)) throw new Error('injected wallet returned no 43-char Arweave address');
+    if(ctx) saveArPublic(ctx, addr);
+    else if(SOUL) saveArPublic('ar:'+SOUL, addr);
+    try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:addr}})) }catch(e3){}
+    return addr;
+  }
+  async function arInjectPublicJwk(){
+    var w=window.arweaveWallet;
+    if(!w||typeof w.getActivePublicKey!=='function')
+      throw new Error('injected wallet has no getActivePublicKey — need ACCESS_PUBLIC_KEY');
+    if(typeof w.connect==='function'){
+      try{ await w.connect(AR_INJECT_PERMS) }catch(e){
+        try{ await w.connect(['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY']) }catch(e2){}
+      }
+    }
+    var n=await w.getActivePublicKey();
+    if(!n||typeof n!=='string'||n.length<80) throw new Error('injected wallet returned no public modulus');
+    return {kty:'RSA', n:n, e:'AQAB'};
+  }
+  function arSigBytes(sig){
+    if(sig instanceof Uint8Array) return sig;
+    if(sig instanceof ArrayBuffer) return new Uint8Array(sig);
+    if(Array.isArray(sig)) return new Uint8Array(sig);
+    if(sig && typeof sig === 'object' && sig.data) return new Uint8Array(sig.data);
+    throw new Error('extension returned unrecognized signature shape');
+  }
+  async function arInjectSignRaw(sigData){
+    var w=window.arweaveWallet;
+    if(!w) throw new Error('no Arweave wallet injected');
+    if(typeof w.connect==='function'){
+      try{ await w.connect(AR_INJECT_PERMS) }catch(e){}
+    }
+    var sigBytes=null, by='arweaveWallet';
+    if(typeof w.signature==='function'){
+      /* RSA-PSS over deepHash output — same shape vault signRaw uses (agents never see d) */
+      sigBytes=arSigBytes(await w.signature(sigData, {name:'RSA-PSS', saltLength:32}));
+      by='arweaveWallet.signature';
+    } else if(typeof w.sign==='function'){
+      var shim={
+        format:2, data:'', data_size:'0', data_root:'', quantity:'0', target:'', reward:'0', last_tx:'', owner:'', tags:[],
+        chunks:{data_root:''},
+        get:function(k){ return this[k] },
+        set:function(k,v){ this[k]=v },
+        getSignatureData:async function(){ return sigData }
+      };
+      var signed=await w.sign(shim);
+      if(!signed||!signed.signature) throw new Error('extension sign() returned no signature');
+      return {signature:signed.signature, id:signed.id, by:'arweaveWallet.sign'};
+    } else {
+      throw new Error('injected wallet cannot sign (no signature/sign API)');
+    }
+    var signature=window.BNRAR.b64u(sigBytes);
+    var idBytes=new Uint8Array(await crypto.subtle.digest('SHA-256', sigBytes));
+    return {signature:signature, id:window.BNRAR.b64u(idBytes), by:by};
+  }
+  function arInjectBoundAddress(){
+    if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
+    return vaultArPublic();
+  }
   function deriveFor(ctx){
+    /* hive: public account name — no private material, works without MPRK */
+    if(/^hive:/.test(ctx)){
+      var hn=hiveNameOf(ctx);
+      if(!hn) return null;
+      return {kind:'Hive account', value:hn, publicOnly:true};
+    }
+    /* ar: public address only — RSA-JWK cannot derive from masterPRK */
+    if(/^ar:/.test(ctx)){
+      var addr=loadArPublic(ctx)||vaultArPublic();
+      if(addr&&isArAddress(addr)) return {kind:'Arweave address', value:addr, publicOnly:true, source:loadArPublic(ctx)?'bound':'vault-meta'};
+      return {kind:'Arweave address', value:null, publicOnly:true, needsConnect:true};
+    }
     if(!MPRK)return null;
     /* sol: is the one context on a DIFFERENT curve — a Solana address is an
        ed25519 key, so it takes deriveRecordKey, not deriveK1Key. Handled first
@@ -2360,13 +2583,57 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pk=BN.PrivateKey.fromString(w);
     return {kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:pk.getPublicKey().toLegacyString(), pubK1:pk.getPublicKey().toString()};
   }
+  function forgeChipNote(d){
+    if(!d) return 'context saved, key never stored';
+    if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
+    if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
+    if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
+    if(d.kind==='Solana') return 'ed25519 base58';
+    if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
+    if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
+    if(d.kind==='Vaulta K1'||d.kind==='K1') return 'eosio public key';
+    return 'public material only';
+  }
+  function renderArConnectChip(box, c){
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
+    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Arweave address</span></div>'+
+      '<div class="cv" style="color:var(--ink)">connect a public AR address</div>'+
+      '<div class="cx" style="margin-top:6px">RSA-JWK cannot derive from masterPRK — public only</div>'+
+      '<div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap">'+
+        '<button type="button" class="gold" data-ar-inject style="font-size:10px;min-height:32px">connect Arweave wallet</button>'+
+        '<input data-ar-pub class="small" placeholder="or paste 43-char public address" spellcheck="false" autocomplete="off" style="flex:1;min-width:160px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px">'+
+        '<button type="button" data-ar-bind style="font-size:10px;min-height:32px">bind public</button>'+
+      '</div>'+
+      '<div class="cx" data-ar-stat style="margin-top:4px;min-height:14px">extension inject if present · else public address field · never a private JWK</div>';
+    var inj=el.querySelector('[data-ar-inject]');
+    var inp=el.querySelector('[data-ar-pub]');
+    var bind=el.querySelector('[data-ar-bind]');
+    var st=el.querySelector('[data-ar-stat]');
+    inj.onclick=function(ev){
+      ev.stopPropagation();
+      st.textContent='asking the injected Arweave wallet…';
+      connectArweaveInject(c).then(function(addr){
+        st.textContent='✓ bound '+addr.slice(0,10)+'…';
+        renderForge();
+        if(typeof readArBound==='function') readArBound(addr);
+      }).catch(function(err){ st.textContent=err.message||String(err); st.style.color='var(--amber)' });
+    };
+    bind.onclick=function(ev){
+      ev.stopPropagation();
+      var a=(inp.value||'').trim();
+      if(!isArAddress(a)){ st.textContent='need a 43-char Arweave address (public only)'; st.style.color='var(--amber)'; return }
+      saveArPublic(c, a);
+      st.textContent='✓ public address bound';
+      renderForge();
+      if(typeof readArBound==='function') readArBound(a);
+    };
+    inp.onclick=function(ev){ ev.stopPropagation() };
+    inp.onkeydown=function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); bind.click() } };
+    box.appendChild(el);
+  }
   function renderForge(){
     var box=$('forge-chips');
     if(!CONTEXTS.length){box.innerHTML='<div class="law">no contexts yet — forge one below</div>';return}
-    if(!MPRK){
-      box.innerHTML=CONTEXTS.map(function(c){return '<div class="chip"><div class="cc">'+c+'</div><div class="cv" style="color:var(--faint)">derives when keychain connects</div><div class="cx">context saved, key never stored</div></div>'}).join('');
-      return;
-    }
     box.innerHTML='';
     CONTEXTS.forEach(function(c){
       /* PER-CONTEXT ISOLATION. One rail that cannot derive must not take the
@@ -2385,12 +2652,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         box.appendChild(bad);
         return;
       }
+      if(!d){
+        var wait=document.createElement('div'); wait.className='chip';
+        wait.innerHTML='<div class="cc">'+esc(c)+'</div><div class="cv" style="color:var(--faint)">derives when keychain connects</div><div class="cx">context saved, key never stored</div>';
+        box.appendChild(wait);
+        return;
+      }
+      if(d.needsConnect){ renderArConnectChip(box, c); return }
+      var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
-      el.innerHTML='<div class="cc">'+c+' <span style="color:var(--faint)">· '+d.kind+'</span></div>'+
-        '<div class="cv">'+d.value+'</div>'+
-        '<div class="cx">'+(d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key')+'</div>';
+      el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
+        '<div class="cv">'+esc(d.value)+'</div>'+
+        '<div class="cx">'+esc(note)+'</div>';
       el.onclick=function(){
-        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key'},1200)}catch(e){}
+        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=note},1200)}catch(e){}
       };
       box.appendChild(el);
       if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
@@ -2399,6 +2674,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $('ethnode').removeAttribute('stroke-dasharray');
         readEvm(EVMADDR);
       }
+      if(/^ar:/.test(c)&&d.value&&typeof readArBound==='function') readArBound(d.value);
     });
   }
   $('forge-go').onclick=function(){
@@ -2412,6 +2688,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+SOUL+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
+  $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
+  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before
@@ -3195,6 +3473,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     MPRK=id.masterPrk.slice();
     id.masterPrk.fill&&id.masterPrk.fill(0);
     deriveK1();
+    if(SOUL) publishSoul(SOUL);
     $('kc-soul-fp').textContent=(id.fingerprint&&id.fingerprint.words)||'—';
     $('kc-soul-pub').textContent='ed25519: '+Array.from(id.record.publicKey).slice(0,8).map(function(b){return b.toString(16).padStart(2,'0')}).join('')+'…';
     $('kc-soul-name').textContent=SOUL||'…';
@@ -3746,9 +4025,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }));
     return found;
   }
+  function publishSoul(name){
+    try{ if(name) localStorage.setItem('bnr_soul',name); else localStorage.removeItem('bnr_soul'); }catch(e){}
+    try{ document.dispatchEvent(new CustomEvent('bnr-soul',{detail:{soul:name||null}})); }catch(e2){}
+    var live=$('wl-soul-name'); if(live) live.textContent=name?name+'.b':'…';
+  }
   async function setSoul(name){
     SOUL=name;
-    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    publishSoul(SOUL);
     $('wq').value=SOUL;
     if(K1&&MPRK)deriveK1();
     readAll();
@@ -4282,8 +4566,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var payload = b64ToBytes(intent.unsigned_bytes);
     var digest = hexS(BN.sha256(payload));   // BN.sha256 gives bytes; hexS is the byte-wise hex
     if (digest !== intent.digest) throw new Error('vault refused: digest mismatch (intent says ' + intent.digest.slice(0, 12) + '…, bytes hash ' + digest.slice(0, 12) + '…)');
-    if (intent.rail === 'arweave') {                         // B3: the JWK signs the deepHash output — RSA-PSS, vault-held
-      if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign with a vault-held JWK — none was revealed');
+    if (intent.rail === 'arweave') {                         // B3: inject OR vault JWK signs deepHash — RSA-PSS; agents never see d
+      if (opts && opts.inject) {
+        var sInj = await arInjectSignRaw(payload);
+        return { signatures: [sInj.signature], ar_id: sInj.id, by: sInj.by };
+      }
+      if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign via window.arweaveWallet inject (primary) or a vault-held JWK scaffold — none available');
       var s = await window.BNRAR.signRaw(opts.jwk, payload);
       return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
     }
@@ -4450,10 +4738,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   spawnAdapter('hive', 'wallet-adapter-hive.js');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js');
 
-  /* ── walletPublish() — the Arweave anchor seam (B3, closes Rail 2 as
-     wallet feature work): the adapter builds from the JWK's PUBLIC parts,
-     the vault signs the deepHash output with the private JWK, the outbox
-     persists before submit, and confirm reads the gateway back. */
+  /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
+     window.arweaveWallet inject (public key + extension sign). Vault JWK is
+     secondary scaffold only. Never invent RSA from masterPRK; agents never
+     see private keys. Adapter builds from PUBLIC parts; outbox persists
+     before submit; confirm reads the gateway back. */
   async function walletPublish(bytes, tags, opts) {
     opts = opts || {};
     var out = $('tx-out');
@@ -4465,11 +4754,34 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">buildPublish is not declared by the arweave adapter</b> — the call path does not exist. Nothing was dispatched.'; }
       return null;
     }
-    if (!opts.jwk || !opts.jwk.d) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">no signing JWK</b> — seal one in <a href="#vault-sec">the vault</a>, or run the demo lane which generates a runtime TEST key (unfunded — the gateway verdict will say so honestly).'; }
-      return null;
+    var publicJwk = null, signOpts = null;
+    var wantInject = opts.inject === true || (opts.inject !== false && arInjectPresent() && !opts.jwk);
+    if (wantInject || opts.inject === true) {
+      try {
+        if (!arInjectPresent()) throw new Error('no Arweave wallet injected');
+        publicJwk = await arInjectPublicJwk();
+        var injAddr = await window.arweaveWallet.getActiveAddress();
+        if (isArAddress(injAddr)) {
+          if (SOUL) saveArPublic('ar:'+SOUL, injAddr);
+          try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:injAddr}})) }catch(e0){}
+        }
+        signOpts = { inject: true };
+      } catch (ie) {
+        if (opts.inject === true && !(opts.jwk && opts.jwk.d)) {
+          if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">inject sign unavailable:</b> ' + (ie && ie.message || ie) + ' — install/connect Wander, or use the vault JWK scaffold.'; }
+          return null;
+        }
+        publicJwk = null; signOpts = null;
+      }
     }
-    var publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
+    if (!publicJwk) {
+      if (!opts.jwk || !opts.jwk.d) {
+        if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--ink)">connect an Arweave wallet</b> (primary — <code>window.arweaveWallet</code>) to publish. Vault JWK paste is optional scaffold only — New-bee never needs it. RSA is never invented from masterPRK.'; }
+        return null;
+      }
+      publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
+      signOpts = { jwk: opts.jwk };
+    }
     var b64in = btoa(String.fromCharCode.apply(null, bytes.length > 30000 ? bytes.subarray(0, 30000) : bytes));
     if (bytes.length > 30000) throw new Error('payload over 30 KB — chunked upload is a later lane; the anchor payload is small');
     var intent;
@@ -4480,9 +4792,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     var sgn;
-    try { sgn = await vaultSign(intent, { jwk: opts.jwk }) }
+    try { sgn = await vaultSign(intent, signOpts) }
     catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + (e && e.message || e); }
       return null;
     }
     var entry = {
@@ -4593,6 +4905,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     capGate: capGate,
     capRecord: capRecord,
     capLoad: capLoad,
+    arInject: {
+      present: arInjectPresent,
+      connect: function () { return connectArweaveInject(SOUL ? ('ar:'+SOUL) : null); },
+      activeAddress: async function () {
+        if (!arInjectPresent()) return arInjectBoundAddress();
+        try {
+          if (typeof window.arweaveWallet.connect === 'function') {
+            try { await window.arweaveWallet.connect(AR_INJECT_PERMS); } catch (e) {}
+          }
+          var a = await window.arweaveWallet.getActiveAddress();
+          return isArAddress(a) ? a : arInjectBoundAddress();
+        } catch (e) { return arInjectBoundAddress(); }
+      },
+      boundAddress: arInjectBoundAddress,
+      publicJwk: arInjectPublicJwk,
+      signRaw: arInjectSignRaw
+    },
     _telemetry: TELEMETRY,
     _crash: crash
   };
@@ -5317,13 +5646,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
   }
 
+  /* AR public balance from a bound forge address — no JWK paste required for reads */
+  async function readArBound(addr){
+    if(!isArAddress(addr)) return;
+    var balEl=$('ar-bal'), statEl=$('ar-stat'), infoEl=$('ar-info');
+    try{
+      if(infoEl) infoEl.textContent='public forge address '+addr.slice(0,10)+'… — reads stay keyless';
+      if(statEl){ statEl.textContent='reading…'; statEl.className='stat' }
+      var winston=null;
+      if(window.BNRAR&&typeof BNRAR.balance==='function') winston=await BNRAR.balance(addr);
+      else {
+        var r=await fetchT('https://arweave.net/wallet/'+encodeURIComponent(addr)+'/balance');
+        winston=await r.text();
+      }
+      var ar=(Number(winston)/1e12);
+      if(balEl) balEl.textContent=(isFinite(ar)?ar.toFixed(6):'?')+' AR';
+      if(statEl){ statEl.textContent='✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
+      $('ch-arweave').classList.add('connected');
+    }catch(e){
+      if(statEl){ statEl.textContent='AR read failed'; statEl.className='stat err'; wlRead(statEl,false) }
+    }
+  }
+
   async function readAll(){
     if(!SOUL)return;
     /* the soul is known and the reads are in flight: say so NOW, not after the round-trip */
     document.body.setAttribute('data-wl-soul','true');
     ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
-    await Promise.all([readVaulta(SOUL), readHive(SOUL)]);
+    var arCtx='ar:'+SOUL;
+    var arPub=loadArPublic(arCtx)||vaultArPublic();
+    await Promise.all([readVaulta(SOUL), readHive(SOUL), arPub?readArBound(arPub):Promise.resolve()]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
     $('sum-soul').textContent=SOUL+'.b';document.body.setAttribute('data-wl-soul','true');
     $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
@@ -5334,9 +5687,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
     if(!v){ $('wstat').textContent='type your name first'; return; }
     SOUL=v;
-    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    publishSoul(SOUL);
     acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
     if(K1)deriveK1();
+    seedContexts(); renderForge();
     readAll();
   };
   $('wq').addEventListener('keydown',function(e){if(e.key==='Enter')$('wgo').click()});
@@ -5374,7 +5728,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
@@ -5953,7 +6307,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var v=view();
     [].forEach.call(document.querySelectorAll('#wl-cards .wlr-card'),function(c){
       var s=document.getElementById(c.getAttribute('data-wl-card-for'));
-      c.hidden=!s||s.style.display==='none';
+      c.hidden=!s||s.style.display==='none'||s.hasAttribute('data-wl-held');
       c.setAttribute('aria-pressed',String(!!s&&s.hasAttribute('data-wl-open')));
     });
   }
@@ -6067,7 +6421,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey)return;
     var h=a.getAttribute('href').slice(1);
     if(!h||h.indexOf('qr=')===0)return;
-    var el=document.getElementById(h), t=taskOf(el);
+    var el=document.getElementById(h), t=landOf(el);
     if(!t)return;
     e.preventDefault();
     /* a cross-reference between tasks REPLACES the task ("‹ wallet" keeps meaning
@@ -6086,11 +6440,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* a deep link lands in the task that holds its target, in every register */
   function taskOf(el){var s=el&&el.closest&&el.closest('main>section[data-wl-task]');return s?s.getAttribute('data-wl-task'):null}
+  /* a section held out of its task (data-wl-held) lives only in "show me
+     everything" in bee and raver: a link or a place there lands on "all" */
+  function held(el){var s=el&&el.closest&&el.closest('main>section[data-wl-task]');return !!s&&s.hasAttribute('data-wl-held')}
+  function landOf(el){var t=taskOf(el);return t&&reg()!=='cypherpunk'&&held(el)?'all':t}
   function landHash(keepView){
     var h=location.hash.slice(1);
     if(!h||h.indexOf('qr=')===0)return;
     var el=null;try{el=document.getElementById(decodeURIComponent(h))}catch(e){}
-    var t=taskOf(el);if(!t)return;
+    var t=landOf(el);if(!t)return;
     if(keepView!==true&&reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
     if(reg()==='raver')openSec(el.closest('main>section'),false);
     requestAnimationFrame(function(){el.scrollIntoView({block:'start'})});
@@ -6103,7 +6461,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      they focused or typed in becomes the bee/raver task, and a bee/raver task
      becomes cypherpunk's place. */
   var workTask=null, workSec=null;
-  function noteWork(e){if(e.target&&e.target.matches&&(e.target.matches('main>section')||e.target.closest('.wl-more')))return;var t=taskOf(e.target);if(t){workTask=t;workSec=e.target.closest('main>section')}}
+  function noteWork(e){if(e.target&&e.target.matches&&(e.target.matches('main>section')||e.target.closest('.wl-more')))return;var t=taskOf(e.target);if(t){workTask=held(e.target)?'all':t;workSec=e.target.closest('main>section')}}
   document.addEventListener('focusin',noteWork);
   document.addEventListener('input',noteWork);
   function current(){

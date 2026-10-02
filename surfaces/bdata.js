@@ -13,7 +13,9 @@
 //  - Unsupported private audiences stay VISIBLY UNAVAILABLE with reasons.
 //  - Nothing here can spend. Phase C adds ONE founder-reviewed authorization
 //    object (an intent to sign, bound to the exact quote + invoice lineage);
-//    there is still no pay route and no signing path — those are Phase E's.
+//    Phase E wires pay-with-wallet (ant-pay.js) after Authorized, and Add to manifest (picker + in-page sha256 + live/local intake).
+//    Wallet load lives ON this surface (injected ethereum / eth_requestAccounts). Agents never hold keys; the person's wallet signs.
+//    Unreachable loopback shelf falls back to an honest browser-local receipt — never a New-bee fail wall, never a fake Autonomi claim.
 //
 // THE A+ REBUILD (founder, 2026-09-18: "D+ — buttons don't even work"):
 //  - EVERY PRESS ANSWERS. The screen is DERIVED from state (policy key + st +
@@ -33,6 +35,9 @@
   'use strict';
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
+  var WAVE_CHUNK = 4190208;
+  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
   var RETRY_MS = 3000;
@@ -128,7 +133,10 @@
   var INV = null, invState = 'loading';   // loading | ready | empty | failed
   var FINV = null;     // the CURRENT founder invoice — the authorization binds THIS lineage
   var review = false;  // the review is open (a reader's tap; closes when the price it was for is gone)
-  var authBusy = false, authErr = null;
+  var authBusy = false;
+  var pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:null, ticker:null };
+  var intake = { file:null, name:'', bytes:0, sha256:null, hashing:false, placing:false, err:null, soft:null, result:null, tooLarge:false }, authErr = null;
+  var wallet = { address:null, chainId:null, connecting:false, soft:null };   // address only — never a key
   var ask = null;      // THE one in-flight ask: { id, startedAt, attempt, phase:'asking'|'retrying', ... }
   var fail = null;     // the last ask's failure: { cls, detail, secs }
   var notice = null;   // 'nostore' | null
@@ -217,6 +225,9 @@
       // no quotes at all is a price only when every chunk is already stored
       if (!payments.length && !(Number(prepare.total_chunks) > 0 && Number(prepare.already_stored) === Number(prepare.total_chunks))) throw problem('refused', 'the answer carried no quotes');
       return { obtainedAt: new Date().toISOString(), totalAtto: sum, count: payments.length, shape: String(prepare.payment_type || ''), uploadId: String(prepare.upload_id || ''),
+               payments: payments.map(function(p){ return { quote_hash: String(p.quote_hash||''), rewards_address: String(p.rewards_address||''), amount_atto: String(p.amount_atto||'') }; }),
+               payment_type: String(prepare.payment_type || ''), data_map_address: prepare.data_map_address ? String(prepare.data_map_address) : '',
+               total_chunks: Number(prepare.total_chunks)||payments.length, already_stored: Number(prepare.already_stored)||0,
                artifact: my.artifact, audience: my.sel.audience, selectedAt: my.sel.selectedAt, bridge: my.bridge };
     }).then(function(q){
       clearTimeout(my.deadline);
@@ -382,8 +393,9 @@
     /* 3 · AUTHORIZE (Phase C) — locked prose until a price stands; then one
        founder-reviewed intent to sign. Never a pay route, never a signing path. */
     h += authStep(sel);
+    h += payStep(sel);
     h += '</section>';
-    return h;
+    return addManifestCard() + h;
   }
 
   function priceStep(sel, ref){
@@ -451,7 +463,7 @@
     var auth = authFor(q);
     var h = '<div class="step" data-bdata-review="1"' + (authBusy ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="auth-h" tabindex="-1" data-fk="auth">' + num + tx('bd.auth.h', 'What you are authorizing') + '</h3>';
     if (auth && auth.state === 'authorized-for-signing') {
-      h += '<p data-bdata-auth-state="authorized"><b><span aria-hidden="true">🔑 </span>' + tx('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E') + '</b></p>';
+      h += '<p data-bdata-auth-state="authorized"><b><span aria-hidden="true">🔑 </span>' + tx('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; pay with your wallet is next') + '</b></p>';
       h += '<p class="sub note"><bdi class="mono">' + esc(auth.id) + '</bdi> · ' + tx('bd.auth.cancelnote', 'cancellation is always lawful before a signature exists') + '</p>';
       if (authErr) h += '<div class="alert note"><bdi class="mono">' + esc(authErr) + '</bdi></div>';
       h += authBusy ? '<div class="busy note"><span class="spin" aria-hidden="true"></span><div class="sub">' + tx('bd.auth.cancel', 'Cancel authorization') + '…</div></div>'
@@ -480,6 +492,423 @@
                   : '<div class="actions"><button type="button" class="btn primary" data-bdata-auth-go="1" data-act="auth-go" data-fk="auth-go">🔑 ' + tx('bd.auth.go', 'I authorize this') + '</button></div>';
     return h + '</div>';
   }
+
+  
+
+  /* ── register voice helpers (New bee: no scare walls) ── */
+  function regName(){ return document.body.getAttribute('data-reg') || 'bee'; }
+  function isNewBee(){ return regName() === 'bee'; }
+  function shortAddr(a){ a = String(a || ''); return a.length > 12 ? (a.slice(0, 6) + '…' + a.slice(-4)) : a; }
+
+  /* ── Wallet on THIS surface (same UI as Add to manifest / pay) ──
+     Injected provider only. Never holds, derives, or stores a private key. */
+  function walletCard(){
+    var h = '<section class="card" data-bdata-wallet="1" aria-labelledby="wal-h">';
+    h += '<div class="head"><div><h2 id="wal-h">' + tx('bd.wal.h', 'Your wallet') + '</h2>';
+    h += '<p class="sub">' + tx('bd.wal.sub', 'load it here — same page as your files; this page never holds a key') + '</p></div></div>';
+    if (wallet.connecting) {
+      h += '<div class="busy" data-bdata-wal-busy="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.wal.connecting', 'opening your wallet…') + '</b></div></div>';
+      return h + '</section>';
+    }
+    if (wallet.address) {
+      h += '<div class="badge" data-bdata-wal-ok="1">✓ ' + tx('bd.wal.ready', 'wallet ready') + ' · <bdi class="mono" data-bdata-wal-addr="' + esc(wallet.address) + '">' + esc(shortAddr(wallet.address)) + '</bdi></div>';
+      if (wallet.chainId && String(wallet.chainId).toLowerCase() !== '0xa4b1') {
+        h += '<p class="sub" data-bdata-wal-chain="1">' + tx('bd.wal.switch', 'when you pay, your wallet will ask to use Arbitrum One') + '</p>';
+      }
+      h += '<div class="actions"><button type="button" class="btn" data-act="wal-connect" data-fk="wal-connect" data-bdata-wal-go="1">↻ ' + tx('bd.wal.again', 'Use a different account') + '</button></div>';
+    } else if (window.ethereum && typeof window.ethereum.request === 'function') {
+      h += '<p class="law">' + tx('bd.wal.intro', 'one press loads the account that will sign Autonomi payments') + '</p>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-act="wal-connect" data-fk="wal-connect" data-bdata-wal-go="1">🔗 ' + tx('bd.wal.go', 'Load wallet') + '</button></div>';
+    } else {
+      h += '<p class="law" data-bdata-wal-miss="1">' + tx('bd.wal.miss', 'install a browser wallet (or open this page in one), then load it here') + '</p>';
+      if (wallet.soft) h += '<p class="sub" data-bdata-wal-soft="1">' + esc(wallet.soft) + '</p>';
+    }
+    if (wallet.soft && wallet.address) h += '<p class="sub" data-bdata-wal-soft="1">' + esc(wallet.soft) + '</p>';
+    h += '</section>';
+    return h;
+  }
+  function connectWallet(){
+    var eth = window.ethereum;
+    if (!eth || typeof eth.request !== 'function') {
+      wallet.soft = T('bd.wal.miss', 'install a browser wallet (or open this page in one), then load it here');
+      render({ focus:'wal-connect' }); say(wallet.soft); return;
+    }
+    wallet.connecting = true; wallet.soft = null; render();
+    eth.request({ method: 'eth_requestAccounts' }).then(function(a){
+      if (!a || !a[0]) throw new Error('no account');
+      wallet.address = String(a[0]);
+      return eth.request({ method: 'eth_chainId' }).catch(function(){ return null; });
+    }).then(function(c){
+      wallet.chainId = c ? String(c) : null;
+      wallet.connecting = false; wallet.soft = null;
+      render({ focus:'wal-connect' });
+      say(T('bd.wal.ready', 'wallet ready') + ' · ' + shortAddr(wallet.address));
+    }).catch(function(e){
+      wallet.connecting = false; wallet.address = null;
+      // calm continuity — never a purple fail wall
+      wallet.soft = T('bd.wal.wait', 'wallet not loaded yet — try again when you are ready');
+      render({ focus:'wal-connect' }); say(wallet.soft);
+    });
+  }
+  function watchWallet(){
+    var eth = window.ethereum; if (!eth || typeof eth.on !== 'function') return;
+    try {
+      eth.on('accountsChanged', function(a){ wallet.address = (a && a[0]) ? String(a[0]) : null; render(); });
+      eth.on('chainChanged', function(c){ wallet.chainId = c ? String(c) : null; render(); });
+    } catch(e){}
+  }
+
+  /* ── Browser-local shelf (honest; not Autonomi) ──
+     When loopback :8807 / local-network permission is unreachable from the
+     public origin, keep bytes on THIS device so Add to manifest still lands. */
+  var IDB_NAME = 'bdata-local-shelf', IDB_STORE = 'artifacts';
+  function idbOpen(){
+    return new Promise(function(resolve, reject){
+      if (!window.indexedDB) return reject(new Error('no indexedDB'));
+      var req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = function(){ var db = req.result; if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath: 'sha256' }); };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('idb open failed')); };
+    });
+  }
+  function shelfLocal(file, sha, name){
+    return file.arrayBuffer().then(function(ab){
+      var rec = { sha256: sha, bytes: file.size || ab.byteLength, name: name, shelf: 'browser', at: new Date().toISOString(), blob: new Blob([ab], { type: file.type || 'application/octet-stream' }) };
+      return idbOpen().then(function(db){
+        return new Promise(function(resolve, reject){
+          var tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).put(rec);
+          tx.oncomplete = function(){ resolve({ sha256: rec.sha256, bytes: rec.bytes, name: rec.name, shelf: 'browser' }); };
+          tx.onerror = function(){ reject(tx.error || new Error('idb put failed')); };
+        });
+      }).catch(function(){
+        // last-resort: metadata-only (tiny files may fit localStorage — never claim bytes on Autonomi)
+        try {
+          var key = 'bdata-shelf-meta';
+          var list = JSON.parse(localStorage.getItem(key) || '[]');
+          if (!Array.isArray(list)) list = [];
+          list = list.filter(function(r){ return r && r.sha256 !== sha; });
+          list.push({ sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser-meta', at: new Date().toISOString() });
+          localStorage.setItem(key, JSON.stringify(list.slice(-40)));
+          return { sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser' };
+        } catch(e){ throw e; }
+      });
+    });
+  }
+  function finishIntake(rec, voice){
+    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge' };
+    intake.err = null; intake.soft = null; intake.placing = false;
+    note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes, shelf: intake.result.shelf });
+    render();
+    say(voice || (intake.result.shelf === 'browser'
+      ? T('bd.add.ok.browser', 'kept on this device')
+      : T('bd.add.ok', 'on the local intake shelf')));
+  }
+
+  /* ── PHASE E-2: Add to manifest (picker + in-page sha256 + live/local intake) ──
+     Two witnesses: the page hashes BEFORE anything is sent; the bridge hashes
+     while writing. Files over the wave limit are prose — never a dead button.
+     Unreachable loopback → honest browser-local shelf (never Autonomi claim). */
+  function addManifestCard(){
+    var h = walletCard();
+    h += '<section class="card" data-bdata-add-manifest="1" aria-labelledby="add-h">';
+    h += '<div class="head"><div><h2 id="add-h">' + tx('bd.add.h', 'Add to manifest') + '</h2>';
+    h += '<p class="sub">' + tx('bd.add.sub', 'choose a file on this device — the page hashes it here; nothing leaves until you pay') + '</p></div></div>';
+    if (intake.result) {
+      var okVoice = intake.result.shelf === 'browser'
+        ? T('bd.add.ok.browser', 'kept on this device')
+        : T('bd.add.ok', 'on the local intake shelf');
+      h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">✓ ' + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
+      h += '<div class="meta sub"><span><bdi>' + esc(intake.result.name) + '</bdi> · <bdi>' + Number(intake.result.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      if (intake.result.shelf === 'browser') {
+        h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'on this browser only — Autonomi storage starts when you pay with your wallet') + '</p>';
+      }
+      h += '<p class="law">' + tx('bd.add.next', 'audience → price → authorize → pay with your wallet — same chain as the registered object below') + '</p>';
+      h += '</section>';
+      return h;
+    }
+    h += '<div class="drop" data-bdata-drop="1" tabindex="0" role="button" aria-label="' + esc(T('bd.add.drop', 'Drop a file here, or browse')) + '">';
+    h += '<p><b>' + tx('bd.add.drop', 'Drop a file here, or browse') + '</b></p>';
+    h += '<p class="sub">' + tx('bd.add.local', 'local only — kept on this machine first; agents never upload your wallet') + '</p>';
+    h += '<div class="actions"><label class="btn primary" data-bdata-browse-label="1" style="cursor:pointer"><input type="file" data-bdata-file="1" data-act="file-pick" hidden>📁 ' + tx('bd.add.browse', 'Browse…') + '</label></div>';
+    h += '</div>';
+    if (intake.hashing) h += '<div class="busy" data-bdata-hashing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.add.hashing', 'hashing on this page…') + '</b></div></div>';
+    if (intake.placing) h += '<div class="busy" data-bdata-intake-placing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.add.placing', 'keeping it on this device…') + '</b></div></div>';
+    if (intake.sha256 && !intake.tooLarge && !intake.placing) {
+      h += '<div class="review" data-bdata-intake-preview="1">';
+      h += '<div class="rv"><span class="sub">' + tx('bd.add.name', 'name') + '</span><span><bdi>' + esc(intake.name) + '</bdi></span></div>';
+      h += '<div class="rv"><span class="sub">' + tx('bd.add.size', 'size') + '</span><span><bdi>' + Number(intake.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      h += '<div class="rv"><span class="sub">sha256</span><span class="mono" data-bdata-intake-sha="' + esc(intake.sha256) + '"><bdi>' + esc(intake.sha256) + '</bdi></span></div>';
+      h += '</div>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-intake-go="1" data-act="intake-go" data-fk="intake-go">➜ ' + tx('bd.add.go', 'Add to manifest') + '</button></div>';
+    }
+    if (intake.tooLarge) {
+      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.large', 'Not available yet') + '</span><span class="desc">' + tx('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(WAVE_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
+    }
+    // New bee: soft continuity only — never a purple fail / "could not" scare panel
+    if (intake.soft) h += '<p class="sub note" data-bdata-intake-soft="1">' + esc(intake.soft) + '</p>';
+    if (intake.err && !isNewBee()) h += '<div class="alert note" data-bdata-intake-err="1"><b>' + esc(intake.err) + '</b></div>';
+    h += '</section>';
+    return h;
+  }
+  function hexOf(buf){
+    var u = new Uint8Array(buf), o = '';
+    for (var i = 0; i < u.length; i++) o += u[i].toString(16).padStart(2, '0');
+    return o;
+  }
+  function hashFile(file){
+    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, placing:false, err:null, soft:null, result:null, tooLarge:file.size > WAVE_MAX_BYTES };
+    render();
+    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent')); return; }
+    // incremental SHA-256 (WebCrypto cannot stream a File directly on every browser — chunked digest)
+    var chunk = 1024 * 1024, offset = 0, acc = [];
+    function step(){
+      if (offset >= file.size) {
+        return crypto.subtle.digest('SHA-256', concat(acc)).then(function(d){
+          intake.hashing = false; intake.sha256 = hexOf(d); render({ focus:'intake-go' });
+          say(intake.name + ' · sha256 ' + intake.sha256.slice(0, 12) + '…');
+        }).catch(function(e){ intake.hashing = false; intake.err = String((e&&e.message)||e).slice(0,160); render(); });
+      }
+      var slice = file.slice(offset, Math.min(offset + chunk, file.size));
+      offset += chunk;
+      return slice.arrayBuffer().then(function(ab){ acc.push(new Uint8Array(ab)); return step(); });
+    }
+    function concat(parts){
+      var n = 0; parts.forEach(function(p){ n += p.length; });
+      var out = new Uint8Array(n), at = 0;
+      parts.forEach(function(p){ out.set(p, at); at += p.length; });
+      return out.buffer;
+    }
+    step();
+  }
+  function intakeGo(){
+    if (!intake.file || !intake.sha256 || intake.tooLarge || intake.hashing || intake.placing) { render(); return; }
+    var bridge = trimBridge(st.bridge);
+    var useLiveDefault = (bridge === DEFAULT_BRIDGE);
+    // automated browsers never touch live :8807; they still get the honest browser shelf
+    var skipLive = navigator.webdriver && useLiveDefault;
+    intake.err = null; intake.soft = null; intake.placing = true; render();
+    function viaBrowser(){
+      return shelfLocal(intake.file, intake.sha256, intake.name).then(function(rec){ finishIntake(rec); });
+    }
+    function viaBridge(){
+      return fetch(bridge + '/v1/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream', 'X-BData-Name': encodeURIComponent(intake.name), 'X-BData-Sha256': intake.sha256 },
+        body: intake.file
+      }).then(function(r){
+        if (r.status === 409) return r.text().then(function(t){ var err = new Error(T('bd.add.mismatch', 'hash mismatch — the bridge refused this intake') + (t ? ' — ' + String(t).slice(0,120) : '')); err.cls = 'mismatch'; throw err; });
+        if (!r.ok) return r.text().then(function(t){ var err = new Error('HTTP ' + r.status + (t ? ' — ' + String(t).slice(0,120) : '')); err.cls = 'http'; throw err; });
+        return r.json();
+      }).then(function(rec){
+        if (!rec || String(rec.sha256||'').toLowerCase() !== intake.sha256.toLowerCase()) { var err = new Error(T('bd.add.mismatch', 'hash mismatch — the bridge refused this intake')); err.cls = 'mismatch'; throw err; }
+        finishIntake(Object.assign({ shelf: 'bridge' }, rec));
+      });
+    }
+    (skipLive ? viaBrowser() : viaBridge()).catch(function(e){
+      var unreachable = (e instanceof TypeError) || (e && e.name === 'TypeError');
+      if (unreachable || (e && e.cls === 'http' && /Failed to fetch/i.test(String(e.message||'')))) {
+        // ONE path that just works: browser-local receipt, no scare panel, no Autonomi claim
+        return viaBrowser().catch(function(e2){
+          intake.placing = false;
+          intake.err = null;
+          intake.soft = T('bd.add.retry', 'still placing it — try again in a moment');
+          render(); say(intake.soft);
+        });
+      }
+      intake.placing = false;
+      var detail = String((e && e.message) || e).slice(0, 200);
+      if (isNewBee()) {
+        intake.err = null;
+        intake.soft = (e && e.cls === 'mismatch')
+          ? T('bd.add.retry.hash', 'that copy did not match — pick the file again')
+          : T('bd.add.retry', 'still placing it — try again in a moment');
+      } else {
+        // cypherpunk (and raver): precise detail, still no Autonomi scare copy
+        intake.soft = null;
+        intake.err = detail;
+      }
+      render(); say(intake.soft || intake.err || '');
+    });
+  }
+
+  /* ── PHASE E-1: pay with your wallet after Authorized (ant-pay.js) ─────────
+     Mock-first: e2e injects a mock signer + bridge /health.evm. Live bridge
+     without evm refuses no-contracts — honest prose, never a fake receipt. */
+  function refusalWords(code){
+    var map = {
+      'no-quote': ['bd.pay.noquote', 'there is no price yet — ask Autonomi first'],
+      'merkle-not-built': ['bd.pay.merkle', 'files this large need batch payments, which are not built'],
+      'quote-sum': ['bd.pay.quotesum', 'the payments do not add up to the quoted total'],
+      'bad-plan': ['bd.pay.badplan', 'the payment plan is malformed'],
+      'not-authorized': ['bd.pay.notauth', 'this price has not been authorized for signing'],
+      'over-ceiling': ['bd.pay.over', 'the price is above the ceiling you authorized'],
+      'no-wallet': ['bd.pay.nowallet', 'no wallet is connected to this page'],
+      'wrong-chain': ['bd.pay.wrongchain', 'the wallet is not on Arbitrum One'],
+      'no-contracts': ['bd.pay.nocontracts', 'the bridge did not name the ANT token and payment vault — until /health carries evm, nothing can be paid from this page'],
+      'short-ant': ['bd.pay.shortant', 'this wallet holds less ANT than the price'],
+      'no-gas': ['bd.pay.nogas', 'this wallet holds no ETH on Arbitrum One for gas'],
+      'not-confirmed': ['bd.pay.notconfirmed', 'you did not confirm — nothing was signed, nothing was paid'],
+      'wallet-declined': ['bd.pay.declined', 'you declined in the wallet — nothing was paid'],
+      'tx-reverted': ['bd.pay.reverted', 'the chain refused the transaction'],
+      'stopped-waiting': ['bd.pay.stopped', 'you stopped waiting — the hash is kept; nothing will be paid twice'],
+      'paid-not-finalized': ['bd.pay.paidnf', 'paid on chain but the upload did not finish — resume later'],
+      'already-paid': ['bd.pay.alreadypaid', 'this price was already paid from this device'],
+      'partial-store': ['bd.pay.partial', 'only some pieces were stored'],
+      'network': ['bd.pay.network', 'the network did not answer'],
+      'bridge-refused': ['bd.pay.bridgerefuse', 'the bridge refused']
+    };
+    var row = map[code] || ['bd.pay.refused', 'payment refused'];
+    return T(row[0], row[1]);
+  }
+  function payPrepare(q){
+    if (!q || !q.uploadId) return null;
+    return {
+      upload_id: q.uploadId,
+      payment_type: q.payment_type || q.shape || 'wave_batch',
+      payments: Array.isArray(q.payments) ? q.payments : [],
+      total_amount_atto: q.totalAtto,
+      data_map_address: q.data_map_address || undefined,
+      total_chunks: q.total_chunks, already_stored: q.already_stored
+    };
+  }
+  function payStep(sel){
+    var q = (sel && priceState(sel) === 'priced') ? usableQuote(sel) : null;
+    var auth = authFor(q);
+    var num = '<span class="num" aria-hidden="true">4</span>';
+    if (!auth || auth.state !== 'authorized-for-signing') {
+      return '<div class="step"><p class="locked" data-bdata-pay-next="1">' + num + '<span><span aria-hidden="true">🔒 </span>' + tx('bd.pay.next', 'Pay with your wallet — unlocks after you authorize') + '</span></p></div>';
+    }
+    var h = '<div class="step" data-bdata-pay="1"' + (pay.phase && pay.phase !== 'done' && pay.phase !== 'refused' && pay.phase !== 'plan' ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3>';
+    if (pay.receipt) {
+      h += '<div class="badge" data-bdata-pay-done="1">✓ ' + tx('bd.pay.done', 'Paid and stored') + '</div>';
+      h += '<div class="review" data-bdata-pay-receipt="1">';
+      function prow(k,v){ return '<div class="rv"><span class="sub">' + k + '</span><span>' + v + '</span></div>'; }
+      h += prow(tx('bd.pay.address', 'address'), '<bdi class="mono">' + esc(pay.receipt.address || '') + '</bdi>');
+      h += prow(tx('bd.pay.pieces', 'pieces'), esc(String(pay.receipt.chunks != null ? pay.receipt.chunks : '')) + ' · ' + esc(String(pay.receipt.quotes_paid != null ? pay.receipt.quotes_paid : '')) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
+      h += prow(tx('bd.pay.ant', 'ANT'), antHtml(String(pay.receipt.ant_atto || ''), true));
+      h += prow(tx('bd.pay.payer', 'payer'), '<bdi class="mono">' + esc(pay.receipt.payer || '') + '</bdi>');
+      if (pay.receipt.at) h += prow(tx('bd.pay.when', 'when'), esc(when(pay.receipt.at)));
+      h += '</div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'plan' && pay.plan) {
+      var pl = pay.plan;
+      h += '<div class="review" data-bdata-pay-plan="1">';
+      function row(k,v){ return '<div class="rv"><span class="sub">' + k + '</span><span>' + v + '</span></div>'; }
+      h += row(tx('bd.pay.token', 'token'), '<bdi class="mono">' + esc(pl.token) + '</bdi>');
+      h += row(tx('bd.pay.spender', 'spender (vault)'), '<bdi class="mono">' + esc(pl.spender) + '</bdi>');
+      h += row(tx('bd.auth.ceiling', 'ANT ceiling'), antHtml(String(pl.ant_total_atto), true) + ' <span class="sub">' + tx('bd.auth.exact', 'exact, never above') + '</span>');
+      h += row(tx('bd.pay.confirms', 'wallet confirmations'), '<b>' + esc(String(pl.wallet_confirmations)) + '</b> · ' + esc(String(pl.payment_calls)) + ' ' + tx('bd.pay.calls', 'payment call(s)') + ' · ' + esc(String(pl.quotes)) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
+      h += '</div>';
+      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — this page never holds a key') + '</p>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-confirm="1" data-act="pay-confirm" data-fk="pay-confirm">✓ ' + tx('bd.pay.confirm', 'Confirm and pay') + '</button>';
+      h += '<button type="button" class="btn" data-bdata-pay-abort="1" data-act="pay-abort" data-fk="pay-abort">✕ ' + tx('bd.pay.abort', 'Not now') + '</button></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'signing') {
+      h += '<div class="busy" data-bdata-pay-signing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.pay.signing', 'waiting on your wallet…') + '</b><div class="sub">' + esc(String(pay.secs || '')) + '</div></div></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'waiting') {
+      h += '<div class="busy" data-bdata-pay-waiting="1"><span class="spin" aria-hidden="true"></span><div><b>' + fill(T('bd.pay.waiting', 'waiting on the chain — {s} s'), { s: String(pay.secs||0) }) + '</b>';
+      h += '<div class="actions"><button type="button" class="btn" data-bdata-pay-stop="1" data-act="pay-stop" data-fk="pay-stop">' + tx('bd.price.stop', 'Stop waiting') + '</button></div></div></div>';
+      return h + '</div>';
+    }
+    if (pay.phase === 'finalizing') {
+      h += '<div class="busy" data-bdata-pay-finalizing="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.pay.finalizing', 'finalizing the upload…') + '</b></div></div>';
+      return h + '</div>';
+    }
+    if (pay.refusal) {
+      h += '<div class="alert note" data-bdata-pay-refused="' + esc(pay.refusal.code || '') + '"><b>' + esc(refusalWords(pay.refusal.code)) + '</b>';
+      if (pay.refusal.message) h += '<div class="sub"><bdi class="mono">' + esc(String(pay.refusal.message).slice(0,180)) + '</bdi></div>';
+      h += '</div>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-open="1" data-act="pay-open" data-fk="pay-open">↻ ' + tx('bd.pay.retry', 'Try pay again') + '</button></div>';
+      return h + '</div>';
+    }
+    // idle authorized — one primary
+    if (!window.AntPay) {
+      h += '<p class="law" data-bdata-pay-missing="1">' + tx('bd.pay.missing', 'ant-pay.js did not load — pay cannot start') + '</p>';
+      return h + '</div>';
+    }
+    if (!wallet.address && !window.__bdataMockSigner && !(window.ethereum && typeof window.ethereum.request === 'function')) {
+      h += '<p class="law" data-bdata-pay-needwal="1">' + tx('bd.wal.miss', 'install a browser wallet (or open this page in one), then load it here') + '</p>';
+      return h + '</div>';
+    }
+    if (!wallet.address && !window.__bdataMockSigner) {
+      h += '<p class="law" data-bdata-pay-needwal="1">' + tx('bd.wal.intro', 'one press loads the account that will sign Autonomi payments') + '</p>';
+      h += '<div class="actions"><button type="button" class="btn primary" data-act="wal-connect" data-fk="wal-connect" data-bdata-wal-go="1">🔗 ' + tx('bd.wal.go', 'Load wallet') + '</button></div>';
+      return h + '</div>';
+    }
+    h += '<p class="sub note">' + tx('bd.pay.intro', 'your wallet will show the exact ANT total and confirmation count before anything is signed') + '</p>';
+    h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-open="1" data-act="pay-open" data-fk="pay-open">💳 ' + tx('bd.pay.go', 'Pay with your wallet') + '</button></div>';
+    return h + '</div>';
+  }
+  function pickSigner(){
+    var AP = window.AntPay;
+    if (!AP) throw Object.assign(new Error('ant-pay missing'), { refusal:'no-wallet' });
+    // e2e / founder mock: window.__bdataMockSigner is a full AntPay signer
+    if (window.__bdataMockSigner) return window.__bdataMockSigner;
+    if (window.ethereum && typeof window.ethereum.request === 'function') return AP.injectedSigner(window.ethereum);
+    throw Object.assign(new Error(T('bd.pay.nowallet', 'no wallet is connected to this page')), { refusal:'no-wallet' });
+  }
+  function payOpen(){
+    var sel = chosen(), q = sel ? usableQuote(sel) : null, auth = authFor(q), fl = founderLine();
+    if (!q || !auth || auth.state !== 'authorized-for-signing' || !fl) { render(); return; }
+    if (pay.phase && pay.phase !== 'refused' && pay.phase !== 'done' && pay.confirmResolve) { render(); return; }
+    var AP = window.AntPay;
+    if (!AP) { pay.refusal = { code:'no-wallet', message:'ant-pay.js missing' }; pay.phase = 'refused'; render(); return; }
+    var prepare = payPrepare(q);
+    var authorization = { id: auth.id, state: auth.state, upload_id: auth.upload_id || q.uploadId, ant_ceiling_atto: auth.ant_ceiling_atto || fl.amountAtto };
+    var storeMem = {};
+    var store = { get: function(k){ return storeMem[k] || null; }, set: function(k,v){ storeMem[k] = v; } };
+    var ctl = new AbortController();
+    pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:ctl, ticker:null };
+    var signer;
+    try { signer = pickSigner(); } catch(e){ pay.phase='refused'; pay.refusal={ code:e.refusal||'no-wallet', message:String(e.message||e) }; render(); say(refusalWords(pay.refusal.code)); return; }
+    var payer = AP.create({
+      bridge: trimBridge(st.bridge),
+      rpc: 'https://arb1.arbitrum.io/rpc',
+      signer: signer,
+      store: store,
+      onState: function(stt){
+        if (!stt || !stt.phase) return;
+        if (stt.phase === 'plan') { pay.phase = 'plan'; pay.plan = stt; render({ focus:'pay-confirm' }); }
+        else if (stt.phase === 'signing') { pay.phase = 'signing'; pay.secs = stt.n != null ? (String(stt.n) + ' / ' + String(stt.m||'?')) : ''; render(); }
+        else if (stt.phase === 'waiting') { pay.phase = 'waiting'; pay.secs = stt.seconds || 0; render(); }
+        else if (stt.phase === 'finalizing') { pay.phase = 'finalizing'; render(); }
+        else if (stt.phase === 'done') { /* handled by pay() resolve */ }
+        else if (stt.phase === 'refused') { pay.phase = 'refused'; pay.refusal = { code: stt.code, message: stt.message }; render(); }
+      }
+    });
+    render();
+    payer.pay({
+      prepare: prepare,
+      authorization: authorization,
+      signal: ctl.signal,
+      confirmPlan: function(plan){
+        pay.phase = 'plan'; pay.plan = plan; render({ focus:'pay-confirm' });
+        return new Promise(function(resolve){ pay.confirmResolve = resolve; });
+      }
+    }).then(function(receipt){
+      pay.phase = 'done';
+      pay.receipt = Object.assign({ at: new Date().toISOString() }, receipt);
+      pay.confirmResolve = null;
+      note({ kind:'paid', address: receipt.address, ant_atto: receipt.ant_atto, chunks: receipt.chunks });
+      render({ focus:'pay' });
+      say(T('bd.pay.done', 'Paid and stored'));
+    }).catch(function(e){
+      pay.phase = 'refused';
+      pay.refusal = { code: (e && e.refusal) || 'network', message: String((e && e.message) || e).slice(0,200) };
+      pay.confirmResolve = null;
+      render({ focus:'pay-open' });
+      say(refusalWords(pay.refusal.code));
+    });
+  }
+  function payConfirm(){ if (typeof pay.confirmResolve === 'function') { var r = pay.confirmResolve; pay.confirmResolve = null; r(true); } }
+  function payAbort(){ if (typeof pay.confirmResolve === 'function') { var r = pay.confirmResolve; pay.confirmResolve = null; r(false); } else { pay.phase = null; pay.plan = null; render(); } }
+  function payStop(){ try { if (pay.abort) pay.abort.abort(); } catch(e){} }
+
 
   function authCall(path, body, done){
     // the same wall as the price ask: an automated browser never reaches the live quote service
@@ -512,12 +941,13 @@
       stop_conditions: (FINV.authorization && FINV.authorization.stopConditions) || [],
       gesture: 'founder press in My Data @ ' + new Date().toISOString()
     }, function(rec){
-      st.authorization = { id: rec.authorization_id, state: rec.state, quoteAt: q.obtainedAt };
+      st.authorization = { id: rec.authorization_id, state: rec.state, quoteAt: q.obtainedAt, upload_id: q.uploadId, ant_ceiling_atto: fl.amountAtto };
       if (!save({ authorization: st.authorization })) notice = 'nostore';
       note({ kind:'auth', id: rec.authorization_id });
       review = false;
-      render({ focus: 'auth-cancel' });
-      say(T('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E'));
+      pay = { phase:null, plan:null, receipt:null, refusal:null, secs:0, confirmResolve:null, abort:null, ticker:null };
+      render({ focus: 'pay-open' });
+      say(T('bd.auth.done', 'Authorized for signing — nothing signed, nothing paid; pay with your wallet is next'));
     });
   }
   function cancelPress(){
@@ -605,10 +1035,10 @@
     var active = document.activeElement, had = (active && active.getAttribute && active.getAttribute('data-fk')) || null;
     // a requested focus move happens only when the reader is nowhere or already in this ceremony —
     // an answer landing a minute later never pulls them out of a field, a disclosure or the top bar
-    var free = !active || active === document.body || /^(ask|stop|price|public|undo|reload-inv|review|auth|auth-go|auth-cancel)$/.test(had || '');
+    var free = !active || active === document.body || /^(ask|stop|price|public|undo|reload-inv|review|auth|auth-go|auth-cancel|pay|pay-open|pay-confirm|pay-abort|pay-stop|intake-go|wal-connect)$/.test(had || '');
     var fk = (opts && opts.focus && free) ? opts.focus : had;
     // a press that replaces its own button hands focus to what took its place
-    var NEXT = { ask:['ask','stop','price'], stop:['stop','ask','price'], undo:['undo','public'], price:['price'], 'reload-inv':['reload-inv','public'], 'reload-stored':['reload-stored','public'], review:['auth-go','review','auth'], 'auth-go':['auth-cancel','auth-go','auth'], 'auth-cancel':['review','auth-cancel','auth'] };
+    var NEXT = { ask:['ask','stop','price'], stop:['stop','ask','price'], undo:['undo','public'], price:['price'], 'reload-inv':['reload-inv','public'], 'reload-stored':['reload-stored','public'], review:['auth-go','review','auth'], 'auth-go':['pay-open','auth-cancel','auth-go','auth'], 'auth-cancel':['review','auth-cancel','auth'], 'pay-open':['pay-confirm','pay-open','pay'], 'pay-confirm':['pay','pay-confirm'], 'pay-abort':['pay-open','pay'], 'intake-go':['intake-go'], 'wal-connect':['wal-connect','pay-open'] };
     // text being typed right now survives the redraw, caret and all
     var typing = (active && (active.id === 'bdata-bound' || active.id === 'bdata-bridge')) ? { id: active.id, v: active.value, s: active.selectionStart, e: active.selectionEnd } : null;
     // a reader's own disclosure taps survive every redraw
@@ -870,6 +1300,23 @@
     else if (act === 'review') { review = true; authErr = null; render(); }
     else if (act === 'auth-go') authorizePress();
     else if (act === 'auth-cancel') cancelPress();
+    else if (act === 'pay-open') payOpen();
+    else if (act === 'pay-confirm') payConfirm();
+    else if (act === 'pay-abort') payAbort();
+    else if (act === 'pay-stop') payStop();
+    else if (act === 'intake-go') intakeGo();
+    else if (act === 'wal-connect') connectWallet();
+  });
+  root.addEventListener('change', function(ev){
+    var t = ev.target; if (!t) return;
+    if (t.getAttribute && t.getAttribute('data-bdata-file') === '1' && t.files && t.files[0]) hashFile(t.files[0]);
+  }, true);
+  root.addEventListener('dragover', function(ev){ if (ev.target.closest && ev.target.closest('[data-bdata-drop]')) { ev.preventDefault(); } });
+  root.addEventListener('drop', function(ev){
+    var z = ev.target.closest && ev.target.closest('[data-bdata-drop]');
+    if (!z) return; ev.preventDefault();
+    var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f) hashFile(f);
   });
   root.addEventListener('change', function(ev){
     var t = ev.target; if (!t) return;
@@ -880,6 +1327,15 @@
   // CSS and the disclosures show, but a redraw keeps new nodes in step
   document.addEventListener('blang', function(){ render(); });
   document.addEventListener('bregister', function(){ render(); });
+  watchWallet();
+  // if the injected wallet already shared an account, surface it without a press
+  try {
+    if (window.ethereum && typeof window.ethereum.request === 'function') {
+      window.ethereum.request({ method: 'eth_accounts' }).then(function(a){
+        if (a && a[0]) { wallet.address = String(a[0]); return window.ethereum.request({ method: 'eth_chainId' }).catch(function(){ return null; }); }
+      }).then(function(c){ if (c) wallet.chainId = String(c); if (wallet.address) render(); }).catch(function(){});
+    }
+  } catch(e){}
   // another tab (My Data or the wallet) changed policy or state: follow it
   window.addEventListener('storage', function(e){
     if (e.key !== null && e.key !== SHARED && e.key !== LS) return;

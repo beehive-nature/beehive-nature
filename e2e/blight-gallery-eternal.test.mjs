@@ -73,7 +73,7 @@ test('three different products: rows, a bloom, a manifest', async () => {
     rows: document.querySelectorAll('#etGaBeeRows .et-b-row').length, petals: document.querySelectorAll('#etGaBloom .et-petal').length,
     table: document.querySelectorAll('#etGaCols tr').length, pipe: document.querySelectorAll('#etGaPipe li').length, rcpt: document.querySelectorAll('#etGaReceipt tr').length,
   }));
-  assert.deepEqual(s, { rows: 3, petals: 9, table: 9, pipe: 6, rcpt: 6 });
+  assert.deepEqual(s, { rows: 0, petals: 9, table: 9, pipe: 6, rcpt: 6 }); // New bee: no status sheet
   await ctx.close();
 });
 
@@ -98,19 +98,21 @@ test('the same facts in all three: nine families, the live garden, the failure s
   const a = facts.bee;
   assert.deepEqual(a.cols, a.view, 'the fronts read the viewer\'s own COLS');
   for (const reg of ['raver', 'cypherpunk']) { assert.deepEqual(facts[reg].cols, a.cols); assert.equal(facts[reg].pieces, a.pieces); assert.equal(facts[reg].failures, a.failures); }
-  assert.equal(a.pieces, a.garden); assert.equal(a.failures, a.failuresView); assert.equal(a.pieces, 0, 'no chain here: no piece');
-  assert.ok(a.failures > 0);
+  assert.equal(a.pieces, a.garden); assert.equal(a.failures, a.failuresView);
+  assert.ok(a.failures > 0, 'chain blocked: failures counted for cypherpunk');
+  assert.ok(a.pieces >= 1, 'New bee/Raver silent seed keeps art on the wall');
   assert.deepEqual(facts.raver.petals, a.cols.map(c => c.split('|')[0])); assert.equal(facts.raver.dashed, 9, 'every family dark, said as a dashed petal');
   assert.deepEqual(facts.cypherpunk.cy, a.cols.map(c => c.split('|')[0]));
-  assert.match(facts.cypherpunk.chip, /state failed.*pieces 0.*failed reads \d+/);
-  assert.match(a.bee, /the chain is quiet right now/);
-  assert.equal(a.tourBee, true); assert.equal(facts.raver.tourRaver, true, 'no tour of nothing');
+  assert.match(facts.cypherpunk.chip, /failed reads \d+/);
+  assert.equal((a.bee || '').trim(), '', 'New bee fail card stays empty');
+  assert.equal(/could not|try again|did not load|unavailable|failed/i.test(a.bee || ''), false, 'New bee has zero fail copy');
+  assert.equal(a.tourBee, false, 'New bee primary stays available after silent recovery');
 });
 
 test('when pieces arrive, all three follow and the tour is the viewer\'s own #bPlay', async () => {
   const { ctx, p, errs } = await open('bee');
-  await p.evaluate(() => { pieces = [{ svg: '<svg viewBox="0 0 1 1"></svg>', sym: 'FUNGI', seed: 7, lvln: 1, chain: 'base', contract: COLS[3].c }]; window.__garden = pieces; readFailures = 0; updateTransport(); show(0); galleryStatus('Artwork loaded from public collection records.'); });
-  await p.waitForFunction(() => window.__eternal.data.pieces.length === 1);
+  await p.evaluate(() => { pieces = [{ svg: '<svg viewBox="0 0 1 1"></svg>', sym: 'FUNGI', seed: 7, lvln: 1, chain: 'base', contract: COLS[3].c }]; window.__garden = pieces; window.__seeded = false; readFailures = 0; updateTransport(); show(0); galleryStatus('Artwork loaded from public collection records.'); });
+  await p.waitForFunction(() => window.__eternal.data.pieces.some(x => x.sym === 'FUNGI'));
   const s = await p.evaluate(() => ({
     tour: document.getElementById('etGaBeeTour').disabled, lit: [...document.querySelectorAll('#etGaBloom .et-petal path')].filter(x => !x.getAttribute('stroke-dasharray')).length,
     cy: document.querySelector('#etGaCols tr:nth-child(4) td:last-child').textContent,
@@ -126,9 +128,9 @@ test('raver: tap a petal to read its family; ask again re-reads through the view
   await p.locator('#etGaBloom .et-petal[data-i="4"]').dispatchEvent('click');
   assert.equal(await p.getAttribute('#etGaBloom .et-petal[data-i="4"]', 'aria-pressed'), 'true');
   assert.match(await p.textContent('#etGaRaverCard'), /\$FROGGI/);
-  const before = p.rpc;
-  await p.click('#etGaRaverRetry'); await p.waitForTimeout(600);
-  assert.ok(p.rpc > before, 'a real re-read went to the chain');
+  // Raver: no retry lecture — primary stays warm; cypherpunk keeps hard re-read
+  assert.equal(await p.isHidden('#etGaRaverRetry'), true, 'raver hides try-again');
+  assert.equal(await p.$eval('#etGaRaverTour', b => b.disabled), false, 'raver primary stays available');
   await ctx.close();
 });
 
@@ -158,4 +160,47 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
     assert.deepEqual(bad, [], reg);
     await ctx.close();
   }
+});
+
+
+test('New bee shows art on the cream wall after silent seed (utility in view)', async () => {
+  const { ctx, p } = await open('bee');
+  const d = await p.evaluate(() => {
+    const mat = document.getElementById('etGaBeeMat');
+    const stage = document.getElementById('etGaBeeStage');
+    const svg = mat && mat.querySelector('svg');
+    return {
+      empty: stage && stage.dataset.empty,
+      hasSvg: !!svg,
+      well: stage && getComputedStyle(stage).backgroundColor,
+      pieces: window.__eternal.data.pieces.length,
+      failCopy: /could not|try again|did not load|unavailable/i.test((document.querySelector('#eternal > .et-b') || {}).innerText || ''),
+    };
+  });
+  assert.ok(d.pieces >= 1, 'silent seed keeps pieces');
+  assert.equal(d.hasSvg, true, 'New bee mat draws the piece in view');
+  assert.equal(d.empty, '0');
+  assert.equal(d.well, 'rgb(239, 233, 221)', 'cream well on the wall');
+  assert.equal(d.failCopy, false);
+  await ctx.close();
+});
+
+test('New bee art stage is cream well (music.html light), not ink', async () => {
+  const { ctx, p } = await open('bee');
+  const colors = await p.evaluate(() => {
+    const mat = document.createElement('span');
+    mat.className = 'art-mat';
+    document.body.appendChild(mat);
+    return {
+      stage: getComputedStyle(document.getElementById('stage')).backgroundColor,
+      mat: getComputedStyle(mat).backgroundColor,
+      ink: getComputedStyle(document.body).getPropertyValue('--sk-ink').trim(),
+      well: getComputedStyle(document.body).getPropertyValue('--sk-bg-well').trim(),
+    };
+  });
+  assert.equal(colors.well, '#efe9dd');
+  assert.equal(colors.ink, '#0c1412');
+  assert.equal(colors.stage, 'rgb(239, 233, 221)', 'stage uses --sk-bg-well, not --sk-ink');
+  assert.equal(colors.mat, 'rgb(239, 233, 221)', 'art-mat uses --sk-bg-well, not --sk-ink');
+  await ctx.close();
 });

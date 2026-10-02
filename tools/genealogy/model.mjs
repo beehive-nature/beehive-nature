@@ -119,6 +119,22 @@ export function addPerson(model, p) {
   return true;
 }
 
+// A correction is a LAYER over the provider record: its patch is spread onto
+// the walked person and the DERIVED era is recomputed (a founder-attested death
+// moves the era off 'living'). `sources` is the provider harvest record's field
+// (importSourceWalk writes it AFTER corrections), so a patch that wrote its own
+// `sources` would be overwritten by the next harvest that finds anything. The
+// documents a correction cites go in `cited`; a patch carrying `sources` is
+// refused by name rather than silently lost later.
+export function applyCorrection(person, c) {
+  if (Object.prototype.hasOwnProperty.call(c.patch, "sources"))
+    throw new Error("a correction patch may not write `sources` (the harvest record's field); put its cited documents in `cited`");
+  const fixed = { ...person, ...c.patch, corrected: { attested: c.attested || "founder", note: c.note || "" } };
+  const era = evidenceClass({ living: fixed.living, lifespan: fixed.lifespan });
+  fixed.evidence = { ...(fixed.evidence || {}), era, class: era };
+  return fixed;
+}
+
 export function addEdge(model, childId, parentIds) {
   // parent targets MAY be ids not yet present as persons — the adapter's
   // "ghost frontier" depends on dangling-but-recorded references so the walker
