@@ -132,59 +132,7 @@ test('the one real action is the board’s own re-read; the fronts add no reques
   }
 });
 
-test('raver: tap a rail or a door to light its measured links; the heart and the pause', async () => {
-  const { ctx, p, errs } = await open('raver');
-  await p.click('#etStEngine [data-sel="rail:ant"] path');
-  assert.match(await p.textContent('#etStCard'), /Autonomi[\s\S]*1 door row runs on it: bIQ · bTranslated · bFactory · recover/);
-  assert.equal(await p.$$eval('#etStEngine .et-chord.et-on', e => e.length), 1);
-  await p.click('#etStEngine [data-sel="door:6"] circle');
-  assert.match(await p.textContent('#etStCard'), /bFood[\s\S]*pure computation[\s\S]*zero-rail/);
-  assert.equal(await p.$$eval('#etStEngine .et-chord.et-on', e => e.length), 0, 'a zero-rail door lights no rail');
-  await p.click('#etStEngine [data-sel="rail:social"] path');
-  assert.match(await p.textContent('#etStCard'), /last planned migration/);
-  await p.click('#etStStill');
-  assert.equal(await p.$eval('#etStEngine .et-chord.et-on', e => getComputedStyle(e).animationPlayState), 'paused');
-  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
-  const still = await open('raver', { reduce: true });
-  assert.equal(await still.p.$eval('#etStEngine .et-beat.s-ok', e => getComputedStyle(e).animationName), 'none', 'still under reduced motion');
-  await still.ctx.close();
-});
-
-test('cypherpunk: complete at first paint; the one real file is read from its receipt, or says it could not be', async () => {
-  const { ctx, p, errs } = await open('cypherpunk');
-  const d = await p.evaluate(() => ({ tiers: document.querySelectorAll('#etStTiers li').length, organs: document.querySelectorAll('#etStOrgans tr').length, doors: document.querySelectorAll('#etStDoors tr').length, file: document.getElementById('etStFile').textContent, debt: document.querySelectorAll('#etStDebtTab tr').length }));
-  assert.deepEqual([d.tiers, d.organs, d.doors, d.debt], [4, 8, SURFACES.length, 4]);
-  assert.ok(d.file.includes(String(RECEIPT.file.bytes)) && d.file.includes(RECEIPT.quote.amountAnt + ' ANT') && d.file.includes(RECEIPT.file.sha256Short));
-  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
-  const off = await open('cypherpunk', { noReceipt: true });
-  const t = await off.p.textContent('#etStFile');
-  assert.match(t, /could not be read just now; no number is guessed/);
-  assert.doesNotMatch(t, /214091829|4\.2459/);
-  assert.equal(off.errs.length, 0, off.errs.join(' | ')); await off.ctx.close();
-});
-
-test('the laws hold on the front: no dash for a value, no forced capitals, 44 px actions, nothing past the edge', async () => {
-  for (const reg of ['bee', 'raver', 'cypherpunk']) {
-    const { ctx, p } = await open(reg);
-    if (reg === 'bee') await p.click('.et-b-row[data-tier="3"]');
-    if (reg === 'raver') await p.click('#etStEngine [data-sel="rail:ant"] path');
-    const bad = await p.evaluate(() => {
-      const fr = [...document.querySelectorAll('#eternal>div')].find(e => getComputedStyle(e).display !== 'none'), out = [];
-      for (const el of fr.querySelectorAll('*')) {
-        const cs = getComputedStyle(el); if (cs.display === 'none' || !el.getClientRects().length) continue;
-        if (cs.textTransform !== 'none') out.push('caps ' + el.className);
-        const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
-        if (/^[—–·-]$|^(undefined|NaN|null)$/.test(own)) out.push('value ' + el.className + ' ' + own);
-        const r = el.getBoundingClientRect();
-        if ((/^(BUTTON|A)$/.test(el.tagName) || el.getAttribute('role') === 'button') && r.height && (r.height < 44 || r.width < 44)) out.push('small ' + el.tagName + ' ' + el.textContent.trim().slice(0, 20));
-        if (r.width && (r.right > innerWidth + 1 || r.left < -1)) out.push('edge ' + el.tagName + ' ' + Math.round(r.right));
-      }
-      return out;
-    });
-    assert.deepEqual(bad, [], reg);
-    await ctx.close();
-  }
-});test('raver: architecture rails link to the complete source directory; pause remains available', async () => {
+test('raver: architecture rails link to the complete source directory; pause remains available', async () => {
   const { ctx, p, errs } = await open('raver');
   await p.click('#etStEngine [data-sel="rail:ant"] path');
   assert.match(await p.textContent('#etStCard'), /Autonomi[\s\S]*not audited/);
@@ -226,7 +174,7 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
   for (const reg of ['bee', 'raver', 'cypherpunk']) {
     const { ctx, p } = await open(reg);
     if (reg === 'bee') await p.click('.et-b-row[data-tier="3"]');
-    if (reg === 'raver') await p.click('#etStEngine [data-sel="door:1"] circle');
+    if (reg === 'raver') await p.click('#etStEngine [data-sel="rail:ant"] path');
     const bad = await p.evaluate(() => {
       const fr = [...document.querySelectorAll('#eternal>div')].find(e => getComputedStyle(e).display !== 'none'), out = [];
       for (const el of fr.querySelectorAll('*')) {
