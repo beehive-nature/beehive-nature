@@ -174,3 +174,23 @@ All edits and the commit are from `C:/Users/travi/wt-zcode` on branch
 checkout sits on `grapheneOSmessagingZcode` (lane marker branch, occupied) —
 not touched, per one-writer-per-worktree. No hex ≥48 anywhere unmarked; the
 vectors file carries PUBLIC-CONSTANT on every baked line.
+
+
+## Pass 3 — the merge cure and the ALL-GREEN receipt
+
+- Run 37155194927 (2002b74c2) failed the footer-audit ratchet on
+  stack.html[raver] SMALL 0→162 — MY regen had used the base generator,
+  which predates main's `#surfaceDirectory small → font-size:14px` fix.
+  Cure per the descendant law: merged origin/main (which also carries the
+  eternal/node repair healing the inherited comprehension/engineflow/
+  ETERNAL-fronts cluster), regenerated hub + directory with the FIXED
+  generator (conflicts: tests.yml eternal list as UNION; index.html
+  regenerated). One self-inflicted stumble cured in 2cab69120: the merge
+  committed a STALE hub (state-root 4b84b523…) because estate-source's
+  restore-loop ran between my regen and the add — re-baked (97d258cc…),
+  committed, estate-source 11/11.
+- **Run 37156964857 (2cab69120): ALL SIX JOBS GREEN — node, wallet,
+  eternal, static, test, meter.** The lane's batteries ride inside: 25/25
+  bchat-core (node list), 18/18 bchat-eternal (eternal list), ratchet
+  clean with bchat at zero findings. Branch head green, no PR by founder
+  order 2026-10-02 — commits live on zcode/bchat-stack-2026-10-02.
