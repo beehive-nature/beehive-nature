@@ -15,7 +15,8 @@
 //
 // LIMITS, stated so the check is never read as more than it is: it reads
 // source text, not a syntax tree. An enable written inside a string passed to
-// evaluate, or in a helper called from the callback, is not seen.
+// evaluate, or in a helper called from the callback, is not seen, and telling
+// a regex from a division is a rule of thumb, not a grammar.
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +30,17 @@ const REACH = 3; // code lines after the task closes in which a separate click i
 // matched in executable code. Newlines survive; offsets line up with the
 // original.
 const REGEX_AFTER = new Set(['return', 'typeof', 'case', 'in', 'of', 'void', 'delete', 'throw', 'await']);
+// true when the text ends with the paren closing an if/while/for/with
+// condition: a slash there opens a regex, where after any other closing paren
+// it divides. `before` is already masked, so its parens are all code.
+function afterCondition(before) {
+  let depth = 0;
+  for (let i = before.length - 1; i >= 0; i--) {
+    if (before[i] === ')') depth++;
+    else if (before[i] === '(' && --depth === 0) return /(^|[^\w$.])(if|while|for|with)\s*$/.test(before.slice(0, i));
+  }
+  return false;
+}
 function mask(text) {
   const out = text.split('');
   const blank = (a, b) => { for (let k = a; k < b; k++) if (out[k] !== '\n') out[k] = ' '; };
@@ -44,7 +56,7 @@ function mask(text) {
       const before = out.slice(0, i).join('').trimEnd();
       const word = (before.match(/[A-Za-z_$]+$/) || [''])[0];
       const last = before.slice(-1);
-      if (!before || '(,=:[!&|?{};+-*%<>~^'.includes(last) || REGEX_AFTER.has(word)) {
+      if (!before || '(,=:[!&|?{};+-*%<>~^'.includes(last) || REGEX_AFTER.has(word) || (last === ')' && afterCondition(before))) {
         let cls = false;
         for (end = i + 1; end < text.length && text[end] !== '\n'; end++) {
           if (text[end] === '\\') end++;
@@ -162,6 +174,8 @@ const SELF = [
   ['a click only in a comment inside the task', L + '.evaluate(b => { b.disabled = false; /* b.click() */ });\n' + C + '\n', 1],
   ['a click only in a string inside the task', L + ".evaluate(b => { b.disabled = false; b.title = 'b.click()'; });\n" + C + '\n', 1],
   ['a regex with a paren before the enable', L + '.evaluate(b => { if (/^[)]$/.test(b.textContent)) return; b.disabled = false; });\n' + C + '\n', 1],
+  ['a regex after a control-flow condition', L + '.evaluate(b => { if (b.id) /[)]/.test(b.id); b.disabled = false; });\n' + C + '\n', 1],
+  ['division after a call paren', L + '.evaluate(b => { b.w = f(1) / 2; b.disabled = false; b.click(); /* ) */ });\n' + W, 0],
   ['removeAttribute then a separate click', L + ".evaluate(b => { b.removeAttribute('disabled'); });\n" + C + '\n', 1],
   ['enable by id in page.evaluate, then a locator click', "await page.evaluate(() => { document.getElementById('arw-go').disabled = false; });\n" + C + '\n', 1],
   ['one task on one line', L + '.evaluate(b => { b.disabled = false; b.click(); });\n' + W, 0],
