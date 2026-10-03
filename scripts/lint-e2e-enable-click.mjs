@@ -116,15 +116,21 @@ const lineOf = (text, at) => text.slice(0, at).split('\n').length;
 function findings(text) {
   const m = mask(text);
   const tasks = [];
-  for (const t of m.matchAll(/\.(evaluate|evaluateHandle|\$eval|\$\$eval)\s*\(/g)) {
+  for (const t of m.matchAll(/\.(evaluate|evaluateAll|evaluateHandle|\$eval|\$\$eval)\s*\(/g)) {
     const open = t.index + t[0].length - 1, close = closeOf(m, open);
     if (close > 0) tasks.push({ dot: t.index, open, close });
   }
+  // An enable is any write to `disabled` that is not plainly a disable: the
+  // property coerces, so `= 0`, `= ''`, `= null` and `= was` all may enable,
+  // and only a literal true is cleared. The attribute forms are
+  // removeAttribute('disabled') and toggleAttribute('disabled'[, not-true]).
   const enables = [];
-  for (const e of m.matchAll(/\.disabled\s*=\s*(false\b|!1)/g)) enables.push(e.index);
-  for (const e of m.matchAll(/\.removeAttribute\s*\(/g)) {
-    const open = e.index + e[0].length - 1;
-    if (/^\(\s*['"`]disabled['"`]/.test(text.slice(open))) enables.push(e.index);
+  for (const e of m.matchAll(/\.disabled\s*=(?!=)(?!\s*(true\b|!0|1\b))/g)) enables.push(e.index);
+  for (const e of m.matchAll(/\.(removeAttribute|toggleAttribute)\s*\(/g)) {
+    const args = text.slice(e.index + e[0].length - 1);
+    if (!/^\(\s*['"`]disabled['"`]/.test(args)) continue;
+    if (e[1] === 'toggleAttribute' && /^\(\s*['"`]disabled['"`]\s*,\s*(true\b|!0|1\b)/.test(args)) continue;
+    enables.push(e.index);
   }
   const out = [];
   for (const at of enables.sort((a, b) => a - b)) {
@@ -177,6 +183,11 @@ const SELF = [
   ['a regex after a control-flow condition', L + '.evaluate(b => { if (b.id) /[)]/.test(b.id); b.disabled = false; });\n' + C + '\n', 1],
   ['division after a call paren', L + '.evaluate(b => { b.w = f(1) / 2; b.disabled = false; b.click(); /* ) */ });\n' + W, 0],
   ['removeAttribute then a separate click', L + ".evaluate(b => { b.removeAttribute('disabled'); });\n" + C + '\n', 1],
+  ['evaluateAll then a separate click', L + '.evaluateAll(bs => { bs[0].disabled = false; });\n' + C + '\n', 1],
+  ['disabled = 0 then a separate click', L + '.evaluate(b => { b.disabled = 0; });\n' + C + '\n', 1],
+  ['toggleAttribute off then a separate click', L + ".evaluate(b => { b.toggleAttribute('disabled', false); });\n" + C + '\n', 1],
+  ['disabled = true then a click', L + '.evaluate(b => { b.disabled = true; });\n' + C + '\n', 0],
+  ['toggleAttribute on then a click', L + ".evaluate(b => { b.toggleAttribute('disabled', true); });\n" + C + '\n', 0],
   ['enable by id in page.evaluate, then a locator click', "await page.evaluate(() => { document.getElementById('arw-go').disabled = false; });\n" + C + '\n', 1],
   ['one task on one line', L + '.evaluate(b => { b.disabled = false; b.click(); });\n' + W, 0],
   ['one task across lines', L + '.evaluate(b => {\n  b.disabled = false;\n  b.click();\n});\n' + W, 0],
