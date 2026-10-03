@@ -33,3 +33,10 @@ Inventory the authenticated Hostinger VPS before adding anything. If capacity an
 Acceptance requires real VPS daemon health, reachable peers, a message sent and read back between enrolled devices, and an Oracle-offline continuity observation. SSH banner receipt alone satisfies none of these mesh gates. Mail sink files, mailboxes, certificates, DNS and service deployment are separate continuity work.
 
 No deployment, credentials, keys, ports, firewall rules, service restarts or device enrollments changed. No runtime proof is claimed for Hostinger x0x.
+## Founder direction: always-on x0x for Buzz rooms
+
+Founder confirmed that an always-on x0x node should support Buzz rooms and supplied an SSH Ed25519 public key. The supplied public-key body differs from the existing laptop `C:/Users/travi/.ssh/buzz-hostinger-admin.pub`. No private-key contents were read or printed. The public key alone does not establish a remote username, an installed authorized key, or possession of its corresponding private key. Requested the Hostinger username/alias and whether the supplied key is already installed.
+
+Room inventory: `ops/watch/README.md` and `ops/watch/buzz-live.service` show that the watch-room POC also needs the RTMP inlet, ffmpeg HLS packaging, Caddy routes, and the room/session gate. An x0x node provides the transport path; it does not by itself migrate those services or make the existing rooms available. Plan Hostinger inventory around the existing Buzz relay, room services, x0x node health, resource headroom, and exact daemon version before deployment. Keep API access on loopback and remote execution disabled unless separately authorized.
+
+No SSH account names guessed, authentication attempts made, public keys installed, SSH configurations changed, or remote services deployed during this follow-up.
