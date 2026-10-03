@@ -101,6 +101,11 @@ read from Mette Kirstine's record = **Bakkendrup, Holbæk, Denmark**
 ## Writes this wake
 
 Browser-session labor only (the four attaches + reasons), plus this
-dispatch. Zero writes from the shared checkout; dispatch committed from
-wt-zcode-zblood on branch zcode/dispatch-8gen-order13. No wallet, no
+dispatch. Zero writes from the shared checkout. LANDING ADDENDUM (same day, founder
+order NO MORE PRs - JUST COMMIT YOUR WORK, banked in
+approval-and-workplace-preference): this dispatch was first pushed on
+branch zcode/dispatch-8gen-order13, then rebased onto the moved main and
+landed DIRECTLY on main as fd300d2fb with the branch deleted - the last
+PR-shaped gesture of this lane. Future lane artifacts push straight to
+main from the seat worktree (worktree law unchanged). No wallet, no
 payment, no upload, no harvest-side state touched.
