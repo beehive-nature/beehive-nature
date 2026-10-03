@@ -75,3 +75,9 @@ was changed by this seat.
 Correction, 2026-10-03 (review of PR #320): an earlier version of this
 paragraph grouped instance metrics with the serial console as RED. That
 misread the addendum and would have blocked an authorized diagnostic.
+
+Correction, 2026-10-03: "Its kernel still answers SYN on port 22" above is
+false and is withdrawn. A middlebox on this laptop's network completes the
+TCP handshake for every destination, including unroutable ones. From outside
+vantage points the OCI host times out on TCP 22, 80, 443, ICMP and UDP 5483.
+See `2026-10-03-oci-box-dark-and-v0460-verified.md`.
