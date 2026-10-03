@@ -41,9 +41,17 @@ Facts from source, 2026-10-02:
 
 Owner: **Codex's full-PQ crypto lane.** This is not a separate lane and this
 seat does not design the binding. Acceptance for full function, stated so the
-reviewer can check it: a Buzz room identity is verifiably bound to a PQ root
-held by the user, the binding is verifiable by a third party from the event
-log alone, and losing the relay loses nothing about who the user is. Until
+reviewer can check it:
+
+1. A Buzz room identity is bound to a PQ root held by the user.
+2. Every event, or an ordered checkpoint that covers every event, carries
+   authentication under that PQ key. A one-time binding is not enough: once
+   Schnorr forgery is practical, new events under the bound secp256k1 key
+   are indistinguishable from real ones to anyone holding only the log.
+3. A third party can verify points 1 and 2 from the event log alone.
+4. Losing the relay loses nothing about who the user is.
+
+Until
 that lands, Buzz rooms are a coordination surface inside the perimeter, with
 the record of truth on bzDiD, ANT and AR.
 
@@ -89,6 +97,12 @@ and never presses. Acceptance for full function:
    the sum of `gas_limit × max_fee_per_gas` over every transaction of the
    upload (the approval and each payment batch) must be at or below the
    gate's `separatedCeilings.gasMaxEth` (0.0002 ETH), checked before the first one is signed, or the run refuses.
+   The budget is plan-wide and persistent. A ledger reserves worst-case
+   exposure for every signed attempt, including reverted, dropped, replaced
+   and unknown-outcome transactions, and is consulted before every
+   signature, not only the first. Exposure is never freed merely because a
+   call failed. This failure mode is already on record in
+   `docs/dispatches/2026-09-12-z2b-negative-review.md:37-52`.
    This matches `tools/genealogy/bpay.mjs::reconcile` (`:286-288`), which
    compares the receipt's aggregate `gasUsedWei` against `maxGasETH`.
 4. The estate client never holds the paying key (ant-extsig custody law).
@@ -98,9 +112,15 @@ and never presses. Acceptance for full function:
    run repo+gh+CLI directly with no local-server bridge
    (`ETERNALIZATION-EDITION-V2.json:52`). Execution goes through the
    reviewed external-signer client. Founder spending approval is
-   standing-granted under the gate (`:56`); the stop conditions are the
-   artifact hash and the two ceilings, and the one irreducible act is the
-   key-holder's signature.
+   standing-granted under the gate (`:51`). Every gate stop condition must
+   pass before the first signature (`:40`): tar sha256 mismatch, either
+   ceiling exceeded, a chunk count other than the gate's, an artifact
+   change, or a client version change. Two of those are already tripped:
+   the artifact changed on 2026-10-03, and the re-pinned external-signer
+   client is not the `ant 0.3.9` the gate's quote names. So the gate
+   (`:52`) requires a rebuild and a fresh quote, and the gate file must be
+   re-issued for the new client, before anything is signed. The one
+   irreducible act is the key-holder's signature.
 
 ## Lane 3 — Buzz was absent from the stack inventory
 
@@ -149,6 +169,18 @@ Second review round, same day:
   no-local-server-bridge rule. The endpoint stays disabled.
 - **Lane 3 source path.** The receipt still named the seat charter as the
   inventory row's source after the row had been changed.
+
+Third review round, same day:
+
+- **Stop conditions.** Point 5 had narrowed the gate to the hash and two
+  ceilings. The gate also stops on chunk-count, artifact and client-version
+  change, and two of those are already tripped.
+- **Gas across retries.** A single pre-sign sum does not bound reruns. The
+  criterion now requires a persistent plan-wide ledger, as the 2026-09-12
+  negative review already demanded.
+- **PQ authentication.** Lane 1's acceptance accepted a key binding alone.
+  It now requires PQ authentication over every event or an ordered
+  checkpoint of them.
 
 ## Box inspection, pending
 
