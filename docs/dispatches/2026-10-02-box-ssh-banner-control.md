@@ -61,6 +61,17 @@ refuses nothing but a missing key:
 powershell -ExecutionPolicy Bypass -File C:\Users\travi\buzz-box-inspect.ps1
 ```
 
-If the OCI host still gives no banner there, the next step is the OCI console
-(serial console or instance metrics), which is RED under the SRE addendum and
-founder-only. Nothing on either host was changed by this seat.
+If the OCI host still gives no banner there, the next control is the
+instance's read-only metrics in the OCI console (CPU, memory, disk and
+network graphs). Passive metrics are GREEN under the SRE addendum
+(`docs/agents/BUZZ-BOX-SRE-SEAT.md:32-36`: read-only inspection, logs and
+metrics, health checks) for any seat that holds read access; they separate
+an overloaded host from an sshd-specific failure without touching it. This
+seat holds no OCI credentials, so in practice the founder or a seat with
+console read access runs it. Serial-console access, a reboot, or anything
+that administers the host is RED and founder-only. Nothing on either host
+was changed by this seat.
+
+Correction, 2026-10-03 (review of PR #320): an earlier version of this
+paragraph grouped instance metrics with the serial console as RED. That
+misread the addendum and would have blocked an authorized diagnostic.

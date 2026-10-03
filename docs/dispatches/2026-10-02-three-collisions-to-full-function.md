@@ -19,13 +19,20 @@ Facts from source, 2026-10-02:
 
 - block/buzz identity is NIP-01 secp256k1 with Schnorr signatures, read at
   upstream commit `8af2d91f` (`ARCHITECTURE.md:159-163`, `:413`;
-  `crates/buzz-core/src/verification.rs:11` `verify_event`). No post-quantum issue, PR or
-  code exists upstream (`gh search issues` and `gh search code` on block/buzz
-  for post-quantum, ML-DSA, fips204: zero results).
-- Nostr itself has an open PQ discussion only for NIP-44 encryption
-  (nostr-protocol/nips #1971, open). Identity keys are untouched.
-- Our PQ primitives already exist: `crates/bsigner/src/pq.rs` (ML-DSA, ML-KEM,
-  host seed files) and the x0x owner key (ML-DSA-65).
+  `crates/buzz-core/src/verification.rs:11` `verify_event`).
+- Upstream post-quantum work: a search of block/buzz issues and code for
+  post-quantum, ML-DSA and fips204 returned nothing on 2026-10-02. That is a
+  search result, not a source citation. Absence is UNVERIFIED.
+- Nostr: nostr-protocol/nips #1971 is an open proposal about NIP-44
+  encryption. Whether any accepted NIP changes identity keys is UNVERIFIED;
+  the only cited fact is Buzz's own implementation above.
+- Our PQ primitives, in tree: `crates/bsigner/src/pq.rs` `dsa_generate`
+  (`:83`), `dsa_sign` (`:101`), `dsa_verify` (`:120`), `kem_generate`
+  (`:161`), `kem_encapsulate` (`:182`), `kem_decapsulate` (`:210`), over
+  host seed files.
+- x0x owner identity, at tag `v0.46.0`: `src/identity.rs:107`
+  `UserId::from_public_key(&MlDsaPublicKey)`; `README.md:18` names the
+  owner key as `~/.x0x/user.key, ML-DSA-65`.
 - Ruled constraint that still binds: a free identity needs no authoritative
   store anywhere (`docs/bzdid-architecture-decision.md:390`: "No authoritative
   store must exist for a free identity to work"). A Buzz relay is
@@ -72,25 +79,35 @@ and never presses. Acceptance for full function:
    still passes.
 2. Before entering either payment arm, meaning before any approval or
    payment transaction is signed: the sum of prepared quotes in atto-ANT
-   must be at or below the 2.5 ANT ceiling, or the run refuses with the
-   exact overage. A check that runs only before `finalize_*` is a receipt,
+   must be at or below the storage ceiling read from the canonical gate,
+   `ETERNALIZATION-EDITION-V2.json` `separatedCeilings.storageMaxAnt`, or
+   the run refuses with the exact overage. That value is 100 ANT as of
+   2026-10-03; 2.5 ANT was retired by founder ruling that day. The client
+   reads the gate file; a hard-coded constant goes stale, as 2.5 did. A check that runs only before `finalize_*` is a receipt,
    because the payment is already irreversible by then.
 3. Gas ceiling is an aggregate, not a unit price and not per transaction:
    the sum of `gas_limit × max_fee_per_gas` over every transaction of the
-   upload (the approval and each payment batch) must be at or below
-   0.0002 ETH, checked before the first one is signed, or the run refuses.
+   upload (the approval and each payment batch) must be at or below the
+   gate's `separatedCeilings.gasMaxEth` (0.0002 ETH), checked before the first one is signed, or the run refuses.
    This matches `tools/genealogy/bpay.mjs::reconcile` (`:286-288`), which
    compares the receipt's aggregate `gasUsedWei` against `maxGasETH`.
 4. The estate client never holds the paying key (ant-extsig custody law).
-5. Only after review does `tools/genealogy/preserve-service.mjs` re-enable
-   `/api/preserve/upload`, and the first mainnet upload is a test artifact
-   paid by the founder's wallet, not promoted.
+5. `/api/preserve/upload` in `tools/genealogy/preserve-service.mjs` stays
+   disabled. That service reads `SECRET_KEY` in its own process (`:244`),
+   which contradicts point 4, and the edition gate requires the upload to
+   run repo+gh+CLI directly with no local-server bridge
+   (`ETERNALIZATION-EDITION-V2.json:52`). Execution goes through the
+   reviewed external-signer client. Founder spending approval is
+   standing-granted under the gate (`:56`); the stop conditions are the
+   artifact hash and the two ceilings, and the one irreducible act is the
+   key-holder's signature.
 
 ## Lane 3 — Buzz was absent from the stack inventory
 
 Done in this change. `scripts/build-stack-inventory.mjs` gains a `buzz` row
 under Coordination, state `implemented`, source
-`docs/agents/BUZZ-BOX-SRE-SEAT.md`, door `buzz-directory.html`. Its evidence
+`docs/dispatches/2026-10-02-three-collisions-to-full-function.md` (this
+file, which carries the pinned upstream citations), door `buzz-directory.html`. Its evidence
 text cites upstream at a pinned commit: secp256k1 identity, no federation,
 one community per relay URL by default with multi-community mode sharing one
 Postgres keyed by `community_id`, an optional per-channel member cap and no
@@ -118,6 +135,20 @@ Fixed forward after review; the earlier wording was this seat's error.
   across all transactions of the upload.
 - **Box state.** The relay version and disk figures came from a 2026-09-18
   audit and are not re-measured; see `2026-10-02-box-ssh-banner-control.md`.
+
+Second review round, same day:
+
+- **Crypto claims.** Each Lane 1 assertion now cites a file and function, or
+  is labelled UNVERIFIED. Two were search results presented as facts.
+- **Storage ceiling value.** 2.5 ANT was in force when this dispatch was
+  written and was retired by founder ruling a few hours later. The criterion
+  now reads the canonical gate (100 ANT as of 2026-10-03) instead of a
+  constant, so the next change does not strand it again.
+- **Upload path.** Point 5 said the key-holding service endpoint would be
+  re-enabled after review. That contradicted point 4 and the gate's
+  no-local-server-bridge rule. The endpoint stays disabled.
+- **Lane 3 source path.** The receipt still named the seat charter as the
+  inventory row's source after the row had been changed.
 
 ## Box inspection, pending
 
