@@ -54,8 +54,8 @@ try {
     ok('all family counts follow the catalog', families.length === familyNames.length && familyNames.every((f,i) => families[i].includes(f+' family: '+data.filter(c => c.family === f).length)), families.join(' | '));
     ok('native Vaulta and token/storage entries have distinct families', data.find(c => c.name === 'Vaulta').family === 'Antelope' && data.find(c => c.name === 'stables').family === 'Tokens' && data.find(c => c.name === 'Autonomi').family === 'Storage');
     const pathCounts = await page.evaluate(() => ({
-      read: (document.getElementById('matrix-body').innerText.match(/read /g) || []).length,
-      sign: (document.getElementById('matrix-body').innerText.match(/sign /g) || []).length
+      read: Array.from(document.querySelectorAll('#matrix-body b')).filter(e => e.textContent === 'read').length,
+      sign: Array.from(document.querySelectorAll('#matrix-body b')).filter(e => e.textContent === 'sign').length
     }));
     ok('every row carries separate read and sign paths', pathCounts.read === data.length && pathCounts.sign === data.length,
       JSON.stringify(pathCounts));

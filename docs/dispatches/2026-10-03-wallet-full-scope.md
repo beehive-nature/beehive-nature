@@ -121,6 +121,11 @@ fixing the prior-head GitHub static failure.
   Hive checks cover exact HIVE/HBD units, missing HBD and malformed HIVE.
 - All 12 inline wallet scripts parse; `estate-check` and generated stack
   inventory/surface checks passed. `git diff --check` passed.
+- The shipped reader also completed a live, read-only zero-address probe of
+  all 13 contracts: Base block `0x31b4c88` via PublicNode and Ethereum block
+  `0x18e6f5b` via dRPC, with chain identities checked. All returned valid
+  `balanceOf` and `decimals` data. [Exact receipt](../receipts/wallet-coins-public-read-2026-10-03.json).
+  This proves endpoint/read compatibility, not browser CORS or user holdings.
 - GitHub browser coverage now checks the full catalog and disabled entries,
   actual removal/count mutation, all 12 Base token rows, adding a contract,
   failure clearing stale amounts, and no art navigation/credential request.
