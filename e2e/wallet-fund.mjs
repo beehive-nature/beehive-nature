@@ -316,12 +316,23 @@ try {
       const bal = document.getElementById('chains').closest('section');
       const kc = document.getElementById('kc-sec');
       const connect = document.getElementById('wq').closest('section');
+      // Measure the actual balance control, not half the height of a section
+      // that can also contain an arbitrarily long public account book.
+      const hero = document.querySelector('#ch-vaulta .va-total').getBoundingClientRect();
       return { bal: top(bal), kc: top(kc), connect: top(connect), fold: window.innerHeight,
-               heroInFold: bal.getBoundingClientRect().top + bal.getBoundingClientRect().height * 0.5 <= window.innerHeight };
+               heroTop: hero.top, heroBottom: hero.bottom,
+               heroInFold: hero.top >= 0 && hero.bottom <= window.innerHeight };
     });
     ok('fold order: BALANCES before CONNECT on a phone', fold.bal < fold.connect, JSON.stringify(fold));
     ok('fold order: the ring before CONNECT on a phone', fold.kc < fold.connect, JSON.stringify(fold));
-    ok('hero balance VISIBLE IN THE FOLD (not below the crease)', fold.heroInFold);
+    ok('hero balance VISIBLE IN THE FOLD (not below the crease)', fold.heroInFold, JSON.stringify(fold));
+    const pushedOut = await cyPage.evaluate(() => {
+      const spacer = document.createElement('div'); spacer.style.height = window.innerHeight + 'px';
+      document.getElementById('chains').before(spacer);
+      const outside = document.querySelector('#ch-vaulta .va-total').getBoundingClientRect().bottom > window.innerHeight;
+      spacer.remove(); return outside;
+    });
+    ok('fold detector rejects a balance pushed below the viewport', pushedOut);
     // desktop order must be untouched
     const desk = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const dpage = await desk.newPage();

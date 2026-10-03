@@ -1131,37 +1131,6 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <h2 data-reg="bee">⚡ <span data-i18n="wl.bee.h.bal">what you hold, on every chain</span></h2>
   <div class="law" data-wl-tech>Balances come from public chain services. These services receive the public addresses you read.</div>
-  <div id="wallet-accounts">
-    <h3>Accounts &amp; following</h3>
-    <p class="wa-note">Bring your other accounts together, or follow any public address. No key or wallet connection needed.</p>
-    <div class="wa-toolbar">
-      <button type="button" id="wa-add" class="green">＋ Add account</button>
-      <button type="button" id="wa-follow">＋ Follow address</button>
-      <button type="button" id="wa-refresh">Refresh all</button>
-    </div>
-    <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
-    <form id="wa-form" hidden aria-label="Save a public account or address" aria-describedby="wa-privacy wa-status">
-      <div class="wa-fields">
-        <label>Network<select id="wa-chain" required>
-          <option value="vaulta">Vaulta · A</option><option value="hive">Hive · HIVE</option>
-          <option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option>
-          <option value="bitcoin">Bitcoin · BTC</option><option value="solana">Solana · SOL</option><option value="arweave">Arweave · AR</option>
-        </select></label>
-        <label>Save to<select id="wa-kind"><option value="mine">My accounts</option><option value="following">Following</option></select></label>
-        <label class="wa-wide">Public address or account name<input id="wa-address" required maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="wa-hint"></label>
-        <div class="wa-wide wa-note" id="wa-hint"></div>
-        <label class="wa-wide">Label (optional)<input id="wa-label" maxlength="60" autocomplete="off" placeholder="e.g. savings · creator I follow"></label>
-      </div>
-      <div class="wa-toolbar"><button type="submit" class="green" id="wa-save">Save &amp; read</button><button type="button" id="wa-cancel">Cancel</button></div>
-    </form>
-    <div id="wa-status" class="wa-note" role="status" aria-live="polite"></div>
-    <h4>My accounts <span id="wa-mine-count"></span></h4>
-    <div id="wa-mine" class="wa-list"></div>
-    <h4>Following <span id="wa-following-count"></span></h4>
-    <div id="wa-following" class="wa-list"></div>
-    <div class="wa-note">Followed balances stay in their own list. Refresh to check again; this page does not send activity alerts. Explorer links show transaction history in a new tab.</div>
-  </div>
-  <h3>Connected wallet</h3>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
@@ -1217,6 +1186,49 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="cd" id="ar-info">of a bound public AR address (forge inject or public bind) — reads stay keyless</div>
       <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
     </div>
+  </div>
+  <div id="wallet-accounts">
+    <h3>Accounts &amp; following</h3>
+    <p class="wa-note">Bring your other accounts together, or follow any public address. No key or wallet connection needed.</p>
+    <div class="wa-toolbar">
+      <button type="button" id="wa-add" class="green">＋ Add account</button>
+      <button type="button" id="wa-follow">＋ Follow address</button>
+      <button type="button" id="wa-trezor">Sync Trezor public accounts</button>
+      <button type="button" id="wa-refresh">Refresh all</button>
+    </div>
+    <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
+    <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
+      <p class="wa-note">Connect your SAFE 7 and choose an account. Import loads Trezor Connect from connect.trezor.io and opens its connection window. Confirm the public export on your device.</p>
+      <div class="wa-fields">
+        <label>Network<select id="wa-trezor-chain"><option value="solana">Solana</option><option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option><option value="bitcoin-account">Bitcoin · native SegWit account</option></select></label>
+        <label>Account number<input id="wa-trezor-account" type="number" min="1" max="100" value="1" required></label>
+        <label id="wa-trezor-sol-label">Solana account layout<select id="wa-trezor-sol"><option value="suite">Suite · m/44'/501'/account'</option><option value="bip44change">With change level · m/44'/501'/account'/0'</option></select></label>
+        <div class="wa-wide wa-note" id="wa-trezor-path"></div>
+      </div>
+      <p class="wa-note" id="wa-trezor-bitcoin" hidden>Bitcoin sync stores an account public key and shares it with Trezor’s blockchain service when you refresh, covering receive and change addresses within its discovery window. This reveals the account’s activity.</p>
+      <p class="wa-note">Choose the same wallet/passphrase and account layout each time. This imports public data without signing a payment. Never enter recovery words here.</p>
+      <div class="wa-toolbar"><button type="submit" class="green" id="wa-trezor-import">Import public account</button><button type="button" id="wa-trezor-cancel">Close</button></div>
+    </form>
+    <form id="wa-form" hidden aria-label="Save a public account or address" aria-describedby="wa-privacy wa-status">
+      <div class="wa-fields">
+        <label>Network<select id="wa-chain" required>
+          <option value="vaulta">Vaulta · A</option><option value="hive">Hive · HIVE</option>
+          <option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option>
+          <option value="bitcoin">Bitcoin · BTC address</option><option value="bitcoin-account">Bitcoin · account public key</option><option value="solana">Solana · SOL</option><option value="arweave">Arweave · AR</option>
+        </select></label>
+        <label>Save to<select id="wa-kind"><option value="mine">My accounts</option><option value="following">Following</option></select></label>
+        <label class="wa-wide">Public address, account name or Bitcoin account public key<input id="wa-address" required maxlength="120" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="wa-hint"></label>
+        <div class="wa-wide wa-note" id="wa-hint"></div>
+        <label class="wa-wide">Label (optional)<input id="wa-label" maxlength="60" autocomplete="off" placeholder="e.g. savings · creator I follow"></label>
+      </div>
+      <div class="wa-toolbar"><button type="submit" class="green" id="wa-save">Save &amp; read</button><button type="button" id="wa-cancel">Cancel</button></div>
+    </form>
+    <div id="wa-status" class="wa-note" role="status" aria-live="polite"></div>
+    <h4>My accounts <span id="wa-mine-count"></span></h4>
+    <div id="wa-mine" class="wa-list"></div>
+    <h4>Following <span id="wa-following-count"></span></h4>
+    <div id="wa-following" class="wa-list"></div>
+    <div class="wa-note">Followed balances stay in their own list. Refresh to check again; this page does not send activity alerts. Explorer links show transaction history in a new tab.</div>
   </div>
 </section>
 
@@ -6900,6 +6912,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     arbitrum:{name:'Arbitrum',hint:'Public 0x address. Reads ETH and Autonomi ANT on Arbitrum One.',explorer:'https://arbiscan.io/address/'},
     base:{name:'Base',hint:'Public 0x address. Reads ETH and native USDC on Base.',explorer:'https://basescan.org/address/'},
     bitcoin:{name:'Bitcoin',hint:'Mainnet address beginning bc1, 1 or 3. Reads confirmed BTC; silent payment addresses cannot be followed by address alone.',explorer:'https://mempool.space/address/'},
+    'bitcoin-account':{name:'Bitcoin account',hint:'Account-level xpub (legacy), ypub (nested SegWit) or zpub (native SegWit). Not a private key. Refresh uses Trezor Connect and shares this public key with its blockchain service. Taproot descriptors are not supported here.'},
     solana:{name:'Solana',hint:'Public Solana address. Reads native SOL.',explorer:'https://explorer.solana.com/address/'},
     arweave:{name:'Arweave',hint:'Public 43-character Arweave address. Never paste a JWK or recovery phrase.',explorer:'https://viewblock.io/arweave/address/'}
   };
@@ -6941,6 +6954,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if('AEIMQUYcgkosw048'.indexOf(a.slice(-1))<0)throw new Error('Arweave address has invalid padding; check the last character');
     }else if(chain==='solana'){
       if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)||base58Bytes(a).length!==32)throw new Error('Enter a public Solana address representing 32 bytes');
+    }else if(chain==='bitcoin-account'){
+      if(a.length!==111)throw new Error('Use an account-level mainnet xpub, ypub or zpub');
+      var extended=base58Bytes(a),versions={xpub:'0488b21e',ypub:'049d7cb2',zpub:'04b24746'};
+      var prefix=a.slice(0,4),magic=Array.from(extended.slice(0,4)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+      if(a.length!==111||!versions[prefix]||magic!==versions[prefix]||extended.length!==82||extended[4]!==3||extended[9]<128||![2,3].includes(extended[45]))throw new Error('Use an account-level mainnet xpub, ypub or zpub. Private keys and Taproot descriptors are not accepted.');
     }else if(chain==='bitcoin'){
       if(/^bc1/i.test(a)){
         if(a!==a.toLowerCase()&&a!==a.toUpperCase())throw new Error('Bitcoin address cannot mix letter cases');
@@ -6957,18 +6975,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         throw new Error('Use a Bitcoin mainnet address (bc1, 1 or 3); silent payment addresses require a private scan');
       }
     }
-    return {chain:chain,address:a,label:label,kind:input.kind};
+    var normalized={chain:chain,address:a,label:label,kind:input.kind};
+    // Public provenance is informational. It grants no signing authority.
+    if(input.trezor&&typeof input.trezor.path==='string'&&/^m\/(44|84)'\/(0|60|501)'\/\d+'(?:\/0'?\/0|\/0')?$/.test(input.trezor.path))normalized.trezor={path:input.trezor.path};
+    return normalized;
   }
   async function validate(input){
     var row=normalize(input);
     // Legacy Bitcoin's Base58Check is checked before an address ever reaches
     // storage or a public endpoint. Segwit uses the existing wallet decoder.
-    if(row.chain==='bitcoin'&&!row.address.startsWith('bc1')){
-      var bytes=base58Bytes(row.address),body=bytes.slice(0,21);
-      if(bytes[0]!==0&&bytes[0]!==5)throw new Error('Use a Bitcoin mainnet address');
+    if(row.chain==='bitcoin-account'||(row.chain==='bitcoin'&&!row.address.startsWith('bc1'))){
+      var bytes=base58Bytes(row.address),body=bytes.slice(0,-4);
+      if(row.chain==='bitcoin'&&bytes[0]!==0&&bytes[0]!==5)throw new Error('Use a Bitcoin mainnet address');
       var first=await crypto.subtle.digest('SHA-256',body);
       var checksum=new Uint8Array(await crypto.subtle.digest('SHA-256',first));
-      if(!bytes.slice(21).every(function(v,i){return v===checksum[i]}))throw new Error('Bitcoin address checksum failed; check the address');
+      if(!bytes.slice(-4).every(function(v,i){return v===checksum[i]}))throw new Error('Bitcoin address checksum failed; check the address or account public key');
     }
     return row;
   }
@@ -7015,31 +7036,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var actions=node('div',undefined,'wa-actions');
         var refresh=button('Refresh','refresh',id);refresh.disabled=state==='reading';actions.appendChild(refresh);
         actions.appendChild(button('Copy address','copy',id));actions.appendChild(button('Edit','edit',id));actions.appendChild(button('Remove','remove',id));
-        var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);
+        if(row.trezor)card.appendChild(node('div','Trezor public export · '+row.trezor.path,'wa-note'));
+        if(NETWORKS[row.chain].explorer){var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);}
         card.appendChild(actions);list.appendChild(card);
       });
     });
     el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
     if(focusAction)Array.from(document.querySelectorAll('[data-wa-action]')).find(function(b){return b.dataset.waAction===focusAction&&b.dataset.waId===focusId})?.focus({preventScroll:true});
   }
-  async function refresh(id){
+  async function refresh(id,userGesture){
     var row=entries.find(function(r){return idOf(r)===id});
     if(!row||reads.get(id)?.state==='reading')return;
     var run={state:'reading'};reads.set(id,run);render();
     try{
       await validate(row);
-      var value=await window.BNRWALLET.readPublicBalance(row.chain,row.address);
+      var value=row.chain==='bitcoin-account'?await readBitcoinAccount(row.address,userGesture):await window.BNRWALLET.readPublicBalance(row.chain,row.address);
       if(!value||!Array.isArray(value.amounts)||!value.amounts.length||value.amounts.some(function(v){return typeof v!=='string'||!/^\d+(\.\d+)? [A-Z]+$/.test(v)}))throw new Error('No valid balance returned');
       if(reads.get(id)!==run)return;
       reads.set(id,{state:'ready',value:value,at:Date.now()});
     }catch(e){if(reads.get(id)!==run)return;reads.set(id,{state:'failed',error:e.message||'Public service unavailable'});}
     render();
   }
-  async function refreshAll(){
+  async function refreshAll(userGesture){
     if(refreshingAll)return;
     refreshingAll=true;render();
     var pending=entries.map(idOf);
-    try{await Promise.all([0,1,2].map(async function(){while(pending.length)await refresh(pending.shift())}));}
+    try{await Promise.all([0,1,2].map(async function(){while(pending.length)await refresh(pending.shift(),userGesture===true)}));}
     finally{refreshingAll=false;render();}
   }
   function hint(){el('wa-hint').textContent=NETWORKS[el('wa-chain').value].hint}
@@ -7053,7 +7075,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   el('wa-follow').onclick=function(){showForm('following')};
   el('wa-chain').onchange=hint;
   el('wa-cancel').onclick=function(){el('wa-form').hidden=true;editing=null;el('wa-add').focus()};
-  el('wa-refresh').onclick=refreshAll;
+  el('wa-refresh').onclick=function(){refreshAll(true)};
   el('wa-form').onsubmit=async function(event){
     event.preventDefault();var submit=el('wa-save');if(submit.disabled)return;submit.disabled=true;
     var original=editing;
@@ -7062,11 +7084,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(entries.some(function(r){return idOf(r)===id&&idOf(r)!==original}))throw new Error('This address is already saved on this network. Use Edit to change its label or list.');
       if(original&&!entries.some(function(r){return idOf(r)===original}))throw new Error('This account was removed in another tab. Add it again if needed.');
       var next=entries.slice(),at=next.findIndex(function(r){return idOf(r)===original});
+      if(at>=0&&idOf(next[at])===id&&next[at].trezor)row.trezor=next[at].trezor;
       if(at<0)next.push(row);else next[at]=row;
       save(next);
       if(original&&original!==id)reads.delete(original);
       el('wa-form').hidden=true;editing=null;render();status('Saved in this browser. Reading '+NETWORKS[row.chain].name+'…');el('wa-add').focus();
-      refresh(id);status('Saved in this browser. See the read status on the account.');
+      refresh(id,true);status('Saved in this browser. See the read status on the account.');
     }catch(e){status(e.message)}finally{submit.disabled=false}
   };
   el('wallet-accounts').addEventListener('click',async function(event){
@@ -7074,7 +7097,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var id=b.dataset.waId,row=entries.find(function(r){return idOf(r)===id});if(!row)return;
     try{
       switch(b.dataset.waAction){
-        case 'refresh':await refresh(id);break;
+        case 'refresh':await refresh(id,true);break;
         case 'copy':await navigator.clipboard.writeText(row.address);status('Public address copied.');break;
         case 'edit':showForm(row.kind,row);break;
         case 'remove':
@@ -7091,6 +7114,67 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(entries.some(function(r){return idOf(r)===idOf(removed)}))throw new Error('That address is already in the list.');
       save(entries.concat([removed]));var id=idOf(removed);removed=null;undo.hidden=true;render();status('Account restored.');refresh(id);
     }catch(e){status(e.message)}
+  };
+  // Official stock-device bridge. No signer or firmware-update method is
+  // exposed here. A loaded public address never becomes the bPay signer.
+  var trezorInit=null;
+  async function connectTrezor(userGesture){
+    if(!userGesture&&!trezorInit)throw new Error('Press Refresh to load Trezor Connect for this public account');
+    if(!trezorInit){
+      trezorInit=(async function(){
+        if(!window.TrezorConnect)await new Promise(function(resolve,reject){
+          var script=document.createElement('script');script.src='https://connect.trezor.io/9/trezor-connect.js';
+          script.onload=function(){window.TrezorConnect?resolve():reject(new Error('Trezor Connect did not start'))};
+          script.onerror=function(){script.remove();reject(new Error('Trezor Connect could not be loaded. Try again.'))};document.head.appendChild(script);
+        });
+        await window.TrezorConnect.init({lazyLoad:true,manifest:{email:'lovis@skaists.dev',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
+        return window.TrezorConnect;
+      })().catch(function(error){trezorInit=null;throw error});
+    }
+    return trezorInit;
+  }
+  function trezorResult(result){
+    if(!result||result.success!==true||!result.payload)throw new Error('Trezor export or read was cancelled or unavailable. Nothing new was saved.');
+    return result.payload;
+  }
+  async function readBitcoinAccount(descriptor,userGesture){
+    var tc=await connectTrezor(userGesture),p=trezorResult(await tc.getAccountInfo({descriptor:descriptor,coin:'btc',details:'basic'}));
+    if(p.descriptor!==descriptor||typeof p.balance!=='string'||!/^\d+$/.test(p.balance))throw new Error('Bitcoin service returned an invalid or different account');
+    var sat=BigInt(p.balance),whole=sat/100000000n,fraction=(sat%100000000n).toString().padStart(8,'0').replace(/0+$/,'');
+    return {amounts:[whole.toString()+(fraction?'.'+fraction:'')+' BTC'],source:'Trezor blockchain service',note:'Confirmed account balance, including discovered receive and change addresses. Pending transactions are excluded.'};
+  }
+  function trezorSelection(){
+    var chain=el('wa-trezor-chain').value,account=Number(el('wa-trezor-account').value);
+    if(!Number.isInteger(account)||account<1||account>100)throw new Error('Choose account 1–100');
+    var index=account-1,path=chain==='bitcoin-account'?"m/84'/0'/"+index+"'":chain==='solana'?"m/44'/501'/"+index+"'"+(el('wa-trezor-sol').value==='bip44change'?"/0'":''):"m/44'/60'/"+index+"'/0/0";
+    return {chain:chain,account:account,path:path};
+  }
+  function trezorHint(){
+    el('wa-trezor-sol-label').hidden=el('wa-trezor-chain').value!=='solana';
+    el('wa-trezor-bitcoin').hidden=el('wa-trezor-chain').value!=='bitcoin-account';
+    try{el('wa-trezor-path').textContent='Derivation path: '+trezorSelection().path}catch(e){el('wa-trezor-path').textContent=e.message}
+  }
+  el('wa-trezor').onclick=function(){el('wa-trezor-form').hidden=false;status('');trezorHint();el('wa-trezor-chain').focus()};
+  el('wa-trezor-cancel').onclick=function(){el('wa-trezor-form').hidden=true;el('wa-trezor').focus()};
+  ['wa-trezor-chain','wa-trezor-account','wa-trezor-sol'].forEach(function(id){el(id).onchange=trezorHint});
+  el('wa-trezor-form').onsubmit=async function(event){
+    event.preventDefault();var submit=el('wa-trezor-import');if(submit.disabled)return;submit.disabled=true;
+    try{
+      var selected=trezorSelection(),tc=await connectTrezor(true),request={path:selected.path,showOnTrezor:true},result;
+      status('Confirm the public account export on your Trezor.');
+      if(selected.chain==='bitcoin-account')result=await tc.getPublicKey(Object.assign(request,{coin:'btc',scriptType:'SPENDWITNESS'}));
+      else if(selected.chain==='solana')result=await tc.solanaGetAddress(request);
+      else result=await tc.ethereumGetAddress(request);
+      var p=trezorResult(result);
+      if(p.serializedPath!==selected.path)throw new Error('Trezor returned a different derivation path. Nothing was saved.');
+      var address=selected.chain==='bitcoin-account'?p.xpubSegwit:p.address;
+      if(selected.chain==='bitcoin-account'&&(typeof address!=='string'||!address.startsWith('zpub')))throw new Error('Trezor did not return a native SegWit account public key. Nothing was saved.');
+      var row=await validate({chain:selected.chain,address:address,label:'Trezor · account '+selected.account,kind:'mine',trezor:{path:selected.path}}),id=idOf(row);
+      if(entries.some(function(r){return idOf(r)===id}))throw new Error('This public account is already saved. Use Refresh to sync its balance.');
+      save(entries.concat([row]));render();status('Public account saved in this browser. Reading its balance…');
+      await refresh(id,true);status('Public account imported. Its card shows the read status. bPay signing wallet is unchanged.');
+    }catch(e){status(e.message||'Trezor import failed. Nothing was saved.')}
+    finally{submit.disabled=false}
   };
   window.addEventListener('storage',function(event){
     if(event.key!==KEY&&event.key!==null)return;
