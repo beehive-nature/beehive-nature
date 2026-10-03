@@ -41,6 +41,9 @@ async function open(reg, opts = {}) {
   await ctx.route('**/*', r => { const q = r.request(); if (!q.url().startsWith(ORIGIN)) sent.push(q.method() + ' ' + q.url());
     if (q.url() === 'https://api.anthropic.com/v1/messages') return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":{"type":"authentication_error"}}' });
     return q.url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'); });
+  // Isolate parent gestures from the festival iframe's independent RPC reads.
+  // festival-eternal tests the festival; no external request is delivered here.
+  await ctx.route("**/surfaces/festival/index.html*", r => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>Festival fixture</title>" }));
   // This suite isolates browser voices and the explicit unavailable-preview path.
   // plur-voices.test.mjs exercises all fixed fallbacks and no-engine routing.
   await ctx.route('**/assets/plur-voices/manifest.json*', r => r.abort('blockedbyclient'));
@@ -97,7 +100,7 @@ test('the same facts in all three: the words, the tongues, the voices, the tutor
   assert.equal(a.d[1], 76); assert.ok(a.d[3] > 0, 'the stub voices light some words'); assert.equal(a.d[4], true, 'a Hebrew or Arabic voice exists'); assert.equal(a.d[5], 'not verified');
   // each register draws the same corpus its own way
   assert.deepEqual(a.beeRows.map(r => r.match(/\d+/)[0]), a.d[0].map(f => String(f[1])));
-  assert.match(a.beeNow, new RegExp(`say ${a.d[3]} of these 76 words`));
+  assert.match(a.beeNow, new RegExp(`${a.d[3]} of these 76 words have browser or synthetic audio`));
   assert.equal(facts.raver.stars, 76, 'one star per word'); assert.equal(facts.raver.filled, a.d[3], 'filled stars are the voiced words');
   assert.match(facts.raver.hint, new RegExp(`76 words · ${a.d[2]} tongues · ${a.d[3]} with a voice`));
   assert.deepEqual(facts.cypherpunk.fields.at(-1), ['total', '76', String(a.d[2]), `${a.d[3]}/76`]);
