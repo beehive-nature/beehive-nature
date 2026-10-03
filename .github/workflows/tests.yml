@@ -81,7 +81,7 @@ jobs:
       - name: PLUR voices — complete fixed audio and language-safe routing
         if: always()
         run: |
-          node --test e2e/plur-voices.test.mjs
+          node --test e2e/plur-voices.test.mjs e2e/plur-model-comparison.test.mjs
           node scripts/audit-plur-language-quality.mjs --check
       - name: Engine Room — every surface included
         if: always()
