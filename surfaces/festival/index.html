@@ -7,6 +7,15 @@
      Every beat wires a rail that already exists — nothing mocked, everything a door. -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
+<script>
+// PLUR uses the same complete page; no copied festival implementation.
+if(new URLSearchParams(location.search).get('embed')==='plur'&&window.parent!==window){
+ document.documentElement.classList.add('plur-embedded');
+ var base=document.createElement('base');base.target='_top';document.head.appendChild(base);
+}
+</script>
+<style>.plur-embedded #tbar,.plur-embedded #bregbar{display:none!important}.plur-embedded body{padding:12px 0;margin:0}.plur-embedded main{max-width:100%}</style>
+
 <title>the festival — the attendee experience</title>
 <style>
 :root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;

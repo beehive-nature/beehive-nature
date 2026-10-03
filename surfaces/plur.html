@@ -477,9 +477,33 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
     <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
     <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
-    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#festival">Enter the festival</a><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
   </div>
 </section>
+
+
+<section id="festival" class="plur-festival" aria-labelledby="plurFestivalTitle">
+  <h2 id="plurFestivalTitle">The festival, here in PLUR</h2>
+  <p>Your day on the floor: the day pass, nine stops, kandi, music, the calm tent and the economy board. The same complete festival experience, in your selected view.</p>
+  <p><a href="festival/index.html">Open the festival on its own</a></p>
+  <iframe id="plurFestival" title="PLUR festival — full interactive attendee experience" src="festival/index.html?embed=plur&amp;v=20261002" loading="lazy"></iframe>
+</section>
+<style>
+.plur-festival{max-width:960px;margin:24px auto;padding:20px;color:var(--sk-ink);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-md);scroll-margin-top:16px}.plur-festival h2{font-size:clamp(22px,5vw,32px);margin-bottom:12px}.plur-festival p{line-height:1.6;margin:10px 0}.plur-festival a{display:inline-flex;align-items:center;min-height:44px}.plur-festival iframe{display:block;width:100%;height:900px;border:0;margin-top:16px;background:transparent}@media(max-width:600px){.plur-festival{padding:12px;margin:16px 8px}}
+</style>
+<script>
+(function(){
+ var frame=document.getElementById('plurFestival'),observer;
+ function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
+ frame.addEventListener('load',function(){
+  var doc=frame.contentDocument;if(!doc||!doc.body)return;
+  function resize(){var h=Math.ceil(doc.body.getBoundingClientRect().height)+8;if(h>0&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';}
+  if(observer)observer.disconnect();observer=new ResizeObserver(function(){sync();resize();});observer.observe(doc.body);sync();resize();
+ });
+ document.addEventListener('bregister',sync);
+ new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
+})();
+</script>
 
 <section class="field f-peace" id="words">
   <div class="en" data-i18n="plur.peace">peace</div>
