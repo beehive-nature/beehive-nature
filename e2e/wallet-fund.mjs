@@ -262,7 +262,7 @@ try {
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'load' });
     await page.waitForTimeout(400);
-    ok('page renders (title)', (await page.title()).includes('BNR wallet'));
+    ok('page renders (title)', (await page.title()).includes('skaists heART WALLet'));
     ok('noscript funding note visible', await page.locator('#fund-sec .fund-nojs').isVisible());
     ok('panel body hidden', await page.locator('#fund-js').isHidden());
     await ctx.close();
@@ -286,13 +286,13 @@ try {
     // text-transform anywhere (capitals are never decoration).
     ok('hero caption ≥ 14px in bee with NO text-transform (bee-label floor + casing law)', capSize >= 14 && capTransform === 'none', capSize + 'px ' + capTransform);
     const head = await page.evaluate(() => {
-      const el = document.querySelector('h1 .h1-arg');
+      const el = document.querySelector('h1 .wallet-brand');
       const cs = getComputedStyle(el);
-      return { img: cs.backgroundImage, color: cs.color };
+      return { img: cs.backgroundImage, color: cs.color, name: el.textContent };
     });
     // honey is the colour of b and ONLY of b — never a heading; bee sets the
     // argument in ink-dim with no gradient at all
-    ok('headline argument: bee solid ink-dim, no gradient, no gold in a heading', !/linear-gradient/.test(head.img) && head.color === 'rgb(74, 95, 85)', JSON.stringify(head).slice(0, 90));
+    ok('wallet identity: exact brand, no gradient or honey decoration', head.name === 'skaists heART WALLet' && !/gradient/.test(head.img) && !['rgb(255, 215, 0)','rgb(232, 181, 75)'].includes(head.color), JSON.stringify(head).slice(0, 90));
     // new bee's own fold: its home says "here is what this is" (the home-chain
     // figure) and asks one question, before any field asks to be filled
     const beeFold = await page.evaluate(() => {

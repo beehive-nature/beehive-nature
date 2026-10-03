@@ -54,7 +54,7 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
   if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
   let body = {}; try { body = req.postDataJSON() || {}; } catch {}
   if (body.method === 'getBalance') return json({ result: { value: 1234567890 } });
-  if (body.method === 'eth_chainId') return json({ result: /base|1rpc/.test(url.host) ? '0x2105' : '0xa4b1' });
+  if (body.method === 'eth_chainId') return json({ result: /base|1rpc/.test(url.host) ? '0x2105' : /arbitrum/.test(url.host) ? '0xa4b1' : '0x1' });
   if (body.method === 'eth_getBalance' || body.method === 'eth_call') return json({ result: '0x1' });
   return route.abort();
 });
@@ -122,6 +122,12 @@ try {
   const shots = join(root, 'e2e', 'shots-wallet-accounts'); await mkdir(shots, { recursive: true });
   await page.locator('#wa-trezor-form').scrollIntoViewIfNeeded();
   await page.screenshot({ path: join(shots, 'trezor-import-390.png') });
+  const exportsBefore=await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='ethereumGetAddress').length);
+  await importAccount('evm','3');
+  const expanded=await entries();
+  check('one public EVM export adds Ethereum and Arbitrum beside existing Base',expanded.length===5&&['ethereum','base','arbitrum'].every(chain=>expanded.some(r=>r.chain===chain&&r.address===EVM)));
+  check('multi-network import preserves existing label and path',expanded.find(r=>r.chain==='base').label==='Hardware savings'&&expanded.filter(r=>['ethereum','base','arbitrum'].includes(r.chain)).every(r=>r.trezor.path==="m/44'/60'/2'/0/0"));
+  check('multi-network sync asks the device only once',await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='ethereumGetAddress').length)===exportsBefore+1);
   check('no browser script exceptions', errors.length === 0);
   console.log(`${checks} Trezor checks passed; fake bridge, no device or signing.`);
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

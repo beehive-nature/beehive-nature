@@ -881,6 +881,9 @@ jobs:
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
         run: node e2e/wallet-accounts.mjs
+      - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
+        if: always()
+        run: node e2e/wallet-unified.mjs
       - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
         if: always()
         run: node e2e/wallet-trezor.mjs

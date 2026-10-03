@@ -22,6 +22,7 @@
   if(!card) return;
   var BRIDGE_DEFAULT = ''; // No local service is required or selected by this wallet.
   var LS = 'bpay-policy-v1';
+  var quoteWorker=null;
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };
   try { var saved = JSON.parse(localStorage.getItem(LS)||'null'); if (saved && typeof saved==='object') st = Object.assign(st, saved); } catch(e){}
   if (/^https?:\/\/(localhost|127\.0\.0\.1):8807(?:\/|$)/i.test(st.bridge)) st.bridge = '';
@@ -65,7 +66,7 @@
   }
 
   function renderChooser(){
-    var h = '<p><a href="myspace.html#eternal">Choose a file for Autonomi storage</a> · <a href="#arw-sec">Use Arweave instead</a></p><p>The hosted Autonomi flow uses ANT and a separate ETH network fee. The invoice below is a reference; it does not store your file or authorize a payment.</p>';
+    var h = '<div class="wa-note">Get a live Autonomi storage quote here. Payment and publication through this wallet are not available yet.</div>';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
     h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
     h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
@@ -79,16 +80,17 @@
     h += '</div>';
     // the gesture's record + the fresh-quote action (quote only — never a payment)
     if (st.audience === 'public') {
+      h += '<div class="wa-note"><label for="ant-quote-file">File to quote (up to 1 MiB)</label><input id="ant-quote-file" type="file" style="display:block;width:100%;max-width:100%;margin:8px 0"><div>A quote sends this file to the hosted Autonomi service for pricing. It does not pay or publish.</div><button type="button" id="ant-quote-go">Get Autonomi quote</button> <button type="button" id="ant-quote-cancel" hidden>Stop request</button><div id="ant-quote-status" role="status" aria-live="polite"></div></div>';
       h += '<div style="margin-top:10px;font-size:12px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b>';
       if (st.selectedAt) h += ' <span style="opacity:.65;font-size:10px">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(st.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
       h += '</div>';
-      h += '<button type="button" id="bpay-quote-go" style="margin-top:6px;padding:8px 14px;border:1px solid #2c4a5a;border-radius:8px;background:#0e2d3a;color:var(--cyan);cursor:pointer;font-size:13px">♡ ' + T('wl.bpay.getquote','Get a fresh quote') + '</button>';
+      if(st.bridge) h += '<button type="button" id="bpay-quote-go" style="margin-top:6px;padding:8px 14px;border:1px solid #2c4a5a;border-radius:8px;background:#0e2d3a;color:var(--cyan);cursor:pointer;font-size:13px">♡ ' + T('wl.bpay.getquote','Get a fresh quote') + '</button>';
       h += '<span id="bpay-quote-stat" style="font-size:11px;opacity:.75;margin-left:8px"></span>';
     }
     // the honest waiting state — until Phase C earns the authorization route
     h += '<div style="margin-top:12px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
     h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','Quote only · payment unavailable in this panel') + '</b>';
-    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.quoteonly.note','Choose a file above to use the hosted storage flow. No payment is requested here.') + '</div>';
+    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.quoteonly.note','A quote shows the storage cost. No payment is requested here.') + '</div>';
     h += '</div>';
     return h;
   }
@@ -134,8 +136,9 @@
   }
 
   function render(){
+    stopQuote();
     var h = renderChooser();
-    if (refInvoice) h += invoiceBlock(refInvoice, false);
+    if (refInvoice) h += '<details id="bpay-reference"><summary>Reference invoice</summary>'+invoiceBlock(refInvoice, false)+'</details>';
     h += '<div id="bpay-fresh"></div>';
     card.innerHTML = h;
     applyInspection();
@@ -150,11 +153,35 @@
         render();
       });
     });
+    var quoteButton=document.getElementById('ant-quote-go');if(quoteButton)quoteButton.onclick=quoteFile;
+    var cancel=document.getElementById('ant-quote-cancel');if(cancel)cancel.onclick=function(){stopQuote();document.getElementById('ant-quote-status').textContent='Request stopped. No payment was requested.';document.getElementById('ant-quote-go').disabled=false;document.getElementById('ant-quote-file').disabled=false;cancel.hidden=true};
     var bridgeInput = document.getElementById('bpay-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save({ bridge: st.bridge }); });
     var go = document.getElementById('bpay-quote-go');
     if (go) go.addEventListener('click', freshQuote);
   }
+
+  function stopQuote(){var worker=quoteWorker;quoteWorker=null;if(worker)worker.terminate('quote request finished or stopped')}
+  async function quoteFile(){
+    var input=document.getElementById('ant-quote-file'),button=document.getElementById('ant-quote-go'),cancel=document.getElementById('ant-quote-cancel'),output=document.getElementById('ant-quote-status');
+    if(quoteWorker)return;
+    var file=input.files[0];output.textContent='';
+    if(st.audience!=='public'||!file||!file.size||file.size>1048576){output.textContent='Choose Public and a non-empty file up to 1 MiB.';return;}
+    if(!window.BnrSeam){output.textContent='The storage adapter did not load. Reload and try again.';return;}
+    button.disabled=true;input.disabled=true;cancel.hidden=false;
+    output.textContent='Checking the Autonomi service and requesting a quote…';
+    var worker=null;
+    try{
+      worker=window.BnrSeam.spawn('ant','myspace-adapter-ant.js');quoteWorker=worker;
+      await worker.ready;
+      var bytes=new Uint8Array(await file.arrayBuffer());if(quoteWorker!==worker)return;
+      var result=await worker.ops['x.preparePut']({bytes:bytes},90000);if(quoteWorker!==worker)return;
+      if(!result||!result.quote||!/^\d+$/.test(result.quote.ant_atto))throw new Error('The service did not return a valid ANT amount');
+      output.textContent=ant(result.quote.ant_atto)+' ANT · '+file.size.toLocaleString()+' bytes · quoted '+new Date().toLocaleTimeString()+'. ETH network fees are separate. Quote only; no payment or publication.';
+    }catch(error){if(quoteWorker===worker)output.textContent='Quote unavailable: '+(error.message||'service unavailable')+'. No payment was requested.';}
+    finally{if(quoteWorker===worker){stopQuote();button.disabled=false;input.disabled=false;cancel.hidden=true;}}
+  }
+  window.addEventListener('pagehide',stopQuote);
 
   function freshQuote(){
     var stat = document.getElementById('bpay-quote-stat');

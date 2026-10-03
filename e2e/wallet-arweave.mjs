@@ -48,7 +48,7 @@ function mockGateways(ctx, tally, txAnswer) {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     if (tally) { const h = u.host; tally[h] = (tally[h] || 0) + 1; }
     const json = (obj, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(obj) });
-    if (u.pathname.endsWith('/price/1926')) return json(FEE);
+    if (/\/price\/\d+$/.test(u.pathname)) return json(FEE);
     if (u.pathname.endsWith('/spot_price')) return json(SPOT);
     if (u.pathname.endsWith('/tx_anchor')) return json('yfE5XWLIT5U0dwMJanchorMOCK0000000000000000000');
     if (u.pathname.includes('/wallet/')) return json('0'); // unfunded
@@ -245,9 +245,10 @@ try {
       };
       window.arweaveWallet = {
         connect: async () => {},
-        getActiveAddress: async () => { if (!_addr) await window.__arInjectBoot(); return _addr; },
+        getActiveAddress: async () => { window.__arAddressCount=(window.__arAddressCount||0)+1;if (!_addr) await window.__arInjectBoot(); return _addr; },
         getActivePublicKey: async () => { if (!_jwk) await window.__arInjectBoot(); return _jwk.n; },
         signature: async (data, alg) => {
+          window.__arSignCount=(window.__arSignCount||0)+1;
           if (!_key) await window.__arInjectBoot();
           const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
           return new Uint8Array(await crypto.subtle.sign(
@@ -267,6 +268,7 @@ try {
       const t = document.getElementById('arw-stat').textContent || '';
       return /extension|connect|Arweave|address|reading|AR/i.test(t) && !/seal your JWK/i.test(t);
     }), await page.locator('#arw-stat').innerText().then(t => t.slice(0, 100)));
+    ok('opening the page never asks the Arweave extension for an address',await page.evaluate(()=>(window.__arAddressCount||0)===0));
     await page.locator('#arw-connect').click();
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-addr');
@@ -299,6 +301,35 @@ try {
     ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
     ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
+    const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');
+    await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
+    await page.locator('#arw-file-review').click();
+    await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
+    await page.locator('#arw-file-cancel').click();
+    await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('Cancelled'));
+    ok('cancel refuses signing and publication',posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('confirmed file uses the existing signed publication adapter',posted.length>beforeFilePosts&&Buffer.from(posted.at(-1).data,'base64url').equals(fileBytes));
+    const beforeBlockedPosts=posted.length;
+    await page.evaluate(()=>{window.__outboxBackup=localStorage.getItem('bnr_outbox_v1');window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='bnr_outbox_v1')throw new DOMException('Storage full','QuotaExceededError');return window.__storageSet.call(this,key,value);};});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('blocked outbox stops submission and preserves the prior receipt',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox could not save')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')===window.__outboxBackup));
+    await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;localStorage.setItem('bnr_outbox_v1','not valid JSON');});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox is unavailable')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    const beforeOversize=posted.length;
+    await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
+    await page.locator('#arw-file-review').click();
+    ok('oversized file is refused before wallet or network work',(await page.locator('#arw-file-status').innerText()).includes('30,000')&&posted.length===beforeOversize);
+
     await ctx.close();
   }
 
