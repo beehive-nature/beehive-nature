@@ -1434,7 +1434,7 @@ document.addEventListener('DOMContentLoaded',function(){
       clearTimeout(deadline); clearInterval(ticker);
       metrics.direct.startupElapsedMs=performance.now()-startedAt;
       routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
-      playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null); await goSound(my);
+      playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null);
       // A stopped decoder or a network stall falls back once, preserving the playhead.
       let stallTimer = null, progressedAt = v.currentTime || 0;
       const fallback = reason => {
@@ -1452,7 +1452,7 @@ document.addEventListener('DOMContentLoaded',function(){
       v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
       session.sounded=!v.paused;
       session.dispose=() => { failed.abort(); clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); bridge.close(); };
-      pub(); return true;
+      pub(); goSound(my); return true;
     } catch (error) {
       failed.abort();
       if (directSession === session) stopDirect();
