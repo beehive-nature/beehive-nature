@@ -3,16 +3,19 @@
 # member's wallet (member-pay.mjs, ethers) pays between the two.
 [package]
 name = "ant-extsig"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 
 [dependencies]
-ant-core = { git = "https://github.com/WithAutonomi/ant-client", features = ["devnet"] }
-ant-node = "0.18.1"
-ant-protocol = "2.3.5"
+ant-core = { git = "https://github.com/WithAutonomi/ant-client", rev = "681d48f30b9de50c262ebfc10cce6111cfc878b1", features = ["devnet"] } # PUBLIC-CONSTANT recorded commit
+ant-node = "=0.21.0"
+ant-protocol = "=3.1.0"
+evmlib = "0.10.0"
 tokio = { version = "1", features = ["full"] }
 serde_json = "1"
 hex = "0.4"
 
 [profile.dev]
 debug = 0
+
+[workspace]
