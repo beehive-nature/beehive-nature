@@ -101,7 +101,7 @@ function mountTreeSpace(host, view, selected, camera, onSelect) {
       ctx.fillStyle = color; ctx.beginPath();ctx.arc(q.x,q.y,p.id === selected ? 9 : p.living ? 4 : 6,0,Math.PI*2);ctx.fill();
       const b = buttons.get(p.id);
       if (b) { b.style.left=q.x+'px';b.style.top=q.y+'px';b.style.zIndex=String(100-Math.round(q.depth*10));
-        b.classList.toggle('show-label',p.gen<=2 || p.id===selected); b.style.setProperty('--branch-color',color); }
+        b.classList.toggle('show-label',p.id===selected); b.style.setProperty('--branch-color',color); }
     }
   }
   function schedule() { if (!frame) frame=win.requestAnimationFrame(draw); }
@@ -459,6 +459,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
       <p class="tol-note">${spatial ? 'Drag the tree to turn it. Use the arrow keys or rotation buttons. Choose a person to explore their family.' : 'Choose a name to open their research; choose a branch to climb.'}</p>
       ${focusLine}
       ${spatial ? '<div class="tol-camera"><button type="button" data-camera="left" aria-label="Rotate left">↶</button><button type="button" data-camera="right" aria-label="Rotate right">↷</button><button type="button" data-camera="in" aria-label="Zoom in">+</button><button type="button" data-camera="out" aria-label="Zoom out">−</button><button type="button" data-camera="reset">Reset view</button></div><div class="tol-space" tabindex="0" role="group" aria-label="3D family tree; arrow keys rotate"></div>' : `<div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>`}
+      ${spatial ? '<div class="tol-family-key" aria-label="Family branches">' + view.nodes.filter(n => n.gen === 2 && !n.living).map(n => '<button type="button" data-person="' + esc(n.id) + '"><span aria-hidden="true" style="color:' + ['#c98cff','#65c5f1','#f4b66a','#7adca0'][Math.min(3,Math.floor(n.pos*4))] + '">●</span> ' + esc(n.name) + '</button>').join('') + '</div>' : ''}
       <div class="tol-guard" role="note"><span class="tol-lock" aria-hidden="true"></span><span>${esc(heldText(view.line.bridge, words))}</span></div>
       ${entryNames.length ? `<p class="tol-note">${esc(fill(words.emerges, { names: entryNames.join(' · ') }))}</p>` : ''}
       ${card}`;

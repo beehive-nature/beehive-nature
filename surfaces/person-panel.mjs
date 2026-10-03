@@ -793,7 +793,7 @@ export function mountPersonPanel (host, archive, opts) {
     let h = '<article class="pp-person" data-ppid="' + esc(id) + '">';
     h += '<h2 class="pp-name" tabindex="-1">' + esc(p.name) + '</h2>';
     if (p.lifespan) h += '<div class="pp-years">' + esc(p.lifespan) + '</div>';
-    h += '<div class="pp-chips">' + chipsHtml(p) + '</div>';
+
     h += '<div class="pp-actions">' +
       '<button type="button" class="pp-act" data-pproot="' + esc(id) + '">' + esc(T('pp.walk', 'walk this branch')) + '</button>' +
       '<button type="button" class="pp-act pp-ghost" data-pparchive="' + esc(id) + '">' + esc(T('pp.research', 'open full research')) + '</button></div>';
@@ -802,8 +802,7 @@ export function mountPersonPanel (host, archive, opts) {
     h += relToRootHtml(p);
     h += familyHtml(p);
     h += frontierHtml(p);
-    h += '<details class="pp-sec"><summary>Sources and research notes</summary>' + layersHtml(p) + '</details>';
-    h += teasersHtml(p);
+    h += '<details class="pp-sec"><summary>Sources and research notes</summary><div class="pp-chips">' + chipsHtml(p) + '</div>' + layersHtml(p) + teasersHtml(p) + '</details>';
     h += '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.bnr', 'blood address')) + '</h3>' +
       '<div class="pp-bnr">' + esc(p.bnr) + '</div></section>';
     h += '</article>';
