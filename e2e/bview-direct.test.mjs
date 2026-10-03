@@ -101,7 +101,7 @@ test('direct setup rejection automatically uses the existing relay', async()=>{
 for(const hang of ['connect','read'])test('one startup budget reaches relay even when direct '+hang+' never finishes',async()=>{
   const at=Date.now(),{ctx,page,errors,relay}=await open(false,false,hang);
   try{
-    await page.waitForFunction(()=>/s \/ 8 s/.test(document.querySelector('#playback-status').textContent));
+    await page.waitForFunction(()=>/s \/ 12 s/.test(document.querySelector('#playback-status').textContent));
     await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0&&window.__bviewEngine().path==='stream',null,{timeout:18000});
     assert.ok(Date.now()-at<20000,'a silent direct start reaches the relay after one quiet limit');
     assert.equal(relay.length,1);assert.ok(await page.evaluate(()=>window.__bviewEngine().direct.fallback));
