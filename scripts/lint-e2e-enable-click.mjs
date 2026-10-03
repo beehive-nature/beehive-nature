@@ -38,6 +38,7 @@ const LEDGER = {
   'e2e/lib/enable-click.mjs': [1, 'the helper itself: enable and click in one browser task'],
   'e2e/agent-dock.test.mjs': [2, 'mock Element in Node, no browser: field initialiser and its removeAttribute'],
   'e2e/artist-audio-player.test.mjs': [1, 'mock Element in Node, no browser: field initialiser'],
+  'e2e/first-work.test.mjs': [1, 'mock Element in Node, no browser: Object.assign field initialiser'],
   'e2e/first-click.test.mjs': [1, 'mock Element in Node, no browser: disabled read from parsed HTML'],
   'e2e/blight-gallery-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
   'e2e/blight-market-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
@@ -49,13 +50,20 @@ const LEDGER = {
 // `= true;` is cleared, `= true && false` and `= 1 - 1` are not.
 const END = String.raw`\s*(?:[;,)}\]]|$)`;
 // the rest of the line is read by lookahead, so a second write on it still counts
-const ASSIGN = /\.disabled\s*=(?!=)(?=([^\n]*))/g;
+// `.disabled` or `['disabled']`, then a plain or compound assignment. A
+// compound one (&&=, ^=, ||=, ??= ...) is always a write: its result depends
+// on the old value, so no right-hand side clears it.
+const ASSIGN = /(?:\.disabled|\[\s*['"`]disabled['"`]\s*\])\s*(\*\*|<<|>>>?|&&|\|\||\?\?|[-+*\/%&|^])?=(?![=>])(?=([^\n]*))/g;
+// the Object.assign form, as in Object.assign(b, { disabled: false }); a bare
+// object key elsewhere is a report or a mock's field, not a write
+const KEY = /Object\.assign\s*\((?=[^\n]*?\bdisabled['"`]?\s*:([^\n]*))/g;
 const ATTR = /\.(removeAttribute|toggleAttribute)\s*\(\s*['"`]disabled['"`](?=([^\n]*))/g;
 const TRUE_RHS = new RegExp(String.raw`^\s*(?:true|!0|1)` + END);
 const TRUE_FORCE = new RegExp(String.raw`^\s*,\s*(?:true|!0|1)\s*\)`);
 function writes(text) {
   let n = 0;
-  for (const m of text.matchAll(ASSIGN)) if (!TRUE_RHS.test(m[1])) n++;
+  for (const m of text.matchAll(ASSIGN)) if (m[1] || !TRUE_RHS.test(m[2])) n++;
+  for (const m of text.matchAll(KEY)) if (!TRUE_RHS.test(m[1])) n++;
   for (const m of text.matchAll(ATTR)) if (!(m[1] === 'toggleAttribute' && TRUE_FORCE.test(m[2]))) n++;
   return n;
 }
@@ -74,6 +82,12 @@ const SELF = [
   ['toggleAttribute with no force', "x.evaluate(b => { b.toggleAttribute('disabled'); });", 1],
   ['a deferred click beside it', 'x.evaluate(b => { b.disabled = false; setTimeout(() => b.click(), 9); });', 1],
   ['two on one line', 'a.disabled = false; b.disabled = false;', 2],
+  ['&&= false', 'x.evaluate(b => { b.disabled &&= false; });', 1],
+  ['^= true', 'x.evaluate(b => { b.disabled ^= true; });', 1],
+  ['a bracket write', "x.evaluate(b => { b['disabled'] = false; });", 1],
+  ['Object.assign', 'x.evaluate(b => { Object.assign(b, { disabled: false }); });', 1],
+  ['a reported key is not a write', 'return { pressed: p, disabled: el.disabled };', 0],
+  ['an arrow is not a write', 'const f = b => b.disabled => 1;', 0],
   ['a literal disable', 'x.evaluate(b => { b.disabled = true; });', 0],
   ['toggleAttribute on', "x.evaluate(b => { b.toggleAttribute('disabled', true); });", 0],
   ['a comparison', 'if (b.disabled == false) go(); if (b.disabled === false) go();', 0],
@@ -84,6 +98,24 @@ for (const [name, src, want] of SELF) {
   const got = writes(src);
   if (got !== want) { console.log(`FAIL self-test — ${name}: counted ${got}, want ${want}`); bad++; }
   else console.log(`PASS self-test — ${name} counts ${want}`);
+}
+
+// THE HELPER IS PINNED, not merely counted. Its one write is lawful only
+// because the click is in the same synchronous callback; a count of one
+// would still pass `evaluate(b => { b.disabled = false; }).then(() =>
+// locator.click())`, which is the race again at every call site. Comments
+// aside, the file must be exactly this statement.
+const HELPER = 'e2e/lib/enable-click.mjs';
+const HELPER_CODE = 'export const enableAndClick = locator => locator.evaluate(b => { b.disabled = false; b.click(); });';
+const codeOf = src => src.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//')).join('\n');
+{
+  const split = "export const enableAndClick = locator => locator.evaluate(b => { b.disabled = false; }).then(() => locator.click());";
+  if (codeOf('// note\n' + HELPER_CODE + '\n') !== HELPER_CODE || codeOf(split) === HELPER_CODE) { console.log('FAIL self-test — the helper pin does not tell the one-task helper from a split one'); bad++; }
+  else console.log('PASS self-test — the helper pin accepts the one-task helper and refuses a split one');
+  let got = null;
+  try { got = codeOf(await readFile(join(ROOT, HELPER), 'utf8')); } catch { /* reported below */ }
+  if (got !== HELPER_CODE) { console.log(`FAIL ${HELPER} is not the pinned one-task helper — enable and click must stay in one synchronous evaluate callback`); bad++; }
+  else console.log(`PASS ${HELPER} — is the pinned one-task helper, byte for byte outside comments`);
 }
 
 // every JavaScript file under e2e/, nested directories included; installed
