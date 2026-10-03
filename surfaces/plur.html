@@ -28,11 +28,10 @@
   .plur{font-size:clamp(3.4rem,17vw,10rem);font-weight:800;letter-spacing:.06em;line-height:.95;
     background:var(--rainbow);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
     color:transparent;animation:drift 14s linear infinite;padding-bottom:.06em}
-  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;
-    text-transform:uppercase;color:var(--ink-mut);margin-top:6px}
+  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;color:var(--ink-mut);margin-top:6px}
   .open p{color:var(--ink-mut);max-width:34ch;margin:26px auto 0;font-size:1.04rem;line-height:1.6}
   .open .floor{color:var(--ink);margin-top:20px;font-size:1.06rem;max-width:32ch}
-  .hint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  .hint{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
     color:var(--ink-dim);margin-top:38px}
 
   @keyframes drift{to{background-position:220% 0}}
@@ -43,8 +42,7 @@
   .field{padding:78px 20px 88px;position:relative;border-top:1px solid var(--line)}
   .field .en{font-size:clamp(2.6rem,11vw,6.6rem);font-weight:800;letter-spacing:-.02em;line-height:1;
     text-align:center;color:var(--hue);text-shadow:0 0 62px var(--hue)}
-  .field .gloss{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--ink-dim);margin-top:16px}
+  .field .gloss{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--ink-dim);margin-top:16px}
   .f-peace{--hue:#8FE0C6}
   .f-love{--hue:#D655BB}
   .f-unity{--hue:#6FA9E0}
@@ -56,7 +54,7 @@
     font-family:inherit;text-align:center;border-radius:10px;transition:transform .22s,color .22s}
   .w .t{display:block;font-size:var(--sz,1.6rem);line-height:1.2;color:var(--ink);
     transition:color .22s,text-shadow .22s}
-  .w .r{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+  .w .r{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.05em;
     color:var(--ink-dim);margin-top:3px;opacity:0;transition:opacity .22s}
   .w:hover,.w:focus-visible{outline:none;transform:translateY(-3px)}
   .w:hover .t,.w:focus-visible .t{color:var(--hue);text-shadow:0 0 26px var(--hue)}
@@ -64,7 +62,7 @@
   .w.speaking .t{color:var(--hue);text-shadow:0 0 34px var(--hue)}
   .w.novoice{cursor:default}
   .w.novoice:hover{transform:none}
-  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:8px;
+  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:12px;
     letter-spacing:.05em;color:var(--guard);opacity:0;transition:opacity .22s}
   .w.novoice:hover .mute{opacity:.75}
   .w[data-sz="xl"]{--sz:2.5rem}
@@ -76,7 +74,7 @@
   /* ── the note ── */
   .note{max-width:640px;margin:52px auto 0;padding:22px 24px;border-left:3px solid var(--hue);
     background:rgba(255,255,255,.022);border-radius:0 12px 12px 0}
-  .note h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  .note h3{font-family:var(--mono);font-size:12px;letter-spacing:.2em;
     color:var(--hue);margin-bottom:11px}
   .note p{color:var(--ink-mut);font-size:1rem;line-height:1.65}
   .note p + p{margin-top:11px}
@@ -95,7 +93,7 @@
   .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
   .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
     border-radius:999px;padding:5px 11px;max-width:230px}
-  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .st{font-family:var(--mono);font-size:12px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
   .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
@@ -124,7 +122,7 @@
   .bloomed .rosehead{animation:sway 7.5s ease-in-out infinite}
   .mourning .rosehead{animation:none}
   @keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
-  .oddlaw{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:10px}
+  .oddlaw{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-dim);margin-top:10px}
   .oddpick{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
   .oddpick button{font-family:var(--mono);font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);
     background:transparent;color:var(--ink-mut);cursor:pointer;transition:all .25s}
@@ -139,7 +137,7 @@
   .talk{padding:80px 20px 90px;border-top:1px solid var(--line)}
   .talk .wrap{max-width:760px;margin:0 auto}
   .talk h2{font-size:clamp(1.7rem,6.4vw,2.8rem);font-weight:800;text-align:center;letter-spacing:-.01em}
-  .talk h2 .who{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.22em;
+  .talk h2 .who{display:block;font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.22em;
     color:var(--ai);margin-top:10px}
   .talk .sub{text-align:center;color:var(--ink-mut);max-width:48ch;margin:14px auto 0;line-height:1.6}
   .tongues{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:26px;
@@ -153,7 +151,7 @@
   .seeds button:hover{border-color:var(--sovereign);color:var(--ink);transform:translateY(-1px)}
   .thread{margin-top:28px;display:flex;flex-direction:column;gap:16px;min-height:40px}
   .msg{border:1px solid var(--line);border-radius:16px;padding:16px 18px;animation:rise .5s ease both;max-width:92%}
-  .msg .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;margin-bottom:8px}
+  .msg .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;margin-bottom:8px}
   .msg.you{align-self:flex-end;background:rgba(214,85,187,.07);border-color:rgba(214,85,187,.35)}
   .msg.you .tag{color:var(--you)}
   .msg.hive{align-self:flex-start;background:rgba(69,194,220,.05);border-color:rgba(69,194,220,.3)}
@@ -184,7 +182,7 @@
   .composer .send:hover{background:rgba(214,85,187,.12)}
   .composer .mic[data-live="1"]{border-color:var(--rose);color:var(--rose-lift);box-shadow:0 0 18px rgba(200,30,60,.35);animation:breathe 1.6s ease-in-out infinite}
   .composer .mic:disabled{opacity:.4;cursor:default}
-  .talkst{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
+  .talkst{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
   .thinking{display:inline-flex;gap:5px;align-items:center}
   .thinking i{width:6px;height:6px;border-radius:50%;background:var(--ai);animation:think 1.1s ease-in-out infinite;font-style:normal}
   .thinking i:nth-child(2){animation-delay:.18s}.thinking i:nth-child(3){animation-delay:.36s}
@@ -199,7 +197,7 @@
   .pillar{border:1px solid var(--line);border-radius:14px;padding:18px;transition:all .3s;animation:rise .6s ease both}
   .pillar:hover{transform:translateY(-3px);border-color:var(--pc)}
   .pillar .word{font-weight:800;font-size:1.1rem;color:var(--pc)}
-  .pillar .is{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
+  .pillar .is{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
   .pillar p{color:var(--ink-mut);font-size:.9rem;line-height:1.55;margin-top:10px}
   .p-peace{--pc:var(--guard)} .p-love{--pc:var(--you)} .p-unity{--pc:var(--sovereign)} .p-respect{--pc:var(--info)}
   .stone .dock{margin-top:30px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mut)}
@@ -405,6 +403,7 @@ body[data-reg="cypherpunk"] :is(.voicebox,.voicebox button,.voicebox select,.pri
 body[data-reg] #eternal{border:0;padding-bottom:0}
 </style>
 <link rel="stylesheet" href="skaists.css">
+<style>/* 44px control floor */#vsel,#myLang,#learnLang{min-height:44px}</style>
 </head>
 <body data-reg="bee" data-bee-theme="custom"><nav aria-label="Festivals, PLUR, SKAISTS and BNR" style="padding:16px;display:flex;gap:16px;flex-wrap:wrap"><a href="festival/index.html">Festivals</a><a href="plur.html" aria-current="page">PLUR</a><a href="doors/skaists.html">SKAISTS</a><a href="index.html">BNR</a></nav>
 
