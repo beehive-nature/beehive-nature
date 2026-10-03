@@ -1,7 +1,7 @@
 # Genealogy public edition refresh
 
-Current continuation: the pkg13 receipt below supersedes the earlier pkg12
-section, which is retained as historical evidence.
+Current edition: the final pkg14 receipt below supersedes pkg13 and pkg12.
+Earlier sections are retained as historical evidence.
 
 Seat: Codex, `C:/Users/travi/wt-codex-genealogy-eternalization`.
 
