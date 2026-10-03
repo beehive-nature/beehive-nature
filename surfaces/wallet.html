@@ -171,7 +171,7 @@ footer .wl-foot>summary{justify-content:center}
 
 /* One identity and action bar across every wallet presentation and task. */
 #wallet-identity{position:sticky;top:0;z-index:8;background:var(--bg);order:-7;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:10px}
-#wallet-identity .wallet-brand-heading{margin:0;background:none;font:inherit;letter-spacing:0;line-height:1.3}
+#wallet-identity .wallet-brand-heading{margin:0;background:none;font:inherit;font-family:var(--reg-font-title);font-weight:700;letter-spacing:0;line-height:1.3}
 #wallet-identity .wallet-brand{font-size:clamp(20px,3vw,24px);text-decoration:none;color:var(--ink);letter-spacing:0}
 #wallet-identity nav{display:flex;gap:8px;flex-wrap:wrap}
 #wallet-identity nav a{display:inline-flex;align-items:center;min-height:44px;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:20px;text-decoration:none}
@@ -2403,7 +2403,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
-<script src="arweave.js?v=2"></script>
+<script src="arweave.js?v=3"></script>
 <!-- the estate's ONE level-truth module — the same file market.html and
      museum.html load. Imported, never re-derived: a third copy of the SeedData
      decode is exactly how the lowest-tier-art bug comes back. -->
@@ -4970,7 +4970,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js');
-  spawnAdapter('arweave', 'wallet-adapter-arweave.js');
+  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=2');
 
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
      window.arweaveWallet inject (public key + extension sign). Vault JWK is
@@ -5026,11 +5026,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + esc(e && e.message || e); }
       return null;
     }
-    if(typeof opts.review==='function'){
-      var wire=JSON.parse(intent.wire_json);
-      if(!/^\d+$/.test(String(wire.reward))||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==publicJwk.n||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
-      if(!await opts.review({feeWinston:String(wire.reward),bytes:bytes.length,address:await window.BNRAR.addressOf(publicJwk)}))return {phase:'cancelled'};
-    }
+    var wire=JSON.parse(intent.wire_json);
+    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==publicJwk.n||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
+    // Reconstruct the signing bytes from the exact public file, tags and fee.
+    // A worker digest alone cannot bind what the user reviewed to the wire body.
+    var rebuilt=await window.BNRAR.buildUnsigned(publicJwk,bytes,tags.map(function(tag){return {name:tag[0],value:tag[1]}}),{reward:String(wire.reward),anchor:wire.last_tx});
+    if(JSON.stringify(rebuilt.wire)!==JSON.stringify(wire)||window.BNRAR.b64u(rebuilt.sigData)!==window.BNRAR.b64u(b64ToBytes(intent.unsigned_bytes)))throw new Error('The signing bytes do not match the reviewed file transaction');
+    if(typeof opts.review==='function'&&!await opts.review({feeWinston:String(wire.reward),bytes:bytes.length,address:await window.BNRAR.addressOf(publicJwk)}))return {phase:'cancelled'};
     var sgn;
     try { sgn = await vaultSign(intent, signOpts) }
     catch (e) {

@@ -11,11 +11,11 @@
    First-party, no bundler (Turbo/ArDrive ruled out by founder order): a
    format-2 data transaction built and signed in the browser with WebCrypto
    only. Serialization mirrors arweave-js exactly (deepHash SHA-384, 32-byte
-   big-endian merkle notes, RSASSA-PKCS1-v1_5-SHA256 over the v2 signature
+   big-endian merkle notes, RSA-PSS-SHA256 over the v2 signature
    data, id = sha256(signature)); the live node is the oracle that proved it.
    Gateway rotation reuses the Base-adapter pattern: the first choice per
-   call is UNIFORMLY RANDOM across public gateways — no single operator learns
-   which IPs are about to anchor what. Keys NEVER live here: the JWK is held
+   call is uniformly randomized across public gateways. Each gateway still
+   observes the IP and requests it receives; rotation is not anonymity. Keys NEVER live here: the JWK is held
    by the vault (BNRVAULT) and only handed to sign(). */
 (function () {
   'use strict';
@@ -152,7 +152,7 @@
     return r.text.replace(/"/g, ''); // winston, string
   }
   async function fee(bytes, target) {
-    var r = await rpc('GET', '/price/' + bytes + (target ? ',' + target : ''));
+    var r = await rpc('GET', '/price/' + bytes + (target ? '/' + encodeURIComponent(target) : ''));
     if (!r.ok) throw new Error('fee quote failed: ' + r.text.slice(0, 80));
     return r.text.replace(/"/g, '');
   }
@@ -274,21 +274,30 @@
     var id = await sha256(sig);
     return { signature: b64u(sig), id: b64u(id) };
   }
-  async function txStatus(txid) {          // the rail read for confirm(): GET /tx/{id}
-    var order = shuffled();
-    for (var i = 0; i < order.length; i++) {
-      try {
-        var r = await fetch(order[i] + '/tx/' + encodeURIComponent(txid), { method: 'GET' });
-        var text = await r.text();
-        if (r.status === 200) {
-          var body = null; try { body = JSON.parse(text) } catch (e) {}
-          return { gateway: order[i], status: r.status, tx: body && body.status, confirmations: (body && body.confirmations) || 0 };
+  async function txStatus(txid) {
+    // The transaction body is NOT confirmation. Read the documented status API:
+    // https://docs.arweave.org/developers/arweave-node-server/http-api#get-transaction-status
+    if(!/^[A-Za-z0-9_-]{43}$/.test(txid))throw new Error('Invalid Arweave transaction ID');
+    var order=shuffled();
+    for(var i=0;i<order.length;i++){
+      var controller=new AbortController(),timer=setTimeout(function(){controller.abort()},3000);
+      try{
+        var response=await fetch(order[i]+'/tx/'+encodeURIComponent(txid)+'/status',{method:'GET',signal:controller.signal});
+        var text=await response.text();
+        if(response.status===200){
+          var body=null;try{body=JSON.parse(text)}catch(error){}
+          if(body&&Number.isSafeInteger(body.block_height)&&body.block_height>=0&&Number.isSafeInteger(body.number_of_confirmations)&&body.number_of_confirmations>0&&/^[A-Za-z0-9_-]{64}$/.test(body.block_indep_hash)){
+            return {gateway:order[i],status:200,tx:'confirmed',confirmations:body.number_of_confirmations,block_height:body.block_height,block_indep_hash:body.block_indep_hash};
+          }
+          continue; // An HTTP success with malformed evidence is never a confirmation.
         }
-        if (r.status === 404 || r.status === 410) return { gateway: order[i], status: r.status, tx: 'unknown' };
-        if (r.status >= 400 && r.status < 500) return { gateway: order[i], status: r.status, tx: 'refused' };
-      } catch (e) { /* walk */ }
+        if(response.status===202)return {gateway:order[i],status:202,tx:'pending',confirmations:0};
+        if(response.status===404||response.status===410)return {gateway:order[i],status:response.status,tx:'unknown',confirmations:0};
+        if(response.status>=400&&response.status<500&&response.status!==429)return {gateway:order[i],status:response.status,tx:'refused',confirmations:0};
+      }catch(error){/* Try another gateway after timeout or transport failure. */}
+      finally{clearTimeout(timer)}
     }
-    return { gateway: null, status: 0, tx: 'unreachable' };
+    return {gateway:null,status:0,tx:'unreachable',confirmations:0};
   }
 
   globalThis.BNRAR = {
