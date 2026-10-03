@@ -717,7 +717,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
   <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
   <div class="wlb-list">
-    <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.bee.have.s">every chain, read live in this browser</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.wallet.accounts">Accounts &amp; coins</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="move"><span class="wlb-i" aria-hidden="true">💸</span><span class="wlb-t"><b data-i18n="wl.bee.move">pay or get paid</b><small data-i18n="wl.bee.move.s">send, receive or swap</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="add"><span class="wlb-i" aria-hidden="true">💳</span><span class="wlb-t"><b data-i18n="wl.bee.add">add money</b><small data-i18n="wl.bee.add.s">the ways to put money in</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.wallet.keep">bPay once · store a file</b><small data-i18n="wl.wallet.networks">Autonomi / ANT · Arweave / AR</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
@@ -745,7 +745,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" >bPay once · Autonomi / ANT or Arweave / AR</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" >bPay once · Autonomi / ANT or Arweave / AR</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -1154,8 +1154,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="bal-sec" data-wl-task="have">
-  <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
-  <h2 data-reg="bee">⚡ <span data-i18n="wl.bee.h.bal">what you hold, on every chain</span></h2>
+  <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.wallet.accounts">Accounts &amp; coins</span></h2>
+  <h2 data-reg="bee">⚡ <span data-i18n="wl.wallet.accounts">Accounts &amp; coins</span></h2>
   <div id="wallet-accounts">
     <h3>Accounts &amp; following</h3>
     <p class="wa-note">Bring your other accounts together, or follow any public address. No key or wallet connection needed.</p>

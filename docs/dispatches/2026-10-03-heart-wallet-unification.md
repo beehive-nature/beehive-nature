@@ -113,3 +113,8 @@ Source evidence: the exact pinned host bundle's `getInitTarget` selects `CoreInS
 The actual pinned SDK initialized in Suite web mode with **zero WebSocket attempts**, without invoking a device/export/signing method. Receipt: `docs/receipts/wallet-trezor-suite-web-2026-10-03.json`. Trezor browser battery is **24/24**, including the explicit transport/application-name assertion. No local server was started. Current official browser guidance: https://trezor.io/guides/trezor-suite/use-trezor-suite-in-your-browser-web-app .
 
 For 3eebfdd25, the wallet, static, Rust/payment, node and standards-meter CI jobs passed. The push run's ETERNAL job failed only PLUR's raver festival scroll-position assertion; the parallel PR run of the exact same source passed that suite, and preceding 17f173238 passed the complete workflow. The failed job was rerun unchanged; no assertion or threshold was weakened. This history is retained rather than erased by the subsequent transport revision.
+
+
+## Final visible capability wording
+
+The final mobile inspection found four inherited headings promising live reads on every chain, despite the network inventory correctly marking unwired readers. Those headings now reuse the translated Accounts & coins label across all registers. This removes the contradictory capability promise without inventing translations or changing reader availability.

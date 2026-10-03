@@ -42,14 +42,14 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
   const { ctx, p, errs } = await pageAt('wallet.html', { lang: 'ru', reg: 'bee' });
   ok('wallet bee register renders ru corpus-exact',
     await p.locator('[data-i18n="wl.wallet.intro"]').textContent() === cell('wl.wallet.intro', 'ru'));
-  ok('wallet account navigation translates and brand stays exact', (await p.locator('[data-i18n="wl.wallet.accounts"]').textContent())===cell('wl.wallet.accounts','ru') && (await p.locator('#wallet-identity h1').textContent())==='skaists heART WALLet');
+  ok('wallet account navigation translates and brand stays exact', (await p.locator('#wallet-identity [data-i18n="wl.wallet.accounts"]').textContent())===cell('wl.wallet.accounts','ru') && (await p.locator('#wallet-identity h1').textContent())==='skaists heART WALLet');
   ok('wallet zero page errors', errs.length === 0, errs.join(' | '));
   await ctx.close();
 }
 {
   const { ctx, p } = await pageAt('wallet.html', { lang: 'ru', reg: 'cypherpunk' });
   ok('wallet cypher register renders ru corpus-exact',
-    await p.locator('[data-i18n="wl.wallet.accounts"]').textContent() === cell('wl.wallet.accounts', 'ru'));
+    await p.locator('#wallet-identity [data-i18n="wl.wallet.accounts"]').textContent() === cell('wl.wallet.accounts', 'ru'));
   await ctx.close();
 }
 
