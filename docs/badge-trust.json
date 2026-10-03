@@ -1,0 +1,6 @@
+{
+ "schema": "proof-lights/trust/1",
+ "keys": [],
+ "revoked": [],
+ "law": "the pinned CI-attestation keys for proof-lights status documents. A document's signature names a key_id; the key itself lives ONLY here, never inside a document, and the gate refuses any signature whose key_id is not pinned here. Validity is judged at signing time (signed_at_ms within valid_from..valid_until): an attestation made while the key was valid stays verifiable after the key retires, while the signing job refuses new signatures the moment validity ends. The revoked list is absolute: a revoked key fails every signature it ever made, because revocation means compromise, not age. keys is empty until the founder generates the production key pair (bsigner keygen --alg ml-dsa-65), pins the verifying key here by reviewed commit, and stores the seed in the protected badge-signing environment — see docs/dispatches/2026-09-30-proof-lights-ci-signing.md for the rotation procedure."
+}

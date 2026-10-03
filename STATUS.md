@@ -36,6 +36,23 @@ in later entries (for example the proof-lights probes, 21/21) measure one suite 
 do not replace it. The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
+- `2026-09-30` — **Proof lights: the CI-signing card landed (zCode seat).** Canonical signed bytes
+  (`canonicalBytes`, signature excluded), the pinned trust file `docs/badge-trust.json`
+  (`proof-lights/trust/1`, ships empty — no production key exists yet), the signing half
+  `e2e/sign-badges.mjs` (head_sha + run-id binding, trust-before-ink, gate-before-ink, env-delivered
+  seed), two `bsigner` surfaces (`sign --seed-env`, `verify-env` with an explicit public key), the
+  gate's step 8 verifying `bheart.signature/1` envelopes against pinned trust (key id derived from
+  the pinned key, validity over the claimed signing time with a no-predating-the-measurement check,
+  revocation; fails closed without a verifier), and the `badge-signing` CI job (pushes to main only,
+  protected environment, PR content never signed, signed trio published as an artifact). Independent
+  review at the first head REQUEST_CHANGES (4 findings incl. a dead artifact upload and an unbound
+  run id) — all repaired; RENEWED review APPROVE at `047a4c71b`; its two P3 notes (forward-dressed
+  signing time, crash-instead-of-named-refusal) repaired in the follow-up commit; probes
+  `node --test render-badges.test.mjs` → 41/41 on disposable keys; `cargo test --locked -p bsigner`
+  → 36; `--check` → 1/1 on the committed
+  unsigned badge; `lint-ci-shape` 102/102; secret-scan clean. Production key pair + environment
+  secret remain the founder's gesture (procedure in the dispatch). Dispatch:
+  `docs/dispatches/2026-09-30-proof-lights-ci-signing.md`.
 - `2026-09-29` — **#250 merged; #247 brought level with `main`.** #250 landed as `eeafc5b`
   (independent review APPROVE at `093c9d1`, CI green at that head). This merge of `main` into
   #247 keeps both sides of the only conflict, these ledger lines, newest first, and
