@@ -78,3 +78,48 @@ Built-in browser on the founder's laptop network, public Autonomi network.
 Second commit: quiet limit 12 s, cap 30 s, and the status names the step the
 SDK reports. The short demo clip was not tested; its full address is not in
 this repository.
+
+## Third commit: chunk lanes, no service worker
+
+The founder's own device then failed a different way: "The media service
+worker did not take control of this page; reload once and retry", after a
+1.03 s file open. A page loaded by a hard refresh is never controlled by a
+service worker, so the SDK's media bridge cannot serve it. Founder order:
+take the time, direct performance before everything else.
+
+Measured in the live page, same clip, same laptop network:
+
+- Chunk size. A 1-byte read at 30 x 4194304 - 2000 took 4.2 s; a second
+  1-byte read at 29 x 4194304 + 100 took 13.4 s. Were chunks 4 MiB those two
+  offsets would share a chunk and the second read would be instant. They do
+  not: chunks are 4190208 B (4 MiB less 4 KiB).
+- Reads that ignore that boundary fetch chunks twice. Four concurrent 4 MiB
+  reads delivered 16 MiB of plaintext while the peer connections received
+  about 32 MB.
+- Six concurrent reads on chunk boundaries: file open 8.3 s, first chunk in
+  order 19.4 s after open, nine chunks (37.7 MB) 48 s after open, about
+  0.8 MB/s. The SDK's own streaming reader gave about 0.6 MB/s. Several
+  clients at once were no faster.
+- The relay on the same network measured 5 MB/s. The comparison table has
+  the unmodified SDK (try.autonomi.com) at 456 s for this clip, which is
+  0.47 MB/s, and ants.tube at 83.6 s; the tester reports ants.tube's client
+  files do not hash to the SDK release. The remaining gap is inside the
+  SDK's Rust core, not in how a page calls it.
+
+What changed:
+
+- Direct playback no longer uses a service worker or the SDK's MediaBridge.
+  It opens the file with openFile and reads whole chunks on their real
+  boundaries, six at a time, handing them in order to the same progressive
+  player the relay feeds. Direct playback now gets that player's start rule,
+  whole-file SHA-256 and device cache.
+- A valid address on the direct route starts finding the video before Watch
+  is pressed.
+- Relay recovery: 12 s without progress (30 s at most) before the file is
+  open, 45 s without one arriving chunk after that. If frames were already
+  playing, the relay continues from the same moment.
+- Tests rewritten for this engine: boundary reads, Blob playback, no service
+  worker registered, connection reuse, both silent-failure paths.
+
+Not done: a core that fetches faster. That means building the SDK's Rust
+core ourselves with connection reuse and no duplicate fetches.

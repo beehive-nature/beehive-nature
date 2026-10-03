@@ -510,16 +510,16 @@ document.addEventListener('DOMContentLoaded',function(){
     const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
     const ny = notYet(), pl = feed && feed.plan, d = metrics.dec, vf=videoFacts(), direct=metrics.path==='webrtc';
     set('n-size', metrics.bytes ? fmtMb(metrics.bytes) : ny);
-    set('n-rate', direct?'wire rate not measured':metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
+    set('n-rate', metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
     set('n-dur', pl ? pl.dur.toFixed(2) + ' s' : direct&&vf.duration!=null ? vf.duration.toFixed(2)+' s' : ny);
     set('n-bps', pl ? (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s' : direct&&vf.duration&&metrics.direct?.size ? (8*metrics.direct.size/vf.duration/1e6).toFixed(1)+' Mb/s · file average' : ny);
     set('n-codec', pl && pl.codec || ny);
     set('n-frame', pl && pl.w ? pl.w + '×' + pl.h + (pl.fps ? ' · ' + (+pl.fps.toFixed(2)) + ' fps' : '') : direct&&vf.width ? vf.width+'×'+vf.height : ny);
     set('n-dec', d ? 'supported ' + d.supported + ' · smooth ' + d.smooth : ny);
     if (!d) set('dec', ny);
-    set('n-blob', direct?'session ranges · no Blob':feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
-    set('n-cl', direct?'not applicable · direct reader':metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
-    set('n-chunk', direct?'not exposed by SDK':metrics.firstChunk || ny);
+    set('n-blob', feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
+    set('n-cl', metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
+    set('n-chunk', direct?'not applicable · direct reader':metrics.firstChunk || ny);
     set('n-ranges', metrics.acceptRanges || ny);
     set('n-ttfb', fmtMs(metrics.ttfbMs));
     set('n-ttff', fmtMs(metrics.ttffMs));
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (done) {
       if (metrics.doneMs != null) {
         done.hidden = false;
-        done.textContent = direct ? 'All plaintext ranges read in '+(metrics.doneMs/1000).toFixed(2)+' s · session only' : lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
+        done.textContent = direct ? 'done in '+(metrics.doneMs/1000).toFixed(2)+' s from Autonomi storage nodes' : lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
       } else { done.hidden = true; done.textContent = ''; }
     }
   };
@@ -1341,15 +1341,21 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
   const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.1/';
-  // The relay takes over after DIRECT_QUIET_MS without direct progress, or DIRECT_CAP_MS without a frame.
-  const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STALL_MS = 5000, ROUTE_KEY = 'bnr.bview.route';
-  let directPool = null, directSession = null, restorePause = false, bridgeTracked = false;
+  // Autonomi self-encryption cuts a file into CHUNK-sized pieces (three equal pieces under 3 × CHUNK).
+  // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
+  const CHUNK = 4190208, DIRECT_LANES = 6;
+  // The relay takes over after DIRECT_QUIET_MS without progress or DIRECT_CAP_MS before the file opens,
+  // or after DIRECT_STARVE_MS without one arriving chunk once it is open.
+  const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STARVE_MS = 45000, ROUTE_KEY = 'bnr.bview.route';
+  let directPool = null, directOpen = null, directRun = null, restorePause = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
-  const stopDirect = () => {
-    const session = directSession; directSession = null;
-    if (session) { session.dispose(); session.source?.close(); }
+  const stopDirect = () => { const run = directRun; directRun = null; if (run) run.stop(); };
+  const dropOpen = () => {
+    const open = directOpen; directOpen = null;
+    if (open) { open.stop.abort(); open.reader.then(reader => reader.close()).catch(() => {}); }
   };
   const closePool = () => {
+    dropOpen();
     const pool = directPool; directPool = null;
     if (pool) { pool.stop.abort(); pool.client.then(client => client.close()).catch(() => {}); }
   };
@@ -1361,15 +1367,41 @@ document.addEventListener('DOMContentLoaded',function(){
     pool.client.catch(() => { if (directPool === pool) directPool = null; });
     return directPool = pool;
   };
-  const directCapable = () => isSecureContext && 'serviceWorker' in navigator && 'RTCPeerConnection' in window;
-  // Choosing the direct route connects at once, before Watch is pressed. The choice is remembered.
+  const directCapable = () => isSecureContext && 'RTCPeerConnection' in window;
+  // A valid address on the direct route starts finding the video before Watch is pressed.
+  const preOpen = raw => {
+    const address = parse(raw);
+    if (!address || $('playback-route').value !== 'direct' || !directCapable()) return;
+    if (directOpen && directOpen.address === address) return;
+    dropOpen();
+    const stop = new AbortController();
+    const open = { address, stop, reader: null, heard: null };
+    const reader = open.reader = openPool().client.then(client => client.openFile(address, { signal: stop.signal, onProgress: event => { if (open.heard) open.heard(event); } }));
+    reader.catch(() => { if (directOpen === open) directOpen = null; });
+    directOpen = open;
+  };
+  const takeOpen = address => {
+    const open = directOpen;
+    if (!open || open.address !== address) return null;
+    directOpen = null; return open;
+  };
+  const directPieces = size => {
+    const pieces = [];
+    if (size < 3 * CHUNK) {
+      const third = Math.floor(size / 3);
+      if (third > 0) pieces.push([0, third], [third, third], [2 * third, size - 2 * third]); else pieces.push([0, size]);
+    } else for (let at = 0; at < size; at += CHUNK) pieces.push([at, Math.min(CHUNK, size - at)]);
+    return pieces;
+  };
+  // Choosing the direct route connects at once. The choice is remembered on this device.
   try { if (localStorage.getItem(ROUTE_KEY) === 'direct') $('playback-route').value = 'direct'; } catch {}
   if ($('playback-route').value === 'direct' && directCapable()) openPool();
   $('playback-route').addEventListener('change', () => {
     const route = $('playback-route').value;
     try { localStorage.setItem(ROUTE_KEY, route); } catch {}
-    if (route === 'direct' && directCapable()) openPool();
+    if (route === 'direct' && directCapable()) { openPool(); preOpen($('addr').value); }
   });
+  $('addr').addEventListener('input', () => preOpen($('addr').value));
   addEventListener('pagehide', () => { stopDirect(); closePool(); });
   async function bounded(work, signal, milliseconds) {
     let timer, aborted;
@@ -1382,113 +1414,131 @@ document.addEventListener('DOMContentLoaded',function(){
       })]);
     } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
   }
+  // Direct playback: chunks come straight from storage nodes, several at once, and are handed in
+  // order to the same progressive player the relay feeds. No service worker is involved.
   async function tryDirect(address, signal, my) {
-    let source, session, pool, quiet, cap, ticker, settled = false;
+    let reader = null, opening = null, pool, quiet, cap, ticker, starve, settled = false, readError = null;
     const startedAt = performance.now();
-    let stage = 'Loading the direct reader', movedAt = startedAt;
+    let stage = 'Connecting to Autonomi nodes', movedAt = startedAt;
     const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
     const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then relay.');
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
-    // Every sign of direct progress restarts the quiet clock; the cap bounds the whole wait for a frame.
-    // The SDK names each step of opening a file; show the viewer which one is running.
-    const heard = event => { const said = String(event && event.message || ''); if (!session && said.startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
+    // Every sign of direct progress restarts the quiet clock; the cap bounds the wait for the file to open.
     const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => failed.abort(), DIRECT_QUIET_MS); };
+    // The SDK names each step of opening a file; show the viewer which one is running.
+    const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
     cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
+    const receipt = metrics.direct = {sdk:'0.1.1',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
     try {
-      metrics.direct={sdk:'0.1.1',reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,startupElapsedMs:null,connectMs:null,openMs:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
       if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
       metrics.path = 'webrtc-connecting'; paintNerd();
       pool = openPool();
-      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, capLeft());
-      // createMediaSource opens the SDK's streaming reader; this hook lets bViEw count its ranges.
-      if (!bridgeTracked) {
-        const attach = MediaBridge.prototype.attach;
-        MediaBridge.prototype.attach = function (reader, options) { return attach.call(this, options && options.bviewTrack ? options.bviewTrack(reader) : reader, options); };
-        bridgeTracked = true;
-      }
-      if (my !== job || signal.aborted) return true;
-      const connectAt=performance.now();
-      stage = 'Connecting to Autonomi nodes'; startupStatus();
+      const connectAt = performance.now();
       const client = await bounded(pool.client, failed.signal, capLeft());
       if (my !== job || signal.aborted) return true;
-      metrics.direct.connectMs=performance.now()-connectAt; moved();
-      const openAt=performance.now();
+      receipt.connectMs = performance.now() - connectAt; moved();
+      const openAt = performance.now();
       stage = 'Finding the video'; startupStatus();
-      // Count completed plaintext ranges, never infer wire bytes from lookup counters.
-      const track = reader => {
-       metrics.direct.openMs=performance.now()-openAt;metrics.direct.size=reader.size;
-       session = { my, receipt:metrics.direct, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => { failed.abort(); } };
-       stage = 'Loading the first video frame'; moved(); startupStatus();
-       return {
-        address: reader.address, name: reader.name, size: reader.size, contentType: reader.contentType,
-        close: () => reader.close(),
-        read: async (start, length) => {
-          const receipt=session.receipt, readAt=performance.now();receipt.requests++;
-          let bytes;
-          try{bytes=await reader.read(start,length,{signal:failed.signal});}catch(error){if(my===job&&!signal.aborted){receipt.failed++;paintNerd();}throw error;}
-          moved();
-          if (my === job && !signal.aborted) {
-            receipt.completed++;receipt.readBytes+=bytes.length;receipt.readMs+=performance.now()-readAt;
-            const sorted = [...session.ranges, [start, start + bytes.length]].sort((a,b) => a[0]-b[0]);
-            const merged = [];
-            for (const range of sorted) { const tail=merged[merged.length-1]; if(tail && range[0]<=tail[1]) tail[1]=Math.max(tail[1],range[1]); else merged.push([...range]); }
-            session.ranges = merged; session.bytes = merged.reduce((n,r) => n+r[1]-r[0],0);
-            metrics.bytes = session.bytes;
-            receipt.uniqueBytes=session.bytes;
-            if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now()-metrics.t0;
-            if(receipt.firstReadMs==null)receipt.firstReadMs=metrics.ttfbMs;
-            if (session.bytes === session.size && metrics.doneMs == null) metrics.doneMs = performance.now()-metrics.t0;
-            paintNerd();
-          }
-          return bytes;
-        }
-       };
-      };
-      source = await bounded(client.createMediaSource(address, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal, onProgress:heard, bviewTrack:track }), failed.signal, capLeft());
-      if (my !== job || signal.aborted) { source.close(); return true; }
-      if (!session) throw new Error('Direct reader was not opened');
-      session.source = source; directSession = session;
-      metrics.path = 'webrtc'; metrics.acceptRanges = 'local range bridge';
-      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, capLeft());
-      if (my !== job || signal.aborted) return true;
-      if (!ok) throw new Error('Direct media did not produce a frame');
+      const early = takeOpen(address);
+      if (early) early.heard = heard;
+      opening = early ? early.reader : client.openFile(address, { signal: failed.signal, onProgress: heard });
+      reader = await bounded(opening, failed.signal, capLeft());
+      if (my !== job || signal.aborted) { reader.close(); return true; }
       settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker);
-      metrics.direct.startupElapsedMs=performance.now()-startedAt;
-      routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
-      playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null);
-      // A stopped decoder or a network stall falls back once, preserving the playhead.
-      let stallTimer = null, progressedAt = v.currentTime || 0;
-      const fallback = reason => {
-        if (my !== job || directSession !== session) return;
-        const at=v.currentTime||0, paused=v.paused;
-        const result=reason + ' at ' + at.toFixed(1) + ' s' + (metrics.ttffMs == null ? '' : ' (first frame ' + (metrics.ttffMs/1000).toFixed(1) + ' s)');
-        const directReceipt={...metrics.direct,fallback:reason,playhead:at};
-        view(address, { relay:true, resumeAt:at, paused, reason:result, directReceipt });
+      const plan = directPieces(reader.size);
+      receipt.openMs = performance.now() - openAt; receipt.size = reader.size; receipt.chunks = plan.length;
+      receipt.startupElapsedMs = performance.now() - startedAt;
+      metrics.path = 'webrtc'; metrics.cl = reader.size; metrics.acceptRanges = 'chunk lanes';
+      const lanes = Math.min(DIRECT_LANES, plan.length);
+      routeStatus('Direct Autonomi · WebRTC · ' + lanes + ' chunks at a time.');
+      note('direct open · ' + reader.size + ' B · ' + plan.length + ' chunks · ' + lanes + ' at a time');
+      paintNerd();
+      // Lanes fetch chunks out of order; the player receives them in order.
+      let next = 0, emit = 0;
+      const arrived = new Map(), waiters = [];
+      const wake = () => { while (waiters.length) waiters.shift()(); };
+      const wait = () => new Promise(resolve => waiters.push(resolve));
+      const fed = () => { clearTimeout(starve); starve = setTimeout(() => { if (!readError) readError = new Error('Direct chunks stopped arriving'); failed.abort(); wake(); }, DIRECT_STARVE_MS); };
+      const lane = async () => {
+        while (!failed.signal.aborted && next < plan.length) {
+          // Never hold more than two rounds of finished chunks ahead of the player.
+          if (next - emit >= DIRECT_LANES * 2) { await wait(); continue; }
+          const index = next++, start = plan[index][0], length = plan[index][1], readAt = performance.now();
+          receipt.requests++;
+          try {
+            const bytes = await reader.read(start, length, { signal: failed.signal });
+            if (bytes.length !== length) throw new Error('Direct chunk came back short');
+            receipt.completed++; receipt.readBytes += bytes.length; receipt.uniqueBytes += bytes.length; receipt.readMs += performance.now() - readAt;
+            if (receipt.firstReadMs == null) receipt.firstReadMs = performance.now() - metrics.t0;
+            arrived.set(index, bytes); fed(); wake();
+            if (my === job) paintNerd();
+          } catch (error) {
+            if (!failed.signal.aborted) { receipt.failed++; if (!readError) readError = error; failed.abort(); }
+            wake(); return;
+          }
+        }
       };
-      const ready = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; session.sounded=true; progressedAt=v.currentTime||0; pub(); };
-      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); if (stallTimer === null) stallTimer=setTimeout(() => fallback('Direct playback stalled'),DIRECT_STALL_MS); };
-      const error = () => fallback('Direct media error');
-      const paused = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; pub(); };
-      const progressed = () => { if(!v.paused && !v.seeking && v.currentTime > progressedAt + 0.01) ready(); };
-      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
-      session.sounded=!v.paused;
-      session.dispose=() => { failed.abort(); clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); };
-      pub(); goSound(my); return true;
+      const rd = {
+        read: async () => {
+          for (;;) {
+            if (readError) throw readError;
+            if (emit >= plan.length) return { done: true, value: undefined };
+            const bytes = arrived.get(emit);
+            if (bytes) {
+              arrived.delete(emit); emit++; wake();
+              if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now() - metrics.t0;
+              return { done: false, value: bytes };
+            }
+            if (failed.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+            await wait();
+          }
+        },
+        cancel: () => { failed.abort(); wake(); }
+      };
+      directRun = { my, stop: () => { failed.abort(); wake(); } };
+      fed();
+      for (let i = 0; i < lanes; i++) lane();
+      frameGen++;
+      v.removeAttribute('src'); v.load();
+      pg.hidden = $('got').hidden = false; pg.value = 0;
+      try { await readBinaryStream(rd, new Uint8Array(0), reader.size, signal, my, address); }
+      catch (error) { if (!readError) readError = error; }
+      const whole = emit >= plan.length && !readError;
+      clearTimeout(starve); failed.abort(); wake();
+      if (directRun && directRun.my === my) directRun = null;
+      try { reader.close(); } catch {}
+      reader = null;
+      if (my !== job || signal.aborted) return true;
+      pg.hidden = $('got').hidden = true;
+      if (!whole) throw readError || new Error('Direct playback stopped early');
+      receipt.firstFrameMs = metrics.ttffMs;
+      routeStatus('Direct Autonomi · WebRTC. Every byte came from storage nodes.');
+      paintNerd();
+      return true;
     } catch (error) {
-      failed.abort();
-      if (session && directSession === session) stopDirect();
-      source?.close(); session?.dispose();
+      failed.abort(); clearTimeout(starve);
+      if (directRun && directRun.my === my) directRun = null;
+      if (reader) { try { reader.close(); } catch {} }
+      else if (opening) opening.then(late => late.close()).catch(() => {});
       if (my !== job || signal.aborted) return true;
       // Keep an open connection for the next video; drop only one that never connected.
       if (!pool || !pool.ready) closePool();
-      metrics.direct.startupElapsedMs=performance.now()-startedAt;
-      metrics.direct.fallback=error.name==='AbortError'?'startup timeout':error.message;
-      metrics.path=''; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
-      routeStatus('Direct playback could not start: ' + (error.name==='AbortError'?'storage nodes went quiet':error.message) + '. Using the relay.');
-      note('direct fallback · ' + (error.name === 'AbortError' ? 'startup timeout' : error.message));
+      const why = readError ? readError.message : error.name === 'AbortError' ? 'storage nodes went quiet' : error.message;
+      if (receipt.startupElapsedMs == null) receipt.startupElapsedMs = performance.now() - startedAt;
+      receipt.fallback = why; receipt.firstFrameMs = metrics.ttffMs;
+      note('direct fallback · ' + why);
+      pg.hidden = $('got').hidden = true;
+      const at = v.currentTime || 0;
+      if (playing === my && at > 0) {
+        // Frames were already playing: continue through the relay from the same moment.
+        view(address, { relay:true, resumeAt:at, paused:v.paused, reason:why + ' at ' + at.toFixed(1) + ' s', directReceipt:{...receipt, playhead:at} });
+        return true;
+      }
+      metrics.path=''; metrics.cl=null; metrics.acceptRanges=null; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
+      routeStatus('Direct playback could not start: ' + why + '. Using the relay.');
       return false;
     } finally { settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker); signal.removeEventListener('abort',cancelled); }
   }
@@ -1552,16 +1602,15 @@ document.addEventListener('DOMContentLoaded',function(){
   // ETERNAL FRONT: a read-only snapshot of the engine for the three renderers (docs/design/eternal).
   // The facts on every front come from here and from nowhere else; it never writes to the engine.
   window.__bviewEngine = () => {
-    const ds = directSession && directSession.my === job ? directSession : null;
-    const st = feed, pl = st && st.plan || (ds && Number.isFinite(v.duration) && v.duration > 0 ? {dur:v.duration,m0:0,m1:ds.size,w:v.videoWidth,h:v.videoHeight,codec:'browser decoder',fps:0} : null);
+    const st = feed, pl = st && st.plan || null;
     return {
       door: DOOR, cache: CACHE, rule: { safety: SAFETY, margin: MARGIN, ahead: AHEAD, probeMs: STREAM_PROBE, stubBytes: STUB_CL },
       has: !!metrics.addr, bad: !$('s-bad').hidden, fail: !$('s-fail').hidden, slow: !$('s-slow').hidden,
-      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: ds ? ds.size : metrics.cl || (pl && pl.m1) || 0,
+      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: metrics.cl || (pl && pl.m1) || 0,
       rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
       dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
-      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: ds ? ds.sounded : !!(st && st.sounded), stalled: ds ? ds.stalled : !!(st && st.stalled), done: !!(st && st.done),
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
       direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
     };
@@ -1601,7 +1650,7 @@ document.addEventListener('DOMContentLoaded',function(){
       arrived:E.bytes?mb(E.bytes)+(E.size?' '+T('et.bview.of','of')+' '+mb(E.size):''):T('et.bview.nothingYet','nothing yet'),
       frac:E.size?Math.min(1,E.bytes/E.size):(E.doneMs!=null?1:0),
       copy:E.size&&E.paintedAt?Math.min(1,E.paintedAt/E.size):0,
-      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s'+(E.path==='webrtc'?' file average':''):T('et.bview.notRead','not read yet'),
+      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s':T('et.bview.notRead','not read yet'),
       time:pl&&E.sounded?Math.min(1,E.playhead/pl.dur):0,
       flowX:flowX,
       flow:flowX!=null?flowX.toFixed(flowX<1?2:1)+'× '+T('et.bview.asFast','as fast as it plays'):T('et.bview.notMeasured','not measured yet'),
@@ -1621,12 +1670,12 @@ document.addEventListener('DOMContentLoaded',function(){
   function bee(){
     var box=$('etBeeRows'); if(!box) return;
     var direct=D.view.path==='webrtc' || D.view.path==='webrtc-connecting';
-    document.querySelector('.et-b-foot').textContent=direct?'Public video: anyone with the address can watch. Direct playback keeps session ranges; My videos remembers the address.':T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
+    document.querySelector('.et-b-foot').textContent=T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
     var rows=[
       ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',(D.view.path==='webrtc'?'This video comes directly from Autonomi storage nodes over WebRTC. This browser is not seeding it to other viewers.':T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.'))],
-      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'The browser requests verified ranges as needed. A sustained stall switches to the relay.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'Several pieces of the video arrive at once, straight from storage nodes. If they stop arriving, the relay takes over.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
-      ['next',T('et.bview.b.next','next time'),esc(direct?'address remembered':T('et.bview.b.nextV','opens at once')),(D.view.path==='webrtc'?'Direct playback keeps bounded ranges during this session; it does not save a complete offline copy. Your saved address remains in My videos.':T('et.bview.b.nextSay','this device keeps a copy of what you watched.'))]
+      ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
     ];
     box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
       return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
@@ -1651,7 +1700,7 @@ document.addEventListener('DOMContentLoaded',function(){
       '<circle class="core" r="68"/><text class="mid" y="6" text-anchor="middle">'+esc(pct)+'</text><text class="sub" y="32" text-anchor="middle">'+esc(cap)+'</text></g>';
   }
   function raver(){
-    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi. Session ranges stay warm; your saved address remains in My videos.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
+    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi storage nodes. Your device keeps a copy, so refresh stays warm.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
     var hint=$('etRaverHint'); if(hint) hint.textContent=w('raver');
     ring();
     var t=$('etTiles'); if(!t) return;
@@ -1668,7 +1717,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var E=D.live, V=D.view; if(!E) return;
     var direct=E.path==='webrtc'||E.path==='webrtc-connecting', dr=E.direct, vf=E.video;
     $('etMethod').textContent=direct?'WebRTC · ':'GET ';
-    $('etTail').textContent=direct?' · plaintext ranges':'{address}/stream';
+    $('etTail').textContent=direct?' · chunk lanes':'{address}/stream';
     var door=$('etDoor'); if(door) door.textContent=D.door.host+D.door.base;
     $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>';
     var r=D.rule, pl=E.plan;
@@ -1683,13 +1732,13 @@ document.addEventListener('DOMContentLoaded',function(){
     ];
     if(direct)steps=[
       ['parse · 64 hex','public read · no wallet required',E.has?'done':'todo'],
-      ['cache · '+D.cache,'whole-file cache miss · session range reader selected',E.has?'done':'todo'],
+      ['cache · '+D.cache,'miss · ask the storage nodes',E.has?'done':'todo'],
       ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.1'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
-      ['service worker · native ranges','one media URL · seekable session ranges · no progressive Blob swaps',E.path==='webrtc'?'done':'todo'],
-      ['browser playback',E.sounded?'decoded frames · '+E.playhead.toFixed(2)+' s':'waiting for a decoded frame',E.sounded?'done':'todo'],
-      ['relay recovery','12 s without direct progress, 30 s without a first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
-      ['whole-file SHA-256','not computed for direct range playback · range reads are not a whole-file hash','skip']
+      ['chunk lanes · '+(dr&&dr.chunks?Math.min(dr.lanes,dr.chunks):6)+' at a time',dr&&dr.chunks?(dr.completed+' of '+dr.chunks+' chunks · read on chunk boundaries, so none is fetched twice'):'chunks are read on their own boundaries, in parallel, and played in order',dr&&dr.chunks&&dr.completed>=dr.chunks?'done':'todo'],
+      steps[4],steps[5],
+      ['relay recovery','12 s without progress before the file opens, or 45 s without one arriving chunk · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
+      steps[6]
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
     var now=steps.findIndex(function(s){return s[2]==='todo';});
@@ -1701,11 +1750,11 @@ document.addEventListener('DOMContentLoaded',function(){
       ['arrived','<span data-et="arrived">'+esc(V.arrived)+'</span>'],
       ['length',esc(V.length)],
       ['flow',esc(V.flow)],
-      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no(direct?'not computed · range playback':'not yet · hashed when the last byte is in')],
+      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no('not yet · hashed when the last byte is in')],
       ['done',V.done?'<span class="yes">'+esc(V.done)+'</span>':no('not yet')]
     ];
     var ms=function(n){return n==null?'not yet':(n/1000).toFixed(2)+' s';};
-    rows.push(['first response',esc((direct?'first plaintext range · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
     if(vf){
       rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
         ['picture',esc(vf.width?vf.width+'×'+vf.height:'not yet')],
@@ -1716,17 +1765,17 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
-      ['direct startup',esc(ms(dr.startupElapsedMs)+' · '+'relay after '+ms(dr.startupBudgetMs)+' quiet'+(dr.startupCapMs?' or '+ms(dr.startupCapMs)+' without a frame':''))],
+      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · relay after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' without a chunk':''))],
+      ['direct lanes',esc(dr.chunks?Math.min(dr.lanes||1,dr.chunks)+' chunks at a time · '+dr.chunks+' chunks':'not yet')],
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
-      ['range calls',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
-      ['range payload',esc(dr.readBytes+' B · includes repeated ranges')],
+      ['chunk reads',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
       ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
-      ['read latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · calls may overlap')],
+      ['chunk latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · lanes overlap')],
       ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
       ['fallback',esc(dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
       ['wire traffic',no('not measured · plaintext bytes are not network bandwidth')],
-      ['viewer seeding',no('not provided · this browser retrieves ranges')]
+      ['viewer seeding',no('not provided · this browser retrieves chunks')]
     );
     $('etReceipt').innerHTML=rows.map(function(x){return '<tr><th>'+esc(x[0])+'</th><td>'+x[1]+'</td></tr>';}).join('');
   }
