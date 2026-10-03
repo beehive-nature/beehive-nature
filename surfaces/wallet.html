@@ -1171,7 +1171,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
     <p class="wa-note">Vaulta and Hive accounts are included. The network picker shows the full wallet scope; entries awaiting a reader are marked unavailable. <a href="#matrix-sec">See every chain, read capability and signing status</a>.</p>
     <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
-      <p class="wa-note">Connect your SAFE 7 and choose an account. Import loads Trezor Connect from connect.trezor.io and opens its connection window. Confirm the public export on your device.</p>
+      <p class="wa-note">Import through Trezor Suite web (opens a window). Confirm the public export on your device. SAFE 7 end-to-end device verification is pending; you can add its verified public addresses manually.</p>
       <div class="wa-fields">
         <label>Network<select id="wa-trezor-chain"><option value="evm">Ethereum + Base + Arbitrum</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option><option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option><option value="bitcoin-account">Bitcoin · native SegWit account</option></select></label>
         <label>Account number<input id="wa-trezor-account" type="number" min="1" max="100" value="1" required></label>
@@ -7329,7 +7329,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
           script.onload=function(){window.TrezorConnect?resolve():reject(new Error('Trezor Connect did not start'))};
           script.onerror=function(){script.remove();reject(new Error('Trezor Connect could not be loaded. Try again.'))};document.head.appendChild(script);
         });
-        await window.TrezorConnect.init({lazyLoad:true,manifest:{email:'lovis@skaists.dev',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
+        await window.TrezorConnect.init({coreMode:'suite-web',lazyLoad:true,manifest:{email:'lovis@skaists.dev',appName:'skaists heART WALLet',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
         return window.TrezorConnect;
       })().catch(function(error){trezorInit=null;throw error});
     }

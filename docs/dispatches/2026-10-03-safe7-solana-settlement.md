@@ -14,7 +14,7 @@ live settlement and production-firmware acceptance remain separate results.
 public accounts**. This extends the existing account book; it does not create a
 second wallet or change bPay's connected signer.
 
-- Solana: explicit account number, Suite three-level path or four-level path.
+- Solana: explicit account number, Suite four-level path or three-level compatibility path (corrected during the wallet review).
 - Arbitrum/Base: explicit EVM account number and its public address.
 - Bitcoin native SegWit: import the account zpub from `getPublicKey` with device
   display requested. `getAccountInfo` reads the public descriptor's confirmed
@@ -28,8 +28,10 @@ second wallet or change bPay's connected signer.
   successful imports/reads. Label edits preserve public derivation provenance.
 - Only public metadata is stored locally. Bitcoin account keys disclose linked
   activity to the reader service; this is explained before import. Trezor Connect
-  loads from its official major-version URL on a click, with the dependency
-  named. Reloading a saved Bitcoin account does not automatically load it.
+  loads its official versioned 9.7.3 URL with SHA-384 integrity on a click and
+  explicitly routes through hosted Trezor Suite web. Physical SAFE 7 pairing is
+  not accepted by the fixture tests. Reloading a saved Bitcoin account does not
+  automatically load the SDK. See heart-wallet-unification for the later repair receipts.
 
 Source functions: wallet address-book `validate`, `connectTrezor`,
 `readBitcoinAccount`, `trezorSelection`, and the Trezor form submit handler.

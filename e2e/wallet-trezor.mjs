@@ -79,6 +79,7 @@ try {
   await importAccount('solana', '2');
   let saved = await entries();
   check('Solana account 2 preserves Suite path and public provenance', saved[0].trezor.path === "m/44'/501'/1'/0'" && saved[0].address === SOL && saved[0].kind === 'mine');
+  check('device requests use Suite web explicitly, never automatic desktop or legacy iframe transport', await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='init').every(([,p])=>p.coreMode==='suite-web'&&p.manifest.appName==='skaists heART WALLet')));
   check('public export explicitly requests device display', await page.evaluate(() => bridgeCalls.find(([m]) => m === 'solanaGetAddress')[1].showOnTrezor === true));
   await importAccount('solana', '2');
   check('repeat sync cannot duplicate an account', (await entries()).length === 1 && (await status()).includes('already saved'));
