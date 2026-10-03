@@ -69,6 +69,31 @@ button.green:hover{background:#86CC72;color:#06110C}
 .chain .stat{font-size:9px;letter-spacing:.08em;margin-top:6px}
 .stat.ok{color:#86CC72} .stat.err{color:var(--amber,#ffb347)}
 .chain.connected{border-color:#86CC72}
+/* Public address book: the same records in every reading register. */
+#wallet-accounts{margin:16px 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line2);scroll-margin-top:120px}
+#wa-mine,#wa-following{scroll-margin-top:120px}
+#wallet-accounts h3{font-size:1.2em;color:var(--ink)}
+.wa-note{color:var(--dim);font-size:13px;line-height:1.65;margin:8px 0}
+.wa-toolbar,.wa-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+#wa-form{padding:16px;background:var(--well);border:1px solid var(--line2);border-radius:12px;margin:14px 0}
+.wa-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wa-fields label{display:flex;flex-direction:column;gap:5px;color:var(--ink);min-width:0}
+.wa-fields input,.wa-fields select{width:100%;min-width:0;flex:auto;padding:10px 12px;background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:8px;font:inherit}
+.wa-wide{grid-column:1/-1}
+.wa-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px;margin:12px 0 20px}
+.wa-card{min-width:0;padding:16px;border:1px solid var(--line2);border-radius:12px;background:var(--well)}
+.wa-card h4{font-size:16px;overflow-wrap:anywhere;color:var(--ink)}
+body[data-reg="bee"] #wallet-accounts :is(.wa-address,.wa-state,.wa-actions a){font-size:14px}
+body[data-reg="bee"] #wallet-accounts .wa-note{font-size:16px}
+.wa-address{display:block;margin:8px 0;font-size:12px;overflow-wrap:anywhere;user-select:all;color:var(--dim)}
+.wa-amount{font-size:20px;line-height:1.5;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
+.wa-state{font-size:12px;color:var(--dim);margin:8px 0}
+.wa-card[data-state="failed"] .wa-state,.wa-card[data-state="stale"] .wa-state{color:var(--amber)}
+.wa-actions button,.wa-actions a{font-size:12px;min-height:44px}
+.wa-actions a{display:inline-flex;align-items:center}
+#wa-status{min-height:1.6em;overflow-wrap:anywhere}
+#wallet-accounts [hidden]{display:none!important}
+@media(max-width:520px){.wa-fields{grid-template-columns:1fr}.wa-toolbar>button{flex:1}.wa-card{padding:12px}}
 /* ── the hero number ── the home-chain balance is the page's thesis figure:
    10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
    full-row on wide grids. CSS-only promotion of the live #v-bal read. */
@@ -1105,8 +1130,38 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="bal-sec" data-wl-task="have">
   <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <h2 data-reg="bee">⚡ <span data-i18n="wl.bee.h.bal">what you hold, on every chain</span></h2>
-  <div class="law" data-wl-tech>Read from public RPCs in your browser. Nothing stored, nothing sent.
-  The chain is the source of truth.</div>
+  <div class="law" data-wl-tech>Balances come from public chain services. These services receive the public addresses you read.</div>
+  <div id="wallet-accounts">
+    <h3>Accounts &amp; following</h3>
+    <p class="wa-note">Bring your other accounts together, or follow any public address. No key or wallet connection needed.</p>
+    <div class="wa-toolbar">
+      <button type="button" id="wa-add" class="green">＋ Add account</button>
+      <button type="button" id="wa-follow">＋ Follow address</button>
+      <button type="button" id="wa-refresh">Refresh all</button>
+    </div>
+    <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
+    <form id="wa-form" hidden aria-label="Save a public account or address" aria-describedby="wa-privacy wa-status">
+      <div class="wa-fields">
+        <label>Network<select id="wa-chain" required>
+          <option value="vaulta">Vaulta · A</option><option value="hive">Hive · HIVE</option>
+          <option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option>
+          <option value="bitcoin">Bitcoin · BTC</option><option value="solana">Solana · SOL</option><option value="arweave">Arweave · AR</option>
+        </select></label>
+        <label>Save to<select id="wa-kind"><option value="mine">My accounts</option><option value="following">Following</option></select></label>
+        <label class="wa-wide">Public address or account name<input id="wa-address" required maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="wa-hint"></label>
+        <div class="wa-wide wa-note" id="wa-hint"></div>
+        <label class="wa-wide">Label (optional)<input id="wa-label" maxlength="60" autocomplete="off" placeholder="e.g. savings · creator I follow"></label>
+      </div>
+      <div class="wa-toolbar"><button type="submit" class="green" id="wa-save">Save &amp; read</button><button type="button" id="wa-cancel">Cancel</button></div>
+    </form>
+    <div id="wa-status" class="wa-note" role="status" aria-live="polite"></div>
+    <h4>My accounts <span id="wa-mine-count"></span></h4>
+    <div id="wa-mine" class="wa-list"></div>
+    <h4>Following <span id="wa-following-count"></span></h4>
+    <div id="wa-following" class="wa-list"></div>
+    <div class="wa-note">Followed balances stay in their own list. Refresh to check again; this page does not send activity alerts. Explorer links show transaction history in a new tab.</div>
+  </div>
+  <h3>Connected wallet</h3>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
@@ -1370,6 +1425,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
 <section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
   <h2>🧾 <span data-i18n="wl.bpay.h">bPay: the preservation invoice</span></h2>
+  <div class="law" id="bpay-accounts">Check your other balances in <a href="#wallet-accounts">accounts &amp; following</a>. Saved public addresses do not grant spending access.</div>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
   <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
   asking for a fresh quote sends your resolved policy to the keyless bridge. no hidden network
@@ -2158,8 +2214,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     })();
   </script>
-</section>
-
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
@@ -3605,7 +3659,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
@@ -4990,6 +5044,53 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   })();
 
   window.BNRWALLET = {
+    /* Public reads deliberately do not set SOUL, EVMADDR, LAST_ACC, forge
+       contexts, signing caps or the connected-wallet rollups. */
+    readPublicBalance: async function(chain,address) {
+      if(Object.prototype.hasOwnProperty.call(EVM_RAILS,chain)) {
+        var rail=EVM_RAILS[chain], last='public RPC unavailable';
+        for(var host of rail.hosts) {
+          try {
+            var request=async function(method,params) {
+              var response=await fetchT(host,{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})},6500);
+              if(!response.ok)throw new Error('RPC HTTP '+response.status);
+              var data=await response.json();
+              if(data.error||typeof data.result!=='string'||!/^0x[0-9a-f]+$/i.test(data.result))throw new Error('RPC returned no valid amount');
+              return data.result;
+            };
+            if(BigInt(await request('eth_chainId',[]))!==BigInt(rail.chainId))throw new Error('RPC answered for a different network');
+            var amounts=[];
+            for(var asset of Object.values(rail.assets)) {
+              var raw=asset.contract
+                ? await request('eth_call',[{to:asset.contract,data:'0x70a08231'+'0'.repeat(24)+address.slice(2)},'latest'])
+                : await request('eth_getBalance',[address,'latest']);
+              amounts.push(fromBaseUnits(BigInt(raw),asset.decimals)+' '+asset.symbol);
+            }
+            return {amounts:amounts,source:new URL(host).hostname};
+          } catch(e) {last=e.message}
+        }
+        throw new Error(last);
+      }
+      if(['vaulta','hive','bitcoin','solana','arweave'].indexOf(chain)<0)throw new Error('Unsupported read network');
+      // Reuse the read-only BTC/SOL workers on demand, through the same shell.
+      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js');
+      var start=Date.now();
+      while(!ADAPTERS[chain].attached) {
+        if(Date.now()-start>8500)throw new Error('Read adapter unavailable; try again');
+        await new Promise(function(resolve){setTimeout(resolve,50)});
+      }
+      var result=await callAdapter(chain,'balance',{address:address,network:'mainnet'},30000);
+      var unit={vaulta:'A',hive:'HIVE',bitcoin:'BTC',solana:'SOL',arweave:'AR'}[chain];
+      if(result.unit!==unit)throw new Error('Read returned an unexpected asset');
+      var quantity=result.quantity;
+      if(chain==='arweave') {
+        if(!/^\d+$/.test(result.winston))throw new Error('Read returned no valid AR balance');
+        quantity=fromBaseUnits(BigInt(result.winston),12)+' AR';
+      }
+      if(typeof quantity!=='string'||!new RegExp('^\\d+(?:\\.\\d+)? '+unit+'$').test(quantity))throw new Error('Read returned no valid balance');
+      return {amounts:[quantity],source:chain+' public adapter',note:chain==='bitcoin'?'Confirmed BTC only':chain==='hive'?'Liquid HIVE only; excludes HBD and Hive Power':''};
+    },
     adapters: ADAPTERS,
     walletAction: walletAction,
     walletPublish: walletPublish,
@@ -6785,6 +6886,220 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(document.readyState==='complete')land();else window.addEventListener('load',land,{once:true});
     setTimeout(land,700);   /* once more after the receipts above it have rendered, unless the reader moved */
   }
+})();
+</script>
+<script id="wallet-address-book">
+/* The public address book has its own storage and read state. It never
+   persists balances, requests a credential or changes the signing wallet. */
+(function(){
+  'use strict';
+  var KEY='bnr.wallet.public-accounts.v1', LIMIT=50, FRESH_MS=120000;
+  var NETWORKS={
+    vaulta:{name:'Vaulta',hint:'Vaulta account name, 1–12 characters: a–z, 1–5 or a dot. A .b suffix is optional.',explorer:'https://bloks.io/account/'},
+    hive:{name:'Hive',hint:'Hive account name, without @. Reads liquid HIVE.',explorer:'https://hiveblocks.com/@'},
+    arbitrum:{name:'Arbitrum',hint:'Public 0x address. Reads ETH and Autonomi ANT on Arbitrum One.',explorer:'https://arbiscan.io/address/'},
+    base:{name:'Base',hint:'Public 0x address. Reads ETH and native USDC on Base.',explorer:'https://basescan.org/address/'},
+    bitcoin:{name:'Bitcoin',hint:'Mainnet address beginning bc1, 1 or 3. Reads confirmed BTC; silent payment addresses cannot be followed by address alone.',explorer:'https://mempool.space/address/'},
+    solana:{name:'Solana',hint:'Public Solana address. Reads native SOL.',explorer:'https://explorer.solana.com/address/'},
+    arweave:{name:'Arweave',hint:'Public 43-character Arweave address. Never paste a JWK or recovery phrase.',explorer:'https://viewblock.io/arweave/address/'}
+  };
+  var entries=[], reads=new Map(), snapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
+  var el=function(id){return document.getElementById(id)};
+  var status=function(message){el('wa-status').textContent=message};
+  var idOf=function(row){return row.chain+':'+row.address};
+  function base58Bytes(value){
+    var alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',n=0n;
+    for(var c of value){var i=alphabet.indexOf(c);if(i<0)throw new Error('Use a public base58 address');n=n*58n+BigInt(i)}
+    var bytes=[];while(n){bytes.unshift(Number(n&255n));n>>=8n}
+    for(var z=0;z<value.length&&value[z]==='1';z++)bytes.unshift(0);
+    return new Uint8Array(bytes);
+  }
+  function normalize(input){
+    if(!input||!Object.prototype.hasOwnProperty.call(NETWORKS,input.chain))throw new Error('Choose a supported network');
+    if(input.kind!=='mine'&&input.kind!=='following')throw new Error('Choose My accounts or Following');
+    if(typeof input.address!=='string'||typeof input.label!=='string')throw new Error('Use a public address and a text label');
+    var a=input.address.trim(),label=input.label.trim(),chain=input.chain;
+    if(label.length>60||/[\u0000-\u001f\u007f]/.test(label))throw new Error('Keep the label to 60 readable characters');
+    if(chain==='vaulta'){
+      a=a.toLowerCase().replace(/\.b$/,'');
+      if(!/^[a-z1-5.]{1,12}$/.test(a)||/^\.|\.$|\.\./.test(a))throw new Error('Enter a Vaulta account name, not a key or address');
+    }else if(chain==='hive'){
+      a=a.toLowerCase().replace(/^@/,'');
+      if(a.length<3||a.length>16||!a.split('.').every(function(part){return /^[a-z][a-z0-9-]+[a-z0-9]$/.test(part)}))throw new Error('Enter a valid Hive account name (3–16 characters)');
+    }else if(chain==='arbitrum'||chain==='base'){
+      if(!/^0x[0-9a-fA-F]{40}$/.test(a))throw new Error('Enter a public 0x address with 40 hexadecimal characters');
+      var hex=a.slice(2);
+      if(hex!==hex.toLowerCase()&&hex!==hex.toUpperCase()){
+        if(!window.BnrSign)throw new Error('Address checksum checker is unavailable');
+        var hash=Array.from(window.BnrSign.keccak_256(new TextEncoder().encode(hex.toLowerCase()))).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+        for(var pos=0;pos<hex.length;pos++)if(/[a-f]/i.test(hex[pos])&&((parseInt(hash[pos],16)>=8)!==(hex[pos]===hex[pos].toUpperCase())))throw new Error('EVM address checksum failed; copy the address again');
+      }
+      a=a.toLowerCase();
+    }else if(chain==='arweave'){
+      if(!/^[a-zA-Z0-9_-]{43}$/.test(a))throw new Error('Enter a 43-character public Arweave address');
+      // Canonical base64url: the final two padding bits must be zero.
+      if('AEIMQUYcgkosw048'.indexOf(a.slice(-1))<0)throw new Error('Arweave address has invalid padding; check the last character');
+    }else if(chain==='solana'){
+      if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)||base58Bytes(a).length!==32)throw new Error('Enter a public Solana address representing 32 bytes');
+    }else if(chain==='bitcoin'){
+      if(/^bc1/i.test(a)){
+        if(a!==a.toLowerCase()&&a!==a.toUpperCase())throw new Error('Bitcoin address cannot mix letter cases');
+        var core=window.BNRPAY, decoded;
+        if(!core)throw new Error('Bitcoin address checker is unavailable');
+        try{decoded=core.bech32mDecode(a,core.BECH32_CONST,90)}
+        catch(e){decoded=core.bech32mDecode(a,core.BECH32M_CONST,90)}
+        var version=decoded.words[0],program=core.convertBits(decoded.words.slice(1),5,8,false);
+        if(decoded.prefix!=='bc'||version>16||program.length<2||program.length>40||
+          (version===0&&program.length!==20&&program.length!==32))throw new Error('Invalid Bitcoin witness address');
+        core.bech32mDecode(a,version===0?core.BECH32_CONST:core.BECH32M_CONST,90);
+        a=a.toLowerCase();
+      }else if(!/^[13][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(a)||base58Bytes(a).length!==25){
+        throw new Error('Use a Bitcoin mainnet address (bc1, 1 or 3); silent payment addresses require a private scan');
+      }
+    }
+    return {chain:chain,address:a,label:label,kind:input.kind};
+  }
+  async function validate(input){
+    var row=normalize(input);
+    // Legacy Bitcoin's Base58Check is checked before an address ever reaches
+    // storage or a public endpoint. Segwit uses the existing wallet decoder.
+    if(row.chain==='bitcoin'&&!row.address.startsWith('bc1')){
+      var bytes=base58Bytes(row.address),body=bytes.slice(0,21);
+      if(bytes[0]!==0&&bytes[0]!==5)throw new Error('Use a Bitcoin mainnet address');
+      var first=await crypto.subtle.digest('SHA-256',body);
+      var checksum=new Uint8Array(await crypto.subtle.digest('SHA-256',first));
+      if(!bytes.slice(21).every(function(v,i){return v===checksum[i]}))throw new Error('Bitcoin address checksum failed; check the address');
+    }
+    return row;
+  }
+  function load(){
+    try{
+      snapshot=localStorage.getItem(KEY);
+      var saved=snapshot===null?{v:1,entries:[]}:JSON.parse(snapshot);
+      if(saved.v!==1||!Array.isArray(saved.entries)||saved.entries.length>LIMIT)throw new Error('Invalid address book');
+      var seen=new Set(),next=saved.entries.map(normalize);
+      next.forEach(function(row){if(seen.has(idOf(row)))throw new Error('Duplicate address');seen.add(idOf(row))});
+      entries=next;storageBlocked=false;
+    }catch(e){entries=[];storageBlocked=true;status('The saved list could not be read. Saving is paused to protect it. Check browser storage access.');}
+  }
+  function save(next){
+    if(storageBlocked)throw new Error('Browser storage is unavailable or the saved list is unreadable. Nothing was changed.');
+    if(next.length>LIMIT)throw new Error('This browser list holds up to '+LIMIT+' accounts. Remove one before adding another.');
+    var latest;
+    try{latest=localStorage.getItem(KEY)}catch(e){throw new Error('Browser storage is unavailable. Nothing was saved.');}
+    if(latest!==snapshot){load();render();throw new Error('The list changed in another tab. Review the updated list and try again.');}
+    var json=JSON.stringify({v:1,entries:next});
+    try{localStorage.setItem(KEY,json)}catch(e){throw new Error('Browser storage is full or blocked. Nothing was saved.');}
+    snapshot=json;entries=next;
+  }
+  function node(tag,text,className){var n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n}
+  function button(text,action,id){var b=node('button',text);b.type='button';b.dataset.waAction=action;b.dataset.waId=id;return b}
+  function render(){
+    var focused=document.activeElement,focusAction=focused&&focused.dataset.waAction,focusId=focused&&focused.dataset.waId;
+    ['mine','following'].forEach(function(kind){
+      var list=el('wa-'+kind),rows=entries.filter(function(row){return row.kind===kind});list.replaceChildren();
+      el('wa-'+kind+'-count').textContent='('+rows.length+')';
+      if(!rows.length){list.appendChild(node('div',kind==='mine'?'Add your first account to read its balance here.':'Follow a public address to keep it within reach.','wa-note'));return;}
+      rows.forEach(function(row){
+        var id=idOf(row),read=reads.get(id),state=read?read.state:'unread';
+        var card=node('article',undefined,'wa-card');card.dataset.waId=id;card.dataset.state=state;
+        card.appendChild(node('h4',row.label||NETWORKS[row.chain].name+' account'));
+        card.appendChild(node('div',NETWORKS[row.chain].name+' · '+(kind==='mine'?'My accounts':'Following')+' · read only','wa-note'));
+        card.appendChild(node('code',row.address,'wa-address'));
+        if(state==='ready')read.value.amounts.forEach(function(amount){card.appendChild(node('div',amount,'wa-amount'))});
+        var msg=state==='ready'?'Read '+new Date(read.at).toLocaleTimeString()+' · '+read.value.source
+          :state==='reading'?'Reading public balance…':state==='failed'?'Read unavailable · '+read.error
+          :state==='stale'?'Out of date · refresh to read again':'Not read yet';
+        card.appendChild(node('div',msg,'wa-state'));
+        if(state==='ready'&&read.value.note)card.appendChild(node('div',read.value.note,'wa-note'));
+        var actions=node('div',undefined,'wa-actions');
+        var refresh=button('Refresh','refresh',id);refresh.disabled=state==='reading';actions.appendChild(refresh);
+        actions.appendChild(button('Copy address','copy',id));actions.appendChild(button('Edit','edit',id));actions.appendChild(button('Remove','remove',id));
+        var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);
+        card.appendChild(actions);list.appendChild(card);
+      });
+    });
+    el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
+    if(focusAction)Array.from(document.querySelectorAll('[data-wa-action]')).find(function(b){return b.dataset.waAction===focusAction&&b.dataset.waId===focusId})?.focus({preventScroll:true});
+  }
+  async function refresh(id){
+    var row=entries.find(function(r){return idOf(r)===id});
+    if(!row||reads.get(id)?.state==='reading')return;
+    var run={state:'reading'};reads.set(id,run);render();
+    try{
+      await validate(row);
+      var value=await window.BNRWALLET.readPublicBalance(row.chain,row.address);
+      if(!value||!Array.isArray(value.amounts)||!value.amounts.length||value.amounts.some(function(v){return typeof v!=='string'||!/^\d+(\.\d+)? [A-Z]+$/.test(v)}))throw new Error('No valid balance returned');
+      if(reads.get(id)!==run)return;
+      reads.set(id,{state:'ready',value:value,at:Date.now()});
+    }catch(e){if(reads.get(id)!==run)return;reads.set(id,{state:'failed',error:e.message||'Public service unavailable'});}
+    render();
+  }
+  async function refreshAll(){
+    if(refreshingAll)return;
+    refreshingAll=true;render();
+    var pending=entries.map(idOf);
+    try{await Promise.all([0,1,2].map(async function(){while(pending.length)await refresh(pending.shift())}));}
+    finally{refreshingAll=false;render();}
+  }
+  function hint(){el('wa-hint').textContent=NETWORKS[el('wa-chain').value].hint}
+  function showForm(kind,row){
+    editing=row?idOf(row):null;el('wa-form').reset();
+    if(row){el('wa-chain').value=row.chain;el('wa-address').value=row.address;el('wa-label').value=row.label;}
+    el('wa-kind').value=kind;el('wa-save').textContent=row?'Save changes':'Save & read';
+    el('wa-form').hidden=false;status('');hint();el('wa-address').focus();
+  }
+  el('wa-add').onclick=function(){showForm('mine')};
+  el('wa-follow').onclick=function(){showForm('following')};
+  el('wa-chain').onchange=hint;
+  el('wa-cancel').onclick=function(){el('wa-form').hidden=true;editing=null;el('wa-add').focus()};
+  el('wa-refresh').onclick=refreshAll;
+  el('wa-form').onsubmit=async function(event){
+    event.preventDefault();var submit=el('wa-save');if(submit.disabled)return;submit.disabled=true;
+    var original=editing;
+    try{
+      var row=await validate({chain:el('wa-chain').value,address:el('wa-address').value,label:el('wa-label').value,kind:el('wa-kind').value}),id=idOf(row);
+      if(entries.some(function(r){return idOf(r)===id&&idOf(r)!==original}))throw new Error('This address is already saved on this network. Use Edit to change its label or list.');
+      if(original&&!entries.some(function(r){return idOf(r)===original}))throw new Error('This account was removed in another tab. Add it again if needed.');
+      var next=entries.slice(),at=next.findIndex(function(r){return idOf(r)===original});
+      if(at<0)next.push(row);else next[at]=row;
+      save(next);
+      if(original&&original!==id)reads.delete(original);
+      el('wa-form').hidden=true;editing=null;render();status('Saved in this browser. Reading '+NETWORKS[row.chain].name+'…');el('wa-add').focus();
+      refresh(id);status('Saved in this browser. See the read status on the account.');
+    }catch(e){status(e.message)}finally{submit.disabled=false}
+  };
+  el('wallet-accounts').addEventListener('click',async function(event){
+    var b=event.target.closest('[data-wa-action]');if(!b)return;
+    var id=b.dataset.waId,row=entries.find(function(r){return idOf(r)===id});if(!row)return;
+    try{
+      switch(b.dataset.waAction){
+        case 'refresh':await refresh(id);break;
+        case 'copy':await navigator.clipboard.writeText(row.address);status('Public address copied.');break;
+        case 'edit':showForm(row.kind,row);break;
+        case 'remove':
+          save(entries.filter(function(r){return idOf(r)!==id}));reads.delete(id);removed=row;render();
+          status('Removed '+(row.label||row.address)+' from this browser list.');
+          undo.hidden=false;el('wa-add').focus();break;
+      }
+    }catch(e){status(b.dataset.waAction==='copy'?'Clipboard unavailable. Select and copy the address shown on the card.':e.message)}
+  });
+  var undo=node('button','Undo remove');undo.type='button';undo.hidden=true;undo.id='wa-undo';el('wallet-accounts').querySelector('.wa-toolbar').appendChild(undo);
+  undo.onclick=function(){
+    if(!removed)return;
+    try{
+      if(entries.some(function(r){return idOf(r)===idOf(removed)}))throw new Error('That address is already in the list.');
+      save(entries.concat([removed]));var id=idOf(removed);removed=null;undo.hidden=true;render();status('Account restored.');refresh(id);
+    }catch(e){status(e.message)}
+  };
+  window.addEventListener('storage',function(event){
+    if(event.key!==KEY&&event.key!==null)return;
+    load();reads.clear();render();if(!storageBlocked)status('List updated in another tab. Refresh to read its balances.');
+  });
+  // A successful historical read is never dressed as a current balance.
+  function expire(){var changed=false;reads.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}});if(changed)render()}
+  setInterval(expire,15000);document.addEventListener('visibilitychange',expire);
+  load();render();if(!storageBlocked)refreshAll();
 })();
 </script>
 </body>

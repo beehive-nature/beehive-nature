@@ -868,6 +868,9 @@ jobs:
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
         run: node e2e/wallet-registers.mjs
+      - name: Wallet public accounts — persistence, following, read failures and signing isolation
+        if: always()
+        run: node e2e/wallet-accounts.mjs
       - name: Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub
         if: always()
         run: node e2e/wallet-forge-pq.mjs
