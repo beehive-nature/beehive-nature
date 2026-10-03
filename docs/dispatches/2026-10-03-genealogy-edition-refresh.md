@@ -122,7 +122,7 @@ hash verification occurred. The historic v2 payment gate is not promoted by
 this quote receipt. GitHub CI and publication of this new branch are separate
 from the existing deployment verified above.
 
-## Staleness audit and completion continuation
+## Staleness audit and pkg13 continuation (superseded by pkg14 below)
 
 Origin was fetched again. The worktree had moved to the already-merged
 reading-order branch; that branch and its seven modified screenshot artifacts
@@ -169,3 +169,43 @@ Both keyless captures bind to the exact tar. The full receipt is
 `docs/receipts/genealogy-edition-v3-2026-10-03-pkg13.json`. All payment/upload
 and network-retrieval states remain false. Final GitHub CI and deployment
 are verified separately after this source/receipt commit.
+
+## Final reconciliation: pkg14
+
+The final fetch found main at `4660aa1a9`, including the genealogy page's
+12px text and 44px disclosure-control fixes and merged ANT client PRs #324
+and #341. These changes are included; the earlier statement that #324 was
+pending is historical. The named worktree was switched by another live
+session to `codex/genealogy-handoff` during this pass. A harmless merge of
+main landed there before that switch was detected; it was retained, never
+reset or pushed by this lane. The interrupted package build was discarded.
+Final work moved to the isolated `C:/Users/travi/wt-codex-genealogy-finalize`
+checkout of this PR's branch. The original seven dirty screenshot artifacts
+remain in the original worktree, untouched.
+
+The repeated full audit again found five changed runtime files against
+pkg12, zero missing files and zero undeclared person JSON/HTML files.
+Pkg14 supersedes pkg13 and includes the latest accessibility edits:
+
+- 22,153 declared files; 87,268,763 content bytes; 107,806,720 tar bytes.
+- Manifest `45cc9ccba10c9509253035764d8fe9f7a5e47fdcac946ff743dbba2781c8c42c` (PUBLIC-CONSTANT; preserve.mjs::verifyPackage).
+- Tar `9efc8ed3ffbfc1d386136e26819145999a6102dd37a968891dc8d10e127058d2` (PUBLIC-CONSTANT; build-eternalization-tar.sh::verify_reproducible_eternalization_tar).
+- Two byte-identical constructions; all 22,153 hashes pass. Fresh extraction
+  imports all six modules, reaches generation 143, resolves the 39-hop route,
+  and has zero raw transcription values across 13,249 records.
+- ANT at 2026-10-03T21:08:52.292Z: 2.803560131835937500 ANT and
+  0.000150000000000000 ETH estimated gas, 29 chunks, priced_sample.
+- AR at 2026-10-03T21:08:33.949Z: 1.355779919142 AR.
+
+Both fresh quotes use the existing adapters and bind to pkg14. The current
+receipt is `docs/receipts/genealogy-edition-v3-2026-10-03-pkg14.json`; the
+local `family-lineage/CURRENT-PUBLIC-EDITION.json` and historical v2 gate point
+to it. Historical package files remain as evidence.
+
+The merged ant-extsig dispatch explicitly retains gate/client mismatch,
+unbound send gas limit, concurrent-ledger and retry-accounting limitations.
+This lane does not reinterpret those as completed payment acceptance.
+The existing ant 0.3.9 quote adapter remains keyless; upload stays disabled.
+The c4aa25ac3 PR check suite passed; final descendant checks and Pages
+deployment are recorded separately after publication. No localhost server,
+wallet access, payment, upload or storage-network retrieval was performed.

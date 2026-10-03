@@ -64,6 +64,6 @@
   ],
   "openFrontier": "image queue COMPLETE 2026-10-03: all 366 queue entries resolved (365 unique member arks — the two deeds-citation entries share 3QSQ-G983-6VKX); the identifier-form exception closed by founder-ordered long-form ARK recovery (3QS7-89WB-8R1M downloaded, 308 images / 83,315,926 B byte-audited); possible lost foreign manifest entries remain unresolved pending the other session's log",
   "historicalArtifact": true,
-  "currentPublicEditionReceipt": "docs/receipts/genealogy-edition-v3-2026-10-03-pkg13.json",
+  "currentPublicEditionReceipt": "docs/receipts/genealogy-edition-v3-2026-10-03-pkg14.json",
   "supersessionNote": "This v2 artifact and quote are historical. The linked public-edition receipt binds the rebuilt current archive. This pointer neither promotes this old payment gate nor enables payment."
 }
