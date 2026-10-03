@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
 import { buildArchive, upLabel, downLabel } from '../../surfaces/person-panel-corpus.mjs';
-import { genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, kinshipTerm, descentTiers, hopWindow, esc } from '../../surfaces/person-panel.mjs';
+import { wikipediaLink, familyGroups, grandparentBranches, genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, kinshipTerm, descentTiers, hopWindow, esc } from '../../surfaces/person-panel.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -141,9 +141,9 @@ test('B3 deliberate choice → relationship to current root is computable and ho
 
 test('B4 blood vs affinity on the same pair is stated separately (summary law)', () => {
   const s = relationshipSummary(archive.relationship(MIRIAM, SAMUEL), id => archive.getPerson(id).name);
-  assert.match(s, /married AND share blood/);
+  assert.match(s, /married and also share ancestors/);
   const sAff = relationshipSummary(archive.relationship(LIV2, LIV1), id => archive.getPerson(id).name);
-  assert.match(sAff, /affinity, never blood/);
+  assert.match(sAff, /are married|connected through a marriage/);
 });
 
 test('B5 records / tradition / testimony / meaning are separately attributed layers', () => {
@@ -232,7 +232,7 @@ test('C3 spouse-only pair: liv-1/liv-2 — affinity and NOTHING else', () => {
   assert.match(rel.affinity.hopsFromRoot[0].evidence, /affinity, never blood/);
   assert.equal(archive.coupleOf(LIV1, LIV2), true);
   /* spouse rows never describe a marriage as blood: the summary says so */
-  assert.match(relationshipSummary(rel, id => archive.getPerson(id).name), /affinity, never blood/);
+  assert.match(relationshipSummary(rel, id => archive.getPerson(id).name), /are married|connected through a marriage/);
 });
 
 test('C4 married cousins: Samuel ⚭ Miriam — blood AND affinity coexist via Joseph Hadlock 1700–1744', () => {
@@ -334,11 +334,12 @@ test('E2 searching for the living returns only anonymous stubs — nothing priva
   }
 });
 
-test('E3 the panel module itself adds no URLs or ids of its own (contract law)', () => {
+test('E3 external discovery is limited to Wikipedia and never logs personal data', () => {
   const src = readFileSync(join(ROOT, 'surfaces', 'person-panel.mjs'), 'utf8');
   /* the ONLY url the panel can produce is the staged person page path pattern */
   const urls = [...src.matchAll(/https?:\/\/[^'"\s]+/g)].map(m => m[0]);
-  assert.deepEqual(urls, [], 'the panel constructs no external URLs; every link comes from the archive');
+  assert.deepEqual(urls, ['https://en.wikipedia.org/wiki/', 'https://en.wikipedia.org/w/index.php?search=']);
+  assert.match(src, /target="_blank" rel="noopener noreferrer"/);
   assert.doesNotMatch(src, /console\./, 'the panel logs nothing — no log leakage');
 });
 
@@ -388,7 +389,7 @@ test('G3 wiring contract: mount markers, keyboard, and the no-silent-choice UI s
     'data-ppgo', 'data-pprel', 'data-pproot', 'data-pparchive',
     "e.key === '/'", "e.key === 'Escape'", 'ArrowDown', 'ArrowUp',
     'never picks for you', 'no silent choice', 'married cousins',
-    'affinity, never blood', 'common ancestor', 'the frontier',
+    'not a marriage to each other', 'common ancestor', 'the frontier',
     'era ≠ support', 'PP_VERSION'
   ]) {
     assert.ok(src.includes(marker), 'missing wiring marker: ' + marker);
@@ -709,7 +710,7 @@ test('J7 wiring v1.3 — descent, kinship, coverage, broader, locked rows exist 
     'kinshipTerm', 'descentTiers', 'hopWindow', 'the evidence texture changes as the line climbs',
     'pp-t-', 'pp-kinship', 'formally:', 'known broader family', 'archive coverage:',
     'fan sideways into the rest of the family', 'locked, not hidden',
-    'coverage, not contradiction', 'standing at {r}'
+    'Children listed here may not be the complete family.', 'standing at {r}'
   ]) {
     assert.ok(src.includes(marker), 'missing v1.3 marker: ' + marker);
   }
@@ -727,4 +728,28 @@ test('J8 the corpus stays byte-identical after the v1.3 battery', () => {
   archive.getPerson('ovl-harthacnut-i');
   archive.relationship('pc996e1efee', FOUNDER); /* the 143-hop line compresses, never corrupts */
   assert.deepEqual(JSON.parse(JSON.stringify(corpus)), pristine);
+});
+
+
+test('Charlemagne and Louis I trace to Donna, independent of the chart starting person', () => {
+  for (const person of ['p1790a81049', 'paf36b10c53']) {
+    const branches = grandparentBranches(archive, FOUNDER, person);
+    assert.equal(branches.length, 4);
+    assert.deepEqual(branches.filter(b => b.direct).map(b => b.grandparent.id), [DONNA]);
+  }
+  assert.match(relationshipSummary(archive.relationship(DONNA, APR), id => archive.getPerson(id).name), /not a marriage to each other/);
+});
+
+test('marriage grouping uses both recorded parents and preserves every child', () => {
+  const p = {id:'a', spouses:['b','c'], children:Array.from({length:13},(_,i)=>'kid'+i)};
+  const groups = familyGroups(p, id => ({parents:[{id:'a'},{id:id==='kid12'?'unknown':'b'}]}));
+  assert.equal(groups.marriages[0].children.length,12);
+  assert.equal(groups.marriages[1].children.length,0);
+  assert.deepEqual(groups.otherChildren,['kid12']);
+});
+test('Wikipedia articles are matched, other names use explicit search, living people stay private', () => {
+  assert.equal(wikipediaLink(archive.getPerson('p1790a81049')).url,'https://en.wikipedia.org/wiki/Charlemagne');
+  assert.equal(wikipediaLink(archive.getPerson('paf36b10c53')).url,'https://en.wikipedia.org/wiki/Louis_the_Pious');
+  assert.match(wikipediaLink(archive.getPerson(DONNA)).label,/Search/);
+  assert.equal(wikipediaLink(archive.getPerson(FOUNDER)),null);
 });
