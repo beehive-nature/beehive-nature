@@ -30,7 +30,7 @@ const ROWS = [{ domain_name: 'king', owner: 'kingbeelovis', account: 'kingbeelov
   { domain_name: 'hive', owner: 'someoneelse1', account: 'someoneelse1', expires: '2027-08-01T00:00:00' }];
 function chain(route) {
   const b = JSON.parse(route.request().postData() || '{}');
-  const body = b.table === 'domains' ? { rows: ROWS, more: false } : b.table === 'config' ? { rows: [{ registration_fee: '0.0000 A', registration_days: 365 }] }
+  const body = b.table === 'domains' ? { rows: ROWS, more: false } : b.table === 'config' ? { rows: [{ registration_fee: '0.0000 EOS', registration_days: 365 }] }
     : b.table === 'rammarket' ? { rows: [{ base: { balance: '100000000 RAM' }, quote: { balance: '33.2000 A' } }] } : { rows: [] };
   return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
 }
@@ -90,7 +90,7 @@ test('the same facts in all three: the registry, the config, the gate', async ()
   const a = facts.bee, D = a.D;
   for (const reg of ['raver', 'cypherpunk']) assert.equal(facts[reg].model, a.model, reg + ' reads the same desk');
   assert.equal(D.rows, ROWS.length); assert.equal(a.deskCount, String(ROWS.length), 'the desk\'s own readout agrees');
-  assert.equal(D.fee, '0.0000 A'); assert.equal(D.days, 365);
+  assert.equal(D.fee, '0.0000 A', 'chain row says EOS; every register reads A'); assert.equal(D.days, 365);
   assert.deepEqual(D.jewels, { king: { state: 'held', owner: 'kingbeelovis', expires: '2027-08-01' }, k: { state: 'free' }, q: { state: 'free' } });
   assert.deepEqual(D.gate, { q: 2, v: 0, h: false }, 'the gate\'s own constants: two verifiers needed, none yet');
   assert.deepEqual(D.hosts, ['https://eos.api.eosnation.io', 'https://eos.greymass.com']);
