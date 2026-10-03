@@ -473,7 +473,7 @@ test("one-history law: syncEngineHash drives a stub history exactly (push/replac
 
 test("mount wiring: the composition mount exists with all organs (engine, panel, rail, hosts)", () => {
   assert.match(page, /from "\.\/blood-atlas\.mjs(?:\?[^"\s]+)?"/);
-  assert.ok(page.includes('from "./person-panel.mjs"'));
+  assert.match(page, /from "\.\/person-panel\.mjs(?:\?v=[^"]+)?"/);
   assert.ok(page.includes('from "./person-panel-corpus.mjs"'));
   assert.ok(page.includes('from "./blood-nav.mjs"'));
   assert.ok(page.includes('id="atlas"'));
