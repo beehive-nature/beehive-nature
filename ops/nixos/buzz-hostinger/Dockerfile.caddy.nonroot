@@ -1,0 +1,16 @@
+# HARDENED VARIANT of Dockerfile.caddy (rider 2026-09-28, Aikido root-user
+# finding CONFIRMED live: buzz-prod-caddy-1 ran uid 0). The ORIGINAL stays
+# byte-faithful — migration record of the 2026-09-24 build. Deltas: the
+# official base image already sets cap_net_bind_service=+ep on the caddy
+# binary, so the ONLY missing piece is the user (uid 1000 exists in the base)
+# plus data/config ownership. Tested on the staging fence 2026-09-28: uid 1000
+# serves on :8080 AND binds privileged :80 through host port 81 — the
+# capability path works unprivileged (receipt dispatch
+# 2026-09-28-buzz-hostinger-root-user-hardening-rider).
+FROM caddy:2.11.4-builder AS builder
+ENV GOMAXPROCS=2 GOFLAGS=-p=2
+RUN xcaddy build v2.11.4 --with github.com/mholt/caddy-ratelimit@v0.1.0
+FROM caddy:2.11.4
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+RUN mkdir -p /data /config && chown -R 1000:1000 /data /config
+USER 1000:1000
