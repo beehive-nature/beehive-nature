@@ -88,6 +88,9 @@ jobs:
         run: |
           node scripts/build-stack-inventory.mjs --check
           node scripts/build-stack-surfaces.mjs --check
+      - name: Wallet coins — full census, exact units, batch identity and read failures
+        if: always()
+        run: node --test e2e/wallet-coins.test.mjs
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs

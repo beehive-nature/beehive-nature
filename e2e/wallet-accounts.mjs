@@ -42,6 +42,15 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
   if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
   let body = {}; try { body = req.postDataJSON() || {}; } catch {}
   const evm = /arbitrum|base\.|1rpc\.io/.test(url.host);
+  if(evm&&Array.isArray(body)){
+    return json(body.map(request=>{
+      calls.push(request.method);
+      if(request.method==='eth_chainId')return {id:request.id,result:wrongChain?'0x1':'0x2105'};
+      if(request.method==='eth_blockNumber')return {id:request.id,result:'0x100'};
+      if(outage)return {id:request.id,error:{code:-32000,message:'fixture outage'}};
+      return {id:request.id,result:'0x'+(request.params[0].data==='0x313ce567'?6n:1250000n).toString(16).padStart(64,'0')};
+    }).reverse());
+  }
   if (evm) {
     calls.push(body.method);
     if (deferred && body.method === 'eth_getBalance') await deferred;
@@ -55,7 +64,7 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
     if (body.account_name === 'missing') return json({ error: { message: 'unknown account' } });
     return json({ account_name: body.account_name, core_liquid_balance: body.account_name === 'alice' ? '12.3456 EOS' : '7.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
   }
-  if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: '42.123 HIVE' }] }); }
+  if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
   if (/blockstream|mempool/.test(url.host)) {
     calls.push('esplora balance');
     return json({ chain_stats: { funded_txo_sum: 123456789, spent_txo_sum: 0, tx_count: 1 }, mempool_stats: { funded_txo_sum: 100, spent_txo_sum: 0 } });
@@ -144,7 +153,7 @@ try {
   await add('arweave', AR, 'following', 'Arweave'); await settled(card(AR));
   check('Arweave formats winston exactly', (await card(AR).textContent()).includes('1.234567890123 AR'));
   await add('hive', '@alice', 'mine', 'Hive'); await settled(card('alice').filter({ hasText: 'Hive ·' }));
-  check('Hive account normalization and liquid balance', (await card('alice').filter({ hasText: 'Hive ·' }).textContent()).includes('42.123 HIVE'));
+  check('Hive account normalization and both liquid coins', (await card('alice').filter({ hasText: 'Hive ·' }).textContent()).includes('42.123 HIVE')&&(await card('alice').filter({ hasText: 'Hive ·' }).textContent()).includes('8.765 HBD'));
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY);
   check('persistence contains only versioned public metadata', saved.v === 1 && saved.entries.length === 9 && saved.entries.every(row => Object.keys(row).sort().join(',') === 'address,chain,kind,label'));
   check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
@@ -200,6 +209,21 @@ try {
   await page.setViewportSize({ width: 1280, height: 900 });
   await open('?account-test=desktop'); await settled(card('alice'));
   await page.screenshot({ path: join(shots, 'accounts-desktop.png') });
+  const coinsCard=page.locator('#wa-mine .wa-card').filter({hasText:'Savings on Base'});
+  const priorHash=await page.evaluate(()=>location.hash);
+  await coinsCard.locator('[data-wa-action="coins"]').click();
+  await page.waitForFunction(()=>document.querySelectorAll('.wa-token').length===12);
+  check('Base card reads all twelve registered ERC-20i token balances', (await coinsCard.textContent()).includes('TRUFFI · 1.25')&&(await coinsCard.textContent()).includes('MiDi-3 · 1.25'));
+  check('token balances stay on the account card without navigating to art', await page.evaluate(()=>location.hash)===priorHash&&await coinsCard.locator('svg,img').count()===0);
+  await coinsCard.locator('input[name="contract"]').fill('0x'+'34'.repeat(20));
+  await coinsCard.locator('form[data-wa-token] button').click();
+  await page.waitForFunction(()=>document.querySelectorAll('.wa-token').length===13);
+  check('additional token expands rather than replaces the census', (await coinsCard.textContent()).includes('Additional token · 1.25'));
+  outage=true;await coinsCard.locator('[data-wa-action="coins"]').click();
+  await page.waitForFunction(()=>document.querySelector('.wa-coins')?.textContent.includes('Contract read failed'));
+  check('token failure removes prior balances instead of reporting zero', !(await coinsCard.locator('.wa-coins').textContent()).includes('1.25')&&(await coinsCard.locator('.wa-coins').textContent()).includes('unavailable'));
+  check('coin reads request no credentials', await page.evaluate(()=>window.credentialCalls)===0);
+  outage=false;
   check('no browser script exceptions', pageErrors.length === 0);
   console.log(`${checks} checks passed; RPC fixtures only, no live signing or chain writes.`);
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

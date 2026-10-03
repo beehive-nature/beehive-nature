@@ -83,6 +83,8 @@ button.green:hover{background:#86CC72;color:#06110C}
 .wa-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px;margin:12px 0 20px}
 .wa-card{min-width:0;padding:16px;border:1px solid var(--line2);border-radius:12px;background:var(--well)}
 .wa-card h4{font-size:16px;overflow-wrap:anywhere;color:var(--ink)}
+.wa-token{padding:10px 0;border-bottom:1px solid var(--line2)}
+.wa-coins{margin-top:12px}.wa-coins form{margin-top:12px}.wa-coins input{box-sizing:border-box;width:100%;min-width:0}
 body[data-reg="bee"] #wallet-accounts :is(.wa-address,.wa-state,.wa-actions a){font-size:14px}
 body[data-reg="bee"] #wallet-accounts .wa-note{font-size:16px}
 .wa-address{display:block;margin:8px 0;font-size:12px;overflow-wrap:anywhere;user-select:all;color:var(--dim)}
@@ -1197,6 +1199,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <button type="button" id="wa-refresh">Refresh all</button>
     </div>
     <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
+    <p class="wa-note">Vaulta and Hive accounts are included. The network picker shows the full wallet scope; entries awaiting a reader are marked unavailable. <a href="#matrix-sec">See every chain, read capability and signing status</a>.</p>
     <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
       <p class="wa-note">Connect your SAFE 7 and choose an account. Import loads Trezor Connect from connect.trezor.io and opens its connection window. Confirm the public export on your device.</p>
       <div class="wa-fields">
@@ -1207,15 +1210,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       </div>
       <p class="wa-note" id="wa-trezor-bitcoin" hidden>Bitcoin sync stores an account public key and shares it with Trezor’s blockchain service when you refresh, covering receive and change addresses within its discovery window. This reveals the account’s activity.</p>
       <p class="wa-note">Choose the same wallet/passphrase and account layout each time. This imports public data without signing a payment. Never enter recovery words here.</p>
+      <p class="wa-note">This importer is one connection method. For Vaulta or Hive, use Add account with your public account name. Importing their hardware keys and linking those keys to registered accounts still needs integration.</p>
       <div class="wa-toolbar"><button type="submit" class="green" id="wa-trezor-import">Import public account</button><button type="button" id="wa-trezor-cancel">Close</button></div>
     </form>
     <form id="wa-form" hidden aria-label="Save a public account or address" aria-describedby="wa-privacy wa-status">
       <div class="wa-fields">
-        <label>Network<select id="wa-chain" required>
-          <option value="vaulta">Vaulta · A</option><option value="hive">Hive · HIVE</option>
-          <option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option>
-          <option value="bitcoin">Bitcoin · BTC address</option><option value="bitcoin-account">Bitcoin · account public key</option><option value="solana">Solana · SOL</option><option value="arweave">Arweave · AR</option>
-        </select></label>
+        <label>Network<select id="wa-chain" required aria-describedby="wa-hint"></select></label>
         <label>Save to<select id="wa-kind"><option value="mine">My accounts</option><option value="following">Following</option></select></label>
         <label class="wa-wide">Public address, account name or Bitcoin account public key<input id="wa-address" required maxlength="120" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="wa-hint"></label>
         <div class="wa-wide wa-note" id="wa-hint"></div>
@@ -2312,13 +2312,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="matrix-sec" data-wl-task="proof">
-  <h2>🗺 chain matrix: <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+  <h2>🗺 chain matrix: <span>full wallet coverage</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each: how it is read and signed</summary>
-  <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
-  (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
-  Rendered from the data block below the fold (never typed prose), and every count you see is
-  computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
-  gracefully, gaps say they are gaps.</div>
+  <div class="law">The original wallet scope plus the Graphene and Cosmos studies, with separate <b>read</b> and <b>sign</b> capabilities. READ means this page has a public account reader; CODE means another implementation exists; EVALUATION means a bounded bench; GAP means required integration is missing; STUDY means researched scope. These labels do not certify a device, a payment or a deployment. Tokens, payment protocols and storage networks are identified separately from blockchains.</div>
+  <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/wallet-accounts-follow-2026-10-03/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
   </details>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
   <div id="matrix-body" data-wl-tech></div>
@@ -3420,6 +3417,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function railOf(k){ var r=EVM_RAILS[k]; if(!r)throw new Error('no such EVM rail: '+k); return r }
   function assetOf(k,a){ var x=railOf(k).assets[a]; if(!x)throw new Error(a+' is not carried on '+railOf(k).label); return x }
   window.__EVM_RAILS=EVM_RAILS;   // the gate's oracle: the signer vs the data
+  // Public observation can expand without granting a payment/signing rail.
+  var PUBLIC_READ_RAILS=Object.assign({},EVM_RAILS,{ethereum:{chainId:1,label:'Ethereum',
+    hosts:['https://ethereum-rpc.publicnode.com','https://eth.drpc.org'],
+    assets:{ETH:{symbol:'ETH',decimals:18,contract:null}}}});
 
   /* ══ R1 — ONE IDENTITY, EVERY RAIL. Every address below falls out of the
      SAME masterPRK by context tag; there is no second seed, no import, no
@@ -5059,8 +5060,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* Public reads deliberately do not set SOUL, EVMADDR, LAST_ACC, forge
        contexts, signing caps or the connected-wallet rollups. */
     readPublicBalance: async function(chain,address) {
-      if(Object.prototype.hasOwnProperty.call(EVM_RAILS,chain)) {
-        var rail=EVM_RAILS[chain], last='public RPC unavailable';
+      if(Object.prototype.hasOwnProperty.call(PUBLIC_READ_RAILS,chain)) {
+        var rail=PUBLIC_READ_RAILS[chain], last='public RPC unavailable';
         for(var host of rail.hosts) {
           try {
             var request=async function(method,params) {
@@ -5101,7 +5102,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         quantity=fromBaseUnits(BigInt(result.winston),12)+' AR';
       }
       if(typeof quantity!=='string'||!new RegExp('^\\d+(?:\\.\\d+)? '+unit+'$').test(quantity))throw new Error('Read returned no valid balance');
-      return {amounts:[quantity],source:chain+' public adapter',note:chain==='bitcoin'?'Confirmed BTC only':chain==='hive'?'Liquid HIVE only; excludes HBD and Hive Power':''};
+      var amounts=[quantity];
+      if(chain==='hive'&&Array.isArray(result.balances))amounts=result.balances.filter(function(value){return /^\d+\.\d{3} (HIVE|HBD)$/.test(value)});
+      return {amounts:amounts,source:chain+' public adapter',note:chain==='bitcoin'?'Confirmed BTC only':chain==='hive'?(result.hbdAvailable?'Liquid HIVE and HBD; excludes savings and Hive Power':'Liquid HIVE; HBD read unavailable; excludes savings and Hive Power'):''};
     },
     adapters: ADAPTERS,
     walletAction: walletAction,
@@ -5140,34 +5143,43 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     _crash: crash
   };
 
-  /* ══ THE CHAIN MATRIX — Brief 04 Part 3 as DATA (matrix law 4: counts
-     computed at render, never typed). Read = first-party path; Sign = custody
-     tier path; State = tonight's honest badge. PROTOCOL may be core, SERVICE
-     degrades, gaps are gaps. ═══════════════════════════════════════════ */
+  /* Brief 04 plus chain-support-graphene-cosmos. The watch key alone enables
+     an account-book reader; researched scope never grants that capability.
+     This registry also populates the account picker. Counts are computed. */
   var CHAIN_MATRIX = [
-    { family: 'EVM', name: 'ETH', unit: 'ETH', read: 'public JSON-RPC eth_getBalance + balanceOf, Multicall3 batching', sign: 'Tier 1/2/3 · EIP-1559 · Permit2', state: 'PROVEN' },
-    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless: the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
-    { family: 'EVM', name: 'Base', unit: 'ETH · USDC', read: 'same; mainnet.base.org keyless. MiDi lives here, and the derived bzDiD address now READS and SIGNS on chain 8453: ETH plus Circle-native USDC at its true 6 decimals', sign: 'Tier 1/2/3 · EIP-155 first-party signer · the spend cap is enforced INSIDE the signer, not by the button', state: 'LIVE' },
-    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified: no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
-    { family: 'EVM', name: 'Vaulta', unit: 'A', read: 'native EOS-line APIs through the adapter contract on this page', sign: 'bzDiD K1 or passkey · firmware ✓', state: 'LIVE' },
-    { family: 'EVM', name: 'stables', unit: 'USDC & kin', read: 'ERC-20 reads on every EVM rail + SPL + HBD on Hive', sign: 'per family · token units, never fiat itemization', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture) · a native-segwit P2WPKH receive address derives in this tab from the same soul, proven against the published BIP-173 and BIP-84 vectors; the spending path stays unwired', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11 invoices AND BOLT-12 offers decode LOCALLY in this tab: amount, payment hash, expiry, issuer; no node contacted, nobody told what you are about to pay', sign: 'the sats cap speaks on the decoded amount; paying rides an NWC connection whose budget lives at the hub (1000 sat/day, live) and whose live leg is parked at a relay ACL (tools/ln-rail/README.md)', state: 'VERIFY' },
-    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE: degrade gracefully · a receive address derives in this tab from the same soul (ed25519 to base58); the spending path stays unwired', state: 'VERIFY' },
-    { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless: reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
-    { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API: privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP: BCH sighash differs from BTC', state: 'GAP' },
-    { family: 'Hard tail', name: 'Zcash', unit: 'ZEC', read: 't-addr via lightwalletd; UA/z-addr by VIEW KEY (same scanner shape as silent payments)', sign: 'FIRMWARE GAP: shielded signing is local-heavy', state: 'GAP' },
-    { family: 'Hard tail', name: 'Monero', unit: 'XMR', read: 'view-only wallet rpc, private view key never leaves the client', sign: 'FIRMWARE GAP: cold files or Tier 1/2 software keys', state: 'GAP' },
-    { family: 'Hard tail', name: 'Autonomi', unit: 'ANT', read: 'antd/CLI wallet reads: REST routes unpublished upstream, verify against the live daemon, never guess', sign: 'keypair per tier', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Arweave', unit: 'AR', read: 'gateway GraphQL winston, multi-gateway rotation, never hard-code arweave.net', sign: 'native JWK Tier 1/2 · firmware ✓', state: 'VERIFY' }
+    { family: 'Antelope', name: 'Vaulta', unit: 'A', watch: 'vaulta', read: 'Public account balance; connected account also shows RAM, CPU and permissions.', sign: 'Native action/transfer adapter and browser K1/passkey path exist. Custom EOS firmware and host integration have separate acceptance.', state: 'READ' },
+    { family: 'Graphene', name: 'Hive', unit: 'HIVE · HBD · HP', watch: 'hive', read: 'Public account reader: liquid HIVE and HBD. Savings, Hive Power and resource-credit expansion remain due.', sign: 'The Hive worker is read-only. Hardware operation encoding and account-key mapping remain integration work.', state: 'READ' },
+    { family: 'EVM', name: 'ETH', unit: 'ETH · ERC-20i', watch: 'ethereum', read: 'Public ETH balance and token balances from the ERC-20i census, including PEPi-item. Additional token contracts can be read.', sign: 'EVM firmware family exists; Ethereum is not enabled in this page’s payment rail table.', state: 'READ' },
+    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', watch: 'arbitrum', read: 'Public ETH and Autonomi ANT balances, with network identity checked.', sign: 'Browser EVM signing exists. Trezor public import is separate from bPay authorization and settlement.', state: 'READ' },
+    { family: 'EVM', name: 'Base', unit: 'ETH · USDC · ERC-20i', watch: 'base', read: 'Public ETH/USDC and on-demand holdings across the complete ERC-20i census, with per-contract decimals and visible failures. Additional contracts can be read.', sign: 'Browser EVM signing and spend-cap code exist. ERC-20i inscription transfers require their own measured contract semantics.', state: 'READ' },
+    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'Rust chain decoder/indexer configuration exists; saved-account balance integration remains due.', sign: 'Pinned EVM chain identity exists. Wallet send integration and end-to-end settlement evidence remain due.', state: 'CODE' },
+    { family: 'Tokens', name: 'stables', unit: 'USDC · HBD · others', read: 'Base USDC is read in this account book; HBD appears in the connected Hive view. Other ERC-20/SPL coverage remains due.', sign: 'Tokens use their chain’s signer and policy. They are not an independent blockchain.', state: 'CODE' },
+    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', watch: 'bitcoin', read: 'Confirmed address balance or an imported account xpub/ypub/zpub. Silent-payment scanning is separate.', sign: 'Receive derivation and Trezor public import exist; this page’s BTC spending path remains unwired.', state: 'READ' },
+    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11/BOLT-12 decoding exists. Account balances require a node connection; a public BTC address cannot provide them.', sign: 'NWC/LDK and allowance work has separate receipts. Current live payment acceptance is not established here.', state: 'CODE' },
+    { family: 'Independent', name: 'Solana', unit: 'SOL', watch: 'solana', read: 'Native SOL balance and Trezor public-account import. SPL token inventory remains due.', sign: 'Rust native-SOL message/signature bench passed with a firmware emulator. No physical device or chain settlement acceptance.', state: 'READ' },
+    { family: 'Privacy', name: 'Zano', unit: 'ZANO', read: 'Rust decoder/watcher work exists. Private balances need a wallet-specific view path, not just a public address.', sign: 'Custom firmware work and conformance records exist; complete clean-source build and transaction acceptance remain due.', state: 'CODE' },
+    { family: 'Bitcoin', name: 'Bitcoin Cash', unit: 'BCH', read: 'Cashaddr/UTXO reader integration and backup-anchor mechanism remain due.', sign: 'Bitcoin-family firmware must be checked for the exact BCH path. Wallet end-to-end support is not established.', state: 'GAP' },
+    { family: 'Privacy', name: 'Zcash', unit: 'ZEC', read: 'Transparent and shielded/viewing-key reads need distinct adapters. Never enter viewing secrets in the public account book.', sign: 'A firmware app directory exists; shielded/address-format/device acceptance is not established.', state: 'GAP' },
+    { family: 'Privacy', name: 'Monero', unit: 'XMR', read: 'Needs a view-only wallet and scanning; a public address alone cannot reveal the balance.', sign: 'A firmware app directory exists. Its presence does not complete the wallet’s cold-signing integration.', state: 'GAP' },
+    { family: 'Storage', name: 'Autonomi', unit: 'ANT', read: 'For ANT token balances choose Arbitrum. Storage quotes, paid upload and verified retrieval are separate capabilities.', sign: 'Arbitrum payment-plan/authorization adapters exist; an accepted quote does not prove settlement or storage.', state: 'CODE' },
+    { family: 'Storage', name: 'Arweave', unit: 'AR', watch: 'arweave', read: 'Public AR balance with gateway fallback; transaction and publication evidence use separate operations.', sign: 'JWK publication and Rust ANS-104 work exist. A custom Arweave firmware signer is not established.', state: 'READ' },
+    { family: 'Graphene', name: 'BitShares', unit: 'BTS', read: 'Named-account reader still needs integration. Research retains a separate BitShares operation decoder.', sign: 'Shared Graphene envelope is reusable; Hive operation tags are not. Device recipient-name verification needs explicit treatment.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Steem', unit: 'STEEM', read: 'Registry/research scope; no reader enabled here.', sign: 'Prior review recommends registration only, with operation support deferred.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Golos', unit: 'GOLOS', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Blurt', unit: 'BLURT', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Peerplays', unit: 'PPY', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Cosmos Hub', unit: 'ATOM', read: 'Named in the reviewed Cosmos expansion; public-account reader remains due.', sign: 'Shared Cosmos DIRECT-mode app and reviewed message allowlist remain due.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Osmosis', unit: 'OSMO', read: 'Distinct chain identity and osmo address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app, not a separate firmware application.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Celestia', unit: 'TIA', read: 'Distinct chain identity and celestia address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app; account derivation is not signing acceptance.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'dYdX', unit: 'DYDX', read: 'Distinct chain identity and dydx address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app and explicit chain configuration.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Injective', unit: 'INJ', read: 'Host-side inj address/transaction integration remains due.', sign: 'Reviewed EIP-712 fixture uses the Ethereum path; it is not the generic Cosmos derivation/signing path.', state: 'STUDY' }
   ];
   (function renderMatrix() {
-    var STATE_COLORS = { LIVE: 'var(--leaf)', PROVEN: 'var(--cyan)', VERIFY: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
+    var STATE_COLORS = { READ: 'var(--leaf)', CODE: 'var(--cyan)', EVALUATION: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
     var byState = {}, byFamily = {};
     CHAIN_MATRIX.forEach(function (c) { byState[c.state] = (byState[c.state] || 0) + 1; byFamily[c.family] = (byFamily[c.family] || 0) + 1 });
     var sum = $('matrix-summary');
-    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' rails · computed</span>' +
+    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' scope entries · computed</span>' +
       Object.keys(byState).map(function (s) {
         return '<span style="border:1px solid ' + STATE_COLORS[s] + ';color:' + STATE_COLORS[s] + ';border-radius:6px;padding:2px 9px;font-size:10px">' + byState[s] + ' ' + s.toLowerCase() + '</span>';
       }).join('');
@@ -6900,6 +6912,107 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
 })();
 </script>
+<script id="wallet-coins">
+(function(){
+'use strict';
+// The whole measured family, shared with selector_census.py. A five-renderer
+// table is not a token-discovery limit. No service or local server is needed.
+var registryUrl = new URL("../docs/receipts/deployments.json", location.href).href;
+var registryPromise = null;
+async function deploymentRegistry(){
+  if(!registryPromise) registryPromise=(async function(){
+    var response=await fetch(registryUrl);
+    if(!response.ok)throw new Error('Collection registry unavailable');
+    var data=await response.json(),seen=new Set();
+    if(!data||!Array.isArray(data.deployments)||data.deployments.length>256)throw new Error('Invalid collection registry');
+    data.deployments.forEach(function(d){
+      if(!d||!['base','ethereum'].includes(d.chain)||!/^0x[0-9a-f]{40}$/i.test(d.address)||typeof d.name!=='string'||d.name.length>80)throw new Error('Invalid collection entry');
+      var key=d.chain+':'+d.address.toLowerCase();if(seen.has(key))throw new Error('Duplicate collection');seen.add(key);
+    });
+    return data.deployments;
+  })().catch(function(e){registryPromise=null;throw e});
+  return registryPromise;
+}
+var HOLDING_RAILS={
+  base:{id:8453,hosts:['https://mainnet.base.org','https://base-rpc.publicnode.com']},
+  ethereum:{id:1,hosts:['https://ethereum-rpc.publicnode.com','https://eth.drpc.org']}
+};
+function uintWord(value){
+  if(typeof value!=='string'||!/^0x[0-9a-f]{64}$/i.test(value))throw new Error('Invalid token amount');
+  return BigInt(value);
+}
+function tokenUnits(raw,decimals){
+  var unit=10n**BigInt(decimals),whole=raw/unit,tail=(raw%unit).toString().padStart(decimals,'0').replace(/0+$/,'');
+  return whole.toString()+(decimals&&tail?'.'+tail:'');
+}
+async function holdingRequest(host,requests){
+  var ctl=new AbortController(),timer=setTimeout(function(){ctl.abort()},8000);
+  try{
+    var response=await fetch(host,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,body:JSON.stringify(requests)});
+    if(!response.ok)throw new Error('RPC HTTP '+response.status);
+    var body=await response.text();if(body.length>1048576)throw new Error('RPC response too large');
+    var rows=JSON.parse(body),byId=new Map();
+    if(!Array.isArray(rows)||rows.length!==requests.length)throw new Error('Incomplete RPC batch');
+    rows.forEach(function(row){
+      if(!row||!requests.some(function(r){return r.id===row.id})||byId.has(row.id))throw new Error('Ambiguous RPC batch');
+      byId.set(row.id,row);
+    });
+    return requests.map(function(r){return byId.get(r.id)});
+  }finally{clearTimeout(timer)}
+}
+async function readHoldings(owner,options){
+  options=options||{};
+  if(!/^0x[0-9a-f]{40}$/i.test(owner))throw new Error('Use a public EVM account address');
+  if(options.chain&&!HOLDING_RAILS[options.chain])throw new Error('Choose Base or Ethereum');
+  var deployments=(await deploymentRegistry()).filter(function(d){return !options.chain||d.chain===options.chain});
+  var extra=options.contracts||[];
+  if(!Array.isArray(extra)||extra.length>20)throw new Error('Use at most 20 additional token contracts per read');
+  extra.forEach(function(contract){
+    if(!options.chain||!/^0x[0-9a-f]{40}$/i.test(contract))throw new Error('Choose a chain and a public token contract');
+    if(!deployments.some(function(d){return d.chain===options.chain&&d.address.toLowerCase()===contract.toLowerCase()}))
+      deployments.push({name:'Additional token',chain:options.chain,address:contract,source:'user supplied contract'});
+  });
+  var result=[];
+  // Chains run concurrently; each chain has bounded batches and one endpoint
+  // at a time. Nothing is polled per account or per rendered card.
+  await Promise.all(Object.keys(HOLDING_RAILS).map(async function(chain){
+    var group=deployments.filter(function(d){return d.chain===chain});if(!group.length)return;
+    var rail=HOLDING_RAILS[chain],last='Chain unavailable';
+    for(var host of rail.hosts){
+      try{
+        var header=await holdingRequest(host,[{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},{jsonrpc:'2.0',id:2,method:'eth_blockNumber',params:[]}]);
+        if(header.some(function(r){return r.error||!/^0x[0-9a-f]+$/i.test(r.result)}))throw new Error('Invalid chain observation');
+        if(BigInt(header[0].result)!==BigInt(rail.id))throw new Error('RPC answered for a different network');
+        var block=header[1].result,observed=[];
+        for(var start=0;start<group.length;start+=8){
+          var slice=group.slice(start,start+8),calls=[];
+          slice.forEach(function(d,i){
+            calls.push({jsonrpc:'2.0',id:i*2,method:'eth_call',params:[{to:d.address,data:'0x70a08231'+('0'.repeat(24)+owner.slice(2).toLowerCase())},block]});
+            calls.push({jsonrpc:'2.0',id:i*2+1,method:'eth_call',params:[{to:d.address,data:'0x313ce567'},block]});
+          });
+          var answers=await holdingRequest(host,calls);
+          slice.forEach(function(d,i){
+            var row=Object.assign({},d,{block:block,source:new URL(host).hostname,state:'unavailable'});
+            try{
+              if(answers[i*2].error||answers[i*2+1].error)throw new Error('Contract read failed');
+              var raw=uintWord(answers[i*2].result),dec=uintWord(answers[i*2+1].result);
+              if(dec>255n)throw new Error('Invalid decimals');
+              row.raw=raw.toString();row.decimals=Number(dec);row.quantity=tokenUnits(raw,row.decimals);row.state=raw===0n?'empty':'held';
+            }catch(e){row.error=e.message}
+            observed.push(row);
+          });
+        }
+        result.push.apply(result,observed);return;
+      }catch(e){last=e.message}
+    }
+    group.forEach(function(d){result.push(Object.assign({},d,{state:'unavailable',error:last}))});
+  }));
+  return deployments.map(function(d){return result.find(function(r){return r.chain===d.chain&&r.address===d.address})});
+}
+
+window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings};
+})();
+</script>
 <script id="wallet-address-book">
 /* The public address book has its own storage and read state. It never
    persists balances, requests a credential or changes the signing wallet. */
@@ -6908,16 +7021,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var KEY='bnr.wallet.public-accounts.v1', LIMIT=50, FRESH_MS=120000;
   var NETWORKS={
     vaulta:{name:'Vaulta',hint:'Vaulta account name, 1–12 characters: a–z, 1–5 or a dot. A .b suffix is optional.',explorer:'https://bloks.io/account/'},
-    hive:{name:'Hive',hint:'Hive account name, without @. Reads liquid HIVE.',explorer:'https://hiveblocks.com/@'},
+    hive:{name:'Hive',hint:'Hive account name, without @. Reads liquid HIVE and HBD.',explorer:'https://hiveblocks.com/@'},
     arbitrum:{name:'Arbitrum',hint:'Public 0x address. Reads ETH and Autonomi ANT on Arbitrum One.',explorer:'https://arbiscan.io/address/'},
-    base:{name:'Base',hint:'Public 0x address. Reads ETH and native USDC on Base.',explorer:'https://basescan.org/address/'},
+    base:{name:'Base',hint:'Public 0x address. Reads ETH and native USDC; use ERC-20i holdings for the full collection census.',explorer:'https://basescan.org/address/'},
+    ethereum:{name:'Ethereum',hint:'Public 0x address. Reads ETH; token balances include the Ethereum ERC-20i census and additional contracts.',explorer:'https://etherscan.io/address/'},
     bitcoin:{name:'Bitcoin',hint:'Mainnet address beginning bc1, 1 or 3. Reads confirmed BTC; silent payment addresses cannot be followed by address alone.',explorer:'https://mempool.space/address/'},
     'bitcoin-account':{name:'Bitcoin account',hint:'Account-level xpub (legacy), ypub (nested SegWit) or zpub (native SegWit). Not a private key. Refresh uses Trezor Connect and shares this public key with its blockchain service. Taproot descriptors are not supported here.'},
     solana:{name:'Solana',hint:'Public Solana address. Reads native SOL.',explorer:'https://explorer.solana.com/address/'},
     arweave:{name:'Arweave',hint:'Public 43-character Arweave address. Never paste a JWK or recovery phrase.',explorer:'https://viewblock.io/arweave/address/'}
   };
-  var entries=[], reads=new Map(), snapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
+  var entries=[], reads=new Map(), coinReads=new Map(), extraTokens=new Map(), snapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
   var el=function(id){return document.getElementById(id)};
+  // Scope comes from the full catalog, readiness from an explicit watch key.
+  // Missing capabilities remain visible but cannot be selected or persisted.
+  (window.__CHAIN_MATRIX||[]).forEach(function(rail){
+    var option=document.createElement('option'),ready=Object.prototype.hasOwnProperty.call(NETWORKS,rail.watch||'');
+    option.value=ready?rail.watch:'';option.disabled=!ready;
+    option.textContent=rail.name+' · '+rail.unit+(ready?'':' · reader not available here');
+    el('wa-chain').appendChild(option);
+    if(rail.watch==='bitcoin'){
+      var account=document.createElement('option');account.value='bitcoin-account';account.textContent='Bitcoin · account public key';el('wa-chain').appendChild(account);
+    }
+  });
   var status=function(message){el('wa-status').textContent=message};
   var idOf=function(row){return row.chain+':'+row.address};
   function base58Bytes(value){
@@ -6939,7 +7064,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }else if(chain==='hive'){
       a=a.toLowerCase().replace(/^@/,'');
       if(a.length<3||a.length>16||!a.split('.').every(function(part){return /^[a-z][a-z0-9-]+[a-z0-9]$/.test(part)}))throw new Error('Enter a valid Hive account name (3–16 characters)');
-    }else if(chain==='arbitrum'||chain==='base'){
+    }else if(chain==='arbitrum'||chain==='base'||chain==='ethereum'){
       if(!/^0x[0-9a-fA-F]{40}$/.test(a))throw new Error('Enter a public 0x address with 40 hexadecimal characters');
       var hex=a.slice(2);
       if(hex!==hex.toLowerCase()&&hex!==hex.toUpperCase()){
@@ -7036,9 +7161,29 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var actions=node('div',undefined,'wa-actions');
         var refresh=button('Refresh','refresh',id);refresh.disabled=state==='reading';actions.appendChild(refresh);
         actions.appendChild(button('Copy address','copy',id));actions.appendChild(button('Edit','edit',id));actions.appendChild(button('Remove','remove',id));
+        if(row.chain==='base'||row.chain==='ethereum'){
+          var coins=button('Read token balances','coins',id);coins.disabled=coinReads.get(id)?.state==='reading';actions.appendChild(coins);
+        }
         if(row.trezor)card.appendChild(node('div','Trezor public export · '+row.trezor.path,'wa-note'));
         if(NETWORKS[row.chain].explorer){var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);}
-        card.appendChild(actions);list.appendChild(card);
+        card.appendChild(actions);
+        var coinRead=coinReads.get(id);
+        if(coinRead){
+          var section=node('div',undefined,'wa-coins');section.appendChild(node('h4','Token balances · '+NETWORKS[row.chain].name));
+          section.appendChild(node('div',coinRead.state==='ready'?'Read '+new Date(coinRead.at).toLocaleTimeString()+' · '+coinRead.rows.length+' contracts':coinRead.state==='reading'?'Reading token balances…':coinRead.state==='stale'?'Out of date · read token balances again':'Token reads unavailable · '+coinRead.error,'wa-note'));
+          if(coinRead.state==='ready')coinRead.rows.forEach(function(token){
+            var item=node('div',undefined,'wa-token');item.dataset.contract=token.address.toLowerCase();
+            item.appendChild(node('div',token.name+' · '+(token.state==='unavailable'?'unavailable':token.quantity),'wa-amount'));
+            var contract=node('a',token.address+' ↗ (new tab)','wa-address');contract.href=NETWORKS[row.chain].explorer+token.address;contract.target='_blank';contract.rel='noopener noreferrer';item.appendChild(contract);
+            item.appendChild(node('div',token.state==='unavailable'?token.error:'Block '+BigInt(token.block).toString()+' · decimals '+token.decimals+' · '+token.source,'wa-note'));section.appendChild(item);
+          });
+          section.appendChild(node('div','Additional token contracts are kept for this tab. Reads never grant spending access.','wa-note'));
+          var form=node('form');form.dataset.waToken=id;
+          var label=node('label','Read another token contract '),input=node('input');input.name='contract';input.required=true;input.maxLength=42;input.placeholder='Public 0x token contract';input.autocomplete='off';input.spellcheck=false;label.appendChild(input);form.appendChild(label);
+          var add=node('button','Add token & read');add.type='submit';add.disabled=coinRead.state==='reading';form.appendChild(add);section.appendChild(form);
+          card.appendChild(section);
+        }
+        list.appendChild(card);
       });
     });
     el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
@@ -7057,6 +7202,29 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){if(reads.get(id)!==run)return;reads.set(id,{state:'failed',error:e.message||'Public service unavailable'});}
     render();
   }
+  async function refreshCoins(id){
+    var row=entries.find(function(r){return idOf(r)===id});if(!row||coinReads.get(id)?.state==='reading')return;
+    var run={state:'reading'};coinReads.set(id,run);render();
+    try{
+      await validate(row);
+      var tokens=await window.BNRCoins.readHoldings(row.address,{chain:row.chain,contracts:extraTokens.get(id)||[]});
+      if(coinReads.get(id)!==run)return;
+      coinReads.set(id,{state:'ready',rows:tokens,at:Date.now()});
+    }catch(e){if(coinReads.get(id)!==run)return;coinReads.set(id,{state:'failed',error:e.message})}
+    render();
+  }
+  el('wallet-accounts').addEventListener('submit',async function(event){
+    var form=event.target;if(!form.dataset.waToken)return;event.preventDefault();
+    var id=form.dataset.waToken,contract=form.elements.contract.value.trim();
+    try{
+      var account=entries.find(function(r){return idOf(r)===id});if(!account)throw new Error('Account was removed');
+      if(coinReads.get(id)?.state==='reading')return;
+      contract=(await validate({chain:account.chain,address:contract,label:'',kind:'following'})).address;
+      var extra=extraTokens.get(id)||[];if(!extra.includes(contract))extra=extra.concat(contract);
+      if(extra.length>20)throw new Error('This read supports 20 additional contracts');
+      extraTokens.set(id,extra);await refreshCoins(id);
+    }catch(e){status(e.message)}
+  });
   async function refreshAll(userGesture){
     if(refreshingAll)return;
     refreshingAll=true;render();
@@ -7087,7 +7255,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(at>=0&&idOf(next[at])===id&&next[at].trezor)row.trezor=next[at].trezor;
       if(at<0)next.push(row);else next[at]=row;
       save(next);
-      if(original&&original!==id)reads.delete(original);
+      if(original&&original!==id){reads.delete(original);coinReads.delete(original);extraTokens.delete(original)}
       el('wa-form').hidden=true;editing=null;render();status('Saved in this browser. Reading '+NETWORKS[row.chain].name+'…');el('wa-add').focus();
       refresh(id,true);status('Saved in this browser. See the read status on the account.');
     }catch(e){status(e.message)}finally{submit.disabled=false}
@@ -7097,11 +7265,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var id=b.dataset.waId,row=entries.find(function(r){return idOf(r)===id});if(!row)return;
     try{
       switch(b.dataset.waAction){
+        case 'coins':await refreshCoins(id);break;
         case 'refresh':await refresh(id,true);break;
         case 'copy':await navigator.clipboard.writeText(row.address);status('Public address copied.');break;
         case 'edit':showForm(row.kind,row);break;
         case 'remove':
-          save(entries.filter(function(r){return idOf(r)!==id}));reads.delete(id);removed=row;render();
+          save(entries.filter(function(r){return idOf(r)!==id}));reads.delete(id);coinReads.delete(id);extraTokens.delete(id);removed=row;render();
           status('Removed '+(row.label||row.address)+' from this browser list.');
           undo.hidden=false;el('wa-add').focus();break;
       }
@@ -7178,10 +7347,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
   window.addEventListener('storage',function(event){
     if(event.key!==KEY&&event.key!==null)return;
-    load();reads.clear();render();if(!storageBlocked)status('List updated in another tab. Refresh to read its balances.');
+    load();reads.clear();coinReads.clear();extraTokens.clear();render();if(!storageBlocked)status('List updated in another tab. Refresh to read its balances.');
   });
   // A successful historical read is never dressed as a current balance.
-  function expire(){var changed=false;reads.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}});if(changed)render()}
+  function expire(){var changed=false;[reads,coinReads].forEach(function(map){map.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}})});if(changed)render()}
   setInterval(expire,15000);document.addEventListener('visibilitychange',expire);
   load();render();if(!storageBlocked)refreshAll();
 })();
