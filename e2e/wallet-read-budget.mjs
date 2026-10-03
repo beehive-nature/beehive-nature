@@ -26,7 +26,11 @@ try{
   active--;await route.fulfill({headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify(Array.isArray(body)?body.map(respond):respond(body))});
  });
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));const start=Date.now();
- await page.goto(WALLET_ORIGIN+'/surfaces/wallet.html#wallet-accounts',{waitUntil:'domcontentloaded'});
+ await page.goto(WALLET_ORIGIN+'/surfaces/wallet.html',{waitUntil:'domcontentloaded'});
+ await page.waitForFunction(()=>window.BNRWALLET&&document.querySelectorAll('.wa-card').length===50);
+ await page.waitForTimeout(100);
+ check('opening the wallet home does not read fifty hidden accounts',total===0);
+ await page.locator('#wallet-identity a[href="#wallet-accounts"]').click();
  await page.waitForFunction(()=>document.querySelectorAll('.wa-card[data-state="reading"]').length===3);
  check('all fifty accounts render while three reads are in flight',await page.locator('.wa-card').count()===50&&peak===3);
  await page.locator('#wa-search').fill('Account 50');

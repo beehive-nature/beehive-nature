@@ -170,6 +170,13 @@ try {
   await page.locator('#wa-cancel').click();
   await settled(card(EVM).filter({ hasText: 'Base savings' }));
   check('watch controls do not auto-unlock a returning soul', await page.evaluate(() => window.credentialCalls) === 0 && await page.locator('#wq').inputValue() === 'alice' && await page.locator('#v-bal').textContent() === '12.3456 A');
+  await page.evaluate(()=>document.activeElement.blur());
+  await page.keyboard.press('Tab');
+  check('keyboard navigation does not start an automatic passkey ceremony',await page.evaluate(()=>window.credentialCalls)===0);
+  await page.locator('[data-wallet-store]').click();
+  await page.locator('#wallet-storage a[href="#arw-sec"]').click();
+  await page.locator('#wallet-identity a[href="#wallet-accounts"]').click();
+  check('returning identity can navigate accounts and storage without a passkey request',await page.evaluate(()=>window.credentialCalls)===0);
   await page.locator('#kc-stat').dispatchEvent('pointerdown');
   await page.waitForFunction(() => window.credentialCalls > 0);
   check('negative control: the existing keychain gesture would request credentials', await page.evaluate(() => window.credentialCalls) === 1);

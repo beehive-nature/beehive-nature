@@ -3734,7 +3734,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
+    if(ev&&ev.type==='keydown'&&['Tab','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Shift','Control','Alt','Meta'].includes(ev.key))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
@@ -7382,7 +7383,15 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   // A successful historical read is never dressed as a current balance.
   function expire(){var changed=false;[reads,coinReads].forEach(function(map){map.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}})});if(changed)render()}
   setInterval(expire,15000);document.addEventListener('visibilitychange',expire);
-  load();render();if(!storageBlocked)refreshAll();
+  load();render();
+  // A visit to keys or storage must not fan out reads of every saved address.
+  // Read the public book on its first appearance; later refreshes are explicit.
+  if(!storageBlocked&&entries.length){
+    if(window.IntersectionObserver){
+      var bookObserver=new IntersectionObserver(function(changes){if(changes.some(function(change){return change.isIntersecting})){bookObserver.disconnect();if(entries.some(function(row){return !reads.has(idOf(row))}))refreshAll();}});
+      bookObserver.observe(el('wallet-accounts'));
+    }else if(el('wallet-accounts').getClientRects().length)refreshAll();
+  }
 })();
 </script>
 </body>
