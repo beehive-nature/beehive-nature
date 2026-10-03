@@ -25,10 +25,13 @@
 //!   (200_000_000_000_000 wei) per transaction. Validated PRE-SEND via provider gas & fee estimation,
 //!   bound at driver level via MaxFeePerGas::LimitedAuto, and verified post-send against mined GasInfo.
 //!
-//! ARBITRUM ONE GAS NOTE:
-//! On Arbitrum One L2, the Nitro fee model sets a minimum base fee of 0.01 Gwei (10,000,000 wei)
-//! up to ~0.1 Gwei in normal conditions (cite: Offchain Labs Arbitrum Nitro gas documentation,
-//! https://docs.arbitrum.io/build-decentralized-apps/how-to-estimate-gas).
+//! ARBITRUM ONE GAS CITATION & CALIBRATION:
+//! On Arbitrum Nitro chains, the base fee is governed by the ArbOwner and ArbGasInfo precompiles:
+//! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the gas price floor (defaults to 0.1 Gwei = 100,000,000 wei,
+//!   cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner).
+//! - ArbGasInfo.getMinimumGasPrice() at 0x000000000000000000000000000000000000006C returns the L2 floor
+//!   (cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbgasinfo).
+//! - On Arbitrum One mainnet post-ArbOS 20 Atlas, minimum base fee is 0.01 Gwei (10,000,000 wei) with observed ~0.01-0.1 Gwei range.
 //! Local Anvil defaults to Ethereum L1 base fees (1.0 Gwei = 1,000,000,000 wei). If the network base fee
 //! or worst-case commitment exceeds 0.0002 ETH, the harness cleanly refuses pre-send.
 
@@ -108,11 +111,12 @@ pub async fn check_pre_send_gas<P: Provider>(
 
     // evmlib uses estimated_gas * 120 / 100 for gas_with_buffer
     let worst_case_gas_limit = (est_gas as u128).saturating_mul(120) / 100;
-    let worst_case_commitment = worst_case_gas_limit.saturating_mul(fees.max_fee_per_gas);
+    // Fable 5.1: The signer is allowed to pay up to max_fee_limit, and evmlib re-reads fees at send.
+    // To protect against fee spikes up to the cap, multiply by the driver cap (max_fee_limit).
+    let worst_case_commitment = worst_case_gas_limit.saturating_mul(max_fee_limit);
 
     println!(
-        "      pre-send gas check [{stage}]: est_gas={est_gas} (buffer_limit={worst_case_gas_limit}) * max_fee={} wei = {worst_case_commitment} wei (ceiling: {MAX_GAS_CEILING_WEI} wei = 0.0002 ETH)",
-        fees.max_fee_per_gas
+        "      pre-send gas check [{stage}]: est_gas={est_gas} (buffer_limit={worst_case_gas_limit}) * max_fee_limit={max_fee_limit} wei = {worst_case_commitment} wei (ceiling: {MAX_GAS_CEILING_WEI} wei = 0.0002 ETH)"
     );
 
     if worst_case_commitment > MAX_GAS_CEILING_WEI {
@@ -193,7 +197,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // For Merkle batches: sum of evm_network.estimate_merkle_payment_cost across all batches.
     let quote_sum_atto: u128 = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
-            payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(0)
+            payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(u128::MAX)
         }
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
             let mut total: u128 = 0;
@@ -271,7 +275,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let paid = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
             let payments: Vec<_> = payment_intent.payments.clone();
-            paid_atto = payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(0);
+            paid_atto = payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(u128::MAX);
 
             // Pre-send gas check for quote payments batch
             let calldata_info = evmlib::external_signer::pay_for_quotes_calldata(&evm_network, payments.clone())?;
@@ -311,7 +315,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let gas_commitment = verify_transaction_gas(&gas, &format!("merkle_batch_{i}"))?;
                 total_gas_wei += gas_commitment;
                 println!("      batch {i}: depth={}, paid {amount} atto, winner {}, gas: {} wei", b.depth, hex::encode(winner), gas_commitment);
-                paid_atto += amount.to_string().parse::<u128>().unwrap_or(0);
+                paid_atto = paid_atto.saturating_add(amount.to_string().parse::<u128>().unwrap_or(u128::MAX));
                 winners.push(winner);
             }
             Paid::Merkle(winners)
@@ -430,5 +434,24 @@ mod tests {
         let err_msg = res.unwrap_err().to_string();
         assert!(err_msg.contains("REFUSE: gas ceiling exceeded"));
         assert!(err_msg.contains("50000000000000 wei"));
+    }
+
+    #[test]
+    fn test_storage_ceiling_fail_closed_overflow() {
+        assert!(verify_storage_ceiling(u128::MAX, "overflow_test").is_err());
+    }
+
+    #[test]
+    fn test_worst_case_gas_calculation_at_cap() {
+        let est_gas = 188_000_u128;
+        let worst_case_gas_limit = est_gas * 120 / 100; // 225_600
+        let max_fee_limit = 800_000_000_u128; // 0.8 Gwei
+        let commitment = worst_case_gas_limit * max_fee_limit; // 180_480_000_000_000 wei
+        assert!(commitment <= MAX_GAS_CEILING_WEI);
+
+        let excessive_est_gas = 250_000_u128;
+        let excessive_limit = excessive_est_gas * 120 / 100; // 300_000
+        let excessive_commitment = excessive_limit * max_fee_limit; // 240_000_000_000_000 wei
+        assert!(excessive_commitment > MAX_GAS_CEILING_WEI);
     }
 }
