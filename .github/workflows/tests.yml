@@ -78,6 +78,9 @@ jobs:
       # on the hub computes from estate.json; this proves the registry is
       # internally honest (surfaces once each, states enum, LIVE files exist,
       # counts == recomputed). A hand-written count anywhere fails here.
+      - name: PLUR voices — complete fixed audio and language-safe routing
+        if: always()
+        run: node --test e2e/plur-voices.test.mjs
       - name: Engine Room — every surface included
         if: always()
         run: |
