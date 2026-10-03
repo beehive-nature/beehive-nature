@@ -77,9 +77,404 @@ locate() {
 # implementation, two enforcers - the standing law. Check 3 below is the
 # ACCOUNTING consumer; secret-scan.sh is the BLOCK consumer. Selftests P5-P11
 # exercise the sourced implementation unchanged.
-
+#
+# A SOURCED FILE RUNS IN THIS SHELL, SO ITS `exit` IS THIS SCRIPT'S EXIT. Measured while
+# building P18b (2026-09-30): `exit 0` as line 2 of keyshape.sh made this whole script,
+# selftest, --hooks and the full preflight alike, exit 0 with ZERO lines of output. Nothing
+# after this line can see that happen, so the file is sourced once in a subshell first, and
+# only a subshell that reaches the line after the source counts as loaded. Anything else is
+# refused here, before any verdict is printed.
+_ksload=$( . "$(dirname "$0")/keyshape.sh" >/dev/null 2>&1; echo loaded )
+if [ "$_ksload" != loaded ]; then
+  echo "PREFLIGHT BLOCKED — scripts/keyshape.sh did not return when sourced (it exited or"
+  echo "   failed while loading), so every check that uses it, and this script itself, would"
+  echo "   end there. See what differs from HEAD with  git diff HEAD -- scripts/keyshape.sh"
+  exit 1
+fi
 . "$(dirname "$0")/keyshape.sh"
 
+
+# ---- HOOKS PRECONDITION — about the BOX, not about the delta --------------
+# WHY THIS EXISTS: on 2026-09-22 this estate measured core.hooksPath UNSET at
+# local, global and effective scope in every worktree, while .githooks/ shipped
+# pre-commit and commit-msg. No seat had a local secret scan or a staged §7 for
+# at least two days. ZcODe named it in
+# docs/dispatches/2026-09-20-zcode-ss2-precommit-hook.md:18 on 09-20, and
+# scripts/identity-check.sh:8 states the same hazard in its own header — and it
+# still sat open, because a warning in a header nobody re-reads is not a gate.
+#
+# THAT IS WHY THIS ROW REFUSES (rc=1) RATHER THAN WARNING. A second printed
+# warning would be the same signal in the same place that already failed. The
+# refusal is cheap and cannot lose a push: this whole layer is advisory by
+# design (see the header above — "never call this layer enforced"), so refusing
+# costs a seat one command, never any work.
+#
+# RESOLVING IS NOT FIRING. A config read tells you a setting; it does not tell
+# you the gate runs. That distinction is exactly how the hazard hid, and the
+# tree carried a second instance of it: .githooks/commit-msg was index mode
+# 100644, so git SILENTLY SKIPS it on every POSIX seat while the config is
+# perfect. This row therefore asks whether the hook can EXECUTE, and the
+# selftest below asks the only question this row cannot: does it actually fire.
+#
+# TWO INSTRUMENTS, AND THEY DO NOT ANSWER THE SAME QUESTION:
+#   index mode (git ls-files -s)  PORTABLE. It is the mode every FRESH clone
+#                                 gets. It is NOT what git execs.
+#   filesystem -x                 What git actually execs — but VACUOUS under
+#                                 Git for Windows, which fabricates the bit: on
+#                                 that box `ls -l` reports -rwxr-xr-x for a file
+#                                 that is 100644 in the index.
+#
+# READING THE INDEX ALONE WAS A FALSE GREEN, DEMONSTRATED (bee-laborer, attack
+# on this PR, 2026-09-23; reproduced by my own hand on ext4 before this fix).
+# With `core.fileMode=false` the filesystem bit can be removed while the index
+# still reads 100755: this row printed "2 of 2 ... executable" at rc=0, git
+# status showed nothing, and a planted 64-hex commit LANDED UNSCANNED, count
+# 1 -> 2. The row read a setting one layer above the thing that fires — which
+# is the exact defect its own header calls RESOLVING IS NOT FIRING. And
+# core.fileMode=false is not exotic here: it is how every /mnt/c clone on this
+# estate behaves, which is the configuration the WSL lane runs in.
+#
+# THE FIX IS A FIRING PROBE, NOT A PLATFORM GUESS. Asking "am I on Windows?"
+# would be another setting read. Instead the row MEASURES whether this
+# filesystem carries the bit: make a throwaway file beside the hooks, chmod +x,
+# chmod -x, read `[ -x ]` back.
+#   bit carried (POSIX)   -> require index 100755 AND filesystem -x, and refuse
+#                            when they disagree, naming the disagreement.
+#   bit not carried (GfW) -> keep the index-only verdict and SAY SO, because
+#                            `[ -x ]` there is a fabricated answer.
+# No false alarm under Git for Windows, no false green on POSIX. The file
+# already knew `-x` is vacuous on one platform; the defect was treating that as
+# a reason never to read it on the other.
+#
+# PLACEMENT: this prints AFTER the empty-delta halt and OUTSIDE the numbered
+# 1)-7) series, deliberately. Checks 1-7 all scan $ADDED; this one scans
+# nothing — it is a precondition about the seat's box. Selftest P2 asserts that
+# an empty delta runs ZERO checks by counting `^[1-7])`, so numbering this row
+# `8)` would silently stop that counter from meaning anything. Do not renumber.
+# FIRING PROBE for the mode bit. Not a platform name, not a config read: it
+# makes a throwaway file on the SAME filesystem as the hooks, sets +x, and
+# removes it again. The +x arm is not decoration — it is the fixture asserting
+# its own precondition: if chmod is a no-op in both directions, the probe says
+# "unknown" instead of reporting a carried bit it never observed.
+# Echoes exactly one of: yes | no | unknown.
+# IT PROBES THE HOOKS DIRECTORY OR IT ANSWERS 'unknown'. There is deliberately no
+# fallback to $TMPDIR: the first draft had one, and bee-laborer demonstrated that it
+# restores the very false green this row exists to close — hooks dir unwritable,
+# TMPDIR on a filesystem that does not carry the bit, and the row printed "2 of 2 ...
+# executable by index mode" rc=0 on the exact box it refuses when the probe lands in
+# the right place. The mirror direction is a false REFUSAL of a correct box. An
+# instrument that cannot answer for the thing in question must say it does not know,
+# never answer for something adjacent.
+_exec_bit_probe() {
+  _pdir=$1; _pf=''
+  if [ -d "$_pdir" ] && [ -w "$_pdir" ]; then
+    _pf=$(mktemp "$_pdir/.execbitprobe.XXXXXX" 2>/dev/null) || _pf=''
+  fi
+  if [ -z "$_pf" ]; then echo unknown; return 0; fi
+  chmod +x "$_pf" 2>/dev/null
+  if [ ! -x "$_pf" ]; then rm -f "$_pf"; echo no:notset; return 0; fi
+  chmod -x "$_pf" 2>/dev/null
+  if [ -x "$_pf" ]; then rm -f "$_pf"; echo no:notcleared; return 0; fi
+  rm -f "$_pf"; echo yes; return 0
+}
+
+# FIRE THE HOOK; DO NOT ONLY READ IT (bFUzZ's second attack on #215, 2026-09-30; acceptance
+# ruled by bee-laborer d630a9e1). Comparing the hook FILE to HEAD said nothing about the
+# scripts the hook RUNS: `exit 0` as line 2 of secret-scan.sh left the hook byte-equal, the
+# row read "wired" rc=0, and a planted 64-hex committed. A list of those scripts would miss
+# the next one somebody adds, and keyshape.sh is SOURCED through $(dirname "$0"), which no
+# search for "scripts/" in the hook would find. So the row runs this box's own hook file, from
+# this checkout's top, BY PATH as git does (so its line 1 decides what runs, bFUzZ F2 on round 3),
+# against a THROWAWAY git dir whose work tree is this
+# checkout. Every file the hook reaches, at any depth, is the one on this disk. The real index,
+# objects and refs are not touched: the planted blob is written into the throwaway only.
+# Each hook must refuse its planted cases AND name the gate that caught them — an rc from a
+# crash is not a catch — and must pass a control that says it scanned something, because a
+# hook that refuses everything is not a gate either.
+# The fixture identities come from HEAD's identity-check.sh, never the file on disk: the file
+# on disk is one of the things under test.
+# Prints one line: ok | through:<why> | control:<why> | unknown:<why>.
+_fire_hook() {
+  _fh=$1; _ff=$2; _ftop=$3
+  _fsrc=$(git cat-file -p "HEAD:scripts/identity-check.sh" 2>/dev/null) || _fsrc=''
+  _ffn=$(printf '%s\n' "$_fsrc" | sed -n 's/^FOUNDER_NAME="\(.*\)"$/\1/p')
+  _ffe=$(printf '%s\n' "$_fsrc" | sed -n 's/^FOUNDER_EMAIL="\(.*\)"$/\1/p')
+  if [ -z "$_ffn" ] || [ -z "$_ffe" ]; then
+    echo "unknown:HEAD's scripts/identity-check.sh names no founder, so no fixture identity can be built"; return 0
+  fi
+  _ft=$(mktemp -d 2>/dev/null) || _ft=''
+  if [ -z "$_ft" ]; then echo "unknown:no throwaway directory"; return 0; fi
+  if ! git init -q "$_ft/g" >/dev/null 2>&1; then
+    rm -rf "$_ft"; echo "unknown:git init failed in a throwaway directory"; return 0
+  fi
+  _fhex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
+  _fmsg_t="preflight hook probe
+
+Co-authored-by: preflight hook probe <probe@invalid>"
+  # $1 arm tag, $2 staged content, $3 author name, $4 author email, $5 message ('' = none)
+  _farm() {
+    (
+      unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR GIT_NAMESPACE
+      GIT_DIR="$_ft/g/.git"; GIT_WORK_TREE="$_ftop"; GIT_INDEX_FILE="$_ft/$1.idx"
+      export GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+      cd "$_ftop" || exit 1
+      _fb=$(printf '%s\n' "$2" | git hash-object -w --stdin 2>/dev/null) || _fb=''
+      [ -n "$_fb" ] || exit 1
+      git update-index --add --cacheinfo "100644,$_fb,preflight-hook-probe.txt" >/dev/null 2>&1 || exit 1
+      echo yes > "$_ft/$1.built"
+      GIT_AUTHOR_NAME=$3; GIT_AUTHOR_EMAIL=$4
+      GIT_COMMITTER_NAME='preflight hook probe'; GIT_COMMITTER_EMAIL='probe@invalid'
+      export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
+      if [ -n "$5" ]; then
+        printf '%s\n' "$5" > "$_ft/$1.msg"
+        if [ -x "$_ff" ]; then "$_ff" "$_ft/$1.msg"; else sh "$_ff" "$_ft/$1.msg"; fi
+      else
+        if [ -x "$_ff" ]; then "$_ff"; else sh "$_ff"; fi
+      fi
+      # A file that is not executable here is read with sh instead: git would not run it at all,
+      # and the mode rows below name it DEAD. Firing it by sh only judges what it would do.
+    ) > "$_ft/$1.out" 2>&1
+    echo "$?" > "$_ft/$1.rc"
+  }
+  # 0 = the arm was built, refused, and its output carries $2; 1 = else; 2 = not built
+  _fref() {
+    [ "$(cat "$_ft/$1.built" 2>/dev/null)" = yes ] || return 2
+    [ "$(cat "$_ft/$1.rc" 2>/dev/null)" != 0 ] && grep -q "$2" "$_ft/$1.out" 2>/dev/null && return 0
+    return 1
+  }
+  _fpass() {  # 0 = built, rc=0, and the output carries every pattern after $1
+    _fa=$1; shift
+    [ "$(cat "$_ft/$_fa.built" 2>/dev/null)" = yes ] || return 2
+    [ "$(cat "$_ft/$_fa.rc" 2>/dev/null)" = 0 ] || return 1
+    for _fp in "$@"; do grep -qE "$_fp" "$_ft/$_fa.out" 2>/dev/null || return 1; done
+    return 0
+  }
+  _fverdict=ok
+  case "$_fh" in
+    pre-commit)
+      _farm sec "planted, unmarked: $_fhex" "$_ffn" "$_ffe" ''
+      _farm id 'benign probe line' 'preflight hook probe' 'probe@invalid' ''
+      _farm ctl 'benign probe line' "$_ffn" "$_ffe" ''
+      _fref sec 'BLOCKED: 48+ char hex'; _fs=$?
+      _fref id 'not the founder'; _fi=$?
+      _fpass ctl 'diff mode, [1-9][0-9]* added lines scanned' 'ok — founder-authored'; _fc=$?
+      if [ "$_fs" = 2 ] || [ "$_fi" = 2 ] || [ "$_fc" = 2 ]; then
+        _fverdict="unknown:the throwaway index could not be staged, so the hook was not fired"
+      elif [ "$_fs" != 0 ]; then
+        _fverdict="through:a planted 64-hex was not refused by the secret scan (rc=$(cat "$_ft/sec.rc"))"
+      elif [ "$_fi" != 0 ]; then
+        _fverdict="through:a seat-authored commit was not refused by the §7 check (rc=$(cat "$_ft/id.rc"))"
+      elif [ "$_fc" != 0 ]; then
+        _fverdict="control:a benign founder-authored commit was not passed with the scanner's count and the §7 ok (rc=$(cat "$_ft/ctl.rc"))"
+      fi ;;
+    commit-msg)
+      _farm id 'benign probe line' "$_ffn" "$_ffe" 'preflight hook probe, no trailer'
+      _farm ctl 'benign probe line' "$_ffn" "$_ffe" "$_fmsg_t"
+      _fref id 'no PARSED Co-authored-by'; _fi=$?
+      _fpass ctl 'Co-authored-by trailer parsed: [1-9]'; _fc=$?
+      if [ "$_fi" = 2 ] || [ "$_fc" = 2 ]; then
+        _fverdict="unknown:the throwaway index could not be staged, so the hook was not fired"
+      elif [ "$_fi" != 0 ]; then
+        _fverdict="through:a seat-committed message with no parsed trailer was not refused (rc=$(cat "$_ft/id.rc"))"
+      elif [ "$_fc" != 0 ]; then
+        _fverdict="control:a message with a parsed trailer was not passed (rc=$(cat "$_ft/ctl.rc"))"
+      fi ;;
+    *)
+      _fverdict="unknown:no firing arms are written for a hook named $_fh" ;;
+  esac
+  rm -rf "$_ft"
+  echo "$_fverdict"
+  return 0
+}
+
+hooks_check() {
+  _hbad=0; _hn=0; _hnamed=0
+  _htop=$(git rev-parse --show-toplevel 2>/dev/null) || _htop=''
+  _hd=$(git rev-parse --git-path hooks 2>/dev/null)
+  if [ -z "${_hd:-}" ]; then
+    echo "HOOKS — FAIL: git cannot name a hooks directory. That is 'unknown',"
+    echo "   not 'installed'. Refusing rather than assuming."
+    return 1
+  fi
+  echo "HOOKS — effective hooks directory: $_hd"
+  echo "   (git rev-parse --git-path hooks honours core.hooksPath at every scope,"
+  echo "    so this is git's own answer, not a precedence rule re-implemented here.)"
+  _hcarry=$(_exec_bit_probe "$_hd")
+  case "$_hcarry" in
+    yes)
+      echo "   exec-bit probe: this filesystem CARRIES the mode bit, so [ -x ] is"
+      echo "    authoritative here and BOTH instruments are required below." ;;
+    no:notcleared)
+      echo "   exec-bit probe: this filesystem does NOT carry the mode bit — chmod -x"
+      echo "    left it set (Git for Windows fabricates it). [ -x ] is vacuous here, so"
+      echo "    only the index mode is read. A POSIX seat gets the stricter verdict." ;;
+    no:notset)
+      echo "   exec-bit probe: this filesystem does NOT carry the mode bit — chmod +x"
+      echo "    did not make a throwaway file executable, so [ -x ] cannot be trusted"
+      echo "    in either direction. Index mode only; requiring [ -x ] here would"
+      echo "    refuse a correctly installed box." ;;
+    *)
+      echo "   exec-bit probe: INCONCLUSIVE — nothing could be written inside $_hd, so"
+      echo "    the filesystem bit is UNREAD and a stripped bit is invisible here. This"
+      echo "    is an admitted blind spot, not a clean bill: the verdict below is the"
+      echo "    permissive index-only one. It does NOT probe anywhere else — a probe in"
+      echo "    another filesystem answers a different question." ;;
+  esac
+  for _hpair in 'pre-commit:secret-scan.sh' 'commit-msg:identity-check.sh'; do
+    _hh=${_hpair%%:*}; _hgate=${_hpair#*:}
+    _hf="$_hd/$_hh"
+    _hn=$((_hn + 1))
+    if [ ! -s "$_hf" ]; then
+      # A MISSING VERDICT MUST BE ABOUT THE FILE, NOT ABOUT THE DIRECTORY. When $_hd cannot be
+      # SEARCHED, every stat inside it fails and an installed, wired, executable hook reads as
+      # absent — and the reader is told to install what is already there. rc stays 1 because git
+      # cannot read the hook either, so this is fail-closed with a FALSE REASON, which is the
+      # worse half. MEASURED on ext4 as uid 1000, not guessed: dir 0755 and 0500 -> [ -d "$d/." ]
+      # true and [ -s "$d/file" ] true; dir 0600 and 0400 -> both false, together. `ls` is the
+      # WRONG instrument here (true at 0600: it needs r, not x). Under Git for Windows every mode
+      # reads searchable, so this arm cannot raise a false alarm there.
+      if [ -d "$_hd" ] && [ ! -d "$_hd/." ]; then
+        echo "   UNREADABLE $_hh — $_hd exists but cannot be SEARCHED from here, so nothing"
+        echo "            inside it can be stat'd and whether $_hh is installed is UNKNOWN."
+        echo "            Git reads the hook the same way and will not run it either, so this"
+        echo "            is still a refusal — but do NOT reinstall: fix the directory's mode."
+      else
+        echo "   MISSING  $_hh — nothing installed at $_hf"
+      fi
+      _hbad=$((_hbad + 1)); continue
+    fi
+    # A NAME IN THE FILE IS NOT A GATE THAT RUNS (bFUzZ's attack on this PR, 2026-09-29).
+    # The name search that used to sit below found it anywhere in the hook, so `exit 0` as line 2, `&&`
+    # turned into `;`, or the name surviving only in a comment each read "wired" at rc=0 while
+    # a planted 64-hex COMMITTED. Reading the text for the name is a resolving read. So a
+    # TRACKED hook is judged by what it is, not by what it mentions: its content on disk must
+    # hash to HEAD's blob for the same path, which is the hook the selftest below makes fire.
+    # hash-object applies the same filters git add does, so a CRLF checkout is not a false
+    # MODIFIED. The mode is not part of this compare on purpose; the arms below judge the bit.
+    # Every value is captured on its own, never through a pipe, so a git that cannot answer
+    # reads UNKNOWN and refuses, instead of reading as a match.
+    _hpath=$(git ls-files --full-name -- "$_hf" 2>/dev/null) || _hpath=''
+    if [ -n "$_hpath" ]; then
+      _hdisk=$(git hash-object -- "$_hf" 2>/dev/null) || _hdisk=''
+      if [ -z "$_hdisk" ]; then
+        echo "   UNKNOWN  $_hh — git hash-object could not read $_hf, so whether it is the"
+        echo "            tracked hook is not known. Refusing rather than assuming."
+        _hbad=$((_hbad + 1)); continue
+      fi
+      _hhead=$(git rev-parse -q --verify "HEAD:$_hpath" 2>/dev/null) || _hhead=''
+      if [ "$_hdisk" != "$_hhead" ]; then
+        if [ -n "$_hhead" ]; then
+          _hwhy="disk blob $(printf %.8s "$_hdisk"), HEAD blob $(printf %.8s "$_hhead")"
+        else
+          _hwhy="HEAD has no file at that path"
+        fi
+        echo "   MODIFIED $_hh — the file on disk is not HEAD's tracked $_hpath ($_hwhy)."
+        echo "            Whether it still runs $_hgate is NOT judged from its text: the name"
+        echo "            can sit in a comment or after an exit. See what changed with"
+        echo "              git diff HEAD -- $_hpath"
+        echo "            and put the reviewed hook back with  git checkout HEAD -- $_hpath"
+        _hbad=$((_hbad + 1)); continue
+      fi
+    fi
+    # No search of the hook's text for the gate's name. It was the resolving read above in a
+    # second form, and with firing below it was also a FALSE REFUSAL: a hook committed calling
+    # a helper that runs the scan (P18e) was refused as never running it. Whether the hook
+    # runs its gate is decided by firing it.
+    if [ -z "$_htop" ]; then
+      echo "   UNKNOWN  $_hh — git cannot name this checkout's top, so the hook cannot be"
+      echo "            fired from where git would run it. Refusing rather than assuming."
+      _hbad=$((_hbad + 1)); continue
+    fi
+    case "$_hf" in /*|[A-Za-z]:*) _hfabs=$_hf ;; *) _hfabs="$PWD/$_hf" ;; esac
+    _hfire=$(_fire_hook "$_hh" "$_hfabs" "$_htop")
+    if [ "$_hfire" != ok ]; then
+      case "$_hfire" in
+        through:*) _hlab='FIRED   ' ;;
+        control:*) _hlab='OVERBLOCK' ;;
+        *)         _hlab='UNKNOWN ' ;;
+      esac
+      echo "   $_hlab $_hh — fired from $_htop against a throwaway git dir:"
+      echo "            ${_hfire#*:}."
+      echo "            Every file the hook reaches was read from this disk, the hook's own"
+      echo "            text and any script it runs, at any depth. See what differs from HEAD"
+      echo "            with  git status --short  and  git diff HEAD"
+      _hbad=$((_hbad + 1)); continue
+    fi
+    _hmode=$(git ls-files -s -- "$_hf" 2>/dev/null | cut -c1-6)
+    if [ -n "$_hmode" ]; then
+      # `[ -x ]` IS A ONE-WAY INSTRUMENT AND ONLY THE FALSE DIRECTION IS SOUND EVERYWHERE.
+      # TRUE is vacuous under Git for Windows, which fabricates it — that is the whole
+      # reason this row used to read the index alone. FALSE is not fabricated by any
+      # platform measured here: on this Windows box both real hooks read `[ -x ]` TRUE
+      # while `chmod +x` on an empty throwaway file does not take at all. So a FALSE is
+      # taken as DEAD even when the probe could not answer, and it is ignored in exactly
+      # one case — probe `no:notset`, the answer that says +x cannot be observed at all,
+      # where a FALSE cannot be distinguished from an instrument stuck low.
+      # WHY IT IS HERE: with no fallback, an unwritable hooks directory gives `unknown`,
+      # and `unknown` alone lands on the permissive index-only verdict. Measured on ext4:
+      # hooks dead, directory unwritable -> rc=0 "2 of 2 ... executable by index mode",
+      # which is the same false green by a different door. THIS IS BEYOND THE ROW AS CUT
+      # and is bee-laborer's to reject; the fallback removal above stands without it.
+      if [ "$_hmode" = 100755 ] && [ "$_hcarry" != no:notset ] && [ ! -x "$_hf" ]; then
+        echo "   DEAD     $_hh — runs $_hgate, index mode 100755, but the file ON DISK"
+        echo "            is not executable. Git execs the FILE, not the index, so this"
+        echo "            hook never runs on this box. Usual cause: core.fileMode=false,"
+        echo "            which also makes git status report nothing. Remedy: chmod +x"
+        echo "            $_hf"
+        _hbad=$((_hbad + 1))
+      elif [ "$_hmode" = 100755 ] && [ "$_hcarry" = yes ]; then
+        echo "   ok       $_hh — runs $_hgate, index mode 100755 AND executable on disk"
+      elif [ "$_hmode" = 100755 ]; then
+        echo "   ok(index) $_hh — runs $_hgate, index mode 100755, so every fresh clone"
+        echo "            gets the bit. The disk bit is not FALSE here, which is the only"
+        echo "            direction this box can answer (probe: $_hcarry), so a fabricated"
+        echo "            TRUE is all that was available and the file stays unverified."
+      else
+        echo "   DEAD     $_hh — runs $_hgate but index mode is $_hmode. Git SKIPS a"
+        echo "            non-executable hook and says so only as an advice hint. The"
+        echo "            config can be perfect and this hook still never runs on POSIX."
+        _hbad=$((_hbad + 1))
+      fi
+    elif [ -x "$_hf" ]; then
+      # Outside the tree there is no reviewed copy to compare with. It was fired above and
+      # refused the planted cases, but a hook that stops exactly those cases and nothing else
+      # is not ruled out by firing, so it is never called "wired".
+      echo "   outside  $_hh — fired: it refused the planted cases and passed the control."
+      echo "            It is outside the tree, so there is no tracked hook to compare it"
+      echo "            with: its content was NOT compared. Only the filesystem bit was read,"
+      echo "            which Git for Windows fabricates."
+      _hnamed=$((_hnamed + 1))
+    else
+      echo "   DEAD     $_hh — runs $_hgate but is not executable and is not tracked"; _hbad=$((_hbad + 1))
+    fi
+  done
+  # NAME THE INSTRUMENT WITH THE NUMBER: "executable" meant two different
+  # measurements depending on the box, and saying only the word is how the
+  # index-only reading passed for the stronger one.
+  if [ "$_hcarry" = yes ]; then _hword="executable on disk"; else _hword="executable by index mode"; fi
+  # "wired" is said only of a hook whose content is HEAD's tracked hook AND which, fired,
+  # refused the planted cases and passed the control. A hook outside the tree is counted
+  # apart, and the line says its content was not compared.
+  echo "   $((_hn - _hbad - _hnamed)) of $_hn required hooks installed, wired (content = HEAD's tracked hook; fired: planted cases refused, control passed) and $_hword"
+  if [ "$_hnamed" -ne 0 ]; then
+    echo "   $_hnamed of $_hn are outside the tree: fired, content NOT compared"
+  fi
+  if [ "$_hbad" -ne 0 ]; then
+    echo "HOOKS BLOCKED — this box has no complete local gate. Remedy, from the repo root:"
+    echo "     git config --local core.hooksPath .githooks"
+    echo "     git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg"
+    echo "   (the second line is a tracked mode change and must be committed to hold"
+    echo "    for anyone else; a local chmod fixes only your own clone.)"
+    echo "   If a hook above is DEAD with index mode 100755, the tracked mode is already"
+    echo "   right and only YOUR working file lost the bit:"
+    echo "     chmod +x $_hd/pre-commit $_hd/commit-msg"
+    echo "     git config --local --unset core.fileMode   # if it is set to false"
+    echo "   This layer is advisory: CI re-scans on push either way. It refuses here"
+    echo "   because a hookless box publishes UNSCANNED material the instant it pushes."
+    return 1
+  fi
+  return 0
+}
 
 # ---- SELFTEST ------------------------------------------------------------
 # LAW (founder, 2026-08-25): a checker is not LANDED until it has been run
@@ -93,6 +488,9 @@ locate() {
 if [ "${1:-}" = "--selftest" ]; then
   SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
   st=0
+  # _skipped — every arm this run DECLARED but did not RUN, named by the branch that
+  # skipped it. See the SKIP CENSUS at the foot of this selftest for why it exists.
+  _skipped=''
   echo "push-preflight selftest — known-BAD and known-GOOD:"
   sh "$SELF" refs/heads/__no_such_ref__ >/tmp/ps1 2>&1; r=$?
   if [ "$r" -ne 0 ] && grep -q "does not resolve" /tmp/ps1; then
@@ -160,7 +558,19 @@ if [ "${1:-}" = "--selftest" ]; then
       cp "$SELF" scripts/push-preflight.sh
       cp "$(dirname "$SELF")/secret-scan.sh" scripts/secret-scan.sh 2>/dev/null || true
       cp "$(dirname "$SELF")/keyshape.sh" scripts/keyshape.sh 2>/dev/null || true
-      git add scripts 2>/dev/null
+      # identity-check.sh too: both hooks run it, and the HOOKS row now FIRES them. Without it
+      # this rig's hooks call a missing script, which the row refuses. Before firing, the row
+      # called that same box wired.
+      cp "$(dirname "$SELF")/identity-check.sh" scripts/identity-check.sh 2>/dev/null || true
+      # The hooks go into the BASE commit, so HEAD carries them: the HOOKS row calls a hook
+      # wired only when its content is HEAD's tracked hook, and a hook that is merely staged
+      # reads MODIFIED. They are switched on (core.hooksPath) only after the fixture commits
+      # below, so the rig's own commits stay unhooked, and HEAD~1..HEAD is still the fixture.
+      mkdir -p .githooks
+      cp "$(dirname "$SELF")/../.githooks/pre-commit" .githooks/pre-commit 2>/dev/null
+      cp "$(dirname "$SELF")/../.githooks/commit-msg" .githooks/commit-msg 2>/dev/null
+      git add scripts .githooks 2>/dev/null
+      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m base 2>/dev/null || exit 1
@@ -169,6 +579,11 @@ if [ "${1:-}" = "--selftest" ]; then
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m fixture 2>/dev/null || exit 1
+      # The HOOKS row refuses a box with no local gate, so this rig must look like
+      # a seat's box or P11 would fail on the precondition instead of on check 3.
+      # Switched on AFTER the fixture commits on purpose: P11's subject is the
+      # DELTA, and hooking the rig's own commits would change what P11 tests.
+      git config core.hooksPath .githooks
       sh scripts/push-preflight.sh HEAD~1 > "$T/out" 2>&1
       echo "$?" > "$T/rc"
     )
@@ -183,6 +598,859 @@ if [ "${1:-}" = "--selftest" ]; then
     fi
     rm -rf "$T"
   fi
+  # P12-P14 — the HOOKS row FIRED, not resolved. This is the whole point of the
+  # row: a config read tells you a setting, and a setting is what was already
+  # "correct" on the day .githooks/commit-msg turned out to be index mode 644
+  # and silently skipped. So these arms build a real throwaway repo (the P11 /
+  # identity-check T-rig pattern), install the estate's own hooks in it, and
+  # make git actually run them.
+  #
+  #   P12 known-GOOD  hooks live, benign commit   -> COMMITS, and the scanner
+  #                                                  SPEAKS (its own count line)
+  #       known-BAD   hooks live, planted 64-hex  -> BLOCKED, commit count flat
+  #   P13 known-BAD   hooks pointed elsewhere     -> the SAME content COMMITS and
+  #                                                  the count RISES (the hazard
+  #                                                  shown, not inferred from an
+  #                                                  absent refusal), and --hooks
+  #                                                  refuses by name
+  #   P14 known-BAD   hook present but mode 644   -> --hooks refuses naming it
+  #       known-GOOD  same hook at mode 755       -> --hooks passes
+  #   P17 known-BAD   tracked hook edited, name kept -> --hooks refuses naming it
+  #                   (bFUzZ M1-M3), and the edit really lets a key commit
+  #       CONTROL     restored byte-equal         -> --hooks passes
+  #       known-WEAK  hooks outside the tree       -> permitted, said to NAME the
+  #                                                  gate, never called wired
+  #
+  # P13's rise is what makes P12's block mean anything: without it, "blocked"
+  # could be any failure at all. P14 is the arm for the WRONG ANSWER rather than
+  # the off-switch — a row that only catches a missing file would hand a green
+  # to the exact tree we are sitting in.
+  _hsrc=$(dirname "$SELF")
+  _fn=$(sed -n 's/^FOUNDER_NAME="\(.*\)"$/\1/p' "$_hsrc/identity-check.sh" | head -1)
+  _fe=$(sed -n 's/^FOUNDER_EMAIL="\(.*\)"$/\1/p' "$_hsrc/identity-check.sh" | head -1)
+  # The fixture asserts its own precondition: an empty founder identity would
+  # make every §7 arm below refuse for the wrong reason and read as a catch.
+  if [ -z "$_fn" ] || [ -z "$_fe" ]; then
+    echo "  P12-P14 -> could not read the founder identity out of identity-check.sh; arms not run"; st=1
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f P17a P17b P17c P17d P17e P18a P18b P18c P18d P18e P18f P18g"
+  else
+  # Generated here, never copied: 8 x 8 chars = a 64-run, and no 48+ literal
+  # ever appears in this source (which would make this file block itself).
+  _hex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
+  _msg_c="control
+
+Co-authored-by: preflight selftest seat <selftest@invalid>"
+  H=$(mktemp -d 2>/dev/null) || H=""
+  # CAPTURE THE PREFIX BEFORE COMPARING. Substituting the command straight into
+  # the case pattern made an EMPTY answer become the pattern `*`, which matches
+  # every path — so a box where git cannot name a toplevel refused with the
+  # sentence "INSIDE the estate checkout" about a /tmp path that plainly is not,
+  # and P12-P14 — this row's entire point — silently did not run while the
+  # header still presented them as the proof. Reproduced 2026-09-23 by running
+  # this selftest with its cwd outside any repository; bee-laborer hit the same
+  # branch from a Windows-created worktree read under WSL, whose .git file
+  # carries a C:/ path git cannot resolve. Same family as the empty WIF_RE that
+  # made `git grep -InE ""` match every line: AN EMPTY PATTERN IS A WILDCARD,
+  # NOT AN ABSENT TEST.
+  _top=$(git rev-parse --show-toplevel 2>/dev/null) || _top=''
+  if [ -z "${_top:-}" ]; then
+    echo "  P12-P14 -> refusing: git cannot name a toplevel from here, so 'is this"
+    echo "            throwaway path inside the estate checkout?' has no answer. That is"
+    echo "            'unknown', not 'outside'. Run the selftest from inside a checkout"
+    echo "            git can resolve."
+    st=1; H=""
+  else
+    case "$H" in
+      "$_top"*)
+        echo "  P12-P14 -> refusing: mktemp handed back a path INSIDE the estate checkout ($H)"; st=1; H="" ;;
+    esac
+  fi
+  if [ -z "$H" ]; then
+    echo "  P12-P14 -> no usable throwaway directory; arms not run"; st=1
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f P17a P17b P17c P17d P17e P18a P18b P18c P18d P18e P18f P18g"
+  else
+    (
+      cd "$H" && git init -q r 2>/dev/null && cd r && mkdir -p scripts .githooks || exit 1
+      cp "$SELF" scripts/push-preflight.sh
+      cp "$_hsrc/secret-scan.sh" "$_hsrc/keyshape.sh" "$_hsrc/identity-check.sh" scripts/ || exit 1
+      cp "$_hsrc/../.githooks/pre-commit" "$_hsrc/../.githooks/commit-msg" .githooks/ || exit 1
+      git add -A >/dev/null 2>&1
+      # --chmod, not chmod: the filesystem bit does not reach the index under
+      # Git for Windows, and the index mode is the thing the row reads.
+      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -q -m "$_msg_c" >/dev/null 2>&1 || exit 1
+      git config core.hooksPath .githooks
+      git rev-list --count HEAD > c0
+
+      echo "benign control line" > control.txt; git add control.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > a.out 2>&1
+      echo "$?" > a.rc; git rev-list --count HEAD > a.n
+
+      printf 'planted, unmarked: %s\n' "$_hex" > bad.txt; git add bad.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > b.out 2>&1
+      echo "$?" > b.rc; git rev-list --count HEAD > b.n
+
+      mkdir -p .nohooks; git config core.hooksPath .nohooks
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > c.out 2>&1
+      echo "$?" > c.rc; git rev-list --count HEAD > c.n
+      sh scripts/push-preflight.sh --hooks > c.pf 2>&1; echo "$?" > c.pfrc
+
+      git config core.hooksPath .githooks
+      git update-index --chmod=-x .githooks/commit-msg >/dev/null 2>&1
+      sh scripts/push-preflight.sh --hooks > d.out 2>&1; echo "$?" > d.rc
+      git update-index --chmod=+x .githooks/commit-msg >/dev/null 2>&1
+      sh scripts/push-preflight.sh --hooks > e.out 2>&1; echo "$?" > e.rc
+
+      # f: the index mode stays 100755 and only the FILESYSTEM bit is stripped,
+      # which is what core.fileMode=false lets happen silently. git execs the
+      # file, so this is a dead hook wearing a correct tracked mode.
+      git config core.fileMode false
+      chmod -x .githooks/commit-msg 2>/dev/null
+      # SECOND INSTRUMENT, read by the rig and not by the gate: did the bit
+      # actually come off? Without this the arm would take the script's OWN
+      # probe verdict as the reason to skip itself, so a probe stuck on "no"
+      # would silence P14c/P14d and still print "selftest ok".
+      if [ -x .githooks/commit-msg ]; then echo no > f.carry; else echo yes > f.carry; fi
+      sh scripts/push-preflight.sh --hooks > f.out 2>&1; echo "$?" > f.rc
+      # g: put the bit back and ask again. Without this control an rc=1 above is
+      # only a rig that refuses; with it, the refusal is attributable to the bit.
+      chmod +x .githooks/commit-msg 2>/dev/null
+      git config --unset core.fileMode 2>/dev/null
+      sh scripts/push-preflight.sh --hooks > g.out 2>&1; echo "$?" > g.rc
+
+      # h: the bit is off AND the hooks directory cannot be written. On a POSIX box
+      # $TMPDIR carries the bit, so a probe that fell back there would print CARRIES
+      # and refuse; the correct answer is that this instrument cannot see.
+      git config core.fileMode false
+      chmod -x .githooks/commit-msg 2>/dev/null
+      chmod 500 .githooks 2>/dev/null
+      if ( : > .githooks/.wprobe ) 2>/dev/null; then rm -f .githooks/.wprobe; echo no > h.unwritable; else echo yes > h.unwritable; fi
+      sh scripts/push-preflight.sh --hooks > h.out 2>&1; echo "$?" > h.rc
+      chmod 700 .githooks 2>/dev/null
+      chmod +x .githooks/commit-msg 2>/dev/null
+      git config --unset core.fileMode 2>/dev/null
+
+      # i: the hooks directory is READABLE but not SEARCHABLE (0600), bits intact. Every stat
+      # inside it fails, so an installed, wired, executable hook reads as absent. Git cannot run
+      # it either, so rc=1 is the right verdict — but "MISSING, nothing installed" is a FALSE
+      # REASON that sends the reader to reinstall a file that is already there.
+      chmod 600 .githooks 2>/dev/null
+      # the rig's OWN second read of the fixture, never the gate's answer: is the directory
+      # actually unsearchable here? On Git for Windows it is not, and the arm says so instead
+      # of claiming a pass it did not earn.
+      if [ -d .githooks/. ]; then echo no > i.blind; else echo yes > i.blind; fi
+      sh scripts/push-preflight.sh --hooks > i.out 2>&1; echo "$?" > i.rc
+      chmod 700 .githooks 2>/dev/null
+      # read AFTER the mode is restored — inside a 0600 directory this test cannot answer.
+      if [ -s .githooks/commit-msg ] && [ -x .githooks/commit-msg ]; then echo yes > i.present; else echo no > i.present; fi
+
+      # j-l: bFUzZ's M1-M3 on the TRACKED pre-commit, each written from a byte copy and put
+      # back from it. Each one keeps the gate's NAME in the file, so a name search reads it
+      # as wired. Each arm also commits a planted 64-hex under the mutation: the refusal only
+      # means something if the mutated hook really lets the key through.
+      cp .githooks/pre-commit pc.orig
+      _mut() {  # $1 = arm letter; the mutated hook is already on disk
+        wc -c < .githooks/pre-commit > "$1.bytes"
+        sh scripts/push-preflight.sh --hooks > "$1.out" 2>&1; echo "$?" > "$1.rc"
+        git rev-list --count HEAD > "$1.n0"
+        printf 'planted under %s: %s\n' "$1" "$_hex" > "bad$1.txt"; git add "bad$1.txt" >/dev/null 2>&1
+        GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+        GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+          git commit -m "$_msg_c" > "$1.commit" 2>&1
+        git rev-list --count HEAD > "$1.n1"
+        git rm -q --cached "bad$1.txt" >/dev/null 2>&1; rm -f "bad$1.txt"
+        cp pc.orig .githooks/pre-commit
+      }
+      # M1: `exit 0` as line 2. Landed = line 2 is exactly that and line 3 is the old line 2.
+      { sed -n 1p pc.orig; echo 'exit 0'; sed 1d pc.orig; } > .githooks/pre-commit
+      if [ "$(sed -n 2p .githooks/pre-commit)" = 'exit 0' ] \
+         && [ "$(sed -n 3p .githooks/pre-commit)" = "$(sed -n 2p pc.orig)" ]; then echo yes > j.landed; else echo no > j.landed; fi
+      _mut j
+      # M2: the one `&&` before the identity check becomes `;`. Landed = the copy has exactly
+      # one `&& S7_STAGED`, the mutant has none, and exactly one `; S7_STAGED`.
+      sed 's/ && S7_STAGED=1 / ; S7_STAGED=1 /' pc.orig > .githooks/pre-commit
+      # Each count is taken on its own line first: a count of 0 is data, and the shell-chain
+      # lint judges a grep -c inside an and-chain whether or not the chain can break.
+      _k1=$(grep -c ' [&][&] S7_STAGED=1 ' pc.orig)
+      _k2=$(grep -c ' [&][&] S7_STAGED=1 ' .githooks/pre-commit)
+      _k3=$(grep -c ' ; S7_STAGED=1 ' .githooks/pre-commit)
+      if [ "$_k1" = 1 ] && [ "$_k2" = 0 ] && [ "$_k3" = 1 ]; then echo yes > k.landed; else echo no > k.landed; fi
+      _mut k
+      # M3: the gate's name survives only in a comment. Landed = the copy has exactly one line
+      # opening with the scan, the mutant has none, and exactly one commented copy of it.
+      sed 's|^sh scripts/secret-scan\.sh|# sh scripts/secret-scan.sh|' pc.orig > .githooks/pre-commit
+      _l1=$(grep -c '^sh scripts/secret-scan\.sh' pc.orig)
+      _l2=$(grep -c '^sh scripts/secret-scan\.sh' .githooks/pre-commit)
+      _l3=$(grep -c '^# sh scripts/secret-scan\.sh' .githooks/pre-commit)
+      if [ "$_l1" = 1 ] && [ "$_l2" = 0 ] && [ "$_l3" = 1 ]; then echo yes > l.landed; else echo no > l.landed; fi
+      _mut l
+      # m: the CONTROL. Restored from the byte copy, the same row must permit the same box.
+      if cmp -s pc.orig .githooks/pre-commit; then echo yes > m.restored; else echo no > m.restored; fi
+      sh scripts/push-preflight.sh --hooks > m.out 2>&1; echo "$?" > m.rc
+
+      # n: hooks OUTSIDE the tree. No tracked copy exists to compare with, so the row may say
+      # the hook NAMES its gate and must never say it is wired. The rig's own read of the bit
+      # decides constructibility: an untracked hook that is not executable here is DEAD for a
+      # different reason and cannot judge this sentence.
+      mkdir -p .outside && cp pc.orig .outside/pre-commit && cp .githooks/commit-msg .outside/commit-msg
+      chmod +x .outside/pre-commit .outside/commit-msg 2>/dev/null
+      if [ -x .outside/pre-commit ] && [ -x .outside/commit-msg ] \
+         && [ -z "$(git ls-files -- .outside)" ]; then echo yes > n.built; else echo no > n.built; fi
+      git config core.hooksPath .outside
+      sh scripts/push-preflight.sh --hooks > n.out 2>&1; echo "$?" > n.rc
+      git config core.hooksPath .githooks
+
+      # o-q, t: `exit 0` as line 2 of a script the hooks RUN, written from a byte copy and put
+      # back from it; the hooks themselves are not touched. Landed = line 2 is exactly that,
+      # line 3 is the old line 2, and the file grew by exactly one line. The hazard is then
+      # committed under the plant: a 64-hex for the scan, a seat author for the §7 check.
+      _splant() {  # $1 letter, $2 file under scripts/, $3 hazard: hex | seat
+        cp "scripts/$2" "$1.orig"
+        { sed -n 1p "$1.orig"; echo 'exit 0'; sed 1d "$1.orig"; } > "scripts/$2"
+        _sl0=$(wc -l < "$1.orig"); _sl1=$(wc -l < "scripts/$2")
+        _sq2=$(sed -n 2p "scripts/$2"); _sq3=$(sed -n 3p "scripts/$2"); _so2=$(sed -n 2p "$1.orig")
+        if [ "$_sq2" = 'exit 0' ] && [ "$_sq3" = "$_so2" ] && [ "$_sl1" -eq "$((_sl0 + 1))" ]; then
+          echo yes > "$1.landed"; else echo no > "$1.landed"; fi
+        sh scripts/push-preflight.sh --hooks > "$1.out" 2>&1; echo "$?" > "$1.rc"
+        git rev-list --count HEAD > "$1.n0"
+        if [ "$3" = hex ]; then
+          printf 'planted under %s: %s\n' "$1" "$_hex" > "bad$1.txt"; _sa=$_fn; _se=$_fe
+        else
+          echo "seat-authored under $1" > "bad$1.txt"; _sa='preflight selftest seat'; _se='selftest@invalid'
+        fi
+        git add "bad$1.txt" >/dev/null 2>&1
+        GIT_AUTHOR_NAME="$_sa" GIT_AUTHOR_EMAIL="$_se" \
+        GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+          git commit -m "$_msg_c" > "$1.commit" 2>&1
+        git rev-list --count HEAD > "$1.n1"
+        git rm -q --cached "bad$1.txt" >/dev/null 2>&1; rm -f "bad$1.txt"
+        cp "$1.orig" "scripts/$2"
+        if cmp -s "$1.orig" "scripts/$2"; then echo yes > "$1.restored"; else echo no > "$1.restored"; fi
+      }
+      _splant o secret-scan.sh hex
+      _splant p keyshape.sh hex
+      _splant q identity-check.sh seat
+      # r: the CONTROL. All three back, byte-equal to the copies AND to HEAD.
+      if cmp -s o.orig scripts/secret-scan.sh && cmp -s p.orig scripts/keyshape.sh \
+         && cmp -s q.orig scripts/identity-check.sh \
+         && git diff --quiet HEAD -- scripts/secret-scan.sh scripts/keyshape.sh scripts/identity-check.sh; then
+        echo yes > r.restored; else echo no > r.restored; fi
+      sh scripts/push-preflight.sh --hooks > r.out 2>&1; echo "$?" > r.rc
+
+      # s: the hook is COMMITTED calling a new helper that runs the scan, so HEAD's hook is the
+      # new one and no list anywhere names the helper. Landed = the hook's one scan line now
+      # calls the helper, nothing calls the scan directly, and both are HEAD's.
+      printf '#!/bin/sh\n# a helper added to the hook after the row was written\nsh scripts/secret-scan.sh diff\n' > scripts/probe-helper.sh
+      sed 's|^sh scripts/secret-scan\.sh diff |sh scripts/probe-helper.sh |' pc.orig > .githooks/pre-commit
+      git add scripts/probe-helper.sh .githooks/pre-commit >/dev/null 2>&1
+      # The tracked mode is set, not inherited: on Git for Windows (core.fileMode=false) this
+      # add recorded 100644 (the rig repo leaves core.fileMode at its default, true, on a disk
+      # with no mode bit), the row rightly called the hook DEAD, and P18e judged the rig. The
+      # landed check reads the mode from the INDEX and the content from the disk, separately.
+      git update-index --chmod=+x .githooks/pre-commit >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > s.commit 2>&1
+      _ss1=$(grep -c '^sh scripts/probe-helper\.sh [&][&] ' .githooks/pre-commit)
+      _ss2=$(grep -c '^sh scripts/secret-scan\.sh' .githooks/pre-commit)
+      if [ "$_ss1" = 1 ] && [ "$_ss2" = 0 ] \
+         && [ "$(git ls-files -s -- .githooks/pre-commit | cut -c1-6)" = 100755 ] \
+         && git -c core.fileMode=false diff --quiet HEAD -- .githooks/pre-commit scripts/probe-helper.sh; then
+        echo yes > s.landed; else echo no > s.landed; fi
+      sh scripts/push-preflight.sh --hooks > s.out 2>&1; echo "$?" > s.rc
+      _splant t probe-helper.sh hex
+
+      # u: a hook COMMITTED so that it refuses every commit. Each planted case is still refused,
+      # by name, so only the control can see it. Committed with the hooks pointed away, because
+      # this hook would refuse its own commit.
+      git config core.hooksPath .nohooks
+      { cat pc.orig; echo 'exit 1'; } > .githooks/pre-commit
+      git add .githooks/pre-commit >/dev/null 2>&1
+      git update-index --chmod=+x .githooks/pre-commit >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > u.commit 2>&1
+      git config core.hooksPath .githooks
+      _ul=$(sed -n '$p' .githooks/pre-commit)
+      if [ "$_ul" = 'exit 1' ] && [ "$(git ls-files -s -- .githooks/pre-commit | cut -c1-6)" = 100755 ] \
+         && git -c core.fileMode=false diff --quiet HEAD -- .githooks/pre-commit; then
+        echo yes > u.landed; else echo no > u.landed; fi
+      sh scripts/push-preflight.sh --hooks > u.out 2>&1; echo "$?" > u.rc
+
+      # z: the hook COMMITTED with only line 1 changed, to #!/bin/true (bFUzZ F2, round 3). Its
+      # text still runs the scan under sh, so a row that fires it with sh reads it wired; git
+      # execs it and runs /bin/true. Landed = line 1 is that, every other line is the copy's,
+      # mode 100755 in the index, and the work tree equals HEAD. The hazard is then committed.
+      git config core.hooksPath .nohooks
+      { echo '#!/bin/true'; sed 1d pc.orig; } > .githooks/pre-commit
+      git add .githooks/pre-commit >/dev/null 2>&1
+      git update-index --chmod=+x .githooks/pre-commit >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > z.commit 2>&1
+      git config core.hooksPath .githooks
+      chmod +x .githooks/pre-commit 2>/dev/null
+      _zl1=$(sed -n 1p .githooks/pre-commit); _zrest=$(sed 1d .githooks/pre-commit); _zorig=$(sed 1d pc.orig)
+      if [ "$_zl1" = '#!/bin/true' ] && [ "$_zrest" = "$_zorig" ] \
+         && [ "$(git ls-files -s -- .githooks/pre-commit | cut -c1-6)" = 100755 ] \
+         && git -c core.fileMode=false diff --quiet HEAD -- .githooks/pre-commit; then
+        echo yes > z.landed; else echo no > z.landed; fi
+      sh scripts/push-preflight.sh --hooks > z.out 2>&1; echo "$?" > z.rc
+      git rev-list --count HEAD > z.n0
+      printf 'planted under z: %s\n' "$_hex" > badz.txt; git add badz.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > z.hazard 2>&1
+      git rev-list --count HEAD > z.n1
+    )
+    _R="$H/r"
+    _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
+    _c0=$(_rd c0); _arc=$(_rd a.rc); _an=$(_rd a.n); _brc=$(_rd b.rc); _bn=$(_rd b.n)
+    _crc=$(_rd c.rc); _cn=$(_rd c.n); _cpf=$(_rd c.pfrc); _drc=$(_rd d.rc); _erc=$(_rd e.rc)
+    if [ "$_arc" = 0 ] && [ "$_an" = "$((${_c0:-0} + 1))" ] && grep -q "added lines scanned" "$_R/a.out" 2>/dev/null; then
+      echo "  P12a known-GOOD hooks live, benign commit -> committed ($_c0 -> $_an) and the scanner SPOKE its count (correct)"
+    else
+      echo "  P12a known-GOOD hooks live, benign commit -> rc=$_arc count $_c0 -> $_an, scanner silent — the rig cannot commit or the hook never ran"; st=1
+    fi
+    if [ "$_brc" != 0 ] && [ "$_bn" = "$_an" ] && grep -q "BLOCKED" "$_R/b.out" 2>/dev/null; then
+      echo "  P12b known-BAD  hooks live, planted 64-hex -> refused, count flat at $_bn (correct)"
+    else
+      echo "  P12b known-BAD  hooks live, planted 64-hex -> rc=$_brc count $_an -> $_bn — the hook did not fire"; st=1
+    fi
+    if [ "$_crc" = 0 ] && [ "$_cn" = "$((${_bn:-0} + 1))" ]; then
+      echo "  P13a known-BAD  hooks pointed elsewhere -> the SAME content LANDED, count ROSE $_bn -> $_cn — the hazard, shown (correct)"
+    else
+      echo "  P13a known-BAD  hooks pointed elsewhere -> rc=$_crc count $_bn -> $_cn — no rise, so P12b's block is unattributed"; st=1
+    fi
+    if [ "$_cpf" = 1 ] && grep -q "HOOKS BLOCKED" "$_R/c.pf" 2>/dev/null && grep -q "MISSING  pre-commit" "$_R/c.pf" 2>/dev/null; then
+      echo "  P13b known-BAD  --hooks over that box -> refused rc=1, naming the missing hook (correct)"
+    else
+      echo "  P13b known-BAD  --hooks over that box -> rc=$_cpf without naming the missing hook — the row is not the thing refusing"; st=1
+    fi
+    if [ "$_drc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/d.out" 2>/dev/null && grep -q "index mode is 100644" "$_R/d.out" 2>/dev/null; then
+      echo "  P14a known-BAD  hook installed, wired, index mode 644 -> refused, named as DEAD (correct)"
+    else
+      echo "  P14a known-BAD  mode-644 hook -> rc=$_drc, not reported dead — config-correct and skipped reads as installed"; st=1
+    fi
+    if [ "$_erc" = 0 ] && grep -q "2 of 2 required hooks" "$_R/e.out" 2>/dev/null; then
+      echo "  P14b known-GOOD same hook at mode 755 -> 2 of 2, permitted (correct)"
+    else
+      echo "  P14b known-GOOD mode-755 hook -> rc=$_erc — the row refuses a correctly installed box"; st=1
+    fi
+    _frc=$(_rd f.rc); _grc=$(_rd g.rc); _fcarry=$(_rd f.carry)
+    if [ "$_fcarry" = yes ] && ! grep -q "exec-bit probe: this filesystem CARRIES" "$_R/f.out" 2>/dev/null; then
+      echo "  P14c/P14d -> the rig's own read says the mode bit CAME OFF, and the row's probe"
+      echo "            says it is not carried. The probe is wrong, and a wrong probe here"
+      echo "            silently downgrades every hook verdict to index-only."; st=1
+    elif [ "$_fcarry" = yes ]; then
+      if [ "$_frc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/f.out" 2>/dev/null && grep -q "file ON DISK" "$_R/f.out" 2>/dev/null; then
+        echo "  P14c known-BAD  index 100755, filesystem bit STRIPPED -> refused rc=1, named DEAD on disk (correct)"
+      else
+        echo "  P14c known-BAD  index 100755, filesystem bit stripped -> rc=$_frc without naming the disagreement. git execs the FILE; reading the index alone is a FALSE GREEN"; st=1
+      fi
+      if [ "$_grc" = 0 ] && grep -q "2 of 2 required hooks" "$_R/g.out" 2>/dev/null; then
+        echo "  P14d CONTROL    same hook, bit restored -> 2 of 2, permitted — so P14c's refusal is the BIT, not a rig that refuses (correct)"
+      else
+        echo "  P14d CONTROL    bit restored -> rc=$_grc still not permitted; P14c's rc=1 is unattributed"; st=1
+      fi
+    else
+      _skipped="$_skipped P14c P14d"
+      echo "  P14c/P14d NOT CONSTRUCTIBLE HERE — the RIG's own read (not the row's probe)"
+      echo "            says chmod -x did not take on this filesystem, so the fixture cannot"
+      echo "            be built. Not a pass and not a skip to be read as one: these two arms"
+      echo "            run for real on every POSIX seat and in CI (ubuntu), which is exactly"
+      echo "            where the defect bites."
+    fi
+    # P14e is OUTSIDE the carried-bit branch on purpose: it judges where the probe
+    # LOOKS, which is a question on every platform, and an arm nobody prints is an
+    # arm nobody can miss the absence of.
+    _hun=$(_rd h.unwritable)
+    if [ "$_hun" = yes ]; then
+      _hrc=$(_rd h.rc)
+      if grep -q "exec-bit probe: INCONCLUSIVE" "$_R/h.out" 2>/dev/null \
+         && ! grep -q "this filesystem CARRIES" "$_R/h.out" 2>/dev/null \
+         && ! grep -q "does NOT carry" "$_R/h.out" 2>/dev/null \
+         && [ "$_hrc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/h.out" 2>/dev/null; then
+        echo "  P14e known-BLIND hooks dir UNWRITABLE, bit stripped -> probe answers INCONCLUSIVE, probes no other filesystem, and the dead hook is STILL named (correct)"
+      else
+        echo "  P14e known-BLIND hooks dir UNWRITABLE, bit stripped -> rc=$_hrc. Either the probe answered for a DIFFERENT filesystem — its verdict decided by where mktemp landed — or a blind probe let a dead hook read as installed"; st=1
+      fi
+    else
+      _skipped="$_skipped P14e"
+      echo "  P14e NOT CONSTRUCTIBLE HERE — the rig could still write inside a 0500 hooks"
+      echo "            directory (root, or a filesystem without POSIX modes), so the blind"
+      echo "            case cannot be built. Runs for real on a non-root POSIX seat."
+    fi
+    # P14f — a MISSING verdict must be about the FILE. An unsearchable directory made every
+    # stat inside it fail, and the row told the reader to install a hook that was already
+    # there, wired and executable. Fail-closed with a false reason is the worse half.
+    _ibl=$(_rd i.blind); _irc=$(_rd i.rc); _ipr=$(_rd i.present)
+    if [ "$_ibl" != yes ]; then
+      _skipped="$_skipped P14f"
+      echo "  P14f NOT CONSTRUCTIBLE HERE — paths inside a 0600 directory still resolve on this"
+      echo "            filesystem (Git for Windows fabricates the modes), so an unsearchable"
+      echo "            hooks directory cannot be built. Runs for real on a non-root POSIX seat."
+    elif [ "$_ipr" = yes ] && [ "$_irc" = 1 ] \
+         && grep -q "UNREADABLE commit-msg" "$_R/i.out" 2>/dev/null \
+         && grep -q "UNREADABLE pre-commit" "$_R/i.out" 2>/dev/null \
+         && ! grep -q "MISSING" "$_R/i.out" 2>/dev/null; then
+      echo "  P14f known-BAD  hooks dir UNSEARCHABLE, hooks installed and executable -> refused rc=1 naming UNREADABLE, and NOT claiming nothing is installed (correct)"
+    else
+      echo "  P14f known-BAD  hooks dir UNSEARCHABLE -> rc=$_irc, hooks-present-afterwards=$_ipr. Either the refusal still says MISSING about a hook that is installed, or it does not name the directory as the cause"; st=1
+    fi
+    # P17a-c — bFUzZ's M1-M3: a tracked hook edited so it no longer runs the scan, with the
+    # gate's name still in it. Each must be refused BY NAME as MODIFIED, and each must be
+    # shown to be a real hazard: under the same mutation a planted 64-hex COMMITS. A mutation
+    # that did not land is a failure of the arm, never a pass. Each arm line is a literal,
+    # because an arm printed from a variable is invisible to P16 and to CI's inventory.
+    _mjudge() {  # 0 = refused by name AND the hazard shown; 2 = mutation did not land; 1 = else
+      _mrc=$(_rd "$1.rc"); _mn0=$(_rd "$1.n0"); _mn1=$(_rd "$1.n1")
+      [ "$(_rd "$1.landed")" = yes ] || return 2
+      [ "$_mrc" = 1 ] && grep -q "MODIFIED pre-commit" "$_R/$1.out" 2>/dev/null \
+        && ! grep -qE "^   ok[^ ]* +pre-commit" "$_R/$1.out" 2>/dev/null \
+        && [ "$_mn1" = "$((${_mn0:-0} + 1))" ] && return 0
+      return 1
+    }
+    _mjudge j; case $? in
+      0) echo "  P17a known-BAD  tracked pre-commit, exit 0 as line 2 -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17a known-BAD  exit 0 as line 2 -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17a known-BAD  exit 0 as line 2 -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mjudge k; case $? in
+      0) echo "  P17b known-BAD  tracked pre-commit, && turned into ; -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17b known-BAD  && turned into ; -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17b known-BAD  && turned into ; -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mjudge l; case $? in
+      0) echo "  P17c known-BAD  tracked pre-commit, scan name only in a comment -> refused rc=1 naming MODIFIED, and the same hook let a planted 64-hex COMMIT ($_mn0 -> $_mn1) (correct)" ;;
+      2) echo "  P17c known-BAD  scan name only in a comment -> the mutation did NOT land on the rig's hook, so this arm judged nothing"; st=1 ;;
+      *) echo "  P17c known-BAD  scan name only in a comment -> rc=$_mrc, count $_mn0 -> $_mn1. The row still calls a hook that no longer scans wired, or the mutation let nothing through"; st=1 ;;
+    esac
+    _mres=$(_rd m.restored); _mrc=$(_rd m.rc)
+    if [ "$_mres" = yes ] && [ "$_mrc" = 0 ] && grep -q "2 of 2 required hooks installed, wired" "$_R/m.out" 2>/dev/null \
+       && ! grep -q "MODIFIED" "$_R/m.out" 2>/dev/null; then
+      echo "  P17d CONTROL    pre-commit restored byte-equal from the copy -> 2 of 2 wired, permitted, so P17a-c refuse the EDIT and not the rig (correct)"
+    else
+      echo "  P17d CONTROL    restored pre-commit -> byte-equal=$_mres rc=$_mrc. The row refuses the tracked hook itself, so P17a-c's refusals are unattributed"; st=1
+    fi
+    # P17e — outside the tree the row can fire a hook but has no reviewed copy to compare.
+    _nbuilt=$(_rd n.built); _nrc=$(_rd n.rc)
+    if [ "$_nbuilt" != yes ]; then
+      _skipped="$_skipped P17e"
+      echo "  P17e NOT CONSTRUCTIBLE HERE — the rig's own read says chmod +x did not take on an"
+      echo "            untracked hook copy on this filesystem, so an executable hook outside the"
+      echo "            tree cannot be built. Runs for real on every POSIX seat and in CI."
+    elif [ "$_nrc" = 0 ] && grep -q "outside  pre-commit" "$_R/n.out" 2>/dev/null \
+         && grep -q "outside  commit-msg" "$_R/n.out" 2>/dev/null \
+         && grep -q "0 of 2 required hooks installed, wired" "$_R/n.out" 2>/dev/null \
+         && grep -q "2 of 2 are outside the tree: fired, content NOT compared" "$_R/n.out" 2>/dev/null \
+         && ! grep -q "^   ok" "$_R/n.out" 2>/dev/null; then
+      echo "  P17e known-WEAK hooks outside the tree -> permitted, each fired and said to be outside, 0 of 2 called wired (correct)"
+    else
+      echo "  P17e known-WEAK hooks outside the tree -> rc=$_nrc. A hook with no tracked copy was called wired, or was not reported as outside the tree"; st=1
+    fi
+    # P18a-c — bFUzZ's F1 on #215 round 2, as bee-laborer ruled it (d630a9e1): `exit 0` as
+    # line 2 of each file the pre-commit and commit-msg hooks RUN, one file at a time. The hook
+    # files stay byte-equal to HEAD, so a refusal here can only come from FIRING them; the arm
+    # therefore also requires that MODIFIED is NOT the reason. Each is shown to be a real hazard:
+    # under the same plant the thing it guards COMMITS. keyshape.sh is the case a list built by
+    # searching the hooks for "scripts/" would miss: secret-scan.sh SOURCES it via $0.
+    _sjudge() {  # $1 letter, $2 [and $3] the refusal(s) the arm must name; 0 ok, 2 not landed, 1 else
+      _src=$(_rd "$1.rc"); _sn0=$(_rd "$1.n0"); _sn1=$(_rd "$1.n1")
+      [ "$(_rd "$1.landed")" = yes ] || return 2
+      [ "$(_rd "$1.restored")" = yes ] || return 1
+      [ "$_src" = 1 ] && grep -q "$2" "$_R/$1.out" 2>/dev/null \
+        && grep -q "${3:-$2}" "$_R/$1.out" 2>/dev/null \
+        && ! grep -q "MODIFIED" "$_R/$1.out" 2>/dev/null \
+        && [ "$_sn1" = "$((${_sn0:-0} + 1))" ] && return 0
+      return 1
+    }
+    _sjudge o "FIRED    pre-commit"; case $? in
+      0) echo "  P18a known-BAD  exit 0 as line 2 of secret-scan.sh, hooks byte-equal -> refused rc=1 naming FIRED pre-commit, and a planted 64-hex COMMITTED under it ($_sn0 -> $_sn1) (correct)" ;;
+      2) echo "  P18a known-BAD  exit 0 in secret-scan.sh -> the plant did NOT land, so this arm judged nothing"; st=1 ;;
+      *) echo "  P18a known-BAD  exit 0 in secret-scan.sh -> rc=$_src, count $_sn0 -> $_sn1. The row calls a hook wired while the scanner it runs gates nothing, or the plant let nothing through, or the copy was not restored"; st=1 ;;
+    esac
+    _sjudge p "keyshape.sh did not return when sourced"; case $? in
+      0) echo "  P18b known-BAD  exit 0 as line 2 of keyshape.sh (SOURCED, never named by the hook) -> refused rc=1 naming keyshape.sh as not returning when sourced, and a planted 64-hex COMMITTED under it ($_sn0 -> $_sn1) (correct)" ;;
+      2) echo "  P18b known-BAD  exit 0 in keyshape.sh -> the plant did NOT land, so this arm judged nothing"; st=1 ;;
+      *) echo "  P18b known-BAD  exit 0 in keyshape.sh -> rc=$_src, count $_sn0 -> $_sn1. A file the scanner sources gates nothing and the row did not see it, or the plant let nothing through"; st=1 ;;
+    esac
+    _sjudge q "FIRED    commit-msg" "FIRED    pre-commit"; case $? in
+      0) echo "  P18c known-BAD  exit 0 as line 2 of identity-check.sh -> refused rc=1 naming FIRED for BOTH hooks that run it, and a seat-authored commit COMMITTED under it ($_sn0 -> $_sn1) (correct)" ;;
+      2) echo "  P18c known-BAD  exit 0 in identity-check.sh -> the plant did NOT land, so this arm judged nothing"; st=1 ;;
+      *) echo "  P18c known-BAD  exit 0 in identity-check.sh -> rc=$_src, count $_sn0 -> $_sn1. The §7 check gates nothing and the row did not see it, or the plant let nothing through"; st=1 ;;
+    esac
+    # P18d — the CONTROL: all three restored byte-equal, the same row must permit the same box.
+    _rres=$(_rd r.restored); _rrc=$(_rd r.rc)
+    if [ "$_rres" = yes ] && [ "$_rrc" = 0 ] && grep -q "2 of 2 required hooks installed, wired" "$_R/r.out" 2>/dev/null \
+       && ! grep -qE "FIRED|OVERBLOCK|UNKNOWN" "$_R/r.out" 2>/dev/null; then
+      echo "  P18d CONTROL    all three scripts restored byte-equal -> 2 of 2 wired, permitted, so P18a-c refuse the PLANT and not the rig (correct)"
+    else
+      echo "  P18d CONTROL    restored scripts -> byte-equal=$_rres rc=$_rrc. The row refuses an untouched box, so P18a-c's refusals are unattributed"; st=1
+    fi
+    # P18e/f — a script ADDED to a hook later is covered with no list to update: the hook is
+    # committed calling a new helper that runs the scan, the row permits it (e), and `exit 0`
+    # in that helper alone is refused (f). This is the arm bee-laborer asked for against the
+    # next script nobody adds to a list.
+    _srcE=$(_rd s.rc)
+    if [ "$(_rd s.landed)" = yes ] && [ "$_srcE" = 0 ] && grep -q "2 of 2 required hooks installed, wired" "$_R/s.out" 2>/dev/null; then
+      echo "  P18e CONTROL    hook committed calling a NEW helper script that runs the scan -> 2 of 2 wired, permitted (correct)"
+    else
+      echo "  P18e CONTROL    new helper committed -> landed=$(_rd s.landed) rc=$_srcE. The row refuses a correct hook that calls a new script, so P18f is unattributed"; st=1
+    fi
+    _sjudge t "FIRED    pre-commit"; case $? in
+      0) echo "  P18f known-BAD  exit 0 as line 2 of that NEW helper -> refused rc=1 naming FIRED pre-commit, and a planted 64-hex COMMITTED under it ($_sn0 -> $_sn1) (correct)" ;;
+      2) echo "  P18f known-BAD  exit 0 in the new helper -> the plant did NOT land, so this arm judged nothing"; st=1 ;;
+      *) echo "  P18f known-BAD  exit 0 in the new helper -> rc=$_src, count $_sn0 -> $_sn1. A script added to a hook later is not covered"; st=1 ;;
+    esac
+    # P18g — the firing's CONTROL half has its own arm: a hook that refuses everything
+    # refuses every planted case by name, so without the control it would read wired.
+    _urc=$(_rd u.rc)
+    if [ "$(_rd u.landed)" = yes ] && [ "$_urc" = 1 ] && grep -q "OVERBLOCK pre-commit" "$_R/u.out" 2>/dev/null \
+       && ! grep -q "MODIFIED" "$_R/u.out" 2>/dev/null; then
+      echo "  P18g known-BAD  hook COMMITTED refusing every commit -> refused rc=1 naming OVERBLOCK, not MODIFIED (correct)"
+    elif [ "$(_rd u.landed)" != yes ]; then
+      echo "  P18g known-BAD  refuse-everything hook -> it did NOT land as HEAD's hook, so this arm judged nothing"; st=1
+    else
+      echo "  P18g known-BAD  refuse-everything hook -> rc=$_urc. A hook that refuses every commit was called wired, or was refused for another reason"; st=1
+    fi
+    # P20 — line 1 decides: a committed hook whose shebang runs /bin/true is refused, and git
+    # really does run /bin/true for it (the hazard commits). Before the row fired by path it
+    # read this hook "2 of 2 wired".
+    _zrc=$(_rd z.rc); _zn0=$(_rd z.n0); _zn1=$(_rd z.n1)
+    if [ "$(_rd z.landed)" != yes ]; then
+      echo "  P20 known-BAD  #!/bin/true hook -> it did NOT land as HEAD's hook, so this arm judged nothing"; st=1
+    elif [ "$_zrc" = 1 ] && grep -q "FIRED    pre-commit" "$_R/z.out" 2>/dev/null && [ "$_zn1" = "$((${_zn0:-0} + 1))" ]; then
+      echo "  P20 known-BAD  hook COMMITTED with line 1 = #!/bin/true -> refused rc=1 naming FIRED pre-commit, and a planted 64-hex COMMITTED under it ($_zn0 -> $_zn1) (correct)"
+    else
+      echo "  P20 known-BAD  #!/bin/true hook -> rc=$_zrc, count $_zn0 -> $_zn1. The row ran the hook's text instead of what git runs, or git did not run /bin/true"; st=1
+    fi
+    rm -rf "$H"
+    if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
+    else echo "  P12-P14 cleanup -> throwaway tree removed (correct)"; fi
+  fi
+  fi
+
+  # ── P19: THE SCANNER READS NO CONFIG AND NO ATTRIBUTES (bFUzZ #215 round 3 C1-C3, A, B;
+  # ruled by bee-laborer 06:27Z and 06:31Z 2026-10-01). Each arm builds a throwaway repo, sets ONE
+  # thing on that box, stages (diff) or commits (tree) a planted 64-hex, and runs THIS checkout's
+  # scripts/secret-scan.sh over it. The judge is the scanner's own BLOCKED line AND its rc, and
+  # each arm first asserts the thing it set took. At d79f246a's scanner C1-C4 and B1-B2 read
+  # "clean"; with the four diff flags and no -a, A1-A2 read "clean" (receipt). P19g is the
+  # control for A: a real binary from this tree, alone, is skipped BY COUNT and is not red.
+  # P19l-s (#215 round 5, ruled 07:22Z/07:25Z): ONE binary rule in both modes, a NUL in the first
+  # 8000 bytes. P19l/P19o: a key after a late NUL is read, tree and diff. P19m/P19p: THE KNOWN GAP,
+  # a key before an early NUL is skipped - those two arms judge that the skip is COUNTED, never
+  # that the key is caught. P19q: a real tracked JPEG carrying a 48+ hex metadata id, staged
+  # alone, is clean (round 4 BLOCKED it). P19r: a NUL on a hex line past byte 8000 must not blind
+  # the filters that read tree mode's hits, so a real key in a later file is still named; P19s is
+  # its control.
+  _p19s=$(dirname "$SELF"); _p19top=$(cd "$_p19s/.." && pwd)
+  _p19png="$_p19top/assets/house/house-achievement.png"
+  _p19jpg="$_p19top/assets/bnature-logo.jpg"
+  _p19t=$(mktemp -d 2>/dev/null) || _p19t=''
+  if [ -z "$_p19t" ] || [ ! -f "$_p19png" ] || [ ! -f "$_p19jpg" ]; then
+    echo "  P19a-P19s NOT CONSTRUCTIBLE HERE — no throwaway directory, or a named binary"
+    echo "     (assets/house/house-achievement.png, assets/bnature-logo.jpg) is not in this checkout"
+    _skipped="$_skipped P19a P19b P19c P19d P19e P19f P19g P19h P19i P19j P19k P19l P19m P19n P19o P19p P19q P19r P19s"
+  else
+    printf '[color]\n\tui = always\n' > "$_p19t/global.cfg"
+    _p19hex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
+    _p19() {  # $1 kind, $2 diff|tree
+      (
+        unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CONFIG_GLOBAL
+        R="$_p19t/$1"; git init -q "$R" >/dev/null 2>&1 || exit 9; cd "$R" || exit 9
+        git config core.autocrlf false; git config user.name p19; git config user.email p19@invalid
+        case $1 in
+          a1) printf 'k = %s\n' "$_p19hex" > a-hex.txt; printf 'x\000y\n' > z.bin ;;
+          a2) printf 'k = %s\n' "$_p19hex" > z-hex.txt; printf 'x\000y\n' > a.bin ;;
+          png) cp "$_p19png" house.png || exit 9 ;;
+          nlate|nlated|nctl) { head -c 9000 /dev/zero | tr '\000' x; printf '\n'; if [ "$1" = nctl ]; then printf ' '; else printf '\000'; fi; printf '\nk = %s\n' "$_p19hex"; } > y.txt ;;
+          nearly|nearlyd) { printf 'k = %s\n' "$_p19hex"; printf 'x\000y\n'; } > y.txt ;;
+          jpg) cp "$_p19jpg" logo.jpg || exit 9 ;;
+          r7) { head -c 9000 /dev/zero | tr '\000' x; printf '\nk = %s\000z\n' "$_p19hex"; } > a.txt; printf 'k = %s\n' "$_p19hex" > b.txt ;;
+          r7ctl) printf 'k = %s\n' "$_p19hex" > b.txt ;;
+          *) printf 'k = %s\n' "$_p19hex" > y.txt ;;
+        esac
+        case $1 in
+          c1) git config color.diff always; [ "$(git config color.diff)" = always ] || exit 8 ;;
+          c2) git config diff.external true; [ "$(git config diff.external)" = true ] || exit 8 ;;
+          c3) printf '* -diff\n' > .git/info/attributes; git check-attr diff -- y.txt | grep -q ': unset$' || exit 8 ;;
+          c4) [ "$(GIT_CONFIG_GLOBAL="$_p19t/global.cfg" git config color.ui)" = always ] || exit 8 ;;
+          a1|a2) od -An -c ./*.bin | grep -q '\\0' || exit 8 ;;
+          nlate|nlated) [ "$(tr -dc '\000' < y.txt | wc -c | tr -d ' ')" = 1 ] && [ "$(head -c 8000 y.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 0 ] || exit 8 ;;
+          jpg) [ "$(head -c 8000 logo.jpg | tr -dc '\000' | wc -c | tr -d ' ')" -gt 0 ] && [ "$(LC_ALL=C tr -d '\000' < logo.jpg | LC_ALL=C grep -acE '[0-9a-fA-F]{48,}')" -gt 0 ] || exit 8 ;;
+          r7) [ "$(head -c 8000 a.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 0 ] && [ "$(sed -n 2p a.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 1 ] || exit 8 ;;
+          nearly|nearlyd) [ "$(head -c 8000 y.txt | tr -dc '\000' | wc -c | tr -d ' ')" = 1 ] || exit 8 ;;
+          nctl) [ "$(tr -dc '\000' < y.txt | wc -c | tr -d ' ')" = 0 ] || exit 8 ;;
+        esac
+        git add -A >/dev/null 2>&1 || exit 9
+        if [ "$2" = tree ]; then
+          git -c core.hooksPath=/dev/null commit -q -m base >/dev/null 2>&1 || exit 9
+          case $1 in
+            b1) printf '*.txt -diff\n' > .gitattributes; git check-attr diff -- y.txt | grep -q ': unset$' || exit 8 ;;
+            b2) printf 'y.txt binary\n' > .git/info/attributes; git check-attr binary -- y.txt | grep -q ': set$' || exit 8 ;;
+          esac
+        fi
+        echo yes > "$_p19t/$1.built"
+        if [ "$1" = c4 ]; then GIT_CONFIG_GLOBAL="$_p19t/global.cfg" sh "$_p19s/secret-scan.sh" "$2"
+        else sh "$_p19s/secret-scan.sh" "$2"; fi
+      ) > "$_p19t/$1.out" 2>&1
+      echo "$?" > "$_p19t/$1.rc"
+    }
+    # 0 = built and BLOCKED by the scan; 2 = not built; 1 = else
+    _p19j() {
+      [ "$(cat "$_p19t/$1.built" 2>/dev/null)" = yes ] || return 2
+      [ "$(cat "$_p19t/$1.rc" 2>/dev/null)" = 1 ] && grep -q '^BLOCKED: 48+ char hex' "$_p19t/$1.out" 2>/dev/null && return 0
+      return 1
+    }
+    # 0 = built, rc=0, clean, and exactly $2 binaries skipped BY COUNT; 2 = not built; 1 = else
+    _p19c() {
+      [ "$(cat "$_p19t/$1.built" 2>/dev/null)" = yes ] || return 2
+      [ "$(cat "$_p19t/$1.rc" 2>/dev/null)" = 0 ] && grep -qE "^secret-scan: clean - (diff|tree) mode, [0-9]+ (added lines|tracked files) scanned, $2 (staged )?binary file\(s\) skipped$" "$_p19t/$1.out" 2>/dev/null && return 0
+      return 1
+    }
+    for _k in c1 c2 c3 c4 a1 a2 png ctl nlated nearlyd jpg; do _p19 "$_k" diff; done
+    for _k in b1 b2 tctl nlate nearly nctl r7 r7ctl; do _p19 "$_k" tree; done
+    _p19j c1; case $? in
+      0) echo "  P19a known-BAD  color.diff=always on the box, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19a known-BAD  color.diff=always -> not BLOCKED, or not built (rc=$(cat "$_p19t/c1.rc" 2>/dev/null)). Color escapes hid every added line from the scan"; st=1 ;;
+    esac
+    _p19j c2; case $? in
+      0) echo "  P19b known-BAD  diff.external=true on the box, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19b known-BAD  diff.external=true -> not BLOCKED, or not built (rc=$(cat "$_p19t/c2.rc" 2>/dev/null)). An external diff took the stream away from the scan"; st=1 ;;
+    esac
+    _p19j c3; case $? in
+      0) echo "  P19c known-BAD  '* -diff' in .git/info/attributes, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19c known-BAD  '* -diff' in info/attributes -> not BLOCKED, or not built (rc=$(cat "$_p19t/c3.rc" 2>/dev/null)). An attribute made the key's file binary to the scan"; st=1 ;;
+    esac
+    _p19j c4; case $? in
+      0) echo "  P19d known-BAD  color.ui=always in a GLOBAL config, 64-hex staged -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19d known-BAD  global color.ui=always -> not BLOCKED, or not built (rc=$(cat "$_p19t/c4.rc" 2>/dev/null)). A seat's own ~/.gitconfig blinded the scan"; st=1 ;;
+    esac
+    _p19j a1; case $? in
+      0) echo "  P19e known-BAD  64-hex staged with a NUL-bearing binary sorting AFTER it -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19e known-BAD  64-hex beside a binary (after) -> not BLOCKED, or not built (rc=$(cat "$_p19t/a1.rc" 2>/dev/null)). One NUL in the stream made grep read nothing"; st=1 ;;
+    esac
+    _p19j a2; case $? in
+      0) echo "  P19f known-BAD  64-hex staged with a NUL-bearing binary sorting BEFORE it -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19f known-BAD  64-hex beside a binary (before) -> not BLOCKED, or not built (rc=$(cat "$_p19t/a2.rc" 2>/dev/null)). One NUL in the stream made grep read nothing"; st=1 ;;
+    esac
+    _p19c png 1; case $? in
+      0) echo "  P19g CONTROL    assets/house/house-achievement.png staged ALONE -> clean rc=0, 1 staged binary skipped BY COUNT, so P19e/f are the key and not the binary (correct)" ;;
+      *) echo "  P19g CONTROL    a tracked PNG staged alone -> rc=$(cat "$_p19t/png.rc" 2>/dev/null), not clean with 1 binary skipped. A real binary is red, or its skip went uncounted"; st=1 ;;
+    esac
+    _p19j b1; case $? in
+      0) echo "  P19h known-BAD  untracked .gitattributes '*.txt -diff', 64-hex committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19h known-BAD  .gitattributes -diff, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/b1.rc" 2>/dev/null)). An attribute took the file out of the tree scan"; st=1 ;;
+    esac
+    _p19j b2; case $? in
+      0) echo "  P19i known-BAD  'y.txt binary' in .git/info/attributes, 64-hex committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19i known-BAD  info/attributes binary, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/b2.rc" 2>/dev/null)). An attribute took the file out of the tree scan"; st=1 ;;
+    esac
+    _p19j ctl; case $? in
+      0) echo "  P19j CONTROL    nothing set, 64-hex staged -> BLOCKED rc=1, the diff rig is sound (correct)" ;;
+      *) echo "  P19j CONTROL    nothing set, diff mode -> not BLOCKED (rc=$(cat "$_p19t/ctl.rc" 2>/dev/null)). The rig, not the setting, decides P19a-f"; st=1 ;;
+    esac
+    _p19j tctl; case $? in
+      0) echo "  P19k CONTROL    nothing set, 64-hex committed, tree mode -> BLOCKED rc=1, the tree rig is sound (correct)" ;;
+      *) echo "  P19k CONTROL    nothing set, tree mode -> not BLOCKED (rc=$(cat "$_p19t/tctl.rc" 2>/dev/null)). The rig, not the attribute, decides P19h-i"; st=1 ;;
+    esac
+    # P19l-n (bFUzZ round 4, ruled 07:10Z): grep -I stopped reading at the buffer holding a NUL.
+    _p19j nlate; case $? in
+      0) echo "  P19l known-BAD  64-hex on the line after ONE NUL past byte 8000, committed, tree mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19l known-BAD  key after a late NUL, tree mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/nlate.rc" 2>/dev/null)). The scan stopped reading at the NUL"; st=1 ;;
+    esac
+    _p19c nearly 1; case $? in
+      0) echo "  P19m KNOWN GAP  64-hex followed by a NUL in the first 8000 bytes, committed, tree mode -> skipped as binary and COUNTED (1 skipped), as on main; the key is NOT read (correct)" ;;
+      *) echo "  P19m KNOWN GAP  key before an early NUL, tree mode -> rc=$(cat "$_p19t/nearly.rc" 2>/dev/null), not clean with 1 binary skipped. The binary rule moved, or its skip went uncounted"; st=1 ;;
+    esac
+    _p19j nctl; case $? in
+      0) echo "  P19n CONTROL    P19l's file with its NUL replaced by a space (same length), tree mode -> BLOCKED rc=1, so P19l is the NUL (correct)" ;;
+      *) echo "  P19n CONTROL    P19l's file without the NUL -> not BLOCKED (rc=$(cat "$_p19t/nctl.rc" 2>/dev/null)). The rig, not the NUL, decides P19l"; st=1 ;;
+    esac
+    _p19j nlated; case $? in
+      0) echo "  P19o known-BAD  64-hex on the line after ONE NUL past byte 8000, staged, diff mode -> BLOCKED rc=1 (correct)" ;;
+      *) echo "  P19o known-BAD  key after a late NUL, diff mode -> not BLOCKED, or not built (rc=$(cat "$_p19t/nlated.rc" 2>/dev/null)). A text file was skipped as binary"; st=1 ;;
+    esac
+    _p19c nearlyd 1; case $? in
+      0) echo "  P19p KNOWN GAP  64-hex followed by a NUL in the first 8000 bytes, staged, diff mode -> skipped as binary and COUNTED (1 skipped), as on main; the key is NOT read (correct)" ;;
+      *) echo "  P19p KNOWN GAP  key before an early NUL, diff mode -> rc=$(cat "$_p19t/nearlyd.rc" 2>/dev/null), not clean with 1 binary skipped. The binary rule moved, or its skip went uncounted"; st=1 ;;
+    esac
+    _p19c jpg 1; case $? in
+      0) echo "  P19q known-GOOD assets/bnature-logo.jpg (a NUL in its first 8000 bytes, a 48+ hex metadata id) staged ALONE, diff mode -> clean rc=0, 1 binary skipped (correct)" ;;
+      *) echo "  P19q known-GOOD a real tracked JPEG staged alone -> rc=$(cat "$_p19t/jpg.rc" 2>/dev/null), not clean with 1 binary skipped. An image commit is refused again"; st=1 ;;
+    esac
+    if _p19j r7 && grep -q '^b\.txt:1: \[REDACTED' "$_p19t/r7.out" 2>/dev/null; then
+      echo "  P19r known-BAD  a.txt: a NUL on a 64-hex line past byte 8000; b.txt after it: a 64-hex. tree mode -> BLOCKED rc=1 naming b.txt:1 (correct)"
+    else echo "  P19r known-BAD  NUL on a hit line, then a key in a later file -> rc=$(cat "$_p19t/r7.rc" 2>/dev/null), b.txt:1 not named. One NUL in tree mode's hits blinded the filters"; st=1; fi
+    if _p19j r7ctl && grep -q '^b\.txt:1: \[REDACTED' "$_p19t/r7ctl.out" 2>/dev/null; then
+      echo "  P19s CONTROL    b.txt ALONE, tree mode -> BLOCKED rc=1 naming b.txt:1, so P19r's verdict is a.txt's NUL (correct)"
+    else echo "  P19s CONTROL    b.txt alone -> rc=$(cat "$_p19t/r7ctl.rc" 2>/dev/null), b.txt:1 not named. The rig, not the NUL, decides P19r"; st=1; fi
+    rm -rf "$_p19t"
+  fi
+
+  # P15 — the throwaway-dir guard's OTHER branch: git cannot name a toplevel.
+  # This runs the REAL script rather than re-checking its case statement here,
+  # because a selftest that exercises a gate's components never judges its
+  # wiring (#165, P5-P10). PREFLIGHT_SELFTEST_DEPTH stops the inner run from
+  # spawning a third: the inner run skips exactly this arm and nothing else.
+  if [ -z "${PREFLIGHT_SELFTEST_DEPTH:-}" ]; then
+    _nt=$(mktemp -d 2>/dev/null) || _nt=''
+    if [ -z "$_nt" ]; then
+      echo "  P15 -> no throwaway directory; arm not run"; st=1; _skipped="$_skipped P15"
+    elif (cd "$_nt" && git rev-parse --show-toplevel >/dev/null 2>&1); then
+      echo "  P15 -> fixture precondition FAILED: $_nt is inside a repository git can"
+      echo "         resolve, so the no-toplevel branch cannot be reached from there."; st=1
+      rm -rf "$_nt"
+    else
+      (cd "$_nt" && PREFLIGHT_SELFTEST_DEPTH=1 sh "$SELF" --selftest) > "$_nt.out" 2>&1
+      _p15rc=$?
+      if [ "$_p15rc" != 0 ] \
+         && grep -q "git cannot name a toplevel from here" "$_nt.out" 2>/dev/null \
+         && ! grep -q "INSIDE the estate checkout" "$_nt.out" 2>/dev/null; then
+        echo "  P15 known-BAD  no resolvable toplevel -> refused rc=$_p15rc naming 'unknown', and NOT claiming the /tmp path is inside the checkout (correct)"
+      else
+        echo "  P15 known-BAD  no resolvable toplevel -> rc=$_p15rc; the refusal does not name the missing toplevel, or still says 'INSIDE the estate checkout' about a path that is not. An empty prefix is a WILDCARD, not an absent test"; st=1
+      fi
+      rm -rf "$_nt" "$_nt.out"
+    fi
+  else
+    # the inner run started by P15 itself. Recorded rather than silent: an arm that did
+    # not run is an arm that did not run, whatever the reason.
+    _skipped="$_skipped P15"
+  fi
+
+  # P16 — the ARM-COUNT FLOOR bee-laborer ruled after M5: deleting an arm outright was
+  # invisible to this selftest, and that is the same defect as a glob that matches nothing
+  # (#212) — a counter nobody reads. A FLOOR, never an equality: it refuses a deletion and
+  # permits an addition, which is what a growing selftest needs.
+  #
+  # IT COUNTS DECLARATIONS, NOT ARMS THAT RAN, AND THE DISTINCTION IS THE POINT. The number
+  # PRINTED is platform-dependent. Measured at THIS commit, instrument named — lines matching
+  # ^  P<id> in the output of --selftest:
+  #     24, rc=0   clean POSIX clone, ext4, native .git, uid 1000 (every arm constructible)
+  #     23, rc=0   Git for Windows on the seat box (P14c/P14d/P14e/P14f not constructible)
+  #     15, rc=1   a Windows-made worktree read under WSL, where git cannot name a toplevel and
+  #                the whole P12-P14 family correctly refuses — 10 arms in the census
+  # An earlier draft of this comment said 21 and 14 for the second and third, and another line of
+  # it said 22 for the first: three numbers taken at earlier pins and never re-measured. A file
+  # carrying two numbers for one measurement is the false-signal class, so the stale ones are
+  # deleted rather than qualified. A COUNT IS ONLY AS FRESH AS THE PIN IT WAS MEASURED AT.
+  # A floor on a printed count would go red on a box that is behaving correctly,
+  # and an always-red gate trains dismissal. The DECLARED inventory is structural: it does not
+  # move with the box, and a deletion is exactly what changes it.
+  # So this arm cannot say the arms ran — P14c/P14e and the others say that for themselves.
+  # The off-switch it cannot catch is its own deletion, which is true of every gate; it is
+  # named here rather than left for a reader to discover.
+  # IT COUNTS ARM-OUTCOME LINES, NOT DISTINCT ARM IDS: my first draft counted IDs and a
+  # HALF-deletion — one arm's pass branch removed while its fail branch stayed — left the
+  # count at 24 and passed, with the arm gone from the run. That is M5 exactly.
+  #
+  # THE TWO PATTERNS BELOW AND IN tests.yml ARE ONE CONVENTION AND IT IS LOAD-BEARING.
+  #   · an arm line is emitted as a quoted literal opening with two spaces and the arm id, in
+  #     EITHER quote — bee-laborer's W4 showed that requiring a double quote put a single-quoted
+  #     arm outside this floor AND outside CI's inventory at the same time, so it could be added
+  #     and never run with both counters reporting fine. COST NAMED: an arm printed from a
+  #     VARIABLE is still outside both, and nothing here can see it.
+  #   · an arm that ASSERTS AN OUTCOME ends its line in "(correct)"; a notice that an arm could
+  #     not be built says NOT CONSTRUCTIBLE and claims nothing. tests.yml reads attendance from
+  #     the first kind ONLY, because a skip notice that opens with the arm id was being counted
+  #     as the arm having run — P14e and P14f could be switched off with every instrument green.
+  #     Getting the marker wrong on a pass line makes CI RED, never quiet: the id then appears
+  #     declared and absent. An arm line that is neither is refused there by name.
+  #   · AND NEITHER LINE MAY BE BOTH. A notice ending in "(correct)" was read as a verdict, so
+  #     P14e could skip with its recording deleted and every instrument stay green — the marker
+  #     forged in the direction that does not go red. tests.yml refuses a line carrying both,
+  #     because an arm cannot judge something and in the same breath say it never ran.
+  #     THIS IS NOT A CLOSURE AND IT IS NOT CALLED ONE. An earlier draft of this block claimed
+  #     "a partition needs no gaps and no overlaps", which promises that the two halves between
+  #     them classify every line. They do not: bee-laborer's Z9 REWORDS the notice — no
+  #     "NOT CONSTRUCTIBLE" anywhere in it, first line ending in "(correct)" — and the arm sits
+  #     out with the census at (none), the inventory at 24 of 24 and this file saying ok. Their
+  #     Z9CTRL, the same reworded notice WITHOUT the marker, is red, so the green is the marker
+  #     and nothing else. Both halves key on text an author writes, so a wording nobody has
+  #     written yet walks through; the overlap half is kept because it costs nothing and catches
+  #     the honest accident (the same copy-edit that left P13a and P14d without markers, one sign
+  #     over), not because it closes the space.
+  #     THE BOUND THAT IS TRUE, STATED MECHANICALLY: AN ARM CANNOT SIT OUT UNLESS ITS OWN LINE
+  #     CARRIES THE VERDICT MARKER. Deleting the recording and leaving the notice alone is red
+  #     (Z1), and so is skipping with the recording intact (Z7). Green costs the author that
+  #     marker on a line which judged nothing — and the marker is author-written, which is the
+  #     reach already named. AN EARLIER DRAFT PUT THE COST AS "a false sentence a reader can
+  #     read"; bee-laborer's Z13 refutes it. Their notice is TRUE in every English clause — the
+  #     rig's chmod -x did not take on that filesystem, so there is no dead hook to probe and
+  #     nothing is claimed about the blind case — and it ends in "(correct)". P14e sits out at
+  #     STEP_RC=0, census (none), 24 of 24. A reader reading that line learns exactly that the arm
+  #     did not run. What is forged is the MACHINE TOKEN, not the sentence, and a bound that
+  #     promises a reader would meet a lie invites the next seat to trust the prose and skip the
+  #     token. State the mechanism; the honesty of the prose is not what is being checked.
+  #     MEASURED AND REFUSED: a FLOOR on the _skipped recording lines. All of Z1, Z6 and Z9 share
+  #     a first edit — deleting the one line where a skipping branch records itself — so a floor
+  #     on those 7 lines would kill the class at the common edit. Z12b refutes it: EMPTY the
+  #     recording instead of deleting it — assign a blank in place of the arm id, which is why no
+  #     token here is written out — and the count is still 7 while the arm sits out, rc=0. Clean
+  #     POSIX clone at 93de30f2: CONTROL0 7 lines, Z1 6, Z12b 7 and green. A floor is not added.
+  #     (Emptying it and keeping the canonical phrase — appending the marker to the notice rather
+  #     than rewording it — IS caught by the both-kinds check: that arm is rc=1. Only the reworded
+  #     form walks through.)
+  #   · ONLY THE FIRST LINE OF AN ARM IS AN ARM LINE. A continuation is indented past the two
+  #     spaces an arm line opens with — which is what the NOT CONSTRUCTIBLE notices below already
+  #     do, and why they are invisible to both counters. This was the file's practice and not its
+  #     stated rule, so a second line at two spaces was refused with no remedy named; it is
+  #     written down here and named in tests.yml's own refusal.
+  # 59 -> 73 with P17 (bFUzZ M1-M3 on #215): P17a-c three lines each, P17d two, P17e three.
+  # 73 -> 92 with P18 (bFUzZ F1 on #215 round 2): P18a-c three lines each, P18d two, P18e two, P18f three, P18g three.
+  # 92 -> 118 with P19/P20 (bFUzZ #215 round 3, ruled 06:27Z/06:31Z): P19a-k two lines each and
+  # one NOT CONSTRUCTIBLE notice (23), P20 three. Measured: grep -cE over this file, 118.
+  # 118 -> 124 with P19l-n (bFUzZ #215 round 4, ruled 07:10Z): two lines each. Measured, 124.
+  # 124 -> 134 with P19o-s (#215 round 5, ruled 07:22Z/07:25Z): two lines each. Measured, 134.
+  _armfloor=134
+  _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
+  if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
+    echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
+  else
+    echo "  P16 arm inventory -> only $_armseen arm-outcome lines declared, floor is $_armfloor. An arm or one of its branches was removed from this selftest. If the removal is deliberate, lower the floor in the SAME commit and say why; do not let it fall quietly"; st=1
+  fi
+  # ── SKIP CENSUS ─────────────────────────────────────────────────────────────
+  # bee-laborer's U1: ONE TOKEN — the rig's own carried-bit read replaced by a pinned
+  # 'no' — stopped P14c and P14d from running, and this file still said "selftest ok"
+  # with P16 reading 59 of 59. P16 is a
+  # DECLARATION floor, so it is structurally blind to a skip — nothing was deleted. The
+  # PRINTED arm count did move, 24 -> 23, and a floor on it would have caught U1; but the
+  # printed count is platform-dependent — re-measured at THIS commit, same instrument as P16's
+  # comment above (lines matching ^  P<id> in --selftest): 24 clean POSIX clone, 23 Git for
+  # Windows, 15 from a Windows-made worktree under WSL. An earlier draft of THIS line still said
+  # 21 and 14 after P16's copy had been corrected, so the file carried two numbers for one
+  # measurement — the false-signal class, and the very defect the correction above was written to
+  # remove. A floor on a platform-dependent count goes red on a box that is behaving correctly,
+  # and an always-red gate trains dismissal. Neither counter can do this job.
+  #
+  # The census can, because it does not count: each skipping branch NAMES the arms it
+  # skipped, and the line is printed whether or not anything was skipped — '(none)' is the
+  # answer a reader needs, and a row that only appears when it has something to say is a
+  # row whose absence means nothing.
+  #
+  # IT IS A REPORT HERE AND A GATE IN CI, deliberately. On Git for Windows these arms
+  # correctly cannot be built, so refusing here would refuse a correct box. On ubuntu every
+  # one of them runs for real — that is where the defect bites and where the census is
+  # empty today — so .github/workflows/tests.yml requires it to be empty there.
+  # WHAT IT CANNOT SEE: an arm deleted outright (that is P16's half), and an arm that runs
+  # but judges the wrong thing (that is each arm's own mutation).
+  _skipn=0; for _a in $_skipped; do _skipn=$((_skipn + 1)); done
+  if [ "$_skipn" -eq 0 ]; then
+    echo "  SKIP CENSUS -> 0 arm(s) declared but not run: (none)"
+  else
+    echo "  SKIP CENSUS -> $_skipn arm(s) declared but not run:$_skipped"
+  fi
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
   exit $st
@@ -190,6 +1458,14 @@ fi
 
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 1
+# --hooks runs the HOOKS precondition row ALONE and exits with its verdict.
+# The selftest needs it: running the whole preflight to judge one row lets
+# checks 1-7 decide rc, so a green would not belong to this row. It is also the
+# mutation target — turn this row off and exactly one selftest arm must fall.
+if [ "${1:-}" = "--hooks" ]; then
+  hooks_check; exit $?
+fi
+
 BASE_REF=${1:-origin/main}
 
 if ! git rev-parse --verify -q "$BASE_REF" >/dev/null; then
@@ -242,6 +1518,11 @@ echo "  direction: $BASE_REF..HEAD (base -> lane). Never lane -> base."
 SELF=scripts/push-preflight.sh
 ADDED=$(git diff "$BASE_REF"...HEAD -- . ":(exclude)$SELF" | grep '^+' | grep -v '^+++')
 rc=0
+
+# The box precondition, judged before any of the delta checks below. It sets
+# rc like check 6 does, so the existing "PREFLIGHT BLOCKED" footer carries it;
+# a second exit path here would bypass the checks a seat still needs to read.
+hooks_check || rc=1
 
 echo ""
 echo "1) secret scan over the tree"
