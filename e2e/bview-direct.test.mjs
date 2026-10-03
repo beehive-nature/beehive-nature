@@ -36,6 +36,15 @@ async function open(reject = false, slow = false, hang = null, large = false) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(reject => { window.rejectDirect=reject; localStorage.setItem('blang','en'); localStorage.setItem('bregister','bee'); }, reject);
   await ctx.addInitScript(hang => { window.hangDirect=hang; }, hang);
+  if(hang==='play')await ctx.addInitScript(()=>{
+    const play=HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play=function(){
+      const started=play.call(this);
+      if(!this.currentSrc.includes('__autonomi_stream'))return started;
+      started.then(()=>{this.playbackRate=0;this.dispatchEvent(new Event('waiting'));window.playStall=setInterval(()=>this.dispatchEvent(new Event('waiting')),1000);}).catch(()=>{});
+      return new Promise(()=>{});
+    };
+  });
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
   await ctx.route('**/vendor/ant-browser-sdk/0.1.0/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
@@ -102,6 +111,13 @@ test('large-file relay startup records a first-frame receipt when early preview 
     await page.waitForFunction(()=>window.__bviewEngine().ttffMs!=null&&document.querySelector('#v').videoWidth>0,null,{timeout:30000});
     const e=await page.evaluate(()=>window.__bviewEngine());
     assert.equal(e.path,'stream');assert.ok(e.size>(48<<20));assert.ok(e.ttffMs>0);assert.equal(relay.length,1);assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('a pending direct play promise cannot prevent the stall watcher from recovering',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,'play');
+  try{
+    await page.waitForFunction(()=>window.__bviewEngine().path==='stream',null,{timeout:15000});
+    assert.equal(relay.length,1);assert.match(await page.locator('#playback-status').textContent(),/Direct playback stalled/);assert.deepEqual(errors,[]);
   }finally{await ctx.close();}
 });
 test('a direct decoder error falls back once and retains the playhead',async()=>{
