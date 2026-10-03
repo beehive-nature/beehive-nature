@@ -91,6 +91,43 @@ ant-extsig 0.21.0, bnames registry-fee, zBlood gate rider, docs/stack) —
 no dirvine-originated requests affecting our backend outstanding in the
 notification surface. x0x #622/#505: unchanged posture per standing memory.
 
+## CI receipts (the branch's own runs)
+
+- **Run 1 (e97eae192)**: `test` job green; `static` red on two beats —
+  both mine, both cured in 7a979b965: (1) the one-shell law
+  (e2e/register.test.mjs:171-175 — exactly one shared-loader tag, and it is
+  tour.js?v=42 which bootstraps register.js itself; bchat.html had loaded
+  register.js directly too); (2) the Engine Room directory is GENERATED
+  (scripts/build-stack-surfaces.mjs) — a new surface requires regeneration;
+  stack.html rebuilt (128 surfaces · 119 registered · 9 unregistered),
+  --check green. `wallet` job also red on the raver adapter battery —
+  NOT reproduced from this tree: two local runs of
+  `WALLET_REG=raver node e2e/wallet-adapter.mjs` at e97eae192 both exit 0
+  (30 passed / 0 failed); run 2 then passed the wallet job clean — flake
+  class, recorded.
+- **Run 2 (7a979b965)**: static/meter/test/wallet GREEN. `node`+
+  `eternal` red — triaged to **INHERITED, not this lane's**: main itself is
+  red at e8a8fa280 (#329, language lane; tests run 37102228253) with the
+  IDENTICAL failing steps (comprehension + engineflow in node; ETERNAL
+  fronts + footer-audit ratchet in eternal; wallet reds besides). Proof
+  this branch adds nothing to that cluster: engineflow fails identically
+  with BASE's stack.html swapped into this tree (c5c15f6d7 stack,
+  unchanged comprehension source = 6 disclosures at base/main/HEAD alike —
+  the 7th is runtime-made and broken by #329's regression, not by the
+  bchat row); both relays answer 200 today, so it is not an outage.
+  NEXT OWNER of node/eternal reds: the #329/#331/#332 seat (main's own
+  descendant run is the cure path; #332 dc03615c6 was still queued at
+  07:0xZ).
+- **Footer-audit ratchet — the 12 "worse" WERE mine, now cured (this
+  push)**: bchat.html lower-half text violated the floors (SMALL <12px,
+  FAINT 4.40:1, CAPS text-transform on h2, TAP-height buttons). Fixed to
+  the audit's own floors: all text ≥12px, --dim ink minimum, no forced
+  capitals, 34px tap floor, lane badges keep AA ink text with colored
+  glyph+border (identity never rode color alone anyway). Proof:
+  `node footer-audit.mjs --only bchat.html --regs bee,cypherpunk` →
+  "0 views with findings on 0 surfaces · no findings". Battery still
+  22/22; page smoke clean (zero console errors, in-page vectors 5/5).
+
 ## Worktree law, kept
 
 All edits and the commit are from `C:/Users/travi/wt-zcode` on branch
