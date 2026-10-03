@@ -1341,7 +1341,7 @@ try {
 
   // The door, mocked. `open:false` answers the ceiling probe the way the live
   // door does today — refused — so the closed-door row is the live page's case.
-  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n }) {
+  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n, finalizeStatus = 200, finalizeFailFirst = 0 }) {
     const log = { ceiling: 0, prepare: [], finalize: [], read: 0 };
     const held = new Map();
     await ctx.route(/^https:\/\/relay\.skaists\.dev\/ant\/v1\//, async route => {
@@ -1373,6 +1373,9 @@ try {
         log.finalize.push(body);
         const up = held.get(body.upload_id);
         if (!up) return route.fulfill({ status: 404, headers: cors, body: '{}' });
+        if (finalizeStatus !== 200) return route.fulfill({ status: finalizeStatus, headers: cors, contentType: 'application/json', body: JSON.stringify({ error: 'gateway' }) });
+        // finalizeFailFirst: the door is down for its first N finalizes and back after — a door that gets FIXED
+        if (log.finalize.length <= finalizeFailFirst) return route.fulfill({ status: 502, headers: cors, contentType: 'application/json', body: JSON.stringify({ error: 'gateway' }) });
         up.stored = true;
         return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ data_map_address: up.addr }) });
       }
@@ -1386,6 +1389,136 @@ try {
       return route.fulfill({ status: 403, headers: cors, body: 'forbidden' });
     });
     return log;
+  }
+
+  // THE WALLET AND THE CHAIN, MOCKED, for the real arm in (k). The wallet is an
+  // EIP-1193 object planted before the page loads; it records every request and
+  // signs nothing — a "transaction hash" is a counter. The chain is the public
+  // Arbitrum One RPC the payer reads balances from (evmlib src/lib.rs:52-53),
+  // answered in this process. MAINNET SPEND: 0.
+  const WALLET_ADDR = '0x' + '44'.repeat(20);
+  const WALLET_TX = n => '0x' + 'c'.repeat(62) + String(n).padStart(2, '0');
+  const RPC_URL = 'https://arb1.arbitrum.io/rpc';
+  const EVM_TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684';   // evmlib v0.9.1 src/lib.rs:64-65
+  const EVM_VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26';   // evmlib v0.9.1 src/lib.rs:71-72
+  // switchAt: from the Nth eth_chainId read on, the wallet answers 0x1 — it was switched after
+  // connecting. 1 is the read at connect; 2 is the read before the first send; 3 before the second.
+  async function mockWallet(ctx, { chain = '0xa4b1', decline = false, absent = false, switchAt = 0 } = {}) {
+    await ctx.addInitScript(({ chain, decline, absent, addr, switchAt }) => {
+      window.__walletCalls = [];
+      // A SPY on the payer's front door, not a stand-in for it: ant-pay.js runs
+      // unmodified; this records the authorization the shell hands to settle().
+      let real;
+      Object.defineProperty(window, 'AntPay', { configurable: true, get() { return real; }, set(v) {
+        real = Object.assign({}, v, { create(cfg) { const p = v.create(cfg); return Object.assign({}, p, {
+          settle(input) { window.__settleAuth = JSON.parse(JSON.stringify(input.authorization)); return p.settle(input); } }); } });
+      } });
+      if (absent) return;
+      let n = 0, chainReads = 0;
+      window.ethereum = {
+        request: async ({ method, params }) => {
+          window.__walletCalls.push({ method, params: params || [] });
+          if (method === 'eth_requestAccounts') return [addr];
+          if (method === 'eth_chainId') { chainReads += 1; return switchAt && chainReads >= switchAt ? '0x1' : chain; }
+          if (method === 'eth_sendTransaction') {
+            if (decline) { const e = new Error('User rejected the request.'); e.code = 4001; throw e; }
+            n += 1; return '0x' + 'c'.repeat(62) + String(n).padStart(2, '0');
+          }
+          throw new Error('mock wallet: unexpected ' + method);
+        }
+      };
+    }, { chain, decline, absent, addr: WALLET_ADDR, switchAt });
+    return () => ctx.pages()[0].evaluate(() => window.__walletCalls);
+  }
+  // downAfter: the chain answers the first N asks about a PAYMENT's receipt and is unreachable after.
+  async function mockChain(ctx, { ant = 10n ** 21n, eth = 10n ** 15n, allowance = 0n, receipt = 'ok', downAfter = null } = {}) {
+    const log = [];
+    let paymentAsks = 0;
+    const hex = v => '0x' + BigInt(v).toString(16);
+    await ctx.route(RPC_URL, async route => {
+      const req = route.request();
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type' } });
+      const { id, method, params } = JSON.parse(req.postData() || '{}');
+      log.push(method + (method === 'eth_call' ? ':' + params[0].to.toLowerCase() + ':' + params[0].data.slice(0, 10) : ''));
+      let result;
+      if (method === 'eth_getBalance') result = hex(eth);
+      else if (method === 'eth_call') result = params[0].data.startsWith('0x70a08231') ? hex(ant) : hex(allowance);
+      else if (method === 'eth_getTransactionReceipt') {
+        // the approve (the token's tx) always lands; `receipt` shapes only the payment's
+        const isPayment = params[0] !== '0x' + 'c'.repeat(62) + '01';
+        if (isPayment) paymentAsks += 1;
+        if (isPayment && (receipt === 'down' || (downAfter !== null && paymentAsks > downAfter))) return route.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*' }, body: 'unavailable' });
+        result = { status: isPayment && receipt === 'reverted' ? '0x0' : '0x1' };
+      }
+      else return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, error: { code: -32601, message: 'mock chain: ' + method } }) });
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, result }) });
+    });
+    return log;
+  }
+  // Every value `data-state` takes, in order, from the moment this is called.
+  async function watchStates(page) {
+    await page.evaluate(() => {
+      window.__states = [document.body.getAttribute('data-state')];
+      new MutationObserver(() => {
+        const s = document.body.getAttribute('data-state');
+        if (window.__states[window.__states.length - 1] !== s) window.__states.push(s);
+      }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
+    });
+    return () => page.evaluate(() => window.__states.slice());
+  }
+  // add() for a paid put: each answer is [stage, yes]. The helper waits for the
+  // sheet of THAT stage, records what it said and what the wallet had been asked
+  // by then, taps, and after the last answer waits the way add() does — on the
+  // page's own busy sequence.
+  async function addPaying(page, name, answers, chainLog = []) {
+    await page.click('#mode-forever');
+    const raw0 = await page.evaluate(() => document.body.getAttribute('data-busy-seq'));
+    if (!/^\d+$/.test(raw0 || '')) throw new Error('addPaying(): no data-busy-seq');
+    const seq0 = Number(raw0);
+    await page.setInputFiles('#picker', { name, mimeType: 'text/plain', buffer: Buffer.from(FOREVER, 'utf8') });
+    /* Each sheet the page puts up takes the next answer. A stage of '*' answers whichever sheet is
+       up, so a row can judge WHICH sheet the page chose instead of dying on a wait for the one it
+       expected. A sheet that arrives after the answers run out is recorded in `unasked` and
+       answered NO — a sheet nobody planned for is never paid through. An answer carrying a third
+       element 'if-asked' may go unused; any other unused answer fails the walk. The walk ends when
+       the page is idle with no sheet up. */
+    const sheets = [], unasked = [], queue = answers.slice();
+    for (;;) {
+      const at = await page.waitForFunction(s => {
+        if (document.body.getAttribute('data-state') === 'pay') return 'sheet';
+        const el = document.getElementById('status');
+        return Number(document.body.getAttribute('data-busy-seq')) > s && document.body.getAttribute('data-busy') === '0' &&
+          el && !el.hidden && el.textContent ? 'done' : false;
+      }, seq0, { timeout: 20000 }).then(h => h.jsonValue());
+      if (at === 'done') break;
+      const sheet = await page.evaluate(() => ({
+        stage: document.getElementById('payYes').getAttribute('data-stage'),
+        title: document.getElementById('pay-title').textContent, body: document.getElementById('pay-body').textContent,
+        yes: document.getElementById('payYes').textContent, no: document.getElementById('payNo').textContent,
+        walletSoFar: window.__walletCalls.map(c => c.method)
+      }));
+      sheet.chainSoFar = chainLog.length;   // chain reads BY THE TIME this sheet was on screen
+      if (!queue.length) {
+        unasked.push(sheet);
+        await page.click('#payNo');
+        await page.waitForFunction(was => document.body.getAttribute('data-state') !== 'pay' ||
+          document.getElementById('payYes').getAttribute('data-stage') + '|' + document.getElementById('pay-title').textContent !== was,
+        sheet.stage + '|' + sheet.title, { timeout: 15000 });
+        continue;
+      }
+      const [stage, yes] = queue.shift();
+      if (stage !== '*' && stage !== sheet.stage) throw new Error(`addPaying(${name}): wanted the ${stage} sheet, the page showed ${sheet.stage}: ` + sheet.title);
+      sheets.push(sheet);
+      await page.click(yes ? '#payYes' : '#payNo');
+      /* this answer is taken when the sheet goes down or a different one is up; until then the
+         walk would read the same sheet twice */
+      await page.waitForFunction(was => document.body.getAttribute('data-state') !== 'pay' ||
+        document.getElementById('payYes').getAttribute('data-stage') + '|' + document.getElementById('pay-title').textContent !== was,
+      sheet.stage + '|' + sheet.title, { timeout: 15000 });
+    }
+    const owed = queue.filter(a => a[2] !== 'if-asked');
+    if (owed.length) throw new Error(`addPaying(${name}): the page finished with ${owed.length} answer(s) unused; status: ` + await page.textContent('#status'));
+    return { sheets, unasked, rows: await page.evaluate(() => window.__myspace.rows()), said: await page.textContent('#status') };
   }
 
   async function antPage(ctx) {
@@ -1492,19 +1625,25 @@ try {
   ok('no page errors on the closed-door path', errsD.length === 0, errsD.join(' | '));
   await cD.close();
 
-  // (f) THE DOOR IS OPEN AND THE PAGE HAS NO ARM FOR THE PLAN — the shipped
-  // state until slice W. Refused by name, nothing finalized, and the sentence
-  // says the door saw the file.
+  // (f) THE DOOR PRICES A MERKLE BATCH WHERE A WAVE WAS EXPECTED. The page has
+  // one arm, `wave_batch`; a plan of any other type is refused by name and is
+  // never paid by the wave arm (the arm-switch law, plan_model.rs:12-14; the
+  // non-vacuity row ruled at 7b0cc99b). No price sheet, no wallet, nothing
+  // finalized, and the sentence says the door saw the file.
   const cF = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const wireF = [];
   offBox(cF, wireF);
   await mockHive(cF);
-  const doorF = await mockAntDoor(cF, { open: true });
+  const doorF = await mockAntDoor(cF, { open: true, paymentType: 'merkle' });
+  const walletF = await mockWallet(cF);
   const { page: pF, errs: errsF } = await antPage(cF);
+  const statesF = await watchStates(pF);
   await add(pF, 'forever', 'noarm.txt', FOREVER);
   const saidF = await pF.textContent('#status');
-  ok('with no arm for the plan the page refuses by name: it cannot pay a wave_batch plan yet',
-    /cannot pay a wave_batch plan yet/.test(saidF || ''), saidF);
+  ok('a merkle plan where a wave was expected is refused by name: the page cannot pay a merkle plan yet',
+    /cannot pay a merkle plan yet/.test(saidF || ''), saidF);
+  ok('and it never switched arms: no price sheet was shown and the wallet was asked for nothing',
+    !(await statesF()).includes('pay') && (await walletF()).length === 0, JSON.stringify({ states: await statesF(), wallet: await walletF() }));
   ok('and it says what really happened to the file: the door saw it, nothing was stored or paid',
     /door saw the file to price it; nothing was stored and nothing was paid/.test(saidF || ''), saidF);
   ok('PRECONDITION — the door was open and DID price it, so the refusal above is the page\'s, not the door\'s',
@@ -1512,13 +1651,16 @@ try {
   ok('nothing was finalized, and nothing but the ceiling probe and the prepare left the page',
     doorF.finalize.length === 0 && wireF.length === 2 && wireF.every(w => w.includes(DOOR_ORIGIN + '/ant/v1/upload/prepare')),
     JSON.stringify({ finalize: doorF.finalize.length, wire: wireF }));
-  ok('no page errors on the no-arm path', errsF.length === 0, errsF.join(' | '));
+  ok('no page errors on the merkle path', errsF.length === 0, errsF.join(' | '));
   await cF.close();
 
-  // (g) PREPARE → PAY → FINALIZE, END TO END, with one planted arm.
+  // (g) PREPARE → PAY → FINALIZE, END TO END, with one planted arm in place of
+  // the shipped wallet arm, so (g) and (h) judge the SEAM — the adapter's own
+  // checks on what a payment step returns — apart from any wallet. The real
+  // arm is driven in (k).
   const PAYS_ALL = "function (plan) { return plan.quotes.map(function (q) { return { quote_hash: q.quote_hash, tx_hash: '" + MOCK_TX + "' }; }); }";
-  const plantArm = (ctx, arm = PAYS_ALL) => mutate(ctx, SHELL_RE, SHELL_REL, '  var PAY_ARMS = {};',
-    '  var PAY_ARMS = { wave_batch: ' + arm + ' };   // FIXTURE: a mock arm; the shipped table is empty until slice W');
+  const plantArm = (ctx, arm = PAYS_ALL) => mutate(ctx, SHELL_RE, SHELL_REL, '  var PAY_ARMS = { wave_batch: payByWallet };',
+    '  var PAY_ARMS = { wave_batch: ' + arm + ' };   // FIXTURE: a mock arm in place of the wallet arm');
 
   const cG = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
   const wireG = [];
@@ -1614,20 +1756,402 @@ try {
     JSON.stringify({ said: saidI, prepare: doorI.prepare.length }));
   await cI.close();
 
-  // (j) SOURCE: rail 4 ships no wallet code and no second payer.
+  // (k) SLICE W: THE REAL ARM — the price, the visitor's two taps, their own
+  // wallet, the estate's one payer. Nothing is planted in the shell here: the
+  // wallet and the chain are mocked (above) and everything on the page runs as
+  // shipped. Each case is one change from the (k1) CONTROL, which is stored.
+  // again: a SECOND try at the same file, in the same page — same bytes, so the door prices it with
+  // the same quote hashes. plant: localStorage entries written before the first try. keys: what the
+  // payer holds in this browser when the case ends.
+  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register, again, plant, deny } = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const wire = [];
+    offBox(ctx, wire);
+    await mockHive(ctx);
+    const doorLog = await mockAntDoor(ctx, { open: true, ...door });
+    const chainLog = await mockChain(ctx, chain);
+    const walletOf = await mockWallet(ctx, wallet);
+    /* deny: this browser refuses localStorage writes — 'all' of them, as a full store or a locked-down
+       profile does, or only the payer's record keys ('paid'), a store that takes a small write and
+       refuses the record. QuotaExceededError is what a real browser throws. 'after-send': the payer's keys are
+       refused only when the value names a transaction, so the pending mark written before the wallet lands
+       and the record written after the send does not (cec532a1). */
+    if (deny) await ctx.addInitScript(which => { const put = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k, v) { if (which === 'all' || (which === 'paid' && String(k).startsWith('ant-pay.paid.')) || (which === 'after-send' && String(k).startsWith('ant-pay.paid.') && /"tx_hash"|"txHashes"/.test(String(v)))) throw new DOMException('the quota has been exceeded', 'QuotaExceededError'); return put.call(this, k, v); }; }, deny);
+    const { page, errs } = await antPage(ctx);
+    if (register) await wearRegister(page, register);
+    if (plant) await page.evaluate(kv => { for (const k of Object.keys(kv)) localStorage.setItem(k, kv[k]); }, plant);
+    let r = await addPaying(page, name, answers, chainLog);
+    const first = again ? { said: r.said, sends: (await walletOf()).filter(c => c.method === 'eth_sendTransaction').length, finalize: doorLog.finalize.length } : null;
+    if (again) r = { ...(await addPaying(page, name, again, chainLog)), first };
+    const keys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('ant-pay.') && localStorage.getItem(k)));
+    r = { ...r, keys };
+    const calls = await walletOf();
+    const auth = await page.evaluate(() => window.__settleAuth || null);
+    await ctx.close();
+    return { ...r, door: doorLog, chain: chainLog, calls, auth, sends: calls.filter(c => c.method === 'eth_sendTransaction'), wire, errs,
+      stored: r.rows.some(x => x.purpose === 'forever' && x.addr && x.addr.scheme === 'ant') };
+  }
+  /* payCaseBetween: one context, two (or three) tries at THE SAME FILE, with `between` changing the
+     browser after try 1. Taken from bFUzZ's round-3 probe (WORK_LOGS/2026-09-30_BFUZZ_ATTACK_211_R3.md,
+     probe-block.mjs), so the round-4 rows judge the exact paths that attack found. */
+  async function payCaseBetween(name, { door = {}, chain = {}, answers, again, third, between } = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const wire = [];
+    offBox(ctx, wire);
+    await mockHive(ctx);
+    const doorLog = await mockAntDoor(ctx, { open: true, ...door });
+    const chainLog = await mockChain(ctx, chain);
+    await mockWallet(ctx, {});
+    const { page, errs } = await antPage(ctx);
+    const r1 = await addPaying(page, name, answers, chainLog);
+    const calls1 = await page.evaluate(() => (window.__walletCalls || []).slice());
+    const first = { said: r1.said, sheets: r1.sheets.map(s => s.stage), sends: calls1.filter(c => c.method === 'eth_sendTransaction').length, finalize: doorLog.finalize.length };
+    const note = between ? await between(page, ctx) : null;
+    const walk = async answersN => {
+      try {
+        const r = await addPaying(page, name, answersN, chainLog);
+        const calls = await page.evaluate(() => (window.__walletCalls || []).slice());
+        return { sheets: r.sheets.map(s => ({ stage: s.stage, title: s.title, body: s.body, yes: s.yes })), unasked: r.unasked.map(s => s.stage), said: r.said,
+          stored: r.rows.some(x => x.purpose === 'forever' && x.addr && x.addr.scheme === 'ant'), sendsSoFar: calls.filter(c => c.method === 'eth_sendTransaction').length };
+      } catch (e) { return { walkErr: String(e.message).slice(0, 400) }; }
+    };
+    const second = await walk(again);
+    const thirdR = third ? await walk(third) : null;
+    const keys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('ant-pay.') && localStorage.getItem(k)));
+    await ctx.close();
+    return { first, note, second, third: thirdR, keys, finalize: doorLog.finalize.length, errs };
+  }
+  const KEPT_KEY = 'ant-pay.paid.quote.' + QUOTE_HASH.toLowerCase();
+  const QUOTED_ANT = '1.5';
+  const approveData = '0x095ea7b3' + EVM_VAULT.slice(2).padStart(64, '0') + BigInt(QUOTED_ATTO).toString(16).padStart(64, '0');
+
+  const k1 = await payCase('paid.txt', { answers: [['price', true], ['plan', true]] });
+  ok('(k1) the PRICE comes first: the door\'s exact total, in ANT, before the wallet is asked for anything at all',
+    k1.sheets[0].stage === 'price' && k1.sheets[0].title.includes(QUOTED_ANT + ' ANT') && k1.sheets[0].yes.includes(QUOTED_ANT + ' ANT') &&
+    k1.sheets[0].walletSoFar.length === 0 && k1.sheets[0].chainSoFar === 0 && k1.sheets[1].chainSoFar > 0,
+    JSON.stringify({ sheet: k1.sheets[0], chainAtPlan: k1.sheets[1].chainSoFar }));
+  ok('(k1) the PLAN comes second, after the balances were read, before anything was signed: two wallet confirmations',
+    k1.sheets[1].stage === 'plan' && /twice|2 times/.test(k1.sheets[1].title) && /exactly 1\.5 ANT/.test(k1.sheets[1].body) &&
+    !k1.sheets[1].walletSoFar.includes('eth_sendTransaction') && k1.sheets[1].walletSoFar.includes('eth_requestAccounts'),
+    JSON.stringify(k1.sheets[1]));
+  ok('(k1) the wallet signed the EXACT approve to evmlib\'s vault on evmlib\'s token, then paid the vault — and nothing else',
+    k1.sends.length === 2 && k1.sends[0].params[0].to.toLowerCase() === EVM_TOKEN && k1.sends[0].params[0].data === approveData &&
+    k1.sends[1].params[0].to.toLowerCase() === EVM_VAULT && k1.sends[1].params[0].data.startsWith('0xb6c2141b') &&
+    k1.sends.every(s => s.params[0].value === '0x0' && s.params[0].from === WALLET_ADDR),
+    JSON.stringify(k1.sends.map(s => s.params[0])));
+  ok('(k1) the door stored against the WALLET\'S payment, named per quote, and the file is on the ANT rail',
+    k1.stored && k1.door.finalize.length === 1 && k1.door.finalize[0].txs.length === 1 &&
+    k1.door.finalize[0].txs[0].quote_hash === QUOTE_HASH && k1.door.finalize[0].txs[0].tx_hash === WALLET_TX(2),
+    JSON.stringify({ finalize: k1.door.finalize, said: k1.said }));
+  const straysK1 = k1.wire.filter(w => !w.includes(DOOR_ORIGIN + '/ant/v1/') && !w.includes(RPC_URL));
+  ok('(k1) every request went to the mocked door or the mocked chain; the chain was only READ',
+    straysK1.length === 0 && k1.chain.length > 0 && k1.chain.every(m => /^(eth_getBalance|eth_call:|eth_getTransactionReceipt)/.test(m)) &&
+    k1.chain.some(m => m === 'eth_call:' + EVM_TOKEN + ':0x70a08231'),
+    JSON.stringify({ strays: straysK1, chain: k1.chain }));
+  ok('(k1) the authorization is the visitor\'s yes to THAT price: its ceiling is the shown total, bound to that upload',
+    !!k1.auth && k1.auth.state === 'authorized-for-signing' && k1.auth.ant_ceiling_atto === QUOTED_ATTO &&
+    k1.auth.upload_id === 'up-' + k1.door.prepare[0].addr.slice(0, 8) && Object.keys(k1.auth).length === 3,
+    JSON.stringify(k1.auth));
+  ok('(k1) no page errors on the paid path', k1.errs.length === 0, k1.errs.join(' | '));
+
+  const k2 = await payCase('no-at-price.txt', { answers: [['price', false]] });
+  ok('(k2) NO at the price: the wallet is never asked, the chain is never read, nothing is finalized, and the page says so',
+    k2.calls.length === 0 && k2.chain.length === 0 && k2.door.finalize.length === 0 && !k2.stored &&
+    /did not accept the price/.test(k2.said || '') && /nothing was stored and nothing was paid/.test(k2.said || ''),
+    JSON.stringify({ calls: k2.calls.length, chain: k2.chain, said: k2.said }));
+
+  const k3 = await payCase('no-at-plan.txt', { answers: [['price', true], ['plan', false]] });
+  ok('(k3) NO at the plan: the wallet shared its account and signed NOTHING; nothing finalized',
+    k3.calls.some(c => c.method === 'eth_requestAccounts') && k3.sends.length === 0 && k3.door.finalize.length === 0 && !k3.stored &&
+    /did not confirm/.test(k3.said || ''),
+    JSON.stringify({ calls: k3.calls.map(c => c.method), said: k3.said }));
+
+  const k4 = await payCase('short.txt', { chain: { ant: BigInt(QUOTED_ATTO) - 1n }, answers: [['price', true]] });
+  ok('(k4) a wallet one atto short of the price is refused by name, before any plan or signature',
+    /less ANT than the price/.test(k4.said || '') && k4.sends.length === 0 && k4.door.finalize.length === 0 && k4.sheets.length === 1,
+    JSON.stringify({ said: k4.said, sends: k4.sends.length }));
+
+  const k5 = await payCase('wrongchain.txt', { wallet: { chain: '0x1' }, answers: [['price', true]] });
+  ok('(k5) a wallet on another chain is refused by name — Autonomi is paid on Arbitrum One — and signs nothing',
+    /Arbitrum One/.test(k5.said || '') && k5.sends.length === 0 && k5.chain.length === 0,
+    JSON.stringify({ said: k5.said }));
+
+  const k6 = await payCase('nowallet.txt', { wallet: { absent: true }, answers: [['price', true]] });
+  ok('(k6) with no wallet in the browser the price is still shown first, then the page says there is no wallet',
+    k6.sheets[0].stage === 'price' && /no wallet is connected/.test(k6.said || '') && k6.door.finalize.length === 0,
+    JSON.stringify({ said: k6.said }));
+
+  const k7 = await payCase('declined.txt', { wallet: { decline: true }, answers: [['price', true], ['plan', true]] });
+  ok('(k7) the wallet declining the approve pays nothing and the page does not claim a payment',
+    k7.sends.length === 1 && k7.door.finalize.length === 0 && !/You paid/.test(k7.said || '') && /rejected/i.test(k7.said || ''),
+    JSON.stringify({ said: k7.said, sends: k7.sends.length }));
+
+  const k8 = await payCase('stranded.txt', { door: { finalizeStatus: 502 }, answers: [['price', true], ['plan', true]] });
+  ok('(k8) paid but not stored: the page prints the WALLET\'S payment id, the stranded-payment receipt',
+    k8.sends.length === 2 && !k8.stored && (k8.said || '').includes('You paid (' + WALLET_TX(2) + ')') && !(k8.said || '').includes(WALLET_TX(1)),
+    JSON.stringify({ said: k8.said }));
+
+  const k11 = await payCase('chaindown.txt', { chain: { receipt: 'down' }, answers: [['price', true], ['plan', true]] });
+  ok('(k11) the payment left the wallet and the chain could not be asked about it: the page names that payment id',
+    k11.sends.length === 2 && !k11.stored && k11.door.finalize.length === 0 && (k11.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify({ said: k11.said }));
+  const k12 = await payCase('reverted.txt', { chain: { receipt: 'reverted' }, answers: [['price', true], ['plan', true]] });
+  ok('(k12) a payment the chain REVERTED moved no ANT: the page says the chain refused it and never prints it as paid',
+    k12.sends.length === 2 && !k12.stored && /refused by the chain/.test(k12.said || '') && !/You paid/.test(k12.said || ''),
+    JSON.stringify({ said: k12.said }));
+
+  // ── #211 REPAIR (bFUzZ's FAIL 2026-09-29; rows ruled a8b43af6 / a75e4de2) ────────────────
+  // (k13) A PAID FILE CAN BE FINISHED. The visitor pays; the door's finalize answers 502; the door
+  // is fixed; the visitor tries THE SAME FILE again in THE SAME BROWSER. Before the repair every
+  // retry was refused "already paid — resume it" on a page that has no resume, and the only ways
+  // out paid a second time.
+  const k13 = await payCase('finish.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['*', true]] });
+  ok('(k13) PRECONDITION — the first try PAID and was not stored: two sends, one refused finalize, and the page printed the payment id',
+    k13.first.sends === 2 && k13.first.finalize === 1 && (k13.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify(k13.first));
+  ok('(k13) the second try at the same file ends STORED, on the ANT rail',
+    k13.stored, JSON.stringify({ said: k13.said, rows: k13.rows.map(x => [x.purpose, x.addr && x.addr.scheme]) }));
+  ok('(k13) with ZERO new sends: the wallet was asked to sign nothing the second time',
+    k13.sends.length === 2, JSON.stringify(k13.calls.map(c => c.method)));
+  ok('(k13) and the finalize that stored it carried the KEPT hash, for the quote the door gave',
+    k13.door.finalize.length === 2 && k13.door.finalize[1].txs.length === 1 && k13.door.finalize[1].txs[0].quote_hash === QUOTE_HASH &&
+    k13.door.finalize[1].txs[0].tx_hash === WALLET_TX(2),
+    JSON.stringify(k13.door.finalize));
+  ok('(k13) the second try showed no price and no plan sheet — there was nothing to pay or sign — but the sheet that says the file is already paid, naming the payment',
+    k13.sheets.length === 1 && k13.sheets[0].stage === 'kept' && (k13.sheets[0].body || '').includes(WALLET_TX(2)) && !/ANT/.test(k13.sheets[0].yes || ''),
+    JSON.stringify({ sheets: k13.sheets, said: k13.said }));
+  ok('(k13) the kept hash was confirmed ON CHAIN before it was handed to the door: two receipt asks about the payment, one per try',
+    k13.chain.filter(m => m === 'eth_getTransactionReceipt').length === 3, JSON.stringify(k13.chain));
+  ok('(k13) no page errors across pay, refused finalize, and the finish', k13.errs.length === 0, k13.errs.join(' | '));
+
+  // (k14) THE SAME, WITH THE CHAIN UNREACHABLE ON THE SECOND TRY. The kept payment cannot be
+  // confirmed, so it is not handed to the door — and the page must still name it as paid.
+  const k14 = await payCase('finish-chaindown.txt', { door: { finalizeFailFirst: 1 }, chain: { downAfter: 1 }, answers: [['price', true], ['plan', true]], again: [['*', true]] });
+  ok('(k14) a kept payment the chain cannot confirm is not sent to the door, signs nothing, and is still printed as PAID — never "nothing was paid"',
+    !k14.stored && k14.sends.length === 2 && k14.door.finalize.length === 1 && (k14.said || '').includes('You paid (' + WALLET_TX(2) + ')') &&
+    !/nothing was paid/.test(k14.said || ''),
+    JSON.stringify({ said: k14.said, sends: k14.sends.length, finalize: k14.door.finalize.length }));
+
+  // (k15) NO FALSE SENTENCE. The payer stops on this phone's own payment record before it can name
+  // a payment id. The page used to finish that refusal with "nothing was stored and nothing was paid".
+  const k15 = await payCase('unreadable.txt', { plant: { ['ant-pay.paid.quote.' + QUOTE_HASH]: 'not a record' }, answers: [['price', true, 'if-asked']] });
+  ok('(k15) stopped on this phone\'s own payment record: the page does NOT say nothing was paid, and says why it will not',
+    !k15.stored && k15.sends.length === 0 && k15.sheets.length === 0 && k15.unasked.length === 0 && !/nothing was paid/.test(k15.said || '') && /holds a payment record/.test(k15.said || '') &&
+    /cannot read it back/.test(k15.said || ''),
+    JSON.stringify({ said: k15.said }));
+  ok('(k15) CONTROL — a plain NO at the price still says nothing was paid, so the sentence was not simply removed',
+    /nothing was stored and nothing was paid/.test(k2.said || ''), JSON.stringify({ said: k2.said }));
+
+  // (k18) A PAID FILE, DECLINED AT THE SHEET. Pay, the door answers 502, then the same file again, and
+  // the visitor says NO. The page used to ask the price before the payer read this phone's record,
+  // so the sheet offered a payment that would never be made and the NO ended "nothing was paid"
+  // while the phone held the record. '*' answers whichever sheet the page chose, so the row judges it.
+  const k18 = await payCase('declined-kept.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]], again: [['*', false]] });
+  ok('(k18) PRECONDITION — the first try PAID and was not stored, and the page printed the payment id',
+    k18.first.sends === 2 && k18.first.finalize === 1 && (k18.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify(k18.first));
+  ok('(k18) the second try put up no price: its one sheet says the file is already paid, names that payment, and offers no payment',
+    k18.sheets.length === 1 && k18.sheets[0].stage === 'kept' && (k18.sheets[0].body || '').includes(WALLET_TX(2)) &&
+    !/ANT/.test(k18.sheets[0].yes || '') && !/costs/.test(k18.sheets[0].title || ''),
+    JSON.stringify(k18.sheets));
+  ok('(k18) a NO there prints the payment id again and never says nothing was paid; nothing new was signed or stored',
+    !k18.stored && k18.sends.length === 2 && k18.door.finalize.length === 1 && (k18.said || '').includes('You paid (' + WALLET_TX(2) + ')') &&
+    !/nothing was paid/.test(k18.said || ''),
+    JSON.stringify({ said: k18.said, sends: k18.sends.length, finalize: k18.door.finalize.length }));
+  ok('(k18) and the phone still holds the payment record the NO left alone',
+    k18.keys.includes('ant-pay.paid.quote.' + QUOTE_HASH.toLowerCase()), JSON.stringify(k18.keys));
+
+  // (k19) A BROWSER THAT WILL NOT KEEP THE RECORD. Every localStorage write throws QuotaExceededError.
+  // The page used to swallow the payer's record write, so the payer's own refusal never fired: the
+  // first try paid and was not stored, the page invited a retry, and the retry paid the vault again.
+  // The answers are 'if-asked': the row judges what the page asks, not the walk.
+  const k19 = await payCase('denied.txt', { deny: 'all', door: { finalizeFailFirst: 1 },
+    answers: [['*', true, 'if-asked'], ['*', true, 'if-asked']], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  const vaultSends19 = k19.sends.filter(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT).length;
+  ok('(k19) ONE QUOTE IS PAID AT MOST ONCE: over both tries the vault was paid ' + vaultSends19 + ' time(s)',
+    vaultSends19 <= 1, JSON.stringify({ sends: k19.sends.map(c => c.params[0].to), finalize: k19.door.finalize.length, first: k19.first }));
+  ok('(k19) a browser that refuses the record is refused BEFORE any sheet, on both tries: no price, no plan, nothing signed',
+    k19.first.sends === 0 && k19.sends.length === 0 && k19.sheets.length === 0 && k19.unasked.length === 0 && k19.door.finalize.length === 0 && !k19.stored,
+    JSON.stringify({ first: k19.first, sheets: k19.sheets.map(s => s.stage), sends: k19.sends.length }));
+  ok('(k19) and it says why, and says truly that nothing was paid',
+    /keep a record of the payment/.test(k19.said || '') && /nothing was paid/.test(k19.said || '') && !/You paid/.test(k19.said || ''),
+    JSON.stringify({ said: k19.said }));
+
+  // (k20) A BROWSER THAT TAKES A SMALL WRITE AND REFUSES THE RECORD. Only the payer's record keys
+  // throw, so the page's check before the price passes. The payer writes its record BEFORE the wallet
+  // is asked (cec532a1), so the refusal comes there: nothing is sent, not even the approve, and the
+  // retry sends nothing either. Before round 4 this row PAID and could only name the payment.
+  const k20 = await payCase('record-refused.txt', { deny: 'paid', answers: [['price', true], ['plan', true]], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  ok('(k20) PRECONDITION — the check before the price passed: the first try showed both sheets',
+    (k20.first.said || '').length > 0 && k20.sends.length === 0, JSON.stringify({ first: k20.first, sends: k20.sends.length }));
+  ok('(k20) a record the phone cannot write is refused BEFORE the wallet is asked: zero sends over both tries, nothing paid, and it says why',
+    k20.first.sends === 0 && k20.sends.length === 0 && !k20.stored && /before asking the wallet/.test(k20.first.said || '') && /before asking the wallet/.test(k20.said || '') &&
+    !/You paid/.test(k20.said || ''),
+    JSON.stringify({ first: k20.first, said: k20.said }));
+
+  // (k20b) cec532a1 ONE STEP ON: the record write is refused only AFTER the send. The store keeps the
+  // pending mark (it names no transaction) and refuses every write that names one. The payment leaves,
+  // its record is refused, and the retry reads the pending mark and sends nothing.
+  const k20b = await payCase('record-after-send.txt', { deny: 'after-send', answers: [['price', true], ['plan', true]], again: [['*', true, 'if-asked'], ['*', true, 'if-asked']] });
+  ok('(k20b) PRECONDITION — the first try paid (approve + payment) and its record was refused by name, with the payment id',
+    k20b.first.sends === 2 && (k20b.first.said || '').includes('You paid (' + WALLET_TX(2) + ')') && /could not write its record/.test(k20b.first.said || ''),
+    JSON.stringify(k20b.first));
+  ok('(k20b) the retry sends NOTHING: the pending mark stops it, by name, and the page does not say nothing was paid',
+    k20b.sends.length === 2 && !k20b.stored && /started a payment/.test(k20b.said || '') && /holds a payment record/.test(k20b.said || '') && !/nothing was paid/.test(k20b.said || ''),
+    JSON.stringify({ said: k20b.said, sends: k20b.sends.length }));
+  ok('(k19/k20/k20b) CONTROL — the same flow with storage allowed (k13) paid the vault once and finished on that payment',
+    k13.stored && k13.sends.filter(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT).length === 1, JSON.stringify(k13.sends.map(c => c.params[0].to)));
+
+  // (k21) G1 (bFUzZ round 3): after a kept payment, the browser fills its storage to the REAL quota
+  // (no patched API). The kept record still reads. The page used to run the storage probe before it
+  // read the record, refuse, and end "nothing was paid" with no id.
+  const k21 = await payCaseBetween('g1-quota.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]],
+    again: [['*', true, 'if-asked'], ['*', true, 'if-asked']],
+    between: page => page.evaluate(k => {
+      let n = 0, size = 1 << 20;
+      while (size >= 1) { try { localStorage.setItem('fill-' + n, 'x'.repeat(size)); n++; } catch (e) { size = Math.floor(size / 2); } }
+      let small; try { localStorage.setItem('fill-last', 'y'); small = true; localStorage.removeItem('fill-last'); } catch (e) { small = String(e.name); }
+      return { oneCharWrite: small, keptReadable: !!localStorage.getItem(k) }; }, KEPT_KEY) });
+  ok('(k21) PRECONDITION — try 1 paid and kept its record; the fill leaves no room for a one-char write, and the record still reads',
+    k21.first.sends === 2 && k21.note.oneCharWrite === 'QuotaExceededError' && k21.note.keptReadable === true, JSON.stringify({ first: k21.first, note: k21.note }));
+  ok('(k21) G1 — storage full AFTER a kept payment: the refusal prints the kept payment id and never says nothing was paid, and sends nothing',
+    (k21.second.said || '').includes(WALLET_TX(2)) && !/nothing was paid/.test(k21.second.said || '') && /keep a record of the payment/.test(k21.second.said || '') && k21.second.sendsSoFar === 2,
+    JSON.stringify({ second: k21.second }));
+
+  // (k22) G2: the visitor comes back with NO injected wallet. The kept sheet says the wallet is not
+  // asked; YES used to fail 'no-wallet', because the page built the signer before the payer chose a path.
+  const k22 = await payCaseBetween('g2-nowallet.txt', { door: { finalizeFailFirst: 1 }, answers: [['price', true], ['plan', true]],
+    again: [['*', true]],
+    between: async (page, ctx) => {
+      await ctx.addInitScript(() => { delete window.ethereum; });
+      await page.reload({ waitUntil: 'load' });
+      await settle(page);
+      await page.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
+      return { ethereum: await page.evaluate(() => typeof window.ethereum), keptReadable: await page.evaluate(k => !!localStorage.getItem(k), KEPT_KEY) };
+    } });
+  ok('(k22) PRECONDITION — try 1 paid and kept its record; after the reload there is no wallet; try 2 showed the kept sheet naming the payment',
+    k22.first.sends === 2 && k22.note.ethereum === 'undefined' && k22.note.keptReadable === true && (k22.second.sheets || []).length === 1 &&
+    k22.second.sheets[0].stage === 'kept' && (k22.second.sheets[0].body || '').includes(WALLET_TX(2)),
+    JSON.stringify({ first: k22.first, note: k22.note, sheets: k22.second.sheets }));
+  ok('(k22) G2 — YES on the kept sheet with NO wallet finishes storing the file, with zero new sends',
+    k22.second.stored === true && k22.second.sendsSoFar === 0 && k22.finalize === 2, JSON.stringify({ said: k22.second.said, stored: k22.second.stored, sends: k22.second.sendsSoFar }));
+  ok('(k22) CONTROL — the same flow WITH a wallet (k13) also stored on the kept payment with zero new sends',
+    k13.stored && k13.sends.length === 2, JSON.stringify({ sends: k13.sends.length }));
+
+  // (k23) G3: a PARTIAL kept payment (one of two quotes), then every stop the page can reach after it
+  // read that record. No line may say "nothing was paid" while it shows the kept id.
+  const PART = { [KEPT_KEY]: JSON.stringify({ upload_id: 'up-earlier1', tx_hash: WALLET_TX(9) }) };
+  const k23stops = [
+    ['plan NO', await payCase('g3-plan-no.txt', { door: { twoQuotes: true }, plant: PART, answers: [['price', true], ['plan', false]] })],
+    ['price NO', await payCase('g3-price-no.txt', { door: { twoQuotes: true }, plant: PART, answers: [['price', false]] })],
+    ['no wallet', await payCase('g3-nowallet.txt', { door: { twoQuotes: true }, plant: PART, wallet: { absent: true }, answers: [['price', true]] })],
+    ['short ANT', await payCase('g3-short.txt', { door: { twoQuotes: true }, plant: PART, chain: { ant: 1n }, answers: [['price', true]] })],
+    ['wrong chain', await payCase('g3-wrongchain.txt', { door: { twoQuotes: true }, plant: PART, wallet: { chain: '0x1' }, answers: [['price', true]] })],
+    ['wallet declines', await payCase('g3-declined.txt', { door: { twoQuotes: true }, plant: PART, wallet: { decline: true }, answers: [['price', true], ['plan', true]] })],
+  ];
+  const k23bad = k23stops.filter(([, r]) => !(r.said || '').includes(WALLET_TX(9)) || /nothing was paid/.test(r.said || '') || r.stored);
+  ok('(k23) G3 — after a partial kept payment, each of ' + k23stops.length + ' stops prints the kept id and none says nothing was paid',
+    k23bad.length === 0 && k23stops.every(([, r]) => !r.sends.some(c => (c.params[0].to || '').toLowerCase() === EVM_VAULT)),
+    JSON.stringify(k23stops.map(([w, r]) => [w, r.said])));
+  ok('(k23) CONTROL — the same plan NO with nothing kept (k3) still says nothing was paid, so the sentence was not simply removed',
+    /nothing was paid/.test(k3.said || ''), JSON.stringify({ said: k3.said }));
+
+  // (k24) G4: try 1 sent the payment and the chain could not be asked about it, so this phone never
+  // saw it confirmed. The kept sheet must not say "already paid"; it says sent, not confirmed. Between
+  // the tries the chain refuses the payment (0x0), so the finish ends on the chain's verdict.
+  const k24 = await payCaseBetween('g4-unconfirmed.txt', { chain: { receipt: 'down' }, answers: [['price', true], ['plan', true]],
+    again: [['*', true]], third: [['*', false, 'if-asked']],
+    between: async (page, ctx) => {
+      await ctx.route(RPC_URL, async route => {
+        const req = route.request();
+        if (req.method() !== 'POST') return route.fallback();
+        const { id, method, params } = JSON.parse(req.postData() || '{}');
+        if (method === 'eth_getTransactionReceipt' && params[0] !== WALLET_TX(1))
+          return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, result: { status: '0x0' } }) });
+        return route.fallback();
+      });
+      return 'the chain now answers the payment receipt with status 0x0';
+    } });
+  ok('(k24) PRECONDITION — try 1 sent the payment, the chain could not be asked, and the page printed the id',
+    k24.first.sends === 2 && (k24.first.said || '').includes('You paid (' + WALLET_TX(2) + ')'), JSON.stringify(k24.first));
+  const k24sheet = (k24.second.sheets || [])[0] || {};
+  ok('(k24) G4 — the kept sheet for a payment this phone never saw confirmed says SENT, NOT CONFIRMED, and never "already paid"',
+    k24sheet.stage === 'kept' && !/already paid/.test(k24sheet.title || '') && /not confirmed/.test(k24sheet.title || '') && /not yet seen the chain confirm/.test(k24sheet.body || '') &&
+    (k24sheet.body || '').includes(WALLET_TX(2)),
+    JSON.stringify({ sheet: k24sheet, said: k24.second.said }));
+  ok('(k24) and the finish ends on the chain refusing it, then the next try is priced again: nothing paid twice',
+    /refused by the chain/.test(k24.second.said || '') && k24.second.sendsSoFar === 2 && (((k24.third || {}).sheets || [])[0] || {}).stage === 'price',
+    JSON.stringify({ said: k24.second.said, third: k24.third && k24.third.sheets && k24.third.sheets.map(s => s.stage) }));
+  ok('(k24) CONTROL — a kept payment the chain DID confirm to this phone (k13, k18) still says already paid',
+    /already paid/.test((k18.sheets[0] || {}).title || ''), JSON.stringify(k18.sheets[0]));
+
+  // (k16) THE CHAIN IS CHECKED BEFORE EVERY SEND. The wallet is on Arbitrum One when it connects
+  // and is switched to 0x1 afterwards — while the plan sheet is open (switchAt 2), or after the
+  // approve lands (switchAt 3).
+  const k16 = await payCase('switched.txt', { wallet: { switchAt: 2 }, answers: [['price', true], ['plan', true]] });
+  ok('(k16) PRECONDITION — the wallet connected on Arbitrum One: the plan sheet was reached, which a wrong chain at connect never reaches (k5)',
+    k16.sheets.length === 2 && k16.sheets[1].stage === 'plan', JSON.stringify(k16.sheets.map(s => s.stage)));
+  ok('(k16) a wallet switched to 0x1 after connecting is refused by name BEFORE it signs: zero sends, nothing finalized, no quote marked paid',
+    k16.sends.length === 0 && k16.door.finalize.length === 0 && !k16.stored && k16.keys.length === 0 &&
+    /moved to chain 0x1/.test(k16.said || '') && /Arbitrum One/.test(k16.said || '') && !/You paid/.test(k16.said || ''),
+    JSON.stringify({ said: k16.said, sends: k16.sends.length, keys: k16.keys }));
+  const k17 = await payCase('switched-late.txt', { wallet: { switchAt: 3 }, answers: [['price', true], ['plan', true]] });
+  ok('(k17) switched after the approve landed: the approve went, the PAYMENT did not, and no quote is marked paid',
+    k17.sends.length === 1 && k17.sends[0].params[0].to.toLowerCase() === EVM_TOKEN && !k17.stored && k17.keys.length === 0 &&
+    /moved to chain 0x1/.test(k17.said || '') && !/You paid/.test(k17.said || ''),
+    JSON.stringify({ said: k17.said, sends: k17.sends.map(s => s.params[0].to), keys: k17.keys }));
+  ok('(k16/k17) CONTROL — the wallet that stays (k1) was asked its chain once at connect and once before each send',
+    k1.calls.filter(c => c.method === 'eth_chainId').length === 3 && k1.stored,
+    JSON.stringify(k1.calls.map(c => c.method)));
+
+  const k9 = await payCase('cypher.txt', { register: 'cypherpunk', answers: [['price', true], ['plan', true]] });
+  ok('(k9) cypherpunk: the price sheet prints total_atto to the atto and the plan names the approve and the vault',
+    k9.stored && k9.sheets[0].body.includes('total_atto ' + QUOTED_ATTO) && k9.sheets[1].body.includes('approve(') &&
+    k9.sheets[1].body.toLowerCase().includes(EVM_VAULT),
+    JSON.stringify(k9.sheets));
+
+  // (k10) A RE-RENDER WHILE THE PRICE IS ON SCREEN keeps the question open, in the new voice.
+  const cK = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await mockHive(cK);
+  const doorK = await mockAntDoor(cK, { open: true });
+  await mockChain(cK);
+  await mockWallet(cK);
+  const { page: pK } = await antPage(cK);
+  await pK.click('#mode-forever');
+  await pK.setInputFiles('#picker', { name: 'reregister.txt', mimeType: 'text/plain', buffer: Buffer.from(FOREVER, 'utf8') });
+  await pK.waitForFunction(() => document.body.getAttribute('data-state') === 'pay', null, { timeout: 15000 });
+  await wearRegister(pK, 'raver');
+  const afterSwitch = await pK.evaluate(() => ({ state: document.body.getAttribute('data-state'), title: document.getElementById('pay-title').textContent }));
+  ok('(k10) switching register while the price is shown keeps the sheet up, re-said in the new register',
+    afterSwitch.state === 'pay' && /^forever costs 1\.5 ANT\.$/.test(afterSwitch.title) && doorK.finalize.length === 0,
+    JSON.stringify(afterSwitch));
+  await cK.close();
+
+  // (j) SOURCE: the shell reaches a wallet in exactly one place, through the
+  // estate's one payer, and carries no payer of its own.
   const antSrc = (await readFile(join(ROOT, ANT_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
   const shellSrc18 = (await readFile(join(ROOT, SHELL_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
   const pageSrc = await readFile(join(ROOT, 'surfaces/myspace.html'), 'utf8');
   const KEYISH = ['privateKey', 'private_key', 'mnemonic', 'eth_sign', 'personal_sign', 'signTransaction', 'ethereum', 'eth_'];
   ok('the ANT adapter names no key and no wallet — it cannot reach one from its worker',
     KEYISH.filter(k => antSrc.includes(k)).length === 0, KEYISH.filter(k => antSrc.includes(k)).join(','));
-  ok('the shell names no key and no wallet either — rail 4 ships no wallet code',
-    KEYISH.filter(k => shellSrc18.includes(k)).length === 0, KEYISH.filter(k => shellSrc18.includes(k)).join(','));
-  ok('and the pay step ships with NO arm — every plan is refused until slice W',
-    (shellSrc18.match(/var PAY_ARMS = \{\};/g) || []).length === 1, 'the arm table is not the one empty table');
+  const KEYS_ONLY = ['privateKey', 'private_key', 'mnemonic', 'eth_sign', 'personal_sign', 'signTransaction', 'eth_'];
+  ok('the shell names no key material and makes no wallet or chain call of its own',
+    KEYS_ONLY.filter(k => shellSrc18.includes(k)).length === 0, KEYS_ONLY.filter(k => shellSrc18.includes(k)).join(','));
+  ok('the shell touches a wallet in exactly one place: it hands window.ethereum to the payer\'s injected signer',
+    (shellSrc18.match(/ethereum/g) || []).length === 1 && /AP\.injectedSigner\(window\.ethereum\)/.test(shellSrc18),
+    String((shellSrc18.match(/ethereum/g) || []).length));
+  // Judged on CODE, not words: the cypherpunk plan sheet prints "approve(" and
+  // "payForQuotes" as copy, which is the payer's plan said aloud, not a payer.
+  ok('the shell carries no payer of its own: no selector, no encoder, no signer of its own',
+    !/0x095ea7b3|0xb6c2141b|encodeApprove|encodePayForQuotes|serialize1559|trezorSigner|\.send\(/.test(shellSrc18), 'a payer fragment is in the shell');
+  ok('the arm table has one arm, the wave, and it is the wallet arm',
+    (shellSrc18.match(/var PAY_ARMS = \{ wave_batch: payByWallet \};/g) || []).length === 1, 'the arm table is not the one wallet arm');
   const scripts = [...pageSrc.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
-  ok('the page loads no payer of its own: ant-pay.js is the estate\'s one payer, and slice W is what wires it',
-    scripts.length > 0 && scripts.every(src => !/pay/i.test(src)), JSON.stringify(scripts));
+  ok('the page loads exactly one payer, the estate\'s — ant-pay.js — and loads it before the shell',
+    JSON.stringify(scripts.filter(s => /pay/i.test(s))) === '["ant-pay.js"]' && scripts.indexOf('ant-pay.js') < scripts.indexOf('myspace.js'),
+    JSON.stringify(scripts));
 
 } catch (e) {
   fail++;
