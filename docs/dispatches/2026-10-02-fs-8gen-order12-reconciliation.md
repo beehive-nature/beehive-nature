@@ -92,3 +92,62 @@ no re-audit, guarded file walker from disk.
   2 pending. No downloads this wake. Lock released (verified absent). Zero repo writes beyond
   this addendum.
 
+---
+
+## Addendum 2 2026-10-03 (~01:10Z) — founder ruling banked; identifier-form exception CLOSED; the image queue is COMPLETE
+
+**Founder ratified the closeout and ruled:** the binding-400 finding is a settled lane finding
+(failure localized to the two short-form ARK identifiers, not session or endpoint); the remaining
+genealogy action = long-form ARK recovery, then one retry each — "more short-form retries are
+just churn"; AND the 2.5 ANT price gate is RETIRED under a **temporary 100 ANT cap** ("that is
+like $0.25 cents. 100 ANT cap for now") — price is no longer a blocker; the atomic-ceiling-
+enforcement invariant is NOT weakened and remains the sole execution blocker.
+
+### Long-form ARK recovery (executed under the authed session)
+
+- **Recovery source:** the citations in the PUBLIC committed layer
+  (`assets/profile-archive/lineage/sources/records.json`) carry both forms — the citation PROSE
+  holds the short ark, the citation URL holds the full ark:
+  `3:1:3QS7-89WB-8R1M?i=82` (North Carolina Revolutionary Pay Vouchers, person SN41-K1G, depth 9)
+  and `3:1:3QSQ-G983-6VKX?i=606` (Record of deeds 1755–1840, person 7Y2W-P5N, depth 9). The
+  queue-builder had taken the prose form — the truncation mechanism, found and named.
+- **Binding proof (one probe each, read-only):** long-form 200 → `TH-1961-33251-23370-13` and
+  `TH-1942-37003-16784-77`; short-form 400 (17/8 lifetime observations); control `33S7-9GY8-1XT`
+  200 on the same wire. The identifier-form theory is proven end-to-end.
+- **Record-page corroboration:** the viewer for the short ark renders authed ("travis remington")
+  but makes ZERO deepzoom calls — a film waypoint context with no image addressable by the
+  truncated id.
+
+### Lawful execution (guard laws kept whole)
+
+- Under the writer lock (`imgqueue-owner/GLM-101-order12`): the two queue entries RE-KEYED to
+  their full arks (records/persons/depths preserved, `identifierFormFix` provenance on the
+  entries) + a `queue-rekey-identifier-form-fix` auditLog entry in the manifest. Queue-source,
+  membership, binding, and save-side laws all still govern — nextPending() then yielded the
+  long-form arks themselves.
+- **One sweep each:** `3QS7-89WB-8R1M` **DOWNLOADED** (2048x1894, 227,131 B, binding-verified,
+  guard-stamped). `3QSQ-G983-6VKX` was **already resolved 2026-10-01** — its twin citation entry
+  (record SRDW-N4H) carried the full ark from the start; the truncation had made one film look
+  like two distinct pending records. No re-download attempted (outcome-finality law).
+- **QUEUE COMPLETE: all 366 entries resolved (100%)** — 365 unique member arks (the two
+  deeds-citation entries share `3QSQ-G983-6VKX`). Manifest-true: **308 downloaded /
+  83,315,926 B** (private tier; bytes never bundled). Lock released at run close.
+
+### Repo changes in this commit
+
+1. `assets/profile-archive/lineage/sources/images-summary.json` regenerated: 308 entries, the
+   new ark present, `openFrontier` = complete/100% with the shared-ark note. Regen script prose
+   updated to match (order-11 residue removed; script remains private-tier).
+2. `ETERNALIZATION-EDITION-V2.json` — the cap ruling BANKED: `storageMaxAnt` 2.5 → **100
+   (temporary, founder 2026-10-03)** with history + provenance; gate status →
+   **PAYMENT CLIENT CAPABILITY REQUIRED** (price axis cleared; enforcement invariant unchanged);
+   explicit artifact-change note: the public corpus changed today (308th entry), so the
+   2026-10-02 artifact/quote are superseded by the file's own rule — a rebuild + fresh quote
+   precedes any founder approval. The service endpoint stays code-disabled; UI and service are
+   ceiling-agnostic (they read this JSON). Preserve suites 28/28 after the change.
+
+**Preserved lane state (founder's enumeration, now updated):** 366/366 queue entries resolved ·
+identifier-form exception CLOSED (was 2/366) · 308 images byte-audited · harvest frozen ·
+writer lock released · ANT publication prepared, spend gate closed on client capability only.
+
+
