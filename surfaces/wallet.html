@@ -4972,7 +4972,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js');
-  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=2');
+  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=3');
 
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
      window.arweaveWallet inject (public key + extension sign). Vault JWK is
@@ -6705,6 +6705,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('[data-wl-go]');
     if(!b)return;
+    e.preventDefault();
     var v=b.getAttribute('data-wl-go');
     if(reg()==='bee'){
       if(v==='home'&&idx()>bootIdx){history.back();return}   /* the stack pops, it does not grow */

@@ -60,3 +60,15 @@ The last visual review found the raver word-fold rule hiding the publication dia
 Saved public accounts now begin their automatic first read only when the account book is actually shown. Visiting the wallet home, keys or storage does not fan out fifty hidden account reads. `wallet-read-budget.mjs` now has nine passing checks, including zero account RPC calls on home and the same three-request ceiling after opening Accounts & coins.
 
 The unified navigation and storage chooser are explicitly excluded from automatic bzDiD connection, as are keyboard navigation keys. A returning identity can use Tab and move between accounts/storage without a passkey prompt; the existing explicit keychain interaction still requests credentials in the negative control. Account battery is now 52/52; Trezor remains 22/22 after lazy reads. These changes preserve automatic connection for actual keychain work rather than treating navigation as signing intent.
+
+
+## Review follow-through after 499118bd6
+
+The 499118bd6 GitHub wallet job passed, as did static, Rust and both secret scans; wider estate jobs were still running when a fresh review arrived. All four actionable observations were taken up:
+
+- Register the exact first-party `surfaces/adapter-seam.js` rider in design acceptance. The standalone design runner was not executed because it starts localhost and uses file previews; source/browser fixture checks remain serverless.
+- Advance the Arweave worker entry URL to v3 along with its already-versioned nested reader, so cached v2 workers cannot retain the old status endpoint.
+- Cancel native default navigation for routed wallet controls, including the brand link. The register battery now exercises home/back/forward through the brand.
+- Remove both uses of the enable-and-click helper from the Arweave suite. Fixtures change the gateway balance, notify the production refresh, wait for production enablement, and use Playwright trusted clicks. Both paths assert `event.isTrusted`. No browser control is force-enabled by this suite. Fable's pinned helper/lint remains intact as a historical guard, with no active callers.
+
+Arweave acceptance now passes **53/53 in each of bee, raver and cypherpunk** with trusted clicks. The lint and its self-tests pass. The extended register battery is running at this checkpoint. No physical extension or device result is inferred from these fixtures.

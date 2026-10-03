@@ -1075,6 +1075,20 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
 }
 
+// Brand navigation must preserve the Bee history stack.
+{
+  const { ctx, page } = await open('bee', { fixture: false });
+  await page.click('#wl-bee [data-wl-go="have"]');
+  await page.waitForFunction(() => document.body.dataset.wlView === 'have');
+  await page.click('#wallet-identity .wallet-brand');
+  await page.waitForFunction(() => document.body.dataset.wlView === 'home');
+  ok('brand returns home without native fragment navigation', await page.evaluate(() => !location.hash && history.state.wlView === 'home'));
+  await page.goForward();
+  await page.waitForFunction(() => document.body.dataset.wlView === 'have');
+  ok('brand back preserves the original forward task', await page.evaluate(() => history.state.wlView === 'have'));
+  await ctx.close();
+}
+
 // 11 · persistence, casing, receipts at desktop width
 {
   const { ctx, page } = await open('bee', { fixture: false });
