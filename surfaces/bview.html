@@ -1340,9 +1340,10 @@ document.addEventListener('DOMContentLoaded',function(){
     if (my === job && !ok && !playing) say('s-fail');
   }
   // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
-  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.0/';
-  const DIRECT_START_MS = 8000, DIRECT_STALL_MS = 5000;
-  let directPool = null, directSession = null, restorePause = false;
+  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.1/';
+  // The relay takes over after DIRECT_QUIET_MS without direct progress, or DIRECT_CAP_MS without a frame.
+  const DIRECT_QUIET_MS = 8000, DIRECT_CAP_MS = 20000, DIRECT_STALL_MS = 5000, ROUTE_KEY = 'bnr.bview.route';
+  let directPool = null, directSession = null, restorePause = false, bridgeTracked = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
   const stopDirect = () => {
     const session = directSession; directSession = null;
@@ -1350,8 +1351,25 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   const closePool = () => {
     const pool = directPool; directPool = null;
-    if (pool) pool.then(client => client.close()).catch(() => {});
+    if (pool) { pool.stop.abort(); pool.client.then(client => client.close()).catch(() => {}); }
   };
+  // One connection outlives every attempt, so a slow start never costs the next one a reconnect.
+  const openPool = () => {
+    if (directPool) return directPool;
+    const stop = new AbortController(), pool = { stop, ready: false, client: null };
+    pool.client = import(SDK_ROOT + 'index.js').then(sdk => sdk.AutonomiClient.connect({ signal: stop.signal })).then(client => { pool.ready = true; return client; });
+    pool.client.catch(() => { if (directPool === pool) directPool = null; });
+    return directPool = pool;
+  };
+  const directCapable = () => isSecureContext && 'serviceWorker' in navigator && 'RTCPeerConnection' in window;
+  // Choosing the direct route connects at once, before Watch is pressed. The choice is remembered.
+  try { if (localStorage.getItem(ROUTE_KEY) === 'direct') $('playback-route').value = 'direct'; } catch {}
+  if ($('playback-route').value === 'direct' && directCapable()) openPool();
+  $('playback-route').addEventListener('change', () => {
+    const route = $('playback-route').value;
+    try { localStorage.setItem(ROUTE_KEY, route); } catch {}
+    if (route === 'direct' && directCapable()) openPool();
+  });
   addEventListener('pagehide', () => { stopDirect(); closePool(); });
   async function bounded(work, signal, milliseconds) {
     let timer, aborted;
@@ -1365,48 +1383,51 @@ document.addEventListener('DOMContentLoaded',function(){
     } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
   }
   async function tryDirect(address, signal, my) {
-    let reader, source, session, deadline, ticker;
+    let source, session, pool, quiet, cap, ticker, settled = false;
     const startedAt = performance.now();
-    let stage = 'Loading the direct reader';
-    const remaining = () => Math.max(1, DIRECT_START_MS - (performance.now() - startedAt));
-    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s / 8 s. Then relay if no frame.');
+    let stage = 'Loading the direct reader', movedAt = startedAt;
+    const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
+    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / 8 s. Then relay.');
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
-    deadline = setTimeout(() => failed.abort(), DIRECT_START_MS);
+    // Every sign of direct progress restarts the quiet clock; the cap bounds the whole wait for a frame.
+    const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => failed.abort(), DIRECT_QUIET_MS); };
+    cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
     try {
-      metrics.direct={sdk:'0.1.0',reused:!!directPool,startupBudgetMs:DIRECT_START_MS,startupElapsedMs:null,connectMs:null,openMs:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
-      if (!isSecureContext || !('serviceWorker' in navigator) || !('RTCPeerConnection' in window)) throw new Error('Direct playback is unavailable in this browser');
+      metrics.direct={sdk:'0.1.1',reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,startupElapsedMs:null,connectMs:null,openMs:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
+      if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
       metrics.path = 'webrtc-connecting'; paintNerd();
-      const sdk = await bounded(import(SDK_ROOT + 'index.js'), failed.signal, remaining());
-      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, remaining());
+      pool = openPool();
+      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, capLeft());
+      // createMediaSource opens the SDK's streaming reader; this hook lets bViEw count its ranges.
+      if (!bridgeTracked) {
+        const attach = MediaBridge.prototype.attach;
+        MediaBridge.prototype.attach = function (reader, options) { return attach.call(this, options && options.bviewTrack ? options.bviewTrack(reader) : reader, options); };
+        bridgeTracked = true;
+      }
       if (my !== job || signal.aborted) return true;
       const connectAt=performance.now();
       stage = 'Connecting to Autonomi nodes'; startupStatus();
-      if (!directPool) {
-        const pending = sdk.AutonomiClient.connect({ signal: failed.signal });
-        directPool = pending;
-        pending.catch(() => { if (directPool === pending) directPool = null; });
-      }
-      const client = await bounded(directPool, failed.signal, remaining());
+      const client = await bounded(pool.client, failed.signal, capLeft());
       if (my !== job || signal.aborted) return true;
-      metrics.direct.connectMs=performance.now()-connectAt;
+      metrics.direct.connectMs=performance.now()-connectAt; moved();
       const openAt=performance.now();
       stage = 'Finding the video'; startupStatus();
-      reader = await bounded(client.openFile(address, { signal: failed.signal }), failed.signal, remaining());
-      if(my!==job||signal.aborted){reader.close();return true;}
-      metrics.direct.openMs=performance.now()-openAt;metrics.direct.size=reader.size;
-      const bridge = new MediaBridge();
-      session = { my, receipt:metrics.direct, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => { failed.abort(); bridge.close(); } };
       // Count completed plaintext ranges, never infer wire bytes from lookup counters.
-      const trackedReader = {
+      const track = reader => {
+       metrics.direct.openMs=performance.now()-openAt;metrics.direct.size=reader.size;
+       session = { my, receipt:metrics.direct, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => { failed.abort(); } };
+       stage = 'Loading the first video frame'; moved(); startupStatus();
+       return {
         address: reader.address, name: reader.name, size: reader.size, contentType: reader.contentType,
         close: () => reader.close(),
         read: async (start, length) => {
           const receipt=session.receipt, readAt=performance.now();receipt.requests++;
           let bytes;
           try{bytes=await reader.read(start,length,{signal:failed.signal});}catch(error){if(my===job&&!signal.aborted){receipt.failed++;paintNerd();}throw error;}
+          moved();
           if (my === job && !signal.aborted) {
             receipt.completed++;receipt.readBytes+=bytes.length;receipt.readMs+=performance.now()-readAt;
             const sorted = [...session.ranges, [start, start + bytes.length]].sort((a,b) => a[0]-b[0]);
@@ -1422,16 +1443,17 @@ document.addEventListener('DOMContentLoaded',function(){
           }
           return bytes;
         }
+       };
       };
-      stage = 'Loading the first video frame'; startupStatus();
-      source = await bounded(bridge.attach(trackedReader, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal }), failed.signal, remaining());
-      if (my !== job || signal.aborted) { source.close(); bridge.close(); return true; }
+      source = await bounded(client.createMediaSource(address, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal, onProgress:moved, bviewTrack:track }), failed.signal, capLeft());
+      if (my !== job || signal.aborted) { source.close(); return true; }
+      if (!session) throw new Error('Direct reader was not opened');
       session.source = source; directSession = session;
       metrics.path = 'webrtc'; metrics.acceptRanges = 'local range bridge';
-      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, remaining());
+      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, capLeft());
       if (my !== job || signal.aborted) return true;
       if (!ok) throw new Error('Direct media did not produce a frame');
-      clearTimeout(deadline); clearInterval(ticker);
+      settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker);
       metrics.direct.startupElapsedMs=performance.now()-startedAt;
       routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
       playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null);
@@ -1451,21 +1473,22 @@ document.addEventListener('DOMContentLoaded',function(){
       const progressed = () => { if(!v.paused && !v.seeking && v.currentTime > progressedAt + 0.01) ready(); };
       v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
       session.sounded=!v.paused;
-      session.dispose=() => { failed.abort(); clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); bridge.close(); };
+      session.dispose=() => { failed.abort(); clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); };
       pub(); goSound(my); return true;
     } catch (error) {
       failed.abort();
-      if (directSession === session) stopDirect();
-      source?.close(); reader?.close(); session?.dispose();
+      if (session && directSession === session) stopDirect();
+      source?.close(); session?.dispose();
       if (my !== job || signal.aborted) return true;
-      closePool();
+      // Keep an open connection for the next video; drop only one that never connected.
+      if (!pool || !pool.ready) closePool();
       metrics.direct.startupElapsedMs=performance.now()-startedAt;
       metrics.direct.fallback=error.name==='AbortError'?'startup timeout':error.message;
       metrics.path=''; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
-      routeStatus('Direct playback could not start. Using the relay.');
+      routeStatus('Direct playback could not start: ' + (error.name==='AbortError'?'storage nodes went quiet':error.message) + '. Using the relay.');
       note('direct fallback · ' + (error.name === 'AbortError' ? 'startup timeout' : error.message));
       return false;
-    } finally { clearTimeout(deadline); clearInterval(ticker); signal.removeEventListener('abort',cancelled); }
+    } finally { settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker); signal.removeEventListener('abort',cancelled); }
   }
   async function view(raw, options = {}) {
     if (options.relay && options.reason) holdDecodedFrame();
@@ -1506,7 +1529,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if (!options.relay && $('playback-route').value === 'direct' && await tryDirect(a, signal, my)) return;
     if (my !== job || signal.aborted) return;
-    if (options.relay || $('playback-route').value === 'relay') closePool();
+    if ($('playback-route').value === 'relay') closePool();
     if (options.resumeAt > 0 || options.paused) {
       const restore = () => { if (my !== job) return; if (options.resumeAt > 0 && Number.isFinite(v.duration)) v.currentTime=Math.min(options.resumeAt,Math.max(0,v.duration-0.05)); if (options.paused) v.pause(); revealDecodedFrame(options.resumeAt || 0); };
       signal.addEventListener('abort', () => v.removeEventListener('loadeddata', restore), {once:true});
@@ -1659,11 +1682,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if(direct)steps=[
       ['parse · 64 hex','public read · no wallet required',E.has?'done':'todo'],
       ['cache · '+D.cache,'whole-file cache miss · session range reader selected',E.has?'done':'todo'],
-      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.0'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
+      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.1'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
       ['service worker · native ranges','one media URL · seekable session ranges · no progressive Blob swaps',E.path==='webrtc'?'done':'todo'],
       ['browser playback',E.sounded?'decoded frames · '+E.playhead.toFixed(2)+' s':'waiting for a decoded frame',E.sounded?'done':'todo'],
-      ['relay recovery','8 s total to first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
+      ['relay recovery','8 s without direct progress, 20 s without a first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
       ['whole-file SHA-256','not computed for direct range playback · range reads are not a whole-file hash','skip']
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
@@ -1691,7 +1714,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
-      ['direct startup',esc(ms(dr.startupElapsedMs)+' · '+ms(dr.startupBudgetMs)+' total budget to first frame')],
+      ['direct startup',esc(ms(dr.startupElapsedMs)+' · '+'relay after '+ms(dr.startupBudgetMs)+' quiet'+(dr.startupCapMs?' or '+ms(dr.startupCapMs)+' without a frame':''))],
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
       ['range calls',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],

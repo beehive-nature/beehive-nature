@@ -25,8 +25,12 @@ before(async () => { await new Promise(r => server.listen(8941, '127.0.0.1', r))
 after(async () => { await browser.close(); await new Promise(r => server.close(r)); });
 // Mock only the network reader. Exercise the vendored SDK MediaBridge and real
 // service worker with real VP9 frames, range seeks, cancellation and relay fallback.
-const mockSDK = `let client; export class AutonomiClient {
-  static async connect() { window.connections=(window.connections||0)+1; if(window.hangDirect==='connect')return new Promise(()=>{}); return client={closed:false, close(){this.closed=true}, async openFile(address,{signal}) {
+const mockSDK = `import { MediaBridge } from '/vendor/ant-browser-sdk/0.1.1/internal/media.js';
+let client; export class AutonomiClient {
+  static async connect() { window.connections=(window.connections||0)+1; if(window.hangDirect==='connect')return new Promise(()=>{}); return client={closed:false, close(){this.closed=true},
+    // Mirrors the SDK: open the reader, then hand it to the real MediaBridge.
+    async createMediaSource(address,options){const reader=await this.openFile(address,options);this.media??=new MediaBridge();try{return await this.media.attach(reader,options);}catch(error){reader.close();throw error;}},
+    async openFile(address,{signal}) {
     if(window.rejectDirect) throw Error('network offline');
     const bytes=new Uint8Array(await (await fetch('/media.mp4',{signal})).arrayBuffer());
     let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length,{signal}={}){if(window.hangDirect==='read')return new Promise((resolve,reject)=>{const abort=()=>{window.cancelledRead=true;reject(new DOMException('Cancelled','AbortError'));};if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});});if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
@@ -47,7 +51,7 @@ async function open(reject = false, slow = false, hang = null, large = false) {
   });
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
-  await ctx.route('**/vendor/ant-browser-sdk/0.1.0/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
+  await ctx.route('**/vendor/ant-browser-sdk/0.1.1/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
   let relayBody=MEDIA;
   if(large){const free=Buffer.alloc(49<<20);free.writeUInt32BE(free.length,0);free.write('free',4);relayBody=Buffer.concat([MEDIA,free]);}
   await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(relayBody.length)},body:relayBody}); });
