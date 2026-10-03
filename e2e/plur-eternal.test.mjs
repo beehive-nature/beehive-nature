@@ -41,9 +41,6 @@ async function open(reg, opts = {}) {
   await ctx.route('**/*', r => { const q = r.request(); if (!q.url().startsWith(ORIGIN)) sent.push(q.method() + ' ' + q.url());
     if (q.url() === 'https://api.anthropic.com/v1/messages') return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":{"type":"authentication_error"}}' });
     return q.url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'); });
-  // Isolate parent gestures from the festival iframe's independent RPC reads.
-  // festival-eternal tests the festival; no external request is delivered here.
-  await ctx.route("**/surfaces/festival/index.html*", r => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>Festival fixture</title>" }));
   // This suite isolates browser voices and the explicit unavailable-preview path.
   // plur-voices.test.mjs exercises all fixed fallbacks and no-engine routing.
   await ctx.route('**/assets/plur-voices/manifest.json*', r => r.abort('blockedbyclient'));
