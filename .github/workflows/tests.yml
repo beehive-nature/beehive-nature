@@ -79,6 +79,7 @@ jobs:
       # internally honest (surfaces once each, states enum, LIVE files exist,
       # counts == recomputed). A hand-written count anywhere fails here.
       - name: Engine Room — every surface included
+        if: always()
         run: |
           node scripts/build-stack-inventory.mjs --check
           node scripts/build-stack-surfaces.mjs --check
