@@ -152,6 +152,9 @@ fn env_nonempty(key: &str) -> Option<String> {
     std::env::var(key).ok().filter(|v| !v.trim().is_empty())
 }
 
+/// Anvil's first default account. Its key is public.
+const ANVIL_ACCOUNT_0: &str = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+
 /// Fee headroom over the network estimate, as a fraction: 2/1 allows the fee
 /// to double between the check and the send, within the remaining budget.
 const FEE_HEADROOM: (u128, u128) = (2, 1);
@@ -278,7 +281,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         // No explicit peers and no manifest: the installed bootstrap file, or
         // the seeds bundled into ant-core (`config.rs` `resolve_bootstrap_multiaddrs`).
-        None => (ant_core::config::resolve_bootstrap_multiaddrs(&[], None)?, evmlib::Network::ArbitrumOne),
+        None => {
+            let source = match ant_core::config::load_bootstrap_multiaddrs()? {
+                Some(_) => "the installed bootstrap_peers.toml",
+                None => "the seeds bundled in ant-core",
+            };
+            let peers = ant_core::config::resolve_bootstrap_multiaddrs(&[], None)?;
+            println!("      bootstrap: {} peer(s) from {source}", peers.len());
+            (peers, evmlib::Network::ArbitrumOne)
+        }
     };
 
     // -- [2/6] the estate client connects (NO wallet attached) --------------
@@ -415,6 +426,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut signer = Wallet::new_from_private_key(evm_network.clone(), member_key.trim_start_matches("0x"))?;
     drop(member_key);
     println!("      member payer address: {}", signer.address());
+    if mainnet {
+        if std::env::var("MEMBER_PRIVATE_KEY").is_ok() {
+            println!("      note: MEMBER_PRIVATE_KEY is set and is ignored on mainnet; the key came from MEMBER_KEY_FILE");
+        }
+        if signer.address().to_string().eq_ignore_ascii_case(ANVIL_ACCOUNT_0) {
+            return Err("REFUSE: MEMBER_KEY_FILE holds the public Anvil test key; it must never pay on mainnet".into());
+        }
+    }
 
     // -- [4/6] THE MEMBER PAYS -- standalone wallet, out-of-band -------------
     println!("[4/6] member wallet paying ({payment_arm} arm)...");
@@ -543,6 +562,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             let batches = calldata_info.batched_calldata_map.len();
             let stage = format!("wave_payment({batches} tx)");
+            if batches == 0 {
+                println!("      nothing to pay: no quote payment is due; no payment is signed");
+            }
+            if batches == 0 {
+                Paid::Wave(std::collections::HashMap::new())
+            } else {
             let reserve_limit = total_limit.saturating_mul(SEND_ATTEMPTS);
             let fee = network_fee(&provider, &stage).await?;
             let cap = plan_fee_cap(ledger.remaining_wei(), reserve_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage)?;
@@ -573,6 +598,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ledger.exposure_wei()
             );
             Paid::Wave(map.into_iter().collect())
+            }
         }
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
             // Project every batch first so a multi-batch payment is never
@@ -636,12 +662,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The ledger is the aggregate. A breach here means the payer's balance
     // fell by more than was reserved; it is reported, never hidden.
     let total_gas_wei = ledger.exposure_wei();
-    if total_gas_wei > max_gas_ceiling_wei {
-        return Err(format!(
-            "BREACH: gas ledger exposure {total_gas_wei} wei exceeds the gate ceiling {max_gas_ceiling_wei} wei by {} wei; not finalizing",
+    let breach = (total_gas_wei > max_gas_ceiling_wei).then(|| {
+        format!(
+            "BREACH: gas ledger exposure {total_gas_wei} wei exceeds the gate ceiling {max_gas_ceiling_wei} wei by {} wei",
             total_gas_wei - max_gas_ceiling_wei
         )
-        .into());
+    });
+    if let Some(b) = &breach {
+        println!("      {b}; the storage is already paid, so the upload is finalized and this run exits with an error");
     }
 
     // -- [5/6] THE INTERRUPT: the estate client is DESTROYED; a FRESH client
@@ -701,14 +729,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "resumed_without_new_quote": true,
             "roundtrip_byte_identical": true,
             "network": network_name,
-            "node_count": node_count,
+            "node_count": devnet.as_ref().map(|_| node_count),
             "payment_mode_requested": format!("{payment_mode:?}"),
             "total_chunks": total_chunks,
             "estate_client_held_wallet": false,
             "upload_result_debug": format!("{result:?}").chars().take(120).collect::<String>(),
         }))?
     );
-    Ok(())
+    match breach {
+        Some(b) => Err(b.into()),
+        None => Ok(()),
+    }
 }
 
 #[cfg(test)]
