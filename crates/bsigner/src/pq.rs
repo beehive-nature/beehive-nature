@@ -54,8 +54,9 @@
 //!   vectors; those have NOT been run in this repo. UNVERIFIED.
 //! - Key storage here is a seed file under the user profile with OS file
 //!   permissions; at-rest encryption is a follow-up, NOT done. The laws that
-//!   DO hold today: keys never leave the device, never printed, zeroized in
-//!   memory after use.
+//!   Custody is on the host computer, NOT inside a Trezor or bSAFE secure
+//!   element. See keys::keygen_dsa/keygen_kem for seed-file persistence.
+//!   This module does not establish hardware custody or hardware recovery.
 //!
 //! ## INDEPENDENCE (the binding law)
 //!
