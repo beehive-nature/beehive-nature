@@ -815,7 +815,7 @@ body[data-reg="cypherpunk"] #stackInventory{font:400 14px/1.6 var(--sk-font-mono
 </section>
 <style>
 #surfaceDirectory{scroll-margin-top:24px}#surfaceDirectory input{box-sizing:border-box;width:100%;min-height:44px;margin-top:8px;padding:12px;background:var(--sk-bg);color:var(--sk-ink);border:1px solid var(--sk-line)}
-#surfaceDirectory table{width:100%;min-width:0;table-layout:fixed}#surfaceDirectory th,#surfaceDirectory td{overflow-wrap:anywhere;font-size:14px;letter-spacing:normal;text-transform:none;padding:12px;vertical-align:top}#surfaceDirectory small{display:block;margin:8px 0;color:var(--sk-ink-mut)}#surfaceDirectory details div{margin:8px 0}#surfaceDirectory summary{min-height:44px;cursor:pointer}#surfaceDirectory [hidden]{display:none!important}
+#surfaceDirectory table{width:100%;min-width:0;table-layout:fixed}#surfaceDirectory th,#surfaceDirectory td{overflow-wrap:anywhere;font-size:14px;letter-spacing:normal;text-transform:none;padding:12px;vertical-align:top}#surfaceDirectory small{display:block;margin:8px 0;font-size:14px;color:var(--sk-ink-mut)}#surfaceDirectory details div{margin:8px 0}#surfaceDirectory summary{min-height:44px;cursor:pointer}#surfaceDirectory [hidden]{display:none!important}
 body[data-reg="raver"] #surfaceDirectory tbody tr{border-top:3px solid var(--sk-sovereign)}body[data-reg="cypherpunk"] #surfaceDirectory{font-family:var(--sk-font-mono)}
 @media(max-width:700px){#surfaceDirectory thead{display:none}#surfaceDirectory table,#surfaceDirectory tbody,#surfaceDirectory tr,#surfaceDirectory td{display:block;width:auto}#surfaceDirectory tr{border:1px solid var(--sk-line);margin:16px 0;padding:8px}#surfaceDirectory td{border:0;padding:8px}}
 </style>
@@ -1251,7 +1251,7 @@ fetch('stack-dataflow-example.json',{cache:'no-store'}).then(function(r){ return
     D.loop=[].map.call(document.querySelectorAll('#flowLoop .fstage'),function(b){return {id:b.getAttribute('data-stage'),name:txt(b.querySelector('.fname'))};});
     var lt=tableAfter('stack.lic.h2');
     D.licence=lt?[].filter.call(lt.querySelectorAll('tr'),function(r){return !r.querySelector('th');}).map(function(r){var td=r.querySelectorAll('td');return {path:txt(td[0]),licence:txt(td[1]),opens:txt(td[2])};}):[];
-    var ah=keyed('h.171'), al=ah&&ah.closest('section').querySelector('.law');
+    var ah=keyed('h.171'), al=ah&&ah.closest('section').querySelector('h2 ~ .law');
     D.autonomi=al?[].map.call(al.querySelectorAll('b'),function(b){return txt(b);}).filter(function(s){return /^\d\s·/.test(s);}):[];
     organs();
   }
