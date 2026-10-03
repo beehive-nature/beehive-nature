@@ -217,7 +217,11 @@ test('bchat.html: renders without a relay — no request on load (the rub law)',
   assert.doesNotMatch(page(), /window\.addEventListener\('load'[^)]*\)[^;]*connect/);
 });
 test('bchat.html: register contract + tokens sheet adopted', () => {
-  assert.match(page(), /register\.js\?v=/);
+  /* the estate's one-shell law (e2e/register.test.mjs:171-175): exactly one
+     shared-loader tag, and it is tour.js?v=42 — tour bootstraps register.js */
+  const tags = [...page().matchAll(/<script\b[^>]*\bsrc=["']([^"']*\b(?:tour|register)\.js(?:\?[^"']*)?)["'][^>]*>/gi)];
+  assert.equal(tags.length, 1, 'must load the shared shell once');
+  assert.match(tags[0][1], /tour\.js\?v=42$/);
   assert.match(page(), /tokens\.css/);
   assert.match(page(), /data-reg/);
 });

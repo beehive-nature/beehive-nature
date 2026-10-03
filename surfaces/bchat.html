@@ -36,7 +36,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>bChat — one surface, three trust lanes</title>
 <link rel="stylesheet" href="tokens.css">
-<script src="register.js?v=1"></script>
+<!-- the shared shell is tour.js?v=42, loaded once at the end of body; it
+     bootstraps register.js itself (register.test.mjs enforces the one-shell law) -->
 <style>
 /* register pre-hide guard — nothing flashes if register.js is late */
 [data-reg]:not(body){display:none}
