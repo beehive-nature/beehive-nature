@@ -98,6 +98,30 @@ pub fn dsa_generate(alg: SigAlg) -> DsaGenerated {
     }
 }
 
+/// Derive the encoded verifying key from a 32-byte seed WITHOUT signing.
+/// Same derivation path `dsa_sign` walks (signing.rs:55 `from_seed` →
+/// Keypair::verifying_key → verifying.rs:158 `encode`), so a seed delivered
+/// by environment (the CI-signing card's delivery law: env, never argv,
+/// never a file the caller has to keep) can state the public key and key_id
+/// it will sign under before any signature exists.
+pub fn dsa_public_from_seed(alg: SigAlg, seed: &[u8; 32]) -> Result<Vec<u8>, String> {
+    if seed.len() != 32 {
+        return Err(format!("ml-dsa seed must be 32 bytes, got {}", seed.len()));
+    }
+    let seed_arr: DsaSeed = (*seed).into();
+    macro_rules! pub_of {
+        ($params:ty) => {{
+            let sk = SigningKey::<$params>::from_seed(&seed_arr); // ml-dsa signing.rs:55
+            Ok(sk.verifying_key().encode().to_vec()) // verifying.rs:158
+        }};
+    }
+    match alg {
+        SigAlg::MlDsa44 => pub_of!(MlDsa44),
+        SigAlg::MlDsa65 => pub_of!(MlDsa65),
+        SigAlg::MlDsa87 => pub_of!(MlDsa87),
+    }
+}
+
 pub fn dsa_sign(alg: SigAlg, seed: &[u8; 32], msg: &[u8]) -> Result<Vec<u8>, String> {
     if seed.len() != 32 {
         return Err(format!("ml-dsa seed must be 32 bytes, got {}", seed.len()));
@@ -254,6 +278,21 @@ mod tests {
         let sig = dsa_sign(SigAlg::MlDsa65, &g.seed, b"x").unwrap();
         // 65-signature offered as 44: size gate catches it (2420 != 3309)
         assert!(dsa_verify(SigAlg::MlDsa44, &g.verifying_key, b"x", &sig).is_err());
+    }
+
+    #[test]
+    fn public_from_seed_is_the_keygen_verifying_key() {
+        // the env-delivered-seed signing path states its public key through
+        // dsa_public_from_seed; it must equal what keygen itself recorded
+        for alg in [SigAlg::MlDsa44, SigAlg::MlDsa65, SigAlg::MlDsa87] {
+            let g = dsa_generate(alg);
+            assert_eq!(dsa_public_from_seed(alg, &g.seed).unwrap(), g.verifying_key);
+        }
+        // and a signature made under the seed verifies under that public key
+        let g = dsa_generate(SigAlg::MlDsa65);
+        let vk = dsa_public_from_seed(SigAlg::MlDsa65, &g.seed).unwrap();
+        let sig = dsa_sign(SigAlg::MlDsa65, &g.seed, b"ci-attestation").unwrap();
+        assert!(dsa_verify(SigAlg::MlDsa65, &vk, b"ci-attestation", &sig).unwrap());
     }
 
     #[test]

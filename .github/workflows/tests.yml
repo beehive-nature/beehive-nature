@@ -965,16 +965,28 @@ jobs:
           npm ci
           npx playwright --version
           npx playwright install --with-deps chromium
+      # THE CI-SIGNING CARD (2026-09-30): the gate verifies ML-DSA signatures with
+      # the estate's own signer — one cited implementation, both directions — so
+      # the probes and any signed document need the binary. When this build fails,
+      # the always() proof-lights steps fire and fail noisily on the missing
+      # verifier: visible, attributable, never skipped.
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build bsigner (the gate's signature verifier)
+        if: always()
+        run: cargo build --locked -p bsigner
       - name: Skaists — the standards meter (three-UI fronts score 100%)
         timeout-minutes: 21 # measured: max 873s in run 36515263333 (+44% headroom)
         if: always()
         working-directory: e2e
-        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html,doors/index.html,doors/beehivenature.html,doors/skaists.html,doors/plur.html,doors/bnature-social.html,doors/bnature-bio.html,doors/beehivebiomass.html,doors/beehivenature-buzz.html,doors/skaists-buzz.html,ant-door.html,forge/index.html,forge/hexfield.html,forge/huddle.html,forge/room.html,comb.html,recover.html,keys/addresses.html,royalguard.html,privacy-lens.html,attest.html,fleet-hosted/lab/blend-lab.html,fleet-hosted/lab/edible-tracker.html,fleet-hosted/lab/flower-lab.html,fleet-hosted/lab/intake-tracker.html,fleet-hosted/lab/spliff-lab.html,dock.html,fieldnotes.html,law-of-the-sea.html,design-system.html,blight/c1-aid.html,blight/coop.html,blight/farmers.html,blight/hearth.html,blight/profile.html,blight/pulse.html,biq.html,bqueenbee-live.html,local-agent/index.html,or-board.html,devroom.html,bset.html,bsymposium.html,btranslated.html,buzz-studio.html,record.html,blight/demo.html,blight/qrroses.html,blight/qrroses-smil.html,blight/qrtree.html,blight/vaulta-reader.html,blight/workbench.html,b4b.html,bantfarm.html,bfactory.html,bmeshasi.html,dao-dashboard/index.html --min 100
+        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html,doors/index.html,doors/beehivenature.html,doors/skaists.html,doors/plur.html,doors/bnature-social.html,doors/bnature-bio.html,doors/beehivebiomass.html,doors/beehivenature-buzz.html,doors/skaists-buzz.html,ant-door.html,forge/index.html,forge/hexfield.html,forge/huddle.html,forge/room.html,comb.html,recover.html,keys/addresses.html,royalguard.html,privacy-lens.html,attest.html,fleet-hosted/lab/blend-lab.html,fleet-hosted/lab/edible-tracker.html,fleet-hosted/lab/flower-lab.html,fleet-hosted/lab/intake-tracker.html,fleet-hosted/lab/spliff-lab.html,dock.html,fieldnotes.html,law-of-the-sea.html,design-system.html,blight/c1-aid.html,blight/coop.html,blight/farmers.html,blight/hearth.html,blight/profile.html,blight/pulse.html,biq.html,bqueenbee-live.html,local-agent/index.html,or-board.html,devroom.html,bset.html,bsymposium.html,btranslated.html,buzz-studio.html,record.html,blight/demo.html,blight/qrroses.html,blight/qrroses-smil.html,blight/qrtree.html,blight/vaulta-reader.html,blight/workbench.html,b4b.html,bantfarm.html,bfactory.html,bmeshasi.html,dao-dashboard/index.html --min 100 --json meter-evidence.json
       # PROOF LIGHTS (founder go, 2026-09-27): a badge is a projection of a status document a check
       # already produced, rendered OFFLINE by Shields' own badge-maker and committed as a static SVG
       # under docs/status/. Same-origin, so design-acceptance I1 holds and a page saying TELEMETRY NONE
       # does not phone a badge CDN to say so. This step re-renders every docs/status/*.json and fails if
-      # the committed SVG differs: derived, not typed. Unsigned documents say so in their own field.
+      # the committed SVG differs: derived, not typed. Unsigned documents say so in their own field;
+      # signed ones are verified against docs/badge-trust.json with bsigner (fails closed, no binary
+      # no pass).
       - name: Proof lights — every badge is exactly what its status document renders
         timeout-minutes: 1 # measured: max 10s in run 36520267475 (+500% headroom)
         if: always()
@@ -983,8 +995,75 @@ jobs:
       # The gate's own negative probes (review of #250, 2026-09-27): deleted evidence, inflated counts
       # with a matching SVG, a forty-zero revision, a bogus signature, non-JSON evidence, a SHA-1-only
       # rebind, a duplicated row, a CI-origin claim — each passed the first gate and must now FAIL.
+      # The CI-signing probes (2026-09-30) add: wrong key, unknown key id, expired, revoked, a
+      # signature over altered bytes, the run/head_sha binding refusal, and the signing job's own
+      # refusals — all on disposable keys bsigner generates at test time.
       - name: Proof lights — the gate refuses every known forgery
         timeout-minutes: 1 # measured: max 6s in run 36741273029 (+900% headroom)
         if: always()
         working-directory: e2e
         run: node --test render-badges.test.mjs
+      # THE CI-SIGNING CARD, stage half: on pushes to main the meter's own run
+      # becomes an origin-ci measurement at exactly this revision, staged (never
+      # written into the tree) for the badge-signing job to sign. PR runs stage
+      # nothing; the signing job does not exist for them.
+      - name: Proof lights — stage the CI measurement for signing (main pushes only)
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: e2e
+        run: node render-badges.mjs meter --from meter-evidence.json --revision "$GITHUB_SHA" --origin ci --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" --stage stage-badge
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: badge-stage
+          path: e2e/stage-badge
+          retention-days: 14
+
+  # THE CI-SIGNING CARD, sign half (founder go 2026-09-27; dispatch 2026-09-30):
+  # signs the staged origin-ci status documents with the dedicated CI-attestation
+  # key — ML-DSA-65 from bsigner's registry, NEVER a wallet or personal key — in
+  # the protected badge-signing environment, on pushes to main only. No PR content
+  # ever runs here (job-level if), and the seed is env-delivered: never an
+  # argument, never printed, never on disk. Until the founder stores the secret
+  # the job skips BY NAME (nothing to sign is not a failure; the gate stays
+  # armed — unsigned origin-ci documents fail --check). The signed trio is
+  # published as an artifact; landing it on main is a normal reviewed commit.
+  badge-signing:
+    needs: meter
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: badge-signing
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        working-directory: e2e
+        run: npm ci --ignore-scripts
+      - name: Build bsigner (verifier + signer)
+        if: always()
+        run: cargo build --locked -p bsigner
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: badge-stage
+          path: stage
+      - name: Proof lights — sign the staged CI measurements
+        if: always()
+        working-directory: e2e
+        env:
+          BADGE_SIGNING_SEED_B64U: ${{ secrets.BADGE_SIGNING_SEED_B64U }}
+        run: |
+          node sign-badges.mjs --stage ../stage --out ../signed --expect-sha "$GITHUB_SHA" --expect-run-id "$GITHUB_RUN_ID" --expect-run-attempt "$GITHUB_RUN_ATTEMPT"
+          # a later step's if: cannot read THIS step's env: block (GitHub scopes
+          # step env to the step), so the "something was signed" signal travels
+          # via GITHUB_ENV — reviewed repair of the independent review's P1
+          if [ -n "$(ls -A ../signed 2>/dev/null)" ]; then echo "BADGE_SIGNED=1" >> "$GITHUB_ENV"; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: env.BADGE_SIGNED == '1'   # nothing signed (no key stored, or named skip) — nothing to publish
+        with:
+          name: badge-signed
+          path: signed
+          retention-days: 14
