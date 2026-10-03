@@ -152,9 +152,9 @@ try {
     const balance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'banchor22222' }));
     ok('Vaulta RPC EOS unit is normalized to A without changing digits',
       balance.unit === 'A' && balance.quantity === '12.3456 A', JSON.stringify(balance));
-    const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }));
-    ok('Vaulta missing liquid defaults to 0.0000 A',
-      emptyBalance.unit === 'A' && emptyBalance.quantity === '0.0000 A', JSON.stringify(emptyBalance));
+    const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }).then(()=>null,error=>error.message));
+    ok('Vaulta missing liquid balance is refused, never fabricated as zero',
+      /no valid liquid balance/.test(emptyBalance), String(emptyBalance));
   }
 
   /* ── 2 · the pipeline on the mock: build → sign → OUTBOX PERSISTED →

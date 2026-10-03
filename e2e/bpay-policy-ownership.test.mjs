@@ -32,7 +32,7 @@
 //   node --test e2e/bpay-policy-ownership.test.mjs
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -42,22 +42,14 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SURFACES = join(here, '..', 'surfaces');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.wasm': 'application/wasm' };
 
-let browser, server, origin, liveBridgeTouches = 0;
+let browser, origin, liveBridgeTouches = 0;
 const guarded = async (ctx) => { await ctx.route('http://127.0.0.1:8807/**', route => { liveBridgeTouches++; route.abort(); }); return ctx; };
 before(async () => {
-  server = createServer(async (req, res) => {
-    const p = (req.url === '/' ? '/bdata.html' : req.url).split('?')[0];
-    try {
-      const body = await readFile(join(SURFACES, ...p.split('/').filter(Boolean)));
-      res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
-      res.end(body);
-    } catch { res.writeHead(404); res.end('not found'); }
-  });
-  await new Promise(r => server.listen(0, '127.0.0.1', r));
-  origin = `http://127.0.0.1:${server.address().port}`;
+  origin=WALLET_ORIGIN;
   browser = await chromium.launch();
+  await installWalletFixture(browser,join(SURFACES,'..'));
 });
-after(async () => { if (browser) await browser.close(); if (server) server.close(); });
+after(async () => { if (browser) await browser.close(); });
 
 const readKey = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('bpay-policy-v1') || 'null'));
 
@@ -69,9 +61,8 @@ test('a View change in a stale wallet tab cannot erase newer founder policy (the
   // lands in the task that holds it (the three grammars, 2026-09-26)
   await tabB.goto(origin + '/wallet.html#bpay-sec', { waitUntil: 'load' });
   await tabB.waitForTimeout(1200);
-  assert.ok((() => { const k = null; return true; })(), 'premise helper');
   const bootKey = await readKey(tabB);
-  assert.ok(!bootKey || bootKey.audience === null, 'wallet boots with no gesture (stale-tab premise)');
+  assert.ok(!bootKey || (bootKey.audience == null && !bootKey.selectedAt), 'wallet boots with no gesture (stale-tab premise)');
 
   // Tab A — My Data, opened AFTER the wallet booted
   const tabA = await ctx.newPage();

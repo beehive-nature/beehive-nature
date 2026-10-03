@@ -11,7 +11,8 @@
 -->
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://connect.trezor.io/9.7.3/trezor-connect.js; object-src 'none'; base-uri 'self';"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
@@ -684,7 +685,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <main>
 <div id="wallet-identity">
   <h1 class="wallet-brand-heading"><a class="wallet-brand" href="#" data-wl-go="home">skaists <strong>heART WALLet</strong></a></h1>
-  <nav aria-label="Wallet actions"><a href="#wallet-accounts">Accounts &amp; coins</a><a href="#pay-sec" aria-label="bPay: send, receive or swap">bPay</a><a href="#bpay-sec" data-wallet-store>bPay · store</a></nav>
+  <nav aria-label="Wallet actions"><a href="#wallet-accounts" data-i18n="wl.wallet.accounts">Accounts &amp; coins</a><a href="#pay-sec" aria-label="bPay: send, receive or swap">bPay</a><a href="#bpay-sec" data-wallet-store data-i18n="wl.wallet.store">bPay · store</a></nav>
 </div>
 <div id="wallet-storage">
   <h2>bPay once · choose your storage network</h2>
@@ -692,7 +693,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>Quotes only · ANT plus ETH network fees</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>Publish small files · keep the receipt</span></a></div>
 </div>
 <header>
-  <p data-reg="bee">Add accounts, follow public addresses and read your coins. Use bPay to send, receive or store.</p>
+  <p data-reg="bee" data-i18n="wl.wallet.intro">Accounts, coins and public addresses.</p>
   <p data-reg="raver">Your coins. Your chains. Follow an address, read a balance, bPay when you choose.</p>
   <p data-reg="cypherpunk">Public account reads · explicit signing · network-specific storage and transaction receipts.</p>
 </header>
@@ -706,7 +707,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button type="button" class="wlb-total" data-vaulta-toggle aria-expanded="false" aria-controls="wlb-vaulta-breakdown">
       <span class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wlb-total-caret" aria-hidden="true">⌄</span>
     </button>
-    <div class="wlb-rollup-hint">tap the total for adapter · chain · account</div>
+    <div class="wlb-rollup-hint" data-i18n="wl.wallet.rollup">tap the total for chain and account</div>
     <div class="va-breakdown" id="wlb-vaulta-breakdown" data-vaulta-breakdown hidden>
       <div class="va-breakdown-head">A held on Vaulta</div>
       <div data-vaulta-rows></div>
@@ -719,7 +720,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.bee.have.s">every chain, read live in this browser</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="move"><span class="wlb-i" aria-hidden="true">💸</span><span class="wlb-t"><b data-i18n="wl.bee.move">pay or get paid</b><small data-i18n="wl.bee.move.s">send, receive or swap</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="add"><span class="wlb-i" aria-hidden="true">💳</span><span class="wlb-t"><b data-i18n="wl.bee.add">add money</b><small data-i18n="wl.bee.add.s">the ways to put money in</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
-    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b >bPay once · store a file</b><small >Autonomi / ANT · Arweave / AR</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.wallet.keep">bPay once · store a file</b><small data-i18n="wl.wallet.networks">Autonomi / ANT · Arweave / AR</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="key"><span class="wlb-i" aria-hidden="true">🗝</span><span class="wlb-t"><b data-i18n="wl.bee.key">my key and my safe</b><small data-i18n="wl.bee.key.s">your passkey, your recovery words, your sealed secrets</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="proof"><span class="wlb-i" aria-hidden="true">🗺</span><span class="wlb-t"><b data-i18n="wl.bee.proof">see how it works</b><small data-i18n="wl.bee.proof.s">every bill recomputed, every rail listed</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
   </div>
@@ -1174,7 +1175,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="wa-fields">
         <label>Network<select id="wa-trezor-chain"><option value="evm">Ethereum + Base + Arbitrum</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option><option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option><option value="bitcoin-account">Bitcoin · native SegWit account</option></select></label>
         <label>Account number<input id="wa-trezor-account" type="number" min="1" max="100" value="1" required></label>
-        <label id="wa-trezor-sol-label">Solana account layout<select id="wa-trezor-sol"><option value="suite">Suite · m/44'/501'/account'</option><option value="bip44change">With change level · m/44'/501'/account'/0'</option></select></label>
+        <label id="wa-trezor-sol-label">Solana account layout<select id="wa-trezor-sol"><option value="suite">Suite · m/44'/501'/account'/0'</option><option value="legacy">Three-level compatibility · m/44'/501'/account'</option></select></label>
         <div class="wa-wide wa-note" id="wa-trezor-path"></div>
       </div>
       <p class="wa-note" id="wa-trezor-bitcoin" hidden>Bitcoin sync stores an account public key and shares it with Trezor’s blockchain service when you refresh, covering receive and change addresses within its discovery window. This reveals the account’s activity.</p>
@@ -2366,7 +2367,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <h2>🗺 chain matrix: <span>full wallet coverage</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each: how it is read and signed</summary>
   <div class="law">The original wallet scope plus the Graphene and Cosmos studies, with separate <b>read</b> and <b>sign</b> capabilities. READ means this page has a public account reader; CODE means another implementation exists; EVALUATION means a bounded bench; GAP means required integration is missing; STUDY means researched scope. These labels do not certify a device, a payment or a deployment. Tokens, payment protocols and storage networks are identified separately from blockchains.</div>
-  <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/wallet-accounts-follow-2026-10-03/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
+  <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/499118bd646dbcefb1e52b0384c5a39296fa4cdb/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
   </details>
   <div class="wallet-section-action"><a href="#wallet-accounts">Add or follow an account on a supported network</a></div>
   <details class="tnote" data-reg-disclose><summary>Solana · Vaulta · x0x settlement evidence</summary>
@@ -4970,8 +4971,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   };
 
-  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
-  spawnAdapter('hive', 'wallet-adapter-hive.js');
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=4');   // document-relative: same dir as this page
+  spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=3');
 
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
@@ -5176,7 +5177,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       if(['vaulta','hive','bitcoin','solana','arweave'].indexOf(chain)<0)throw new Error('Unsupported read network');
       // Reuse the read-only BTC/SOL workers on demand, through the same shell.
-      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js');
+      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js?v=4');
+      else if(!ADAPTERS[chain].attached&&ADAPTERS[chain].state!=='spawning')ADAPTERS[chain].respawn();
       var start=Date.now();
       while(!ADAPTERS[chain].attached) {
         if(Date.now()-start>8500)throw new Error('Read adapter unavailable; try again');
@@ -7015,7 +7017,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     solana:{name:'Solana',hint:'Public Solana address. Reads native SOL.',explorer:'https://explorer.solana.com/address/'},
     arweave:{name:'Arweave',hint:'Public 43-character Arweave address. Never paste a JWK or recovery phrase.',explorer:'https://viewblock.io/arweave/address/'}
   };
-  var query='', entries=[], reads=new Map(), coinReads=new Map(), extraTokens=new Map(), snapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
+  var query='', entries=[], reads=new Map(), coinReads=new Map(), extraTokens=new Map(), snapshot=null, editSnapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
   var el=function(id){return document.getElementById(id)};
   // Scope comes from the full catalog, readiness from an explicit watch key.
   // Missing capabilities remain visible but cannot be selected or persisted.
@@ -7238,6 +7240,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   }
   function hint(){el('wa-hint').textContent=NETWORKS[el('wa-chain').value].hint}
   function showForm(kind,row){
+    editSnapshot=snapshot;
     editing=row?idOf(row):null;el('wa-form').reset();
     if(row){el('wa-chain').value=row.chain;el('wa-address').value=row.address;el('wa-label').value=row.label;}
     el('wa-kind').value=kind;el('wa-save').textContent=row?'Save changes':'Save & read';
@@ -7275,9 +7278,10 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   el('wa-refresh').onclick=function(){refreshAll(true)};
   el('wa-form').onsubmit=async function(event){
     event.preventDefault();var submit=el('wa-save');if(submit.disabled)return;submit.disabled=true;
-    var original=editing;
+    var original=editing,formRevision=editSnapshot;
     try{
       var row=await validate({chain:el('wa-chain').value,address:el('wa-address').value,label:el('wa-label').value,kind:el('wa-kind').value}),id=idOf(row);
+      if(original&&(formRevision!==snapshot||localStorage.getItem(KEY)!==formRevision))throw new Error('This account list changed in another tab. Cancel and reopen Edit before saving.');
       if(entries.some(function(r){return idOf(r)===id&&idOf(r)!==original}))throw new Error('This address is already saved on this network. Use Edit to change its label or list.');
       if(original&&!entries.some(function(r){return idOf(r)===original}))throw new Error('This account was removed in another tab. Add it again if needed.');
       var next=entries.slice(),at=next.findIndex(function(r){return idOf(r)===original});
@@ -7321,7 +7325,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     if(!trezorInit){
       trezorInit=(async function(){
         if(!window.TrezorConnect)await new Promise(function(resolve,reject){
-          var script=document.createElement('script');script.src='https://connect.trezor.io/9/trezor-connect.js';
+          var script=document.createElement('script');script.src='https://connect.trezor.io/9.7.3/trezor-connect.js';script.integrity='sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6';script.crossOrigin='anonymous';
           script.onload=function(){window.TrezorConnect?resolve():reject(new Error('Trezor Connect did not start'))};
           script.onerror=function(){script.remove();reject(new Error('Trezor Connect could not be loaded. Try again.'))};document.head.appendChild(script);
         });
@@ -7344,7 +7348,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   function trezorSelection(){
     var chain=el('wa-trezor-chain').value,account=Number(el('wa-trezor-account').value);
     if(!Number.isInteger(account)||account<1||account>100)throw new Error('Choose account 1–100');
-    var index=account-1,path=chain==='bitcoin-account'?"m/84'/0'/"+index+"'":chain==='solana'?"m/44'/501'/"+index+"'"+(el('wa-trezor-sol').value==='bip44change'?"/0'":''):"m/44'/60'/"+index+"'/0/0";
+    var index=account-1,path=chain==='bitcoin-account'?"m/84'/0'/"+index+"'":chain==='solana'?"m/44'/501'/"+index+"'"+(el('wa-trezor-sol').value==='suite'?"/0'":''):"m/44'/60'/"+index+"'/0/0";
     return {chain:chain,account:account,path:path};
   }
   function trezorHint(){

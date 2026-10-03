@@ -20,6 +20,7 @@ const BTC = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'; // PUBLIC-CONSTANT: Bitcoin ge
 const SOL = '11111111111111111111111111111111'; // PUBLIC-CONSTANT: Solana system program
 const AR = 'a'.repeat(42) + 'A'; // Synthetic public address, no key material.
 const calls = [], pageErrors = [];
+let solRaw='1234567890', vaultMalformed=false, hiveMalformed=false;
 let outage = false, wrongChain = false, deferred = null, preview = false;
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await ctx.addInitScript(() => {
@@ -55,14 +56,14 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
   if (url.pathname === '/v1/chain/get_account') {
     calls.push('get_account');
     if (body.account_name === 'missing') return json({ error: { message: 'unknown account' } });
-    return json({ account_name: body.account_name, core_liquid_balance: body.account_name === 'alice' ? '12.3456 EOS' : '7.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
+    return json({ account_name: body.account_name, core_liquid_balance: vaultMalformed ? null : body.account_name === 'alice' ? '12.3456 EOS' : '7.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
   }
-  if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
+  if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: hiveMalformed ? 'not a balance' : '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
   if (/blockstream|mempool/.test(url.host)) {
     calls.push('esplora balance');
     return json({ chain_stats: { funded_txo_sum: 123456789, spent_txo_sum: 0, tx_count: 1 }, mempool_stats: { funded_txo_sum: 100, spent_txo_sum: 0 } });
   }
-  if (/solana|solana-mainnet/.test(url.host)) { calls.push(body.method); return json({ result: { value: 1234567890 } }); }
+  if (/solana|solana-mainnet/.test(url.host)) { calls.push(body.method); return route.fulfill({headers,contentType:'application/json',body:'{"result":{"value":'+solRaw+'}}'}); }
   if (/\/wallet\/.+\/balance$/.test(url.pathname)) { calls.push('AR balance'); return route.fulfill({ headers, body: '1234567890123' }); }
   return route.abort();
 });
@@ -143,10 +144,30 @@ try {
   check('segwit checksum and witness program accepted', (await card('bc1q').textContent()).includes('BTC'));
   await add('solana', SOL, 'following', 'Solana'); await settled(card(SOL));
   check('Solana reuses existing read worker', (await card(SOL).textContent()).includes('1.23456789 SOL'));
+  solRaw='9007199254740993';
+  await card(SOL).getByRole('button',{name:'Refresh',exact:true}).click(); await settled(card(SOL));
+  check('Solana preserves lamports above Number safe integer', (await card(SOL).textContent()).includes('9007199.254740993 SOL'));
+  for (const malformed of ['null','-1','1.5','18446744073709551616']) {
+    solRaw=malformed; await card(SOL).getByRole('button',{name:'Refresh',exact:true}).click(); await settled(card(SOL));
+    check('Solana refuses invalid u64 '+malformed, await card(SOL).locator('.wa-amount').count()===0);
+  }
+  solRaw='1234567890';
+  await page.evaluate(()=>BNRWALLET._crash('solana','fixture worker failure'));
+  await card(SOL).getByRole('button',{name:'Refresh',exact:true}).click(); await settled(card(SOL));
+  check('Refresh respawns a crashed Solana worker', (await card(SOL).textContent()).includes('1.23456789 SOL'));
   await add('arweave', AR, 'following', 'Arweave'); await settled(card(AR));
   check('Arweave formats winston exactly', (await card(AR).textContent()).includes('1.234567890123 AR'));
   await add('hive', '@alice', 'mine', 'Hive'); await settled(card('alice').filter({ hasText: 'Hive ·' }));
   check('Hive account normalization and both liquid coins', (await card('alice').filter({ hasText: 'Hive ·' }).textContent()).includes('42.123 HIVE')&&(await card('alice').filter({ hasText: 'Hive ·' }).textContent()).includes('8.765 HBD'));
+  vaultMalformed=true;
+  const vaultCard=card('alice').filter({hasText:'Vaulta'});
+  await vaultCard.getByRole('button',{name:'Refresh',exact:true}).click(); await settled(vaultCard);
+  check('missing Vaulta balance is unavailable rather than zero',await vaultCard.locator('.wa-amount').count()===0);
+  vaultMalformed=false;hiveMalformed=true;
+  const hiveCard=card('alice').filter({hasText:'Hive'});
+  await hiveCard.getByRole('button',{name:'Refresh',exact:true}).click(); await settled(hiveCard);
+  check('malformed Hive balance is unavailable rather than zero',await hiveCard.locator('.wa-amount').count()===0);
+  hiveMalformed=false;
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY);
   check('persistence contains only versioned public metadata', saved.v === 1 && saved.entries.length === 9 && saved.entries.every(row => Object.keys(row).sort().join(',') === 'address,chain,kind,label'));
   check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
@@ -156,6 +177,15 @@ try {
   await second.evaluate(key => { const data = JSON.parse(localStorage.getItem(key)); data.entries = data.entries.filter(row => row.chain !== 'bitcoin'); localStorage.setItem(key, JSON.stringify(data)); }, KEY);
   await page.waitForFunction(() => document.querySelectorAll('.wa-card').length === 7);
   check('cross-tab changes clear old reads and preserve the new list', (await page.locator('#wa-status').textContent()).includes('another tab') && await cards().locator('.wa-amount').count() === 0);
+  await base.getByRole('button',{name:'Edit',exact:true}).click();
+  await page.locator('#wa-label').fill('Stale edit');
+  await second.evaluate(key=>{const data=JSON.parse(localStorage.getItem(key));data.entries.find(r=>r.chain==='base').label='Other tab wins';localStorage.setItem(key,JSON.stringify(data));},KEY);
+  await page.waitForFunction(()=>document.getElementById('wa-mine').textContent.includes('Other tab wins'));
+  await page.locator('#wa-save').click();
+  check('open edit cannot overwrite another tab after its storage event',await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).entries.find(r=>r.chain==='base').label==='Other tab wins',KEY));
+  await page.locator('#wa-cancel').click();
+  await second.evaluate(key=>{const data=JSON.parse(localStorage.getItem(key));data.entries.find(r=>r.chain==='base').label='Base savings';localStorage.setItem(key,JSON.stringify(data));},KEY);
+  await base.waitFor();
   await second.close();
   await page.locator('#wa-refresh').click(); await settled(base);
   await page.evaluate(() => { const original = Storage.prototype.setItem; window.restoreStorage = () => { Storage.prototype.setItem = original; }; Storage.prototype.setItem = function(key,value){ if(key === 'bnr.wallet.public-accounts.v1')throw new DOMException('quota','QuotaExceededError'); return original.call(this,key,value); }; });

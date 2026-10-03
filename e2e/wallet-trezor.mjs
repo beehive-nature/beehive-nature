@@ -23,14 +23,7 @@ const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } }
 let loads = 0, checks = 0;
 const errors = [];
 const check = (label, condition) => { assert.ok(condition, label); console.log(`PASS ${++checks}: ${label}`); };
-await ctx.addInitScript(() => { localStorage.setItem('bregister', 'bee'); window.bridgeCalls = []; window.bridgeMode = 'ok'; });
-await ctx.route(url => !url.href.startsWith(origin), async route => {
-  const req = route.request(), url = new URL(req.url());
-  const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
-  const json = value => route.fulfill({ headers, contentType: 'application/json', body: JSON.stringify(value) });
-  if (url.href === 'https://connect.trezor.io/9/trezor-connect.js') {
-    loads++;
-    return route.fulfill({ headers, contentType: 'text/javascript', body: `
+const mockBridge = `
       window.TrezorConnect={
         init:async p=>{bridgeCalls.push(['init',p]);if(bridgeMode==='init-fail')throw Error('fixture init failure')},
         solanaGetAddress:async p=>reply('solanaGetAddress',p,{address:${JSON.stringify(SOL)}}),
@@ -42,7 +35,18 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
         firmwareUpdate:()=>{throw Error('FORBIDDEN FIRMWARE UPDATE')}
       };
       function reply(method,p,data){bridgeCalls.push([method,p]);return bridgeMode==='cancel'?{success:false,payload:{error:'cancelled'}}:{success:true,payload:{serializedPath:bridgeMode==='wrong-path'?"m/44'/501'/99'":p.path,...data}}}
-    ` });
+    `;
+let tamperBridge=true;
+const fixtureIntegrity='sha384-'+createHash('sha384').update(mockBridge).digest('base64');
+await ctx.route(origin+'/surfaces/wallet.html*',route=>route.fulfill({contentType:'text/html',body:fixtureHtml.replace('sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6',fixtureIntegrity)}));
+await ctx.addInitScript(() => { localStorage.setItem('bregister', 'bee'); window.bridgeCalls = []; window.bridgeMode = 'ok'; });
+await ctx.route(url => !url.href.startsWith(origin), async route => {
+  const req = route.request(), url = new URL(req.url());
+  const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
+  const json = value => route.fulfill({ headers, contentType: 'application/json', body: JSON.stringify(value) });
+  if (url.href === 'https://connect.trezor.io/9.7.3/trezor-connect.js') {
+    loads++;
+    return route.fulfill({ headers, contentType: 'text/javascript', body: mockBridge + (tamperBridge ? "\nwindow.tamperedBridgeRan=true;" : "") });
   }
   if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
   let body = {}; try { body = req.postDataJSON() || {}; } catch {}
@@ -65,13 +69,16 @@ try {
   check('bridge absent at page load', loads === 0);
   await page.locator('#wa-trezor').click();
   check('opening import form does not contact Trezor', loads === 0);
+  await importAccount('solana');
+  check('changed bridge bytes fail integrity without executing or saving', (await entries()).length===0 && await page.evaluate(()=>!window.tamperedBridgeRan&&!window.TrezorConnect));
+  tamperBridge=false;
   await page.evaluate(() => window.bridgeMode = 'init-fail');
   await importAccount('solana');
   check('init failure saves no account and is surfaced', (await entries()).length === 0 && (await status()).includes('fixture init failure'));
   await page.evaluate(() => window.bridgeMode = 'ok');
   await importAccount('solana', '2');
   let saved = await entries();
-  check('Solana account 2 preserves Suite path and public provenance', saved[0].trezor.path === "m/44'/501'/1'" && saved[0].address === SOL && saved[0].kind === 'mine');
+  check('Solana account 2 preserves Suite path and public provenance', saved[0].trezor.path === "m/44'/501'/1'/0'" && saved[0].address === SOL && saved[0].kind === 'mine');
   check('public export explicitly requests device display', await page.evaluate(() => bridgeCalls.find(([m]) => m === 'solanaGetAddress')[1].showOnTrezor === true));
   await importAccount('solana', '2');
   check('repeat sync cannot duplicate an account', (await entries()).length === 1 && (await status()).includes('already saved'));
@@ -98,7 +105,7 @@ try {
   await btc.getByRole('button', { name: 'Refresh', exact: true }).click();
   await btc.locator('.wa-state').filter({ hasText: 'different account' }).waitFor();
   check('wrong Bitcoin descriptor removes previous amount', await btc.locator('.wa-amount').count() === 0);
-  check('bridge was loaded once and no signer method was used', loads === 1 && await page.evaluate(() => bridgeCalls.every(([m]) => ['init','getPublicKey','getAccountInfo','solanaGetAddress','ethereumGetAddress'].includes(m))));
+  check('bridge retries only after integrity failure and uses no signer method', loads === 2 && await page.evaluate(() => bridgeCalls.every(([m]) => ['init','getPublicKey','getAccountInfo','solanaGetAddress','ethereumGetAddress'].includes(m))));
   const beforeReload = loads;
   await page.reload();
   await page.locator('.wa-state').filter({ hasText: 'Press Refresh' }).waitFor();
