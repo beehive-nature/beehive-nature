@@ -3,38 +3,38 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood interactive public preservation edition v3",
-  "manifestSha256": "28ba77a9e3ce685cd279c19a074b79c569057e000ba971d65ab4daffa364d77d", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-02T23:30:24.843Z",
+  "manifestSha256": "16bc9081d2e1e7169bf9ff93314ccc343f0a5727c4a8aef536232ec23f0726c5", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-03T07:49:15.754Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": false,
   "files": 22153,
-  "bytes": 87265203,
-  "GiB": 0.081272,
+  "bytes": 87248672,
+  "GiB": 0.081257,
   "personObjects": 11041,
   "evidencePacks": 3,
   "uploadForm": "deterministic public tar; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
   "uploadObject": {
    "form": "tar",
-   "bytes": 107806720,
-   "sha256": "c5af1181cbd2fbce9016277f1a53c0e7c598ab9fe9f0cbaceb02d2d4fc9ae855", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-02T23:30:32.084Z"
+   "bytes": 107786240,
+   "sha256": "71c759ba9f0740a5167e0be6de8e20e3e29181985192dc467eade84dfa4661d6", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-03T07:49:36.867Z"
   }
  },
  "quotes": {
   "arweave": {
    "state": "fresh size-based quote only; no transaction",
    "route": "surfaces/arweave.js::fee via https://arweave.net/price/{bytes}",
-   "queriedAt": "2026-10-02T23:30:51.531Z",
+   "queriedAt": "2026-10-03T07:50:54.719Z",
    "raw": [
     {
-     "bytes": 107806720,
-     "winston": "1350464003759"
+     "bytes": 107786240,
+     "winston": "1353564954399"
     }
    ],
    "computed": {
-    "fullArchiveAR": "1.350464003759",
+    "fullArchiveAR": "1.353564954399",
     "formula": "winston / 1e12"
    },
    "note": "public size-based fee estimate only; no wallet, signing or upload"
@@ -42,32 +42,33 @@
   "autonomi": {
    "state": "quoted; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-02T23:31:14.048Z",
+   "queriedAt": "2026-10-03T07:51:16.962Z",
    "raw": {
-    "file_size": 107806720,
+    "file_size": 107786240,
     "chunk_count": 29,
-    "storage_cost_atto": "2762555859375000000",
+    "storage_cost_atto": "3655445100585937500",
     "estimated_gas_cost_wei": "150000000000000",
     "payment_mode": "single",
     "confidence": "priced_sample"
    },
    "qualifications": [
     "keyless quote on a private byte-verified snapshot; no wallet access, payment, or upload",
-    "2.762555859375000000 ANT exceeds the standing 2.5 ANT storage ceiling",
+    "3.655445100585937500 ANT is within the temporary 100 ANT storage ceiling",
     "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
     "storage and gas are separate obligations"
    ],
    "computed": {
-    "storageANT": "2.762555859375000000",
+    "storageANT": "3.655445100585937500",
     "gasETH": "0.000150000000000000",
     "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
    "ceilings": {
-    "storageMaxANT": 2.5,
+    "storageMaxANT": 100,
     "gasMaxETH": 0.0002,
     "enforceableByClient": false,
-    "storageWithinCeiling": false,
-    "gasWithinCeiling": true
+    "storageWithinCeiling": true,
+    "gasWithinCeiling": true,
+    "policySource": "ETERNALIZATION-EDITION-V2.json::separatedCeilings; temporary 100 ANT policy recorded by merged PR #326; payment remains disabled"
    }
   }
  },
@@ -150,7 +151,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-02T23:31:14.048Z",
+ "generatedAt": "2026-10-03T07:51:16.962Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",

@@ -15,7 +15,7 @@ export function checkRuntimeDependencies(root, files, runtime) {
   for (const [from, refs] of Object.entries(runtime.dynamicDependencies)) {
     for (const ref of refs) if (!allowed.has(ref)) missing.add(from + " -> " + ref);
   }
-  for (const file of files.filter(f => /\.(?:html|mjs|js|css)$/.test(f) && !f.includes('/persons/'))) {
+  for (const file of files.filter(f => /\.(?:html|mjs|js|css)$/.test(f))) {
     const source = readFileSync(join(root, file), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[^]*?-->/g, '');
     if (/\.(?:html|mjs|js)$/.test(file)) {
       for (const m of source.matchAll(/(?:^|\n)\s*(?:import|export)\s+(?:[^;"']*?\bfrom\s*)?["']([^"']+)["']/g)) requireRef(file, m[1]);
