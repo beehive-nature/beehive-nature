@@ -458,6 +458,13 @@ jobs:
       - name: CI shape — every suite step carries if:always()
         if: always()
         run: node scripts/lint-ci-shape.mjs
+      # NO ENABLE-THEN-CLICK ACROSS TWO STEPS (2026-10-03): the wallet check
+      # went red on unrelated commits because a test enabled a control and
+      # clicked it in separate Playwright steps while the page re-disabled it
+      # between them. This fails the run if that shape returns in any e2e file.
+      - name: e2e shape — a control is enabled and clicked in one browser task
+        if: always()
+        run: node scripts/lint-e2e-enable-click.mjs
       # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
       # frozen art — CI fails on ANY edit to its committed blob. The hash is
       # taken from the committed blob, never the worktree copy. Tinkering

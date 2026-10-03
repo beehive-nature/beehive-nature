@@ -10,6 +10,7 @@ import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { pinRegister } from './wallet-register-pin.mjs';
+import { enableAndClick } from './lib/enable-click.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -180,8 +181,8 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; }); // panel state machine re-reads on click
-    await page.locator('#arw-go').click();
+    // panel state machine re-reads on click; enable and click in one browser task so the balance refresh cannot re-disable between them
+    await enableAndClick(page.locator('#arw-go'));
     await page.waitForFunction(() => document.getElementById('arw-stat').textContent.includes('expected verdict'), null, { timeout: 10000 })
       .catch(() => {});
     const after = await page.locator('#arw-stat').innerText();
@@ -281,8 +282,7 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; });
-    await page.locator('#arw-go').click();
+    await enableAndClick(page.locator('#arw-go')); // one browser task, as above
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';

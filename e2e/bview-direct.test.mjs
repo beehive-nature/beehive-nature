@@ -26,19 +26,31 @@ after(async () => { await browser.close(); await new Promise(r => server.close(r
 // Mock only the network reader. Exercise the vendored SDK MediaBridge and real
 // service worker with real VP9 frames, range seeks, cancellation and relay fallback.
 const mockSDK = `let client; export class AutonomiClient {
-  static async connect() { window.connections=(window.connections||0)+1; return client={closed:false, close(){this.closed=true}, async openFile(address,{signal}) {
+  static async connect() { window.connections=(window.connections||0)+1; if(window.hangDirect==='connect')return new Promise(()=>{}); return client={closed:false, close(){this.closed=true}, async openFile(address,{signal}) {
     if(window.rejectDirect) throw Error('network offline');
     const bytes=new Uint8Array(await (await fetch('/media.mp4',{signal})).arrayBuffer());
-    let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length){if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
+    let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length,{signal}={}){if(window.hangDirect==='read')return new Promise((resolve,reject)=>{const abort=()=>{window.cancelledRead=true;reject(new DOMException('Cancelled','AbortError'));};if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});});if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
   }} }
 }`;
-async function open(reject = false, slow = false) {
+async function open(reject = false, slow = false, hang = null, large = false) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(reject => { window.rejectDirect=reject; localStorage.setItem('blang','en'); localStorage.setItem('bregister','bee'); }, reject);
+  await ctx.addInitScript(hang => { window.hangDirect=hang; }, hang);
+  if(hang==='play')await ctx.addInitScript(()=>{
+    const play=HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play=function(){
+      const started=play.call(this);
+      if(!this.currentSrc.includes('__autonomi_stream'))return started;
+      started.then(()=>{this.playbackRate=0;this.dispatchEvent(new Event('waiting'));window.playStall=setInterval(()=>this.dispatchEvent(new Event('waiting')),1000);}).catch(()=>{});
+      return new Promise(()=>{});
+    };
+  });
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
   await ctx.route('**/vendor/ant-browser-sdk/0.1.0/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
-  await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(MEDIA.length)},body:MEDIA}); });
+  let relayBody=MEDIA;
+  if(large){const free=Buffer.alloc(49<<20);free.writeUInt32BE(free.length,0);free.write('free',4);relayBody=Buffer.concat([MEDIA,free]);}
+  await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(relayBody.length)},body:relayBody}); });
   await page.goto(ORIGIN+'/surfaces/bview.html');
   await page.selectOption('#playback-route','direct'); await page.fill('#addr',ADDRESS); await page.click('button[type=submit]');
   return {ctx,page,errors,relay};
@@ -81,6 +93,32 @@ test('direct setup rejection automatically uses the existing relay', async()=>{
     assert.equal(relay.length,1); assert.match(await page.locator('#playback-status').textContent(),/Using the relay/);
     assert.deepEqual(errors,[]);
   } finally {await ctx.close();}
+});
+for(const hang of ['connect','read'])test('one startup budget reaches relay even when direct '+hang+' never finishes',async()=>{
+  const at=Date.now(),{ctx,page,errors,relay}=await open(false,false,hang);
+  try{
+    await page.waitForFunction(()=>/s \/ 8 s/.test(document.querySelector('#playback-status').textContent));
+    await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0&&window.__bviewEngine().path==='stream',null,{timeout:12000});
+    assert.ok(Date.now()-at<14000,'setup and first-frame waits share one budget');
+    assert.equal(relay.length,1);assert.ok(await page.evaluate(()=>window.__bviewEngine().direct.fallback));
+    if(hang==='read')assert.equal(await page.evaluate(()=>window.cancelledRead),true);
+    assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('large-file relay startup records a first-frame receipt when early preview is skipped',async()=>{
+  const {ctx,page,errors,relay}=await open(true,false,null,true);
+  try{
+    await page.waitForFunction(()=>window.__bviewEngine().ttffMs!=null&&document.querySelector('#v').videoWidth>0,null,{timeout:30000});
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(e.path,'stream');assert.ok(e.size>(48<<20));assert.ok(e.ttffMs>0);assert.equal(relay.length,1);assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('a pending direct play promise cannot prevent the stall watcher from recovering',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,'play');
+  try{
+    await page.waitForFunction(()=>window.__bviewEngine().path==='stream',null,{timeout:15000});
+    assert.equal(relay.length,1);assert.match(await page.locator('#playback-status').textContent(),/Direct playback stalled/);assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
 });
 test('a direct decoder error falls back once and retains the playhead',async()=>{
   const {ctx,page,errors,relay}=await open(false,true);
