@@ -16,9 +16,10 @@
 //! By default, Anvil runs with Ethereum L1 default fees (1.0 Gwei = 1,000,000,000 wei).
 //! Because alloy-node-bindings (`alloy::node_bindings::Anvil`) spawns `Command::new("anvil")`
 //! without an argument injection hook, this wrapper provides the calibrated `--base-fee 100000000`.
-//! If the actual network base fee ever exceeds the configured MaxFeePerGas::LimitedAuto cap
-//! (800,000,000 wei = 0.8 Gwei), the harness pre-send check and driver-level policy refuse
-//! cleanly before broadcasting.
+//!
+//! On Windows the real anvil is placed in a kill-on-close job object, so it
+//! dies with this wrapper. Without that, the devnet killing the wrapper left
+//! the real anvil running.
 
 use std::process::Command;
 
@@ -37,18 +38,71 @@ fn main() {
     });
 
     let mut cmd = Command::new(&real_anvil);
-    // Arbitrum One L2 realistic base fee (0.1 Gwei = 100_000_000 wei)
-    cmd.arg("--base-fee").arg("100000000");
+    // 0.1 Gwei unless ANT_EXTSIG_ANVIL_BASE_FEE names another base fee in wei.
+    let base_fee = std::env::var("ANT_EXTSIG_ANVIL_BASE_FEE").unwrap_or_else(|_| "100000000".to_string());
+    if base_fee.is_empty() || !base_fee.bytes().all(|b| b.is_ascii_digit()) {
+        eprintln!("anvil wrapper: ANT_EXTSIG_ANVIL_BASE_FEE must be a whole number of wei, got '{base_fee}'");
+        std::process::exit(1);
+    }
+    cmd.arg("--base-fee").arg(&base_fee);
     for arg in std::env::args().skip(1) {
         cmd.arg(arg);
     }
 
-    let status = match cmd.status() {
-        Ok(s) => s,
+    let mut child = match cmd.spawn() {
+        Ok(c) => c,
         Err(e) => {
             eprintln!("anvil wrapper: failed to execute real anvil binary at '{real_anvil}': {e}");
             std::process::exit(1);
         }
     };
+    #[cfg(windows)]
+    if let Err(e) = tie_to_this_process(&child) {
+        eprintln!("anvil wrapper: could not tie anvil to the wrapper's lifetime ({e}); stopping it");
+        let _ = child.kill();
+        std::process::exit(1);
+    }
+    let status = match child.wait() {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("anvil wrapper: waiting on anvil failed: {e}");
+            std::process::exit(1);
+        }
+    };
     std::process::exit(status.code().unwrap_or(1));
+}
+
+/// Put the child in a job object whose only handle is held by this process.
+/// When this process ends, however it ends, the handle closes and Windows
+/// terminates the child.
+#[cfg(windows)]
+fn tie_to_this_process(child: &std::process::Child) -> std::io::Result<()> {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::System::JobObjects::{
+        AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+        SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION, JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+    };
+    // SAFETY: plain Win32 calls with valid arguments; the job handle is
+    // deliberately never closed so it lives exactly as long as this process.
+    unsafe {
+        let job = CreateJobObjectW(std::ptr::null(), std::ptr::null());
+        if job.is_null() {
+            return Err(std::io::Error::last_os_error());
+        }
+        let mut info: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = std::mem::zeroed();
+        info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if SetInformationJobObject(
+            job,
+            JobObjectExtendedLimitInformation,
+            std::ptr::addr_of!(info).cast(),
+            std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+        ) == 0
+        {
+            return Err(std::io::Error::last_os_error());
+        }
+        if AssignProcessToJobObject(job, child.as_raw_handle().cast()) == 0 {
+            return Err(std::io::Error::last_os_error());
+        }
+    }
+    Ok(())
 }

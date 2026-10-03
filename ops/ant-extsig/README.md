@@ -52,3 +52,20 @@ ant-node 0.18.1 processes — not test doubles)
   PayForQuotesError needs a manual map (no std Error impl).
 - antd arm64 vs amd64: the box is aarch64; the amd64 binary dies "Exec
   format error" only at exec (file(1) tells you late).
+
+## Options (0.3.x)
+
+The sections above record the 2026-09-04 lane. Current behaviour is described
+in the header of `src/main.rs` and in `docs/dispatches/2026-10-03-ant-extsig-*`.
+
+- `--gate <path>` or `ANT_EXTSIG_GATE`: the gate file. Default: the
+  repository root this crate was built in.
+- `--nodes N`: devnet size (default 8; the merkle arm needs 17 or more).
+- `--mode auto|merkle|single`: payment mode asked of the network.
+- `--fixture-bytes N`: upload N deterministic bytes instead of a file.
+- `--devnet-fixture`: treat a named file as a fixture (skips the gate's
+  artifact stop conditions; ceilings still apply).
+- `ANT_EXTSIG_LEDGER`: an explicit gas ledger file. Default: a file derived
+  from the plan under `ANT_EXTSIG_STATE_DIR` or the local application data
+  directory.
+- `ANT_EXTSIG_ANVIL_BASE_FEE`: devnet base fee in wei (default 100000000).

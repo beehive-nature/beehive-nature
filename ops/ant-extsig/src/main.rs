@@ -24,15 +24,19 @@
 //! - Exact token approval: the vault is approved for exactly the quoted sum,
 //!   never an unlimited amount.
 //! - Gas ceiling (`budget.rs`): `separatedCeilings.gasMaxEth` is an aggregate
-//!   over the whole upload and every attempt at it. Before every signature the
-//!   transaction's worst case is reserved in a persistent ledger; a failed or
-//!   unknown-outcome send keeps its reservation; only a mined receipt lowers
-//!   it. The per-gas fee cap for each send is derived from what remains.
-//!   evmlib re-estimates gas when it sends, so the checked limit is not a
-//!   bound on the signed limit; the fee cap is what the signer enforces.
-//! - Stop conditions: when the file is the gate's artifact (or
-//!   `--enforce-gate-artifact` is given), tar sha256, chunk count and client
-//!   version must all match the gate before the first signature.
+//!   over the whole upload and every attempt at it. Before every send call the
+//!   worst case of every transaction evmlib may sign inside it (four: one send
+//!   and three retries) is reserved in a persistent ledger; a failed or
+//!   unknown-outcome send keeps its reservation; only the payer's own on-chain
+//!   balance change lowers it. The per-gas fee cap for each send is derived
+//!   from what remains. evmlib re-estimates gas when it sends, so the checked
+//!   limit is not a bound on the signed limit; the fee cap is what the signer
+//!   enforces, and the balance change records whatever was actually spent.
+//! - The ledger file is found from the plan itself, so a rerun meets the
+//!   earlier attempts without being told where they are.
+//! - Stop conditions: tar sha256, chunk count and client version must all
+//!   match the gate before the first signature. They are skipped only for the
+//!   harness's own generated fixtures, or a file passed with `--devnet-fixture`.
 //!
 //! ARBITRUM NITRO PRECOMPILE CITATION & DEVNET CALIBRATION:
 //! Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
@@ -62,7 +66,7 @@ use sha2::{Digest, Sha256};
 
 mod budget;
 mod gate;
-use budget::{gas_limit_with_buffer, payment_floor_limit, plan_fee_cap, GasLedger};
+use budget::{default_ledger_path, gas_limit_with_buffer, payment_floor_limit, plan_fee_cap, GasLedger, SEND_ATTEMPTS};
 use gate::Gate;
 
 type Res<T> = Result<T, Box<dyn std::error::Error>>;
@@ -99,27 +103,94 @@ async fn network_fee<P: Provider>(provider: &P, stage: &str) -> Res<u128> {
     Ok(fees.max_fee_per_gas)
 }
 
+/// What the payer holds in ETH, in wei.
+async fn eth_balance<P: Provider>(provider: &P, payer: alloy::primitives::Address, stage: &str) -> Res<u128> {
+    let balance = provider
+        .get_balance(payer)
+        .await
+        .map_err(|e| format!("REFUSE: cannot read the payer's balance for {stage}; nothing signed: {e}"))?;
+    u128::try_from(balance).map_err(|_| format!("REFUSE: payer balance does not fit 128 bits at {stage}").into())
+}
+
+/// What the chain says the payer spent since `balance_before`, or `None` when
+/// that cannot be read as final: a transaction of the payer's is still
+/// pending, or a read failed. The payment token is an ERC-20, so on this
+/// account ETH leaves only as gas; the difference covers every transaction
+/// that mined, including retries evmlib sent inside one call.
+async fn eth_spent_since<P: Provider>(provider: &P, payer: alloy::primitives::Address, balance_before: u128) -> Option<u128> {
+    let mined = provider.get_transaction_count(payer).await.ok()?;
+    let pending = provider.get_transaction_count(payer).pending().await.ok()?;
+    if mined != pending {
+        return None;
+    }
+    let after = u128::try_from(provider.get_balance(payer).await.ok()?).ok()?;
+    Some(balance_before.saturating_sub(after))
+}
+
 /// Fee headroom over the network estimate, as a fraction: 2/1 allows the fee
 /// to double between the check and the send, within the remaining budget.
 const FEE_HEADROOM: (u128, u128) = (2, 1);
+
+/// Deterministic incompressible bytes for a devnet fixture of any size
+/// (xorshift64; the same size always gives the same file).
+fn fixture_content(len: usize) -> Vec<u8> {
+    let mut state: u64 = 0x9E37_79B9_7F4A_7C15 ^ len as u64;
+    let mut out = Vec::with_capacity(len + 8);
+    while out.len() < len {
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        out.extend_from_slice(&state.to_le_bytes());
+    }
+    out.truncate(len);
+    out
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut gate_arg: Option<String> = None;
     let mut file_arg: Option<std::path::PathBuf> = None;
     let mut enforce_gate_artifact = false;
+    let mut devnet_fixture = false;
+    let mut node_count: usize = 8;
+    let mut payment_mode = PaymentMode::Auto;
+    let mut fixture_bytes: Option<usize> = None;
     let mut args = std::env::args().skip(1);
     while let Some(a) = args.next() {
         match a.as_str() {
             "--gate" => gate_arg = Some(args.next().ok_or("--gate needs a path")?),
             "--enforce-gate-artifact" => enforce_gate_artifact = true,
+            "--devnet-fixture" => devnet_fixture = true,
+            "--nodes" => node_count = args.next().ok_or("--nodes needs a count")?.parse()?,
+            "--mode" => {
+                payment_mode = match args.next().ok_or("--mode needs auto, merkle or single")?.as_str() {
+                    "auto" => PaymentMode::Auto,
+                    "merkle" => PaymentMode::Merkle,
+                    "single" => PaymentMode::Single,
+                    other => return Err(format!("unknown --mode '{other}'").into()),
+                }
+            }
+            "--fixture-bytes" => fixture_bytes = Some(args.next().ok_or("--fixture-bytes needs a size")?.parse()?),
             _ if file_arg.is_none() && !a.starts_with("--") => file_arg = Some(std::path::PathBuf::from(a)),
             other => return Err(format!("unexpected argument '{other}'").into()),
         }
     }
-    let file_path = file_arg.unwrap_or_else(|| std::env::temp_dir().join("a1-genesis.json"));
+    if fixture_bytes.is_some() && file_arg.is_some() {
+        return Err("--fixture-bytes and a file path are mutually exclusive".into());
+    }
+    let file_path = match fixture_bytes {
+        Some(n) => {
+            let p = std::env::temp_dir().join(format!("ant-extsig-fixture-{n}.bin"));
+            std::fs::write(&p, fixture_content(n))?;
+            p
+        }
+        None => file_arg.clone().unwrap_or_else(|| std::env::temp_dir().join("a1-genesis.json")),
+    };
+    // A file the caller names is treated as the real thing unless it is
+    // declared a fixture. Only the harness's own fixtures skip the stop conditions.
+    let is_fixture = devnet_fixture || file_arg.is_none();
 
-    if !file_path.exists() {
+    if file_arg.is_none() && fixture_bytes.is_none() && !file_path.exists() {
         let fixture = br#"{"protocol":"ant-extsig","version":"0.2.1","event":"genesis","timestamp":"2026-09-04T05:10:17Z","estate":"beehive-nature","payload":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}"#; // PUBLIC-CONSTANT fixture payload
         std::fs::write(&file_path, fixture)?;
     }
@@ -137,9 +208,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let is_gate_artifact = gate.is_gate_artifact(&file_sha256);
 
     // -- [1/6] the swarm: real ant-nodes + embedded Anvil (member-paid EVM) --
-    println!("[1/6] starting 8-node LocalDevnet + Anvil...");
+    println!("[1/6] starting {node_count}-node LocalDevnet + Anvil...");
     let devnet = LocalDevnet::start(DevnetConfig {
-        node_count: 8,
+        node_count,
         ..DevnetConfig::default()
     })
     .await?;
@@ -168,9 +239,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::connect(&bootstrap, cfg.clone()).await?;
 
     // -- [3/6] PREPARE the upload (PaymentMode::Auto) ------------------------
-    println!("[3/6] preparing the a1-genesis upload...");
+    println!(
+        "[3/6] preparing the upload of {} ({} bytes, mode {payment_mode:?})...",
+        file_path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default(),
+        std::fs::metadata(&file_path)?.len()
+    );
     let prepared = client
-        .file_prepare_upload_with_mode(&file_path, Visibility::Public, PaymentMode::Auto, None)
+        .file_prepare_upload_with_mode(&file_path, Visibility::Public, payment_mode, None)
         .await?;
     let data_map_address = prepared
         .data_map_address
@@ -181,8 +256,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         prepared.total_chunks
     );
 
+    let total_chunks = prepared.total_chunks;
     // Gate stop conditions about the artifact and the client, before any signature.
-    if is_gate_artifact || enforce_gate_artifact {
+    if is_gate_artifact || enforce_gate_artifact || !is_fixture {
         let tripped = gate.tripped_stop_conditions(&file_sha256, prepared.total_chunks as u64, gate::CLIENT_VERSION);
         if !tripped.is_empty() {
             return Err(format!(
@@ -193,7 +269,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         println!("      gate stop conditions: tar sha256, chunk count and client version all match the gate");
     } else {
-        println!("      gate stop conditions: not applied, this file is not the gate artifact (devnet fixture); ceilings still apply");
+        println!("      gate stop conditions: not applied to a devnet fixture; ceilings still apply");
     }
 
     // Verify storage quote sum against the storage ceiling before payment
@@ -232,13 +308,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut paid_atto: u128 = 0;
     let provider = signer.to_provider();
     let vault_address = *evm_network.payment_vault_address();
+    let payer = signer.address();
 
-    // The plan-wide gas ledger. Persistent when ANT_EXTSIG_LEDGER names a file;
-    // on devnet each run is a fresh chain, so the default is a per-run file.
-    let ledger_path = std::env::var("ANT_EXTSIG_LEDGER")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::env::temp_dir().join(format!("ant-extsig-gas-ledger-{}.json", std::process::id())));
-    let plan_id = format!("devnet:{}:{addr_hex}", signer.address());
+    // The plan-wide gas ledger. Its file is derived from the plan unless
+    // ANT_EXTSIG_LEDGER names one, so a rerun of a plan meets its history.
+    let plan_id = format!("devnet:{payer}:{addr_hex}");
+    let ledger_path = match std::env::var("ANT_EXTSIG_LEDGER") {
+        Ok(p) => std::path::PathBuf::from(p),
+        Err(_) => {
+            let state_dir = std::env::var("ANT_EXTSIG_STATE_DIR")
+                .or_else(|_| std::env::var("LOCALAPPDATA"))
+                .or_else(|_| std::env::var("XDG_STATE_HOME"))
+                .or_else(|_| std::env::var("HOME").map(|h| format!("{h}/.local/state")))
+                .map_err(|_| "REFUSE: no place for the gas ledger: set ANT_EXTSIG_LEDGER or ANT_EXTSIG_STATE_DIR")?;
+            default_ledger_path(std::path::Path::new(&state_dir), &plan_id)
+        }
+    };
     let mut ledger = GasLedger::open(&ledger_path, &plan_id, max_gas_ceiling_wei)?;
     println!(
         "      gas ledger {}: ceiling {} wei, carried exposure {} wei from {} earlier entr(ies)",
@@ -257,17 +342,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let (approve_calldata, token_contract_addr) =
             evmlib::external_signer::approve_to_spend_tokens_calldata(&evm_network, vault_address, approve_amount);
         let approve_tx = TransactionRequest::default()
-            .with_from(signer.address())
+            .with_from(payer)
             .with_to(token_contract_addr)
             .with_input(approve_calldata);
 
         println!("      current vault allowance {current_allowance} < required {required_tokens}; approving EXACT amount...");
         let limit = estimate_limit(&provider, approve_tx, "token_approval").await?;
+        let reserve_limit = limit.saturating_mul(SEND_ATTEMPTS);
         let fee = network_fee(&provider, "token_approval").await?;
-        let cap = plan_fee_cap(ledger.remaining_wei(), limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, "token_approval")?;
+        let cap = plan_fee_cap(ledger.remaining_wei(), reserve_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, "token_approval")?;
         println!(
-            "      plan [token_approval]: gas_limit={limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
-            limit.saturating_mul(cap),
+            "      plan [token_approval]: gas_limit={limit} x {SEND_ATTEMPTS} attempts network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+            reserve_limit.saturating_mul(cap),
             ledger.remaining_wei()
         );
         // Do not sign an approval for a payment that clearly cannot fit afterwards.
@@ -276,39 +362,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ExternalPaymentInfo::Merkle { prepared_batches, .. } => prepared_batches.len() as u128,
         };
         let floor_limit = payment_floor_limit(limit, transfers);
-        let floor_wei = limit.saturating_add(floor_limit).saturating_mul(fee);
+        // The payment will be reserved for every attempt, so the floor is too.
+        let floor_wei = limit.saturating_add(floor_limit).saturating_mul(SEND_ATTEMPTS).saturating_mul(fee);
         println!(
-            "      floor [approval + payment lower bound]: ({limit} + {floor_limit}) gas x {fee} wei = {floor_wei} wei (remaining {} wei)",
+            "      floor [approval + payment lower bound]: ({limit} + {floor_limit}) gas x {SEND_ATTEMPTS} attempts x {fee} wei = {floor_wei} wei (remaining {} wei)",
             ledger.remaining_wei()
         );
         ledger.check_projection(floor_wei, "the approval plus a lower bound for the payment")?;
 
         signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
-        let entry = ledger.reserve("token_approval", limit, cap)?;
+        let balance_before = eth_balance(&provider, payer, "token_approval").await?;
+        let entry = ledger.reserve("token_approval", reserve_limit, cap)?;
 
         // From here a failure leaves the reservation in the ledger.
         let approve_tx_hash = signer.approve_to_spend_tokens(vault_address, approve_amount).await?;
         println!("      exact approval tx submitted: {approve_tx_hash}");
-        match provider.get_transaction_receipt(approve_tx_hash).await? {
-            Some(rcpt) => {
-                let cost = (rcpt.gas_used as u128).saturating_mul(rcpt.effective_gas_price);
+        match eth_spent_since(&provider, payer, balance_before).await {
+            Some(cost) => {
                 ledger.settle(entry, cost)?;
                 println!(
-                    "      approval mined: gas_used={}, cost={cost} wei (ledger exposure {} wei, remaining {} wei)",
-                    rcpt.gas_used,
+                    "      approval settled from the payer's balance: spent {cost} wei (ledger exposure {} wei, remaining {} wei)",
                     ledger.exposure_wei(),
                     ledger.remaining_wei()
                 );
             }
-            None => println!("      approval receipt not available; its full reservation stays in the ledger"),
+            None => println!("      approval spend not final on chain; its full reservation stays in the ledger"),
         }
     } else {
         println!("      current vault allowance {current_allowance} >= required {required_tokens}; approval not needed");
     }
 
+    // evmlib's pay calls approve an unlimited amount themselves when the
+    // allowance is short (`evmlib` v0.10.0 `wallet.rs`). Never reach them short.
+    let allowance_now = signer.token_allowance(vault_address).await?;
+    if allowance_now < required_tokens {
+        return Err(format!(
+            "REFUSE: vault allowance {allowance_now} is below the required {required_tokens} after the approval step; not paying"
+        )
+        .into());
+    }
+
     // 4b. Payment. The approval is mined, so the payment can be simulated.
-    //     Every batch is estimated and the whole payment must fit in what
-    //     remains before the first payment signature.
+    //     Every batch is estimated and the whole payment, with every attempt
+    //     evmlib may make, must fit in what remains before the first payment
+    //     signature.
     enum Paid { Wave(std::collections::HashMap<ant_protocol::evm::QuoteHash, ant_protocol::evm::TxHash>), Merkle(Vec<[u8; 32]>) }
     let paid = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
@@ -319,33 +416,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut total_limit: u128 = 0;
             for (i, (calldata, _)) in calldata_info.batched_calldata_map.iter().enumerate() {
                 let tx = TransactionRequest::default()
-                    .with_from(signer.address())
+                    .with_from(payer)
                     .with_to(calldata_info.to)
                     .with_input(calldata.clone());
                 total_limit = total_limit.saturating_add(estimate_limit(&provider, tx, &format!("wave_batch_{i}")).await?);
             }
             let batches = calldata_info.batched_calldata_map.len();
             let stage = format!("wave_payment({batches} tx)");
+            let reserve_limit = total_limit.saturating_mul(SEND_ATTEMPTS);
             let fee = network_fee(&provider, &stage).await?;
-            let cap = plan_fee_cap(ledger.remaining_wei(), total_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage)?;
+            let cap = plan_fee_cap(ledger.remaining_wei(), reserve_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage)?;
             println!(
-                "      plan [{stage}]: gas_limit={total_limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
-                total_limit.saturating_mul(cap),
+                "      plan [{stage}]: gas_limit={total_limit} x {SEND_ATTEMPTS} attempts network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+                reserve_limit.saturating_mul(cap),
                 ledger.remaining_wei()
             );
-            ledger.check_projection(total_limit.saturating_mul(cap), &stage)?;
+            ledger.check_projection(reserve_limit.saturating_mul(cap), &stage)?;
             signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
-            let entry = ledger.reserve(&stage, total_limit, cap)?;
+            let balance_before = eth_balance(&provider, payer, &stage).await?;
+            let entry = ledger.reserve(&stage, reserve_limit, cap)?;
 
             let (map, gas) = signer.pay_for_quotes(payments.into_iter()).await.map_err(|e| format!("member pay_for_quotes: {e:?}"))?;
-            ledger.settle(entry, gas.gas_cost_wei)?;
+            let settled = eth_spent_since(&provider, payer, balance_before).await;
+            if let Some(cost) = settled {
+                ledger.settle(entry, cost)?;
+            }
             println!(
-                "      paid {} quote payments: gas_limit_set={} max_fee_set={:?} gas_used={} cost={} wei (ledger exposure {} wei)",
+                "      paid {} quote payments: gas_limit_set={} max_fee_set={:?} gas_used={} receipt_cost={} wei balance_spent={} (ledger exposure {} wei)",
                 map.len(),
                 gas.gas_with_buffer,
                 gas.max_fee_per_gas,
                 gas.actual_gas_used,
                 gas.gas_cost_wei,
+                settled.map_or("not final, reservation kept".to_string(), |c| format!("{c} wei")),
                 ledger.exposure_wei()
             );
             Paid::Wave(map.into_iter().collect())
@@ -362,37 +465,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     b.merkle_payment_timestamp,
                 )?;
                 let tx = TransactionRequest::default()
-                    .with_from(signer.address())
+                    .with_from(payer)
                     .with_to(calldata_info.to)
                     .with_input(calldata_info.calldata);
                 limits.push(estimate_limit(&provider, tx, &format!("merkle_batch_{i}")).await?);
             }
             let total_limit = limits.iter().fold(0u128, |a, l| a.saturating_add(*l));
+            let reserve_limit = total_limit.saturating_mul(SEND_ATTEMPTS);
             let stage_all = format!("merkle_payment({} tx)", limits.len());
             let fee = network_fee(&provider, &stage_all).await?;
-            let cap = plan_fee_cap(ledger.remaining_wei(), total_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage_all)?;
+            let cap = plan_fee_cap(ledger.remaining_wei(), reserve_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage_all)?;
             println!(
-                "      plan [{stage_all}]: gas_limit={total_limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
-                total_limit.saturating_mul(cap),
+                "      plan [{stage_all}]: gas_limit={total_limit} x {SEND_ATTEMPTS} attempts network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+                reserve_limit.saturating_mul(cap),
                 ledger.remaining_wei()
             );
-            ledger.check_projection(total_limit.saturating_mul(cap), &stage_all)?;
+            ledger.check_projection(reserve_limit.saturating_mul(cap), &stage_all)?;
             signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
 
             let mut winners = Vec::new();
             for (i, b) in prepared_batches.iter().enumerate() {
                 let stage = format!("merkle_batch_{i}");
-                let entry = ledger.reserve(&stage, limits[i], cap)?;
+                let balance_before = eth_balance(&provider, payer, &stage).await?;
+                let entry = ledger.reserve(&stage, limits[i].saturating_mul(SEND_ATTEMPTS), cap)?;
                 let (winner, amount, gas) = signer
                     .pay_for_merkle_tree(b.depth, b.pool_commitments.clone(), b.merkle_payment_timestamp)
                     .await?;
-                ledger.settle(entry, gas.gas_cost_wei)?;
+                let settled = eth_spent_since(&provider, payer, balance_before).await;
+                if let Some(cost) = settled {
+                    ledger.settle(entry, cost)?;
+                }
                 println!(
-                    "      batch {i}: depth={}, paid {amount} atto, winner {}, gas_used={} cost={} wei (ledger exposure {} wei)",
+                    "      batch {i}: depth={}, paid {amount} atto, winner {}, gas_used={} receipt_cost={} wei balance_spent={} (ledger exposure {} wei)",
                     b.depth,
                     hex::encode(winner),
                     gas.actual_gas_used,
                     gas.gas_cost_wei,
+                    settled.map_or("not final, reservation kept".to_string(), |c| format!("{c} wei")),
                     ledger.exposure_wei()
                 );
                 paid_atto = paid_atto.saturating_add(amount.to_string().parse::<u128>().unwrap_or(u128::MAX));
@@ -402,8 +511,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // The ledger is the aggregate. A breach here means a mined cost exceeded
-    // its reservation; it is reported, never hidden.
+    // The ledger is the aggregate. A breach here means the payer's balance
+    // fell by more than was reserved; it is reported, never hidden.
     let total_gas_wei = ledger.exposure_wei();
     if total_gas_wei > max_gas_ceiling_wei {
         return Err(format!(
@@ -435,7 +544,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // -- [6/6] round-trip: download what the member paid to store -----------
     let data_map = fresh_client.data_map_fetch(&data_map_address).await?;
-    let out = std::env::temp_dir().join("ant-extsig-roundtrip.json");
+    let out = std::env::temp_dir().join(format!("ant-extsig-roundtrip-{}.bin", std::process::id()));
     let written = fresh_client.file_download(&data_map, &out).await?;
     let orig = std::fs::read(&file_path)?;
     let got = std::fs::read(&out)?;
@@ -469,6 +578,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "interrupt": "client destroyed after payment; fresh client finalized",
             "resumed_without_new_quote": true,
             "roundtrip_byte_identical": true,
+            "node_count": node_count,
+            "payment_mode_requested": format!("{payment_mode:?}"),
+            "total_chunks": total_chunks,
             "estate_client_held_wallet": false,
             "upload_result_debug": format!("{result:?}").chars().take(120).collect::<String>(),
         }))?
@@ -498,6 +610,13 @@ mod tests {
     #[test]
     fn an_unparseable_amount_fails_closed() {
         assert!(verify_storage_ceiling(u128::MAX, CEILING_ATTO, "overflow").is_err());
+    }
+
+    #[test]
+    fn fixture_is_deterministic_and_exactly_sized() {
+        assert_eq!(fixture_content(1_000_003).len(), 1_000_003);
+        assert_eq!(fixture_content(4096), fixture_content(4096));
+        assert_ne!(fixture_content(4096), fixture_content(4097)[..4096].to_vec());
     }
 
     #[test]

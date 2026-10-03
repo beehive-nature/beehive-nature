@@ -3,6 +3,12 @@
 Seat: Claude (Seat 3). Date: 2026-10-03. Branch `claude-LoVis/ant-extsig-client`,
 built on `lane/ant-extsig-dual-ceiling` (PR #324) and carrying its commits.
 
+> Corrected 2026-10-03 by `2026-10-03-ant-extsig-review-fixes-and-large-file.md`.
+> At this head a rerun met its earlier exposure only when `ANT_EXTSIG_LEDGER`
+> was set (runs C1 and C2), and evmlib's internal retries were not counted. A
+> sentence here that said otherwise is deleted. The C1 and C2 blocks are
+> excerpts of their runs, not the full output.
+
 ## What was built
 
 - `ops/ant-extsig/src/gate.rs` — reads `ETERNALIZATION-EDITION-V2.json`. The
@@ -14,8 +20,7 @@ built on `lane/ant-extsig-dual-ceiling` (PR #324) and carrying its commits.
 - `ops/ant-extsig/src/budget.rs` — the plan-wide gas ledger. Before every
   signature the transaction's worst case (`gas_limit × fee_cap`) is reserved
   and written to disk. Only a mined receipt lowers a reservation. A failed or
-  unknown-outcome send keeps it. A rerun of the same plan opens the same
-  ledger and sees the earlier exposure. The fee cap for each send is derived
+  unknown-outcome send keeps it. The fee cap for each send is derived
   from what remains, so a large transaction passes on a cheap chain and
   refuses on an expensive one.
 - `ops/ant-extsig/src/main.rs` — wired to both. The fixed `ceiling / 300_000`

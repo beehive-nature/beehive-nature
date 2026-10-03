@@ -12,15 +12,38 @@
 //!   fit, nothing is signed.
 //! - The reservation is written to disk before the signature, so a crash or a
 //!   rerun still sees it.
-//! - A reservation is only ever lowered by a validated receipt for that
-//!   transaction. A failed, dropped or unknown-outcome send keeps its full
+//! - One reservation covers every transaction evmlib may send for one call:
+//!   `SEND_ATTEMPTS` worst cases, because evmlib retries inside the call.
+//! - A reservation is only ever lowered by what the chain itself reports the
+//!   payer spent (its ETH balance before and after, with no transaction still
+//!   pending). A failed, dropped or unknown-outcome send keeps its full
 //!   reservation. Exposure is never freed because a call returned an error.
+//! - The ledger file for a plan is at a path derived from the plan, so a rerun
+//!   finds it without being told. A ledger file is local state: deleting it,
+//!   or naming a different one with `ANT_EXTSIG_LEDGER`, discards the history.
 //! - The fee cap for a send is derived from what remains, so a large
 //!   transaction passes when the chain is cheap and refuses when it is not.
 
 use std::path::{Path, PathBuf};
 
 type Res<T> = Result<T, Box<dyn std::error::Error>>;
+
+/// How many transactions one evmlib send call can put on chain. evmlib retries
+/// a failed send or confirmation up to `MAX_RETRIES = 3` times
+/// (`evmlib` v0.10.0 `retry.rs:9`, loop at `:107-170`), and a retry after a
+/// broadcast timeout goes out with a fresh nonce (`:234-238`), so an earlier
+/// attempt can still be mined beside it. Every reservation covers all four.
+pub const SEND_ATTEMPTS: u128 = 4;
+
+/// The ledger file for a plan when `ANT_EXTSIG_LEDGER` does not name one.
+/// The same plan always maps to the same file, so every attempt at a plan
+/// meets the earlier attempts. `state_dir` is `ANT_EXTSIG_STATE_DIR`, or the
+/// user's local application data directory; with neither, the caller refuses.
+pub fn default_ledger_path(state_dir: &Path, plan_id: &str) -> PathBuf {
+    use sha2::{Digest, Sha256};
+    let digest = hex::encode(Sha256::digest(plan_id.as_bytes()));
+    state_dir.join("ant-extsig").join("ledgers").join(format!("gas-ledger-{}.json", &digest[..16]))
+}
 
 /// evmlib sets the gas limit to the estimate plus 20 percent
 /// (`evmlib` v0.10.0 `retry.rs:219`). The ledger reserves against that.
@@ -74,7 +97,7 @@ pub fn payment_floor_limit(approval_gas_limit: u128, transfers: u128) -> u128 {
 pub struct Entry {
     pub stage: String,
     pub reserved_wei: u128,
-    /// Set only from a validated receipt for this transaction.
+    /// Set only from the payer's on-chain balance change for this call.
     pub settled_wei: Option<u128>,
 }
 
@@ -191,8 +214,8 @@ impl GasLedger {
         Ok(self.entries.len() - 1)
     }
 
-    /// Record the validated actual cost of a mined transaction. This is the
-    /// only way a reservation shrinks. A cost above the reservation is
+    /// Record what the chain reports the payer spent on this call. This is
+    /// the only way a reservation shrinks. A cost above the reservation is
     /// recorded as it is, so a breach is visible rather than hidden.
     pub fn settle(&mut self, index: usize, actual_wei: u128) -> Res<()> {
         let entry = self
@@ -222,8 +245,16 @@ impl GasLedger {
             "exposure_wei": self.exposure_wei().to_string(),
             "entries": entries,
         }))?;
+        use std::io::Write;
+        if let Some(dir) = self.path.parent() {
+            std::fs::create_dir_all(dir)
+                .map_err(|e| format!("REFUSE: cannot create gas ledger directory {}: {e}", dir.display()))?;
+        }
         let tmp = self.path.with_extension("tmp");
-        std::fs::write(&tmp, body)
+        // Flushed to the device before the rename, so the reservation is on
+        // disk before the signature that follows it.
+        std::fs::File::create(&tmp)
+            .and_then(|mut f| f.write_all(body.as_bytes()).and_then(|()| f.sync_all()))
             .map_err(|e| format!("REFUSE: cannot write gas ledger {}: {e}", tmp.display()))?;
         std::fs::rename(&tmp, &self.path)
             .map_err(|e| format!("REFUSE: cannot commit gas ledger {}: {e}", self.path.display()))?;
@@ -338,6 +369,30 @@ mod tests {
         // A corrupt ledger refuses rather than starting from zero.
         std::fs::write(&path, "{ not json").unwrap();
         assert!(GasLedger::open(&path, "plan-c", CEILING).is_err());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn the_default_ledger_path_is_the_same_for_every_run_of_a_plan() {
+        let dir = Path::new("state");
+        let a = default_ledger_path(dir, "devnet:0xabc:plan-1");
+        assert_eq!(a, default_ledger_path(dir, "devnet:0xabc:plan-1"));
+        assert_ne!(a, default_ledger_path(dir, "devnet:0xabc:plan-2"));
+        assert!(a.starts_with("state"));
+        // Nothing about the process or the clock is in the name.
+        assert!(!a.to_string_lossy().contains(&std::process::id().to_string()) || std::process::id() < 10);
+    }
+
+    #[test]
+    fn one_reservation_covers_every_attempt_evmlib_can_send() {
+        let path = temp_ledger("attempts");
+        let mut l = GasLedger::open(&path, "plan-h", CEILING).unwrap();
+        // The cap is planned against all four attempts, and the reservation holds them.
+        let cap = plan_fee_cap(l.remaining_wei(), 226_213 * SEND_ATTEMPTS, 157_379_521, 2, 1, "t").unwrap();
+        assert!(cap >= 157_379_521);
+        l.reserve("payment", 226_213 * SEND_ATTEMPTS, cap).unwrap();
+        assert_eq!(l.exposure_wei(), 4 * 226_213 * cap);
+        assert!(l.exposure_wei() <= CEILING);
         let _ = std::fs::remove_file(&path);
     }
 

@@ -17,6 +17,9 @@ hex = "0.4"
 sha2 = "0.10"
 alloy = { version = "1.0.32", features = ["rpc-types", "provider-http"] }
 
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_System_JobObjects", "Win32_System_Threading"] }
+
 [profile.dev]
 debug = 0
 

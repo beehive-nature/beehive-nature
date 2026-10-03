@@ -54,15 +54,48 @@ pub fn resolve_gate_path(explicit: Option<&str>, env_value: Option<&str>) -> Res
     Ok(path)
 }
 
-/// Parse a JSON number or string holding a non-negative decimal into an
-/// 18-decimal fixed-point integer. No floating point. More than 18 fractional
-/// digits is an error rather than a silent truncation.
+/// Parse a JSON integer or string holding a non-negative decimal into an
+/// 18-decimal fixed-point integer. A non-integer JSON number is refused here:
+/// `serde_json` has already rounded it through `f64`. `Gate::parse` reads such
+/// a number from the gate's own text with `raw_number_literal` instead.
 pub fn decimal_to_atto(val: &serde_json::Value, what: &str) -> Res<u128> {
-    let s = match val {
-        serde_json::Value::Number(n) => n.to_string(),
-        serde_json::Value::String(s) => s.trim().to_string(),
-        other => return Err(format!("REFUSE: gate {what} is not a number or string: {other}").into()),
-    };
+    match val {
+        serde_json::Value::Number(n) => match n.as_u64() {
+            Some(u) => decimal_str_to_atto(&u.to_string(), what),
+            None => Err(format!("REFUSE: gate {what} is a non-integer JSON number; it must be read from the gate text, not through a float").into()),
+        },
+        serde_json::Value::String(s) => decimal_str_to_atto(s.trim(), what),
+        other => Err(format!("REFUSE: gate {what} is not a number or string: {other}").into()),
+    }
+}
+
+/// The literal text of the JSON number stored under `key`, taken from the
+/// file's own characters. The key must occur exactly once as a key.
+pub fn raw_number_literal(content: &str, key: &str) -> Res<String> {
+    let needle = format!("\"{key}\"");
+    let mut found: Vec<&str> = Vec::new();
+    let mut from = 0;
+    while let Some(i) = content[from..].find(&needle) {
+        let after = &content[from + i + needle.len()..];
+        if let Some(value) = after.trim_start().strip_prefix(':') {
+            found.push(value.trim_start());
+        }
+        from += i + needle.len();
+    }
+    if found.len() != 1 {
+        return Err(format!("REFUSE: gate key {key} occurs {} times as a key; exactly one is required", found.len()).into());
+    }
+    let end = found[0]
+        .find(|c: char| c == ',' || c == '}' || c == ']' || c.is_whitespace())
+        .unwrap_or(found[0].len());
+    Ok(found[0][..end].to_string())
+}
+
+/// Parse a plain non-negative decimal into an 18-decimal fixed-point integer.
+/// No floating point. More than 18 fractional digits is an error rather than
+/// a silent truncation.
+pub fn decimal_str_to_atto(s: &str, what: &str) -> Res<u128> {
+    let s = s.to_string();
     let (int_s, frac_s) = match s.split_once('.') {
         Some((i, f)) => (i, f),
         None => (s.as_str(), ""),
@@ -103,10 +136,17 @@ impl Gate {
             v.pointer(ptr)
                 .ok_or_else(|| format!("REFUSE: gate {} has no {ptr}", path.display()).into())
         };
+        // A JSON number is read from the file's own text, so no value passes
+        // through a float on its way to becoming a ceiling.
+        let ceiling = |ptr: &str, key: &str, what: &str| -> Res<u128> {
+            match need(ptr)? {
+                serde_json::Value::Number(_) => decimal_str_to_atto(&raw_number_literal(content, key)?, what),
+                other => decimal_to_atto(other, what),
+            }
+        };
         let storage_ceiling_atto =
-            decimal_to_atto(need("/separatedCeilings/storageMaxAnt")?, "separatedCeilings.storageMaxAnt")?;
-        let gas_ceiling_wei =
-            decimal_to_atto(need("/separatedCeilings/gasMaxEth")?, "separatedCeilings.gasMaxEth")?;
+            ceiling("/separatedCeilings/storageMaxAnt", "storageMaxAnt", "separatedCeilings.storageMaxAnt")?;
+        let gas_ceiling_wei = ceiling("/separatedCeilings/gasMaxEth", "gasMaxEth", "separatedCeilings.gasMaxEth")?;
         if storage_ceiling_atto == 0 || gas_ceiling_wei == 0 {
             return Err(format!("REFUSE: gate {} carries a zero ceiling", path.display()).into());
         }
@@ -190,7 +230,9 @@ mod tests {
     #[test]
     fn decimal_is_exact_and_refuses_bad_shapes() {
         assert_eq!(decimal_to_atto(&json!(100), "x").unwrap(), 100_000_000_000_000_000_000);
-        assert_eq!(decimal_to_atto(&json!(0.0002), "x").unwrap(), 200_000_000_000_000);
+        assert_eq!(decimal_str_to_atto("0.0002", "x").unwrap(), 200_000_000_000_000);
+        // A non-integer JSON number has been through a float; it is refused here.
+        assert!(decimal_to_atto(&json!(0.0002), "x").is_err());
         assert_eq!(
             decimal_to_atto(&json!("2.825569772460937500"), "x").unwrap(),
             2_825_569_772_460_937_500
@@ -212,6 +254,26 @@ mod tests {
         assert_eq!(g.chunk_count, 29);
         assert_eq!(g.client_version, "ant 0.3.9");
         assert_eq!(g.tar_sha256, SHA);
+    }
+
+    #[test]
+    fn ceilings_are_read_from_the_gate_text_not_through_a_float() {
+        let p = Path::new("gate.json");
+        let text = |gas: &str| {
+            format!(
+                r#"{{"artifact":{{"tarSha256":"{SHA}"}},"quote":{{"clientVersion":"ant 0.3.9","chunkCount":29}},
+                "separatedCeilings":{{"storageMaxAnt": 100, "storageMaxAntHistory":"2.5", "gasMaxEth": {gas} }}}}"#
+            )
+        };
+        assert_eq!(Gate::parse(p, &text("0.0002")).unwrap().gas_ceiling_wei, 200_000_000_000_000);
+        assert_eq!(Gate::parse(p, &text("0.000200000000000001")).unwrap().gas_ceiling_wei, 200_000_000_000_001);
+        // A float would round this to 0.0002 and accept it. The text has 20 places: refused.
+        assert!(Gate::parse(p, &text("0.00020000000000000001")).is_err());
+        assert!(Gate::parse(p, &text("2e-4")).is_err());
+        // The same key twice is ambiguous: refused.
+        let twice = text("0.0002").replace("\"quote\"", "\"gasMaxEth\": 9, \"quote\"");
+        assert!(Gate::parse(p, &twice).is_err());
+        assert_eq!(raw_number_literal(&text("0.0002"), "storageMaxAnt").unwrap(), "100");
     }
 
     #[test]
