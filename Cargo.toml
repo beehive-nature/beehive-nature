@@ -60,6 +60,7 @@ members = [
     "crates/banchor",
     "crates/btrezor",
     "crates/watchpay",
+    "crates/settle-solana",
     "crates/bnr-seal",
 ]
 

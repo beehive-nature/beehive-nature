@@ -159,3 +159,23 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
     await ctx.close();
   }
 });
+
+for (const reg of ['bee', 'raver', 'cypherpunk']) {
+  test(`${reg}: spatial tree rotates, opens a person and retains the flat view`, async () => {
+    const {ctx,p,errs}=await open(reg);
+    const node=p.locator('#tree .tol-orbit-person').first();
+    await node.waitFor({state:'visible'});
+    const before=await node.getAttribute('style');
+    await p.locator('#tree [data-camera="right"]').click();
+    await p.waitForFunction(old => document.querySelector('#tree .tol-orbit-person').getAttribute('style') !== old, before);
+    const id=await node.getAttribute('data-person');
+    await node.click();
+    assert.match(await p.evaluate(()=>location.hash),new RegExp(`p=${id}`));
+    assert.equal(await p.locator('#tree .tol-card').count(),1);
+    await p.locator('#tree [data-spatial="flat"]').click();
+    assert.equal(await p.locator('#tree .tol-stage').count(),1);
+    assert.equal(await p.locator('#tree .tol-space').count(),0);
+    assert.equal(errs.length,0,errs.join(' | '));
+    await ctx.close();
+  });
+}

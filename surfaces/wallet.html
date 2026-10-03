@@ -11,11 +11,12 @@
 -->
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://connect.trezor.io/9.7.3/trezor-connect.js; object-src 'none'; base-uri 'self';"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
-<title>the BNR wallet: one soul, every chain</title>
+<title>skaists heART WALLet · accounts, coins &amp; bPay</title>
   <link rel="icon" type="image/svg+xml" href="assets/house/house-seal-roundel.svg">
 <style>
 /* SEMANTIC COLOUR — meanings picked FIRST, hues second (master design pass
@@ -69,6 +70,34 @@ button.green:hover{background:#86CC72;color:#06110C}
 .chain .stat{font-size:9px;letter-spacing:.08em;margin-top:6px}
 .stat.ok{color:#86CC72} .stat.err{color:var(--amber,#ffb347)}
 .chain.connected{border-color:#86CC72}
+/* Public address book: the same records in every reading register. */
+#wallet-accounts{margin:16px 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line2);scroll-margin-top:120px}
+#wa-mine,#wa-following{scroll-margin-top:120px}
+#wallet-accounts h3{font-size:1.2em;color:var(--ink)}
+.wa-note{color:var(--dim);font-size:14px;line-height:1.65;margin:8px 0}
+.wa-toolbar,.wa-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+#wa-form{padding:16px;background:var(--well);border:1px solid var(--line2);border-radius:12px;margin:14px 0}
+.wa-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wa-fields label{display:flex;flex-direction:column;gap:5px;color:var(--ink);min-width:0}
+.wa-fields input,.wa-fields select{width:100%;min-width:0;flex:auto;padding:10px 12px;background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:8px;font:inherit}
+.wa-wide{grid-column:1/-1}
+.wa-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px;margin:12px 0 20px}
+.wa-card{min-width:0;padding:16px;border:1px solid var(--line2);border-radius:12px;background:var(--well)}
+.wa-card h4{font-size:16px;overflow-wrap:anywhere;color:var(--ink)}
+.wa-token{padding:10px 0;border-bottom:1px solid var(--line2)}
+.wa-coins{margin-top:12px}.wa-coins form{margin-top:12px}.wa-coins input{box-sizing:border-box;width:100%;min-width:0}
+body[data-reg="bee"] #wallet-accounts :is(.wa-address,.wa-state,.wa-actions a){font-size:14px}
+body[data-reg="bee"] #wallet-accounts .wa-note{font-size:16px}
+.wa-address{display:block;margin:8px 0;font-size:12px;overflow-wrap:anywhere;user-select:all;color:var(--dim)}
+.wa-amount{font-size:20px;line-height:1.5;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
+.wa-state{font-size:12px;color:var(--dim);margin:8px 0}
+.wa-card[data-state="failed"] .wa-state,.wa-card[data-state="stale"] .wa-state{color:var(--amber)}
+.wa-actions button,.wa-actions a{font-size:12px;min-height:44px}
+.wa-actions a{display:inline-flex;align-items:center}
+#wa-status{min-height:1.6em;overflow-wrap:anywhere}
+#arw-file-dialog #arw-file-dialog-title{display:flex!important;font-size:18px;letter-spacing:0}
+#wallet-accounts [hidden],#bpay-card [hidden]{display:none!important}
+@media(max-width:520px){.wa-fields{grid-template-columns:1fr}.wa-toolbar>button{flex:1}.wa-card{padding:12px}}
 /* ── the hero number ── the home-chain balance is the page's thesis figure:
    10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
    full-row on wide grids. CSS-only promotion of the live #v-bal read. */
@@ -141,6 +170,29 @@ pre b{color:var(--ink)}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 footer .wl-foot>summary{justify-content:center}
+
+/* One identity and action bar across every wallet presentation and task. */
+#wallet-identity{position:sticky;top:0;z-index:8;background:var(--bg);order:-7;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:10px}
+#wallet-identity .wallet-brand-heading{margin:0;background:none;font:inherit;font-family:var(--reg-font-title);font-weight:700;letter-spacing:0;line-height:1.3}
+#wallet-identity .wallet-brand{font-size:clamp(20px,3vw,24px);text-decoration:none;color:var(--ink);letter-spacing:0}
+#wallet-identity nav{display:flex;gap:8px;flex-wrap:wrap}
+#wallet-identity nav a{display:inline-flex;align-items:center;min-height:44px;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:20px;text-decoration:none}
+#wl-bar,#wl-dock{position:relative;top:auto}
+body[data-reg="cypherpunk"] #bal-sec{display:flex;flex-direction:column}
+body[data-reg="cypherpunk"] #wallet-accounts{order:2}
+body[data-reg="cypherpunk"] #wallet-storage{order:0}
+main>section,#wallet-accounts{scroll-margin-top:var(--wallet-offset,140px)}
+#wallet-accounts :is(button,input,select),#arw-file-flow :is(button,input){min-height:44px}
+.wa-address{direction:ltr;unicode-bidi:isolate}
+.wa-card h4{unicode-bidi:plaintext}
+#wallet-storage{order:-3;display:none;padding:18px 0;scroll-margin-top:var(--wallet-offset,140px)}
+body:is([data-wl-view="keep"],[data-wl-view="all"]) #wallet-storage,body[data-reg="cypherpunk"] #wallet-storage{display:block}
+#wallet-storage h2{font-size:22px} #wallet-storage p{font-size:15px;line-height:1.5}
+.wallet-storage-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wallet-storage-options a{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid var(--line);border-radius:16px;text-decoration:none}
+.wallet-storage-options strong{font-size:20px}.wallet-storage-options span{font-size:14px}
+body[data-wl-view="keep"] #wl-deck,body[data-wl-view="keep"] #wl-lines,body[data-wl-view="keep"] #wl-cards{display:none!important}
+@media(max-width:520px){.wallet-storage-options{grid-template-columns:1fr}#wallet-identity nav a{padding:10px 8px}}
 </style>
 <script>
 /* ══ THE KIT PROFILE — every estate-only fact this surface carries lives HERE,
@@ -585,7 +637,7 @@ body[data-reg="raver"] main>section[data-wl-task]{animation:wlr-arrive .52s cubi
 .cy-keys{color:var(--dim)}
 .cy-keys kbd{font:inherit;color:var(--ink);border:1px solid var(--line2);border-radius:3px;padding:0 4px}
 body[data-reg="cypherpunk"] main>section[style*="--gold"]{border-color:var(--line2)!important}
-body[data-reg="cypherpunk"] main>section{scroll-margin-top:8px}
+body[data-reg="cypherpunk"] main>section{scroll-margin-top:var(--wallet-offset,140px)}
 body[data-reg="cypherpunk"] main>section:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(data-wl-n);margin-inline-start:auto;color:var(--faint);font-weight:400;letter-spacing:0}
 @media (max-width:700px){.cy-idx{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}}
@@ -614,7 +666,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 var w='home',own=null;try{own=history.state&&history.state.wlView;w=own||sessionStorage.getItem('wl.view')||'home';}catch(e){}
 /* the section-to-task map, stated here too so a #section deep link paints in its
    own task at FIRST paint; the gate proves it equals the data-wl-task attributes */
-var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','insc-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
+var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
 window.WL_TASK_OF=T;
 /* the sections HELD out of their task in bee and raver (data-wl-held): a deep
    link to one lands on "show me everything", the one view there that shows it */
@@ -631,19 +683,19 @@ window.wlRead=function(el,ok){if(!el)return;if(ok)el.removeAttribute('data-read-
 window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(typeof p==='string')el.appendChild(document.createTextNode(p));else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
-<nav class="crumbs" aria-label="you are here">
-  <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
-  <span class="badge-live"><i></i><span data-i18n="wl.badge">your keys stay in this tab only, gone when you close it</span></span>
-</nav>
+<div id="wallet-identity">
+  <h1 class="wallet-brand-heading"><a class="wallet-brand" href="#" data-wl-go="home">skaists <strong>heART WALLet</strong></a></h1>
+  <nav aria-label="Wallet actions"><a href="#wallet-accounts" data-i18n="wl.wallet.accounts">Accounts &amp; coins</a><a href="#pay-sec" aria-label="bPay: send, receive or swap">bPay</a><a href="#bpay-sec" data-wallet-store data-i18n="wl.wallet.store">bPay · store</a></nav>
+</div>
+<div id="wallet-storage">
+  <h2>bPay once · choose your storage network</h2>
+  <p>Autonomi uses ANT on Arbitrum. Arweave uses AR. Review the quote and network before authorizing payment.</p>
+  <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>Quotes only · ANT plus ETH network fees</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>Publish small files · keep the receipt</span></a></div>
+</div>
 <header>
-  <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet<span class="h1-arg" data-i18n="wl.h1arg">: one soul, every chain</span></h1>
-  <p data-reg="bee" data-i18n="wl.reg.connect.bee">one identity, every chain. your bzDiD is your wallet: connect it once to see your balances on all your chains, sign and hold your keys. nothing leaves your browser.</p>
-  <p data-reg="raver" data-i18n="wl.reg.connect.raver">one soul, every chain. the lights show what you hold.</p>
-  <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
-  (secp256k1 for Vaulta AND 0x/EVM, ed25519 for bzDiD rails) → client-side eosjs serialization +
-  signed here → sent onward via a public door. Your keys stay in this tab's memory: nothing saved, nothing held for you.
-  New accounts are forged bzDiD-native: no exports, no imports, no manual keys, ever.</p>
+  <p data-reg="bee" data-i18n="wl.wallet.intro">Accounts, coins and public addresses.</p>
+  <p data-reg="raver">Your coins. Your chains. Follow an address, read a balance, bPay when you choose.</p>
+  <p data-reg="cypherpunk">Public account reads · explicit signing · network-specific storage and transaction receipts.</p>
 </header>
 
 <!-- ══ THE THREE GRAMMARS — each register's own way in. Every figure below is a
@@ -655,7 +707,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button type="button" class="wlb-total" data-vaulta-toggle aria-expanded="false" aria-controls="wlb-vaulta-breakdown">
       <span class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wlb-total-caret" aria-hidden="true">⌄</span>
     </button>
-    <div class="wlb-rollup-hint">tap the total for adapter · chain · account</div>
+    <div class="wlb-rollup-hint" data-i18n="wl.wallet.rollup">tap the total for chain and account</div>
     <div class="va-breakdown" id="wlb-vaulta-breakdown" data-vaulta-breakdown hidden>
       <div class="va-breakdown-head">A held on Vaulta</div>
       <div data-vaulta-rows></div>
@@ -665,10 +717,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
   <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
   <div class="wlb-list">
-    <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.bee.have.s">every chain, read live in this browser</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.wallet.accounts">Accounts &amp; coins</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="move"><span class="wlb-i" aria-hidden="true">💸</span><span class="wlb-t"><b data-i18n="wl.bee.move">pay or get paid</b><small data-i18n="wl.bee.move.s">send, receive or swap</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="add"><span class="wlb-i" aria-hidden="true">💳</span><span class="wlb-t"><b data-i18n="wl.bee.add">add money</b><small data-i18n="wl.bee.add.s">the ways to put money in</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
-    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.bee.keep">keep something forever</b><small data-i18n="wl.bee.keep.s">pay once to store a file on a permanent network</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.wallet.keep">bPay once · store a file</b><small data-i18n="wl.wallet.networks">Autonomi / ANT · Arweave / AR</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="key"><span class="wlb-i" aria-hidden="true">🗝</span><span class="wlb-t"><b data-i18n="wl.bee.key">my key and my safe</b><small data-i18n="wl.bee.key.s">your passkey, your recovery words, your sealed secrets</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="proof"><span class="wlb-i" aria-hidden="true">🗺</span><span class="wlb-t"><b data-i18n="wl.bee.proof">see how it works</b><small data-i18n="wl.bee.proof.s">every bill recomputed, every rail listed</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
   </div>
@@ -677,7 +729,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </div>
 <div id="wl-bar" data-reg="bee">
   <button type="button" class="wlb-back" data-wl-go="home"><span aria-hidden="true">‹</span> <span data-i18n="wl.bee.back">wallet</span></button>
-  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" data-i18n="wl.bee.keep">keep something forever</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
+  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" >bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
 </div>
 
 <nav id="wl-dock" data-reg="raver" aria-label="wallet">
@@ -693,7 +745,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" >bPay once · Autonomi / ANT or Arweave / AR</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -703,9 +755,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <button type="button" class="wlr-card" data-wl-card-for="voucher-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🎟</span><span class="w" data-i18n="wl.rv.s.voucher-sec">voucher</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="fund-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.s.fund-sec">card</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="peer-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🏧</span><span class="w" data-i18n="wl.rv.s.peer-sec">fiat in</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="bpay-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.bpay-sec">keep a file</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="insc-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🎨</span><span class="w" data-i18n="wl.rv.s.insc-sec">garden</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="arw-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" data-i18n="wl.rv.s.arw-sec">Arweave</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bpay-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" >Autonomi · ANT</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="arw-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" >Arweave · AR</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="kc-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🗝</span><span class="w" data-i18n="wl.rv.s.kc-sec">keychain</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="vault-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🔐</span><span class="w" data-i18n="wl.rv.s.vault-sec">vault</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="forge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">♾</span><span class="w" data-i18n="wl.rv.s.forge-sec">key forge</span></button>
@@ -776,7 +827,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
   <div class="law wl-soul-live" id="wl-soul-live">live as <b id="wl-soul-name" style="color:var(--leaf)">…</b> — your name and short addr ride the bottom rails bar.</div>
   <div class="row wl-connect-cta">
-    <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
+    <input id="wq" aria-label="Account or .b name" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
   <div class="law" id="wstat" style="margin-top:8px;min-height:20px">not connected</div>
@@ -886,7 +937,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
         Prefer <b>connect keychain (passkey)</b> — New-bee never needs to paste.</div>
         <div class="row" style="margin-top:8px">
-          <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+          <input id="kc-rec" aria-label="Recovery phrase or bdidrec code" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
           <button id="kc-recgo">recover</button>
         </div>
       </details>
@@ -939,7 +990,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </details>
     <div class="row">
       <button id="vlt-gen" class="gold">⚄ generate a keypass</button>
-      <select id="vlt-genlen" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+      <select id="vlt-genlen" aria-label="Generated seed length" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="6">6 words · 66 bits</option>
         <option value="8" selected>8 words · 88 bits</option>
         <option value="10">10 words · 110 bits</option>
@@ -948,8 +999,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <pre id="vlt-genout" style="display:none"></pre>
     <div class="row">
-      <input id="vlt-newpass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
-      <input id="vlt-newpass2" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
+      <input id="vlt-newpass" aria-label="New vault keypass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
+      <input id="vlt-newpass2" aria-label="Confirm vault keypass" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
     </div>
     <div class="law" id="vlt-strength" style="margin-top:4px;min-height:18px"></div>
     <div class="row">
@@ -961,7 +1012,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <!-- ── state B: vault exists, locked ─────────────────────────────────── -->
   <div id="vlt-locked" style="display:none">
     <div class="row" style="margin-top:12px">
-      <input id="vlt-pass" type="password" placeholder="your keypass" autocomplete="current-password" spellcheck="false" style="flex:2">
+      <input id="vlt-pass" aria-label="Vault keypass" type="password" placeholder="your keypass" autocomplete="current-password" spellcheck="false" style="flex:2">
       <button id="vlt-unlock" class="gold">UNLOCK</button>
     </div>
     <div class="row">
@@ -991,22 +1042,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       checksum-verified and curve-checked, before anything is sealed.
       Prefer inject/connect on each rail; Arweave JWK paste remains scaffold · advanced.</div>
       <div class="row" style="margin-top:8px">
-        <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <select id="vlt-type" aria-label="Secret type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
           <option value="auto" selected>detect type</option>
           <option value="seed">seed phrase (scaffold · recovery)</option>
           <option value="vaulta">Vaulta active key (scaffold · recovery)</option>
           <option value="arweave">Arweave JWK (scaffold · advanced)</option>
           <option value="note">plain note</option>
         </select>
-        <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
+        <input id="vlt-label" aria-label="Secret label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
       </div>
       <div class="row">
-        <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
+        <textarea id="vlt-secret" aria-label="Seed phrase or active private key" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
           style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
       </div>
       <div class="row">
-        <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
-        <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
+        <input id="vlt-chain" aria-label="Chain, optional" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
+        <input id="vlt-bip39pass" aria-label="BIP39 passphrase, optional" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
       </div>
       <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
       <div class="row">
@@ -1064,7 +1115,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
 
   <div class="law" id="vlt-stat" style="margin-top:10px;min-height:20px">— </div>
-  <input type="file" id="vlt-file" accept=".json,.bnrvault,application/json" style="display:none">
+  <input type="file" id="vlt-file" aria-label="Import encrypted vault file" accept=".json,.bnrvault,application/json" style="display:none">
 </section>
 
 <section id="forge-sec" data-wl-task="key">
@@ -1089,7 +1140,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
   <div class="row">
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
+    <input id="forge-ctx" aria-label="New key context" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
@@ -1103,10 +1154,56 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="bal-sec" data-wl-task="have">
-  <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
-  <h2 data-reg="bee">⚡ <span data-i18n="wl.bee.h.bal">what you hold, on every chain</span></h2>
-  <div class="law" data-wl-tech>Read from public RPCs in your browser. Nothing stored, nothing sent.
-  The chain is the source of truth.</div>
+  <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.wallet.accounts">Accounts &amp; coins</span></h2>
+  <h2 data-reg="bee">⚡ <span data-i18n="wl.wallet.accounts">Accounts &amp; coins</span></h2>
+  <div id="wallet-accounts">
+    <h3>Accounts &amp; following</h3>
+    <p class="wa-note">Bring your other accounts together, or follow any public address. No key or wallet connection needed.</p>
+    <div class="wa-toolbar">
+      <button type="button" id="wa-add" class="green">＋ Add account</button>
+      <button type="button" id="wa-follow">＋ Follow address</button>
+      <button type="button" id="wa-trezor">Sync Trezor public accounts</button>
+      <button type="button" id="wa-refresh">Refresh all</button>
+      <button type="button" id="wa-export">Export accounts</button>
+      <button type="button" id="wa-import">Import accounts</button>
+      <input type="file" id="wa-import-file" accept="application/json,.json" hidden aria-label="Import public accounts JSON">
+    </div>
+    <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
+    <p class="wa-note">Vaulta and Hive accounts are included. The network picker shows the full wallet scope; entries awaiting a reader are marked unavailable. <a href="#matrix-sec">See every chain, read capability and signing status</a>.</p>
+    <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
+      <p class="wa-note">Import through Trezor Suite web (opens a window). Confirm the public export on your device. SAFE 7 end-to-end device verification is pending; you can add its verified public addresses manually.</p>
+      <div class="wa-fields">
+        <label>Network<select id="wa-trezor-chain"><option value="evm">Ethereum + Base + Arbitrum</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option><option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option><option value="bitcoin-account">Bitcoin · native SegWit account</option></select></label>
+        <label>Account number<input id="wa-trezor-account" type="number" min="1" max="100" value="1" required></label>
+        <label id="wa-trezor-sol-label">Solana account layout<select id="wa-trezor-sol"><option value="suite">Suite · m/44'/501'/account'/0'</option><option value="legacy">Three-level compatibility · m/44'/501'/account'</option></select></label>
+        <div class="wa-wide wa-note" id="wa-trezor-path"></div>
+      </div>
+      <p class="wa-note" id="wa-trezor-bitcoin" hidden>Bitcoin sync stores an account public key and shares it with Trezor’s blockchain service when you refresh, covering receive and change addresses within its discovery window. This reveals the account’s activity.</p>
+      <p class="wa-note">Choose the same wallet/passphrase and account layout each time. This imports public data without signing a payment. Never enter recovery words here.</p>
+      <p class="wa-note">This importer is one connection method. For Vaulta or Hive, use Add account with your public account name. Importing their hardware keys and linking those keys to registered accounts still needs integration.</p>
+      <div class="wa-toolbar"><button type="submit" class="green" id="wa-trezor-import">Import public account</button><button type="button" id="wa-trezor-cancel">Close</button></div>
+    </form>
+    <form id="wa-form" hidden aria-label="Save a public account or address" aria-describedby="wa-privacy wa-status">
+      <div class="wa-fields">
+        <label>Network<select id="wa-chain" required aria-describedby="wa-hint"></select></label>
+        <label>Save to<select id="wa-kind"><option value="mine">My accounts</option><option value="following">Following</option></select></label>
+        <label class="wa-wide">Public address, account name or Bitcoin account public key<input id="wa-address" required maxlength="120" autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="wa-hint"></label>
+        <div class="wa-wide wa-note" id="wa-hint"></div>
+        <label class="wa-wide">Label (optional)<input id="wa-label" maxlength="60" autocomplete="off" placeholder="e.g. savings · creator I follow"></label>
+      </div>
+      <div class="wa-toolbar"><button type="submit" class="green" id="wa-save">Save &amp; read</button><button type="button" id="wa-cancel">Cancel</button></div>
+    </form>
+    <div id="wa-status" class="wa-note" role="status" aria-live="polite"></div>
+    <label class="wa-note" for="wa-search">Find an account by label, address or network</label>
+    <input type="search" id="wa-search" placeholder="Search your accounts and following" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0">
+    <h4>My accounts <span id="wa-mine-count"></span></h4>
+    <div id="wa-mine" class="wa-list"></div>
+    <h4>Following <span id="wa-following-count"></span></h4>
+    <div id="wa-following" class="wa-list"></div>
+    <div class="wa-note">Followed balances stay in their own list. Refresh to check again; this page does not send activity alerts. Explorer links show transaction history in a new tab.</div>
+  </div>
+  <h3>Connected signing wallet</h3>
+  <div class="law" data-wl-tech>Balances come from public chain services. These services receive the public addresses you read.</div>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
@@ -1163,6 +1260,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
     </div>
   </div>
+
 </section>
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
@@ -1185,7 +1283,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / migration only: paste the account's existing ACTIVE private key to bridge your derived bzDiD.
     Prefer connect/inject when available — this paste is never required for New-bee.</div>
     <div class="row" style="margin-top:8px">
-      <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
+      <input id="br-wif" aria-label="Existing active private key" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
       <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
     </div>
   </details>
@@ -1204,7 +1302,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   (live price below). Near infinite: every account born this way signs with your keychain.</div>
   </details>
   <div class="row">
-    <input id="ac-name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
+    <input id="ac-name" aria-label="New Vaulta account name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
     <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
   </div>
   <div class="row">
@@ -1215,7 +1313,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
-  <h2>💸 pay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
+  <h2>💸 bPay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
@@ -1262,9 +1360,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="sv-to" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="sv-to" aria-label="Recipient Vaulta account" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
         <input id="sv-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount in A">
-        <input id="sv-memo" class="small" placeholder="memo (optional)" style="flex:2">
+        <input id="sv-memo" aria-label="Transfer memo, optional" class="small" placeholder="memo (optional)" style="flex:2">
         <button id="sv-go" class="gold">📤 send A</button>
       </div>
       <div class="law" id="sv-stat" style="margin-top:4px;min-height:18px">liquid: — </div>
@@ -1273,7 +1371,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="row">
         <select id="se-rail" style="max-width:150px;flex:0 1 150px" title="EVM rail — chain id and token decimals come from the rail, never from this box"></select>
         <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset carried on the chosen rail"></select>
-        <input id="se-to" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="se-to" aria-label="Recipient EVM address" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
         <input id="se-amt" class="small" inputmode="decimal" placeholder="0.00" style="max-width:130px;flex:0 1 130px" title="amount, in the asset's own units — typed exactly, never rounded">
         <button id="se-go" class="gold">📤 send</button>
       </div>
@@ -1285,7 +1383,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
          BOLT-12 offer, both, no node and no third party touched. ══ -->
     <div id="tx-l" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="ln-req" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
+        <input id="ln-req" aria-label="Lightning invoice or offer" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
         <button id="ln-read" class="gold">🔎 read it</button>
       </div>
       <div id="ln-card" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
@@ -1309,8 +1407,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
       <div id="pn-mine-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-name" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
-          <input id="pn-offer" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-name" aria-label="Payment name to publish" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-offer" aria-label="BOLT-12 offer, optional" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
           <button id="pn-build" class="gold">build the record</button>
         </div>
         <div id="pn-out" style="display:none;margin-top:8px"></div>
@@ -1328,7 +1426,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
       <div id="pn-theirs-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-lookup" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
+          <input id="pn-lookup" aria-label="Recipient payment name" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
           <button id="pn-resolve" class="gold">🔎 resolve</button>
         </div>
         <div id="pn-res" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
@@ -1349,7 +1447,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="sw-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
       <button id="sw-dir" class="gold" style="flex:0 1 220px">direction: buy RAM with A</button>
-      <input id="sw-amt" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
+      <input id="sw-amt" aria-label="Swap amount" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
       <div class="law" style="flex:2;min-width:200px" id="sw-quote">quote: reading rammarket…</div>
       <button id="sw-go" class="gold">🔁 swap</button>
     </div>
@@ -1369,7 +1467,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      first-class BEFORE quote; this panel records the policy the quote actually
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
 <section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
-  <h2>🧾 <span data-i18n="wl.bpay.h">bPay: the preservation invoice</span></h2>
+  <h2>🧾 <span >Autonomi · ANT storage quote</span></h2>
+  <div class="law" id="bpay-accounts">Check your other balances in <a href="#wallet-accounts">accounts &amp; following</a>. Saved public addresses do not grant spending access.</div>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
   <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
   asking for a fresh quote sends your resolved policy to the keyless bridge. no hidden network
@@ -1383,28 +1482,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   receipt substitutes for it.</p></details>
   <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
 </section>
-<script src="bpay-invoice.js?v=3" defer></script>
-
-<!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
-     piece leads, the numbers stand beside it. Every SVG here is fetched from
-     the collection's own contract at read time; nothing is cached, stored, or
-     redrawn by this page. ══ -->
-<section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
-  <h2 data-wl-tech>🎨 <span data-i18n="wl.insc.h2">inscriptions: your garden, drawn on-chain</span></h2>
-  <h2 data-reg="bee">🎨 <span data-i18n="wl.bee.h.insc">your garden, drawn on the chain</span></h2>
-  <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
-  <b>true tier</b> through the estate's one level-truth module, the same one the market and the museum
-  use. Keyless, read-only, nothing signed.</div>
-  <div class="row" style="margin-top:8px">
-    <input id="insc-addr" class="small" placeholder="0x… address or a .base.eth name — defaults to your connected soul" spellcheck="false" autocomplete="off" style="flex:2;min-width:220px;font-family:'IBM Plex Mono',monospace">
-    <button id="insc-go" class="gold">🎨 <span data-i18n="wl.insc.go">draw the garden</span></button>
-  </div>
-  <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">connect your keychain, or type an address</div>
-  <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
-  <div class="law" data-wl-tech style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
-  checked against the collection's <b>own getMeta</b> at read time. A disagreement prints as a
-  <b>GATE FAILURE</b> on the card, never smoothed into a number that looks fine.</div>
-</section>
+<script src="adapter-seam.js" defer></script>
+<script src="bpay-invoice.js?v=5" defer></script>
+<script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
@@ -1423,7 +1503,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   that ledger via the estate oracle; the box owns the writes.</p>
 
   <div class="row" style="align-items:center;flex-wrap:wrap">
-    <input id="vc-key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <input id="vc-key" aria-label="Meter key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
@@ -1471,7 +1551,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <!-- 4 · KNOW WHEN YOU'RE OUT -->
     <div class="row" style="margin-top:12px;align-items:center;flex-wrap:wrap">
-      <input id="vc-afford-amt" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
+      <input id="vc-afford-amt" aria-label="Job cost in A" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
       <button id="vc-afford-go" class="gold" style="min-height:36px">can I afford it?</button>
       <span id="vc-afford-out" class="law" style="flex:2;min-width:180px">—</span>
     </div>
@@ -1556,7 +1636,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <option value="USDC_BASE">USDC · Base</option>
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
-      <input id="fund-addr" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
+      <input id="fund-addr" aria-label="Buy destination address or ENS name, optional" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
       <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
@@ -1978,8 +2058,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       <button type="button" id="arw-connect" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔌 connect Arweave wallet</button>
       <span id="arw-addr" class="law" style="font:14px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
     </div>
+    <div id="arw-file-flow" style="margin-top:18px">
+      <label for="arw-file">Choose a small file to publish (up to 30 KB)</label>
+      <input type="file" id="arw-file" style="display:block;max-width:100%;width:100%;margin:8px 0" aria-describedby="arw-file-note">
+      <div id="arw-file-note" class="wa-note">Published files are public and cannot be deleted from the network. Larger files need the chunked upload flow, which is not available here yet.</div>
+      <button type="button" id="arw-file-review">Review file &amp; fee</button>
+      <div id="arw-file-status" class="wa-note" role="status" aria-live="polite"></div>
+      <dialog id="arw-file-dialog" aria-labelledby="arw-file-dialog-title" style="margin:auto;padding:24px;max-width:min(92vw,520px);background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:16px">
+        <h2 id="arw-file-dialog-title">bPay · publish to Arweave</h2><div id="arw-file-plan" style="overflow-wrap:anywhere"></div>
+        <div class="wa-toolbar"><button type="button" id="arw-file-confirm">Confirm &amp; sign</button><button type="button" id="arw-file-cancel">Cancel</button></div>
+      </dialog>
+    </div>
+    <div class="wa-note" style="margin-top:18px">Or publish the estate's pinned reference anchor:</div>
     <div class="row" style="align-items:center;flex-wrap:wrap;margin-top:8px">
-      <select id="arw-what" title="what to publish" style="max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+      <select id="arw-what" title="what to publish" style="width:100%;min-width:0;max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="orbit-anchor">the orbit-manifest anchor · forge/orbit-manifests.md (1,926 B)</option>
       </select>
       <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
@@ -1997,14 +2089,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       try {
         var $ = function (id) { return document.getElementById(id); };
         var box = $('arw-js'), go = $('arw-go'), stat = $('arw-stat');
-        var conn = $('arw-connect'), addrEl = $('arw-addr');
+        var conn = $('arw-connect'), addrEl = $('arw-addr'), publishing=false, refreshing=false;
         if (!box || !go || !stat) return;
         var ORBIT = (window.WALLET_PROFILE && WALLET_PROFILE.anchor) || { path: '', sha256: '', tags: [] };
         var optLabel = document.querySelector('#arw-what option[value="orbit-anchor"]');
         if (optLabel && ORBIT.label) optLabel.textContent = ORBIT.label;
         function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
         function paint(msg, color) {
-          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+          stat.replaceChildren();if(!msg)return;
+          var text=String(msg).replace(/<\/?b>/g,'');
+          if(color){var b=document.createElement('b');b.style.color=color;b.textContent=text;stat.appendChild(b)}else stat.textContent=text;
         }
         function arInject() { return window.BNRWALLET && BNRWALLET.arInject; }
         function vaultArEntry() {
@@ -2017,9 +2111,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         }
         async function resolveAddr() {
           var inj = arInject();
-          if (inj && inj.present && inj.present()) {
-            try { return await inj.activeAddress(); } catch (e) { /* fall */ }
-          }
           if (inj && typeof inj.boundAddress === 'function') {
             var b = inj.boundAddress();
             if (b) return b;
@@ -2028,6 +2119,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           return (e && e.meta && e.meta.address) || null;
         }
         async function refresh() {
+          if(publishing||refreshing)return;
           var A = window.BNRAR;
           if (!A) { paint('the arweave adapter did not load', 'var(--amber)'); return; }
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
@@ -2052,26 +2144,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           }
           if (statEl) statEl.textContent = 'reading ' + addr.slice(0, 10) + '…';
           paint('reading ' + addr + '…');
+          refreshing=true;
           try {
             var bal = await A.balance(addr);
             var fee = await A.fee(1926);
             var spot = null;
             try { spot = await A.spotPrice(); } catch (e2) { /* optional */ }
-            var winston = parseInt(bal, 10) || 0, need = parseInt(fee, 10) || 0;
-            if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, winston / 1e12);
-            else if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
+            if(!/^\d+$/.test(String(bal))||!/^\d+$/.test(String(fee)))throw new Error('gateway returned an invalid balance or fee');
+            var winston = BigInt(bal), need = BigInt(fee);
+            if(addr!==await resolveAddr())return;
+            if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
+            else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
             if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
-                        statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + ((need - winston) / 1e12) + ' AR for the anchor';
-            paint('address ' + addr + ' · balance ' + (winston / 1e12) + ' AR · anchor fee ' +
-              (need / 1e12) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
-              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
+                        statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + arUnits(need-winston) + ' AR for the anchor';
+            paint('address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' +
+              arUnits(need) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
+              (winston < need ? ' — ⚠ short by ' + arUnits(need-winston) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
               (hasInj ? ' · sign via extension' : ' · sign via vault scaffold if publishing'));
             go.disabled = winston < need;
             if (typeof wlRead === 'function') wlRead(statEl, true);
           } catch (err) {
             if (statEl) { statEl.textContent = 'read failed'; if (typeof wlRead === 'function') wlRead(statEl, false); }
-            paint('gateway read failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
-          }
+            go.disabled=true;
+            paint(esc('gateway read failed: ' + (err && err.message ? err.message : err)), 'var(--amber)');
+          }finally{refreshing=false}
         }
         if (conn) conn.addEventListener('click', async function () {
           var inj = arInject();
@@ -2096,7 +2192,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         go.addEventListener('click', async function () {
           var W = window.BNRWALLET, V = window.BNRVAULT;
           if (!W) { paint('the wallet shell did not load', 'var(--amber)'); return; }
-          go.disabled = true;
+          if(publishing)return;publishing=true;go.disabled = true;
           paint('fetching the committed manifest…');
           try {
             var res = await fetch(ORBIT.path);
@@ -2139,12 +2235,36 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           } catch (err) {
             paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           } finally {
-            go.disabled = false;
+            publishing=false;go.disabled = false;
           }
         });
+        function arUnits(raw){var n=BigInt(raw),f=(n%1000000000000n).toString().padStart(12,'0').replace(/0+$/,'');return (n/1000000000000n).toString()+(f?'.'+f:'')}
+        $('arw-file-review').onclick=async function(){
+          var button=$('arw-file-review'),note=$('arw-file-status'),file=$('arw-file').files[0];
+          if(publishing)return;
+          if(!file||file.size===0||file.size>30000){note.textContent='Choose a non-empty file up to 30,000 bytes.';return;}
+          var W=window.BNRWALLET;
+          if(!W||!arInject()||!arInject().present()){note.textContent='Connect an Arweave wallet to review and sign this file.';return;}
+          publishing=true;button.disabled=true;$('arw-file').disabled=true;
+          note.textContent='Preparing this file and its exact network fee. No payment has been signed.';
+          try{
+            var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
+            var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
+            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:true,review:async function(plan){
+              var dialog=$('arw-file-dialog'),details=$('arw-file-plan');details.replaceChildren();
+              [file.name,bytes.length.toLocaleString()+' bytes','Network: Arweave','Paying address: '+plan.address,'Exact fee: '+arUnits(plan.feeWinston)+' AR','SHA-256: '+sha,'Public storage. Publication cannot be undone.'].forEach(function(text){var line=document.createElement('div');line.style.marginBottom='10px';line.textContent=text;details.appendChild(line)});
+              return new Promise(function(resolve){var finish=function(accepted){dialog.close();resolve(accepted)};$('arw-file-confirm').onclick=function(){finish(true)};$('arw-file-cancel').onclick=function(){finish(false)};dialog.oncancel=function(e){e.preventDefault();finish(false)};dialog.showModal();$('arw-file-cancel').focus()});
+            }});
+            if(!result){note.textContent='The wallet did not complete publication. No stored-file receipt is available.';return;}
+            note.textContent=result.phase==='cancelled'?'Cancelled before signing. Nothing was published.':'Publication '+result.phase+'.';
+            if(result.phase!=='cancelled'){var receipt=document.createElement('a');receipt.href='#outbox-sec';receipt.textContent='View the transaction receipt';note.appendChild(document.createElement('br'));note.appendChild(receipt)}
+            if(result.ref){var link=document.createElement('a');link.href='https://arweave.net/'+encodeURIComponent(result.ref);link.target='_blank';link.rel='noopener noreferrer';link.textContent='View transaction '+result.ref+' (new tab)';note.appendChild(document.createElement('br'));note.appendChild(link)}
+          }catch(error){note.textContent='File publication did not complete: '+(error.message||'unknown error')}
+          finally{publishing=false;button.disabled=false;$('arw-file').disabled=false}
+        };
         box.hidden = false;
         paint('…');
-        setInterval(function () { if (!go.disabled) refresh(); }, 45000);
+        setInterval(function () { if (!document.hidden&&!publishing) refresh(); }, 45000);
         setTimeout(refresh, 700);
         var vsec = document.getElementById('vault-sec');
         if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); });
@@ -2158,8 +2278,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     })();
   </script>
-</section>
-
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
@@ -2194,8 +2312,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </div>
   <div id="adapter-states" data-wl-tech style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
-    <input id="tx-contract" placeholder="contract" value="" spellcheck="false">
-    <input id="tx-action" placeholder="action" value="" spellcheck="false">
+    <input id="tx-contract" aria-label="Contract account" placeholder="contract" value="" spellcheck="false">
+    <input id="tx-action" aria-label="Contract action" placeholder="action" value="" spellcheck="false">
     <select id="tx-net" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
       <option value="main">Vaulta mainnet</option>
       <option value="j4">Jungle4 · testnet</option>
@@ -2206,8 +2324,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <details id="tx-j4-scaffold" style="flex:1 1 100%">
       <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · Jungle4 test key (TESTNET-ONLY — gold mainnet never pastes)</summary>
       <div class="row" style="margin-top:8px">
-        <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
-        <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+        <input id="tx-j4key" aria-label="Jungle4 test private key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
+        <input id="tx-j4actor" aria-label="Jungle4 test account" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
       </div>
     </details>
   </div>
@@ -2216,7 +2334,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <div class="row" style="margin-top:0" id="tx-fields-row"></div>
   </div>
   <div class="row">
-    <input id="tx-data" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
+    <input id="tx-data" aria-label="Transaction arguments JSON" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
   </div>
   <div id="tx-preview" style="display:none;margin-top:10px;border:1px solid #2c4a5a;border-radius:10px;padding:11px 13px;background:#081820">
     <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">EXACTLY WHAT YOU ARE SIGNING</div>
@@ -2246,13 +2364,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="matrix-sec" data-wl-task="proof">
-  <h2>🗺 chain matrix: <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+  <h2>🗺 chain matrix: <span>full wallet coverage</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each: how it is read and signed</summary>
-  <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
-  (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
-  Rendered from the data block below the fold (never typed prose), and every count you see is
-  computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
-  gracefully, gaps say they are gaps.</div>
+  <div class="law">The original wallet scope plus the Graphene and Cosmos studies, with separate <b>read</b> and <b>sign</b> capabilities. READ means this page has a public account reader; CODE means another implementation exists; EVALUATION means a bounded bench; GAP means required integration is missing; STUDY means researched scope. These labels do not certify a device, a payment or a deployment. Tokens, payment protocols and storage networks are identified separately from blockchains.</div>
+  <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/499118bd646dbcefb1e52b0384c5a39296fa4cdb/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
+  </details>
+  <div class="wallet-section-action"><a href="#wallet-accounts">Add or follow an account on a supported network</a></div>
+  <details class="tnote" data-reg-disclose><summary>Solana · Vaulta · x0x settlement evidence</summary>
+  <p>PR #338 records 111 receiver-verified x0x deliveries, private-validator Solana proof verification and settlement, and private-chain Vaulta PLONK fixture settlement. Reconciliation remains partial because the separate fixture fee was unpaid. These are private-network results; this wallet does not offer them as public settlement.</p>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/09f3357a54c176bcdd1242bdf5bbe01c23b9a777/docs/dispatches/2026-10-03-tungsten-chain-acceptance.md" target="_blank" rel="noopener noreferrer">Pinned test evidence and source functions — opens a new tab</a>
   </details>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
   <div id="matrix-body" data-wl-tech></div>
@@ -2271,7 +2391,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 </main>
 <footer>
-  🗝 the BNR wallet · bzDiD is the wallet · <a href="index.html">the hub</a>
+  skaists heART WALLet · <a href="museum.html">Art &amp; collections</a> · <a href="index.html">the hub</a>
   <details class="wl-foot" data-reg-disclose><summary data-i18n="wl.foot.how">how this page is built</summary>
   <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · this page: surfaces/wallet.html
@@ -2285,11 +2405,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
-<script src="arweave.js?v=2"></script>
+<script src="arweave.js?v=3"></script>
 <!-- the estate's ONE level-truth module — the same file market.html and
      museum.html load. Imported, never re-derived: a third copy of the SeedData
      decode is exactly how the lowest-tier-art bug comes back. -->
-<script src="level-truth.js?v=2"></script>
+
 
 <script>
 (function(){
@@ -2437,7 +2557,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // enroll a NEW passkey on THIS origin; returns {pub:PUB_WA_…, credIdHex, credIdB64} or throws honestly
   async function enrollAccountPasskey(){
     var cred=await navigator.credentials.create({publicKey:{
-      rp:{name:'BNR wallet',id:location.hostname},
+      rp:{name:'skaists heART WALLet',id:location.hostname},
       user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL,displayName:SOUL+' (account passkey)'},
       challenge:crypto.getRandomValues(new Uint8Array(32)),
       pubKeyCredParams:[{type:'public-key',alg:-7}],
@@ -2510,6 +2630,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){ return null }
   }
   function isArAddress(s){ return typeof s==='string'&&s.length===43&&/^[A-Za-z0-9_-]{43}$/.test(s) }
+  var AR_INJECT_ACTIVE=null; // Set only by an explicit connection or publication gesture.
   var AR_INJECT_PERMS=['ACCESS_ADDRESS','ACCESS_PUBLIC_KEY','SIGNATURE','SIGN_TRANSACTION'];
   function arInjectPresent(){
     return !!(window.arweaveWallet && typeof window.arweaveWallet.getActiveAddress==='function');
@@ -2527,6 +2648,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     var addr=await w.getActiveAddress();
     if(!isArAddress(addr)) throw new Error('injected wallet returned no 43-char Arweave address');
+    AR_INJECT_ACTIVE=addr;
     if(ctx) saveArPublic(ctx, addr);
     else if(SOUL) saveArPublic('ar:'+SOUL, addr);
     try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:addr}})) }catch(e3){}
@@ -2582,6 +2704,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {signature:signature, id:window.BNRAR.b64u(idBytes), by:by};
   }
   function arInjectBoundAddress(){
+    if(AR_INJECT_ACTIVE)return AR_INJECT_ACTIVE;
     if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
     return vaultArPublic();
   }
@@ -3354,6 +3477,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function railOf(k){ var r=EVM_RAILS[k]; if(!r)throw new Error('no such EVM rail: '+k); return r }
   function assetOf(k,a){ var x=railOf(k).assets[a]; if(!x)throw new Error(a+' is not carried on '+railOf(k).label); return x }
   window.__EVM_RAILS=EVM_RAILS;   // the gate's oracle: the signer vs the data
+  // Public observation can expand without granting a payment/signing rail.
+  var PUBLIC_READ_RAILS=Object.assign({},EVM_RAILS,{ethereum:{chainId:1,label:'Ethereum',
+    hosts:['https://ethereum-rpc.publicnode.com','https://eth.drpc.org'],
+    assets:{ETH:{symbol:'ETH',decimals:18,contract:null}}}});
 
   /* ══ R1 — ONE IDENTITY, EVERY RAIL. Every address below falls out of the
      SAME masterPRK by context tag; there is no second seed, no import, no
@@ -3605,10 +3732,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
+    if(ev&&ev.type==='keydown'&&['Tab','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Shift','Control','Alt','Meta'].includes(ev.key))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
@@ -3675,7 +3803,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      here); a U2F-only or pre-PRF firmware key is refused honestly. */
   async function enrollHardware(){
     var cred=await navigator.credentials.create({publicKey:{
-      rp:{name:'BNR wallet'},
+      rp:{name:'skaists heART WALLet'},
       user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL||'you',displayName:SOUL||'you'},
       challenge:crypto.getRandomValues(new Uint8Array(32)),
       pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
@@ -4232,9 +4360,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
       if(res&&res.transaction_id){
-        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+res.transaction_id.slice(0,16)+'…'+
+        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+esc(String(res.transaction_id).slice(0,16))+'…'+
           (SWITCHED_FROM?' <i>(wallet switched from '+SWITCHED_FROM+' — the key named the account itself)</i>':'');
-        out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+        out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
           '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys — derived key AND passkey can both sign (nothing removed)';
         checkBridge();
@@ -4269,7 +4397,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
     var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):'—';
-    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+cpuAvail+'μs · '+
+    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+esc(cpuAvail)+'μs · '+
       (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
       'liquid '+liquid+' covers the RAM purchase';
   }
@@ -4310,7 +4438,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');ensureCtx('vaulta:'+name);
         renderForge();
         stat.innerHTML='<b style="color:var(--leaf)">5/5 FORGED</b> — '+name+' born, keys on your keychain';
-        out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+        out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>account:</b> '+name+String.fromCharCode(10)+
           '<b>owner key:</b> '+kd.value+String.fromCharCode(10)+
           '<b>active key:</b> '+ka.value+String.fromCharCode(10)+
@@ -4415,8 +4543,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var fields = (st && st.fields) || [];
       $('tx-fields-title').textContent = 'FIELDS — from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')';
       $('tx-fields-row').innerHTML = fields.map(function (f) {
-        return '<input class="small tx-f" data-fn="' + f.name + '" data-ft="' + (f.type || 'string') +
-          '" placeholder="' + f.name + ' · ' + (f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
+        return '<input class="small tx-f" data-fn="' + esc(f.name) + '" data-ft="' + esc(f.type || 'string') +
+          '" placeholder="' + esc(f.name) + ' · ' + esc(f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
       }).join('');
       $('tx-fields').style.display = fields.length ? 'block' : 'none';
       // keep any already-typed JSON that matches field names
@@ -4429,7 +4557,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var args = buildArgsFromFields();
       $('tx-data').value = JSON.stringify(args);
       preview(contract, action, args, netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key');
-    } catch (e) { out.innerHTML = '<b style="color:var(--amber)">ABI error:</b> ' + e.message }
+    } catch (e) { out.innerHTML = '<b style="color:var(--amber)">ABI error:</b> ' + esc(e.message) }
   }
   $('tx-abi').onclick = loadAbiUi;
   $('tx-net').onchange = function () {
@@ -4596,19 +4724,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      Retry resubmits the IDENTICAL stored bytes — never re-signs, never
      rebuilds. intent_id is the idempotency key on every resubmission. */
   var OUTBOX_KEY = 'bnr_outbox_v1';
-  function outboxRead() { try { var o = JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]'); return Array.isArray(o) ? o : [] } catch (e) { return [] } }
+  function outboxRead(strict) {
+    try {
+      var list=JSON.parse(localStorage.getItem(OUTBOX_KEY)||'[]');
+      if(!Array.isArray(list)||list.some(function(e){return !e||typeof e.intent_id!=='string'||typeof e.rail!=='string'||typeof e.phase!=='string'}))throw new Error('invalid outbox');
+      return list;
+    }catch(error){if(strict)throw new Error('The saved outbox is unavailable or unreadable. Submission stopped to protect existing transactions.');return null;}
+  }
   function outboxWrite(list) {
-    try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(list.slice(-40))) } catch (e) {}
+    // Never discard unresolved signed transactions to make room for history.
+    var terminal=list.filter(function(e){return ['confirmed','failed','expired'].includes(e.phase)}).slice(-40);
+    var keep=list.filter(function(e){return !['confirmed','failed','expired'].includes(e.phase)||terminal.includes(e)});
+    var raw=JSON.stringify(keep);
+    try{localStorage.setItem(OUTBOX_KEY,raw);if(localStorage.getItem(OUTBOX_KEY)!==raw)throw new Error('read-back mismatch');}
+    catch(error){throw new Error('The outbox could not save the transaction. Submission stopped. Free browser storage and try again.');}
   }
   function outboxPut(entry) {
-    var list = outboxRead();
+    var list = outboxRead(true);
     for (var i = 0; i < list.length; i++) if (list[i].intent_id === entry.intent_id) { list[i] = entry; break }
     if (i === list.length) list.push(entry);
     outboxWrite(list);
     renderOutbox();
   }
   function outboxGet(id) {
-    var list = outboxRead();
+    var list = outboxRead(true);
     for (var i = 0; i < list.length; i++) if (list[i].intent_id === id) return list[i];
     return null;
   }
@@ -4618,7 +4757,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function renderOutbox() {
     var el = $('outbox-list');
     if (!el) return;
-    var list = outboxRead().slice().reverse();
+    var saved=outboxRead();
+    if(saved===null){el.textContent='The saved outbox is unavailable or unreadable. Existing transactions have not been replaced.';return;}
+    var list = saved.slice().reverse();
     if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)"><span data-wl-tech>empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</span><span data-reg="bee" data-i18n="wl.bee.outbox.empty">nothing is waiting to be sent</span></div>';
       var bx = el.querySelector('span[data-reg="bee"]');   /* rendered after the language pass: translate it once in place */
       if (bx && window.BNRLanguage && BNRLanguage.text) bx.textContent = BNRLanguage.text('wl.bee.outbox.empty', bx.textContent);
@@ -4635,7 +4776,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '</div>';
     }).join('');
     Array.prototype.forEach.call(el.querySelectorAll('.obx-retry'), function (b) {
-      b.onclick = function () { retryOutbox(b.getAttribute('data-id')) };
+      b.onclick = async function () {
+        b.disabled=true;
+        try{await retryOutbox(b.getAttribute('data-id'))}catch(error){var out=$('tx-out');out.style.display='block';out.textContent=error.message||'Retry did not complete.';}finally{b.disabled=false}
+      };
     });
   }
   async function retryOutbox(intentId) {
@@ -4763,7 +4907,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var net = opts.network === 'j4' ? 'jungle4' : 'mainnet';
     var out = $('tx-out'); out.style.display = 'block';
     if (!ADAPTERS.vaulta || !ADAPTERS.vaulta.attached) {
-      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + ((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
+      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + esc((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
       return null;
     }
     if (!hasCap('vaulta', 'buildAction')) {                  // path GONE, not erroring (§9.2)
@@ -4775,15 +4919,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try {
       intent = await callAdapter('vaulta', 'buildAction', { account: contract, action: action, data: data, auth: auth, network: net }, 25000);
     } catch (e) {
-      out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + (e && e.message || e);
+      out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + esc(e && e.message || e);
       return null;
     }
     preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
-    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + intent.intent_id + '\n<b>digest</b>  ' + intent.digest.slice(0, 32) + '…\n<b>in words</b> ' + intent.human_summary;
+    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + esc(intent.intent_id) + '\n<b>digest</b>  ' + esc(intent.digest.slice(0, 32)) + '…\n<b>in words</b> ' + esc(intent.human_summary);
     out.textContent = '2/5 the vault signs the digest…';
     var sgn;
     try { sgn = await vaultSign(intent, opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : null)) }
-    catch (e) { out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); return null }
+    catch (e) { out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + esc(e && e.message || e); return null }
     var entry = {
       intent_id: intent.intent_id, rail: 'vaulta', network: net,
       human_summary: intent.human_summary, digest: intent.digest,
@@ -4793,7 +4937,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       expires_at: intent.expires_at, signed_by: sgn.by,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
-    outboxPut(entry);                                        // PERSIST BEFORE SUBMIT — the law
+    try{outboxPut(entry)}catch(error){out.textContent=error.message;return null} // PERSIST BEFORE SUBMIT — the law
     out.textContent = '3/5 signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes…';
     return submitAndConfirm(entry, function (msg, phase) {
       var color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : 'var(--cyan)';
@@ -4827,9 +4971,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   };
 
-  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
-  spawnAdapter('hive', 'wallet-adapter-hive.js');
-  spawnAdapter('arweave', 'wallet-adapter-arweave.js');
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=4');   // document-relative: same dir as this page
+  spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
+  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=3');
 
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
      window.arweaveWallet inject (public key + extension sign). Vault JWK is
@@ -4840,7 +4984,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     opts = opts || {};
     var out = $('tx-out');
     if (!ADAPTERS.arweave || !ADAPTERS.arweave.attached) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + ((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + esc((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
       return null;
     }
     if (!hasCap('arweave', 'buildPublish')) {
@@ -4855,13 +4999,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         publicJwk = await arInjectPublicJwk();
         var injAddr = await window.arweaveWallet.getActiveAddress();
         if (isArAddress(injAddr)) {
+          AR_INJECT_ACTIVE=injAddr;
           if (SOUL) saveArPublic('ar:'+SOUL, injAddr);
           try{ document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:injAddr}})) }catch(e0){}
         }
         signOpts = { inject: true };
       } catch (ie) {
         if (opts.inject === true && !(opts.jwk && opts.jwk.d)) {
-          if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">inject sign unavailable:</b> ' + (ie && ie.message || ie) + ' — install/connect Wander, or use the vault JWK scaffold.'; }
+          if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">inject sign unavailable:</b> ' + esc(ie && ie.message || ie) + ' — install/connect Wander, or use the vault JWK scaffold.'; }
           return null;
         }
         publicJwk = null; signOpts = null;
@@ -4881,15 +5026,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try {
       intent = await callAdapter('arweave', 'buildPublish', { public_jwk: publicJwk, payload_b64: b64in, tags: tags }, 25000);
     } catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + (e && e.message || e); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + esc(e && e.message || e); }
       return null;
     }
+    var wire=JSON.parse(intent.wire_json);
+    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==publicJwk.n||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
+    // Reconstruct the signing bytes from the exact public file, tags and fee.
+    // A worker digest alone cannot bind what the user reviewed to the wire body.
+    var rebuilt=await window.BNRAR.buildUnsigned(publicJwk,bytes,tags.map(function(tag){return {name:tag[0],value:tag[1]}}),{reward:String(wire.reward),anchor:wire.last_tx});
+    if(JSON.stringify(rebuilt.wire)!==JSON.stringify(wire)||window.BNRAR.b64u(rebuilt.sigData)!==window.BNRAR.b64u(b64ToBytes(intent.unsigned_bytes)))throw new Error('The signing bytes do not match the reviewed file transaction');
+    if(typeof opts.review==='function'&&!await opts.review({feeWinston:String(wire.reward),bytes:bytes.length,address:await window.BNRAR.addressOf(publicJwk)}))return {phase:'cancelled'};
     var sgn;
     try { sgn = await vaultSign(intent, signOpts) }
     catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + (e && e.message || e); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + esc(e && e.message || e); }
       return null;
     }
+    var signatureBytes=window.BNRAR.unb64u(sgn.signatures[0]);
+    var verifyKey=await crypto.subtle.importKey('jwk',publicJwk,{name:'RSA-PSS',hash:'SHA-256'},false,['verify']);
+    if(!await crypto.subtle.verify({name:'RSA-PSS',saltLength:32},verifyKey,signatureBytes,rebuilt.sigData))throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+    var signedId=window.BNRAR.b64u(new Uint8Array(await crypto.subtle.digest('SHA-256',signatureBytes)));
+    if(signedId!==sgn.ar_id)throw new Error('The returned transaction ID did not match its signature. Nothing was submitted.');
     var entry = {
       intent_id: intent.intent_id, rail: 'arweave', network: 'mainnet',
       human_summary: intent.human_summary, digest: intent.digest,
@@ -4990,6 +5147,56 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   })();
 
   window.BNRWALLET = {
+    /* Public reads deliberately do not set SOUL, EVMADDR, LAST_ACC, forge
+       contexts, signing caps or the connected-wallet rollups. */
+    readPublicBalance: async function(chain,address) {
+      if(Object.prototype.hasOwnProperty.call(PUBLIC_READ_RAILS,chain)) {
+        var rail=PUBLIC_READ_RAILS[chain], last='public RPC unavailable';
+        for(var host of rail.hosts) {
+          try {
+            var request=async function(method,params) {
+              var response=await fetchT(host,{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})},6500);
+              if(!response.ok)throw new Error('RPC HTTP '+response.status);
+              var data=await response.json();
+              if(data.error||typeof data.result!=='string'||!/^0x[0-9a-f]+$/i.test(data.result))throw new Error('RPC returned no valid amount');
+              return data.result;
+            };
+            if(BigInt(await request('eth_chainId',[]))!==BigInt(rail.chainId))throw new Error('RPC answered for a different network');
+            var amounts=[];
+            for(var asset of Object.values(rail.assets)) {
+              var raw=asset.contract
+                ? await request('eth_call',[{to:asset.contract,data:'0x70a08231'+'0'.repeat(24)+address.slice(2)},'latest'])
+                : await request('eth_getBalance',[address,'latest']);
+              amounts.push(fromBaseUnits(BigInt(raw),asset.decimals)+' '+asset.symbol);
+            }
+            return {amounts:amounts,source:new URL(host).hostname};
+          } catch(e) {last=e.message}
+        }
+        throw new Error(last);
+      }
+      if(['vaulta','hive','bitcoin','solana','arweave'].indexOf(chain)<0)throw new Error('Unsupported read network');
+      // Reuse the read-only BTC/SOL workers on demand, through the same shell.
+      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js?v=5');
+      else if(!ADAPTERS[chain].attached&&ADAPTERS[chain].state!=='spawning')ADAPTERS[chain].respawn();
+      var start=Date.now();
+      while(!ADAPTERS[chain].attached) {
+        if(Date.now()-start>8500)throw new Error('Read adapter unavailable; try again');
+        await new Promise(function(resolve){setTimeout(resolve,50)});
+      }
+      var result=await callAdapter(chain,'balance',{address:address,network:'mainnet'},30000);
+      var unit={vaulta:'A',hive:'HIVE',bitcoin:'BTC',solana:'SOL',arweave:'AR'}[chain];
+      if(result.unit!==unit)throw new Error('Read returned an unexpected asset');
+      var quantity=result.quantity;
+      if(chain==='arweave') {
+        if(!/^\d+$/.test(result.winston))throw new Error('Read returned no valid AR balance');
+        quantity=fromBaseUnits(BigInt(result.winston),12)+' AR';
+      }
+      if(typeof quantity!=='string'||!new RegExp('^\\d+(?:\\.\\d+)? '+unit+'$').test(quantity))throw new Error('Read returned no valid balance');
+      var amounts=[quantity];
+      if(chain==='hive'&&Array.isArray(result.balances))amounts=result.balances.filter(function(value){return /^\d+\.\d{3} (HIVE|HBD)$/.test(value)});
+      return {amounts:amounts,source:chain+' public adapter',note:chain==='bitcoin'?'Confirmed BTC only':chain==='hive'?(result.hbdAvailable?'Liquid HIVE and HBD; excludes savings and Hive Power':'Liquid HIVE; HBD read unavailable; excludes savings and Hive Power'):''};
+    },
     adapters: ADAPTERS,
     walletAction: walletAction,
     walletPublish: walletPublish,
@@ -5027,34 +5234,43 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     _crash: crash
   };
 
-  /* ══ THE CHAIN MATRIX — Brief 04 Part 3 as DATA (matrix law 4: counts
-     computed at render, never typed). Read = first-party path; Sign = custody
-     tier path; State = tonight's honest badge. PROTOCOL may be core, SERVICE
-     degrades, gaps are gaps. ═══════════════════════════════════════════ */
+  /* Brief 04 plus chain-support-graphene-cosmos. The watch key alone enables
+     an account-book reader; researched scope never grants that capability.
+     This registry also populates the account picker. Counts are computed. */
   var CHAIN_MATRIX = [
-    { family: 'EVM', name: 'ETH', unit: 'ETH', read: 'public JSON-RPC eth_getBalance + balanceOf, Multicall3 batching', sign: 'Tier 1/2/3 · EIP-1559 · Permit2', state: 'PROVEN' },
-    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless: the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
-    { family: 'EVM', name: 'Base', unit: 'ETH · USDC', read: 'same; mainnet.base.org keyless. MiDi lives here, and the derived bzDiD address now READS and SIGNS on chain 8453: ETH plus Circle-native USDC at its true 6 decimals', sign: 'Tier 1/2/3 · EIP-155 first-party signer · the spend cap is enforced INSIDE the signer, not by the button', state: 'LIVE' },
-    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified: no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
-    { family: 'EVM', name: 'Vaulta', unit: 'A', read: 'native EOS-line APIs through the adapter contract on this page', sign: 'bzDiD K1 or passkey · firmware ✓', state: 'LIVE' },
-    { family: 'EVM', name: 'stables', unit: 'USDC & kin', read: 'ERC-20 reads on every EVM rail + SPL + HBD on Hive', sign: 'per family · token units, never fiat itemization', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture) · a native-segwit P2WPKH receive address derives in this tab from the same soul, proven against the published BIP-173 and BIP-84 vectors; the spending path stays unwired', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11 invoices AND BOLT-12 offers decode LOCALLY in this tab: amount, payment hash, expiry, issuer; no node contacted, nobody told what you are about to pay', sign: 'the sats cap speaks on the decoded amount; paying rides an NWC connection whose budget lives at the hub (1000 sat/day, live) and whose live leg is parked at a relay ACL (tools/ln-rail/README.md)', state: 'VERIFY' },
-    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE: degrade gracefully · a receive address derives in this tab from the same soul (ed25519 to base58); the spending path stays unwired', state: 'VERIFY' },
-    { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless: reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
-    { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API: privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP: BCH sighash differs from BTC', state: 'GAP' },
-    { family: 'Hard tail', name: 'Zcash', unit: 'ZEC', read: 't-addr via lightwalletd; UA/z-addr by VIEW KEY (same scanner shape as silent payments)', sign: 'FIRMWARE GAP: shielded signing is local-heavy', state: 'GAP' },
-    { family: 'Hard tail', name: 'Monero', unit: 'XMR', read: 'view-only wallet rpc, private view key never leaves the client', sign: 'FIRMWARE GAP: cold files or Tier 1/2 software keys', state: 'GAP' },
-    { family: 'Hard tail', name: 'Autonomi', unit: 'ANT', read: 'antd/CLI wallet reads: REST routes unpublished upstream, verify against the live daemon, never guess', sign: 'keypair per tier', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Arweave', unit: 'AR', read: 'gateway GraphQL winston, multi-gateway rotation, never hard-code arweave.net', sign: 'native JWK Tier 1/2 · firmware ✓', state: 'VERIFY' }
+    { family: 'Antelope', name: 'Vaulta', unit: 'A', watch: 'vaulta', read: 'Public account balance; connected account also shows RAM, CPU and permissions.', sign: 'Native action/transfer adapter and browser K1/passkey path exist. Custom EOS firmware and host integration have separate acceptance.', state: 'READ' },
+    { family: 'Graphene', name: 'Hive', unit: 'HIVE · HBD · HP', watch: 'hive', read: 'Public account reader: liquid HIVE and HBD. Savings, Hive Power and resource-credit expansion remain due.', sign: 'The Hive worker is read-only. Hardware operation encoding and account-key mapping remain integration work.', state: 'READ' },
+    { family: 'EVM', name: 'ETH', unit: 'ETH · ERC-20i', watch: 'ethereum', read: 'Public ETH balance and token balances from the ERC-20i census, including PEPi-item. Additional token contracts can be read.', sign: 'EVM firmware family exists; Ethereum is not enabled in this page’s payment rail table.', state: 'READ' },
+    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', watch: 'arbitrum', read: 'Public ETH and Autonomi ANT balances, with network identity checked.', sign: 'Browser EVM signing exists. Trezor public import is separate from bPay authorization and settlement.', state: 'READ' },
+    { family: 'EVM', name: 'Base', unit: 'ETH · USDC · ERC-20i', watch: 'base', read: 'Public ETH/USDC and on-demand holdings across the complete ERC-20i census, with per-contract decimals and visible failures. Additional contracts can be read.', sign: 'Browser EVM signing and spend-cap code exist. ERC-20i inscription transfers require their own measured contract semantics.', state: 'READ' },
+    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'Rust chain decoder/indexer configuration exists; saved-account balance integration remains due.', sign: 'Pinned EVM chain identity exists. Wallet send integration and end-to-end settlement evidence remain due.', state: 'CODE' },
+    { family: 'Tokens', name: 'stables', unit: 'USDC · HBD · others', read: 'Base USDC is read in this account book; HBD appears in the connected Hive view. Other ERC-20/SPL coverage remains due.', sign: 'Tokens use their chain’s signer and policy. They are not an independent blockchain.', state: 'CODE' },
+    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', watch: 'bitcoin', read: 'Confirmed address balance or an imported account xpub/ypub/zpub. Silent-payment scanning is separate.', sign: 'Receive derivation and Trezor public import exist; this page’s BTC spending path remains unwired.', state: 'READ' },
+    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11/BOLT-12 decoding exists. Account balances require a node connection; a public BTC address cannot provide them.', sign: 'NWC/LDK and allowance work has separate receipts. Current live payment acceptance is not established here.', state: 'CODE' },
+    { family: 'Independent', name: 'Solana', unit: 'SOL', watch: 'solana', read: 'Native SOL balance and Trezor public-account import. SPL token inventory remains due.', sign: 'Rust native-SOL message/signature bench passed with a firmware emulator. No physical device or chain settlement acceptance.', state: 'READ' },
+    { family: 'Privacy', name: 'Zano', unit: 'ZANO', read: 'Rust decoder/watcher work exists. Private balances need a wallet-specific view path, not just a public address.', sign: 'Custom firmware work and conformance records exist; complete clean-source build and transaction acceptance remain due.', state: 'CODE' },
+    { family: 'Bitcoin', name: 'Bitcoin Cash', unit: 'BCH', read: 'Cashaddr/UTXO reader integration and backup-anchor mechanism remain due.', sign: 'Bitcoin-family firmware must be checked for the exact BCH path. Wallet end-to-end support is not established.', state: 'GAP' },
+    { family: 'Privacy', name: 'Zcash', unit: 'ZEC', read: 'Transparent and shielded/viewing-key reads need distinct adapters. Never enter viewing secrets in the public account book.', sign: 'A firmware app directory exists; shielded/address-format/device acceptance is not established.', state: 'GAP' },
+    { family: 'Privacy', name: 'Monero', unit: 'XMR', read: 'Needs a view-only wallet and scanning; a public address alone cannot reveal the balance.', sign: 'A firmware app directory exists. Its presence does not complete the wallet’s cold-signing integration.', state: 'GAP' },
+    { family: 'Storage', name: 'Autonomi', unit: 'ANT', read: 'For ANT token balances choose Arbitrum. Storage quotes, paid upload and verified retrieval are separate capabilities.', sign: 'Arbitrum payment-plan/authorization adapters exist; an accepted quote does not prove settlement or storage.', state: 'CODE' },
+    { family: 'Storage', name: 'Arweave', unit: 'AR', watch: 'arweave', read: 'Public AR balance with gateway fallback; transaction and publication evidence use separate operations.', sign: 'JWK publication and Rust ANS-104 work exist. A custom Arweave firmware signer is not established.', state: 'READ' },
+    { family: 'Graphene', name: 'BitShares', unit: 'BTS', read: 'Named-account reader still needs integration. Research retains a separate BitShares operation decoder.', sign: 'Shared Graphene envelope is reusable; Hive operation tags are not. Device recipient-name verification needs explicit treatment.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Steem', unit: 'STEEM', read: 'Registry/research scope; no reader enabled here.', sign: 'Prior review recommends registration only, with operation support deferred.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Golos', unit: 'GOLOS', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Blurt', unit: 'BLURT', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Graphene', name: 'Peerplays', unit: 'PPY', read: 'Family research only; no reader enabled here.', sign: 'Family relationship does not establish a signing adapter.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Cosmos Hub', unit: 'ATOM', read: 'Named in the reviewed Cosmos expansion; public-account reader remains due.', sign: 'Shared Cosmos DIRECT-mode app and reviewed message allowlist remain due.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Osmosis', unit: 'OSMO', read: 'Distinct chain identity and osmo address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app, not a separate firmware application.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Celestia', unit: 'TIA', read: 'Distinct chain identity and celestia address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app; account derivation is not signing acceptance.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'dYdX', unit: 'DYDX', read: 'Distinct chain identity and dydx address prefix; reader remains due.', sign: 'Uses the planned shared Cosmos app and explicit chain configuration.', state: 'STUDY' },
+    { family: 'Cosmos', name: 'Injective', unit: 'INJ', read: 'Host-side inj address/transaction integration remains due.', sign: 'Reviewed EIP-712 fixture uses the Ethereum path; it is not the generic Cosmos derivation/signing path.', state: 'STUDY' }
   ];
   (function renderMatrix() {
-    var STATE_COLORS = { LIVE: 'var(--leaf)', PROVEN: 'var(--cyan)', VERIFY: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
+    var STATE_COLORS = { READ: 'var(--leaf)', CODE: 'var(--cyan)', EVALUATION: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
     var byState = {}, byFamily = {};
     CHAIN_MATRIX.forEach(function (c) { byState[c.state] = (byState[c.state] || 0) + 1; byFamily[c.family] = (byFamily[c.family] || 0) + 1 });
     var sum = $('matrix-summary');
-    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' rails · computed</span>' +
+    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' scope entries · computed</span>' +
       Object.keys(byState).map(function (s) {
         return '<span style="border:1px solid ' + STATE_COLORS[s] + ';color:' + STATE_COLORS[s] + ';border-radius:6px;padding:2px 9px;font-size:10px">' + byState[s] + ' ' + s.toLowerCase() + '</span>';
       }).join('');
@@ -5126,111 +5342,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
   $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
-
-  /* ══ INSCRIPTIONS — the connected soul's garden, drawn from chain.
-     EVERY piece of chain arithmetic here comes from LevelTruth. This surface
-     builds NO calldata and decodes NO string of its own: the SeedData encoding
-     (a static struct, no leading offset word) and the 128 KB decode ceiling
-     live in that one module, and re-deriving either here is precisely how the
-     always-lowest-tier bug returns. ══ */
-  var LT = window.LevelTruth || null;
-  function inscTarget(){
-    var typed = ($('insc-addr').value||'').trim();
-    if(typed) return typed;
-    if(MPRK && SOUL){
-      var r = BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
-      try{ return evmAddressFromSeed(r.seed) } finally { r.seed.fill(0) }
-    }
-    return null;
-  }
-  /* the art is handed to the browser as an <img> data URI rather than injected
-     as live markup: an SVG in an <img> cannot run script, and this is
-     contract-supplied content. Static art renders identically. */
-  function svgImg(svg){
-    var b64;
-    try{ b64 = btoa(unescape(encodeURIComponent(svg))) }catch(e){ return '' }
-    return '<img alt="on-chain inscription" loading="lazy" src="data:image/svg+xml;base64,'+b64+'" '+
-      'style="width:100%;aspect-ratio:1;object-fit:contain;display:block;background:#07060d;border-radius:10px">';
-  }
-  function inscCard(p){
-    var lvlLine = p.gate && p.gate.agree === false
-      ? '<div style="color:var(--amber);font-size:10.5px;margin-top:5px;line-height:1.6"><b>⚠ GATE FAILURE</b><br>'+
-        'this page reads level <b>'+p.gate.ours+'</b>; the contract’s own getMeta says <b>'+p.gate.theirs+'</b>. '+
-        'The number is not smoothed — the disagreement is the finding.</div>'
-      : '<div style="font-size:12px;color:var(--ink);margin-top:5px;letter-spacing:.14em">'+
-        esc(LT.pips(p.lvl, LT.pipmax(p.col)))+' <span style="color:var(--dim);font-size:10px;letter-spacing:0">level '+p.lvl+
-        (p.gate && p.gate.agree ? ' · getMeta agrees' : '')+'</span></div>';
-    return '<div style="border:1px solid var(--line2);border-radius:12px;padding:10px;background:var(--well)">'+
-      svgImg(p.svg)+
-      '<div style="font-size:12.5px;font-weight:600;margin-top:8px">'+esc(p.col.sym)+'</div>'+
-      lvlLine+
-      '<div style="font-size:9.5px;color:var(--faint);margin-top:5px;line-height:1.7">balance <b style="color:var(--ink)">'+
-      p.balDisp+'</b><br>seed '+p.seed.toLocaleString()+' · '+p.svg.length.toLocaleString()+' bytes of art</div>'+
-      '</div>';
-  }
-  async function inscDraw(){
-    if(!LT){ $('insc-stat').innerHTML='<b style="color:var(--amber)">level-truth.js did not load</b> — the garden stays closed rather than guess a tier.'; return }
-    var target = inscTarget();
-    $('insc-grid').innerHTML='';
-    if(!target){ $('insc-stat').textContent='connect your keychain, or type an address — nothing is read until then'; return }
-    /* a .base.eth name resolves through the same registry-first path the FUND
-       panel uses; a raw 0x goes straight through */
-    if(!/^0x[0-9a-fA-F]{40}$/.test(target)){
-      $('insc-stat').textContent='resolving '+target+'…';
-      var resolved = await (window.__bnrResolveName ? window.__bnrResolveName(target) : Promise.resolve(null));
-      if(!resolved){ $('insc-stat').innerHTML='<b style="color:var(--amber)">that name has no address record</b> — paste a 0x… address instead.'; return }
-      target = resolved;
-    }
-    $('insc-stat').textContent='reading '+target.slice(0,10)+'… across '+LT.COLLECTIONS.length+' collections…';
-    var balCalls = LT.COLLECTIONS.map(function(c){ return {to:c.c, data:'0x70a08231'+LT.AD(target)} });
-    var bals = await LT.rpc(balCalls);
-    if(!bals){ $('insc-stat').innerHTML='<b style="color:var(--amber)">the rails did not answer</b> — no art is drawn rather than a wrong one.'; return }
-    var held = [];
-    for(var i=0;i<LT.COLLECTIONS.length;i++){
-      var b = bals[i];
-      if(!b || b==='0x') continue;
-      var raw; try{ raw = BigInt(b) }catch(e){ continue }
-      if(raw === 0n) continue;
-      /* the SAME normalisation market.html and museum.html use — whole tokens,
-         because the contract does not re-apply decimals() to SeedData.seed */
-      held.push({col: LT.COLLECTIONS[i], seed: Number(raw/1000000000n), raw: raw});
-    }
-    if(!held.length){
-      $('insc-grid').innerHTML =
-        '<div style="grid-column:1/-1;border:1px dashed var(--line2);border-radius:12px;padding:26px 18px;text-align:center">'+
-        '<div style="font-size:13px;color:var(--ink)">no inscriptions yet</div>'+
-        '<div style="font-size:10.5px;color:var(--dim);margin-top:7px;line-height:1.8;max-width:44ch;margin-inline:auto">'+
-        'This address holds none of the '+LT.COLLECTIONS.length+' ERC-20i collections this page reads. '+
-        'Nothing is drawn — an empty garden is empty, not a placeholder.</div></div>';
-      $('insc-stat').innerHTML='✓ read '+target.slice(0,10)+'… — <b>holds none of the '+LT.COLLECTIONS.length+' collections</b>.';
-      return;
-    }
-    $('insc-stat').textContent='drawing '+held.length+' piece'+(held.length===1?'':'s')+' at true tier…';
-    var pieces = [];
-    for(var k=0;k<held.length;k++){
-      var h = held[k];
-      var lvl = LT.lvlOf(h.seed, h.col);
-      var art = await LT.rpc([{to:h.col.c, data: LT.svgCallData(h.col, h.seed, 0)}]);
-      if(!art || !art[0] || art[0]==='0x') continue;
-      var svg; try{ svg = LT.decodeString(art[0]) }catch(e){ continue }
-      /* THE GATE: the collection's own getMeta, live, every time */
-      var gate = await LT.verifyLevel(h.col, h.seed, 0);
-      pieces.push({col:h.col, seed:h.seed, lvl:lvl, svg:svg, gate:gate,
-        balDisp: fromBaseUnits(h.raw, 9)+' '+h.col.sym});
-    }
-    if(!pieces.length){
-      $('insc-stat').innerHTML='<b style="color:var(--amber)">balances found, but no art decoded</b> — nothing is drawn rather than a broken frame.';
-      return;
-    }
-    pieces.sort(function(a,b){ return b.lvl-a.lvl || b.seed-a.seed });   // the highest tier leads
-    $('insc-grid').innerHTML = pieces.map(inscCard).join('');
-    var bad = pieces.filter(function(p){ return p.gate && p.gate.agree===false }).length;
-    $('insc-stat').innerHTML = '✓ <b>'+pieces.length+' piece'+(pieces.length===1?'':'s')+'</b> drawn from chain at true tier'+
-      (bad ? ' · <b style="color:var(--amber)">'+bad+' GATE FAILURE</b>' : ' · <b style="color:var(--leaf)">every level agrees with the contract’s own getMeta</b>')+
-      ' · '+esc(target.slice(0,10))+'…';
-  }
-  $('insc-go').onclick=inscDraw;
-  $('insc-addr').addEventListener('keydown',function(e){ if(e.key==='Enter')inscDraw() });
 
   /* ── PAYMENT NAME — one name, both rails ─────────────────────────────── */
   function pnSide(which){
@@ -5376,7 +5487,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{ capAssert(unit,amt); return true }
     catch(e){
       if(!e.capRefused) throw e;
-      $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+e.message+
+      $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+esc(e.message)+
         ' Raise or clear it above. No one is asked.';
       return false;
     }
@@ -5434,13 +5545,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
-        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
         capRecord('A',amt);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
       }
     }catch(e){ $('sv-stat').textContent='send error: '+e.message }
     $('sv-to').value='';$('sv-amt').value='';
@@ -5707,13 +5818,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
-        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
         if(swCapCost!==null)capRecord('A',swCapCost);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
       }
     }catch(e){ $('sw-stat').textContent='swap error: '+e.message }
   };
@@ -6596,6 +6707,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('[data-wl-go]');
     if(!b)return;
+    e.preventDefault();
     var v=b.getAttribute('data-wl-go');
     if(reg()==='bee'){
       if(v==='home'&&idx()>bootIdx){history.back();return}   /* the stack pops, it does not grow */
@@ -6784,6 +6896,506 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     ['wheel','touchstart','keydown'].forEach(function(t){window.addEventListener(t,function(){moved=true},{once:true,passive:true})});
     if(document.readyState==='complete')land();else window.addEventListener('load',land,{once:true});
     setTimeout(land,700);   /* once more after the receipts above it have rendered, unless the reader moved */
+  }
+})();
+</script>
+<script id="wallet-coins">
+(function(){
+'use strict';
+// The whole measured family, shared with selector_census.py. A five-renderer
+// table is not a token-discovery limit. No service or local server is needed.
+var registryUrl = new URL("../docs/receipts/deployments.json", location.href).href;
+var registryPromise = null;
+async function deploymentRegistry(){
+  if(!registryPromise) registryPromise=(async function(){
+    var response=await fetch(registryUrl);
+    if(!response.ok)throw new Error('Collection registry unavailable');
+    var data=await response.json(),seen=new Set();
+    if(!data||!Array.isArray(data.deployments)||data.deployments.length>256)throw new Error('Invalid collection registry');
+    data.deployments.forEach(function(d){
+      if(!d||!['base','ethereum'].includes(d.chain)||!/^0x[0-9a-f]{40}$/i.test(d.address)||typeof d.name!=='string'||d.name.length>80)throw new Error('Invalid collection entry');
+      var key=d.chain+':'+d.address.toLowerCase();if(seen.has(key))throw new Error('Duplicate collection');seen.add(key);
+    });
+    return data.deployments;
+  })().catch(function(e){registryPromise=null;throw e});
+  return registryPromise;
+}
+var HOLDING_RAILS={
+  base:{id:8453,hosts:['https://mainnet.base.org','https://base-rpc.publicnode.com']},
+  ethereum:{id:1,hosts:['https://ethereum-rpc.publicnode.com','https://eth.drpc.org']}
+};
+function uintWord(value){
+  if(typeof value!=='string'||!/^0x[0-9a-f]{64}$/i.test(value))throw new Error('Invalid token amount');
+  return BigInt(value);
+}
+function tokenUnits(raw,decimals){
+  var unit=10n**BigInt(decimals),whole=raw/unit,tail=(raw%unit).toString().padStart(decimals,'0').replace(/0+$/,'');
+  return whole.toString()+(decimals&&tail?'.'+tail:'');
+}
+async function holdingRequest(host,requests){
+  var ctl=new AbortController(),timer=setTimeout(function(){ctl.abort()},8000);
+  try{
+    var response=await fetch(host,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,body:JSON.stringify(requests)});
+    if(!response.ok)throw new Error('RPC HTTP '+response.status);
+    var body=await response.text();if(body.length>1048576)throw new Error('RPC response too large');
+    var rows=JSON.parse(body),byId=new Map();
+    if(!Array.isArray(rows)||rows.length!==requests.length)throw new Error('Incomplete RPC batch');
+    rows.forEach(function(row){
+      if(!row||!requests.some(function(r){return r.id===row.id})||byId.has(row.id))throw new Error('Ambiguous RPC batch');
+      byId.set(row.id,row);
+    });
+    return requests.map(function(r){return byId.get(r.id)});
+  }finally{clearTimeout(timer)}
+}
+async function readHoldings(owner,options){
+  options=options||{};
+  if(!/^0x[0-9a-f]{40}$/i.test(owner))throw new Error('Use a public EVM account address');
+  if(options.chain&&!HOLDING_RAILS[options.chain])throw new Error('Choose Base or Ethereum');
+  var deployments=(await deploymentRegistry()).filter(function(d){return !options.chain||d.chain===options.chain});
+  var extra=options.contracts||[];
+  if(!Array.isArray(extra)||extra.length>20)throw new Error('Use at most 20 additional token contracts per read');
+  extra.forEach(function(contract){
+    if(!options.chain||!/^0x[0-9a-f]{40}$/i.test(contract))throw new Error('Choose a chain and a public token contract');
+    if(!deployments.some(function(d){return d.chain===options.chain&&d.address.toLowerCase()===contract.toLowerCase()}))
+      deployments.push({name:'Additional token',chain:options.chain,address:contract,source:'user supplied contract'});
+  });
+  var result=[];
+  // Chains run concurrently; each chain has bounded batches and one endpoint
+  // at a time. Nothing is polled per account or per rendered card.
+  await Promise.all(Object.keys(HOLDING_RAILS).map(async function(chain){
+    var group=deployments.filter(function(d){return d.chain===chain});if(!group.length)return;
+    var rail=HOLDING_RAILS[chain],last='Chain unavailable';
+    for(var host of rail.hosts){
+      try{
+        var header=await holdingRequest(host,[{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},{jsonrpc:'2.0',id:2,method:'eth_blockNumber',params:[]}]);
+        if(header.some(function(r){return r.error||!/^0x[0-9a-f]+$/i.test(r.result)}))throw new Error('Invalid chain observation');
+        if(BigInt(header[0].result)!==BigInt(rail.id))throw new Error('RPC answered for a different network');
+        var block=header[1].result,observed=[];
+        for(var start=0;start<group.length;start+=8){
+          var slice=group.slice(start,start+8),calls=[];
+          slice.forEach(function(d,i){
+            calls.push({jsonrpc:'2.0',id:i*2,method:'eth_call',params:[{to:d.address,data:'0x70a08231'+('0'.repeat(24)+owner.slice(2).toLowerCase())},block]});
+            calls.push({jsonrpc:'2.0',id:i*2+1,method:'eth_call',params:[{to:d.address,data:'0x313ce567'},block]});
+          });
+          var answers=await holdingRequest(host,calls);
+          slice.forEach(function(d,i){
+            var row=Object.assign({},d,{block:block,source:new URL(host).hostname,state:'unavailable'});
+            try{
+              if(answers[i*2].error||answers[i*2+1].error)throw new Error('Contract read failed');
+              var raw=uintWord(answers[i*2].result),dec=uintWord(answers[i*2+1].result);
+              if(dec>255n)throw new Error('Invalid decimals');
+              row.raw=raw.toString();row.decimals=Number(dec);row.quantity=tokenUnits(raw,row.decimals);row.state=raw===0n?'empty':'held';
+            }catch(e){row.error=e.message}
+            observed.push(row);
+          });
+        }
+        result.push.apply(result,observed);return;
+      }catch(e){last=e.message}
+    }
+    group.forEach(function(d){result.push(Object.assign({},d,{state:'unavailable',error:last}))});
+  }));
+  return deployments.map(function(d){return result.find(function(r){return r.chain===d.chain&&r.address===d.address})});
+}
+
+window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings};
+})();
+</script>
+<script id="wallet-address-book">
+/* The public address book has its own storage and read state. It never
+   persists balances, requests a credential or changes the signing wallet. */
+(function(){
+  'use strict';
+  var KEY='bnr.wallet.public-accounts.v1', LIMIT=50, FRESH_MS=120000;
+  var NETWORKS={
+    vaulta:{name:'Vaulta',hint:'Vaulta account name, 1–12 characters: a–z, 1–5 or a dot. A .b suffix is optional.',explorer:'https://bloks.io/account/'},
+    hive:{name:'Hive',hint:'Hive account name, without @. Reads liquid HIVE and HBD.',explorer:'https://hiveblocks.com/@'},
+    arbitrum:{name:'Arbitrum',hint:'Public 0x address. Reads ETH and Autonomi ANT on Arbitrum One.',explorer:'https://arbiscan.io/address/'},
+    base:{name:'Base',hint:'Public 0x address. Reads ETH and native USDC; use ERC-20i holdings for the full collection census.',explorer:'https://basescan.org/address/'},
+    ethereum:{name:'Ethereum',hint:'Public 0x address. Reads ETH; token balances include the Ethereum ERC-20i census and additional contracts.',explorer:'https://etherscan.io/address/'},
+    bitcoin:{name:'Bitcoin',hint:'Mainnet address beginning bc1, 1 or 3. Reads confirmed BTC; silent payment addresses cannot be followed by address alone.',explorer:'https://mempool.space/address/'},
+    'bitcoin-account':{name:'Bitcoin account',hint:'Account-level xpub (legacy), ypub (nested SegWit) or zpub (native SegWit). Not a private key. Refresh uses Trezor Connect and shares this public key with its blockchain service. Taproot descriptors are not supported here.'},
+    solana:{name:'Solana',hint:'Public Solana address. Reads native SOL.',explorer:'https://explorer.solana.com/address/'},
+    arweave:{name:'Arweave',hint:'Public 43-character Arweave address. Never paste a JWK or recovery phrase.',explorer:'https://viewblock.io/arweave/address/'}
+  };
+  var query='', entries=[], reads=new Map(), coinReads=new Map(), extraTokens=new Map(), snapshot=null, editSnapshot=null, storageBlocked=false, editing=null, removed=null, refreshingAll=false;
+  var el=function(id){return document.getElementById(id)};
+  // Scope comes from the full catalog, readiness from an explicit watch key.
+  // Missing capabilities remain visible but cannot be selected or persisted.
+  (window.__CHAIN_MATRIX||[]).forEach(function(rail){
+    var option=document.createElement('option'),ready=Object.prototype.hasOwnProperty.call(NETWORKS,rail.watch||'');
+    option.value=ready?rail.watch:'';option.disabled=!ready;
+    option.textContent=rail.name+' · '+rail.unit+(ready?'':' · reader not available here');
+    el('wa-chain').appendChild(option);
+    if(rail.watch==='bitcoin'){
+      var account=document.createElement('option');account.value='bitcoin-account';account.textContent='Bitcoin · account public key';el('wa-chain').appendChild(account);
+    }
+  });
+  var status=function(message){el('wa-status').textContent=message};
+  var idOf=function(row){return row.chain+':'+row.address};
+  function base58Bytes(value){
+    var alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',n=0n;
+    for(var c of value){var i=alphabet.indexOf(c);if(i<0)throw new Error('Use a public base58 address');n=n*58n+BigInt(i)}
+    var bytes=[];while(n){bytes.unshift(Number(n&255n));n>>=8n}
+    for(var z=0;z<value.length&&value[z]==='1';z++)bytes.unshift(0);
+    return new Uint8Array(bytes);
+  }
+  function normalize(input){
+    if(!input||!Object.prototype.hasOwnProperty.call(NETWORKS,input.chain))throw new Error('Choose a supported network');
+    if(input.kind!=='mine'&&input.kind!=='following')throw new Error('Choose My accounts or Following');
+    if(typeof input.address!=='string'||typeof input.label!=='string')throw new Error('Use a public address and a text label');
+    var a=input.address.trim(),label=input.label.trim(),chain=input.chain;
+    if(label.length>60||/[\u0000-\u001f\u007f]/.test(label))throw new Error('Keep the label to 60 readable characters');
+    if(chain==='vaulta'){
+      a=a.toLowerCase().replace(/\.b$/,'');
+      if(!/^[a-z1-5.]{1,12}$/.test(a)||/^\.|\.$|\.\./.test(a))throw new Error('Enter a Vaulta account name, not a key or address');
+    }else if(chain==='hive'){
+      a=a.toLowerCase().replace(/^@/,'');
+      if(a.length<3||a.length>16||!a.split('.').every(function(part){return /^[a-z][a-z0-9-]+[a-z0-9]$/.test(part)}))throw new Error('Enter a valid Hive account name (3–16 characters)');
+    }else if(chain==='arbitrum'||chain==='base'||chain==='ethereum'){
+      if(!/^0x[0-9a-fA-F]{40}$/.test(a))throw new Error('Enter a public 0x address with 40 hexadecimal characters');
+      var hex=a.slice(2);
+      if(hex!==hex.toLowerCase()&&hex!==hex.toUpperCase()){
+        if(!window.BnrSign)throw new Error('Address checksum checker is unavailable');
+        var hash=Array.from(window.BnrSign.keccak_256(new TextEncoder().encode(hex.toLowerCase()))).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+        for(var pos=0;pos<hex.length;pos++)if(/[a-f]/i.test(hex[pos])&&((parseInt(hash[pos],16)>=8)!==(hex[pos]===hex[pos].toUpperCase())))throw new Error('EVM address checksum failed; copy the address again');
+      }
+      a=a.toLowerCase();
+    }else if(chain==='arweave'){
+      if(!/^[a-zA-Z0-9_-]{43}$/.test(a))throw new Error('Enter a 43-character public Arweave address');
+      // Canonical base64url: the final two padding bits must be zero.
+      if('AEIMQUYcgkosw048'.indexOf(a.slice(-1))<0)throw new Error('Arweave address has invalid padding; check the last character');
+    }else if(chain==='solana'){
+      if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)||base58Bytes(a).length!==32)throw new Error('Enter a public Solana address representing 32 bytes');
+    }else if(chain==='bitcoin-account'){
+      if(a.length!==111)throw new Error('Use an account-level mainnet xpub, ypub or zpub');
+      var extended=base58Bytes(a),versions={xpub:'0488b21e',ypub:'049d7cb2',zpub:'04b24746'};
+      var prefix=a.slice(0,4),magic=Array.from(extended.slice(0,4)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+      if(a.length!==111||!versions[prefix]||magic!==versions[prefix]||extended.length!==82||extended[4]!==3||extended[9]<128||![2,3].includes(extended[45]))throw new Error('Use an account-level mainnet xpub, ypub or zpub. Private keys and Taproot descriptors are not accepted.');
+    }else if(chain==='bitcoin'){
+      if(/^bc1/i.test(a)){
+        if(a!==a.toLowerCase()&&a!==a.toUpperCase())throw new Error('Bitcoin address cannot mix letter cases');
+        var core=window.BNRPAY, decoded;
+        if(!core)throw new Error('Bitcoin address checker is unavailable');
+        try{decoded=core.bech32mDecode(a,core.BECH32_CONST,90)}
+        catch(e){decoded=core.bech32mDecode(a,core.BECH32M_CONST,90)}
+        var version=decoded.words[0],program=core.convertBits(decoded.words.slice(1),5,8,false);
+        if(decoded.prefix!=='bc'||version>16||program.length<2||program.length>40||
+          (version===0&&program.length!==20&&program.length!==32))throw new Error('Invalid Bitcoin witness address');
+        core.bech32mDecode(a,version===0?core.BECH32_CONST:core.BECH32M_CONST,90);
+        a=a.toLowerCase();
+      }else if(!/^[13][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(a)||base58Bytes(a).length!==25){
+        throw new Error('Use a Bitcoin mainnet address (bc1, 1 or 3); silent payment addresses require a private scan');
+      }
+    }
+    var normalized={chain:chain,address:a,label:label,kind:input.kind};
+    // Public provenance is informational. It grants no signing authority.
+    if(input.trezor&&typeof input.trezor.path==='string'&&/^m\/(44|84)'\/(0|60|501)'\/\d+'(?:\/0'?\/0|\/0')?$/.test(input.trezor.path))normalized.trezor={path:input.trezor.path};
+    return normalized;
+  }
+  async function validate(input){
+    var row=normalize(input);
+    // Legacy Bitcoin's Base58Check is checked before an address ever reaches
+    // storage or a public endpoint. Segwit uses the existing wallet decoder.
+    if(row.chain==='bitcoin-account'||(row.chain==='bitcoin'&&!row.address.startsWith('bc1'))){
+      var bytes=base58Bytes(row.address),body=bytes.slice(0,-4);
+      if(row.chain==='bitcoin'&&bytes[0]!==0&&bytes[0]!==5)throw new Error('Use a Bitcoin mainnet address');
+      var first=await crypto.subtle.digest('SHA-256',body);
+      var checksum=new Uint8Array(await crypto.subtle.digest('SHA-256',first));
+      if(!bytes.slice(-4).every(function(v,i){return v===checksum[i]}))throw new Error('Bitcoin address checksum failed; check the address or account public key');
+    }
+    return row;
+  }
+  function load(){
+    try{
+      snapshot=localStorage.getItem(KEY);
+      var saved=snapshot===null?{v:1,entries:[]}:JSON.parse(snapshot);
+      if(saved.v!==1||!Array.isArray(saved.entries)||saved.entries.length>LIMIT)throw new Error('Invalid address book');
+      var seen=new Set(),next=saved.entries.map(normalize);
+      next.forEach(function(row){if(seen.has(idOf(row)))throw new Error('Duplicate address');seen.add(idOf(row))});
+      entries=next;storageBlocked=false;
+    }catch(e){entries=[];storageBlocked=true;status('The saved list could not be read. Saving is paused to protect it. Check browser storage access.');}
+  }
+  function save(next){
+    if(storageBlocked)throw new Error('Browser storage is unavailable or the saved list is unreadable. Nothing was changed.');
+    if(next.length>LIMIT)throw new Error('This browser list holds up to '+LIMIT+' accounts. Remove one before adding another.');
+    var latest;
+    try{latest=localStorage.getItem(KEY)}catch(e){throw new Error('Browser storage is unavailable. Nothing was saved.');}
+    if(latest!==snapshot){load();render();throw new Error('The list changed in another tab. Review the updated list and try again.');}
+    var json=JSON.stringify({v:1,entries:next});
+    try{localStorage.setItem(KEY,json)}catch(e){throw new Error('Browser storage is full or blocked. Nothing was saved.');}
+    snapshot=json;entries=next;
+  }
+  function node(tag,text,className){var n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n}
+  function button(text,action,id){var b=node('button',text);b.type='button';b.dataset.waAction=action;b.dataset.waId=id;return b}
+  function render(){
+    var focused=document.activeElement,focusAction=focused&&focused.dataset.waAction,focusId=focused&&focused.dataset.waId;
+    var priorCards=new Map(),drafts=new Map(),focusToken=focused&&focused.name==='contract'&&focused.closest('[data-wa-token]')?.dataset.waToken,selection=focusToken?[focused.selectionStart,focused.selectionEnd]:null;
+    document.querySelectorAll('.wa-card').forEach(function(card){priorCards.set(card.dataset.waId,card)});
+    document.querySelectorAll('[data-wa-token]').forEach(function(form){drafts.set(form.dataset.waToken,form.elements.contract.value)});
+
+    ['mine','following'].forEach(function(kind){
+      var list=el('wa-'+kind),rows=entries.filter(function(row){return row.kind===kind&&(!query||(row.label+' '+row.address+' '+NETWORKS[row.chain].name).toLowerCase().includes(query))});list.replaceChildren();
+      el('wa-'+kind+'-count').textContent='('+rows.length+')';
+      if(!rows.length){list.appendChild(node('div',query?'No accounts match this search.':kind==='mine'?'Add your first account to read its balance here.':'Follow a public address to keep it within reach.','wa-note'));return;}
+      rows.forEach(function(row){
+        var id=idOf(row),read=reads.get(id),state=read?read.state:'unread';
+        var previous=priorCards.get(id),coin=coinReads.get(id),view=[row,read,state,coin,coin&&coin.state];
+        if(previous&&previous._waView&&view.every(function(value,index){return value===previous._waView[index]})){list.appendChild(previous);return;}
+        var card=node('article',undefined,'wa-card');card.dataset.waId=id;card.dataset.state=state;card._waView=view;
+        card.appendChild(node('h4',row.label||NETWORKS[row.chain].name+' account'));
+        card.appendChild(node('div',NETWORKS[row.chain].name+' · '+(kind==='mine'?'My accounts':'Following')+' · read only','wa-note'));
+        card.appendChild(node('code',row.address,'wa-address'));
+        if(state==='ready')read.value.amounts.forEach(function(amount){card.appendChild(node('div',amount,'wa-amount'))});
+        var msg=state==='ready'?'Read '+new Date(read.at).toLocaleTimeString()+' · '+read.value.source
+          :state==='reading'?'Reading public balance…':state==='failed'?'Read unavailable · '+read.error
+          :state==='stale'?'Out of date · refresh to read again':'Not read yet';
+        card.appendChild(node('div',msg,'wa-state'));
+        if(state==='ready'&&read.value.note)card.appendChild(node('div',read.value.note,'wa-note'));
+        var actions=node('div',undefined,'wa-actions');
+        var refresh=button('Refresh','refresh',id);refresh.disabled=state==='reading';actions.appendChild(refresh);
+        actions.appendChild(button('Copy address','copy',id));actions.appendChild(button('Edit','edit',id));actions.appendChild(button('Remove','remove',id));
+        if(row.chain==='base'||row.chain==='ethereum'){
+          var coins=button('Read token balances','coins',id);coins.disabled=coinReads.get(id)?.state==='reading';actions.appendChild(coins);
+        }
+        if(row.trezor)card.appendChild(node('div','Trezor public export · '+row.trezor.path,'wa-note'));
+        if(NETWORKS[row.chain].explorer){var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);}
+        card.appendChild(actions);
+        var coinRead=coinReads.get(id);
+        if(coinRead){
+          var section=node('div',undefined,'wa-coins');section.appendChild(node('h4','Token balances · '+NETWORKS[row.chain].name));
+          section.appendChild(node('div',coinRead.state==='ready'?'Read '+new Date(coinRead.at).toLocaleTimeString()+' · '+coinRead.rows.length+' contracts':coinRead.state==='reading'?'Reading token balances…':coinRead.state==='stale'?'Out of date · read token balances again':'Token reads unavailable · '+coinRead.error,'wa-note'));
+          if(coinRead.state==='ready')coinRead.rows.forEach(function(token){
+            var item=node('div',undefined,'wa-token');item.dataset.contract=token.address.toLowerCase();
+            item.appendChild(node('div',token.name+' · '+(token.state==='unavailable'?'unavailable':token.quantity),'wa-amount'));
+            var contract=node('a',token.address+' ↗ (new tab)','wa-address');contract.href=NETWORKS[row.chain].explorer+token.address;contract.target='_blank';contract.rel='noopener noreferrer';item.appendChild(contract);
+            item.appendChild(node('div',token.state==='unavailable'?token.error:'Block '+BigInt(token.block).toString()+' · decimals '+token.decimals+' · '+token.source,'wa-note'));section.appendChild(item);
+          });
+          section.appendChild(node('div','Additional token contracts are kept for this tab. Reads never grant spending access.','wa-note'));
+          var form=node('form');form.dataset.waToken=id;
+          var label=node('label','Read another token contract '),input=node('input');input.name='contract';input.required=true;input.maxLength=42;input.placeholder='Public 0x token contract';input.autocomplete='off';input.spellcheck=false;input.value=drafts.get(id)||'';label.appendChild(input);form.appendChild(label);
+          var add=node('button','Add token & read');add.type='submit';add.disabled=coinRead.state==='reading';form.appendChild(add);section.appendChild(form);
+          card.appendChild(section);
+        }
+        list.appendChild(card);
+      });
+    });
+    el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
+    if(focusAction)Array.from(document.querySelectorAll('[data-wa-action]')).find(function(b){return b.dataset.waAction===focusAction&&b.dataset.waId===focusId})?.focus({preventScroll:true});
+    if(focusToken){var form=Array.from(document.querySelectorAll('[data-wa-token]')).find(function(form){return form.dataset.waToken===focusToken});if(form){form.elements.contract.focus({preventScroll:true});form.elements.contract.setSelectionRange(selection[0],selection[1])}}
+
+  }
+  // One per-tab budget covers bulk refresh, individual refresh and token reads.
+  // Queued rows removed or changed in another tab are checked before dispatch.
+  var activeReads=0,readJobs=[];
+  function readSlot(task){return new Promise(function(resolve,reject){readJobs.push({task:task,resolve:resolve,reject:reject});drainReads()})}
+  function drainReads(){
+    while(activeReads<3&&readJobs.length){
+      var job=readJobs.shift();activeReads++;
+      (function(current){Promise.resolve().then(current.task).then(current.resolve,current.reject).finally(function(){activeReads--;drainReads()})})(job);
+    }
+  }
+  async function refresh(id,userGesture){
+    var row=entries.find(function(r){return idOf(r)===id});
+    if(!row||reads.get(id)?.state==='reading')return;
+    var run={state:'reading'};reads.set(id,run);render();
+    try{
+      await validate(row);
+      var value=await readSlot(function(){if(reads.get(id)!==run)return null;return row.chain==='bitcoin-account'?readBitcoinAccount(row.address,userGesture):window.BNRWALLET.readPublicBalance(row.chain,row.address)});
+      if(reads.get(id)!==run)return;
+      if(!value||!Array.isArray(value.amounts)||!value.amounts.length||value.amounts.some(function(v){return typeof v!=='string'||!/^\d+(\.\d+)? [A-Z]+$/.test(v)}))throw new Error('No valid balance returned');
+      if(reads.get(id)!==run)return;
+      reads.set(id,{state:'ready',value:value,at:Date.now()});
+    }catch(e){if(reads.get(id)!==run)return;reads.set(id,{state:'failed',error:e.message||'Public service unavailable'});}
+    render();
+  }
+  async function refreshCoins(id){
+    var row=entries.find(function(r){return idOf(r)===id});if(!row||coinReads.get(id)?.state==='reading')return;
+    var run={state:'reading'};coinReads.set(id,run);render();
+    try{
+      await validate(row);
+      var tokens=await readSlot(function(){if(coinReads.get(id)!==run)return null;return window.BNRCoins.readHoldings(row.address,{chain:row.chain,contracts:extraTokens.get(id)||[]})});
+      if(coinReads.get(id)!==run)return;
+      coinReads.set(id,{state:'ready',rows:tokens,at:Date.now()});
+    }catch(e){if(coinReads.get(id)!==run)return;coinReads.set(id,{state:'failed',error:e.message})}
+    render();
+  }
+  el('wallet-accounts').addEventListener('submit',async function(event){
+    var form=event.target;if(!form.dataset.waToken)return;event.preventDefault();
+    var id=form.dataset.waToken,contract=form.elements.contract.value.trim();
+    try{
+      var account=entries.find(function(r){return idOf(r)===id});if(!account)throw new Error('Account was removed');
+      if(coinReads.get(id)?.state==='reading')return;
+      contract=(await validate({chain:account.chain,address:contract,label:'',kind:'following'})).address;
+      var extra=extraTokens.get(id)||[];if(!extra.includes(contract))extra=extra.concat(contract);
+      if(extra.length>20)throw new Error('This read supports 20 additional contracts');
+      extraTokens.set(id,extra);await refreshCoins(id);
+    }catch(e){status(e.message)}
+  });
+  async function refreshAll(userGesture){
+    if(refreshingAll)return;
+    refreshingAll=true;render();
+    var pending=entries.map(idOf);
+    try{await Promise.all([0,1,2].map(async function(){while(pending.length)await refresh(pending.shift(),userGesture===true)}));}
+    finally{refreshingAll=false;render();}
+  }
+  function hint(){el('wa-hint').textContent=NETWORKS[el('wa-chain').value].hint}
+  function showForm(kind,row){
+    editSnapshot=snapshot;
+    editing=row?idOf(row):null;el('wa-form').reset();
+    if(row){el('wa-chain').value=row.chain;el('wa-address').value=row.address;el('wa-label').value=row.label;}
+    el('wa-kind').value=kind;el('wa-save').textContent=row?'Save changes':'Save & read';
+    el('wa-form').hidden=false;status('');hint();el('wa-address').focus();
+  }
+  el('wa-search').addEventListener('input',function(){query=this.value.trim().toLowerCase();render()});
+  el('wa-export').onclick=function(){
+    if(storageBlocked){status('The saved list could not be read. Export is paused to protect it.');return;}
+    var blob=new Blob([JSON.stringify({v:1,entries:entries},null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='skaists-wallet-public-accounts.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000);
+    status('Exported public addresses and labels only. Keep this file private if you do not want these accounts linked.');
+  };
+  el('wa-import').onclick=function(){el('wa-import-file').click()};
+  el('wa-import-file').onchange=async function(){
+    var file=this.files&&this.files[0];this.value='';if(!file)return;
+    try{
+      if(file.size>131072)throw new Error('Account file is too large. Choose a JSON export under 128 KB.');
+      var data=JSON.parse(await file.text());
+      if(!data||data.v!==1||!Array.isArray(data.entries)||data.entries.length>LIMIT)throw new Error('Choose a version 1 public account export with at most '+LIMIT+' accounts.');
+      var imported=[],seen=new Set();
+      for(var input of data.entries){
+        // A file is untrusted input. It cannot assert a hardware export or grant signing authority.
+        var row=await validate({chain:input.chain,address:input.address,label:input.label,kind:input.kind});
+        var id=idOf(row);if(seen.has(id))throw new Error('The import contains duplicate accounts. Nothing was imported.');seen.add(id);imported.push(row);
+      }
+      var existing=new Set(entries.map(idOf)),added=imported.filter(function(r){return !existing.has(idOf(r))});
+      save(entries.concat(added));query='';el('wa-search').value='';render();
+      status('Imported '+added.length+' public accounts; '+(imported.length-added.length)+' already saved. Press Refresh all to read balances.');
+    }catch(e){status('Import refused: '+(e.message||'invalid account file')+' Existing accounts are unchanged.');}
+  };
+  el('wa-add').onclick=function(){showForm('mine')};
+  el('wa-follow').onclick=function(){showForm('following')};
+  el('wa-chain').onchange=hint;
+  el('wa-cancel').onclick=function(){el('wa-form').hidden=true;editing=null;el('wa-add').focus()};
+  el('wa-refresh').onclick=function(){refreshAll(true)};
+  el('wa-form').onsubmit=async function(event){
+    event.preventDefault();var submit=el('wa-save');if(submit.disabled)return;submit.disabled=true;
+    var original=editing,formRevision=editSnapshot;
+    try{
+      var row=await validate({chain:el('wa-chain').value,address:el('wa-address').value,label:el('wa-label').value,kind:el('wa-kind').value}),id=idOf(row);
+      if(original&&(formRevision!==snapshot||localStorage.getItem(KEY)!==formRevision))throw new Error('This account list changed in another tab. Cancel and reopen Edit before saving.');
+      if(entries.some(function(r){return idOf(r)===id&&idOf(r)!==original}))throw new Error('This address is already saved on this network. Use Edit to change its label or list.');
+      if(original&&!entries.some(function(r){return idOf(r)===original}))throw new Error('This account was removed in another tab. Add it again if needed.');
+      var next=entries.slice(),at=next.findIndex(function(r){return idOf(r)===original});
+      if(at>=0&&idOf(next[at])===id&&next[at].trezor)row.trezor=next[at].trezor;
+      if(at<0)next.push(row);else next[at]=row;
+      save(next);
+      if(original&&original!==id){reads.delete(original);coinReads.delete(original);extraTokens.delete(original)}
+      el('wa-form').hidden=true;editing=null;render();status('Saved in this browser. Reading '+NETWORKS[row.chain].name+'…');el('wa-add').focus();
+      refresh(id,true);status('Saved in this browser. See the read status on the account.');
+    }catch(e){status(e.message)}finally{submit.disabled=false}
+  };
+  el('wallet-accounts').addEventListener('click',async function(event){
+    var b=event.target.closest('[data-wa-action]');if(!b)return;
+    var id=b.dataset.waId,row=entries.find(function(r){return idOf(r)===id});if(!row)return;
+    try{
+      switch(b.dataset.waAction){
+        case 'coins':await refreshCoins(id);break;
+        case 'refresh':await refresh(id,true);break;
+        case 'copy':await navigator.clipboard.writeText(row.address);status('Public address copied.');break;
+        case 'edit':showForm(row.kind,row);break;
+        case 'remove':
+          save(entries.filter(function(r){return idOf(r)!==id}));reads.delete(id);coinReads.delete(id);extraTokens.delete(id);removed=row;render();
+          status('Removed '+(row.label||row.address)+' from this browser list.');
+          undo.hidden=false;el('wa-add').focus();break;
+      }
+    }catch(e){status(b.dataset.waAction==='copy'?'Clipboard unavailable. Select and copy the address shown on the card.':e.message)}
+  });
+  var undo=node('button','Undo remove');undo.type='button';undo.hidden=true;undo.id='wa-undo';el('wallet-accounts').querySelector('.wa-toolbar').appendChild(undo);
+  undo.onclick=function(){
+    if(!removed)return;
+    try{
+      if(entries.some(function(r){return idOf(r)===idOf(removed)}))throw new Error('That address is already in the list.');
+      save(entries.concat([removed]));var id=idOf(removed);removed=null;undo.hidden=true;render();status('Account restored.');refresh(id);
+    }catch(e){status(e.message)}
+  };
+  // Official stock-device bridge. No signer or firmware-update method is
+  // exposed here. A loaded public address never becomes the bPay signer.
+  var trezorInit=null;
+  async function connectTrezor(userGesture){
+    if(!userGesture&&!trezorInit)throw new Error('Press Refresh to load Trezor Connect for this public account');
+    if(!trezorInit){
+      trezorInit=(async function(){
+        if(!window.TrezorConnect)await new Promise(function(resolve,reject){
+          var script=document.createElement('script');script.src='https://connect.trezor.io/9.7.3/trezor-connect.js';script.integrity='sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6';script.crossOrigin='anonymous';
+          script.onload=function(){window.TrezorConnect?resolve():reject(new Error('Trezor Connect did not start'))};
+          script.onerror=function(){script.remove();reject(new Error('Trezor Connect could not be loaded. Try again.'))};document.head.appendChild(script);
+        });
+        await window.TrezorConnect.init({coreMode:'suite-web',lazyLoad:true,manifest:{email:'lovis@skaists.dev',appName:'skaists heART WALLet',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
+        return window.TrezorConnect;
+      })().catch(function(error){trezorInit=null;throw error});
+    }
+    return trezorInit;
+  }
+  function trezorResult(result){
+    if(!result||result.success!==true||!result.payload)throw new Error('Trezor export or read was cancelled or unavailable. Nothing new was saved.');
+    return result.payload;
+  }
+  async function readBitcoinAccount(descriptor,userGesture){
+    var tc=await connectTrezor(userGesture),p=trezorResult(await tc.getAccountInfo({descriptor:descriptor,coin:'btc',details:'basic'}));
+    if(p.descriptor!==descriptor||typeof p.balance!=='string'||!/^\d+$/.test(p.balance))throw new Error('Bitcoin service returned an invalid or different account');
+    var sat=BigInt(p.balance),whole=sat/100000000n,fraction=(sat%100000000n).toString().padStart(8,'0').replace(/0+$/,'');
+    return {amounts:[whole.toString()+(fraction?'.'+fraction:'')+' BTC'],source:'Trezor blockchain service',note:'Confirmed account balance, including discovered receive and change addresses. Pending transactions are excluded.'};
+  }
+  function trezorSelection(){
+    var chain=el('wa-trezor-chain').value,account=Number(el('wa-trezor-account').value);
+    if(!Number.isInteger(account)||account<1||account>100)throw new Error('Choose account 1–100');
+    var index=account-1,path=chain==='bitcoin-account'?"m/84'/0'/"+index+"'":chain==='solana'?"m/44'/501'/"+index+"'"+(el('wa-trezor-sol').value==='suite'?"/0'":''):"m/44'/60'/"+index+"'/0/0";
+    return {chain:chain,account:account,path:path};
+  }
+  function trezorHint(){
+    el('wa-trezor-sol-label').hidden=el('wa-trezor-chain').value!=='solana';
+    el('wa-trezor-bitcoin').hidden=el('wa-trezor-chain').value!=='bitcoin-account';
+    try{el('wa-trezor-path').textContent='Derivation path: '+trezorSelection().path}catch(e){el('wa-trezor-path').textContent=e.message}
+  }
+  el('wa-trezor').onclick=function(){el('wa-trezor-form').hidden=false;status('');trezorHint();el('wa-trezor-chain').focus()};
+  el('wa-trezor-cancel').onclick=function(){el('wa-trezor-form').hidden=true;el('wa-trezor').focus()};
+  ['wa-trezor-chain','wa-trezor-account','wa-trezor-sol'].forEach(function(id){el(id).onchange=trezorHint});
+  el('wa-trezor-form').onsubmit=async function(event){
+    event.preventDefault();var submit=el('wa-trezor-import');if(submit.disabled)return;submit.disabled=true;
+    try{
+      var selected=trezorSelection(),tc=await connectTrezor(true),request={path:selected.path,showOnTrezor:true},result;
+      status('Confirm the public account export on your Trezor.');
+      if(selected.chain==='bitcoin-account')result=await tc.getPublicKey(Object.assign(request,{coin:'btc',scriptType:'SPENDWITNESS'}));
+      else if(selected.chain==='solana')result=await tc.solanaGetAddress(request);
+      else result=await tc.ethereumGetAddress(request);
+      var p=trezorResult(result);
+      if(p.serializedPath!==selected.path)throw new Error('Trezor returned a different derivation path. Nothing was saved.');
+      var address=selected.chain==='bitcoin-account'?p.xpubSegwit:p.address;
+      if(selected.chain==='bitcoin-account'&&(typeof address!=='string'||!address.startsWith('zpub')))throw new Error('Trezor did not return a native SegWit account public key. Nothing was saved.');
+      var networks=selected.chain==='evm'?['ethereum','base','arbitrum']:[selected.chain], imported=[];
+      for(var network of networks)imported.push(await validate({chain:network,address:address,label:'Trezor · account '+selected.account,kind:'mine',trezor:{path:selected.path}}));
+      var known=new Set(entries.map(idOf)),added=imported.filter(function(row){return !known.has(idOf(row))});
+      if(!added.length)throw new Error('This public account is already saved. Use Refresh to sync its balance.');
+      save(entries.concat(added));render();status('Public accounts saved in this browser. Reading balances…');
+      await Promise.all(added.map(function(row){return refresh(idOf(row),true)}));
+      status('Imported '+added.length+' public account'+(added.length===1?'':'s')+'. Each card shows its read status. bPay signing wallet is unchanged.');
+    }catch(e){status(e.message||'Trezor import failed. Nothing was saved.')}
+    finally{submit.disabled=false}
+  };
+  window.addEventListener('storage',function(event){
+    if(event.key!==KEY&&event.key!==null)return;
+    load();reads.clear();coinReads.clear();extraTokens.clear();render();if(!storageBlocked)status('List updated in another tab. Refresh to read its balances.');
+  });
+  // A successful historical read is never dressed as a current balance.
+  function expire(){var changed=false;[reads,coinReads].forEach(function(map){map.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}})});if(changed)render()}
+  setInterval(expire,15000);document.addEventListener('visibilitychange',expire);
+  load();render();
+  // A visit to keys or storage must not fan out reads of every saved address.
+  // Read the public book on its first appearance; later refreshes are explicit.
+  if(!storageBlocked&&entries.length){
+    if(window.IntersectionObserver){
+      var bookObserver=new IntersectionObserver(function(changes){if(changes.some(function(change){return change.isIntersecting})){bookObserver.disconnect();if(entries.some(function(row){return !reads.has(idOf(row))}))refreshAll();}});
+      bookObserver.observe(el('wallet-accounts'));
+    }else if(el('wallet-accounts').getClientRects().length)refreshAll();
   }
 })();
 </script>

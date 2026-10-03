@@ -1,0 +1,40 @@
+{
+  "measured_at": "2026-10-03T13:39:16.594Z",
+  "operation": "read-only Arweave transaction status",
+  "source": "surfaces/arweave.js::txStatus",
+  "transaction": "eiHVpo3lzifCKF3HN0JrDCnS8BlEjIUCk1oFM-4nMS4",
+  "prior_reference": "docs/dispatches/RECEIPT_VENDING_LADDER_2026-09-04.md",
+  "requests": [
+    "https://ar-io.dev/tx/eiHVpo3lzifCKF3HN0JrDCnS8BlEjIUCk1oFM-4nMS4/status",
+    "https://gateway.ardrive.io/tx/eiHVpo3lzifCKF3HN0JrDCnS8BlEjIUCk1oFM-4nMS4/status",
+    "https://arweave.net/tx/eiHVpo3lzifCKF3HN0JrDCnS8BlEjIUCk1oFM-4nMS4/status"
+  ],
+  "result": {
+    "gateway": "https://arweave.net",
+    "status": 404,
+    "tx": "unknown",
+    "confirmations": 0
+  },
+  "boundary": "Existing public transaction only. No file upload, payment, signing, or new transaction.",
+  "current_public_block_sample": {
+    "measured_at": "2026-10-03T13:39:31.890Z",
+    "selection": {
+      "gateway": "https://arweave.net",
+      "reported_height": 2013748,
+      "sampled_height": 2013718,
+      "rule": "first transaction ID in block thirty heights behind reported head"
+    },
+    "transaction": "jNjOhzWCpVn_KMvhHqpbmrssZkrcVIHWvtBJqJ6OqjY",
+    "requests": [
+      "https://arweave.net/tx/jNjOhzWCpVn_KMvhHqpbmrssZkrcVIHWvtBJqJ6OqjY/status"
+    ],
+    "result": {
+      "gateway": "https://arweave.net",
+      "status": 200,
+      "tx": "confirmed",
+      "confirmations": 26,
+      "block_height": 2013718,
+      "block_indep_hash": "aYweQ9NzVw2Suaj901BvpErWY00E7B7MNj-asjNz9z95Mtm3U3TlDLo5i9C2UvXU"
+    }
+  }
+}

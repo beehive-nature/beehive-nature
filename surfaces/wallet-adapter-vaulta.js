@@ -35,10 +35,8 @@ var RPC_TIMEOUT = 9000;
 /* RPC account rows still use the historical EOS symbol on Vaulta. Keep the
    numeric text exactly as returned; only the display unit belongs to this UI. */
 function displayA(raw) {
-  var s = String(raw || '').trim();
-  if (!s) return '0.0000 A';
-  if (/\s*EOS$/i.test(s)) return s.replace(/\s*EOS$/i, ' A');
-  return /\sA$/i.test(s) ? s : s + ' A';
+  if(typeof raw!=='string'||!/^\d+\.\d{4} (EOS|A)$/.test(raw))throw new Error('Vaulta returned no valid liquid balance');
+  return raw.replace(/ EOS$/, ' A');
 }
 
 // estate error codes (spec §6: a coded error object, never a bare string,

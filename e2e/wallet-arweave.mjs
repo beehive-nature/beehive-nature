@@ -4,7 +4,7 @@
 // JWK — never a literal key in this file, per the fixture-refinement law), the
 // publish flow end-to-end with a MOCKED gateway, and the honest unfunded path.
 // Run:  cd e2e && node wallet-arweave.mjs     (exit 0 = green)
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,15 +17,6 @@ const URL_ = '/surfaces/wallet.html';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(8892, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -47,7 +38,7 @@ function mockGateways(ctx, tally, txAnswer) {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     if (tally) { const h = u.host; tally[h] = (tally[h] || 0) + 1; }
     const json = (obj, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(obj) });
-    if (u.pathname.endsWith('/price/1926')) return json(FEE);
+    if (/\/price\/\d+$/.test(u.pathname)) return json(FEE);
     if (u.pathname.endsWith('/spot_price')) return json(SPOT);
     if (u.pathname.endsWith('/tx_anchor')) return json('yfE5XWLIT5U0dwMJanchorMOCK0000000000000000000');
     if (u.pathname.includes('/wallet/')) return json('0'); // unfunded
@@ -60,6 +51,7 @@ function mockGateways(ctx, tally, txAnswer) {
 }
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+const fixtureHtml=await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
 try {
@@ -69,7 +61,7 @@ try {
   {
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const v = await page.evaluate(async (FEE) => {
       const A = window.BNRAR;
       const payload = new Uint8Array(await (await fetch('/surfaces/forge/orbit-manifests.md')).arrayBuffer());
@@ -98,7 +90,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const r = await page.evaluate(async () => {
       // generate a THROWAWAY RSA-4096 key IN THE PAGE (construct-at-runtime law)
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
@@ -130,7 +122,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx, tally);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     for (let i = 0; i < 12; i++) await page.evaluate(() => window.BNRAR.fee(1926));
     const hosts = Object.keys(tally);
     const total = hosts.reduce((s, h) => s + tally[h], 0);
@@ -153,7 +145,7 @@ try {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.evaluate(async () => {
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
         publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
@@ -180,8 +172,12 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; }); // panel state machine re-reads on click
+    // Production refresh owns enablement; Playwright supplies trusted input.
+    await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));
+    await page.waitForFunction(() => !document.getElementById('arw-go').disabled);
+    await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
+    ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
     await page.waitForFunction(() => document.getElementById('arw-stat').textContent.includes('expected verdict'), null, { timeout: 10000 })
       .catch(() => {});
     const after = await page.locator('#arw-stat').innerText();
@@ -244,9 +240,10 @@ try {
       };
       window.arweaveWallet = {
         connect: async () => {},
-        getActiveAddress: async () => { if (!_addr) await window.__arInjectBoot(); return _addr; },
+        getActiveAddress: async () => { window.__arAddressCount=(window.__arAddressCount||0)+1;if (!_addr) await window.__arInjectBoot(); return _addr; },
         getActivePublicKey: async () => { if (!_jwk) await window.__arInjectBoot(); return _jwk.n; },
         signature: async (data, alg) => {
+          window.__arSignCount=(window.__arSignCount||0)+1;
           if (!_key) await window.__arInjectBoot();
           const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
           return new Uint8Array(await crypto.subtle.sign(
@@ -254,7 +251,7 @@ try {
         }
       };
     });
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
     ok('arInject API exposed on BNRWALLET', await page.evaluate(() =>
       !!(BNRWALLET.arInject && BNRWALLET.arInject.present && BNRWALLET.arInject.present())));
@@ -266,6 +263,7 @@ try {
       const t = document.getElementById('arw-stat').textContent || '';
       return /extension|connect|Arweave|address|reading|AR/i.test(t) && !/seal your JWK/i.test(t);
     }), await page.locator('#arw-stat').innerText().then(t => t.slice(0, 100)));
+    ok('opening the page never asks the Arweave extension for an address',await page.evaluate(()=>(window.__arAddressCount||0)===0));
     await page.locator('#arw-connect').click();
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-addr');
@@ -281,8 +279,12 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; });
+    // Production refresh owns enablement; Playwright supplies trusted input.
+    await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));
+    await page.waitForFunction(() => !document.getElementById('arw-go').disabled);
+    await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
+    ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';
@@ -299,6 +301,46 @@ try {
     ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
     ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    await page.setViewportSize({width:390,height:844});
+    const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
+    const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');
+    await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
+    await page.locator('#arw-file-review').click();
+    await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    ok('mobile review keeps its title and both decisions visible',await page.locator('#arw-file-dialog-title').isVisible()&&await page.locator('#arw-file-dialog').evaluate(el=>{const box=el.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth&&box.top>=0&&box.bottom<=innerHeight})&&await page.locator('#arw-file-cancel').isVisible()&&await page.locator('#arw-file-confirm').isVisible());
+    ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
+    await page.locator('#arw-file-cancel').click();
+    await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('Cancelled'));
+    ok('cancel refuses signing and publication',posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('confirmed file uses the existing signed publication adapter',posted.length>beforeFilePosts&&Buffer.from(posted.at(-1).data,'base64url').equals(fileBytes));
+    const beforeBlockedPosts=posted.length;
+    await page.evaluate(()=>{window.__outboxBackup=localStorage.getItem('bnr_outbox_v1');window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='bnr_outbox_v1')throw new DOMException('Storage full','QuotaExceededError');return window.__storageSet.call(this,key,value);};});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('blocked outbox stops submission and preserves the prior receipt',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox could not save')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')===window.__outboxBackup));
+    await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;localStorage.setItem('bnr_outbox_v1','not valid JSON');});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox is unavailable')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    await page.evaluate(()=>{const seed=JSON.parse(window.__outboxBackup)[0];localStorage.setItem('bnr_outbox_v1',JSON.stringify(Array.from({length:80},(_,i)=>({...seed,intent_id:'retention-fixture-'+i,phase:i<40?'signed':'confirmed'}))));});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('history trimming retains all forty unresolved signed transactions',await page.evaluate(()=>{const list=JSON.parse(localStorage.getItem('bnr_outbox_v1'));return list.length===80&&Array.from({length:40},(_,i)=>'retention-fixture-'+i).every(id=>list.some(e=>e.intent_id===id&&e.phase==='signed'));}));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    const beforeBadSignature=posted.length;
+    await page.evaluate(()=>{window.__originalSignature=arweaveWallet.signature;arweaveWallet.signature=async()=>new Uint8Array(512)});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('wrong signing key or invalid extension signature is refused before submission',posted.length===beforeBadSignature&&(await page.locator('#arw-file-status').innerText()).includes('signature did not match'));
+    await page.evaluate(()=>{arweaveWallet.signature=window.__originalSignature});
+    const beforeOversize=posted.length;
+    await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
+    await page.locator('#arw-file-review').click();
+    ok('oversized file is refused before wallet or network work',(await page.locator('#arw-file-status').innerText()).includes('30,000')&&posted.length===beforeOversize);
+
     await ctx.close();
   }
 
@@ -308,7 +350,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1000);
     const t = await page.locator('#arw-stat').innerText();
     ok('empty path names connect / Wander / public bind', /Wander|connect|public address|forge/i.test(t), t.slice(0, 120));
@@ -324,7 +366,7 @@ try {
   function unb64len(s) { return Buffer.from(s, 'base64url').length; }
 } finally {
   await browser.close();
-  server.close();
+
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

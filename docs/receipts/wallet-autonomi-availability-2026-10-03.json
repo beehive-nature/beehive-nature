@@ -1,0 +1,10 @@
+{
+  "measured_at": "2026-10-03T13:42:29.698Z",
+  "url": "https://relay.skaists.dev/ant/v1/upload/prepare",
+  "method": "GET",
+  "status": 405,
+  "cors": "https://skaists.dev",
+  "body": "",
+  "interpretation": "Hosted quote capability unavailable; adapter must refuse before file bytes leave the browser",
+  "boundary": "Metadata probe only. No file, quote POST, payment, wallet or local server."
+}

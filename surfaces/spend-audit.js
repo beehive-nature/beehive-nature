@@ -320,7 +320,7 @@
       '<span>' + cellChip('FAILED', 13) + ' FAILED = flag #c07f1c</span><span>' + cellChip('INCONCLUSIVE', 13) + ' INCONCLUSIVE = nectar</span></div>' +
       '<div style="margin-top:10px">' + rows + '</div>' +
       (opts.showPaste !== false ?
-        '<div style="margin-top:10px"><textarea id="sa-paste" rows="3" placeholder="paste any spend receipt (SPEC-SPEND-RECEIPT-1 JSON) — a stranger can audit any session, keylessly"' +
+        '<div style="margin-top:10px"><textarea id="sa-paste" aria-label="Spend receipt JSON" rows="3" placeholder="paste any spend receipt (SPEC-SPEND-RECEIPT-1 JSON) — a stranger can audit any session, keylessly"' +
         ' style="width:100%;box-sizing:border-box;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font:11px \'IBM Plex Mono\',monospace"></textarea>' +
         '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--sa-figure,var(--gold));border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
         '<span id="sa-paste-out" style="font-size:10px;color:var(--dim)"></span></div></div>' : '') +
