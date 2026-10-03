@@ -505,7 +505,20 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 })();
 </script>
 
-<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><p>Audio availability is not a quality score. Meaning, dialect and pronunciation still need a speaker’s review. <a href="../assets/plur-voices/quality.json">Download the review queue and audio evidence</a> · <a href="blanguage.html">Explore the language dock</a></p><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
+<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><p>Audio availability is not a quality score. Meaning, dialect and pronunciation still need a speaker’s review. <a href="../assets/plur-voices/quality.json">Download the review queue and audio evidence</a> · <a href="blanguage.html">Explore the language dock</a></p><details id="plurReview"><summary>Compare voices and prepare a speaker review</summary>
+<p>Compare the existing preview with a Kokoro candidate where available. No winner is selected automatically. A downloaded review is your assessment, not a verified approval; nothing is submitted or saved automatically.</p>
+<label for="reviewItem">Word or language sample</label><select id="reviewItem"></select>
+<p id="reviewText" aria-live="polite"></p>
+<label>Existing preview<audio id="reviewBaseline" controls preload="none"></audio></label>
+<label>Kokoro candidate<audio id="reviewCandidate" controls preload="none"></audio></label>
+<p id="reviewCandidateNote"></p>
+<form id="speakerReviewForm">
+<label for="reviewerName">Reviewer name or public alias</label><input id="reviewerName" required maxlength="100" autocomplete="off">
+<label for="reviewerDialect">Language and dialect you speak</label><input id="reviewerDialect" required maxlength="120" autocomplete="off">
+<label for="reviewRating">Your assessment</label><select id="reviewRating" required><option value="">Choose after listening</option><option value="baseline">Existing preview is better</option><option value="candidate">Kokoro candidate is better</option><option value="both">Both are acceptable</option><option value="neither">Both need correction</option><option value="unsure">I am unsure</option></select>
+<label for="reviewNotes">Meaning, pronunciation, stress or corrections</label><textarea id="reviewNotes" required maxlength="2000"></textarea>
+<button type="submit">Download my review draft</button><p id="reviewStatus" role="status">Loading comparison evidence…</p>
+</form><details><summary>Translation model probes</summary><p>These are machine drafts of contextual sentences, not replacements for the word cards. Speaker review is pending.</p><div id="translationProbes"></div></details></details><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}#plurReview label{display:block;margin-top:14px}#plurReview input,#plurReview select,#plurReview textarea,#plurReview audio{display:block;width:100%;max-width:100%;min-height:44px;box-sizing:border-box}#plurReview textarea{min-height:100px}#plurReview{margin:18px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
 <section class="field f-peace" id="words">
   <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss" data-i18n="plur.g1">the first word</div>
@@ -774,7 +787,7 @@ function index(){
  try{preferred=localStorage.getItem('plur.voiceURI')||'';}catch(e){}
  sel.replaceChildren();var auto=document.createElement('option');auto.value='';auto.textContent='Match each language automatically';sel.appendChild(auto);
  voices.forEach(function(v){var o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' — '+v.lang;sel.appendChild(o);});sel.value=voices.some(v=>v.voiceURI===preferred)?preferred:'';sel.disabled=!voices.length;
- var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
+ var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);var mute=w.querySelector&&w.querySelector('.mute');if(mute){mute.hidden=ok;mute.setAttribute('aria-hidden',String(ok));}w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
  pair.disabled=!words.some(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));
  document.getElementById('voiceCoverageSummary').textContent=ready+' of '+words.length+' word cards have an audio route. '+manifest.languages.length+' language samples. Synthetic previews await native review.';
  var body=document.getElementById('voiceCoverageRows');body.replaceChildren();manifest.languages.forEach(function(lang){var sample=manifest.entries.find(e=>e.lang===lang&&e.kind==='sample'),v=pick(lang);var row=document.createElement('tr');
@@ -1249,5 +1262,36 @@ fetch('../assets/plur-voices/manifest.json?v=20261002').then(function(r){if(!r.o
 })();
 </script>
 <script src="tour.js?v=42"></script>
+
+<script>
+(function(){
+'use strict';
+var root=document.getElementById('plurReview'),select=document.getElementById('reviewItem'),status=document.getElementById('reviewStatus'),base=document.getElementById('reviewBaseline'),candidate=document.getElementById('reviewCandidate'),entries=[],comparisons=new Map();
+function chosen(){return entries.find(e=>e.id===select.value);}
+function urls(e){var c=comparisons.get(e.id);return {baseline:'../assets/plur-voices/'+e.file+'?v='+e['sha256_PUBLIC-CONSTANT'].slice(0,12),candidate:c?'../assets/plur-voices/comparison/'+c.candidate+'?v='+c['candidateSha256_PUBLIC-CONSTANT'].slice(0,12):null};}
+function show(){var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e);base.pause();candidate.pause();base.src=u.baseline;candidate.removeAttribute('src');candidate.hidden=!c;if(c)candidate.src=u.candidate;
+ document.getElementById('reviewText').textContent=e.lang+' · '+e.text+' · '+e.linguistic;
+ document.getElementById('reviewCandidateNote').textContent=c?'Kokoro v1.0 int8 · '+c.voice+' · '+c.dialect+' · unreviewed. Short-word performance needs special scrutiny.':'No Kokoro comparison for this entry. Review the existing preview; do not infer support from a different language.';
+ document.getElementById('reviewRating').value='';document.getElementById('reviewNotes').value='';
+ Array.from(document.getElementById('reviewRating').options).forEach(o=>{o.disabled=!c&&['candidate','both','neither'].includes(o.value);});
+ document.getElementById('reviewRating').options[1].textContent=c?'Existing preview is better':'Existing preview is acceptable';
+ status.textContent='Ready for your review. Nothing is submitted automatically.';
+}
+select.addEventListener('change',show);base.addEventListener('play',()=>{candidate.pause();if(window.bvoice)window.bvoice.stop();});candidate.addEventListener('play',()=>{base.pause();if(window.bvoice)window.bvoice.stop();});
+async function verified(url,expected){var response=await fetch(url);if(!response.ok)throw Error('Audio unavailable');var bytes=await response.arrayBuffer(),digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');if(digest!==expected)throw Error('Audio changed since this review queue was built');return digest;}
+document.getElementById('speakerReviewForm').addEventListener('submit',async function(event){event.preventDefault();var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e),button=event.currentTarget.querySelector('button[type="submit"]');
+ var receipt={schema:1,status:'self-reported review draft; not authenticated or approved',createdAt:new Date().toISOString(),entryId:e.id,lang:e.lang,text:e.text,reviewer:document.getElementById('reviewerName').value.trim(),dialect:document.getElementById('reviewerDialect').value.trim(),assessment:document.getElementById('reviewRating').value,notes:document.getElementById('reviewNotes').value.trim()};
+ if(!receipt.reviewer||!receipt.dialect||!receipt.assessment||!receipt.notes){status.textContent='Complete each review field first.';return;}
+ if(!c&&['candidate','both','neither'].includes(receipt.assessment)){status.textContent='No candidate exists for this entry.';return;}
+ button.disabled=true;select.disabled=true;status.textContent='Checking the exact audio files…';
+ try{receipt.baselineSha256=await verified(u.baseline,e['sha256_PUBLIC-CONSTANT']);if(c)receipt.candidateSha256=await verified(u.candidate,c['candidateSha256_PUBLIC-CONSTANT']);var blob=new Blob([JSON.stringify(receipt,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='plur-review-'+e.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='Review draft downloaded. It has not been submitted or marked as approved.';}
+ catch(error){status.textContent='Review not exported: '+error.message+'. Reload the current edition and try again.';}
+ finally{button.disabled=false;select.disabled=false;}
+});
+Promise.all(['../assets/plur-voices/quality.json?v=20261003','../assets/plur-voices/comparison/manifest.json?v=20261003'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error('Comparison evidence unavailable');return r.json();}))).then(function(data){entries=data[0].entries;comparisons=new Map(data[1].entries.map(e=>[e.id,e]));entries.forEach(e=>{var o=document.createElement('option');o.value=e.id;o.textContent=e.lang+' · '+e.text+(comparisons.has(e.id)?' · two recordings':'');select.appendChild(o);});show();}).catch(()=>{status.textContent='Review evidence could not be loaded. Existing word previews remain available.';});
+fetch('../assets/plur-voices/comparison/translations.json?v=20261003').then(r=>{if(!r.ok)throw Error('Unavailable');return r.json();}).then(function(report){var host=document.getElementById('translationProbes');report.models.forEach(function(model){var h=document.createElement('h3');h.textContent=model.lang+' · '+model.model;host.appendChild(h);model.entries.forEach(e=>{var p=document.createElement('p');p.textContent=e.source+' → '+e.candidate+' · machine draft';host.appendChild(p);});});}).catch(()=>{document.getElementById('translationProbes').textContent='Translation comparison evidence is unavailable.';});
+window.addEventListener('pagehide',()=>{base.pause();candidate.pause();});
+})();
+</script>
 </body>
 </html>
