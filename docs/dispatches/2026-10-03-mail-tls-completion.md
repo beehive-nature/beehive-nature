@@ -58,3 +58,8 @@ At the receipt snapshot, build succeeded and deploy was queued. Merge completion
 ## Completion status follow-up
 
 GitHub Pages run 37105100848 completed SUCCESS: publication is now confirmed. Main tests run 37105100918 completed FAILURE. Failed jobs: `eternal` (ETERNAL fronts and bottom-half rendered checks) and `node` (comprehension and engineflow rendered checks). Observed node diagnostics include “seven disclosures on the organ board, got 6” and an engineflow `paraKey` TypeError after keyboard-navigation failures. These are unresolved repository CI findings; this status check does not establish the introducing commit or attribute them to the mail diagnostic. Server TLS remains UNVERIFIED after the two recorded SSH banner timeouts. Therefore the merge and publication are complete, but host verification and a green post-merge test run are not complete.
+## Retry requested: current main is green; SSH still unavailable
+
+Re-fetched origin/main on 2026-10-03. Main `fd423f3fa8e825120b62f3afae3fb7608e843541` contains the #260 merge. Tests run 37108252124, secret scan 37108252168, and Pages deployment 37108251432 all completed SUCCESS. The earlier failed rendered checks are no longer a current-main gate.
+
+Retried `wsl -e ssh -o BatchMode=yes -o ConnectTimeout=15 oracle 'id -un; hostname; sudo -n true'`. It exited 1: “Connection timed out during banner exchange”; connection to 129.153.202.144 port 22 timed out. No remote commands ran. Live host TLS verification is the only remaining mail-lane completion item. The next meaningful attempt is when the configured SSH endpoint can complete its banner/authentication exchange; elapsed time alone does not establish that it is reachable.
