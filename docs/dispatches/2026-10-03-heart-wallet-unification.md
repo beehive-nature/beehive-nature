@@ -44,3 +44,11 @@ Code review found `BNRAR.txStatus` was reading `/tx/{id}` and expecting invented
 A read-only live check used the actual revised `BNRAR.txStatus` against a transaction selected from a recent public block. It returned block 2013718, 26 confirmations and the block hash. The older estate vending receipt tested first returned unknown/404 and is retained as such, not relabeled successful. Exact requests, selection and both results: `docs/receipts/wallet-arweave-status-2026-10-03.json`. No new transaction was made.
 
 The hub registry label is now skaists heART WALLet; atlas and stack generated outputs were rebuilt. Arweave loader versions were advanced so the revised shell and worker load the matching implementation.
+
+## Final failure-path follow-through
+
+The live hosted Autonomi metadata probe returned HTTP 405 with the expected skaists.dev CORS origin at 13:42:29 UTC. `ops/ant-writedoor/src/main.rs` still instantiates `UnwiredGateway`; the feature declaration is not a production ant-core implementation. The wallet therefore says to check availability, reports the closed service in plain language, and proves that no file bytes are sent on this refusal. Receipt: `docs/receipts/wallet-autonomi-availability-2026-10-03.json`. This is a remaining live backend gap, not a completed storage purchase.
+
+Arweave publication now additionally verifies the returned RSA-PSS signature with the reviewed public key and reconstructs its transaction ID before persisting/submitting. A wrong-key/invalid-signature control is refused before submission. Arweave battery is 50/50; adapter battery remains 33/33 after this change.
+
+CI at 908ef011a found one generated-hub mismatch: the Windows-written registry had CRLF while Git stored LF, so its baked byte hash differed on Linux. The registry was normalized to its committed LF bytes and the atlas rebuilt; the generated output correction is included. No rule or check was weakened. Exact failure: `FAIL the committed hub matches its registry regeneration (byte for byte)`. Earlier superseded branch runs were cancelled to release capacity for the current head; their cancelled checks are not passing evidence.

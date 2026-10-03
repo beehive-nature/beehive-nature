@@ -5039,6 +5039,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + esc(e && e.message || e); }
       return null;
     }
+    var signatureBytes=window.BNRAR.unb64u(sgn.signatures[0]);
+    var verifyKey=await crypto.subtle.importKey('jwk',publicJwk,{name:'RSA-PSS',hash:'SHA-256'},false,['verify']);
+    if(!await crypto.subtle.verify({name:'RSA-PSS',saltLength:32},verifyKey,signatureBytes,rebuilt.sigData))throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+    var signedId=window.BNRAR.b64u(new Uint8Array(await crypto.subtle.digest('SHA-256',signatureBytes)));
+    if(signedId!==sgn.ar_id)throw new Error('The returned transaction ID did not match its signature. Nothing was submitted.');
     var entry = {
       intent_id: intent.intent_id, rail: 'arweave', network: 'mainnet',
       human_summary: intent.human_summary, digest: intent.digest,

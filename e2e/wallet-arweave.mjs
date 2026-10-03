@@ -321,6 +321,11 @@ try {
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
     ok('history trimming retains all forty unresolved signed transactions',await page.evaluate(()=>{const list=JSON.parse(localStorage.getItem('bnr_outbox_v1'));return list.length===80&&Array.from({length:40},(_,i)=>'retention-fixture-'+i).every(id=>list.some(e=>e.intent_id===id&&e.phase==='signed'));}));
     await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    const beforeBadSignature=posted.length;
+    await page.evaluate(()=>{window.__originalSignature=arweaveWallet.signature;arweaveWallet.signature=async()=>new Uint8Array(512)});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('wrong signing key or invalid extension signature is refused before submission',posted.length===beforeBadSignature&&(await page.locator('#arw-file-status').innerText()).includes('signature did not match'));
+    await page.evaluate(()=>{arweaveWallet.signature=window.__originalSignature});
     const beforeOversize=posted.length;
     await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
     await page.locator('#arw-file-review').click();

@@ -66,7 +66,7 @@
   }
 
   function renderChooser(){
-    var h = '<div class="wa-note">Get a live Autonomi storage quote here. Payment and publication through this wallet are not available yet.</div>';
+    var h = '<div class="wa-note">Check Autonomi quote availability for your file. Payment and publication through this wallet are not available yet.</div>';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
     h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
     h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
@@ -178,7 +178,7 @@
       var result=await worker.ops['x.preparePut']({bytes:bytes},90000);if(quoteWorker!==worker)return;
       if(!result||!result.quote||!/^\d+$/.test(result.quote.ant_atto))throw new Error('The service did not return a valid ANT amount');
       output.textContent=ant(result.quote.ant_atto)+' ANT · '+file.size.toLocaleString()+' bytes · quoted '+new Date().toLocaleTimeString()+'. ETH network fees are separate. Quote only; no payment or publication.';
-    }catch(error){if(quoteWorker===worker)output.textContent='Quote unavailable: '+(error.message||'service unavailable')+'. No payment was requested.';}
+    }catch(error){if(quoteWorker===worker)output.textContent=error.code===-32030?'Quote unavailable: the Autonomi service is not accepting requests. Your file was not sent.':'Quote unavailable: '+(error.message||'service unavailable')+'. No payment was requested.';}
     finally{if(quoteWorker===worker){stopQuote();button.disabled=false;input.disabled=false;cancel.hidden=true;}}
   }
   window.addEventListener('pagehide',stopQuote);

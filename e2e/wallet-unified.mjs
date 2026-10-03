@@ -74,7 +74,7 @@ try {
     check(label+' worker startup failure restores controls',await page.locator('#ant-quote-go').isEnabled()&&await page.locator('#ant-quote-file').isEnabled()&&(await page.locator('#ant-quote-status').innerText()).includes('Worker unavailable'));
     await page.evaluate(()=>{window.BnrSeam.spawn=window.__spawn;});
     quoteMode='closed';const sent=antPosts;await page.locator('#ant-quote-go').click();await page.waitForFunction(()=>!document.querySelector('#ant-quote-go').disabled);
-    check(label+' closed service refuses before uploading bytes',antPosts===sent&&(await page.locator('#ant-quote-status').innerText()).startsWith('Quote unavailable'));
+    check(label+' closed service refuses before uploading bytes',antPosts===sent&&(await page.locator('#ant-quote-status').innerText()).includes('Your file was not sent.'));
    }
    await page.locator('[data-wallet-store]').click();
    await page.screenshot({path:resolve(shots,label.replace(' ','-')+'-storage.png'),fullPage:false});
