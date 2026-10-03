@@ -102,8 +102,8 @@ for(const hang of ['connect','read'])test('one startup budget reaches relay even
   const at=Date.now(),{ctx,page,errors,relay}=await open(false,false,hang);
   try{
     await page.waitForFunction(()=>/s \/ 8 s/.test(document.querySelector('#playback-status').textContent));
-    await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0&&window.__bviewEngine().path==='stream',null,{timeout:12000});
-    assert.ok(Date.now()-at<14000,'setup and first-frame waits share one budget');
+    await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0&&window.__bviewEngine().path==='stream',null,{timeout:18000});
+    assert.ok(Date.now()-at<20000,'a silent direct start reaches the relay after one quiet limit');
     assert.equal(relay.length,1);assert.ok(await page.evaluate(()=>window.__bviewEngine().direct.fallback));
     if(hang==='read')assert.equal(await page.evaluate(()=>window.cancelledRead),true);
     assert.deepEqual(errors,[]);

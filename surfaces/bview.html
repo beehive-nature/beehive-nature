@@ -1342,7 +1342,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
   const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.1/';
   // The relay takes over after DIRECT_QUIET_MS without direct progress, or DIRECT_CAP_MS without a frame.
-  const DIRECT_QUIET_MS = 8000, DIRECT_CAP_MS = 20000, DIRECT_STALL_MS = 5000, ROUTE_KEY = 'bnr.bview.route';
+  const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STALL_MS = 5000, ROUTE_KEY = 'bnr.bview.route';
   let directPool = null, directSession = null, restorePause = false, bridgeTracked = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
   const stopDirect = () => {
@@ -1387,11 +1387,13 @@ document.addEventListener('DOMContentLoaded',function(){
     const startedAt = performance.now();
     let stage = 'Loading the direct reader', movedAt = startedAt;
     const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
-    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / 8 s. Then relay.');
+    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then relay.');
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
     // Every sign of direct progress restarts the quiet clock; the cap bounds the whole wait for a frame.
+    // The SDK names each step of opening a file; show the viewer which one is running.
+    const heard = event => { const said = String(event && event.message || ''); if (!session && said.startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
     const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => failed.abort(), DIRECT_QUIET_MS); };
     cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
     try {
@@ -1445,7 +1447,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
        };
       };
-      source = await bounded(client.createMediaSource(address, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal, onProgress:moved, bviewTrack:track }), failed.signal, capLeft());
+      source = await bounded(client.createMediaSource(address, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal, onProgress:heard, bviewTrack:track }), failed.signal, capLeft());
       if (my !== job || signal.aborted) { source.close(); return true; }
       if (!session) throw new Error('Direct reader was not opened');
       session.source = source; directSession = session;
@@ -1686,7 +1688,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
       ['service worker · native ranges','one media URL · seekable session ranges · no progressive Blob swaps',E.path==='webrtc'?'done':'todo'],
       ['browser playback',E.sounded?'decoded frames · '+E.playhead.toFixed(2)+' s':'waiting for a decoded frame',E.sounded?'done':'todo'],
-      ['relay recovery','8 s without direct progress, 20 s without a first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
+      ['relay recovery','12 s without direct progress, 30 s without a first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
       ['whole-file SHA-256','not computed for direct range playback · range reads are not a whole-file hash','skip']
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
