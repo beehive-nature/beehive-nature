@@ -37,12 +37,13 @@ async function open(reg, opts = {}) {
     const stub = { _voices: voices, getVoices() { return this._voices; }, addEventListener() {}, cancel() {}, speak(u) { window.__spokes.push(u.text); setTimeout(() => { if (u.onend) u.onend(); }, 5); } };
     Object.defineProperty(window, 'speechSynthesis', { value: stub, writable: true, configurable: true });
   }, [reg, opts.voices || []]);
-  // sent: what PLUR's own page asks of other origins. festival: what the embedded festival frame
-  // asks once it scrolls into view; it reads Arbitrum from its own two hosts, as it does standalone.
-  const sent = [], festival = [];
-  await ctx.route('**/*', r => { const q = r.request(); if (!q.url().startsWith(ORIGIN)) (q.frame().parentFrame() ? festival : sent).push(q.method() + ' ' + q.url());
+  const sent = [];
+  await ctx.route('**/*', r => { const q = r.request(); if (!q.url().startsWith(ORIGIN)) sent.push(q.method() + ' ' + q.url());
     if (q.url() === 'https://api.anthropic.com/v1/messages') return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":{"type":"authentication_error"}}' });
     return q.url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'); });
+  // Isolate parent gestures from the festival iframe's independent RPC reads.
+  // festival-eternal tests the festival; no external request is delivered here.
+  await ctx.route("**/surfaces/festival/index.html*", r => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>Festival fixture</title>" }));
   // This suite isolates browser voices and the explicit unavailable-preview path.
   // plur-voices.test.mjs exercises all fixed fallbacks and no-engine routing.
   await ctx.route('**/assets/plur-voices/manifest.json*', r => r.abort('blockedbyclient'));
@@ -50,10 +51,9 @@ async function open(reg, opts = {}) {
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/surfaces/plur.html`, { waitUntil: 'load' });
   await p.waitForFunction(() => window.__eternal && window.__eternal.data.total > 0, null, { timeout: 15000 });
-  return { ctx, p, errs, sent, festival };
+  return { ctx, p, errs, sent };
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
-const FESTIVAL_READS = ['POST https://arb1.arbitrum.io/rpc', 'POST https://arbitrum-one-rpc.publicnode.com/'];
 const VOICES = [{ name: 'Hebrew Local', lang: 'he-IL' }, { name: 'Arabic Local', lang: 'ar-SA' }, { name: 'Latvian Local', lang: 'lv-LV' }];
 
 test('one front per register, each in its own dress', async () => {
@@ -118,20 +118,19 @@ test('without voices every register says so plainly, and nothing pretends to spe
 });
 
 test('bee: the one action walks to the page\'s own words; the talk link opens the conversation', async () => {
-  const { ctx, p, errs, sent, festival } = await open('bee');
+  const { ctx, p, errs, sent } = await open('bee');
   await p.click('#etBeeStart');
   await p.waitForFunction(() => { const r = document.getElementById('words').getBoundingClientRect(); return r.top > -40 && r.top < 200; });
   assert.equal(await p.evaluate(() => document.activeElement.classList.contains('w') && document.activeElement.closest('.f-peace') !== null), true, 'focus lands on the first peace card');
   await p.click('.et-b-link[data-go="talk"]');
   assert.equal(await p.evaluate(() => document.activeElement.id), 'say');
   assert.equal(await p.evaluate(() => window.__spokes.length), 0, 'nothing spoke');
-  assert.deepEqual(sent, [], 'PLUR itself sent nothing');
-  assert.deepEqual(festival.filter(u => !FESTIVAL_READS.includes(u)), [], 'the embedded festival asks only its own two Arbitrum hosts');
+  assert.deepEqual(sent, [], 'nothing was sent');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });
 
 test('raver: tap a field, tap a word: the page\'s own card speaks it, or it says it has no voice', async () => {
-  const { ctx, p, errs, sent, festival } = await open('raver', { voices: VOICES });
+  const { ctx, p, errs, sent } = await open('raver', { voices: VOICES });
   await p.click('#etStars .field-w[data-k="0"]', { force: true }); // the sky turns (3 minutes); a tap lands anyway
   assert.match(await p.textContent('#etRaverCard'), /peace/);
   const chips = await p.$$eval('#etChipsR button', bs => bs.map(b => [b.textContent, b.classList.contains('mute')]));
@@ -147,7 +146,7 @@ test('raver: tap a field, tap a word: the page\'s own card speaks it, or it says
   assert.equal(await p.evaluate(() => document.activeElement.id), 'say');
   await p.click('#etMotion');
   assert.equal(await p.evaluate(() => document.body.classList.contains('et-still') && getComputedStyle(document.querySelector('.et-r-turn')).animationPlayState), 'paused');
-  assert.deepEqual(sent, []); assert.deepEqual(festival.filter(u => !FESTIVAL_READS.includes(u)), []); assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+  assert.deepEqual(sent, []); assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
   const r = await open('raver', { reduce: true });
   assert.equal(await r.p.evaluate(() => getComputedStyle(document.querySelector('.et-r-turn')).animationName), 'none', 'still under reduced motion');
   await r.ctx.close();

@@ -29,10 +29,14 @@ try {
     const stub = {
       _voices: [], _fn: null,
       getVoices() { return this._voices; },
+      addEventListener(type, fn) { if (type === "voiceschanged") this._fn = fn; },
       cancel() {},
-      addEventListener(type, fn) { if (type === 'voiceschanged') this._fn = fn; },
       speak(u) { window.__spokes.push(u.text); setTimeout(() => { if (u.onend) u.onend(); }, 5); },
     };
+    Object.defineProperty(stub, 'onvoiceschanged', {
+      get() { return this._fn; },
+      set(fn) { this._fn = fn; },
+    });
     Object.defineProperty(window, 'speechSynthesis', { value: stub, writable: true, configurable: true });
     window.__setVoices = function (v) {
       stub._voices = v;
@@ -42,13 +46,12 @@ try {
   // External services never receive test input; simulate an actual HTTP refusal.
   await page.route('**/*', route => {
     const url = route.request().url();
+    // Browser-only branch: fixed previews are covered by plur-voices.test.mjs.
+    if (url.includes("/assets/plur-voices/manifest.json")) return route.abort();
     if (url.startsWith(base)) return route.continue();
     if (url === 'https://api.anthropic.com/v1/messages') return route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":{"type":"authentication_error"}}' });
     return route.abort();
   });
-  // This check isolates browser voices and the explicit unavailable-preview path, as
-  // plur-eternal.test.mjs does. plur-voices.test.mjs exercises the fixed synthetic fallbacks.
-  await page.route('**/assets/plur-voices/manifest.json*', route => route.abort());
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   for (const name of ['plur', 'blanguage']) {
@@ -75,7 +78,7 @@ try {
   assert(await hearButton.evaluate(el => el.closest('.field.f-peace') !== null), 'the control sits beside the peace words');
   assert(await hearButton.evaluate(el => el.closest('.open') === null), 'the control is NOT the page header or its first task');
   assert.equal(await hearButton.locator('[data-i18n="plur.hearPair"]').innerText(), 'Hear the Hebrew and Arabic greetings', 'direct, labelled purpose');
-  await page.locator('#vnote').getByText(/Nothing plays automatically./).waitFor();
+  await page.locator('#vnote').getByText(/Missing voices use site-hosted synthetic word previews/).waitFor();
   assert(await hearButton.isDisabled(), 'no Hebrew or Arabic voice (fake synth) → honestly disabled');
   await page.locator('#vst').getByText(/Synthetic audio catalog unavailable/).waitFor();
   assert.equal(await page.evaluate(() => window.__spokes.length), 0, 'nothing plays automatically');
