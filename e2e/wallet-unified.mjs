@@ -35,6 +35,7 @@ try {
    const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));
    await page.goto(origin+'/surfaces/wallet.html');
    await page.waitForFunction(()=>window.BNRWALLET&&document.querySelector('#bpay-card').textContent.includes('Choose'),null,{timeout:15000});
+   check(label+' form controls have explicit accessible names',await page.evaluate(()=>[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].every(e=>e.labels?.length||e.getAttribute('aria-label')||e.getAttribute('aria-labelledby')||e.title)));
    check(label+' exact wallet identity',await page.locator('.wallet-brand').innerText()==='skaists heART WALLet');
    check(label+' one global presentation selector',await page.locator('[data-inspection]').count()===0);
    check(label+' art remains on a separate surface',await page.locator('#insc-sec').count()===0&&await page.locator('footer a[href="museum.html"]').count()===1);

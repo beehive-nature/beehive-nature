@@ -76,7 +76,7 @@
     // the quote-service endpoint is cypherpunk-view configuration
     h += '<div class="row" data-min-insp="cypherpunk" style="margin-top:6px;gap:8px;align-items:center;display:none">';
     h += '<span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span>';
-    h += '<input id="bpay-bridge" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" />';
+    h += '<input id="bpay-bridge" aria-label="Autonomi quote service URL" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" />';
     h += '</div>';
     // the gesture's record + the fresh-quote action (quote only — never a payment)
     if (st.audience === 'public') {

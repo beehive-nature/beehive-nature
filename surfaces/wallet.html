@@ -827,7 +827,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
   <div class="law wl-soul-live" id="wl-soul-live">live as <b id="wl-soul-name" style="color:var(--leaf)">…</b> — your name and short addr ride the bottom rails bar.</div>
   <div class="row wl-connect-cta">
-    <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
+    <input id="wq" aria-label="Account or .b name" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
   <div class="law" id="wstat" style="margin-top:8px;min-height:20px">not connected</div>
@@ -937,7 +937,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
         Prefer <b>connect keychain (passkey)</b> — New-bee never needs to paste.</div>
         <div class="row" style="margin-top:8px">
-          <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+          <input id="kc-rec" aria-label="Recovery phrase or bdidrec code" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
           <button id="kc-recgo">recover</button>
         </div>
       </details>
@@ -990,7 +990,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </details>
     <div class="row">
       <button id="vlt-gen" class="gold">⚄ generate a keypass</button>
-      <select id="vlt-genlen" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+      <select id="vlt-genlen" aria-label="Generated seed length" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
         <option value="6">6 words · 66 bits</option>
         <option value="8" selected>8 words · 88 bits</option>
         <option value="10">10 words · 110 bits</option>
@@ -999,8 +999,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <pre id="vlt-genout" style="display:none"></pre>
     <div class="row">
-      <input id="vlt-newpass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
-      <input id="vlt-newpass2" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
+      <input id="vlt-newpass" aria-label="New vault keypass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
+      <input id="vlt-newpass2" aria-label="Confirm vault keypass" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
     </div>
     <div class="law" id="vlt-strength" style="margin-top:4px;min-height:18px"></div>
     <div class="row">
@@ -1012,7 +1012,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <!-- ── state B: vault exists, locked ─────────────────────────────────── -->
   <div id="vlt-locked" style="display:none">
     <div class="row" style="margin-top:12px">
-      <input id="vlt-pass" type="password" placeholder="your keypass" autocomplete="current-password" spellcheck="false" style="flex:2">
+      <input id="vlt-pass" aria-label="Vault keypass" type="password" placeholder="your keypass" autocomplete="current-password" spellcheck="false" style="flex:2">
       <button id="vlt-unlock" class="gold">UNLOCK</button>
     </div>
     <div class="row">
@@ -1042,22 +1042,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       checksum-verified and curve-checked, before anything is sealed.
       Prefer inject/connect on each rail; Arweave JWK paste remains scaffold · advanced.</div>
       <div class="row" style="margin-top:8px">
-        <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <select id="vlt-type" aria-label="Secret type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
           <option value="auto" selected>detect type</option>
           <option value="seed">seed phrase (scaffold · recovery)</option>
           <option value="vaulta">Vaulta active key (scaffold · recovery)</option>
           <option value="arweave">Arweave JWK (scaffold · advanced)</option>
           <option value="note">plain note</option>
         </select>
-        <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
+        <input id="vlt-label" aria-label="Secret label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
       </div>
       <div class="row">
-        <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
+        <textarea id="vlt-secret" aria-label="Seed phrase or active private key" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
           style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
       </div>
       <div class="row">
-        <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
-        <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
+        <input id="vlt-chain" aria-label="Chain, optional" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
+        <input id="vlt-bip39pass" aria-label="BIP39 passphrase, optional" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
       </div>
       <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
       <div class="row">
@@ -1115,7 +1115,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
 
   <div class="law" id="vlt-stat" style="margin-top:10px;min-height:20px">— </div>
-  <input type="file" id="vlt-file" accept=".json,.bnrvault,application/json" style="display:none">
+  <input type="file" id="vlt-file" aria-label="Import encrypted vault file" accept=".json,.bnrvault,application/json" style="display:none">
 </section>
 
 <section id="forge-sec" data-wl-task="key">
@@ -1140,7 +1140,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
   <div class="row">
-    <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
+    <input id="forge-ctx" aria-label="New key context" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
@@ -1283,7 +1283,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / migration only: paste the account's existing ACTIVE private key to bridge your derived bzDiD.
     Prefer connect/inject when available — this paste is never required for New-bee.</div>
     <div class="row" style="margin-top:8px">
-      <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
+      <input id="br-wif" aria-label="Existing active private key" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
       <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
     </div>
   </details>
@@ -1302,7 +1302,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   (live price below). Near infinite: every account born this way signs with your keychain.</div>
   </details>
   <div class="row">
-    <input id="ac-name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
+    <input id="ac-name" aria-label="New Vaulta account name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
     <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
   </div>
   <div class="row">
@@ -1360,9 +1360,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="sv-to" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="sv-to" aria-label="Recipient Vaulta account" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
         <input id="sv-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount in A">
-        <input id="sv-memo" class="small" placeholder="memo (optional)" style="flex:2">
+        <input id="sv-memo" aria-label="Transfer memo, optional" class="small" placeholder="memo (optional)" style="flex:2">
         <button id="sv-go" class="gold">📤 send A</button>
       </div>
       <div class="law" id="sv-stat" style="margin-top:4px;min-height:18px">liquid: — </div>
@@ -1371,7 +1371,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="row">
         <select id="se-rail" style="max-width:150px;flex:0 1 150px" title="EVM rail — chain id and token decimals come from the rail, never from this box"></select>
         <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset carried on the chosen rail"></select>
-        <input id="se-to" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="se-to" aria-label="Recipient EVM address" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
         <input id="se-amt" class="small" inputmode="decimal" placeholder="0.00" style="max-width:130px;flex:0 1 130px" title="amount, in the asset's own units — typed exactly, never rounded">
         <button id="se-go" class="gold">📤 send</button>
       </div>
@@ -1383,7 +1383,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
          BOLT-12 offer, both, no node and no third party touched. ══ -->
     <div id="tx-l" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="ln-req" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
+        <input id="ln-req" aria-label="Lightning invoice or offer" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
         <button id="ln-read" class="gold">🔎 read it</button>
       </div>
       <div id="ln-card" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
@@ -1407,8 +1407,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
       <div id="pn-mine-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-name" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
-          <input id="pn-offer" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-name" aria-label="Payment name to publish" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-offer" aria-label="BOLT-12 offer, optional" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
           <button id="pn-build" class="gold">build the record</button>
         </div>
         <div id="pn-out" style="display:none;margin-top:8px"></div>
@@ -1426,7 +1426,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
       <div id="pn-theirs-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-lookup" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
+          <input id="pn-lookup" aria-label="Recipient payment name" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
           <button id="pn-resolve" class="gold">🔎 resolve</button>
         </div>
         <div id="pn-res" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
@@ -1447,7 +1447,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="sw-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
       <button id="sw-dir" class="gold" style="flex:0 1 220px">direction: buy RAM with A</button>
-      <input id="sw-amt" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
+      <input id="sw-amt" aria-label="Swap amount" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
       <div class="law" style="flex:2;min-width:200px" id="sw-quote">quote: reading rammarket…</div>
       <button id="sw-go" class="gold">🔁 swap</button>
     </div>
@@ -1503,7 +1503,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   that ledger via the estate oracle; the box owns the writes.</p>
 
   <div class="row" style="align-items:center;flex-wrap:wrap">
-    <input id="vc-key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <input id="vc-key" aria-label="Meter key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
@@ -1551,7 +1551,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <!-- 4 · KNOW WHEN YOU'RE OUT -->
     <div class="row" style="margin-top:12px;align-items:center;flex-wrap:wrap">
-      <input id="vc-afford-amt" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
+      <input id="vc-afford-amt" aria-label="Job cost in A" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
       <button id="vc-afford-go" class="gold" style="min-height:36px">can I afford it?</button>
       <span id="vc-afford-out" class="law" style="flex:2;min-width:180px">—</span>
     </div>
@@ -1636,7 +1636,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <option value="USDC_BASE">USDC · Base</option>
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
-      <input id="fund-addr" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
+      <input id="fund-addr" aria-label="Buy destination address or ENS name, optional" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
       <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
@@ -2312,8 +2312,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </div>
   <div id="adapter-states" data-wl-tech style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
-    <input id="tx-contract" placeholder="contract" value="" spellcheck="false">
-    <input id="tx-action" placeholder="action" value="" spellcheck="false">
+    <input id="tx-contract" aria-label="Contract account" placeholder="contract" value="" spellcheck="false">
+    <input id="tx-action" aria-label="Contract action" placeholder="action" value="" spellcheck="false">
     <select id="tx-net" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
       <option value="main">Vaulta mainnet</option>
       <option value="j4">Jungle4 · testnet</option>
@@ -2324,8 +2324,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <details id="tx-j4-scaffold" style="flex:1 1 100%">
       <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · Jungle4 test key (TESTNET-ONLY — gold mainnet never pastes)</summary>
       <div class="row" style="margin-top:8px">
-        <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
-        <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+        <input id="tx-j4key" aria-label="Jungle4 test private key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
+        <input id="tx-j4actor" aria-label="Jungle4 test account" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
       </div>
     </details>
   </div>
@@ -2334,7 +2334,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <div class="row" style="margin-top:0" id="tx-fields-row"></div>
   </div>
   <div class="row">
-    <input id="tx-data" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
+    <input id="tx-data" aria-label="Transaction arguments JSON" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
   </div>
   <div id="tx-preview" style="display:none;margin-top:10px;border:1px solid #2c4a5a;border-radius:10px;padding:11px 13px;background:#081820">
     <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">EXACTLY WHAT YOU ARE SIGNING</div>

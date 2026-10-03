@@ -118,3 +118,8 @@ For 3eebfdd25, the wallet, static, Rust/payment, node and standards-meter CI job
 ## Final visible capability wording
 
 The final mobile inspection found four inherited headings promising live reads on every chain, despite the network inventory correctly marking unwired readers. Those headings now reuse the translated Accounts & coins label across all registers. This removes the contradictory capability promise without inventing translations or changing reader availability.
+
+
+## Explicit form names
+
+A final DOM accessibility census found 33 inherited form controls relying on placeholders or nearby prose without an explicit accessible name. Recovery, vault, recipient, amount, invoice, account and transaction fields now carry descriptive names. The unified browser battery checks every form control in each register and viewport. This is a naming repair, not full screen-reader or WCAG certification; new accessible-name fallback strings are English.
