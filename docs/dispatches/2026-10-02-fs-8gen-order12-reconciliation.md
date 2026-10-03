@@ -63,3 +63,32 @@ place per the shared-checkout law, named here for a future tidy decision.
   (receipts in the #296/#298/#303 PR threads).
 
 **Dispatch:** this file. **Worktree:** wt-zcode-zblood, branch `zcode/dispatch-8gen-order12`.
+
+---
+
+## Addendum 2026-10-03 ~00:35–00:57Z — founder signed in; frontier arks retried authed; binding-400 persists
+
+The founder signed in inside the staged pane ("you logged in"): the tab bounced ident → the
+3QS7-89WB viewer = **AUTHED** (oracle law satisfied). Standing disposition applied — no ceremony,
+no re-audit, guarded file walker from disk.
+
+- **One-writer stand-down first:** my initial sweep was REFUSED at lock acquisition —
+  imgqueue-owner/GLM-session had refreshed a heartbeat at 00:34:49Z (fresh). Per the coordination
+  protocol I stood down read-only and polled; the holder never refreshed again (its single
+  refresh remains its only write — manifest byte-unchanged across the window; observed, not
+  inferred). At 10-min staleness I took the conditional takeover.
+- **claimId law exercised (honest gotcha):** the #296/#298 hardening binds each acquisition to a
+  process-local claim — my first sweep cell's kernel died holding the claim, so the follow-on
+  kernel was refused against MY OWN lock until the 10-minute staleness elapsed; the run then
+  completed as takeover → sweep → control → release inside ONE kernel.
+- **Both frontier arks retried under auth, same verdict:** `3QS7-89WB` (attempts at 00:45 and
+  00:56; 17 lifetime observations) and `3QSQ-G983` (00:56; 8 lifetime observations) —
+  **binding-400 persists on both**. Control ark `33S7-9GY8-1XT` (a known-downloaded record)
+  returned **200 on the same binding wire between the 400s** → the endpoint is healthy; the
+  rejection is specific to these two short-form arks. They stay **retryable observations, never
+  outcomes** (09-29i law). Any future cure likely needs the long/full ark form for these two
+  records, not another same-form retry.
+- **Terminal state unchanged:** 307 downloaded / 83,088,795 B · 364/366 resolved (99.5%) ·
+  2 pending. No downloads this wake. Lock released (verified absent). Zero repo writes beyond
+  this addendum.
+
