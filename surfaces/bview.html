@@ -1006,6 +1006,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const ok = await paintBlob(blob, (n > (32 << 20) ? BLOB_WAIT_FULL : BLOB_WAIT), st);
       if (st.my !== job) return false;
       if (!ok) { st.retryAt = bytesAt(st.plan, mediaAt(st.plan, st.bytes) + EXTEND_GAIN); return false; }
+      markFirstFrame();
       st.paintedAt = n;
       note((st.sounded ? 'swap' : 'start') + ' · playing copy ' + fmtMb(n) + ' (' + mediaAt(st.plan, n).toFixed(1) + ' s) from ' + at.toFixed(2) + ' s');
       paintNerd();
