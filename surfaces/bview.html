@@ -62,6 +62,7 @@ button[type=submit]:active{transform:scale(.97)}
 .saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
+.save-file{margin:12px 0}.save-file p{font-size:14px;line-height:1.5}.save-file progress{display:block;width:100%}.save-file button{font:inherit;min-height:var(--sk-control-row);padding:var(--sk-s2);border:1px solid var(--edge);border-radius:var(--ctl);background:var(--well);color:var(--ink)}
 .playback-route{margin:12px 0}.playback-route label{display:block}.playback-route select{width:100%;min-height:44px;font:inherit;background:var(--screen);color:var(--fg);border:1px solid currentColor;border-radius:var(--ctl);padding:8px}.playback-route p{font-size:14px;line-height:1.5}
 #frame-hold{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;background:var(--screen)}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
@@ -247,6 +248,13 @@ document.addEventListener('DOMContentLoaded',function(){
             <p>Direct connects to storage nodes without a wallet. Applies when you press Watch. The relay remains the default while we compare playback.</p>
             <p id="playback-status" role="status" aria-live="polite"></p>
           </div>
+          <div class="save-file">
+            <button type="button" id="save-file">save file</button>
+            <button type="button" id="save-stop" hidden>stop saving</button>
+            <progress id="save-pg" max="1" value="0" aria-labelledby="save-status" hidden></progress>
+            <p id="save-status" role="status" aria-live="polite"></p>
+            <p>keeps a copy of any public file on this device, video or not. it connects straight to Autonomi storage nodes: no wallet, no account, nothing to pay.</p>
+          </div>
           <details class="my-videos" id="my-videos">
             <summary>My videos <span id="saved-count">(0)</span></summary>
             <p>Videos you play are remembered here. Save an address now, give it a name, or remove it whenever you like.</p>
@@ -368,6 +376,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </main>
 <script src="lang.js?v=42"></script>
 <script src="tour.js?v=42"></script>
+<script src="blink.js?v=1"></script>
 <script>
 /* bview.html -- PUBLIC Autonomi video through the estate ANT door
    (relay.skaists.dev/ant/v1 -> antd). Happy path is progressive binary,
@@ -406,7 +415,12 @@ document.addEventListener('DOMContentLoaded',function(){
   // ETERNAL FRONT hook: tell the three renderers the engine moved (they read, never write).
   const pub = () => { try { if (window.__eternalPaint) window.__eternalPaint(); } catch (_) {} };
   const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; pub(); };
-  const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
+  // A pasted link may be a bare address, autonomi://…, or a bLink carrying a name and a size (blink.js).
+  const BLink = window.BLink;
+  const parse = raw => { const link = BLink.parse(raw); return link ? link.address : null; };
+  // The labels of the link that was opened last. The field may show only its address.
+  let linked = null;
+  const current = () => { const link = BLink.parse($('addr').value); return link && linked && link.address === linked.address && !link.name && link.size === null ? linked : link; };
   // A versioned, address-only browser record. No wallet secrets or identity claims.
   // Future bData sync can consume this schema without coupling playback to a signer.
   const PLAYLIST = 'bnr.bview.playlist.v1';
@@ -435,7 +449,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
   function saveVideo(address) {
-    return changeVideos(rows => rows.some(row => row.address === address) ? rows : [{ address, name: '' }, ...rows], 'Saved in this browser.');
+    return changeVideos(rows => rows.some(row => row.address === address) ? rows : [{ address, name: (link => link && link.address === address ? link.name.slice(0, 160) : '')(current()) }, ...rows], 'Saved in this browser.');
   }
   function renderVideos() {
     const list = $('saved-videos'); list.replaceChildren();
@@ -1347,10 +1361,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if (session) { session.dispose(); session.source?.close(); }
   };
   const closePool = () => {
+    if (saving) return; // a save in flight owns the connection; it closes the pool when it ends
     const pool = directPool; directPool = null;
     if (pool) pool.then(client => client.close()).catch(() => {});
   };
-  addEventListener('pagehide', () => { stopDirect(); closePool(); });
+  addEventListener('pagehide', () => { if (saving) { saving.abort(); saving = null; } stopDirect(); closePool(); });
   async function bounded(work, signal, milliseconds) {
     let timer, aborted;
     try {
@@ -1362,6 +1377,88 @@ document.addEventListener('DOMContentLoaded',function(){
       })]);
     } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
   }
+  // SAVE A FILE: the same direct reader, read in order and written as it arrives. When the browser
+  // can write to a file the person chose, memory stays bounded whatever the size. Otherwise the
+  // file is held in memory first, so it is refused above SAVE_MEMORY_MAX with the reason in words.
+  // One slow or failed range does not end a save: each range is asked for up to SAVE_TRIES times.
+  const SAVE_MEMORY_MAX = 256 << 20, SAVE_CHUNK = 1 << 20, SAVE_TRIES = 3;
+  let saving = null;
+  const saveStatus = text => { $('save-status').textContent = text; };
+  const bytesSay = n => n < 1048576 ? n + ' B' : fmtMb(n);
+  async function saveFile() {
+    if (saving) return;
+    const link = current();
+    if (!link) { saveStatus('enter a complete address first: after autonomi:// come 64 letters and numbers.'); return; }
+    if (!isSecureContext || !('RTCPeerConnection' in window)) { saveStatus('this browser cannot connect to Autonomi storage nodes directly, so saving is not available here.'); return; }
+    const stop = new AbortController(), pg = $('save-pg');
+    let handle = null, reader = null, writable = null, got = 0, size = null;
+    saving = stop; $('save-file').disabled = true; $('save-stop').hidden = false;
+    try {
+      // Ask where to save first, while the press still counts as the person's own gesture.
+      if (window.showSaveFilePicker) {
+        try { handle = await window.showSaveFilePicker({ suggestedName: BLink.saveName(link, '') }); }
+        catch (error) {
+          if (error.name === 'AbortError') { saveStatus('nothing was saved: the save window was closed.'); return; }
+          if (error.name !== 'SecurityError') throw error;
+        }
+      }
+      saveStatus('connecting to Autonomi storage nodes. this can take a minute.');
+      const sdk = await bounded(import(SDK_ROOT + 'index.js'), stop.signal, 45000);
+      if (!directPool) {
+        const pending = sdk.AutonomiClient.connect({ signal: stop.signal });
+        directPool = pending;
+        pending.catch(() => { if (directPool === pending) directPool = null; });
+      }
+      const client = await bounded(directPool, stop.signal, 45000);
+      reader = await bounded(client.openFile(link.address, { signal: stop.signal }), stop.signal, 45000);
+      size = reader.size; const name = BLink.saveName(link, reader.name);
+      if (!handle && size > SAVE_MEMORY_MAX) {
+        saveStatus('this file is ' + bytesSay(size) + '. this browser cannot write it straight to a file, and that is too large to hold in memory. open this page in Chrome or Edge on a computer to save it.');
+        return;
+      }
+      if (handle) writable = await handle.createWritable();
+      const parts = [];
+      pg.max = size || 1; pg.value = 0; pg.hidden = false;
+      while (got < size) {
+        let bytes;
+        for (let attempt = 1; ; attempt++) {
+          try { bytes = await bounded(reader.read(got, Math.min(SAVE_CHUNK, size - got), { signal: stop.signal }), stop.signal, 60000); break; }
+          catch (error) {
+            if (stop.signal.aborted || attempt === SAVE_TRIES) throw error;
+            note('save retry · at ' + got + ' B · ' + error.message);
+            saveStatus('the network is slow. asking for this part again (' + (attempt + 1) + ' of ' + SAVE_TRIES + '): ' + bytesSay(got) + ' of ' + bytesSay(size) + ' so far.');
+          }
+        }
+        if (!bytes.byteLength) break;
+        if (writable) await writable.write(bytes); else parts.push(bytes);
+        got += bytes.byteLength; pg.value = got;
+        saveStatus('saving ' + name + ': ' + bytesSay(got) + ' of ' + bytesSay(size) + '.');
+      }
+      if (got !== size) throw new Error('short read: ' + got + ' of ' + size + ' bytes');
+      if (writable) { const closing = writable; writable = null; await closing.close(); }
+      else {
+        const url = URL.createObjectURL(new Blob(parts, { type: 'application/octet-stream' }));
+        const anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.hidden = true;
+        document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+      note('save · ' + (handle ? 'file' : 'memory') + ' · ' + size + ' B');
+      saveStatus('saved ' + name + ' · ' + bytesSay(size) + (handle ? '.' : '. look in the downloads of this browser.')
+        + (link.size !== null && link.size !== size ? ' the link said ' + link.size + ' B; the network holds ' + size + ' B.' : ''));
+    } catch (error) {
+      note('save failed · ' + (stop.signal.aborted ? 'stopped' : error.message));
+      saveStatus(stop.signal.aborted ? 'stopped. no file was saved.'
+        : got > 0 ? 'could not finish this file: Autonomi storage nodes stopped answering at ' + bytesSay(got) + ' of ' + bytesSay(size) + '. no file was saved. try again in a few minutes.'
+        : 'could not save this file: Autonomi storage nodes did not answer in time, or the address holds no public file. no file was saved. try again in a few minutes.');
+    } finally {
+      if (writable) { try { await writable.abort(); } catch {} }
+      try { reader?.close(); } catch {}
+      if (saving === stop) saving = null;
+      $('save-file').disabled = false; $('save-stop').hidden = true; pg.hidden = true;
+      if (!directSession && $('playback-route').value === 'relay') closePool();
+    }
+  }
+  $('save-file').addEventListener('click', saveFile);
+  $('save-stop').addEventListener('click', () => { if (saving) saving.abort(); });
   async function tryDirect(address, signal, my) {
     let reader, source, session, deadline;
     const failed = new AbortController();
@@ -1529,8 +1626,27 @@ document.addEventListener('DOMContentLoaded',function(){
       direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
     };
   };
-  $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
-  const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
+  // A link that names a file which is not a video is never sent to the player: it would wait on
+  // the network and then fail. It is offered to save instead, in words.
+  const openLink = x => {
+    linked = BLink.parse(x);
+    const file = linked && (linked.handler === 'download' || linked.handler === 'view');
+    saveStatus(!linked || !linked.name ? '' : (file ? 'this link is a file, not a video: ' : 'this link names ') + linked.name + (linked.size === null ? '' : ' · ' + bytesSay(linked.size)) + (file ? '. press save file to keep a copy on this device.' : '.'));
+    if (!file) view(x);
+  };
+  $('f').addEventListener('submit', e => {
+    e.preventDefault(); const x = $('addr').value.trim(); if (!x) return;
+    const link = BLink.parse(x);
+    history.replaceState(null, '', link && !BLink.address(x) ? BLink.format(link, '') : '#' + x); openLink(x);
+  });
+  const fromHash = () => {
+    const raw = location.hash.slice(1); if (!raw) return;
+    let x = raw; try { x = decodeURIComponent(raw); } catch {}
+    // a=…&n=… keeps its own encoding: decoding it twice would break a name holding % or &.
+    if (!BLink.address(x) && BLink.parse(raw)) x = raw;
+    const link = BLink.parse(x);
+    $('addr').value = link && !BLink.address(x) ? 'autonomi://' + link.address : x; openLink(x);
+  };
   paintNerd(); renderInst();
   for(const event of ['timeupdate','progress','loadedmetadata','playing','pause','ended','seeked'])v.addEventListener(event,paintNerd);
   addEventListener('hashchange', fromHash); fromHash();
