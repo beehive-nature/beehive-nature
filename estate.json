@@ -295,6 +295,16 @@
    "descriptionKey": "s.b4b.name"
   },
   {
+   "id": "bchat",
+   "family": "bnr",
+   "home": "skaists.buzz",
+   "path": "surfaces/bchat.html",
+   "state": "LIVE",
+   "gloss": "the estate's messaging surface — one thread, three trust lanes (SMS low-trust · BNR private · Autonomi capability)",
+   "org": "beehive-nature",
+   "limit": "SMS lane is a SIMULATED display demo until the Android surface; Autonomi retrieval adapter is Building — descriptor-only travels; the relay's DM-kind allowlist is UNVERIFIED (box ssh reset 2026-10-02), verdicts render verbatim"
+  },
+  {
    "id": "biq",
    "family": "bnr",
    "home": "bnr.quest",
@@ -1445,8 +1455,8 @@
   }
  ],
  "counts": {
-  "surfaces": 109,
-  "listed": 118,
+  "surfaces": 110,
+  "listed": 119,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1460,13 +1470,13 @@
    "beehivebiomass": 5,
    "beehivebuds": 0,
    "midi": 5,
-   "bnr": 1
+   "bnr": 2
   },
   "byState": {
-   "LIVE": 118
+   "LIVE": 119
   },
   "byOrg": {
-   "beehive-nature": 62,
+   "beehive-nature": 63,
    "skaists": 42,
    "beehive-biomass": 5
   }

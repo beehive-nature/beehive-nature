@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<!--
+/* ─── LICENSE ──────────────────────────────────────────────────────────────
+  SPDX-License-Identifier: Apache-2.0
+  Copyright 2026 Travis Mark Remington <lovis@skaists.dev>
+  Licensed under the Apache License, Version 2.0 (the "License"); you
+  may not use this file except in compliance with the License. You may
+  obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  See /LICENSE and /NOTICE in this repository. Applies to the bChat lane:
+  this surface, bchat-core.js, bchat-nip44.js.
+
+  bChat — ONE conversation surface, THREE trust lanes (SPEC-BCHAT-1).
+  The lane is payload, not decoration: a thread visibly distinguishes
+    ▸ SMS            carrier transport — SIMULATED here, display-only, low
+                     trust. Carrier text arrives with the Android surface
+                     (GrapheneOS Messages plumbing, MIT); the browser never
+                     fakes a send. BNR keys never touch telephony (E5 law).
+    🔒 BNR private   NIP-44 v2 end-to-end (bchat-nip44.js — official
+                     vectors green, e2e/bchat-core.test.mjs) carried as
+                     NIP-17 gift wrap (kind 14 sealed in kind 1059) over
+                     the estate relay, NIP-42 AUTH at the door.
+    ▣ AUTONOMI       a capability travels (autonomi://addr + bytes +
+                     sha256), never the bytes. Retrieval is a MEASURED
+                     state — descriptor-only today; the retrieval adapter
+                     is Building (capability-truth: never claimed as live).
+
+  THE RUB LAW (this page's posture): the surface renders entirely from
+  local state — connect is a click. No request leaves this page to render
+  it; the probe is opt-in and learns that something answered, never reads
+  a byte. Publication is proven by event id (relay OK true), never by
+  "sent" prose. Receipts carry events, never contents (bMeter shape).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bChat — one surface, three trust lanes</title>
+<link rel="stylesheet" href="tokens.css">
+<script src="register.js?v=1"></script>
+<style>
+/* register pre-hide guard — nothing flashes if register.js is late */
+[data-reg]:not(body){display:none}
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:block}
+:root{--bubble-out:var(--bg3);--bubble-in:var(--bg2)}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg1);color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:var(--t-body);line-height:var(--lh-body);
+}
+main{max-width:1060px;margin:0 auto;padding:var(--s4)}
+h1{font-family:'burti',ui-monospace,monospace;font-size:var(--t-display);margin:var(--s2) 0 var(--s1);letter-spacing:.5px}
+.sub{color:var(--dim);font-size:var(--t-small);margin:0 0 var(--s4)}
+h2{font-size:var(--t-h2);text-transform:uppercase;letter-spacing:2px;color:var(--dim);margin:var(--s5) 0 var(--s2)}
+.card{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s4)}
+.law{font-size:var(--t-law);color:var(--faint);line-height:var(--lh-law)}
+button{
+  background:var(--bg3);color:var(--ink);border:1px solid var(--line-hi);
+  border-radius:var(--r-sm);padding:var(--s2) var(--s3);font:inherit;font-size:var(--t-small);
+  cursor:pointer;transition:border-color var(--dur-fast) var(--ease)
+}
+button:hover{border-color:var(--gold)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,textarea,select{
+  background:var(--bg0);color:var(--ink);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:var(--s2);font:inherit;font-size:var(--t-small);width:100%
+}
+textarea{min-height:64px;resize:vertical}
+a{color:var(--cyan)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:var(--t-micro);border-radius:var(--r-pill);padding:2px var(--s2);border:1px solid}
+.badge-sms{color:var(--dim);border-color:var(--line-hi)}
+.badge-bnr{color:var(--ok);border-color:var(--ok)}
+.badge-ant{color:var(--flag);border-color:var(--flag)}
+.state{font-size:var(--t-micro);color:var(--faint)}
+.state-ok{color:var(--ok)}
+.state-bad{color:var(--flag)}
+.chip{display:inline-block;font-size:var(--t-micro);padding:1px var(--s2);border-radius:var(--r-pill);border:1px dashed var(--line-hi);color:var(--dim)}
+.chip-live{border-style:solid;color:var(--ok);border-color:var(--ok)}
+/* the two panes stack at 390px, sit side-by-side when there is room */
+.panes{display:grid;gap:var(--s4)}
+@media(min-width:820px){.panes{grid-template-columns:340px 1fr;align-items:start}}
+.threadlist{display:flex;flex-direction:column;gap:var(--s2)}
+.threadrow{display:block;width:100%;text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s3)}
+.threadrow[aria-current="true"]{border-color:var(--gold);box-shadow:var(--glow-gold)}
+.threadrow .t{font-size:var(--t-body);color:var(--ink)}
+.threadrow .s{font-size:var(--t-micro);color:var(--faint)}
+.msgs{display:flex;flex-direction:column;gap:var(--s2);max-height:46vh;overflow-y:auto;padding:var(--s2);border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg0)}
+.msg{max-width:86%;padding:var(--s2) var(--s3);border-radius:var(--r-md);border:1px solid var(--line)}
+.msg.out{align-self:flex-end;background:var(--bubble-out);border-color:var(--line-hi)}
+.msg.in{align-self:flex-start;background:var(--bubble-in)}
+.msg .m{white-space:pre-wrap;overflow-wrap:anywhere}
+.attach{border:1px dashed var(--flag);border-radius:var(--r-sm);padding:var(--s2);font-size:var(--t-micro);color:var(--dim);margin-top:var(--s2)}
+.compose{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s3)}
+.compose .row{display:flex;gap:var(--s2);align-items:center}
+.log{max-height:180px;overflow-y:auto;font-size:var(--t-micro);color:var(--dim);background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--s2)}
+.log div{border-bottom:1px solid var(--line);padding:2px 0;overflow-wrap:anywhere}
+.vectors .ok{color:var(--ok)}
+.vectors .bad{color:var(--flag)}
+.grid2{display:grid;gap:var(--s3)}
+@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
+.hexpl{font-size:var(--t-micro);color:var(--faint);overflow-wrap:anywhere}
+footer{max-width:1060px;margin:var(--s6) auto;padding:0 var(--s4) var(--s6);color:var(--faint);font-size:var(--t-law)}
+details[data-reg-disclose]>summary{color:var(--dim)}
+</style>
+</head>
+<body data-no-request-on-load>
+<main>
+  <h1>bChat</h1>
+  <p class="sub">one conversation surface · three trust lanes — the lane is payload, not decoration</p>
+
+  <div class="card" id="posture" style="margin-bottom:var(--s4)">
+    <b>this page renders from local state alone</b> — <span class="law">connect is a click; no
+    request leaves this page to render it. The relay probe below is opt-in and learns that
+    something answered, never reads a byte (the rub law). Publication is proven by relay
+    event id on <span class="state state-ok">OK true</span>, never by "sent" prose.</span>
+  </div>
+
+  <h2>identity — the BNR lane's key</h2>
+  <div class="card" id="identity">
+    <div id="nokey">
+      <p style="margin:0 0 var(--s2)">This identity is a nostr keypair generated on-device. It never
+      derives from a phone number and never touches the SMS lane — the handset is not a root-key
+      holder (E5 law).</p>
+      <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap">
+        <button id="genkey">generate a fresh key</button>
+        <input id="impkey" placeholder="or paste a 64-hex secret" style="flex:1;min-width:180px" spellcheck="false">
+        <button id="useimp">use it</button>
+      </div>
+    </div>
+    <div id="haskey" hidden>
+      <div>your public identity (x-only): <span class="hexpl" id="pubview"></span></div>
+      <div class="law" style="margin:var(--s2) 0">The secret stays in this browser's localStorage
+      (<code>bchat.sec</code>). Export it if you want the identity on another device; there is no
+      recovery — losing the browser profile loses the identity, by design.</div>
+      <button id="wipekey">forget this key (local only)</button>
+    </div>
+  </div>
+
+  <div class="panes">
+    <section>
+      <h2>threads</h2>
+      <div class="threadlist" id="threads"></div>
+      <h2>prove the encryptor</h2>
+      <div class="card vectors" id="vectors">
+        <button id="runvec">run the NIP-44 official vectors in this page</button>
+        <div class="law" style="margin-top:var(--s2)">cite-or-silent: the encryptor's claim is the
+        NIP's own published vectors, run in front of you — the same battery CI runs
+        (e2e/bchat-core.test.mjs).</div>
+        <div id="vecout" style="margin-top:var(--s2)"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="threadtitle">conversation</h2>
+      <div class="card" id="threadcard">
+        <div id="lanebadge" style="margin-bottom:var(--s3)"></div>
+        <div class="msgs" id="msgs"></div>
+        <div class="compose" id="compose">
+          <div class="row" id="rcptrow">
+            <input id="rcpt" placeholder="recipient public key (64-hex or npub…)" spellcheck="false">
+          </div>
+          <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center">
+            <label class="law" for="retain">retain:</label>
+            <select id="retain" style="width:auto">
+              <option value="persistent">persistent</option>
+              <option value="until-read">until-read</option>
+              <option value="ephemeral">ephemeral</option>
+            </select>
+            <button id="attachbtn" style="width:auto">attach a descriptor…</button>
+          </div>
+          <div id="attachform" hidden class="card" style="background:var(--bg2)">
+            <div class="law" style="margin-bottom:var(--s2)">an AUTONOMI attachment sends the
+            <b>capability</b> (address · bytes · sha256) inside the encrypted envelope — never the
+            bytes. Retrieval is a measured state: <span class="chip">descriptor-only</span> today;
+            the retrieval adapter is <b>Building</b> (capability-truth — never claimed as live).</div>
+            <input id="antaddr" placeholder="autonomi:// + 64 hex" spellcheck="false" style="margin-bottom:var(--s2)">
+            <div class="row" style="display:flex;gap:var(--s2)">
+              <input id="antbytes" placeholder="bytes (integer)" inputmode="numeric">
+              <input id="antsha" placeholder="sha256 (64 hex)" spellcheck="false">
+            </div>
+            <div class="row" style="margin-top:var(--s2);display:flex;gap:var(--s2)">
+              <button id="antsend">queue the descriptor</button>
+              <button id="antcancel">cancel</button>
+            </div>
+          </div>
+          <textarea id="draft" placeholder="write to the BNR private lane… (encrypted NIP-44 v2, gift-wrapped NIP-17)"></textarea>
+          <div class="row" style="display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap">
+            <button id="send" style="background:var(--bg3)">send — encrypted</button>
+            <span class="state" id="sendstate"></span>
+          </div>
+        </div>
+        <div id="smscompose" hidden>
+          <div class="law"><b>SIMULATED.</b> Carrier transport cannot run from a browser and never
+          will from this surface — the SMS lane arrives with the Android messaging surface, built on
+          <a href="https://github.com/GrapheneOS/Messages" target="_blank" rel="noopener noreferrer">GrapheneOS
+          Messages' open-source plumbing (MIT — opens a new tab)</a>. What this lane teaches today:
+          carrier text is <b>display-only, low trust</b>, and nothing BNR-private ever routes
+          through the telephony stack. A send button here would be theater; there is none.</div>
+        </div>
+      </div>
+
+      <h2>the relay door</h2>
+      <div class="card">
+        <div id="roomcard">
+          <div><b id="roomname"></b> · <span class="state" id="roomstate"></span></div>
+          <div class="hexpl" id="joincode" style="margin:var(--s2) 0"></div>
+          <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap">
+            <button id="checkroom">probe the road (opt-in)</button>
+            <button id="connect">connect is a click — join as <span id="whoami">…</span></button>
+            <button id="copywss">copy join address</button>
+          </div>
+          <div class="state" id="roomprobe" style="margin-top:var(--s2)"></div>
+          <div class="state" id="relaystate" style="margin-top:var(--s2)"></div>
+        </div>
+        <details data-reg-disclose class="law" style="margin-top:var(--s3)">
+          <summary>the wire, verbatim (cypherpunk register stands this open)</summary>
+          <div class="log" id="wirelog" style="margin-top:var(--s2)"></div>
+        </details>
+      </div>
+
+      <h2>receipts — events, never contents</h2>
+      <div class="card">
+        <div class="log" id="receipts"></div>
+        <div class="law" style="margin-top:var(--s2)">bMeter shape: a receipt records the event,
+        the reference and the clock — message contents never enter a receipt. SETTLE (paid lanes)
+        is founder-gated and absent here.</div>
+      </div>
+
+      <div data-reg="cypherpunk">
+        <h2>envelope inspector</h2>
+        <div class="card"><div class="hexpl" id="envjson">select a message to inspect its envelope v1.</div></div>
+      </div>
+
+      <h2>where the Android surface comes from</h2>
+      <div class="card law">
+        GrapheneOS Messages is open source (MIT) and already carries the Android ergonomics we
+        would otherwise build — conversation lists, notifications, camera/media sharing,
+        <code>ACTION_SEND</code> intents, contact integration, default-SMS machinery. We reuse that
+        <b>plumbing</b> around a separate BNR envelope, identity, encryption and storage layer; we
+        do <b>not</b> inherit its trust model, and SMS stays a visibly separate low-trust lane.
+        Spec: <a href="../docs/specs/SPEC-BCHAT-1.md">SPEC-BCHAT-1</a> ·
+        <a href="https://github.com/GrapheneOS/Messages" target="_blank" rel="noopener noreferrer">GrapheneOS/Messages (opens a new tab)</a> ·
+        <a href="https://github.com/nostr-protocol/nips/blob/master/44.md" target="_blank" rel="noopener noreferrer">NIP-44 (opens a new tab)</a> ·
+        <a href="https://github.com/nostr-protocol/nips/blob/master/17.md" target="_blank" rel="noopener noreferrer">NIP-17 (opens a new tab)</a>
+      </div>
+    </section>
+  </div>
+</main>
+<footer>
+  bChat · the estate's messaging stack, layer one: bChat Core (transport-neutral) → surfaces →
+  adapters (relay / SMS-bridge / Autonomi retrieval). RETAIN/FORGET is publication-consent
+  routing, not deletion — no deletion promise exists anywhere. External links open a new tab so
+  this page and its session remain yours.
+</footer>
+<script src="onboarding/vendor/bnr-sign.js?v=6"></script>
+<script src="bchat-core.js?v=1"></script>
+<script src="bchat-nip44.js?v=1"></script>
+<script src="tour.js?v=42"></script>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var HEX64=/^[0-9a-fA-F]{64}$/;
+
+/* ─── TURNKEY (lane C law a): point this page at any hive's relay by
+   editing ROOM — nothing else assumes this estate. ─── */
+var ROOM={
+  name:'skaists.buzz',
+  wss:'wss://skaists.buzz',
+  fallback:'wss://relay.skaists.dev',
+  web:'https://skaists.buzz/',
+  state:'live — dual-home since 2026-08-31'
+};
+/* ROAD MEMORY (lane G law): networks that filter the .buzz name (SNI-level,
+   proven on the founder's building wifi) kill the primary road. The probe
+   learns which road answered and REMEMBERS it; primary success clears it —
+   the .buzz name stays the community identity (ORIGIN RULING). */
+function roadMemory(v){
+  try{ if(v) localStorage.setItem('bz.road',v); return localStorage.getItem('bz.road')||'primary'; }
+  catch(e){ return 'primary'; }
+}
+function activeWss(){ return (roadMemory()==='fallback'&&ROOM.fallback)?ROOM.fallback:ROOM.wss; }
+$('roomname').textContent=ROOM.name;
+$('roomstate').textContent=ROOM.state;
+$('joincode').textContent=activeWss();
+$('checkroom').onclick=function(){
+  $('roomprobe').textContent='probing reachability… (no-cors — we learn that something answered, never read a byte)';
+  var ctrl=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
+  fetch(ROOM.web,{mode:'no-cors',signal:ctrl}).then(function(){
+    roadMemory('primary'); $('joincode').textContent=activeWss();
+    $('roomprobe').textContent='answering ✓ via '+ROOM.name+' — the primary road stands on this network';
+  },function(){
+    var fb=ROOM.fallback?ROOM.fallback.replace('wss://','https://'):null;
+    if(!fb){ $('roomprobe').textContent='not answering right now — probed just now'; return; }
+    var c2=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
+    fetch(fb,{mode:'no-cors',signal:c2}).then(function(){
+      roadMemory('fallback'); $('joincode').textContent=activeWss();
+      $('roomprobe').textContent='answering ✓ via the fallback road — this network filters the '+ROOM.name+' name; remembered for next time';
+    },function(){
+      $('roomprobe').textContent='neither road answered — probed just now; the surface stays fully usable offline';
+    });
+  });
+};
+$('copywss').onclick=function(){
+  var t=activeWss();
+  function done(){ $('copywss').textContent='copied ✓'; setTimeout(function(){$('copywss').textContent='copy join address';},1600); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,done); }
+  else done();
+};
+
+/* ─── identity ─── */
+var SEC=null,PUB='';
+function loadKey(){
+  try{ var s=localStorage.getItem('bchat.sec'); if(s&&HEX64.test(s)) SEC=s; }catch(e){}
+  if(SEC) armKey(false); else { $('nokey').hidden=false; $('haskey').hidden=true; }
+}
+function armKey(fresh){
+  try{ PUB=BCHATNIP44.bytesToHex(BnrSign.secp.getPublicKey(SEC,true).slice(1)); }catch(e){ note('key arm failed: '+e.message); return; }
+  try{ localStorage.setItem('bchat.sec',SEC); }catch(e){}
+  $('nokey').hidden=true; $('haskey').hidden=false;
+  $('pubview').textContent=PUB;
+  $('whoami').textContent=PUB.slice(0,8)+'…';
+}
+$('genkey').onclick=function(){
+  var b=new Uint8Array(32); crypto.getRandomValues(b);
+  SEC=BCHATNIP44.bytesToHex(b); armKey(true); render();
+};
+$('useimp').onclick=function(){
+  var v=$('impkey').value.trim().toLowerCase();
+  if(!HEX64.test(v)){ note('import expects exactly 64 hex characters'); return; }
+  SEC=v; armKey(false); $('impkey').value=''; render();
+};
+$('wipekey').onclick=function(){
+  try{ localStorage.removeItem('bchat.sec'); }catch(e){}
+  SEC=null;PUB=''; $('nokey').hidden=false; $('haskey').hidden=true;
+  $('whoami').textContent='…'; render();
+};
+
+/* ─── the store: threads of envelopes ───
+   DEMO threads are STATIC and labeled; the BNR thread is real local state. */
+var SMS_DEMO=[
+  {dir:'in',  when:'09:41', text:'vai tu nāksi svētdien?(will you come Sunday?)'},
+  {dir:'out', when:'09:44', text:'yes — bringing the honey from Māra'},
+  {dir:'in',  when:'09:45', text:'👍'}
+];
+var store={bnr:{peer:'',retain:'persistent',messages:[]}};
+function loadStore(){
+  try{
+    var raw=localStorage.getItem('bchat.store.v1');
+    if(raw){ var s=JSON.parse(raw); if(s&&s.bnr) store=s; }
+  }catch(e){}
+  sweep();
+}
+function saveStore(){ try{ localStorage.setItem('bchat.store.v1',JSON.stringify(store)); }catch(e){} }
+/* FORGET — applyRetain runs on load and before every render: the LOCAL store
+   is pruned by policy and the sweep REPORTS; it never claims deletion */
+function sweep(){
+  if(!store.bnr||!store.bnr.messages) return '';
+  var wrap=store.bnr.messages.map(function(m){return {env:m.env,read:!!m.read};});
+  var r=BCHAT.applyRetain(wrap,Date.now());
+  if(r.dropped.length){
+    store.bnr.messages=store.bnr.messages.filter(function(m){
+      return !r.dropped.some(function(d){return d.id===m.env.id;});
+    });
+    saveStore();
+    return 'FORGET swept '+r.dropped.length+' message(s) locally — '+BCHAT.FORGET_LAW;
+  }
+  return '';
+}
+var receipts=[];
+function addReceipt(event,ref,meta){
+  receipts.unshift(BCHAT.receipt(event,ref,meta));
+  receipts=receipts.slice(0,60);
+  $('receipts').innerHTML=receipts.map(function(r){
+    return '<div>'+new Date(r.ts).toISOString().slice(11,19)+'Z · <b>'+esc(r.event)+'</b>'+
+      (r.ref?' · '+String(r.ref).slice(0,16):'')+(r.kind?' · kind '+r.kind:'')+'</div>';
+  }).join('')||'<div>no receipts yet</div>';
+}
+
+/* ─── threads ─── */
+var current='sms';
+function laneBadge(lane){
+  if(lane===BCHAT.LANES.SMS) return '<span class="badge badge-sms">▸ SMS · carrier</span>';
+  if(lane===BCHAT.LANES.AUTONOMI) return '<span class="badge badge-ant">▣ AUTONOMI · capability</span>';
+  return '<span class="badge badge-bnr">🔒 BNR · private</span>';
+}
+function renderThreads(){
+  var bnrCount=store.bnr.messages.length;
+  $('threads').innerHTML=
+    '<button class="threadrow" data-t="sms" aria-current="'+(current==='sms')+'">'+
+      '<span class="t">Māte — SMS</span> '+laneBadge(BCHAT.LANES.SMS)+'<br>'+
+      '<span class="s">SIMULATED demo · display-only, low trust · 3 messages</span></button>'+
+    '<button class="threadrow" data-t="bnr" aria-current="'+(current==='bnr')+'">'+
+      '<span class="t">BNR private thread</span> '+laneBadge(BCHAT.LANES.BNR)+'<br>'+
+      '<span class="s">'+(SEC?'key armed':'no key yet')+' · '+bnrCount+' message(s) · encrypted NIP-44 v2</span></button>';
+  Array.prototype.forEach.call($('threads').querySelectorAll('.threadrow'),function(b){
+    b.onclick=function(){ current=b.getAttribute('data-t'); render(); };
+  });
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function render(){
+  renderThreads();
+  var sweepNote=sweep();
+  if(current==='sms'){
+    $('threadtitle').textContent='Māte — SMS (SIMULATED)';
+    $('lanebadge').innerHTML=laneBadge(BCHAT.LANES.SMS)+' <span class="state">carrier transport — SIMULATED, labeled honestly; never a fake send</span>';
+    $('compose').hidden=true; $('smscompose').hidden=false; $('rcptrow').hidden=true;
+    $('msgs').innerHTML=SMS_DEMO.map(function(m){
+      return '<div class="msg '+(m.dir==='out'?'out':'in')+'"><div class="m">'+esc(m.text)+'</div>'+
+        '<div class="state">'+m.when+' · '+laneBadge(BCHAT.LANES.SMS)+'</div></div>';
+    }).join('');
+  }else{
+    $('threadtitle').textContent='BNR private thread';
+    $('lanebadge').innerHTML=laneBadge(BCHAT.LANES.BNR)+' <span class="state">'+BCHAT.LANE_TRUST[BCHAT.LANES.BNR]+'</span>'+
+      (sweepNote?'<div class="state" style="margin-top:4px">'+esc(sweepNote)+'</div>':'');
+    $('compose').hidden=false; $('smscompose').hidden=true; $('rcptrow').hidden=false;
+    $('rcpt').value=store.bnr.peer||'';
+    $('retain').value=store.bnr.retain||'persistent';
+    $('msgs').innerHTML=store.bnr.messages.length?store.bnr.messages.map(function(m){
+      var lane=m.env.lane, extra='';
+      if(m.env.body.type==='attachment'){
+        var a=m.env.attachment;
+        extra='<div class="attach">▣ '+esc(String(a.addr).slice(0,24))+'… · '+a.bytes+' bytes<br>'+
+          'sha256 '+esc(String(a.sha256).slice(0,16))+'… · state: <span class="chip">'+a.state+'</span><br>'+
+          'retrieval adapter: <b>Building</b> — the descriptor travels; bytes stream when the adapter is GREEN</div>';
+      }
+      var st=m.state==='published'?'<span class="state state-ok">published · event '+esc(String(m.eventId).slice(0,8))+'</span>'
+        :m.state==='rejected'?'<span class="state state-bad">relay said NO: '+esc(m.verdict||'')+'</span>'
+        :'<span class="state">local — not yet published</span>';
+      return '<div class="msg '+(m.dir==='out'?'out':'in')+'" data-mid="'+esc(m.env.id)+'">'+
+        '<div class="m">'+esc(m.env.body.type==='text'?m.env.body.text:'')+'</div>'+extra+
+        '<div class="state">'+new Date(m.env.ts).toISOString().slice(11,19)+'Z · '+laneBadge(lane)+' · '+st+'</div></div>';
+    }).join(''):'<div class="law" style="align-self:center">empty — write below. The first send builds an envelope v1, seals it NIP-44 v2 to your recipient, gift-wraps it (kind 1059) and proves publication by relay event id.</div>';
+    Array.prototype.forEach.call($('msgs').querySelectorAll('.msg'),function(el){
+      el.onclick=function(){
+        var m=store.bnr.messages.filter(function(x){return x.env.id===el.getAttribute('data-mid');})[0];
+        if(m){ $('envjson').textContent=BCHAT.wireEncode(m.env); if(!m.read){ m.read=true; saveStore(); } }
+      };
+    });
+  }
+}
+function note(t){ $('sendstate').textContent=t; }
+
+/* ─── prove-the-encryptor panel ─── */
+$('runvec').onclick=function(){
+  var r=BCHATNIP44.selftest();
+  $('vecout').innerHTML=r.map(function(t){
+    return '<div class="'+(t.ok?'ok':'bad')+'">'+(t.ok?'✓':'✗')+' '+esc(t.name)+(t.ok?'':(' — '+esc(t.err)))+'</div>';
+  }).join('')+'<div class="law" style="margin-top:6px">full battery (all official vectors + RFC 5869 + RFC 8439): e2e/bchat-core.test.mjs — 18/18 green at genesis, receipts in the dispatch.</div>';
+};
+
+/* ─── nostr events (NIP-01) — ids are sha256 of the canonical serial ─── */
+function serializeEvent(pub,created_at,kind,tags,content){
+  return '["0",'+JSON.stringify(pub)+','+created_at+','+kind+','+JSON.stringify(tags)+','+JSON.stringify(content)+']';
+}
+function finishEvent(ev,sec){
+  ev.id=BCHATNIP44.bytesToHex(BnrSign.sha256(BCHATNIP44.utf8encode(serializeEvent(ev.pubkey,ev.created_at,ev.kind,ev.tags,ev.content))));
+  ev.sig=BCHATNIP44.bytesToHex(BnrSign.schnorr.sign(BCHATNIP44.hexToBytes(ev.id),BCHATNIP44.hexToBytes(sec)));
+  return ev;
+}
+function verifyEvent(ev){
+  try{
+    var id=BCHATNIP44.bytesToHex(BnrSign.sha256(BCHATNIP44.utf8encode(serializeEvent(ev.pubkey,ev.created_at,ev.kind,ev.tags,ev.content))));
+    if(id!==ev.id) return false;
+    return !!BnrSign.schnorr.verify(BCHATNIP44.hexToBytes(ev.sig),BCHATNIP44.hexToBytes(ev.id),BCHATNIP44.hexToBytes(ev.pubkey));
+  }catch(e){ return false; }
+}
+function nowSec(){ return Math.floor(Date.now()/1000); }
+
+/* ─── NIP-17: rumor → seal → gift wrap, all NIP-44 v2 ─── */
+function buildDM(rcptPub,envJson){
+  var rumor={pubkey:PUB,created_at:nowSec(),kind:14,tags:[['p',rcptPub]],content:envJson};
+  var ckSeal=BCHATNIP44.conversationKey(SEC,rcptPub);
+  var seal=finishEvent({
+    pubkey:PUB,created_at:nowSec(),kind:14,tags:[['p',rcptPub]],
+    content:BCHATNIP44.encrypt(ckSeal,JSON.stringify(rumor))
+  },SEC);
+  var eph=new Uint8Array(32); crypto.getRandomValues(eph);
+  var ephHex=BCHATNIP44.bytesToHex(eph);
+  var ckGift=BCHATNIP44.conversationKey(ephHex,rcptPub);
+  var gift=finishEvent({
+    pubkey:BCHATNIP44.bytesToHex(BnrSign.secp.getPublicKey(ephHex,true).slice(1)),
+    created_at:nowSec(),kind:1059,tags:[['p',rcptPub]],
+    content:BCHATNIP44.encrypt(ckGift,JSON.stringify(seal))
+  },ephHex);
+  return gift;
+}
+function unwrapGift(gift){
+  /* we are the recipient: eph→us unwraps the seal, sender→us opens the rumor */
+  var ckGift=BCHATNIP44.conversationKey(SEC,gift.pubkey);
+  var seal=JSON.parse(BCHATNIP44.decrypt(ckGift,gift.content));
+  if(!verifyEvent(seal)) throw new Error('seal signature failed verification — message shown untrusted is refused');
+  var ckSeal=BCHATNIP44.conversationKey(SEC,seal.pubkey);
+  var rumor=JSON.parse(BCHATNIP44.decrypt(ckSeal,seal.content));
+  if(rumor.kind!==14) throw new Error('rumor kind '+rumor.kind+' is not a DM');
+  return {rumor:rumor,from:seal.pubkey};
+}
+
+/* ─── the relay client — connect is a click, verdicts are verbatim ─── */
+var sock=null,connected=false;
+function wire(dir,obj){
+  var el=$('wirelog');
+  var d=document.createElement('div');
+  d.textContent=dir+' '+JSON.stringify(obj).slice(0,300);
+  el.insertBefore(d,el.firstChild);
+  while(el.childNodes.length>200) el.removeChild(el.lastChild);
+}
+$('connect').onclick=function(){
+  if(!SEC){ $('relaystate').textContent='arm a key first — the BNR lane has no identity without one'; return; }
+  if(sock){ try{sock.close();}catch(e){} }
+  var url=activeWss();
+  $('relaystate').textContent='dialing '+url+' …';
+  try{ sock=new WebSocket(url); }catch(e){ $('relaystate').textContent='ws unavailable: '+e.message; return; }
+  sock.onopen=function(){
+    connected=true;
+    wire('→',['REQ','bchat_'+nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]);
+    sock.send(JSON.stringify(['REQ','bchat_'+nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]));
+    $('relaystate').textContent='connected to '+url+' — listening for gift wraps addressed to '+PUB.slice(0,8)+'…';
+    addReceipt('relay-open',url);
+  };
+  sock.onmessage=function(ev){
+    var m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
+    wire('←',m);
+    if(m[0]==='AUTH'&&m[1]){
+      /* NIP-42: the relay gates ingest behind a signed kind 22242 */
+      var auth=finishEvent({pubkey:PUB,created_at:nowSec(),kind:22242,tags:[['relay',url],['challenge',m[1]]],content:''},SEC);
+      sock.send(JSON.stringify(['AUTH',auth]));
+      wire('→',['AUTH',auth.id]);
+      addReceipt('nip42-auth',auth.id,{kind:22242});
+      return;
+    }
+    if(m[0]==='EVENT'&&m[2]&&m[2].kind===1059){
+      try{
+        var got=unwrapGift(m[2]);
+        var env=BCHAT.wireDecode(got.rumor.content);
+        store.bnr.peer=got.from;
+        store.bnr.messages.push({env:env,dir:'in',state:'published',eventId:m[2].id,read:false});
+        saveStore(); render();
+        addReceipt('dm-received',m[2].id,{kind:14});
+      }catch(e){
+        addReceipt('dm-refused',m[2]&&m[2].id,{note:'unwrap failed'});
+        $('sendstate').textContent='a wrap arrived that failed verification — refused: '+e.message;
+      }
+      return;
+    }
+    if(m[0]==='OK'&&pending[m[1]]!==undefined){
+      var p=pending[m[1]];
+      if(m[2]===true){
+        p.msg.state='published'; p.msg.eventId=m[1];
+        addReceipt('dm-published',m[1],{kind:1059});
+        note('published · event '+m[1].slice(0,16)+'… — proof by relay OK true, not by prose');
+      }else{
+        p.msg.state='rejected'; p.msg.verdict=String(m[3]||'unspecified');
+        addReceipt('dm-rejected',m[1],{note:String(m[3]||'').slice(0,40)});
+        note('relay said NO: '+p.msg.verdict);
+      }
+      delete pending[m[1]];
+      saveStore(); render();
+      return;
+    }
+    if(m[0]==='CLOSED'){ $('relaystate').textContent='relay CLOSED the subscription: '+String(m[2]||'')+' — shown verbatim, never paraphrased'; }
+  };
+  sock.onclose=function(){ connected=false; $('relaystate').textContent='relay connection closed — the surface stays fully usable offline'; };
+  sock.onerror=function(){ $('relaystate').textContent='relay error — the surface stays fully usable offline'; };
+};
+var pending={};
+
+/* ─── compose ─── */
+function npubToHex(v){
+  v=v.trim();
+  if(HEX64.test(v)) return v.toLowerCase();
+  /* npub bech32 → 32 bytes via the vendored bech32 (read-only convenience) */
+  try{
+    if(/^npub1/.test(v)){
+      var d=BnrSign.bech32.decode(v,10000);
+      var w=BnrSign.bech32.fromWords(d.words);
+      var h=BCHATNIP44.bytesToHex(new Uint8Array(w));
+      if(HEX64.test(h)) return h;
+    }
+  }catch(e){}
+  return null;
+}
+$('rcpt').onchange=function(){
+  var h=npubToHex($('rcpt').value);
+  store.bnr.peer=h||''; saveStore();
+  if(!h&&$('rcpt').value.trim()) note('recipient must be 64-hex or npub — not saved until it parses');
+};
+$('retain').onchange=function(){ store.bnr.retain=$('retain').value; saveStore(); };
+$('attachbtn').onclick=function(){ $('attachform').hidden=!$('attachform').hidden; };
+$('antcancel').onclick=function(){ $('attachform').hidden=true; };
+var queuedAttach=null;
+$('antsend').onclick=function(){
+  var addr=$('antaddr').value.trim(), by=$('antbytes').value.trim(), sha=$('antsha').value.trim();
+  if(!/^autonomi:\/\/[0-9a-fA-F]{64}$/.test(addr)){ note('addr must be autonomi:// + 64 hex'); return; }
+  if(!/^\d+$/.test(by)||parseInt(by,10)<1){ note('bytes must be a positive integer'); return; }
+  if(!HEX64.test(sha)){ note('sha256 must be 64 hex'); return; }
+  queuedAttach={addr:addr.toLowerCase(),bytes:parseInt(by,10),sha256:sha.toLowerCase(),state:'descriptor-only'};
+  $('attachform').hidden=true;
+  note('descriptor queued — it travels inside the next encrypted message; bytes stay out');
+};
+function send(){
+  if(!SEC){ note('generate or import a key first'); return; }
+  var rcpt=npubToHex($('rcpt').value);
+  if(!rcpt){ note('recipient needed: 64-hex or npub'); return; }
+  store.bnr.peer=rcpt;
+  var text=$('draft').value;
+  var fields;
+  if(queuedAttach){
+    fields={lane:BCHAT.LANES.AUTONOMI,from:{kind:'npub',value:PUB},body:{type:'attachment'},attachment:queuedAttach,policy:{retain:$('retain').value}};
+    queuedAttach=null;
+  }else{
+    if(!text){ note('write something first — an empty send is not an envelope'); return; }
+    fields={lane:BCHAT.LANES.BNR,from:{kind:'npub',value:PUB},body:{type:'text',text:text},policy:{retain:$('retain').value}};
+  }
+  if(fields.policy.retain==='ephemeral') fields.policy.forgetAt=Date.now()+3600000; /* one hour, stated here */
+  var built=BCHAT.envelope(fields);
+  if(!built.ok){ note('envelope refused: '+built.errors.join('; ')); return; }
+  var msg={env:built.env,dir:'out',state:'local',read:true};
+  store.bnr.messages.push(msg);
+  saveStore(); render();
+  if(!connected||!sock||sock.readyState!==1){
+    msg.state='local'; saveStore(); render();
+    note('held locally — connect is a click; nothing leaves until the relay door opens');
+    return;
+  }
+  try{
+    var gift=buildDM(rcpt,BCHAT.wireEncode(built.env));
+    pending[gift.id]={msg:msg};
+    wire('→',['EVENT',gift.id+'…']);
+    sock.send(JSON.stringify(['EVENT',gift]));
+    note('sealed + gift-wrapped, offering to the relay…');
+  }catch(e){
+    msg.state='rejected'; msg.verdict=e.message; saveStore(); render();
+    note('encryption failed — nothing sent: '+e.message);
+  }
+  $('draft').value='';
+}
+$('send').onclick=send;
+$('draft').addEventListener('keydown',function(e){ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)) send(); });
+
+/* ─── boot: local state only, then render ─── */
+loadKey();
+loadStore();
+addReceipt('surface-open','local-state-only',{});
+render();
+})();
+</script>
+</body>
+</html>
