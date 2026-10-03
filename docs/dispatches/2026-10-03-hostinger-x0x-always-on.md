@@ -56,3 +56,12 @@ Live source SHA-256 pins:
 Later 30-second sample (uptime 107→137 s): 37,597,296 egress bytes and 42,620,378 ingress bytes; 23 peers / 23 send-ready peers, healthy, NRestarts=0, MemoryCurrent 79,237,120 bytes. Egress declined from the earlier startup burst to about 1.25 MB/s in this sample. This measured window supports leaving the node running within the VPS's observed 32 TB monthly allowance, but does not establish a future traffic ceiling or #504 acceptance. No sustained-traffic test was run on the shared laptop network.
 
 Local source hashes match the three live deployment source pins. `git diff --check` and staged secret scan passed. Actual Nix build, dry activation, switch, API/UDP binding checks, authenticated mesh health, remote-exec-disabled inspection, daemon-only identity persistence, and unchanged healthy Buzz relay checks were completed on the deployed host. Broad repository CI is deferred to the PR; these runtime results are not a claim that every repository check passes.
+## Review correction: clean-exit recovery
+
+PR #340's independent Codex review identified that `Restart=on-failure` would ignore the daemon's graceful zero-peer watchdog exit. Changed to `Restart=always` in both the live module and its repository mirror. `nixos-rebuild switch --flake .#buzz-hostinger` exited 0; active system is `/nix/store/6li6479g3dcx6nv96i38py09wgk8ayzr-nixos-system-buzz-hostinger-26.05.20260829.c5c4a43`.
+
+Sent SIGTERM to daemon PID 3587438, without stopping the unit. Subsequent inspection confirmed ExecMainStatus=0, automatic NRestarts=1, new PID 3587770, ActiveState=active, Restart=always, and authenticated healthy status with 23 peers / 23 send-ready peers. Agent ID remained the same. Buzz relay remained healthy. This exercises clean-exit supervisor recovery, not a ten-minute zero-peer outage or VPS reboot.
+
+Local and live module SHA256: bd9adab0c9ef6de931083b9a867fdd40aba1b22f2c33aedf976f407f4db5cf38 (PUBLIC-CONSTANT).
+
+Initial PR CI run 37120698518 failed only the wallet job: Playwright timed out clicking an element that remained disabled. The standalone branch run also inherited earlier node/eternal failures. Updating the branch from current main retains the estate's subsequent UI repairs; new-head CI is required before claiming a green merge gate. This deployment does not enroll devices or prove Buzz-room send/read delivery. Oracle host TLS remains UNVERIFIED because its SSH banner still times out.

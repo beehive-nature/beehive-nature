@@ -17,8 +17,10 @@ The daemon runs as the dedicated `x0x` system user. Identity and data are in
 `/var/lib/x0x/identity` and `/var/lib/x0x/data`, with private directory/file
 modes. Its API binds only to `127.0.0.1:12700`; mesh UDP binds to port 5483.
 It is a default Leaf, not a relay. Self-update and remote exec are disabled.
-Memory is bounded at 1 GiB, CPU at one core, and tasks at 128. Durable history
-has the upstream default size limit; no stronger persistence or backup claim
+Memory is bounded at 1 GiB, CPU at one core, and tasks at 128.
+The service restarts after clean exits as well as failures, including the
+daemon's zero-peer watchdog exit; recovery was exercised on the live host.
+Durable history has the upstream default size limit; no stronger persistence or backup claim
 is made by this service definition.
 
 ## Apply and inspect

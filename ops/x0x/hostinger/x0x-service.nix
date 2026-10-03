@@ -39,7 +39,7 @@ in {
       UMask = "0077";
       ExecStartPre = "${x0xPackage}/bin/x0xd --config /etc/x0x/x0xd.toml --check";
       ExecStart = "${x0xPackage}/bin/x0xd --config /etc/x0x/x0xd.toml --skip-update-check";
-      Restart = "on-failure";
+      Restart = "always";
       RestartSec = 5;
       TimeoutStopSec = 30;
       MemoryMax = "1G";
