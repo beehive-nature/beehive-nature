@@ -39,3 +39,5 @@ Previous full CI run 37089684100: static passed; node/eternal/wallet failed. PLU
 ## Upstream priority freshness
 
 Fresh x0x discussion check found the standing handoff itself stale: #622's latest dirvine comment (2026-09-30) moves remaining work BACK to #504, which is open. #505's latest dirvine comment (2026-09-15) records field acceptance. No new backend measurement or communication was performed. This publication-quality lane does not depend on promoting an x0x binary.
+
+Follow-up: PR #329 first CI passed the PLUR rendered adapters and voice ledger, but caught a missed atlas-template version bump. Corrected scripts/build-atlas.mjs and regenerated; estate-source now passes 11/11 locally. All 32 non-English language/locale samples subsequently completed playback on the published page; the English route uses the installed browser voice.
