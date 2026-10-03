@@ -884,6 +884,9 @@ jobs:
       - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
         if: always()
         run: node e2e/wallet-unified.mjs
+      - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
+        if: always()
+        run: node e2e/wallet-read-budget.mjs
       - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
         if: always()
         run: node e2e/wallet-trezor.mjs

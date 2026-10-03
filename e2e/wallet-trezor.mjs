@@ -1,7 +1,7 @@
 // Chromium contract checks with a fake official bridge. No hardware or live RPC.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile, mkdir } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,16 +16,9 @@ Buffer.from('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'
 const hash = bytes => createHash('sha256').update(bytes).digest();
 let n = BigInt('0x' + Buffer.concat([body, hash(hash(body)).subarray(0, 4)]).toString('hex')), ZPUB = '';
 while (n) { ZPUB = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Number(n % 58n)] + ZPUB; n /= 58n; }
-const server = createServer(async (req, res) => {
-  try {
-    const path = new URL(req.url, 'http://localhost').pathname;
-    res.setHeader('Content-Type', { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm' }[extname(path)] || 'application/octet-stream');
-    res.end(await readFile(join(root, decodeURIComponent(path))));
-  } catch { res.writeHead(404); res.end(); }
-});
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const origin = `http://localhost:${server.address().port}`;
+const origin = WALLET_ORIGIN;
 const browser = await chromium.launch();
+const fixtureHtml=await installWalletFixture(browser,root);
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
 let loads = 0, checks = 0;
 const errors = [];
@@ -130,4 +123,4 @@ try {
   check('multi-network sync asks the device only once',await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='ethereumGetAddress').length)===exportsBefore+1);
   check('no browser script exceptions', errors.length === 0);
   console.log(`${checks} Trezor checks passed; fake bridge, no device or signing.`);
-} finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+} finally { await browser.close();  }

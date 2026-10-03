@@ -171,8 +171,8 @@ footer .wl-foot>summary{justify-content:center}
 
 /* One identity and action bar across every wallet presentation and task. */
 #wallet-identity{position:sticky;top:0;z-index:8;background:var(--bg);order:-7;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:10px}
-.wallet-brand-heading{margin:0;background:none;font:inherit;line-height:1.3}
-.wallet-brand{font-size:clamp(18px,3vw,24px);text-decoration:none;color:var(--ink)}
+#wallet-identity .wallet-brand-heading{margin:0;background:none;font:inherit;letter-spacing:0;line-height:1.3}
+#wallet-identity .wallet-brand{font-size:clamp(20px,3vw,24px);text-decoration:none;color:var(--ink);letter-spacing:0}
 #wallet-identity nav{display:flex;gap:8px;flex-wrap:wrap}
 #wallet-identity nav a{display:inline-flex;align-items:center;min-height:44px;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:20px;text-decoration:none}
 #wl-bar,#wl-dock{position:relative;top:auto}
@@ -4773,7 +4773,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '</div>';
     }).join('');
     Array.prototype.forEach.call(el.querySelectorAll('.obx-retry'), function (b) {
-      b.onclick = function () { retryOutbox(b.getAttribute('data-id')) };
+      b.onclick = async function () {
+        b.disabled=true;
+        try{await retryOutbox(b.getAttribute('data-id'))}catch(error){var out=$('tx-out');out.style.display='block';out.textContent=error.message||'Retry did not complete.';}finally{b.disabled=false}
+      };
     });
   }
   async function retryOutbox(intentId) {
@@ -4917,7 +4920,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
-    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + intent.intent_id + '\n<b>digest</b>  ' + intent.digest.slice(0, 32) + '…\n<b>in words</b> ' + intent.human_summary;
+    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + esc(intent.intent_id) + '\n<b>digest</b>  ' + esc(intent.digest.slice(0, 32)) + '…\n<b>in words</b> ' + esc(intent.human_summary);
     out.textContent = '2/5 the vault signs the digest…';
     var sgn;
     try { sgn = await vaultSign(intent, opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : null)) }
@@ -4931,7 +4934,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       expires_at: intent.expires_at, signed_by: sgn.by,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
-    outboxPut(entry);                                        // PERSIST BEFORE SUBMIT — the law
+    try{outboxPut(entry)}catch(error){out.textContent=error.message;return null} // PERSIST BEFORE SUBMIT — the law
     out.textContent = '3/5 signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes…';
     return submitAndConfirm(entry, function (msg, phase) {
       var color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : 'var(--cyan)';
@@ -7114,13 +7117,19 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   function button(text,action,id){var b=node('button',text);b.type='button';b.dataset.waAction=action;b.dataset.waId=id;return b}
   function render(){
     var focused=document.activeElement,focusAction=focused&&focused.dataset.waAction,focusId=focused&&focused.dataset.waId;
+    var priorCards=new Map(),drafts=new Map(),focusToken=focused&&focused.name==='contract'&&focused.closest('[data-wa-token]')?.dataset.waToken,selection=focusToken?[focused.selectionStart,focused.selectionEnd]:null;
+    document.querySelectorAll('.wa-card').forEach(function(card){priorCards.set(card.dataset.waId,card)});
+    document.querySelectorAll('[data-wa-token]').forEach(function(form){drafts.set(form.dataset.waToken,form.elements.contract.value)});
+
     ['mine','following'].forEach(function(kind){
       var list=el('wa-'+kind),rows=entries.filter(function(row){return row.kind===kind&&(!query||(row.label+' '+row.address+' '+NETWORKS[row.chain].name).toLowerCase().includes(query))});list.replaceChildren();
       el('wa-'+kind+'-count').textContent='('+rows.length+')';
       if(!rows.length){list.appendChild(node('div',query?'No accounts match this search.':kind==='mine'?'Add your first account to read its balance here.':'Follow a public address to keep it within reach.','wa-note'));return;}
       rows.forEach(function(row){
         var id=idOf(row),read=reads.get(id),state=read?read.state:'unread';
-        var card=node('article',undefined,'wa-card');card.dataset.waId=id;card.dataset.state=state;
+        var previous=priorCards.get(id),coin=coinReads.get(id),view=[row,read,state,coin,coin&&coin.state];
+        if(previous&&previous._waView&&view.every(function(value,index){return value===previous._waView[index]})){list.appendChild(previous);return;}
+        var card=node('article',undefined,'wa-card');card.dataset.waId=id;card.dataset.state=state;card._waView=view;
         card.appendChild(node('h4',row.label||NETWORKS[row.chain].name+' account'));
         card.appendChild(node('div',NETWORKS[row.chain].name+' · '+(kind==='mine'?'My accounts':'Following')+' · read only','wa-note'));
         card.appendChild(node('code',row.address,'wa-address'));
@@ -7151,7 +7160,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
           });
           section.appendChild(node('div','Additional token contracts are kept for this tab. Reads never grant spending access.','wa-note'));
           var form=node('form');form.dataset.waToken=id;
-          var label=node('label','Read another token contract '),input=node('input');input.name='contract';input.required=true;input.maxLength=42;input.placeholder='Public 0x token contract';input.autocomplete='off';input.spellcheck=false;label.appendChild(input);form.appendChild(label);
+          var label=node('label','Read another token contract '),input=node('input');input.name='contract';input.required=true;input.maxLength=42;input.placeholder='Public 0x token contract';input.autocomplete='off';input.spellcheck=false;input.value=drafts.get(id)||'';label.appendChild(input);form.appendChild(label);
           var add=node('button','Add token & read');add.type='submit';add.disabled=coinRead.state==='reading';form.appendChild(add);section.appendChild(form);
           card.appendChild(section);
         }
@@ -7160,6 +7169,18 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     });
     el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
     if(focusAction)Array.from(document.querySelectorAll('[data-wa-action]')).find(function(b){return b.dataset.waAction===focusAction&&b.dataset.waId===focusId})?.focus({preventScroll:true});
+    if(focusToken){var form=Array.from(document.querySelectorAll('[data-wa-token]')).find(function(form){return form.dataset.waToken===focusToken});if(form){form.elements.contract.focus({preventScroll:true});form.elements.contract.setSelectionRange(selection[0],selection[1])}}
+
+  }
+  // One per-tab budget covers bulk refresh, individual refresh and token reads.
+  // Queued rows removed or changed in another tab are checked before dispatch.
+  var activeReads=0,readJobs=[];
+  function readSlot(task){return new Promise(function(resolve,reject){readJobs.push({task:task,resolve:resolve,reject:reject});drainReads()})}
+  function drainReads(){
+    while(activeReads<3&&readJobs.length){
+      var job=readJobs.shift();activeReads++;
+      (function(current){Promise.resolve().then(current.task).then(current.resolve,current.reject).finally(function(){activeReads--;drainReads()})})(job);
+    }
   }
   async function refresh(id,userGesture){
     var row=entries.find(function(r){return idOf(r)===id});
@@ -7167,7 +7188,8 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     var run={state:'reading'};reads.set(id,run);render();
     try{
       await validate(row);
-      var value=row.chain==='bitcoin-account'?await readBitcoinAccount(row.address,userGesture):await window.BNRWALLET.readPublicBalance(row.chain,row.address);
+      var value=await readSlot(function(){if(reads.get(id)!==run)return null;return row.chain==='bitcoin-account'?readBitcoinAccount(row.address,userGesture):window.BNRWALLET.readPublicBalance(row.chain,row.address)});
+      if(reads.get(id)!==run)return;
       if(!value||!Array.isArray(value.amounts)||!value.amounts.length||value.amounts.some(function(v){return typeof v!=='string'||!/^\d+(\.\d+)? [A-Z]+$/.test(v)}))throw new Error('No valid balance returned');
       if(reads.get(id)!==run)return;
       reads.set(id,{state:'ready',value:value,at:Date.now()});
@@ -7179,7 +7201,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     var run={state:'reading'};coinReads.set(id,run);render();
     try{
       await validate(row);
-      var tokens=await window.BNRCoins.readHoldings(row.address,{chain:row.chain,contracts:extraTokens.get(id)||[]});
+      var tokens=await readSlot(function(){if(coinReads.get(id)!==run)return null;return window.BNRCoins.readHoldings(row.address,{chain:row.chain,contracts:extraTokens.get(id)||[]})});
       if(coinReads.get(id)!==run)return;
       coinReads.set(id,{state:'ready',rows:tokens,at:Date.now()});
     }catch(e){if(coinReads.get(id)!==run)return;coinReads.set(id,{state:'failed',error:e.message})}

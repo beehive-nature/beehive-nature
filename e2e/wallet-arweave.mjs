@@ -4,7 +4,7 @@
 // JWK — never a literal key in this file, per the fixture-refinement law), the
 // publish flow end-to-end with a MOCKED gateway, and the honest unfunded path.
 // Run:  cd e2e && node wallet-arweave.mjs     (exit 0 = green)
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,15 +18,6 @@ const URL_ = '/surfaces/wallet.html';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(8892, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -61,6 +52,7 @@ function mockGateways(ctx, tally, txAnswer) {
 }
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+const fixtureHtml=await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
 try {
@@ -70,7 +62,7 @@ try {
   {
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const v = await page.evaluate(async (FEE) => {
       const A = window.BNRAR;
       const payload = new Uint8Array(await (await fetch('/surfaces/forge/orbit-manifests.md')).arrayBuffer());
@@ -99,7 +91,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const r = await page.evaluate(async () => {
       // generate a THROWAWAY RSA-4096 key IN THE PAGE (construct-at-runtime law)
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
@@ -131,7 +123,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx, tally);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     for (let i = 0; i < 12; i++) await page.evaluate(() => window.BNRAR.fee(1926));
     const hosts = Object.keys(tally);
     const total = hosts.reduce((s, h) => s + tally[h], 0);
@@ -154,7 +146,7 @@ try {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.evaluate(async () => {
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
         publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
@@ -256,7 +248,7 @@ try {
         }
       };
     });
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
     ok('arInject API exposed on BNRWALLET', await page.evaluate(() =>
       !!(BNRWALLET.arInject && BNRWALLET.arInject.present && BNRWALLET.arInject.present())));
@@ -325,6 +317,10 @@ try {
     await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
     ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox is unavailable')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
     await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    await page.evaluate(()=>{const seed=JSON.parse(window.__outboxBackup)[0];localStorage.setItem('bnr_outbox_v1',JSON.stringify(Array.from({length:80},(_,i)=>({...seed,intent_id:'retention-fixture-'+i,phase:i<40?'signed':'confirmed'}))));});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('history trimming retains all forty unresolved signed transactions',await page.evaluate(()=>{const list=JSON.parse(localStorage.getItem('bnr_outbox_v1'));return list.length===80&&Array.from({length:40},(_,i)=>'retention-fixture-'+i).every(id=>list.some(e=>e.intent_id===id&&e.phase==='signed'));}));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
     const beforeOversize=posted.length;
     await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
     await page.locator('#arw-file-review').click();
@@ -339,7 +335,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1000);
     const t = await page.locator('#arw-stat').innerText();
     ok('empty path names connect / Wander / public bind', /Wander|connect|public address|forge/i.test(t), t.slice(0, 120));
@@ -355,7 +351,7 @@ try {
   function unb64len(s) { return Buffer.from(s, 'base64url').length; }
 } finally {
   await browser.close();
-  server.close();
+
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -1,7 +1,7 @@
 // Public accounts / following: real Chromium, existing workers, mocked RPCs.
 // No keys, funding, signing or live chain writes. Run: node e2e/wallet-accounts.mjs
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile, mkdir } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,16 +9,9 @@ import { chromium } from 'playwright';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm' };
-const server = createServer(async (req, res) => {
-  try {
-    const path = new URL(req.url, 'http://localhost').pathname;
-    res.setHeader('Content-Type', mime[extname(path)] || 'application/octet-stream');
-    res.end(await readFile(join(root, decodeURIComponent(path))));
-  } catch { res.writeHead(404); res.end('not found'); }
-});
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const origin = `http://localhost:${server.address().port}`;
+const origin = WALLET_ORIGIN;
 const browser = await chromium.launch();
+const fixtureHtml=await installWalletFixture(browser,root);
 let checks = 0;
 function check(name, value) { assert.ok(value, name); console.log(`PASS ${++checks}: ${name}`); }
 const KEY = 'bnr.wallet.public-accounts.v1';
@@ -224,6 +217,11 @@ try {
   check('token failure removes prior balances instead of reporting zero', !(await coinsCard.locator('.wa-coins').textContent()).includes('1.25')&&(await coinsCard.locator('.wa-coins').textContent()).includes('unavailable'));
   check('coin reads request no credentials', await page.evaluate(()=>window.credentialCalls)===0);
   outage=false;
+  const draftAddress='0x'+'56'.repeat(20);
+  await coinsCard.locator('input[name="contract"]').fill(draftAddress);
+  await page.locator('#wa-refresh').click();
+  await page.waitForFunction(()=>!document.querySelector('#wa-refresh').disabled);
+  check('balance refresh preserves an unfinished token contract entry',await coinsCard.locator('input[name="contract"]').inputValue()===draftAddress);
   check('no browser script exceptions', pageErrors.length === 0);
   console.log(`${checks} checks passed; RPC fixtures only, no live signing or chain writes.`);
-} finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+} finally { await browser.close();  }

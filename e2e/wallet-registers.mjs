@@ -18,7 +18,7 @@
 // this surface's own contribution, measured after it.
 //
 //   node e2e/wallet-registers.mjs
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -34,21 +34,11 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 const results = [];
 const ok = (name, pass, detail = '') => { results.push({ name, pass }); console.log(`${pass ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); };
 
-const server = createServer(async (req, res) => {
-  const url = (req.url || '/').split('?')[0];
-  const p = (url === '/' ? '/wallet.html' : url.indexOf('/surfaces/') === 0 ? url.slice('/surfaces'.length) : url);
-  try {
-    const body = await readFile(join(SURFACES, ...p.split('/').filter(Boolean)));
-    res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('not found'); }
-});
-await new Promise(r => server.listen(0, '127.0.0.1', r));
-// localhost, not the bare IP: the wallet's origin guard (rightly) bannered an
-// IP origin, and the receipts should show the page a person gets
-const origin = `http://localhost:${server.address().port}`;
+// Production-origin source fixture; all services remain mocked or blocked.
+const origin = WALLET_ORIGIN;
 
 const browser = await chromium.launch();
+const fixtureHtml=await installWalletFixture(browser,join(SURFACES,'..'));
 const pageErrors = [];
 const REGS = ['bee', 'raver', 'cypherpunk'];
 // identical data for every register: the network is cut (no live chain can
@@ -992,7 +982,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
     await ctx.route(url => !url.href.startsWith(origin), r => r.abort());
-    await ctx.route(/\/wallet\.html$/, async route => { const resp = await route.fetch(); await route.fulfill({ response: resp, body: (await resp.text()).replace('data-meld-public-key=""', 'data-meld-public-key="GATE-PUBLIC-PLACEHOLDER"') }); });
+    await ctx.route(/\/wallet\.html$/, async route => { const resp = {text:async()=>fixtureHtml}; await route.fulfill({ contentType: 'text/html', body: (await resp.text()).replace('data-meld-public-key=""', 'data-meld-public-key="GATE-PUBLIC-PLACEHOLDER"') }); });
     const page = await ctx.newPage();
     await page.goto(origin + '/wallet.html', { waitUntil: 'load' }); await page.waitForTimeout(600);
     const armed = await page.evaluate(() => ({ go: document.getElementById('fund-go').getClientRects().length > 0, off: document.getElementById('fund-off').getClientRects().length > 0, dis: document.getElementById('fund-go').getAttribute('aria-disabled') }));
@@ -1106,7 +1096,7 @@ ok('receipts banked: arrival with read balances at 390 and 1280 for each registe
 ok('no page errors across all three registers', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | ').slice(0, 200));
 
 await browser.close();
-server.close();
+
 const failed = results.filter(r => !r.pass);
 console.log(failed.length
   ? `\nWALLET REGISTERS GATE: ${failed.length} FAILED of ${results.length}`

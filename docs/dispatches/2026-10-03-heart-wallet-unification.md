@@ -26,3 +26,11 @@ All browser results here use in-memory production-origin route fixtures with blo
 ## Remaining acceptance boundaries
 
 No claim of ten-billion-user capacity, public Solana/Vaulta settlement, custom SAFE 7 firmware readiness, physical device acceptance, live ANT payment, or live Arweave publication is made. No funds, real user files or private keys were used. Public-site deployment remains separately verifiable; a PR or source pass is not deployment.
+
+## Continued repair after checkpoint 262f2d940
+
+- `readSlot` / `drainReads` in wallet.html impose one three-read budget across automatic bulk reads, user refreshes, and token reads. Removed or cross-tab-invalidated queued records do not dispatch. Render reuses unchanged account cards and preserves unfinished token input and its caret through read updates.
+- `e2e/wallet-read-budget.mjs`: eight checks with 50 Base accounts, delayed mocked RPC, overlapping manual/token refresh and removal. Forty-eight remaining accounts succeed while one failure is isolated; peak concurrent RPC requests is three. This measures one browser against fixtures, not global capacity.
+- Account battery now 50/50, including token draft retention. Arweave battery now 49/49 including retention of all 40 unresolved signed transactions when trimming historical receipts. Last three-register pass before that added retention assertion was 48/48 each; final assertion passes in cypherpunk.
+- Five core wallet browser batteries now use committed `e2e/lib/wallet-source-fixture.mjs` rather than temporary transport conversions. Every default network route is denied unless the test explicitly mocks it. There is no local listener, and these fixtures cannot be mistaken for a deployed site. Chooser and unified batteries also run without listeners.
+- Full navigation/presentation battery passed 125/125 before the small brand typography adjustment; the updated run is completing. Fund 97/97 and Trezor 22/22 passed using the committed fixture helper. Outbox retry now reports storage errors instead of leaving an unhandled rejection, and composer preview escapes adapter-provided text.

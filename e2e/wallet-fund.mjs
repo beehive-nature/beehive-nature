@@ -4,7 +4,7 @@
 // address handling, and the no-JS render. Self-contained like estate-review:
 // serves the repo root so /surfaces/... paths resolve exactly as on Pages.
 // Run:  cd e2e && node wallet-fund.mjs     (exit 0 = green)
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,15 +20,6 @@ const ADDR = '0x742c8f2e0ce07Dd3f7E78A31E5A97D45c50fF2c8'; // Meld's own doc exa
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(8891, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -40,11 +31,11 @@ const ok = (name, cond, detail) => {
 const armedContext = async (browser, { env } = {}) => {
   const ctx = await browser.newContext();
   await ctx.route('**' + URL_, async route => {
-    const r = await route.fetch();
+    const r = {text:async()=>fixtureHtml};
     let body = (await r.text()).replace(
       'data-meld-public-key=""', `data-meld-public-key="${PLACEHOLDER}"`);
     if (env) body = body.replace('data-meld-env="sandbox"', `data-meld-env="${env}"`);
-    await route.fulfill({ response: r, body });
+    await route.fulfill({ contentType: 'text/html', body });
   });
   return ctx;
 };
@@ -95,6 +86,7 @@ const assertUrl = (href, host, asset) => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+const fixtureHtml=await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
 try {
@@ -106,7 +98,7 @@ try {
     const page = await ctx.newPage();
     page.on('console', m => consoleLines.push(`[${m.type()}] ${m.text()}`));
     page.on('pageerror', e => consoleLines.push(`[pageerror] ${e.message}`));
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1200);
     const go = page.locator('#fund-go');
     ok('launch disabled', (await go.getAttribute('aria-disabled')) === 'true');
@@ -146,7 +138,7 @@ try {
   {
     const ctx = await armedContext(browser);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     ok('launch enabled', (await page.locator('#fund-go').getAttribute('aria-disabled')) === 'false');
     let u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
@@ -171,7 +163,7 @@ try {
     const ctx = await armedContext(browser);
     mockBaseRpc(ctx, '0x' + '0'.repeat(24) + MOCK, tally);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await waitBnrSign(page);
     await page.fill('#fund-addr', 'bloverai.base.eth');
@@ -204,7 +196,7 @@ try {
     const ctx = await armedContext(browser);
     mockBaseRpc(ctx, '0x' + '00'.repeat(32)); // zero = no record
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await waitBnrSign(page);
     await page.fill('#fund-addr', 'not-a-base-name.eth');
@@ -224,7 +216,7 @@ try {
     const ctx = await armedContext(browser);
     mockBaseRpc(ctx, '0x' + '0'.repeat(24) + MOCK, tally);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await waitBnrSign(page);
     for (let k = 0; k < 10; k++) {
@@ -249,7 +241,7 @@ try {
   {
     const ctx = await armedContext(browser, { env: 'production' });
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     assertUrl(await goHref(page), 'meldcrypto.com', 'USDC_BASE');
     await ctx.close();
@@ -260,7 +252,7 @@ try {
   {
     const ctx = await browser.newContext({ javaScriptEnabled: false });
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'load' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'load' });
     await page.waitForTimeout(400);
     ok('page renders (title)', (await page.title()).includes('skaists heART WALLet'));
     ok('noscript funding note visible', await page.locator('#fund-sec .fund-nojs').isVisible());
@@ -275,7 +267,7 @@ try {
     const ctx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
     await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); } catch (e) {} });
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     const heroSize = await page.evaluate(() => parseFloat(getComputedStyle(document.getElementById('v-bal')).fontSize));
     const capSize = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#ch-vaulta .cn')).fontSize));
@@ -308,7 +300,7 @@ try {
     const cyCtx = await browser.newContextOwnRegister({ viewport: { width: 390, height: 844 } });
     await cyCtx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
     const cyPage = await cyCtx.newPage();
-    await cyPage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await cyPage.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await cyPage.waitForTimeout(600);
     // the fold, on a phone: hero balance + ring ABOVE connect (form-kill law)
     const fold = await cyPage.evaluate(() => {
@@ -336,7 +328,7 @@ try {
     // desktop order must be untouched
     const desk = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const dpage = await desk.newPage();
-    await dpage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await dpage.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await dpage.waitForTimeout(400);
     const dOrder = await dpage.evaluate(() => {
       const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);
@@ -350,7 +342,7 @@ try {
   }
 } finally {
   await browser.close();
-  server.close();
+
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
