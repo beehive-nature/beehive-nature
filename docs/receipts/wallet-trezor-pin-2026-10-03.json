@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-03T14:15:45.817Z",
+  "url": "https://connect.trezor.io/9.7.3/trezor-connect.js",
+  "status": 200,
+  "bytes": 155586,
+  "requestOrigin": "https://skaists.dev",
+  "cors": "*",
+  "integrity": "sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6",
+  "boundary": "Read-only dependency pin. No device, signing, or firmware methods invoked. Browser SRI rejects changed bytes."
+}

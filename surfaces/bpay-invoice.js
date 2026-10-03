@@ -20,10 +20,12 @@
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var card = document.getElementById('bpay-card');
   if(!card) return;
-  var BRIDGE_DEFAULT = 'http://127.0.0.1:8807';
+  var BRIDGE_DEFAULT = ''; // No local service is required or selected by this wallet.
   var LS = 'bpay-policy-v1';
+  var quoteWorker=null;
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };
   try { var saved = JSON.parse(localStorage.getItem(LS)||'null'); if (saved && typeof saved==='object') st = Object.assign(st, saved); } catch(e){}
+  if (/^https?:\/\/(localhost|127\.0\.0\.1):8807(?:\/|$)/i.test(st.bridge)) st.bridge = '';
   /* SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
      this tab NEVER writes its whole local snapshot back — a stale tab must
      not erase newer founder policy. Presentation/service writes carry ONLY
@@ -64,37 +66,31 @@
   }
 
   function renderChooser(){
-    var h = '';
+    var h = '<div class="wa-note">Check Autonomi quote availability for your file. Payment and publication through this wallet are not available yet.</div>';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
     h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
     h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
     h += audBtn('selected-people','👥','wl.bpay.aud.selected','Selected people',false,['bd.aud.selected.why','Sharing with people you pick is not ready.'],['bd.aud.selected.tech','recipient capability/key granting not yet qualified']);
     h += '<div style="font-size:10px;opacity:.6;margin-top:6px">' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting, never silently inferred') + '</div>';
-    // inspection depth — a SEPARATE axis; never alters audience or authority
-    h += '<div class="row" style="margin-top:12px;gap:8px;align-items:center;flex-wrap:wrap">';
-    h += '<span style="font-size:11px;opacity:.8">' + T('wl.bpay.inspect','view') + ':</span>';
-    ['newbee','raver','cypherpunk'].forEach(function(r){
-      h += '<button type="button" data-inspection="' + r + '" style="padding:3px 10px;border:1px solid ' + (st.inspection===r?'var(--cyan)':'#1d4655') + ';border-radius:12px;background:' + (st.inspection===r?'#0e2d3a':'transparent') + ';color:inherit;cursor:pointer;font-size:11px">' + r + '</button>';
-    });
-    h += '</div>';
-    h += '<div style="font-size:10px;opacity:.6">' + T('wl.bpay.inspect.note','changes what you can inspect and configure, never the audience or your authority') + '</div>';
+    // Inspection follows the wallet register; there is no second view selector.
     // the quote-service endpoint is cypherpunk-view configuration
     h += '<div class="row" data-min-insp="cypherpunk" style="margin-top:6px;gap:8px;align-items:center;display:none">';
     h += '<span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span>';
-    h += '<input id="bpay-bridge" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" />';
+    h += '<input id="bpay-bridge" aria-label="Autonomi quote service URL" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" />';
     h += '</div>';
     // the gesture's record + the fresh-quote action (quote only — never a payment)
     if (st.audience === 'public') {
+      h += '<div class="wa-note"><label for="ant-quote-file">File to quote (up to 1 MiB)</label><input id="ant-quote-file" type="file" style="display:block;width:100%;max-width:100%;margin:8px 0"><div>A quote sends this file to the hosted Autonomi service for pricing. It does not pay or publish.</div><button type="button" id="ant-quote-go">Get Autonomi quote</button> <button type="button" id="ant-quote-cancel" hidden>Stop request</button><div id="ant-quote-status" role="status" aria-live="polite"></div></div>';
       h += '<div style="margin-top:10px;font-size:12px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b>';
       if (st.selectedAt) h += ' <span style="opacity:.65;font-size:10px">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(st.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
       h += '</div>';
-      h += '<button type="button" id="bpay-quote-go" style="margin-top:6px;padding:8px 14px;border:1px solid #2c4a5a;border-radius:8px;background:#0e2d3a;color:var(--cyan);cursor:pointer;font-size:13px">♡ ' + T('wl.bpay.getquote','Get a fresh quote') + '</button>';
+      if(st.bridge) h += '<button type="button" id="bpay-quote-go" style="margin-top:6px;padding:8px 14px;border:1px solid #2c4a5a;border-radius:8px;background:#0e2d3a;color:var(--cyan);cursor:pointer;font-size:13px">♡ ' + T('wl.bpay.getquote','Get a fresh quote') + '</button>';
       h += '<span id="bpay-quote-stat" style="font-size:11px;opacity:.75;margin-left:8px"></span>';
     }
     // the honest waiting state — until Phase C earns the authorization route
     h += '<div style="margin-top:12px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
-    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.state','awaiting your authorization') + '</b>';
-    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.statenote','the authorization surface is not built yet. this panel renders; it cannot spend') + '</div>';
+    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','Quote only · payment unavailable in this panel') + '</b>';
+    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.quoteonly.note','A quote shows the storage cost. No payment is requested here.') + '</div>';
     h += '</div>';
     return h;
   }
@@ -132,7 +128,7 @@
   }
 
   function applyInspection(){
-    var want = st.inspection;
+    var want = document.body.dataset.reg === 'bee' ? 'newbee' : (document.body.dataset.reg || 'newbee');
     var order = { newbee:0, raver:1, cypherpunk:2 };
     card.querySelectorAll('[data-min-insp]').forEach(function(el){
       el.style.display = (order[(el.dataset.minInsp||'cypherpunk')] <= order[want]) ? '' : 'none';
@@ -140,8 +136,9 @@
   }
 
   function render(){
+    stopQuote();
     var h = renderChooser();
-    if (refInvoice) h += invoiceBlock(refInvoice, false);
+    if (refInvoice) h += '<details id="bpay-reference"><summary>Reference invoice</summary>'+invoiceBlock(refInvoice, false)+'</details>';
     h += '<div id="bpay-fresh"></div>';
     card.innerHTML = h;
     applyInspection();
@@ -156,18 +153,40 @@
         render();
       });
     });
-    card.querySelectorAll('[data-inspection]').forEach(function(b){
-      b.addEventListener('click', function(){ st.inspection = b.dataset.inspection; save({ inspection: st.inspection }); render(); });
-    });
+    var quoteButton=document.getElementById('ant-quote-go');if(quoteButton)quoteButton.onclick=quoteFile;
+    var cancel=document.getElementById('ant-quote-cancel');if(cancel)cancel.onclick=function(){stopQuote();document.getElementById('ant-quote-status').textContent='Request stopped. No payment was requested.';document.getElementById('ant-quote-go').disabled=false;document.getElementById('ant-quote-file').disabled=false;cancel.hidden=true};
     var bridgeInput = document.getElementById('bpay-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save({ bridge: st.bridge }); });
     var go = document.getElementById('bpay-quote-go');
     if (go) go.addEventListener('click', freshQuote);
   }
 
+  function stopQuote(){var worker=quoteWorker;quoteWorker=null;if(worker)worker.terminate('quote request finished or stopped')}
+  async function quoteFile(){
+    var input=document.getElementById('ant-quote-file'),button=document.getElementById('ant-quote-go'),cancel=document.getElementById('ant-quote-cancel'),output=document.getElementById('ant-quote-status');
+    if(quoteWorker)return;
+    var file=input.files[0];output.textContent='';
+    if(st.audience!=='public'||!file||!file.size||file.size>1048576){output.textContent='Choose Public and a non-empty file up to 1 MiB.';return;}
+    if(!window.BnrSeam){output.textContent='The storage adapter did not load. Reload and try again.';return;}
+    button.disabled=true;input.disabled=true;cancel.hidden=false;
+    output.textContent='Checking the Autonomi service and requesting a quote…';
+    var worker=null;
+    try{
+      worker=window.BnrSeam.spawn('ant','myspace-adapter-ant.js');quoteWorker=worker;
+      await worker.ready;
+      var bytes=new Uint8Array(await file.arrayBuffer());if(quoteWorker!==worker)return;
+      var result=await worker.ops['x.preparePut']({bytes:bytes},90000);if(quoteWorker!==worker)return;
+      if(!result||!result.quote||!/^\d+$/.test(result.quote.ant_atto))throw new Error('The service did not return a valid ANT amount');
+      output.textContent=ant(result.quote.ant_atto)+' ANT · '+file.size.toLocaleString()+' bytes · quoted '+new Date().toLocaleTimeString()+'. ETH network fees are separate. Quote only; no payment or publication.';
+    }catch(error){if(quoteWorker===worker)output.textContent=error.code===-32030?'Quote unavailable: the Autonomi service is not accepting requests. Your file was not sent.':'Quote unavailable: '+(error.message||'service unavailable')+'. No payment was requested.';}
+    finally{if(quoteWorker===worker){stopQuote();button.disabled=false;input.disabled=false;cancel.hidden=true;}}
+  }
+  window.addEventListener('pagehide',stopQuote);
+
   function freshQuote(){
     var stat = document.getElementById('bpay-quote-stat');
     var fresh = document.getElementById('bpay-fresh');
+    if (!st.bridge) { if(stat) stat.textContent = 'Use the hosted file flow above. No reference quote service is configured.'; return; }
     if (!PIN) { if(stat) stat.textContent = '⚠ ' + T('wl.bpay.loadfail','no invoice loaded'); return; }
     if (stat) stat.textContent = '…';
     // the RESOLVED policy rides the request: audience chosen by the founder,
@@ -215,6 +234,12 @@
       if (stat) stat.textContent = '⚠ ' + T('wl.bpay.freshfail','fresh quote failed') + ': ' + (e && e.message ? e.message.slice(0,180) : 'error');
     });
   }
+
+  new MutationObserver(function(){
+    st.inspection = document.body.dataset.reg === 'bee' ? 'newbee' : document.body.dataset.reg;
+    save({ inspection: st.inspection });
+    applyInspection();
+  }).observe(document.body, { attributes:true, attributeFilter:['data-reg'] });
 
   fetch('bpay-invoice.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
    .then(function(inv){ refInvoice = inv; PIN = inv.domain && inv.domain.artifact && inv.domain.artifact.sha256; render(); })

@@ -56,7 +56,12 @@ async function esplora(path) {
     var to = setTimeout(function () { ctl.abort() }, HTTP_TIMEOUT);
     try {
       var res = await fetch(hs[i] + path, { signal: ctl.signal, headers: { 'Accept': 'application/json' } });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        var raw=await res.text();
+        return JSON.parse(raw.replace(/"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g,function(token){
+          return /^-?\d+$/.test(token)?'"'+token+'"':token;
+        }));
+      }
       if (res.status === 400 || res.status === 404) {
         var nf = new Error('the rail does not know this address (' + res.status + ')');
         nf.code = E.NOT_FOUND; throw nf;
@@ -164,16 +169,18 @@ var METHODS = {
     var cs = (d && d.chain_stats) || null;
     if (!cs) { var e = new Error('the rail answered without chain_stats'); e.code = E.NOT_FOUND; throw e }
     /* confirmed balance = funded - spent, in satoshi, as integers throughout */
-    var sats = BigInt(cs.funded_txo_sum || 0) - BigInt(cs.spent_txo_sum || 0);
+    function sum(value){if(typeof value!=='string'||!/^\d+$/.test(value)||BigInt(value)>18446744073709551615n)throw new Error('Bitcoin returned an invalid satoshi sum');return BigInt(value)}
+    var sats = sum(cs.funded_txo_sum) - sum(cs.spent_txo_sum);
+    if(sats<0n||sats>2100000000000000n)throw new Error('Bitcoin returned an impossible confirmed balance');
     var mp = (d && d.mempool_stats) || null;
-    var pending = mp ? BigInt(mp.funded_txo_sum || 0) - BigInt(mp.spent_txo_sum || 0) : 0n;
+    var pending = mp ? sum(mp.funded_txo_sum) - sum(mp.spent_txo_sum) : null;
     return {
       unit: 'BTC',
       quantity: fromSats(sats) + ' BTC',
       sats: String(sats),
       /* unconfirmed is reported SEPARATELY and never folded into the balance —
          a number that silently mixes settled and pending is a wrong number */
-      unconfirmed_sats: String(pending),
+      unconfirmed_sats: pending===null?null:String(pending),
       tx_count: (cs.tx_count || 0)
     };
   }

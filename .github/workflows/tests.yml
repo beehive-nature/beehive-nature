@@ -88,6 +88,12 @@ jobs:
         run: |
           node scripts/build-stack-inventory.mjs --check
           node scripts/build-stack-surfaces.mjs --check
+      - name: Wallet coins — full census, exact units, batch identity and read failures
+        if: always()
+        run: node --test e2e/wallet-coins.test.mjs
+      - name: Arweave status — documented confirmations, malformed evidence and rate limits
+        if: always()
+        run: node --test e2e/arweave-status.test.mjs
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
@@ -455,6 +461,13 @@ jobs:
       - name: CI shape — every suite step carries if:always()
         if: always()
         run: node scripts/lint-ci-shape.mjs
+      # NO ENABLE-THEN-CLICK ACROSS TWO STEPS (2026-10-03): the wallet check
+      # went red on unrelated commits because a test enabled a control and
+      # clicked it in separate Playwright steps while the page re-disabled it
+      # between them. This fails the run if that shape returns in any e2e file.
+      - name: e2e shape — a control is enabled and clicked in one browser task
+        if: always()
+        run: node scripts/lint-e2e-enable-click.mjs
       # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
       # frozen art — CI fails on ANY edit to its committed blob. The hash is
       # taken from the committed blob, never the worktree copy. Tinkering
@@ -868,6 +881,18 @@ jobs:
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
         run: node e2e/wallet-registers.mjs
+      - name: Wallet public accounts — persistence, following, read failures and signing isolation
+        if: always()
+        run: node e2e/wallet-accounts.mjs
+      - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
+        if: always()
+        run: node e2e/wallet-unified.mjs
+      - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
+        if: always()
+        run: node e2e/wallet-read-budget.mjs
+      - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
+        if: always()
+        run: node e2e/wallet-trezor.mjs
       - name: Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub
         if: always()
         run: node e2e/wallet-forge-pq.mjs
