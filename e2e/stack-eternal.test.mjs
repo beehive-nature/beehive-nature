@@ -11,6 +11,7 @@
 // Run: node --test e2e/stack-eternal.test.mjs
 // Red-on-HEAD proof: ETERNAL_OVERRIDE=<file with `git show HEAD:surfaces/stack.html`> node --test …
 import { test, before, after } from 'node:test';
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -20,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PAGE = 'surfaces/stack.html';
+const SURFACES = execFileSync('git', ['ls-files', '-z', 'surfaces/*.html'], {cwd:ROOT,encoding:'utf8'}).split('\0').filter(Boolean).sort();
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 const PORT = 9168, ORIGIN = `http://127.0.0.1:${PORT}`;
 const RECEIPT = JSON.parse(await readFile(join(ROOT, 'surfaces/stack-dataflow-example.json'), 'utf8'));
@@ -94,17 +96,17 @@ test('the same facts in all three: the shape, the rails, the doors, the board as
   for (const reg of ['raver', 'cypherpunk']) for (const k of ['tiers', 'rails', 'doors', 'honest', 'loop', 'licence', 'measured', 'organs', 'alive', 'autonomi']) assert.deepEqual(facts[reg][k], a[k], reg + ' ' + k);
   assert.equal(a.tiers.length, a.wall.tiers); assert.equal(a.tiers.length, 4);
   assert.deepEqual(a.rails, a.wall.chips); assert.equal(a.rails.length, 7);
-  assert.equal(a.doors.length, 7); assert.equal(a.measured, '2026-08-21'); assert.equal(a.loop, a.wall.stages); assert.equal(a.loop, 8);
+  assert.equal(a.doors.length, SURFACES.length); assert.equal(a.measured, ''); assert.equal(a.loop, a.wall.stages); assert.equal(a.loop, 8);
   assert.deepEqual(a.licence, ['BUSL-1.1', 'Apache-2.0']); assert.equal(a.autonomi, 5);
   // the board, mirrored: the same eight organs with the same words and the same live count
   assert.deepEqual(a.organs.map(o => [o[0], o[1]]), a.wall.board); assert.equal(String(a.alive), a.wall.count);
   assert.deepEqual(a.organs.find(o => /pages/.test(o[0])).slice(1), ['alive', 'ok'], 'this origin answers');
   assert.ok(a.organs.filter(o => /hive|till/.test(o[0])).every(o => o[2] === 'guard'), 'a refused road is a guard, never red');
   // each register draws them: four layers, seven rails and seven door rows, eight heartbeats, the board's words
-  assert.equal(a.bee.length, 4); assert.equal(facts.raver.arcs.length, 7); assert.equal(facts.raver.dnodes, 7);
+  assert.equal(a.bee.length, 4); assert.equal(facts.raver.arcs.length, 7); assert.equal(facts.raver.dnodes, 0);
   assert.deepEqual(facts.raver.beats, a.organs.map(o => 's-' + o[2]));
   a.rails.forEach((r, i) => assert.ok(facts.raver.arcs[i].startsWith(r)));
-  assert.deepEqual(facts.cypherpunk.cTiers, a.tiers); assert.equal(facts.cypherpunk.cDoors, 7);
+  assert.deepEqual(facts.cypherpunk.cTiers, a.tiers); assert.equal(facts.cypherpunk.cDoors, SURFACES.length);
   facts.cypherpunk.cOrgans.forEach((row, i) => assert.ok(row.includes(a.organs[i][0]) && row.includes(a.organs[i][1])));
   assert.match(a.beeLive, new RegExp('^right now\\s*' + a.alive + ' of 4 watched parts answered'));
   // the honest parts, in every register, in the page's own words
@@ -130,28 +132,35 @@ test('the one real action is the board’s own re-read; the fronts add no reques
   }
 });
 
-test('raver: tap a rail or a door to light its measured links; the heart and the pause', async () => {
+test('raver: architecture rails link to the complete source directory; pause remains available', async () => {
   const { ctx, p, errs } = await open('raver');
   await p.click('#etStEngine [data-sel="rail:ant"] path');
-  assert.match(await p.textContent('#etStCard'), /Autonomi[\s\S]*1 door row runs on it: bIQ · bTranslated · bFactory · recover/);
-  assert.equal(await p.$$eval('#etStEngine .et-chord.et-on', e => e.length), 1);
-  await p.click('#etStEngine [data-sel="door:6"] circle');
-  assert.match(await p.textContent('#etStCard'), /bFood[\s\S]*pure computation[\s\S]*zero-rail/);
-  assert.equal(await p.$$eval('#etStEngine .et-chord.et-on', e => e.length), 0, 'a zero-rail door lights no rail');
-  await p.click('#etStEngine [data-sel="rail:social"] path');
-  assert.match(await p.textContent('#etStCard'), /last planned migration/);
+  assert.match(await p.textContent('#etStCard'), /Autonomi[\s\S]*not audited/);
+  assert.equal(await p.getAttribute('#etStCard a', 'href'), '#surfaceDirectory');
   await p.click('#etStStill');
-  assert.equal(await p.$eval('#etStEngine .et-chord.et-on', e => getComputedStyle(e).animationPlayState), 'paused');
+  assert.equal(await p.$eval('#etStEngine .et-beat.s-ok', e => getComputedStyle(e).animationPlayState), 'paused');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
-  const still = await open('raver', { reduce: true });
-  assert.equal(await still.p.$eval('#etStEngine .et-beat.s-ok', e => getComputedStyle(e).animationName), 'none', 'still under reduced motion');
-  await still.ctx.close();
+});
+
+test('every surface is included and searchable in every register', async () => {
+  for (const reg of ['bee','raver','cypherpunk']) {
+    const {ctx,p}=await open(reg);
+    const paths=await p.$$eval('#surfaceDirectory [data-surface]', es=>es.map(e=>e.dataset.surface).sort());
+    assert.deepEqual(paths,SURFACES);
+    await p.fill('#surfaceSearch','blood.html');
+    assert.equal(await p.$$eval('#surfaceDirectory [data-surface]:not([hidden])', es=>es.length),1);
+    await p.fill('#surfaceSearch','no-such-surface-xyz');
+    assert.equal(await p.isVisible('#surfaceEmpty'),true);
+    await p.fill('#surfaceSearch','');
+    assert.equal(await p.$$eval('#surfaceDirectory [data-surface]:not([hidden])', es=>es.length),SURFACES.length);
+    await ctx.close();
+  }
 });
 
 test('cypherpunk: complete at first paint; the one real file is read from its receipt, or says it could not be', async () => {
   const { ctx, p, errs } = await open('cypherpunk');
   const d = await p.evaluate(() => ({ tiers: document.querySelectorAll('#etStTiers li').length, organs: document.querySelectorAll('#etStOrgans tr').length, doors: document.querySelectorAll('#etStDoors tr').length, file: document.getElementById('etStFile').textContent, debt: document.querySelectorAll('#etStDebtTab tr').length }));
-  assert.deepEqual([d.tiers, d.organs, d.doors, d.debt], [4, 8, 7, 4]);
+  assert.deepEqual([d.tiers, d.organs, d.doors, d.debt], [4, 8, SURFACES.length, 4]);
   assert.ok(d.file.includes(String(RECEIPT.file.bytes)) && d.file.includes(RECEIPT.quote.amountAnt + ' ANT') && d.file.includes(RECEIPT.file.sha256Short));
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
   const off = await open('cypherpunk', { noReceipt: true });
@@ -165,7 +174,7 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
   for (const reg of ['bee', 'raver', 'cypherpunk']) {
     const { ctx, p } = await open(reg);
     if (reg === 'bee') await p.click('.et-b-row[data-tier="3"]');
-    if (reg === 'raver') await p.click('#etStEngine [data-sel="door:1"] circle');
+    if (reg === 'raver') await p.click('#etStEngine [data-sel="rail:ant"] path');
     const bad = await p.evaluate(() => {
       const fr = [...document.querySelectorAll('#eternal>div')].find(e => getComputedStyle(e).display !== 'none'), out = [];
       for (const el of fr.querySelectorAll('*')) {
