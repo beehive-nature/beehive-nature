@@ -123,3 +123,30 @@ What changed:
 
 Not done: a core that fetches faster. That means building the SDK's Rust
 core ourselves with connection reuse and no duplicate fetches.
+
+## Live check of the chunk-lane engine, skaists.dev, 214 MB clip
+
+Commit 6c0ca0d22, built-in browser on the founder's laptop network, direct
+route, no relay request made:
+
+- File open 9.5 s (connection already open). First chunk in order 21.5 s.
+- 52 of 52 chunks, 0 failed, no fallback. All 204 MB in at 286.1 s, about
+  0.75 MB/s. The clip then played; the source is a Blob, not a worker URL.
+- SHA-256 338b486874f6a8f86afe6537143548fb99594038b9ee7de918794db9e744207e PUBLIC-CONSTANT
+  the same digest the relay path reports for this address, so the direct
+  bytes are the relay's bytes.
+- The picture did not appear until 286 s: the large-file rule skipped the
+  early frame, and the start rule holds while media arrives slower than it
+  plays (this clip is 32.6 Mb/s; direct delivered about 6 Mb/s).
+
+Commit bae2eb8b5 keeps the early frame on the direct route. Live: file open
+6.1 s, first chunk in order 30.6 s, first frame 31.4 s, 3318 px wide, while
+the rest keeps arriving.
+
+Fifth commit: the route menu was dark text on the dark stage colour in the
+new bee register and could not be read. It now uses the stage's own ink.
+
+Honest position against the comparison table for this clip: relay whole file
+about 50 s, ants.tube 83.6 s, bViEw direct 286 s, unmodified SDK download
+456 s. Direct now works without the relay and without a service worker; it
+is not yet fast.
