@@ -14,13 +14,16 @@
 //!   rerun still sees it.
 //! - One reservation covers every transaction evmlib may send for one call:
 //!   `SEND_ATTEMPTS` worst cases, because evmlib retries inside the call.
-//! - A reservation is only ever lowered by what the chain itself reports the
-//!   payer spent (its ETH balance before and after, with no transaction still
-//!   pending). A failed, dropped or unknown-outcome send keeps its full
+//! - A reservation is only ever lowered to the larger of two chain readings:
+//!   the payer's ETH balance change across the call (with no transaction
+//!   still pending) and the receipt cost. A failed, dropped or unknown-outcome
+//!   send keeps its full
 //!   reservation. Exposure is never freed because a call returned an error.
 //! - The ledger file for a plan is at a path derived from the plan, so a rerun
 //!   finds it without being told. A ledger file is local state: deleting it,
 //!   or naming a different one with `ANT_EXTSIG_LEDGER`, discards the history.
+//!   There is no lock: two runs of one plan at the same time lose each other's
+//!   entries. Run one at a time.
 //! - The fee cap for a send is derived from what remains, so a large
 //!   transaction passes when the chain is cheap and refuses when it is not.
 

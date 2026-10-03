@@ -29,6 +29,9 @@ pub struct Gate {
     pub chunk_count: u64,
     /// `quote.clientVersion`.
     pub client_version: String,
+    /// `paymentClientCapability.uploadEnabled`. A paid mainnet run refuses
+    /// unless the gate itself says uploads are enabled.
+    pub upload_enabled: bool,
 }
 
 /// Resolve the gate path without consulting the working directory.
@@ -162,7 +165,11 @@ impl Gate {
             .as_str()
             .map(str::to_string)
             .ok_or_else(|| format!("REFUSE: gate {} quote.clientVersion is not a string", path.display()))?;
+        let upload_enabled = need("/paymentClientCapability/uploadEnabled")?
+            .as_bool()
+            .ok_or_else(|| format!("REFUSE: gate {} paymentClientCapability.uploadEnabled is not true or false", path.display()))?;
         Ok(Gate {
+            upload_enabled,
             path: path.to_path_buf(),
             storage_ceiling_atto,
             gas_ceiling_wei,
@@ -222,6 +229,7 @@ mod tests {
         json!({
             "artifact": { "tarSha256": SHA },
             "quote": { "clientVersion": "ant 0.3.9", "chunkCount": 29 },
+            "paymentClientCapability": { "uploadEnabled": false },
             "separatedCeilings": { "storageMaxAnt": storage, "gasMaxEth": gas }
         })
         .to_string()
@@ -254,6 +262,10 @@ mod tests {
         assert_eq!(g.chunk_count, 29);
         assert_eq!(g.client_version, "ant 0.3.9");
         assert_eq!(g.tar_sha256, SHA);
+        assert!(!g.upload_enabled);
+        // A gate without the upload switch refuses; it is never assumed on.
+        let no_switch = gate_json(json!(100), json!("0.0002")).replace("paymentClientCapability", "x");
+        assert!(Gate::parse(Path::new("gate.json"), &no_switch).unwrap_err().to_string().contains("uploadEnabled"));
     }
 
     #[test]
@@ -261,7 +273,7 @@ mod tests {
         let p = Path::new("gate.json");
         let text = |gas: &str| {
             format!(
-                r#"{{"artifact":{{"tarSha256":"{SHA}"}},"quote":{{"clientVersion":"ant 0.3.9","chunkCount":29}},
+                r#"{{"artifact":{{"tarSha256":"{SHA}"}},"quote":{{"clientVersion":"ant 0.3.9","chunkCount":29}},"paymentClientCapability":{{"uploadEnabled":false}},
                 "separatedCeilings":{{"storageMaxAnt": 100, "storageMaxAntHistory":"2.5", "gasMaxEth": {gas} }}}}"#
             )
         };
@@ -284,6 +296,7 @@ mod tests {
         let no_gas = json!({
             "artifact": { "tarSha256": SHA },
             "quote": { "clientVersion": "ant 0.3.9", "chunkCount": 29 },
+            "paymentClientCapability": { "uploadEnabled": false },
             "separatedCeilings": { "storageMaxAnt": 100 }
         })
         .to_string();

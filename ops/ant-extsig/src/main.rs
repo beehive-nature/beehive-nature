@@ -38,6 +38,15 @@
 //!   match the gate before the first signature. They are skipped only for the
 //!   harness's own generated fixtures, or a file passed with `--devnet-fixture`.
 //!
+//! NETWORKS:
+//! - `--network devnet` (the default) starts a LocalDevnet and pays with its
+//!   funded test account.
+//! - `--network mainnet` connects to the real network and Arbitrum One. Without
+//!   `--pay` it only quotes: no key is read, no wallet exists, nothing is
+//!   signed. With `--pay` the key is read from the file `MEMBER_KEY_FILE`
+//!   names, the gate's stop conditions are always enforced, and the gate's own
+//!   `paymentClientCapability.uploadEnabled` must be true.
+//!
 //! ARBITRUM NITRO PRECOMPILE CITATION & DEVNET CALIBRATION:
 //! Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
 //! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the chain's gas price floor
@@ -59,6 +68,7 @@ use ant_core::data::{
 };
 use ant_node::devnet::DevnetConfig;
 use ant_protocol::evm::Wallet;
+use ant_protocol::transport::MultiAddr;
 use evmlib::common::Amount;
 use evmlib::transaction_config::{MaxFeePerGas, TransactionConfig};
 use serde_json::json;
@@ -116,7 +126,9 @@ async fn eth_balance<P: Provider>(provider: &P, payer: alloy::primitives::Addres
 /// that cannot be read as final: a transaction of the payer's is still
 /// pending, or a read failed. The payment token is an ERC-20, so on this
 /// account ETH leaves only as gas; the difference covers every transaction
-/// that mined, including retries evmlib sent inside one call.
+/// that mined, including retries evmlib sent inside one call. ETH arriving on
+/// the account in the same window makes the difference smaller, so callers
+/// settle with the larger of this and the receipt cost evmlib reports.
 async fn eth_spent_since<P: Provider>(provider: &P, payer: alloy::primitives::Address, balance_before: u128) -> Option<u128> {
     let mined = provider.get_transaction_count(payer).await.ok()?;
     let pending = provider.get_transaction_count(payer).pending().await.ok()?;
@@ -125,6 +137,19 @@ async fn eth_spent_since<P: Provider>(provider: &P, payer: alloy::primitives::Ad
     }
     let after = u128::try_from(provider.get_balance(payer).await.ok()?).ok()?;
     Some(balance_before.saturating_sub(after))
+}
+
+/// A settle that could not be written leaves the full reservation on disk,
+/// which is the safe side. The payment is already made, so the run goes on.
+fn settle_or_warn(result: Res<()>) {
+    if let Err(e) = result {
+        println!("      WARNING: the ledger file was not updated ({e}); the full reservation stays on disk");
+    }
+}
+
+/// An environment variable that is set and not empty.
+fn env_nonempty(key: &str) -> Option<String> {
+    std::env::var(key).ok().filter(|v| !v.trim().is_empty())
 }
 
 /// Fee headroom over the network estimate, as a fraction: 2/1 allows the fee
@@ -152,6 +177,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut file_arg: Option<std::path::PathBuf> = None;
     let mut enforce_gate_artifact = false;
     let mut devnet_fixture = false;
+    let mut mainnet = false;
+    let mut quote_only = false;
+    let mut pay = false;
     let mut node_count: usize = 8;
     let mut payment_mode = PaymentMode::Auto;
     let mut fixture_bytes: Option<usize> = None;
@@ -161,6 +189,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--gate" => gate_arg = Some(args.next().ok_or("--gate needs a path")?),
             "--enforce-gate-artifact" => enforce_gate_artifact = true,
             "--devnet-fixture" => devnet_fixture = true,
+            "--network" => {
+                mainnet = match args.next().ok_or("--network needs devnet or mainnet")?.as_str() {
+                    "devnet" => false,
+                    "mainnet" => true,
+                    other => return Err(format!("unknown --network '{other}'").into()),
+                }
+            }
+            "--quote-only" => quote_only = true,
+            "--pay" => pay = true,
             "--nodes" => node_count = args.next().ok_or("--nodes needs a count")?.parse()?,
             "--mode" => {
                 payment_mode = match args.next().ok_or("--mode needs auto, merkle or single")?.as_str() {
@@ -189,10 +226,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A file the caller names is treated as the real thing unless it is
     // declared a fixture. Only the harness's own fixtures skip the stop conditions.
     let is_fixture = devnet_fixture || file_arg.is_none();
+    if mainnet && is_fixture {
+        return Err("REFUSE: --network mainnet takes a real file; fixtures are for the devnet".into());
+    }
+    if quote_only && pay {
+        return Err("--quote-only and --pay are mutually exclusive".into());
+    }
+    // On mainnet nothing is paid unless it is asked for by name.
+    let quote_only = quote_only || (mainnet && !pay);
+    let network_name = if mainnet { "arbitrum-one" } else { "devnet" };
 
     if file_arg.is_none() && fixture_bytes.is_none() && !file_path.exists() {
         let fixture = br#"{"protocol":"ant-extsig","version":"0.2.1","event":"genesis","timestamp":"2026-09-04T05:10:17Z","estate":"beehive-nature","payload":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}"#; // PUBLIC-CONSTANT fixture payload
         std::fs::write(&file_path, fixture)?;
+    }
+
+    if !file_path.is_file() {
+        return Err(format!("REFUSE: no file at {}", file_path.display()).into());
     }
 
     // The gate is the only source of ceilings and stop conditions. Absent or
@@ -207,36 +257,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file_sha256 = hex::encode(Sha256::digest(std::fs::read(&file_path)?));
     let is_gate_artifact = gate.is_gate_artifact(&file_sha256);
 
-    // -- [1/6] the swarm: real ant-nodes + embedded Anvil (member-paid EVM) --
-    println!("[1/6] starting {node_count}-node LocalDevnet + Anvil...");
-    let devnet = LocalDevnet::start(DevnetConfig {
-        node_count,
-        ..DevnetConfig::default()
-    })
-    .await?;
-    let bootstrap = devnet.bootstrap_addrs();
-    let evm_network = devnet.evm_network().clone();
-
-    let member_key = if let Ok(k) = std::env::var("MEMBER_PRIVATE_KEY") {
-        k
+    // -- [1/6] the network: a local swarm with embedded Anvil, or the real one --
+    let devnet = if mainnet {
+        println!("[1/6] network: Autonomi mainnet, payments on Arbitrum One{}", if quote_only { " (quote only: no key, no wallet, no signature)" } else { "" });
+        None
     } else {
-        let k = devnet.wallet_private_key().to_string(); // devnet-funded stand-in
-        let key_file = std::env::temp_dir().join("ant-extsig-member-key.txt");
-        std::fs::write(&key_file, &k)?;
-        k
+        println!("[1/6] starting {node_count}-node LocalDevnet + Anvil...");
+        Some(
+            LocalDevnet::start(DevnetConfig {
+                node_count,
+                ..DevnetConfig::default()
+            })
+            .await?,
+        )
     };
-
-    // The member's signer. Its per-gas fee cap is set before each send, from
-    // what the gas ledger has left.
-    let mut signer = Wallet::new_from_private_key(evm_network.clone(), member_key.trim_start_matches("0x"))?;
-    println!("      member payer address: {}", signer.address());
+    let (bootstrap, evm_network): (Vec<MultiAddr>, evmlib::Network) = match &devnet {
+        Some(d) => (
+            d.bootstrap_addrs().iter().copied().map(MultiAddr::quic).collect(),
+            d.evm_network().clone(),
+        ),
+        // No explicit peers and no manifest: the installed bootstrap file, or
+        // the seeds bundled into ant-core (`config.rs` `resolve_bootstrap_multiaddrs`).
+        None => (ant_core::config::resolve_bootstrap_multiaddrs(&[], None)?, evmlib::Network::ArbitrumOne),
+    };
 
     // -- [2/6] the estate client connects (NO wallet attached) --------------
     let cfg = ClientConfig {
-        allow_loopback: bootstrap.iter().any(|a| a.ip().is_loopback()),
+        allow_loopback: devnet.is_some(),
         ..Default::default()
     };
-    let client = Client::connect(&bootstrap, cfg.clone()).await?;
+    let client = Client::connect_multiaddrs(&bootstrap, cfg.clone()).await?;
 
     // -- [3/6] PREPARE the upload (PaymentMode::Auto) ------------------------
     println!(
@@ -258,8 +308,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let total_chunks = prepared.total_chunks;
     // Gate stop conditions about the artifact and the client, before any signature.
-    if is_gate_artifact || enforce_gate_artifact || !is_fixture {
-        let tripped = gate.tripped_stop_conditions(&file_sha256, prepared.total_chunks as u64, gate::CLIENT_VERSION);
+    let tripped = gate.tripped_stop_conditions(&file_sha256, prepared.total_chunks as u64, gate::CLIENT_VERSION);
+    if quote_only {
+        // A quote signs nothing, so the conditions are reported, not enforced:
+        // a fresh quote is what a re-issued gate is made from.
+        if tripped.is_empty() {
+            println!("      gate stop conditions: all match the gate");
+        }
+        for t in &tripped {
+            println!("      gate stop condition tripped (reported, a quote signs nothing): {t}");
+        }
+    } else if is_gate_artifact || enforce_gate_artifact || !is_fixture {
         if !tripped.is_empty() {
             return Err(format!(
                 "REFUSE: gate stop conditions tripped before any signature: {}",
@@ -303,6 +362,60 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
+    if quote_only {
+        println!(
+            "QUOTE {}",
+            serde_json::to_string_pretty(&json!({
+                "network": network_name,
+                "client_version": gate::CLIENT_VERSION,
+                "captured_unix": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_secs(),
+                "file": file_path.display().to_string(),
+                "file_size": std::fs::metadata(&file_path)?.len(),
+                "file_sha256": file_sha256,
+                "file_is_gate_artifact": is_gate_artifact,
+                "total_chunks": total_chunks,
+                "chunks_already_stored": prepared.already_stored_addresses.len(),
+                "payment_arm": payment_arm,
+                "payment_mode_requested": format!("{payment_mode:?}"),
+                "storage_cost_atto": quote_sum_atto.to_string(),
+                "storage_ceiling_atto": max_storage_ceiling_atto.to_string(),
+                "gas_ceiling_wei": max_gas_ceiling_wei.to_string(),
+                "gate_path": gate.path.display().to_string(),
+                "gate_stop_conditions_tripped": tripped,
+                "signed": false,
+                "wallet_constructed": false,
+            }))?
+        );
+        return Ok(());
+    }
+
+    // The member's key. On mainnet it comes only from a file the key holder
+    // names; this program never writes it anywhere. On the devnet it is the
+    // swarm's funded test account.
+    let member_key = match &devnet {
+        None => {
+            if !gate.upload_enabled {
+                return Err(format!(
+                    "REFUSE: the gate {} says paymentClientCapability.uploadEnabled is false; nothing is paid on mainnet",
+                    gate.path.display()
+                )
+                .into());
+            }
+            let key_file = std::env::var("MEMBER_KEY_FILE")
+                .map_err(|_| "REFUSE: --network mainnet --pay needs MEMBER_KEY_FILE to name the key holder's key file")?;
+            std::fs::read_to_string(&key_file)
+                .map_err(|e| format!("REFUSE: cannot read MEMBER_KEY_FILE: {e}"))?
+                .trim()
+                .to_string()
+        }
+        Some(d) => std::env::var("MEMBER_PRIVATE_KEY").unwrap_or_else(|_| d.wallet_private_key().to_string()),
+    };
+    // The member's signer. Its per-gas fee cap is set before each send, from
+    // what the gas ledger has left.
+    let mut signer = Wallet::new_from_private_key(evm_network.clone(), member_key.trim_start_matches("0x"))?;
+    drop(member_key);
+    println!("      member payer address: {}", signer.address());
+
     // -- [4/6] THE MEMBER PAYS -- standalone wallet, out-of-band -------------
     println!("[4/6] member wallet paying ({payment_arm} arm)...");
     let mut paid_atto: u128 = 0;
@@ -312,15 +425,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The plan-wide gas ledger. Its file is derived from the plan unless
     // ANT_EXTSIG_LEDGER names one, so a rerun of a plan meets its history.
-    let plan_id = format!("devnet:{payer}:{addr_hex}");
-    let ledger_path = match std::env::var("ANT_EXTSIG_LEDGER") {
-        Ok(p) => std::path::PathBuf::from(p),
-        Err(_) => {
-            let state_dir = std::env::var("ANT_EXTSIG_STATE_DIR")
-                .or_else(|_| std::env::var("LOCALAPPDATA"))
-                .or_else(|_| std::env::var("XDG_STATE_HOME"))
-                .or_else(|_| std::env::var("HOME").map(|h| format!("{h}/.local/state")))
-                .map_err(|_| "REFUSE: no place for the gas ledger: set ANT_EXTSIG_LEDGER or ANT_EXTSIG_STATE_DIR")?;
+    let plan_id = format!("{network_name}:{payer}:{addr_hex}");
+    let ledger_path = match env_nonempty("ANT_EXTSIG_LEDGER") {
+        Some(p) => std::path::PathBuf::from(p),
+        None => {
+            let state_dir = env_nonempty("ANT_EXTSIG_STATE_DIR")
+                .or_else(|| env_nonempty("LOCALAPPDATA"))
+                .or_else(|| env_nonempty("XDG_STATE_HOME"))
+                .or_else(|| env_nonempty("HOME").map(|h| format!("{h}/.local/state")))
+                .ok_or("REFUSE: no place for the gas ledger: set ANT_EXTSIG_LEDGER or ANT_EXTSIG_STATE_DIR")?;
             default_ledger_path(std::path::Path::new(&state_dir), &plan_id)
         }
     };
@@ -377,11 +490,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // From here a failure leaves the reservation in the ledger.
         let approve_tx_hash = signer.approve_to_spend_tokens(vault_address, approve_amount).await?;
         println!("      exact approval tx submitted: {approve_tx_hash}");
-        match eth_spent_since(&provider, payer, balance_before).await {
+        let receipt_cost = provider
+            .get_transaction_receipt(approve_tx_hash)
+            .await
+            .ok()
+            .flatten()
+            .map(|r| (r.gas_used as u128).saturating_mul(r.effective_gas_price));
+        let balance_spent = eth_spent_since(&provider, payer, balance_before).await;
+        match balance_spent.zip(receipt_cost).map(|(b, r)| b.max(r)) {
             Some(cost) => {
-                ledger.settle(entry, cost)?;
+                settle_or_warn(ledger.settle(entry, cost));
                 println!(
-                    "      approval settled from the payer's balance: spent {cost} wei (ledger exposure {} wei, remaining {} wei)",
+                    "      approval settled at {cost} wei, the larger of balance change {balance_spent:?} and receipt {receipt_cost:?} (ledger exposure {} wei, remaining {} wei)",
                     ledger.exposure_wei(),
                     ledger.remaining_wei()
                 );
@@ -437,12 +557,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let entry = ledger.reserve(&stage, reserve_limit, cap)?;
 
             let (map, gas) = signer.pay_for_quotes(payments.into_iter()).await.map_err(|e| format!("member pay_for_quotes: {e:?}"))?;
-            let settled = eth_spent_since(&provider, payer, balance_before).await;
+            let balance_spent = eth_spent_since(&provider, payer, balance_before).await;
+            let settled = balance_spent.map(|b| b.max(gas.gas_cost_wei));
             if let Some(cost) = settled {
-                ledger.settle(entry, cost)?;
+                settle_or_warn(ledger.settle(entry, cost));
             }
             println!(
-                "      paid {} quote payments: gas_limit_set={} max_fee_set={:?} gas_used={} receipt_cost={} wei balance_spent={} (ledger exposure {} wei)",
+                "      paid {} quote payments: gas_limit_set={} max_fee_set={:?} gas_used={} receipt_cost={} wei balance_change={balance_spent:?} settled={} (ledger exposure {} wei)",
                 map.len(),
                 gas.gas_with_buffer,
                 gas.max_fee_per_gas,
@@ -491,12 +612,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let (winner, amount, gas) = signer
                     .pay_for_merkle_tree(b.depth, b.pool_commitments.clone(), b.merkle_payment_timestamp)
                     .await?;
-                let settled = eth_spent_since(&provider, payer, balance_before).await;
+                let balance_spent = eth_spent_since(&provider, payer, balance_before).await;
+            let settled = balance_spent.map(|b| b.max(gas.gas_cost_wei));
                 if let Some(cost) = settled {
-                    ledger.settle(entry, cost)?;
+                    settle_or_warn(ledger.settle(entry, cost));
                 }
                 println!(
-                    "      batch {i}: depth={}, paid {amount} atto, winner {}, gas_used={} receipt_cost={} wei balance_spent={} (ledger exposure {} wei)",
+                    "      batch {i}: depth={}, paid {amount} atto, winner {}, gas_used={} receipt_cost={} wei balance_change={balance_spent:?} settled={} (ledger exposure {} wei)",
                     b.depth,
                     hex::encode(winner),
                     gas.actual_gas_used,
@@ -528,7 +650,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     drop(client);
     println!("[5/6] INTERRUPT: client destroyed -- reconnecting FRESH for the resume...");
-    let fresh_client = Client::connect(&bootstrap, cfg).await?;
+    let fresh_client = Client::connect_multiaddrs(&bootstrap, cfg).await?;
     let winner_report: Vec<String> = match &paid {
         Paid::Wave(_) => vec![],
         Paid::Merkle(ws) => ws.iter().map(hex::encode).collect(),
@@ -578,6 +700,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "interrupt": "client destroyed after payment; fresh client finalized",
             "resumed_without_new_quote": true,
             "roundtrip_byte_identical": true,
+            "network": network_name,
             "node_count": node_count,
             "payment_mode_requested": format!("{payment_mode:?}"),
             "total_chunks": total_chunks,
