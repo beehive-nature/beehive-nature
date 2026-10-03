@@ -88,6 +88,9 @@ const TRUE_RHS = new RegExp(String.raw`^\s*(?:true|!0|1)` + END);
 const TRUE_FORCE = new RegExp(String.raw`^\s*,\s*(?:true|!0|1)\s*\)`);
 // the whole Object.assign call, across lines, to its closing paren; a bare
 // object key elsewhere is a report or a mock's field, not a write
+// inside such a call, `disabled` as a key: with a value (`disabled: false`)
+// or as shorthand (`{ disabled }`), which carries whatever the variable holds
+const ASSIGN_KEY = /(?<![.\w$])['"`]?disabled['"`]?\s*(?::(?=([^\n]*))|(?=[,}]))/g;
 function assignCalls(text) {
   const calls = [];
   for (const m of text.matchAll(/Object\.assign\s*\(/g)) {
@@ -111,7 +114,7 @@ function writes(text) {
   for (const m of text.matchAll(ASSIGN)) if (m[1] || !TRUE_RHS.test(m[2])) n++;
   n += [...text.matchAll(STEP)].length;
   for (const m of text.matchAll(ATTR)) if (!(m[1] === 'toggleAttribute' && TRUE_FORCE.test(m[2]))) n++;
-  for (const call of assignCalls(text)) for (const m of call.matchAll(/\bdisabled['"`]?\s*:(?=([^\n]*))/g)) if (!TRUE_RHS.test(m[1])) n++;
+  for (const call of assignCalls(text)) for (const m of call.matchAll(ASSIGN_KEY)) if (m[1] === undefined || !TRUE_RHS.test(m[1])) n++;
   return n;
 }
 
@@ -136,6 +139,9 @@ const SELF = [
   ['Object.assign across lines', 'x.evaluate(b => {\n  Object.assign(b, {\n    disabled: false\n  });\n});', 1],
   ['Object.assign past a quoted paren', "Object.assign(b, { note: ')', disabled: false });", 1],
   ['Object.assign past a commented paren', 'Object.assign(b, { /* ) */ disabled: false });', 1],
+  ['Object.assign shorthand', 'const disabled = false; Object.assign(b, { disabled });', 1],
+  ['Object.assign shorthand among keys', 'Object.assign(b, { title, disabled, hidden });', 1],
+  ['Object.assign copying a read', 'Object.assign(report, { was: b.disabled });', 0],
   ['postfix --', 'x.evaluate(b => { b.disabled--; });', 1],
   ['prefix ++', 'x.evaluate(b => { ++b.disabled; });', 1],
   ['bracket --', "x.evaluate(b => { b['disabled']--; });", 1],
