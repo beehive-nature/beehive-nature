@@ -80,6 +80,9 @@ const LEDGER = {
 // lookahead, so a second write on it still counts.
 const END = String.raw`\s*(?:[;,)}\]]|$)`;
 const ASSIGN = /(?:\.disabled|\[\s*['"`]disabled['"`]\s*\])\s*(\*\*|<<|>>>?|&&|\|\||\?\?|[-+*\/%&|^])?=(?![=>])(?=([^\n]*))/g;
+// `b.disabled--` writes 0 back through the boolean property and enables;
+// postfix or prefix, ++ or --, every one is a write
+const STEP = /(?:\.disabled|\[\s*['"`]disabled['"`]\s*\])\s*(?:\+\+|--)|(?:\+\+|--)\s*[\w$][\w$.]*(?:\.disabled\b|\[\s*['"`]disabled['"`]\s*\])/g;
 const ATTR = /\.(removeAttribute|toggleAttribute)\s*\(\s*['"`]disabled['"`](?=([^\n]*))/g;
 const TRUE_RHS = new RegExp(String.raw`^\s*(?:true|!0|1)` + END);
 const TRUE_FORCE = new RegExp(String.raw`^\s*,\s*(?:true|!0|1)\s*\)`);
@@ -88,10 +91,16 @@ const TRUE_FORCE = new RegExp(String.raw`^\s*,\s*(?:true|!0|1)\s*\)`);
 function assignCalls(text) {
   const calls = [];
   for (const m of text.matchAll(/Object\.assign\s*\(/g)) {
+    // parens inside strings, templates and comments are not syntax; a call
+    // whose end is never found is read to the end of the file, not dropped
     let depth = 0, i = m.index + m[0].length - 1;
     for (; i < text.length; i++) {
-      if (text[i] === '(') depth++;
-      else if (text[i] === ')' && --depth === 0) break;
+      const c = text[i];
+      if (c === '"' || c === "'" || c === '`') { for (i++; i < text.length && text[i] !== c; i++) if (text[i] === '\\') i++; }
+      else if (c === '/' && text[i + 1] === '/') { while (i < text.length && text[i] !== '\n') i++; }
+      else if (c === '/' && text[i + 1] === '*') { const e = text.indexOf('*/', i + 2); i = e < 0 ? text.length : e + 1; }
+      else if (c === '(') depth++;
+      else if (c === ')' && --depth === 0) break;
     }
     calls.push(text.slice(m.index, i + 1));
   }
@@ -100,6 +109,7 @@ function assignCalls(text) {
 function writes(text) {
   let n = 0;
   for (const m of text.matchAll(ASSIGN)) if (m[1] || !TRUE_RHS.test(m[2])) n++;
+  n += [...text.matchAll(STEP)].length;
   for (const m of text.matchAll(ATTR)) if (!(m[1] === 'toggleAttribute' && TRUE_FORCE.test(m[2]))) n++;
   for (const call of assignCalls(text)) for (const m of call.matchAll(/\bdisabled['"`]?\s*:(?=([^\n]*))/g)) if (!TRUE_RHS.test(m[1])) n++;
   return n;
@@ -124,6 +134,11 @@ const SELF = [
   ['a bracket write', "x.evaluate(b => { b['disabled'] = false; });", 1],
   ['Object.assign', 'x.evaluate(b => { Object.assign(b, { disabled: false }); });', 1],
   ['Object.assign across lines', 'x.evaluate(b => {\n  Object.assign(b, {\n    disabled: false\n  });\n});', 1],
+  ['Object.assign past a quoted paren', "Object.assign(b, { note: ')', disabled: false });", 1],
+  ['Object.assign past a commented paren', 'Object.assign(b, { /* ) */ disabled: false });', 1],
+  ['postfix --', 'x.evaluate(b => { b.disabled--; });', 1],
+  ['prefix ++', 'x.evaluate(b => { ++b.disabled; });', 1],
+  ['bracket --', "x.evaluate(b => { b['disabled']--; });", 1],
   ['Object.assign setting true', 'Object.assign(b, {\n  disabled: true\n});', 0],
   ['a reported key is not a write', 'return { pressed: p, disabled: el.disabled };', 0],
   ['an arrow is not a write', 'const f = b => b.disabled => 1;', 0],
