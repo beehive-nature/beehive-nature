@@ -73,9 +73,9 @@ ok('stage legend chips render (four circuits)', (await page.locator('#dataflow .
 ok('default state asks to select a stage', await page.locator('#flowSelect').isVisible());
 
 /* 2 · keyboard: Tab to the first stage, Enter opens it */
-await page.focus('#organboard'); // anchor above the loop
+const tabStops = await page.locator('a[href],button,input,select,summary,[tabindex]').count();
 let kbFocused = false;
-for (let i = 0; i < 40 && !kbFocused; i++) {
+for (let i = 0; i < tabStops && !kbFocused; i++) {
   await page.keyboard.press('Tab');
   kbFocused = await page.evaluate(() => document.activeElement && document.activeElement.classList.contains('fstage'));
 }
