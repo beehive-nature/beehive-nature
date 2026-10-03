@@ -1,0 +1,14 @@
+# Hostinger daemon: API private; independent service identity; default Leaf.
+api_address = "127.0.0.1:12700"
+bind_address = "0.0.0.0:5483"
+log_level = "warn"
+log_format = "text"
+data_dir = "/var/lib/x0x/data"
+identity_dir = "/var/lib/x0x/identity"
+zero_peer_restart_secs = 600
+
+[update]
+enabled = false
+
+[history]
+enabled = true
