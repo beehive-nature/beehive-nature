@@ -1251,7 +1251,7 @@ fetch('stack-dataflow-example.json',{cache:'no-store'}).then(function(r){ return
     D.loop=[].map.call(document.querySelectorAll('#flowLoop .fstage'),function(b){return {id:b.getAttribute('data-stage'),name:txt(b.querySelector('.fname'))};});
     var lt=tableAfter('stack.lic.h2');
     D.licence=lt?[].filter.call(lt.querySelectorAll('tr'),function(r){return !r.querySelector('th');}).map(function(r){var td=r.querySelectorAll('td');return {path:txt(td[0]),licence:txt(td[1]),opens:txt(td[2])};}):[];
-    var ah=keyed('h.171'), al=ah&&ah.closest('section').querySelector('.law');
+    var ah=keyed('h.171'), al=ah&&ah.closest('section').querySelector('h2 ~ .law');
     D.autonomi=al?[].map.call(al.querySelectorAll('b'),function(b){return txt(b);}).filter(function(s){return /^\d\s·/.test(s);}):[];
     organs();
   }
