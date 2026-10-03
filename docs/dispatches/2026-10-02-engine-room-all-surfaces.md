@@ -13,3 +13,5 @@ Upstream priority checked: x0x #504 remains open (September 30 update); #622 and
 One local edit attempt used unavailable python; it made no edit. The edit was completed with installed Node instead.
 
 Follow-up: update the existing browser suite's obsolete seven-door/August-date assertions to the tracked surface census, assert exact route coverage and filtering in every register, and test architecture-rail links instead of historical door nodes. These tests run in CI; no local server was started. PR #317 merged at e3398a0a8ba00be8729c57f4ae7b5a2d1de16c46; Pages publication is being checked separately.
+
+CI caught one introduced workflow convention violation: the new generator step lacked if: always(). Corrected it so it runs even when another static check fails. The cypherpunk runtime column now names its actual scope; new front links receive 44px touch targets. This is a descendant repair, with no rewritten commits.
