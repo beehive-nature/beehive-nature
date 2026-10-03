@@ -2,6 +2,13 @@ use bnr_solana_tungsten::*;
 
 fn main() {
     let worker = Worker::new();
+    if std::env::args().nth(1).as_deref() == Some("bundle") {
+        println!(
+            "{}",
+            serde_json::to_string(&worker.bundle(fixture().job)).unwrap()
+        );
+        return;
+    }
     let solana = SolanaHost::new(worker.key()).expect("publishable key");
     let reference = ArkworksHost::new(worker.key()).expect("publishable key");
     let grant = fixture();

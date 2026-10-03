@@ -35,3 +35,9 @@ jobs:
         run: cargo clippy --locked --manifest-path tools/solana-tungsten/Cargo.toml --all-targets -- -D warnings
       - name: Existing reconciliation stays open
         run: node tools/solana-tungsten/run.mjs
+      - name: Lab source syntax and dependency audit (not a chain run)
+        run: |
+          python3 -m py_compile tools/solana-tungsten/lab/*.py
+          for file in tools/solana-tungsten/lab/*.mjs; do node --check "$file"; done
+          npm ci --ignore-scripts --prefix tools/solana-tungsten/lab
+          npm audit --prefix tools/solana-tungsten/lab --audit-level=moderate

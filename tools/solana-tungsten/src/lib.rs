@@ -66,7 +66,7 @@ pub fn commitment(job: &Job) -> [u8; 32] {
     hash.finalize().into()
 }
 
-fn inputs(job: &Job, output: u64) -> [Fr; 4] {
+fn inputs(job: &Job, output: u64) -> [Fr; 5] {
     let digest = commitment(job);
     // Two 128-bit limbs preserve all 256 bits; no reduction of a full hash mod r.
     [
@@ -74,12 +74,13 @@ fn inputs(job: &Job, output: u64) -> [Fr; 4] {
         Fr::from(output),
         Fr::from_be_bytes_mod_order(&digest[..16]),
         Fr::from_be_bytes_mod_order(&digest[16..]),
+        Fr::from(job.nonce),
     ]
 }
 
 #[derive(Clone)]
 struct SquareJob {
-    public: [Fr; 4],
+    public: [Fr; 5],
 }
 
 impl ConstraintSynthesizer<Fr> for SquareJob {
@@ -115,7 +116,7 @@ impl Worker {
     pub fn new() -> Self {
         let proving_key = Groth16::<Bn254>::generate_random_parameters_with_reduction(
             SquareJob {
-                public: [Fr::from(0u64); 4],
+                public: [Fr::from(0u64); 5],
             },
             &mut OsRng,
         )
@@ -143,6 +144,34 @@ impl Worker {
             proof: arkworks::proof(&proof).0.to_vec(),
         }
     }
+
+    /// Public artifacts for isolated transport/chain rehearsals. Never exports
+    /// the proving key or setup randomness. The receiving harness pins the key
+    /// from its local owner manifest, not from an untrusted incoming packet.
+    pub fn bundle(&self, job: Job) -> ProofBundle {
+        let packet = self.prove(job);
+        let key = self.key();
+        ProofBundle {
+            schema: "bnr.tungsten-proof-bundle/2".into(),
+            public_inputs: arkworks::public_inputs(&inputs(&packet.job, packet.output))
+                .iter()
+                .map(|input| input.to_vec())
+                .collect(),
+            verifying_key_hash: key.hash(),
+            verifying_key_body: key.body().to_vec(),
+            packet,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ProofBundle {
+    pub schema: String,
+    pub packet: Packet,
+    pub verifying_key_body: Vec<u8>,
+    pub verifying_key_hash: [u8; 32],
+    pub public_inputs: Vec<Vec<u8>>,
 }
 
 impl Default for Worker {
