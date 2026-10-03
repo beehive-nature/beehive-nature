@@ -311,7 +311,7 @@ button.et-b-row{cursor:pointer}
 .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
 .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
 .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
-.et-r-tiles button{height:108px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s2);font:700 11px/1.2 var(--sk-font-raver-display);letter-spacing:.06em;color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+.et-r-tiles button{height:108px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s2);font:700 12px/1.2 var(--sk-font-raver-display);letter-spacing:.06em;color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
 .et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
 .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
 .et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -334,13 +334,13 @@ button.et-b-row{cursor:pointer}
 .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
 .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
 .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
-.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 11px/1.4 var(--sk-font-mono);letter-spacing:.04em}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);letter-spacing:.04em}
 .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
 .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
 .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
 .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
 .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
-.et-c-tab th{padding:var(--sk-s1) var(--sk-s3);text-align:left;font:600 11px/1.4 var(--sk-font-mono);letter-spacing:.04em;color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s3);text-align:left;font:600 12px/1.4 var(--sk-font-mono);letter-spacing:.04em;color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
 .et-c-tab td{height:var(--sk-control-min);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono)}
 .et-c-tab td:nth-child(2){white-space:nowrap}
 .et-c-tab tr:last-child td{border-bottom:0}
@@ -384,8 +384,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 </style>
 <link rel="stylesheet" href="skaists.css">
 <link rel="stylesheet" href="blood-atlas.css?v=20261002-labels">
-<link rel="stylesheet" href="tree-of-life.css?v=1">
+<link rel="stylesheet" href="tree-of-life.css?v=20261003-3d2">
 <link rel="stylesheet" href="person-panel.css?v=1">
+<style>/* 44px control floor */details>summary{min-height:44px;display:flex;align-items:center}</style>
 </head>
 <body>
 <main>
@@ -556,7 +557,7 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 <div class="econcard" id="econcard" hidden>
   <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
   <span class="states" id="econ-states">…</span><br>
-  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ view Autonomi eternalization status</button>
+  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">⬡ view Autonomi eternalization status</button>
 </div>
 <div id="preservepanel" hidden style="margin-top:12px;border:1px solid var(--gold);border-radius:14px;padding:16px;background:var(--panel)">
   <div style="font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--gold)">preserve this family archive</div>
@@ -1506,10 +1507,10 @@ hex.setAttribute('data-pid',id);
 // history -> one URL grammar. If ANYTHING here throws, the incumbent comb
 // path stays fully functional (the engine gates all read __guxAtlas).
 import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs?v=20261002-labels";
-import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
+import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs?v=20261003-family2";
 import { fetchArchive } from "./person-panel-corpus.mjs";
 import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
-import { mountTreeOfLife } from "./tree-of-life.mjs";
+import { mountTreeOfLife } from "./tree-of-life.mjs?v=20261003-3d2";
 import { SCHEMA as LIFE_SCHEMA, lineLabel, emergence, validate as validateLife, depths } from "../tools/genealogy/model.mjs";
 
 const $ = (id) => document.getElementById(id);

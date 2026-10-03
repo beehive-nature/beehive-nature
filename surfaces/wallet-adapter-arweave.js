@@ -18,7 +18,7 @@
 // surfaces/arweave.js (format-2 data tx, deepHash SHA-384, merkle notes) —
 // vendored same-origin, proven working inside the worker (the stack law:
 // present-but-inert does not count).
-importScripts('arweave.js?v=2');
+importScripts('arweave.js?v=3');
 var A = globalThis.BNRAR;
 
 var E = { RAIL_UNREACHABLE: -32001, BAD_PARAMS: -32007, SUBMIT_REFUSED: -32005, UNSUPPORTED: -32008, SERIALIZE: -32004 };
@@ -102,12 +102,12 @@ var METHODS = {
     if (!p || !p.ref) throw bad('confirm needs {ref}');
     var st = await A.txStatus(p.ref);
     if (st.tx === 'confirmed') {
-      return { phase: 'confirmed', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + st.gateway, status: st.tx, confirmations: st.confirmations } };
+      return { phase: 'confirmed', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + st.gateway, status: st.tx, confirmations: st.confirmations, block_height: st.block_height, block_indep_hash: st.block_indep_hash } };
     }
     if (st.tx === 'unknown' || st.tx === 'refused') {
-      return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + st.gateway, status: 'not in the mempool (HTTP ' + st.status + ') — an unfunded key never enters the pool' } };
+      return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + st.gateway, status: 'not in the mempool (HTTP ' + st.status + ') — an unfunded key never enters the pool' } };
     }
-    return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + (st.gateway || 'no gateway'), status: st.tx || 'pending' } };
+    return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + (st.gateway || 'no gateway'), status: st.tx || 'pending' } };
   },
   status: null   // alias set below
 };

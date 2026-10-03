@@ -40,6 +40,8 @@ import { fileURLToPath } from 'node:url';
 const RIDER_ALLOWLIST = [
   /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/, /\/level-truth\.js/,
   /\/agent-dock\.js/,
+  // First-party worker RPC seam used by wallet storage quotes.
+  /\/surfaces\/adapter-seam\.js(?:\?|$)/,
   /\/manifest\.webmanifest/, /\/bn-logo\.(jpg|png)/, /\/icon-180\.png/,
   /\.(json|css)(\?|$)/,
   /* the wallet's first-party vendored riders — the bzDiD key carrier and the

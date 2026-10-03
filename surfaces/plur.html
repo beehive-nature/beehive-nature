@@ -28,11 +28,10 @@
   .plur{font-size:clamp(3.4rem,17vw,10rem);font-weight:800;letter-spacing:.06em;line-height:.95;
     background:var(--rainbow);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
     color:transparent;animation:drift 14s linear infinite;padding-bottom:.06em}
-  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;
-    text-transform:uppercase;color:var(--ink-mut);margin-top:6px}
+  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;color:var(--ink-mut);margin-top:6px}
   .open p{color:var(--ink-mut);max-width:34ch;margin:26px auto 0;font-size:1.04rem;line-height:1.6}
   .open .floor{color:var(--ink);margin-top:20px;font-size:1.06rem;max-width:32ch}
-  .hint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  .hint{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
     color:var(--ink-dim);margin-top:38px}
 
   @keyframes drift{to{background-position:220% 0}}
@@ -43,8 +42,7 @@
   .field{padding:78px 20px 88px;position:relative;border-top:1px solid var(--line)}
   .field .en{font-size:clamp(2.6rem,11vw,6.6rem);font-weight:800;letter-spacing:-.02em;line-height:1;
     text-align:center;color:var(--hue);text-shadow:0 0 62px var(--hue)}
-  .field .gloss{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--ink-dim);margin-top:16px}
+  .field .gloss{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--ink-dim);margin-top:16px}
   .f-peace{--hue:#8FE0C6}
   .f-love{--hue:#D655BB}
   .f-unity{--hue:#6FA9E0}
@@ -56,7 +54,7 @@
     font-family:inherit;text-align:center;border-radius:10px;transition:transform .22s,color .22s}
   .w .t{display:block;font-size:var(--sz,1.6rem);line-height:1.2;color:var(--ink);
     transition:color .22s,text-shadow .22s}
-  .w .r{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+  .w .r{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.05em;
     color:var(--ink-dim);margin-top:3px;opacity:0;transition:opacity .22s}
   .w:hover,.w:focus-visible{outline:none;transform:translateY(-3px)}
   .w:hover .t,.w:focus-visible .t{color:var(--hue);text-shadow:0 0 26px var(--hue)}
@@ -64,7 +62,7 @@
   .w.speaking .t{color:var(--hue);text-shadow:0 0 34px var(--hue)}
   .w.novoice{cursor:default}
   .w.novoice:hover{transform:none}
-  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:8px;
+  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:12px;
     letter-spacing:.05em;color:var(--guard);opacity:0;transition:opacity .22s}
   .w.novoice:hover .mute{opacity:.75}
   .w[data-sz="xl"]{--sz:2.5rem}
@@ -76,7 +74,7 @@
   /* ── the note ── */
   .note{max-width:640px;margin:52px auto 0;padding:22px 24px;border-left:3px solid var(--hue);
     background:rgba(255,255,255,.022);border-radius:0 12px 12px 0}
-  .note h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  .note h3{font-family:var(--mono);font-size:12px;letter-spacing:.2em;
     color:var(--hue);margin-bottom:11px}
   .note p{color:var(--ink-mut);font-size:1rem;line-height:1.65}
   .note p + p{margin-top:11px}
@@ -95,7 +93,7 @@
   .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
   .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
     border-radius:999px;padding:5px 11px;max-width:230px}
-  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .st{font-family:var(--mono);font-size:12px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
   .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
@@ -124,7 +122,7 @@
   .bloomed .rosehead{animation:sway 7.5s ease-in-out infinite}
   .mourning .rosehead{animation:none}
   @keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
-  .oddlaw{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:10px}
+  .oddlaw{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-dim);margin-top:10px}
   .oddpick{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
   .oddpick button{font-family:var(--mono);font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);
     background:transparent;color:var(--ink-mut);cursor:pointer;transition:all .25s}
@@ -139,7 +137,7 @@
   .talk{padding:80px 20px 90px;border-top:1px solid var(--line)}
   .talk .wrap{max-width:760px;margin:0 auto}
   .talk h2{font-size:clamp(1.7rem,6.4vw,2.8rem);font-weight:800;text-align:center;letter-spacing:-.01em}
-  .talk h2 .who{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.22em;
+  .talk h2 .who{display:block;font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.22em;
     color:var(--ai);margin-top:10px}
   .talk .sub{text-align:center;color:var(--ink-mut);max-width:48ch;margin:14px auto 0;line-height:1.6}
   .tongues{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:26px;
@@ -153,7 +151,7 @@
   .seeds button:hover{border-color:var(--sovereign);color:var(--ink);transform:translateY(-1px)}
   .thread{margin-top:28px;display:flex;flex-direction:column;gap:16px;min-height:40px}
   .msg{border:1px solid var(--line);border-radius:16px;padding:16px 18px;animation:rise .5s ease both;max-width:92%}
-  .msg .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;margin-bottom:8px}
+  .msg .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;margin-bottom:8px}
   .msg.you{align-self:flex-end;background:rgba(214,85,187,.07);border-color:rgba(214,85,187,.35)}
   .msg.you .tag{color:var(--you)}
   .msg.hive{align-self:flex-start;background:rgba(69,194,220,.05);border-color:rgba(69,194,220,.3)}
@@ -184,7 +182,7 @@
   .composer .send:hover{background:rgba(214,85,187,.12)}
   .composer .mic[data-live="1"]{border-color:var(--rose);color:var(--rose-lift);box-shadow:0 0 18px rgba(200,30,60,.35);animation:breathe 1.6s ease-in-out infinite}
   .composer .mic:disabled{opacity:.4;cursor:default}
-  .talkst{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
+  .talkst{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
   .thinking{display:inline-flex;gap:5px;align-items:center}
   .thinking i{width:6px;height:6px;border-radius:50%;background:var(--ai);animation:think 1.1s ease-in-out infinite;font-style:normal}
   .thinking i:nth-child(2){animation-delay:.18s}.thinking i:nth-child(3){animation-delay:.36s}
@@ -199,7 +197,7 @@
   .pillar{border:1px solid var(--line);border-radius:14px;padding:18px;transition:all .3s;animation:rise .6s ease both}
   .pillar:hover{transform:translateY(-3px);border-color:var(--pc)}
   .pillar .word{font-weight:800;font-size:1.1rem;color:var(--pc)}
-  .pillar .is{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
+  .pillar .is{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
   .pillar p{color:var(--ink-mut);font-size:.9rem;line-height:1.55;margin-top:10px}
   .p-peace{--pc:var(--guard)} .p-love{--pc:var(--you)} .p-unity{--pc:var(--sovereign)} .p-respect{--pc:var(--info)}
   .stone .dock{margin-top:30px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mut)}
@@ -405,6 +403,7 @@ body[data-reg="cypherpunk"] :is(.voicebox,.voicebox button,.voicebox select,.pri
 body[data-reg] #eternal{border:0;padding-bottom:0}
 </style>
 <link rel="stylesheet" href="skaists.css">
+<style>/* 44px control floor */#vsel,#myLang,#learnLang{min-height:44px}</style>
 </head>
 <body data-reg="bee" data-bee-theme="custom"><nav aria-label="Festivals, PLUR, SKAISTS and BNR" style="padding:16px;display:flex;gap:16px;flex-wrap:wrap"><a href="festival/index.html">Festivals</a><a href="plur.html" aria-current="page">PLUR</a><a href="doors/skaists.html">SKAISTS</a><a href="index.html">BNR</a></nav>
 
@@ -477,7 +476,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
     <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
     <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
-    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#voices">All language voices</a><a href="#festival">Enter the festival</a><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#voices">All language voices</a><a href="#festival">Enter the festival</a><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span>Matching browser voices or labelled synthetic previews. Native review is pending.</span></p>
   </div>
 </section>
 
@@ -486,26 +485,45 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
   <h2 id="plurFestivalTitle">The festival, here in PLUR</h2>
   <p>Your day on the floor: the day pass, nine stops, kandi, music, the calm tent and the economy board. The same complete festival experience, in your selected view.</p>
   <p><a href="festival/index.html">Open the festival on its own</a></p>
-  <iframe id="plurFestival" title="PLUR festival — full interactive attendee experience" src="festival/index.html?embed=plur&amp;v=20261002" loading="lazy"></iframe>
+  <p id="plurFestivalEnter"><a href="#festival">Enter the festival</a></p>
+  <iframe id="plurFestival" title="PLUR festival — full interactive attendee experience" data-src="festival/index.html?embed=plur&amp;v=20261002" hidden></iframe>
 </section>
 <style>
-.plur-festival{max-width:960px;margin:24px auto;padding:20px;color:var(--sk-ink);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-md);scroll-margin-top:16px}.plur-festival h2{font-size:clamp(22px,5vw,32px);margin-bottom:12px}.plur-festival p{line-height:1.6;margin:10px 0}.plur-festival a{display:inline-flex;align-items:center;min-height:44px}.plur-festival iframe{display:block;width:100%;height:900px;border:0;margin-top:16px;background:transparent}@media(max-width:600px){.plur-festival{padding:12px;margin:16px 8px}}
+.plur-festival{max-width:960px;margin:24px auto;padding:20px;color:var(--sk-ink);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-md);scroll-margin-top:16px}.plur-festival h2{font-size:clamp(22px,5vw,32px);margin-bottom:12px}.plur-festival p{line-height:1.6;margin:10px 0}.plur-festival a{display:inline-flex;align-items:center;min-height:44px}.plur-festival iframe{display:block;width:100%;height:900px;border:0;margin-top:16px;background:transparent}.plur-festival iframe[hidden]{display:none}@media(max-width:600px){.plur-festival{padding:12px;margin:16px 8px}}
 </style>
 <script>
 (function(){
- var frame=document.getElementById('plurFestival'),observer;
+ var frame=document.getElementById('plurFestival'),enter=document.getElementById('plurFestivalEnter'),observer,focusOnLoad;
+ // Explicit entry: the frame has no src until the reader presses an "Enter the festival" control,
+ // so reading or scrolling PLUR never starts the festival's own chain reads.
+ function open(e){if(frame.getAttribute('src'))return;frame.src=frame.dataset.src;frame.hidden=false;focusOnLoad=enter.contains(e.target);enter.hidden=true;}
+ document.addEventListener('click',function(e){if(e.target.closest('a[href="#festival"]'))open(e);});
  function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
  frame.addEventListener('load',function(){
   var doc=frame.contentDocument;if(!doc||!doc.body)return;
   function resize(){var h=Math.ceil(doc.body.getBoundingClientRect().height)+8;if(h>0&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';}
   if(observer)observer.disconnect();observer=new ResizeObserver(function(){sync();resize();});observer.observe(doc.body);sync();resize();
+  if(focusOnLoad){focusOnLoad=false;frame.focus({preventScroll:true});}
  });
  document.addEventListener('bregister',sync);
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
 })();
 </script>
 
-<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
+<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><p>Audio availability is not a quality score. Meaning, dialect and pronunciation still need a speaker’s review. <a href="../assets/plur-voices/quality.json">Download the review queue and audio evidence</a> · <a href="blanguage.html">Explore the language dock</a></p><details id="plurReview"><summary>Compare voices and prepare a speaker review</summary>
+<p>Compare the existing preview with a Kokoro candidate where available. No winner is selected automatically. Language stewardship follows <a href="blanguage.html#representation">bLanguageDOCK’s Royal Guard pathway</a>, with Thai/Rama X as the original reference case. Diplomatic consent and a speaker’s assessment of pronunciation are recorded separately. Every assessment records a named speaker and dialect. A downloaded review is your assessment, not a verified approval; nothing is submitted or saved automatically.</p>
+<label for="reviewItem">Word or language sample</label><select id="reviewItem"></select>
+<p id="reviewText" aria-live="polite"></p>
+<label>Existing preview<audio id="reviewBaseline" controls preload="none"></audio></label>
+<label>Kokoro candidate<audio id="reviewCandidate" controls preload="none"></audio></label>
+<p id="reviewCandidateNote"></p>
+<form id="speakerReviewForm">
+<label for="reviewerName">Reviewer name or public alias</label><input id="reviewerName" required maxlength="100" autocomplete="off">
+<label for="reviewerDialect">Language and dialect you speak</label><input id="reviewerDialect" required maxlength="120" autocomplete="off">
+<label for="reviewRating">Your assessment</label><select id="reviewRating" required><option value="">Choose after listening</option><option value="baseline">Existing preview is better</option><option value="candidate">Kokoro candidate is better</option><option value="both">Both are acceptable</option><option value="neither">Both need correction</option><option value="unsure">I am unsure</option></select>
+<label for="reviewNotes">Meaning, pronunciation, stress or corrections</label><textarea id="reviewNotes" required maxlength="2000"></textarea>
+<button type="submit">Download my review draft</button><p id="reviewStatus" role="status">Loading comparison evidence…</p>
+</form><details><summary>Translation model probes</summary><p>These are machine drafts of contextual sentences, not replacements for the word cards. Speaker review is pending.</p><div id="translationProbes"></div></details></details><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}.voice-coverage a{color:var(--sk-link)}#plurReview label{display:block;margin-top:14px}#plurReview input,#plurReview select,#plurReview textarea,#plurReview audio{display:block;width:100%;max-width:100%;min-height:44px;box-sizing:border-box}#plurReview textarea{min-height:100px}#plurReview{margin:18px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
 <section class="field f-peace" id="words">
   <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss" data-i18n="plur.g1">the first word</div>
@@ -774,7 +792,7 @@ function index(){
  try{preferred=localStorage.getItem('plur.voiceURI')||'';}catch(e){}
  sel.replaceChildren();var auto=document.createElement('option');auto.value='';auto.textContent='Match each language automatically';sel.appendChild(auto);
  voices.forEach(function(v){var o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' — '+v.lang;sel.appendChild(o);});sel.value=voices.some(v=>v.voiceURI===preferred)?preferred:'';sel.disabled=!voices.length;
- var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
+ var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);var mute=w.querySelector&&w.querySelector('.mute');if(mute){mute.hidden=ok;mute.setAttribute('aria-hidden',String(ok));}w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
  pair.disabled=!words.some(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));
  document.getElementById('voiceCoverageSummary').textContent=ready+' of '+words.length+' word cards have an audio route. '+manifest.languages.length+' language samples. Synthetic previews await native review.';
  var body=document.getElementById('voiceCoverageRows');body.replaceChildren();manifest.languages.forEach(function(lang){var sample=manifest.entries.find(e=>e.lang===lang&&e.kind==='sample'),v=pick(lang);var row=document.createElement('tr');
@@ -1249,5 +1267,36 @@ fetch('../assets/plur-voices/manifest.json?v=20261002').then(function(r){if(!r.o
 })();
 </script>
 <script src="tour.js?v=42"></script>
+
+<script>
+(function(){
+'use strict';
+var root=document.getElementById('plurReview'),select=document.getElementById('reviewItem'),status=document.getElementById('reviewStatus'),base=document.getElementById('reviewBaseline'),candidate=document.getElementById('reviewCandidate'),entries=[],comparisons=new Map();
+function chosen(){return entries.find(e=>e.id===select.value);}
+function urls(e){var c=comparisons.get(e.id);return {baseline:'../assets/plur-voices/'+e.file+'?v='+e['sha256_PUBLIC-CONSTANT'].slice(0,12),candidate:c?'../assets/plur-voices/comparison/'+c.candidate+'?v='+c['candidateSha256_PUBLIC-CONSTANT'].slice(0,12):null};}
+function show(){var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e);base.pause();candidate.pause();base.src=u.baseline;candidate.removeAttribute('src');candidate.hidden=!c;if(c)candidate.src=u.candidate;
+ document.getElementById('reviewText').textContent=e.lang+' · '+e.text+' · '+e.linguistic;
+ document.getElementById('reviewCandidateNote').textContent=c?'Kokoro v1.0 int8 · '+c.voice+' · '+c.dialect+' · unreviewed. Short-word performance needs special scrutiny.':'No Kokoro comparison for this entry. Review the existing preview; do not infer support from a different language.';
+ document.getElementById('reviewRating').value='';document.getElementById('reviewNotes').value='';
+ Array.from(document.getElementById('reviewRating').options).forEach(o=>{o.disabled=!c&&['candidate','both','neither'].includes(o.value);});
+ document.getElementById('reviewRating').options[1].textContent=c?'Existing preview is better':'Existing preview is acceptable';
+ status.textContent='Ready for your review. Nothing is submitted automatically.';
+}
+select.addEventListener('change',show);base.addEventListener('play',()=>{candidate.pause();if(window.bvoice)window.bvoice.stop();});candidate.addEventListener('play',()=>{base.pause();if(window.bvoice)window.bvoice.stop();});
+async function verified(url,expected){var response=await fetch(url);if(!response.ok)throw Error('Audio unavailable');var bytes=await response.arrayBuffer(),digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');if(digest!==expected)throw Error('Audio changed since this review queue was built');return digest;}
+document.getElementById('speakerReviewForm').addEventListener('submit',async function(event){event.preventDefault();var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e),button=event.currentTarget.querySelector('button[type="submit"]');
+ var receipt={schema:1,status:'self-reported review draft; not authenticated or approved',pathway:'bLanguageDOCK / Royal Guard / FATHER-SET-1',communityAttested:'not_sought',royalEndorsement:'not evidenced by this draft',createdAt:new Date().toISOString(),entryId:e.id,lang:e.lang,text:e.text,reviewer:document.getElementById('reviewerName').value.trim(),dialect:document.getElementById('reviewerDialect').value.trim(),assessment:document.getElementById('reviewRating').value,notes:document.getElementById('reviewNotes').value.trim()};
+ if(!receipt.reviewer||!receipt.dialect||!receipt.assessment||!receipt.notes){status.textContent='Complete each review field first.';return;}
+ if(!c&&['candidate','both','neither'].includes(receipt.assessment)){status.textContent='No candidate exists for this entry.';return;}
+ button.disabled=true;select.disabled=true;status.textContent='Checking the exact audio files…';
+ try{receipt.baselineSha256=await verified(u.baseline,e['sha256_PUBLIC-CONSTANT']);if(c)receipt.candidateSha256=await verified(u.candidate,c['candidateSha256_PUBLIC-CONSTANT']);var blob=new Blob([JSON.stringify(receipt,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='plur-review-'+e.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='Review draft downloaded. It has not been submitted or marked as approved.';}
+ catch(error){status.textContent='Review not exported: '+error.message+'. Reload the current edition and try again.';}
+ finally{button.disabled=false;select.disabled=false;}
+});
+Promise.all(['../assets/plur-voices/quality.json?v=20261003','../assets/plur-voices/comparison/manifest.json?v=20261003-headroom'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error('Comparison evidence unavailable');return r.json();}))).then(function(data){entries=data[0].entries;comparisons=new Map(data[1].entries.map(e=>[e.id,e]));entries.forEach(e=>{var o=document.createElement('option');o.value=e.id;o.textContent=e.lang+' · '+e.text+(comparisons.has(e.id)?' · two recordings':'');select.appendChild(o);});show();}).catch(()=>{status.textContent='Review evidence could not be loaded. Existing word previews remain available.';});
+fetch('../assets/plur-voices/comparison/translations.json?v=20261003').then(r=>{if(!r.ok)throw Error('Unavailable');return r.json();}).then(function(report){var host=document.getElementById('translationProbes');report.models.forEach(function(model){var h=document.createElement('h3');h.textContent=model.lang+' · '+model.model;host.appendChild(h);model.entries.forEach(e=>{var p=document.createElement('p');p.textContent=e.source+' → '+e.candidate+' · machine draft';host.appendChild(p);});});}).catch(()=>{document.getElementById('translationProbes').textContent='Translation comparison evidence is unavailable.';});
+window.addEventListener('pagehide',()=>{base.pause();candidate.pause();});
+})();
+</script>
 </body>
 </html>

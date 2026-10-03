@@ -1,6 +1,6 @@
 // wallet-matrix.mjs — the chain-matrix gate (Brief 04 Part 3 as data).
-// Proves: 16 rails rendered from the data block, every count computed at
-// render (matrix law 4), every row honest (read + sign + state badge), and —
+// Proves: the original scope and reviewed additions stay visible, counts
+// follow the data, every row separates read/sign status, and —
 // by served-page mutation, removing one chain from the data — that NOTHING
 // is typed prose: the render follows the data or the gate goes red.
 // Run:  cd e2e && node wallet-matrix.mjs
@@ -24,6 +24,10 @@ const server = createServer(async (req, res) => {
 await new Promise(r => server.listen(8895, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
+const requiredScope = ['Vaulta','Hive','ETH','Arbitrum','Base','exSAT','stables',
+  'BTC','Lightning','Solana','Zano','Bitcoin Cash','Zcash','Monero','Autonomi','Arweave',
+  'BitShares','Steem','Golos','Blurt','Peerplays','Cosmos Hub','Osmosis','Celestia','dYdX','Injective'];
+let originalCount;
 const ok = (name, cond, detail) => {
   if (cond) { pass++; console.log(`  PASS ${name}`); }
   else { fail++; console.log(`  FAIL ${name}${detail ? ' — ' + String(detail).slice(0, 140) : ''}`); }
@@ -32,58 +36,62 @@ const ok = (name, cond, detail) => {
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
 pinRegister(browser);   // WALLET_REG (see wallet-register-pin.mjs)
 try {
-  /* A · the sixteen, rendered from data, counts computed */
-  console.log('A · sixteen rails from data:');
+  /* A · the complete scope, rendered from data, counts computed */
+  console.log('A · full wallet scope from data:');
   {
     const page = await browser.newPage();
     await page.goto('http://127.0.0.1:8895/surfaces/wallet.html', { waitUntil: 'load' });
     await page.waitForFunction(() => window.__CHAIN_MATRIX && document.querySelectorAll('#matrix-body > div').length >= 4, null, { timeout: 15000 });
     const data = await page.evaluate(() => window.__CHAIN_MATRIX);
-    ok('sixteen chains in the data block', data.length === 16, data.length);
+    originalCount = data.length;
+    ok('original rails and reviewed Graphene/Cosmos scope are retained', requiredScope.every(name => data.some(c => c.name === name)), data.map(c => c.name).join(','));
+    ok('catalog names are unique', new Set(data.map(c => c.name)).size === data.length);
     const rendered = await page.evaluate(() => Array.from(document.querySelectorAll('#matrix-body strong')).map(e => e.textContent));
     const namesOk = await page.evaluate(d => d.every(c => document.getElementById('matrix-body').textContent.includes(c.name)), data);
     ok('every chain name renders', namesOk, 'missing: ' + data.filter(c => !rendered.some(r => r.includes(c.name))).map(c => c.name).join(','));
     const families = await page.evaluate(() => Array.from(document.querySelectorAll('#matrix-body > div > div:first-child')).map(e => e.textContent));
-    ok('four families sectioned (EVM · Bitcoin · Independent · Hard tail)',
-      families.length === 4 && /EVM family: 6 rails/.test(families[0]) && /Bitcoin family: 2 rails/.test(families[1]) &&
-      /Independent family: 3 rails/.test(families[2]) && /Hard tail family: 5 rails/.test(families[3]), families.join(' | ')); // the casing law: headers read as authored, no machine caps
+    const familyNames = [...new Set(data.map(c => c.family))];
+    ok('all family counts follow the catalog', families.length === familyNames.length && familyNames.every((f,i) => families[i].includes(f+' family: '+data.filter(c => c.family === f).length)), families.join(' | '));
+    ok('native Vaulta and token/storage entries have distinct families', data.find(c => c.name === 'Vaulta').family === 'Antelope' && data.find(c => c.name === 'stables').family === 'Tokens' && data.find(c => c.name === 'Autonomi').family === 'Storage');
     const pathCounts = await page.evaluate(() => ({
-      read: (document.getElementById('matrix-body').innerText.match(/read /g) || []).length,
-      sign: (document.getElementById('matrix-body').innerText.match(/sign /g) || []).length
+      read: Array.from(document.querySelectorAll('#matrix-body b')).filter(e => e.textContent === 'read').length,
+      sign: Array.from(document.querySelectorAll('#matrix-body b')).filter(e => e.textContent === 'sign').length
     }));
-    ok('every row carries a read path and a sign path (16 each)', pathCounts.read === 16 && pathCounts.sign === 16,
+    ok('every row carries separate read and sign paths', pathCounts.read === data.length && pathCounts.sign === data.length,
       JSON.stringify(pathCounts));
-    const badgeStates = await page.evaluate(() => Array.from(document.querySelectorAll('#matrix-body span')).map(s => s.textContent).filter(t => /^(LIVE|PROVEN|VERIFY|GAP|STUDY)$/.test(t)));
-    ok('sixteen honest state badges (LIVE/PROVEN/VERIFY/GAP/STUDY)', badgeStates.length === 16, badgeStates.join(','));
+    const badgeStates = await page.evaluate(() => Array.from(document.querySelectorAll('#matrix-body span')).map(s => s.textContent).filter(t => /^(READ|CODE|EVALUATION|GAP|STUDY)$/.test(t)));
+    ok('every row has an implementation-status badge', badgeStates.length === data.length, badgeStates.join(','));
+    const options = await page.locator('#wa-chain option').evaluateAll(nodes => nodes.map(n => ({value:n.value,disabled:n.disabled,text:n.textContent})));
+    const available = data.filter(c => c.watch).map(c => c.watch).concat('bitcoin-account');
+    ok('only implemented public readers can be selected', options.filter(o => !o.disabled).length === available.length && options.filter(o => !o.disabled).every(o => available.includes(o.value)));
+    ok('every research/gap row is visible and unavailable in the picker', data.filter(c => !c.watch).every(c => options.some(o => o.disabled && o.value === '' && o.text.startsWith(c.name+' · '))));
+    ok('Vaulta and Hive remain first-class selectable accounts', ['vaulta','hive'].every(value => options.some(o => o.value === value && !o.disabled)));
     const summary = await page.locator('#matrix-summary').innerText();
     const tally = await page.evaluate(d => {
       const t = {}; d.forEach(c => t[c.state] = (t[c.state] || 0) + 1); return t;
     }, data);
-    ok('summary counts COMPUTED from the data (16 rails + per-state chips)',
-      /16 rails · computed/.test(summary) && new RegExp((tally.LIVE || 0) + ' live').test(summary) &&
-      new RegExp((tally.GAP || 0) + ' gap').test(summary) && new RegExp((tally.VERIFY || 0) + ' verify').test(summary), summary.replace(/\n/g, ' | '));
+    ok('summary counts are computed from the data', summary.includes(data.length+' scope entries · computed') && Object.entries(tally).every(([state,count]) => summary.includes(count+' '+state.toLowerCase())), summary.replace(/\n/g, ' | '));
     await page.close();
   }
 
   /* B · MUTATION (matrix law 4): one chain removed from the DATA — the
-     render must follow (15 rows, recomputed counts), proving no typed prose */
+     render AND account picker must follow, including recomputed counts. */
   console.log('B · data mutation (never typed):');
   {
     const ctx = await browser.newContext();
     await ctx.route(/surfaces\/wallet\.html/, async route => {
       const src = await readFile(join(ROOT, 'surfaces', 'wallet.html'), 'utf8');
-      const anchor = "{ family: 'Hard tail', name: 'Arweave',";
-      if (!src.includes(anchor)) return route.fulfill({ status: 500, contentType: 'text/plain', body: 'mutation anchor missing' });
-      return route.fulfill({ status: 200, contentType: 'text/html', body: src.replace(anchor, "{ family: 'Hard tail', name: 'REMOVED-RAIL',") });
+      const anchor = /^    \{ family: 'Storage', name: 'Arweave',.*\r?\n/m;
+      if (!anchor.test(src)) return route.fulfill({ status: 500, contentType: 'text/plain', body: 'mutation anchor missing' });
+      return route.fulfill({ status: 200, contentType: 'text/html', body: src.replace(anchor, '') });
     });
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8895/surfaces/wallet.html', { waitUntil: 'load' });
     await page.waitForFunction(() => window.__CHAIN_MATRIX, null, { timeout: 15000 });
     const body = await page.evaluate(() => document.getElementById('matrix-body').innerText);
-    ok('renamed rail in the data ⇒ the render follows (no hand-written Arweave row)',
-      /REMOVED-RAIL/.test(body) && !/Arweave gateway/.test(body), body.slice(0, 80));
+    ok('removed rail disappears from the matrix and picker', !/Arweave/.test(body) && await page.locator('#wa-chain option[value="arweave"]').count() === 0);
     const sum2 = await page.locator('#matrix-summary').innerText();
-    ok('hard-tail count follows the data (5 → still 5 with the renamed rail; summary stays computed)', /16 rails · computed/.test(sum2), sum2.slice(0, 60));
+    ok('removal recomputes the summary count', sum2.includes((originalCount-1)+' scope entries · computed'), sum2.slice(0, 60));
     await ctx.close();
   }
   /* C · THE KIT PROFILE (founder north star, supplemented 2026-08-28): the

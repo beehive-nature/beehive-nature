@@ -16,7 +16,7 @@
 //   8. no page errors, no bPay-panel console errors.
 //
 //   node e2e/bpay-invoice-phase-a.mjs
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -35,22 +35,11 @@ const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); c
 let invoice = null;
 try { invoice = JSON.parse(await readFile(INVOICE_PATH, 'utf8')); } catch { /* RED phase: absent */ }
 
-const server = createServer(async (req, res) => {
-  const url = (req.url || '/').split('?')[0];
-  const path = url === '/' ? '/wallet.html' : url;
-  try {
-    const body = await readFile(join(SURFACES, path.replaceAll('/', '\\').replace(/^\\/, '')));
-    res.writeHead(200, { 'content-type': MIME[extname(path)] || 'application/octet-stream' });
-    res.end(body);
-  } catch {
-    res.writeHead(404); res.end('not found');
-  }
-});
-await new Promise(r => server.listen(0, '127.0.0.1', r));
-const origin = `http://127.0.0.1:${server.address().port}`;
-
+const origin=WALLET_ORIGIN;
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+await installWalletFixture(browser,join(SURFACES,'..'));
+const ctx=await browser.newContext({viewport:{width:390,height:844}});
+const page=await ctx.newPage();
 const pageErrors = [];
 const bpayConsole = [];
 page.on('pageerror', e => pageErrors.push(String(e)));
@@ -91,7 +80,7 @@ if (invoice) {
 
   // waiting state, honestly
   const stateText = (await page.$('#bpay-sec [data-bpay-state]')) ? await page.$eval('#bpay-sec [data-bpay-state]', e => e.innerText) : '';
-  check('waiting state rendered', /await/i.test(stateText), stateText.slice(0, 60));
+  check('quote-only reference has no payment authorization', /Quote only.*payment unavailable/i.test(stateText), stateText.slice(0, 60));
 
   // founder corrections 2026-09-17 — Phase E: obligations ≠ confirmations
   const tux = invoice.domain?.trezor_ux || {};
@@ -115,7 +104,7 @@ check('no bPay console errors', bpayConsole.length === 0, bpayConsole.slice(0, 2
 
 await page.screenshot({ path: join(here, 'shots-bpay-phase-a', 'wallet-bpay-390.png'), fullPage: false });
 await browser.close();
-server.close();
+
 
 const failed = results.filter(r => !r.ok);
 console.log(failed.length

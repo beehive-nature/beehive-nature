@@ -30552,7 +30552,7 @@
    "sa": "सारांशं प्रति निवर्तस्व"
   },
   "ux.pause": {
-   "en": "Pause motion",
+   "en": "pause motion",
    "ru": "Приостановить анимацию",
    "lv": "Apturēt animāciju",
    "th": "หยุดภาพเคลื่อนไหวชั่วคราว",
@@ -75443,7 +75443,7 @@
    "sa": "LOVErnment DAO · अनुशीलितस्वातन्त्र्यम्"
   },
   "missions.beeLead": {
-   "en": "You set the mission and the limits. The agents work inside them.",
+   "en": "you set the mission and the limits. the agents work inside them.",
    "ru": "Вы ставите задачу и границы. Агенты работают внутри них.",
    "lv": "Jūs nostādāt misiju un robežas. Aģenti strādā to iekšienē.",
    "th": "คุณกำหนดภารกิจและขอบเขต เอเจนต์ทำงานอยู่ในนั้น",
@@ -75474,7 +75474,7 @@
    "sa": "त्वं कार्यं सीमां च निर्धारयसि। अभिकर्तारस्तत्र एव कार्यं कुर्वन्ति।"
   },
   "missions.raverLead": {
-   "en": "You set the night. The floor runs itself.",
+   "en": "you set the night. the floor runs itself.",
    "ru": "Вы задаёте ночь. Танцпол управляет собой сам.",
    "lv": "Tu piešķir naktij toni. Grīda pati par sevi gādā.",
    "th": "คุณตั้งคืนนี้ ด่านเต้นรันตัวเอง",
@@ -75505,7 +75505,7 @@
    "sa": "त्वं रात्रिं विधानं करोषि। नृत्यभूमिः स्वयमेव चलति।"
   },
   "missions.cypherLead": {
-   "en": "Proposals, ceilings, receipts — inspect the whole envelope.",
+   "en": "proposals, ceilings, receipts — inspect the whole envelope.",
    "ru": "Предложения, лимиты, квитанции — изучите весь конверт.",
    "lv": "Priekšlikumi, griesti, kvītis — izpēti visu aploksni.",
    "th": "ข้อเสนอ เพดาน ใบเสร็จ — ตรวจทั้งซอง",
@@ -75536,7 +75536,7 @@
    "sa": "प्रस्तावाः उच्चसीमाः प्राप्तिपत्राणि च — सम्पूर्णं समावेशकं परीक्षस्व।"
   },
   "missions.beeIntro": {
-   "en": "Every operation here is a supervised mission. You approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. Nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.",
+   "en": "every operation here is a supervised mission. you approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.",
    "ru": "Каждая операция здесь — миссия под надзором. Вы утверждаете миссию и её лимит расходов; команда работает в комнате Buzz; отдельный проверяющий подтверждает результат; каждое значимое действие оставляет квитанцию. Ничто не тратится сверх лимита, объём не расширяется тихо, а ваша остановка останавливает всё.",
    "lv": "Katra darbība šeit ir uzraudzīta misija. Tu apstiprini misiju un tās izdevumu griestus; komanda strādā Buzz istabā; atsevišķs recenzents pārbauda; katra jēgpilnā darbība atstāj kvīti. Nekas netiek tērēts virs griestiem, apjoms nemēmi neaug, un tavs apturējums aptur visu.",
    "th": "ทุกปฏิบัติการที่นี่คือภารกิจภายใต้การกำกับ คุณอนุมัติภารกิจและเพดานการใช้จ่าย ทีมทำงานในห้อง Buzz ผู้ตรวจสอบอิสระตรวจรับ ทุกการกระทำที่มีความหมายทิ้งใบเสร็จไว้ ไม่มีการใช้จ่ายเกินเพดาน ไม่มีขอบเขตโตแบบเงียบ และการหยุดจากคุณหยุดทุกอย่าง",
@@ -75567,7 +75567,7 @@
    "sa": "अत्र प्रत्येकं कार्यम् अनुशीलितकर्तृकार्यम् अस्ति। त्वं कार्यं तस्य च व्ययसीमां अङ्गीकुरुषि; समूहः Buzz-कक्षे कार्यं करोति; पृथक् परीक्षकः पुष्टिं करोति; प्रत्येकं अर्थपूर्णं कर्म प्राप्तिपत्रं त्यजति। सीमातः उपरि किमपि व्ययते न, विषयः मौनेन वर्धते न, तव स्थगनं सर्वं स्थगयति।"
   },
   "missions.raverIntro": {
-   "en": "The LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. Missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.",
+   "en": "the LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.",
    "ru": "LOVErnment правит заботой — <b>mīlestība ir karalis</b>, любовь — король. Миссии живут на том же танцполе: основатель держит фейдеры (одобрение, лимит, стоп), команда играет сет, и каждый шаг падает в гроссбух, чтобы и утром после правда осталась правдой.",
    "lv": "LOVErnment pārvalda rūpes kā likumu — <b>mīlestība ir karalis</b>. Misijas dzīvo uz tās pašas grīdas: dibinātājs tur faderus (apstiprinājums, griesti, apturēšana), komanda spēlē setu, un katrs solis nolaižas virsgrāmatā, lai arī nākamajā rītā patiesība vēl stāsta patiesību.",
    "th": "LOVErnment ปกครองด้วยความเคียร์ — <b>mīlestība ir karalis</b>, ความรักคือราชา ภารกิจเต้นบนฟลอร์เดียวกัน: ผู้ก่อตั้งถือเฟดเดอร์ (อนุมัติ เพดาน หยุด) ทีมเล่นเซ็ต และทุกจังหวะตกลงในบัญชีรับรองเพื่อให้เช้าวันรุ่งขึ้นยังเล่าความจริง",
@@ -75598,7 +75598,7 @@
    "sa": "LOVErnment पालनेन शासति — <b>mīlestība ir karalis</b>, प्रेमैव राजा। कार्यानि एवं नृत्यभूमौ चलन्ति: संस्थापकः फेडरानि धरति (अङ्गीकारः, उच्चसीमा, स्थगनम्), दलः सेटं वादयति, प्रत्येकं कर्म ग्रन्थे पतति येन श्वः प्रभातेऽपि सत्यं सत्यमेव कथयति।"
   },
   "missions.cypherIntro": {
-   "en": "Off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. The Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. Verify the chain; trust nothing unlabeled.",
+   "en": "off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. the Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. verify the chain; trust nothing unlabeled.",
    "ru": "Первая дорожка — вне цепи: предложения и хеш-связанные квитанции с тестнет-учётом, локально поверх детерминированного сида. Релей Buzz и казна ERC20i — поздние дорожки: названы, но не заявлены как готовые. Проверяйте цепь; не верьте ничему без метки.",
    "lv": "Pirmā sliede — ārpus ķēdes: priekšlikumi un joslā saistītas kvītis ar testnet aprēķinu, lokāli pāri deterministiskam sēklas datam. Buzz releja vads un ERC20i kase ir vēlākas sliedes — nosauktas, nevis apgalvotas. Pārbaudi ķēdi; netici nekam bez marķējuma.",
    "th": "รางแรกนอกเชน: ข้อเสนอและใบเสร็จที่ผูกด้วยแฮช บัญชีแบบเทสต์เน็ต ทำงาน locally บน seed แบบ deterministic สายรีเลย์ Buzz และคลัง ERC20i เป็นรางถัดไป — บอกชื่อไว้ แต่ไม่อ้างว่ามีแล้ว ตรวจกำแพงลูกโซ่ อย่าเชื่ออะไรที่ไร้ป้าย",
@@ -75846,7 +75846,7 @@
    "sa": "Buzz · कार्यकक्षम्"
   },
   "missionroom.beeLead": {
-   "en": "The team works in the open. Every action leaves a receipt.",
+   "en": "the team works in the open. every action leaves a receipt.",
    "ru": "Команда работает открыто. Каждое действие оставляет квитанцию.",
    "lv": "Komanda strādā atklāti. Katra darbība atstāj kvīti.",
    "th": "ทีมทำงานอย่างเปิดเผย ทุกการกระทำทิ้งใบเสร็จ",
@@ -75877,7 +75877,7 @@
    "sa": "दलः उन्मुक्तं कार्यं करोति। प्रत्येकं कर्म प्राप्तिपत्रं त्यजति।"
   },
   "missionroom.raverLead": {
-   "en": "The set is running. Watch the decks.",
+   "en": "the set is running. watch the decks.",
    "ru": "Сет идёт. Смотри на деки.",
    "lv": "Sets jau skan. Skaties uz pults.",
    "th": "เซ็ตกำลังเล่น ดูเด็คไป",
@@ -75908,7 +75908,7 @@
    "sa": "सेटः चलति। वाद्यपीठानि पश्य।"
   },
   "missionroom.cypherLead": {
-   "en": "Work units, handoffs, costs — the room, logged.",
+   "en": "work units, handoffs, costs — the room, logged.",
    "ru": "Рабочие единицы, передачи, расходы — комната в журнале.",
    "lv": "Darba vienības, nodošanas, izmaksas — istaba, žurnālā.",
    "th": "หน่วยงาน การส่งมอบ ค่าใช้จ่าย — ห้องนี้ถูกบันทึก",
@@ -75939,7 +75939,7 @@
    "sa": "कार्यएकाः प्रदानानि व्ययाश्च — कक्षः अभिलिखितः।"
   },
   "missionroom.beeIntro": {
-   "en": "Pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. Costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.",
+   "en": "pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.",
    "ru": "Выберите миссию и наблюдайте: кто в ней участвует, какие рабочие единицы движутся, что проверено и что решил оценщик этапов. Расходы копятся в пределах утверждённого лимита — ничего не выпускается за него, а ваш стоп или изменение порядка достигает комнаты в любой момент.",
    "lv": "Izvēlies misiju un vēro, kā tā darbojas: kas tajā ir, kuri darba bloki kustas, kas pārbaudīts un ko nolēma starpposmu vērtētājs. Izdevumi krājas apstiprināto griestu robežās — nekas netiek atlaists pāri, un tava apturēšana vai pasūtījuma maiņa sasniedz istabu jebkurā brīdī.",
    "th": "เลือกภารกิจแล้วดูมันทำงาน: ใครอยู่ในทีม หน่วยงานไหนกำลังเดิน อะไรผ่านการตรวจแล้ว และผู้ประเมินไมล์สโตนตัดสินอะไร ค่าใช้จ่ายสะสมภายในเพดานที่อนุมัติ — ไม่มีอะไรปล่อยเกินนั้น และการหยุดหรือเปลี่ยนคำสั่งของคุณมาถึงห้องได้ทุกขณะ",
@@ -75970,7 +75970,7 @@
    "sa": "एकं कार्यं चित्वा तद्वृत्तं पश्य: कः तस्मिन् अस्ति, कानि कार्यएकानि चलन्ति, किं पुष्टितम्, किं च दशाङ्कमापकेन निर्णीतम्। व्ययाः अङ्गीकृतायाः उच्चसीमायाः अन्तः सञ्चीयन्ते — तस्याः परं किमपि मुच्यते न, तव स्थगनं परिवर्तनादेशश्च कस्मिन् अपि क्षणे कक्षं प्राप्नोति।"
   },
   "missionroom.raverIntro": {
-   "en": "One deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. When something leaves the envelope, the music stops and asks you. That pause is the safety, not the failure.",
+   "en": "one deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. when something leaves the envelope, the music stops and asks you. that pause is the safety, not the failure.",
    "ru": "Одна дека, все руки на ней — команда вращается вокруг миссии, оценщик держит фейдеры, а квитанции падают в такт. Когда что-то выходит за конверт, музыка стихает и спрашивает вас. Эта пауза — безопасность, а не сбой.",
    "lv": "Viens pults, visas rokas uz tās — komanda riņķo ap misiju, vērtētājs tur faderus, un kvītis krīt kā bits. Kad kaut kas iziet no aploksnes, mūzika apklust un tevi vaicā. Šā pauze ir drošība, ne kļūme.",
    "th": "เด็คเดียว มือทุกคู่อยู่บนนั้น — ทีมโคจรรอบภารกิจ ผู้ประเมินถือเฟดเดอร์ และใบเสร็จตกลงมาเหมือนจังหวะ เมื่อมีอะไรหลุดออกจากซอง ดนตรีจะหยุดและถามคุณ การหยุดนั้นคือความปลอดภัย ไม่ใช่ความล้มเหลว",
@@ -76001,7 +76001,7 @@
    "sa": "एकं वाद्यपीठम्, सर्वाणि हस्तानि तस्य उपरि — दलः कार्यं परिक्रमति, मापकः फेडरानि धरति, प्राप्तिपत्रानि तालवत् पतन्ति। यदा किञ्चित् समावेशकात् बहिः निर्गच्छति, तदा सङ्गीतं स्थित्वा त्वां पृच्छति। तत् स्थगनं रक्षा अस्ति, न तु पतनम्।"
   },
   "missionroom.cypherIntro": {
-   "en": "This room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. The relay wire for live rooms is designed, not built — nothing on this page opens a socket.",
+   "en": "this room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. the relay wire for live rooms is designed, not built — nothing on this page opens a socket.",
    "ru": "Эта комната читает только локальный гроссбух: состав, единицы, квитанции, вердикты оценщика и выпуски казны — всё проверяется по цепочке при загрузке. Провод реле для живых комнат спроектирован, но не построен — эта страница не открывает ни одного сокета.",
    "lv": "Šī istaba lasa tikai vietējo virsgrāmatu: sastāvs, vienības, kvītis, vērtētāja spriedumi un kases izlaižanas — viss ķēdes pārbaudīts ielādes brīdī. Releja vads dzīvām istabām ir izplānots, ne uzbūvēts — šī lapa neatver nevienu soketu.",
    "th": "ห้องนี้อ่านเฉพาะบัญชีท้องถิ่น: รายชื่อ หน่วยงาน ใบเสร็จ คำตัดสินของผู้ประเมิน และการเบิกจ่ายจากคลัง ตรวจกำแพงลูกโซ่ตอนโหลด สายรีเลย์สำหรับห้องสดถูกออกแบบไว้แต่ยังไม่สร้าง — หน้านี้ไม่เปิดซ็อกเก็ตใด",
@@ -76094,7 +76094,7 @@
    "sa": "प्राप्तिपत्रपुस्तकम् · यन्त्रपठितम्"
   },
   "ledger.beeLead": {
-   "en": "Every meaningful action, on one line you can check.",
+   "en": "every meaningful action, on one line you can check.",
    "ru": "Каждое значимое действие — в одну строку, которую можно проверить.",
    "lv": "Katra jēgpilnā darbība — vienā rindā, ko vari pārbaudīt.",
    "th": "ทุกการกระทำที่มีความหมาย อยู่ในบรรทัดเดียวที่คุณตรวจได้",
@@ -76125,7 +76125,7 @@
    "sa": "प्रत्येकम् अर्थपूर्णं कर्म, एकस्मिन् पङक्तौ यत् त्वं परीक्षितुं शक्नोषि।"
   },
   "ledger.raverLead": {
-   "en": "The receipts never stop.",
+   "en": "the receipts never stop.",
    "ru": "Квитанции не умолкают.",
    "lv": "Kvītis neapklust.",
    "th": "ใบเสร็จไม่หยุด",
@@ -76156,7 +76156,7 @@
    "sa": "प्राप्तिपत्राणि कदापि न स्थगन्ति।"
   },
   "ledger.cypherLead": {
-   "en": "Hash-chained. Verify, don't trust.",
+   "en": "hash-chained. verify, don't trust.",
    "ru": "Хеш-сцеплено. Проверяйте, не верьте.",
    "lv": "Joslā saistīts. Pārbaudi, netici.",
    "th": "ผูกด้วยแฮช ตรวจ อย่าเชื่อ",
@@ -76187,7 +76187,7 @@
    "sa": "हैश-शृङ्खलाबद्धम्। पुष्टिं कुरु, विश्वसु न।"
   },
   "ledger.beeIntro": {
-   "en": "Each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. Change anything quietly and the chain breaks where everyone can see. The whole ledger exports as one machine-readable file.",
+   "en": "each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. change anything quietly and the chain breaks where everyone can see. the whole ledger exports as one machine-readable file.",
    "ru": "Каждая строка — одно действие агента или человека в миссии: что это было, кто сделал, сколько стоило и какой хеш связывает её с предыдущей строкой. Тихо поменяете что-либо — цепь разорвётся у всех на виду. Весь гроссбух выгружается одним машиночитаемым файлом.",
    "lv": "Katra rinda ir viena aģenta vai cilvēka darbība misijā — kas tā bija, kas to darīja, cik maksāja un kurš jaucējsha saista to ar iepriekšējo rindu. Klusi maini jebko — josla pārtrūks visiem redzamā vietā. Viss virsgrāmata eksportējas kā viens mašīnlasāms fails.",
    "th": "แต่ละแถวคือการกระทำหนึ่งครั้งของเอเจนต์หรือมนุษย์ในภารกิจ — มันคืออะไร ใครทำ ต้นทุนเท่าไหร่ และแฮชที่ผูกมันกับแถวก่อนหน้า แก้อะไรแบบเงียบ ๆ กำแพงลูกโซ่จะขาดให้ทุกคนเห็น ทั้งบัญชีส่งออกเป็นไฟล์เดียวที่เครื่องอ่านได้",
@@ -76218,7 +76218,7 @@
    "sa": "प्रत्येका पङ्क्तिः कस्मिंश्चित् कार्ये अभिकर्तृणः मानवस्य वा एकं कर्म — किम् आसीत्, केन कृतम्, कति व्ययः, च यः हैशः तां पूर्वपङ्क्त्या सह बध्नाति। मौनेन किमपि परिवर्तय — शृङ्खला सर्वेषां समक्षं भज्यते। सम्पूर्णः ग्रन्थः एकेन यन्त्रपठितेन फैलेन निर्यात्यते।"
   },
   "ledger.raverIntro": {
-   "en": "The beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. Export it, check it, love it: the receipt is the track list of the night.",
+   "en": "the beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. export it, check it, love it: the receipt is the track list of the night.",
    "ru": "Бит, под который танцует поместье, — честность: каждый дроп, который кладёт команда, записывается здесь, сцепленный с предыдущим, поэтому утреннюю историю нельзя сремиксовать. Экспортируйте, проверяйте, любите: квитанция — это трек-лист ночи.",
    "lv": "Bitam, pie kura muiža dejo, ir vārds — godīgums: katrs komandas noliktais drops šeit pieraksta pats sevi, saistīts ar iepriekšējo, tāpēc rīta stāstu vairs nevar remiksēt. Eksportē, pārbaudi, mīli: kvīts ir nakts repertuāra saraksts.",
    "th": "จังหวะที่ที่นี่เต้นคือความซื่อ — ทุกดรอปที่ทีมทิ้งเขียนตัวเองลงตรงนี้ ผูกกับอันก่อนเสมอ เช้าคืนนั้นจึงรีมิกซ์ใหม่ไม่ได้ เอ็กซ์พอร์ต ตรวจ แล้วก็รักมัน: ใบเสร็จคือเซ็ตลิสต์ของคืน",
@@ -76249,7 +76249,7 @@
    "sa": "यः तालः श्रीते अस्मिन् नृत्यते स ईश्वरभावः सत्यम् — दलस्य प्रत्येकं निक्षेपः स्वयम् अत्र लिख्यते, पूर्वेण सह बद्धः, येन प्रभातकथा कदापि पुनःमिश्रिता न भवितुम् अर्हति। निर्यातय, पुष्टिं कुरु, स्नेहं कुरु: प्राप्तिपत्रम् एव रात्रेः गीतसूचिः।"
   },
   "ledger.cypherIntro": {
-   "en": "sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. Export and verify offline — the ledger is data, not a promise.",
+   "en": "sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. export and verify offline — the ledger is data, not a promise.",
    "ru": "sha-256 от prev-hash и канонической записи фиксированного порядка; браузер пересчитывает каждое звено при загрузке, а записал их генератор (node:crypto, тот же движок). Подделанная строка разрывает цепь на своей позиции. Экспортируйте и проверяйте офлайн — гроссбух это данные, а не обещание.",
    "lv": "sha-256 pāri prev-hash un fiksēta kārtības kanoniskam ierakstam; pārlūks pārrēķina katru saiti ielādējot, un tās ierakstīja ģenerators (node:crypto, tas pats dzinis). Izmainīta rinda pārtrūkst joslā savā pozīcijā. Eksportē un pārbaudi bezsaistē — virsgrāmata ir dati, ne solījums.",
    "th": "sha-256 บน prev-hash และระเบียน canonical ที่ลำดับคงที่ เบราว์เซอร์คำนวณทุกลิงก์ใหม่ตอนโหลด และตัวสร้าง (node:crypto,  engine เดียวกัน) เป็นคนเขียน แถวที่ถูกแก้จะตัดกำแพงลูกโซ่ที่ลำดับของมันเอง ส่งออกแล้วตรวจออฟไลน์ — บัญชีคือข้อมูล ไม่ใช่คำสัญญา",
@@ -79254,6 +79254,192 @@
    "ar": "أقصر مسارات النسب المسجلة: {n} أجيال (ليست إثباتًا)",
    "he": "מסלולי ההורות המתועדים הקצרים ביותר: {n} דורות (לא הוכחה)",
    "fa": "کوتاه‌ترین مسیرهای نسب ثبت‌شده: {n} نسل (نه اثبات)"
+  },
+  "wl.wallet.accounts": {
+   "en": "Accounts & coins",
+   "ru": "Счета и монеты",
+   "lv": "Konti un monētas",
+   "th": "บัญชีและเหรียญ",
+   "gd": "Cunntasan is buinn",
+   "tt": "Хисаплар һәм тәңкәләр",
+   "uk": "Рахунки й монети",
+   "cs": "Účty a mince",
+   "zh": "账户与代币",
+   "ko": "계정과 코인",
+   "ar": "الحسابات والعملات",
+   "nl-be": "Rekeningen en munten",
+   "es": "Cuentas y monedas",
+   "nl": "Rekeningen en munten",
+   "de": "Konten und Coins",
+   "fr": "Comptes et monnaies",
+   "he": "חשבונות ומטבעות",
+   "hi": "खाते और सिक्के",
+   "bn": "অ্যাকাউন্ট ও কয়েন",
+   "fa": "حساب‌ها و سکه‌ها",
+   "ur": "اکاؤنٹس اور سکے",
+   "ja": "アカウントとコイン",
+   "da": "Konti og mønter",
+   "nb": "Kontoer og mynter",
+   "sv": "Konton och mynt",
+   "fi": "Tilit ja kolikot",
+   "tr": "Hesaplar ve coinler",
+   "hu": "Számlák és érmék",
+   "sa": "लेखाः मुद्राश्च"
+  },
+  "wl.wallet.store": {
+   "en": "bPay · store",
+   "ru": "bPay · сохранить",
+   "lv": "bPay · glabāt",
+   "th": "bPay · จัดเก็บ",
+   "gd": "bPay · glèidh",
+   "tt": "bPay · саклау",
+   "uk": "bPay · зберегти",
+   "cs": "bPay · uložit",
+   "zh": "bPay · 存储",
+   "ko": "bPay · 저장",
+   "ar": "bPay · تخزين",
+   "nl-be": "bPay · bewaren",
+   "es": "bPay · guardar",
+   "nl": "bPay · bewaren",
+   "de": "bPay · speichern",
+   "fr": "bPay · stocker",
+   "he": "bPay · אחסון",
+   "hi": "bPay · सहेजें",
+   "bn": "bPay · সংরক্ষণ",
+   "fa": "bPay · ذخیره",
+   "ur": "bPay · محفوظ کریں",
+   "ja": "bPay · 保存",
+   "da": "bPay · gem",
+   "nb": "bPay · lagre",
+   "sv": "bPay · lagra",
+   "fi": "bPay · tallenna",
+   "tr": "bPay · sakla",
+   "hu": "bPay · tárolás",
+   "sa": "bPay · सञ्चयः"
+  },
+  "wl.wallet.intro": {
+   "en": "Accounts, coins and public addresses.",
+   "ru": "Счета, монеты и публичные адреса.",
+   "lv": "Konti, monētas un publiskās adreses.",
+   "th": "บัญชี เหรียญ และที่อยู่สาธารณะ",
+   "gd": "Cunntasan, buinn is seòlaidhean poblach.",
+   "tt": "Хисаплар, тәңкәләр һәм ачык адреслар.",
+   "uk": "Рахунки, монети й публічні адреси.",
+   "cs": "Účty, mince a veřejné adresy.",
+   "zh": "账户、代币和公开地址。",
+   "ko": "계정, 코인 및 공개 주소.",
+   "ar": "الحسابات والعملات والعناوين العامة.",
+   "nl-be": "Rekeningen, munten en openbare adressen.",
+   "es": "Cuentas, monedas y direcciones públicas.",
+   "nl": "Rekeningen, munten en openbare adressen.",
+   "de": "Konten, Coins und öffentliche Adressen.",
+   "fr": "Comptes, monnaies et adresses publiques.",
+   "he": "חשבונות, מטבעות וכתובות ציבוריות.",
+   "hi": "खाते, सिक्के और सार्वजनिक पते।",
+   "bn": "অ্যাকাউন্ট, কয়েন ও প্রকাশ্য ঠিকানা।",
+   "fa": "حساب‌ها، سکه‌ها و نشانی‌های عمومی.",
+   "ur": "اکاؤنٹس، سکے اور عوامی پتے۔",
+   "ja": "アカウント、コイン、公開アドレス。",
+   "da": "Konti, mønter og offentlige adresser.",
+   "nb": "Kontoer, mynter og offentlige adresser.",
+   "sv": "Konton, mynt och offentliga adresser.",
+   "fi": "Tilit, kolikot ja julkiset osoitteet.",
+   "tr": "Hesaplar, coinler ve herkese açık adresler.",
+   "hu": "Számlák, érmék és nyilvános címek.",
+   "sa": "लेखाः मुद्राः सार्वजनिकस्थानानि च।"
+  },
+  "wl.wallet.keep": {
+   "en": "bPay once · store a file",
+   "ru": "bPay один раз · сохранить файл",
+   "lv": "bPay vienreiz · glabāt failu",
+   "th": "bPay ครั้งเดียว · จัดเก็บไฟล์",
+   "gd": "bPay aon turas · glèidh faidhle",
+   "tt": "bPay бер тапкыр · файлны саклау",
+   "uk": "bPay один раз · зберегти файл",
+   "cs": "bPay jednou · uložit soubor",
+   "zh": "bPay 一次 · 存储文件",
+   "ko": "bPay 한 번 · 파일 저장",
+   "ar": "bPay مرة واحدة · تخزين ملف",
+   "nl-be": "bPay eenmaal · een bestand bewaren",
+   "es": "bPay una vez · guardar un archivo",
+   "nl": "bPay eenmaal · een bestand bewaren",
+   "de": "bPay einmal · Datei speichern",
+   "fr": "bPay une fois · stocker un fichier",
+   "he": "bPay פעם אחת · אחסון קובץ",
+   "hi": "bPay एक बार · फ़ाइल सहेजें",
+   "bn": "bPay একবার · ফাইল সংরক্ষণ",
+   "fa": "bPay یک‌بار · ذخیرهٔ فایل",
+   "ur": "bPay ایک بار · فائل محفوظ کریں",
+   "ja": "bPay 一度で · ファイルを保存",
+   "da": "bPay én gang · gem en fil",
+   "nb": "bPay én gang · lagre en fil",
+   "sv": "bPay en gång · lagra en fil",
+   "fi": "bPay kerran · tallenna tiedosto",
+   "tr": "bPay bir kez · dosya sakla",
+   "hu": "bPay egyszer · fájl tárolása",
+   "sa": "bPay सकृत् · सञ्चिकां सञ्चिनुत"
+  },
+  "wl.wallet.rollup": {
+   "en": "tap the total for chain and account",
+   "ru": "нажмите сумму, чтобы увидеть сеть и счёт",
+   "lv": "pieskarieties summai, lai redzētu tīklu un kontu",
+   "th": "แตะยอดรวมเพื่อดูเครือข่ายและบัญชี",
+   "gd": "brùth an t-suim gus an lìonra is an cunntas fhaicinn",
+   "tt": "челтәрне һәм хисапны күрү өчен суммага басыгыз",
+   "uk": "натисніть суму, щоб побачити мережу й рахунок",
+   "cs": "klepnutím na součet zobrazíte síť a účet",
+   "zh": "点击总额查看网络和账户",
+   "ko": "합계를 눌러 네트워크와 계정 보기",
+   "ar": "اضغط على الإجمالي لعرض الشبكة والحساب",
+   "nl-be": "tik op het totaal voor netwerk en rekening",
+   "es": "toca el total para ver la red y la cuenta",
+   "nl": "tik op het totaal voor netwerk en rekening",
+   "de": "auf den Gesamtbetrag tippen, um Netzwerk und Konto zu sehen",
+   "fr": "touchez le total pour voir le réseau et le compte",
+   "he": "הקישו על הסכום לצפייה ברשת ובחשבון",
+   "hi": "नेटवर्क और खाता देखने के लिए कुल राशि पर टैप करें",
+   "bn": "নেটওয়ার্ক ও অ্যাকাউন্ট দেখতে মোট পরিমাণে ট্যাপ করুন",
+   "fa": "برای دیدن شبکه و حساب روی مجموع بزنید",
+   "ur": "نیٹ ورک اور اکاؤنٹ دیکھنے کے لیے کل رقم پر ٹیپ کریں",
+   "ja": "合計をタップしてネットワークとアカウントを表示",
+   "da": "tryk på beløbet for at se netværk og konto",
+   "nb": "trykk på beløpet for å se nettverk og konto",
+   "sv": "tryck på summan för att se nätverk och konto",
+   "fi": "napauta summaa nähdäksesi verkon ja tilin",
+   "tr": "ağı ve hesabı görmek için toplama dokunun",
+   "hu": "koppintson az összegre a hálózat és a számla megtekintéséhez",
+   "sa": "जालं लेखं च द्रष्टुं योगराशिं स्पृशत"
+  },
+  "wl.wallet.networks": {
+   "en": "Autonomi / ANT · Arweave / AR",
+   "ru": "Autonomi / ANT · Arweave / AR",
+   "lv": "Autonomi / ANT · Arweave / AR",
+   "th": "Autonomi / ANT · Arweave / AR",
+   "gd": "Autonomi / ANT · Arweave / AR",
+   "tt": "Autonomi / ANT · Arweave / AR",
+   "uk": "Autonomi / ANT · Arweave / AR",
+   "cs": "Autonomi / ANT · Arweave / AR",
+   "zh": "Autonomi / ANT · Arweave / AR",
+   "ko": "Autonomi / ANT · Arweave / AR",
+   "ar": "Autonomi / ANT · Arweave / AR",
+   "nl-be": "Autonomi / ANT · Arweave / AR",
+   "es": "Autonomi / ANT · Arweave / AR",
+   "nl": "Autonomi / ANT · Arweave / AR",
+   "de": "Autonomi / ANT · Arweave / AR",
+   "fr": "Autonomi / ANT · Arweave / AR",
+   "he": "Autonomi / ANT · Arweave / AR",
+   "hi": "Autonomi / ANT · Arweave / AR",
+   "bn": "Autonomi / ANT · Arweave / AR",
+   "fa": "Autonomi / ANT · Arweave / AR",
+   "ur": "Autonomi / ANT · Arweave / AR",
+   "ja": "Autonomi / ANT · Arweave / AR",
+   "da": "Autonomi / ANT · Arweave / AR",
+   "nb": "Autonomi / ANT · Arweave / AR",
+   "sv": "Autonomi / ANT · Arweave / AR",
+   "fi": "Autonomi / ANT · Arweave / AR",
+   "tr": "Autonomi / ANT · Arweave / AR",
+   "hu": "Autonomi / ANT · Arweave / AR",
+   "sa": "Autonomi / ANT · Arweave / AR"
   }
  },
  "prof.mail.link": {
@@ -80249,7 +80435,7 @@
   "sa": "LOVErnment DAO · अनुशीलितस्वातन्त्र्यम्"
  },
  "missions.beeLead": {
-  "en": "You set the mission and the limits. The agents work inside them.",
+  "en": "you set the mission and the limits. the agents work inside them.",
   "ru": "Вы ставите задачу и границы. Агенты работают внутри них.",
   "lv": "Jūs nostādāt misiju un robežas. Aģenti strādā to iekšienē.",
   "th": "คุณกำหนดภารกิจและขอบเขต เอเจนต์ทำงานอยู่ในนั้น",
@@ -80280,7 +80466,7 @@
   "sa": "त्वं कार्यं सीमां च निर्धारयसि। अभिकर्तारस्तत्र एव कार्यं कुर्वन्ति।"
  },
  "missions.raverLead": {
-  "en": "You set the night. The floor runs itself.",
+  "en": "you set the night. the floor runs itself.",
   "ru": "Вы задаёте ночь. Танцпол управляет собой сам.",
   "lv": "Tu piešķir naktij toni. Grīda pati par sevi gādā.",
   "th": "คุณตั้งคืนนี้ ด่านเต้นรันตัวเอง",
@@ -80311,7 +80497,7 @@
   "sa": "त्वं रात्रिं विधानं करोषि। नृत्यभूमिः स्वयमेव चलति।"
  },
  "missions.cypherLead": {
-  "en": "Proposals, ceilings, receipts — inspect the whole envelope.",
+  "en": "proposals, ceilings, receipts — inspect the whole envelope.",
   "ru": "Предложения, лимиты, квитанции — изучите весь конверт.",
   "lv": "Priekšlikumi, griesti, kvītis — izpēti visu aploksni.",
   "th": "ข้อเสนอ เพดาน ใบเสร็จ — ตรวจทั้งซอง",
@@ -80342,7 +80528,7 @@
   "sa": "प्रस्तावाः उच्चसीमाः प्राप्तिपत्राणि च — सम्पूर्णं समावेशकं परीक्षस्व।"
  },
  "missions.beeIntro": {
-  "en": "Every operation here is a supervised mission. You approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. Nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.",
+  "en": "every operation here is a supervised mission. you approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.",
   "ru": "Каждая операция здесь — миссия под надзором. Вы утверждаете миссию и её лимит расходов; команда работает в комнате Buzz; отдельный проверяющий подтверждает результат; каждое значимое действие оставляет квитанцию. Ничто не тратится сверх лимита, объём не расширяется тихо, а ваша остановка останавливает всё.",
   "lv": "Katra darbība šeit ir uzraudzīta misija. Tu apstiprini misiju un tās izdevumu griestus; komanda strādā Buzz istabā; atsevišķs recenzents pārbauda; katra jēgpilnā darbība atstāj kvīti. Nekas netiek tērēts virs griestiem, apjoms nemēmi neaug, un tavs apturējums aptur visu.",
   "th": "ทุกปฏิบัติการที่นี่คือภารกิจภายใต้การกำกับ คุณอนุมัติภารกิจและเพดานการใช้จ่าย ทีมทำงานในห้อง Buzz ผู้ตรวจสอบอิสระตรวจรับ ทุกการกระทำที่มีความหมายทิ้งใบเสร็จไว้ ไม่มีการใช้จ่ายเกินเพดาน ไม่มีขอบเขตโตแบบเงียบ และการหยุดจากคุณหยุดทุกอย่าง",
@@ -80373,7 +80559,7 @@
   "sa": "अत्र प्रत्येकं कार्यम् अनुशीलितकर्तृकार्यम् अस्ति। त्वं कार्यं तस्य च व्ययसीमां अङ्गीकुरुषि; समूहः Buzz-कक्षे कार्यं करोति; पृथक् परीक्षकः पुष्टिं करोति; प्रत्येकं अर्थपूर्णं कर्म प्राप्तिपत्रं त्यजति। सीमातः उपरि किमपि व्ययते न, विषयः मौनेन वर्धते न, तव स्थगनं सर्वं स्थगयति।"
  },
  "missions.raverIntro": {
-  "en": "The LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. Missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.",
+  "en": "the LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.",
   "ru": "LOVErnment правит заботой — <b>mīlestība ir karalis</b>, любовь — король. Миссии живут на том же танцполе: основатель держит фейдеры (одобрение, лимит, стоп), команда играет сет, и каждый шаг падает в гроссбух, чтобы и утром после правда осталась правдой.",
   "lv": "LOVErnment pārvalda rūpes kā likumu — <b>mīlestība ir karalis</b>. Misijas dzīvo uz tās pašas grīdas: dibinātājs tur faderus (apstiprinājums, griesti, apturēšana), komanda spēlē setu, un katrs solis nolaižas virsgrāmatā, lai arī nākamajā rītā patiesība vēl stāsta patiesību.",
   "th": "LOVErnment ปกครองด้วยความเคียร์ — <b>mīlestība ir karalis</b>, ความรักคือราชา ภารกิจเต้นบนฟลอร์เดียวกัน: ผู้ก่อตั้งถือเฟดเดอร์ (อนุมัติ เพดาน หยุด) ทีมเล่นเซ็ต และทุกจังหวะตกลงในบัญชีรับรองเพื่อให้เช้าวันรุ่งขึ้นยังเล่าความจริง",
@@ -80404,7 +80590,7 @@
   "sa": "LOVErnment पालनेन शासति — <b>mīlestība ir karalis</b>, प्रेमैव राजा। कार्यानि एवं नृत्यभूमौ चलन्ति: संस्थापकः फेडरानि धरति (अङ्गीकारः, उच्चसीमा, स्थगनम्), दलः सेटं वादयति, प्रत्येकं कर्म ग्रन्थे पतति येन श्वः प्रभातेऽपि सत्यं सत्यमेव कथयति।"
  },
  "missions.cypherIntro": {
-  "en": "Off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. The Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. Verify the chain; trust nothing unlabeled.",
+  "en": "off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. the Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. verify the chain; trust nothing unlabeled.",
   "ru": "Первая дорожка — вне цепи: предложения и хеш-связанные квитанции с тестнет-учётом, локально поверх детерминированного сида. Релей Buzz и казна ERC20i — поздние дорожки: названы, но не заявлены как готовые. Проверяйте цепь; не верьте ничему без метки.",
   "lv": "Pirmā sliede — ārpus ķēdes: priekšlikumi un joslā saistītas kvītis ar testnet aprēķinu, lokāli pāri deterministiskam sēklas datam. Buzz releja vads un ERC20i kase ir vēlākas sliedes — nosauktas, nevis apgalvotas. Pārbaudi ķēdi; netici nekam bez marķējuma.",
   "th": "รางแรกนอกเชน: ข้อเสนอและใบเสร็จที่ผูกด้วยแฮช บัญชีแบบเทสต์เน็ต ทำงาน locally บน seed แบบ deterministic สายรีเลย์ Buzz และคลัง ERC20i เป็นรางถัดไป — บอกชื่อไว้ แต่ไม่อ้างว่ามีแล้ว ตรวจกำแพงลูกโซ่ อย่าเชื่ออะไรที่ไร้ป้าย",
@@ -80652,7 +80838,7 @@
   "sa": "Buzz · कार्यकक्षम्"
  },
  "missionroom.beeLead": {
-  "en": "The team works in the open. Every action leaves a receipt.",
+  "en": "the team works in the open. every action leaves a receipt.",
   "ru": "Команда работает открыто. Каждое действие оставляет квитанцию.",
   "lv": "Komanda strādā atklāti. Katra darbība atstāj kvīti.",
   "th": "ทีมทำงานอย่างเปิดเผย ทุกการกระทำทิ้งใบเสร็จ",
@@ -80683,7 +80869,7 @@
   "sa": "दलः उन्मुक्तं कार्यं करोति। प्रत्येकं कर्म प्राप्तिपत्रं त्यजति।"
  },
  "missionroom.raverLead": {
-  "en": "The set is running. Watch the decks.",
+  "en": "the set is running. watch the decks.",
   "ru": "Сет идёт. Смотри на деки.",
   "lv": "Sets jau skan. Skaties uz pults.",
   "th": "เซ็ตกำลังเล่น ดูเด็คไป",
@@ -80714,7 +80900,7 @@
   "sa": "सेटः चलति। वाद्यपीठानि पश्य।"
  },
  "missionroom.cypherLead": {
-  "en": "Work units, handoffs, costs — the room, logged.",
+  "en": "work units, handoffs, costs — the room, logged.",
   "ru": "Рабочие единицы, передачи, расходы — комната в журнале.",
   "lv": "Darba vienības, nodošanas, izmaksas — istaba, žurnālā.",
   "th": "หน่วยงาน การส่งมอบ ค่าใช้จ่าย — ห้องนี้ถูกบันทึก",
@@ -80745,7 +80931,7 @@
   "sa": "कार्यएकाः प्रदानानि व्ययाश्च — कक्षः अभिलिखितः।"
  },
  "missionroom.beeIntro": {
-  "en": "Pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. Costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.",
+  "en": "pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.",
   "ru": "Выберите миссию и наблюдайте: кто в ней участвует, какие рабочие единицы движутся, что проверено и что решил оценщик этапов. Расходы копятся в пределах утверждённого лимита — ничего не выпускается за него, а ваш стоп или изменение порядка достигает комнаты в любой момент.",
   "lv": "Izvēlies misiju un vēro, kā tā darbojas: kas tajā ir, kuri darba bloki kustas, kas pārbaudīts un ko nolēma starpposmu vērtētājs. Izdevumi krājas apstiprināto griestu robežās — nekas netiek atlaists pāri, un tava apturēšana vai pasūtījuma maiņa sasniedz istabu jebkurā brīdī.",
   "th": "เลือกภารกิจแล้วดูมันทำงาน: ใครอยู่ในทีม หน่วยงานไหนกำลังเดิน อะไรผ่านการตรวจแล้ว และผู้ประเมินไมล์สโตนตัดสินอะไร ค่าใช้จ่ายสะสมภายในเพดานที่อนุมัติ — ไม่มีอะไรปล่อยเกินนั้น และการหยุดหรือเปลี่ยนคำสั่งของคุณมาถึงห้องได้ทุกขณะ",
@@ -80776,7 +80962,7 @@
   "sa": "एकं कार्यं चित्वा तद्वृत्तं पश्य: कः तस्मिन् अस्ति, कानि कार्यएकानि चलन्ति, किं पुष्टितम्, किं च दशाङ्कमापकेन निर्णीतम्। व्ययाः अङ्गीकृतायाः उच्चसीमायाः अन्तः सञ्चीयन्ते — तस्याः परं किमपि मुच्यते न, तव स्थगनं परिवर्तनादेशश्च कस्मिन् अपि क्षणे कक्षं प्राप्नोति।"
  },
  "missionroom.raverIntro": {
-  "en": "One deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. When something leaves the envelope, the music stops and asks you. That pause is the safety, not the failure.",
+  "en": "one deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. when something leaves the envelope, the music stops and asks you. that pause is the safety, not the failure.",
   "ru": "Одна дека, все руки на ней — команда вращается вокруг миссии, оценщик держит фейдеры, а квитанции падают в такт. Когда что-то выходит за конверт, музыка стихает и спрашивает вас. Эта пауза — безопасность, а не сбой.",
   "lv": "Viens pults, visas rokas uz tās — komanda riņķo ap misiju, vērtētājs tur faderus, un kvītis krīt kā bits. Kad kaut kas iziet no aploksnes, mūzika apklust un tevi vaicā. Šā pauze ir drošība, ne kļūme.",
   "th": "เด็คเดียว มือทุกคู่อยู่บนนั้น — ทีมโคจรรอบภารกิจ ผู้ประเมินถือเฟดเดอร์ และใบเสร็จตกลงมาเหมือนจังหวะ เมื่อมีอะไรหลุดออกจากซอง ดนตรีจะหยุดและถามคุณ การหยุดนั้นคือความปลอดภัย ไม่ใช่ความล้มเหลว",
@@ -80807,7 +80993,7 @@
   "sa": "एकं वाद्यपीठम्, सर्वाणि हस्तानि तस्य उपरि — दलः कार्यं परिक्रमति, मापकः फेडरानि धरति, प्राप्तिपत्रानि तालवत् पतन्ति। यदा किञ्चित् समावेशकात् बहिः निर्गच्छति, तदा सङ्गीतं स्थित्वा त्वां पृच्छति। तत् स्थगनं रक्षा अस्ति, न तु पतनम्।"
  },
  "missionroom.cypherIntro": {
-  "en": "This room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. The relay wire for live rooms is designed, not built — nothing on this page opens a socket.",
+  "en": "this room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. the relay wire for live rooms is designed, not built — nothing on this page opens a socket.",
   "ru": "Эта комната читает только локальный гроссбух: состав, единицы, квитанции, вердикты оценщика и выпуски казны — всё проверяется по цепочке при загрузке. Провод реле для живых комнат спроектирован, но не построен — эта страница не открывает ни одного сокета.",
   "lv": "Šī istaba lasa tikai vietējo virsgrāmatu: sastāvs, vienības, kvītis, vērtētāja spriedumi un kases izlaižanas — viss ķēdes pārbaudīts ielādes brīdī. Releja vads dzīvām istabām ir izplānots, ne uzbūvēts — šī lapa neatver nevienu soketu.",
   "th": "ห้องนี้อ่านเฉพาะบัญชีท้องถิ่น: รายชื่อ หน่วยงาน ใบเสร็จ คำตัดสินของผู้ประเมิน และการเบิกจ่ายจากคลัง ตรวจกำแพงลูกโซ่ตอนโหลด สายรีเลย์สำหรับห้องสดถูกออกแบบไว้แต่ยังไม่สร้าง — หน้านี้ไม่เปิดซ็อกเก็ตใด",

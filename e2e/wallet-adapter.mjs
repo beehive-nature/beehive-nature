@@ -5,7 +5,7 @@
 // the worker and the gate asserts the enforcement fires. A gate that has never
 // gone red has not been proven: every mutation below is first shown green on
 // the unmutated path. Run:  cd e2e && node wallet-adapter.mjs
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,15 +15,6 @@ import { pinRegister } from './wallet-register-pin.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(8896, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -79,9 +70,9 @@ function mockChain(ctx, opts = {}) {
         state.arAccepted = body.id;                                  // idempotent by id — the rail's own dedupe
         return route.fulfill({ status: 202, headers: cors, body: '' });
       }
-      if (u.pathname.startsWith('/tx/')) {                           // the confirm rail read
-        if (state.arConfirm) return json({ status: 'confirmed', confirmations: 20 });
-        return json({ status: 'pending', confirmations: 0 });
+      if (/^\/tx\/[^/]+\/status$/.test(u.pathname)) {                           // the confirm rail read
+        if (state.arConfirm) return json({ block_height:123499, block_indep_hash:'B'.repeat(64), number_of_confirmations:20 });
+        return json('pending',202);
       }
       return text('');
     }
@@ -132,11 +123,12 @@ function mutateVaulta(ctx, from, to) {
   });
 }
 
-const WALLET = 'http://127.0.0.1:8896/surfaces/wallet.html';
+const WALLET = WALLET_ORIGIN+'/surfaces/wallet.html';
 const COMMIT_ARGS = { committer: 'banchor22222', epoch: '1000150', new_root: '0'.repeat(64),
   prev_root: '0'.repeat(64), tree_size: '19', delta_id: '0'.repeat(64), forced_watermark: '1000150' };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
 try {
@@ -160,9 +152,9 @@ try {
     const balance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'banchor22222' }));
     ok('Vaulta RPC EOS unit is normalized to A without changing digits',
       balance.unit === 'A' && balance.quantity === '12.3456 A', JSON.stringify(balance));
-    const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }));
-    ok('Vaulta missing liquid defaults to 0.0000 A',
-      emptyBalance.unit === 'A' && emptyBalance.quantity === '0.0000 A', JSON.stringify(emptyBalance));
+    const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }).then(()=>null,error=>error.message));
+    ok('Vaulta missing liquid balance is refused, never fabricated as zero',
+      /no valid liquid balance/.test(emptyBalance), String(emptyBalance));
   }
 
   /* ── 2 · the pipeline on the mock: build → sign → OUTBOX PERSISTED →
@@ -402,10 +394,44 @@ try {
     await c11.close();
   }
 
+  // The wire shown for review and the signing bytes must describe one file.
+  for(const mutation of ["reward:String(BigInt(built.wire.reward)+1n)","data_root:'A'.repeat(43)","tags:[]"]){
+    const changed=await browser.newContext();mockChain(changed);
+    await changed.route(/wallet-adapter-arweave\.js/,async route=>{
+      const source=await readFile(join(ROOT,'surfaces/wallet-adapter-arweave.js'),'utf8');
+      const anchor='wire_json: JSON.stringify(built.wire),';
+      if(!source.includes(anchor))throw Error('mutation anchor missing');
+      return route.fulfill({contentType:'text/javascript',body:source.replace(anchor,'wire_json: JSON.stringify({...built.wire,'+mutation+'}),')});
+    });
+    const p=await changed.newPage();await p.goto(WALLET);
+    await p.waitForFunction(()=>window.BNRWALLET?.adapters.arweave?.attached);
+    const result=await p.evaluate(async()=>{
+      const pair=await crypto.subtle.generateKey({name:'RSA-PSS',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign']);
+      const jwk=await crypto.subtle.exportKey('jwk',pair.privateKey);let signed=0;
+      const original=BNRAR.signRaw;BNRAR.signRaw=async(...args)=>{signed++;return original(...args)};
+      let error='';try{await BNRWALLET.walletPublish(new TextEncoder().encode('fixture'),[['App-Name','fixture']],{jwk})}catch(e){error=e.message}
+      return {error,signed,outbox:localStorage.getItem('bnr_outbox_v1')};
+    });
+    ok('changed wire refused before signing: '+mutation,/do not match/.test(result.error)&&result.signed===0&&result.outbox===null,JSON.stringify(result));
+    await changed.close();
+  }
+
+  // ABI metadata is untrusted RPC text, never executable wallet markup.
+  {
+    const hostile=await browser.newContext();mockChain(hostile);
+    const payload='"><img id="rpc-injection" src="missing" onerror="window.rpcInjected=true">';
+    await hostile.route(/\/v1\/chain\/get_abi$/,route=>route.fulfill({headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify({...COMMIT_ABI,abi:{...COMMIT_ABI.abi,structs:[{name:'commit',fields:[{name:payload,type:'string'}]}]}})}));
+    const p=await hostile.newPage();await p.goto(WALLET);
+    await p.locator('#tx-contract').fill('banchor22222');await p.locator('#tx-action').fill('commit');await p.locator('#tx-abi').click();
+    await p.waitForFunction(()=>document.querySelectorAll('.tx-f').length===1);
+    ok('hostile ABI names stay attribute text and cannot inject wallet HTML',await p.locator('.tx-f').getAttribute('data-fn')===payload&&await p.locator('#rpc-injection').count()===0&&await p.evaluate(()=>!window.rpcInjected));
+    await hostile.close();
+  }
+
   await ctx.close();
 } finally {
   await browser.close();
-  server.close();
+
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
