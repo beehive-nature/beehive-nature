@@ -11,3 +11,5 @@ Validation before publication: both generators pass --check; estate-check passes
 Upstream priority checked: x0x #504 remains open (September 30 update); #622 and #505 closed. This lane changes the public inventory, not mesh acceptance, release promotion or signing.
 
 One local edit attempt used unavailable python; it made no edit. The edit was completed with installed Node instead.
+
+Follow-up: update the existing browser suite's obsolete seven-door/August-date assertions to the tracked surface census, assert exact route coverage and filtering in every register, and test architecture-rail links instead of historical door nodes. These tests run in CI; no local server was started. PR #317 merged at e3398a0a8ba00be8729c57f4ae7b5a2d1de16c46; Pages publication is being checked separately.
