@@ -1103,7 +1103,8 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     // Phase A -- at most ONE early paint. Skip on huge CL (8K): first frame needs MiBs of mdat.
-    if (!state.preview && metrics.cl && metrics.cl > (48 << 20)) {
+    // Direct playback delivers a whole 4 MB chunk first, enough for that frame, so it keeps the preview.
+    if (!state.preview && metrics.path !== 'webrtc' && metrics.cl && metrics.cl > (48 << 20)) {
       state.previewTried = true;
       state.preview = true;
       state.early = false;
