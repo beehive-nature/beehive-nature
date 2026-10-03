@@ -2,7 +2,7 @@
 
 ## Landed
 
-PR #260 is MERGED as `ee6e3ddc9c6be814e0e5a4218ca9c9248b3f8540`, from reviewed head `39eea28794a3aad23631ec8ff8d9e2463ebd02d9`. GitHub recorded mergedAt `2026-10-03T07:03:48Z` (October 3 UTC; October 2 at 01:03:48 America/Denver).
+PR #260 is MERGED as `ee6e3ddc9c6be814e0e5a4218ca9c9248b3f8540`, from reviewed head `39eea28794a3aad23631ec8ff8d9e2463ebd02d9`. GitHub recorded mergedAt `2026-10-03T07:03:48Z` (October 3 UTC; October 3 at 01:03:48 America/Denver).
 
 - PR: https://github.com/beehive-nature/beehive-nature/pull/260
 - Completion review: https://github.com/beehive-nature/beehive-nature/pull/260#issuecomment-5966592484
@@ -54,4 +54,4 @@ Worktree: `C:/Users/travi/wt-codex-mail-tls-finish`, branch `codex/mail-tls-fini
 
 GitHub Pages run: https://github.com/beehive-nature/beehive-nature/actions/runs/37105100848
 
-At the receipt snapshot, build succeeded and deploy was queued. Merge completion is confirmed; site publication and post-merge CI completion are not yet claimed here. Prior PR CI passes do not stand in for these new main runs.
+At the receipt snapshot, build succeeded and deploy was queued. Merge completion is confirmed; site publication and post-merge CI completion are not yet claimed here. Post-merge secret scan run 37105100950 subsequently completed SUCCESS. The tests run and Pages deployment are still pending at the final follow-up. Prior PR CI passes do not stand in for these new main runs.
