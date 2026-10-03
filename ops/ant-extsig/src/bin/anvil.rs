@@ -1,6 +1,18 @@
 //! Anvil wrapper for LocalDevnet: ensures Anvil runs with Arbitrum One L2 realistic
 //! base fee (0.1 Gwei / 100_000_000 wei) so local development reflects production
 //! gas conditions and adheres to the 0.0002 ETH standing gas ceiling.
+//!
+//! ARBITRUM ONE GAS CITATION:
+//! On Arbitrum One L2, base fees are determined by the Nitro gas model with a minimum
+//! floor of 0.01 Gwei (10,000,000 wei) up to ~0.1 Gwei under standard conditions
+//! (cite: Offchain Labs Arbitrum Nitro gas docs,
+//! https://docs.arbitrum.io/build-decentralized-apps/how-to-estimate-gas).
+//!
+//! By default, Anvil runs with Ethereum L1 default fees (1.0 Gwei = 1,000,000,000 wei).
+//! Because alloy-node-bindings (`alloy::node_bindings::Anvil`) spawns `Command::new("anvil")`
+//! without an argument injection hook, this wrapper provides the calibrated `--base-fee 100000000`.
+//! If the actual base fee ever spikes above the configured MaxFeePerGas::LimitedAuto cap,
+//! the harness pre-send check and driver-level policy refuse cleanly before broadcasting.
 
 use std::process::Command;
 

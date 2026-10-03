@@ -870,6 +870,7 @@ dependencies = [
 name = "ant-extsig"
 version = "0.2.1"
 dependencies = [
+ "alloy",
  "ant-core",
  "ant-node",
  "ant-protocol",

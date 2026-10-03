@@ -2,8 +2,9 @@
 
 - **Date:** 2026-10-02
 - **Lane:** Lane 2 ("ANT upload code-disabled" / Dual-Ceiling Upgrade)
-- **Status:** GREEN — Built, 4/4 unit tests passed, live 8-node swarm + embedded Anvil LocalDevnet proof passed, roundtrip byte-identical verified.
+- **Status:** GREEN — Built, 5/5 unit tests passed, live 8-node swarm + embedded Anvil LocalDevnet proof passed, exact token approval verified, pre-send gas binding verified, roundtrip byte-identical verified.
 - **Branch:** `lane/ant-extsig-dual-ceiling`
+- **PR:** [#324](https://github.com/beehive-nature/beehive-nature/pull/324)
 
 ---
 
@@ -35,10 +36,11 @@ edition = "2021"
 ant-core = { git = "https://github.com/WithAutonomi/ant-client", rev = "681d48f30b9de50c262ebfc10cce6111cfc878b1", features = ["devnet"] } # PUBLIC-CONSTANT recorded commit
 ant-node = "=0.21.0"
 ant-protocol = "=3.1.0"
-evmlib = "0.10.0"
+evmlib = { version = "0.10.0", features = ["external-signer"] }
 tokio = { version = "1", features = ["full"] }
 serde_json = "1"
 hex = "0.4"
+alloy = { version = "1.0.32", features = ["rpc-types", "provider-http"] }
 
 [profile.dev]
 debug = 0
@@ -49,64 +51,63 @@ debug = 0
 - Pinned `ant-core` commit: `681d48f30b9de50c262ebfc10cce6111cfc878b1` on `main`. PUBLIC-CONSTANT recorded commit.
 - Pinned `ant-node`: `=0.21.0`.
 - Pinned `ant-protocol`: `=3.1.0`.
-- Pinned `evmlib`: `0.10.0`.
+- Pinned `evmlib`: `0.10.0` with `external-signer` feature enabled.
+- Pinned `alloy`: `1.0.32`.
 - Added isolated `[workspace]` table so the crate builds independently without inheriting root-level workspace settings.
 
 ---
 
-## 3. Ceiling Enforcement & Unit Test Battery (`ops/ant-extsig/src/main.rs`)
+## 3. Ceiling Enforcement, Pre-Send Binding, & Review Resolution
 
-### 3.1 Dual-Ceiling Constants and Verification Functions
+Following PR #324 read-only review comments from Claude Fable 5.1, the implementation addresses all review findings:
 
-In `ops/ant-extsig/src/main.rs`:
+### 3.1 Merkle Storage Quote Derivation
+- `ExternalPaymentInfo::Merkle` batches carry depth and candidate pool commitments rather than a pre-calculated total.
+- The harness calls `evm_network.estimate_merkle_payment_cost(b.depth, &b.pool_commitments)` for each batch in `prepared_batches`, which executes the exact Solidity PaymentVault formula (`median16(pool_prices) * 2^depth, max across pools`).
+- The sum of these estimates in atto-ANT is verified against `MAX_STORAGE_CEILING_ATTO_ANT` at `[3/6]` before any payment is attempted, and re-verified at `[5/6]` immediately prior to `finalize_upload`.
 
-```rust
-/// Standing ANT storage ceiling: 2.5 ANT in atto-ANT (1 ANT = 10^18 atto-ANT).
-pub const MAX_STORAGE_CEILING_ATTO_ANT: u128 = 2_500_000_000_000_000_000; // 2.5 ANT
+### 3.2 Exact Token Approval (No `U256::MAX`)
+- `evmlib`'s internal `pay_for_quotes` approves `U256::MAX` if allowance is short. Under a 2.5 ANT ceiling, an unlimited approval is inconsistent.
+- The harness checks `signer.token_allowance(vault_address)` prior to payment. If insufficient, it submits an approval for **exactly** `Amount::from(quote_sum_atto)`.
+- The approval transaction is pre-send gas-checked and its on-chain receipt gas is aggregated into `total_gas_wei`.
+- When `pay_for_quotes` subsequently executes, existing allowance satisfies the requirement, preventing `evmlib` from broadcasting an unlimited approval.
 
-/// Standing ETH gas ceiling: 0.0002 ETH in wei (1 ETH = 10^18 wei).
-pub const MAX_GAS_CEILING_WEI: u128 = 200_000_000_000_000; // 0.0002 ETH
+### 3.3 Pre-Send Gas Check & Driver Binding
+- Before any transaction is signed or broadcasted:
+  - Calldata is generated via `evmlib::external_signer::pay_for_quotes_calldata` (wave) or `pay_for_merkle_tree_calldata` (merkle).
+  - Gas and EIP-1559 fees are estimated via the provider (`provider.estimate_gas` and `provider.estimate_eip1559_fees`).
+  - Worst-case gas limit is calculated as `estimated_gas * 120 / 100`.
+  - Worst-case commitment is evaluated as `worst_case_gas_limit * fees.max_fee_per_gas`.
+  - If `fees.max_fee_per_gas > max_fee_limit` (the LimitedAuto cap) or `worst_case_commitment > MAX_GAS_CEILING_WEI`, the harness halts and refuses pre-send with exact overage.
+- Driver-level binding: `MaxFeePerGas::LimitedAuto(MAX_GAS_CEILING_WEI / 250_000)` enforces the fee ceiling inside `evmlib`'s `send_transaction_with_retries`.
+- Post-send receipt: `verify_transaction_gas` verifies the mined `GasInfo` and receipts.
 
-pub fn verify_storage_ceiling(amount_atto: u128, stage: &str) -> Result<(), Box<dyn std::error::Error>> { ... }
-pub fn verify_transaction_gas(gas: &GasInfo, tx_desc: &str) -> Result<u128, Box<dyn std::error::Error>> { ... }
-```
-
-- Storage ceiling is verified at `[3/6]` quote preparation (`ExternalPaymentInfo::WaveBatch` or `ExternalPaymentInfo::Merkle`), and verified again at `[5/6]` immediately prior to `finalize_upload`.
-- Gas ceiling is enforced on the member wallet signer via `signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(MAX_GAS_CEILING_WEI / 250_000) })` and validated for each transaction's `GasInfo`.
-
-### 3.2 Unit Test Results
-
-`cargo test --manifest-path ops/ant-extsig/Cargo.toml` executes 4 unit tests covering both positive and negative boundary conditions:
-
-```
-running 4 tests
-test tests::test_storage_ceiling_within_limit ... ok
-test tests::test_storage_ceiling_exceeded_refuses ... ok
-test tests::test_gas_ceiling_exceeded_refuses ... ok
-test tests::test_gas_ceiling_within_limit ... ok
-
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-```
-
-Negative tests prove exact refusal formatting:
-- Storage overage refusal: `REFUSE: storage amount 2500000000000001000 atto-ANT exceeds ceiling 2500000000000000000 atto-ANT (2.5 ANT) by 1000 atto-ANT at test`
-- Gas overage refusal: `REFUSE: gas ceiling exceeded for test: worst-case gas commitment 250000000000000 wei exceeds ceiling 200000000000000 wei (0.0002 ETH) by 50000000000000 wei`
+### 3.4 Arbitrum One Fee Schedule Citation & Anvil Calibration
+- On Arbitrum One L2, the Nitro fee model sets a minimum base fee of 0.01 Gwei (10,000,000 wei) up to ~0.1 Gwei in standard conditions (cite: Offchain Labs Arbitrum Nitro gas docs, `https://docs.arbitrum.io/build-decentralized-apps/how-to-estimate-gas`).
+- Anvil defaults to Ethereum L1 base fees (1.0 Gwei = 1,000,000,000 wei). Under 1.0 Gwei, a 220,000 gas transaction costs `> 0.00022 ETH`, artificially exceeding the ceiling.
+- `ops/ant-extsig/src/bin/anvil.rs` forwards `--base-fee 100000000` (0.1 Gwei) to the underlying Anvil binary so local devnet reflects Arbitrum One production conditions.
+- If the chain's base fee ever spikes above the cap, the pre-send check cleanly refuses before broadcasting.
 
 ---
 
-## 4. Anvil L2 Gas Calibration (`ops/ant-extsig/src/bin/anvil.rs`)
+## 4. Unit Test Battery (`cargo test`)
 
-When running `LocalDevnet`, `evmlib::testnet::Testnet` launches Anvil using `alloy::node_bindings::Anvil::new().try_spawn()`, which looks up `anvil` on `PATH`. By default, Anvil runs with `base_fee = 1 Gwei`. Alloy's fee estimator adds priority buffer fees, producing testnet gas fees around ~1.57 Gwei.
+`cargo test --manifest-path ops/ant-extsig/Cargo.toml` executes 5 unit tests covering storage, Merkle cost estimation, and gas bounds:
 
-On Arbitrum One production, base fees are typically 0.01–0.1 Gwei. Under default Anvil settings, even standard batch payments exceed the 0.0002 ETH ceiling due to unrealistic L1 testnet base fees.
+```
+running 5 tests
+test tests::test_gas_ceiling_within_limit ... ok
+test tests::test_merkle_cost_estimation_empty ... ok
+test tests::test_gas_ceiling_exceeded_refuses ... ok
+test tests::test_storage_ceiling_exceeded_refuses ... ok
+test tests::test_storage_ceiling_within_limit ... ok
 
-To align local devnet behavior with production Arbitrum One economics, `ops/ant-extsig/src/bin/anvil.rs` acts as a wrapper that passes `--base-fee 100000000` (0.1 Gwei = 100,000,000 wei) to the underlying Anvil binary:
-
-```rust
-cmd.arg("--base-fee").arg("100000000");
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-Because `anvil.rs` is a standard Cargo binary (`src/bin/anvil.rs`), `cargo build` compiles `target/debug/anvil.exe`, which lives inside the gitignored `target/` directory without polluting source control or requiring binary commits. Prepending `target/debug` to `PATH` ensures `LocalDevnet` uses the calibrated Anvil instance.
+Refusal verification:
+- Storage refusal: `REFUSE: storage amount 2500000000000001000 atto-ANT exceeds ceiling 2500000000000000000 atto-ANT (2.5 ANT) by 1000 atto-ANT at test`
+- Gas refusal: `REFUSE: gas ceiling exceeded for test: worst-case gas commitment 250000000000000 wei exceeds ceiling 200000000000000 wei (0.0002 ETH) by 50000000000000 wei`
 
 ---
 
@@ -127,11 +128,16 @@ Output:
       4 chunks, DataMap 1e44a2ca1a773b88bb275551d1d19a4ff3c9293fe6fda67251203f5a6ab5e25a (PUBLIC-CONSTANT testnet DataMap)
       storage check [prepare_quotes]: 46875000000000000 atto-ANT (ceiling: 2500000000000000000 atto-ANT = 2.5 ANT)
       arm: WAVE (4 quote payments, total 46875000000000000 atto)
-      e.g. quote hash 5a710691f31b5d1188c479275b5d56740494a92c95570480d4b8a5dbc05e5b59 (PUBLIC-CONSTANT quote hash)
-      e.g. quote hash e8b74618ebdd9dc280cf0985397e241f246b904241f94b62ce8be7adc4b8eaa8 (PUBLIC-CONSTANT quote hash)
+      e.g. quote hash 78e039003bef2329351f1d8b892ce995ced03865bfb4edc4ea8ed29970c92258 (PUBLIC-CONSTANT quote hash)
+      e.g. quote hash b46c13e37d058e924f29e0167ae4735d85439a4876bb7a4b267e9cdb64dacd7a (PUBLIC-CONSTANT quote hash)
 [4/6] member wallet paying (wave arm)...
-      gas check [wave_batch_quotes]: gas_limit=220717 * max_fee_per_gas=157379521 wei = 34736335736557 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
-      paid 4 quote payments, actual gas used: 183931, max gas commitment: 34736335736557 wei
+      current vault allowance 0 < required 46875000000000000; approving EXACT amount...
+      pre-send gas check [token_approval]: est_gas=46394 (buffer_limit=55672) * max_fee=178247123 wei = 9923373831656 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
+      exact approval tx submitted: 0xff302f8e5661401add312457aaddc90d94b23b3bfd7fb6dff467b86d0f842958 (PUBLIC-CONSTANT approval tx)
+      approval confirmed: gas_used=46394, cost=3650732771834 wei
+      pre-send gas check [wave_batch_quotes]: est_gas=188499 (buffer_limit=226198) * max_fee=157379521 wei = 35598932891158 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
+      gas check [wave_batch_quotes]: gas_limit=226198 * max_fee_per_gas=157379521 wei = 35598932891158 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
+      paid 4 quote payments, actual gas used: 183699, max gas commitment: 35598932891158 wei
       storage check [pre_finalize]: 46875000000000000 atto-ANT (ceiling: 2500000000000000000 atto-ANT = 2.5 ANT)
 [5/6] INTERRUPT: client destroyed -- reconnecting FRESH for the resume...
 RECEIPT {
@@ -149,7 +155,7 @@ RECEIPT {
   "roundtrip_byte_identical": true,
   "storage_ceiling_atto": "2500000000000000000",
   "storage_ceiling_met": true,
-  "total_gas_commitment_wei": "34736335736557",
+  "total_gas_commitment_wei": "39249665662992",
   "upload_result_debug": "FileUploadResult { data_map: DataMap:\n        ChunkInfo { index: 0, dst_hash: 25a2a3..65abf8, src_hash: 14946e..f878d4, ",
   "winner_hashes": []
 }
@@ -157,13 +163,14 @@ RECEIPT {
 
 - DataMap address: `1e44a2ca1a773b88bb275551d1d19a4ff3c9293fe6fda67251203f5a6ab5e25a`. PUBLIC-CONSTANT testnet DataMap address.
 - Member payer address: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. PUBLIC-CONSTANT testnet address.
+- Approval transaction: `0xff302f8e5661401add312457aaddc90d94b23b3bfd7fb6dff467b86d0f842958`. PUBLIC-CONSTANT approval tx hash.
 - Storage quote: `46875000000000000` atto-ANT ($\approx 0.0469$ ANT), safely within 2.5 ANT ceiling.
-- Gas commitment: `34736335736557` wei ($\approx 0.0000347$ ETH), safely within 0.0002 ETH ceiling.
+- Gas commitment across both transactions (approval + payment): `39249665662992` wei ($\approx 0.0000392$ ETH), safely within 0.0002 ETH ceiling.
 - Verified byte-identical round-trip download after full client interrupt and recreation.
 
 ---
 
 ## 6. Next Steps & Merge Gate
 
-1. **Review**: Push branch `lane/ant-extsig-dual-ceiling` to `origin` and hand off to Claude Fable 5.1 for exact-HEAD review.
+1. **Re-Review**: Updated HEAD pushed to branch `lane/ant-extsig-dual-ceiling` for Claude Fable 5.1 exact-HEAD re-review on [PR #324](https://github.com/beehive-nature/beehive-nature/pull/324).
 2. **Production Gate**: Keep `/api/preserve/upload` code-disabled in `tools/genealogy/preserve-service.mjs` until Fable 5.1 review confirms receipts and the founder performs a mainnet test payment.

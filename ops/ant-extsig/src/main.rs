@@ -13,19 +13,35 @@
 //! ADR-0003's "every keyless consumer" flow; identical EVM signing, same
 //! custody boundary). The estate `Client` never receives the wallet.
 //!
-//! DUAL-CEILING ENFORCEMENT:
-//! - Storage ceiling: sum of prepared quotes <= 2.5 ANT (2_500_000_000_000_000_000 atto-ANT)
-//!   before finalize; refuses with exact overage if exceeded.
+//! DUAL-CEILING ENFORCEMENT & PRE-SEND BINDING:
+//! - Storage ceiling: sum of prepared quotes <= 2.5 ANT (2_500_000_000_000_000_000 atto-ANT).
+//!   For wave arm: checked from payment_intent.total_amount.
+//!   For merkle arm: computed pre-send by evaluating evm_network.estimate_merkle_payment_cost
+//!   across all prepared batches (matches Solidity PaymentVault median16 formula).
+//!   Checked at preparation AND immediately pre-finalize; refuses with exact overage if exceeded.
+//! - Exact Token Approval: if allowance is insufficient, the harness approves the payment
+//!   vault for EXACTLY the required quote sum (never U256::MAX), and gas-checks the approval.
 //! - Gas ceiling: total worst-case gas commitment (gas_limit * max_fee_per_gas) <= 0.0002 ETH
-//!   (200_000_000_000_000 wei) per payment transaction, enforced via MaxFeePerGas::LimitedAuto
-//!   on the member signer's TransactionConfig and verified against transaction gas info.
+//!   (200_000_000_000_000 wei) per transaction. Validated PRE-SEND via provider gas & fee estimation,
+//!   bound at driver level via MaxFeePerGas::LimitedAuto, and verified post-send against mined GasInfo.
+//!
+//! ARBITRUM ONE GAS NOTE:
+//! On Arbitrum One L2, the Nitro fee model sets a minimum base fee of 0.01 Gwei (10,000,000 wei)
+//! up to ~0.1 Gwei in normal conditions (cite: Offchain Labs Arbitrum Nitro gas documentation,
+//! https://docs.arbitrum.io/build-decentralized-apps/how-to-estimate-gas).
+//! Local Anvil defaults to Ethereum L1 base fees (1.0 Gwei = 1,000,000,000 wei). If the network base fee
+//! or worst-case commitment exceeds 0.0002 ETH, the harness cleanly refuses pre-send.
 
+use alloy::network::TransactionBuilder;
+use alloy::providers::Provider;
+use alloy::rpc::types::TransactionRequest;
 use ant_core::data::{
     Client, ClientConfig, ExternalPaymentInfo, LocalDevnet, PaymentMode, Visibility,
 };
 use ant_node::devnet::DevnetConfig;
 use ant_protocol::evm::Wallet;
 use evmlib::GasInfo;
+use evmlib::common::Amount;
 use evmlib::transaction_config::{MaxFeePerGas, TransactionConfig};
 use serde_json::json;
 
@@ -64,6 +80,48 @@ pub fn verify_storage_ceiling(amount_atto: u128, stage: &str) -> Result<(), Box<
         ).into());
     }
     Ok(())
+}
+
+/// Performs a pre-send simulation/estimation check to ensure transaction cannot exceed the 0.0002 ETH gas ceiling.
+pub async fn check_pre_send_gas<P: Provider>(
+    provider: &P,
+    tx: TransactionRequest,
+    max_fee_limit: u128,
+    stage: &str,
+) -> Result<u128, Box<dyn std::error::Error>> {
+    let est_gas = provider
+        .estimate_gas(tx)
+        .await
+        .map_err(|e| format!("pre-send gas estimation failed for {stage}: {e}"))?;
+    let fees = provider
+        .estimate_eip1559_fees()
+        .await
+        .map_err(|e| format!("pre-send fee estimation failed for {stage}: {e}"))?;
+
+    // Verify fee does not exceed driver cap
+    if fees.max_fee_per_gas > max_fee_limit {
+        return Err(format!(
+            "REFUSE: network fee estimate {} wei exceeds max fee limit {} wei before send for {stage}",
+            fees.max_fee_per_gas, max_fee_limit
+        ).into());
+    }
+
+    // evmlib uses estimated_gas * 120 / 100 for gas_with_buffer
+    let worst_case_gas_limit = (est_gas as u128).saturating_mul(120) / 100;
+    let worst_case_commitment = worst_case_gas_limit.saturating_mul(fees.max_fee_per_gas);
+
+    println!(
+        "      pre-send gas check [{stage}]: est_gas={est_gas} (buffer_limit={worst_case_gas_limit}) * max_fee={} wei = {worst_case_commitment} wei (ceiling: {MAX_GAS_CEILING_WEI} wei = 0.0002 ETH)",
+        fees.max_fee_per_gas
+    );
+
+    if worst_case_commitment > MAX_GAS_CEILING_WEI {
+        let overage = worst_case_commitment - MAX_GAS_CEILING_WEI;
+        return Err(format!(
+            "REFUSE: pre-send gas ceiling exceeded for {stage}: worst-case gas commitment {worst_case_commitment} wei exceeds ceiling {MAX_GAS_CEILING_WEI} wei (0.0002 ETH) by {overage} wei"
+        ).into());
+    }
+    Ok(worst_case_commitment)
 }
 
 #[tokio::main]
@@ -131,12 +189,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Verify storage quote sum against the 2.5 ANT ceiling before payment
+    // For Wave batches: total_amount from payment intent.
+    // For Merkle batches: sum of evm_network.estimate_merkle_payment_cost across all batches.
     let quote_sum_atto: u128 = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
             payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(0)
         }
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
-            prepared_batches.len() as u128
+            let mut total: u128 = 0;
+            for b in prepared_batches {
+                let est: Amount = evm_network.estimate_merkle_payment_cost(b.depth, &b.pool_commitments);
+                let cost = est.to_string().parse::<u128>().unwrap_or(u128::MAX);
+                total = total.saturating_add(cost);
+            }
+            total
         }
     };
     verify_storage_ceiling(quote_sum_atto, "prepare_quotes")?;
@@ -153,22 +219,70 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "wave"
         }
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
-            println!("      arm: MERKLE ({} batch(es))", prepared_batches.len());
+            println!("      arm: MERKLE ({} batch(es), total estimated {} atto)", prepared_batches.len(), quote_sum_atto);
             "merkle"
         }
     };
 
     // -- [4/6] THE MEMBER PAYS -- standalone wallet, out-of-band -------------
-    // wave: one pay_for_quotes tx batch -> quote-hash -> tx-hash map
-    // merkle: one pay_for_merkle_tree tx per batch -> winner hashes
     println!("[4/6] member wallet paying ({payment_arm} arm)...");
     let mut paid_atto: u128 = 0;
     let mut total_gas_wei: u128 = 0;
+    let provider = signer.to_provider();
+    let vault_address = *evm_network.payment_vault_address();
+
+    // 4a. Exact Token Approval (never unlimited U256::MAX)
+    // Query current allowance; if insufficient, approve EXACTLY quote_sum_atto tokens.
+    let current_allowance = signer.token_allowance(vault_address).await?;
+    let required_tokens = Amount::from(quote_sum_atto);
+    if current_allowance < required_tokens {
+        println!("      current vault allowance {current_allowance} < required {required_tokens}; approving EXACT amount...");
+        let approve_amount = required_tokens;
+        let (approve_calldata, token_contract_addr) =
+            evmlib::external_signer::approve_to_spend_tokens_calldata(&evm_network, vault_address, approve_amount);
+
+        let approve_tx = TransactionRequest::default()
+            .with_from(signer.address())
+            .with_to(token_contract_addr)
+            .with_input(approve_calldata);
+
+        // Pre-send gas check on the approval transaction
+        check_pre_send_gas(&provider, approve_tx, max_fee_per_gas_limit, "token_approval").await?;
+
+        let approve_tx_hash = signer
+            .approve_to_spend_tokens(vault_address, approve_amount)
+            .await?;
+        println!("      exact approval tx submitted: {approve_tx_hash}");
+
+        // Capture approval gas receipt
+        if let Some(rcpt) = provider.get_transaction_receipt(approve_tx_hash).await? {
+            let gas_used = rcpt.gas_used;
+            let eff_price = rcpt.effective_gas_price;
+            let cost = (gas_used as u128) * eff_price;
+            total_gas_wei += cost;
+            println!("      approval confirmed: gas_used={gas_used}, cost={cost} wei");
+        }
+    } else {
+        println!("      current vault allowance {current_allowance} >= required {required_tokens}; approval not needed");
+    }
+
+    // 4b. Pre-send gas checks & member execution
     enum Paid { Wave(std::collections::HashMap<ant_protocol::evm::QuoteHash, ant_protocol::evm::TxHash>), Merkle(Vec<[u8; 32]>) }
     let paid = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
             let payments: Vec<_> = payment_intent.payments.clone();
             paid_atto = payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(0);
+
+            // Pre-send gas check for quote payments batch
+            let calldata_info = evmlib::external_signer::pay_for_quotes_calldata(&evm_network, payments.clone())?;
+            for (calldata, _) in &calldata_info.batched_calldata_map {
+                let tx = TransactionRequest::default()
+                    .with_from(signer.address())
+                    .with_to(calldata_info.to)
+                    .with_input(calldata.clone());
+                check_pre_send_gas(&provider, tx, max_fee_per_gas_limit, "wave_batch_quotes").await?;
+            }
+
             let (map, gas) = signer.pay_for_quotes(payments.into_iter()).await.map_err(|e| format!("member pay_for_quotes: {e:?}"))?;
             let gas_commitment = verify_transaction_gas(&gas, "wave_batch_quotes")?;
             total_gas_wei += gas_commitment;
@@ -178,6 +292,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
             let mut winners = Vec::new();
             for (i, b) in prepared_batches.iter().enumerate() {
+                // Pre-send gas check for each merkle batch
+                let calldata_info = evmlib::external_signer::pay_for_merkle_tree_calldata(
+                    &evm_network,
+                    b.depth,
+                    b.pool_commitments.clone(),
+                    b.merkle_payment_timestamp,
+                )?;
+                let tx = TransactionRequest::default()
+                    .with_from(signer.address())
+                    .with_to(calldata_info.to)
+                    .with_input(calldata_info.calldata);
+                check_pre_send_gas(&provider, tx, max_fee_per_gas_limit, &format!("merkle_batch_{i}")).await?;
+
                 let (winner, amount, gas) = signer
                     .pay_for_merkle_tree(b.depth, b.pool_commitments.clone(), b.merkle_payment_timestamp)
                     .await?;
@@ -263,6 +390,13 @@ mod tests {
         let err_msg = res.unwrap_err().to_string();
         assert!(err_msg.contains("REFUSE: storage amount"));
         assert!(err_msg.contains(&format!("by {overage} atto-ANT")));
+    }
+
+    #[test]
+    fn test_merkle_cost_estimation_empty() {
+        let network = evmlib::Network::ArbitrumOne;
+        let cost = network.estimate_merkle_payment_cost(4, &[]);
+        assert_eq!(cost, Amount::ZERO);
     }
 
     #[test]
