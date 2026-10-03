@@ -48,6 +48,13 @@
   table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
   th{text-align:left;color:var(--dim);font-weight:normal;border-bottom:1px solid var(--line);padding:6px 8px 6px 0}
   td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  /* The body-wide overflow-wrap:anywhere also erases a table cell's min-content width,
+     so the auto layout starves the short columns and breaks words inside them
+     ("2014-01-02" as "201 / 4-01 / -02"). Inside the wall tables words stay whole:
+     notes wrap at spaces, and anything genuinely wider than the table scrolls in its
+     own .scroll box instead. */
+  .scroll th,.scroll td,div[style*="overflow-x"] th,div[style*="overflow-x"] td{overflow-wrap:normal}
+  #chrono th,#chrono td:first-child,#chrono td:nth-child(3){white-space:nowrap}
   .cls{display:inline-block;width:17px;height:17px;line-height:17px;text-align:center;
     border-radius:4px;font-size:10px;font-weight:bold}
   .a{background:#12301a;color:var(--ok)} .b{background:#2a2a12;color:var(--accent)}
@@ -475,7 +482,7 @@ body[data-reg="cypherpunk"] #fleet-nav,body[data-reg="cypherpunk"] #fleet-nav a{
 <h2 id="ex4"><span data-i18n="h.077">Exhibit 4 · The chronology</span></h2>
 <div class="lede">Dates read from creation transactions and block headers, not from write-ups. The story starts on Bitcoin, three years before Ethereum's art history.</div>
 <div class="panel">
-<div class="scroll"><table>
+<div class="scroll"><table id="chrono">
   <tr><th>date</th><th>object</th><th>class</th><th>note</th></tr>
   <tr><td>2014-01-02</td><td>Counterparty genesis</td><td class="note">layer</td><td>BTC 278270 — an interpretation of ordinary Bitcoin transactions</td></tr>
   <tr><td>2015-03-11</td><td>Spells of Genesis <code>FDCARD</code></td><td><span class="cls f">f</span></td><td>BTC 347172 — bare 1-of-3 multisig, <b>still unspent in 2026</b></td></tr>

@@ -2,7 +2,7 @@
    a browser without the Translator API (no button, no throw, no store write) and a
    browser with a recording fake (button mounts, translates lettered leaves only,
    restores on toggle, obeys the estate-tongue event, never writes storage).
-   The fake Translation is a recording boundary, not a copy of the platform's. */
+   The fake Translator is a recording boundary, not a copy of the platform's. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -66,7 +66,7 @@ function makeSandbox(doc,{translation=null,languages=['lv']}={}){
                    getItem(){ throw new Error('FLOORS LAW: browser-translate must not read storage'); } } };
   sandbox.window=sandbox; sandbox.self=sandbox; sandbox.globalThis=sandbox;
   sandbox.Intl=Intl;
-  if(translation) sandbox.Translation=translation;
+  if(translation) sandbox.Translator=translation;
   return sandbox;
 }
 const drain=()=>new Promise(r=>setImmediate(r));
@@ -143,4 +143,18 @@ test('create() failure → honest degrade: offer disappears, page unchanged, not
   btn.click(); await drain(); await drain();
   assert.equal(w.host.children.length,0,'button removed after failure');
   assert.equal(w.p1.textContent,'the estate atlas, honest and counted','page unchanged');
+});
+
+
+test('nested controls and curated language text survive the translation layer', async()=>{
+  const w=makeDoc(), parent=new Element('section'), keyed=new Element('span'), child=new Element('p');
+  parent.textContent='parent container must survive';
+  keyed.setAttribute('data-i18n','plur.peace'); keyed.textContent='curated Latvian';
+  child.textContent='unkeyed prose';parent.appendChild(keyed);parent.appendChild(child);w.main.appendChild(parent);
+  const seen=[],fake={availability:async()=>'available',create:async()=>({translate:async text=>{seen.push(text);return '[draft] '+text;}})};
+  const sandbox=makeSandbox(w.doc,{translation:fake});vm.runInNewContext(source,sandbox);await drain();await drain();
+  w.host.children[0].children[0].click();await drain();await drain();
+  assert.equal(parent.textContent,'parent container must survive');assert.equal(parent.children.length,2);
+  assert.equal(keyed.textContent,'curated Latvian');assert.equal(child.textContent,'[draft] unkeyed prose');
+  assert.ok(!seen.includes('curated Latvian'));assert.ok(!seen.includes('parent container must survive'));
 });
