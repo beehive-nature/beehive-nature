@@ -87,7 +87,7 @@ test('a View change in a stale wallet tab cannot erase newer founder policy (the
   const gestureAt = afterGesture.selectedAt;
 
   // THE DEFECT CASE: the STALE wallet tab makes a presentation-only change
-  await tabB.click('[data-inspection="cypherpunk"]');
+  await tabB.click('#breg-cypherpunk');
   await tabB.waitForTimeout(300);
   const afterViewChange = await readKey(tabB);
   assert.equal(afterViewChange.audience, 'public', 'VIEW change preserved audience (orthogonality law)');

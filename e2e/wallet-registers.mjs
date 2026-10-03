@@ -267,7 +267,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['(rate cited below)', 'within the voucher'],
     ['The key in the config below is', 'within fund'],
     ['its Base address below is a bare', 'within fiat in'],
-    ['data block below the fold', 'the chain matrix names its own source-code data block'],
     ['no contexts yet — forge one below', 'within the key forge'],
     ['NOT YET on chain — bridge below', 'keychain → bridge, same task, after it'],
     ['use the recovery lane below', 'within the keychain'],
@@ -332,7 +331,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // the visible words, the visible controls, and any engineering left showing.
 {
   const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'peer-sec'],
-    keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
+    keep: ['bpay-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
   const measure = (page, id) => page.evaluate(i => {
     // shown = it has boxes AND no closed <details> folds it (this Chromium keeps boxes for a closed note's content)
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
@@ -378,7 +377,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     tasks.map(t => `${t}: bee ${bodies.bee[t].shownSecs.length} sections · raver ${bodies.raver[t].cardsShown} cards`).join(' · '));
   const all = [].concat(...tasks.map(t => TASKS[t]));
   const m = (reg, id) => bodies[reg][tasks.find(t => TASKS[t].includes(id))].sec[id];
-  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'insc-sec', 'receipts-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
+  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'receipts-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
   ok('each section with engineering reads as three bodies by visible words: cypherpunk > bee (engineering folded) > raver (words folded)',
     folded.every(id => m('cypherpunk', id).words.length > m('bee', id).words.length && m('bee', id).words.length > m('raver', id).words.length),
     folded.map(id => `${id} ${m('cypherpunk', id).words.length}/${m('bee', id).words.length}/${m('raver', id).words.length}`).join(' · '));
@@ -422,13 +421,13 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
     await page.click(`#wl-dock [data-wl-go="${go}"]`); await page.waitForTimeout(250);
     leads[go] = await page.evaluate(() => {
-      const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && e.id !== 'wl-dock').sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+      const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && !['wl-dock','wallet-identity'].includes(e.id)).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
       const g = [...document.querySelectorAll('#wl-deck [data-wl-for]')].filter(s => s.getClientRects().length).map(s => s.textContent).join();
       return (first && first.id) + (g ? ':' + g : '');
     });
   }
   ok('raver: EVERY deck opens on art before any section (have on the stage, the rest on their lit glyph)',
-    leads.have === 'wl-rave' && ['move', 'add', 'keep', 'key', 'proof', 'all'].every(g => leads[g].startsWith('wl-deck:')), JSON.stringify(leads));
+    leads.have === 'wl-rave' && leads.keep === 'wallet-storage' && ['move', 'add', 'key', 'proof', 'all'].every(g => leads[g].startsWith('wl-deck:')), JSON.stringify(leads));
   await page.click('#wl-dock [data-wl-go="add"]'); await page.waitForTimeout(600);
   const filled = async () => page.evaluate(() => {
     const probe = document.createElement('i'); probe.style.color = getComputedStyle(document.body).getPropertyValue('--reg-primary').trim(); document.body.appendChild(probe);
@@ -679,7 +678,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     const secs = [...document.querySelectorAll('main>section')];
     return { n: secs.length, orphans: secs.filter(s => !rows.has(s.dataset.wlTask) || !glyphs.has(s.dataset.wlTask)).map(s => s.id || s.querySelector('h2').textContent) };
   });
-  ok('every one of the 19 sections belongs to a task a bee row and a raver glyph can open', reach.n === 19 && reach.orphans.length === 0, reach.orphans.join(', '));
+  ok('every one of the 18 sections belongs to a task a bee row and a raver glyph can open', reach.n === 18 && reach.orphans.length === 0, reach.orphans.join(', '));
   const map = await page.evaluate(() => {
     const dom = Object.fromEntries([...document.querySelectorAll('main>section[data-wl-task]')].map(s => [s.id, s.dataset.wlTask]));
     const early = window.WL_TASK_OF || {};

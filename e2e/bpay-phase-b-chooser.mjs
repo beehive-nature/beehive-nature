@@ -126,7 +126,7 @@ const lsPolicy = await page.evaluate(() => localStorage.getItem('bpay-policy-v1'
 check('resolved policy recorded in localStorage', !!lsPolicy && JSON.parse(lsPolicy).audience === 'public' && !!JSON.parse(lsPolicy).selectedAt, lsPolicy || 'absent');
 
 // the quote-service now points at the mock (seeded pre-boot); expose it in cypherpunk view
-await page.click('[data-inspection="cypherpunk"]');
+await page.click('#breg-cypherpunk');
 const bridgeVisible = await page.$eval('#bpay-bridge', e => e.value);
 check('quote-service field visible in cypherpunk view', bridgeVisible.includes('/mock-bridge'), bridgeVisible);
 await page.click('#bpay-quote-go');

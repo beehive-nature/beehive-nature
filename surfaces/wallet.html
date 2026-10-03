@@ -15,7 +15,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
-<title>the BNR wallet: one soul, every chain</title>
+<title>skaists heART WALLet · accounts, coins &amp; bPay</title>
   <link rel="icon" type="image/svg+xml" href="assets/house/house-seal-roundel.svg">
 <style>
 /* SEMANTIC COLOUR — meanings picked FIRST, hues second (master design pass
@@ -168,6 +168,20 @@ pre b{color:var(--ink)}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 footer .wl-foot>summary{justify-content:center}
+
+/* One identity and action bar across every wallet presentation and task. */
+#wallet-identity{order:-7;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:10px}
+.wallet-brand{font-size:clamp(18px,3vw,24px);text-decoration:none;color:var(--ink)}
+#wallet-identity nav{display:flex;gap:8px;flex-wrap:wrap}
+#wallet-identity nav a{font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:20px;text-decoration:none}
+#wallet-storage{order:-3;display:none;padding:18px 0}
+body:is([data-wl-view="keep"],[data-wl-view="all"]) #wallet-storage,body[data-reg="cypherpunk"] #wallet-storage{display:block}
+#wallet-storage h2{font-size:22px} #wallet-storage p{font-size:15px;line-height:1.5}
+.wallet-storage-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wallet-storage-options a{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid var(--line);border-radius:16px;text-decoration:none}
+.wallet-storage-options strong{font-size:20px}.wallet-storage-options span{font-size:14px}
+body[data-wl-view="keep"] #wl-deck,body[data-wl-view="keep"] #wl-lines{display:none!important}
+@media(max-width:520px){.wallet-storage-options{grid-template-columns:1fr}#wallet-identity nav a{padding:10px 8px}}
 </style>
 <script>
 /* ══ THE KIT PROFILE — every estate-only fact this surface carries lives HERE,
@@ -641,7 +655,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 var w='home',own=null;try{own=history.state&&history.state.wlView;w=own||sessionStorage.getItem('wl.view')||'home';}catch(e){}
 /* the section-to-task map, stated here too so a #section deep link paints in its
    own task at FIRST paint; the gate proves it equals the data-wl-task attributes */
-var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','insc-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
+var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
 window.WL_TASK_OF=T;
 /* the sections HELD out of their task in bee and raver (data-wl-held): a deep
    link to one lands on "show me everything", the one view there that shows it */
@@ -658,13 +672,22 @@ window.wlRead=function(el,ok){if(!el)return;if(ok)el.removeAttribute('data-read-
 window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(typeof p==='string')el.appendChild(document.createTextNode(p));else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
+<div id="wallet-identity">
+  <a class="wallet-brand" href="#" data-wl-go="home">skaists <strong>heART WALLet</strong></a>
+  <nav aria-label="Wallet actions"><a href="#wallet-accounts">Accounts &amp; coins</a><a href="#pay-sec">bPay · send / receive</a><a href="#bpay-sec" data-wallet-store>bPay · store</a></nav>
+</div>
+<div id="wallet-storage">
+  <h2>bPay once · choose your storage network</h2>
+  <p>Autonomi uses ANT on Arbitrum. Arweave uses AR. Review the quote and network before authorizing payment.</p>
+  <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>Storage quotes · ETH for network fees</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>Publish a file · keep its receipt</span></a></div>
+</div>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
   <span class="badge-live"><i></i><span data-i18n="wl.badge">your keys stay in this tab only, gone when you close it</span></span>
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet<span class="h1-arg" data-i18n="wl.h1arg">: one soul, every chain</span></h1>
+  <h1>Your accounts. Your coins. Your choice.</h1>
   <p data-reg="bee" data-i18n="wl.reg.connect.bee">one identity, every chain. your bzDiD is your wallet: connect it once to see your balances on all your chains, sign and hold your keys. nothing leaves your browser.</p>
   <p data-reg="raver" data-i18n="wl.reg.connect.raver">one soul, every chain. the lights show what you hold.</p>
   <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
@@ -695,7 +718,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.bee.have.s">every chain, read live in this browser</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="move"><span class="wlb-i" aria-hidden="true">💸</span><span class="wlb-t"><b data-i18n="wl.bee.move">pay or get paid</b><small data-i18n="wl.bee.move.s">send, receive or swap</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="add"><span class="wlb-i" aria-hidden="true">💳</span><span class="wlb-t"><b data-i18n="wl.bee.add">add money</b><small data-i18n="wl.bee.add.s">the ways to put money in</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
-    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.bee.keep">keep something forever</b><small data-i18n="wl.bee.keep.s">pay once to store a file on a permanent network</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b >bPay once · store a file</b><small >Autonomi / ANT · Arweave / AR</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="key"><span class="wlb-i" aria-hidden="true">🗝</span><span class="wlb-t"><b data-i18n="wl.bee.key">my key and my safe</b><small data-i18n="wl.bee.key.s">your passkey, your recovery words, your sealed secrets</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
     <button type="button" class="wlb-row" data-wl-go="proof"><span class="wlb-i" aria-hidden="true">🗺</span><span class="wlb-t"><b data-i18n="wl.bee.proof">see how it works</b><small data-i18n="wl.bee.proof.s">every bill recomputed, every rail listed</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
   </div>
@@ -704,7 +727,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </div>
 <div id="wl-bar" data-reg="bee">
   <button type="button" class="wlb-back" data-wl-go="home"><span aria-hidden="true">‹</span> <span data-i18n="wl.bee.back">wallet</span></button>
-  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" data-i18n="wl.bee.keep">keep something forever</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
+  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" >bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
 </div>
 
 <nav id="wl-dock" data-reg="raver" aria-label="wallet">
@@ -720,7 +743,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" >bPay once · Autonomi / ANT or Arweave / AR</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -730,9 +753,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <button type="button" class="wlr-card" data-wl-card-for="voucher-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🎟</span><span class="w" data-i18n="wl.rv.s.voucher-sec">voucher</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="fund-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.s.fund-sec">card</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="peer-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🏧</span><span class="w" data-i18n="wl.rv.s.peer-sec">fiat in</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="bpay-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.bpay-sec">keep a file</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="insc-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🎨</span><span class="w" data-i18n="wl.rv.s.insc-sec">garden</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="arw-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" data-i18n="wl.rv.s.arw-sec">Arweave</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bpay-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" >Autonomi · ANT</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="arw-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" >Arweave · AR</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="kc-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🗝</span><span class="w" data-i18n="wl.rv.s.kc-sec">keychain</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="vault-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🔐</span><span class="w" data-i18n="wl.rv.s.vault-sec">vault</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="forge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">♾</span><span class="w" data-i18n="wl.rv.s.forge-sec">key forge</span></button>
@@ -1282,7 +1304,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
-  <h2>💸 pay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
+  <h2>💸 bPay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
@@ -1436,7 +1458,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      first-class BEFORE quote; this panel records the policy the quote actually
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
 <section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
-  <h2>🧾 <span data-i18n="wl.bpay.h">bPay: the preservation invoice</span></h2>
+  <h2>🧾 <span >Autonomi · ANT — storage quote</span></h2>
   <div class="law" id="bpay-accounts">Check your other balances in <a href="#wallet-accounts">accounts &amp; following</a>. Saved public addresses do not grant spending access.</div>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
   <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
@@ -1451,28 +1473,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   receipt substitutes for it.</p></details>
   <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
 </section>
-<script src="bpay-invoice.js?v=3" defer></script>
-
-<!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
-     piece leads, the numbers stand beside it. Every SVG here is fetched from
-     the collection's own contract at read time; nothing is cached, stored, or
-     redrawn by this page. ══ -->
-<section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
-  <h2 data-wl-tech>🎨 <span data-i18n="wl.insc.h2">inscriptions: your garden, drawn on-chain</span></h2>
-  <h2 data-reg="bee">🎨 <span data-i18n="wl.bee.h.insc">your garden, drawn on the chain</span></h2>
-  <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
-  <b>true tier</b> through the estate's one level-truth module, the same one the market and the museum
-  use. Keyless, read-only, nothing signed.</div>
-  <div class="row" style="margin-top:8px">
-    <input id="insc-addr" class="small" placeholder="0x… address or a .base.eth name — defaults to your connected soul" spellcheck="false" autocomplete="off" style="flex:2;min-width:220px;font-family:'IBM Plex Mono',monospace">
-    <button id="insc-go" class="gold">🎨 <span data-i18n="wl.insc.go">draw the garden</span></button>
-  </div>
-  <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">connect your keychain, or type an address</div>
-  <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
-  <div class="law" data-wl-tech style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
-  checked against the collection's <b>own getMeta</b> at read time. A disagreement prints as a
-  <b>GATE FAILURE</b> on the card, never smoothed into a number that looks fine.</div>
-</section>
+<script src="bpay-invoice.js?v=4" defer></script>
+<script>document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
@@ -2317,6 +2319,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <div class="law">The original wallet scope plus the Graphene and Cosmos studies, with separate <b>read</b> and <b>sign</b> capabilities. READ means this page has a public account reader; CODE means another implementation exists; EVALUATION means a bounded bench; GAP means required integration is missing; STUDY means researched scope. These labels do not certify a device, a payment or a deployment. Tokens, payment protocols and storage networks are identified separately from blockchains.</div>
   <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/wallet-accounts-follow-2026-10-03/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
   </details>
+  <p><a href="#wallet-accounts">Add or follow an account on a supported network</a></p>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
   <div id="matrix-body" data-wl-tech></div>
 </section>
@@ -2334,7 +2337,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 </main>
 <footer>
-  🗝 the BNR wallet · bzDiD is the wallet · <a href="index.html">the hub</a>
+  skaists heART WALLet · <a href="museum.html">Art &amp; collections</a> · <a href="index.html">the hub</a>
   <details class="wl-foot" data-reg-disclose><summary data-i18n="wl.foot.how">how this page is built</summary>
   <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · this page: surfaces/wallet.html
@@ -2352,7 +2355,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <!-- the estate's ONE level-truth module — the same file market.html and
      museum.html load. Imported, never re-derived: a third copy of the SeedData
      decode is exactly how the lowest-tier-art bug comes back. -->
-<script src="level-truth.js?v=2"></script>
+
 
 <script>
 (function(){
@@ -2500,7 +2503,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // enroll a NEW passkey on THIS origin; returns {pub:PUB_WA_…, credIdHex, credIdB64} or throws honestly
   async function enrollAccountPasskey(){
     var cred=await navigator.credentials.create({publicKey:{
-      rp:{name:'BNR wallet',id:location.hostname},
+      rp:{name:'skaists heART WALLet',id:location.hostname},
       user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL,displayName:SOUL+' (account passkey)'},
       challenge:crypto.getRandomValues(new Uint8Array(32)),
       pubKeyCredParams:[{type:'public-key',alg:-7}],
@@ -3742,7 +3745,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      here); a U2F-only or pre-PRF firmware key is refused honestly. */
   async function enrollHardware(){
     var cred=await navigator.credentials.create({publicKey:{
-      rp:{name:'BNR wallet'},
+      rp:{name:'skaists heART WALLet'},
       user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL||'you',displayName:SOUL||'you'},
       challenge:crypto.getRandomValues(new Uint8Array(32)),
       pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
@@ -5251,111 +5254,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
   $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
-
-  /* ══ INSCRIPTIONS — the connected soul's garden, drawn from chain.
-     EVERY piece of chain arithmetic here comes from LevelTruth. This surface
-     builds NO calldata and decodes NO string of its own: the SeedData encoding
-     (a static struct, no leading offset word) and the 128 KB decode ceiling
-     live in that one module, and re-deriving either here is precisely how the
-     always-lowest-tier bug returns. ══ */
-  var LT = window.LevelTruth || null;
-  function inscTarget(){
-    var typed = ($('insc-addr').value||'').trim();
-    if(typed) return typed;
-    if(MPRK && SOUL){
-      var r = BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
-      try{ return evmAddressFromSeed(r.seed) } finally { r.seed.fill(0) }
-    }
-    return null;
-  }
-  /* the art is handed to the browser as an <img> data URI rather than injected
-     as live markup: an SVG in an <img> cannot run script, and this is
-     contract-supplied content. Static art renders identically. */
-  function svgImg(svg){
-    var b64;
-    try{ b64 = btoa(unescape(encodeURIComponent(svg))) }catch(e){ return '' }
-    return '<img alt="on-chain inscription" loading="lazy" src="data:image/svg+xml;base64,'+b64+'" '+
-      'style="width:100%;aspect-ratio:1;object-fit:contain;display:block;background:#07060d;border-radius:10px">';
-  }
-  function inscCard(p){
-    var lvlLine = p.gate && p.gate.agree === false
-      ? '<div style="color:var(--amber);font-size:10.5px;margin-top:5px;line-height:1.6"><b>⚠ GATE FAILURE</b><br>'+
-        'this page reads level <b>'+p.gate.ours+'</b>; the contract’s own getMeta says <b>'+p.gate.theirs+'</b>. '+
-        'The number is not smoothed — the disagreement is the finding.</div>'
-      : '<div style="font-size:12px;color:var(--ink);margin-top:5px;letter-spacing:.14em">'+
-        esc(LT.pips(p.lvl, LT.pipmax(p.col)))+' <span style="color:var(--dim);font-size:10px;letter-spacing:0">level '+p.lvl+
-        (p.gate && p.gate.agree ? ' · getMeta agrees' : '')+'</span></div>';
-    return '<div style="border:1px solid var(--line2);border-radius:12px;padding:10px;background:var(--well)">'+
-      svgImg(p.svg)+
-      '<div style="font-size:12.5px;font-weight:600;margin-top:8px">'+esc(p.col.sym)+'</div>'+
-      lvlLine+
-      '<div style="font-size:9.5px;color:var(--faint);margin-top:5px;line-height:1.7">balance <b style="color:var(--ink)">'+
-      p.balDisp+'</b><br>seed '+p.seed.toLocaleString()+' · '+p.svg.length.toLocaleString()+' bytes of art</div>'+
-      '</div>';
-  }
-  async function inscDraw(){
-    if(!LT){ $('insc-stat').innerHTML='<b style="color:var(--amber)">level-truth.js did not load</b> — the garden stays closed rather than guess a tier.'; return }
-    var target = inscTarget();
-    $('insc-grid').innerHTML='';
-    if(!target){ $('insc-stat').textContent='connect your keychain, or type an address — nothing is read until then'; return }
-    /* a .base.eth name resolves through the same registry-first path the FUND
-       panel uses; a raw 0x goes straight through */
-    if(!/^0x[0-9a-fA-F]{40}$/.test(target)){
-      $('insc-stat').textContent='resolving '+target+'…';
-      var resolved = await (window.__bnrResolveName ? window.__bnrResolveName(target) : Promise.resolve(null));
-      if(!resolved){ $('insc-stat').innerHTML='<b style="color:var(--amber)">that name has no address record</b> — paste a 0x… address instead.'; return }
-      target = resolved;
-    }
-    $('insc-stat').textContent='reading '+target.slice(0,10)+'… across '+LT.COLLECTIONS.length+' collections…';
-    var balCalls = LT.COLLECTIONS.map(function(c){ return {to:c.c, data:'0x70a08231'+LT.AD(target)} });
-    var bals = await LT.rpc(balCalls);
-    if(!bals){ $('insc-stat').innerHTML='<b style="color:var(--amber)">the rails did not answer</b> — no art is drawn rather than a wrong one.'; return }
-    var held = [];
-    for(var i=0;i<LT.COLLECTIONS.length;i++){
-      var b = bals[i];
-      if(!b || b==='0x') continue;
-      var raw; try{ raw = BigInt(b) }catch(e){ continue }
-      if(raw === 0n) continue;
-      /* the SAME normalisation market.html and museum.html use — whole tokens,
-         because the contract does not re-apply decimals() to SeedData.seed */
-      held.push({col: LT.COLLECTIONS[i], seed: Number(raw/1000000000n), raw: raw});
-    }
-    if(!held.length){
-      $('insc-grid').innerHTML =
-        '<div style="grid-column:1/-1;border:1px dashed var(--line2);border-radius:12px;padding:26px 18px;text-align:center">'+
-        '<div style="font-size:13px;color:var(--ink)">no inscriptions yet</div>'+
-        '<div style="font-size:10.5px;color:var(--dim);margin-top:7px;line-height:1.8;max-width:44ch;margin-inline:auto">'+
-        'This address holds none of the '+LT.COLLECTIONS.length+' ERC-20i collections this page reads. '+
-        'Nothing is drawn — an empty garden is empty, not a placeholder.</div></div>';
-      $('insc-stat').innerHTML='✓ read '+target.slice(0,10)+'… — <b>holds none of the '+LT.COLLECTIONS.length+' collections</b>.';
-      return;
-    }
-    $('insc-stat').textContent='drawing '+held.length+' piece'+(held.length===1?'':'s')+' at true tier…';
-    var pieces = [];
-    for(var k=0;k<held.length;k++){
-      var h = held[k];
-      var lvl = LT.lvlOf(h.seed, h.col);
-      var art = await LT.rpc([{to:h.col.c, data: LT.svgCallData(h.col, h.seed, 0)}]);
-      if(!art || !art[0] || art[0]==='0x') continue;
-      var svg; try{ svg = LT.decodeString(art[0]) }catch(e){ continue }
-      /* THE GATE: the collection's own getMeta, live, every time */
-      var gate = await LT.verifyLevel(h.col, h.seed, 0);
-      pieces.push({col:h.col, seed:h.seed, lvl:lvl, svg:svg, gate:gate,
-        balDisp: fromBaseUnits(h.raw, 9)+' '+h.col.sym});
-    }
-    if(!pieces.length){
-      $('insc-stat').innerHTML='<b style="color:var(--amber)">balances found, but no art decoded</b> — nothing is drawn rather than a broken frame.';
-      return;
-    }
-    pieces.sort(function(a,b){ return b.lvl-a.lvl || b.seed-a.seed });   // the highest tier leads
-    $('insc-grid').innerHTML = pieces.map(inscCard).join('');
-    var bad = pieces.filter(function(p){ return p.gate && p.gate.agree===false }).length;
-    $('insc-stat').innerHTML = '✓ <b>'+pieces.length+' piece'+(pieces.length===1?'':'s')+'</b> drawn from chain at true tier'+
-      (bad ? ' · <b style="color:var(--amber)">'+bad+' GATE FAILURE</b>' : ' · <b style="color:var(--leaf)">every level agrees with the contract’s own getMeta</b>')+
-      ' · '+esc(target.slice(0,10))+'…';
-  }
-  $('insc-go').onclick=inscDraw;
-  $('insc-addr').addEventListener('keydown',function(e){ if(e.key==='Enter')inscDraw() });
 
   /* ── PAYMENT NAME — one name, both rails ─────────────────────────────── */
   function pnSide(which){

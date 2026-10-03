@@ -20,10 +20,11 @@
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var card = document.getElementById('bpay-card');
   if(!card) return;
-  var BRIDGE_DEFAULT = 'http://127.0.0.1:8807';
+  var BRIDGE_DEFAULT = ''; // No local service is required or selected by this wallet.
   var LS = 'bpay-policy-v1';
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };
   try { var saved = JSON.parse(localStorage.getItem(LS)||'null'); if (saved && typeof saved==='object') st = Object.assign(st, saved); } catch(e){}
+  if (/^https?:\/\/(localhost|127\.0\.0\.1):8807(?:\/|$)/i.test(st.bridge)) st.bridge = '';
   /* SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
      this tab NEVER writes its whole local snapshot back — a stale tab must
      not erase newer founder policy. Presentation/service writes carry ONLY
@@ -64,20 +65,13 @@
   }
 
   function renderChooser(){
-    var h = '';
+    var h = '<p><a href="myspace.html#eternal">Choose a file for Autonomi storage</a> · <a href="#arw-sec">Use Arweave instead</a></p><p>The hosted Autonomi flow uses ANT and a separate ETH network fee. The invoice below is a reference; it does not store your file or authorize a payment.</p>';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
     h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
     h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
     h += audBtn('selected-people','👥','wl.bpay.aud.selected','Selected people',false,['bd.aud.selected.why','Sharing with people you pick is not ready.'],['bd.aud.selected.tech','recipient capability/key granting not yet qualified']);
     h += '<div style="font-size:10px;opacity:.6;margin-top:6px">' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting, never silently inferred') + '</div>';
-    // inspection depth — a SEPARATE axis; never alters audience or authority
-    h += '<div class="row" style="margin-top:12px;gap:8px;align-items:center;flex-wrap:wrap">';
-    h += '<span style="font-size:11px;opacity:.8">' + T('wl.bpay.inspect','view') + ':</span>';
-    ['newbee','raver','cypherpunk'].forEach(function(r){
-      h += '<button type="button" data-inspection="' + r + '" style="padding:3px 10px;border:1px solid ' + (st.inspection===r?'var(--cyan)':'#1d4655') + ';border-radius:12px;background:' + (st.inspection===r?'#0e2d3a':'transparent') + ';color:inherit;cursor:pointer;font-size:11px">' + r + '</button>';
-    });
-    h += '</div>';
-    h += '<div style="font-size:10px;opacity:.6">' + T('wl.bpay.inspect.note','changes what you can inspect and configure, never the audience or your authority') + '</div>';
+    // Inspection follows the wallet register; there is no second view selector.
     // the quote-service endpoint is cypherpunk-view configuration
     h += '<div class="row" data-min-insp="cypherpunk" style="margin-top:6px;gap:8px;align-items:center;display:none">';
     h += '<span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span>';
@@ -93,8 +87,8 @@
     }
     // the honest waiting state — until Phase C earns the authorization route
     h += '<div style="margin-top:12px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
-    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.state','awaiting your authorization') + '</b>';
-    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.statenote','the authorization surface is not built yet. this panel renders; it cannot spend') + '</div>';
+    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','Quote only · payment unavailable in this panel') + '</b>';
+    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.quoteonly.note','Choose a file above to use the hosted storage flow. No payment is requested here.') + '</div>';
     h += '</div>';
     return h;
   }
@@ -132,7 +126,7 @@
   }
 
   function applyInspection(){
-    var want = st.inspection;
+    var want = document.body.dataset.reg === 'bee' ? 'newbee' : (document.body.dataset.reg || 'newbee');
     var order = { newbee:0, raver:1, cypherpunk:2 };
     card.querySelectorAll('[data-min-insp]').forEach(function(el){
       el.style.display = (order[(el.dataset.minInsp||'cypherpunk')] <= order[want]) ? '' : 'none';
@@ -156,9 +150,6 @@
         render();
       });
     });
-    card.querySelectorAll('[data-inspection]').forEach(function(b){
-      b.addEventListener('click', function(){ st.inspection = b.dataset.inspection; save({ inspection: st.inspection }); render(); });
-    });
     var bridgeInput = document.getElementById('bpay-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save({ bridge: st.bridge }); });
     var go = document.getElementById('bpay-quote-go');
@@ -168,6 +159,7 @@
   function freshQuote(){
     var stat = document.getElementById('bpay-quote-stat');
     var fresh = document.getElementById('bpay-fresh');
+    if (!st.bridge) { if(stat) stat.textContent = 'Use the hosted file flow above. No reference quote service is configured.'; return; }
     if (!PIN) { if(stat) stat.textContent = '⚠ ' + T('wl.bpay.loadfail','no invoice loaded'); return; }
     if (stat) stat.textContent = '…';
     // the RESOLVED policy rides the request: audience chosen by the founder,
@@ -215,6 +207,12 @@
       if (stat) stat.textContent = '⚠ ' + T('wl.bpay.freshfail','fresh quote failed') + ': ' + (e && e.message ? e.message.slice(0,180) : 'error');
     });
   }
+
+  new MutationObserver(function(){
+    st.inspection = document.body.dataset.reg === 'bee' ? 'newbee' : document.body.dataset.reg;
+    save({ inspection: st.inspection });
+    applyInspection();
+  }).observe(document.body, { attributes:true, attributeFilter:['data-reg'] });
 
   fetch('bpay-invoice.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
    .then(function(inv){ refInvoice = inv; PIN = inv.domain && inv.domain.artifact && inv.domain.artifact.sha256; render(); })
