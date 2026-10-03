@@ -868,7 +868,7 @@ dependencies = [
 
 [[package]]
 name = "ant-extsig"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "alloy",
  "ant-core",
@@ -877,6 +877,7 @@ dependencies = [
  "evmlib",
  "hex",
  "serde_json",
+ "sha2",
  "tokio",
 ]
 

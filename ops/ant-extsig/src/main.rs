@@ -13,18 +13,26 @@
 //! ADR-0003's "every keyless consumer" flow; identical EVM signing, same
 //! custody boundary). The estate `Client` never receives the wallet.
 //!
-//! DUAL-CEILING ENFORCEMENT & PRE-SEND GAS SIMULATION:
-//! - Storage ceiling: loaded dynamically from ETERNALIZATION-EDITION-V2.json (fails closed if absent).
-//!   For wave arm: checked from payment_intent.total_amount.
-//!   For merkle arm: computed pre-send by evaluating evm_network.estimate_merkle_payment_cost
-//!   across all prepared batches (matches Solidity PaymentVault median16 formula).
-//!   Checked at preparation AND immediately pre-finalize; refuses with exact overage if exceeded.
-//! - Exact Token Approval: if allowance is insufficient, the harness approves the payment
-//!   vault for EXACTLY the required quote sum (never U256::MAX), and gas-checks the approval.
-//! - Gas ceiling: aggregate worst-case gas commitment across all planned transactions in the upload
-//!   (approval + payment transactions) <= 0.0002 ETH (200_000_000_000_000 wei). Validated
-//!   PRE-SEND via provider gas & fee estimation, driver fee cap enforcement via
-//!   MaxFeePerGas::LimitedAuto, and verified post-send against mined GasInfo.
+//! CEILINGS AND STOP CONDITIONS (all read from the gate, `gate.rs`):
+//! - The gate is `ETERNALIZATION-EDITION-V2.json`. Its path comes from `--gate`,
+//!   `ANT_EXTSIG_GATE`, or this crate's own location, never the working
+//!   directory. An absent, unreadable or incomplete gate refuses; there is no
+//!   built-in fallback number.
+//! - Storage ceiling: the sum of prepared quotes (wave: `payment_intent.total_amount`;
+//!   merkle: `estimate_merkle_payment_cost` summed over every batch) must be at
+//!   or below `separatedCeilings.storageMaxAnt` before either payment arm is entered.
+//! - Exact token approval: the vault is approved for exactly the quoted sum,
+//!   never an unlimited amount.
+//! - Gas ceiling (`budget.rs`): `separatedCeilings.gasMaxEth` is an aggregate
+//!   over the whole upload and every attempt at it. Before every signature the
+//!   transaction's worst case is reserved in a persistent ledger; a failed or
+//!   unknown-outcome send keeps its reservation; only a mined receipt lowers
+//!   it. The per-gas fee cap for each send is derived from what remains.
+//!   evmlib re-estimates gas when it sends, so the checked limit is not a
+//!   bound on the signed limit; the fee cap is what the signer enforces.
+//! - Stop conditions: when the file is the gate's artifact (or
+//!   `--enforce-gate-artifact` is given), tar sha256, chunk count and client
+//!   version must all match the gate before the first signature.
 //!
 //! ARBITRUM NITRO PRECOMPILE CITATION & DEVNET CALIBRATION:
 //! Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
@@ -36,8 +44,8 @@
 //! Note: the cited precompile reference documents the interface methods without stating specific
 //! fee constants. Numeric fee figures (0.1 Gwei devnet calibration, ~0.01-0.1 Gwei mainnet observations)
 //! are empirical and UNVERIFIED against reference documentation text.
-//! Local Anvil defaults to Ethereum L1 base fees (1.0 Gwei = 1,000,000,000 wei). If the network base fee
-//! or worst-case commitment exceeds 0.0002 ETH, the harness cleanly refuses pre-send.
+//! Local Anvil defaults to a 1 Gwei base fee. When the network fee does not fit
+//! the remaining gas budget for a transaction, the harness refuses before signing.
 
 use alloy::network::TransactionBuilder;
 use alloy::providers::Provider;
@@ -47,94 +55,17 @@ use ant_core::data::{
 };
 use ant_node::devnet::DevnetConfig;
 use ant_protocol::evm::Wallet;
-use evmlib::GasInfo;
 use evmlib::common::Amount;
 use evmlib::transaction_config::{MaxFeePerGas, TransactionConfig};
 use serde_json::json;
+use sha2::{Digest, Sha256};
 
-/// Parses a JSON value (number or string representation of a decimal) to 18-decimal fixed-point integer (atto/wei).
-/// Fails closed on any parse error; avoids floating point arithmetic.
-pub fn parse_decimal_to_atto(val: &serde_json::Value) -> Result<u128, Box<dyn std::error::Error>> {
-    let s = match val {
-        serde_json::Value::Number(n) => n.to_string(),
-        serde_json::Value::String(s) => s.clone(),
-        _ => return Err(format!("expected number or string for decimal value, got {val:?}").into()),
-    };
-    let parts: Vec<&str> = s.trim().split('.').collect();
-    if parts.is_empty() || parts.len() > 2 {
-        return Err(format!("invalid decimal string: '{s}'").into());
-    }
-    let part0 = parts[0];
-    let int_part: u128 = part0.parse::<u128>()
-        .map_err(|e| format!("failed to parse integer part '{part0}' in '{s}': {e}"))?;
-    let mut frac_str = if parts.len() == 2 { parts[1].to_string() } else { String::new() };
-    if frac_str.len() > 18 {
-        frac_str.truncate(18);
-    } else {
-        while frac_str.len() < 18 {
-            frac_str.push('0');
-        }
-    }
-    let frac_part: u128 = if frac_str.is_empty() { 0 } else {
-        frac_str.parse::<u128>()
-            .map_err(|e| format!("failed to parse fractional part '{frac_str}' in '{s}': {e}"))?
-    };
-    let int_scaled = int_part.checked_mul(1_000_000_000_000_000_000)
-        .ok_or_else(|| format!("overflow converting integer part of '{s}' to 18-decimal fixed point"))?;
-    Ok(int_scaled.saturating_add(frac_part))
-}
+mod budget;
+mod gate;
+use budget::{gas_limit_with_buffer, payment_floor_limit, plan_fee_cap, GasLedger};
+use gate::Gate;
 
-/// Reads ceilings from canonical gate file ETERNALIZATION-EDITION-V2.json.
-/// Fails closed if the gate file is missing, unreadable, or does not contain valid bounds.
-pub fn load_ceilings() -> Result<(u128, u128), Box<dyn std::error::Error>> {
-    let candidates = [
-        std::path::PathBuf::from("ETERNALIZATION-EDITION-V2.json"),
-        std::path::PathBuf::from("../../ETERNALIZATION-EDITION-V2.json"),
-    ];
-
-    for path in &candidates {
-        if path.exists() {
-            let content = std::fs::read_to_string(path)
-                .map_err(|e| format!("failed to read gate file {}: {e}", path.display()))?;
-            let v: serde_json::Value = serde_json::from_str(&content)
-                .map_err(|e| format!("failed to parse JSON from gate file {}: {e}", path.display()))?;
-            let ceilings = v.get("separatedCeilings")
-                .ok_or_else(|| format!("gate file {} missing 'separatedCeilings'", path.display()))?;
-
-            let storage_val = ceilings.get("storageMaxAnt")
-                .ok_or_else(|| format!("gate file {} missing 'storageMaxAnt'", path.display()))?;
-            let gas_val = ceilings.get("gasMaxEth")
-                .ok_or_else(|| format!("gate file {} missing 'gasMaxEth'", path.display()))?;
-
-            let storage_atto = parse_decimal_to_atto(storage_val)?;
-            let gas_wei = parse_decimal_to_atto(gas_val)?;
-
-            println!(
-                "      loaded ceilings from {}: storage <= {storage_atto} atto-ANT, gas <= {gas_wei} wei",
-                path.display()
-            );
-            return Ok((storage_atto, gas_wei));
-        }
-    }
-    Err("REFUSE: canonical gate file ETERNALIZATION-EDITION-V2.json absent or unreadable".into())
-}
-
-/// Verifies that a transaction's gas commitment does not exceed the gas ceiling.
-pub fn verify_transaction_gas(gas: &GasInfo, gas_ceiling_wei: u128, tx_desc: &str) -> Result<u128, Box<dyn std::error::Error>> {
-    let max_fee = gas.max_fee_per_gas.unwrap_or(gas.effective_gas_price);
-    let worst_case_gas_wei = (gas.gas_with_buffer as u128) * max_fee;
-    println!(
-        "      gas check [{tx_desc}]: gas_limit={} * max_fee_per_gas={} wei = {} wei (ceiling: {} wei)",
-        gas.gas_with_buffer, max_fee, worst_case_gas_wei, gas_ceiling_wei
-    );
-    if worst_case_gas_wei > gas_ceiling_wei {
-        let overage = worst_case_gas_wei - gas_ceiling_wei;
-        return Err(format!(
-            "REFUSE: gas ceiling exceeded for {tx_desc}: worst-case gas commitment {worst_case_gas_wei} wei exceeds ceiling {gas_ceiling_wei} wei by {overage} wei"
-        ).into());
-    }
-    Ok(worst_case_gas_wei)
-}
+type Res<T> = Result<T, Box<dyn std::error::Error>>;
 
 /// Verifies that storage quote sum does not exceed the storage ceiling.
 pub fn verify_storage_ceiling(amount_atto: u128, storage_ceiling_atto: u128, stage: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -150,64 +81,60 @@ pub fn verify_storage_ceiling(amount_atto: u128, storage_ceiling_atto: u128, sta
     Ok(())
 }
 
-/// Performs a pre-send simulation/estimation check to ensure transaction cannot exceed the gas ceiling.
-pub async fn check_pre_send_gas<P: Provider>(
-    provider: &P,
-    tx: TransactionRequest,
-    max_fee_limit: u128,
-    gas_ceiling_wei: u128,
-    stage: &str,
-) -> Result<u128, Box<dyn std::error::Error>> {
+/// Estimate one transaction and return the gas limit evmlib will set for it.
+async fn estimate_limit<P: Provider>(provider: &P, tx: TransactionRequest, stage: &str) -> Res<u128> {
     let est_gas = provider
         .estimate_gas(tx)
         .await
-        .map_err(|e| format!("pre-send gas estimation failed for {stage}: {e}"))?;
+        .map_err(|e| format!("REFUSE: gas estimation failed for {stage}; nothing signed: {e}"))?;
+    Ok(gas_limit_with_buffer(est_gas))
+}
+
+/// The network's current EIP-1559 max fee per gas.
+async fn network_fee<P: Provider>(provider: &P, stage: &str) -> Res<u128> {
     let fees = provider
         .estimate_eip1559_fees()
         .await
-        .map_err(|e| format!("pre-send fee estimation failed for {stage}: {e}"))?;
-
-    // Verify fee does not exceed driver cap
-    if fees.max_fee_per_gas > max_fee_limit {
-        return Err(format!(
-            "REFUSE: network fee estimate {} wei exceeds max fee limit {} wei before send for {stage}",
-            fees.max_fee_per_gas, max_fee_limit
-        ).into());
-    }
-
-    // evmlib uses estimated_gas * 120 / 100 for gas_with_buffer
-    let worst_case_gas_limit = (est_gas as u128).saturating_mul(120) / 100;
-    // Protect against fee spikes up to driver cap
-    let worst_case_commitment = worst_case_gas_limit.saturating_mul(max_fee_limit);
-
-    println!(
-        "      pre-send gas check [{stage}]: est_gas={est_gas} (buffer_limit={worst_case_gas_limit}) * max_fee_limit={max_fee_limit} wei = {worst_case_commitment} wei (ceiling: {gas_ceiling_wei} wei)"
-    );
-
-    if worst_case_commitment > gas_ceiling_wei {
-        let overage = worst_case_commitment - gas_ceiling_wei;
-        return Err(format!(
-            "REFUSE: pre-send gas ceiling exceeded for {stage}: worst-case gas commitment {worst_case_commitment} wei exceeds ceiling {gas_ceiling_wei} wei by {overage} wei"
-        ).into());
-    }
-    Ok(worst_case_commitment)
+        .map_err(|e| format!("REFUSE: fee estimation failed for {stage}; nothing signed: {e}"))?;
+    Ok(fees.max_fee_per_gas)
 }
+
+/// Fee headroom over the network estimate, as a fraction: 2/1 allows the fee
+/// to double between the check and the send, within the remaining budget.
+const FEE_HEADROOM: (u128, u128) = (2, 1);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let default_file = std::env::temp_dir().join("a1-genesis.json");
-    let file_path = std::env::args()
-        .nth(1)
-        .map(std::path::PathBuf::from)
-        .unwrap_or(default_file);
+    let mut gate_arg: Option<String> = None;
+    let mut file_arg: Option<std::path::PathBuf> = None;
+    let mut enforce_gate_artifact = false;
+    let mut args = std::env::args().skip(1);
+    while let Some(a) = args.next() {
+        match a.as_str() {
+            "--gate" => gate_arg = Some(args.next().ok_or("--gate needs a path")?),
+            "--enforce-gate-artifact" => enforce_gate_artifact = true,
+            _ if file_arg.is_none() && !a.starts_with("--") => file_arg = Some(std::path::PathBuf::from(a)),
+            other => return Err(format!("unexpected argument '{other}'").into()),
+        }
+    }
+    let file_path = file_arg.unwrap_or_else(|| std::env::temp_dir().join("a1-genesis.json"));
 
     if !file_path.exists() {
         let fixture = br#"{"protocol":"ant-extsig","version":"0.2.1","event":"genesis","timestamp":"2026-09-04T05:10:17Z","estate":"beehive-nature","payload":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}"#; // PUBLIC-CONSTANT fixture payload
         std::fs::write(&file_path, fixture)?;
     }
 
-    // Load ceilings from canonical gate file ETERNALIZATION-EDITION-V2.json (fails closed if absent/unreadable)
-    let (max_storage_ceiling_atto, max_gas_ceiling_wei) = load_ceilings()?;
+    // The gate is the only source of ceilings and stop conditions. Absent or
+    // unreadable means nothing runs.
+    let gate_env = std::env::var("ANT_EXTSIG_GATE").ok();
+    let gate = Gate::load(&gate::resolve_gate_path(gate_arg.as_deref(), gate_env.as_deref())?)?;
+    let (max_storage_ceiling_atto, max_gas_ceiling_wei) = (gate.storage_ceiling_atto, gate.gas_ceiling_wei);
+    println!(
+        "[0/6] gate {}: storage <= {max_storage_ceiling_atto} atto-ANT, gas <= {max_gas_ceiling_wei} wei (aggregate, all attempts)",
+        gate.path.display()
+    );
+    let file_sha256 = hex::encode(Sha256::digest(std::fs::read(&file_path)?));
+    let is_gate_artifact = gate.is_gate_artifact(&file_sha256);
 
     // -- [1/6] the swarm: real ant-nodes + embedded Anvil (member-paid EVM) --
     println!("[1/6] starting 8-node LocalDevnet + Anvil...");
@@ -228,14 +155,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         k
     };
 
-    // Configure member wallet with driver fee cap derived to fit aggregate worst-case gas (~300k gas buffer limit across approval + payment)
-    let max_fee_per_gas_limit: u128 = max_gas_ceiling_wei / 300_000;
+    // The member's signer. Its per-gas fee cap is set before each send, from
+    // what the gas ledger has left.
     let mut signer = Wallet::new_from_private_key(evm_network.clone(), member_key.trim_start_matches("0x"))?;
-    signer.set_transaction_config(TransactionConfig {
-        max_fee_per_gas: MaxFeePerGas::LimitedAuto(max_fee_per_gas_limit),
-    });
     println!("      member payer address: {}", signer.address());
-    println!("      signer gas policy: MaxFeePerGas::LimitedAuto({max_fee_per_gas_limit} wei/gas)");
 
     // -- [2/6] the estate client connects (NO wallet attached) --------------
     let cfg = ClientConfig {
@@ -257,6 +180,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "      {} chunks, DataMap {addr_hex}",
         prepared.total_chunks
     );
+
+    // Gate stop conditions about the artifact and the client, before any signature.
+    if is_gate_artifact || enforce_gate_artifact {
+        let tripped = gate.tripped_stop_conditions(&file_sha256, prepared.total_chunks as u64, gate::CLIENT_VERSION);
+        if !tripped.is_empty() {
+            return Err(format!(
+                "REFUSE: gate stop conditions tripped before any signature: {}",
+                tripped.join("; ")
+            )
+            .into());
+        }
+        println!("      gate stop conditions: tar sha256, chunk count and client version all match the gate");
+    } else {
+        println!("      gate stop conditions: not applied, this file is not the gate artifact (devnet fixture); ceilings still apply");
+    }
 
     // Verify storage quote sum against the storage ceiling before payment
     let quote_sum_atto: u128 = match &prepared.payment_info {
@@ -292,12 +230,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // -- [4/6] THE MEMBER PAYS -- standalone wallet, out-of-band -------------
     println!("[4/6] member wallet paying ({payment_arm} arm)...");
     let mut paid_atto: u128 = 0;
-    let mut total_gas_wei: u128 = 0;
-    let mut remaining_gas_ceiling_wei = max_gas_ceiling_wei;
     let provider = signer.to_provider();
     let vault_address = *evm_network.payment_vault_address();
 
-    // 4a. Exact Token Approval (never unlimited U256::MAX)
+    // The plan-wide gas ledger. Persistent when ANT_EXTSIG_LEDGER names a file;
+    // on devnet each run is a fresh chain, so the default is a per-run file.
+    let ledger_path = std::env::var("ANT_EXTSIG_LEDGER")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::env::temp_dir().join(format!("ant-extsig-gas-ledger-{}.json", std::process::id())));
+    let plan_id = format!("devnet:{}:{addr_hex}", signer.address());
+    let mut ledger = GasLedger::open(&ledger_path, &plan_id, max_gas_ceiling_wei)?;
+    println!(
+        "      gas ledger {}: ceiling {} wei, carried exposure {} wei from {} earlier entr(ies)",
+        ledger_path.display(),
+        ledger.ceiling_wei(),
+        ledger.exposure_wei(),
+        ledger.entries().len()
+    );
+
+    // 4a. Exact token approval (never unlimited)
     let current_allowance = signer.token_allowance(vault_address).await?;
     let required_tokens = Amount::from(quote_sum_atto);
 
@@ -305,33 +256,59 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let approve_amount = required_tokens;
         let (approve_calldata, token_contract_addr) =
             evmlib::external_signer::approve_to_spend_tokens_calldata(&evm_network, vault_address, approve_amount);
-
         let approve_tx = TransactionRequest::default()
             .with_from(signer.address())
             .with_to(token_contract_addr)
             .with_input(approve_calldata);
 
         println!("      current vault allowance {current_allowance} < required {required_tokens}; approving EXACT amount...");
-        check_pre_send_gas(&provider, approve_tx, max_fee_per_gas_limit, remaining_gas_ceiling_wei, "token_approval").await?;
+        let limit = estimate_limit(&provider, approve_tx, "token_approval").await?;
+        let fee = network_fee(&provider, "token_approval").await?;
+        let cap = plan_fee_cap(ledger.remaining_wei(), limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, "token_approval")?;
+        println!(
+            "      plan [token_approval]: gas_limit={limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+            limit.saturating_mul(cap),
+            ledger.remaining_wei()
+        );
+        // Do not sign an approval for a payment that clearly cannot fit afterwards.
+        let transfers = match &prepared.payment_info {
+            ExternalPaymentInfo::WaveBatch { payment_intent, .. } => payment_intent.payments.len() as u128,
+            ExternalPaymentInfo::Merkle { prepared_batches, .. } => prepared_batches.len() as u128,
+        };
+        let floor_limit = payment_floor_limit(limit, transfers);
+        let floor_wei = limit.saturating_add(floor_limit).saturating_mul(fee);
+        println!(
+            "      floor [approval + payment lower bound]: ({limit} + {floor_limit}) gas x {fee} wei = {floor_wei} wei (remaining {} wei)",
+            ledger.remaining_wei()
+        );
+        ledger.check_projection(floor_wei, "the approval plus a lower bound for the payment")?;
 
-        let approve_tx_hash = signer
-            .approve_to_spend_tokens(vault_address, approve_amount)
-            .await?;
+        signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
+        let entry = ledger.reserve("token_approval", limit, cap)?;
+
+        // From here a failure leaves the reservation in the ledger.
+        let approve_tx_hash = signer.approve_to_spend_tokens(vault_address, approve_amount).await?;
         println!("      exact approval tx submitted: {approve_tx_hash}");
-
-        if let Some(rcpt) = provider.get_transaction_receipt(approve_tx_hash).await? {
-            let gas_used = rcpt.gas_used;
-            let eff_price = rcpt.effective_gas_price;
-            let cost = (gas_used as u128) * eff_price;
-            total_gas_wei += cost;
-            remaining_gas_ceiling_wei = remaining_gas_ceiling_wei.saturating_sub(cost);
-            println!("      approval confirmed: gas_used={gas_used}, cost={cost} wei (remaining budget: {remaining_gas_ceiling_wei} wei)");
+        match provider.get_transaction_receipt(approve_tx_hash).await? {
+            Some(rcpt) => {
+                let cost = (rcpt.gas_used as u128).saturating_mul(rcpt.effective_gas_price);
+                ledger.settle(entry, cost)?;
+                println!(
+                    "      approval mined: gas_used={}, cost={cost} wei (ledger exposure {} wei, remaining {} wei)",
+                    rcpt.gas_used,
+                    ledger.exposure_wei(),
+                    ledger.remaining_wei()
+                );
+            }
+            None => println!("      approval receipt not available; its full reservation stays in the ledger"),
         }
     } else {
         println!("      current vault allowance {current_allowance} >= required {required_tokens}; approval not needed");
     }
 
-    // 4b. Pre-send gas checks for payment (now that approval is mined on-chain) & execution
+    // 4b. Payment. The approval is mined, so the payment can be simulated.
+    //     Every batch is estimated and the whole payment must fit in what
+    //     remains before the first payment signature.
     enum Paid { Wave(std::collections::HashMap<ant_protocol::evm::QuoteHash, ant_protocol::evm::TxHash>), Merkle(Vec<[u8; 32]>) }
     let paid = match &prepared.payment_info {
         ExternalPaymentInfo::WaveBatch { payment_intent, .. } => {
@@ -339,22 +316,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             paid_atto = payment_intent.total_amount.to_string().parse::<u128>().unwrap_or(u128::MAX);
 
             let calldata_info = evmlib::external_signer::pay_for_quotes_calldata(&evm_network, payments.clone())?;
-            for (calldata, _) in &calldata_info.batched_calldata_map {
+            let mut total_limit: u128 = 0;
+            for (i, (calldata, _)) in calldata_info.batched_calldata_map.iter().enumerate() {
                 let tx = TransactionRequest::default()
                     .with_from(signer.address())
                     .with_to(calldata_info.to)
                     .with_input(calldata.clone());
-                check_pre_send_gas(&provider, tx, max_fee_per_gas_limit, remaining_gas_ceiling_wei, "wave_batch_quotes").await?;
+                total_limit = total_limit.saturating_add(estimate_limit(&provider, tx, &format!("wave_batch_{i}")).await?);
             }
+            let batches = calldata_info.batched_calldata_map.len();
+            let stage = format!("wave_payment({batches} tx)");
+            let fee = network_fee(&provider, &stage).await?;
+            let cap = plan_fee_cap(ledger.remaining_wei(), total_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage)?;
+            println!(
+                "      plan [{stage}]: gas_limit={total_limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+                total_limit.saturating_mul(cap),
+                ledger.remaining_wei()
+            );
+            ledger.check_projection(total_limit.saturating_mul(cap), &stage)?;
+            signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
+            let entry = ledger.reserve(&stage, total_limit, cap)?;
 
             let (map, gas) = signer.pay_for_quotes(payments.into_iter()).await.map_err(|e| format!("member pay_for_quotes: {e:?}"))?;
-            let gas_commitment = verify_transaction_gas(&gas, remaining_gas_ceiling_wei, "wave_batch_quotes")?;
-            total_gas_wei += gas_commitment;
-            println!("      paid {} quote payments, actual gas used: {}, max gas commitment: {} wei", map.len(), gas.actual_gas_used, gas_commitment);
+            ledger.settle(entry, gas.gas_cost_wei)?;
+            println!(
+                "      paid {} quote payments: gas_limit_set={} max_fee_set={:?} gas_used={} cost={} wei (ledger exposure {} wei)",
+                map.len(),
+                gas.gas_with_buffer,
+                gas.max_fee_per_gas,
+                gas.actual_gas_used,
+                gas.gas_cost_wei,
+                ledger.exposure_wei()
+            );
             Paid::Wave(map.into_iter().collect())
         }
         ExternalPaymentInfo::Merkle { prepared_batches, .. } => {
-            let mut winners = Vec::new();
+            // Project every batch first so a multi-batch payment is never
+            // started that the budget cannot finish.
+            let mut limits = Vec::with_capacity(prepared_batches.len());
             for (i, b) in prepared_batches.iter().enumerate() {
                 let calldata_info = evmlib::external_signer::pay_for_merkle_tree_calldata(
                     &evm_network,
@@ -366,14 +365,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .with_from(signer.address())
                     .with_to(calldata_info.to)
                     .with_input(calldata_info.calldata);
-                check_pre_send_gas(&provider, tx, max_fee_per_gas_limit, remaining_gas_ceiling_wei, &format!("merkle_batch_{i}")).await?;
+                limits.push(estimate_limit(&provider, tx, &format!("merkle_batch_{i}")).await?);
+            }
+            let total_limit = limits.iter().fold(0u128, |a, l| a.saturating_add(*l));
+            let stage_all = format!("merkle_payment({} tx)", limits.len());
+            let fee = network_fee(&provider, &stage_all).await?;
+            let cap = plan_fee_cap(ledger.remaining_wei(), total_limit, fee, FEE_HEADROOM.0, FEE_HEADROOM.1, &stage_all)?;
+            println!(
+                "      plan [{stage_all}]: gas_limit={total_limit} network_fee={fee} fee_cap={cap} worst_case={} wei (remaining {} wei)",
+                total_limit.saturating_mul(cap),
+                ledger.remaining_wei()
+            );
+            ledger.check_projection(total_limit.saturating_mul(cap), &stage_all)?;
+            signer.set_transaction_config(TransactionConfig { max_fee_per_gas: MaxFeePerGas::LimitedAuto(cap) });
 
+            let mut winners = Vec::new();
+            for (i, b) in prepared_batches.iter().enumerate() {
+                let stage = format!("merkle_batch_{i}");
+                let entry = ledger.reserve(&stage, limits[i], cap)?;
                 let (winner, amount, gas) = signer
                     .pay_for_merkle_tree(b.depth, b.pool_commitments.clone(), b.merkle_payment_timestamp)
                     .await?;
-                let gas_commitment = verify_transaction_gas(&gas, remaining_gas_ceiling_wei, &format!("merkle_batch_{i}"))?;
-                total_gas_wei += gas_commitment;
-                println!("      batch {i}: depth={}, paid {amount} atto, winner {}, gas: {} wei", b.depth, hex::encode(winner), gas_commitment);
+                ledger.settle(entry, gas.gas_cost_wei)?;
+                println!(
+                    "      batch {i}: depth={}, paid {amount} atto, winner {}, gas_used={} cost={} wei (ledger exposure {} wei)",
+                    b.depth,
+                    hex::encode(winner),
+                    gas.actual_gas_used,
+                    gas.gas_cost_wei,
+                    ledger.exposure_wei()
+                );
                 paid_atto = paid_atto.saturating_add(amount.to_string().parse::<u128>().unwrap_or(u128::MAX));
                 winners.push(winner);
             }
@@ -381,8 +402,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // Assert total gas commitment across approval and payments strictly met standing authorization
-    assert!(total_gas_wei <= max_gas_ceiling_wei, "total gas commitment must meet aggregate ceiling");
+    // The ledger is the aggregate. A breach here means a mined cost exceeded
+    // its reservation; it is reported, never hidden.
+    let total_gas_wei = ledger.exposure_wei();
+    if total_gas_wei > max_gas_ceiling_wei {
+        return Err(format!(
+            "BREACH: gas ledger exposure {total_gas_wei} wei exceeds the gate ceiling {max_gas_ceiling_wei} wei by {} wei; not finalizing",
+            total_gas_wei - max_gas_ceiling_wei
+        )
+        .into());
+    }
 
     // -- [5/6] THE INTERRUPT: the estate client is DESTROYED; a FRESH client
     //          reconnects and finalizes with the member's payment -- no quote
@@ -426,7 +455,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "storage_ceiling_met": paid_atto <= max_storage_ceiling_atto,
             "gas_ceiling_wei": max_gas_ceiling_wei.to_string(),
             "gas_ceiling_met": total_gas_wei <= max_gas_ceiling_wei,
-            "total_gas_commitment_wei": total_gas_wei.to_string(),
+            "gas_exposure_wei": total_gas_wei.to_string(),
+            "gas_ledger": ledger.entries().iter().map(|e| json!({
+                "stage": e.stage,
+                "reserved_wei": e.reserved_wei.to_string(),
+                "settled_wei": e.settled_wei.map(|s| s.to_string()),
+            })).collect::<Vec<_>>(),
+            "gas_ledger_path": ledger_path.display().to_string(),
+            "gate_path": gate.path.display().to_string(),
+            "file_sha256": file_sha256,
+            "file_is_gate_artifact": is_gate_artifact,
+            "client_version": gate::CLIENT_VERSION,
             "interrupt": "client destroyed after payment; fresh client finalized",
             "resumed_without_new_quote": true,
             "roundtrip_byte_identical": true,
@@ -441,103 +480,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 mod tests {
     use super::*;
 
-    const DEFAULT_STORAGE_CEILING_ATTO: u128 = 2_500_000_000_000_000_000; // 2.5 ANT
-    const DEFAULT_GAS_CEILING_WEI: u128 = 200_000_000_000_000; // 0.0002 ETH
+    const CEILING_ATTO: u128 = 100_000_000_000_000_000_000; // 100 ANT
 
     #[test]
-    fn test_parse_decimal_to_atto() {
-        assert_eq!(parse_decimal_to_atto(&json!(100)).unwrap(), 100_000_000_000_000_000_000);
-        assert_eq!(parse_decimal_to_atto(&json!("2.5")).unwrap(), 2_500_000_000_000_000_000);
-        assert_eq!(parse_decimal_to_atto(&json!("0.0002")).unwrap(), 200_000_000_000_000);
-        assert_eq!(parse_decimal_to_atto(&json!(2.5)).unwrap(), 2_500_000_000_000_000_000);
-        assert_eq!(parse_decimal_to_atto(&json!(0.0002)).unwrap(), 200_000_000_000_000);
-        assert!(parse_decimal_to_atto(&json!("invalid")).is_err());
+    fn storage_ceiling_within_limit() {
+        assert!(verify_storage_ceiling(CEILING_ATTO, CEILING_ATTO, "test").is_ok());
+        assert!(verify_storage_ceiling(2_825_569_772_460_937_500, CEILING_ATTO, "test").is_ok()); // the gate's quote
     }
 
     #[test]
-    fn test_storage_ceiling_within_limit() {
-        assert!(verify_storage_ceiling(DEFAULT_STORAGE_CEILING_ATTO, DEFAULT_STORAGE_CEILING_ATTO, "test").is_ok());
-        assert!(verify_storage_ceiling(1_000_000_000_000_000_000, DEFAULT_STORAGE_CEILING_ATTO, "test").is_ok()); // 1.0 ANT
+    fn storage_ceiling_exceeded_refuses_with_the_overage() {
+        let err = verify_storage_ceiling(CEILING_ATTO + 1_000, CEILING_ATTO, "test").unwrap_err().to_string();
+        assert!(err.contains("REFUSE: storage amount"), "{err}");
+        assert!(err.contains("by 1000 atto-ANT"), "{err}");
     }
 
     #[test]
-    fn test_storage_ceiling_exceeded_refuses() {
-        let overage = 1_000_u128;
-        let excessive = DEFAULT_STORAGE_CEILING_ATTO + overage;
-        let res = verify_storage_ceiling(excessive, DEFAULT_STORAGE_CEILING_ATTO, "test");
-        assert!(res.is_err());
-        let err_msg = res.unwrap_err().to_string();
-        assert!(err_msg.contains("REFUSE: storage amount"));
-        assert!(err_msg.contains(&format!("by {overage} atto-ANT")));
+    fn an_unparseable_amount_fails_closed() {
+        assert!(verify_storage_ceiling(u128::MAX, CEILING_ATTO, "overflow").is_err());
     }
 
     #[test]
-    fn test_merkle_cost_estimation_empty() {
+    fn merkle_cost_of_no_pools_is_zero() {
         let network = evmlib::Network::ArbitrumOne;
-        let cost = network.estimate_merkle_payment_cost(4, &[]);
-        assert_eq!(cost, Amount::ZERO);
-    }
-
-    #[test]
-    fn test_gas_ceiling_within_limit() {
-        let gas = GasInfo {
-            estimated_gas: 150_000,
-            gas_with_buffer: 180_000,
-            max_fee_per_gas: Some(1_000_000_000), // 1 Gwei
-            max_priority_fee_per_gas: Some(100_000_000),
-            actual_gas_used: 140_000,
-            effective_gas_price: 1_000_000_000,
-            gas_cost_wei: 140_000_000_000_000,
-        };
-        assert!(verify_transaction_gas(&gas, DEFAULT_GAS_CEILING_WEI, "test").is_ok());
-    }
-
-    #[test]
-    fn test_gas_ceiling_exceeded_refuses() {
-        let gas = GasInfo {
-            estimated_gas: 200_000,
-            gas_with_buffer: 250_000,
-            max_fee_per_gas: Some(1_000_000_000), // 1 Gwei -> 250,000,000,000,000 wei > 200,000,000,000,000 wei
-            max_priority_fee_per_gas: Some(100_000_000),
-            actual_gas_used: 200_000,
-            effective_gas_price: 1_000_000_000,
-            gas_cost_wei: 200_000_000_000_000,
-        };
-        let res = verify_transaction_gas(&gas, DEFAULT_GAS_CEILING_WEI, "test");
-        assert!(res.is_err());
-        let err_msg = res.unwrap_err().to_string();
-        assert!(err_msg.contains("REFUSE: gas ceiling exceeded"));
-        assert!(err_msg.contains("50000000000000 wei"));
-    }
-
-    #[test]
-    fn test_storage_ceiling_fail_closed_overflow() {
-        assert!(verify_storage_ceiling(u128::MAX, DEFAULT_STORAGE_CEILING_ATTO, "overflow_test").is_err());
-    }
-
-    #[test]
-    fn test_worst_case_gas_calculation_at_cap() {
-        let est_gas = 188_000_u128;
-        let worst_case_gas_limit = est_gas * 120 / 100; // 225_600
-        let max_fee_limit = 666_666_666_u128; // ~0.66 Gwei
-        let commitment = worst_case_gas_limit * max_fee_limit; // ~150_400_000_000_000 wei
-        assert!(commitment <= DEFAULT_GAS_CEILING_WEI);
-
-        let excessive_est_gas = 350_000_u128;
-        let excessive_limit = excessive_est_gas * 120 / 100; // 420_000
-        let excessive_commitment = excessive_limit * max_fee_limit; // 279_999_999_720_000 wei
-        assert!(excessive_commitment > DEFAULT_GAS_CEILING_WEI);
-    }
-
-    #[test]
-    fn test_aggregate_gas_budgeting() {
-        let approval_worst_case = 37_114_666_629_332_u128;
-        let payment_worst_case = 150_808_666_522_558_u128;
-        let aggregate = approval_worst_case.saturating_add(payment_worst_case);
-        assert!(aggregate <= DEFAULT_GAS_CEILING_WEI); // 187,923,333,151,890 <= 200,000,000,000,000
-
-        let excessive_payment = 170_000_000_000_000_u128;
-        let excessive_aggregate = approval_worst_case.saturating_add(excessive_payment);
-        assert!(excessive_aggregate > DEFAULT_GAS_CEILING_WEI);
+        assert_eq!(network.estimate_merkle_payment_cost(4, &[]), Amount::ZERO);
     }
 }

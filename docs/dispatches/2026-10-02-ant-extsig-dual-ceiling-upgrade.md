@@ -1,5 +1,8 @@
 # Dispatch: 2026-10-02 ant-extsig Dual-Ceiling Upgrade & Dependency Modernization
 
+> **Superseded in part, 2026-10-03.** Gate loading, the fixed fee cap and the per-transaction gas check described below were replaced by `gate.rs` and `budget.rs` in ant-extsig 0.3.0. See `2026-10-03-ant-extsig-gate-and-gas-ledger.md` for the current behaviour and receipts.
+
+
 ## 1. Overview & PR #324 Status
 
 Branch: `lane/ant-extsig-dual-ceiling`  
