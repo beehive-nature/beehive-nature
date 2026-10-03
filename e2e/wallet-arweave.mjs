@@ -293,12 +293,14 @@ try {
     ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
     ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    await page.setViewportSize({width:390,height:844});
     const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
     const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');
     await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
     await page.locator('#arw-file-review').click();
     await page.locator('#arw-file-dialog').waitFor({state:'visible'});
     ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    ok('mobile review keeps its title and both decisions visible',await page.locator('#arw-file-dialog-title').isVisible()&&await page.locator('#arw-file-dialog').evaluate(el=>{const box=el.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth&&box.top>=0&&box.bottom<=innerHeight})&&await page.locator('#arw-file-cancel').isVisible()&&await page.locator('#arw-file-confirm').isVisible());
     ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
     await page.locator('#arw-file-cancel').click();
     await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('Cancelled'));
