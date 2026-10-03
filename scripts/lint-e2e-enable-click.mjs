@@ -1,203 +1,89 @@
-// lint-e2e-enable-click.mjs — no browser test enables a control in one
-// Playwright step and clicks it in the next.
+// lint-e2e-enable-click.mjs — a browser test enables a control in exactly
+// one place: e2e/lib/enable-click.mjs.
 //
 // THE RACE (wallet check, run 37108235973 attempt 1, 2026-10-03):
 // e2e/wallet-arweave.mjs set `disabled = false` on the intentionally unfunded
 // publish control in one evaluate and clicked it in a second step. The page's
 // own balance refresh re-disabled the button between the two, and Playwright
 // waited 30 s for an enabled element. It went red on unrelated commits, and a
-// dispatch had already claimed the repair. The class fix is not two lines:
-// THIS check fails the run if any e2e file enables a control and then clicks
-// it in a later Playwright step, so the shape cannot come back invisibly.
+// dispatch had already claimed the repair.
 //
-// The lawful shape is one browser task:
-//   await page.locator('#x').evaluate(b => { b.disabled = false; b.click(); });
+// WHY THIS IS A BLUNT RULE. The first cuts of this check tried to recognise
+// the race itself: find the browser task, find the click, decide whether the
+// two belong to the same control. Four review rounds each found a real hole
+// (line layout, regex literals, evaluateAll, deferred callbacks, two locator
+// spellings for one button), and a text reader cannot close that class. So
+// the check no longer judges whether an enable is safe. The only code that
+// may enable a control is enableAndClick() in e2e/lib/enable-click.mjs, which
+// enables and clicks in one synchronous browser task. Every other write to
+// `disabled` under e2e/ fails the run unless it is on the ledger below with
+// its reason and its exact count.
 //
-// LIMITS, stated so the check is never read as more than it is: it reads
-// source text, not a syntax tree. An enable written inside a string passed to
-// evaluate, or in a helper called from the callback, is not seen, and telling
-// a regex from a division is a rule of thumb, not a grammar.
+// It reads raw text on purpose. A write inside a string passed to evaluate
+// counts, and so does one inside a comment: nothing is skipped, so nothing
+// can hide. What it cannot see is an enable that never names `disabled`
+// (a helper in page code, a property set through a computed key).
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const E2E = join(HERE, '..', 'e2e');
-const REACH = 3; // code lines after the task closes in which a separate click is the race
+const ROOT = join(HERE, '..');
+const E2E = join(ROOT, 'e2e');
 
-// Same-length copy of the source with every comment, string, template and
-// regular-expression literal blanked, so parens and `.click(` are only ever
-// matched in executable code. Newlines survive; offsets line up with the
-// original.
-const REGEX_AFTER = new Set(['return', 'typeof', 'case', 'in', 'of', 'void', 'delete', 'throw', 'await']);
-// true when the text ends with the paren closing an if/while/for/with
-// condition: a slash there opens a regex, where after any other closing paren
-// it divides. `before` is already masked, so its parens are all code.
-function afterCondition(before) {
-  let depth = 0;
-  for (let i = before.length - 1; i >= 0; i--) {
-    if (before[i] === ')') depth++;
-    else if (before[i] === '(' && --depth === 0) return /(^|[^\w$.])(if|while|for|with)\s*$/.test(before.slice(0, i));
-  }
-  return false;
-}
-function mask(text) {
-  const out = text.split('');
-  const blank = (a, b) => { for (let k = a; k < b; k++) if (out[k] !== '\n') out[k] = ' '; };
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i], n = text[i + 1];
-    let end = -1;
-    if (c === '/' && n === '/') { end = text.indexOf('\n', i); if (end < 0) end = text.length; }
-    else if (c === '/' && n === '*') { end = text.indexOf('*/', i + 2); end = end < 0 ? text.length : end + 2; }
-    else if (c === '"' || c === "'" || c === '`') {
-      for (end = i + 1; end < text.length && text[end] !== c; end++) if (text[end] === '\\') end++;
-      end++;
-    } else if (c === '/') {
-      const before = out.slice(0, i).join('').trimEnd();
-      const word = (before.match(/[A-Za-z_$]+$/) || [''])[0];
-      const last = before.slice(-1);
-      if (!before || '(,=:[!&|?{};+-*%<>~^'.includes(last) || REGEX_AFTER.has(word) || (last === ')' && afterCondition(before))) {
-        let cls = false;
-        for (end = i + 1; end < text.length && text[end] !== '\n'; end++) {
-          if (text[end] === '\\') end++;
-          else if (text[end] === '[') cls = true;
-          else if (text[end] === ']') cls = false;
-          else if (text[end] === '/' && !cls) break;
-        }
-        end++;
-      }
-    }
-    if (end > i) { blank(i, end); i = end - 1; }
-  }
-  return out.join('');
+// file -> exact count of writes, and why each is not this race. A count that
+// drifts either way fails: a new write needs a new reason, and a stale entry
+// is a false signal.
+const LEDGER = {
+  'e2e/lib/enable-click.mjs': [1, 'the helper itself: enable and click in one browser task'],
+  'e2e/agent-dock.test.mjs': [2, 'mock Element in Node, no browser: field initialiser and its removeAttribute'],
+  'e2e/artist-audio-player.test.mjs': [1, 'mock Element in Node, no browser: field initialiser'],
+  'e2e/first-click.test.mjs': [1, 'mock Element in Node, no browser: disabled read from parsed HTML'],
+  'e2e/blight-gallery-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
+  'e2e/blight-market-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
+  'e2e/vending-machine.test.mjs': [2, 'regex source matched against page HTML; nothing is written'],
+};
+
+// A write is any assignment to `.disabled`, or removeAttribute/toggleAttribute
+// of 'disabled'. Only a whole-statement literal true is a plain disable:
+// `= true;` is cleared, `= true && false` and `= 1 - 1` are not.
+const END = String.raw`\s*(?:[;,)}\]]|$)`;
+// the rest of the line is read by lookahead, so a second write on it still counts
+const ASSIGN = /\.disabled\s*=(?!=)(?=([^\n]*))/g;
+const ATTR = /\.(removeAttribute|toggleAttribute)\s*\(\s*['"`]disabled['"`](?=([^\n]*))/g;
+const TRUE_RHS = new RegExp(String.raw`^\s*(?:true|!0|1)` + END);
+const TRUE_FORCE = new RegExp(String.raw`^\s*,\s*(?:true|!0|1)\s*\)`);
+function writes(text) {
+  let n = 0;
+  for (const m of text.matchAll(ASSIGN)) if (!TRUE_RHS.test(m[1])) n++;
+  for (const m of text.matchAll(ATTR)) if (!(m[1] === 'toggleAttribute' && TRUE_FORCE.test(m[2]))) n++;
+  return n;
 }
 
-// offset of the paren closing the one opened at `open` in masked text
-function closeOf(m, open) {
-  let depth = 0;
-  for (let i = open; i < m.length; i++) {
-    if (m[i] === '(') depth++;
-    else if (m[i] === ')' && --depth === 0) return i;
-  }
-  return -1;
-}
-
-// the expression a `.member` hangs off, read backwards from its dot: a chain
-// such as page.locator('#x') or document.getElementById('x'), original text
-function exprBefore(m, text, dot) {
-  let depth = 0, j = dot - 1;
-  for (; j >= 0; j--) {
-    const c = m[j];
-    if (c === ')' || c === ']') depth++;
-    else if (c === '(' || c === '[') { if (depth === 0) break; depth--; }
-    else if (depth === 0) {
-      if (/[;{},=!&|?:+*<>]/.test(c)) break;
-      if (/\s/.test(c)) { // whitespace belongs to the chain only beside a dot
-        const next = m.slice(j).match(/^\s*(.)/), prev = m.slice(0, j + 1).match(/(\S)\s*$/);
-        if (!(next && next[1] === '.') && !(prev && prev[1] === '.')) break;
-      }
-    }
-  }
-  return text.slice(j + 1, dot).replace(/\s+/g, '');
-}
-const literals = expr => [...expr.matchAll(/(['"`])((?:\\.|(?!\1).)*)\1/g)].map(x => x[2].replace(/[^A-Za-z0-9_-]/g, '')).filter(s => s.length > 1);
-const lineOf = (text, at) => text.slice(0, at).split('\n').length;
-
-// The boundary is the browser task, never the physical line, and the click
-// that counts is a click on the control that was enabled.
-//  - safe: inside the same evaluate call, after the enable, the same
-//    expression that was enabled is clicked (b.disabled = false; b.click()).
-//  - the race: no such click, and a Playwright click follows the call's
-//    closing paren on a target that is, or may be, the enabled control.
-// A following click is cleared only when both sides name their target by a
-// literal and the literals share nothing; anything it cannot tell apart is
-// flagged. An enable outside any evaluate call is test-side DOM (the mock
-// elements) and is not this race.
-function findings(text) {
-  const m = mask(text);
-  const tasks = [];
-  for (const t of m.matchAll(/\.(evaluate|evaluateAll|evaluateHandle|\$eval|\$\$eval)\s*\(/g)) {
-    const open = t.index + t[0].length - 1, close = closeOf(m, open);
-    if (close > 0) tasks.push({ dot: t.index, open, close });
-  }
-  // An enable is any write to `disabled` that is not plainly a disable: the
-  // property coerces, so `= 0`, `= ''`, `= null` and `= was` all may enable,
-  // and only a literal true is cleared. The attribute forms are
-  // removeAttribute('disabled') and toggleAttribute('disabled'[, not-true]).
-  const enables = [];
-  for (const e of m.matchAll(/\.disabled\s*=(?!=)(?!\s*(true\b|!0|1\b))/g)) enables.push(e.index);
-  for (const e of m.matchAll(/\.(removeAttribute|toggleAttribute)\s*\(/g)) {
-    const args = text.slice(e.index + e[0].length - 1);
-    if (!/^\(\s*['"`]disabled['"`]/.test(args)) continue;
-    if (e[1] === 'toggleAttribute' && /^\(\s*['"`]disabled['"`]\s*,\s*(true\b|!0|1\b)/.test(args)) continue;
-    enables.push(e.index);
-  }
-  const out = [];
-  for (const at of enables.sort((a, b) => a - b)) {
-    const inside = tasks.filter(t => t.open < at && at < t.close);
-    if (!inside.length) continue;
-    const task = inside.reduce((x, y) => (y.open < x.open ? y : x)); // outermost task
-    const enabled = exprBefore(m, text, at);
-    const body = m.slice(at, task.close);
-    let atomic = false;
-    for (const c of body.matchAll(/\.click\s*\(/g)) if (exprBefore(m, text, at + c.index) === enabled) { atomic = true; break; }
-    if (atomic) continue;
-    const target = exprBefore(m, text, task.dot);
-    const named = [...literals(target), ...literals(enabled)];
-    const rest = m.slice(task.close + 1).split('\n');
-    let seen = 0, off = task.close + 1;
-    for (let j = 0; j < rest.length; j++) {
-      const here = off;
-      off += rest[j].length + 1;
-      if (j > 0) { // the rest of the closing line is always in reach
-        if (!rest[j].trim()) continue;
-        if (++seen > REACH) break;
-      }
-      let hit = -1;
-      for (const c of rest[j].matchAll(/\.click\s*\(/g)) {
-        const clicked = exprBefore(m, text, here + c.index), theirs = literals(clicked);
-        const apart = clicked !== target && named.length && theirs.length &&
-          !named.some(a => theirs.some(b => a.includes(b) || b.includes(a)));
-        if (!apart) { hit = here + c.index; break; }
-      }
-      if (hit >= 0) { out.push({ line: lineOf(text, at), click: lineOf(text, hit) }); break; }
-    }
-  }
-  return out;
-}
-
-// the check proves it fires before it is trusted: the shape that went red
-// must be caught however it is laid out, and the repaired shape must pass
-// however it is laid out
-const L = "await page.locator('#arw-go')";
-const C = L + '.click();';
-const W = 'await page.waitForFunction(() => true);\n';
+// the check proves it fires before it is trusted
 const SELF = [
-  ['two steps on two lines', L + '.evaluate(b => { b.disabled = false; });\n' + C + '\n', 1],
-  ['two steps on one line', L + '.evaluate(b => { b.disabled = false; }); ' + C + '\n', 1],
-  ['space before the call paren', L + '.evaluate (b => { b.disabled = false; });\n' + C + '\n', 1],
-  ['another element clicked inside the task', L + '.evaluate(b => { b.disabled = false; document.body.click(); });\n' + C + '\n', 1],
-  ['a click only in a comment inside the task', L + '.evaluate(b => { b.disabled = false; /* b.click() */ });\n' + C + '\n', 1],
-  ['a click only in a string inside the task', L + ".evaluate(b => { b.disabled = false; b.title = 'b.click()'; });\n" + C + '\n', 1],
-  ['a regex with a paren before the enable', L + '.evaluate(b => { if (/^[)]$/.test(b.textContent)) return; b.disabled = false; });\n' + C + '\n', 1],
-  ['a regex after a control-flow condition', L + '.evaluate(b => { if (b.id) /[)]/.test(b.id); b.disabled = false; });\n' + C + '\n', 1],
-  ['division after a call paren', L + '.evaluate(b => { b.w = f(1) / 2; b.disabled = false; b.click(); /* ) */ });\n' + W, 0],
-  ['removeAttribute then a separate click', L + ".evaluate(b => { b.removeAttribute('disabled'); });\n" + C + '\n', 1],
-  ['evaluateAll then a separate click', L + '.evaluateAll(bs => { bs[0].disabled = false; });\n' + C + '\n', 1],
-  ['disabled = 0 then a separate click', L + '.evaluate(b => { b.disabled = 0; });\n' + C + '\n', 1],
-  ['toggleAttribute off then a separate click', L + ".evaluate(b => { b.toggleAttribute('disabled', false); });\n" + C + '\n', 1],
-  ['disabled = true then a click', L + '.evaluate(b => { b.disabled = true; });\n' + C + '\n', 0],
-  ['toggleAttribute on then a click', L + ".evaluate(b => { b.toggleAttribute('disabled', true); });\n" + C + '\n', 0],
-  ['enable by id in page.evaluate, then a locator click', "await page.evaluate(() => { document.getElementById('arw-go').disabled = false; });\n" + C + '\n', 1],
-  ['one task on one line', L + '.evaluate(b => { b.disabled = false; b.click(); });\n' + W, 0],
-  ['one task across lines', L + '.evaluate(b => {\n  b.disabled = false;\n  b.click();\n});\n' + W, 0],
-  ['a later click on a different named control', L + ".evaluate(b => { b.disabled = false; });\nawait page.locator('#other').click();\n", 0],
+  ['b.disabled = false', 'x.evaluate(b => { b.disabled = false; });', 1],
+  ['b.disabled = 0', 'x.evaluate(b => { b.disabled = 0; });', 1],
+  ['true && false', 'x.evaluate(b => { b.disabled = true && false; });', 1],
+  ['1 - 1', 'x.evaluate(b => { b.disabled = 1 - 1; });', 1],
+  ['a variable', 'x.evaluate(b => { b.disabled = was; });', 1],
+  ['evaluateAll', 'x.evaluateAll(bs => { bs[0].disabled = false; });', 1],
+  ['a string body', 'page.evaluate("document.querySelector(\'#go\').disabled = false");', 1],
+  ['removeAttribute', "x.evaluate(b => { b.removeAttribute('disabled'); });", 1],
+  ['toggleAttribute off', "x.evaluate(b => { b.toggleAttribute('disabled', false); });", 1],
+  ['toggleAttribute with no force', "x.evaluate(b => { b.toggleAttribute('disabled'); });", 1],
+  ['a deferred click beside it', 'x.evaluate(b => { b.disabled = false; setTimeout(() => b.click(), 9); });', 1],
+  ['two on one line', 'a.disabled = false; b.disabled = false;', 2],
+  ['a literal disable', 'x.evaluate(b => { b.disabled = true; });', 0],
+  ['toggleAttribute on', "x.evaluate(b => { b.toggleAttribute('disabled', true); });", 0],
+  ['a comparison', 'if (b.disabled == false) go(); if (b.disabled === false) go();', 0],
+  ['a read', 'const was = b.disabled;', 0],
 ];
 let bad = 0;
 for (const [name, src, want] of SELF) {
-  const got = findings(src).length;
-  if (got !== want) { console.log(`FAIL self-test — ${name}: ${got} finding(s), want ${want}`); bad++; }
-  else console.log(`PASS self-test — ${name} is ${want ? 'caught' : 'clean'}`);
+  const got = writes(src);
+  if (got !== want) { console.log(`FAIL self-test — ${name}: counted ${got}, want ${want}`); bad++; }
+  else console.log(`PASS self-test — ${name} counts ${want}`);
 }
 
 // every JavaScript file under e2e/, nested directories included; installed
@@ -213,13 +99,21 @@ async function walk(dir) {
   return found;
 }
 const files = (await walk(E2E)).sort();
+const seen = new Set();
 for (const f of files) {
-  const name = relative(join(E2E, '..'), f).split('\\').join('/');
-  for (const hit of findings(await readFile(f, 'utf8'))) {
+  const name = relative(ROOT, f).split('\\').join('/');
+  const n = writes(await readFile(f, 'utf8'));
+  const entry = LEDGER[name];
+  if (entry) {
+    seen.add(name);
+    if (n !== entry[0]) { bad++; console.log(`FAIL ${name} writes to disabled ${n} time(s), ledger says ${entry[0]} — a new write needs its own reason, a removed one leaves a stale entry`); }
+    else console.log(`PASS ${name} — ${n} on the ledger: ${entry[1]}`);
+  } else if (n) {
     bad++;
-    console.log(`FAIL ${name}:${hit.line} enables a control, then clicks at :${hit.click} in a separate step — the page can re-disable it between them; do both in one evaluate`);
+    console.log(`FAIL ${name} writes to disabled ${n} time(s) — to press a disabled control use enableAndClick() from e2e/lib/enable-click.mjs; a separate enable and click races the page`);
   }
 }
+for (const name of Object.keys(LEDGER)) if (!seen.has(name)) { bad++; console.log(`FAIL ledger names ${name}, which was not read — a stale entry is a false signal`); }
 if (files.length === 0) { console.log('FAIL read ZERO e2e files — a could-not-compute fails closed'); process.exit(1); }
-console.log(`\n${files.length} e2e files read — ${bad ? 'FIX BEFORE PUSH' : 'no enable-then-click race shape'}`);
+console.log(`\n${files.length} e2e files read — ${bad ? 'FIX BEFORE PUSH' : 'the only enable is the one-task helper'}`);
 process.exit(bad ? 1 : 0);
