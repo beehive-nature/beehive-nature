@@ -278,20 +278,20 @@
     <h1>the mission <span>desk</span></h1>
 
     <!-- one lead per view — same desk, three temperatures -->
-    <p class="lead" data-reg="bee" data-i18n="missions.beeLead">You set the mission and the limits. The agents work inside them.</p>
-    <p class="lead" data-reg="raver" data-i18n="missions.raverLead">You set the night. The floor runs itself.</p>
-    <p class="lead" data-reg="cypherpunk" data-i18n="missions.cypherLead">Proposals, ceilings, receipts — inspect the whole envelope.</p>
+    <p class="lead" data-reg="bee" data-i18n="missions.beeLead">you set the mission and the limits. the agents work inside them.</p>
+    <p class="lead" data-reg="raver" data-i18n="missions.raverLead">you set the night. the floor runs itself.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="missions.cypherLead">proposals, ceilings, receipts — inspect the whole envelope.</p>
 
-    <p class="intro" data-reg="bee" data-i18n="missions.beeIntro">Every operation here is a supervised mission. You approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. Nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.</p>
-    <p class="intro" data-reg="raver" data-i18n="missions.raverIntro">The LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. Missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.</p>
-    <p class="intro" data-reg="cypherpunk" data-i18n="missions.cypherIntro">Off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. The Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. Verify the chain; trust nothing unlabeled.</p>
+    <p class="intro" data-reg="bee" data-i18n="missions.beeIntro">every operation here is a supervised mission. you approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.</p>
+    <p class="intro" data-reg="raver" data-i18n="missions.raverIntro">the LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="missions.cypherIntro">off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. the Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. verify the chain; trust nothing unlabeled.</p>
 
     <ul class="steplist" data-reg="bee" aria-label="how a mission runs">
-      <li>You state the mission and its constraints.</li>
-      <li>The budget and tithe calculator prices it; independent review checks it.</li>
-      <li>You approve the ceiling. Milestone one is funded; the team works in the open.</li>
+      <li>you state the mission and its constraints.</li>
+      <li>the budget and tithe calculator prices it; independent review checks it.</li>
+      <li>you approve the ceiling. milestone one is funded; the team works in the open.</li>
       <li>A separate reviewer verifies; the evaluator continues, pauses, or escalates.</li>
-      <li>The final report compares projections with receipts; reputation follows delivery.</li>
+      <li>the final report compares projections with receipts; reputation follows delivery.</li>
     </ul>
 
     <nav class="nav" aria-label="mission desk links">
@@ -299,7 +299,7 @@
       <a href="receipts.html">the receipt ledger</a>
       <a href="or-board.html" data-i18n="missions.navOr">the OR board, live</a>
       <a href="dao-dashboard/index.html">the DAO dashboard</a>
-      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">pause motion</button>
     </nav>
 
     <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the ledger…</span><span id="status-note"></span><span class="fx" id="fixture-chip" data-i18n="missions.fixture">seed ledger · fixture figures</span></div>
@@ -344,7 +344,7 @@
   <div id="list-view">
     <section class="card" style="margin-top:14px" aria-label="the docket">
       <h2>the docket — every mission, one state each</h2>
-      <p class="sub">Approve a ceiling, stop a mission, or open one to read its whole envelope.</p>
+      <p class="sub">approve a ceiling, stop a mission, or open one to read its whole envelope.</p>
       <div id="mission-list"></div>
     </section>
   </div>
@@ -357,7 +357,7 @@
   <div class="grid" style="margin-top:14px" id="detail-grid">
     <section class="card third" id="boundary-card" data-reg="cypherpunk">
       <h2>boundary · what this desk does</h2>
-      <p class="sub">Named by the code that runs it, per the estate's honesty law.</p>
+      <p class="sub">named by the code that runs it, per the estate's honesty law.</p>
       <dl class="boundary-dl">
         <dt>engine</dt><dd>surfaces/mission-core.js — budget(), evaluate(), verifyChain(); the seed is regenerated by scripts/build-missions-seed.mjs from the same engine</dd>
         <dt>storage</dt><dd>local-first: the deterministic seed in surfaces/mission-seed.js, your edits in this browser's localStorage; export carries the whole ledger</dd>
@@ -368,7 +368,7 @@
     </section>
   </div>
 
-  <div class="law"><b>Desk law.</b> <span>The attending human is not required to direct each action. They supervise: mission approval, spending and permission ceilings, escalation policy, milestone review, emergency stop, final acceptance. Inside that envelope the team continues autonomously — and every meaningful action leaves a machine-readable receipt.</span></div>
+  <div class="law"><b>desk law.</b> <span>the attending human is not required to direct each action. they supervise: mission approval, spending and permission ceilings, escalation policy, milestone review, emergency stop, final acceptance. inside that envelope the team continues autonomously — and every meaningful action leaves a machine-readable receipt.</span></div>
 </main>
 
 <footer>the mission desk · LOVErnment · one station of three with the mission room and the receipt ledger · every figure is a testnet-accounting fixture · <a href="receipts.html">verify the chain</a></footer>

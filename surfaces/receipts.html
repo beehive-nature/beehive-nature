@@ -220,19 +220,19 @@
     <div class="eyebrow" data-i18n="ledger.eyebrow">the receipt ledger · machine-readable</div>
     <h1>the receipt <span>ledger</span></h1>
 
-    <p class="lead" data-reg="bee" data-i18n="ledger.beeLead">Every meaningful action, on one line you can check.</p>
-    <p class="lead" data-reg="raver" data-i18n="ledger.raverLead">The receipts never stop.</p>
-    <p class="lead" data-reg="cypherpunk" data-i18n="ledger.cypherLead">Hash-chained. Verify, don't trust.</p>
+    <p class="lead" data-reg="bee" data-i18n="ledger.beeLead">every meaningful action, on one line you can check.</p>
+    <p class="lead" data-reg="raver" data-i18n="ledger.raverLead">the receipts never stop.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="ledger.cypherLead">hash-chained. verify, don't trust.</p>
 
-    <p class="intro" data-reg="bee" data-i18n="ledger.beeIntro">Each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. Change anything quietly and the chain breaks where everyone can see. The whole ledger exports as one machine-readable file.</p>
-    <p class="intro" data-reg="raver" data-i18n="ledger.raverIntro">The beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. Export it, check it, love it: the receipt is the track list of the night.</p>
-    <p class="intro" data-reg="cypherpunk" data-i18n="ledger.cypherIntro">sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. Export and verify offline — the ledger is data, not a promise.</p>
+    <p class="intro" data-reg="bee" data-i18n="ledger.beeIntro">each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. change anything quietly and the chain breaks where everyone can see. the whole ledger exports as one machine-readable file.</p>
+    <p class="intro" data-reg="raver" data-i18n="ledger.raverIntro">the beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. export it, check it, love it: the receipt is the track list of the night.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="ledger.cypherIntro">sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. export and verify offline — the ledger is data, not a promise.</p>
 
     <nav class="nav" aria-label="ledger links">
       <a href="missions.html">the mission desk</a>
       <a href="mission-room.html">the mission room</a>
       <a href="or-board.html" data-i18n="missions.navOr">the OR board, live</a>
-      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">pause motion</button>
     </nav>
 
     <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the ledger…</span><span class="fx" data-i18n="missions.fixture">seed ledger · fixture figures</span></div>
@@ -272,7 +272,7 @@
       <button class="act" id="reverify" type="button">re-verify the chain</button>
       <button class="act" id="reset" type="button">restore the seed ledger</button>
     </div>
-    <p class="sub" id="export-note" style="margin-top:8px">The export is the whole ledger — missions, receipts, chain — exactly as verified. Local edits live in this browser only.</p>
+    <p class="sub" id="export-note" style="margin-top:8px">the export is the whole ledger — missions, receipts, chain — exactly as verified. local edits live in this browser only.</p>
   </section>
 
   <div class="grid" style="margin-top:14px">
@@ -298,7 +298,7 @@
 
     <section class="card third" id="boundary-card" data-reg="cypherpunk">
       <h2>boundary · what this ledger does</h2>
-      <p class="sub">Named by the code that runs it.</p>
+      <p class="sub">named by the code that runs it.</p>
       <dl class="boundary-dl">
         <dt>chain</dt><dd>surfaces/mission-core.js receiptHash() — sha-256(prev + '|' + canonical), fixed field order; verified on every load and on demand</dd>
         <dt>seed</dt><dd>scripts/build-missions-seed.mjs writes surfaces/mission-seed.js through node:crypto using the same engine — the two hash paths cannot diverge</dd>
@@ -309,19 +309,19 @@
 
     <section class="card third">
       <h2>team reputation — earned in receipts</h2>
-      <p class="sub">From final reports only: delivery, cost accuracy, truthful reporting.</p>
+      <p class="sub">from final reports only: delivery, cost accuracy, truthful reporting.</p>
       <div class="rep" id="rep"></div>
       <p class="sub" id="rep-note" style="margin-top:8px"></p>
     </section>
 
     <section class="card third">
       <h2>spend by mission</h2>
-      <p class="sub">Receipt sums against approved ceilings — the envelope, measured.</p>
+      <p class="sub">receipt sums against approved ceilings — the envelope, measured.</p>
       <div class="rep" id="spends"></div>
     </section>
   </div>
 
-  <div class="law"><b>Ledger law.</b> <span>A machine-readable receipt for every meaningful action — task, handoff, artifact, tool cost, decision, gate. The chain is verified, not believed: any quiet edit breaks it at the exact sequence. Reputation follows delivery quality, cost accuracy and truthful reporting, never promises.</span></div>
+  <div class="law"><b>ledger law.</b> <span>A machine-readable receipt for every meaningful action — task, handoff, artifact, tool cost, decision, gate. the chain is verified, not believed: any quiet edit breaks it at the exact sequence. reputation follows delivery quality, cost accuracy and truthful reporting, never promises.</span></div>
 </main>
 
 <footer>the receipt ledger · LOVErnment · sha-256 chained by mission-core.js, seed by node:crypto through the same engine · every figure is a testnet-accounting fixture · <a href="missions.html">file a mission at the desk</a></footer>

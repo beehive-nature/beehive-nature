@@ -278,25 +278,25 @@
     <div class="eyebrow" data-i18n="missionroom.eyebrow">Buzz · the mission room</div>
     <h1>the mission <span>room</span></h1>
 
-    <p class="lead" data-reg="bee" data-i18n="missionroom.beeLead">The team works in the open. Every action leaves a receipt.</p>
-    <p class="lead" data-reg="raver" data-i18n="missionroom.raverLead">The set is running. Watch the decks.</p>
-    <p class="lead" data-reg="cypherpunk" data-i18n="missionroom.cypherLead">Work units, handoffs, costs — the room, logged.</p>
+    <p class="lead" data-reg="bee" data-i18n="missionroom.beeLead">the team works in the open. every action leaves a receipt.</p>
+    <p class="lead" data-reg="raver" data-i18n="missionroom.raverLead">the set is running. watch the decks.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="missionroom.cypherLead">work units, handoffs, costs — the room, logged.</p>
 
-    <p class="intro" data-reg="bee" data-i18n="missionroom.beeIntro">Pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. Costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.</p>
-    <p class="intro" data-reg="raver" data-i18n="missionroom.raverIntro">One deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. When something leaves the envelope, the music stops and asks you. That pause is the safety, not the failure.</p>
-    <p class="intro" data-reg="cypherpunk" data-i18n="missionroom.cypherIntro">This room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. The relay wire for live rooms is designed, not built — nothing on this page opens a socket.</p>
+    <p class="intro" data-reg="bee" data-i18n="missionroom.beeIntro">pick a mission and watch it run: who is on it, which work units are moving, what has been verified, and what the milestone evaluator decided. costs accumulate against the approved ceiling — nothing releases past it, and your stop or change order reaches the room at any moment.</p>
+    <p class="intro" data-reg="raver" data-i18n="missionroom.raverIntro">one deck, every hand on it — the crew orbits the mission, the evaluator holds the faders, and the receipts drop like the beat. when something leaves the envelope, the music stops and asks you. that pause is the safety, not the failure.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="missionroom.cypherIntro">this room reads the local ledger only: roster, units, receipts, evaluator verdicts and treasury releases, all chain-verified on load. the relay wire for live rooms is designed, not built — nothing on this page opens a socket.</p>
 
     <div class="explainer" data-reg="bee" aria-label="how the room works">
-      <div>The planner routes the work into bounded units; agents pick them up and hand them off.</div>
+      <div>the planner routes the work into bounded units; agents pick them up and hand them off.</div>
       <div>A separate reviewer verifies outputs before any milestone can release.</div>
-      <div>The evaluator continues, pauses, or escalates — production access and secrets stay behind your word.</div>
+      <div>the evaluator continues, pauses, or escalates — production access and secrets stay behind your word.</div>
     </div>
 
     <nav class="nav" aria-label="mission room links">
       <a href="missions.html">the mission desk</a>
       <a href="receipts.html">the receipt ledger</a>
       <a href="or-board.html">who is here, live — the OR board</a>
-      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">pause motion</button>
     </nav>
 
     <div class="picker">
@@ -357,7 +357,7 @@
 
     <section class="card third" id="boundary-card" data-reg="cypherpunk">
       <h2>boundary · what this room does</h2>
-      <p class="sub">Named by the code that runs it.</p>
+      <p class="sub">named by the code that runs it.</p>
       <dl class="boundary-dl">
         <dt>engine</dt><dd>surfaces/mission-core.js — evaluate() recomputes every verdict from the receipts; applyControl() is the only state-changing door and it always appends a chained receipt</dd>
         <dt>releases</dt><dd>blocked unless state is funded/active, the ceiling holds, and no escalation is open — try the button on an escalated room and it refuses</dd>
@@ -368,19 +368,19 @@
 
     <section class="card third">
       <h2>the team · who holds what</h2>
-      <p class="sub">Humans purple, Ai teal — the law that holds, green.</p>
+      <p class="sub">humans purple, Ai teal — the law that holds, green.</p>
       <div class="roster" id="roster"></div>
     </section>
 
     <section class="card third">
       <h2>work units · the planner's board</h2>
-      <p class="sub">Bounded units; artifacts named where they landed.</p>
+      <p class="sub">bounded units; artifacts named where they landed.</p>
       <div class="units" id="units"></div>
     </section>
 
     <section class="card half">
       <h2>the receipt feed · every meaningful action</h2>
-      <p class="sub">Newest first; the full chain lives on the ledger surface.</p>
+      <p class="sub">newest first; the full chain lives on the ledger surface.</p>
       <div class="feed" id="feed" aria-live="polite"></div>
     </section>
 
@@ -394,7 +394,7 @@
     </section>
   </div>
 
-  <div class="law"><b>Room law.</b> <span>The agents never silently expand scope, never spend beyond the approved ceiling, never expose secrets, never publish unverified claims, never deploy irreversible changes. Inside the envelope they continue autonomously — and every task, handoff, artifact and tool cost lands in the receipt ledger before the evaluator will move.</span></div>
+  <div class="law"><b>room law.</b> <span>the agents never silently expand scope, never spend beyond the approved ceiling, never expose secrets, never publish unverified claims, never deploy irreversible changes. inside the envelope they continue autonomously — and every task, handoff, artifact and tool cost lands in the receipt ledger before the evaluator will move.</span></div>
 </main>
 
 <footer>the mission room · Buzz station · roster and presence live on the OR board · every figure is a testnet-accounting fixture · <a href="receipts.html">verify the chain</a></footer>
