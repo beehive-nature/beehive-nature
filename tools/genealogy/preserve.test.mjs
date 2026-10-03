@@ -80,8 +80,43 @@ function buildFixture() {
     file("surfaces/" + s, "<!--" + s + "-->");
   file("docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg", "<svg>breathe</svg>");
   file("assets/brand/skaists-separators.svg", "<svg>sep</svg>");
+  const runtime = JSON.parse(readFileSync(join(REPO, 'tools/genealogy/preservation-runtime.json'), 'utf8'));
+  file('tools/genealogy/preservation-runtime.json', JSON.stringify(runtime));
+  for (const path of runtime.files) file(path, '');
   return root;
 }
+
+test('interactive dependency missing fails before replacing an existing package', () => {
+  const root = buildFixture(), pkg = join(root, 'pkg');
+  mkdirSync(pkg); writeFileSync(join(pkg, 'sentinel'), 'keep');
+  rmSync(join(root, 'surfaces/tree-of-life.mjs'));
+  const result = run(['prepare', pkg], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /tree-of-life\.mjs/);
+  assert.equal(readFileSync(join(pkg, 'sentinel'), 'utf8'), 'keep');
+});
+
+test('new transitive import refuses silent omission from the reviewed allowlist', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'surfaces/tree-of-life.mjs'), 'import "./new-tree-helper.mjs";');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /Undeclared interactive dependencies/);
+  assert.match(result.stderr, /new-tree-helper\.mjs/);
+  writeFileSync(join(root, 'surfaces/tree-of-life.mjs'), 'import {\n helper\n} from "./multiline-helper.mjs";');
+  const multiline = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(multiline.code, 0);
+  assert.match(multiline.stderr, /multiline-helper\.mjs/);
+});
+
+test('string CSS imports and both video dependencies must be declared', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'surfaces/tree-of-life.css'), '@import "missing-theme.css";');
+  writeFileSync(join(root, 'surfaces/blood.html'), '<video src="missing-video.webm" poster="missing-poster.jpg"></video>');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  for (const name of ['missing-theme.css', 'missing-video.webm', 'missing-poster.jpg']) assert.ok(result.stderr.includes(name));
+});
 
 test("probe 0 (control): crest-missing refusal stays", () => {
   const root = buildFixture();

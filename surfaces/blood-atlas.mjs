@@ -695,6 +695,34 @@ export function createCore(model, opts) {
 
 // ─── DOM layer (browser only): pan/zoom world, LOD, pointer + keyboard ─────
 const SVGNS = "http://www.w3.org/2000/svg";
+// Fit actual glyph widths, not character counts. Full identity stays on the
+// cell's aria-label/title and in the person panel; only the map caption wraps.
+export function fitCellLabel(value, width, measure, maxLines = 2) {
+  let rest = String(value || "").trim().replace(/\s+/gu, " ");
+  const lines = [];
+  if (!rest || width <= 0 || measure("…") > width) return lines;
+  const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  while (rest && lines.length < maxLines) {
+    if (measure(rest) <= width) { lines.push(rest); break; }
+    const last = lines.length === maxLines - 1;
+    const glyphs = [...segmenter.segment(rest)].map(part => part.segment);
+    let lo = 0, hi = glyphs.length;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (measure(glyphs.slice(0, mid).join("") + (last ? "…" : "")) <= width) lo = mid;
+      else hi = mid - 1;
+    }
+    if (!lo) { lines.push("…"); break; }
+    let head = glyphs.slice(0, lo).join("");
+    if (last) { lines.push(head.trimEnd() + "…"); break; }
+    const space = head.lastIndexOf(" ");
+    if (space > 0 && rest[head.length] !== " ") head = head.slice(0, space);
+    lines.push(head.trimEnd());
+    rest = rest.slice(head.length).trimStart();
+  }
+  return lines;
+}
+
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVGNS, tag);
   for (const k of Object.keys(attrs || {})) if (attrs[k] !== undefined) el.setAttribute(k, attrs[k]);
@@ -727,6 +755,9 @@ export async function createAtlas(opts) {
   const pan = svgEl("g", { class: "atlas-pan" });
   world.appendChild(pan);
 
+  const textMeasure = document.createElement("canvas").getContext("2d");
+  let labelLayouts = [];
+  let labelScale = null;
   const CELL = 108;       // pedigree cell pitch, px (world units)
   const RING = 150;       // fractal ring pitch, px
   let transform = { k: 1, x: 0, y: 0 };
@@ -794,6 +825,8 @@ export async function createAtlas(opts) {
     world.style.display = isTree ? "none" : "";
     listview.style.display = isTree ? "" : "none";
     pan.innerHTML = "";
+    labelLayouts = [];
+    labelScale = null;
     listview.innerHTML = "";
     world.setAttribute("data-painted", String(isTree ? scene.counts.painted : scene.counts.painted));
     world.setAttribute("data-view", scene.view);
@@ -872,13 +905,15 @@ export async function createAtlas(opts) {
         }
       }
       if (c.kind !== "ghost" && c.iid) {
-        const label = svgEl("text", { class: "atlas-label", y: c.kind === "mirror" ? 4 : -2, "text-anchor": "middle" });
-        label.textContent = c.living ? "Living" : shortName(c.name, c.kind === "mirror");
+        const label = svgEl("text", { class: "atlas-label", "text-anchor": "middle" });
         g.appendChild(label);
+        const width = Math.max(0, (scene.view === "fractal" ? Math.sqrt(3) : 2) * r - 12);
+        labelLayouts.push({ element: label, text: c.living ? "Living" : c.name,
+          width, lines: r >= 38 ? 2 : 1, radius: r });
         if (c.kind !== "mirror") {
-          const yr = svgEl("text", { class: "atlas-year", y: 14, "text-anchor": "middle" });
-          yr.textContent = c.year || "";
+          const yr = svgEl("text", { class: "atlas-year", "text-anchor": "middle" });
           g.appendChild(yr);
+          labelLayouts.push({ element: yr, text: c.year || "", width, lines: 1, radius: r, year: true });
         }
         if (c.kind === "mirror") {
           const m = svgEl("text", { class: "atlas-mirrormark", y: 16, "text-anchor": "middle" });
@@ -913,10 +948,29 @@ export async function createAtlas(opts) {
     }
     applyTransform();
   }
-  function shortName(n, tight) {
-    const s = String(n || "");
-    return tight ? s.split(" ")[0] : s.length > 18 ? s.slice(0, 17) + "…" : s;
+  function fitLabels(force = false) {
+    if (!force && labelScale === transform.k) return; // panning does not remeasure names
+    labelScale = transform.k;
+    for (const item of labelLayouts) {
+      const { element, width, radius, year } = item;
+      const style = getComputedStyle(element);
+      textMeasure.font = style.font || `${style.fontSize} ${style.fontFamily}`;
+      textMeasure.letterSpacing = style.letterSpacing === "normal" ? "0px" : style.letterSpacing;
+      const measure = text => textMeasure.measureText(text).width;
+      const lines = radius < (year ? 38 : 18) ? [] : fitCellLabel(item.text, width, measure, item.lines);
+      element.replaceChildren();
+      lines.forEach((line, i) => {
+        const y = year ? 27 : lines.length > 1 ? -5 + i * 16 : 4;
+        const span = svgEl("tspan", { x: 0, y,
+          // Lock each measured run to its cell even while a webfont swaps.
+          textLength: Math.min(width, measure(line)).toFixed(2), lengthAdjust: "spacingAndGlyphs" });
+        span.textContent = line;
+        element.appendChild(span);
+      });
+    }
   }
+  const onFontsLoaded = () => fitLabels(true);
+  document.fonts?.addEventListener("loadingdone", onFontsLoaded);
   function applyTransform() {
     core.setTransform(transform);
     // center-anchored world: the root (0,0) sits at the STAGE CENTER, pan/zoom
@@ -928,6 +982,7 @@ export async function createAtlas(opts) {
     world.classList.add("lod-" + lod);
     world.setAttribute("data-lod", lod);
     world.style.setProperty("--atlas-k", String(transform.k)); // label counter-scale (blood-atlas.css)
+    fitLabels();
   }
 
   // pointer: pan + pinch + wheel zoom-to-cursor; a drag NEVER selects.
@@ -1000,6 +1055,12 @@ export async function createAtlas(opts) {
   mount.setAttribute("tabindex", "0");
 
   paint();
+  // The atlas can boot inside a hidden view. Re-anchor when it becomes visible
+  // or its panel resizes, preserving the user's saved pan and zoom offsets.
+  const stageObserver = typeof ResizeObserver === "function" ? new ResizeObserver(() => {
+    if (stage.clientWidth && stage.clientHeight) applyTransform();
+  }) : null;
+  stageObserver?.observe(stage);
   const api = {
     model, core,
     getContext: () => core.getContext(),
@@ -1015,12 +1076,14 @@ export async function createAtlas(opts) {
     ghostCount: (iid) => model.ghostCount(iid),
     repaint: paint,
     destroy() {
+      stageObserver?.disconnect();
       mount.removeEventListener("keydown", keyNav);
       stage.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
       window.removeEventListener("blur", onBlur);
+      document.fonts?.removeEventListener("loadingdone", onFontsLoaded);
       mount.classList.remove("atlas-root");
       mount.removeAttribute("tabindex");
       stage.remove();

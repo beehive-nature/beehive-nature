@@ -140,10 +140,9 @@ const starters = [
   return `<a class="start-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${picture}</span><div><strong>${text('atlas.'+item.mark+'Action',item.action)}</strong><span class="start-help">${text('atlas.'+item.mark+'Help',item.help)}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
 /* ── remember · restore · keep ──────────────────────────────────────────────
-   Two open doors and one honest not-yet. The open rows take their words from
+   Three registered doors. The first two open rows take their words from
    the destination pages' own keys, so the hub can never promise more than the
-   page does. bGENEaLOGy is not registered yet, so it is a plain row with its
-   reason — never a link to nowhere, never a disabled button. */
+   page does. bGENEaLOGy resolves the registered blood surface. */
 const keepPictures = {
   data: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 10 26 15v30L40 70 14 55V25Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="m40 27 11.5 6.5v13L40 53l-11.5-6.5v-13Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg>',
   watch: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="10" y="16" width="60" height="40" rx="7" stroke="currentColor" stroke-width="3"/><path d="m35 28 13 8-13 8Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M27 67h26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
@@ -158,8 +157,9 @@ const keepers = [
   for (const key of [item.action, item.help]) if (!corpus[key]?.en) throw new Error('Keep row key missing from the corpus: '+key);
   return `<a class="keep-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${keepPictures[item.mark]}</span><div><strong>${text(item.action,'')}</strong><span class="start-help">${text(item.help,'')}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
-if (E.surfaces.some(s => /genealogy/i.test(s.id + s.path))) throw new Error('bGENEaLOGy is registered now — turn its plain row on the hub into a keep-link');
-const notYet = `<div class="keep-plain line"><span class="start-picture" aria-hidden="true">${keepPictures.line}</span><div><strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong><span class="start-help">${text('hub.keep.line.help','')}</span><span class="keep-state"><span aria-hidden="true">△</span> ${text('hub.keep.line.state','')}</span></div></div>`;
+const genealogy = E.surfaces.find(s => s.id === 'blood' && s.presented !== false);
+if (!genealogy) throw new Error('Genealogy destination missing from registry');
+const notYet = `<a class="keep-link line" href="${esc(genealogy.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${keepPictures.line}</span><div><strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong><span class="start-help">Walk the Latvian tree of life, switch to the fan chart, and research your relatives.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 
 /* ── Austras koks, from the counts ───────────────────────────────────────── */
 const treeFams = E.families.map(f => { const o = ORGS.find(o => o.id === familyOrg(f)); return {id:f, org:o?.id, mark:o?.mark || 'sk', n:c.byFamily[f] || 0}; });

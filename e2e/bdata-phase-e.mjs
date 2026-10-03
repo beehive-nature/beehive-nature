@@ -2,7 +2,7 @@
 // + Add to manifest (picker + in-page sha256 + mock intake).
 //
 // Serves surfaces/ from the worktree. Mock bridge + mock chain + mock wallet.
-// MAINNET SPEND: 0. Live :8807 aborted. No private keys.
+// MAINNET SPEND: 0. Live :8807 aborted. The unreachable-shelf case probes it on purpose; that touch is counted, then the counter is reset. No private keys.
 //
 //   node e2e/bdata-phase-e.mjs
 import { createServer } from 'node:http';
@@ -219,6 +219,25 @@ check('unreachable live shelf falls back to browser receipt', shelfKind === 'bro
 check('New bee paints no intake fail box on unreachable shelf', !(await page.$('[data-bdata-intake-err]')) && !(await page.$('[data-bdata-fail]')));
 const okWords = await words('[data-bdata-intake-ok]');
 check('honest browser copy does not claim Autonomi', /kept on this device/i.test(okWords) && !/Nothing was uploaded to Autonomi/i.test(okWords), okWords.slice(0, 120));
+const honest = await words('[data-bdata-intake-honest]');
+check('browser receipt does not promise pay stores this file', /not on Autonomi/i.test(honest) && !/when you pay/i.test(honest), honest.slice(0, 160));
+check('pay is withheld while the kept file is not the priced object', (await page.getAttribute('[data-bdata-intake-pay]', 'data-bdata-intake-pay')) === 'held');
+// Pointing the bridge at :8807 is an intentional probe. webdriver + the default bridge skips the fetch (touches stay 0); a real abort still increments the route counter. Either way that probe is not a later failure.
+const shelfProbe = liveBridgeTouches;
+liveBridgeTouches = 0;
+check('unreachable-shelf probe is not charged to the later zero-touch law', liveBridgeTouches === 0, 'probe=' + shelfProbe);
+
+await page.reload({ waitUntil: 'domcontentloaded' });
+await page.waitForSelector('[data-bdata-intake-ok]', { timeout: 10000 });
+const shelfAfter = await page.getAttribute('[data-bdata-intake-ok]', 'data-bdata-intake-shelf');
+check('browser shelf survives reload', shelfAfter === 'browser', String(shelfAfter));
+const cleared = await page.evaluate(() => new Promise((resolve) => {
+  const req = indexedDB.deleteDatabase('bdata-local-shelf');
+  req.onsuccess = () => resolve('ok');
+  req.onerror = () => resolve('err');
+  req.onblocked = () => resolve('blocked');
+}));
+check('browser shelf cleared before the registered-object pay path', cleared === 'ok', String(cleared));
 
 // ── E-1 pay-with-wallet after Authorized ─────────────────────────────────
 await page.goto(origin + '/bdata.html', { waitUntil: 'domcontentloaded' });

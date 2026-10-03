@@ -307,6 +307,7 @@ export function mountPersonPanel (host, archive, opts) {
   function setView (nv) {
     view = nv;
     render();
+    if (o.scrollContainer) restoreScroll(0);
     viewEl.focus({ preventScroll: true });
     notify();
   }
@@ -390,7 +391,12 @@ export function mountPersonPanel (host, archive, opts) {
 
   function choosePerson (id, fromQuery) {
     resultsEl.hidden = true;
-    if (view.type === 'person' && view.id === id) return;
+    if (view.type === 'person' && view.id === id) {
+      if (o.scrollContainer) restoreScroll(0);
+      viewEl.focus({ preventScroll: true });
+      notify();
+      return;
+    }
     pushContext();
     setView({ type: 'person', id, fromQuery: fromQuery || null });
   }
@@ -545,9 +551,13 @@ export function mountPersonPanel (host, archive, opts) {
         const sp = archive.getPerson(sid);
         const pairRel = archive.relationship(p.id, sid);
         const cousins = !!(pairRel && pairRel.blood && pairRel.affinity);
+        const founderRel = o.founderRoot ? archive.relationship(sid, o.founderRoot) : null;
+        const founderAncestor = founderRel && founderRel.blood && founderRel.blood.mode === 'ancestor-of-root';
         h += '<button type="button" class="pp-row" data-pprel="' + esc(p.id) + '|' + esc(sid) + '">' +
           '<span class="pp-row-name">⚭ ' + esc(sp ? sp.name : sid) + (sp && sp.lifespan ? ' · ' + esc(sp.lifespan) : '') + '</span>' +
-          '<span class="pp-row-ev">' + esc(T('pp.spouse.ev', 'marriage — affinity, never blood')) + (cousins ? ' · ' + esc(T('pp.spouse.cousins', 'married cousins — blood also present')) : '') + '</span></button>';
+          '<span class="pp-row-ev">' + esc(T('pp.spouse.named', 'spouse of {name}').replace('{name}', p.name)) +
+          (founderAncestor ? ' · ' + esc(T('pp.spouse.founderAncestor', 'also a direct blood ancestor of the founder')) : '') +
+          (cousins ? ' · ' + esc(T('pp.spouse.sharedAncestry', 'the archive also records shared ancestry between these spouses')) : '') + '</span></button>';
       }
     }
     if (!p.parents.length && !p.children.length && !p.spouses.length) {
@@ -750,17 +760,17 @@ export function mountPersonPanel (host, archive, opts) {
     h += '<h2 class="pp-name" tabindex="-1">' + esc(p.name) + '</h2>';
     if (p.lifespan) h += '<div class="pp-years">' + esc(p.lifespan) + '</div>';
     h += '<div class="pp-chips">' + chipsHtml(p) + '</div>';
-    h += relToRootHtml(p);
+    h += '<div class="pp-actions">' +
+      '<button type="button" class="pp-act" data-pproot="' + esc(id) + '">' + esc(T('pp.walk', 'walk this branch')) + '</button>' +
+      '<button type="button" class="pp-act pp-ghost" data-pparchive="' + esc(id) + '">' + esc(T('pp.research', 'open full research')) + '</button></div>';
     h += familyHtml(p);
+    h += relToRootHtml(p);
     h += frontierHtml(p);
     h += layersHtml(p);
     h += teasersHtml(p);
     h += '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.bnr', 'blood address')) + '</h3>' +
       '<div class="pp-bnr">' + esc(p.bnr) + '</div></section>';
-    h += '<div class="pp-actions">' +
-      '<button type="button" class="pp-act" data-pproot="' + esc(id) + '">' + esc(T('pp.reroot', 'stand here (re-root)')) + ' <kbd>R</kbd></button>' +
-      '<button type="button" class="pp-act pp-ghost" data-pparchive="' + esc(id) + '">' + esc(T('pp.openarchive', 'open the person archive')) + ' <kbd>O</kbd></button>' +
-      '</div></article>';
+    h += '</article>';
     return h;
   }
 

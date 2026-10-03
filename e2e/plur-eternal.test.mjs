@@ -34,13 +34,16 @@ async function open(reg, opts = {}) {
     try { localStorage.setItem('bregister', r); localStorage.removeItem('bnr.motion.paused'); } catch {}
     window.__spokes = [];
     window.SpeechSynthesisUtterance = function (text) { this.text = text; };
-    const stub = { _voices: voices, getVoices() { return this._voices; }, cancel() {}, speak(u) { window.__spokes.push(u.text); setTimeout(() => { if (u.onend) u.onend(); }, 5); } };
+    const stub = { _voices: voices, getVoices() { return this._voices; }, addEventListener() {}, cancel() {}, speak(u) { window.__spokes.push(u.text); setTimeout(() => { if (u.onend) u.onend(); }, 5); } };
     Object.defineProperty(window, 'speechSynthesis', { value: stub, writable: true, configurable: true });
   }, [reg, opts.voices || []]);
   const sent = [];
   await ctx.route('**/*', r => { const q = r.request(); if (!q.url().startsWith(ORIGIN)) sent.push(q.method() + ' ' + q.url());
     if (q.url() === 'https://api.anthropic.com/v1/messages') return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":{"type":"authentication_error"}}' });
     return q.url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'); });
+  // This suite isolates browser voices and the explicit unavailable-preview path.
+  // plur-voices.test.mjs exercises all fixed fallbacks and no-engine routing.
+  await ctx.route('**/assets/plur-voices/manifest.json*', r => r.abort('blockedbyclient'));
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/surfaces/plur.html`, { waitUntil: 'load' });
@@ -107,7 +110,7 @@ test('without voices every register says so plainly, and nothing pretends to spe
   await ctx.close();
   const c = await open('cypherpunk');
   assert.equal(await c.p.$eval('#etCyPair', b => b.disabled), true, 'the pair hand-off is honestly off');
-  assert.match(await c.p.textContent('#etReceipt'), /no Hebrew or Arabic voice/);
+  assert.match(await c.p.textContent('#etReceipt'), /no Hebrew or Arabic audio route/);
   await c.ctx.close();
 });
 

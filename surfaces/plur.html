@@ -406,7 +406,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 </style>
 <link rel="stylesheet" href="skaists.css">
 </head>
-<body data-reg="bee" data-bee-theme="custom">
+<body data-reg="bee" data-bee-theme="custom"><nav aria-label="Festivals, PLUR, SKAISTS and BNR" style="padding:16px;display:flex;gap:16px;flex-wrap:wrap"><a href="festival/index.html">Festivals</a><a href="plur.html" aria-current="page">PLUR</a><a href="doors/skaists.html">SKAISTS</a><a href="index.html">BNR</a></nav>
 
 <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
      one surface. ONE data layer (the word cards this page carries, the browser's own voices as the
@@ -477,10 +477,35 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
     <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
     <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
-    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#voices">All language voices</a><a href="#festival">Enter the festival</a><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
   </div>
 </section>
 
+
+<section id="festival" class="plur-festival" aria-labelledby="plurFestivalTitle">
+  <h2 id="plurFestivalTitle">The festival, here in PLUR</h2>
+  <p>Your day on the floor: the day pass, nine stops, kandi, music, the calm tent and the economy board. The same complete festival experience, in your selected view.</p>
+  <p><a href="festival/index.html">Open the festival on its own</a></p>
+  <iframe id="plurFestival" title="PLUR festival — full interactive attendee experience" src="festival/index.html?embed=plur&amp;v=20261002" loading="lazy"></iframe>
+</section>
+<style>
+.plur-festival{max-width:960px;margin:24px auto;padding:20px;color:var(--sk-ink);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-md);scroll-margin-top:16px}.plur-festival h2{font-size:clamp(22px,5vw,32px);margin-bottom:12px}.plur-festival p{line-height:1.6;margin:10px 0}.plur-festival a{display:inline-flex;align-items:center;min-height:44px}.plur-festival iframe{display:block;width:100%;height:900px;border:0;margin-top:16px;background:transparent}@media(max-width:600px){.plur-festival{padding:12px;margin:16px 8px}}
+</style>
+<script>
+(function(){
+ var frame=document.getElementById('plurFestival'),observer;
+ function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
+ frame.addEventListener('load',function(){
+  var doc=frame.contentDocument;if(!doc||!doc.body)return;
+  function resize(){var h=Math.ceil(doc.body.getBoundingClientRect().height)+8;if(h>0&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';}
+  if(observer)observer.disconnect();observer=new ResizeObserver(function(){sync();resize();});observer.observe(doc.body);sync();resize();
+ });
+ document.addEventListener('bregister',sync);
+ new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
+})();
+</script>
+
+<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
 <section class="field f-peace" id="words">
   <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss" data-i18n="plur.g1">the first word</div>
@@ -513,8 +538,8 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <label class="vpick" for="vsel"><span data-i18n="plur.voicePick">Voice used for listening</span>
       <select id="vsel"></select>
     </label>
-    <span class="st" id="vst" role="status">—</span>
-    <p class="vnote" id="vnote" data-i18n="plur.hearPairNote">Optional pronunciation example beside the words. It plays the two greetings in turn, only when you press it, and only if your browser offers a Hebrew or an Arabic voice. Nothing plays automatically.</p>
+    <button id="voiceStop" type="button">Stop audio</button><span class="st" id="vst" role="status">Choose a word or language sample.</span>
+    <p class="vnote" id="vnote">Matching browser voices are preferred. Missing voices use site-hosted synthetic word previews, not a recording by a native speaker. Native review is pending. A selected voice only applies to its own language. Nothing plays automatically.</p>
   </div>
   <div class="note">
     <h3>the word two peoples share</h3>
@@ -646,7 +671,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <a href="blight/museum.html" data-i18n="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>  </div>
 </section>
 
-<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
+<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech uses matching browser voices or fixed synthetic previews fetched from this site. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
 <section class="talk" id="talk">
   <div class="wrap">
     <h2><span data-i18n="d.plur.talk.h">now say it back</span>
@@ -720,120 +745,52 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 </footer>
 
 <script>
-/* bvoice — the estate's shared voice module.
-   Any element with data-say + data-lang speaks. Zero network, zero deps.
-   Honest about absence: a tongue with no installed voice is LABELLED, never silently mute. */
 (function(){
-  "use strict";
-  var synth = window.speechSynthesis;
-  var words = [].slice.call(document.querySelectorAll('[data-say][data-lang]'));
-  var sel = document.getElementById('vsel'), st = document.getElementById('vst');
-  var salam = document.getElementById('vsalam');
-  var voices = [], byLang = {}, override = null, current = null;
-
-  if(!synth){
-    stDirty=true; st.textContent = T('plur.st.noengine', 'no speech engine in this browser');
-    words.forEach(function(w){ w.classList.add('novoice'); });
-    sel.disabled = salam.disabled = true;
-    window.bvoice = { speak:function(t,l,then){ if(then) then(); }, has:function(){ return false; } };
-    return;
-  }
-  function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
-  /* the shared corpus lookup keeps script-written strings translatable with
-     a visible English fallback (corpus law) */
-  function T(key, fallback){
-    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
-      ? window.BNRLanguage.text(key, fallback) : fallback;
-  }
-  /* honest enable/disable for the optional pronunciation example: it is
-     usable exactly when a Hebrew OR an Arabic voice exists — never a mystery
-     button, never silent-on-click without an explanation */
-  function pairVoices(){
-    return words.filter(function(w){
-      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
-    });
-  }
-  function refreshSalam(){
-    var ok = pairVoices().length > 0;
-    salam.disabled = !ok;
-    st.textContent = ok ? T('plur.voiceReady', 'a Hebrew or Arabic voice is available for the example')
-                        : T('plur.voiceNone', 'No Hebrew or Arabic voice is installed in this browser, so this example stays silent; the written greetings remain.');
-  }
-
-  function index(){
-    voices = synth.getVoices() || [];
-    byLang = {};
-    voices.forEach(function(v){ var b = base(v.lang); (byLang[b] = byLang[b]||[]).push(v); });
-    var have = {}, miss = {};
-    words.forEach(function(w){
-      var b = base(w.dataset.lang), ok = !!(byLang[b] && byLang[b].length);
-      w.classList.toggle('novoice', !ok);
-      ok ? have[b]=1 : miss[b]=1;
-    });
-    var h = Object.keys(have).length, m = Object.keys(miss).length;
-    /* the status line belongs to the pronunciation example (refreshSalam);
-       the general voice summary stays visible on the word cards themselves */
-    sel.title = h + ' tongues speak here · ' + m + ' have no voice on this machine';
-    fill();
-    refreshSalam();
-  }
-  function fill(){
-    sel.innerHTML = '';
-    var a = document.createElement('option');
-    a.value=''; a.textContent = T('plur.voiceMatch', 'match each tongue'); sel.appendChild(a);
-    voices.forEach(function(v,i){
-      var o=document.createElement('option'); o.value=String(i);
-      o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
-    });
-    var s=null; try{ s = localStorage.getItem('bvoice'); }catch(e){}
-    if(s !== null && voices[s]){ sel.value = s; override = voices[s]; }
-  }
-  sel.addEventListener('change', function(){
-    override = sel.value === '' ? null : voices[sel.value];
-    try{ localStorage.setItem('bvoice', sel.value); }catch(e){}
-  });
-  function pick(lang){
-    if(override) return override;
-    var b = base(lang), l = byLang[b];
-    if(!l || !l.length) return null;
-    for(var i=0;i<l.length;i++){ if(l[i].lang.toLowerCase().replace('_','-') === lang.toLowerCase()) return l[i]; }
-    return l[0];
-  }
-  function say(w, then){
-    var v = pick(w.dataset.lang);
-    if(!v){ if(then) then(); return; }
-    synth.cancel();
-    var u = new SpeechSynthesisUtterance(w.dataset.say);
-    u.voice = v; u.lang = v.lang; u.rate = .82;
-    if(current) current.classList.remove('speaking');
-    current = w; w.classList.add('speaking');
-    u.onend = u.onerror = function(){ w.classList.remove('speaking'); if(then) then(); };
-    synth.speak(u);
-  }
-  words.forEach(function(w){
-    w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
-  });
-  salam.addEventListener('click', function(){
-    var pair = pairVoices();
-    if(!pair.length){ refreshSalam(); return; } /* honest disable makes this rare; the runtime check stays as a guard */
-    pair[0].scrollIntoView({block:'center',behavior:'auto'}); /* jump, not glide: reduced-motion safe */
-    say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
-  });
-  window.bvoice = {
-    speak: function(text, lang, then){
-      var v = pick(lang);
-      if(!v){ if(then) then(); return; }
-      synth.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.voice = v; u.lang = v.lang; u.rate = .82;
-      u.onend = u.onerror = function(){ if(then) then(); };
-      synth.speak(u);
-    },
-    has: function(lang){ return !!pick(lang); }
-  };
-  index();
-  if(typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = index;
+'use strict';
+var synth=window.speechSynthesis,words=Array.from(document.querySelectorAll('.w[data-say][data-lang]'));
+var sel=document.getElementById('vsel'),st=document.getElementById('vst'),pair=document.getElementById('vsalam');
+var voices=[],preferred='',manifest={entries:[],languages:[]},clips=new Map(),active=null,serial=0;
+function norm(lang){return String(lang||'').toLowerCase().replace(/_/g,'-').replace(/^iw(?=-|$)/,'he').replace(/^no(?=-|$)/,'nb');}
+function matches(a,b){a=norm(a);b=norm(b);if(a===b)return true;if(a.startsWith('zh')||b.startsWith('zh'))return ['zh','zh-cn','zh-sg','cmn'].includes(a)&&['zh','zh-cn','zh-sg','cmn'].includes(b);return a.split('-')[0]===b.split('-')[0];}
+function pick(lang){var available=voices.filter(v=>matches(v.lang,lang));return available.find(v=>v.voiceURI===preferred)||available.find(v=>norm(v.lang)===norm(lang))||available[0]||null;}
+function clip(text,lang){return clips.get(lang+'|'+text)||null;}
+function stop(){serial++;if(active){if(active.audio){active.audio.pause();active.audio.onended=active.audio.onerror=null;}if(active.node)active.node.classList.remove('speaking');active=null;}if(synth)synth.cancel();}
+function speak(text,lang,done,node){
+ stop();var ticket=serial,v=pick(lang),recording=clip(text,lang);active={node:node};if(node)node.classList.add('speaking');
+ function finish(ok,message){if(ticket!==serial)return;if(node)node.classList.remove('speaking');active=null;st.textContent=message;if(done)done(ok);}
+ function preview(){if(ticket!==serial)return;if(!recording){finish(false,'No matching voice or fixed preview for '+lang+'. No substitute language was used.');return;}
+  var audio=new Audio('../assets/plur-voices/'+recording.file);active={node:node,audio:audio};st.textContent=recording.note+' · '+lang+' · native review pending';
+  audio.onended=function(){finish(true,'Played '+lang+' synthetic preview · native review pending');};audio.onerror=function(){finish(false,'Audio could not be loaded for '+lang+'. Try again.');};
+  audio.play().catch(function(){finish(false,'Playback was blocked or unavailable. Press the word to retry.');});
+ }
+ if(!v){preview();return;}
+ try{var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=lang;u.rate=.82;
+  st.textContent='Browser voice: '+v.name+' · '+v.lang;
+  u.onend=function(){finish(true,'Finished '+lang+' with '+v.name);};u.onerror=function(e){if(e.error==='canceled'||e.error==='interrupted'){finish(false,'Speech stopped.');return;}preview();};synth.speak(u);
+ }catch(e){preview();}
+}
+function index(){
+ voices=synth?synth.getVoices()||[]:[];
+ try{preferred=localStorage.getItem('plur.voiceURI')||'';}catch(e){}
+ sel.replaceChildren();var auto=document.createElement('option');auto.value='';auto.textContent='Match each language automatically';sel.appendChild(auto);
+ voices.forEach(function(v){var o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' — '+v.lang;sel.appendChild(o);});sel.value=voices.some(v=>v.voiceURI===preferred)?preferred:'';sel.disabled=!voices.length;
+ var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
+ pair.disabled=!words.some(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));
+ document.getElementById('voiceCoverageSummary').textContent=ready+' of '+words.length+' word cards have an audio route. '+manifest.languages.length+' language samples. Synthetic previews await native review.';
+ var body=document.getElementById('voiceCoverageRows');body.replaceChildren();manifest.languages.forEach(function(lang){var sample=manifest.entries.find(e=>e.lang===lang&&e.kind==='sample'),v=pick(lang);var row=document.createElement('tr');
+ var name=document.createElement('th');name.scope='row';name.textContent=lang+' · '+sample.text;var status=document.createElement('td');status.textContent=v?'Browser voice + synthetic sample':sample.note+' · native review pending';var action=document.createElement('td'),button=document.createElement('button');button.type='button';button.textContent='Hear '+lang;button.addEventListener('click',()=>speak(sample.text,lang,null,button));action.appendChild(button);row.append(name,status,action);body.appendChild(row);});
+ document.dispatchEvent(new CustomEvent('plurvoiceschanged'));
+}
+sel.addEventListener('change',function(){preferred=sel.value;try{localStorage.setItem('plur.voiceURI',preferred);}catch(e){}index();});
+words.forEach(w=>w.addEventListener('click',()=>speak(w.dataset.say,w.dataset.lang,null,w)));
+pair.addEventListener('click',function(){var greetings=words.filter(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));if(!greetings.length)return;speak(greetings[0].dataset.say,greetings[0].dataset.lang,function(ok){if(ok&&greetings[1])speak(greetings[1].dataset.say,greetings[1].dataset.lang,null,greetings[1]);},greetings[0]);});
+document.getElementById('voiceStop').addEventListener('click',function(){stop();st.textContent='Speech stopped.';});
+window.bvoice={speak:speak,has:function(lang,text){return !!(pick(lang)||(text&&clip(text,lang)));},stop:stop};
+if(synth)synth.addEventListener('voiceschanged',index);
+window.addEventListener('pagehide',stop);index();
+fetch('../assets/plur-voices/manifest.json?v=20261002').then(function(r){if(!r.ok)throw Error('manifest');return r.json();}).then(function(m){manifest=m;clips=new Map(m.entries.map(e=>[e.lang+'|'+e.text,e]));index();}).catch(function(){st.textContent='Synthetic audio catalog unavailable; matching browser voices remain usable.';});
 })();
+
 </script>
 <script>
 /* ─────────────────────────────────────────────────────────────
@@ -1183,7 +1140,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
       return {key:k,n:ws.length,tongues:new Set(ws.map(function(w){return w.lang.split('-')[0];})).size,voiced:ws.filter(function(w){return w.voice;}).length,words:ws};});
     D.total=D.fields.reduce(function(a,f){return a+f.n;},0); D.tongues=all.size;
     D.voiced=D.fields.reduce(function(a,f){return a+f.voiced;},0);
-    D.engine=!!window.speechSynthesis; D.voices=D.engine?(speechSynthesis.getVoices()||[]).length:0;
+    D.engine=!!window.bvoice; D.voices=window.speechSynthesis?(speechSynthesis.getVoices()||[]).length:0;
     D.pair=!!($('vsalam')&&!$('vsalam').disabled);
     D.recognition=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
     var th=$('thread'); D.tutor=th&&th.querySelector('.msg.hive:not(:has(.thinking))')?'answered':th&&th.querySelector('.msg.sys')?'unavailable':'not verified';
@@ -1195,7 +1152,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     $('etBeeRows').innerHTML=D.fields.map(function(f){
       return '<button type="button" class="et-b-row" data-go="f-'+f.key+'"><span>'+esc(fieldName(f.key))+'</span><small>'+esc(f.n+' '+T('et.plur.b.ways','ways to say it'))+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
     $('etBeeNow').textContent=!D.engine?T('et.plur.b.noEngine','this browser cannot speak, so the words stay written. every one of them is here to read.')
-      :D.voiced?T('et.plur.b.voiced','your browser can say {n} of these {t} words out loud. press one to hear it.').replace('{n}',D.voiced).replace('{t}',D.total)
+      :D.voiced?T('et.plur.b.audioRoutes','{n} of these {t} words have browser or synthetic audio. Press one to hear it; synthetic previews await native review.').replace('{n}',D.voiced).replace('{t}',D.total)
       :T('et.plur.b.silent','your browser has no voices for these words yet, so they stay written. every one of them is here to read.');
     $('etBeeStart').textContent=T('et.plur.b.start','start with peace');
   }
@@ -1238,7 +1195,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
       '<tr><td>total</td><td>'+D.total+'</td><td>'+D.tongues+'</td><td class="'+(D.voiced?'st-ok':'st-no')+'">'+D.voiced+'/'+D.total+'</td></tr>';
     var steps=[
       ['browser · word cards',D.total+' cards embedded in this document · register and tongue kept on this origin','done'],
-      ['voice engine',!D.engine?'no speechSynthesis in this browser · every card labelled silent':D.voices+' installed voices · '+D.voiced+' of '+D.total+' cards can speak · local-only audio not established',D.engine?'done':'guard'],
+      ['voice engine',!D.engine?'audio routing unavailable · inspect the language coverage below':D.voices+' browser voices · '+D.voiced+' of '+D.total+' cards have browser or synthetic audio · native review pending',D.engine?'done':'guard'],
       ['voice in',D.recognition?'SpeechRecognition present · may use a browser vendor service':'no SpeechRecognition · the mic stays off',D.recognition?'done':'guard'],
       ['ai provider',D.tutor==='answered'?'api.anthropic.com/v1/messages answered':D.tutor==='unavailable'?'api.anthropic.com/v1/messages refused · the message was not answered':'api.anthropic.com/v1/messages · no auth header configured · not verified · nothing sent until you press send',D.tutor==='answered'?'done':'now']
     ];
@@ -1246,7 +1203,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
     $('etReceipt').innerHTML=kv([
       ['voices',esc(String(D.voices))],['voiced',esc(D.voiced+' / '+D.total)],
-      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic voice exists</span>':'<span class="no">no Hebrew or Arabic voice · the example stays silent</span>'],
+      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic audio route exists</span>':'<span class="no">no Hebrew or Arabic audio route</span>'],
       ['tutor',D.tutor==='answered'?'<span class="yes">answered</span>':'<span class="no">'+esc(D.tutor)+'</span>'],
       ['sent','<span class="yes">nothing</span> · until you press send'],
       ['unverified','provider retention · relay privacy · end-to-end encryption']]);
