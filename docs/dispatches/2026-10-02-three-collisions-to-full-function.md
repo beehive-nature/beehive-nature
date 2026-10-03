@@ -10,8 +10,12 @@ Date: 2026-10-02.
 > also we/codex is upgrading our crypto stack to full PQ
 
 The three collisions were filed earlier the same day in this seat's stack
-assessment (Buzz, Autonomi, x0x). They stop being open escalations and become
-three lanes. Each lane's target is full function, not a parked note.
+assessment, which covered Buzz, Autonomi and x0x. The collisions themselves
+are: Buzz identity is classical while the stack goes post-quantum; ANT upload
+is code-disabled; Buzz is absent from the stack inventory. x0x raised no
+collision, so it has no lane here; its v0.46.0 release state is recorded at
+the end. The three stop being open escalations and become three lanes. Each
+lane's target is full function, not a parked note.
 
 ## Lane 1 — Buzz identity is secp256k1; the stack is going post-quantum
 
@@ -181,6 +185,9 @@ Third review round, same day:
 - **PQ authentication.** Lane 1's acceptance accepted a key binding alone.
   It now requires PQ authentication over every event or an ordered
   checkpoint of them.
+- **Which three.** The opening named the assessment's subjects (Buzz,
+  Autonomi, x0x) as if they were the collisions. x0x had none. The opening
+  now lists the actual three.
 
 ## Box inspection, pending
 
