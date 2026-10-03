@@ -2,18 +2,17 @@
 //! base fee (0.1 Gwei / 100_000_000 wei) so local development reflects production
 //! gas conditions and adheres to the 0.0002 ETH standing gas ceiling.
 //!
-//! ARBITRUM ONE GAS CITATION & CALIBRATION:
-//! On Arbitrum Nitro chains, the base fee is governed by the ArbOwner and ArbGasInfo
-//! precompiles:
-//! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the gas price floor
-//!   (minL2BaseFee), which defaults to 0.1 Gwei (100_000_000 wei) in Nitro chain configs
+//! ARBITRUM NITRO PRECOMPILE CITATION & DEVNET CALIBRATION:
+//! Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
+//! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the chain's gas price floor
 //!   (cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner).
 //! - ArbGasInfo.getMinimumGasPrice() at precompile address 0x000000000000000000000000000000000000006C
-//!   returns the current L2 gas price floor
+//!   returns the current gas price floor
 //!   (cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbgasinfo).
-//! - On Arbitrum One mainnet post-ArbOS 20 Atlas, the minimum base fee was lowered to 0.01 Gwei
-//!   (10,000,000 wei), and live base fees fluctuate between ~0.01 and ~0.1 Gwei under normal traffic.
 //!
+//! Note on fee figures: the 0.1 Gwei (100_000_000 wei) figure passed below to `--base-fee`
+//! is an empirical testnet calibration for local devnet execution (UNVERIFIED against official doc text);
+//! the cited reference defines the interface functions only and specifies no numerical constants.
 //! By default, Anvil runs with Ethereum L1 default fees (1.0 Gwei = 1,000,000,000 wei).
 //! Because alloy-node-bindings (`alloy::node_bindings::Anvil`) spawns `Command::new("anvil")`
 //! without an argument injection hook, this wrapper provides the calibrated `--base-fee 100000000`.

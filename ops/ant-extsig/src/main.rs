@@ -25,13 +25,16 @@
 //!   (200_000_000_000_000 wei) per transaction. Validated PRE-SEND via provider gas & fee estimation,
 //!   bound at driver level via MaxFeePerGas::LimitedAuto, and verified post-send against mined GasInfo.
 //!
-//! ARBITRUM ONE GAS CITATION & CALIBRATION:
-//! On Arbitrum Nitro chains, the base fee is governed by the ArbOwner and ArbGasInfo precompiles:
-//! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the gas price floor (defaults to 0.1 Gwei = 100,000,000 wei,
-//!   cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner).
-//! - ArbGasInfo.getMinimumGasPrice() at 0x000000000000000000000000000000000000006C returns the L2 floor
+//! ARBITRUM NITRO PRECOMPILE CITATION & DEVNET CALIBRATION:
+//! Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
+//! - ArbOwner.setMinimumL2BaseFee(uint256 priceInWei) configures the chain's gas price floor
+//!   (cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner).
+//! - ArbGasInfo.getMinimumGasPrice() at precompile address 0x000000000000000000000000000000000000006C
+//!   returns the current gas price floor
 //!   (cite: https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbgasinfo).
-//! - On Arbitrum One mainnet post-ArbOS 20 Atlas, minimum base fee is 0.01 Gwei (10,000,000 wei) with observed ~0.01-0.1 Gwei range.
+//! Note: the cited precompile reference documents the interface methods without stating specific
+//! fee constants. Numeric fee figures (0.1 Gwei devnet calibration, ~0.01-0.1 Gwei mainnet observations)
+//! are empirical and UNVERIFIED against reference documentation text.
 //! Local Anvil defaults to Ethereum L1 base fees (1.0 Gwei = 1,000,000,000 wei). If the network base fee
 //! or worst-case commitment exceeds 0.0002 ETH, the harness cleanly refuses pre-send.
 

@@ -15,14 +15,17 @@ This dispatch delivers the implementation and verification receipts for Lane 2 (
 
 The `ops/ant-extsig` harness proves member-signed upload under strict standing economic bounds without holding member private keys or wallets on estate clients.
 
-This update resolves all blocking items and receipt requirements from Claude Fable 5.1's Round 1 and Round 2 reviews:
+This update resolves all blocking items and receipt requirements from Claude Fable 5.1's Round 1, Round 2, and Round 3 reviews:
 1. **Merkle Storage Cost Derivation**: Evaluates `evm_network.estimate_merkle_payment_cost(b.depth, &b.pool_commitments)` across all prepared batches, matching Solidity `PaymentVault.sol` worst-case pricing across candidate pools with the 3× settlement multiplier baked in by `ant-core`.
 2. **Fail-Closed Numeric Parsing**: All string-to-integer parse fallbacks for storage and payment sums fail closed via `.unwrap_or(u128::MAX)` across both wave and merkle arms.
 3. **Pre-Send Gas Simulation with Driver Cap**: Evaluates worst-case gas commitment as `worst_case_gas_limit.saturating_mul(max_fee_limit)`, where `max_fee_limit` is the `MaxFeePerGas::LimitedAuto` driver cap (800,000,000 wei = 0.8 Gwei). Refuses pre-send if network base fee exceeds the cap or if worst-case gas commitment exceeds 0.0002 ETH (200,000,000,000,000 wei).
 4. **Exact Token Approval (No `U256::MAX`)**: Vault allowance is inspected pre-payment. If insufficient, the harness submits an approval for **exactly** the quoted sum, gas-checking the approval transaction and aggregating its cost. `evmlib`'s internal `U256::MAX` approval path is never entered.
-5. **Arbitrum One Nitro Documentation Citations**: Corrected citations to link directly to Arbitrum precompiles: `ArbOwner.setMinimumL2BaseFee(uint256)` (defaults to 0.1 Gwei = 100,000,000 wei) and `ArbGasInfo.getMinimumGasPrice()` at `0x000000000000000000000000000000000000006C`.
+5. **Arbitrum Nitro Precompile Citations & Fee Honesty**: Corrected citations to link directly to Arbitrum precompiles: `ArbOwner.setMinimumL2BaseFee(uint256)` and `ArbGasInfo.getMinimumGasPrice()` at `0x000000000000000000000000000000000000006C`. Acknowledged that numerical fee figures (0.1 Gwei devnet calibration, ~0.01-0.1 Gwei mainnet observations) are empirical and UNVERIFIED against reference documentation text.
 6. **Live Refusal Receipt against Vanilla Anvil**: Captured live run against default Anvil (no wrapper), proving immediate pre-send refusal when network base fee exceeds the driver fee cap.
-7. **Honest Merkle Execution Status**: Merkle arm live execution is marked **UNVERIFIED** on 8-node local devnets (which fall back to wave-batch because `ant-core` requires 35+ DHT nodes for Merkle pool depth). Verified sound by construction and unit test.
+7. **Accurate Merkle Execution Status & Upstream Citations**: Merkle arm live execution is marked **UNVERIFIED on live devnet**, with exact upstream reasons from `ant-core` commit `681d48f3`:
+   - `DEFAULT_MERKLE_THRESHOLD = 64` (`merkle.rs:38`): 4-chunk fixture < 64 chunks selects wave arm under `PaymentMode::Auto`.
+   - `CANDIDATES_PER_POOL = 16` (`merkle.rs:1293-1304`): `remote_peers.len() < CANDIDATES_PER_POOL` triggers `Error::InsufficientPeers` fallback to wave-batch under `PaymentMode::Auto`.
+8. **Functional Gap & Re-Enable Gate**: Documented the transaction scale limitation identified in Round 3 (fixed 250k gas cap vs Autonomi's `GAS_PER_WAVE_TX = 1_500_000` and 29-chunk genealogy archive). Marked dynamic fee cap derivation as **REQUIRED BEFORE RE-ENABLE, NOT BEFORE MERGE**.
 
 ---
 
@@ -60,12 +63,19 @@ File: `ops/ant-extsig/Cargo.toml`
 - Driver cap: `MaxFeePerGas::LimitedAuto(MAX_GAS_CEILING_WEI / 250_000 = 800_000_000 wei)` enforces the fee ceiling inside `evmlib`'s `send_transaction_with_retries`.
 - Post-send receipt: `verify_transaction_gas` verifies the mined `GasInfo` and receipts.
 
-### 3.4 Arbitrum One Fee Schedule Citation & Anvil Calibration
-- On Arbitrum Nitro chains, the base fee is governed by the ArbOwner and ArbGasInfo precompiles:
-  - `ArbOwner.setMinimumL2BaseFee(uint256 priceInWei)` configures the gas price floor (`minL2BaseFee`), which defaults to 0.1 Gwei (100,000,000 wei) in Nitro chain configs (cite: `https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner`).
-  - `ArbGasInfo.getMinimumGasPrice()` at precompile address `0x000000000000000000000000000000000000006C` returns the current L2 gas price floor (cite: `https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbgasinfo`).
-  - On Arbitrum One mainnet post-ArbOS 20 Atlas, the minimum base fee was lowered to 0.01 Gwei (10,000,000 wei), and live base fees fluctuate between ~0.01 and ~0.1 Gwei under normal traffic.
-- `ops/ant-extsig/src/bin/anvil.rs` forwards `--base-fee 100000000` (0.1 Gwei) to the underlying Anvil binary so local devnet reflects Arbitrum One production conditions.
+### 3.4 Arbitrum Nitro Precompile Citations & Devnet Calibration
+- Arbitrum Nitro documentation defines the precompiles governing the L2 gas price floor:
+  - `ArbOwner.setMinimumL2BaseFee(uint256 priceInWei)` configures the chain's gas price floor (cite: `https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbowner`).
+  - `ArbGasInfo.getMinimumGasPrice()` at precompile address `0x000000000000000000000000000000000000006C` returns the current gas price floor (cite: `https://docs.arbitrum.io/build-decentralized-apps/precompiles/reference#arbgasinfo`).
+- Note on fee numbers: The cited reference page defines interface functions only and specifies no numerical constants. The 0.1 Gwei (100,000,000 wei) figure passed to `--base-fee` in `ops/ant-extsig/src/bin/anvil.rs` is an empirical testnet calibration (UNVERIFIED from official doc text) to prevent local Anvil from defaulting to Ethereum L1 1.0 Gwei fees.
+
+### 3.5 Functional Gap Analysis: 29-Chunk Archive & Per-Transaction Dynamic Cap
+- The harness currently fixes `max_fee_limit = MAX_GAS_CEILING_WEI / 250_000 = 800_000_000 wei`, assuming a small transaction ($le 250,000$ gas limit).
+- For the 4-chunk fixture (`worst_case_gas_limit = 226,213`), `worst_case_commitment` is `180,970,400,000,000` wei (~90.5% of the 0.0002 ETH ceiling).
+- In `ant-core` (`file/native.rs:248`), Autonomi defines `const GAS_PER_WAVE_TX: u128 = 1_500_000`, and the BNR genealogy archive was quoted at 29 chunks. A transaction with gas limit $> 250,000$ will refuse pre-send under a fixed 800,000,000 wei cap even when true network fees are very low (e.g. 0.02 Gwei).
+- Because the harness fails closed, nothing leaks or overspends; however, before `/api/preserve/upload` can be code-re-enabled in `preserve-service.mjs`, the upload service must derive the driver fee cap dynamically per transaction:
+  `max_fee_per_gas_limit = MAX_GAS_CEILING_WEI / worst_case_gas_limit` (refusing if `fees.max_fee_per_gas > max_fee_per_gas_limit`).
+- **Status:** Required before re-enable, not before PR #324 merge.
 
 ---
 
@@ -117,11 +127,12 @@ error: process didn't exit successfully: `ops\ant-extsig\target\debug\ant-extsig
 
 Proof: The harness refused pre-send immediately before broadcasting any transaction when the network base fee exceeded the driver cap of 800,000,000 wei.
 
-### 5.2 Live 8-Node Swarm Run with Calibrated Devnet (Receipt JSON)
+### 5.2 Fresh Live 8-Node Swarm Run with Calibrated Devnet (Receipt JSON)
 
 Command:
 ```powershell
-$env:PATH = "$((Get-Item ops\ant-extsig\target\debug).FullName);$env:PATH"
+$dir = (Resolve-Path 'ops/ant-extsig/target/debug').Path
+$env:PATH = $dir + ';' + $env:PATH
 cargo run --manifest-path ops/ant-extsig/Cargo.toml --bin ant-extsig
 ```
 
@@ -134,16 +145,16 @@ Terminal output:
       4 chunks, DataMap 1e44a2ca1a773b88bb275551d1d19a4ff3c9293fe6fda67251203f5a6ab5e25a <!-- TESTNET-ONLY -->
       storage check [prepare_quotes]: 46875000000000000 atto-ANT (ceiling: 2500000000000000000 atto-ANT = 2.5 ANT)
       arm: WAVE (4 quote payments, total 46875000000000000 atto)
-      e.g. quote hash 7c67fecb643379001a4f8d42799e61587621f48bab4d0eb09db552e8b796e5e2 <!-- TESTNET-ONLY -->
-      e.g. quote hash 5e734978b82d75c1c5baf61ae59c5bbef2d2a925ec1ab34f7d3b3c88cd7ba8bd <!-- TESTNET-ONLY -->
+      e.g. quote hash 2a42e182fbdd7ba6a4b35f2bb9b39ac7859784c32abb6add7af640b3c51d50d0 <!-- TESTNET-ONLY -->
+      e.g. quote hash 3892d812c08228b5d9b2573aa4ffeeae6fe4bbd4dc9a5c14d89a11d223ef46f0 <!-- TESTNET-ONLY -->
 [4/6] member wallet paying (wave arm)...
       current vault allowance 0 < required 46875000000000000; approving EXACT amount...
       pre-send gas check [token_approval]: est_gas=46394 (buffer_limit=55672) * max_fee_limit=800000000 wei = 44537600000000 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
       exact approval tx submitted: 0xff302f8e5661401add312457aaddc90d94b23b3bfd7fb6dff467b86d0f842958 <!-- TESTNET-ONLY -->
       approval confirmed: gas_used=46394, cost=3650732771834 wei
-      pre-send gas check [wave_batch_quotes]: est_gas=188499 (buffer_limit=226198) * max_fee_limit=800000000 wei = 180958400000000 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
-      gas check [wave_batch_quotes]: gas_limit=226198 * max_fee_per_gas=157379521 wei = 35598932891158 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
-      paid 4 quote payments, actual gas used: 183699, max gas commitment: 35598932891158 wei
+      pre-send gas check [wave_batch_quotes]: est_gas=188511 (buffer_limit=226213) * max_fee_limit=800000000 wei = 180970400000000 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
+      gas check [wave_batch_quotes]: gas_limit=226213 * max_fee_per_gas=157379521 wei = 35601293583973 wei (ceiling: 200000000000000 wei = 0.0002 ETH)
+      paid 4 quote payments, actual gas used: 183711, max gas commitment: 35601293583973 wei
       storage check [pre_finalize]: 46875000000000000 atto-ANT (ceiling: 2500000000000000000 atto-ANT = 2.5 ANT)
 [5/6] INTERRUPT: client destroyed -- reconnecting FRESH for the resume...
 RECEIPT {
@@ -161,7 +172,7 @@ RECEIPT {
   "roundtrip_byte_identical": true,
   "storage_ceiling_atto": "2500000000000000000",
   "storage_ceiling_met": true,
-  "total_gas_commitment_wei": "39249665662992",
+  "total_gas_commitment_wei": "39252026355807",
   "upload_result_debug": "FileUploadResult { data_map: DataMap:\n        ChunkInfo { index: 0, dst_hash: 25a2a3..65abf8, src_hash: 14946e..f878d4, ",
   "winner_hashes": []
 }
@@ -171,11 +182,15 @@ RECEIPT {
 - Member payer address: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. <!-- TESTNET-ONLY -->
 - Approval transaction: `0xff302f8e5661401add312457aaddc90d94b23b3bfd7fb6dff467b86d0f842958`. <!-- TESTNET-ONLY -->
 - Storage quote: `46875000000000000` atto-ANT ($approx 0.0469$ ANT), safely within 2.5 ANT ceiling.
-- Gas commitment across both transactions (approval + payment): `39249665662992` wei ($approx 0.0000392$ ETH), safely within 0.0002 ETH ceiling.
+- Gas commitment across both transactions (approval + payment): `39252026355807` wei ($approx 0.00003925$ ETH), safely within 0.0002 ETH ceiling.
 - Verified byte-identical round-trip download after full client interrupt and recreation.
 
 ### 5.3 Merkle Arm Status: UNVERIFIED on Live Devnet
-- Status: **UNVERIFIED on live devnet** (requires 35+ node testnet for DHT pool commitments; local 8-node devnet preflight safely falls back to wave-batch).
+- Status: **UNVERIFIED on live devnet**.
+- Grounded upstream reasons from `ant-core` commit `681d48f3`:
+  1. `DEFAULT_MERKLE_THRESHOLD = 64` (`merkle.rs:38`): Uploads with chunk count < 64 (such as the 4-chunk fixture) select wave-batch under `PaymentMode::Auto`.
+  2. Candidate pool peer requirements (`merkle.rs:1293-1304`): `remote_peers.len() < CANDIDATES_PER_POOL (16)` triggers `Error::InsufficientPeers`, which falls back to wave-batch under `PaymentMode::Auto` (`merkle.rs:118-120`).
+  3. An 8-node local devnet running a 4-chunk fixture selects the wave arm on both grounds.
 - Verified sound by construction and unit test:
   - Exact formula `estimate_merkle_payment_cost` verified in unit test `test_merkle_cost_estimation_empty`.
   - Calldata generation `pay_for_merkle_tree_calldata` and pre-send simulation wired before signing.
@@ -185,5 +200,9 @@ RECEIPT {
 
 ## 6. Next Steps & Merge Gate
 
-1. **Re-Review**: Updated HEAD pushed to branch `lane/ant-extsig-dual-ceiling` for Claude Fable 5.1 exact-HEAD re-review on [PR #324](https://github.com/beehive-nature/beehive-nature/pull/324).
-2. **Production Gate**: Keep `/api/preserve/upload` code-disabled in `tools/genealogy/preserve-service.mjs` until Fable 5.1 review confirms receipts and the founder performs a mainnet test payment.
+1. **Re-Review & PR #324 Merge Gate**:
+   - Claude Fable 5.1 round-three review verification on [PR #324](https://github.com/beehive-nature/beehive-nature/pull/324).
+   - PR #324 is ready for founder merge gate once review confirms the text and receipt corrections.
+2. **Pre-Re-Enable Gate (REQUIRED BEFORE RE-ENABLE, NOT BEFORE MERGE)**:
+   - Before un-disabling `/api/preserve/upload` in `tools/genealogy/preserve-service.mjs`, the upload service must derive the fee cap dynamically per transaction (`max_fee_per_gas_limit = MAX_GAS_CEILING_WEI / worst_case_gas_limit`) to support archives up to 29 chunks without premature refusal.
+   - Founder conducts live mainnet test upload payment.
