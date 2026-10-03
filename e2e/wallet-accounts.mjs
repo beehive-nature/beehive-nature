@@ -20,7 +20,7 @@ const BTC = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'; // PUBLIC-CONSTANT: Bitcoin ge
 const SOL = '11111111111111111111111111111111'; // PUBLIC-CONSTANT: Solana system program
 const AR = 'a'.repeat(42) + 'A'; // Synthetic public address, no key material.
 const calls = [], pageErrors = [];
-let solRaw='1234567890', vaultMalformed=false, hiveMalformed=false;
+let btcRaw=null, solRaw='1234567890', vaultMalformed=false, hiveMalformed=false;
 let outage = false, wrongChain = false, deferred = null, preview = false;
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await ctx.addInitScript(() => {
@@ -61,6 +61,7 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
   if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: hiveMalformed ? 'not a balance' : '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
   if (/blockstream|mempool/.test(url.host)) {
     calls.push('esplora balance');
+    if(btcRaw!==null)return route.fulfill({headers,contentType:'application/json',body:btcRaw});
     return json({ chain_stats: { funded_txo_sum: 123456789, spent_txo_sum: 0, tx_count: 1 }, mempool_stats: { funded_txo_sum: 100, spent_txo_sum: 0 } });
   }
   if (/solana|solana-mainnet/.test(url.host)) { calls.push(body.method); return route.fulfill({headers,contentType:'application/json',body:'{"result":{"value":'+solRaw+'}}'}); }
@@ -137,6 +138,14 @@ try {
   check('undo restores the public account', await page.locator('#wa-following .wa-card').count() === 1);
   await add('bitcoin', BTC, 'following', 'Bitcoin genesis'); await settled(card(BTC));
   check('Bitcoin uses existing worker and confirmed amount only', (await card(BTC).textContent()).includes('1.23456789 BTC') && (await card(BTC).textContent()).includes('Confirmed BTC only'));
+  btcRaw='{"chain_stats":{"funded_txo_sum":9007199254740993,"spent_txo_sum":9007199254740992,"tx_count":2},"mempool_stats":{"funded_txo_sum":0,"spent_txo_sum":0}}';
+  await card(BTC).getByRole('button',{name:'Refresh',exact:true}).click();await settled(card(BTC));
+  check('Bitcoin subtracts cumulative sums exactly above Number safe integer',(await card(BTC).textContent()).includes('0.00000001 BTC'));
+  for(const raw of ['{"chain_stats":{}}','{"chain_stats":{"funded_txo_sum":1,"spent_txo_sum":2}}','{"chain_stats":{"funded_txo_sum":1.5,"spent_txo_sum":0}}']){
+    btcRaw=raw;await card(BTC).getByRole('button',{name:'Refresh',exact:true}).click();await settled(card(BTC));
+    check('invalid Bitcoin sums refuse a displayed amount',await card(BTC).locator('.wa-amount').count()===0);
+  }
+  btcRaw=null;
   await add('bitcoin', BTC.slice(0, -1) + 'b');
   check('legacy Bitcoin checksum rejected before save', (await page.locator('#wa-status').textContent()).includes('checksum failed'));
   await add('bitcoin', 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu', 'following', 'Segwit');

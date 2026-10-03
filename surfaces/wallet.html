@@ -5177,7 +5177,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       if(['vaulta','hive','bitcoin','solana','arweave'].indexOf(chain)<0)throw new Error('Unsupported read network');
       // Reuse the read-only BTC/SOL workers on demand, through the same shell.
-      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js?v=4');
+      if(!ADAPTERS[chain])spawnAdapter(chain,'wallet-adapter-'+chain+'.js?v=5');
       else if(!ADAPTERS[chain].attached&&ADAPTERS[chain].state!=='spawning')ADAPTERS[chain].respawn();
       var start=Date.now();
       while(!ADAPTERS[chain].attached) {

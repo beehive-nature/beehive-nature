@@ -95,3 +95,10 @@ The wider 499118bd6 CI finished with wallet/static/eternal/meter/Rust green and 
 `loadAbiUi` now escapes untrusted ABI field names and types in attribute values. A malicious field containing an image/event-handler payload remains the exact input attribute text and creates no injected element or execution. Adapter battery is **34/34**. Network error messages, transaction-id snippets, adapter states and CPU availability inserted into the affected HTML status panels are escaped too. This closes observed sinks, not a claim of a complete security audit.
 
 A separate browser receipt proves the actual upstream 9.7.3 bundle loaded under the wallet's CSP, CORS and exact SRI hash on an in-memory skaists.dev-origin source page: `docs/receipts/wallet-trezor-browser-pin-2026-10-03.json`. No SDK initialization, device, account export, signing or firmware method was invoked. Estate source checks pass **11/11**, including every language key and current English text.
+
+
+## Bitcoin cumulative precision
+
+The matching Bitcoin read path had the same pre-BigInt rounding defect in cumulative received/spent totals. `wallet-adapter-bitcoin.js::esplora` now preserves integer JSON tokens before parsing, and `balance` strictly validates both u64 sums and the confirmed supply bound before subtraction. Missing/fractional/negative totals never become zero. Missing pending statistics remain unknown (`null`) rather than an invented zero. The worker entry version advances for returning readers.
+
+The account battery is now **65/65**, including 9007199254740993 received minus 9007199254740992 spent yielding exactly one satoshi, and missing, negative-result and fractional controls. This is fixture acceptance, not an assertion of independently verified chain balances.
