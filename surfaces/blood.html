@@ -1998,7 +1998,7 @@ try {
       ['guard · living = exclude',D.living+' records refused · they never reach the manifest','guard'],
       ['consent · '+(st.approved?'bound':'not yet'),st.approved?String(st.approved):'no manifest bound yet',st.approved?'consent':'todo'],
       ['quote · Autonomi',an&&an.computed?('storage '+an.computed.storageANT+' ANT + gas '+an.computed.gasETH+' ETH · '+(an.raw&&an.raw.confidence||'estimate')+' @ '+date(an.queriedAt)+' · source '+an.route):'not quoted yet',st.quoted?'done':'todo'],
-      ['settle · ANT · pay once',st.purchased?'settled':'blocked · '+(an&&an.computed&&C&&Number(an.computed.storageANT)>Number(C.storageMaxANT)?'quote exceeds ceiling · ':'')+(C?'payment client cannot enforce both ceilings':'required ceiling data unavailable'),st.purchased?'done':'todo'],
+      ['settle · ANT · pay once',st.purchased?'settled':'blocked · '+(an&&an.computed&&C&&(Number(an.computed.storageANT)>Number(C.storageMaxANT)||Number(an.computed.gasETH)>Number(C.gasMaxETH))?'quote exceeds ceiling · ':'')+(C?'payment client cannot enforce both ceilings':'required ceiling data unavailable'),st.purchased?'done':'todo'],
       ['address · immutable · public',st.uploaded?'uploaded':'not yet · anyone fetches → hashes → compares',st.uploaded?'done':'todo']
     ];
     var nowAt=steps.findIndex(function(s){return s[2]==='todo';});
@@ -2030,7 +2030,7 @@ try {
       set('ant',fmtAnt(an.computed.storageANT)+'<br>ANT');
       set('antShort',fmtAnt(an.computed.storageANT)+' ANT');
       var gate=C
-        ? (Number(an.computed.storageANT)>Number(C.storageMaxANT)?' · storage quote exceeds ceiling':'')+' · payment disabled until both ceilings are atomic'
+        ? (Number(an.computed.storageANT)>Number(C.storageMaxANT)?' · storage quote exceeds ceiling':'')+(Number(an.computed.gasETH)>Number(C.gasMaxETH)?' · gas quote exceeds ceiling':'')+' · payment disabled until both ceilings are atomic'
         : ' · required ceiling data unavailable · payment disabled';
       set('beeQuote',esc('+ '+an.computed.gasETH+' ETH estimated gas · quoted '+String(an.queriedAt||'').slice(0,10)+gate));
       set('raverQuote',esc('estimate · payment capability required'));

@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-03T20:43:04.152Z",
+  "baseline": "pkg12",
+  "checked": 22151,
+  "changed": [
+    "surfaces/blood.html",
+    "surfaces/lang-corpus.json",
+    "surfaces/tree-of-life.css",
+    "surfaces/person-panel.mjs",
+    "surfaces/tree-of-life.mjs"
+  ],
+  "missing": [],
+  "stalePersonFiles": [],
+  "projectedSeparately": [
+    "assets/profile-archive/lineage/sources/records.json",
+    "assets/profile-archive/lineage/zblood-storage-economics.json"
+  ]
+}

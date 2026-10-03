@@ -1,5 +1,8 @@
 # Genealogy public edition refresh
 
+Current continuation: the pkg13 receipt below supersedes the earlier pkg12
+section, which is retained as historical evidence.
+
 Seat: Codex, `C:/Users/travi/wt-codex-genealogy-eternalization`.
 
 Origin was fetched before changes. The resumed checkout was on
@@ -118,3 +121,51 @@ No wallet access, payment, upload, storage-network retrieval or network
 hash verification occurred. The historic v2 payment gate is not promoted by
 this quote receipt. GitHub CI and publication of this new branch are separate
 from the existing deployment verified above.
+
+## Staleness audit and completion continuation
+
+Origin was fetched again. The worktree had moved to the already-merged
+reading-order branch; that branch and its seven modified screenshot artifacts
+were retained. PR #336's own branch was restored and current main `0d30d1b76`
+was merged without conflicts, preserving the new family relationships panel,
+3D tree and readable branch-label work from #342–#343.
+
+The stale-file audit hashed all 22,151 non-projected source entries against
+pkg12: five changed runtime files, zero missing files, zero undeclared person
+JSON/HTML files. Source records and economics are deliberately projected
+separately by the existing builder. The five updates are blood.html,
+lang-corpus.json, tree-of-life.css, person-panel.mjs and tree-of-life.mjs.
+The complete result is `docs/receipts/genealogy-staleness-2026-10-03.json`.
+Historical archives and receipts are retained, not deleted or mislabeled as
+current. The v2 gate now explicitly points to the current pkg13 receipt and
+labels its old artifact historical; that does not authorize an old upload.
+
+The earlier PR run's sole browser failure was a stale assertion:
+`settlement reports the over-ceiling quote` in blood-eternal.test.mjs:141.
+It assumed the old 2.5 ANT limit after #326 raised the recorded policy to 100.
+The assertion now reads both limits from the receipt. Independent browser
+fixtures cover within-budget, excessive ANT, and excessive ETH quotes.
+That third case exposed a real status-display omission: the settlement and
+new-bee price text only warned about storage overages. Both now warn about
+gas overages too, while the payment-capability stop remains in every case.
+
+The focused preservation, person-panel and 3D suite passed 75/75 with no
+skips. Browser tests run on GitHub; no local server is started. The current
+package is rebuilt with the existing source projection and deterministic tar
+builder, including all five runtime updates rather than pricing stale pkg12.
+
+The final current archive is `C:/Users/travi/family-lineage/pkg13.tar`:
+22,153 files, 87,268,661 content bytes, 107,806,720 tar bytes. Two constructions
+are byte-identical; all files verify, six runtime modules import after fresh
+extraction, and all 13,249 public records remain free of raw transcription values.
+
+- Manifest `fb6950a0b8a2886f2db386a566888d23a99ce1820d9d551c05813efb99cb4039` (PUBLIC-CONSTANT; preserve.mjs::verifyPackage).
+- Tar `5cf5aaeb8eee0b37dd8d91393d0d5f262ee37af8e44994b1a3450d4077572947` (PUBLIC-CONSTANT; build-eternalization-tar.sh::verify_reproducible_eternalization_tar).
+- ANT captured 2026-10-03T20:45:11.494Z: 3.684167589843750000 ANT storage,
+  0.000150000000000000 ETH gas estimate, 29 chunks, priced_sample, ant 0.3.9.
+- AR captured 2026-10-03T20:44:51.294Z: 1.355779919142 AR for that tar size.
+
+Both keyless captures bind to the exact tar. The full receipt is
+`docs/receipts/genealogy-edition-v3-2026-10-03-pkg13.json`. All payment/upload
+and network-retrieval states remain false. Final GitHub CI and deployment
+are verified separately after this source/receipt commit.
