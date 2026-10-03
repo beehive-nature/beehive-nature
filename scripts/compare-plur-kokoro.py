@@ -13,8 +13,9 @@ for e in m['entries']:
  if e['lang'] not in choices:continue
  voice,lang=choices[e['lang']];start=time.perf_counter();audio,rate=k.create(e['text'],voice=voice,lang=lang,speed=1);elapsed=time.perf_counter()-start
  if len(audio)<rate*.1 or float(np.max(np.abs(audio)))<.003:raise RuntimeError('Empty output '+e['id'])
+ source_peak=float(np.max(np.abs(audio)));gain=min(1.0,0.95/source_peak);audio=audio*gain
  dest=out/(e['id']+'.wav');sf.write(dest,audio,rate,subtype='PCM_16')
- results.append({'id':e['id'],'lang':e['lang'],'text':e['text'],'kind':e['kind'],'baseline':'../'+e['file'],'baselineSha256_PUBLIC-CONSTANT':sha(root/'assets/plur-voices'/e['file']),'candidate':e['id']+'.wav','candidateSha256_PUBLIC-CONSTANT':sha(dest),'voice':voice,'dialect':lang,'durationSeconds':round(len(audio)/rate,3),'generationSeconds':round(elapsed,3),'peak':round(float(np.max(np.abs(audio))),5),'review':'unreviewed candidate'})
+ results.append({'id':e['id'],'lang':e['lang'],'text':e['text'],'kind':e['kind'],'baseline':'../'+e['file'],'baselineSha256_PUBLIC-CONSTANT':sha(root/'assets/plur-voices'/e['file']),'candidate':e['id']+'.wav','candidateSha256_PUBLIC-CONSTANT':sha(dest),'voice':voice,'dialect':lang,'durationSeconds':round(len(audio)/rate,3),'generationSeconds':round(elapsed,3),'sourcePeak':round(source_peak,5),'gain':round(gain,6),'peak':round(float(np.max(np.abs(audio))),5),'review':'unreviewed candidate'})
  print(e['lang'],e['id'],round(elapsed,2),flush=True)
 report={'engine':'Kokoro v1.0 int8 / kokoro-onnx 0.4.9','phonemizer':'eSpeak via kokoro-onnx; not an independent pronunciation authority','modelSha256_PUBLIC-CONSTANT':sha(model),'voicesSha256_PUBLIC-CONSTANT':sha(voices),'modelSource':'https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0','machine':platform.machine(),'comparisonBoundary':'Same text, different synthesizers. No automatic quality winner. Timings include per-item synthesis but exclude model download/load; first item may include warm-up.','entries':results}
 (out/'manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')

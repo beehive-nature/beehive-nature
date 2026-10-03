@@ -11,3 +11,5 @@ Reproduce using Python 3.11, requirements.txt (CPU torch wheel from https://down
 Generation measurements describe this one x86_64 CPU run; they exclude download/model loading, include possible first-item warm-up, and do not compare baseline synthesis speed. Quantization, phonemizer, voice and speed are part of the candidate. No quality winner or general latency claim is made.
 
 The public review form downloads a self-reported draft tied to exact audio hashes. It neither submits nor authenticates a review and never updates the native-review status. A qualified speaker still needs to assess meaning, dialect, stress and intelligibility; publication approval requires separate evidence review.
+
+Headroom repair: the initial float outputs for Hindi exceeded full scale. The renderer now applies only attenuation when needed to keep candidate peaks at or below 0.95 before PCM conversion. sourcePeak and gain are recorded; tests inspect the actual PCM samples. This avoids clipping, but does not establish pronunciation quality.
