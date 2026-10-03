@@ -55,3 +55,6 @@ Worktree: `C:/Users/travi/wt-codex-mail-tls-finish`, branch `codex/mail-tls-fini
 GitHub Pages run: https://github.com/beehive-nature/beehive-nature/actions/runs/37105100848
 
 At the receipt snapshot, build succeeded and deploy was queued. Merge completion is confirmed; site publication and post-merge CI completion are not yet claimed here. Post-merge secret scan run 37105100950 subsequently completed SUCCESS. The tests run and Pages deployment are still pending at the final follow-up. Prior PR CI passes do not stand in for these new main runs.
+## Completion status follow-up
+
+GitHub Pages run 37105100848 completed SUCCESS: publication is now confirmed. Main tests run 37105100918 completed FAILURE. Failed jobs: `eternal` (ETERNAL fronts and bottom-half rendered checks) and `node` (comprehension and engineflow rendered checks). Observed node diagnostics include “seven disclosures on the organ board, got 6” and an engineflow `paraKey` TypeError after keyboard-navigation failures. These are unresolved repository CI findings; this status check does not establish the introducing commit or attribute them to the mail diagnostic. Server TLS remains UNVERIFIED after the two recorded SSH banner timeouts. Therefore the merge and publication are complete, but host verification and a green post-merge test run are not complete.
