@@ -4360,9 +4360,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
       if(res&&res.transaction_id){
-        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+res.transaction_id.slice(0,16)+'…'+
+        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+esc(String(res.transaction_id).slice(0,16))+'…'+
           (SWITCHED_FROM?' <i>(wallet switched from '+SWITCHED_FROM+' — the key named the account itself)</i>':'');
-        out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+        out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
           '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys — derived key AND passkey can both sign (nothing removed)';
         checkBridge();
@@ -4397,7 +4397,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
     var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):'—';
-    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+cpuAvail+'μs · '+
+    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+esc(cpuAvail)+'μs · '+
       (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
       'liquid '+liquid+' covers the RAM purchase';
   }
@@ -4438,7 +4438,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');ensureCtx('vaulta:'+name);
         renderForge();
         stat.innerHTML='<b style="color:var(--leaf)">5/5 FORGED</b> — '+name+' born, keys on your keychain';
-        out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+        out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>account:</b> '+name+String.fromCharCode(10)+
           '<b>owner key:</b> '+kd.value+String.fromCharCode(10)+
           '<b>active key:</b> '+ka.value+String.fromCharCode(10)+
@@ -4543,8 +4543,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var fields = (st && st.fields) || [];
       $('tx-fields-title').textContent = 'FIELDS — from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')';
       $('tx-fields-row').innerHTML = fields.map(function (f) {
-        return '<input class="small tx-f" data-fn="' + f.name + '" data-ft="' + (f.type || 'string') +
-          '" placeholder="' + f.name + ' · ' + (f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
+        return '<input class="small tx-f" data-fn="' + esc(f.name) + '" data-ft="' + esc(f.type || 'string') +
+          '" placeholder="' + esc(f.name) + ' · ' + esc(f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
       }).join('');
       $('tx-fields').style.display = fields.length ? 'block' : 'none';
       // keep any already-typed JSON that matches field names
@@ -4907,7 +4907,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var net = opts.network === 'j4' ? 'jungle4' : 'mainnet';
     var out = $('tx-out'); out.style.display = 'block';
     if (!ADAPTERS.vaulta || !ADAPTERS.vaulta.attached) {
-      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + ((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
+      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + esc((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
       return null;
     }
     if (!hasCap('vaulta', 'buildAction')) {                  // path GONE, not erroring (§9.2)
@@ -4984,7 +4984,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     opts = opts || {};
     var out = $('tx-out');
     if (!ADAPTERS.arweave || !ADAPTERS.arweave.attached) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + ((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + esc((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
       return null;
     }
     if (!hasCap('arweave', 'buildPublish')) {
@@ -5545,13 +5545,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
-        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
         capRecord('A',amt);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
       }
     }catch(e){ $('sv-stat').textContent='send error: '+e.message }
     $('sv-to').value='';$('sv-amt').value='';
@@ -5818,13 +5818,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
-        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
         if(swCapCost!==null)capRecord('A',swCapCost);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
       }
     }catch(e){ $('sw-stat').textContent='swap error: '+e.message }
   };

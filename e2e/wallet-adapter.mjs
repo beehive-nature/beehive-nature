@@ -416,6 +416,18 @@ try {
     await changed.close();
   }
 
+  // ABI metadata is untrusted RPC text, never executable wallet markup.
+  {
+    const hostile=await browser.newContext();mockChain(hostile);
+    const payload='"><img id="rpc-injection" src="missing" onerror="window.rpcInjected=true">';
+    await hostile.route(/\/v1\/chain\/get_abi$/,route=>route.fulfill({headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify({...COMMIT_ABI,abi:{...COMMIT_ABI.abi,structs:[{name:'commit',fields:[{name:payload,type:'string'}]}]}})}));
+    const p=await hostile.newPage();await p.goto(WALLET);
+    await p.locator('#tx-contract').fill('banchor22222');await p.locator('#tx-action').fill('commit');await p.locator('#tx-abi').click();
+    await p.waitForFunction(()=>document.querySelectorAll('.tx-f').length===1);
+    ok('hostile ABI names stay attribute text and cannot inject wallet HTML',await p.locator('.tx-f').getAttribute('data-fn')===payload&&await p.locator('#rpc-injection').count()===0&&await p.evaluate(()=>!window.rpcInjected));
+    await hostile.close();
+  }
+
   await ctx.close();
 } finally {
   await browser.close();
