@@ -34,7 +34,8 @@
   },
   "separatedCeilings": {
     "law": "two assets, never collapsed into one dollar figure",
-    "storageMaxAnt": 2.5,
+    "storageMaxAnt": 100,
+    "storageMaxAntHistory": "2.5 ANT until 2026-10-03, retired by founder ruling ('that is like $0.25 cents. 100 ANT cap for now') — the price axis is cleared at the 2.8255 ANT quote level; the ceiling ENFORCEMENT invariant is unchanged and is not weakened to finish an edition",
     "gasMaxEth": 0.0002,
     "stopConditions": "tar sha256 mismatch at upload, either ceiling exceeded, chunk count != 29, artifact change, client version change"
   },
@@ -46,14 +47,14 @@
     "evidence": "ant file upload --help exposes no storage-price or gas ceiling option"
   },
   "spendingApprovalGate": {
-    "status": "QUOTE EXCEEDS CEILING + PAYMENT CLIENT CAPABILITY REQUIRED",
-    "rule": "NO approval, payment, or upload occurs: the 2.825569772460937500 ANT quote exceeds the standing 2.5 ANT storage ceiling, and ant 0.3.9 cannot apply both the storage and 0.0002 ETH gas ceilings atomically to the paid operation.",
-    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation, obtain a quote within founder-approved separated ceilings, rebuild and re-quote if any artifact/client input changes, then request founder approval of the successor exact hash and bounds. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
+    "status": "PAYMENT CLIENT CAPABILITY REQUIRED",
+    "rule": "NO payment or upload occurs until a payment client enforces the storage and 0.0002 ETH gas ceilings ATOMICALLY on the paid operation — that invariant is not weakened regardless of price. Founder spending approval is STANDING-GRANTED (2026-10-02c, 'approval always. never gate me'): per-edition approval ceremonies are retired; the exact tar hash and the separated ceilings operate as fail-closed STOP CONDITIONS only (tar sha256 mismatch, ceiling exceeded, chunk-count change, artifact change, client change). The price axis is cleared by the founder's 2026-10-03 temporary 100 ANT cap (quote 2.825569772460937500 ANT is within bounds). The one irreducible act remains the key-holder signature (wallet constitution).",
+    "afterCapabilityLands": "Implement and review an upload call that passes both limits to the payment operation (repo+gh+CLI directly — no local-server bridges per the 2026-10-02c workplace law), obtain a fresh quote within the separated ceilings (temporary storage cap 100 ANT, gas 0.0002 ETH), rebuild and re-quote because the artifact changed 2026-10-03 (images-summary 308th entry from the identifier-form fix — the 2026-10-02 artifact/quote below are superseded by this file's own artifact-change rule), then execute under standing-granted approval with the stop conditions armed. Changing this JSON alone cannot enable upload because the service endpoint is code-disabled."
   },
   "progression": [
     "preserved: YES (privacy-safe public projection, local bytes verified 22108/22108)",
-    "approved: BLOCKED (quote exceeds storage ceiling; payment client also lacks atomic ceilings)",
-    "quoted: YES (ant 0.3.9 live priced_sample; 2.825569772460937500 ANT > 2.5 ANT ceiling)",
+    "approved: STANDING-GRANTED (founder 2026-10-02c 'approval always. never gate me'; per-edition approval retired; hash+ceilings = fail-closed stop conditions only; BLOCKED solely on payment-client atomic ceilings — and the artifact changed 2026-10-03 so a rebuild + fresh quote precedes execution)",
+    "quoted: YES for the 2026-10-02 artifact (ant 0.3.9 live priced_sample 2.825569772460937500 ANT — within the temporary 100 ANT cap; superseded by the 2026-10-03 corpus change)",
     "spend-authorized: NOT YET",
     "purchased: NOT YET",
     "uploaded: NOT YET",
@@ -61,5 +62,5 @@
     "hash-verified from storage: NOT YET",
     "restoration-verified: NOT YET"
   ],
-  "openFrontier": "image queue 364/366 (99.5%): two short-form ARKs (3QS7-89WB, 3QSQ-G983) remain retryable after persistent binding-400; possible lost foreign manifest entries remain unresolved pending the other session's log"
+  "openFrontier": "image queue COMPLETE 2026-10-03: all 366 queue entries resolved (365 unique member arks — the two deeds-citation entries share 3QSQ-G983-6VKX); the identifier-form exception closed by founder-ordered long-form ARK recovery (3QS7-89WB-8R1M downloaded, 308 images / 83,315,926 B byte-audited); possible lost foreign manifest entries remain unresolved pending the other session's log"
 }
