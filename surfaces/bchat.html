@@ -44,6 +44,7 @@
 body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:block}
 :root{--bubble-out:var(--bg3);--bubble-in:var(--bg2)}
 *{box-sizing:border-box}
+[hidden]{display:none!important} /* author display rules must never defeat the hidden flag (caught by bchat-eternal) */
 body{
   margin:0;background:var(--bg1);color:var(--ink);
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
@@ -204,6 +205,10 @@ details[data-reg-disclose]>summary{color:var(--dim)}
       <div class="card">
         <div id="roomcard">
           <div><b id="roomname"></b> · <span class="state" id="roomstate"></span></div>
+          <div class="law" style="margin-top:var(--s2)">MEASURED 2026-10-02, both roads: the relay gates
+          reading AND publishing behind NIP-42 member auth, and a fresh key is not a member — expect
+          <code>auth-required</code> verdicts (rendered verbatim) until the invite lane mints this
+          identity in. The lanes below the door stay fully provable offline.</div>
           <div class="hexpl" id="joincode" style="margin:var(--s2) 0"></div>
           <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap">
             <button id="checkroom">probe the road (opt-in)</button>
@@ -256,6 +261,7 @@ details[data-reg-disclose]>summary{color:var(--dim)}
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="bchat-core.js?v=1"></script>
 <script src="bchat-nip44.js?v=1"></script>
+<script src="bchat-wire.js?v=1"></script>
 <script src="tour.js?v=42"></script>
 <script>
 (function(){
@@ -354,9 +360,12 @@ function loadStore(){
 }
 function saveStore(){ try{ localStorage.setItem('bchat.store.v1',JSON.stringify(store)); }catch(e){} }
 /* FORGET — applyRetain runs on load and before every render: the LOCAL store
-   is pruned by policy and the sweep REPORTS; it never claims deletion */
+   is pruned by policy and the sweep REPORTS; it never claims deletion. The
+   last sweep's receipt STAYS visible (timestamped) — a prune that happened
+   during another view's render is still a fact the reader deserves to see. */
+var lastSweepNote='';
 function sweep(){
-  if(!store.bnr||!store.bnr.messages) return '';
+  if(!store.bnr||!store.bnr.messages) return lastSweepNote;
   var wrap=store.bnr.messages.map(function(m){return {env:m.env,read:!!m.read};});
   var r=BCHAT.applyRetain(wrap,Date.now());
   if(r.dropped.length){
@@ -364,9 +373,9 @@ function sweep(){
       return !r.dropped.some(function(d){return d.id===m.env.id;});
     });
     saveStore();
-    return 'FORGET swept '+r.dropped.length+' message(s) locally — '+BCHAT.FORGET_LAW;
+    lastSweepNote='FORGET swept '+r.dropped.length+' message(s) locally at '+new Date().toISOString().slice(11,19)+'Z — '+BCHAT.FORGET_LAW;
   }
-  return '';
+  return lastSweepNote;
 }
 var receipts=[];
 function addReceipt(event,ref,meta){
@@ -450,53 +459,9 @@ $('runvec').onclick=function(){
   }).join('')+'<div class="law" style="margin-top:6px">full battery (all official vectors + RFC 5869 + RFC 8439): e2e/bchat-core.test.mjs — 18/18 green at genesis, receipts in the dispatch.</div>';
 };
 
-/* ─── nostr events (NIP-01) — ids are sha256 of the canonical serial ─── */
-function serializeEvent(pub,created_at,kind,tags,content){
-  return '["0",'+JSON.stringify(pub)+','+created_at+','+kind+','+JSON.stringify(tags)+','+JSON.stringify(content)+']';
-}
-function finishEvent(ev,sec){
-  ev.id=BCHATNIP44.bytesToHex(BnrSign.sha256(BCHATNIP44.utf8encode(serializeEvent(ev.pubkey,ev.created_at,ev.kind,ev.tags,ev.content))));
-  ev.sig=BCHATNIP44.bytesToHex(BnrSign.schnorr.sign(BCHATNIP44.hexToBytes(ev.id),BCHATNIP44.hexToBytes(sec)));
-  return ev;
-}
-function verifyEvent(ev){
-  try{
-    var id=BCHATNIP44.bytesToHex(BnrSign.sha256(BCHATNIP44.utf8encode(serializeEvent(ev.pubkey,ev.created_at,ev.kind,ev.tags,ev.content))));
-    if(id!==ev.id) return false;
-    return !!BnrSign.schnorr.verify(BCHATNIP44.hexToBytes(ev.sig),BCHATNIP44.hexToBytes(ev.id),BCHATNIP44.hexToBytes(ev.pubkey));
-  }catch(e){ return false; }
-}
-function nowSec(){ return Math.floor(Date.now()/1000); }
-
-/* ─── NIP-17: rumor → seal → gift wrap, all NIP-44 v2 ─── */
-function buildDM(rcptPub,envJson){
-  var rumor={pubkey:PUB,created_at:nowSec(),kind:14,tags:[['p',rcptPub]],content:envJson};
-  var ckSeal=BCHATNIP44.conversationKey(SEC,rcptPub);
-  var seal=finishEvent({
-    pubkey:PUB,created_at:nowSec(),kind:14,tags:[['p',rcptPub]],
-    content:BCHATNIP44.encrypt(ckSeal,JSON.stringify(rumor))
-  },SEC);
-  var eph=new Uint8Array(32); crypto.getRandomValues(eph);
-  var ephHex=BCHATNIP44.bytesToHex(eph);
-  var ckGift=BCHATNIP44.conversationKey(ephHex,rcptPub);
-  var gift=finishEvent({
-    pubkey:BCHATNIP44.bytesToHex(BnrSign.secp.getPublicKey(ephHex,true).slice(1)),
-    created_at:nowSec(),kind:1059,tags:[['p',rcptPub]],
-    content:BCHATNIP44.encrypt(ckGift,JSON.stringify(seal))
-  },ephHex);
-  return gift;
-}
-function unwrapGift(gift){
-  /* we are the recipient: eph→us unwraps the seal, sender→us opens the rumor */
-  var ckGift=BCHATNIP44.conversationKey(SEC,gift.pubkey);
-  var seal=JSON.parse(BCHATNIP44.decrypt(ckGift,gift.content));
-  if(!verifyEvent(seal)) throw new Error('seal signature failed verification — message shown untrusted is refused');
-  var ckSeal=BCHATNIP44.conversationKey(SEC,seal.pubkey);
-  var rumor=JSON.parse(BCHATNIP44.decrypt(ckSeal,seal.content));
-  if(rumor.kind!==14) throw new Error('rumor kind '+rumor.kind+' is not a DM');
-  return {rumor:rumor,from:seal.pubkey};
-}
-
+/* the wire assembly (NIP-01 ids/sigs, NIP-17 rumor→seal→gift) lives in
+   bchat-wire.js — shared with the lane’s harnesses; the page keeps only
+   ROOM + socket (turnkey law) */
 /* ─── the relay client — connect is a click, verdicts are verbatim ─── */
 var sock=null,connected=false;
 function wire(dir,obj){
@@ -514,8 +479,8 @@ $('connect').onclick=function(){
   try{ sock=new WebSocket(url); }catch(e){ $('relaystate').textContent='ws unavailable: '+e.message; return; }
   sock.onopen=function(){
     connected=true;
-    wire('→',['REQ','bchat_'+nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]);
-    sock.send(JSON.stringify(['REQ','bchat_'+nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]));
+    wire('→',['REQ','bchat_'+BCHATWIRE.nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]);
+    sock.send(JSON.stringify(['REQ','bchat_'+BCHATWIRE.nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]));
     $('relaystate').textContent='connected to '+url+' — listening for gift wraps addressed to '+PUB.slice(0,8)+'…';
     addReceipt('relay-open',url);
   };
@@ -524,7 +489,7 @@ $('connect').onclick=function(){
     wire('←',m);
     if(m[0]==='AUTH'&&m[1]){
       /* NIP-42: the relay gates ingest behind a signed kind 22242 */
-      var auth=finishEvent({pubkey:PUB,created_at:nowSec(),kind:22242,tags:[['relay',url],['challenge',m[1]]],content:''},SEC);
+      var auth=BCHATWIRE.finishEvent({pubkey:PUB,created_at:BCHATWIRE.nowSec(),kind:22242,tags:[['relay',url],['challenge',m[1]]],content:''},SEC);
       sock.send(JSON.stringify(['AUTH',auth]));
       wire('→',['AUTH',auth.id]);
       addReceipt('nip42-auth',auth.id,{kind:22242});
@@ -532,7 +497,7 @@ $('connect').onclick=function(){
     }
     if(m[0]==='EVENT'&&m[2]&&m[2].kind===1059){
       try{
-        var got=unwrapGift(m[2]);
+        var got=BCHATWIRE.unwrapGift(SEC,PUB,m[2]);
         var env=BCHAT.wireDecode(got.rumor.content);
         store.bnr.peer=got.from;
         store.bnr.messages.push({env:env,dir:'in',state:'published',eventId:m[2].id,read:false});
@@ -625,7 +590,7 @@ function send(){
     return;
   }
   try{
-    var gift=buildDM(rcpt,BCHAT.wireEncode(built.env));
+    var gift=BCHATWIRE.buildDM(SEC,PUB,rcpt,BCHAT.wireEncode(built.env));
     pending[gift.id]={msg:msg};
     wire('→',['EVENT',gift.id+'…']);
     sock.send(JSON.stringify(['EVENT',gift]));

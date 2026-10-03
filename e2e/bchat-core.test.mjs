@@ -195,6 +195,62 @@ test('bchat-core: receipts carry events, never contents', () => {
   assert.ok(!('content' in r) && !('text' in r) && !('payload' in r));
 });
 
+/* ── bchat-wire.js: the NIP-01/NIP-17 assembly shared by page + harness ── */
+vm.runInContext(read('surfaces/bchat-wire.js'), vendorCtx, { filename: 'bchat-wire.js' });
+const WIRE = vendorCtx.BCHATWIRE;
+test('bchat-wire: NIP-17 gift round-trip between two fresh identities', () => {
+  const rawA = new Uint8Array(32), rawB = new Uint8Array(32);
+  crypto.getRandomValues(rawA); crypto.getRandomValues(rawB);
+  const secA = b2h(rawA), secB = b2h(rawB);
+  const pubA = WIRE.xonly(secA), pubB = WIRE.xonly(secB);
+  const env = CORE.envelope({
+    lane: CORE.LANES.BNR, from: { kind: 'npub', value: pubA },
+    body: { type: 'text', text: 'wire round-trip ⛓' }, policy: { retain: 'persistent' }
+  }).env;
+  const gift = WIRE.buildDM(secA, pubA, pubB, CORE.wireEncode(env));
+  assert.equal(gift.kind, 1059, 'gift wrap kind');
+  assert.equal(JSON.stringify(gift.tags), JSON.stringify([['p', pubB]]), 'gift addressed to recipient'); // cross-realm compare
+  assert.notEqual(gift.pubkey, pubA, 'gift carries the EPHEMERAL key, not the sender');
+  assert.ok(WIRE.verifyEvent(gift), 'gift is a well-signed NIP-01 event');
+  const got = WIRE.unwrapGift(secB, pubB, gift);
+  assert.equal(got.from, pubA, 'seal reveals the true sender');
+  assert.equal(got.rumor.kind, 14);
+  assert.equal(JSON.stringify(CORE.wireDecode(got.rumor.content)), JSON.stringify(env), 'envelope survives the wire');
+});
+test('bchat-wire: a forged seal signature is refused, never shown untrusted', () => {
+  const secA = b2h(new Uint8Array(32).fill(7)), secB = b2h(new Uint8Array(32).fill(9));
+  const pubA = WIRE.xonly(secA), pubB = WIRE.xonly(secB);
+  const env = CORE.envelope({
+    lane: CORE.LANES.BNR, from: { kind: 'npub', value: pubA },
+    body: { type: 'text', text: 'forged' }, policy: { retain: 'persistent' }
+  }).env;
+  const rumor = { pubkey: pubA, created_at: 1, kind: 14, tags: [['p', pubB]], content: CORE.wireEncode(env) };
+  const seal = WIRE.finishEvent({
+    pubkey: pubA, created_at: 1, kind: 14, tags: [['p', pubB]],
+    content: N44.encrypt(N44.conversationKey(secA, pubB), JSON.stringify(rumor))
+  }, secA);
+  const sig = seal.sig.split('');
+  sig[0] = sig[0] === '0' ? '1' : '0'; /* break the signature */
+  seal.sig = sig.join('');
+  const eph = b2h(new Uint8Array(32).fill(3));
+  const gift = WIRE.finishEvent({
+    pubkey: WIRE.xonly(eph), created_at: 1, kind: 1059, tags: [['p', pubB]],
+    content: N44.encrypt(N44.conversationKey(eph, pubB), JSON.stringify(seal))
+  }, eph);
+  assert.throws(() => WIRE.unwrapGift(secB, pubB, gift), /signature/);
+});
+test('bchat-wire: a wrap for someone else cannot be opened (wrong identity)', () => {
+  const secA = b2h(new Uint8Array(32).fill(5)), secB = b2h(new Uint8Array(32).fill(6));
+  const secC = b2h(new Uint8Array(32).fill(8));
+  const pubA = WIRE.xonly(secA), pubB = WIRE.xonly(secB), pubC = WIRE.xonly(secC);
+  const env = CORE.envelope({
+    lane: CORE.LANES.BNR, from: { kind: 'npub', value: pubA },
+    body: { type: 'text', text: 'not for C' }, policy: { retain: 'persistent' }
+  }).env;
+  const gift = WIRE.buildDM(secA, pubA, pubB, CORE.wireEncode(env));
+  assert.throws(() => WIRE.unwrapGift(secC, pubC, gift), /MAC|conversation|pub/i);
+});
+
 /* ── bchat.html source boundary laws (cite-or-silent, no theater) ── */
 /* lazy: the page tests read the file at run time so the crypto battery
    above still runs while the surface is being authored */

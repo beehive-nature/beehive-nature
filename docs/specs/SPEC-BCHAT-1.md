@@ -101,11 +101,17 @@ own receipt log; the economics join stays with the zBlood/bMeter lanes.
 
 ## §open — named, not hidden
 
-- **Relay DM-kind allowlist UNVERIFIED.** Box ssh refused connections
-  (reset by peer, 2026-10-02) so whether skaists.buzz accepts kinds 14/1059
-  is unproven; the surface renders the relay's verdict verbatim either way.
-  NEXT OWNER: box seat — read the relay's kind policy, flip the allowlist if
-  1059 bounces (ops/ law: change tree and box together).
+- **Relay membership is the gate; measured live 2026-10-02 (both roads).**
+  `scripts/bchat-live-proof.mjs` (on-demand, receipts in the genesis
+  dispatch): wss://skaists.buzz and wss://relay.skaists.dev both answer,
+  speak NIP-01, demand NIP-42 AUTH for subscribe AND publish, and REFUSE a
+  fresh identity's AUTH — verbatim `auth-required: verification failed` /
+  `CLOSED auth-required: not authenticated`. So kind-1059 acceptance is
+  not yet reachable for non-member keys: the question moved from "allowlist
+  row" to "member mint". NEXT OWNERS: invite lane (mint bChat identities)
+  + box seat (behind member auth, confirm kinds 14/1059 accepted; ops/ law:
+  change tree and box together). The surface states the auth wall in place
+  and renders every verdict verbatim.
 - Autonomi retrieval adapter (descriptor → stream, bview's SW is the
   candidate seam). NEXT OWNER: bData/bview seat.
 - Android surface (§grapheneos). SEAT-OPEN.

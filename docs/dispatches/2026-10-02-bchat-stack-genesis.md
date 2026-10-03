@@ -128,6 +128,45 @@ notification surface. x0x #622/#505: unchanged posture per standing memory.
   "0 views with findings on 0 surfaces · no findings". Battery still
   22/22; page smoke clean (zero console errors, in-page vectors 5/5).
 
+## Pass 2 (same seat, same night) — the wire shared, proven live, made ETERNAL
+
+- **surfaces/bchat-wire.js** — the NIP-01/NIP-17 assembly (event ids/sigs,
+  rumor→seal→gift build, verify-and-unwrap) extracted from the page into ONE
+  module shared by bchat.html and the lane's harnesses; the page keeps only
+  ROOM + socket (turnkey law). Battery grew to 25/25: gift round-trip
+  between fresh identities, forged-seal refusal, wrong-identity refusal.
+- **scripts/bchat-live-proof.mjs — the LIVE receipt (on-demand, never CI).**
+  Run against BOTH roads 2026-10-02 ~21:21Z, fresh ephemeral identities:
+  wss://skaists.buzz AND wss://relay.skaists.dev connect, speak NIP-01,
+  challenge AUTH (NIP-42), we answer kind 22242 correctly — and the relay
+  REFUSES the fresh identity on both doors, verbatim:
+  `OK false auth-required: verification failed` and
+  `CLOSED auth-required: not authenticated` (subscribe gated the same way).
+  FINDING (measured, both roads): the relay is a MEMBER hive — publication
+  and reading sit behind member auth, so kind-1059 acceptance is
+  unreachable for non-member keys; the open question moved from "kind
+  allowlist" to "member mint." Box ssh (port 22) timed out both routes all
+  day — the harness is what settled it. NEXT OWNERS: invite lane (mint
+  bChat identities) + box seat (behind member auth, confirm kinds 14/1059;
+  ops/ change-both law). The surface now states the auth wall in the door
+  card ("MEASURED 2026-10-02, both roads") and renders verdicts verbatim.
+- **e2e/bchat-eternal.test.mjs (CI-wired, 18/18)** — the lane's 390px
+  eternal front: rub law WATCHED from the harness (no socket, no external
+  request fires on load), lanes + SIMULATED in place, register law,
+  in-browser vectors 5/5, held-local send, FORGET actually prunes and SAYS
+  consent-routing, Autonomi descriptor descriptor-only/Building. It caught
+  a real bug on first run: `.compose{display:flex}` defeated the `hidden`
+  flag (author CSS beats UA CSS) — cured with the `[hidden]{display:none!important}`
+  guard. Related honest-semantics find, banked: an until-read OUTBOX copy
+  is born read and sweeps itself — correct per policy; the eternal test
+  resets retention to persistent before the descriptor step.
+- FORGET receipts now CARRY: the last sweep's note stays visible
+  (timestamped) instead of dying with the render that performed it.
+- Re-verified after all edits: battery 25/25 · footer-audit
+  --only bchat.html = zero findings, all three registers · eternal 18/18 ·
+  build-stack-surfaces --check OK (directory regenerated with the
+  bchat-wire.js reference) · lint-ci-shape 104/104.
+
 ## Worktree law, kept
 
 All edits and the commit are from `C:/Users/travi/wt-zcode` on branch
