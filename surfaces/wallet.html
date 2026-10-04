@@ -3976,17 +3976,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('dm-stat').textContent='revoked'+(selfGone?' (this browser\'s seal deleted too — connect falls back to passkey/recovery)':' — the device keeps any cached copy offline; full kill is the recovery-rotate lane');
   }
 
-  /* ── QR BRIDGE — phone ⇄ desk login, first-party ─────────────
+  /* ── QR BRIDGE v2 — phone ⇄ desk login, first-party, post-quantum ─────
      The desktop shows a QR; the phone (this same page, keychain already live)
      scans it and grants the desktop a session. No third-party service holds
      anything readable: the masterPrk travels as AES-256-GCM ciphertext over
-     public nostr relays, keyed by a throwaway ECDH agreement between the two
-     tabs (ephemeral keys live in tab memory only). Relays carry ephemeral
-     events (kind 20107) they don't store, signed by a throwaway BIP-340 key;
-     the QR itself carries only the page URL + a random session id + the
-     desktop's PUBLIC ephemeral. Pre-check digits (derived from the QR data,
-     computable by both sides before any secret moves) let the human catch a
-     swapped QR; AEAM failure silently discards garbage/replays. */
+     public nostr relays. Its key mixes TWO throwaway agreements between the two
+     tabs: secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519, SPEC-BPQ-1 §2), so a
+     recorded grant stays sealed even to someone who later has a quantum
+     computer AND a photo of the QR. The QR carries the page URL, a random
+     session id, the desktop's secp256k1 ephemeral and the SHA-256 of its X-Wing
+     ephemeral (81 bytes); the 1216-byte X-Wing key itself is announced on the
+     relays every 2 s and the phone accepts it only if it hashes to the QR's
+     value. Relays carry ephemeral events (kind 20107) they don't store, signed
+     by throwaway BIP-340 keys. Pre-check digits (from the QR data, computable
+     by both sides before any secret moves) let the human catch a swapped QR;
+     AEAD failure silently discards garbage/replays. A v1 code (49 bytes, no
+     PQ half) is refused: the root never travels under a classical-only key. */
   var QR_RELAYS=['wss://relay.damus.io','wss://nos.lol','wss://relay.snort.social'];
   var QRB=null;   // live bridge state — keys scrubbed on end
   var QR_PENDING=null;  // a desktop's request opened via #qr= — offered once the keychain is live
@@ -4002,13 +4007,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function toHex(u){ return BZDIDKEY.toHex(u) }
   function concatB(){var n=0,i,a;for(i=0;i<arguments.length;i++)n+=arguments[i].length;
     var o=new Uint8Array(n),p=0;for(i=0;i<arguments.length;i++){a=arguments[i];o.set(a,p);p+=a.length}return o}
-  async function bridgeKey(priv,theirPub33,sid){
-    var shared=BN.secp.getSharedSecret(priv,theirPub33);      // 33B compressed point
-    var ikm=BN.sha256(shared);                                 // uniform 32B
+  /* both halves feed one HKDF: secure while EITHER secp256k1 ECDH or X-Wing holds.
+     info binds the QR's X-Wing commitment, the phone's ephemeral and the KEM
+     ciphertext, so no half can be swapped between sessions. */
+  async function bridgeKey2(priv,theirPub33,sid,xss,commit,phoneEpk,xct){
+    var ikm=concatB(BN.sha256(BN.secp.getSharedSecret(priv,theirPub33)),xss);
+    var info=concatB(new TextEncoder().encode('bnr-qr-bridge-v2'),commit,phoneEpk,BN.sha256(xct));
     var ik=await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:sid,info:new TextEncoder().encode('bnr-qr-bridge-v1')},
+    ikm.fill(0);
+    return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:sid,info:info},
       ik,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
   }
+  function sameBytes(a,b){ if(!a||!b||a.length!==b.length)return false; for(var i=0;i<a.length;i++)if(a[i]!==b[i])return false; return true }
   function nostrEvent(sk,content,tags,kind){
     var pub=BN.schnorr.getPublicKey(sk);                       // 32B x-only — nostr form
     var ev={pubkey:toHex(pub),created_at:Math.floor(Date.now()/1000),kind:kind||20107,tags:tags||[],content:content};
@@ -4026,6 +4036,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function qrEnd(msg){
     if(QRB){
       if(QRB.sk)QRB.sk.fill(0);
+      if(QRB.xsk)QRB.xsk.fill(0);
+      if(QRB.nsk)QRB.nsk.fill(0);
+      if(QRB.helloT)clearInterval(QRB.helloT);
+      if(QRB.waitT)clearTimeout(QRB.waitT);
       if(QRB.sock){try{QRB.sock.forEach(function(w){try{w.close()}catch(e){}})}catch(e){}}
       if(QRB.camStream){try{QRB.camStream.getTracks().forEach(function(t){t.stop()})}catch(e){}}
       if(QRB.raf)cancelAnimationFrame(QRB.raf);
@@ -4046,6 +4060,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* desktop side — ask a phone to log me in */
   $('kc-qr').onclick=async function(){
     if(!BN||!BNRQR||!BZDIDKEY){$('kc-stat').textContent='QR bridge needs the vendor bundle (bnr-qr.js)';return}
+    if(!window.BPQ_LIB){$('kc-stat').textContent='QR bridge needs the post-quantum bundle (bpq-lib.js)';return}
     if(typeof WebSocket==='undefined'){$('kc-stat').textContent='this browser lacks WebSockets — QR bridge unavailable';return}
     qrEnd();
     $('qr-sec').style.display='block';
@@ -4053,9 +4068,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var sid=crypto.getRandomValues(new Uint8Array(16));
     var sk=BN.secp.utils.randomPrivateKey();
     var pub=BN.secp.getPublicKey(sk);     // 33B compressed
-    var url=location.origin+location.pathname+'#qr='+bytesToB64u(concatB(sid,pub));
-    var dig=qrDigits(pub,sid);
-    QRB={mode:'ask',sid:sid,sk:sk,pub:pub,sock:[],nopen:0};
+    var xsk=crypto.getRandomValues(new Uint8Array(32));        // X-Wing seed = its secret key
+    var xpk=window.BPQ_LIB.xwing.keygen(xsk).publicKey;          // 1216B, announced on the relays
+    var commit=BN.sha256(xpk);                                  // 32B, rides in the QR
+    var url=location.origin+location.pathname+'#qr='+bytesToB64u(concatB(sid,pub,commit));
+    var dig=qrDigits(concatB(pub,commit),sid);
+    QRB={mode:'ask',sid:sid,sk:sk,pub:pub,xsk:xsk,xpk:xpk,commit:commit,nsk:BN.secp.utils.randomPrivateKey(),sock:[],nopen:0};
     $('qr-title').textContent='📷 QR BRIDGE — waiting for your phone';
     $('qr-body').innerHTML='<div class="row" style="align-items:flex-start;gap:14px;flex-wrap:wrap">'+
       qrSvg(url)+
@@ -4066,26 +4084,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '<div id="qr-relaystat" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
         '<div id="qr-count" style="font-size:11px;color:var(--dim)">expires in 120s</div>'+
       '</div></div>';
-    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays (ephemeral kind they never store, throwaway keys both ends); tab memory only, scrubbed on close like every lane here';
+    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays, keyed by secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519) together (ephemeral kind they never store, throwaway keys both ends); tab memory only, scrubbed on close like every lane here';
     var sidHex=toHex(sid), got=0;
+    var hello=function(){ return JSON.stringify(['EVENT',nostrEvent(QRB.nsk,JSON.stringify({v:2,xpk:bytesToB64u(QRB.xpk)}),[['sid',sidHex]])]) };
     QRB.sock=QR_RELAYS.map(function(rs){
       var w; try{ w=new WebSocket(rs) }catch(e){ return null }
-      var opened=false;
-      w.onopen=function(){ opened=true;
+      w.onopen=function(){
         w.send(JSON.stringify(['REQ','bnrqr'+sidHex,{kinds:[20107],'#sid':[sidHex]}]));
+        if(QRB&&QRB.nsk)w.send(hello());
         var up=$('qr-relaystat'); if(up)up.textContent='relays: '+ (++QRB.nopen||1)+' listening';
       };
       w.onmessage=async function(m){
-        if(got)return;
+        if(got||!QRB)return;
         var t; try{t=JSON.parse(m.data)}catch(e){return}
         if(!t||t[0]!=='EVENT'||!t[2]||t[1]!==('bnrqr'+sidHex))return;
         try{
           var ev=t[2];
           var o=JSON.parse(ev.content);
-          var epk=b64uToBytes(o.epk), iv=b64uToBytes(o.iv), ct=b64uToBytes(o.ct);
-          if(epk.length!==33)return;
-          var key=await bridgeKey(QRB.sk,epk,QRB.sid);
-          var pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},key,ct));
+          if(o.v!==2||!o.ct)return;                          // our own hello, or not a v2 grant
+          var epk=b64uToBytes(o.epk), xct=b64uToBytes(o.xct), iv=b64uToBytes(o.iv), ct=b64uToBytes(o.ct);
+          if(epk.length!==33||xct.length!==1120)return;
+          var xss=window.BPQ_LIB.xwing.decapsulate(xct,QRB.xsk);
+          var key=await bridgeKey2(QRB.sk,epk,QRB.sid,xss,QRB.commit,epk,xct);
+          xss.fill(0);
+          var pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:iv,additionalData:QRB.sid},key,ct));
           if(pt.length!==32)throw new Error('bad prk len');
           got=1;
           var id2=BZDIDKEY.deriveIdentity(pt,'bnr.b'); id2.masterPrk=pt;
@@ -4098,6 +4120,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return w;
     });
     QRB.nopen=0;
+    // the 1216-byte X-Wing key cannot ride in the QR; re-announce it until a phone answers
+    QRB.helloT=setInterval(function(){
+      if(!QRB||QRB.mode!=='ask'){return}
+      var msg=hello();
+      QRB.sock.forEach(function(w){ if(w&&w.readyState===1){ try{w.send(msg)}catch(e){} } });
+    },2000);
     var t0=Date.now();
     (function tick(){
       if(!QRB||QRB.mode!=='ask')return;
@@ -4152,13 +4180,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function qrParseHash(b64){
     try{
       var u=b64uToBytes(b64);
-      if(u.length!==16+33)return null;
-      return {sid:u.slice(0,16),pub:u.slice(16)};
+      if(u.length===16+33+32)return {v:2,sid:u.slice(0,16),pub:u.slice(16,49),commit:u.slice(49)};
+      if(u.length===16+33)return {v:1,sid:u.slice(0,16),pub:u.slice(16)};   // pre-PQ code: recognised, refused
+      return null;
     }catch(e){return null}
   }
+  function qrOldCode(){
+    QRB={mode:'confirm'};
+    $('qr-title').textContent='📷 QR BRIDGE — this desktop code is out of date';
+    $('qr-body').innerHTML='<div style="font-size:12px">that code comes from an older wallet page that sends your soul under a classical key exchange only. Reload the wallet on the desktop and scan its new code — nothing was sent.</div>'+
+      '<div class="row" style="margin-top:12px"><button id="qr-deny">close</button></div>';
+    $('qr-deny').onclick=qrClose;
+  }
   function qrConfirmSheet(req){
+    if(req.v!==2)return qrOldCode();
     QRB={mode:'confirm',req:req};
-    var dig=qrDigits(req.pub,req.sid);
+    var dig=qrDigits(concatB(req.pub,req.commit),req.sid);
     $('qr-body').innerHTML='<div style="font-size:12px">a desktop at <b>'+location.host+'</b> asks to sign in</div>'+
       '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace">'+dig+'</div>'+
       '<div style="font-size:11px;color:var(--dim)">these digits must match the desktop\'s — mismatch means a swapped QR, cancel</div>'+
@@ -4167,24 +4204,53 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('qr-deny').onclick=qrClose;
     $('qr-allow').onclick=async function(){
       if(!MPRK){$('kc-stat').textContent='keychain not live — connect first, the request is gone after close';return}
-      var sk=BN.secp.utils.randomPrivateKey();               // throwaway nostr key
-      var esk=BN.secp.utils.randomPrivateKey();              // throwaway ECDH key
-      var epk=BN.secp.getPublicKey(esk);
-      var iv=crypto.getRandomValues(new Uint8Array(12));
-      var key=await bridgeKey(esk,QRB.req.pub,QRB.req.sid);
-      var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,MPRK.slice()));
-      var ev=nostrEvent(sk,JSON.stringify({v:1,epk:bytesToB64u(epk),iv:bytesToB64u(iv),ct:bytesToB64u(ct)}),[['sid',toHex(QRB.req.sid)]]);
-      sk.fill&&sk.fill(0); esk.fill&&esk.fill(0);   // event carries the sig now — scrub both throwaways
-      var sent=0;
-      $('qr-body').innerHTML='<div style="font-size:12px">sending the encrypted grant…</div><div id="qr-relaystat" style="font-size:11px;color:var(--dim);margin-top:6px">relays: 0 ok</div>';
-      QR_RELAYS.forEach(function(rs){
-        var w; try{w=new WebSocket(rs)}catch(e){return}
-        w.onopen=function(){ w.send(JSON.stringify(['EVENT',ev])); sent++;
-          var st=$('qr-relaystat'); if(st)st.textContent='relays: '+sent+' ok'; };
-        w.onclose=function(){try{w.close()}catch(e){}};
+      if(!window.BPQ_LIB){$('kc-stat').textContent='QR bridge needs the post-quantum bundle (bpq-lib.js)';return}
+      var req=QRB.req, sidHex=toHex(req.sid), sent=0, done=false;
+      $('qr-body').innerHTML='<div id="qr-sendstat" style="font-size:12px">finding the desktop\'s post-quantum key…</div><div id="qr-relaystat" style="font-size:11px;color:var(--dim);margin-top:6px">relays: connecting…</div>';
+      /* the desktop announces its X-Wing key every 2 s; take the first one that
+         hashes to the QR's commitment, then seal the grant to it */
+      async function grant(xpk){
+        if(done||!MPRK)return;
+        done=true;
+        var sk=BN.secp.utils.randomPrivateKey();               // throwaway nostr key
+        var esk=BN.secp.utils.randomPrivateKey();              // throwaway ECDH key
+        var epk=BN.secp.getPublicKey(esk);
+        var enc=window.BPQ_LIB.xwing.encapsulate(xpk);
+        var iv=crypto.getRandomValues(new Uint8Array(12));
+        var key=await bridgeKey2(esk,req.pub,req.sid,enc.sharedSecret,req.commit,epk,enc.cipherText);
+        enc.sharedSecret.fill(0);
+        var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv,additionalData:req.sid},key,MPRK.slice()));
+        var ev=nostrEvent(sk,JSON.stringify({v:2,epk:bytesToB64u(epk),xct:bytesToB64u(enc.cipherText),iv:bytesToB64u(iv),ct:bytesToB64u(ct)}),[['sid',sidHex]]);
+        sk.fill&&sk.fill(0); esk.fill&&esk.fill(0);   // event carries the sig now — scrub both throwaways
+        var msg=JSON.stringify(['EVENT',ev]);
+        (QRB&&QRB.sock||[]).forEach(function(w){ if(w&&w.readyState===1){ try{w.send(msg);sent++}catch(e){} } });
+        var st=$('qr-relaystat'); if(st)st.textContent='relays: '+sent+' ok';
+        var ss=$('qr-sendstat'); if(ss)ss.textContent='encrypted grant sent';
+        $('qr-law').textContent='sent — ciphertext only, sealed with secp256k1 ECDH and X-Wing together, one-time session id, relays drop ephemeral events by design. The desktop signs in the moment it decrypts.';
+        setTimeout(function(){ if(QRB&&QRB.mode==='confirm') qrEnd('grant sent — this phone can close the bridge now'); },4000);
+      }
+      QRB.sock=QR_RELAYS.map(function(rs){
+        var w; try{w=new WebSocket(rs)}catch(e){return null}
+        w.onopen=function(){
+          w.send(JSON.stringify(['REQ','bnrqrg'+sidHex,{kinds:[20107],'#sid':[sidHex]}]));
+          var st=$('qr-relaystat'); if(st&&!done)st.textContent='relays: '+(++QRB.nopen||1)+' listening for the desktop';
+        };
+        w.onmessage=function(m){
+          if(done)return;
+          var t; try{t=JSON.parse(m.data)}catch(e){return}
+          if(!t||t[0]!=='EVENT'||!t[2]||t[1]!==('bnrqrg'+sidHex))return;
+          try{
+            var o=JSON.parse(t[2].content);
+            if(o.v!==2||!o.xpk)return;
+            var xpk=b64uToBytes(o.xpk);
+            if(xpk.length!==1216||!sameBytes(BN.sha256(xpk),req.commit))return;   // not the key this QR named
+            grant(xpk);
+          }catch(e){}
+        };
+        return w;
       });
-      $('qr-law').textContent='sent — ciphertext only, one-time session id, relays drop ephemeral events by design. The desktop signs in the moment it decrypts.';
-      setTimeout(function(){ if(QRB&&QRB.mode==='confirm') qrEnd('grant sent — this phone can close the bridge now'); },4000);
+      QRB.nopen=0;
+      QRB.waitT=setTimeout(function(){ if(!done&&QRB) qrEnd('the desktop did not answer in 30 s — nothing was sent; rescan its code'); },30000);
     };
   }
   /* boot detect: opened via the desktop's QR (#qr=…)? stash the request; once the

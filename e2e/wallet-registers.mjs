@@ -1029,7 +1029,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   // the desktop's QR (#qr=<request>) lands on the waiting sheet, painted, in every register
   {
-    const q = Buffer.alloc(49, 7); q[16] = 2;
+    const q = Buffer.alloc(81, 7); q[16] = 2;   // v2: sid(16) ‖ secp256k1 pub(33) ‖ SHA-256 of the X-Wing key(32)
     const got = {};
     for (const reg of REGS) {
       const r = await open(reg, { path: '/wallet.html#qr=' + q.toString('base64url'), fixture: false });
