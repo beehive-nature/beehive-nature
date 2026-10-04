@@ -243,8 +243,8 @@ document.addEventListener('DOMContentLoaded',function(){
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
           <div class="playback-route"><label for="playback-route">Playback route</label>
-            <select id="playback-route"><option value="relay">Relay</option><option value="direct">Direct Autonomi + relay fallback</option></select>
-            <p>Direct connects to storage nodes without a wallet. Applies when you press Watch. The relay remains the default while we compare playback.</p>
+            <select id="playback-route"><option value="relay">Relay only</option><option value="direct-only">Direct Autonomi only</option><option value="direct">Direct Autonomi + relay fallback</option></select>
+            <p>Direct connects to storage nodes without a wallet. Direct only never asks the relay, so a slow or failed run stays slow or failed. Applies when you press Watch. Every run names where its bytes came from.</p>
             <p id="playback-status" role="status" aria-live="polite"></p>
           </div>
           <details class="my-videos" id="my-videos">
@@ -496,7 +496,20 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.addr = ''; metrics.path = ''; metrics.cl = null; metrics.acceptRanges = null;
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
-    metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0;
+    metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0; metrics.route = '';
+  };
+  // Where this run's bytes came from, said once for every front and every receipt.
+  const sourceOf = () => {
+    const dr = metrics.direct, p = metrics.path;
+    if (p === 'cache') return { kind: 'cache', text: 'cache · this device · neither the relay nor Autonomi was asked' };
+    if (dr && dr.stopped) return { kind: 'direct', text: 'direct only · stopped: ' + dr.stopped + ' · ' + dr.uniqueBytes + ' B arrived · relay not used' };
+    if (p === 'webrtc' || p === 'webrtc-connecting') return { kind: 'direct', text: 'direct · Autonomi storage nodes over WebRTC · no relay bytes' };
+    if (p === 'stream' || p === 'envelope') {
+      if (dr && dr.fallback && dr.playhead != null) return { kind: 'mixed', text: 'mixed · ' + dr.uniqueBytes + ' B direct, played to ' + dr.playhead.toFixed(2) + ' s · then ' + metrics.bytes + ' B relay' };
+      if (dr && dr.fallback) return { kind: 'relay', text: 'relay · direct gave up before the first frame (' + dr.fallback + ') · every played byte from the relay' };
+      return { kind: 'relay', text: 'relay · every byte from relay.skaists.dev' };
+    }
+    return null;
   };
   const fmtMs = ms => ms == null ? notYet() : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
   const fmtMb = n => n == null ? notYet() : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
@@ -1369,10 +1382,13 @@ document.addEventListener('DOMContentLoaded',function(){
     return directPool = pool;
   };
   const directCapable = () => isSecureContext && 'RTCPeerConnection' in window;
+  // Three routes: relay only, direct only (never the relay), direct with relay fallback.
+  const routeOf = () => $('playback-route').value;
+  const wantsDirect = () => routeOf() === 'direct' || routeOf() === 'direct-only';
   // A valid address on the direct route starts finding the video before Watch is pressed.
   const preOpen = raw => {
     const address = parse(raw);
-    if (!address || $('playback-route').value !== 'direct' || !directCapable()) return;
+    if (!address || !wantsDirect() || !directCapable()) return;
     if (directOpen && directOpen.address === address) return;
     dropOpen();
     const stop = new AbortController();
@@ -1395,12 +1411,12 @@ document.addEventListener('DOMContentLoaded',function(){
     return pieces;
   };
   // Choosing the direct route connects at once. The choice is remembered on this device.
-  try { if (localStorage.getItem(ROUTE_KEY) === 'direct') $('playback-route').value = 'direct'; } catch {}
-  if ($('playback-route').value === 'direct' && directCapable()) openPool();
+  try { const saved = localStorage.getItem(ROUTE_KEY); if (saved === 'direct' || saved === 'direct-only') $('playback-route').value = saved; } catch {}
+  if (wantsDirect() && directCapable()) openPool();
   $('playback-route').addEventListener('change', () => {
     const route = $('playback-route').value;
     try { localStorage.setItem(ROUTE_KEY, route); } catch {}
-    if (route === 'direct' && directCapable()) { openPool(); preOpen($('addr').value); }
+    if (wantsDirect() && directCapable()) { openPool(); preOpen($('addr').value); }
   });
   $('addr').addEventListener('input', () => preOpen($('addr').value));
   addEventListener('pagehide', () => { stopDirect(); closePool(); });
@@ -1421,8 +1437,9 @@ document.addEventListener('DOMContentLoaded',function(){
     let reader = null, opening = null, pool, quiet, cap, ticker, starve, settled = false, readError = null;
     const startedAt = performance.now();
     let stage = 'Connecting to Autonomi nodes', movedAt = startedAt;
+    const only = routeOf() === 'direct-only';
     const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
-    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then relay.');
+    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
@@ -1431,7 +1448,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // The SDK names each step of opening a file; show the viewer which one is running.
     const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
     cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
-    const receipt = metrics.direct = {sdk:'0.1.1',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
+    const receipt = metrics.direct = {sdk:'0.1.1',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
     try {
       if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
@@ -1517,6 +1534,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if (!whole) throw readError || new Error('Direct playback stopped early');
       receipt.firstFrameMs = metrics.ttffMs;
       routeStatus('Direct Autonomi · WebRTC. Every byte came from storage nodes.');
+      note('source · direct · every byte from Autonomi storage nodes · no relay bytes');
       paintNerd();
       return true;
     } catch (error) {
@@ -1529,7 +1547,18 @@ document.addEventListener('DOMContentLoaded',function(){
       if (!pool || !pool.ready) closePool();
       const why = readError ? readError.message : error.name === 'AbortError' ? 'storage nodes went quiet' : error.message;
       if (receipt.startupElapsedMs == null) receipt.startupElapsedMs = performance.now() - startedAt;
-      receipt.fallback = why; receipt.firstFrameMs = metrics.ttffMs;
+      receipt.firstFrameMs = metrics.ttffMs;
+      if (only) {
+        // Direct only: the failure is the measurement. The relay is never asked.
+        receipt.stopped = why; receipt.playhead = v.currentTime || 0;
+        note('source · direct only · stopped · ' + why + ' · relay not used');
+        pg.hidden = $('got').hidden = true;
+        routeStatus('Direct only stopped: ' + why + '. The relay was not used.');
+        if (playing !== my) say('s-fail');
+        paintNerd();
+        return true;
+      }
+      receipt.fallback = why;
       note('direct fallback · ' + why);
       pg.hidden = $('got').hidden = true;
       const at = v.currentTime || 0;
@@ -1562,10 +1591,11 @@ document.addEventListener('DOMContentLoaded',function(){
     delete $('s-wait').dataset.s; $('log').textContent = ''; $('dec').textContent = notYet(); metrics.dec = null;
     resetMetrics(); paintNerd();
     if(options.directReceipt)metrics.direct=options.directReceipt;
+    metrics.route = routeOf();
     if (!a) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
     routeStatus(options.reason ? options.reason + '. Continuing through the relay.' : '');
-    note('open · ' + (options.relay ? 'relay fallback' : $('playback-route').value));
+    note('open · route ' + metrics.route + (options.relay ? ' · relay fallback' : ''));
     $('out').dataset.addr = 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     const hit = await cacheGet(a);
@@ -1580,9 +1610,10 @@ document.addEventListener('DOMContentLoaded',function(){
         return;
       }
     }
-    if (!options.relay && $('playback-route').value === 'direct' && await tryDirect(a, signal, my)) return;
+    if (!options.relay && wantsDirect() && await tryDirect(a, signal, my)) return;
     if (my !== job || signal.aborted) return;
-    if ($('playback-route').value === 'relay') closePool();
+    if (routeOf() === 'direct-only') { routeStatus('Direct only: this browser cannot reach storage nodes. The relay was not used.'); say('s-fail'); return; }
+    if (routeOf() === 'relay') closePool();
     if (options.resumeAt > 0 || options.paused) {
       const restore = () => { if (my !== job) return; if (options.resumeAt > 0 && Number.isFinite(v.duration)) v.currentTime=Math.min(options.resumeAt,Math.max(0,v.duration-0.05)); if (options.paused) v.pause(); revealDecodedFrame(options.resumeAt || 0); };
       signal.addEventListener('abort', () => v.removeEventListener('loadeddata', restore), {once:true});
@@ -1614,6 +1645,7 @@ document.addEventListener('DOMContentLoaded',function(){
       planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
       direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
+      route: metrics.route || null, source: sourceOf(),
     };
   };
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
@@ -1674,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelector('.et-b-foot').textContent=T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
     var rows=[
       ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',(D.view.path==='webrtc'?'This video comes directly from Autonomi storage nodes over WebRTC. This browser is not seeding it to other viewers.':T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.'))],
-      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'Several pieces of the video arrive at once, straight from storage nodes. If they stop arriving, the relay takes over.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'Several pieces of the video arrive at once, straight from storage nodes. '+(D.live&&D.live.route==='direct-only'?'If they stop arriving, playback stops. The relay is never asked.':'If they stop arriving, the relay takes over.'):T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
       ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
     ];
@@ -1720,7 +1752,7 @@ document.addEventListener('DOMContentLoaded',function(){
     $('etMethod').textContent=direct?'WebRTC · ':'GET ';
     $('etTail').textContent=direct?' · chunk lanes':'{address}/stream';
     var door=$('etDoor'); if(door) door.textContent=D.door.host+D.door.base;
-    $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>';
+    $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>'+(E.source?'<span class="ok" data-source="'+E.source.kind+'">source '+esc(E.source.kind)+'</span>':'');
     var r=D.rule, pl=E.plan;
     var steps=[
       ['parse · 64 hex','refuse anything else · no request is made for a bad address',E.bad?'guard':E.has?'done':'todo'],
@@ -1738,7 +1770,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
       ['chunk lanes · '+(dr&&dr.chunks?Math.min(dr.lanes,dr.chunks):6)+' at a time',dr&&dr.chunks?(dr.completed+' of '+dr.chunks+' chunks · read on chunk boundaries, so none is fetched twice'):'chunks are read on their own boundaries, in parallel, and played in order',dr&&dr.chunks&&dr.completed>=dr.chunks?'done':'todo'],
       steps[4],steps[5],
-      ['relay recovery','12 s without progress before the file opens, or 45 s without one arriving chunk · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
+      dr&&dr.only?['relay recovery','off · direct only · a stall or failure stops here and is recorded',dr.stopped?'guard':'skip']:['relay recovery','12 s without progress before the file opens, or 45 s without one arriving chunk · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
       steps[6]
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
@@ -1747,6 +1779,8 @@ document.addEventListener('DOMContentLoaded',function(){
     var no=function(t){return '<span class="no">'+esc(t)+'</span>';};
     var rows=[
       ['door','<span data-et="network">'+esc(D.door.host+' · '+D.door.network)+'</span>'],
+      ['route',E.route?esc({relay:'relay only','direct-only':'direct Autonomi only',direct:'direct Autonomi + relay fallback'}[E.route]||E.route):no('not yet')],
+      ['source',E.source?'<span class="yes" data-et="source">'+esc(E.source.text)+'</span>':no('not yet')],
       ['path',V.path?esc(V.path):no('not yet')],
       ['arrived','<span data-et="arrived">'+esc(V.arrived)+'</span>'],
       ['length',esc(V.length)],
@@ -1766,7 +1800,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
-      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · relay after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' without a chunk':''))],
+      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · '+(dr.only?'stop':'relay')+' after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' without a chunk':''))],
       ['direct lanes',esc(dr.chunks?Math.min(dr.lanes||1,dr.chunks)+' chunks at a time · '+dr.chunks+' chunks':'not yet')],
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
@@ -1774,7 +1808,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
       ['chunk latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · lanes overlap')],
       ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
-      ['fallback',esc(dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
+      ['fallback',esc(dr.only?'off · direct only'+(dr.stopped?' · stopped: '+dr.stopped+' at '+(dr.playhead||0).toFixed(2)+' s':''):dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
       ['wire traffic',no('not measured · plaintext bytes are not network bandwidth')],
       ['viewer seeding',no('not provided · this browser retrieves chunks')]
     );

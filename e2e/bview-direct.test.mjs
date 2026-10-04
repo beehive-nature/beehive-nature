@@ -32,7 +32,7 @@ const mockSDK = `let client; export class AutonomiClient {
     let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length,{signal}={}){if(window.hangDirect==='read')return new Promise((resolve,reject)=>{const abort=()=>{window.cancelledRead=true;reject(new DOMException('Cancelled','AbortError'));};if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});});if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
   }} }
 }`;
-async function open(reject = false, slow = false, hang = null, large = false) {
+async function open(reject = false, slow = false, hang = null, large = false, route = 'direct') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(reject => { window.rejectDirect=reject; localStorage.setItem('blang','en'); localStorage.setItem('bregister','bee'); }, reject);
   await ctx.addInitScript(hang => { window.hangDirect=hang; }, hang);
@@ -43,7 +43,7 @@ async function open(reject = false, slow = false, hang = null, large = false) {
   if(large){const free=Buffer.alloc(49<<20);free.writeUInt32BE(free.length,0);free.write('free',4);relayBody=Buffer.concat([MEDIA,free]);}
   await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(relayBody.length)},body:relayBody}); });
   await page.goto(ORIGIN+'/surfaces/bview.html');
-  await page.selectOption('#playback-route','direct'); await page.fill('#addr',ADDRESS); await page.click('button[type=submit]');
+  await page.selectOption('#playback-route',route); await page.fill('#addr',ADDRESS); await page.click('button[type=submit]');
   return {ctx,page,errors,relay};
 }
 test('direct: chunks read on their boundaries, real frames from a Blob, one connection, no relay', async () => {
@@ -73,6 +73,8 @@ test('direct: chunks read on their boundaries, real frames from a Blob, one conn
     assert.equal(await page.evaluate(()=>window.__bviewEngine().direct.reused),true);
     assert.ok(await page.evaluate(()=>window.closedReaders>=2));
     assert.equal(relay.length,0); assert.deepEqual(errors,[]);
+    const src=await page.evaluate(()=>({e:window.__bviewEngine(),receipt:document.querySelector('#etReceipt').textContent}));
+    assert.equal(src.e.route,'direct');assert.equal(src.e.source.kind,'direct');assert.match(src.receipt,/source.*no relay bytes/);
     console.log('# direct chunk lanes: three boundary reads per file, Blob playback, no service worker, one connection across two addresses, readers closed, no relay');
   } finally {await ctx.close();}
 });
@@ -81,6 +83,8 @@ test('direct setup rejection automatically uses the existing relay', async()=>{
   try {
     await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0 && window.__bviewEngine().path==='stream',null,{timeout:20000});
     assert.equal(relay.length,1); assert.match(await page.locator('#playback-status').textContent(),/Using the relay/);
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(e.source.kind,'relay');assert.match(e.source.text,/direct gave up before the first frame \(network offline\)/);
     assert.deepEqual(errors,[]);
   } finally {await ctx.close();}
 });
@@ -110,5 +114,39 @@ test('large-file relay startup records a first-frame receipt when early preview 
     await page.waitForFunction(()=>window.__bviewEngine().ttffMs!=null&&document.querySelector('#v').videoWidth>0,null,{timeout:30000});
     const e=await page.evaluate(()=>window.__bviewEngine());
     assert.equal(e.path,'stream');assert.ok(e.size>(48<<20));assert.ok(e.ttffMs>0);assert.equal(relay.length,1);assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('direct only: a failed direct start stops, records why, and never asks the relay',async()=>{
+  const {ctx,page,errors,relay}=await open(true,false,null,false,'direct-only');
+  try{
+    await page.waitForFunction(()=>{const e=window.__bviewEngine();return e.direct&&e.direct.stopped&&e.fail;},null,{timeout:20000});
+    await new Promise(r=>setTimeout(r,1500));
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(relay.length,0,'direct only never requests the relay');
+    assert.equal(e.route,'direct-only');assert.equal(e.direct.only,true);assert.equal(e.direct.fallback,null);
+    assert.match(e.direct.stopped,/network offline/);assert.match(e.source.text,/direct only · stopped: network offline.*relay not used/);
+    assert.match(await page.locator('#playback-status').textContent(),/The relay was not used/);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('bnr.bview.route')),'direct-only');
+    assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('direct only: a clean run is labelled direct with no relay bytes',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,null,false,'direct-only');
+  try{
+    await page.waitForFunction(()=>{const e=window.__bviewEngine();return e.path==='webrtc'&&!!e.sha;},null,{timeout:20000});
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(relay.length,0);assert.equal(e.source.kind,'direct');assert.equal(e.direct.stopped,null);
+    assert.deepEqual(errors,[]);
+  }finally{await ctx.close();}
+});
+test('relay only: every byte is labelled relay and no direct connection opens',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,null,false,'relay');
+  try{
+    await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0&&window.__bviewEngine().path==='stream',null,{timeout:20000});
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(relay.length,1);assert.equal(e.route,'relay');assert.equal(e.direct,null);
+    assert.equal(e.source.text,'relay · every byte from relay.skaists.dev');
+    assert.equal(await page.evaluate(()=>window.connections||0),0);
+    assert.deepEqual(errors,[]);
   }finally{await ctx.close();}
 });
