@@ -66,7 +66,7 @@ function mountTreeSpace(host, view, selected, camera, onSelect) {
   if (!ctx) { host.textContent = '3D drawing is unavailable. Choose the flat tree above.'; return () => {}; }
   const points = treeSpace(view), byId = new Map(points.map(p => [p.id, p]));
   const buttons = new Map();
-  for (const p of points.filter(p => !p.living)) {
+  for (const p of points) {
     const b = doc.createElement('button');
     b.type = 'button'; b.className = 'tol-orbit-person';
     b.dataset.person = p.id; b.setAttribute('aria-label', p.name);
@@ -98,7 +98,7 @@ function mountTreeSpace(host, view, selected, camera, onSelect) {
     ctx.globalAlpha = 1;
     for (const p of [...points].sort((a,b)=>projected.get(b.id).depth-projected.get(a.id).depth)) {
       const q = projected.get(p.id), color = p.gen < 2 ? ink : colors[p.limb];
-      ctx.fillStyle = color; ctx.beginPath();ctx.arc(q.x,q.y,p.id === selected ? 9 : p.living ? 4 : 6,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle = color; ctx.beginPath();ctx.arc(q.x,q.y,p.id === selected ? 9 : 6,0,Math.PI*2);ctx.fill();
       const b = buttons.get(p.id);
       if (b) { b.style.left=q.x+'px';b.style.top=q.y+'px';b.style.zIndex=String(100-Math.round(q.depth*10));
         b.classList.toggle('show-label',p.id===selected); b.style.setProperty('--branch-color',color); }
@@ -214,19 +214,29 @@ export function lineView(corpus, lineKey, focusId, depth = DEPTH) {
   const line = (corpus.lines || []).find((l) => l.key === lineKey) || null;
   if (!line) return null;
   const P = corpus.persons || {}, E = corpus.edges || {};
-  const focus = focusId && P[focusId] ? focusId : line.root;
+  // Living continuity stubs remain model structure, never UI roots.
+  // The cold view begins at the first deceased blood relative on each branch.
+  const requested = focusId && P[focusId] && !P[focusId].living ? focusId : null;
+  const starts = requested
+    ? [requested]
+    : [...new Set((line.entries || []).filter((id) => P[id] && !P[id].living))];
+  if (!starts.length && line.root && P[line.root] && !P[line.root].living) starts.push(line.root);
+
   const nodes = [], links = [], at = new Map();
-  let frontier = P[focus] ? [{ id: focus, slot: 0 }] : [];
+  const rootCount = Math.max(1, starts.length);
+  const focus = requested || starts[0] || null;
+  let frontier = starts.map((id, slot) => ({ id, slot }));
   for (let gen = 0; frontier.length && gen <= depth; gen++) {
     const next = [];
     for (const { id, slot } of frontier) {
       if (at.has(id)) continue;
       const p = P[id];
-      const parents = (E[id] || []).filter((x) => P[x]);
-      const node = { id, gen, pos: (slot + 0.5) / 2 ** gen, living: !!p.living,
-        name: p.living ? null : p.name, lifespan: p.living ? null : (p.lifespan || null),
-        support: p.living ? null : (p.evidence && p.evidence.support) || null,
-        claims: p.living ? 0 : claimLines(p).length, above: 0 };
+      if (!p || p.living) continue;
+      const parents = firstDeceasedAbove(P, E, id);
+      const node = { id, gen, pos: (slot + 0.5) / (rootCount * 2 ** gen), living: false,
+        name: p.name, lifespan: p.lifespan || null,
+        support: (p.evidence && p.evidence.support) || null,
+        claims: claimLines(p).length, above: 0 };
       nodes.push(node);
       at.set(id, node);
       if (gen === depth) { node.above = parents.length; continue; }
@@ -238,11 +248,23 @@ export function lineView(corpus, lineKey, focusId, depth = DEPTH) {
     frontier = next;
   }
   const shown = new Set(nodes.map((n) => n.id));
-  return {
-    line, focus, nodes,
-    links: links.filter((k) => shown.has(k.parent)),
-    held: nodes.filter((n) => n.living).length,
-  };
+  return { line, focus, nodes, links: links.filter((k) => shown.has(k.parent)), held: line.bridge || 0 };
+}
+
+function firstDeceasedAbove(P, E, id) {
+  const out = [], seen = new Set();
+  let frontier = [...(E[id] || [])];
+  while (frontier.length) {
+    const next = [];
+    for (const pid of frontier) {
+      if (seen.has(pid) || !P[pid]) continue;
+      seen.add(pid);
+      if (P[pid].living) next.push(...(E[pid] || []));
+      else out.push(pid);
+    }
+    frontier = next;
+  }
+  return [...new Set(out)];
 }
 
 // How many generations fit: the widest row of a depth-d view holds 2^d
@@ -385,8 +407,8 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   function normalize(s) {
     const l = lines.some((x) => x.key === s.l) ? s.l : (lines[0] && lines[0].key) || null;
     const P = corpus.persons || {};
-    // a living id in the hash opens nothing: stubs have no card
-    const f = s.f && P[s.f] ? s.f : null;
+    // living continuity stubs never become UI focus targets
+    const f = s.f && P[s.f] && !P[s.f].living ? s.f : null;
     const p = s.p && P[s.p] && !P[s.p].living ? s.p : null;
     return { l, f, p };
   }
@@ -426,11 +448,11 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
 
     const svg = `<svg class="tol-art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${r === 'bee' ? `<path class="tol-root" d="M50,${ry} q -6,${(100 - ry) * 0.5} -12,${(100 - ry) * 0.6} M50,${ry} q 6,${(100 - ry) * 0.5} 12,${(100 - ry) * 0.6} M50,${ry} V99" />` : r === 'raver' ? '<circle class="tol-root" cx="50" cy="50" r="44" />' : ''}
-      ${paths.map((k) => `<path class="tol-branch${P[k.parent] && P[k.parent].living ? ' is-held' : ''}" d="${k.d}" />`).join('')}
+      ${paths.map((k) => `<path class="tol-branch" d="${k.d}" />`).join('')}
     </svg>
     <svg class="tol-hit" viewBox="0 0 100 100" preserveAspectRatio="none">
       ${paths.filter((k) => P[k.parent]).map((k) => {
-        const who = P[k.parent].living ? words.living : P[k.parent].name;
+        const who = P[k.parent].name;
         return `<path class="tol-limb" d="${k.d}" data-focus="${esc(k.parent)}" tabindex="0" role="button" aria-label="${esc(fill(words.limb, { name: who }))}" />`;
       }).join('')}
     </svg>`;
@@ -438,8 +460,6 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     const nodes = view.nodes.map((n) => {
       const { x, y } = pos[n.id];
       const style = `inset-inline-start:${x}%;top:${y}%;width:${pos[n.id].w}%`;
-      if (n.living)
-        return `<div class="tol-node is-held" style="${style}"><span class="tol-lock" aria-hidden="true"></span><span class="tol-cap">${esc(words.living)}</span>${n.above ? `<button type="button" class="tol-climb" data-focus="${esc(n.id)}">${esc(fill(words.more, { n: n.above }))}</button>` : ''}</div>`;
       const meta = r === 'cypherpunk'
         ? `<span class="tol-cap tol-mono">${esc(n.id)}</span><span class="tol-cap tol-mono">${esc(n.lifespan || words.datesUnknown)}</span>`
         : `<span class="tol-cap">${esc(n.lifespan || words.datesUnknown)}</span>`;
@@ -450,7 +470,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
 
     const card = st.p ? personCard(P[st.p], st.p) : '';
     const focusLine = st.f && focusP
-      ? `<p class="tol-focus">${esc(focusP.living ? words.focusHeld : fill(words.focusOn, { name: focusP.name }))} <button type="button" class="tol-quiet" data-whole>${esc(words.whole)}</button></p>`
+      ? `<p class="tol-focus">${esc(fill(words.focusOn, { name: focusP.name }))} <button type="button" class="tol-quiet" data-whole>${esc(words.whole)}</button></p>`
       : '';
 
     host.innerHTML = `
@@ -459,7 +479,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
       <p class="tol-note">${spatial ? 'Drag the tree to turn it. Use the arrow keys or rotation buttons. Choose a person to explore their family.' : 'Choose a name to open their research; choose a branch to climb.'}</p>
       ${focusLine}
       ${spatial ? '<div class="tol-camera"><button type="button" data-camera="left" aria-label="Rotate left">↶</button><button type="button" data-camera="right" aria-label="Rotate right">↷</button><button type="button" data-camera="in" aria-label="Zoom in">+</button><button type="button" data-camera="out" aria-label="Zoom out">−</button><button type="button" data-camera="reset">Reset view</button></div><div class="tol-space" tabindex="0" role="group" aria-label="3D family tree; arrow keys rotate"></div>' : `<div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>`}
-      ${spatial ? '<div class="tol-family-key" aria-label="Family branches">' + view.nodes.filter(n => n.gen === 2 && !n.living).map(n => '<button type="button" data-person="' + esc(n.id) + '"><span aria-hidden="true" style="color:' + ['#c98cff','#65c5f1','#f4b66a','#7adca0'][Math.min(3,Math.floor(n.pos*4))] + '">●</span> ' + esc(n.name) + '</button>').join('') + '</div>' : ''}
+      ${spatial ? '<div class="tol-family-key" aria-label="Family branches">' + view.nodes.filter(n => n.gen === 0).map(n => '<button type="button" data-person="' + esc(n.id) + '"><span aria-hidden="true" style="color:' + ['#c98cff','#65c5f1','#f4b66a','#7adca0'][Math.min(3,Math.floor(n.pos*4))] + '">●</span> ' + esc(n.name) + '</button>').join('') + '</div>' : ''}
       <div class="tol-guard" role="note"><span class="tol-lock" aria-hidden="true"></span><span>${esc(heldText(view.line.bridge, words))}</span></div>
       ${entryNames.length ? `<p class="tol-note">${esc(fill(words.emerges, { names: entryNames.join(' · ') }))}</p>` : ''}
       ${card}`;
