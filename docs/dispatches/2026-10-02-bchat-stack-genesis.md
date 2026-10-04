@@ -194,3 +194,32 @@ vectors file carries PUBLIC-CONSTANT on every baked line.
   bchat-core (node list), 18/18 bchat-eternal (eternal list), ratchet
   clean with bchat at zero findings. Branch head green, no PR by founder
   order 2026-10-02 — commits live on zcode/bchat-stack-2026-10-02.
+
+## Pass 4 (2026-10-03) — CORRECTION + the definitive member-wall receipt
+
+**CORRECTION LEDGER (withdrawn-then-proven, per corrective discipline):**
+- WITHDRAWN as evidence: pass-2 read `auth-required: verification failed`
+  as the relay refusing a fresh key (inferred member hive). FALSE CAUSE —
+  the verification failure was OUR defect: bchat-wire.serializeEvent
+  emitted `["0",…]` (string) instead of canonical `[0,…]` (number), so
+  every signature was made over a wrong hash. The relay was RIGHT.
+- HOW IT WAS CAUGHT: the live-proof harness grew an offline CONTROL leg —
+  cross-library verification against nostr-tools 2.10.4 (the estate's own
+  ops pin; installed scratch-side, never in-tree), which recomputes ids
+  with ITS serializer: hash-match=false, verifyEvent=false on AUTH/seal/
+  gift. One-character-class fix ('[0,'), re-run: hash-match=true and
+  verifyEvent=true for kinds 22242, 14, 1059 — cross-library green.
+- THE DEFINITIVE RECEIPT (post-fix run, both doors standing): AUTH now
+  VERIFIES and the relay answers the TRUE reason, verbatim:
+  'OK false … restricted: not a relay member'. Membership is the gate,
+  now PROVEN, not inferred. The kind-1059 allowlist behind membership
+  remains next-owner work (invite-lane mint + box seat).
+- Regression pinned: e2e/bchat-core.test.mjs now carries a golden-string
+  test asserting the canonical serialization ('[0,"<pub>",…]') and that a
+  finished event's id equals the hash OF THAT STRING — battery 26/26.
+- BANKED LAW: same-library sign+verify agreement proves NOTHING (the
+  defect self-verified green for two passes). Crypto wire code earns its
+  claim only against an INDEPENDENT implementation.
+- The door card copy and SPEC §open updated to quote 'restricted: not a
+  relay member'; harness control leg is offline-first (public-relay
+  fallback exists but this network SNI-filters those hosts).

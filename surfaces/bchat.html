@@ -205,10 +205,11 @@ details[data-reg-disclose]>summary{color:var(--dim)}
       <div class="card">
         <div id="roomcard">
           <div><b id="roomname"></b> · <span class="state" id="roomstate"></span></div>
-          <div class="law" style="margin-top:var(--s2)">MEASURED 2026-10-02, both roads: the relay gates
-          reading AND publishing behind NIP-42 member auth, and a fresh key is not a member — expect
-          <code>auth-required</code> verdicts (rendered verbatim) until the invite lane mints this
-          identity in. The lanes below the door stay fully provable offline.</div>
+          <div class="law" style="margin-top:var(--s2)">MEASURED 2026-10-03 (corrected): the relay gates reading AND
+          publishing behind NIP-42 member auth — a correctly-signed AUTH from a fresh key draws the
+          relay's own words, <code>restricted: not a relay member</code> (rendered verbatim) until
+          the invite lane mints this identity in. The lanes below the door stay fully provable
+          offline.</div>
           <div class="hexpl" id="joincode" style="margin:var(--s2) 0"></div>
           <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap">
             <button id="checkroom">probe the road (opt-in)</button>
@@ -261,7 +262,7 @@ details[data-reg-disclose]>summary{color:var(--dim)}
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="bchat-core.js?v=1"></script>
 <script src="bchat-nip44.js?v=1"></script>
-<script src="bchat-wire.js?v=1"></script>
+<script src="bchat-wire.js?v=2"></script>
 <script src="tour.js?v=42"></script>
 <script>
 (function(){

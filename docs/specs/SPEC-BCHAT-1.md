@@ -101,17 +101,17 @@ own receipt log; the economics join stays with the zBlood/bMeter lanes.
 
 ## §open — named, not hidden
 
-- **Relay membership is the gate; measured live 2026-10-02 (both roads).**
-  `scripts/bchat-live-proof.mjs` (on-demand, receipts in the genesis
-  dispatch): wss://skaists.buzz and wss://relay.skaists.dev both answer,
-  speak NIP-01, demand NIP-42 AUTH for subscribe AND publish, and REFUSE a
-  fresh identity's AUTH — verbatim `auth-required: verification failed` /
-  `CLOSED auth-required: not authenticated`. So kind-1059 acceptance is
-  not yet reachable for non-member keys: the question moved from "allowlist
-  row" to "member mint". NEXT OWNERS: invite lane (mint bChat identities)
-  + box seat (behind member auth, confirm kinds 14/1059 accepted; ops/ law:
-  change tree and box together). The surface states the auth wall in place
-  and renders every verdict verbatim.
+- **Relay membership is the gate — PROVEN live (corrected 2026-10-03).**
+  First reading blamed the relay; the truth was ours: serializeEvent
+  emitted the NIP-01 array marker as string "0" (wrong hash → invalid
+  signatures — the relay's 'verification failed' was correct). Fixed and
+  cross-library verified against nostr-tools (hash+sig green for 22242/
+  14/1059); the relay then answered the TRUE reason, verbatim:
+  'restricted: not a relay member'. NEXT OWNERS unchanged: invite lane
+  (mint bChat identities) + box seat (behind membership, confirm kinds
+  14/1059; ops/ change-both law). BANKED LAW: same-library sign+verify
+  proves nothing — wire crypto claims require an independent verifier.
+
 - Autonomi retrieval adapter (descriptor → stream, bview's SW is the
   candidate seam). NEXT OWNER: bData/bview seat.
 - Android surface (§grapheneos). SEAT-OPEN.

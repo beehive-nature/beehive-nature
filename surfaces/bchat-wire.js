@@ -29,7 +29,11 @@ var N=G.BnrSign, W=G.BCHATNIP44;
 if(!N||!W) throw new Error('bchat-wire: BnrSign + bchat-nip44 must load first');
 
 function serializeEvent(pub,created_at,kind,tags,content){
-  return '["0",'+JSON.stringify(pub)+','+created_at+','+kind+','+JSON.stringify(tags)+','+JSON.stringify(content)+']';
+  /* NIP-01 canonical: [0,<pubkey>,<created_at>,<kind>,<tags>,<content>] —
+     the leading 0 is a NUMBER. Signed-as-"0" (string) was a live defect
+     caught 2026-10-03 by cross-library hash comparison against nostr-tools:
+     the relay's 'auth-required: verification failed' was TRUE. */
+  return '[0,'+JSON.stringify(pub)+','+created_at+','+kind+','+JSON.stringify(tags)+','+JSON.stringify(content)+']';
 }
 function finishEvent(ev,secHex){
   ev.id=W.bytesToHex(N.sha256(W.utf8encode(serializeEvent(ev.pubkey,ev.created_at,ev.kind,ev.tags,ev.content))));

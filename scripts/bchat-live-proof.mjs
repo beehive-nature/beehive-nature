@@ -10,7 +10,14 @@
      dialed ≠ connected ≠ authed(NIP-42) ≠ published(OK true + event id)
      ≠ received(B saw the id) ≠ unwrapped(seal signature VERIFIED) ≠ matched.
    Any refusal prints the relay's verdict VERBATIM and exits 1 with the state
-   that failed. Keys are fresh per run — nothing persists, nothing is reused. */
+   that failed. Keys are fresh per run — nothing persists, nothing is reused.
+
+   THE CONTROL LEG (added 2026-10-03): before the member-relay legs, the same
+   serializer/signer publishes a short kind-1 control note to a PUBLIC relay
+   (cascade: relay.damus.io → nos.lol). If the public relay says OK true,
+   our NIP-01 serialization + BIP-340 schnorr are valid — so a member relay's
+   'auth-required: verification failed' is ADMISSION CONTROL (member hive),
+   not a signature defect. One note per run, ephemeral key, neutral content. */
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
@@ -143,6 +150,47 @@ function session(who, ident, { filter, drive, timeoutMs = 40000 }) {
 }
 
 /* ── the run ── */
+/* CONTROL (decisive, offline-first): verify our serializer/signer against an
+   INDEPENDENT implementation before spending a connection. nostr-tools 2.10.4
+   (the estate's own ops pin) recomputes ids with ITS serializer; if it disagrees,
+   every relay verdict below is meaningless. Falls back to a public-relay publish
+   attempt when nostr-tools is not importable (this network SNI-filters most
+   public relays, so the offline check is the primary). */
+let ctlNote = 'nostr-tools unavailable; public-relay fallback attempted';
+try {
+  const nt = await import('nostr-tools');
+  const raw0 = new Uint8Array(32); crypto.getRandomValues(raw0);
+  const sec0 = b2h(raw0);
+  const auth0 = WIRE.finishEvent({
+    pubkey: WIRE.xonly(sec0), created_at: WIRE.nowSec(), kind: 22242,
+    tags: [['relay', CASCADE[0]], ['challenge', '00'.repeat(32)]], content: ''
+  }, sec0);
+  const hashOk = nt.getEventHash(auth0) === auth0.id;
+  const sigOk = hashOk && nt.verifyEvent(auth0);
+  log('C', 'control', 'nostr-tools cross-verify: hash-match=' + hashOk + ' signature=' + sigOk);
+  if (!sigOk) {
+    console.log('CONTROL FAILED OFFLINE — serializer/signature is wrong; FIX bchat-wire BEFORE reading any relay verdict below.');
+    process.exit(1);
+  }
+  ctlNote = 'offline cross-library control PASSED (nostr-tools verified our hash + signature)';
+} catch (e) {
+  const CONTROL = ['wss://relay.damus.io', 'wss://nos.lol'];
+  const c = fresh();
+  const note = WIRE.finishEvent({
+    pubkey: c.pub, created_at: WIRE.nowSec(), kind: 1, tags: [],
+    content: 'bChat wire control probe — ephemeral key; NIP-01 serialization + schnorr validity check. zCode lane receipt.'
+  }, c.sec);
+  const savedCascade = CASCADE.slice();
+  CASCADE.length = 0; CONTROL.forEach(u => CASCADE.push(u));
+  const ctl = await session('C', c, { drive: (send, setExpect) => { setExpect(note.id); send(['EVENT', note]); }, timeoutMs: 25000 });
+  CASCADE.length = 0; savedCascade.forEach(u => CASCADE.push(u));
+  log('C', 'verdict', ctl.verdict + (ctl.okMsg ? ' · relay said: ' + ctl.okMsg : '') + (ctl.url ? ' · ' + ctl.url : ''));
+  ctlNote = ctl.verdict === 'published'
+    ? 'CONTROL PASSED on a public relay (event ' + note.id.slice(0, 16) + '…)'
+    : 'CONTROL INCONCLUSIVE (' + ctl.verdict + ') — public relays unreachable from this network';
+}
+console.log('CONTROL VERDICT: ' + ctlNote);
+
 const A = fresh(), B = fresh();
 log('A', 'identity', 'fresh sender ' + A.pub.slice(0, 8) + '…');
 log('B', 'identity', 'fresh recipient ' + B.pub.slice(0, 8) + '…');

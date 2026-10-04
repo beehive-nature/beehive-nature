@@ -251,6 +251,22 @@ test('bchat-wire: a wrap for someone else cannot be opened (wrong identity)', ()
   assert.throws(() => WIRE.unwrapGift(secC, pubC, gift), /MAC|conversation|pub/i);
 });
 
+test('bchat-wire: canonical NIP-01 serialization — the leading 0 is a NUMBER (regression: the signed-as-"0" defect)', () => {
+  /* 2026-10-03: serializeEvent emitted ["0",…] so every signature was made over a
+     wrong hash; the member relay's 'verification failed' was TRUE. Caught by
+     cross-library hash comparison against nostr-tools 2.10.4 (offline control).
+     This golden string pins the canonical form forever. */
+  const pub = 'ab'.repeat(32), chal = 'cd'.repeat(32);
+  const s = WIRE.serializeEvent(pub, 1700000000, 22242, [['relay', 'wss://x'], ['challenge', chal]], '');
+  assert.equal(s, '[0,"' + pub + '",1700000000,22242,[["relay","wss://x"],["challenge","' + chal + '"]],""]');
+  /* and a finished event's id is the hash OF THAT STRING */
+  const raw = new Uint8Array(32); crypto.getRandomValues(raw);
+  const sec = b2h(raw);
+  const ev = WIRE.finishEvent({ pubkey: WIRE.xonly(sec), created_at: 1700000001, kind: 1, tags: [], content: 'x' }, sec);
+  const expectId = b2h(B.sha256(N44.utf8encode('[0,"' + ev.pubkey + '",1700000001,1,[],"x"]')));
+  assert.equal(ev.id, expectId);
+});
+
 /* ── bchat.html source boundary laws (cite-or-silent, no theater) ── */
 /* lazy: the page tests read the file at run time so the crypto battery
    above still runs while the surface is being authored */
