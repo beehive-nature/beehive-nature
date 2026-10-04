@@ -61,8 +61,12 @@
 //!     deterministic variant) and `Verifier::verify` checks with (src/verifying.rs:194-205),
 //!     which is what bsigner's `dsa_sign` / `dsa_verify` use.
 //!   * WARNING, verbatim from the README: "The implementation contained in this crate
-//!     has never been independently audited!" NIST ACVP known-answer vectors are not run
-//!     here: UNVERIFIED. What the tests do show: a signature made by a second, independent
+//!     has never been independently audited!" A small subset of NIST ACVP known-answer
+//!     vectors runs against the same resolved crate (ml-dsa 0.1.1, one copy in Cargo.lock):
+//!     `surfaces/pq-kat.json`, ML-DSA-65 keyGen tcId 26-28 and sigVer tcId 31, 33, 34, 38,
+//!     39, 41, 43, checked by crates/bsigner/src/kat.rs. They do not run through this
+//!     module, and a handful of cases is not ACVP validation. What the tests here show: a
+//!     signature made by a second, independent
 //!     implementation (@noble/post-quantum 0.7.1, the SPEC-BPQ-1 card in
 //!     `surfaces/bpq-vectors.json`) verifies through this dispatch, and one flipped bit
 //!     does not.

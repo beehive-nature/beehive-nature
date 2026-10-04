@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { createHash, createCipheriv, hkdfSync } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -61,7 +61,7 @@ test('the public head names no reader and no sealer', async () => {
   assert.deepEqual(h.slots.map(s => Object.keys(s).sort().join(',')), ['to,w', 'ct,to,w']);
 });
 
-test('ranges decrypt by seeking, every flipped bit is refused', async () => {
+test('ranges decrypt by seeking; flips at four structural points, a cut byte and a trailing byte are refused', async () => {
   const a = keysOf('A');
   const plain = new Uint8Array(5000).map((_, i) => (i * 13) & 255);
   const obj = await B.seal(plain, { self: a, seg: 1024 });
@@ -107,6 +107,195 @@ test('detached signatures verify for their file only, under the signer id', () =
   assert.equal(B.verifyFile({ ...d, id: V.keys[1].id }, file).ok, false);
   const fresh = B.signFile(keysOf('B'), file, '2026-10-04T12:00:00Z');
   assert.equal(B.verifyFile(fresh, file).id, V.keys[1].id);
+});
+
+// ── negatives; crates/bsigner/src/bpq.rs mirrors each of these ─────────────
+const L = globalThis.BPQ_LIB;
+const te = new TextEncoder();
+const cat = (...xs) => new Uint8Array(Buffer.concat(xs.map(x => Buffer.from(x))));
+// the exact string a binding signs, rebuilt naively from its fields
+const signedText = b => b.id + '\n' + b.at + '\n' + Object.keys(b.claims).sort().map(k => k + '=' + b.claims[k] + '\n').join('');
+
+test('bindings: a claim moved into `at`, a wrong version or kind, and claim shapes that sign alike are refused', () => {
+  const b = V.bind, k = keysOf('A');
+  assert.equal(B.verifyBind(b), true, 'control');
+  // Move the first claim line into `at`: the signed bytes do not change.
+  const { ed25519, ...rest } = b.claims;
+  const stripped = { ...b, at: b.at + '\ned25519=' + ed25519, claims: rest };
+  assert.equal(signedText(stripped), signedText(b), 'the attack keeps the signed bytes');
+  assert.equal(B.verifyBind(stripped), false, 'a claim moved into `at` is refused');
+  assert.equal(B.verifyBind({ ...b, bpq: 2 }), false);
+  assert.equal(B.verifyBind({ ...b, kind: 'detached' }), false);
+  assert.equal(B.verifyBind({ ...b, kind: null }), false);
+  const { kind, ...noKind } = b;
+  assert.equal(B.verifyBind(noKind), false);
+  for (const at of ['2026-10-04', '2026-10-04T00:00:00', '2026-10-04T00:00:00+00:00', '2026-10-04T00:00:00Z\n', ' 2026-10-04T00:00:00Z', '2026-10-04T00:00:00.1234567890Z']) {
+    assert.throws(() => B.bind(k, { evm: '0x1' }, at), e => e.code === 'at', JSON.stringify(at));
+  }
+  // fractional seconds, as toISOString writes them, are lawful
+  assert.equal(B.verifyBind(B.bind(k, { evm: '0x1' }, '2026-10-04T12:34:56.789Z')), true, 'control');
+  // {a: 'b=c'} and {'a=b': 'c'} sign the same line; only the first is lawful
+  const eqv = B.bind(k, { a: 'b=c' }, b.at);
+  assert.equal(B.verifyBind(eqv), true, 'control');
+  assert.equal(B.verifyBind({ ...eqv, claims: { 'a=b': 'c' } }), false);
+  // validly signed over "A=b=c\n": only the kind pattern refuses it
+  const upperSig = B.b64u(k.dsa.sign(cat(te.encode('bpq1/bind'), L.sha3_256(te.encode(b.id + '\n' + b.at + '\nA=b=c\n')))));
+  assert.equal(B.verifyBind({ ...eqv, claims: { A: 'b=c' }, sig: upperSig }), false);
+  assert.throws(() => B.bind(k, { 'a=b': 'c' }, b.at), e => e.code === 'claim_kind');
+  // {'0': 'x'} and ['x'] sign the same line; only the object is lawful
+  const arr = B.bind(k, { 0: 'x' }, b.at);
+  assert.equal(B.verifyBind(arr), true, 'control');
+  assert.equal(B.verifyBind({ ...arr, claims: ['x'] }), false);
+  assert.throws(() => B.bind(k, ['x'], b.at), e => e.code === 'claims');
+});
+
+test('cards: a wrong version or any kind is refused', () => {
+  assert.equal(B.verifyCard(V.card), true, 'control');
+  assert.equal(B.verifyCard({ ...V.card, bpq: 2 }), false);
+  assert.equal(B.verifyCard({ ...V.card, kind: 'binding' }), false);
+  const { bpq, ...noVersion } = V.card;
+  assert.equal(B.verifyCard(noVersion), false);
+});
+
+test('detached signatures: a validly signed `at` that is not a UTC timestamp, a wrong version or kind are refused', () => {
+  const k = keysOf('A'), d = V.detached.signature;
+  const file = new Uint8Array(4096).map((_, i) => (i * 31 + 7) & 255), fh = L.sha3_256(file);
+  const resign = at => ({ ...d, at, sig: B.b64u(k.dsa.sign(cat(te.encode('bpq1/detached'), fh, L.sha3_256(te.encode(d.id + '\n' + at + '\n' + 4096))))) });
+  assert.equal(B.verifyFile(resign('2026-10-04T01:02:03.5Z'), file).ok, true, 'control');
+  assert.equal(B.verifyFile(resign('2026-10-04T00:00:00Z\nx'), file).ok, false);
+  assert.equal(B.verifyFile(resign('yesterday'), file).ok, false);
+  assert.equal(B.verifyFile({ ...d, bpq: 2 }, file).ok, false);
+  assert.equal(B.verifyFile({ ...d, kind: 'binding' }, file).ok, false);
+  assert.throws(() => B.signFile(k, file, '2026-10-04'), e => e.code === 'at');
+});
+
+// byte ranges of KEYS, META, BODY and SEAL in a sealed object
+function regions(obj) {
+  const h = B.inspect(obj), keysStart = 12 + h.coreBytes.length + 4;
+  return {
+    keys: [keysStart, keysStart + h.keysBytes.length],
+    meta: [h.bodyOffset - h.metaBytes.length, h.bodyOffset],
+    body: [h.bodyOffset, h.sealOffset], seal: [h.sealOffset + 4, obj.length], seg: h.core.seg,
+  };
+}
+// change the base64url character `after` bytes past `needle` inside range r
+function changeB64(obj, r, needle, after) {
+  const at = r[0] + Buffer.from(obj.subarray(r[0], r[1])).indexOf(needle) + needle.length + after;
+  obj[at] = obj[at] === 0x41 ? 0x42 : 0x41;
+}
+
+test('a signed shared object (self + X-Wing reader + signer + meta): a change in KEYS, META, SEAL or BODY never passes (refused, or the seal reads not ok)', async () => {
+  const o = V.objects[0], a = keysOf('A'), me = { self: a };
+  assert.equal(o.name, 'self-and-x-wing-signed');
+  const obj = B.unb64u(o.object), r = regions(obj);
+  assert.equal((await B.open(obj, me)).sealedBy.ok, true, 'control');
+
+  // KEYS is not under the AEAD; the seal signature covers it. A changed byte
+  // in the other reader's slot still opens for A, and the seal no longer verifies.
+  let x = obj.slice(); changeB64(x, r.keys, '"ct":"', 40);
+  assert.equal((await B.open(x, me)).sealedBy.ok, false);
+  x = obj.slice(); changeB64(x, r.keys, '"w":"', 20);
+  await assert.rejects(B.open(x, me), e => e.code === 'no_key');
+
+  x = obj.slice(); x[r.meta[0] + 5] ^= 1;
+  await assert.rejects(B.open(x, me), e => e.code === 'auth');
+  // altered SEAL bytes: the open stands (segments authenticate the bytes),
+  // and the sealer is never reported ok
+  x = obj.slice(); x[r.seal[0] + 5] ^= 1;
+  const sb = (await B.open(x, me)).sealedBy;
+  assert.equal(sb.ok, false); assert.equal(sb.id, null);
+  x = obj.slice(); x[r.body[0] + 1500] ^= 1;
+  await assert.rejects(B.open(x, me), e => e.code === 'auth');
+
+  // swap segments 0 and 1 (both full length): each nonce names its index
+  const s = r.seg + 16, s0 = r.body[0], s1 = s0 + s;
+  x = obj.slice(); x.set(obj.subarray(s1, s1 + s), s0); x.set(obj.subarray(s0, s0 + s), s1);
+  await assert.rejects(B.open(x, me), e => e.code === 'auth');
+  // cut one byte from the final segment, or append a copy of segment 0: the
+  // length the head implies no longer matches
+  x = cat(obj.subarray(0, r.body[1] - 1), obj.subarray(r.body[1]));
+  await assert.rejects(B.open(x, me));
+  x = cat(obj.subarray(0, r.body[1]), obj.subarray(s0, s0 + s), obj.subarray(r.body[1]));
+  await assert.rejects(B.open(x, me));
+});
+
+// A minimal object built here with node:crypto, independently of bpq.js: one
+// "self" slot, a fixed file key, one segment, optional extra slots and SEAL.
+const CORE_OK = '{"bpq":1,"aead":"aes-256-gcm","seg":1024,"len":{len},"oid":"{oid}","kc":"{kc}"}';
+const u32 = n => { const b = Buffer.alloc(4); b.writeUInt32BE(n); return b; };
+const nonceOf = (flag, i) => { const n = Buffer.alloc(12); n.writeUInt32BE(flag, 0); n.writeBigUInt64BE(BigInt(i), 4); return n; };
+const gcm = (key, iv, msg, aad) => { const c = createCipheriv('aes-256-gcm', key, iv); c.setAAD(aad); return Buffer.concat([c.update(msg), c.final(), c.getAuthTag()]); };
+// signWith: keys that sign a valid ml-dsa-65 seal record (claiming `claimId`,
+// default their own id); bom: prefix the SEAL plaintext with a UTF-8 BOM.
+function craft(vault, { core = CORE_OK, extra = [], seal = null, signWith = null, claimId = null, bom = false } = {}) {
+  const fk = Buffer.alloc(32, 7), oid = Buffer.alloc(16, 9), plain = te.encode('crafted');
+  const coreB = Buffer.from(core.replace('{len}', String(plain.length)).replace('{oid}', B.b64u(oid))
+    .replace('{kc}', B.b64u(L.sha3_256(cat(te.encode('bpq1/key-commit'), oid, fk)))));
+  const aad = L.sha3_256(coreB);
+  const kw = Buffer.from(hkdfSync('sha256', vault, oid, 'bpq1/wrap/self', 32));
+  const keysB = Buffer.from(JSON.stringify([{ to: 'self', w: B.b64u(gcm(kw, Buffer.alloc(12), fk, aad)) }, ...extra]));
+  const body = gcm(fk, nonceOf(1, 0), plain, aad);
+  let rec = seal;
+  if (signWith) {
+    const msg = cat(te.encode('bpq1/seal'), aad, L.sha3_256(keysB), L.sha3_256(new Uint8Array(0)), L.sha3_256(body));
+    rec = { alg: 'ml-dsa-65', pk: B.b64u(signWith.dsa.publicKey), sig: B.b64u(signWith.dsa.sign(msg)),
+      id: claimId || signWith.id, succ: B.b64u(signWith.succession.commit) };
+  }
+  const recB = rec ? Buffer.concat([Buffer.from(bom ? [0xef, 0xbb, 0xbf] : []), Buffer.from(JSON.stringify(rec))]) : null;
+  const sealB = recB ? gcm(fk, nonceOf(3, 0), recB, aad) : Buffer.alloc(0);
+  return cat([0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a], u32(coreB.length), coreB, u32(keysB.length), keysB, u32(0), body, u32(sealB.length), sealB);
+}
+
+test('crafted objects: unknown slots and non-plain or oversized CORE numbers are refused; a failing seal record never reads ok', async () => {
+  const a = keysOf('A'), me = { self: a }, vault = a.vault.key;
+  const control = await B.open(craft(vault), me);
+  assert.equal(new TextDecoder().decode(control.bytes), 'crafted', 'control');
+  assert.equal(control.sealedBy, null);
+
+  // SPEC-BPQ-1 §6: an unknown slot `to` is refused, even after one that opens
+  for (const extra of [{ to: 'hqc', w: 'AA' }, { w: 'AA' }, 'self']) {
+    await assert.rejects(B.open(craft(vault, { extra: [extra] }), me), e => e.code === 'slot', JSON.stringify(extra));
+  }
+  // JSON.parse reads 1024.0 as 1024; the Rust twin refuses it, so both do
+  for (const bad of ['"seg":1024.0', '"seg":1.024e3', '"seg":1024,"x":-1']) {
+    await assert.rejects(B.open(craft(vault, { core: CORE_OK.replace('"seg":1024', bad) }), me), e => e.code === 'number', bad);
+  }
+  // a len past 2^53 cannot be counted exactly: refused (Rust: does not fit the object)
+  for (const len of ['18446744073709551615', '9223372036854775808', '9007199254740993']) {
+    await assert.rejects(B.open(craft(vault, { core: CORE_OK.replace('{len}', len) }), me), e => e.code === 'len' && e.message === 'bad len', len);
+  }
+  // len = 2^53 - 1 is a safe integer, but len + 16 per segment is not: the body-length check refuses it
+  await assert.rejects(B.open(craft(vault, { core: CORE_OK.replace('{len}', '9007199254740991') }), me),
+    e => e.code === 'len' && /past 2\^53/.test(e.message));
+
+  // Seal records. Every SEAL that fails reads as ok: false with id: null and
+  // never fails the open; an id is reported only when ok. Rust (bpq.rs
+  // seal_record) draws the same line; before this, an id without succ failed
+  // the whole open in Rust and read as ok: false here.
+  const b = keysOf('B');
+  const valid = (await B.open(craft(vault, { signWith: a }), me)).sealedBy;
+  assert.equal(valid.ok, true, 'control: a valid seal verifies'); assert.equal(valid.id, a.id, 'control: the id is read');
+  // a BOM before the record: TextDecoder would strip it by default; serde_json refuses it, so both refuse
+  const bomd = (await B.open(craft(vault, { signWith: a, bom: true }), me)).sealedBy;
+  assert.equal(bomd.ok, false); assert.equal(bomd.id, null);
+  // a valid signature by A claiming B's id: never reported as B
+  const forged = (await B.open(craft(vault, { signWith: a, claimId: b.id }), me)).sealedBy;
+  assert.equal(forged.ok, false); assert.equal(forged.id, null); assert.equal(forged.idOk, false);
+
+  const pk = B.b64u(a.dsa.publicKey), id = a.id, succ = B.b64u(a.succession.commit);
+  const sealer = async rec => (await B.open(craft(vault, { seal: rec }), me)).sealedBy;
+  const s = await sealer({ alg: 'ml-dsa-65', pk, sig: 'AAAA', id, succ });
+  assert.equal(s.ok, false, 'a bad signature reads as ok: false'); assert.equal(s.id, null); assert.equal(s.idOk, true);
+  for (const rec of [
+    { alg: 'ml-dsa-65', pk, sig: 'AAAA', id },            // an id without its succession commitment
+    { alg: 'ml-dsa-65', pk, sig: 'AAAA', id: 5, succ },
+    { alg: 'ml-dsa-65', sig: 'AAAA' },
+    [1, 2],
+    { alg: 'slh-dsa-shake-256f', pk: 'AA' },
+  ]) {
+    const x = await sealer(rec);
+    assert.equal(x.ok, false, JSON.stringify(rec)); assert.equal(x.id, null, JSON.stringify(rec));
+  }
 });
 
 test('the succession key re-derives from the root and matches the commitment', () => {

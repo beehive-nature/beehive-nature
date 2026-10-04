@@ -32,6 +32,8 @@
        not independently audited). Its ML-DSA-65 / ML-KEM-768 outputs agree byte
        for byte with RustCrypto ml-dsa 0.1.1 / ml-kem 0.3.2 on shared seeds; the
        vectors in surfaces/bpq-vectors.json are checked by both implementations in CI.
+       The SLH-DSA succession key is derived here only: the Rust twin never derives
+       it and no known-answer vectors cover it (SPEC-BPQ-1 §6).
      · Symmetric layer: WebCrypto AES-256-GCM. 256-bit keys are the PQ choice for
        symmetric ciphers; the only quantum speed-up known is Grover's square root.
      · Keys live in this page's memory while it is open. Uint8Arrays are zeroed by
@@ -63,9 +65,18 @@
   var FLAG_MORE = 0, FLAG_FINAL = 1, FLAG_META = 2, FLAG_SEAL = 3;
   var ROSETTA = 'bpq1 sealed object: CORE json, KEYS json (file key wrapped per reader: self = AES-256-GCM under HKDF-SHA256(vault key), x-wing = ML-KEM-768+X25519), META, BODY = AES-256-GCM segments (nonce = u32 flag || u64 index, AAD = SHA3-256(CORE)), SEAL = ML-DSA-65 record, itself AES-256-GCM under the file key. Spec: SPEC-BPQ-1.';
 
-  var te = new TextEncoder(), td = new TextDecoder('utf-8', { fatal: true });
+  var te = new TextEncoder(), td = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });   // keep a BOM, so JSON.parse refuses it as serde_json does
   var utf8 = function (s) { return te.encode(s); };
   var H = function (b) { return L.sha3_256(b); };
+
+  // A signed timestamp has the shape YYYY-MM-DDTHH:MM:SS[.f]Z and nothing
+  // else (the shape only: field ranges are not checked). The signed bytes are
+  // "id NL at NL lines", so an `at` carrying a newline could move a claim line
+  // out of `claims` and keep the signature valid.
+  var AT_RE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{1,9})?Z$/;
+  // A claim kind: lowercase, no '=' and no newline, so "kind=value" splits one way.
+  var KIND_RE = /^[a-z0-9][a-z0-9._-]{0,31}$/;
+  function isAt(at) { return typeof at === 'string' && AT_RE.test(at); }
 
   function BpqError(msg, code) { var e = new Error(msg); e.name = 'BpqError'; e.code = code; return e; }
 
@@ -200,8 +211,10 @@
     var msg = concat(utf8(DOM.CARD), k.dsa.publicKey, k.kem.publicKey, k.succession.commit);
     return { bpq: 1, id: k.id, dsa: b64u(k.dsa.publicKey), kem: b64u(k.kem.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(msg)) };
   }
+  // A card carries no `kind` (SPEC-BPQ-1 §3); bindings and detached signatures do.
   function verifyCard(c) {
     try {
+      if (!c || c.bpq !== 1 || c.kind !== undefined) return false;
       var dsa = unb64u(c.dsa), kem = unb64u(c.kem), succ = unb64u(c.succ), sig = unb64u(c.sig);
       if (dsa.length !== 1952 || kem.length !== 1216 || succ.length !== 32) return false;
       if (idFrom(dsa, succ) !== c.id) return false;
@@ -212,23 +225,26 @@
   // { evm: '0x…', vaulta: 'name.b', ed25519: '<hex>' }. Signed over a stable
   // line form so any implementation can rebuild the exact bytes.
   function claimLines(claims) {
+    var proto = claims && typeof claims === 'object' ? Object.getPrototypeOf(claims) : undefined;
+    if (proto !== Object.prototype && proto !== null) throw BpqError('claims must be a plain object', 'claims');
     var ks = Object.keys(claims).sort(), out = '';
     for (var i = 0; i < ks.length; i++) {
       var k = ks[i], v = claims[k];
-      if (!/^[a-z0-9][a-z0-9._-]{0,31}$/.test(k)) throw BpqError('claim kind "' + k + '" must be lowercase [a-z0-9._-]', 'claim_kind');
+      if (!KIND_RE.test(k)) throw BpqError('claim kind "' + k + '" must be lowercase [a-z0-9._-]', 'claim_kind');
       if (typeof v !== 'string' || !v || /[\r\n]/.test(v)) throw BpqError('claim "' + k + '" must be a one-line string', 'claim_value');
       out += k + '=' + v + '\n';
     }
     return out;
   }
   function bind(k, claims, at) {
-    if (typeof at !== 'string' || !/^\d{4}-\d\d-\d\dT/.test(at)) throw BpqError('at must be an ISO-8601 timestamp', 'at');
+    if (!isAt(at)) throw BpqError('at must have the shape YYYY-MM-DDTHH:MM:SS[.f]Z (UTC)', 'at');
     var lines = claimLines(claims);
     var msg = concat(utf8(DOM.BIND), H(utf8(k.id + '\n' + at + '\n' + lines)));
     return { bpq: 1, kind: 'binding', id: k.id, at: at, claims: claims, dsa: b64u(k.dsa.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(msg)) };
   }
   function verifyBind(b) {
     try {
+      if (!b || b.bpq !== 1 || b.kind !== 'binding' || !isAt(b.at)) return false;
       var dsa = unb64u(b.dsa), succ = unb64u(b.succ);
       if (idFrom(dsa, succ) !== b.id) return false;
       var msg = concat(utf8(DOM.BIND), H(utf8(b.id + '\n' + b.at + '\n' + claimLines(b.claims))));
@@ -244,7 +260,7 @@
   }
   function signFile(k, fileBytes, at) {
     bytes(fileBytes, 'file');
-    if (typeof at !== 'string' || !/^\d{4}-\d\d-\d\dT/.test(at)) throw BpqError('at must be an ISO-8601 timestamp', 'at');
+    if (!isAt(at)) throw BpqError('at must have the shape YYYY-MM-DDTHH:MM:SS[.f]Z (UTC)', 'at');
     var fh = H(fileBytes);
     return { bpq: 1, kind: 'detached', id: k.id, at: at, file: { size: fileBytes.length, sha3: b64u(fh) },
       dsa: b64u(k.dsa.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(detachedMsg(k.id, at, fileBytes.length, fh))) };
@@ -253,6 +269,8 @@
   function verifyFile(d, fileBytes) {
     try {
       if (!d || d.kind !== 'detached' || d.bpq !== 1) return { ok: false, why: 'not a bpq1 detached signature' };
+      if (!isAt(d.at)) return { ok: false, why: 'at does not have the shape YYYY-MM-DDTHH:MM:SS[.f]Z' };
+      if (!d.file || !Number.isSafeInteger(d.file.size) || d.file.size < 0) return { ok: false, why: 'file.size is not a whole byte count' };
       var dsa = unb64u(d.dsa), succ = unb64u(d.succ);
       if (idFrom(dsa, succ) !== d.id) return { ok: false, why: 'the id does not match the key' };
       var fh = H(bytes(fileBytes, 'file'));
@@ -321,6 +339,25 @@
     return concat(Uint8Array.from(MAGIC), u32(coreB.length), coreB, u32(keysB.length), keysB, u32(metaB.length), metaB, body, u32(sealB.length), sealB);
   }
 
+  // JSON.parse reads 65536.0 or 6.5536e4 as 65536; the Rust twin refuses them.
+  // Every CORE number is a whole count, so CORE's number tokens must be plain
+  // digits: no sign, fraction or exponent. Scans the text outside strings.
+  function plainIntegers(text) {
+    var inStr = false, esc = false, prevDigit = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charCodeAt(i);
+      if (inStr) {
+        if (esc) esc = false; else if (c === 92) esc = true; else if (c === 34) inStr = false;
+        continue;
+      }
+      if (c === 34) inStr = true;
+      else if (c === 45 || c === 46 || c === 43) return false;      // - . +
+      else if ((c === 101 || c === 69) && prevDigit) return false;   // e E after a digit
+      prevDigit = c >= 48 && c <= 57;
+    }
+    return true;
+  }
+
   // Parse the head. Accepts the whole object or just a prefix that covers the
   // head (for streaming: fetch the first few KiB, then ranges of the body).
   function inspect(obj) {
@@ -335,15 +372,22 @@
     var m = readU32(obj, o); o += 4;
     if (o + m > obj.length) throw BpqError('truncated head', 'truncated');
     var metaB = obj.subarray(o, o + m); o += m;
-    var core, slots;
-    try { core = JSON.parse(td.decode(coreB)); slots = JSON.parse(td.decode(keysB)); }
+    var core, slots, coreText;
+    try { coreText = td.decode(coreB); core = JSON.parse(coreText); slots = JSON.parse(td.decode(keysB)); }
     catch (e) { throw BpqError('head is not valid JSON', 'head_json'); }
+    if (!core || typeof core !== 'object' || Array.isArray(core)) throw BpqError('CORE must be a JSON object', 'head_json');
+    if (!plainIntegers(coreText)) throw BpqError('CORE numbers must be plain non-negative integers', 'number');
     if (core.bpq !== 1) throw BpqError('unsupported bpq version ' + core.bpq, 'version');
     if (core.aead !== 'aes-256-gcm') throw BpqError('unsupported aead ' + core.aead, 'aead');
-    if (!Number.isInteger(core.seg) || core.seg < SEG_MIN || core.seg > SEG_MAX) throw BpqError('bad seg', 'seg');
+    if (!Number.isSafeInteger(core.seg) || core.seg < SEG_MIN || core.seg > SEG_MAX) throw BpqError('bad seg', 'seg');
     if (!Number.isSafeInteger(core.len) || core.len < 0) throw BpqError('bad len', 'len');
     if (!Array.isArray(slots)) throw BpqError('KEYS must be an array', 'keys');
+    for (var j = 0; j < slots.length; j++) {
+      var st = slots[j] && typeof slots[j] === 'object' && !Array.isArray(slots[j]) ? slots[j].to : undefined;
+      if (st !== 'self' && st !== 'x-wing') throw BpqError('unknown reader slot ' + JSON.stringify(st) + ' (slot ' + j + ')', 'slot');
+    }
     var n = segCount(core.len, core.seg), bodyLen = core.len + 16 * n;
+    if (!Number.isSafeInteger(bodyLen)) throw BpqError('len + 16 per segment is past 2^53', 'len');
     return {
       core: core, slots: slots, coreBytes: coreB, keysBytes: keysB, metaBytes: metaB, aad: H(coreB),
       bodyOffset: o, bodyLength: bodyLen, segments: n, sealOffset: o + bodyLen,
@@ -401,17 +445,31 @@
       sealedBy: async function (whole) {
         var x = sealInfo(whole, h);
         if (!x.sealB.length) return null;
+        // The SEAL answers only who sealed the object; the bytes themselves are
+        // authenticated segment by segment. Every SEAL that fails (altered
+        // bytes, a malformed record, an unknown alg, an id without its
+        // succession commitment, a signature or id that does not match) reads
+        // as ok: false with id: null, never ok: true, and never fails the open.
+        // The Rust twin (bpq.rs seal_record) draws the same line.
+        var no = function (why) { return { ok: false, id: null, idOk: null, why: why }; };
         var p = await gcmOpen(fk, nonce(FLAG_SEAL, 0), x.sealB, h.aad);
-        if (!p) return { ok: false, why: 'seal failed authentication' };
+        if (!p) return no('seal failed authentication');
         var rec;
-        try { rec = JSON.parse(td.decode(p)); } catch (e) { return { ok: false, why: 'seal is not JSON' }; }
-        if (rec.alg !== 'ml-dsa-65') return { ok: false, why: 'unsupported seal ' + rec.alg };
-        var pk = unb64u(rec.pk), body = whole.subarray(h.bodyOffset, h.sealOffset);
+        try { rec = JSON.parse(td.decode(p)); } catch (e) { return no('seal is not JSON'); }
+        if (!rec || typeof rec !== 'object' || Array.isArray(rec)) return no('seal record is not an object');
+        if (rec.alg !== 'ml-dsa-65') return no('unsupported seal ' + rec.alg);
+        var hasId = rec.id !== undefined && rec.id !== null;
+        if (hasId && typeof rec.id !== 'string') return no('seal id is not a string');
+        var pk, sig, succ;
+        try { pk = unb64u(rec.pk); sig = unb64u(rec.sig); if (hasId) succ = unb64u(rec.succ); }
+        catch (e) { return no('seal record has a missing or malformed field'); }
+        var idOk = hasId ? pk.length === 1952 && succ.length === 32 && idFrom(pk, succ) === rec.id : null;
+        var body = whole.subarray(h.bodyOffset, h.sealOffset);
         var msg = concat(utf8(DOM.SEAL), h.aad, H(h.keysBytes), H(h.metaBytes), H(body));
-        var ok = pk.length === 1952 && L.ml_dsa65.verify(unb64u(rec.sig), msg, pk);
-        var idOk = null;
-        if (rec.id) { try { idOk = idFrom(pk, unb64u(rec.succ)) === rec.id; } catch (e) { idOk = false; } }
-        return { ok: ok && idOk !== false, id: rec.id || null, idOk: idOk, publicKey: pk };
+        var ok = pk.length === 1952 && L.ml_dsa65.verify(sig, msg, pk) && idOk !== false;
+        // an id is reported only when ok: a page or CLI never shows a
+        // claimed sealer that did not verify
+        return { ok: ok, id: ok && hasId ? rec.id : null, idOk: idOk, publicKey: pk };
       },
       // plaintext bytes [start, end) — fetchRange(a, b) must return object bytes [a, b)
       read: async function (start, end, fetchRange) {

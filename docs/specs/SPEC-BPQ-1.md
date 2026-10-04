@@ -51,9 +51,20 @@ Card: `{bpq:1, id, dsa, kem, succ, sig}` (base64url, no padding). `sig` = ML-DSA
 `"bpq1/card" ‖ dsa ‖ kem ‖ succ`. Verify: lengths 1952 / 1216 / 32, `id` recomputes, signature.
 
 Binding (pre-quantum notarization): `{bpq:1, kind:"binding", id, at, claims, dsa, succ, sig}`.
-`claims` maps a lowercase kind (`evm`, `vaulta`, `ed25519`, …) to a one-line account string.
-`sig` = ML-DSA-65 over `"bpq1/bind" ‖ SHA3-256(UTF-8(id ‖ "\n" ‖ at ‖ "\n" ‖ lines))`, where
-`lines` is `kind=value\n` for each claim, kinds sorted. Made while the classical keys are still
+`claims` is a JSON object (never an array) mapping a kind (`evm`, `vaulta`, `ed25519`, …) to a
+non-empty one-line account string. `sig` = ML-DSA-65 over
+`"bpq1/bind" ‖ SHA3-256(UTF-8(id ‖ "\n" ‖ at ‖ "\n" ‖ lines))`, where `lines` is `kind=value\n`
+for each claim, kinds sorted.
+
+Because those bytes are newline-delimited, a verifier refuses, and a signer never writes:
+- `at` not of the shape `YYYY-MM-DDTHH:MM:SS[.f]Z` (UTC; the shape only, field ranges are not
+  checked), exactly `^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{1,9})?Z$` (otherwise `at:"…Z\ned25519=…"` could carry a claim removed from `claims` under the same
+  signature);
+- a kind not matching `^[a-z0-9][a-z0-9._-]{0,31}$` (so no `=`, no newline, ASCII order is the
+  sort order), or a value that is empty or contains `\n` or `\r`;
+- `bpq` other than 1, or `kind` other than `"binding"`. A card carries no `kind` at all; a card
+  with any `kind` is refused. A detached signature (§3b) needs `kind:"detached"`, `bpq:1` and the
+  same `at` rule. Made while the classical keys are still
 sound, and co-signed by them where the chain allows, it lets an owner prove after a quantum break
 which classical accounts were theirs before it.
 
@@ -75,8 +86,12 @@ proof-of-work chain hold, and is renewed under a new hash before either weakens 
 `"bpq1/detached" ‖ SHA3-256(file) ‖ SHA3-256(UTF-8(id ‖ "\n" ‖ at ‖ "\n" ‖ size))`. The file name
 is not signed: files get renamed, their bytes do not. In a repository the signature sits beside its
 file as `<file>.bpqsig.json`; `node scripts/verify-bpq-signatures.mjs` checks every one in CI and
-`bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is how rulings, releases
-and archive manifests carry an authorship proof that outlives Ed25519 and the hosting account.
+`bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is the mechanism by
+which rulings, releases and archive manifests can carry an authorship proof that outlives Ed25519
+and the hosting account. It is not in force yet: no tracked file carries a `.bpqsig.json` (the
+script reports 0 of 0), and while `docs/PQ-SIGNERS.json` does not exist a signature that verifies
+proves only that some `bzpq1` key signed, not whose. Enforcement begins once
+`docs/PQ-SIGNERS.json` lists a signer.
 
 ## 4 · Sealed object (`bpq1`)
 
@@ -102,6 +117,19 @@ u32be  S,  SEAL   AES-256-GCM(Kf, nonce(3,0), JSON {alg,pk,sig,id?,succ?}, AAD) 
   - `w = AES-256-GCM(KW, nonce = 0¹², Kf, AAD)` (48 B). A reader tries each slot it can.
 - SEAL is inside the encryption: only readers learn who sealed an object. Its signature is
   ML-DSA-65 over `"bpq1/seal" ‖ AAD ‖ SHA3-256(KEYS) ‖ SHA3-256(META) ‖ SHA3-256(BODY)`.
+  The SEAL answers only who sealed the object; the bytes are authenticated segment by segment.
+  So a SEAL that fails in any way (fails AES-GCM, is not a JSON object, names an unknown `alg`,
+  lacks or mangles `pk`/`sig`, has a non-string `id`, has an `id` without `succ`, or whose
+  signature or id does not match) reports the sealer as not verified, never as verified, and
+  does not fail the open. A sealer id is reported only when the sealer is verified (signature
+  valid and the id recomputes from `pk` and `succ`); otherwise no id is reported.
+- Every JSON part (CORE, KEYS, META, SEAL) is UTF-8 without a byte-order mark; a leading BOM is
+  not stripped, so the part is refused (or, for SEAL, not verified).
+- KEYS is not under the AEAD: a change there that leaves the reader's own slot intact still
+  opens, and is caught by the SEAL signature (signed objects only).
+- CORE number tokens are plain non-negative decimal digits (no sign, fraction or exponent):
+  `65536.0` is refused, not read as 65536. `len + 16·n` must be computed without overflow and
+  fit inside the object; a reader checks this before allocating.
 - The total length must equal exactly what the head implies; trailing bytes are refused.
 
 Revocation: a reader who opened an object keeps what they read. To revoke, seal a new object (new
@@ -121,9 +149,15 @@ only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 
 ## 6 · Agility rules
 
-- Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default.
+- Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot
+  refuses the whole object, even when another slot opens it. An unknown seal `alg` means the
+  sealer is reported not verified (§4).
 - New algorithms arrive as new ids (e.g. an HQC slot once FIPS 207 is final, for a second-family
   double wrap); old objects keep their ids and stay readable.
 - Assurance, stated plainly: @noble/post-quantum 0.7.1 (self-audited) and RustCrypto ml-dsa 0.1.1 /
   ml-kem 0.3.2 (unaudited) agree byte for byte on the vectors; that is a cross-check between two
   implementations, not an audit. JS signing is not claimed to be constant-time.
+- Not cross-checked: the SLH-DSA-SHAKE-256f succession key (§2, §5). Only the JS side derives
+  it; the Rust twin takes the succession commitment as an input and never derives the key, so
+  the vectors' `slhPublicKey` has one implementation behind it, and `surfaces/pq-kat.json`
+  carries no SLH-DSA known-answer vectors.

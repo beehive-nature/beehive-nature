@@ -1125,8 +1125,12 @@ impl Verifier for Ed25519Verifier {
 /// # Limits, carried forward rather than smoothed over
 ///
 /// - `ml-dsa` 0.1.1 README.md: "The implementation contained in this crate has
-///   never been independently audited!" NIST ACVP known-answer vectors have
-///   not been run in this repo — UNVERIFIED.
+///   never been independently audited!" A small subset of NIST ACVP
+///   known-answer vectors runs against the same resolved crate (ml-dsa 0.1.1,
+///   one copy in Cargo.lock): `surfaces/pq-kat.json`, ML-DSA-65 keyGen tcId
+///   26-28 and sigVer tcId 31, 33, 34, 38, 39, 41, 43, checked by
+///   crates/bsigner/src/kat.rs. They do not run through this verifier, and a
+///   handful of cases is not ACVP validation; sigGen is not covered.
 /// - What the tests do pin: a signature made by @noble/post-quantum 0.7.1 (the
 ///   estate's vendored browser library, `surfaces/onboarding/vendor/bpq-lib.js`)
 ///   from the same public test seed verifies here, and this crate's

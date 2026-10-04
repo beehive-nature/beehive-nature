@@ -149,6 +149,7 @@ const out = {
     'ML-KEM encapsulation (ek, m -> c, k): RustCrypto exposes it only as the doc-hidden encapsulate_deterministic (encapsulation_key.rs:43-45, public docs under the hazmat feature); not attempted in this file.',
     'ML-KEM decapsulationKeyCheck / encapsulationKeyCheck groups: not attempted in this file.',
     'ML-DSA-44/87 and ML-KEM-512/1024: the estate uses ML-DSA-65 and ML-KEM-768 (inside X-Wing).',
+    'SLH-DSA-SHAKE-256f (FIPS 205), the SPEC-BPQ-1 succession key: no known-answer vectors here, and the Rust twin (crates/bsigner/src/bpq.rs) never derives it, so it is not cross-checked by a second implementation either.',
   ],
 };
 const text = JSON.stringify(out, null, 1) + '\n';
