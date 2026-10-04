@@ -90,12 +90,15 @@ jobs:
           node scripts/build-stack-surfaces.mjs --check
       # SPEC-BPQ-1: the browser (noble) half of the shared PQ vectors; the
       # Rust half runs in `cargo test --workspace` (crates/bsigner/src/bpq.rs).
+      # pq-kat: NIST ACVP known-answer vectors (surfaces/pq-kat.json), noble
+      # half here, RustCrypto half in crates/bsigner/src/kat.rs.
       - name: Post-quantum keys and sealed objects — shared vectors, two implementations
         if: always()
         run: |
           node scripts/build-bpq-vectors.mjs --check
           node --test e2e/bpq.test.mjs
           node scripts/verify-bpq-signatures.mjs
+          node --test e2e/pq-kat.test.mjs
       - name: Wallet coins — full census, exact units, batch identity and read failures
         if: always()
         run: node --test e2e/wallet-coins.test.mjs

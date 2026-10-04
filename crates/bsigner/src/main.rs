@@ -44,6 +44,8 @@ mod alg;
 mod b64;
 mod bpq;
 mod envelope;
+#[cfg(test)]
+mod kat;
 mod keys;
 mod pq;
 mod x402;
