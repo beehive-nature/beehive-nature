@@ -62,6 +62,13 @@ The wallet adds `cosign: [{alg:"ed25519", claim:"bzdid-ed25519", sig}]`: the bzD
 statement while Ed25519 is still sound. Verifiers that do not know a cosign `alg` ignore that entry;
 the PQ signature alone decides `verifyBind`.
 
+A binding proves something only if it existed before the break. The wallet stamps the exact saved
+binding bytes with OpenTimestamps: SHA-256 of the file is POSTed to public calendars and the
+replies are written as a standard detached `.ots` file (magic, version 1, sha256 op, digest, one
+forked branch per calendar). The proof is hash-only (SHA-256 commitments into a Bitcoin block
+header), so no signature inside it can be forged by Shor; it holds while SHA-256 and the
+proof-of-work chain hold, and is renewed under a new hash before either weakens (RFC 4998 model).
+
 ## 4 · Sealed object (`bpq1`)
 
 ```

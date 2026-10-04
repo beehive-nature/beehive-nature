@@ -3016,6 +3016,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       st.appendChild(pqSave(r.bytes,name,'save '+name));
     }catch(e){ st.textContent='could not open: '+(e.message||e) }
   };
+  /* OpenTimestamps: a binding is only worth something if it provably existed
+     BEFORE a quantum break. Only the SHA-256 of the binding leaves this tab; the
+     calendars aggregate it into a Bitcoin block. The file below is the standard
+     detached .ots format (magic, version 1, sha256 op, digest, then the
+     calendars' timestamps as forked branches); any OpenTimestamps tool upgrades
+     and verifies it. Hash-only: no signature in the proof can be forged by Shor. */
+  var PQ_OTS_CALENDARS=['https://a.pool.opentimestamps.org','https://b.pool.opentimestamps.org','https://a.pool.eternitywall.com'];
+  async function pqTimestamp(bytes){
+    var digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)), parts=[];
+    await Promise.all(PQ_OTS_CALENDARS.map(function(c){
+      // a form-encoded body keeps this a simple request: the calendars answer CORS without a preflight
+      return fetchT(c+'/digest',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:digest},15000)
+        .then(function(r){ return r.ok?r.arrayBuffer():null })
+        .then(function(b){ if(b&&b.byteLength>0&&b.byteLength<8192) parts.push(new Uint8Array(b)) })
+        .catch(function(){});
+    }));
+    if(!parts.length) throw new Error('no OpenTimestamps calendar answered — nothing was stamped; try again later');
+    var magic=concatB(new TextEncoder().encode('\0OpenTimestamps\0\0Proof\0'),Uint8Array.of(0xbf,0x89,0xe2,0xe8,0x84,0xe8,0x92,0x94));
+    var body=[]; parts.forEach(function(x,i){ if(i<parts.length-1)body.push(Uint8Array.of(0xff)); body.push(x) });
+    return {ots:concatB.apply(null,[magic,Uint8Array.of(0x01,0x08),digest].concat(body)), calendars:parts.length};
+  }
   $('pq-bind').onclick=function(){
     var st=$('pq-bind-stat');
     if(!pqReady()){st.textContent='connect your keychain first';return}
@@ -3031,10 +3052,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       // the classical bzDiD key endorses this exact PQ statement, while it is still sound
       b.cosign=[{alg:'ed25519', claim:'bzdid-ed25519', over:'utf8("bpq1/cosign:" + sig)', sig:window.BPQ.b64u(rec.sign(new TextEncoder().encode('bpq1/cosign:'+b.sig)))}];
       rec.seed.fill(0);
-      var json=JSON.stringify(b,null,1);
+      var json=JSON.stringify(b,null,1), jsonBytes=new TextEncoder().encode(json), fname='pq-binding-'+SOUL+'.json';
       st.textContent='✓ '+Object.keys(claims).length+' accounts bound to '+k.id+' · ';
-      st.appendChild(pqSave(new TextEncoder().encode(json),'pq-binding-'+SOUL+'.json','save the binding'));
-      st.appendChild(document.createTextNode(' — keep a copy somewhere permanent; it proves these were yours before any quantum break'));
+      st.appendChild(pqSave(jsonBytes,fname,'save the binding'));
+      st.appendChild(document.createTextNode(' — keep a copy somewhere permanent. '));
+      var tb=document.createElement('button'); tb.type='button'; tb.id='pq-ots'; tb.textContent='⏱ timestamp it on Bitcoin';
+      tb.onclick=async function(){
+        tb.disabled=true; tb.textContent='asking OpenTimestamps calendars…';
+        try{
+          var r=await pqTimestamp(jsonBytes), span=document.createElement('span');
+          span.appendChild(pqSave(r.ots,fname+'.ots','save '+fname+'.ots'));
+          span.appendChild(document.createTextNode(' — stamped by '+r.calendars+' calendar'+(r.calendars===1?'':'s')+'; it completes once Bitcoin confirms (a few hours) and then proves this binding existed before that block. Keep it beside the binding; only the binding\'s SHA-256 left this tab.'));
+          tb.replaceWith(span);
+        }catch(e){ tb.disabled=false; tb.textContent='⏱ timestamp it on Bitcoin'; st.appendChild(document.createTextNode(' '+(e.message||e))) }
+      };
+      st.appendChild(tb);
       try{ navigator.clipboard.writeText(json) }catch(e){}
     }catch(e){ st.textContent='could not bind: '+(e.message||e) }
   };

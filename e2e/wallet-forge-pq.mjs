@@ -182,6 +182,19 @@ try {
     await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
     const binding = await page.evaluate(async () => JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()));
     ok('binding verifies in Node under the bzpq1 id', NODE_BPQ.verifyBind(binding) && binding.id === EXPECT.id, JSON.stringify(Object.keys(binding.claims || {})));
+    // OpenTimestamps against mocked calendars: no network in CI, same bytes as a real reply's shape
+    const pending = Buffer.concat([Buffer.from([0x00, 0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e, 0x0e]), Buffer.from('https://mock/x')]);
+    let calendarHits = 0;
+    await page.route(/\/digest$/, route => { calendarHits++; route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/vnd.opentimestamps.v1' }, body: pending }); });
+    await page.evaluate(() => document.getElementById('pq-ots').click());
+    await page.waitForFunction(() => [...document.querySelectorAll('#pq-bind-stat a')].some(x => /\.ots$/.test(x.download)), null, { timeout: 20000 });
+    const ots = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.ots$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const bindingBytes = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.json$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const magic = Buffer.concat([Buffer.from('\0OpenTimestamps\0\0Proof\0'), Buffer.from([0xbf, 0x89, 0xe2, 0xe8, 0x84, 0xe8, 0x92, 0x94])]);
+    const digest = (await import('node:crypto')).createHash('sha256').update(bindingBytes).digest();
+    ok('the .ots stamps exactly the saved binding (magic, v1, sha256, digest, one branch per calendar)',
+      ots.subarray(0, magic.length).equals(magic) && ots[magic.length] === 1 && ots[magic.length + 1] === 0x08 && ots.subarray(magic.length + 2, magic.length + 34).equals(digest) && calendarHits === 3 && ots.length === magic.length + 34 + 2 + pending.length * 3,
+      'len ' + ots.length + ' hits ' + calendarHits);
     ok('binding names the derived accounts and carries the bzDiD Ed25519 co-signature', !!(binding.claims && binding.claims.evm && binding.claims['bzdid-ed25519'] && binding.cosign && binding.cosign[0] && binding.cosign[0].alg === 'ed25519'), JSON.stringify(binding.claims));
     await page.close();
   }

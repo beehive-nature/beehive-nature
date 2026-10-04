@@ -26,6 +26,13 @@ row below is a data-plane call the user's operation asked for.
 |---|---|---|---|
 | `connect.trezor.io` | Trezor Connect (hosted `/9/trezor-connect.js`, probe-verified 200 on 2026-08-14; the `/10/` path 404s) — official device rail (consent popup; Bridge/WebUSB) | **On the user ENTERING the Trezor step** (they clicked the Trezor card — explicit rail choice; preloading there keeps the connect popup inside the click's gesture window, or browsers silently block it) | Never enter the Trezor step, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
 
+## surfaces/wallet.html (served page)
+
+| endpoint | purpose | when it fires | override / kill |
+|---|---|---|---|
+| `relay.damus.io`, `nos.lol`, `relay.snort.social` (wss) | QR bridge v2: ephemeral kind-20107 events carrying the desktop's X-Wing key and the phone's sealed grant (ciphertext only) | only while a QR bridge is open (desktop shows a code, or the phone presses allow) | `QR_RELAYS` in wallet.html; close the bridge |
+| `a.pool.opentimestamps.org`, `b.pool.opentimestamps.org`, `a.pool.eternitywall.com` | OpenTimestamps: POST /digest with the SHA-256 of a PQ binding (32 bytes, nothing else) | only when the person presses "timestamp it on Bitcoin" after making a binding | `PQ_OTS_CALENDARS` in wallet.html; do not press |
+
 ## atmirror (mirror pipeline)
 
 | endpoint | purpose | default host(s) | override / kill |
