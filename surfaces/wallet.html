@@ -4071,6 +4071,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {sk:seed,pub:pub,pubHex:toHex(pub)};
   }
   function dmLocal(){ return loadSeal()||null }
+  /* The registry's nostr signature is secp256k1 and its author key is public, so
+     after a quantum break anyone could forge it. v2 also carries an ML-DSA-65
+     detached signature (SPEC-BPQ-1 §3b) over {at, devices} from a key this soul
+     derives for the registry alone; only this soul reads its registry, so it
+     checks the signer against its own derived id, no pinning needed. */
+  function dmPqKeys(){ return (BSIGNER&&typeof BSIGNER.keysFor==='function'&&window.BPQ&&MPRK)?BSIGNER.keysFor(MPRK,'bnr-devices'):null }
+  function dmSignedBytes(at,devices){ return new TextEncoder().encode(JSON.stringify({at:at,devices:devices})) }
+  function dmTrust(o){
+    var k=dmPqKeys();
+    if(!k) return 'unchecked';
+    if(o.v!==2||!o.pqsig) return 'classical';
+    var r=window.BPQ.verifyFile(o.pqsig,dmSignedBytes(o.at,o.devices));
+    return (r.ok&&r.id===k.id)?'pq':'bad';
+  }
   function dmRender(devices,reg){
     var me=dmLocal();
     var rows=(devices||[]).map(function(d){
@@ -4083,6 +4097,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!rows)rows='<div class="law">no permanent devices registered yet</div>';
     $('dm-body').innerHTML=
       '<div style="font-size:10px;color:var(--faint)">registry: '+ (reg?('<span style="color:var(--leaf)">'+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString()+'</span>'):'not found on relays (new soul, or never published)')+'</div>'+
+      (reg&&reg.trust?'<div style="font-size:10px;color:'+(reg.trust==='pq'?'var(--leaf)':'var(--amber)')+'" data-dm-trust="'+reg.trust+'">'+
+        (reg.trust==='pq'?'signed post-quantum (ML-DSA-65) by this soul ✓':
+         reg.trust==='classical'?'signed classically only — the next add or revoke re-signs it post-quantum':
+         reg.trust==='bad'?'⚠ its post-quantum signature does NOT verify for this soul — do not trust this list; re-save it from a device you hold':
+         'post-quantum check unavailable here (bpq-lib.js did not load)')+'</div>':'')+
       rows+
       '<div class="row" style="margin-top:10px">'+
         '<button id="dm-add" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make THIS device permanent</button>'+
@@ -4114,7 +4133,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(!o.devices)return;
           got=true; clearTimeout(timer);
           socks.forEach(function(x){try{x.close()}catch(e){}});
-          cb(o.devices,{n:o.devices.length,at:ev.created_at});
+          cb(o.devices,{n:o.devices.length,at:ev.created_at,trust:dmTrust(o)});
         }catch(e){}
       };
       socks.push(w);
@@ -4135,8 +4154,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('dm-open').onclick=dmOpen;
   $('dm-x').onclick=function(){ $('dm-sec').style.display='none'; };
   function dmPublish(devices){
-    var sn=soulNostr();
-    var ev=nostrEvent(sn.sk,JSON.stringify({v:1,devices:devices}),[['d','bnr-devices-v1'],['alt','BNR bzDiD device registry']],30078);
+    var sn=soulNostr(), k=dmPqKeys(), body;
+    if(k){
+      var at=new Date().toISOString();
+      body={v:2,at:at,devices:devices,pqsig:window.BPQ.signFile(k,dmSignedBytes(at,devices),at)};
+    } else body={v:1,devices:devices};
+    var ev=nostrEvent(sn.sk,JSON.stringify(body),[['d','bnr-devices-v1'],['alt','BNR bzDiD device registry']],30078);
     var sent=0;
     QR_RELAYS.forEach(function(rs){
       var w; try{w=new WebSocket(rs)}catch(e){return}
