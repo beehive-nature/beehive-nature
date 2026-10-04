@@ -167,11 +167,12 @@ for (const reg of ['bee', 'raver', 'cypherpunk']) {
     assert.ok(entry,'a public deceased entry exists');
     assert.equal(await p.evaluate(id=>window.__eternal.climb(id),entry),true);
     await p.waitForFunction(()=>document.activeElement?.classList.contains('tol-space'));
-    const node=p.locator('#tree .tol-orbit-person').first();
+    const nodes=p.locator('#tree .tol-orbit-person');
+    const node=nodes.first();
     await node.waitFor({state:'visible'});
-    const before=await node.getAttribute('style');
+    const before=await nodes.evaluateAll(els=>els.map(e=>e.getAttribute('style')));
     await p.locator('#tree [data-camera="right"]').click();
-    await p.waitForFunction(old => document.querySelector('#tree .tol-orbit-person').getAttribute('style') !== old, before);
+    await p.waitForFunction(old => [...document.querySelectorAll('#tree .tol-orbit-person')].some((e,i)=>e.getAttribute('style') !== old[i]), before);
     const id=await node.getAttribute('data-person');
     await node.click();
     assert.match(await p.evaluate(()=>location.hash),new RegExp(`p=${id}`));
