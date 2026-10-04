@@ -300,7 +300,8 @@ pub fn pubkey_envelope(
 /// What [`check`] found.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Checked {
-    /// No `v`, or `v:1`: written before v2, accepted as it is.
+    /// No `v`, or `v:1`: written before v2, accepted as it is. None of its
+    /// fields is checked, its `pq.ready` included.
     Legacy,
     /// `v:2`, and its `self_desc` and `pq` are exactly what its own
     /// key_algo / network and successor derive.

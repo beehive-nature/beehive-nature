@@ -128,7 +128,7 @@ pub async fn enroll_handler(body: Bytes) -> Response {
     }
     // Produce an UNSIGNED updateauth tx adding the pubkey to bni.id.
     // The key lives at pubkey_envelope.payload.value (envelope.rs::pubkey_envelope).
-    let envelope = p.get("pubkey_envelope").cloned().unwrap_or_default();
+    let mut envelope = p.get("pubkey_envelope").cloned().unwrap_or_default();
     let pubkey =
         match envelope
             .get("payload")
@@ -156,10 +156,16 @@ pub async fn enroll_handler(body: Bytes) -> Response {
         };
     // A v2 envelope must say exactly what its own key_algo and successor
     // derive, wrap a pubkey, and name the key_algo the key's prefix names.
-    // v1 and unversioned envelopes are legacy: accepted as before, never
-    // rewritten.
+    // v1 and unversioned envelopes still enroll, but none of their fields is
+    // checked, so their echo carries no pq block: a v1 envelope wrote
+    // pq.ready:true for every key. A v2 pq block is checked for form and
+    // self-consistency only; nothing here ties the successor to the key holder.
     match crate::envelope::check(&envelope) {
-        Ok(crate::envelope::Checked::Legacy) => {}
+        Ok(crate::envelope::Checked::Legacy) => {
+            if let Some(fields) = envelope.as_object_mut() {
+                fields.remove("pq");
+            }
+        }
         Ok(crate::envelope::Checked::V2) => {
             let declared = envelope["self_desc"]["key_algo"].as_str();
             let prefix_says = vaulta_key_algo(&pubkey);
@@ -327,22 +333,55 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn enroll_still_accepts_the_v1_shape() {
-        // exactly what envelope.rs wrote before v2: old data keeps working
+    async fn enroll_still_accepts_the_v1_shape_but_echoes_no_pq_claim() {
+        // exactly what envelope.rs wrote before v2: old data keeps working,
+        // but its unchecked pq.ready:true is not echoed back
         let key = test_key();
         let v1 = serde_json::json!({ "v":1,
             "self_desc":{"key_algo":"secp256k1","sig_algo":"ecdsa","hash":"sha2-256","encoding":"base58"},
             "pq":{"ready":true,"successor_algo":null,"successor_key_ref":null},
             "payload":{"type":"pubkey","value":key.as_str(),"source":"test","custody_tier":"T-F"}, "timestamp":0 });
-        let (status, body) = call(serde_json::json!({
-            "tier": "larva", "account": "alice", "pubkey_envelope": v1,
-        }))
-        .await;
-        assert_eq!(status, StatusCode::OK);
-        assert_eq!(
-            body["unsigned_tx"]["actions"][0]["data"]["auth"]["keys"][0]["key"],
-            key.as_str()
-        );
+        let mut unversioned = v1.clone();
+        unversioned.as_object_mut().unwrap().remove("v");
+        for env in [v1, unversioned] {
+            let (status, body) = call(serde_json::json!({
+                "tier": "larva", "account": "alice", "pubkey_envelope": env.clone(),
+            }))
+            .await;
+            assert_eq!(status, StatusCode::OK, "{env}");
+            assert_eq!(
+                body["unsigned_tx"]["actions"][0]["data"]["auth"]["keys"][0]["key"],
+                key.as_str()
+            );
+            assert!(
+                body["envelope"].get("pq").is_none(),
+                "an unchecked envelope must not echo pq readiness: {body}"
+            );
+            // everything else is echoed as sent
+            let mut rest = env.clone();
+            rest.as_object_mut().unwrap().remove("pq");
+            assert_eq!(body["envelope"], rest);
+        }
+    }
+
+    #[tokio::test]
+    async fn enroll_echoes_a_checked_v2_pq_block_as_sent() {
+        let v: serde_json::Value =
+            serde_json::from_str(include_str!("../../../surfaces/bpq-vectors.json")).unwrap();
+        let id = v["keys"][0]["id"].as_str().unwrap();
+        let succ = crate::envelope::PqSuccessor::from_bzpq_id(id).unwrap();
+        let key = test_key();
+        for (successor, ready) in [(Some(&succ), true), (None, false)] {
+            let envelope =
+                crate::envelope::pubkey_envelope(&key, "k1", "test", "T-F", successor).unwrap();
+            let (status, body) = call(serde_json::json!({
+                "tier": "larva", "account": "alice", "pubkey_envelope": envelope.clone(),
+            }))
+            .await;
+            assert_eq!(status, StatusCode::OK);
+            assert_eq!(body["envelope"]["pq"]["ready"], ready);
+            assert_eq!(body["envelope"], envelope, "a checked v2 echo is unchanged");
+        }
     }
 
     #[tokio::test]
