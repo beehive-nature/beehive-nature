@@ -1153,6 +1153,56 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button id="forge-pq-kem" style="font-size:11px">+ pq:ml-kem-768:<span id="fs7">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
+  <div id="pq-sec" style="margin-top:22px">
+    <h3>🔒 only me: <span data-i18n="wl.h.pqseal">seal files only you, or people you pick, can open</span></h3>
+    <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.pqseal">How sealing works, and why it is post-quantum</summary>
+    <div class="law">Sealing happens here, in this tab, before the file goes anywhere. Each file gets its
+    own random 256-bit key (AES-256-GCM). That key is locked once per reader: for you, under a key
+    your recovery words derive, with no public-key step at all; for each person you pick, under the
+    X-Wing key (ML-KEM-768 + X25519) in the PQ card they gave you. The sealed file names no reader
+    and, if you sign it, only its readers learn who sealed it. Keep it anywhere, publish it, store it
+    on Autonomi or Arweave: without a reader's words it opens for no one. To revoke, seal a new copy
+    for new readers; someone who already opened a file keeps what they read. The binding button signs
+    your classical addresses with your post-quantum id, co-signed by your bzDiD key, so you can prove
+    later, even after a quantum break, which accounts were yours. Signing a file gives it a detached
+    post-quantum signature (<code>file.bpqsig.json</code>) that anyone can check here, with no keys.
+    Spec: SPEC-BPQ-1.</div>
+    <div class="law"><b>Used the QR bridge before 4 October 2026?</b> That older bridge sent your recovery
+    root over public relays under a classical key exchange only, so someone who recorded it could open it
+    once quantum computers arrive, and with it every key that root derives, post-quantum ones included.
+    Make new recovery words, then, still connected with your old words, paste the new bzpq1 id into
+    the binding field here and bind: the old id then vouches for the new one while its keys still hold.</div>
+    </details>
+    <div class="law" id="pq-gate">connect your keychain to seal or open</div>
+    <div id="pq-tools" hidden>
+      <label for="pq-file">file to seal</label>
+      <input type="file" id="pq-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
+      <label for="pq-to">people who may also open it (optional): paste each person's PQ card, one per line</label>
+      <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
+      <div class="row"><button type="button" id="pq-seal" class="gold">🔒 seal</button></div>
+      <div class="law" id="pq-seal-stat" role="status" aria-live="polite"></div>
+      <label for="pq-open-file" style="display:block;margin-top:14px">sealed file to open (.bpq)</label>
+      <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" style="display:block;max-width:100%;width:100%;margin:8px 0">
+      <div class="row"><button type="button" id="pq-open">🔓 open</button></div>
+      <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
+      <label for="pq-sign-file" style="display:block;margin-top:14px">file to sign (the signature travels beside it)</label>
+      <input type="file" id="pq-sign-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
+      <div class="row"><button type="button" id="pq-sign">✍ sign</button></div>
+      <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
+      <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
+      <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
+      <div class="row"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
+      <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
+    </div>
+    <div id="pq-check" style="margin-top:14px">
+      <label for="pq-ver-target">check a signature: the file</label>
+      <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
+      <label for="pq-ver-sig">and its .bpqsig.json</label>
+      <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
+      <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
+      <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
+    </div>
+  </div>
 </section>
 
 <section id="bal-sec" data-wl-task="have">
@@ -2041,56 +2091,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <!-- ══ ARWEAVE — publish & anchor (inject-first · vault JWK scaffold) ══ -->
-<section id="pq-sec" data-wl-task="keep" style="border-color:var(--cyan)">
-  <h2>🔒 only me: <span data-i18n="wl.h.pqseal">seal files only you, or people you pick, can open</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.pqseal">How sealing works, and why it is post-quantum</summary>
-  <div class="law">Sealing happens here, in this tab, before the file goes anywhere. Each file gets its
-  own random 256-bit key (AES-256-GCM). That key is locked once per reader: for you, under a key
-  your recovery words derive, with no public-key step at all; for each person you pick, under the
-  X-Wing key (ML-KEM-768 + X25519) in the PQ card they gave you. The sealed file names no reader
-  and, if you sign it, only its readers learn who sealed it. Keep it anywhere, publish it, store it
-  on Autonomi or Arweave: without a reader's words it opens for no one. To revoke, seal a new copy
-  for new readers; someone who already opened a file keeps what they read. The binding button signs
-  your classical addresses with your post-quantum id, co-signed by your bzDiD key, so you can prove
-  later, even after a quantum break, which accounts were yours. Signing a file gives it a detached
-  post-quantum signature (<code>file.bpqsig.json</code>) that anyone can check here, with no keys.
-  Spec: SPEC-BPQ-1.</div>
-  <div class="law"><b>Used the QR bridge before 4 October 2026?</b> That older bridge sent your recovery
-  root over public relays under a classical key exchange only, so someone who recorded it could open it
-  once quantum computers arrive, and with it every key that root derives, post-quantum ones included.
-  Make new recovery words, paste the new bzpq1 id into the binding below while connected with the OLD
-  words, and bind: the old id then vouches for the new one while its keys still hold.</div>
-  </details>
-  <div class="law" id="pq-gate">connect your keychain above to seal or open</div>
-  <div id="pq-tools" hidden>
-    <label for="pq-file">file to seal</label>
-    <input type="file" id="pq-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
-    <label for="pq-to">people who may also open it (optional): paste each person's PQ card, one per line</label>
-    <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
-    <div class="row"><button type="button" id="pq-seal" class="gold">🔒 seal</button></div>
-    <div class="law" id="pq-seal-stat" role="status" aria-live="polite"></div>
-    <label for="pq-open-file" style="display:block;margin-top:14px">sealed file to open (.bpq)</label>
-    <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" style="display:block;max-width:100%;width:100%;margin:8px 0">
-    <div class="row"><button type="button" id="pq-open">🔓 open</button></div>
-    <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
-    <label for="pq-sign-file" style="display:block;margin-top:14px">file to sign (the signature travels beside it)</label>
-    <input type="file" id="pq-sign-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
-    <div class="row"><button type="button" id="pq-sign">✍ sign</button></div>
-    <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
-    <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
-    <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
-    <div class="row"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
-    <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
-  </div>
-  <div id="pq-check" style="margin-top:14px">
-    <label for="pq-ver-target">check a signature: the file</label>
-    <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
-    <label for="pq-ver-sig">and its .bpqsig.json</label>
-    <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
-    <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
-    <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
-  </div>
-</section>
 
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
   <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
@@ -2971,7 +2971,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var g=$('pq-gate'), t=$('pq-tools'); if(!g||!t)return;
     var on=pqReady();
     t.hidden=!on; g.hidden=on;
-    if(!on) g.textContent=window.BPQ?'connect your keychain above to seal or open':'sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
+    if(!on) g.textContent=window.BPQ?'connect your keychain to seal or open':'sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
   }
   function pqSize(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB' }
   function pqSave(bytes,name,label){
