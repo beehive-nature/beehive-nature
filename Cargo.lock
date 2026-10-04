@@ -166,6 +166,7 @@ dependencies = [
  "curve25519-dalek",
  "ed25519-dalek",
  "k256",
+ "ml-dsa",
  "p256",
  "rand 0.8.7",
  "rsa",
