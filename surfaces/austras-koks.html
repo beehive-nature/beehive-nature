@@ -242,7 +242,7 @@ document.body.setAttribute('data-reg',r);})();
       </ol>
     </div>
     <div class="et-c-row">
-      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/tree-of-life.mjs?v=20261003-3d2" target="_blank" rel="noopener noreferrer" data-t="et.austras.c.source">read the component · new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/tree-of-life.mjs?v=20261004-deceased1" target="_blank" rel="noopener noreferrer" data-t="et.austras.c.source">read the component · new tab</a>
       <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/tools/genealogy" target="_blank" rel="noopener noreferrer" data-t="et.austras.c.fork">fork the template · new tab</a>
     </div>
   </div>
@@ -272,8 +272,8 @@ document.body.setAttribute('data-reg',r);})();
    every number they show is read from `tree` and `archive` here, and every climb is the
    mounted tree's own go(), so the fronts can never disagree with the tree they hand off to. */
 import { fetchArchive } from './person-panel-corpus.mjs';
-import { mountPersonPanel } from './person-panel.mjs?v=20261003-family2';
-import { mountTreeOfLife } from './tree-of-life.mjs?v=20261003-3d2';
+import { mountPersonPanel } from './person-panel.mjs?v=20261004-deceased1';
+import { mountTreeOfLife } from './tree-of-life.mjs?v=20261004-deceased1';
 
 const BASE = '../assets/profile-archive/lineage/';
 const host = document.getElementById('tree');
@@ -317,7 +317,7 @@ function climb(id) {
   if (!handle || !id) return false;
   handle.go({ f: id, p: null }); cy();
   host.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-  const node = host.querySelector('.tol-node[data-person]'); if (node) node.focus({ preventScroll: true });
+  const node = host.querySelector('.tol-space, .tol-node[data-person]'); if (node) node.focus({ preventScroll: true });
   return true;
 }
 function words() { document.querySelectorAll('#eternal [data-t],#etArchive[data-t]').forEach((e) => { if (!e.dataset.en) e.dataset.en = e.textContent; e.textContent = T(e.dataset.t, e.dataset.en); }); }
