@@ -163,6 +163,10 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
 for (const reg of ['bee', 'raver', 'cypherpunk']) {
   test(`${reg}: spatial tree rotates, opens a person and retains the flat view`, async () => {
     const {ctx,p,errs}=await open(reg);
+    const entry=await p.evaluate(()=>window.__eternal.data.entries[0]?.id || null);
+    assert.ok(entry,'a public deceased entry exists');
+    assert.equal(await p.evaluate(id=>window.__eternal.climb(id),entry),true);
+    await p.waitForFunction(()=>document.activeElement?.classList.contains('tol-space'));
     const node=p.locator('#tree .tol-orbit-person').first();
     await node.waitFor({state:'visible'});
     const before=await node.getAttribute('style');
