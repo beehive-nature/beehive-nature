@@ -33,7 +33,8 @@ directory; an exceptional process failure can leave only synthetic artifacts.
 | Signed policy event | Experimental kind 30078 with domain tag; one channel, canonical origin, explicit member keys, one writer, expiry |
 | Original kind-9 Nostr events | Verified again at publish and recovery; original authors and thread tags are retained |
 | Checkpoint pin | Exact checkpoint event ID, sequence, policy ID and storage reference retained by the client |
-| Channel encryption key | Held outside the failed gateway; provided only to authorized replacement gateways |
+| Channel encryption key | v1: one key held outside the failed gateway, handed out of band only to authorized replacement gateways. With a keyring: numbered epoch keys, each delivered as an owner-signed PQ key grant (see Key distribution) |
+| Owner PQ id (`bzpq1…`) | Supplied outside the gateway, like the owner key; the only signer whose key grants are accepted |
 | Local query index and socket subscriptions | Disposable state rebuilt from the verified snapshot |
 
 `Channel.restore` in `core.mjs` verifies the supplied checkpoint pin, authorized
@@ -65,8 +66,50 @@ independent cryptographic audit or post-quantum application-signature claim.
 
 Gateways can read channel plaintext. This is **not member-to-member end-to-end
 encryption against the gateway**. A former gateway/member cannot be made to forget
-data or keys it already obtained. Membership changes, key rotation and revocation
-need an explicit versioned policy/key handover; v1 has a fixed expiring roster.
+data or keys it already obtained. Key rotation on a roster change is the PQ re-key
+below; changing who the gateway admits still needs a new signed policy, because v1
+policies have a fixed expiring roster.
+
+## Key distribution: PQ key grants
+
+The v1 path, one channel key handed out of band, is unchanged. `keygrant.mjs` adds
+numbered **epoch keys** carried in SPEC-BPQ-1 sealed objects
+([`docs/specs/SPEC-BPQ-1.md`](../../docs/specs/SPEC-BPQ-1.md) §4), reusing
+`surfaces/bpq.js`; no new cryptographic library.
+
+- **Grant.** `newEpoch` / `issueGrant` verify every recipient card (`BPQ.verifyCard`),
+  then `BPQ.seal` a fresh random 32-byte epoch key with one X-Wing (ML-KEM-768 +
+  X25519) slot per card, signed by the owner's ML-DSA-65 key. The encrypted META binds
+  type, policy ID, channel, epoch and the recipients' ids; the signature covers it and
+  the slot list. The public head names no recipient and the signer record is inside
+  the encryption, so a grant is ordinary bytes any store may hold.
+- **Open.** `openGrant` returns the key only when the recipient's own keys open a slot,
+  the signature verifies under the externally pinned owner PQ id, and the signed binding
+  names this policy, channel and recipient. Altered bytes, a slot added by a member who
+  unwrapped the key, another signer and another channel are all refused.
+- **Re-key.** `rekey(current, { remove })` issues epoch n+1: a fresh random key, never
+  derived from the old one, wrapped only to the cards that remain. A gateway adds the
+  opened key to its `EpochKeyring`; its next mutation re-encrypts the whole snapshot
+  under the newest epoch.
+- **Snapshots record their epoch.** A `Channel` given a `keyring` writes checkpoint
+  content `version: 2` with `epoch`, and binds the number into the AES-GCM AAD
+  (`bnr-channel-snapshot-v2:<policy>:<epoch>`). Given only `key`, it writes v1 exactly
+  as before; `key` plus `keyring` reads v1 history and continues at v2. Unknown versions
+  are refused, a reader without the recorded epoch key refuses instead of guessing, and
+  a follower refuses a successor sealed under an older epoch than it has already seen.
+
+**Revocation is prospective.** A removed member keeps every epoch key they were granted
+and can still decrypt every snapshot sealed under those epochs, including copies they
+already fetched. Re-keying only stops them reading snapshots written after the gateway
+moves to the new epoch.
+
+Not covered: the epoch number is visible to the storage provider in the checkpoint, so
+it shows how often the key changed. The grant roster is separate from the policy's Nostr
+member list; removing a card does not stop gateway admission. Gateways hold epoch keys
+and read plaintext. Grants travel out of band here, with no delivery receipt. Bounds:
+32 recipients and 128 KiB per grant. PQ assurance is SPEC-BPQ-1 §6's (two implementations
+cross-checked, not independently audited); signatures on events, policies and
+checkpoints remain classical secp256k1 Schnorr.
 
 `DirectoryStore` is the offline fixture, with file fsync and Unix parent-directory
 fsync. Windows creation durability and power-loss persistence are unproven.
