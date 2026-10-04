@@ -166,7 +166,14 @@ impl KeyAlg {
     }
 }
 
-/// Verify a record signature under the algorithm its op names in `keyAlg`.
+/// Verify a record signature under `key_alg`, the algorithm of the SIGNING key.
+///
+/// Which `keyAlg` that is follows did-autonomi-spec §5-§7: an entry's `keyAlg` names
+/// the algorithm of `authKeys` in THAT entry's state, and its `sig` is made by a key
+/// valid in the PREVIOUS state. So pass the entry's own `keyAlg` only for genesis
+/// (seq 0, self-signed with `authKeys[0]`); for seq n > 0 pass the `keyAlg` of
+/// state n-1. A rotate op that moves ed25519 -> ml-dsa-65 is therefore verified
+/// as ed25519, by the old key, and every op after it as ml-dsa-65.
 ///
 /// The id is parsed FIRST, so an unknown algorithm is refused whatever the bytes
 /// are. Then the public-key length must be the one that algorithm fixes, so a key
