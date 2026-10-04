@@ -62,6 +62,7 @@ button{
   cursor:pointer;transition:border-color var(--dur-fast) var(--ease);min-height:34px
 } /* footer-audit TINY floor: taps >= 32px */
 button:hover{border-color:var(--gold)}
+button.primary{background:var(--gold);color:var(--bg0);border-color:var(--gold);box-shadow:var(--glow-gold)} /* ONE primary affordance per concept — filled, unmistakable */
 button:disabled{opacity:.45;cursor:not-allowed}
 input,textarea,select{
   background:var(--bg0);color:var(--ink);border:1px solid var(--line);
@@ -101,7 +102,7 @@ a{color:var(--cyan)}
 .grid2{display:grid;gap:var(--s3)}
 @media(min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
 .hexpl{font-size:12px;color:var(--dim);overflow-wrap:anywhere}
-footer{max-width:1060px;margin:var(--s6) auto;padding:0 var(--s4) var(--s6);color:var(--dim);font-size:12px} /* footer-audit floors: 12px + AA ink, never faint */
+footer{max-width:1060px;margin:var(--s6) auto;padding:0 var(--s4) calc(var(--s6) + 76px);color:var(--dim);font-size:12px} /* footer-audit floors: 12px + AA ink, never faint */
 details[data-reg-disclose]>summary{color:var(--dim)}
 </style>
 </head>
@@ -110,12 +111,12 @@ details[data-reg-disclose]>summary{color:var(--dim)}
   <h1>bChat</h1>
   <p class="sub">one conversation surface · three trust lanes — the lane is payload, not decoration</p>
 
-  <div class="card" id="posture" style="margin-bottom:var(--s4)">
-    <b>this page renders from local state alone</b> — <span class="law">connect is a click; no
-    request leaves this page to render it. The relay probe below is opt-in and learns that
-    something answered, never reads a byte (the rub law). Publication is proven by relay
-    event id on <span class="state state-ok">OK true</span>, never by "sent" prose.</span>
-  </div>
+  <details class="card" id="posture" data-reg-disclose style="margin-bottom:var(--s4)">
+    <summary><b>this page renders from local state alone</b> — connect is a click</summary>
+    <div class="law">No request leaves this page to render it. The relay probe below is opt-in
+    and learns that something answered, never reads a byte (the rub law). Publication is proven
+    by relay event id on <span class="state state-ok">OK true</span>, never by "sent" prose.</div>
+  </details>
 
   <h2>identity — the BNR lane's key</h2>
   <div class="card" id="identity">
@@ -124,7 +125,7 @@ details[data-reg-disclose]>summary{color:var(--dim)}
       derives from a phone number and never touches the SMS lane — the handset is not a root-key
       holder (E5 law).</p>
       <div class="row" style="display:flex;gap:var(--s2);flex-wrap:wrap">
-        <button id="genkey">generate a fresh key</button>
+        <button id="genkey" class="primary">generate a fresh key</button>
         <input id="impkey" placeholder="or paste a 64-hex secret" style="flex:1;min-width:180px" spellcheck="false">
         <button id="useimp">use it</button>
       </div>
@@ -187,7 +188,7 @@ details[data-reg-disclose]>summary{color:var(--dim)}
           </div>
           <textarea id="draft" placeholder="write to the BNR private lane… (encrypted NIP-44 v2, gift-wrapped NIP-17)"></textarea>
           <div class="row" style="display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap">
-            <button id="send" style="background:var(--bg3)">send — encrypted</button>
+            <button id="send" class="primary">send — encrypted</button>
             <span class="state" id="sendstate"></span>
           </div>
         </div>
