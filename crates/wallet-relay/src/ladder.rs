@@ -68,7 +68,7 @@ impl AuthenticatorTier {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EnrollmentRequest {
     pub tier: AuthenticatorTier,
-    pub pubkey_envelope: serde_json::Value, // PQ-ready versioned envelope (§2)
+    pub pubkey_envelope: serde_json::Value, // versioned envelope (envelope.rs); v2 re-derived on enroll
     pub account: String,                    // Vaulta account name (the bzDiD)
 }
 
@@ -154,6 +154,35 @@ pub async fn enroll_handler(body: Bytes) -> Response {
                     .into_response()
             }
         };
+    // A v2 envelope must say exactly what its own key_algo and successor
+    // derive, wrap a pubkey, and name the key_algo the key's prefix names.
+    // v1 and unversioned envelopes are legacy: accepted as before, never
+    // rewritten.
+    match crate::envelope::check(&envelope) {
+        Ok(crate::envelope::Checked::Legacy) => {}
+        Ok(crate::envelope::Checked::V2) => {
+            let declared = envelope["self_desc"]["key_algo"].as_str();
+            let prefix_says = vaulta_key_algo(&pubkey);
+            if envelope["payload"]["type"] != "pubkey" || declared != prefix_says {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(serde_json::json!({
+                        "error":"pubkey_envelope must wrap a pubkey whose self_desc.key_algo is the one the key's own prefix names",
+                        "declared": declared,
+                        "key_prefix_says": prefix_says,
+                    })),
+                )
+                    .into_response();
+            }
+        }
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": format!("pubkey_envelope: {e}")})),
+            )
+                .into_response()
+        }
+    }
     let tx =
         crate::tx_prep::prepare_updateauth(account, "bni.id", "active", 1, &[(pubkey.as_str(), 1)]);
     Json(serde_json::json!({
@@ -191,6 +220,21 @@ pub fn plausible_vaulta_pubkey(k: &str) -> bool {
         }
     }
     false
+}
+
+/// The envelope key_algo a Vaulta key's text prefix names. Legacy `EOS…`
+/// text is the K1 form. UNVERIFIED at crate source: no Antelope crate is in
+/// this workspace (format per SPEC-VAULTA-IDENTITY-1 §0.2, K1/R1/WA only).
+fn vaulta_key_algo(k: &str) -> Option<&'static str> {
+    if k.starts_with("EOS") || k.starts_with("PUB_K1_") {
+        Some("k1")
+    } else if k.starts_with("PUB_R1_") {
+        Some("r1")
+    } else if k.starts_with("PUB_WA_") {
+        Some("wa")
+    } else {
+        None
+    }
 }
 
 pub fn ladder_metadata() -> serde_json::Value {
@@ -239,7 +283,7 @@ mod tests {
     #[tokio::test]
     async fn enroll_emits_the_envelope_pubkey_in_the_unsigned_tx() {
         let key = test_key();
-        let envelope = crate::envelope::pubkey_envelope(&key, "secp256k1", "test", "T-F");
+        let envelope = crate::envelope::pubkey_envelope(&key, "k1", "test", "T-F", None).unwrap();
         let (status, body) = call(serde_json::json!({
             "tier": "larva", "account": "alice", "pubkey_envelope": envelope,
         }))
@@ -280,6 +324,79 @@ mod tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(body["got"], "not-a-key!!!");
+    }
+
+    #[tokio::test]
+    async fn enroll_still_accepts_the_v1_shape() {
+        // exactly what envelope.rs wrote before v2: old data keeps working
+        let key = test_key();
+        let v1 = serde_json::json!({ "v":1,
+            "self_desc":{"key_algo":"secp256k1","sig_algo":"ecdsa","hash":"sha2-256","encoding":"base58"},
+            "pq":{"ready":true,"successor_algo":null,"successor_key_ref":null},
+            "payload":{"type":"pubkey","value":key.as_str(),"source":"test","custody_tier":"T-F"}, "timestamp":0 });
+        let (status, body) = call(serde_json::json!({
+            "tier": "larva", "account": "alice", "pubkey_envelope": v1,
+        }))
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(
+            body["unsigned_tx"]["actions"][0]["data"]["auth"]["keys"][0]["key"],
+            key.as_str()
+        );
+    }
+
+    #[tokio::test]
+    async fn enroll_carries_a_v2_successor() {
+        let v: serde_json::Value =
+            serde_json::from_str(include_str!("../../../surfaces/bpq-vectors.json")).unwrap();
+        let id = v["keys"][1]["id"].as_str().unwrap();
+        let succ = crate::envelope::PqSuccessor::from_bzpq_id(id).unwrap();
+        let key = format!("PUB_R1_{}", "K1".repeat(25));
+        let envelope =
+            crate::envelope::pubkey_envelope(&key, "r1", "test", "T-F", Some(&succ)).unwrap();
+        let (status, body) = call(serde_json::json!({
+            "tier": "pupa", "account": "alice", "pubkey_envelope": envelope,
+        }))
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["envelope"]["pq"]["ready"], true);
+        assert_eq!(body["envelope"]["pq"]["successor_key_ref"], id);
+    }
+
+    #[tokio::test]
+    async fn enroll_refuses_a_v2_envelope_that_says_more_than_it_carries() {
+        let key = test_key();
+        let good = crate::envelope::pubkey_envelope(&key, "k1", "test", "T-F", None).unwrap();
+
+        // pq.ready true with no successor behind it
+        let mut pretty = good.clone();
+        pretty["pq"]["ready"] = serde_json::json!(true);
+        // a key_algo the key's own prefix does not name (self-consistent v2)
+        let wrong_algo = crate::envelope::pubkey_envelope(&key, "r1", "test", "T-F", None).unwrap();
+        // an address envelope offered where a pubkey is enrolled
+        let address = crate::envelope::address_envelope(&key, "evm", "test", "T-F", None).unwrap();
+        // a version this build cannot name
+        let mut v3 = good.clone();
+        v3["v"] = serde_json::json!(3);
+
+        for env in [pretty, wrong_algo, address, v3] {
+            let (status, body) = call(serde_json::json!({
+                "tier": "larva", "account": "alice", "pubkey_envelope": env.clone(),
+            }))
+            .await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{env}");
+            assert!(body["error"].is_string());
+            assert!(body.get("unsigned_tx").is_none());
+        }
+    }
+
+    #[test]
+    fn vaulta_key_prefix_names_its_key_algo() {
+        assert_eq!(vaulta_key_algo(&test_key()), Some("k1"));
+        assert_eq!(vaulta_key_algo("PUB_K1_x"), Some("k1"));
+        assert_eq!(vaulta_key_algo("PUB_R1_x"), Some("r1"));
+        assert_eq!(vaulta_key_algo("PUB_WA_x"), Some("wa"));
+        assert_eq!(vaulta_key_algo("PUB_BLS_x"), None);
     }
 
     #[test]

@@ -4138,6 +4138,7 @@ dependencies = [
  "atmirror",
  "axum",
  "base64",
+ "bech32",
  "bmesh-hwfit",
  "ed25519-dalek",
  "http-body-util",
