@@ -37,16 +37,20 @@ test('Austras koks is the primary world and connects branch navigation to resear
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`http://127.0.0.1:${PORT}/surfaces/blood.html`, { waitUntil: 'load' });
-  await page.waitForSelector('#lifeTree .tol-stage');
+  await page.waitForSelector('#lifeTree .tol-space');
   await page.waitForSelector('#ppanel[data-pp-mounted="1"]', { state: 'attached' });
 
   assert.equal(await page.getAttribute('#viewlife', 'aria-pressed'), 'true');
   assert.equal(await page.isVisible('#treeoflife'), true);
   assert.equal(await page.isVisible('#atlas'), false);
-  assert.ok(await page.locator('#lifeTree .tol-node[data-person]').count() >= 4);
-  assert.ok(await page.locator('#lifeTree .tol-limb[data-focus]').count() >= 4);
+  assert.ok(await page.locator('#lifeTree .tol-orbit-person[data-person]').count() >= 1);
+  assert.ok(await page.locator('#lifeTree .tol-family-key [data-person]').count() >= 1);
+  assert.equal(await page.locator('#lifeTree .tol-orbit-person').evaluateAll((els) =>
+    els.filter((el) => /living/i.test((el.getAttribute('aria-label') || '') + ' ' + (el.textContent || ''))).length), 0);
+  assert.equal(await page.locator('#lifeTree .tol-family-key [data-person]').evaluateAll((els) =>
+    els.filter((el) => /living/i.test(el.textContent || '')).length), 0);
 
-  const person = page.locator('#lifeTree .tol-node[data-person]').first();
+  const person = page.locator('#lifeTree .tol-orbit-person[data-person]').first();
   const id = await person.getAttribute('data-person');
   await person.click();
   assert.equal(await page.isVisible('#lifeTree .tol-card'), true);
@@ -57,11 +61,33 @@ test('Austras koks is the primary world and connects branch navigation to resear
   await page.locator('#lifeTree .tol-card [data-focus]').click();
   assert.equal((await page.evaluate(() => globalThis.__guxAtlas.getContext().root)), id);
   assert.match(await page.innerText('#lifeTree .tol-focus'), /climbing from/i);
+  await page.locator('#lifeTree [data-spatial="flat"]').click();
+  assert.equal(await page.isVisible('#lifeTree .tol-stage'), true);
+  assert.equal(await page.locator('#lifeTree .tol-node.is-held').count(), 0);
 
   await page.click('#viewped');
   assert.equal(await page.isVisible('#treeoflife'), false);
   assert.equal(await page.isVisible('#atlas'), true);
   assert.equal(await page.getAttribute('.atlas-world', 'data-view'), 'pedigree');
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('direct grandparent self relationship has no empty parent-to-child disclosure', async () => {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`http://127.0.0.1:${PORT}/surfaces/blood.html`, { waitUntil: 'load' });
+  await page.waitForSelector('#lifeTree .tol-space');
+  const donna = page.locator('#lifeTree .tol-family-key button', { hasText: 'Donna Ruth Lawton' });
+  assert.equal(await donna.count(), 1, 'Donna is a first deceased branch entry');
+  await donna.click();
+  await page.locator('#lifeTree .tol-card [data-story]').click();
+  await page.waitForSelector('#ppanel .pp-person');
+  const panel = await page.innerText('#ppanel');
+  assert.match(panel, /Through Grandma Donna Ruth Lawton/);
+  assert.match(panel, /This person is the head of this grandparent branch\./);
+  assert.doesNotMatch(panel, /parent-to-child line from Donna Ruth Lawton to Donna Ruth Lawton/i);
   assert.deepEqual(errors, []);
   await page.close();
 });
