@@ -146,7 +146,7 @@ details.facts dt{color:var(--quiet)}
  <p class="st" data-st="mem"></p>
  <div class="rows" data-rows="mem"></div>
  <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
-  <dl><dt>format</dt><dd>a1-log v1 · <code>contracts/vending/tool/a1.mjs</code> · hash-linked, owner-signed ed25519, highest valid revision wins</dd>
+  <dl><dt>format</dt><dd>a1-log v2 · <code>contracts/vending/tool/a1.mjs</code> · hash-linked; every revision signed by your ed25519 key and by an ML-DSA-65 key pinned at genesis; highest valid revision wins; v1 logs still verify under v1 rules</dd>
    <dt>gate</dt><dd>SPEC-VENDING-2 §memory: the funded write waits on the ANT custody review (storage-substrate-split item 8); R3 says never price it at nothing</dd></dl></details>
 </li>
 

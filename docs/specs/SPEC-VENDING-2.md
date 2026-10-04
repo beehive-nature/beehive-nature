@@ -115,14 +115,33 @@ The law and the pointer, never bulk history (§layers layer 3):
 
 ## §memory — the ANT store binding (layer 2 as built)
 
-- Format: **a1-log v1** (`contracts/vending/tool/a1.mjs`) — append-only,
+- Format: **a1-log v1** (`contracts/vending/tool/a1.mjs`; v2 below) — append-only,
   hash-linked, owner-signed ed25519 (the member's own key), highest-VALID-
   revision wins; shuffled chains verify, tampered middles refuse (self-test
   green). Autonomi 2.0's immutability is WHY mutability lives in the log
   (storage-substrate-split §2 cited).
+- **a1-log v2** (2026-10-04, additive; v1 logs verify exactly as before): v1
+  asks only for ed25519, so whoever forges ed25519 can append the next
+  revision and become the head. v2's genesis pins a post-quantum key —
+  `pq: {alg: "ml-dsa-65", id, dsa, succ}`, the bzpq1 id and card fields of
+  `BPQ.keys(member seed, "a1:" + agent)` (SPEC-BPQ-1 §2) — and every v2
+  revision carries `sig_ed25519` over the canonical bytes AND `sig_ml_dsa_65`
+  over `a1/v2/pq` ‖ those bytes ‖ the raw ed25519 signature, so an ed25519
+  forger cannot re-sign a body and mint a twin revision. A revision counts only if
+  every revision from genesis to it carries both from the pinned key, revs run
+  0,1,2… and prev links hold; chains never mix versions; unknown versions and
+  algorithms are refused. A v2 chain is read against the certificate's pin
+  (`a1_genesis.sha256` or `a1_genesis.pq_id`), and so is `resolveHead`, for every
+  version (a v1-only reader opts out explicitly). `resolveHead` takes the highest
+  revision that counts from an append-only set that may hold forks, replays
+  and forgeries; a tie at the top is reported as a fork, because the A1
+  ruling's "ties broken by content-hash order" names no direction. v2 defines
+  no key rotation yet (the succession commitment is pinned, the rotation
+  revision is not built). Tests: `e2e/a1-log.test.mjs`. The machine (page,
+  `mint.mjs`, the dry run) mints v2 from this date.
 - The certificate carries a REAL signed genesis revision's hash
-  (`a1_genesis.sha256`) — the day the store is funded, its first chunk is
-  verifiable against this record.
+  (`a1_genesis.sha256`, and for v2 `a1_genesis.pq_id`) — the day the store is
+  funded, its first chunk is verifiable against this record.
 - **The funded Autonomi write is GATED** on the ANT custody review
   (storage-substrate-split item 8) and priced honestly (~0.085 ANT/chunk
   live median + gas; never $0 — R3). This gate is existing law; the build

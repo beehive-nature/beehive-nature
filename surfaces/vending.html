@@ -1042,8 +1042,17 @@ async function mintInPage(door) {
      mid-mint, a certificate already on the permaweb still has its owner */
   const keyBlob = extra => URL.createObjectURL(new Blob([JSON.stringify(Object.assign({ agent: name + '.a', member_key_ed25519_hex: key.publicHex, seed_hex: A.hex(key.seed) }, extra), null, 2)], { type: 'application/json' }));
   say(door.innerHTML + ` ✓ · <a class="code" style="color:var(--gold)" href="${keyBlob({ note: 'your key, made in your browser. keep it; the machine does not have a copy. the certificate id is added to the file offered when the mint finishes.' })}" download="${esc(name)}.a.key.json">↓ keep your key now</a>`);
-  /* 2 · memory genesis + the certificate */
-  const genesis = await C.genesisRevision({ agent: name, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: key.privateKey });
+  /* 2 · memory genesis + the certificate. a1 v2: the memory log pins a
+     post-quantum key derived from the same seed (bpq.js); a revision
+     carrying only a forged ed25519 signature does not count. No PQ
+     library, no mint: nothing is uploaded, and no v1 log is made instead. */
+  let genesis;
+  try {
+    if (!window.BPQ) throw new Error('the post-quantum library (bpq-lib.js) did not load, so the memory log cannot be pinned to its post-quantum key');
+    const pq = C.a1PqKeys(key.seed, name);
+    try { genesis = await C.genesisRevisionV2({ agent: name, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: key.privateKey, pqKeys: pq }); }
+    finally { pq.wipe(); }
+  } catch (e) { throw step('memory', e); }
   const binding = C.storeBinding(genesis, await C.hashRevision(genesis));
   const mintedIso = new Date().toISOString();
   const record = await C.composeCertificate({ agentName: name, house: 'a', tongue, template, memberKeyHex: key.publicHex, memberAccount: CONTRACT, mintedIso, storeBinding: binding });
@@ -1118,7 +1127,9 @@ async function mintInPage(door) {
    degrades to a named state, never a fake verdict. */
 </script>
 <script src="ans104.js?v=1"></script>
-<script src="vending-cert.js?v=1"></script>
+<script src="onboarding/vendor/bpq-lib.js?v=1"></script>
+<script src="bpq.js?v=1"></script>
+<script src="vending-cert.js?v=2"></script>
 <script src="x402-meter.js?v=1"></script>
 <script>
 (async () => {
