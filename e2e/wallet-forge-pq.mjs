@@ -178,6 +178,16 @@ try {
     await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
     const opened = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent }));
     ok('the page opens its own sealed file back to the same bytes and name', opened.text === secret && opened.name === 'note.txt', opened.stat.slice(0, 120));
+    await page.setInputFiles('#pq-sign-file', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });
+    await page.evaluate(() => document.getElementById('pq-sign').click());
+    await page.waitForSelector('#pq-sign-stat a', { state: 'attached', timeout: 20000 });
+    const sigJson = await page.evaluate(async () => (await (await fetch(document.querySelector('#pq-sign-stat a').href)).text()));
+    ok('page-made detached signature verifies in Node for that file only', NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling\n')).id === EXPECT.id && !NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling!\n')).ok);
+    await page.setInputFiles('#pq-ver-target', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });
+    await page.setInputFiles('#pq-ver-sig', { name: 'ruling.md.bpqsig.json', mimeType: 'application/json', buffer: Buffer.from(sigJson) });
+    await page.evaluate(() => document.getElementById('pq-verify').click());
+    await page.waitForFunction(() => /✓|✗/.test(document.getElementById('pq-verify-stat').textContent), null, { timeout: 10000 });
+    ok('the page checks its own signature', await page.evaluate(() => /^✓ ruling\.md was signed/.test(document.getElementById('pq-verify-stat').textContent)));
     await page.evaluate(() => document.getElementById('pq-bind').click());
     await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
     const binding = await page.evaluate(async () => JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()));

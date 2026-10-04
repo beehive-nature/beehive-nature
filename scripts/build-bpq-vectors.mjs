@@ -68,6 +68,7 @@ async function build() {
   }
   const card = B.card(A.keys);
   const bind = B.bind(A.keys, { ed25519: 'vector-ed25519-public-key', evm: '0x000000000000000000000000000000000000dEaD', vaulta: 'vector.b' }, '2026-10-04T00:00:00Z');
+  const detached = B.signFile(A.keys, plaintext(4096), '2026-10-04T00:00:00Z');
   const strip = r => { const { keys, ...rest } = r; return rest; };
   return {
     bpq: 1,
@@ -76,6 +77,7 @@ async function build() {
     library: B.library,
     keys: [strip(A), strip(Bk), strip(C)],
     objects, card, bind,
+    detached: { file: 'bytes i -> (i*31+7) mod 256, length 4096', signature: detached },
   };
 }
 
@@ -114,6 +116,10 @@ async function check(v) {
   }
   want(B.verifyCard(v.card), 'card verifies');
   want(B.verifyBind(v.bind), 'binding verifies');
+  if (v.detached) {
+    want(B.verifyFile(v.detached.signature, plaintext(4096)).ok === true, 'detached signature verifies');
+    want(B.verifyFile(v.detached.signature, plaintext(4095)).ok === false, 'detached signature refuses another file');
+  }
   return fails;
 }
 

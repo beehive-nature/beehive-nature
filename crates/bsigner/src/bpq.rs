@@ -47,6 +47,7 @@ pub const LABEL_VAULT: &str = "BDID-v1/vault-key";
 const DOM_ID: &[u8] = b"bpq1/id";
 const DOM_CARD: &[u8] = b"bpq1/card";
 const DOM_BIND: &[u8] = b"bpq1/bind";
+const DOM_DETACHED: &[u8] = b"bpq1/detached";
 const DOM_KC: &[u8] = b"bpq1/key-commit";
 const DOM_SEAL: &[u8] = b"bpq1/seal";
 const DOM_WRAP_SELF: &[u8] = b"bpq1/wrap/self";
@@ -271,6 +272,39 @@ pub fn verify_bind(b: &Value) -> bool {
     }
     let digest = sha3(&[format!("{id}\n{at}\n{lines}").as_bytes()]);
     dsa_verify(&dsa, &[DOM_BIND, &digest].concat(), &sig)
+}
+
+/// A detached file signature: ML-DSA-65 over "bpq1/detached" || SHA3-256(file)
+/// || SHA3-256("id\nat\nsize"), never over the file name. Returns the signer id
+/// when the id, the file and the signature all match.
+pub fn verify_detached(d: &Value, file: &[u8]) -> Option<String> {
+    if d["kind"] != "detached" || d["bpq"].as_u64() != Some(1) {
+        return None;
+    }
+    let (Ok(dsa), Ok(succ), Ok(sig), Ok(want)) = (
+        unb64(&d["dsa"]),
+        unb64(&d["succ"]),
+        unb64(&d["sig"]),
+        unb64(&d["file"]["sha3"]),
+    ) else {
+        return None;
+    };
+    let (Some(id), Some(at), Some(size)) = (
+        d["id"].as_str(),
+        d["at"].as_str(),
+        d["file"]["size"].as_u64(),
+    ) else {
+        return None;
+    };
+    let fh = sha3(&[file]);
+    if id_from(&dsa, &succ).as_deref() != Some(id)
+        || size != file.len() as u64
+        || fh.as_slice() != want.as_slice()
+    {
+        return None;
+    }
+    let meta = sha3(&[format!("{id}\n{at}\n{size}").as_bytes()]);
+    dsa_verify(&dsa, &[DOM_DETACHED, &fh, &meta].concat(), &sig).then(|| id.to_string())
 }
 
 /// The 32-byte master PRK from a `bdidrec1…` recovery code (bech32m; payload
@@ -561,6 +595,21 @@ mod tests {
             );
         }
         assert!(master_prk_from_recovery_code("bzpq1qqqqqq").is_err());
+    }
+
+    #[test]
+    fn detached_signature_verifies_for_its_file_only() {
+        let v = vectors();
+        let file: Vec<u8> = (0..4096u32).map(|i| ((i * 31 + 7) & 255) as u8).collect();
+        let d = &v["detached"]["signature"];
+        assert_eq!(verify_detached(d, &file).as_deref(), d["id"].as_str());
+        assert!(verify_detached(d, &file[..4095]).is_none());
+        let mut other = file.clone();
+        other[7] ^= 1;
+        assert!(verify_detached(d, &other).is_none());
+        let mut moved = d.clone();
+        moved["at"] = Value::from("2026-10-05T00:00:00Z");
+        assert!(verify_detached(&moved, &file).is_none());
     }
 
     #[test]

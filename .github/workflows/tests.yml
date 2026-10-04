@@ -95,6 +95,7 @@ jobs:
         run: |
           node scripts/build-bpq-vectors.mjs --check
           node --test e2e/bpq.test.mjs
+          node scripts/verify-bpq-signatures.mjs
       - name: Wallet coins — full census, exact units, batch identity and read failures
         if: always()
         run: node --test e2e/wallet-coins.test.mjs

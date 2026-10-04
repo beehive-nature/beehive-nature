@@ -96,6 +96,19 @@ test('cards and bindings verify; edits do not', () => {
   assert.throws(() => B.bind(keysOf('A'), { 'Bad Kind': 'x' }, '2026-10-04T00:00:00Z'), e => e.code === 'claim_kind');
 });
 
+test('detached signatures verify for their file only, under the signer id', () => {
+  const file = new Uint8Array(4096).map((_, i) => (i * 31 + 7) & 255);
+  const d = V.detached.signature;
+  assert.deepEqual(B.verifyFile(d, file), { ok: true, id: d.id, at: d.at });
+  assert.equal(B.verifyFile(d, file.subarray(0, 4095)).ok, false);
+  const other = file.slice(); other[9] ^= 1;
+  assert.equal(B.verifyFile(d, other).ok, false);
+  assert.equal(B.verifyFile({ ...d, at: '2026-10-05T00:00:00Z' }, file).ok, false);
+  assert.equal(B.verifyFile({ ...d, id: V.keys[1].id }, file).ok, false);
+  const fresh = B.signFile(keysOf('B'), file, '2026-10-04T12:00:00Z');
+  assert.equal(B.verifyFile(fresh, file).id, V.keys[1].id);
+});
+
 test('the succession key re-derives from the root and matches the commitment', () => {
   const row = V.keys[0];
   const s = B.successionKeys(rootOf(row.rootFrom), row.context);

@@ -34,7 +34,9 @@
 //!     (opens a bpq1 sealed object made in the browser — surfaces/bpq.js —
 //!      with the keys your bzDiD recovery code derives; the code is read from
 //!      the environment variable VAR, never from argv, and never printed)
-//!   bsigner bpq-verify --file PATH   (a bpq1 public key card or binding)
+//!   bsigner bpq-verify --file PATH [--target FILE]
+//!     (a bpq1 public key card or binding; or a detached signature, checked
+//!      against the file named by --target)
 //!   bsigner selftest
 //!   bsigner version
 
@@ -87,6 +89,7 @@ struct Opts {
     object: Option<String>,
     rec_env: Option<String>,
     context: Option<String>,
+    target: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -102,6 +105,7 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         object: None,
         rec_env: None,
         context: None,
+        target: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -121,6 +125,7 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--object" => o.object = Some(val),
             "--rec-env" => o.rec_env = Some(val),
             "--context" => o.context = Some(val),
+            "--target" => o.target = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -437,7 +442,16 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         Ok(v) => v,
         Err(e) => return fail(format!("{path}: {e}")),
     };
-    let (kind, ok) = if doc["kind"] == "binding" {
+    let (kind, ok) = if doc["kind"] == "detached" {
+        let Some(target) = o.target else {
+            return fail("a detached signature needs --target FILE".into());
+        };
+        let bytes = match std::fs::read(&target) {
+            Ok(b) => b,
+            Err(e) => return fail(format!("read {target}: {e}")),
+        };
+        ("detached", bpq::verify_detached(&doc, &bytes).is_some())
+    } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
         ("card", bpq::verify_card(&doc))

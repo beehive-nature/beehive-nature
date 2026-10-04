@@ -54,7 +54,7 @@
     SUCC: 'BDID-v1/slh-dsa-shake-256f-succession'
   };
   var DOM = {
-    ID: 'bpq1/id', SUCC: 'bpq1/succession', CARD: 'bpq1/card', BIND: 'bpq1/bind',
+    ID: 'bpq1/id', SUCC: 'bpq1/succession', CARD: 'bpq1/card', BIND: 'bpq1/bind', DETACHED: 'bpq1/detached',
     KC: 'bpq1/key-commit', SEAL: 'bpq1/seal', WRAP_SELF: 'bpq1/wrap/self', WRAP_XWING: 'bpq1/wrap/x-wing'
   };
   var MAGIC = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];   // "\x89BPQ1\r\n\x1a"
@@ -234,6 +234,32 @@
       var msg = concat(utf8(DOM.BIND), H(utf8(b.id + '\n' + b.at + '\n' + claimLines(b.claims))));
       return L.ml_dsa65.verify(unb64u(b.sig), msg, dsa);
     } catch (e) { return false; }
+  }
+
+  // ── detached file signatures: rulings, releases, archives ──────────────
+  // Signed over the file's SHA3-256 and "id NL at NL size" (NL = newline),
+  // never its name: files get renamed, their bytes do not.
+  function detachedMsg(id, at, size, fileHash) {
+    return concat(utf8(DOM.DETACHED), fileHash, H(utf8(id + '\n' + at + '\n' + size)));
+  }
+  function signFile(k, fileBytes, at) {
+    bytes(fileBytes, 'file');
+    if (typeof at !== 'string' || !/^\d{4}-\d\d-\d\dT/.test(at)) throw BpqError('at must be an ISO-8601 timestamp', 'at');
+    var fh = H(fileBytes);
+    return { bpq: 1, kind: 'detached', id: k.id, at: at, file: { size: fileBytes.length, sha3: b64u(fh) },
+      dsa: b64u(k.dsa.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(detachedMsg(k.id, at, fileBytes.length, fh))) };
+  }
+  // {ok, id, why}: ok only when the signature, the id and the file all match
+  function verifyFile(d, fileBytes) {
+    try {
+      if (!d || d.kind !== 'detached' || d.bpq !== 1) return { ok: false, why: 'not a bpq1 detached signature' };
+      var dsa = unb64u(d.dsa), succ = unb64u(d.succ);
+      if (idFrom(dsa, succ) !== d.id) return { ok: false, why: 'the id does not match the key' };
+      var fh = H(bytes(fileBytes, 'file'));
+      if (fileBytes.length !== d.file.size || !eq(fh, unb64u(d.file.sha3))) return { ok: false, id: d.id, why: 'this is not the file that was signed' };
+      var ok = L.ml_dsa65.verify(unb64u(d.sig), detachedMsg(d.id, d.at, d.file.size, fh), dsa);
+      return ok ? { ok: true, id: d.id, at: d.at } : { ok: false, id: d.id, why: 'the signature does not verify' };
+    } catch (e) { return { ok: false, why: e.message }; }
   }
 
   // ── sealed objects ───────────────────────────────────────────────────────
@@ -442,6 +468,7 @@
     idFrom: idFrom,
     card: card, verifyCard: verifyCard,
     bind: bind, verifyBind: verifyBind,
+    signFile: signFile, verifyFile: verifyFile,
     seal: seal, open: open, opener: opener, inspect: inspect, isSealed: isSealed,
     fingerprint: fingerprint, b64u: b64u, unb64u: unb64u
   });

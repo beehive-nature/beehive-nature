@@ -2052,7 +2052,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   on Autonomi or Arweave: without a reader's words it opens for no one. To revoke, seal a new copy
   for new readers; someone who already opened a file keeps what they read. The binding button signs
   your classical addresses with your post-quantum id, co-signed by your bzDiD key, so you can prove
-  later, even after a quantum break, which accounts were yours. Spec: SPEC-BPQ-1.</div>
+  later, even after a quantum break, which accounts were yours. Signing a file gives it a detached
+  post-quantum signature (<code>file.bpqsig.json</code>) that anyone can check here, with no keys.
+  Spec: SPEC-BPQ-1.</div>
+  <div class="law"><b>Used the QR bridge before 4 October 2026?</b> That older bridge sent your recovery
+  root over public relays under a classical key exchange only, so someone who recorded it could open it
+  once quantum computers arrive, and with it every key that root derives, post-quantum ones included.
+  Make new recovery words, paste the new bzpq1 id into the binding below while connected with the OLD
+  words, and bind: the old id then vouches for the new one while its keys still hold.</div>
   </details>
   <div class="law" id="pq-gate">connect your keychain above to seal or open</div>
   <div id="pq-tools" hidden>
@@ -2066,8 +2073,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" style="display:block;max-width:100%;width:100%;margin:8px 0">
     <div class="row"><button type="button" id="pq-open">🔓 open</button></div>
     <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
-    <div class="row" style="margin-top:14px"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
+    <label for="pq-sign-file" style="display:block;margin-top:14px">file to sign (the signature travels beside it)</label>
+    <input type="file" id="pq-sign-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
+    <div class="row"><button type="button" id="pq-sign">✍ sign</button></div>
+    <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
+    <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
+    <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
+    <div class="row"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
     <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
+  </div>
+  <div id="pq-check" style="margin-top:14px">
+    <label for="pq-ver-target">check a signature: the file</label>
+    <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
+    <label for="pq-ver-sig">and its .bpqsig.json</label>
+    <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
+    <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
+    <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
   </div>
 </section>
 
@@ -3037,6 +3058,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var body=[]; parts.forEach(function(x,i){ if(i<parts.length-1)body.push(Uint8Array.of(0xff)); body.push(x) });
     return {ots:concatB.apply(null,[magic,Uint8Array.of(0x01,0x08),digest].concat(body)), calendars:parts.length};
   }
+  $('pq-sign').onclick=async function(){
+    var st=$('pq-sign-stat');
+    if(!pqReady()){st.textContent='connect your keychain first';return}
+    if(!SOUL){st.textContent='name your soul first';return}
+    var f=$('pq-sign-file').files[0];
+    if(!f){st.textContent='choose a file first';return}
+    if(f.size>PQ_MAX){st.textContent='this tab signs files up to '+pqSize(PQ_MAX);return}
+    try{
+      st.textContent='signing '+f.name+'…';
+      var k=BSIGNER.keysFor(MPRK,SOUL);
+      var d=window.BPQ.signFile(k,new Uint8Array(await f.arrayBuffer()),new Date().toISOString());
+      st.textContent='✓ signed by '+k.id+' · ';
+      st.appendChild(pqSave(new TextEncoder().encode(JSON.stringify(d,null,1)),f.name+'.bpqsig.json','save '+f.name+'.bpqsig.json'));
+      st.appendChild(document.createTextNode(' — keep it beside the file; anyone can check it here or with bsigner bpq-verify'));
+    }catch(e){ st.textContent='could not sign: '+(e.message||e) }
+  };
+  $('pq-verify').onclick=async function(){
+    var st=$('pq-verify-stat');
+    if(!window.BPQ){st.textContent='checking needs the post-quantum bundle (bpq-lib.js), which did not load';return}
+    var f=$('pq-ver-target').files[0], g=$('pq-ver-sig').files[0];
+    if(!f||!g){st.textContent='choose the file and its .bpqsig.json';return}
+    try{
+      var d=JSON.parse(await g.text());
+      var r=window.BPQ.verifyFile(d,new Uint8Array(await f.arrayBuffer()));
+      st.textContent=r.ok?('✓ '+f.name+' was signed '+r.at+' by '+r.id+' (ML-DSA-65)'):('✗ '+(r.why||'does not verify'));
+    }catch(e){ st.textContent='✗ that signature file is not readable JSON' }
+  };
   $('pq-bind').onclick=function(){
     var st=$('pq-bind-stat');
     if(!pqReady()){st.textContent='connect your keychain first';return}
@@ -3048,6 +3096,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       });
       var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
       claims['bzdid-ed25519']=toHex(rec.publicKey);
+      var succ=$('pq-succ').value.trim();
+      if(succ){
+        if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); st.textContent='that is not a bzpq1 id — copy it from the new words\' PQ card'; return }
+        if(succ===k.id){ rec.seed.fill(0); st.textContent='that is this same id — connect with your OLD words to vouch for the new one'; return }
+        claims['successor-bzpq']=succ;
+      }
       var b=window.BPQ.bind(k,claims,new Date().toISOString());
       // the classical bzDiD key endorses this exact PQ statement, while it is still sound
       b.cosign=[{alg:'ed25519', claim:'bzdid-ed25519', over:'utf8("bpq1/cosign:" + sig)', sig:window.BPQ.b64u(rec.sign(new TextEncoder().encode('bpq1/cosign:'+b.sig)))}];

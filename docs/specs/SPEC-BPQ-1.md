@@ -69,6 +69,15 @@ forked branch per calendar). The proof is hash-only (SHA-256 commitments into a 
 header), so no signature inside it can be forged by Shor; it holds while SHA-256 and the
 proof-of-work chain hold, and is renewed under a new hash before either weakens (RFC 4998 model).
 
+## 3b · Detached file signature
+
+`{bpq:1, kind:"detached", id, at, file:{size, sha3}, dsa, succ, sig}`. `sig` = ML-DSA-65 over
+`"bpq1/detached" ‖ SHA3-256(file) ‖ SHA3-256(UTF-8(id ‖ "\n" ‖ at ‖ "\n" ‖ size))`. The file name
+is not signed: files get renamed, their bytes do not. In a repository the signature sits beside its
+file as `<file>.bpqsig.json`; `node scripts/verify-bpq-signatures.mjs` checks every one in CI and
+`bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is how rulings, releases
+and archive manifests carry an authorship proof that outlives Ed25519 and the hosting account.
+
 ## 4 · Sealed object (`bpq1`)
 
 ```
