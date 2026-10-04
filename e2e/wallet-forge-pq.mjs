@@ -206,6 +206,24 @@ try {
       ots.subarray(0, magic.length).equals(magic) && ots[magic.length] === 1 && ots[magic.length + 1] === 0x08 && ots.subarray(magic.length + 2, magic.length + 34).equals(digest) && calendarHits === 3 && ots.length === magic.length + 34 + 2 + pending.length * 3,
       'len ' + ots.length + ' hits ' + calendarHits);
     ok('binding names the derived accounts and carries the bzDiD Ed25519 co-signature', !!(binding.claims && binding.claims.evm && binding.claims['bzdid-ed25519'] && binding.cosign && binding.cosign[0] && binding.cosign[0].alg === 'ed25519'), JSON.stringify(binding.claims));
+    // Only me → My Data: the sealed bytes, and nothing else, land on My Data's shelf on this device
+    await page.evaluate(() => document.getElementById('pq-to-mydata').click());
+    await page.waitForSelector('#pq-mydata-link', { state: 'attached', timeout: 10000 });
+    const shelved = await page.evaluate(() => new Promise((resolve, reject) => {
+      const rq = indexedDB.open('bdata-local-shelf', 1);
+      rq.onerror = () => reject(rq.error);
+      rq.onsuccess = () => { const all = rq.result.transaction('artifacts', 'readonly').objectStore('artifacts').getAll(); all.onsuccess = async () => { const r = all.result; rq.result.close(); resolve(await Promise.all(r.map(async x => ({ sha256: x.sha256, name: x.name, keys: Object.keys(x).sort().join(','), bytes: Array.from(new Uint8Array(await x.blob.arrayBuffer())) })))); }; };
+    }));
+    const shelfSha = (await import('node:crypto')).createHash('sha256').update(sealed).digest('hex');
+    ok('My Data shelf holds exactly the sealed bytes under their sha256, no key and no plaintext',
+      shelved.length === 1 && shelved[0].sha256 === shelfSha && Buffer.from(shelved[0].bytes).equals(sealed) && shelved[0].name === 'note.txt.bpq' && shelved[0].keys === 'at,blob,bytes,name,sha256,shelf',
+      JSON.stringify(shelved.map(x => [x.name, x.keys, x.bytes.length])));
+    await page.route('http://127.0.0.1:8807/**', route => route.abort());
+    await page.goto(`${BASE}/surfaces/bdata.html`, { waitUntil: 'load' });
+    await page.waitForSelector('[data-bdata-sealed]', { state: 'attached', timeout: 15000 });
+    const md = await page.evaluate(() => ({ shelf: document.querySelector('[data-bdata-intake-ok]')?.getAttribute('data-bdata-intake-shelf'), sha: document.querySelector('[data-bdata-intake-ok]')?.textContent, honest: !!document.querySelector('[data-bdata-intake-honest]'), link: document.querySelector('[data-bdata-seal-link]')?.getAttribute('href') }));
+    ok('My Data shows the kept file as sealed, still on this device, and links back to the seal panel',
+      md.shelf === 'browser' && md.honest && (md.sha || '').includes(shelfSha.slice(0, 16)) && md.link === 'wallet.html#pq-file', JSON.stringify(md));
     await page.close();
   }
 

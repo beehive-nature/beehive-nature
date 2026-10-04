@@ -2980,6 +2980,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     a.download=name; a.textContent=label;
     return a;
   }
+  // Hand a sealed object to My Data's shelf on this device (same origin, IndexedDB
+  // 'bdata-local-shelf'). Only sealed bytes cross; no key and no plaintext leaves this tab.
+  function pqShelve(sealed,name){
+    return crypto.subtle.digest('SHA-256',sealed).then(function(d){
+      var u=new Uint8Array(d), sha='';
+      for(var i=0;i<u.length;i++) sha+=u[i].toString(16).padStart(2,'0');
+      return new Promise(function(resolve,reject){
+        if(!window.indexedDB) return reject(new Error('this browser has no local shelf'));
+        var rq=indexedDB.open('bdata-local-shelf',1);
+        rq.onupgradeneeded=function(){ var db=rq.result; if(!db.objectStoreNames.contains('artifacts')) db.createObjectStore('artifacts',{keyPath:'sha256'}); };
+        rq.onerror=function(){ reject(rq.error||new Error('the local shelf did not open')); };
+        rq.onsuccess=function(){
+          var db=rq.result, t=db.transaction('artifacts','readwrite');
+          t.objectStore('artifacts').put({sha256:sha, bytes:sealed.length, name:name, shelf:'browser', at:new Date().toISOString(), blob:new Blob([sealed],{type:'application/octet-stream'})});
+          t.oncomplete=function(){ db.close(); resolve(sha); };
+          t.onerror=function(){ db.close(); reject(t.error||new Error('the local shelf did not keep it')); };
+        };
+      });
+    });
+  }
   // every PQ identity this keychain has named: the soul's, plus any forged pq: context
   function pqNames(){
     var out=[]; if(SOUL)out.push(SOUL);
@@ -3013,7 +3033,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       plain.fill(0);
       st.textContent='✓ sealed for you'+(to.length?' and '+to.length+' '+(to.length===1?'person':'people')+' you picked':'')+' · '+pqSize(sealed.length)+' · ';
       st.appendChild(pqSave(sealed,f.name+'.bpq','save '+f.name+'.bpq'));
-      st.appendChild(document.createTextNode(' — keep it anywhere; it opens only for these readers'));
+      st.appendChild(document.createTextNode(' · keep it anywhere; it opens only for these readers · '));
+      var md=document.createElement('button'); md.type='button'; md.id='pq-to-mydata'; md.textContent='add to My Data';
+      md.onclick=function(){
+        md.disabled=true;
+        pqShelve(sealed,f.name+'.bpq').then(function(){
+          var a=document.createElement('a'); a.href='bdata.html'; a.id='pq-mydata-link'; a.textContent='open My Data';
+          md.replaceWith(document.createTextNode('✓ in My Data on this device, sealed · '),a);
+        },function(e){ md.disabled=false; md.textContent='add to My Data (it did not keep: '+(e.message||e)+')'; });
+      };
+      st.appendChild(md);
     }catch(e){ st.textContent='could not seal: '+(e.message||e) }
   };
   $('pq-open').onclick=async function(){
