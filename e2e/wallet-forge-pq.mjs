@@ -144,6 +144,48 @@ try {
     await page.close();
   }
 
+  /* D · only me: seal in the page, open in the page, open the same bytes in Node;
+     bind the classical accounts to the PQ id and verify the binding in Node */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    const gateCold = await page.evaluate(() => ({ gate: !document.getElementById('pq-gate').hidden, tools: document.getElementById('pq-tools').hidden }));
+    ok('seal panel waits for the keychain (tools hidden, gate shown)', gateCold.gate && gateCold.tools, JSON.stringify(gateCold));
+    await page.evaluate(() => {
+      const mprk = new Uint8Array(32).fill(0x2a);
+      const code = window.BZDIDKEY.encodeRecoveryCode(mprk);
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    ok('seal tools appear with the keychain', await page.evaluate(() => !document.getElementById('pq-tools').hidden));
+    const secret = 'only me — ' + 'x'.repeat(70000);
+    await page.setInputFiles('#pq-file', { name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from(secret) });
+    await page.evaluate(() => document.getElementById('pq-seal').click());
+    await page.waitForSelector('#pq-seal-stat a', { state: 'attached', timeout: 20000 });
+    const sealed = Buffer.from(await page.evaluate(async () => Array.from(new Uint8Array(await (await fetch(document.querySelector('#pq-seal-stat a').href)).arrayBuffer()))));
+    ok('sealed file is a bpq1 object that does not contain the plaintext', NODE_BPQ.isSealed(new Uint8Array(sealed)) && sealed.indexOf('only me') < 0, String(sealed.length));
+    const inNode = await NODE_BPQ.open(new Uint8Array(sealed), { self: EXPECT });
+    ok('Node opens the page-sealed file with keys from the same root', Buffer.from(inNode.bytes).toString() === secret && inNode.meta.name === 'note.txt');
+    const stranger = NODE_BPQ.keys(new Uint8Array(32).fill(0x2b), 'pq:gatesoul');
+    let strangerOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: stranger, kem: stranger }); strangerOpened = true; } catch (e) {}
+    ok('a different root cannot open it', !strangerOpened);
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: sealed });
+    await page.evaluate(() => document.getElementById('pq-open').click());
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const opened = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent }));
+    ok('the page opens its own sealed file back to the same bytes and name', opened.text === secret && opened.name === 'note.txt', opened.stat.slice(0, 120));
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const binding = await page.evaluate(async () => JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()));
+    ok('binding verifies in Node under the bzpq1 id', NODE_BPQ.verifyBind(binding) && binding.id === EXPECT.id, JSON.stringify(Object.keys(binding.claims || {})));
+    ok('binding names the derived accounts and carries the bzDiD Ed25519 co-signature', !!(binding.claims && binding.claims.evm && binding.claims['bzdid-ed25519'] && binding.cosign && binding.cosign[0] && binding.cosign[0].alg === 'ed25519'), JSON.stringify(binding.claims));
+    await page.close();
+  }
+
   /* C · no keychain: pq contexts may seed with soul, chips wait honestly */
   {
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });

@@ -2041,6 +2041,36 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <!-- ══ ARWEAVE — publish & anchor (inject-first · vault JWK scaffold) ══ -->
+<section id="pq-sec" data-wl-task="keep" style="border-color:var(--cyan)">
+  <h2>🔒 only me: <span data-i18n="wl.h.pqseal">seal files only you, or people you pick, can open</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.pqseal">How sealing works, and why it is post-quantum</summary>
+  <div class="law">Sealing happens here, in this tab, before the file goes anywhere. Each file gets its
+  own random 256-bit key (AES-256-GCM). That key is locked once per reader: for you, under a key
+  your recovery words derive, with no public-key step at all; for each person you pick, under the
+  X-Wing key (ML-KEM-768 + X25519) in the PQ card they gave you. The sealed file names no reader
+  and, if you sign it, only its readers learn who sealed it. Keep it anywhere, publish it, store it
+  on Autonomi or Arweave: without a reader's words it opens for no one. To revoke, seal a new copy
+  for new readers; someone who already opened a file keeps what they read. The binding button signs
+  your classical addresses with your post-quantum id, co-signed by your bzDiD key, so you can prove
+  later, even after a quantum break, which accounts were yours. Spec: SPEC-BPQ-1.</div>
+  </details>
+  <div class="law" id="pq-gate">connect your keychain above to seal or open</div>
+  <div id="pq-tools" hidden>
+    <label for="pq-file">file to seal</label>
+    <input type="file" id="pq-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
+    <label for="pq-to">people who may also open it (optional): paste each person's PQ card, one per line</label>
+    <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
+    <div class="row"><button type="button" id="pq-seal" class="gold">🔒 seal</button></div>
+    <div class="law" id="pq-seal-stat" role="status" aria-live="polite"></div>
+    <label for="pq-open-file" style="display:block;margin-top:14px">sealed file to open (.bpq)</label>
+    <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" style="display:block;max-width:100%;width:100%;margin:8px 0">
+    <div class="row"><button type="button" id="pq-open">🔓 open</button></div>
+    <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
+    <div class="row" style="margin-top:14px"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
+    <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
   <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: inject signs, this page builds and posts</summary>
@@ -2516,6 +2546,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function scrubAll(){
     if(BSIGNER && typeof BSIGNER.wipe==='function') BSIGNER.wipe();
+    setTimeout(pqPanel,0);
     if(MPRK){MPRK.fill(0);MPRK=null}
     if(K1&&K1.seed){K1.seed.fill(0)}
     K1=null;BRIDGED=null;
@@ -2911,6 +2942,102 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
   $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
+  /* ── only me: seal / open / bind (SPEC-BPQ-1). Everything happens in this tab;
+     the plaintext never leaves it, the keys come from MPRK and die with it. ── */
+  var PQ_MAX=256*1024*1024;
+  function pqReady(){ return !!(MPRK && BSIGNER && typeof BSIGNER.keysFor==='function' && window.BPQ) }
+  function pqPanel(){
+    var g=$('pq-gate'), t=$('pq-tools'); if(!g||!t)return;
+    var on=pqReady();
+    t.hidden=!on; g.hidden=on;
+    if(!on) g.textContent=window.BPQ?'connect your keychain above to seal or open':'sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
+  }
+  function pqSize(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB' }
+  function pqSave(bytes,name,label){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+    a.download=name; a.textContent=label;
+    return a;
+  }
+  // every PQ identity this keychain has named: the soul's, plus any forged pq: context
+  function pqNames(){
+    var out=[]; if(SOUL)out.push(SOUL);
+    CONTEXTS.forEach(function(c){ var m=/^pq:(?:ml-dsa-65|ml-kem-768):(.{1,48})$/.exec(c); if(m&&out.indexOf(m[1])<0)out.push(m[1]) });
+    return out;
+  }
+  function pqCards(text){
+    var out=[], lines=String(text||'').split(/\n+/).map(function(l){return l.trim()}).filter(Boolean);
+    for(var i=0;i<lines.length;i++){
+      var c; try{ c=JSON.parse(lines[i]) }catch(e){ throw new Error('line '+(i+1)+' is not a PQ card (paste the card exactly as copied)') }
+      if(!window.BPQ.verifyCard(c)) throw new Error('the card on line '+(i+1)+' does not verify — ask its owner to copy it again');
+      out.push({id:c.id, kem:window.BPQ.unb64u(c.kem)});
+    }
+    return out;
+  }
+  $('pq-seal').onclick=async function(){
+    var st=$('pq-seal-stat');
+    if(!pqReady()){st.textContent='connect your keychain first';return}
+    if(!SOUL){st.textContent='name your soul first — your post-quantum keys are named by it';return}
+    var f=$('pq-file').files[0];
+    if(!f){st.textContent='choose a file first';return}
+    if(f.size>PQ_MAX){st.textContent='this tab seals files up to '+pqSize(PQ_MAX)+'; '+f.name+' is '+pqSize(f.size);return}
+    var to;
+    try{ to=pqCards($('pq-to').value) }catch(e){ st.textContent=e.message; return }
+    st.textContent='sealing '+f.name+'…';
+    try{
+      var k=BSIGNER.keysFor(MPRK,SOUL);
+      var plain=new Uint8Array(await f.arrayBuffer());
+      // shared files carry the sealer's signature, itself sealed; only-me files need none
+      var sealed=await window.BPQ.seal(plain,{self:k, to:to.map(function(r){return r.kem}), signer:to.length?k:null, meta:{name:f.name, type:f.type||'application/octet-stream'}});
+      plain.fill(0);
+      st.textContent='✓ sealed for you'+(to.length?' and '+to.length+' '+(to.length===1?'person':'people')+' you picked':'')+' · '+pqSize(sealed.length)+' · ';
+      st.appendChild(pqSave(sealed,f.name+'.bpq','save '+f.name+'.bpq'));
+      st.appendChild(document.createTextNode(' — keep it anywhere; it opens only for these readers'));
+    }catch(e){ st.textContent='could not seal: '+(e.message||e) }
+  };
+  $('pq-open').onclick=async function(){
+    var st=$('pq-open-stat');
+    if(!pqReady()){st.textContent='connect your keychain first';return}
+    var f=$('pq-open-file').files[0];
+    if(!f){st.textContent='choose a sealed file first';return}
+    st.textContent='opening '+f.name+'…';
+    try{
+      var bytes=new Uint8Array(await f.arrayBuffer());
+      if(!window.BPQ.isSealed(bytes)){st.textContent=f.name+' is not a sealed file';return}
+      var names=pqNames(), r=null, i;
+      for(i=0;i<names.length&&!r;i++){
+        var k=BSIGNER.keysFor(MPRK,names[i]);
+        try{ r=await window.BPQ.open(bytes,{self:k,kem:k}) }catch(e){ if(e.code!=='no_key')throw e }
+      }
+      if(!r){st.textContent='none of your keys opens '+f.name+' — it was sealed for someone else';return}
+      var name=(r.meta&&r.meta.name)||f.name.replace(/\.bpq$/,'');
+      var who=r.sealedBy?(r.sealedBy.ok?'sealed and signed by '+r.sealedBy.id:'⚠ the sealer signature does NOT verify — treat the contents as unauthenticated'):'unsigned (an only-me file, or the sealer chose not to sign)';
+      st.textContent='✓ opened · '+pqSize(r.bytes.length)+' · '+who+' · ';
+      st.appendChild(pqSave(r.bytes,name,'save '+name));
+    }catch(e){ st.textContent='could not open: '+(e.message||e) }
+  };
+  $('pq-bind').onclick=function(){
+    var st=$('pq-bind-stat');
+    if(!pqReady()){st.textContent='connect your keychain first';return}
+    if(!SOUL){st.textContent='name your soul first';return}
+    try{
+      var k=BSIGNER.keysFor(MPRK,SOUL), claims={};
+      [['evm','evm:'],['vaulta-k1','vaulta:'],['solana','sol:'],['bitcoin','btc:'],['nostr','nostr:']].forEach(function(p){
+        try{ var d=deriveFor(p[1]+SOUL); if(d&&d.value) claims[p[0]]=String(d.value) }catch(e){}
+      });
+      var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
+      claims['bzdid-ed25519']=toHex(rec.publicKey);
+      var b=window.BPQ.bind(k,claims,new Date().toISOString());
+      // the classical bzDiD key endorses this exact PQ statement, while it is still sound
+      b.cosign=[{alg:'ed25519', claim:'bzdid-ed25519', over:'utf8("bpq1/cosign:" + sig)', sig:window.BPQ.b64u(rec.sign(new TextEncoder().encode('bpq1/cosign:'+b.sig)))}];
+      rec.seed.fill(0);
+      var json=JSON.stringify(b,null,1);
+      st.textContent='✓ '+Object.keys(claims).length+' accounts bound to '+k.id+' · ';
+      st.appendChild(pqSave(new TextEncoder().encode(json),'pq-binding-'+SOUL+'.json','save the binding'));
+      st.appendChild(document.createTextNode(' — keep a copy somewhere permanent; it proves these were yours before any quantum break'));
+      try{ navigator.clipboard.writeText(json) }catch(e){}
+    }catch(e){ st.textContent='could not bind: '+(e.message||e) }
+  };
   $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your seal-to-me key for <b>'+SOUL+'</b> — others can now seal files only you open'):('✓ pq:ml-kem-768 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
@@ -3708,7 +3835,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-outrow').style.display='flex';
     $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
     $('sum-kc').textContent='connected ✓';$('sum-kc').style.color='var(--leaf)';
-    seedContexts(); renderForge();
+    seedContexts(); renderForge(); pqPanel();
     checkBridge();
     if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
       $('qr-sec').style.display='block'; qrGrantUI(rq); }

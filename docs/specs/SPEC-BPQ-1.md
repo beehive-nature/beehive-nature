@@ -57,6 +57,11 @@ Binding (pre-quantum notarization): `{bpq:1, kind:"binding", id, at, claims, dsa
 sound, and co-signed by them where the chain allows, it lets an owner prove after a quantum break
 which classical accounts were theirs before it.
 
+The wallet adds `cosign: [{alg:"ed25519", claim:"bzdid-ed25519", sig}]`: the bzDiD Ed25519 record key
+(context `bnr.b`) signs UTF-8(`"bpq1/cosign:" ‖ sig`), so the classical identity endorses this exact PQ
+statement while Ed25519 is still sound. Verifiers that do not know a cosign `alg` ignore that entry;
+the PQ signature alone decides `verifyBind`.
+
 ## 4 · Sealed object (`bpq1`)
 
 ```
