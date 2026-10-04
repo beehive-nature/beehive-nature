@@ -3054,14 +3054,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{
       var bytes=new Uint8Array(await f.arrayBuffer());
       if(!window.BPQ.isSealed(bytes)){st.textContent=f.name+' is not a sealed file';return}
-      var names=pqNames(), r=null, i;
-      for(i=0;i<names.length&&!r;i++){
+      // try the self slot first, then the reader (X-Wing) slots, so we know which one opened it
+      var names=pqNames(), r=null, via=null, i, p;
+      for(p=0;p<2&&!r;p++) for(i=0;i<names.length&&!r;i++){
         var k=BSIGNER.keysFor(MPRK,names[i]);
-        try{ r=await window.BPQ.open(bytes,{self:k,kem:k}) }catch(e){ if(e.code!=='no_key')throw e }
+        try{ r=await window.BPQ.open(bytes,p===0?{self:k}:{kem:k}); via=p===0?'self':'reader' }catch(e){ if(e.code!=='no_key')throw e }
       }
       if(!r){st.textContent='none of your keys opens '+f.name+' — it was sealed for someone else';return}
       var name=(r.meta&&r.meta.name)||f.name.replace(/\.bpq$/,'');
-      var who=r.sealedBy?(r.sealedBy.ok?'sealed and signed by '+r.sealedBy.id:'⚠ the sealer signature does NOT verify — treat the contents as unauthenticated'):'unsigned (an only-me file, or the sealer chose not to sign)';
+      var slots=window.BPQ.inspect(bytes).slots, sb=r.sealedBy, who;
+      if(!sb) who=(via==='self'&&slots.length===1)?'unsigned, an only-me file: its one key slot opens with your own key':'unsigned: nothing proves who sealed it (opened through '+(via==='self'?'your own key slot':'a reader slot')+')';
+      else if(!sb.ok) who='⚠ the sealer signature does NOT verify, so treat the contents as unauthenticated';
+      else who=sb.id?'sealed and signed by '+sb.id:'signed by a key the seal does not name (fingerprint '+window.BPQ.fingerprint(sb.publicKey)+'), so it does not say who sealed it';
       st.textContent='✓ opened · '+pqSize(r.bytes.length)+' · '+who+' · ';
       st.appendChild(pqSave(r.bytes,name,'save '+name));
     }catch(e){ st.textContent='could not open: '+(e.message||e) }
@@ -3071,18 +3075,57 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      calendars aggregate it into a Bitcoin block. The file below is the standard
      detached .ots format (magic, version 1, sha256 op, digest, then the
      calendars' timestamps as forked branches); any OpenTimestamps tool upgrades
-     and verifies it. Hash-only: no signature in the proof can be forged by Shor. */
+     and verifies it. Hash-only: no signature in the proof can be forged by Shor.
+     A calendar reply is spliced in only if it parses as an OTS timestamp whose
+     every leaf is a PENDING attestation naming an http(s) calendar URL; any other
+     body (an error page, a proxy's HTML) is refused and not counted. */
   var PQ_OTS_CALENDARS=['https://a.pool.opentimestamps.org','https://b.pool.opentimestamps.org','https://a.pool.eternitywall.com'];
+  var OTS_PENDING=[0x83,0xdf,0xe3,0x0d,0x2e,0xf9,0x0c,0x8e];
+  function otsPendingOnly(b){
+    var i=0, pending=0;
+    function u8(){ if(i>=b.length) throw 0; return b[i++] }
+    function vu(){ var v=0,m=1,c; do{ c=u8(); v+=(c&0x7f)*m; m*=128; if(m>Math.pow(2,56)) throw 0 }while(c&0x80); return v }
+    function vb(max,min){ var n=vu(); if(n>max||n<(min||0)||i+n>b.length) throw 0; var r=b.subarray(i,i+n); i+=n; return r }
+    function item(tag,depth){
+      if(tag===0x00){
+        var t=b.subarray(i,i+8); if(t.length!==8) throw 0; i+=8;
+        for(var j=0;j<8;j++) if(t[j]!==OTS_PENDING[j]) throw 0;      // only pending attestations belong in a fresh reply
+        var pay=vb(8192), save=b, si=i;
+        b=pay; i=0;
+        var uri=vb(1000); if(i!==b.length) throw 0;                   // the payload is exactly one varbytes URI
+        b=save; i=si;
+        var s=''; for(var q=0;q<uri.length;q++) s+=String.fromCharCode(uri[q]);
+        if(!/^https?:\/\/[A-Za-z0-9.\-_\/:]+$/.test(s)) throw 0;
+        pending++; return;
+      }
+      if(tag===0xf0||tag===0xf1) vb(4096,1);                        // append / prepend carry a non-empty argument
+      else if([0x02,0x03,0x08,0x67,0xf2,0xf3].indexOf(tag)<0) throw 0; // sha1 ripemd160 sha256 keccak256 reverse hexlify
+      ts(depth+1);
+    }
+    function ts(depth){
+      if(depth>256) throw 0;
+      var tag=u8();
+      while(tag===0xff){ item(u8(),depth); tag=u8() }
+      item(tag,depth);
+    }
+    // a reply that forks at its top level would turn into ff ff after the splice, which the ots client rejects
+    if(!b.length||b[0]===0xff) return false;
+    try{ ts(0); return i===b.length&&pending>0 }catch(e){ return false }
+  }
   async function pqTimestamp(bytes){
-    var digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)), parts=[];
+    var digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)), parts=[], refused=0;
     await Promise.all(PQ_OTS_CALENDARS.map(function(c){
       // a form-encoded body keeps this a simple request: the calendars answer CORS without a preflight
       return fetchT(c+'/digest',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:digest},15000)
         .then(function(r){ return r.ok?r.arrayBuffer():null })
-        .then(function(b){ if(b&&b.byteLength>0&&b.byteLength<8192) parts.push(new Uint8Array(b)) })
+        .then(function(b){
+          if(!b) return;
+          var u=new Uint8Array(b);
+          if(u.length>0&&u.length<8192&&otsPendingOnly(u)) parts.push(u); else refused++;
+        })
         .catch(function(){});
     }));
-    if(!parts.length) throw new Error('no OpenTimestamps calendar answered — nothing was stamped; try again later');
+    if(!parts.length) throw new Error(refused?'no calendar gave a usable pending stamp ('+refused+' answered with something that is not one), so no stamp was made. Try again later':'no OpenTimestamps calendar answered, so no stamp was made. Try again later');
     var magic=concatB(new TextEncoder().encode('\0OpenTimestamps\0\0Proof\0'),Uint8Array.of(0xbf,0x89,0xe2,0xe8,0x84,0xe8,0x92,0x94));
     var body=[]; parts.forEach(function(x,i){ if(i<parts.length-1)body.push(Uint8Array.of(0xff)); body.push(x) });
     return {ots:concatB.apply(null,[magic,Uint8Array.of(0x01,0x08),digest].concat(body)), calendars:parts.length};
@@ -3111,7 +3154,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{
       var d=JSON.parse(await g.text());
       var r=window.BPQ.verifyFile(d,new Uint8Array(await f.arrayBuffer()));
-      st.textContent=r.ok?('✓ '+f.name+' was signed '+r.at+' by '+r.id+' (ML-DSA-65)'):('✗ '+(r.why||'does not verify'));
+      st.textContent=r.ok?('✓ '+f.name+' is signed by '+r.id+' (ML-DSA-65); it says it was signed at '+r.at):('✗ '+(r.why||'does not verify'));
     }catch(e){ st.textContent='✗ that signature file is not readable JSON' }
   };
   $('pq-bind').onclick=function(){
@@ -3128,6 +3171,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var succ=$('pq-succ').value.trim();
       if(succ){
         if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); st.textContent='that is not a bzpq1 id — copy it from the new words\' PQ card'; return }
+        var succOk=false;
+        try{ var dec=window.BPQ_LIB.bech32m.decode(succ,120); succOk=dec.prefix==='bzpq'&&window.BPQ_LIB.bech32m.fromWords(dec.words).length===32 }catch(e){}
+        if(!succOk){ rec.seed.fill(0); st.textContent='that bzpq1 id fails its checksum, so a letter is wrong. Nothing was signed. Copy it again from the new words\' PQ card'; return }
         if(succ===k.id){ rec.seed.fill(0); st.textContent='that is this same id — connect with your OLD words to vouch for the new one'; return }
         claims['successor-bzpq']=succ;
       }
@@ -3145,7 +3191,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         try{
           var r=await pqTimestamp(jsonBytes), span=document.createElement('span');
           span.appendChild(pqSave(r.ots,fname+'.ots','save '+fname+'.ots'));
-          span.appendChild(document.createTextNode(' — stamped by '+r.calendars+' calendar'+(r.calendars===1?'':'s')+'; it completes once Bitcoin confirms (a few hours) and then proves this binding existed before that block. Keep it beside the binding; only the binding\'s SHA-256 left this tab.'));
+          span.appendChild(document.createTextNode(' · '+r.calendars+' calendar'+(r.calendars===1?' holds':'s hold')+' a pending stamp for it. This file holds only those pending promises, and nothing on this page checks it. After Bitcoin confirms (usually a few hours), upgrade it with the OpenTimestamps client (ots upgrade) while the calendars still hold it; only the upgraded file can show this binding existed before that block. Keep it beside the binding; only the binding\'s SHA-256 left this tab.'));
           tb.replaceWith(span);
         }catch(e){ tb.disabled=false; tb.textContent='⏱ timestamp it on Bitcoin'; st.appendChild(document.createTextNode(' '+(e.message||e))) }
       };
@@ -4114,6 +4160,69 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var r=window.BPQ.verifyFile(o.pqsig,dmSignedBytes(o.at,o.devices));
     return (r.ok&&r.id===k.id)?'pq':'bad';
   }
+  /* High-water mark: the signed time of the newest post-quantum-signed registry
+     this browser has seen for this soul. A lagging or hostile relay can still
+     serve an older list that verifies (a revoked device back in it), or a
+     classical one; neither is accepted once this browser has seen newer. Kept
+     per soul under a prefix of the registry's PUBLIC nostr key; it holds a
+     timestamp only, never a secret. A time more than DM_SKEW_MS ahead of this
+     device's clock is never remembered, so one device with a fast clock cannot
+     lock every other device out. */
+  var DM_HWM_KEY='bnr_dm_hwm', DM_SKEW_MS=10*60*1000, DM_MAX_EVENTS=10;
+  function dmHwmAll(){ try{ var o=JSON.parse(localStorage.getItem(DM_HWM_KEY)||'{}'); return (o&&typeof o==='object')?o:{} }catch(e){ return {} } }
+  function dmHwm(pubHex){ var h=dmHwmAll()[pubHex.slice(0,16)]; return (h&&typeof h.at==='string'&&isFinite(Date.parse(h.at)))?h:null }
+  function dmHwmSet(pubHex,at){
+    var t=Date.parse(at);
+    if(!isFinite(t)||t>Date.now()+DM_SKEW_MS) return false;
+    var all=dmHwmAll(), key=pubHex.slice(0,16), h=all[key];
+    if(h&&typeof h.at==='string'&&Date.parse(h.at)>=t) return true;
+    all[key]={at:at};
+    try{ localStorage.setItem(DM_HWM_KEY,JSON.stringify(all)) }catch(e){}
+    return true;
+  }
+  // one relay event → a checked candidate, or null. The id is recomputed from the
+  // content, so a relay cannot pair a real signature with a different list.
+  function dmCheck(ev,pubHex){
+    try{
+      if(!ev||ev.pubkey!==pubHex||ev.kind!==30078||typeof ev.content!=='string'||!Array.isArray(ev.tags)||!Number.isInteger(ev.created_at)) return null;
+      if(!ev.tags.some(function(t){ return Array.isArray(t)&&t[0]==='d'&&t[1]==='bnr-devices-v1' })) return null;
+      var ser='[0,"'+ev.pubkey+'",'+ev.created_at+','+ev.kind+','+JSON.stringify(ev.tags)+','+JSON.stringify(ev.content)+']';
+      if(toHex(BN.sha256(new TextEncoder().encode(ser)))!==ev.id) return null;
+      if(!BN.schnorr.verify(hexBytes(ev.sig),hexBytes(ev.id),hexBytes(ev.pubkey))) return null;
+      var o=JSON.parse(ev.content);
+      if(!o||!Array.isArray(o.devices)) return null;
+      var trust=dmTrust(o);
+      return {id:ev.id, created:ev.created_at, o:o, trust:trust, atMs:trust==='pq'?Date.parse(o.at):NaN};
+    }catch(e){ return null }
+  }
+  // all relays' answers → the one list to show, or a refusal. Newest by the
+  // SIGNED time, and only among lists whose post-quantum signature verified.
+  // net = {queried, eose}: how many relays were asked, and how many said they
+  // had sent everything they hold.
+  function dmPick(cands,pubHex,net){
+    var hw=dmHwm(pubHex);
+    var pqServed=cands.some(function(c){ return c.o.v===2||!!c.o.pqsig });
+    var pq=cands.filter(function(c){ return c.trust==='pq'&&isFinite(c.atMs) }).sort(function(a,b){ return b.atMs-a.atMs });
+    if(pq.length){
+      var best=pq[0];
+      if(hw&&best.atMs<Date.parse(hw.at))
+        return {refused:'the relays served only an older list (it says it was signed at '+best.o.at+') than the one this browser last saw (signed at '+hw.at+'). An older list can bring back a device you revoked, so it is not used', pqServed:pqServed};
+      var ahead=!dmHwmSet(pubHex,best.o.at);
+      return {devices:best.o.devices, reg:{n:best.o.devices.length, at:best.created, trust:'pq'}, base:true, ahead:ahead?best.o.at:null, pqServed:pqServed};
+    }
+    if(!cands.length){
+      if(hw) return {devices:null, reg:{missing:hw.at}, base:false, pqServed:pqServed};
+      // "nothing here" counts only when enough relays said they had sent everything
+      var enough=net.eose>=2||(net.queried>0&&net.eose===net.queried);
+      return enough?{devices:null, reg:null, base:true, pqServed:pqServed}:{devices:null, reg:{partial:net}, base:false, pqServed:pqServed};
+    }
+    var newest=cands.slice().sort(function(a,b){ return b.created-a.created })[0];
+    if(hw) return {refused:newest.trust==='unchecked'
+      ?'this page cannot check post-quantum signatures right now (bpq-lib.js did not load), and this browser has already seen a list this soul signed post-quantum (signed at '+hw.at+'), so the list the relays served is not used'
+      :'the relays served only a list that is not signed post-quantum by this soul, and this browser has already seen one that is (signed at '+hw.at+'), so it is not used', pqServed:pqServed};
+    return {devices:newest.o.devices, reg:{n:newest.o.devices.length, at:newest.created, trust:newest.trust}, base:newest.trust==='unchecked', pqServed:pqServed};
+  }
+  var DM_REG=[], DM_BASE=false, DM_PUB=null, DM_PQ_SERVED=false;
   function dmRender(devices,reg){
     var me=dmLocal();
     var rows=(devices||[]).map(function(d){
@@ -4125,82 +4234,134 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }).join('');
     if(!rows)rows='<div class="law">no permanent devices registered yet</div>';
     $('dm-body').innerHTML=
-      '<div style="font-size:10px;color:var(--faint)">registry: '+ (reg?('<span style="color:var(--leaf)">'+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString()+'</span>'):'not found on relays (new soul, or never published)')+'</div>'+
+      '<div style="font-size:10px;color:var(--faint)" data-dm-reg>registry: '+
+        (reg&&reg.refused?'<span style="color:var(--amber)">refused, and nothing was changed</span>':
+         reg&&reg.missing?'<span style="color:var(--amber)">not found on the relays this time, though this browser saw one signed at '+reg.missing+'</span>':
+         reg&&reg.partial?'<span style="color:var(--amber)">not found, but only '+reg.partial.eose+' of '+reg.partial.queried+' relays answered in full</span>':
+         reg&&reg.local?'<span style="color:var(--leaf)">'+reg.n+' device(s) · this browser\'s own view, not published yet</span>':
+         reg?('<span style="color:var(--leaf)">'+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString()+'</span>'):'not found on relays (new soul, or never published)')+'</div>'+
       (reg&&reg.trust?'<div style="font-size:10px;color:'+(reg.trust==='pq'?'var(--leaf)':'var(--amber)')+'" data-dm-trust="'+reg.trust+'">'+
         (reg.trust==='pq'?'signed post-quantum (ML-DSA-65) by this soul ✓':
-         reg.trust==='classical'?'signed classically only — the next add or revoke re-signs it post-quantum':
-         reg.trust==='bad'?'⚠ its post-quantum signature does NOT verify for this soul — do not trust this list; re-save it from a device you hold':
+         reg.trust==='classical'?'signed classically only, so this page will not add or revoke on top of it':
+         reg.trust==='bad'?'⚠ its post-quantum signature does NOT verify for this soul. Do not trust this list; this page will not add or revoke on top of it':
          'post-quantum check unavailable here (bpq-lib.js did not load)')+'</div>':'')+
       rows+
       '<div class="row" style="margin-top:10px">'+
+        (DM_BASE?'':'<button id="dm-own" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">start from this device\'s own view</button>')+
         '<button id="dm-add" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make THIS device permanent</button>'+
         '<button id="dm-addhw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ on a hardware key</button>'+
       '</div>'+
+      (DM_BASE?'':'<div class="law" style="margin-top:4px">this device\'s own view holds only the seal this browser keeps, or nothing. Publishing it replaces the list on the relays, so any other device must be added again from that device.</div>')+
       '<div class="law" style="margin-top:4px">add = a passkey on THIS browser wraps the soul (platform, or a FIDO key via its native USB lane). The soul must be live here first — connect, QR-bridge from another device, or recovery.</div>';
     Array.prototype.forEach.call(document.querySelectorAll('.dm-rv'),function(b){
       b.onclick=function(){ dmRevoke(b.getAttribute('data-c')); };
     });
+    var own=$('dm-own'); if(own)own.onclick=dmOwnView;
     var add=$('dm-add'); if(add)add.onclick=function(){dmAdd(function(){return BZDIDKEY.enrollPasskey(SOUL||'this-device')})};
     var addhw=$('dm-addhw'); if(addhw)addhw.onclick=function(){dmAdd(enrollHardware)};
   }
-  function dmWs(cb){
-    var socks=[],got=false,timer;
+  function dmWs(pubHex,cb){
+    var socks=[],cands=[],seen={},open=0,queried=0,eose=0,done=false,timer;
+    function finish(){
+      if(done)return; done=true; clearTimeout(timer);
+      socks.forEach(function(x){try{x.close()}catch(e){}});
+      cb(dmPick(cands,pubHex,{queried:queried,eose:eose}));
+    }
+    // every relay answers (or gives up) inside one bounded window; none wins by being first
     QR_RELAYS.forEach(function(rs){
-      var w; try{w=new WebSocket(rs)}catch(e){return}
+      var w,fin=false,n=0; try{w=new WebSocket(rs)}catch(e){return}
+      open++; queried++;
+      function relayDone(full){ if(fin)return; fin=true; if(full)eose++; if(--open<=0)finish(); }
       w.onopen=function(){
-        var sk=soulNostr();
-        w.send(JSON.stringify(['REQ','bnrdm'+sk.pubHex.slice(0,8),{authors:[sk.pubHex],kinds:[30078],'#d':['bnr-devices-v1'],limit:1}]));
+        w.send(JSON.stringify(['REQ','bnrdm'+pubHex.slice(0,8),{authors:[pubHex],kinds:[30078],'#d':['bnr-devices-v1'],limit:5}]));
       };
       w.onmessage=function(m){
-        if(got)return;
+        if(fin)return;
         var t; try{t=JSON.parse(m.data)}catch(e){return}
-        if(!t||t[0]!=='EVENT'||!t[2])return;
+        if(!Array.isArray(t))return;
+        if(t[0]==='EOSE'){ relayDone(true); return; }
+        if(t[0]==='CLOSED'){ relayDone(false); return; }
+        if(t[0]!=='EVENT')return;
+        // a relay that floods is cut off: it asked for 5, it never needs more than 10
+        if(++n>DM_MAX_EVENTS){ try{w.close()}catch(e){} relayDone(false); return; }
         var ev=t[2];
-        try{
-          if(!BN.schnorr.verify(hexBytes(ev.sig),hexBytes(ev.id),hexBytes(ev.pubkey)))return;
-          var o=JSON.parse(ev.content);
-          if(!o.devices)return;
-          got=true; clearTimeout(timer);
-          socks.forEach(function(x){try{x.close()}catch(e){}});
-          cb(o.devices,{n:o.devices.length,at:ev.created_at,trust:dmTrust(o)});
-        }catch(e){}
+        if(!ev||typeof ev.id!=='string'||seen[ev.id])return;   // a repeat costs nothing to drop
+        var c=dmCheck(ev,pubHex);
+        if(c){ seen[c.id]=1; cands.push(c); }
       };
+      w.onerror=function(){ relayDone(false) }; w.onclose=function(){ relayDone(false) };
       socks.push(w);
     });
-    timer=setTimeout(function(){ if(!got){ socks.forEach(function(x){try{x.close()}catch(e){}}); cb(null,null); } },6000);
+    if(!open){ setTimeout(finish,0); return; }
+    timer=setTimeout(finish,6000);
   }
   function dmOpen(){
     if(!MPRK){$('kc-stat').textContent='connect the keychain first — the manager is soul-held';return}
     $('dm-sec').style.display='block';
     $('dm-stat').textContent='loading registry from relays…';
-    dmWs(function(devices,reg){
-      DM_REG=devices||[];
-      dmRender(DM_REG,reg);
-      $('dm-stat').textContent=reg?'registry loaded':'no registry on the relays yet — this soul\'s device list starts here';
+    var sn=soulNostr(); DM_PUB=sn.pubHex; sn.sk.fill(0);
+    DM_REG=[]; DM_BASE=false; DM_PQ_SERVED=false;
+    dmWs(DM_PUB,function(res){
+      DM_PQ_SERVED=!!res.pqServed;
+      if(res.refused){
+        DM_REG=[]; DM_BASE=false;
+        dmRender([],{refused:true});
+        $('dm-stat').textContent='registry not used: '+res.refused+'. Nothing was changed.';
+        return;
+      }
+      DM_REG=res.devices||[]; DM_BASE=res.base;
+      dmRender(DM_REG,res.reg);
+      var r=res.reg||{};
+      $('dm-stat').textContent=
+        r.missing?'no registry came back from the relays, though this browser saw one signed at '+r.missing+'. Adding or revoking from an empty list would replace it, so this page waits until you choose this device\'s own view':
+        r.partial?'no registry came back, but only '+r.partial.eose+' of '+r.partial.queried+' relays answered in full, so a list may still exist. Adding or revoking from an empty list could replace it, so this page waits until you choose this device\'s own view':
+        res.reg?(!DM_BASE?'registry loaded, but it is not signed post-quantum by this soul, so this page will not add or revoke on top of it':
+          res.ahead?'registry loaded. It says it was signed at '+res.ahead+', more than 10 minutes ahead of this device\'s clock, so this browser does not remember that time as the newest it has seen':'registry loaded'):
+        'no registry on the relays yet, so this soul\'s device list starts here';
     });
   }
-  var DM_REG=[];
+  // a fresh start the human chose: only what this browser itself holds
+  function dmOwnView(){
+    var me=dmLocal();
+    DM_REG=(me&&me.credId)?[{credId:me.credId,name:me.name,fp:me.fp,at:me.at}]:[];
+    DM_BASE=true;
+    dmRender(DM_REG,{n:DM_REG.length,local:true});
+    $('dm-stat').textContent='the list now holds only what this browser knows ('+DM_REG.length+' device'+(DM_REG.length===1?'':'s')+'). The next add or revoke publishes it, signed post-quantum, and it replaces the list on the relays.';
+  }
+  // why an add or revoke must not happen now, or null
+  function dmRefuse(){
+    if(!DM_PUB) return 'open the device list first';
+    if(!dmPqKeys()&&(dmHwm(DM_PUB)||DM_PQ_SERVED)) return 'this page cannot sign post-quantum right now (bpq-lib.js did not load), and this soul already has a post-quantum-signed list, so a classical list must not replace it. Nothing was changed';
+    if(!DM_BASE) return 'this list is not one this soul signed post-quantum, so adding or revoking on top of it could republish a device you revoked. Nothing was changed. Choose "start from this device\'s own view" to begin a fresh list';
+    return null;
+  }
   $('dm-open').onclick=dmOpen;
   $('dm-x').onclick=function(){ $('dm-sec').style.display='none'; };
   function dmPublish(devices){
-    var sn=soulNostr(), k=dmPqKeys(), body;
+    var sn=soulNostr(), k=dmPqKeys(), body, at=null;
     if(k){
-      var at=new Date().toISOString();
+      // never sign a time at or below the newest this browser has seen, even if this clock is behind
+      var hw=dmHwm(sn.pubHex), t=Date.now();
+      if(hw) t=Math.max(t,Date.parse(hw.at)+1);
+      at=new Date(t).toISOString();
       body={v:2,at:at,devices:devices,pqsig:window.BPQ.signFile(k,dmSignedBytes(at,devices),at)};
     } else body={v:1,devices:devices};
     var ev=nostrEvent(sn.sk,JSON.stringify(body),[['d','bnr-devices-v1'],['alt','BNR bzDiD device registry']],30078);
+    if(at) dmHwmSet(sn.pubHex,at);
+    sn.sk.fill(0);
     var sent=0;
     QR_RELAYS.forEach(function(rs){
       var w; try{w=new WebSocket(rs)}catch(e){return}
       w.onopen=function(){ w.send(JSON.stringify(['EVENT',ev])); sent++;
         $('dm-stat').textContent='registry published to '+sent+' relay(s)'; };
     });
-    return ev;
+    return {ev:ev, trust:at?'pq':'unchecked'};
   }
   async function dmAdd(enrollFn){
     if(!MPRK){$('dm-stat').textContent='soul not live here';return}
     var me=dmLocal();
     if(me){ $('dm-stat').textContent='this browser already holds a permanent seal (made '+me.at+')'; return; }
+    var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
     if(CEREMONY){$('dm-stat').textContent='a passkey prompt is already open';return}
     CEREMONY=true;
     try{
@@ -4222,8 +4383,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       devs=devs.filter(function(d){return d.credId!==seal.credId});
       devs.push({credId:seal.credId,name:seal.name,fp:seal.fp,at:seal.at});
       DM_REG=devs;
-      dmPublish(devs);
-      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000)});
+      var pub=dmPublish(devs);
+      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
       $('dm-stat').textContent='✓ this device now holds the soul permanently — connect lands here without QR or recovery';
     }catch(e){
       $('dm-stat').textContent='add failed: '+((e&&e.message)||e)+' — nothing was stored';
@@ -4231,13 +4392,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function dmRevoke(credId){
     if(!MPRK)return;
+    var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
     var devs=(DM_REG||[]).filter(function(d){return d.credId!==credId});
-    dmPublish(devs);
+    var pub=dmPublish(devs);
     DM_REG=devs;
     var me=dmLocal();
     var selfGone=me&&me.credId===credId;
     if(selfGone){ saveSeal(null); }
-    dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000)});
+    dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
     $('dm-stat').textContent='revoked'+(selfGone?' (this browser\'s seal deleted too — connect falls back to passkey/recovery)':' — the device keeps any cached copy offline; full kill is the recovery-rotate lane');
   }
 
@@ -4349,7 +4511,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '<div id="qr-relaystat" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
         '<div id="qr-count" style="font-size:11px;color:var(--dim)">expires in 120s</div>'+
       '</div></div>';
-    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays, keyed by secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519) together (ephemeral kind they never store, throwaway keys both ends); tab memory only, scrubbed on close like every lane here';
+    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays, keyed by secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519) together (ephemeral kind they never store, throwaway keys both ends); tab memory only, wiped when this page closes';
     var sidHex=toHex(sid), got=0;
     var hello=function(){ return JSON.stringify(['EVENT',nostrEvent(QRB.nsk,JSON.stringify({v:2,xpk:bytesToB64u(QRB.xpk)}),[['sid',sidHex]])]) };
     QRB.sock=QR_RELAYS.map(function(rs){
@@ -6330,6 +6492,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('br-wif').addEventListener('keydown',function(e){if(e.key==='Enter')$('br-go').click()});
 
   window.addEventListener('beforeunload',scrubAll);
+  /* iOS Safari does not reliably fire beforeunload, and a page kept in the
+     back/forward cache would carry its keys with it. pagehide fires on close and
+     on leaving, so the keys are wiped there too. If the browser later restores
+     this page from that cache, its keychain views would still say connected
+     with no keys behind them, so the page reloads and starts disconnected. */
+  var HID_LIVE=false;
+  window.addEventListener('pagehide',function(){ HID_LIVE=HID_LIVE||!!MPRK||!!QRB; try{ qrEnd() }catch(e){} scrubAll(); });
+  window.addEventListener('pageshow',function(ev){ if(ev.persisted&&HID_LIVE) location.reload(); });
 
   // boot: kit-profile defaults → composer, bundle check + Rust core arming + auto-connect balances from localStorage
   renderRailPickers();   // the send panel's rails are DATA — rendered before any read

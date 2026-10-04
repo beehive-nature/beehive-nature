@@ -31,7 +31,7 @@ for (const sig of sigs) {
     else if (pins && !pins.has(r.id)) why = 'signer ' + r.id + ' is not listed in docs/PQ-SIGNERS.json';
   }
   if (why) { bad++; console.error(`FAIL ${sig}: ${why}`); }
-  else console.log(`ok   ${target} — signed ${r.at} by ${r.id}`);
+  else console.log(`ok   ${target}: signed by ${r.id}, says it was signed at ${r.at}`);
 }
 console.log(`bpq signatures: ${sigs.length - bad} of ${sigs.length} verify` + (pins ? `, signers pinned (${pins.size})` : ', no signer pin file yet'));
 if (bad) process.exit(1);
