@@ -95,6 +95,21 @@ as long as possible — the stronger seed"). Fresh founder login this wake
 - Combined arc (10-03 + 10-04): 15 records attached, 29 person-attachments,
   4 persons created, 4 false matches refused, 3 same-event re-indexes parked.
 
+## Addendum — second pass same day (founder "go")
+- **Daniel L Briggs's hints computed: Find a Grave Index XQ3P-7926 (conf 5)
+  ATTACHED to PNC5-R9G** — b. 2 Feb 1937 / d. 1 Jun 2025 EXACT match, burial
+  Cranberry Horn Cemetery, East Harpswell, Cumberland, Maine (photograph +
+  biography on the stone page); reload-verified DETACH. The obit re-index
+  variant in his hint list (X3R1-XZLK) skipped per the same-event law — the
+  obit is already his creation source.
+- PNC6-GJQ / PNCX-S8Q / PNCP-RDN hints still computing (empty wire).
+- The tasks queue now renders EMPTY (header only, auth proven by the wire
+  fetch working seconds earlier) and the portal serves the 516-char
+  degraded-SPA shell through reloads — the banked end-of-day pattern. Hint
+  labor paused at that boundary; next wake re-checks new-person hints first.
+- Final wake totals: **10 records / 21 person-attachments / 2 persons
+  created.** Arc: 16 records / 30 person-attachments / 4 created.
+
 ## Open frontier (unchanged)
 - 2-ark image queue: closed at 366/366 (10-03). Eternalization: PR #336
   (codex seat) + ceiling-atomic payment client. New-person hints (PNC6-GJQ,
