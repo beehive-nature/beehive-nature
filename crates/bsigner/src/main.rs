@@ -30,11 +30,17 @@
 //!      remaining budget BEFORE any signing, validates the exact-multi split
 //!      invariants, then emits ONE signed instruction paying seller + tithe
 //!      together — signed, never submitted; see src/x402.rs for the laws)
+//!   bsigner bpq-open --object PATH --rec-env VAR --context CTX [--out PATH]
+//!     (opens a bpq1 sealed object made in the browser — surfaces/bpq.js —
+//!      with the keys your bzDiD recovery code derives; the code is read from
+//!      the environment variable VAR, never from argv, and never printed)
+//!   bsigner bpq-verify --file PATH   (a bpq1 public key card or binding)
 //!   bsigner selftest
 //!   bsigner version
 
 mod alg;
 mod b64;
+mod bpq;
 mod envelope;
 mod keys;
 mod pq;
@@ -51,6 +57,8 @@ fn main() {
         Some("list") => cmd_list(&args[1..]),
         Some("kemtest") => cmd_kemtest(&args[1..]),
         Some("x402pay") => cmd_x402pay(&args[1..]),
+        Some("bpq-open") => cmd_bpq_open(&args[1..]),
+        Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -76,6 +84,9 @@ struct Opts {
     out: Option<String>,
     offer: Option<String>,
     policy: Option<String>,
+    object: Option<String>,
+    rec_env: Option<String>,
+    context: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -88,6 +99,9 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         out: None,
         offer: None,
         policy: None,
+        object: None,
+        rec_env: None,
+        context: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -104,6 +118,9 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--out" => o.out = Some(val),
             "--offer" => o.offer = Some(val),
             "--policy" => o.policy = Some(val),
+            "--object" => o.object = Some(val),
+            "--rec-env" => o.rec_env = Some(val),
+            "--context" => o.context = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -349,6 +366,91 @@ fn cmd_x402pay(args: &[String]) -> i32 {
         None => println!("{text}"),
     }
     0
+}
+
+fn cmd_bpq_open(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(path), Some(var), Some(context)) = (o.object, o.rec_env, o.context) else {
+        return fail("bpq-open needs --object PATH --rec-env VAR --context CTX".into());
+    };
+    let obj = match std::fs::read(&path) {
+        Ok(b) => b,
+        Err(e) => return fail(format!("read {path}: {e}")),
+    };
+    let code = match std::env::var(&var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bpq::master_prk_from_recovery_code(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e.to_string()),
+    };
+    let keys = bpq::keys(&prk, &context);
+    let opened = bpq::open(&obj, &bpq::Reader::SelfVault(keys.vault()))
+        .or_else(|_| bpq::open(&obj, &bpq::Reader::XWing(&keys)));
+    let opened = match opened {
+        Ok(x) => x,
+        Err(e) => return fail(e.to_string()),
+    };
+    let sealed_by = opened.sealed_by.as_ref().map(
+        |s| json!({ "ok": s.ok, "id": s.id, "public_key_sha3": b64::sha3_256_b64u(&s.public_key) }),
+    );
+    if let Some(out) = &o.out {
+        if let Err(e) = std::fs::write(out, &opened.bytes) {
+            return fail(format!("write {out}: {e}"));
+        }
+    }
+    println!(
+        "{}",
+        json!({
+            "opened": true,
+            "bytes": opened.bytes.len(),
+            "plaintext_sha3": b64::sha3_256_b64u(&opened.bytes),
+            "meta": opened.meta,
+            "sealed_by": sealed_by,
+            "you": {
+                "context": context,
+                "ml_dsa_65_public_sha3": b64::sha3_256_b64u(&keys.dsa_public),
+                "x_wing_public_sha3": b64::sha3_256_b64u(&keys.kem_public),
+            },
+            "written": o.out,
+        })
+    );
+    0
+}
+
+fn cmd_bpq_verify(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let Some(path) = o.file else {
+        return fail("bpq-verify needs --file PATH".into());
+    };
+    let doc: Value = match std::fs::read(&path)
+        .map_err(|e| e.to_string())
+        .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
+    {
+        Ok(v) => v,
+        Err(e) => return fail(format!("{path}: {e}")),
+    };
+    let (kind, ok) = if doc["kind"] == "binding" {
+        ("binding", bpq::verify_bind(&doc))
+    } else {
+        ("card", bpq::verify_card(&doc))
+    };
+    println!(
+        "{}",
+        json!({ "kind": kind, "id": doc["id"], "verified": ok })
+    );
+    if ok {
+        0
+    } else {
+        1
+    }
 }
 
 fn cmd_selftest() -> i32 {

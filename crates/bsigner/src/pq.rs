@@ -22,8 +22,9 @@
 //!   are the preferred serialization"); `signing.rs:55` (`from_seed`),
 //!   `signing.rs:102` (`as_seed`).
 //! - Signing: `Signer::try_sign` — `ml-dsa` 0.1.1 src/signing.rs:184
-//!   (`fn try_sign(&self, msg: &[u8])`). Randomized per FIPS 204 §5; the
-//!   randomness is consumed inside the crate.
+//!   (`fn try_sign(&self, msg: &[u8])`). Deterministic, empty context:
+//!   signing.rs:181-182 "uses the optional deterministic variant of ML-DSA,
+//!   and only supports signing with an empty context string".
 //! - Verifying: `Verifier::verify` — `ml-dsa` 0.1.1 src/verifying.rs:195
 //!   (`fn verify(&self, msg, signature)`).
 //!

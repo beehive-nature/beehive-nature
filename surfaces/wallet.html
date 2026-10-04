@@ -1126,10 +1126,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
   Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
   never invents one; connect an injected Arweave wallet or bind a public address.
-  <b>pq:ml-dsa-65</b> and <b>pq:ml-kem-768</b> are public cards for the bsigner registry
-  (FIPS 204 / 203): when the keychain is connected <b>and</b> bsigner WASM is armed, the
-  forge shows a short public fingerprint derived from your masterPRK; until that WASM is
-  browser-ready the card stays an honest stub — never a fake PQ key from nothing.
+  <b>pq:ml-dsa-65</b> and <b>pq:ml-kem-768</b> are your post-quantum public cards
+  (FIPS 204 signatures; ML-KEM-768 + X25519 "X-Wing" so people can seal things to you),
+  derived from the same masterPRK your recovery words carry, so those words restore them
+  too. The signing card shows your self-certifying <b>bzpq1</b> id; tap either card to
+  copy your full public card (id, both keys, signature). The secret halves exist only while
+  the keychain is connected and are wiped when it locks.
   Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
@@ -2405,6 +2407,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
+<script src="onboarding/vendor/bpq-lib.js?v=1"></script>
+<script src="bpq.js?v=1"></script>
 <script src="arweave.js?v=3"></script>
 <!-- the estate's ONE level-truth module — the same file market.html and
      museum.html load. Imported, never re-derived: a third copy of the SeedData
@@ -2511,6 +2515,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     K1={seed:seed,wif:w,eosPub:eos,pubK1:pub1};
   }
   function scrubAll(){
+    if(BSIGNER && typeof BSIGNER.wipe==='function') BSIGNER.wipe();
     if(MPRK){MPRK.fill(0);MPRK=null}
     if(K1&&K1.seed){K1.seed.fill(0)}
     K1=null;BRIDGED=null;
@@ -2715,7 +2720,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {
       alg:alg,
       name:name,
-      kind:alg==='ml-dsa-65'?'ML-DSA-65 (FIPS 204)':'ML-KEM-768 (FIPS 203)',
+      kind:alg==='ml-dsa-65'?'ML-DSA-65 (FIPS 204)':'X-Wing: ML-KEM-768 + X25519',
       registryId:alg
     };
   }
@@ -2734,7 +2739,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         try{
           var pub=BSIGNER.publicFingerprint(MPRK, pq.alg, pq.name||'');
           if(pub && pub.short){
-            return {kind:pq.kind, value:pub.short, fingerprint:pub.fp||pub.short, publicOnly:true, derived:true, alg:pq.alg};
+            return {kind:pq.kind, value:pub.short, fingerprint:pub.fp||pub.short, copy:pub.copy||null, publicOnly:true, derived:true, alg:pq.alg};
           }
         }catch(e){ /* fall through to honest stub — never fake */ }
       }
@@ -2792,7 +2797,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
     if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
     if(d.needsWasm) return 'bsigner registry · core derives when WASM armed — never a fake PQ key';
-    if(d.derived && /^ML-DSA|^ML-KEM/.test(d.kind||'')) return 'public fingerprint only · seed never stored';
+    if(d.derived && d.alg) return d.alg==='ml-dsa-65'?'your PQ id · tap to copy your public card · seed never stored':'seal-to-me key · tap to copy your public card · seed never stored';
     if(d.kind==='Solana') return 'ed25519 base58';
     if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
     if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
@@ -2875,11 +2880,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
       var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
+      if(d.derived && d.alg) el.setAttribute('data-pq-card', d.alg);
       el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
         '<div class="cv">'+esc(d.value)+'</div>'+
         '<div class="cx">'+esc(note)+'</div>';
       el.onclick=function(){
-        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=note},1200)}catch(e){}
+        try{navigator.clipboard.writeText(d.copy||d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=note},1200)}catch(e){}
       };
       box.appendChild(el);
       if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
@@ -2904,8 +2910,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
-  $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-dsa-65 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
-  $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ pq:ml-kem-768 public card for <b>'+SOUL+'</b> — fingerprint when bsigner WASM armed; honest stub until then'; };
+  $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
+  $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your seal-to-me key for <b>'+SOUL+'</b> — others can now seal files only you open'):('✓ pq:ml-kem-768 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before
@@ -6033,6 +6039,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }).catch(function(){ /* absent = honest stub residual */ });
   } else if(window.BNRBSIGNER && typeof window.BNRBSIGNER.publicFingerprint==='function'){
     BSIGNER=window.BNRBSIGNER;
+  }
+  /* PQ in the browser: bpq.js (spec docs/specs/SPEC-BPQ-1.md; vectors shared
+     with crates/bsigner, which derives the same keys natively). One PQ identity
+     per soul: context 'pq:'+name gives ML-DSA-65, X-Wing and the SLH-DSA
+     succession commitment. Secret halves live in this cache only while MPRK
+     does; scrubAll() wipes them. */
+  if(!BSIGNER && window.BPQ){
+    var PQKEYS={};
+    BSIGNER={
+      source:'bpq.js',
+      entry:function(mprk,name){
+        var ctx='pq:'+name, hit=PQKEYS[ctx];
+        if(hit && hit.mprk===mprk) return hit;
+        if(hit) hit.keys.wipe();
+        var keys=window.BPQ.keys(mprk,ctx);
+        hit=PQKEYS[ctx]={mprk:mprk, keys:keys, card:JSON.stringify(window.BPQ.card(keys))};
+        return hit;
+      },
+      keysFor:function(mprk,name){ return this.entry(mprk,name).keys },
+      publicFingerprint:function(mprk,alg,name){
+        var e=this.entry(mprk,name), k=e.keys;
+        if(alg==='ml-dsa-65') return {short:k.id, fp:k.words||k.id, copy:e.card};
+        if(alg==='ml-kem-768') return {short:'x-wing '+window.BPQ.fingerprint(k.kem.publicKey), fp:k.id, copy:e.card};
+        return null;
+      },
+      wipe:function(){ for(var c in PQKEYS){ PQKEYS[c].keys.wipe() } PQKEYS={} }
+    };
   }
   try{
     var saved=localStorage.getItem('bnr_soul');

@@ -1,17 +1,25 @@
-/* wallet-forge-pq.mjs — Gold move: forge pq: public cards (ML-DSA-65 / ML-KEM-768)
-   Beside classical contexts. Persist names only. Never fake PQ from nothing.
-   When keychain live + no bsigner WASM: honest "core derives when WASM armed".
-   When no keychain: chip says derives when keychain connects.
-   Served like soul-chrome; CI: tests.yml node job. */
+/* wallet-forge-pq.mjs — forge pq: public cards (ML-DSA-65 / X-Wing) beside
+   classical contexts. Persist names only. With the keychain live, bpq.js
+   derives real PQ keys from masterPRK: the cards must equal what Node derives
+   from the same root with the same files (two runtimes, one answer), and the
+   copied card must verify. Without the keychain: chip says derives when
+   keychain connects. Served like soul-chrome; CI: tests.yml node job. */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { createRequire } from 'node:module';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const SURF = join(ROOT, 'surfaces');
+// the same two files the page loads, evaluated in Node: the expected answer
+const require = createRequire(import.meta.url);
+require(join(SURF, 'onboarding', 'vendor', 'bpq-lib.js'));
+require(join(SURF, 'bpq.js'));
+const NODE_BPQ = globalThis.BPQ;
+const EXPECT = NODE_BPQ.keys(new Uint8Array(32).fill(0x2a), 'pq:gatesoul');
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.wasm': 'application/wasm',
@@ -65,7 +73,7 @@ try {
     await page.close();
   }
 
-  /* B · soul + keychain live — pq contexts seeded; honest WASM stub (no fake pubkey) */
+  /* B · soul + keychain live — pq contexts seeded; real PQ keys derived by bpq.js */
   {
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
     await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
@@ -91,6 +99,7 @@ try {
         armed: window.BNRWALLET.forgePq.armed(),
         dsa: window.BNRWALLET.forgePq.derive('pq:ml-dsa-65:gatesoul'),
         kem: window.BNRWALLET.forgePq.derive('pq:ml-kem-768:gatesoul'),
+        dashed: chips.filter(c => c.pq).map(c => c.dashed),
         chipTexts: pqChips.map(c => c.t.replace(/\s+/g, ' ').trim()),
         pqDom: document.querySelectorAll('#forge-chips [data-pq-card]').length,
         failBox: [...document.querySelectorAll('#forge-sec .stat.err, #forge-chips .chip')].some(el => /fail|error|refused/i.test(el.textContent) && /var\(--amber\)/.test(el.getAttribute('style') || '')),
@@ -99,11 +108,15 @@ try {
     ok('pq count is 2 after soul seed', live.count === 2, String(live.count) + ' ' + JSON.stringify(live.contexts));
     ok('contexts include pq:ml-dsa-65:gatesoul', live.contexts.includes('pq:ml-dsa-65:gatesoul'), JSON.stringify(live.contexts));
     ok('contexts include pq:ml-kem-768:gatesoul', live.contexts.includes('pq:ml-kem-768:gatesoul'), JSON.stringify(live.contexts));
-    ok('bsigner WASM not armed on main (honest residual)', live.armed === false);
-    ok('ml-dsa-65 derive is needsWasm stub (no fake value)', !!(live.dsa && live.dsa.needsWasm && !live.dsa.value), JSON.stringify(live.dsa));
-    ok('ml-kem-768 derive is needsWasm stub (no fake value)', !!(live.kem && live.kem.needsWasm && !live.kem.value), JSON.stringify(live.kem));
+    ok('PQ armed on the page (bpq.js)', live.armed === true);
+    ok('ml-dsa-65 card is the bzpq1 id Node derives from the same root', !!(live.dsa && live.dsa.derived && live.dsa.value === EXPECT.id), JSON.stringify(live.dsa && live.dsa.value) + ' vs ' + EXPECT.id);
+    ok('ml-kem-768 card is the X-Wing fingerprint Node derives', !!(live.kem && live.kem.derived && live.kem.value === 'x-wing ' + NODE_BPQ.fingerprint(EXPECT.kem.publicKey)), JSON.stringify(live.kem && live.kem.value));
+    const card = live.dsa && live.dsa.copy ? JSON.parse(live.dsa.copy) : null;
+    ok('copied public card verifies in Node and names the same id', !!(card && NODE_BPQ.verifyCard(card) && card.id === EXPECT.id));
+    ok('copied card carries no secret material', !!(card && Object.keys(card).sort().join(',') === 'bpq,dsa,id,kem,sig,succ'), card ? Object.keys(card).join(',') : 'none');
     ok('DOM paints two data-pq-card chips', live.pqDom === 2, String(live.pqDom));
-    ok('chips say core derives when WASM armed', live.chipTexts.every(t => /core derives when WASM armed/i.test(t)), JSON.stringify(live.chipTexts));
+    ok('armed chips are solid, not stubs', live.dashed.length === 2 && live.dashed.every(d => d === false), JSON.stringify(live.dashed));
+    ok('chips name the PQ id and the seal-to-me key', live.chipTexts.some(t => /your PQ id/.test(t)) && live.chipTexts.some(t => /seal-to-me key/.test(t)), JSON.stringify(live.chipTexts));
     ok('no New-bee fail box on forge pq cards', !live.failBox);
     // quick-add buttons still work if contexts cleared
     await page.evaluate(() => {
