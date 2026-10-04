@@ -392,7 +392,7 @@
       h += '<div class="opt na" role="radio" aria-checked="false" aria-disabled="true" data-bdata-aud="' + u.id + '" data-bdata-unavailable="' + u.id + '"><span class="ico" aria-hidden="true">' + u.ico + '</span><span class="name">' + tx(u.label[0], u.label[1]) + '</span><span class="soon">' + tx('bd.aud.notyet', 'Not available yet') + '</span><span class="desc">' + tx(u.why[0], u.why[1]) + '<span data-reg="cypherpunk"> · ' + tx(u.tech[0], u.tech[1]) + '</span></span></div>';
     });
     h += '</div>';
-    h += '<p class="law" data-bdata-seal-hint="1">🔒 <a href="wallet.html#pq-file" data-bdata-seal-link="1">' + tx('bd.aud.sealhint', 'For your eyes only, or for people you pick: seal the file in your wallet, then add the sealed file here.') + '</a></p>';
+    h += '<p class="law" data-bdata-seal-hint="1">🔒 <a href="wallet.html#pq-file" data-bdata-seal-link="1"><b>' + tx('bd.aud.sealhint', 'For your eyes only, or for people you pick: seal the file in your wallet, then add the sealed file here.') + '</b></a></p>';
     if (notice === 'nostore') h += '<div class="alert note"><b>' + tx('bd.aud.nostore', 'This browser would not save your choice, so nothing was asked.') + '</b></div>';
     if (sel) h += '<div class="chose"><span>' + tx('wl.bpay.youchose', 'You chose') + ' <b>🌐 ' + tx('wl.bpay.aud.public', 'Public') + '</b> <span class="sub">· ' + when(sel.selectedAt) + '</span></span><button type="button" class="btn quiet" data-bdata-undo="1" data-act="undo" data-fk="undo">' + tx('bd.aud.undo', 'Undo this choice') + '</button></div>';
     h += '<details class="more" data-reg-disclose data-dk="aud-rules"><summary>' + tx('bd.rules.sum', 'The rules behind this') + '</summary>';
