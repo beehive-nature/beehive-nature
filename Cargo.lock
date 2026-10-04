@@ -545,6 +545,7 @@ name = "capability"
 version = "0.1.0"
 dependencies = [
  "ed25519-dalek",
+ "ml-dsa",
  "serde",
  "serde_json",
  "type-bindings",
