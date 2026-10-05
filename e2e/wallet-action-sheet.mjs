@@ -94,6 +94,10 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         (state.reads = state.reads || []).push(body.account_name);
         if (state.slowAcct) await new Promise(r => setTimeout(r, state.slowAcct));
         if (state.acctDown) return route.abort();   // no node answers the account read
+        // a name that cannot be an account: nodes answer 400 "Name not properly normalized" (as review6 read it on both public hosts)
+        if (!/^[a-z1-5.]{1,12}$/.test(body.account_name) || /\.$/.test(body.account_name)) return json({ code: 400, message: 'Invalid Request', error: { code: 3010000, name: 'invalid_http_request', what: 'Invalid http request', details: [{ message: 'Name not properly normalized (name: ' + body.account_name + ', normalized: x)' }] } }, 400);
+        // one node a block behind: it says unknown key for an account the other node holds
+        if (state.staleHost === body.account_name && /eosnation/.test(url)) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'account_query_exception', what: 'Account Query Exception', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + body.account_name + ')' }] } }, 500);
         // a name the forge has not made yet does not exist: nodes answer 500 "unknown key"
         if (/^newacctname/.test(body.account_name) && !state.keys[body.account_name]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + body.account_name + ')' }] } }, 500);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
@@ -1140,17 +1144,27 @@ try {
     await page.waitForFunction(() => /is not a Vaulta account yet/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
     const na = await page.evaluate(() => ({ sum: document.getElementById('sum-bridge').textContent.trim(), sumLink: !!document.querySelector('#sum-bridge a[href="#connect-sec"]'),
       verdict: document.getElementById('kc-bridge-verdict').textContent, card: window.BNRPAY.railAddresses(null, 'newacctnamez')[0] }));
-    ok('at a glance says the account does not exist, with its one link, never "could not read"', na.sum === 'newacctnamez is not a Vaulta account yet, so this wallet cannot sign for it. choose the account' && na.sumLink, JSON.stringify(na));
+    ok('at a glance says the account does not exist, with its link and check again, never "could not read"', na.sum === 'newacctnamez is not a Vaulta account yet, so this wallet cannot sign for it. choose the account or check again' && na.sumLink, JSON.stringify(na));
     ok('the keychain\'s verdict says the same', /^newacctnamez is not a Vaulta account yet\. choose the account/.test(na.verdict), na.verdict);
     ok('the receive card says no Vaulta account, never a try again that cannot work', na.card.v === null && na.card.why === 'vacct-noacct', JSON.stringify(na.card));
     await openRx();
     vc = await vcard();
-    ok('and the open card says it in one sentence with its one link', !!vc && /^newacctnamez is not a Vaulta account yet, so there is no Vaulta address to share\. choose the account$/.test(vc.t) && !vc.btn, JSON.stringify(vc));
+    ok('and the open card says it in one sentence with its link and check again', !!vc && /^newacctnamez is not a Vaulta account yet, so there is no Vaulta address to share\. choose the account or check again$/.test(vc.t) && vc.btn === 'check again', JSON.stringify(vc));
     const p0 = (state.posts || []).length;
     await page.evaluate(() => { document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click();
       document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.1'; document.getElementById('sv-go').click(); });
     await page.waitForFunction(() => /nothing was signed/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
     ok('a send from it is refused in the same words, and nothing is signed', /^newacctnamez is not a Vaulta account yet, so nothing was signed\./.test((await page.innerText('#sv-stat')).trim()) && (state.posts || []).length === p0, await page.innerText('#sv-stat'));
+    // the account forge and the vault's "use it here" read the same state
+    await page.waitForFunction(() => /cannot pay for a new account/.test(document.getElementById('ac-stat').textContent), null, { timeout: 15000 }).catch(() => {});
+    const forge = await page.evaluate(() => ({ t: document.getElementById('ac-stat').textContent.trim(), kind: document.getElementById('bridge-sec').getAttribute('data-kind'), say: document.getElementById('bridge-sec').getAttribute('data-noacct') }));
+    ok('the account forge says it does not exist and offers to make it from an account you have', /^newacctnamez is not a Vaulta account yet, so it cannot pay for a new account\. connect an account you have, and make newacctnamez from it here\. choose the account or check again/.test(forge.t), forge.t);
+    ok('the bridge tells the vault what it shows', forge.kind === 'noacct' && forge.say === 'newacctnamez is not a Vaulta account yet', JSON.stringify(forge));
+    // check again reads it: once the account exists, every line follows
+    state.keys.newacctnamez = [STRANGER_KEY];
+    await page.evaluate(() => document.querySelector('#sum-bridge button.wl-act').click());
+    await page.waitForFunction(() => /^newacctnamez · let this wallet sign for it$/.test(document.getElementById('sum-bridge').textContent.trim()), null, { timeout: 20000 }).catch(() => {});
+    ok('check again reads the account, and at a glance follows', (await page.textContent('#sum-bridge')).trim() === 'newacctnamez · let this wallet sign for it', await page.textContent('#sum-bridge'));
     // a read that gets no answer at all keeps its try again, and the try again can succeed
     state.acctDown = true;
     await page.evaluate(() => { document.getElementById('wq').value = 'someoneelse1'; document.getElementById('wgo').click(); });
@@ -1159,10 +1173,12 @@ try {
     vc = await vcard();
     ok('an account read that got no answer says so on the card, with try again', !!vc && /^we could not check someoneelse1 just now, so no Vaulta address is shown\. try again$/.test(vc.t) && vc.btn === 'try again', JSON.stringify(vc));
     state.acctDown = false;
+    state.staleHost = 'someoneelse1';   // the first node now says unknown key; the second holds the account
     await page.evaluate(() => [...document.getElementById('rx-cards').children].find(x => /Vaulta/.test(x.textContent)).querySelector('button.wl-act').click());
     await page.waitForFunction(() => /once this wallet can sign for someoneelse1/.test(document.getElementById('rx-cards').innerText), null, { timeout: 15000 }).catch(() => {});
     vc = await vcard();
     ok('and its try again reads the account, and the card follows', !!vc && /^your Vaulta address shows here once this wallet can sign for someoneelse1\./.test(vc.t), JSON.stringify(vc));
+    ok('one node saying unknown key while another holds the account never makes it nonexistent', (await page.textContent('#sum-bridge')).trim() === 'someoneelse1 · let this wallet sign for it', await page.textContent('#sum-bridge'));
     // a key placed in the bridge's field (as the vault places it) goes when the bridge hides
     await page.waitForFunction(() => document.getElementById('bridge-sec').style.display === 'block' && !!document.getElementById('br-paste'), null, { timeout: 15000 }).catch(() => {});
     await page.evaluate(w => { document.getElementById('br-paste').value = w; }, DEV_WIF);
@@ -1182,6 +1198,18 @@ try {
     await page.waitForFunction(() => { const f = document.getElementById('br-paste'); return f && /kingbeelovis/.test(f.placeholder); }, null, { timeout: 20000 }).catch(() => {});
     fld = await page.evaluate(() => { const f = document.getElementById('br-paste'); return { ph: f ? f.placeholder : null, v: f ? f.value : '' }; });
     ok('a key placed for someoneelse1 is not carried into kingbeelovis\'s field', /kingbeelovis/.test(fld.ph || '') && fld.v === '', JSON.stringify({ ph: fld.ph, held: fld.v.length }));
+    state.staleHost = null;
+    await page.evaluate(() => { document.getElementById('wq').value = 'king7'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => /king7 is not a Vaulta account name/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.waitForFunction(() => /^king7 is not a Vaulta account name, so it cannot pay/.test(document.getElementById('ac-stat').textContent.trim()), null, { timeout: 15000 }).catch(() => {});
+    const k7 = await page.evaluate(() => ({ sum: document.getElementById('sum-bridge').textContent.trim(), sumBtn: !!document.querySelector('#sum-bridge button'),
+      verdict: document.getElementById('kc-bridge-verdict').textContent, verdictBtn: !!document.querySelector('#kc-bridge-verdict button'),
+      forge: document.getElementById('ac-stat').textContent.trim(), forgeBtn: !!document.querySelector('#ac-stat button'), card: window.BNRPAY.railAddresses(null, 'king7')[0] }));
+    ok('a name that cannot be an account is said as that at a glance, with its one link and no try again', k7.sum === 'king7 is not a Vaulta account name, so this wallet cannot sign for it. choose the account' && !k7.sumBtn, JSON.stringify(k7));
+    ok('the verdict, the forge and the receive card say the same, with no try again', /^king7 is not a Vaulta account name\. choose the account/.test(k7.verdict) && !k7.verdictBtn && /^king7 is not a Vaulta account name, so it cannot pay for a new account\. choose the account/.test(k7.forge) && !k7.forgeBtn && k7.card.why === 'vacct-noacct', JSON.stringify(k7));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click(); });
+    await page.waitForFunction(() => /king7 is not a Vaulta account name/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    ok('the Send line says the same, with no try again', /^king7 is not a Vaulta account name, so there is nothing to send from\. choose the account$/.test((await page.innerText('#sv-stat')).trim()) && !(await page.$('#sv-stat button')), await page.innerText('#sv-stat'));
     ok('no key is left in this browser\'s storage', await page.evaluate(() => !JSON.stringify(localStorage).includes('5KQwrPbw')));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();

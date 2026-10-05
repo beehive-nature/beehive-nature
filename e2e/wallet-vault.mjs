@@ -132,6 +132,17 @@ await page.waitForTimeout(300);
 t('with the bridge closed, the key is placed nowhere (never the hidden #br-wif)',
   (await page.inputValue('#br-wif')) === '' && (await page.locator('#br-paste').count()) === 0);
 t('and the line names the keychain to connect', await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#kc-sec"]')));
+// the bridge shows for an account a node says does not exist: it has no field, and says why (as brShow marks it)
+await page.evaluate(() => { const k = document.getElementById('kc-cards'); window.__kcWas = k.style.display; k.style.display = 'block';
+  const s = document.getElementById('bridge-sec'); s.style.display = 'block'; s.setAttribute('data-kind', 'noacct'); s.setAttribute('data-noacct', 'kingbeelovs is not a Vaulta account yet'); });
+await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
+await page.waitForTimeout(300);
+t('for an account that does not exist, the key is placed nowhere and the line says so, with its one link',
+  /^kingbeelovs is not a Vaulta account yet, so this key cannot be used here\. choose the account/.test((await page.innerText('#vlt-stat')).trim())
+    && await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#connect-sec"]')) && (await page.locator('#br-paste').count()) === 0 && (await page.inputValue('#br-wif')) === '',
+  await page.innerText('#vlt-stat'));
+await page.evaluate(() => { document.getElementById('kc-cards').style.display = window.__kcWas;
+  const s = document.getElementById('bridge-sec'); s.removeAttribute('data-kind'); s.removeAttribute('data-noacct'); s.style.display = 'none'; });
 // the bridge open with its one-press field, as brCalm paints it once the keychain reads the account
 await page.evaluate(() => {
   document.getElementById('bridge-sec').style.display = 'block';

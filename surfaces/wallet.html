@@ -2809,6 +2809,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var VACCT_LAPSED=false;   /* 'self' because the name's row ran out: the bare name may be a stranger's account */
   var VACCT_READING=null;   /* the pointer read in flight: a card says "reading", never "could not read", while it is out */
   var VACCT_NOACCT=null;    /* the account a node said does not exist (unknown key): no Vaulta account, never a read that failed */
+  /* a name the chain can hold as an account (a trailing dot is not normalized), and the one sentence for one that is none */
+  function acctNameOk(a){ return ACCT_RE.test(a||'')&&!/\.$/.test(a||'') }
+  function noAcctWords(a){ return a+(acctNameOk(a)?' is not a Vaulta account yet':' is not a Vaulta account name') }
+  /* the noacct lines' second press: read the account again, for a name that could be one */
+  function noAcctAgain(a,on){ return acctNameOk(a)?[' or ',{btn:'check again',on:on||function(){ checkBridge() }}]:[] }
   var BR_UNREAD=null;       /* the account whose last check got no answer at all */
   function vacct(){ return (SOUL&&VACCT_FOR===SOUL&&VACCT)||SOUL }
   function vrecv(){ return (SOUL&&VACCT_FOR===SOUL&&(VRECV||VACCT))||SOUL }
@@ -4934,11 +4939,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(mine) out.push({t:'Vaulta · A',ctx:'vaulta:'+va,unit:'A',v:vr,
         note:vr!==soul?soul+'.b points at '+vr+', which receives A directly · memo optional':'your account name receives A directly · memo optional'});
       else {
-        var noacct=(bare&&!ACCT_RE.test(soul))||(BRIDGED===false&&VACCT_NOACCT===va);
+        var noacct=(bare&&!acctNameOk(soul))||(BRIDGED===false&&VACCT_NOACCT===va);
         var why=noacct?'vacct-noacct':bare&&VACCT_LAPSED?'vacct-lapsed':!MPRK?'vacct-nokc':BRIDGED===false?'vacct-unbridged':BR_CHECK?'vacct-checking':BR_UNREAD===va?'vacct-unchecked':'vacct-unknown';
         out.push({t:'Vaulta · A',ctx:'vaulta:'+va,unit:'A',v:null,why:why,
           err:!bare?soul+'.b points at '+vr+'. This wallet shows it here once it signs for '+va
-            :why==='vacct-noacct'?(ACCT_RE.test(soul)?'get_account '+va+': unknown account; no current .b row points '+soul+' at another':soul+' is not a Vaulta account name, and no current .b row points it at one')
+            :why==='vacct-noacct'?(acctNameOk(soul)?'get_account '+va+': unknown account; no current .b row points '+soul+' at another':soul+' is not a Vaulta account name, and no current .b row points it at one')
             :why==='vacct-unchecked'?'get_account '+va+' answered nothing'
             :why==='vacct-lapsed'?soul+'.b has lapsed, so the bare account '+soul+' may be a stranger\u2019s; it shows here only once this wallet signs for it'
             :'this wallet has not shown it signs for '+va+', so '+va+' may be a stranger\u2019s account; it shows here once it does'});
@@ -5094,8 +5099,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(held){
       await checkBridge();
       if(BRIDGED===true&&held.adds&&held.extra===brExtraKey(extra)){ BR_PENDING=null; return {tx:held.tx,earlier:true} }
-      if(BRIDGED===null)
-        throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held','get_account '+a+' answered nothing · tx '+held.tx);
+      if(BRIDGED===null||VACCT_NOACCT===a)   /* an account a paste already went to cannot have stopped existing: that answer proves nothing */
+        throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held',(VACCT_NOACCT===a?'get_account '+a+' answered unknown account':'get_account '+a+' answered nothing')+' · tx '+held.tx);
       /* proof it never landed: its window is over and the account, read, lacks the key it added */
       var proven=held.adds&&BRIDGED===false&&Date.now()>=held.exp+30000;
       if(!proven&&(held.adds||Date.now()<held.exp+86400000))
@@ -5198,6 +5203,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function checkBridgeRun(){
     if(!K1||!SOUL){BRIDGED=null;return}
     if(!vacctKnown()){BRIDGED=null;setBridgeState(false,'could not read where '+SOUL+'.b points','unknown');return}
+    if(!acctNameOk(vacct())){ var a0=vacct(); VACCT_NOACCT=a0; BR_UNREAD=null; BRIDGED=false; setBridgeState(false,a0+' is not a valid Vaulta account name: no read','noacct'); return }   /* no node can read it, so none is asked */
     $('kc-bridge-verdict').textContent='checking '+vacct()+'…';$('kc-bridge-verdict').className='stamp';
     var a=vacct();
     sumAuth('checking');
@@ -5267,7 +5273,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     else if(kind==='checking') wlSay(el,['checking '+a+'…']);
     else if(kind==='missing') wlSay(el,[a+' · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
     else if(kind==='noperm') wlSay(el,[a+' has no active key, so this wallet cannot sign for it. ',{to:'bridge-sec',t:'see what to do'}]);
-    else if(kind==='noacct') wlSay(el,[a+' is not a Vaulta account yet, so this wallet cannot sign for it. ',{to:'connect-sec',t:'choose the account'}]);
+    else if(kind==='noacct') wlSay(el,[noAcctWords(a)+', so this wallet cannot sign for it. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(a)));
     else if(kind==='multisig') wlSay(el,[a+' needs more than one key to sign, so this wallet cannot sign for it alone. ',{to:'bridge-sec',t:'see what to do'}]);
     else if(kind==='unread'){ wlSay(el,['could not read '+a+' · ']); var b=document.createElement('button'); b.type='button'; b.textContent='try again'; b.onclick=function(){ checkBridge() }; el.appendChild(b) }
     else if(kind==='unknown'){ wlSay(el,['could not read where '+SOUL+'.b points · ']); var b2=document.createElement('button'); b2.type='button'; b2.textContent='try again'; b2.onclick=function(){ readAll() }; el.appendChild(b2) }
@@ -5278,7 +5284,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var v=$('kc-bridge-verdict');
     if(kind==='unread'||kind==='unknown') wlSay(v,[(kind==='unknown'?'could not read where '+SOUL+'.b points':'could not read '+vacct())+' just now. ',{btn:'try again',on:function(){ if(kind==='unknown')readAll(); else checkBridge() }},{cy:'chain authority: '+(label||kind)}]);
     else if(kind==='noperm') wlSay(v,[vacct()+' has no active key this wallet can join. ',{to:'bridge-sec',t:'see what to do'},{cy:'chain authority: '+(label||kind)}]);
-    else if(kind==='noacct') wlSay(v,[vacct()+' is not a Vaulta account yet. ',{to:'connect-sec',t:'choose the account'},{cy:'chain authority: '+(label||kind)}]);
+    else if(kind==='noacct') wlSay(v,[noAcctWords(vacct())+'. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(vacct()),[{cy:'chain authority: '+(label||kind)}]));
     else if(label) v.textContent=label; else wlSay(v,['not on '+vacct()+' yet · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
     v.className='stamp'+(ok?' ok':'');
     BR_OK=!!ok; BR_KIND=kind||null;
@@ -5299,6 +5305,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var on=!!(MPRK&&K1&&(done||BR_BUSY||said||(!BR_OK&&BR_KIND!=='unread'&&BR_KIND!=='unknown')));
     $('bridge-sec').style.display=on?'block':'none';
     if(!on){ var f=$('br-paste'); if(f)f.value='' }   /* the bridge hides: a key placed in its field goes with it */
+    /* what the bridge says, for the vault's "use it here" (a separate script): its kind, and for an account that does not exist, its sentence */
+    $('bridge-sec').setAttribute('data-kind',BR_KIND||''); $('bridge-sec').setAttribute('data-noacct',BR_KIND==='noacct'?noAcctWords(a):'');
   }
   function brRender(){
     if(BR_OK&&!BR_BUSY&&!(BR_DONE&&BR_DONE.acct===vacct())&&!(BR_PENDING&&BR_PENDING.acct===vacct()))BR_SAID=null;   /* signing by another way: old words go (a held paste keeps its words) */
@@ -5315,7 +5323,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     if(BR_KIND==='noperm'){ wlSay(el,['this wallet cannot be added to '+a+', so choose the account you want to use. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': no active permission'}]); return }
-    if(BR_KIND==='noacct'){ wlSay(el,[a+' is not a Vaulta account yet, so choose the account you want to use. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': unknown account'}]); return }
+    if(BR_KIND==='noacct'&&!(BR_PENDING&&BR_PENDING.acct===a)){ wlSay(el,[noAcctWords(a)+', so choose the account you want to use. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(a),[{cy:'get_account '+a+': unknown account'}])); return }   /* a held paste keeps its own words */
     if(BR_KIND==='multisig'){ wlSay(el,[a+' needs more than one key to sign, so this wallet cannot sign for it alone. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': its active threshold is more than 1; one key at weight 1 cannot meet it'}]); return }
     var say=document.createElement('div');
     say.textContent='this wallet does not sign for '+a+' yet, so paste its active key once and every sign after is one press. the key is used for this one press and wiped from the page right after.';
@@ -5375,7 +5383,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(a!==vacct())return;
     var p=BR_PENDING&&BR_PENDING.acct===a?BR_PENDING:null;
     if(BRIDGED===true){ BR_PENDING=null; BR_SAID=null; BR_DONE={acct:a,tx:p?p.tx:null}; brRender(); return }
-    if(BRIDGED===null)brSay(a,['could not read '+a+' just now. ',{btn:'check again',on:brRecheck},{cy:'get_account '+a+' answered nothing'}]);
+    if(BRIDGED===null||VACCT_NOACCT===a)brSay(a,['could not read '+a+' just now, so this wallet cannot tell yet whether the last paste went in. ',{btn:'check again',on:brRecheck},{cy:VACCT_NOACCT===a?'get_account '+a+' answered unknown account; a paste is never given back on that answer':'get_account '+a+' answered nothing'}]);
     else if(p&&(Date.now()<p.exp+30000||(!p.adds&&Date.now()<p.exp+86400000)))brSay(a,[a+' does not show this wallet yet, and the last paste may still go in. ',{btn:'check again',on:brRecheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]);
     else { if(p&&p.adds)brGiveBack(p); BR_PENDING=null; brSay(a,['the last paste did not go in, so nothing changed. paste '+a+'\u2019s active key here to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+a:a+'@active does not carry this wallet\u2019s key'}]) }
     brRender();
@@ -7002,6 +7010,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(st.hasAttribute('data-act'))return;   /* the line holds what the last press did, until the reader types again */
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to make a new Vaulta account.']); return }
     if(pointerUnread()){ pointerSay(st); return }
+    if(!acctNameOk(a)||why==='missing'||(BRIDGED===false&&VACCT_NOACCT===a)){
+      var mk=/^[a-z][a-z1-5]{11}$/.test(a);   /* a name the forge itself can make */
+      wlSay(st,[noAcctWords(a)+', so it cannot pay for a new account. '+(mk?'connect an account you have, and make '+a+' from it here. ':''),{to:'connect-sec',t:'choose the account'}]
+        .concat(noAcctAgain(a,function(){ if(K1)checkBridge(); acReread() }),[{cy:'get_account '+a+': unknown account'}]));
+      return;
+    }
     var cy={cy:'sending draws on staked CPU '+cpuAvail+'μs and NET '+(netAvail/1024).toFixed(0)+' KB available, not on liquid A; the RAM purchase draws on liquid A'};
     if(liq===null){
       if(why==='failed') wlSay(st,['could not read the A on '+a+' just now, so the cost of a new account is not known yet. ',{btn:'try again',on:acReread},{cy:'get_account / get_currency_balance '+A_TOKEN+' answered nothing'}]);
@@ -7039,15 +7053,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   });
   /* an account, or a node's word that it does not exist; null when no node answered */
   async function acctOrMissing(name){
+    /* every node is asked: one a block behind, or restoring, is not the chain. Missing only when
+       at least one node said so and every node that answered said so; a node that holds it wins */
+    var missing=0, other=0;
     for(var i=0;i<VH.length;i++){
       try{
         var r=await fetchT(VH[i]+'/v1/chain/get_account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({account_name:name})});
         var d=null; try{ d=await r.json() }catch(je){}
         if(r.ok&&d&&d.account_name)return {acc:d};
-        if(!r.ok&&d&&/unknown key|does not exist|unknown account|account_query/i.test(JSON.stringify(d)))return {missing:true};
-      }catch(e){}
+        if(!r.ok&&d&&/unknown key|does not exist|unknown account|account_query|not properly normalized|invalid name/i.test(JSON.stringify(d)))missing++;
+        else other++;
+      }catch(e){}   /* no answer: no word either way */
     }
-    return null;
+    return missing&&!other?{missing:true}:null;
   }
   $('ac-ram').addEventListener('input',function(){ $('ac-stat').removeAttribute('data-act'); if(VH&&SOUL)refreshAcctPanel() });
   $('ac-name').addEventListener('input',function(){ $('ac-stat').removeAttribute('data-act') });
@@ -8374,7 +8392,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(BRIDGED===null){tell('fail',['Could not read '+vacct()+' just now. Press Sign to try again.']);return 'fail'}
     if(BRIDGED!==true&&BR_KIND==='multisig'){tell('fail',[vacct()+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was signed. ',{to:'bridge-sec',t:'see what to do'}]);return 'stop'}
     if(BRIDGED!==true&&BR_KIND==='noperm'){tell('fail',['This wallet cannot be added to '+vacct()+', so nothing was signed. ',{to:'bridge-sec',t:'see what to do'}]);return 'stop'}
-    if(BRIDGED!==true&&BR_KIND==='noacct'){tell('fail',[vacct()+' is not a Vaulta account yet, so nothing was signed. ',{to:'connect-sec',t:'choose the account'}]);return 'stop'}
+    if(BRIDGED!==true&&BR_KIND==='noacct'){tell('fail',[noAcctWords(vacct())+', so nothing was signed. '+(acctNameOk(vacct())?'Press Sign to check it again, or ':''),{to:'connect-sec',t:'choose the account'}]);return acctNameOk(vacct())?'fail':'stop'}
     if(BRIDGED!==true){tell('wait',['This wallet does not sign for '+vacct()+' yet. Paste '+vacct()+'\u2019s active key once: one press adds this wallet to the account and does this too. The key is used once and never kept.']);return 'paste'}
     for(var i=0;i<40&&!(ADAPTERS.vaulta&&ADAPTERS.vaulta.attached);i++) await new Promise(function(r){setTimeout(r,200)});
     tell('busy',['Signing…']);
@@ -9041,7 +9059,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(c.why==='vacct-checking') return ['checking '+vacct()+', one moment.'];
     if(c.why==='vacct-unchecked') return ['we could not check '+vacct()+' just now, so no Vaulta address is shown. ',{btn:'try again',on:function(){ var p=checkBridge(); rxShow(); p.then(rxShow,rxShow) }}];
     if(c.why==='vacct-lapsed') return [SOUL+'.b has lapsed, so it points at no account and no Vaulta address is shown. ',{to:'connect-sec',t:'choose the account'}];
-    if(c.why==='vacct-noacct') return [(ACCT_RE.test(SOUL)?vacct()+' is not a Vaulta account yet':SOUL+' is not a Vaulta account name')+', so there is no Vaulta address to share. ',{to:'connect-sec',t:'choose the account'}];
+    if(c.why==='vacct-noacct') return [noAcctWords(vacct())+', so there is no Vaulta address to share. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(vacct(),function(){ var p=checkBridge(); rxShow(); p.then(rxShow,rxShow) }));
     return ['this address could not be made here, so none is shown. ',{btn:'try again',on:rxRender}];
   }
   /* the open receive panel follows the wallet: rxShow redraws it, rxSoft only when a card would change */
@@ -9354,7 +9372,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     else if(!vacctKnown()&&VACCT_READING){ wlSay(st,['reading which account '+SOUL+'.b points at, one moment.']); VACCT_READING.then(function(){ svRefresh() },function(){ svRefresh() }) }
     else if(!vacctKnown()) wlSay(st,['we could not read which account '+SOUL+'.b points at just now. ',{btn:'try again',on:function(){ resolveVacct().then(function(){ svRefresh() },function(){ svRefresh() }) }}]);
     else if(BRIDGED===null) wlSay(st,['whether this wallet signs for '+vacct()+' is not known yet. ',{btn:'check again',on:function(){ checkBridge().then(function(){ svRefresh() },function(){ svRefresh() }) }},{cy:'BRIDGED unknown: the check is running, or get_account / the registry read failed'}]);
-    else if(BRIDGED===false&&VACCT_NOACCT===vacct()) wlSay(st,[vacct()+' is not a Vaulta account yet, so there is nothing to send from. ',{to:'connect-sec',t:'choose the account'}]);
+    else if(BRIDGED===false&&VACCT_NOACCT===vacct()) wlSay(st,[noAcctWords(vacct())+', so there is nothing to send from. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(vacct(),function(){ checkBridge().then(function(){ svRefresh() },function(){ svRefresh() }) })));
     else if(BRIDGED!==true) wlSay(st,['this wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]);
     else if(liq===null) wlSay(st,[after?'we could not read your A just now. ':'your A is not known yet. ',{btn:after?'try again':'read it',on:function(){ readVaulta(vacct()).then(function(){ svRefresh(true) },function(){ svRefresh(true) }) }},after?{cy:'get_account / get_currency_balance at '+A_TOKEN+' answered nothing'}:null]);
     else wlSay(st,['you can send up to '+aAmount(liq)+' from '+vacct()+'.',{cy:'liquid A at '+A_TOKEN+' · signed by the keychain K1 key · cap unit A'}]);
@@ -10318,7 +10336,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!d&&vaultaMissing(why)) wlSay($('v-stat'),['there is no Vaulta account named '+acct+' yet. ',{to:'acct-sec',t:'make one'},{cy:'get_account '+acct+': '+JSON.stringify(why).slice(0,160)}]);
       else wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
       $('v-stat').className='stat err'; wlRead($('v-stat'),false);
-      if(vacct()===acct)refreshAcctPanel('failed');   /* the account forge says it too, never a figure from before */
+      if(vacct()===acct)refreshAcctPanel(!d&&vaultaMissing(why)?'missing':'failed');   /* the account forge says it too, never a figure from before */
       return;
     }
     LAST_ACC=d; LAST_A={acct:acct,a:a};
@@ -10944,6 +10962,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var vd=$('kc-bridge-verdict'), signs=!!(vd&&/(^|\s)ok(\s|$)/.test(vd.className));
       if(!kcOn) sayP(['this key lets your keychain sign for your account, so ',{to:'kc-sec',t:'connect your keychain'},' first, then press let this wallet sign on this key again.',{cy:'#bridge-sec closed: no keychain in this tab. The key was placed nowhere.'}],'var(--amber)');
       else if(signs) sayP(['this wallet already signs for your account, so this key is not needed here.',{cy:'#bridge-sec closed: the account already carries this wallet\'s key. The key was placed nowhere.'}]);
+      else if(showing&&sec.getAttribute('data-kind')==='noacct') sayP([(sec.getAttribute('data-noacct')||'your account is not a Vaulta account yet')+', so this key cannot be used here. ',{to:'connect-sec',t:'choose the account'},{cy:'no #br-paste: get_account answered unknown account. The key was placed nowhere.'}],'var(--amber)');
+      else if(showing&&sec.getAttribute('data-kind')==='multisig') sayP(['your account needs more than one key to sign, so this key cannot be used here. ',{to:'bridge-sec',t:'see why'},{cy:'no #br-paste: the active threshold needs more weight than one key carries. The key was placed nowhere.'}],'var(--amber)');
       else if(showing) sayP(['your account has no active key this wallet can join, so this key cannot be used here. ',{to:'bridge-sec',t:'see why'},{cy:'no #br-paste: the account has no active permission. The key was placed nowhere.'}],'var(--amber)');
       else sayP(['your account could not be read just now, so wait a moment and press let this wallet sign again.',{cy:'#bridge-sec closed: the account read failed. The key was placed nowhere.'}],'var(--amber)');
       return;
