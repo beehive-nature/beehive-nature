@@ -314,7 +314,9 @@ try {
     const arwStat = await page.locator('#arw-stat').innerText();
     ok('inject sign path spoke honestly, in the Arweave panel and nowhere else', /enough AR|said no|confirmed|sent/i.test(arwStat) && txOut === '', (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
-    ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    ok('vault JWK option reads as an Arweave key file, its scaffold tag kept for cypherpunk',
+      await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /Arweave key file/.test(t))
+      && await page.locator('#vlt-scaffold-law').textContent().then(t => /JWK paste is scaffold · advanced/.test(t)));
     // a publish still on its way is never signed twice: a second press points to it instead
     {
       const signs0 = await page.evaluate(() => window.__arSignCount || 0), posts0 = posted.length;

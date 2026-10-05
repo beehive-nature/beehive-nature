@@ -70,6 +70,9 @@ t('no page errors on boot', pageErrors.length === 0, pageErrors.join(' | '));
 
 console.log('\n── the three states ──');
 t('starts on the create-a-vault state', await page.locator('#vlt-new').isVisible());
+t('the vault speaks in lowercase sentences: no ALL-CAPS button or stamp',
+  await page.evaluate(() => ['vlt-create', 'vlt-unlock', 'vlt-add', 'vlt-openstamp'].every(i => !/\b[A-Z]{3,}\b/.test(document.getElementById(i).textContent))));
+t('before create, the no-reset truth sits beside the button, not inside a fold', await page.locator('#vlt-noreset').isVisible());
 t('locked state hidden', !(await page.locator('#vlt-locked').isVisible()));
 t('unlocked state hidden', !(await page.locator('#vlt-open').isVisible()));
 
@@ -145,13 +148,17 @@ console.log('\n── lock / unlock round trip ──');
 await page.click('#vlt-lock');
 await page.waitForTimeout(300);
 t('locked state shown', await page.locator('#vlt-locked').isVisible());
+t('a vault no passkey opens offers no passkey button', !(await page.locator('#vlt-pkunlock').isVisible()));
 t('the key handed to the bridge is wiped when the vault locks', (await page.inputValue('#br-paste')) === '');
+await page.evaluate(() => { window.__vaultOpened = 0; document.addEventListener('vault-unlocked', () => { window.__vaultOpened++; }); });
 await page.evaluate(() => { document.getElementById('br-paste').remove(); document.getElementById('bridge-sec').style.display = 'none'; });
 t('entries not in the DOM while locked', (await page.locator('#vlt-list .chip').count()) === 0);
 await page.fill('#vlt-pass', gen);
 await page.click('#vlt-unlock');
 await page.waitForTimeout(2500);
 t('unlocked again', await page.locator('#vlt-open').isVisible());
+t('the vault says it opened (vault-unlocked), so a part reading a sealed key need not wait for a click',
+  await page.evaluate(() => window.__vaultOpened === 1));
 t('both entries survived', (await page.locator('#vlt-list .chip').count()) === 2);
 
 console.log('\n── wrong keypass ──');
@@ -256,6 +263,15 @@ if (hasPrf) {
     await revokeBtn.click();
     await page.waitForTimeout(800);
     t('a slot was revoked', (await page.locator('#vlt-devices .chip').count()) === before - 1);
+    // only the passkey is left: a file of this vault could be opened nowhere, so none is written
+    let dlNow = false;
+    const onDl = () => { dlNow = true; };
+    page.on('download', onDl);
+    await page.click('#vlt-export');
+    await page.waitForTimeout(500);
+    page.off('download', onDl);
+    t('a passkey-only vault is not saved as a file nothing could open; it offers add a keypass',
+      !dlNow && await page.locator('#vlt-stat button', { hasText: 'add a keypass' }).isVisible(), await page.textContent('#vlt-stat'));
   } else {
     t('a slot was revoked', false, 'vault not open, or no revocable slot — an earlier step failed');
   }
@@ -313,9 +329,11 @@ t('kc-rec summary names scaffold · recovery', await page.locator('#kc-rec-scaff
 t('vlt-secret scaffold present', await page.locator('#vlt-secret-scaffold').count().then(n => n === 1));
 t('vlt-secret summary names scaffold · recovery', await page.locator('#vlt-secret-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
 t('br-wif scaffold present', await page.locator('#br-wif-scaffold').count().then(n => n === 1));
-t('seed option labeled scaffold', await page.locator('#vlt-type option[value="seed"]').textContent().then(x => /scaffold/i.test(x)));
-t('vaulta option labeled scaffold', await page.locator('#vlt-type option[value="vaulta"]').textContent().then(x => /scaffold/i.test(x)));
-t('arweave option still scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(x => /scaffold/i.test(x)));
+t('seed option reads as recovery words', await page.locator('#vlt-type option[value="seed"]').textContent().then(x => /recovery words/i.test(x)));
+t('vaulta option reads as a Vaulta key', await page.locator('#vlt-type option[value="vaulta"]').textContent().then(x => /Vaulta key/.test(x)));
+t('arweave option reads as an Arweave key file', await page.locator('#vlt-type option[value="arweave"]').textContent().then(x => /Arweave key file/.test(x)));
+t('the scaffold tags stay, for cypherpunk (seed and key: recovery; JWK: advanced)',
+  await page.locator('#vlt-scaffold-law').textContent().then(x => /scaffold · recovery/.test(x) && /scaffold · advanced/.test(x)));
 t('arw-jwk-scaffold still demoted', await page.locator('#arw-jwk-scaffold').count().then(n => n === 1));
 t('primary keychain CTA is passkey connect (not paste)', await page.locator('#kc-pass').isVisible());
 t('paste fields remain in DOM (recovery capability kept)', await page.locator('#kc-rec,#vlt-secret,#br-wif').count().then(n => n === 3));

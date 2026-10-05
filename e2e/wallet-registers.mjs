@@ -260,8 +260,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
     ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
-    ['filled into both fields below', 'within the vault'],
-    ['unlock with a keypass below', 'within the vault'],
   ];
   const blank = m => m.replace(/[^\n]/g, ' ');
   let code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);
