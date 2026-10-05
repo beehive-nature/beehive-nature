@@ -112,6 +112,9 @@ pre b{color:var(--ink)}
 .rd{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
 .rd .k{font-size:9px;color:var(--faint);letter-spacing:.08em}
 .rd .v{font-size:16px;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
+/* a tile's next step is a real target: the 44px floor */
+.rd .v a,.rd .v button{display:inline-flex;align-items:center;min-height:44px}
+#ar-stat a,#arw-stat a{display:inline-flex;align-items:center;min-height:44px}
 /* ── the keychain ring ── */
 .ring-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .ring-wrap svg{flex:0 0 auto}
@@ -1319,8 +1322,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="va-breakdown-head">AR held</div>
         <div data-ar-rows></div>
       </div>
-      <div class="cd" id="ar-info">of a bound public AR address (forge inject or public bind) — reads stay keyless</div>
-      <div class="stat" id="ar-stat">connect Arweave wallet or bind a public address</div>
+      <div class="cd" id="ar-info">your Arweave address comes from your keys · reads stay keyless</div>
+      <div class="stat" id="ar-stat"><a href="#kc-sec">connect your keychain</a> to see your Arweave address</div>
     </div>
   </div>
 
@@ -2166,6 +2169,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(color){var b=document.createElement('b');b.style.color=color;b.textContent=text;stat.appendChild(b)}else stat.textContent=text;
         }
         function arInject() { return window.BNRWALLET && BNRWALLET.arInject; }
+        function ownAr() { var i = arInject(); return (i && typeof i.derivedAddress === 'function') ? i.derivedAddress() : null; }
         function vaultArEntry() {
           if (!window.BNRVAULT || !BNRVAULT.isUnlocked()) return null;
           return BNRVAULT.list().filter(function (e) { return e.type === 'arweave'; })[0] || null;
@@ -2183,27 +2187,29 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var e = vaultArEntry();
           return (e && e.meta && e.meta.address) || null;
         }
+        var arWaits = 0;
         async function refresh() {
           if(publishing||refreshing)return;
           var A = window.BNRAR;
-          if (!A) { paint('the arweave adapter did not load', 'var(--amber)'); return; }
+          // a slow page load is not a failure: wait for the module a little before saying so
+          if (!A) { if (++arWaits < 20) { setTimeout(refresh, 500); return; } paint('The Arweave part of the wallet did not load. Reload the page.', 'var(--amber)'); return; }
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
           var inj = arInject();
           var hasInj = !!(inj && inj.present && inj.present());
           var addr = null;
           try { addr = await resolveAddr(); } catch (e) { addr = null; }
           if (addrEl) {
-            addrEl.textContent = addr ? addr : (hasInj ? 'extension present — tap connect' : 'no extension — install Wander, or bind public address on the forge ar: card');
+            addrEl.textContent = addr ? addr : (hasInj ? 'an Arweave extension is here · tap connect to use it' : 'your Arweave address appears when your keychain is connected');
             addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
           }
-          if (conn) conn.textContent = addr && hasInj ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
+          var lane = inj && inj.signLane ? inj.signLane() : null;
+          if (conn) conn.textContent = lane === 'inject' ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
           if (!addr) {
             if (window.wlClearRollup) window.wlClearRollup('ar');
             else if (balEl) balEl.textContent = '';
-            if (statEl) { statEl.textContent = hasInj ? 'extension ready — tap connect' : 'connect Arweave wallet or bind a public address'; statEl.className = 'stat'; }
-            paint(hasInj
-              ? 'Arweave extension detected — tap <b>connect Arweave wallet</b> to bind your public address and publish. No JWK paste required.'
-              : 'No Arweave extension yet — install <b>Wander</b> (or an arweave.app-style wallet), then tap connect. Or bind a 43-char public address on the forge <b>ar:</b> card for keyless reads. Vault JWK paste is optional scaffold only.');
+            if (statEl) { if (hasInj) statEl.textContent = 'an extension is ready · tap connect'; else wlSay(statEl, [{ to: 'kc-sec', t: 'connect your keychain' }, ' to see your Arweave address']); statEl.className = 'stat'; }
+            if (hasInj) paint('An Arweave extension is here. Tap connect Arweave wallet to use its address, or connect your keychain to use the address made from your own keys.');
+            else wlSay(stat, ['Your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to see it.']);
             go.disabled = true;
             return;
           }
@@ -2213,20 +2219,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           try {
             var bal = await A.balance(addr);
             var fee = await A.fee(1926);
-            var spot = null;
-            try { spot = await A.spotPrice(); } catch (e2) { /* optional */ }
             if(!/^\d+$/.test(String(bal))||!/^\d+$/.test(String(fee)))throw new Error('gateway returned an invalid balance or fee');
             var winston = BigInt(bal), need = BigInt(fee);
+            // a price only for an address that holds AR: an empty one never asks a third party
+            var spot = null;
+            if (winston > 0n) { try { spot = await A.spotPrice(); } catch (e2) { /* optional */ } }
             if(addr!==await resolveAddr())return;
             if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
             else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
-            if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
-                        statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + arUnits(need-winston) + ' AR for the anchor';
+            if (statEl) {
+              if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['empty for now · ', { to: 'arw-sec', t: 'add AR to publish' }]); }
+              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + arUnits(need-winston) + ' AR for the anchor'; }
+            }
             paint('address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' +
               arUnits(need) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
               (winston < need ? ' — ⚠ short by ' + arUnits(need-winston) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
-              (hasInj ? ' · sign via extension' : ' · sign via vault scaffold if publishing'));
-            go.disabled = winston < need;
+              (lane === 'inject' ? ' · sign via extension' : lane === 'derived' ? ' · made from your keys' : lane === 'vault' ? ' · sign via vault scaffold if publishing' : ' · nothing here signs for it'));
+            go.disabled = winston < need || !lane;
             if (typeof wlRead === 'function') wlRead(statEl, true);
           } catch (err) {
             if (statEl) { statEl.textContent = 'read failed'; if (typeof wlRead === 'function') wlRead(statEl, false); }
@@ -2241,7 +2250,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             return;
           }
           if (!inj.present()) {
-            paint('No Arweave extension injected. Install <b>Wander</b> (Chrome/Firefox), reload this page, then tap connect. Or open the forge <b>ar:</b> card and bind a public address for reads.', 'var(--ink)');
+            if (ownAr()) paint('Your Arweave address already comes from your own keys, so no extension is needed.');
+            else wlSay(stat, ['Your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to see it.']);
             return;
           }
           conn.disabled = true;
@@ -2269,20 +2279,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
               return;
             }
-            var inj = arInject();
-            var useInject = !!(inj && inj.present && inj.present());
+            var inj = arInject(), lane = inj && inj.signLane ? inj.signLane() : null;
             var jwk = null;
-            if (!useInject) {
+            if (lane === 'vault') {
               var e = vaultArEntry();
               if (e && V) jwk = JSON.parse(V.reveal(e.id).secret);
             }
-            if (!useInject && !jwk) {
-              paint('Connect an Arweave wallet to publish (primary), or seal a JWK in the vault scaffold (advanced). No private key is invented from masterPRK.', 'var(--ink)');
+            if (!lane || (lane === 'vault' && !jwk)) {
+              wlSay(stat, ['Nothing here signs for this address yet. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to publish from your own Arweave address.']);
               return;
             }
-            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — ' +
-              (useInject ? 'extension signs (inject path)…' : 'vault JWK scaffold signs…'));
-            var r = await W.walletPublish(bytes, ORBIT.tags, useInject ? { inject: true } : { jwk: jwk });
+            paint('payload verified (' + bytes.length + ' B, sha256 pinned) · ' +
+              (lane === 'inject' ? 'the extension signs…' : lane === 'derived' ? 'your own key signs…' : 'the vault key signs…'));
+            var r = await W.walletPublish(bytes, ORBIT.tags, lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false });
             if (r && r.phase === 'confirmed') {
               paint('⚓ ANCHORED — read back from the gateway: ' + (r.evidence && r.evidence.read));
               var a = document.createElement('a');
@@ -2309,13 +2318,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(publishing)return;
           if(!file||file.size===0||file.size>30000){note.textContent='Choose a non-empty file up to 30,000 bytes.';return;}
           var W=window.BNRWALLET;
-          if(!W||!arInject()||!arInject().present()){note.textContent='Connect an Arweave wallet to review and sign this file.';return;}
+          var lane=arInject()&&arInject().signLane?arInject().signLane():null, viaInject=lane==='inject', viaKeys=lane==='derived';
+          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'Connect your keychain'},' to publish from your own Arweave address.']);return;}
           publishing=true;button.disabled=true;$('arw-file').disabled=true;
           note.textContent='Preparing this file and its exact network fee. No payment has been signed.';
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
             var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
-            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:true,review:async function(plan){
+            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,review:async function(plan){
               var dialog=$('arw-file-dialog'),details=$('arw-file-plan');details.replaceChildren();
               [file.name,bytes.length.toLocaleString()+' bytes','Network: Arweave','Paying address: '+plan.address,'Exact fee: '+arUnits(plan.feeWinston)+' AR','SHA-256: '+sha,'Public storage. Publication cannot be undone.'].forEach(function(text){var line=document.createElement('div');line.style.marginBottom='10px';line.textContent=text;details.appendChild(line)});
               return new Promise(function(resolve){var finish=function(accepted){dialog.close();resolve(accepted)};$('arw-file-confirm').onclick=function(){finish(true)};$('arw-file-cancel').onclick=function(){finish(false)};dialog.oncancel=function(e){e.preventDefault();finish(false)};dialog.showModal();$('arw-file-cancel').focus()});
@@ -2472,7 +2482,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="vault.js?v=2"></script>
 <script src="onboarding/vendor/bpq-lib.js?v=1"></script>
 <script src="bpq.js?v=1"></script>
-<script src="arweave.js?v=3"></script>
+<script src="arweave.js?v=4"></script>
 <!-- the estate's ONE level-truth module — the same file market.html and
      museum.html load. Imported, never re-derived: a third copy of the SeedData
      decode is exactly how the lowest-tier-art bug comes back. -->
@@ -2814,10 +2824,43 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var idBytes=new Uint8Array(await crypto.subtle.digest('SHA-256', sigBytes));
     return {signature:signature, id:window.BNRAR.b64u(idBytes), by:by};
   }
+  /* Arweave has taken secp256k1 keys natively since its 2.9 fork (block 1,602,350,
+     2025-02-03): the address is base64url(SHA-256(the 33-byte compressed key)),
+     the transaction goes out with an empty owner and a 65-byte recoverable
+     signature. So, unlike RSA, an Arweave key DOES derive from masterPRK: context
+     ar:<soul>, the same K1 derivation as every secp256k1 rail here. The address is
+     public and kept so reads stay keyless; the key lives in tab memory only. An
+     extension address or a bound address the person chose still comes first. */
+  var AR_DERIVED=null;   // {soul, addr}: public, tab memory only, made fresh by each keychain
+  function arDeriveAddr(mprk,soul){
+    var r=BZDIDKEY.deriveK1Key(mprk,'ar:'+soul);
+    try{ return window.BNRAR.b64u(BN.sha256(BN.secp.getPublicKey(r.seed,true))) } finally { r.seed.fill(0) }
+  }
+  function arDerivedAddr(){
+    if(!SOUL)return null;
+    if(!MPRK)return null;
+    if(AR_DERIVED&&AR_DERIVED.soul===SOUL)return AR_DERIVED.addr;
+    return arDeriveNow();
+  }
+  function arDeriveNow(){
+    if(!MPRK||!SOUL||!window.BNRAR||!BN||!BN.secp)return null;
+    try{ var a=arDeriveAddr(MPRK,SOUL); AR_DERIVED={soul:SOUL,addr:a}; return a }catch(e){ return null }
+  }
   function arInjectBoundAddress(){
     if(AR_INJECT_ACTIVE)return AR_INJECT_ACTIVE;
     if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
-    return vaultArPublic();
+    return vaultArPublic()||arDerivedAddr();
+  }
+  /* the address shown is the address that pays: 'inject' when it is the
+     extension's, 'vault' when it is the vault key's, 'derived' when it is made
+     from your keys; null when nothing here can sign for it */
+  function arSignLane(){
+    var shown=arInjectBoundAddress(); if(!shown)return null;
+    if(shown===AR_INJECT_ACTIVE&&arInjectPresent())return 'inject';
+    if(SOUL&&shown===loadArPublic('ar:'+SOUL)&&arInjectPresent())return 'inject';
+    if(shown===vaultArPublic())return 'vault';
+    if(shown===arDerivedAddr())return 'derived';
+    return null;
   }
   function parsePqCtx(ctx){
     var m=/^pq:(ml-dsa-65|ml-kem-768)(?::(.{1,48}))?$/.exec(ctx||'');
@@ -2857,10 +2900,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!hn) return null;
       return {kind:'Hive account', value:hn, publicOnly:true};
     }
-    /* ar: public address only — RSA-JWK cannot derive from masterPRK */
+    /* ar: a bound or vault address first; else the secp256k1 address that derives
+       from masterPRK (Arweave 2.9+). RSA-JWK still never derives from it. */
     if(/^ar:/.test(ctx)){
       var addr=loadArPublic(ctx)||vaultArPublic();
       if(addr&&isArAddress(addr)) return {kind:'Arweave address', value:addr, publicOnly:true, source:loadArPublic(ctx)?'bound':'vault-meta'};
+      if(MPRK&&ctx==='ar:'+SOUL){ var own=arDerivedAddr(); if(own) return {kind:'Arweave address (from your keys)', value:own, publicOnly:true, source:'derived'} }
       return {kind:'Arweave address', value:null, publicOnly:true, needsConnect:true};
     }
     if(!MPRK)return null;
@@ -2921,8 +2966,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function renderArConnectChip(box, c){
     var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
     el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Arweave address</span></div>'+
-      '<div class="cv" style="color:var(--ink)">connect a public AR address</div>'+
-      '<div class="cx" style="margin-top:6px">RSA-JWK cannot derive from masterPRK — public only</div>'+
+      '<div class="cv" style="color:var(--ink)">connect your keychain to make your Arweave address, or bind a public one</div>'+
+      '<div class="cx" style="margin-top:6px">secp256k1 (Arweave 2.9+) derives from masterPRK · RSA never does</div>'+
       '<div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap">'+
         '<button type="button" class="gold" data-ar-inject style="font-size:10px;min-height:32px">connect Arweave wallet</button>'+
         '<input data-ar-pub class="small" placeholder="or paste 43-char public address" spellcheck="false" autocomplete="off" style="flex:1;min-width:160px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px">'+
@@ -3015,7 +3060,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+vacct()); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+esc(vacct())+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
-  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
+  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?'✓ your Arweave address for <b>'+esc(SOUL)+'</b> · made from your keys (secp256k1), never stored':'✓ ar card for <b>'+esc(SOUL)+'</b> · connect your keychain to make its address, or bind a public one (never a private JWK)'; };
   $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
   /* ── only me: seal / open / bind (SPEC-BPQ-1). Everything happens in this tab;
      the plaintext never leaves it, the keys come from MPRK and die with it. ── */
@@ -4313,8 +4358,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-outrow').style.display='flex';
     $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
     wlSay($('sum-kc'),['connected ✓']);$('sum-kc').style.color='var(--leaf)';
+    var arOwn=arDeriveNow();
     seedContexts(); renderForge(); pqPanel();
     checkBridge();
+    if(arOwn&&arInjectBoundAddress()===arOwn){ readArBound(arOwn); document.dispatchEvent(new CustomEvent('ar-inject-connected',{detail:{address:arOwn}})) }
     if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
       $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
@@ -5050,7 +5097,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
 
   $('kc-out').onclick=function(){
-    scrubAll(); EVMADDR=null;
+    scrubAll(); EVMADDR=null; AR_DERIVED=null;
     $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
@@ -5650,6 +5697,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var sInj = await arInjectSignRaw(payload);
         return { signatures: [sInj.signature], ar_id: sInj.id, by: sInj.by };
       }
+      if (opts && opts.arSecp) {                              // the address made from your keys: secp256k1, tab memory only
+        if (!MPRK || !SOUL) throw new Error('connect your keychain to sign from your Arweave address');
+        var arK = BZDIDKEY.deriveK1Key(MPRK, 'ar:' + SOUL);
+        try { var sEc = await window.BNRAR.signEcdsa(arK.seed, payload); } finally { arK.seed.fill(0) }
+        return { signatures: [sEc.signature], ar_id: sEc.id, by: 'arweave-secp256k1' };
+      }
       if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign via window.arweaveWallet inject (primary) or a vault-held JWK scaffold — none available');
       var s = await window.BNRAR.signRaw(opts.jwk, payload);
       return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
@@ -5985,7 +6038,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=4');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
-  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=3');
+  spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=4');
 
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
      window.arweaveWallet inject (public key + extension sign). Vault JWK is
@@ -6004,7 +6057,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     var publicJwk = null, signOpts = null;
-    var wantInject = opts.inject === true || (opts.inject !== false && arInjectPresent() && !opts.jwk);
+    var wantInject = opts.inject === true || (opts.inject !== false && arInjectPresent() && !opts.jwk && !opts.derived);
     if (wantInject || opts.inject === true) {
       try {
         if (!arInjectPresent()) throw new Error('no Arweave wallet injected');
@@ -6024,6 +6077,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         publicJwk = null; signOpts = null;
       }
     }
+    if (!publicJwk && !(opts.jwk && opts.jwk.d) && MPRK && SOUL && opts.derived !== false) {
+      var arP = BZDIDKEY.deriveK1Key(MPRK, 'ar:' + SOUL);
+      try { publicJwk = { kty: 'EC', crv: 'secp256k1', pub: window.BNRAR.b64u(BN.secp.getPublicKey(arP.seed, true)) }; } finally { arP.seed.fill(0) }
+      signOpts = { arSecp: true };
+    }
     if (!publicJwk) {
       if (!opts.jwk || !opts.jwk.d) {
         if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--ink)">connect an Arweave wallet</b> (primary — <code>window.arweaveWallet</code>) to publish. Vault JWK paste is optional scaffold only — New-bee never needs it. RSA is never invented from masterPRK.'; }
@@ -6042,7 +6100,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     var wire=JSON.parse(intent.wire_json);
-    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==publicJwk.n||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
+    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==(publicJwk.kty==='EC'?'':publicJwk.n)||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
     // Reconstruct the signing bytes from the exact public file, tags and fee.
     // A worker digest alone cannot bind what the user reviewed to the wire body.
     var rebuilt=await window.BNRAR.buildUnsigned(publicJwk,bytes,tags.map(function(tag){return {name:tag[0],value:tag[1]}}),{reward:String(wire.reward),anchor:wire.last_tx});
@@ -6055,8 +6113,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     var signatureBytes=window.BNRAR.unb64u(sgn.signatures[0]);
+    if(publicJwk.kty==='EC'){
+      // the node recovers the owner from the signature: it must recover exactly this key
+      var ecPub=window.BNRAR.unb64u(publicJwk.pub), ecMsg=BN.sha256(rebuilt.sigData), ecOk=false;
+      try{ ecOk=signatureBytes.length===65&&BN.secp.verify(signatureBytes.slice(0,64),ecMsg,ecPub)&&
+        hexS(BN.secp.Signature.fromCompact(signatureBytes.slice(0,64)).addRecoveryBit(signatureBytes[64]).recoverPublicKey(ecMsg).toRawBytes(true))===hexS(ecPub) }catch(e){ ecOk=false }
+      if(!ecOk)throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+    } else {
     var verifyKey=await crypto.subtle.importKey('jwk',publicJwk,{name:'RSA-PSS',hash:'SHA-256'},false,['verify']);
     if(!await crypto.subtle.verify({name:'RSA-PSS',saltLength:32},verifyKey,signatureBytes,rebuilt.sigData))throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+    }
     var signedId=window.BNRAR.b64u(new Uint8Array(await crypto.subtle.digest('SHA-256',signatureBytes)));
     if(signedId!==sgn.ar_id)throw new Error('The returned transaction ID did not match its signature. Nothing was submitted.');
     var entry = {
@@ -6222,6 +6288,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     capLoad: capLoad,
     arInject: {
       present: arInjectPresent,
+      derivedAddress: function () { return arDerivedAddr(); },
+      derivedReady: function () { return !!(MPRK && SOUL && arDerivedAddr()); },
+      signLane: function () { return arSignLane(); },
       connect: function () { return connectArweaveInject(SOUL ? ('ar:'+SOUL) : null); },
       activeAddress: async function () {
         if (!arInjectPresent()) return arInjectBoundAddress();
@@ -6960,7 +7029,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!isArAddress(addr)) return;
     var balEl=$('ar-bal'), statEl=$('ar-stat'), infoEl=$('ar-info');
     try{
-      if(infoEl) infoEl.textContent='public forge address '+addr.slice(0,10)+'… — reads stay keyless';
+      if(infoEl) infoEl.textContent=(addr===arDerivedAddr()?'your Arweave address, made from your keys · ':'public address · ')+addr+' · reads stay keyless';
       if(statEl){ statEl.textContent='reading…'; statEl.className='stat' }
       var winston=null;
       if(window.BNRAR&&typeof BNRAR.balance==='function') winston=await BNRAR.balance(addr);
@@ -6971,7 +7040,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var ar=(Number(winston)/1e12);
       if(isFinite(ar)) upsertArBalance(addr,ar);
       else if(balEl) balEl.textContent='? AR';
-      if(statEl){ statEl.textContent='✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
+      if(statEl){ statEl.textContent=addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
       $('ch-arweave').classList.add('connected');
     }catch(e){
       if(statEl){ statEl.textContent='AR read failed'; statEl.className='stat err'; wlRead(statEl,false) }
@@ -6986,7 +7055,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'</b> · reading balances…';
     var arCtx='ar:'+SOUL;
-    var arPub=loadArPublic(arCtx)||vaultArPublic();
+    var arPub=loadArPublic(arCtx)||vaultArPublic()||arDerivedAddr();   // derived: only while the keychain is connected
     await resolveVacct();
     if(vacctKnown())acctDirAdd(vacct());
     var who=vacct()!==SOUL?' · Vaulta account <b style="color:var(--leaf)">'+esc(vacct())+'</b>':'';
