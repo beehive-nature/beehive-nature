@@ -1608,7 +1608,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
   <div id="sw-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
-      <button id="sw-dir" class="gold" style="flex:0 1 220px">buy RAM with A</button>
+      <button id="sw-dir" class="gold" data-pin style="flex:0 1 220px">buy RAM with A</button>
       <input id="sw-amt" aria-label="Bytes of RAM" class="small" type="number" value="8192" min="1024" step="1024" style="max-width:150px;flex:0 1 150px">
       <div class="law" style="flex:2;min-width:200px" id="sw-quote">reading today's RAM price…</div>
       <button id="sw-go" class="gold">🔁 swap</button>
@@ -5213,9 +5213,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
   /* what a press was made for: the name, the open keychain (by its soul, not the key object a check may
      re-derive), the account it signs from, and everything typed or chosen in its part of the page */
+  function pinHash(v){ var h=0x811c9dc5; v=String(v); for(var i=0;i<v.length;i++){ h^=v.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0 } return h.toString(36) }
   function guardPin(el){
     var part=(el&&el.closest&&el.closest('section'))||document.body;
-    var form=Array.prototype.map.call(part.querySelectorAll('input,select,textarea'),function(i){ return (i.id||i.name||'')+'='+(i.type==='checkbox'||i.type==='radio'?i.checked:i.value) }).join('\u0001');
+    /* a hash of each value, never the value: a key field is skipped outright, and nothing typed is kept while the press waits */
+    var form=Array.prototype.filter.call(part.querySelectorAll('input,select,textarea'),function(i){ return i.type!=='password'&&!i.hasAttribute('data-secret') })
+      .map(function(i){ return (i.id||i.name||'')+'='+pinHash(i.type==='checkbox'||i.type==='radio'?i.checked:i.value) })
+      .concat(Array.prototype.map.call(part.querySelectorAll('[data-pin]'),function(b){ return (b.id||'')+'~'+pinHash(b.textContent) }))   /* a lane's choice that lives on a button */
+      .join('|');
     return {soul:SOUL, kc:MPRK?(typeof KC_FP!=='undefined'?KC_FP:'open'):null, acct:vacctKnown()?vacct():null, form:form};
   }
   /* the press goes on only if nothing it was made for changed while it waited; otherwise it is said, and signs nothing */
@@ -5223,7 +5228,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var now=guardPin(el), again={btn:'press it now',on:retry};
     if(now.soul!==pin.soul){ wlSay(el,['you connected another name while this was being checked, so nothing was signed. ',again]); return false }
     if(now.kc!==pin.kc){ wlSay(el,[(now.kc?'your keychain changed':'your keychain closed')+' while this was being checked, so nothing was signed. ',now.kc?again:{to:'kc-sec',t:'connect your keychain'}]); return false }
-    if(pin.acct&&now.acct&&now.acct!==pin.acct){ wlSay(el,[SOUL+'.b now points to '+now.acct+', so nothing was signed. ',again]); return false }
+    if(pin.acct&&now.acct&&now.acct!==pin.acct){ wlSay(el,['this wallet now signs for '+now.acct+', not '+pin.acct+', so nothing was signed. ',again]); return false }
     if(now.form!==pin.form){ wlSay(el,['you changed it while this was being checked, so nothing was signed. ',again]); return false }
     return true;
   }
@@ -5231,6 +5236,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* a lane that can press itself again gets the button; the pointer and the account are read first, then the
        lane, and only if nothing the press was made for changed while it waited */
     var again=function(read){ return retry?{btn:'try again',on:function(){ var pin=guardPin(el); Promise.resolve(read()).then(function(){ return checkBridge() }).then(function(){ if(guardHolds(el,pin,retry))retry() },function(){ if(guardHolds(el,pin,retry))retry() }) }}:'try again in a moment.' };
+    if(!vacctKnown()&&VACCT_READING&&retry){   /* the pointer is being read: say so, and go on once it answers */
+      var wr=VACCT_READING, pinr=pinned||guardPin(el); wlSay(el,['reading which account '+SOUL+'.b points at, one moment.']);
+      var onr=function(){ if(!guardHolds(el,pinr,retry))return; if(vacctKnown())signGuard(el,retry,false,pinr); else signGuard(el,retry,true,pinr) };
+      wr.then(onr,onr); return false }
     if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
     if(BRIDGED===null&&retry&&(BR_CHECK||!checked)){   /* not checked yet, or being checked: check it, say so, and go on once it answers */
       var w=BR_CHECK||checkBridge(), pin=pinned||guardPin(el); wlSay(el,['checking '+vacct()+', one moment.']);
@@ -9306,6 +9315,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     st.style.color='';
     if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']);
     else if(!K1) wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']);
+    else if(!vacctKnown()&&VACCT_READING){ wlSay(st,['reading which account '+SOUL+'.b points at, one moment.']); VACCT_READING.then(function(){ svRefresh() },function(){ svRefresh() }) }
     else if(!vacctKnown()) wlSay(st,['we could not read which account '+SOUL+'.b points at just now. ',{btn:'try again',on:function(){ resolveVacct().then(function(){ svRefresh() },function(){ svRefresh() }) }}]);
     else if(BRIDGED===null) wlSay(st,['whether this wallet signs for '+vacct()+' is not known yet. ',{btn:'check again',on:function(){ checkBridge().then(function(){ svRefresh() },function(){ svRefresh() }) }},{cy:'BRIDGED unknown: the check is running, or get_account / the registry read failed'}]);
     else if(BRIDGED===false&&VACCT_NOACCT===vacct()) wlSay(st,[vacct()+' is not a Vaulta account yet, so there is nothing to send from. ',{to:'connect-sec',t:'choose the account'}]);

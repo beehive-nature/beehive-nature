@@ -59,6 +59,7 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
       const json = (o, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(o) });
       const body = JSON.parse(route.request().postData() || '{}');
       if (u.pathname.endsWith('/get_table_rows')) {
+        if (state.rowsDelay && body.table === 'domains') await new Promise(r => setTimeout(r, state.rowsDelay));
         if (body.code === 'kingbeelovis' && body.table === 'domains') {
           const rows = body.lower_bound ? ROWS.filter(r => r.id === String(body.lower_bound)) : ROWS;
           return json({ rows: rows.slice(0, body.limit || 500), more: false, next_key: '' });
@@ -334,6 +335,57 @@ try {
     await page.waitForTimeout(1500);
     const said = await page.evaluate(() => window.__acSaid);
     ok('a name typed again while the press waited is never signed: it is said, with the one press that would sign it', said.some(s => /^you changed it while this was being checked, so nothing was signed\. press it now$/.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-3)) + ' · posts ' + state.posts.length);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* Q6 · a RAM swap pressed while the account is checked, then flipped to sell, signs nothing */
+  {
+    console.log('Q6 · a swap, then its direction flipped, while the account is checked (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-sw').click(); document.getElementById('sw-amt').value = '4096'; });
+    state.acctDelay = { kingbeelovis: 4000 };
+    await page.evaluate(() => {
+      window.__swSaid = []; const st = document.getElementById('sw-stat');
+      new MutationObserver(() => window.__swSaid.push(st.innerText.trim())).observe(st, { childList: true, subtree: true, characterData: true });
+      document.getElementById('wgo').click();
+    });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.getElementById('sw-go').click());
+    await page.waitForFunction(() => window.__swSaid.some(s => /^checking kingbeelovis, one moment\./.test(s)), null, { timeout: 5000 }).catch(() => {});
+    await page.evaluate(() => document.getElementById('sw-dir').click());   // flipped to sell while the press waits
+    await page.waitForFunction(() => window.__swSaid.some(s => /^you changed it while this was being checked, so nothing was signed\./.test(s)), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const said = await page.evaluate(() => window.__swSaid);
+    ok('a swap flipped to sell while the press waited signs nothing, and says why', said.some(s => /^you changed it while this was being checked, so nothing was signed\. press it now$/.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-3)) + ' · posts ' + state.posts.length);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* Q7 · a press made while the name's pointer is still being read waits for it, then goes on */
+  {
+    console.log('Q7 · a press while the pointer is read (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await toKey(page);
+    state.aBal = '0.0100 A';
+    state.rowsDelay = 3000;
+    await page.evaluate(() => {
+      try { localStorage.removeItem('bnr_vacct'); } catch (e) {}
+      window.__acSaid = []; const st = document.getElementById('ac-stat');
+      new MutationObserver(() => window.__acSaid.push(st.innerText.trim())).observe(st, { childList: true, subtree: true, characterData: true });
+      document.getElementById('wgo').click();   // the pointer is read again, slowly
+    });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamef'; document.getElementById('ac-go').click(); });
+    await page.waitForFunction(() => window.__acSaid.some(s => /so nothing was signed/.test(s)), null, { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(800);
+    const said = await page.evaluate(() => window.__acSaid);
+    ok('while the pointer is read the press says so, never "could not read"', said.some(s => /^reading which account king\.b points at, one moment\./.test(s)) && !said.some(s => /could not read which account/.test(s)), JSON.stringify(said.slice(0, 5)));
+    ok('and once it answers the press goes on to its own verdict, signing nothing it should not', said.some(s => /^a new account needs about [0-9.]+ A for its room on the chain, and you have 0\.0100 A, so nothing was signed\./.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-3)) + ' · posts ' + state.posts.length);
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
