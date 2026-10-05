@@ -862,7 +862,10 @@ jobs:
     # the pipeline open at once, new bee and raver in the reader's own
     # "everything" view. Each step runs all six and fails at the end, so one red
     # battery never hides the others.
-    timeout-minutes: 30
+    # 2026-10-05: the bug sweep doubled the batteries (about 1,100 checks), so 30 minutes ran out mid-run
+    # and a cancelled job publishes no log. Each step now has its own limit: a slow or stuck battery fails
+    # its own step, with its log, and the steps after it still run.
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -878,57 +881,72 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-registers.mjs
       - name: Wallet action sheet — one press composes and signs a .b action as the account the name points at
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-action-sheet.mjs
       - name: Arweave from your own keys — native secp256k1 address, keyless reads, a publish the network would attribute to you
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-arweave-keys.mjs
       - name: Hive — one paste adds the account its active key controls; bytes and digest equal Hive's own library; one press sends
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-hive.mjs
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-accounts.mjs
       - name: Bridge and account forge — one paste never signs twice; the forge reads the name and says its price
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-bridge-acct.mjs
       - name: Composer — what a link, a contract or a worker says is shown as text and never runs, in all three registers
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-compose-xss.mjs
       - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-unified.mjs
       - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-read-budget.mjs
       - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-trezor.mjs
       - name: Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-forge-pq.mjs
       - name: Soul chrome truth — live bzDiD removes connect/create from rails footer
         if: always()
+        timeout-minutes: 10
         run: node e2e/soul-chrome.mjs
   eternal:
     timeout-minutes: 25

@@ -11,6 +11,7 @@ import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { pinRegister, REG } from './wallet-register-pin.mjs';
+import { enableAndClick } from './lib/enable-click.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -591,7 +592,8 @@ try {
     const before14 = r14.submits;
     await p14.click('#tx-out button.wl-act');   // the status line's own "send it again"
     await p14.waitForTimeout(400);
-    const mid14 = await p14.evaluate(() => { const b = document.querySelector('#outbox-list .obx-retry'); const was = b ? b.disabled : 'gone'; if (b) { b.disabled = false; b.click(); } return was; });   // even a forced press of the row's button starts nothing
+    const mid14 = await p14.evaluate(() => { const b = document.querySelector('#outbox-list .obx-retry'); return b ? b.disabled : 'gone'; });
+    if (mid14 !== 'gone') await enableAndClick(p14.locator('#outbox-list .obx-retry').first());   // even a forced press of the row's button starts nothing
     await p14.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'confirmed', null, { timeout: 30000 }).catch(() => {});
     ok('a status line\'s send it again holds the row\'s button, and a press there starts no second send', mid14 === true && r14.submits - before14 === 1, JSON.stringify({ mid14, sends: r14.submits - before14 }));
     r14.slowMs = 0; r14.head = 123456;   // the next build reads its reference block where the mock keeps one
