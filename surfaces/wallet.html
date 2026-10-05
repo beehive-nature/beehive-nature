@@ -2948,7 +2948,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }});
     if(!cred)throw new Error('passkey enrollment returned nothing');
     notSoulKeep(cred.id);
-    var att=new Uint8Array(cred.getResponse().attestationObject);
+    var att=new Uint8Array((cred.response&&cred.response.attestationObject)||new ArrayBuffer(0));   /* WebAuthn: the attestation is on cred.response */
     var authData=authDataFromAttestation(att);
     if(!authData||authData.length<56)throw new Error('could not read the passkey attestation (unexpected format)');
     var rpIdHash=authData.slice(0,32),flags=authData[32];
