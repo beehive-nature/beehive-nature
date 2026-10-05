@@ -1171,11 +1171,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="forge-sec" data-wl-task="key">
   <h2>♾ the key forge: <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key: derivation, on demand</summary>
-  <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
-  Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
-  <b>hive:</b> binds the public Hive account name (same rail as balances). <b>ar:</b> shows an
-  Arweave public address only — RSA-JWK cannot honestly derive from masterPRK, so the forge
-  never invents one; connect an injected Arweave wallet or bind a public address.
+  <div class="law">Every address here comes from your keys. Each context name derives its own key
+  from your masterPRK: <b>vaulta:</b> for Vaulta account keys, <b>evm:</b> for 0x addresses, then
+  <b>sol:</b>, <b>btc:</b>, <b>ln:</b> and <b>nostr:</b>; a name the wallet has no coin for is refused.
+  <b>hive:</b> shows the public Hive account its active key named (same rail as balances).
+  <b>ar:</b> is your Arweave address, a secp256k1 key under ar:&lt;your name&gt; (Arweave 2.9+);
+  an RSA key never derives from masterPRK, and an address bound by hand or by an extension is
+  only followed, never shown as yours.
   <b>pq:ml-dsa-65</b> and <b>pq:ml-kem-768</b> are your post-quantum public cards
   (FIPS 204 signatures; ML-KEM-768 + X25519 "X-Wing" so people can seal things to you),
   derived from the same masterPRK your recovery words carry, so those words restore them
@@ -1189,20 +1191,20 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <!-- forge chips + quick-adds stay visible in bee register: public hive/ar
        cards are the New-bee path. Custom context typing stays available too. -->
   <div class="chips" id="forge-chips">
-    <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
+    <div class="law" id="forge-empty"><a href="#kc-sec">connect your keychain</a> to see your addresses.</div>
   </div>
   <div class="row">
-    <input id="forge-ctx" aria-label="New key context" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · hive:name · ar:name · pq:ml-dsa-65:name" spellcheck="false">
-    <button id="forge-go" class="gold">⚒ FORGE KEY</button>
-    <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
-    <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
-    <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
-    <button id="forge-hive" style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
-    <button id="forge-ar" style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
-    <button id="forge-pq-dsa" style="font-size:11px">+ pq:ml-dsa-65:<span id="fs6">soul</span></button>
-    <button id="forge-pq-kem" style="font-size:11px">+ pq:ml-kem-768:<span id="fs7">soul</span></button>
+    <input id="forge-ctx" aria-label="a name for a new key" class="small" placeholder="a name for a new key, like evm:savings" spellcheck="false">
+    <button id="forge-go" class="gold">⚒ <span data-reg="bee">make a key</span><span data-reg="raver">make</span><span data-reg="cypherpunk">forge key</span></button>
+    <button id="forge-evm" hidden style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
+    <button id="forge-vaulta" hidden style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
+    <button id="forge-nostr" hidden style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
+    <button id="forge-hive" hidden style="font-size:11px">+ hive:<span id="fs4">soul</span></button>
+    <button id="forge-ar" hidden style="font-size:11px">+ ar:<span id="fs5">soul</span></button>
+    <button id="forge-pq-dsa" hidden style="font-size:11px">+ pq:ml-dsa-65:<span id="fs6">soul</span></button>
+    <button id="forge-pq-kem" hidden style="font-size:11px">+ pq:ml-kem-768:<span id="fs7">soul</span></button>
   </div>
-  <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
+  <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">your addresses come from your keys, and none is ever stored.<span class="wl-cyd"> the forge is unlimited; contexts are names, keys derive on demand</span></div>
   <div id="pq-sec" style="margin-top:22px">
     <h3>🔒 only me: <span data-i18n="wl.h.pqseal">seal files only you, or people you pick, can open</span></h3>
     <p data-reg="bee">seal a file with your recovery words. any phone opens it again with the same words, and no one else can.</p>
@@ -1219,27 +1221,28 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
     </div>
     <details class="tnote" data-reg-disclose id="pq-more"><summary>share, sign, check or bind</summary>
+      <div class="law" id="pq-more-gate"><a href="#kc-sec">connect your keychain</a> to share, sign or bind; checking a signature works right now.</div>
       <div id="pq-tools-more" hidden>
         <label for="pq-to">people who may also open what you seal: paste each person's card, one per line</label>
-        <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
+        <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder="paste each card here, one per line"></textarea>
         <input type="file" id="pq-sign-file" hidden aria-label="file to sign">
         <div class="row"><button type="button" id="pq-sign">✍ <span data-reg="bee">sign a file</span><span data-reg="raver">sign it</span><span data-reg="cypherpunk">sign · ml-dsa-65</span></button></div>
         <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
-        <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
+        <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? paste the new id from their card (optional)<span class="wl-cyd"> the new bzpq1 id</span></label>
         <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
         <div class="row"><button type="button" id="pq-bind">✍ <span data-reg="bee">bind my accounts to this id</span><span data-reg="raver">bind my accounts</span><span data-reg="cypherpunk">bind · claims + ed25519 cosign</span></button></div>
         <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
       </div>
       <div id="pq-law" style="margin:14px 0 0">
-        <div class="law"><b>Sign the law.</b> Press Sign, then confirm with your passkey.</div>
+        <div class="law" id="pq-law-say">sign the law files listed here with your passkey.</div>
         <ul id="pq-law-list" class="law" style="margin:8px 0;padding-left:18px"><li><button type="button" id="pq-law-show">show the law files</button></li></ul>
-        <div class="row"><button type="button" id="pq-law-go">✍ Sign</button></div>
+        <div class="row"><button type="button" id="pq-law-go">✍ sign the law</button></div>
         <div class="law" id="pq-law-stat" role="status" aria-live="polite"></div>
       </div>
       <div id="pq-check" style="margin-top:14px">
-        <label for="pq-ver-target">check a signature: the file</label>
+        <label for="pq-ver-target">check a signature: pick the file</label>
         <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
-        <label for="pq-ver-sig">and its .bpqsig.json</label>
+        <label for="pq-ver-sig">then the signature file saved beside it<span class="wl-cyd"> (.bpqsig.json)</span></label>
         <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
         <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
         <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
@@ -1249,8 +1252,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law">Sealing happens here, in this tab, before the file goes anywhere. Each file gets its
     own random 256-bit key (AES-256-GCM). That key is locked once per reader: for you, under a key
     your recovery words derive, with no public-key step at all; for each person you pick, under the
-    X-Wing key (ML-KEM-768 + X25519) in the PQ card they gave you. The sealed file names no reader
-    and, if you sign it, only its readers learn who sealed it. Keep it anywhere, publish it, store it
+    X-Wing key (ML-KEM-768 + X25519) in the PQ card they gave you. The sealed file names no reader.
+    A file you share carries your signature inside it, so only its readers learn it came from you;
+    a file only for you carries none. Keep it anywhere, publish it, store it
     on Autonomi or Arweave: without a reader's words it opens for no one. To revoke, seal a new copy
     for new readers; someone who already opened a file keeps what they read. The binding button signs
     your classical addresses with your post-quantum id, co-signed by your bzDiD key, so you can prove
@@ -1260,8 +1264,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="law"><b>Used the QR bridge before 4 October 2026?</b> That older bridge sent your recovery
     root over public relays under a classical key exchange only, so someone who recorded it could open it
     once quantum computers arrive, and with it every key that root derives, post-quantum ones included.
-    Make new recovery words, then, still connected with your old words, paste the new bzpq1 id into
-    the binding field here and bind: the old id then vouches for the new one while its keys still hold.</div>
+    Make new recovery words, then, still connected with your old words, <a href="#pq-more">bind your new
+    words</a>: paste the new bzpq1 id into the binding field and bind, and the old id vouches for the new
+    one while its keys still hold.</div>
     </details>
   </div>
 </section>
@@ -2796,11 +2801,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* one soul, every rail — value rails + comms from masterPRK, plus the two
        public-only rails (hive account name, arweave address binding). AR never
        pretends RSA falls out of the PRK. */
-    ensureCtx('vaulta:'+vacct()); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
+    ensureCtx(k1Ctx()); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
     ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
     ensureCtx('pq:ml-dsa-65:'+SOUL); ensureCtx('pq:ml-kem-768:'+SOUL);
-    $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
+    $('forge-soulname').textContent=SOUL; $('fs2').textContent=vacct(); $('fs3').textContent=SOUL;
     if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL;
     if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL;
   }
@@ -3196,78 +3201,137 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pk=BN.PrivateKey.fromString(w);
     return {kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:pk.getPublicKey().toLegacyString(), pubK1:pk.getPublicKey().toString()};
   }
-  function forgeChipNote(d){
-    if(!d) return 'context saved, key never stored';
-    if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
-    if(d.kind==='Hive account') return 'your Hive account · the one its active key named';
-    if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
-    if(d.needsWasm) return 'bsigner registry · core derives when WASM armed — never a fake PQ key';
-    if(d.derived && d.alg) return d.alg==='ml-dsa-65'?'your PQ id · tap to copy your public card · seed never stored':'seal-to-me key · tap to copy your public card · seed never stored';
-    if(d.kind==='Solana') return 'ed25519 base58';
-    if(d.kind==='Bitcoin bc1') return 'native segwit P2WPKH';
-    if(d.kind==='nostr npub'||d.kind==='Lightning (NWC key)') return 'NIP-19 npub of the derived secp pair';
-    if(d.kind==='Vaulta K1'||d.kind==='K1') return 'eosio public key';
-    return 'public material only';
+  /* ── the forge in words a reader acts on: each card names its coin in plain
+     words; the context tag, the curve and the encoding ride in cypherpunk ── */
+  var FORGE_KINDS=/^(vaulta|evm|sol|btc|ln|nostr|hive|ar):./;
+  function forgeKnown(ctx){ return FORGE_KINDS.test(ctx||'')||!!parsePqCtx(ctx) }
+  function forgeNameOf(ctx){   // the name part of a context: vaulta:alice/active gives alice
+    var pq=parsePqCtx(ctx); if(pq)return pq.name;
+    var m=/^[a-z]+:([^\/]*)/.exec(ctx||''); return m?m[1]:'';
+  }
+  /* one of the current name's own cards? The rest fold away, kept, never deleted:
+     the account sweep finds an older key on an account through those names */
+  function forgeIsMine(ctx){
+    if(!SOUL)return true;
+    if(/^vaulta:/.test(ctx))return ctx===k1Ctx();
+    return forgeKnown(ctx)&&forgeNameOf(ctx)===SOUL;
+  }
+  function forgePlain(ctx){
+    if(/^vaulta:/.test(ctx)){
+      /* the account is named only when the .b pointer or a proof gave it; the soul's own name may be a stranger's account */
+      if(ctx===k1Ctx())return (vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))?'the key your vaulta account '+vacct()+' signs with':'your vaulta key';
+      var am=/^vaulta:([a-z1-5.]{1,12})\/(owner|active)$/.exec(ctx);
+      return am?'the '+am[2]+' key of your account '+am[1]:'a vaulta key named '+ctx.replace(/^vaulta:/,'');
+    }
+    var pq=parsePqCtx(ctx), nm=forgeNameOf(ctx), own=!SOUL||nm===SOUL;
+    var w=pq?(pq.alg==='ml-dsa-65'?'post-quantum id':'seal-to-me key'):
+      {evm:'ethereum address',sol:'solana address',btc:'bitcoin address',ln:'lightning link key',nostr:'nostr address',hive:'hive account',ar:'arweave address'}[(/^([a-z]+):/.exec(ctx||'')||[])[1]];
+    if(!w||!forgeKnown(ctx))return 'a key this wallet has no coin for';
+    return own?'your '+w:'the '+w+' named '+nm;
+  }
+  function forgeChipNote(c,d){
+    if(!d) return {say:'', cy:'derives when keychain connects · context saved, key never stored'};
+    if(!forgeKnown(c)) return {say:'this wallet has no coin by that name, so this key pays nowhere.', cy:'unknown prefix: a secp256k1 key shown as an eosio public key ('+d.kind+'); no chain of that name accepts it'};
+    if(d.kind==='EVM 0x') return {say:'tap to copy it, and get paid in ETH or ANT on arbitrum and base.', cy:'EVM 0x · arbitrum reads auto-connect in balances'};
+    if(d.kind==='Hive account') return {say:'the hive account its active key named; tap to copy its name.', cy:'public account name, nothing derived'};
+    if(d.source==='vault-meta') return {say:'your vault holds its key; tap to copy it.', cy:'public address from vault meta (the JWK is never shown)'};
+    if(d.source==='derived') return {say:'made from your keys; tap to copy it and get paid in AR.', cy:'secp256k1 under '+c+' · address = base64url(sha256(compressed pubkey)) · Arweave 2.9+ · public material only'};
+    if(d.derived&&d.alg) return d.alg==='ml-dsa-65'?
+      {say:'tap to copy your card, so people can check what you sign and seal files for you.', cy:'ML-DSA-65 (FIPS 204) · your PQ id · tap to copy your public card · seed never stored'}:
+      {say:'tap to copy your card, so people can seal files only you open.', cy:'X-Wing: ML-KEM-768 + X25519 · seal-to-me key · tap to copy your public card · seed never stored'};
+    if(d.kind==='Solana') return {say:'tap to copy it, and share it with whoever pays you.', cy:'ed25519 base58'};
+    if(d.kind==='Bitcoin bc1') return {say:'tap to copy it, and share it with whoever pays you.', cy:'native segwit P2WPKH'};
+    if(d.kind==='Lightning (NWC key)') return {say:'the key your lightning link uses, not an address to receive sats.', cy:'NIP-19 npub of the derived secp pair; the NWC connection binds to it'};
+    if(d.kind==='nostr npub') return {say:'tap to copy it, and share it with whoever wants to reach you.', cy:'NIP-19 npub of the derived secp pair'};
+    if(d.kind==='Vaulta K1'){
+      if(c===k1Ctx()) return {say:'tap to copy it.', cy:'eosio public key of '+c};
+      if(/\/(owner|active)$/.test(c)) return {say:'tap to copy it.', cy:'eosio public key of '+c+', made by the account forge'};
+      return {say:'it is not the key your account signs with; tap to copy it.', cy:'eosio public key of '+c+' · the account '+(vacct()||'?')+' signs with '+(k1Ctx()||'?')};
+    }
+    return {say:'tap to copy it.', cy:'public material only'};
+  }
+  function forgeCc(c,d){ return '<div class="cc">'+esc(forgePlain(c))+' <span class="wl-cyd">'+esc(c)+(d&&d.kind?' · '+esc(d.kind):'')+'</span></div>' }
+  function forgeNote(el,n){
+    el.textContent=n.say||'';
+    if(n.cy){ var s=document.createElement('span'); s.className='wl-cyd'; s.textContent=' '+n.cy; el.appendChild(s) }
+  }
+  function forgeCopied(c,d){
+    if(d.copy) return 'copied your card, so share it with whoever seals files for you or checks what you sign.';
+    if(/^vaulta:/.test(c)) return 'copied the key, so paste it where your key is asked for.';
+    if(/^ln:/.test(c)) return 'copied the key; it is not an address to receive sats.';
+    if(/^nostr:/.test(c)) return 'copied, so share it with whoever wants to reach you.';
+    return 'copied, so paste it where you want to be paid.';
   }
   function renderPqWasmChip(box, c, d){
-    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed'; el.style.cursor='default';
     el.setAttribute('data-pq-card', (d&&d.alg)||'pq');
-    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc((d&&d.kind)||'PQ')+'</span></div>'+
-      '<div class="cv" style="color:var(--ink)">core derives when WASM armed</div>'+
-      '<div class="cx" style="margin-top:6px">bsigner registry <b>'+esc((d&&d.alg)||'')+'</b> · public card only · never invent PQ from nothing · private seed never stored</div>';
+    el.innerHTML=forgeCc(c,d)+'<div class="cv" style="color:var(--ink)"></div><div class="cx" style="margin-top:6px"></div>';
+    var known=!!(d&&d.alg&&d.alg!=='?');
+    wlSay(el.querySelector('.cv'), known?
+      ['your post-quantum id did not load, so reload the page to try again. ',{btn:'reload',on:function(ev){ if(ev)ev.stopPropagation(); location.reload() }}]:
+      ['this wallet has no key kind by that name, so nothing will appear on this card.']);
+    forgeNote(el.querySelector('.cx'),{say:'',cy:'bsigner registry '+((d&&d.alg)||'?')+' · core derives when WASM armed · public card only · never invent PQ from nothing · private seed never stored'});
     box.appendChild(el);
   }
+  /* the ar: card when no address of yours can show yet. Your keychain first; an
+     address from elsewhere is a quiet last resort, and it is only followed */
   function renderArConnectChip(box, c){
-    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed';
-    el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Arweave address</span></div>'+
-      '<div class="cv" style="color:var(--ink)">connect your keychain to make your Arweave address, or bind a public one</div>'+
-      '<div class="cx" style="margin-top:6px">secp256k1 (Arweave 2.9+) derives from masterPRK · RSA never does</div>'+
+    var mine=c==='ar:'+SOUL;
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed'; el.style.cursor='default';
+    if(!MPRK)el.setAttribute('data-wl-tech','');
+    el.innerHTML=forgeCc(c,{kind:'Arweave address'})+'<div class="cv" style="color:var(--ink)"></div><div class="cx" style="margin-top:6px"></div>'+
+      '<details data-ar-else style="margin-top:6px"><summary class="cx">follow an arweave address you already have</summary>'+
       '<div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap">'+
-        '<button type="button" class="gold" data-ar-inject style="font-size:10px;min-height:32px">connect Arweave wallet</button>'+
-        '<input data-ar-pub class="small" placeholder="or paste 43-char public address" spellcheck="false" autocomplete="off" style="flex:1;min-width:160px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px">'+
-        '<button type="button" data-ar-bind style="font-size:10px;min-height:32px">bind public</button>'+
-      '</div>'+
-      '<div class="cx" data-ar-stat style="margin-top:4px;min-height:14px">extension inject if present · else public address field · never a private JWK</div>';
-    var inj=el.querySelector('[data-ar-inject]');
-    var inp=el.querySelector('[data-ar-pub]');
-    var bind=el.querySelector('[data-ar-bind]');
-    var st=el.querySelector('[data-ar-stat]');
+        '<button type="button" data-ar-inject style="font-size:10px;min-height:32px">use an arweave extension</button>'+
+        '<input data-ar-pub class="small" aria-label="an arweave address to follow" placeholder="an arweave address" spellcheck="false" autocomplete="off" style="flex:1;min-width:160px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px">'+
+        '<button type="button" data-ar-bind style="font-size:10px;min-height:32px">follow it</button>'+
+      '</div><div class="cx" data-ar-stat style="margin-top:4px;min-height:14px"></div></details>';
+    var cv=el.querySelector('.cv'), stat=el.querySelector('[data-ar-stat]');
+    if(!MPRK) wlSay(cv,[{to:'kc-sec',t:'connect your keychain'},' and your keys make your arweave address.']);
+    else if(!mine) wlSay(cv,['your keys make one arweave address, under your own name, so this card stays empty.']);
+    else wlSay(cv,['your arweave address could not be made on this page, so reload it to try again. ',{btn:'reload',on:function(ev){ if(ev)ev.stopPropagation(); location.reload() }}]);
+    forgeNote(el.querySelector('.cx'),{say:'',cy:'secp256k1 (Arweave 2.9+) derives from masterPRK under ar:'+(SOUL||'<name>')+' · RSA never does'+(MPRK&&mine?' · arDeriveNow returned null: '+(!window.BNRAR?'arweave.js (BNRAR) did not load':'BN.secp did not load'):'')});
+    forgeNote(stat,{say:'',cy:'extension inject (Wander, arweave.app) if present · else a public address field · never a private JWK'});
+    var inj=el.querySelector('[data-ar-inject]'), inp=el.querySelector('[data-ar-pub]'), bind=el.querySelector('[data-ar-bind]');
     inj.onclick=function(ev){
       ev.stopPropagation();
-      st.textContent='asking the injected Arweave wallet…';
+      wlSay(stat,['asking your arweave extension…']);
       connectArweaveInject(c).then(function(addr){
-        st.textContent='✓ bound '+addr.slice(0,10)+'…';
         renderForge();
-        if(typeof readArBound==='function') readArBound(addr);
-      }).catch(function(err){ st.textContent=err.message||String(err); st.style.color='var(--amber)' });
+        wlSay($('forge-stat'),['you now follow the arweave address your extension gave.',{cy:'bound from the extension as '+arBindKey(c)+': '+addr}]);
+        var shown=arInjectBoundAddress(); if(shown&&typeof readArBound==='function') readArBound(shown);
+      }).catch(function(err){
+        wlSay(stat,['no arweave extension answered, so ',{to:'kc-sec',t:'connect your keychain'},' and your own keys make your address.',{cy:(err&&err.message)||String(err)}]);
+      });
     };
     bind.onclick=function(ev){
       ev.stopPropagation();
       var a=(inp.value||'').trim();
-      if(!isArAddress(a)){ st.textContent='need a 43-char Arweave address (public only)'; st.style.color='var(--amber)'; return }
+      if(!isArAddress(a)){ wlSay(stat,['that is not an arweave address, so check it and try again.',{cy:'need 43 base64url characters; a public address only'}]); return }
       saveArPublic(c, a);
-      st.textContent='✓ public address bound';
       renderForge();
-      if(typeof readArBound==='function') readArBound(a);
+      wlSay($('forge-stat'),['you now follow that arweave address, and this wallet only reads it.',{cy:'bound by hand as '+arBindKey(c)+': '+a+' (shape checked only)'}]);
+      var shown=arInjectBoundAddress(); if(shown&&typeof readArBound==='function') readArBound(shown);
     };
     inp.onclick=function(ev){ ev.stopPropagation() };
     inp.onkeydown=function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); bind.click() } };
     box.appendChild(el);
   }
-  /* an address bound by hand or by an extension: shown apart from yours, read
-     only, and one press lets it go (the context name stays) */
+  /* an address bound by hand or by an extension: shown apart from yours, and one
+     press lets it go (the context name stays) */
   function renderArFollowChip(box, c, addr){
-    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed'; el.setAttribute('data-ar-followed', c);
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed'; el.style.cursor='default'; el.setAttribute('data-ar-followed', c);
     el.innerHTML='<div class="cc">an arweave address you follow <span class="wl-cyd">'+esc(c)+' · bound public address</span></div>'+
       '<div class="cv">'+esc(addr)+'</div><div class="cx"></div>';
-    wlSay(el.querySelector('.cx'),['you added this address, so this wallet only reads it. ',
+    var ext=arSignLane()==='inject'&&arInjectBoundAddress()===addr;
+    wlSay(el.querySelector('.cx'),[ext?'your arweave extension holds this address, so it signs for it, not your keys. ':'you added this address, so this wallet only reads it. ',
       {btn:'stop following it',on:function(ev){
         if(ev)ev.stopPropagation();
         saveArPublic(c,null); if(AR_INJECT_ACTIVE===addr)AR_INJECT_ACTIVE=null;
         renderForge();
         var shown=arInjectBoundAddress(); if(shown&&typeof readArBound==='function')readArBound(shown);
       }},
-      {cy:'kept in this browser as '+arBindKey(c)+' (bound by hand or by an extension); a bound address never outranks the one your keys make; signs through: '+(arSignLane()==='inject'&&arInjectBoundAddress()===addr?'the extension':'nothing here')}]);
+      {cy:'kept in this browser as '+arBindKey(c)+' (bound by hand or by an extension); a bound address never outranks the one your keys make; signs through: '+(ext?'the extension':'nothing here')}]);
     box.appendChild(el);
   }
   /* copy, and say "copied" only when the browser says it copied */
@@ -3288,90 +3352,172 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return false;
     });
   }
-  function renderForge(){
-    var box=$('forge-chips');
-    if(!CONTEXTS.length){box.innerHTML='<div class="law">no contexts yet — forge one below</div>';return}
-    box.innerHTML='';
-    CONTEXTS.forEach(function(c){
-      /* PER-CONTEXT ISOLATION. One rail that cannot derive must not take the
-         keychain down with it — before this, a single throwing context broke
-         renderForge, which broke keychainOn, which meant a stranger's whole
-         wallet failed to connect because one address kind was unavailable.
-         Caught by e2e/wallet-signer.mjs §G, which deliberately breaks one. */
-      var d;
-      try{ d=deriveFor(c) }
-      catch(err){
-        var bad=document.createElement('div'); bad.className='chip';
-        bad.style.borderStyle='dashed';
-        bad.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· not derivable here</span></div>'+
-          '<div class="cv" style="color:var(--amber)">no address shown — '+esc(err.message||String(err))+'</div>'+
-          '<div class="cx">a wrong address cannot be undone, so this chip stays empty</div>';
-        box.appendChild(bad);
-        return;
-      }
-      if(!d){
-        var wait=document.createElement('div'); wait.className='chip';
-        wait.innerHTML='<div class="cc">'+esc(c)+'</div><div class="cv" style="color:var(--faint)">derives when keychain connects</div><div class="cx">context saved, key never stored</div>';
-        box.appendChild(wait);
-        return;
-      }
-      if(d.needsConnect){ renderArConnectChip(box, c); if(d.followed)renderArFollowChip(box, c, d.followed); return }
-      if(d.hiveAdd){
-        var hc=document.createElement('div'); hc.className='chip'; hc.style.borderStyle='dashed';
-        hc.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Hive account</span></div><div class="cv"><a href="#ch-hive">add your Hive account</a>: paste its active key</div>';
-        box.appendChild(hc); return;
-      }
-      if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
-      var note=forgeChipNote(d);
-      var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
-      if(d.derived && d.alg) el.setAttribute('data-pq-card', d.alg);
-      el.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· '+esc(d.kind)+'</span></div>'+
-        '<div class="cv">'+esc(d.value)+'</div>'+
-        '<div class="cx">'+esc(note)+'</div>';
-      el.onclick=function(){
-        forgeCopy(el, d.copy||d.value, d.copy?'copied your card, so share it with whoever seals files for you or checks what you sign.':'copied, so paste it where you want to be paid.', function(){ el.querySelector('.cx').textContent=note });
-      };
-      box.appendChild(el);
-      if(d.followed)renderArFollowChip(box, c, d.followed);
-      if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
-        EVMADDR=d.value;
-        $('ethg').setAttribute('opacity','1');
-        $('ethnode').removeAttribute('stroke-dasharray');
-        readEvm(EVMADDR);
-      }
-      if(c==='ar:'+SOUL&&d.value&&d.value===arInjectBoundAddress()&&typeof readArBound==='function') readArBound(d.value);
-    });
+  /* one card per context; one rail that cannot derive never takes the rest down */
+  function forgeChip(box, c){
+    /* PER-CONTEXT ISOLATION. One rail that cannot derive must not take the
+       keychain down with it: before this, a single throwing context broke
+       renderForge, which broke keychainOn, which meant a stranger's whole
+       wallet failed to connect because one address kind was unavailable.
+       Caught by e2e/wallet-signer.mjs §G, which deliberately breaks one. */
+    var d;
+    try{ d=deriveFor(c) }
+    catch(err){
+      var bad=document.createElement('div'); bad.className='chip'; bad.style.borderStyle='dashed'; bad.style.cursor='default';
+      bad.innerHTML=forgeCc(c,null)+'<div class="cv"></div>';
+      wlSay(bad.querySelector('.cv'),['this address could not be made here, so none is shown. ',{btn:'try again',on:function(ev){ if(ev)ev.stopPropagation(); renderForge() }},
+        {cy:'not derivable here: '+((err&&err.message)||String(err))+' · a wrong address cannot be undone, so this chip stays empty'}]);
+      box.appendChild(bad);
+      return;
+    }
+    if(!d){
+      var wait=document.createElement('div'); wait.className='chip'; wait.style.cursor='default'; wait.setAttribute('data-wl-tech','');
+      wait.innerHTML=forgeCc(c,null)+'<div class="cv" style="color:var(--faint)">appears when your keychain connects</div><div class="cx"></div>';
+      forgeNote(wait.querySelector('.cx'),forgeChipNote(c,null));
+      box.appendChild(wait);
+      return;
+    }
+    if(d.needsConnect){ renderArConnectChip(box, c); if(d.followed)renderArFollowChip(box, c, d.followed); return }
+    if(d.hiveAdd){
+      var hc=document.createElement('div'); hc.className='chip'; hc.style.borderStyle='dashed'; hc.style.cursor='default';
+      hc.innerHTML=forgeCc(c,d)+'<div class="cv"></div>';
+      wlSay(hc.querySelector('.cv'),[{to:'ch-hive',t:'add your hive account'},' by pasting its active key.']);
+      box.appendChild(hc); return;
+    }
+    if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
+    var n=forgeChipNote(c,d);
+    var el=document.createElement('div'); el.className='chip';
+    if(d.derived && d.alg) el.setAttribute('data-pq-card', d.alg);
+    el.innerHTML=forgeCc(c,d)+'<div class="cv">'+esc(d.value)+'</div><div class="cx"></div>';
+    var cx=el.querySelector('.cx'); forgeNote(cx,n);
+    if(forgeKnown(c)){
+      el.title='tap to copy'; el.setAttribute('role','button'); el.tabIndex=0;
+      el.onclick=function(){ forgeCopy(el, d.copy||d.value, forgeCopied(c,d), function(){ forgeNote(cx,n) }) };
+      el.onkeydown=function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); el.click() } };
+    } else el.style.cursor='default';
+    box.appendChild(el);
+    if(d.followed)renderArFollowChip(box, c, d.followed);
+    if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
+      EVMADDR=d.value;
+      $('ethg').setAttribute('opacity','1');
+      $('ethnode').removeAttribute('stroke-dasharray');
+      readEvm(EVMADDR);
+    }
+    if(c==='ar:'+SOUL&&d.value&&d.value===arInjectBoundAddress()&&typeof readArBound==='function') readArBound(d.value);
   }
+  function forgeButtons(){
+    ['forge-evm','forge-vaulta','forge-nostr','forge-hive','forge-ar','forge-pq-dsa','forge-pq-kem'].forEach(function(id){ var b=$(id); if(b)b.hidden=!SOUL });
+    if(SOUL&&$('fs2'))$('fs2').textContent=vacct();
+  }
+  function forgeIdle(){
+    wlSay($('forge-stat'),['your addresses come from your keys, and none is ever stored.',{cy:'the forge is unlimited; contexts are names, keys derive on demand from masterPRK'}]);
+  }
+  var FORGE_LIVE=null;
+  function renderForge(){
+    var box=$('forge-chips'), live=!!MPRK;
+    /* the keychain came or went: the last forge line no longer holds */
+    if(FORGE_LIVE!==null&&FORGE_LIVE!==live)forgeIdle();
+    FORGE_LIVE=live;
+    forgeButtons();
+    box.innerHTML='';
+    if(!live||!CONTEXTS.length){
+      var top=document.createElement('div'); top.className='law'; top.id='forge-empty';
+      if(!live) wlSay(top,[{to:'kc-sec',t:'connect your keychain'},SOUL?' and your addresses appear here.':' to see your addresses.']);
+      else wlSay(top,[{to:'connect-sec',t:'name your wallet'},' first, and your addresses appear here.',{cy:'no contexts yet: type one in the field after this list'}]);
+      box.appendChild(top);
+      if(!CONTEXTS.length)return;
+    }
+    var other=[];
+    CONTEXTS.forEach(function(c){ if(forgeIsMine(c))forgeChip(box,c); else other.push(c) });
+    if(other.length){
+      var det=document.createElement('details'); det.className='tnote'; det.id='forge-other'; det.style.flex='1 1 100%';
+      var sm=document.createElement('summary'); sm.textContent='keys for your other names ('+other.length+')'; det.appendChild(sm);
+      var inner=document.createElement('div'); inner.className='chips'; det.appendChild(inner);
+      other.forEach(function(c){ forgeChip(inner,c) });
+      box.appendChild(det);
+    }
+  }
+  /* what a forge press did, said from what the card really shows */
+  function forgeSaid(c){
+    var st=$('forge-stat'), d, plain=forgePlain(c);
+    try{ d=deriveFor(c) }catch(e){ wlSay(st,[plain+' could not be made here, so none is shown. ',{btn:'try again',on:function(){ renderForge(); forgeSaid(c) }},{cy:c+': '+((e&&e.message)||e)}]); return }
+    if(d===null){ wlSay(st,[plain+' appears in your list once your keychain is connected. ',{to:'kc-sec',t:'connect your keychain'},{cy:c+' saved; its key derives from masterPRK when the keychain connects'}]); return }
+    if(d.hiveAdd){ wlSay(st,['add your hive account by pasting its active key on the ',{to:'ch-hive',t:'hive card'},'.',{cy:c+': a public account name, nothing derived'}]); return }
+    if(d.needsConnect){
+      if(!MPRK) wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' and your keys make your arweave address.',{cy:c+' saved; its address derives from masterPRK when the keychain connects'+(d.followed?'; followed (read only): '+d.followed:'')}]);
+      else if(c!=='ar:'+SOUL) wlSay(st,['your keys make one arweave address, under your own name, so this card stays empty.',{cy:'ar derivation runs only for ar:'+SOUL}]);
+      else wlSay(st,['your arweave address could not be made on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:'arDeriveNow returned null: '+(!window.BNRAR?'arweave.js (BNRAR) did not load':'BN.secp did not load')}]);
+      return;
+    }
+    if(d.needsWasm){
+      if(d.alg==='?') wlSay(st,['this wallet has no key kind by that name, so nothing will appear on that card.',{cy:c+': unknown PQ alg'}]);
+      else wlSay(st,['your post-quantum id did not load, so reload the page to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:c+': bpq.js / bsigner not armed (window.BPQ '+(window.BPQ?'present':'missing')+')'}]);
+      return;
+    }
+    var cy=c+' · '+d.kind+' · '+d.value+(d.source==='vault-meta'?' · vault meta':d.kind==='Hive account'?'':' · derived from masterPRK, never stored');
+    if(d.kind==='Hive account') wlSay(st,['your hive account '+d.value+' is in your list.',{cy:cy}]);
+    else if(d.source==='derived') wlSay(st,['your arweave address, made from your keys, is in your list, so tap it to copy it.',{cy:cy}]);
+    else if(d.source==='vault-meta') wlSay(st,['your vault’s arweave address is in your list, and your vault holds its key.',{cy:cy}]);
+    else if(/^ln:/.test(c)) wlSay(st,[plain+' is in your list; it is the key your lightning link uses, not an address to receive sats.',{cy:cy}]);
+    else if(!forgeKnown(c)) wlSay(st,[plain+' is in your list, and it pays nowhere.',{cy:cy}]);
+    else if(d.copy) wlSay(st,[plain+' is in your list, so tap it to copy the card people use '+(d.alg==='ml-dsa-65'?'to check what you sign and seal files for you.':'to seal files for you.'),{cy:cy}]);
+    else wlSay(st,[plain+' is in your list, so tap it to copy it.',{cy:cy}]);
+    if(/^nostr:/.test(c)){
+      var sp=document.createElement('span'); sp.className='wl-cyd'; sp.appendChild(document.createTextNode(' the comms lane: '));
+      var a=document.createElement('a'); a.href='keys/addresses.html'; a.target='_blank'; a.rel='noopener'; a.textContent='your two addresses'; sp.appendChild(a);
+      st.appendChild(sp);
+    }
+  }
+  /* the custom row: a name the wallet knows how to make, or a calm refusal */
+  var FORGE_HINT={eth:'evm',ethereum:'evm',base:'evm',arb:'evm',arbitrum:'evm',solana:'sol',bitcoin:'btc',lightning:'ln',arweave:'ar',eos:'vaulta'};
   $('forge-go').onclick=function(){
-    var c=$('forge-ctx').value.trim();
-    if(!c){$('forge-stat').textContent='type a context first — e.g. vaulta:myaccount or evm:myname';return}
-    if(!/^[\x20-\x7e]{1,64}$/.test(c)){$('forge-stat').textContent='context: plain letters/numbers/symbols, 1–64 chars';return}
+    var c=$('forge-ctx').value.trim(), st=$('forge-stat');
+    if(!c){ wlSay(st,['type a name for the new key first, like evm:savings.',{cy:'contexts: vaulta: evm: sol: btc: ln: nostr: hive: ar: pq:ml-dsa-65: pq:ml-kem-768:'}]); $('forge-ctx').focus(); return }
+    if(!/^[\x20-\x7e]{1,64}$/.test(c)){ wlSay(st,['use plain letters, numbers and symbols for the new key’s name, at most 64.',{cy:'allowed: printable ASCII, 1 to 64 characters'}]); $('forge-ctx').focus(); return }
+    if(!forgeKnown(c)){
+      var pre=((/^([^:]*):/.exec(c)||[])[1]||'').toLowerCase(), hint=FORGE_HINT[pre];
+      wlSay(st,[hint?hint+' is the name for '+pre+' here, so type '+hint+':'+c.slice(pre.length+1)+' instead.':'this wallet makes keys for vaulta, evm, sol, btc, ln, nostr, hive, ar and pq, so start the name with one of those, like evm:savings.',
+        {cy:'refused: '+(pre?'unknown prefix '+pre:'no prefix')+'; it would derive a secp256k1 key no chain of that name accepts (pq: takes ml-dsa-65 or ml-kem-768 and a name up to 48)'}]);
+      $('forge-ctx').focus(); return;
+    }
     ensureCtx(c); $('forge-ctx').value='';
-    $('forge-stat').innerHTML=MPRK?('✓ forged <b>'+c+'</b> — derived from your masterPRK, never stored'):'✓ context saved — connect keychain to derive its key';
-    renderForge();
+    renderForge(); forgeSaid(c);
   };
-  $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
-  $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+vacct()); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+esc(vacct())+'</b>'; };
-  $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
-  $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); var hb=hiveBound(); $('forge-stat').innerHTML=hb?'✓ your Hive account is <b>'+esc(hb)+'</b>':'✓ hive card · add your Hive account on the Hive card: paste its active key'; };
-  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge();
-    var d=null, st=$('forge-stat'); try{ d=deriveFor('ar:'+SOUL) }catch(e){}
-    if(d&&d.source==='derived') wlSay(st,['your arweave address, made from your keys, is in your list, so tap it to copy it.',{cy:'ar:'+SOUL+' · secp256k1 (Arweave 2.9+) · '+d.value+' · never stored'}]);
-    else if(d&&d.source==='vault-meta') wlSay(st,['your vault’s arweave address is in your list, and your vault holds its key.',{cy:'vault meta address '+d.value}]);
-    else if(MPRK) wlSay(st,['your arweave address could not be made on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:'arDeriveNow returned null: '+(!window.BNRAR?'arweave.js (BNRAR) did not load':'BN.secp did not load')}]);
-    else wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' and your keys make your arweave address.',{cy:'ar:'+SOUL+' saved; its address derives from masterPRK when the keychain connects'+(d&&d.followed?'; followed (read only): '+d.followed:'')}]);
-  };
-  $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
+  $('forge-ctx').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); $('forge-go').click() } });
+  function forgeQuick(prefix){ return function(){
+    if(!SOUL){ wlSay($('forge-stat'),[{to:'connect-sec',t:'name your wallet'},' first, and your addresses appear here.']); return }
+    var c=prefix==='vaulta:'?k1Ctx():prefix+SOUL;
+    ensureCtx(c); renderForge(); forgeSaid(c);
+  } }
+  $('forge-evm').onclick=forgeQuick('evm:');
+  $('forge-vaulta').onclick=forgeQuick('vaulta:');
+  $('forge-nostr').onclick=forgeQuick('nostr:');
+  $('forge-hive').onclick=forgeQuick('hive:');
+  $('forge-ar').onclick=forgeQuick('ar:');
+  $('forge-pq-dsa').onclick=forgeQuick('pq:ml-dsa-65:');
+  $('forge-pq-kem').onclick=forgeQuick('pq:ml-kem-768:');
   /* ── only me: seal / open / bind (SPEC-BPQ-1). Everything happens in this tab;
      the plaintext never leaves it, the keys come from MPRK and die with it. ── */
   var PQ_MAX=256*1024*1024;
   function pqReady(){ return !!(MPRK && BSIGNER && typeof BSIGNER.keysFor==='function' && window.BPQ) }
   function pqPanel(){
-    var g=$('pq-gate'), t=$('pq-tools'), m=$('pq-tools-more'); if(!g||!t)return;
+    var g=$('pq-gate'), t=$('pq-tools'), m=$('pq-tools-more'), mg=$('pq-more-gate'); if(!g||!t)return;
     var on=pqReady();
-    t.hidden=!on; g.hidden=on; if(m)m.hidden=!on;
-    if(!on&&!window.BPQ) g.textContent='sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
+    t.hidden=!on; g.hidden=on; if(m)m.hidden=!on; if(mg)mg.hidden=on;
+    if(on)return;
+    if(!window.BPQ){
+      wlSay(g,['sealing did not load on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:'bpq-lib.js / bpq.js did not load; window.BPQ is missing'}]);
+      if(mg)wlSay(mg,['sharing, signing and checking did not load on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }}]);
+    } else {
+      wlSay(g,[{to:'kc-sec',t:'connect your keychain'},' to seal or open.']);
+      if(mg)wlSay(mg,[{to:'kc-sec',t:'connect your keychain'},' to share, sign or bind; checking a signature works right now.']);
+    }
   }
+  /* a page action said calmly: the sentence, one button that does it again, the raw detail for cypherpunk */
+  function pqFail(st,say,btn,on,e){ wlSay(st,[say+(btn?' ':''),btn?{btn:btn,on:on}:null,{cy:e?((e.code?e.code+': ':'')+((e&&e.message)||e)):''}]) }
+  function pqNeedKeys(st){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' first.',{cy:'pqReady() is false: MPRK, BSIGNER.keysFor and window.BPQ are all needed'}]) }
+  function pqNeedName(st,why){ wlSay(st,[{to:'connect-sec',t:'name your wallet'},' first, so '+why+'.',{cy:'keys are BSIGNER.keysFor(MPRK, SOUL)'}]) }
+  function pqPick(id){ return function(){ $(id).click() } }
+  pqPanel();   // at load too: a missing bundle is said before anyone connects to find it
   function pqSize(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB' }
   function pqSave(bytes,name,label){
     var a=document.createElement('a');
@@ -3408,22 +3554,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function pqCards(text){
     var out=[], lines=String(text||'').split(/\n+/).map(function(l){return l.trim()}).filter(Boolean);
     for(var i=0;i<lines.length;i++){
-      var c; try{ c=JSON.parse(lines[i]) }catch(e){ throw new Error('line '+(i+1)+' is not a PQ card (paste the card exactly as copied)') }
-      if(!window.BPQ.verifyCard(c)) throw new Error('the card on line '+(i+1)+' does not verify. ask its owner to copy it again');
+      var c, bad=new Error('the card on line '+(i+1)+' is not a whole card, so ask its owner to copy it again.');
+      try{ c=JSON.parse(lines[i]) }catch(e){ bad.cy='line '+(i+1)+' is not JSON: '+e.message+' · a card is {bpq,id,dsa,kem,sig,succ}'; throw bad }
+      if(!window.BPQ.verifyCard(c)){ bad.cy='line '+(i+1)+': verifyCard failed'; throw bad }
       out.push({id:c.id, kem:window.BPQ.unb64u(c.kem)});
     }
     return out;
   }
   $('pq-seal').onclick=async function(){
     var st=$('pq-seal-stat');
-    if(!pqReady()){st.textContent='connect your keychain first';return}
+    if(!pqReady()){pqNeedKeys(st);return}
     var f=$('pq-file').files[0];
-    if(!f){st.textContent='choose a file first';return}
-    if(f.size>PQ_MAX){st.textContent='this tab seals files up to '+pqSize(PQ_MAX)+'; '+f.name+' is '+pqSize(f.size);return}
+    if(!f){wlSay(st,['pick a file to seal. ',{btn:'seal a file',on:pqPick('pq-file')}]);return}
+    if(f.size>PQ_MAX){pqFail(st,'this file is too big to seal here, because the most is 256 MB, so pick a smaller one.','seal a file',pqPick('pq-file'),{message:'this tab seals files up to '+pqSize(PQ_MAX)+'; '+f.name+' is '+pqSize(f.size)});return}
     var to;
-    try{ to=pqCards($('pq-to').value) }catch(e){ st.textContent=e.message; return }
+    try{ to=pqCards($('pq-to').value) }catch(e){ wlSay(st,[e.message,{cy:e.cy||''}]); $('pq-to').focus(); return }
     // only me needs no soul name; a shared file is signed by the soul's post-quantum keys
-    if(to.length&&!SOUL){st.textContent='name your soul first: a shared file is signed with your post-quantum keys, and they are named by it';return}
+    if(to.length&&!SOUL){pqNeedName(st,'your shared files can be signed with your id');return}
     st.textContent='sealing '+f.name+'…';
     var rv=null;
     try{
@@ -3436,29 +3583,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var sealed=await window.BPQ.seal(plain,{self:rv.key, to:to.map(function(r){return r.kem}), signer:k, meta:{name:f.name, type:f.type||'application/octet-stream'}});
       pqDone(rv); rv=null;
       plain.fill(0);
-      st.textContent='✓ sealed for you'+(to.length?' and '+to.length+' '+(to.length===1?'person':'people')+' you picked':'')+' · your own slot opens from your recovery words alone · '+pqSize(sealed.length)+' · ';
+      wlSay(st,['sealed, so save it anywhere, and only you'+(to.length?' and the '+(to.length===1?'person':to.length+' people')+' you picked':'')+' can open it. ']);
       st.appendChild(pqSave(sealed,f.name+'.bpq','save '+f.name+'.bpq'));
-      st.appendChild(document.createTextNode(' · keep it anywhere; it opens only for these readers · '));
+      /* the second way to keep it (My Data on this device) is quiet: cypherpunk carries it */
+      var quiet=document.createElement('span'); quiet.className='wl-cyd';
+      quiet.appendChild(document.createTextNode(' · slots: your own (the root vault, opens from your recovery words alone)'+(to.length?' + '+to.length+' X-Wing reader slot'+(to.length===1?'':'s'):'')+' · '+pqSize(sealed.length)+' · '));
       var md=document.createElement('button'); md.type='button'; md.id='pq-to-mydata'; md.textContent='add to My Data';
+      var mdSay=document.createElement('span');
       md.onclick=function(){
-        md.disabled=true;
+        md.disabled=true; mdSay.textContent='';
         pqShelve(sealed,f.name+'.bpq').then(function(){
           var a=document.createElement('a'); a.href='bdata.html'; a.id='pq-mydata-link'; a.textContent='open My Data';
           md.replaceWith(document.createTextNode('✓ in My Data on this device, sealed · '),a);
-        },function(e){ md.disabled=false; md.textContent='add to My Data (it did not keep: '+(e.message||e)+')'; });
+        },function(e){ md.disabled=false; md.textContent='try again'; wlSay(mdSay,[' My Data on this device did not keep it, so save the file instead or try again.',{cy:(e&&e.message)||String(e)}]) });
       };
-      st.appendChild(md);
-    }catch(e){ pqDone(rv); st.textContent='could not seal: '+(e.message||e) }
+      quiet.appendChild(md); quiet.appendChild(mdSay);
+      st.appendChild(quiet);
+    }catch(e){ pqDone(rv); pqFail(st,'sealing did not finish, so nothing was saved and you can try again.','seal a file',pqPick('pq-file'),e) }
   };
   $('pq-open').onclick=async function(){
     var st=$('pq-open-stat');
-    if(!pqReady()){st.textContent='connect your keychain first';return}
+    if(!pqReady()){pqNeedKeys(st);return}
     var f=$('pq-open-file').files[0];
-    if(!f){st.textContent='choose a sealed file first';return}
+    if(!f){wlSay(st,['pick the sealed file to open. ',{btn:'open a sealed file',on:pqPick('pq-open-file')}]);return}
     st.textContent='opening '+f.name+'…';
     try{
       var bytes=new Uint8Array(await f.arrayBuffer());
-      if(!window.BPQ.isSealed(bytes)){st.textContent=f.name+' is not a sealed file';return}
+      if(!window.BPQ.isSealed(bytes)){pqFail(st,f.name+' is not a sealed file, so pick the one you saved, whose name ends in .bpq.','open a sealed file',pqPick('pq-open-file'),{message:'bpq1 magic bytes do not match'});return}
       // the phrase-only root vault first (every only-me file sealed since 4 October 2026),
       // then each known soul: its own vault slot (files sealed before), then its reader
       // (X-Wing) slots, so we know which one opened it
@@ -3470,7 +3621,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       if(r){ pqOpened(st,f,bytes,r,via,null); return }
       pqAskSoul(st,f,bytes);
-    }catch(e){ st.textContent='could not open: '+(e.message||e) }
+    }catch(e){ pqOpenFail(st,e) }
   };
   // the phrase-only "only me" key (context 'root', SPEC-BPQ-1 §2). From BSIGNER's
   // cache when it keeps one (wiped with the persona keys by scrubAll); otherwise
@@ -3480,22 +3631,35 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {key:window.BPQ.rootVault(MPRK), own:true};
   }
   function pqDone(rv){ if(rv&&rv.own) rv.key.fill(0) }
+  function pqOpenFail(st,e){
+    if(e&&e.code==='wiped') wlSay(st,['your keychain locked while it worked, so ',{to:'kc-sec',t:'connect it'},' and try again.',{cy:'wiped: keys were wiped'}]);
+    else pqFail(st,'this file did not open, perhaps because it is damaged or cut short, so try the copy you saved.','open a sealed file',pqPick('pq-open-file'),e);
+  }
   function pqOpened(st,f,bytes,r,via,typed){
     var name=(r.meta&&r.meta.name)||f.name.replace(/\.bpq$/,'');
     var slots=window.BPQ.inspect(bytes).slots, sb=r.sealedBy, who, own=via!=='reader';
-    if(!sb) who=(own&&slots.length===1)?'unsigned, an only-me file: its one key slot opens with your own key'+(via==='root'?', from your recovery words alone':''):'unsigned: nothing proves who sealed it (opened through '+(own?'your own key slot':'a reader slot')+')';
-    else if(!sb.ok) who='⚠ the sealer signature does NOT verify, so treat the contents as unauthenticated';
-    else who=sb.id?'sealed and signed by '+sb.id:'signed by a key the seal does not name (fingerprint '+window.BPQ.fingerprint(sb.publicKey)+'), so it does not say who sealed it';
-    st.textContent='✓ opened · '+pqSize(r.bytes.length)+' · '+who+(typed?' · opened as '+typed+', and this browser now knows that name':'')+' · ';
-    st.appendChild(pqSave(r.bytes,name,'save '+name));
+    var say, label='save '+name;
+    if(!sb){
+      who=(own&&slots.length===1)?'unsigned, an only-me file: its one key slot opens with your own key'+(via==='root'?', from your recovery words alone':''):'unsigned: nothing proves who sealed it (opened through '+(own?'your own key slot':'a reader slot')+')';
+      say=(own&&slots.length===1)?(via==='root'?'opened, and only your recovery words could open it, so save it to keep it. ':'opened with your own key, so save it to keep it. '):'opened, but nothing proves who sealed it, so save it only if you trust where it came from. ';
+    }
+    else if(!sb.ok){ who='the sealer signature does not verify, so treat the contents as unauthenticated'; say='opened, but the seal was signed by a key that does not check out, so do not trust what it says. '; label='save anyway' }
+    else if(sb.id){ who='sealed and signed by '+sb.id; say='opened, and its sealer signed it, so save it to keep it. ' }
+    else { who='signed by a key the seal does not name (fingerprint '+window.BPQ.fingerprint(sb.publicKey)+'), so it does not say who sealed it'; say='opened, but the seal does not say who signed it, so save it only if you trust where it came from. ' }
+    wlSay(st,[say]);
+    st.appendChild(pqSave(r.bytes,name,label));
+    var cyd=document.createElement('span'); cyd.className='wl-cyd';
+    cyd.textContent=' ✓ opened · '+pqSize(r.bytes.length)+' · '+who+(typed?' · opened as '+typed+', and this browser now knows that name':'');
+    st.appendChild(cyd);
   }
   // Nothing this browser knows opens it: it may have been sealed (before 4 October
   // 2026, under that soul's own vault) or shared (through X-Wing) under one of your
   // souls whose name this browser forgot. The typed name is kept only if it opens
   // the file.
   function pqAskSoul(st,f,bytes){
-    st.textContent='none of the keys this browser knows opens '+f.name+'. It was sealed for someone else, or sealed or shared under one of your souls whose name this browser does not know. If it is yours, type that soul name (the name on its card) and try again. ';
-    var lab=document.createElement('label'); lab.htmlFor='pq-open-soul'; lab.textContent='the soul name this file was sealed or shared under';
+    wlSay(st,['no key in this browser opens '+f.name+', so if it is yours, type the name it was sealed under. ',{cy:'none of the keys this browser knows opens '+f.name+'. It was sealed for someone else, or sealed or shared under one of your souls whose name this browser does not know. If it is yours, type that soul name (the name on its card) and try again.'}]);
+    var lab=document.createElement('label'); lab.htmlFor='pq-open-soul'; lab.textContent='the name it was sealed under';
+    var labCy=document.createElement('span'); labCy.className='wl-cyd'; labCy.textContent=' (the soul name this file was sealed or shared under)'; lab.appendChild(labCy);
     var inp=document.createElement('input'); inp.type='text'; inp.id='pq-open-soul'; inp.autocomplete='off'; inp.spellcheck=false; inp.maxLength=48;
     inp.style.cssText='display:block;max-width:100%;width:100%;margin:8px 0';
     var go=document.createElement('button'); go.type='button'; go.id='pq-open-soul-go'; go.textContent='try this name';
@@ -3503,17 +3667,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     inp.onkeydown=function(e){ if(e.key==='Enter') go.click() };
     go.onclick=async function(){
       var typed=inp.value.trim(), k=null, r=null, via=null;
-      if(!/^[\x20-\x7e]{1,48}$/.test(typed)){ msg.textContent=' type the soul name: plain letters, numbers or symbols, up to 48'; return }
-      if(!pqReady()){ msg.textContent=' connect your keychain first'; return }
+      if(!/^[\x20-\x7e]{1,48}$/.test(typed)){ wlSay(msg,[' type the name with plain letters, numbers or symbols, at most 48.']); inp.focus(); return }
+      if(!pqReady()){ msg.textContent=' '; pqNeedKeys(msg); return }
       go.disabled=true; msg.textContent=' trying '+typed+'…';
       try{
         k=window.BPQ.keys(MPRK,'pq:'+typed);
         try{ r=await window.BPQ.open(bytes,{self:k}); via='self' }catch(e){ if(e.code!=='no_key')throw e }
         if(!r){ try{ r=await window.BPQ.open(bytes,{kem:k}); via='reader' }catch(e){ if(e.code!=='no_key')throw e } }
-      }catch(e){ go.disabled=false; msg.textContent=' could not open: '+(e.message||e); return }
+      }catch(e){ go.disabled=false; msg.textContent=' '; pqOpenFail(msg,e); return }
       finally{ if(k) k.wipe() }
       go.disabled=false;
-      if(!r){ msg.textContent=' '+typed+' does not open it; the name was not kept'; return }
+      if(!r){ wlSay(msg,[' '+typed+' does not open it, so check the name and try again.',{cy:'the name was not kept'}]); inp.focus(); return }
       ensureCtx('pq:ml-kem-768:'+typed); renderForge();
       pqOpened(st,f,bytes,r,via,typed);
     };
@@ -3581,19 +3745,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   $('pq-sign').onclick=async function(){
     var st=$('pq-sign-stat');
-    if(!pqReady()){st.textContent='connect your keychain first';return}
-    if(!SOUL){st.textContent='name your soul first';return}
+    if(!pqReady()){pqNeedKeys(st);return}
+    if(!SOUL){pqNeedName(st,'your files can be signed with your id');return}
     var f=$('pq-sign-file').files[0];
-    if(!f){st.textContent='choose a file first';return}
-    if(f.size>PQ_MAX){st.textContent='this tab signs files up to '+pqSize(PQ_MAX);return}
+    if(!f){wlSay(st,['pick a file to sign. ',{btn:'sign a file',on:pqPick('pq-sign-file')}]);return}
+    if(f.size>PQ_MAX){pqFail(st,'this file is too big to sign here, because the most is 256 MB, so pick a smaller one.','sign a file',pqPick('pq-sign-file'),{message:'this tab signs files up to '+pqSize(PQ_MAX)+'; '+f.name+' is '+pqSize(f.size)});return}
     try{
       st.textContent='signing '+f.name+'…';
       var k=BSIGNER.keysFor(MPRK,SOUL);
       var d=window.BPQ.signFile(k,new Uint8Array(await f.arrayBuffer()),new Date().toISOString());
-      st.textContent='✓ signed by '+k.id+' · ';
+      wlSay(st,['signed, so save the signature beside the file, and anyone can check it with check a signature. ']);
       st.appendChild(pqSave(new TextEncoder().encode(JSON.stringify(d,null,1)),f.name+'.bpqsig.json','save '+f.name+'.bpqsig.json'));
-      st.appendChild(document.createTextNode('. keep it beside the file; anyone can check it here'));
-    }catch(e){ st.textContent='could not sign: '+(e.message||e) }
+      var cyd=document.createElement('span'); cyd.className='wl-cyd'; cyd.textContent=' ✓ signed by '+k.id+' · ML-DSA-65 · at '+d.at; st.appendChild(cyd);
+    }catch(e){ pqFail(st,'signing did not finish, so nothing was saved and you can try again.','sign a file',pqPick('pq-sign-file'),e) }
   };
   /* ── sign the law: one press. The list is docs/PQ-LAW.json; each file is
      fetched from this same site, shown with its status, and signed with this
@@ -3607,7 +3771,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var list=(await r.json()).files||[], out=[];
       for(var i=0;i<list.length;i++){
         var path=list[i], f=await fetch('../'+path,{cache:'no-store'});
-        if(!f.ok){out.push({path:path,err:'could not be read (HTTP '+f.status+')'});continue}
+        if(!f.ok){out.push({path:path,err:'did not load',cy:'HTTP '+f.status});continue}
         var bytes=new Uint8Array(await f.arrayBuffer()), st='not signed yet';
         try{
           var g=await fetch('../'+path+'.bpqsig.json',{cache:'no-store'});
@@ -3624,30 +3788,36 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var li=document.createElement('li'), a=document.createElement('a');
         a.href='../'+x.path; a.target='_blank'; a.rel='noopener'; a.textContent=x.path.replace(/^docs\//,'');
         li.appendChild(a); li.appendChild(document.createTextNode(' · '+(x.err||x.status)));
+        if(x.cy){ var c=document.createElement('span'); c.className='wl-cyd'; c.textContent=' '+x.cy; li.appendChild(c) }
         ul.appendChild(li);
       });
       return out;
-    }catch(e){ ul.textContent=''; var li=document.createElement('li'); li.textContent='the list of law files did not load: '+(e.message||e); ul.appendChild(li); return null }
+    }catch(e){
+      ul.textContent=''; var li=document.createElement('li');
+      wlSay(li,['the law files did not load, so check your connection and try again. ',{btn:'try again',on:function(){ lawRead() }},{cy:'the list of law files did not load: '+((e&&e.message)||e)}]);
+      ul.appendChild(li); return null;
+    }
   }
   /* One signing identity for the law, whatever souls this keychain has named:
      the persona context 'pq:signer'. A person signing never meets a soul name. */
   var LAW_SIGNER='signer';
-  // say(kind, text): kind is 'busy' | 'done' | 'fail'; returns true when signed
+  // say(kind, text, a, info): kind is 'busy' | 'done' | 'fail'; info says what happened
+  // ({code, n, of, err}) so a caller can word it its own way; returns true when signed
   async function lawSign(say){
-    if(!window.BPQ||!BSIGNER){say('fail','This page did not finish loading. Reload it and press again.');return false}
+    if(!window.BPQ||!BSIGNER){say('fail','This page did not finish loading. Reload it and press again.',null,{code:'noload'});return false}
     try{
       if(!MPRK){
-        say('busy','Confirm with your passkey…');
+        say('busy','Confirm with your passkey…',null,{code:'passkey'});
         var sup=BZDIDKEY&&await BZDIDKEY.prfBrowserSupport();
-        if(sup===false){say('fail','This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.');return false}
+        if(sup===false){say('fail','This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.',null,{code:'prf'});return false}
         CEREMONY=true;
         try{ keychainOn(await connectSoul()); }
-        catch(e){ say('fail',/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.');return false }
+        catch(e){ var cancel=/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''); say('fail',cancel?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.',null,{code:cancel?'cancel':'nopasskey',err:e});return false }
         finally{ CEREMONY=false }
       }
-      say('busy','Signing…');
+      say('busy','Signing…',null,{code:'signing'});
       var law=LAW||await lawRead();
-      if(!law||!law.length){say('fail','The law files did not load. Check your connection and press again.');return false}
+      if(!law||!law.length){say('fail','The law files did not load. Check your connection and press again.',null,{code:'nolaw'});return false}
       var k=BSIGNER.keysFor(MPRK,LAW_SIGNER), at=new Date().toISOString(), sigs=[];
       for(var i=0;i<law.length;i++){ if(law[i].bytes) sigs.push({path:law[i].path, sig:window.BPQ.signFile(k,law[i].bytes,at)}) }
       var bundle={bpq:1, kind:'law-signatures', at:at, card:window.BPQ.card(k), signatures:sigs};
@@ -3655,14 +3825,34 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var a=pqSave(new TextEncoder().encode(JSON.stringify(bundle,null,1)),name,'save the receipt again');
       a.id='law-receipt';
       a.click();
-      say('done','Done. You signed '+sigs.length+' law files. You can close this page.',a);
+      say('done','Done. You signed '+sigs.length+' law files. You can close this page.',a,{code:'done',n:sigs.length,of:law.length,name:name,id:k.id,skipped:law.filter(function(x){return !x.bytes}).map(function(x){return x.path+' ('+(x.cy||x.err||'no bytes')+')'})});
       return true;
-    }catch(e){ say('fail','Something went wrong, so nothing was signed. Press Sign again.'); return false }
+    }catch(e){ say('fail','Something went wrong, so nothing was signed. Press Sign again.',null,{code:'error',err:e}); return false }
+  }
+  /* the wallet panel words for each lawSign outcome (the #sign sheet keeps its own) */
+  function lawSay(st,kind,text,a,info){
+    var i=info||{}, again={btn:'sign the law',on:function(){ $('pq-law-go').click() }}, reload={btn:'reload',on:function(){ location.reload() }};
+    var cy={cy:(i.err?((i.err.message)||String(i.err)):'')};
+    if(kind==='busy'){ wlSay(st,[i.code==='passkey'?'confirm with your passkey…':'signing…']); return }
+    if(i.code==='done'){
+      var part=i.n<i.of;
+      wlSay(st,[part?'you signed '+i.n+' of the '+i.of+' law files, because '+(i.of-i.n)+' did not load, and the receipt is in your downloads, so keep it and try again for the rest. ':'you signed all '+i.n+' law files, and the receipt is in your downloads, so keep it: the signatures live only in that file. ',
+        part?{btn:'try again',on:function(){ LAW=null; lawRead().then(function(){ $('pq-law-go').click() }) }}:null,
+        {cy:'receipt '+i.name+' · signer '+i.id+(part?' · skipped: '+i.skipped.join(', '):'')+' · agents commit it with scripts/apply-law-signatures.mjs'}]);
+      if(a){ st.appendChild(document.createTextNode(' ')); st.appendChild(a) }
+      return;
+    }
+    if(i.code==='noload') wlSay(st,['this page did not finish loading, so reload it and press sign again. ',reload]);
+    else if(i.code==='prf') wlSay(st,['this browser cannot use your passkey here, so open the wallet in Chrome, Edge or Safari.']);
+    else if(i.code==='cancel') wlSay(st,['nothing was signed, so press sign when you are ready. ',again,cy]);
+    else if(i.code==='nopasskey') wlSay(st,['no wallet passkey answered, so open the wallet on the device you use for it.',cy]);
+    else if(i.code==='nolaw') wlSay(st,['the law files did not load, so check your connection and press sign again. ',again]);
+    else wlSay(st,['nothing was signed, so press sign to try again. ',again,cy]);
   }
   $('pq-law-go').onclick=async function(){
     var st=$('pq-law-stat'), btn=this;
     btn.disabled=true;
-    try{ await lawSign(function(kind,text,a){ st.textContent=text; if(a){st.appendChild(document.createTextNode(' '));st.appendChild(a)} }) }
+    try{ await lawSign(function(kind,text,a,info){ lawSay(st,kind,text,a,info) }) }
     finally{ btn.disabled=false }
   };
   /* wallet.html#sign: the whole job on one sheet. One sentence, one button; the
@@ -3754,41 +3944,47 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   pqLand(); addEventListener('hashchange',pqLand);
   addEventListener('hashchange',function(){ if(/^#pq-law/.test(location.hash)&&!LAW)lawRead() });
   $('pq-verify').onclick=async function(){
-    var st=$('pq-verify-stat');
-    if(!window.BPQ){st.textContent='checking needs the post-quantum bundle (bpq-lib.js), which did not load';return}
+    var st=$('pq-verify-stat'), again={btn:'check',on:function(){ $('pq-verify').click() }};
+    if(!window.BPQ){wlSay(st,['checking did not load on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:'bpq-lib.js / bpq.js did not load; window.BPQ is missing'}]);return}
     var f=$('pq-ver-target').files[0], g=$('pq-ver-sig').files[0];
-    if(!f||!g){st.textContent='choose the file and its .bpqsig.json';return}
-    try{
-      var d=JSON.parse(await g.text());
-      var r=window.BPQ.verifyFile(d,new Uint8Array(await f.arrayBuffer()));
-      st.textContent=r.ok?('✓ '+f.name+' is signed by '+r.id+' (ML-DSA-65); it says it was signed at '+r.at):('✗ '+(r.why||'does not verify'));
-    }catch(e){ st.textContent='✗ that signature file is not readable JSON' }
+    if(!f||!g){wlSay(st,['pick the file, then the signature file saved beside it.',{cy:'the signature file is <file>.bpqsig.json'}]);return}
+    if(f.size>PQ_MAX){wlSay(st,['✗ that file is too big to check here, because the most is 256 MB.',{cy:f.name+' is '+pqSize(f.size)}]);return}
+    var d, bytes;
+    try{ d=JSON.parse(await g.text()) }catch(e){ wlSay(st,['✗ '+g.name+' could not be read as a signature, so pick the .bpqsig.json saved beside the file. ',again,{cy:'not readable JSON: '+((e&&e.message)||e)}]); return }
+    try{ bytes=new Uint8Array(await f.arrayBuffer()) }catch(e){ wlSay(st,['✗ '+f.name+' could not be read here, so pick it again. ',again,{cy:(e&&e.message)||String(e)}]); return }
+    var r=window.BPQ.verifyFile(d,bytes);
+    if(r.ok){
+      var when=new Date(r.at), day=isNaN(when)?r.at:when.getUTCDate()+' '+['january','february','march','april','may','june','july','august','september','october','november','december'][when.getUTCMonth()]+' '+when.getUTCFullYear();
+      wlSay(st,['✓ '+f.name+' checks out: it was signed by the id shown, and the signer says it was on '+day+'.',{cy:'✓ '+f.name+' is signed by '+r.id+' (ML-DSA-65); it says it was signed at '+r.at}]);
+    }
+    else if(r.id) wlSay(st,['✗ this signature does not match this file, so either the file changed or the signature belongs to another one. ',again,{cy:'✗ '+(r.why||'does not verify')}]);
+    else wlSay(st,['✗ that is not a signature this wallet can check, so pick the .bpqsig.json saved beside the file. ',again,{cy:'✗ '+(r.why||'does not verify')}]);
   };
   $('pq-bind').onclick=function(){
     var st=$('pq-bind-stat');
-    if(!pqReady()){st.textContent='connect your keychain first';return}
-    if(!SOUL){st.textContent='name your soul first';return}
+    if(!pqReady()){pqNeedKeys(st);return}
+    if(!SOUL){pqNeedName(st,'your accounts can be bound to your id');return}
     try{
-      var k=BSIGNER.keysFor(MPRK,SOUL), claims={};
+      var k=BSIGNER.keysFor(MPRK,SOUL), claims={}, left=[];
       [['evm','evm:'],['solana','sol:'],['bitcoin','btc:'],['nostr','nostr:']].forEach(function(p){
-        try{ var d=deriveFor(p[1]+SOUL); if(d&&d.value) claims[p[0]]=String(d.value) }catch(e){}
+        try{ var d=deriveFor(p[1]+SOUL); if(d&&d.value) claims[p[0]]=String(d.value); else left.push(p[0]) }catch(e){ left.push(p[0]+' ('+((e&&e.message)||e)+')') }
       });
       /* the Vaulta claim is the key the account really signs with: context k1Ctx()
          (vaulta:<account>, or the older context found on it), never vaulta:<soul> by
          name; the account itself is named only when the .b pointer or a proof says so */
       try{
         var vctx=k1Ctx(), vd=vctx&&deriveFor(vctx);
-        if(vd&&vd.value){ claims['vaulta-k1']=String(vd.value); if(vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))claims['vaulta-account']=vacct() }
-      }catch(e){}
+        if(vd&&vd.value){ claims['vaulta-k1']=String(vd.value); if(vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))claims['vaulta-account']=vacct() } else left.push('vaulta-k1')
+      }catch(e){ left.push('vaulta-k1 ('+((e&&e.message)||e)+')') }
       var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
       claims['bzdid-ed25519']=toHex(rec.publicKey);
       var succ=$('pq-succ').value.trim();
       if(succ){
-        if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); st.textContent='that is not a bzpq1 id. copy it from the new words\' card'; return }
+        if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); wlSay(st,['that is not a post-quantum id, so copy it again from your new words’ card.',{cy:'not a bzpq1 id: bzpq1 + 58 bech32m letters'}]); $('pq-succ').focus(); return }
         var succOk=false;
         try{ var dec=window.BPQ_LIB.bech32m.decode(succ,120); succOk=dec.prefix==='bzpq'&&window.BPQ_LIB.bech32m.fromWords(dec.words).length===32 }catch(e){}
-        if(!succOk){ rec.seed.fill(0); st.textContent='that bzpq1 id fails its checksum, so a letter is wrong. Nothing was signed. Copy it again from the new words\' PQ card'; return }
-        if(succ===k.id){ rec.seed.fill(0); st.textContent='that is this same id. connect with your old words to vouch for the new one'; return }
+        if(!succOk){ rec.seed.fill(0); wlSay(st,['that new id has a wrong letter, so nothing was signed, and you can copy it again from your new words’ card.',{cy:'that bzpq1 id fails its checksum (bech32m, prefix bzpq, 32-byte payload)'}]); $('pq-succ').focus(); return }
+        if(succ===k.id){ rec.seed.fill(0); wlSay(st,['that is this same id, so connect with your old words to vouch for the new one.',{cy:'successor equals '+k.id}]); return }
         claims['successor-bzpq']=succ;
       }
       var b=window.BPQ.bind(k,claims,new Date().toISOString());
@@ -3796,24 +3992,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       b.cosign=[{alg:'ed25519', claim:'bzdid-ed25519', over:'utf8("bpq1/cosign:" + sig)', sig:window.BPQ.b64u(rec.sign(new TextEncoder().encode('bpq1/cosign:'+b.sig)))}];
       rec.seed.fill(0);
       var json=JSON.stringify(b,null,1), jsonBytes=new TextEncoder().encode(json), fname='pq-binding-'+SOUL+'.json';
-      st.textContent='✓ '+Object.keys(claims).length+' accounts bound to '+k.id+' · ';
+      var accts=['evm','vaulta-k1','solana','bitcoin','nostr'].filter(function(x){ return claims[x] }).length;
+      wlSay(st,['your '+accts+' addresses are now tied to your post-quantum id, so save the binding and keep a copy somewhere safe. ']);
       st.appendChild(pqSave(jsonBytes,fname,'save the binding'));
-      st.appendChild(document.createTextNode('. keep a copy somewhere permanent. '));
+      var bcy=document.createElement('span'); bcy.className='wl-cyd';
+      bcy.textContent=' ✓ bound to '+k.id+' · claims: '+Object.keys(claims).map(function(x){ return x+'='+claims[x] }).join(', ')+' · ed25519 cosign by bzdid'+(left.length?' · left out (did not derive): '+left.join(', '):'')+' · ';
+      st.appendChild(bcy);
       var tb=document.createElement('button'); tb.type='button'; tb.id='pq-ots'; tb.textContent='⏱ timestamp it on Bitcoin';
+      var tsay=document.createElement('span'); tsay.id='pq-ots-say';
       tb.onclick=async function(){
-        tb.disabled=true; tb.textContent='asking OpenTimestamps calendars…';
+        tb.disabled=true; tb.textContent='asking the time servers…'; tsay.textContent='';
         try{
           var r=await pqTimestamp(jsonBytes), span=document.createElement('span');
+          span.appendChild(document.createTextNode(r.calendars+' time server'+(r.calendars===1?' holds':'s hold')+' a stamp for it, so save the stamp beside the binding; after Bitcoin confirms it in a few hours, it can be upgraded into proof of the date. '));
           span.appendChild(pqSave(r.ots,fname+'.ots','save '+fname+'.ots'));
-          span.appendChild(document.createTextNode(' · '+r.calendars+' calendar'+(r.calendars===1?' holds':'s hold')+' a pending stamp for it. This file holds only those pending promises, and nothing on this page checks it. After Bitcoin confirms (usually a few hours), upgrade it with the OpenTimestamps client (ots upgrade) while the calendars still hold it; only the upgraded file can show this binding existed before that block. Keep it beside the binding; only the binding\'s SHA-256 left this tab.'));
-          tb.replaceWith(span);
-        }catch(e){ tb.disabled=false; tb.textContent='⏱ timestamp it on Bitcoin'; st.appendChild(document.createTextNode(' '+(e.message||e))) }
+          var scy=document.createElement('span'); scy.className='wl-cyd';
+          scy.textContent=' · '+r.calendars+' calendar'+(r.calendars===1?' holds':'s hold')+' a pending stamp for it. This file holds only those pending promises, and nothing on this page checks it. After Bitcoin confirms (usually a few hours), upgrade it with the OpenTimestamps client (ots upgrade) while the calendars still hold it; only the upgraded file can show this binding existed before that block. Keep it beside the binding; only the binding\'s SHA-256 left this tab.';
+          span.appendChild(scy);
+          tb.replaceWith(span); tsay.textContent='';
+        }catch(e){
+          tb.disabled=false; tb.textContent='⏱ try the timestamp again';
+          wlSay(tsay,[' the timestamp did not go through this time, so try again in a minute.',{cy:(e&&e.message)||String(e)}]);
+        }
       };
-      st.appendChild(tb);
-      try{ navigator.clipboard.writeText(json) }catch(e){}
-    }catch(e){ st.textContent='could not bind: '+(e.message||e) }
+      st.appendChild(tb); st.appendChild(tsay);
+    }catch(e){ pqFail(st,'binding did not finish, so nothing was signed and you can try again.','bind again',function(){ $('pq-bind').click() },e) }
   };
-  $('forge-pq-kem').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-kem-768:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your seal-to-me key for <b>'+SOUL+'</b> — others can now seal files only you open'):('✓ pq:ml-kem-768 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
 
   /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
      rail argument defaults to arbitrum so the balance lanes written before

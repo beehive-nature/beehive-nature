@@ -209,6 +209,60 @@ try {
     await page.close();
   }
 
+  /* B3 · the forge says what it did: an unknown kind is refused (no key nobody
+     accepts), the last line resets when the keychain locks, the binding counts only
+     addresses and never overwrites the clipboard, and a failed stamp never stacks */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());
+    await page.goto(`${BASE}/surfaces/wallet.html#forge-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const refuse = await page.evaluate(() => {
+      document.getElementById('forge-ctx').value = 'eth:me';
+      document.getElementById('forge-go').click();
+      return { say: document.getElementById('forge-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') };
+    });
+    ok('forge: an unknown kind is refused with the right name, and no key is made', /^evm is the name for eth here, so type evm:me instead\./.test(refuse.say) && !refuse.ctx.includes('eth:me'), JSON.stringify(refuse));
+    const made = await page.evaluate(() => {
+      document.getElementById('forge-ctx').value = 'evm:savings';
+      document.getElementById('forge-ctx').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      return { say: document.getElementById('forge-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]'), html: document.getElementById('forge-stat').innerHTML };
+    });
+    ok('forge: Enter makes the key, and the line says where it is, from what the card shows', made.ctx.includes('evm:savings') && /^the ethereum address named savings is in your list, so tap it to copy it\./.test(made.say) && !/<b>/.test(made.html), JSON.stringify(made));
+    const other = await page.evaluate(() => { const d = document.getElementById('forge-other'); return d ? [...d.querySelectorAll('.chip .cc')].map(x => x.textContent) : []; });
+    ok('forge: a key for another name folds away, kept', other.some(t => /evm:savings/.test(t)), JSON.stringify(other));
+    // bind: the count is addresses only, and the clipboard is untouched
+    await page.evaluate(() => { window.__clip = []; Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: t => { window.__clip.push(t); return Promise.resolve(); } }); });
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const bind = await page.evaluate(async () => ({ say: document.getElementById('pq-bind-stat').textContent, clip: window.__clip.length, b: JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()) }));
+    const addrN = ['evm', 'vaulta-k1', 'solana', 'bitcoin', 'nostr'].filter(k => bind.b.claims[k]).length;
+    ok('bind: the count is the addresses bound, not the co-sign key', new RegExp('^your ' + addrN + ' addresses are now tied to your post-quantum id').test(bind.say) && addrN < Object.keys(bind.b.claims).length, bind.say.slice(0, 120));
+    ok('bind: the clipboard is never overwritten behind your back', bind.clip === 0, String(bind.clip));
+    // a failed stamp, twice: one calm line, never stacked
+    await page.route(/\/digest$/, r => r.abort());
+    for (let i = 0; i < 2; i++) {
+      await page.evaluate(() => document.getElementById('pq-ots').click());
+      await page.waitForFunction(() => !document.getElementById('pq-ots').disabled && /did not go through/.test(document.getElementById('pq-ots-say').textContent), null, { timeout: 20000 });
+    }
+    const ots = await page.evaluate(() => document.getElementById('pq-bind-stat').textContent);
+    ok('bind: a failed timestamp says so once, however often it is pressed', (ots.match(/did not go through/g) || []).length === 1 && (ots.match(/no OpenTimestamps calendar answered/g) || []).length === 1, ots.slice(-260));
+    await page.unroute(/\/digest$/);
+    // the keychain locks: the last forge line no longer claims a key
+    await page.evaluate(() => document.getElementById('kc-out').click());
+    const locked = await page.evaluate(() => ({ say: document.getElementById('forge-stat').textContent, empty: (document.getElementById('forge-empty') || {}).textContent || '' }));
+    ok('forge: when the keychain locks, the line resets and the list says to connect', /^your addresses come from your keys, and none is ever stored\./.test(locked.say) && /connect your keychain and your addresses appear here/.test(locked.empty), JSON.stringify(locked));
+    await page.close();
+  }
+
   /* D · only me: seal in the page, open in the page, open the same bytes in Node;
      bind the classical accounts to the PQ id and verify the binding in Node */
   {
@@ -264,7 +318,7 @@ try {
     await page.evaluate(() => document.getElementById('pq-verify').click());
     await page.waitForFunction(() => /✓|✗/.test(document.getElementById('pq-verify-stat').textContent), null, { timeout: 10000 });
     const verStat = await page.evaluate(() => document.getElementById('pq-verify-stat').textContent);
-    ok('the page checks its own signature and calls its time a claim', /^✓ ruling\.md is signed by bzpq1\S+ \(ML-DSA-65\); it says it was signed at \d{4}-/.test(verStat), verStat);
+    ok('the page checks its own signature and calls its time a claim', /^✓ ruling\.md checks out: it was signed by the id shown, and the signer says it was on \d{1,2} [a-z]+ \d{4}\./.test(verStat) && /✓ ruling\.md is signed by bzpq1\S+ \(ML-DSA-65\); it says it was signed at \d{4}-/.test(verStat), verStat);
     await page.evaluate(() => document.getElementById('pq-bind').click());
     await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
     const binding = await page.evaluate(async () => JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()));
@@ -601,7 +655,7 @@ try {
     await page.waitForFunction(() => /does not open it/.test(document.getElementById('pq-open-soul-stat').textContent), null, { timeout: 20000 });
     const g3 = await page.evaluate(() => ({ msg: document.getElementById('pq-open-soul-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
     ok('forgotten soul: a wrong name does not open the file and is not kept',
-      g3.links === 0 && /notmysoul does not open it; the name was not kept/.test(g3.msg) && !g3.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g3));
+      g3.links === 0 && /notmysoul does not open it, so check the name and try again/.test(g3.msg) && /the name was not kept/.test(g3.msg) && !g3.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g3));
     // 4 · the right name opens it, and only then is the name kept, as the forge keeps it
     await page.fill('#pq-open-soul', 'gatesoul');
     await page.click('#pq-open-soul-go');
@@ -772,8 +826,8 @@ try {
       dl.suggestedFilename() + ' ' + JSON.stringify(each.filter(x => !x.r.ok)));
     ok('law: the receipt carries the public card of that id and no soul name or secret',
       NODE_BPQ.verifyCard(rc.card) && rc.card.id === SIGNER.id && !/gatesoul/.test(JSON.stringify(rc)) && Object.keys(rc).sort().join() === 'at,bpq,card,kind,signatures');
-    ok('law: the page says it is done, in one plain sentence',
-      /^Done\. You signed \d+ law files\./.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
+    ok('law: the page says it is done, in one plain sentence, and names the receipt as the only copy',
+      /^you signed all \d+ law files, and the receipt is in your downloads, so keep it: the signatures live only in that file\./.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
     await page.close();
   }
 
