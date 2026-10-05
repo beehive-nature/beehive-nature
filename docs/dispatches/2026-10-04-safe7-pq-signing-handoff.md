@@ -133,9 +133,9 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
 
 > Read `beehive-nature/docs/dispatches/2026-10-04-safe7-pq-signing-handoff.md` and every file in
 > its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Steps 1
-> to 4 are done (§8). Execute §8 "Next": rebase `bpq-safe7` onto `beehive` `7a8709bdff`, rebuild
-> and rerun the emulator cross-check, then measure hardware fit without flashing. No flashing, no
-> unlock, no real phrase, no mainnet. Report done and pending only, with receipts.
+> to 4 are done, rebased onto `beehive` `7a8709bdff`, and hardware fit is measured (§8). Execute
+> §8 "Next": the ARM compile fix for `bpq_slh.c`, then step 5, the gate-6 ceremony plan. No
+> flashing, no unlock, no real phrase, no mainnet. Report done and pending only, with receipts.
 
 ## 8 · Status, 2026-10-04 (Seat 3, emulator only)
 
@@ -158,9 +158,30 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
   commit; the 98 modified working-tree files untouched; `bpq-safe7` still at `e4efbb7c8`. The
   13 earlier commits carry the `dev@beehive-nature` identity the ORDERS-1 trailer clause ended;
   published as they were, not rewritten (escalated, not resolved).
-- **Next, for a fresh session:** rebase `bpq-safe7` onto `beehive` `7a8709bdff`, rebuild the T3W1
-  emulator from a clean clone, rerun `emu_xcheck` and update the receipt; then hardware fit
-  (measure ML-DSA-65 heap and stack on a T3W1 image, no flash without the founder); step 5 (the
-  gate-6 ceremony plan) after that.
-- **Not claimed:** hardware fit (UNVERIFIED; no hardware image contains the app), channel
-  confidentiality, device attestation. Step 5 not started.
+- **Rebased and remeasured, 2026-10-05 (Seat 3, no device).** Fork branch `bpq-safe7-7a8709b`
+  at `da2583079` (new branch; `bpq-safe7` stays at `e4efbb7c8`, which the 10-04 receipt cites):
+  the two bpq commits on `7a8709bdff`, plus `1d21da9e4` committing the qstrs the build
+  regenerates for the Zano app (without it every build of `7a8709bdff` dirties the tree). From a
+  fresh clone at `1d21da9e4`, clean before and after the build: the T3W1 emulator builds, the
+  host test passes 25/25, the unit test 5/5, and `emu_xcheck` passes with `fork_dirty: false`.
+  The device id and wallet id are the ones recorded on 10-04. Receipt:
+  `docs/receipts/bpq-safe7-rebase-fit-2026-10-05.json`; fork `crypto/bpq/EMU_XCHECK_RECEIPT.md`.
+- **Hardware fit, measured from two built T3W1 images, never flashed** (fork
+  `crypto/bpq/HARDWARE_FIT_RECEIPT.md`, reproduced by `crypto/bpq/fit.sh`):
+  - **As committed, bpq does not compile for ARM.** `vendor/sphincsplus/ref/merkle.c:29`
+    assigns `unsigned int *` to `uint32_t *`, which is `long unsigned int` on `arm-none-eabi`
+    (the same type on x86-64, so the emulator hid it). The measurement lowered that one
+    diagnostic to a warning in an uncommitted patch; the fix is open.
+  - Flash: +36,352 B, image at 70.2 % of `FIRMWARE_MAXSIZE`. No `.data` or `.bss` added.
+  - Heap (MicroPython GC, 697,904 B): peak 86,160 B for a signature, largest block 30,720 B.
+  - Stack (32 KiB app stack): worst path 16,296 B for `BpqGetCard`, of which 13,832 B is one
+    ML-KEM-768 keygen frame; `BpqSign` 6,600 B. The MicroPython VM frames above the binding are
+    not counted.
+- **Next, for a fresh session:** the ARM compile fix for `bpq_slh.c` (it needs a choice: the
+  vendored reference's `unsigned` against its own `uint32_t` field), then a clean hardware build
+  with bpq lifted out of the emulator-only gate as a reviewed change; step 5 (the gate-6
+  ceremony plan) after that. On-device stack headroom, heap fragmentation and signing time can
+  only be measured at that ceremony.
+- **Not claimed:** hardware fit as a whole (it does not compile for ARM as committed; VM stack
+  headroom, fragmentation, timing and the device flow are unmeasured), channel confidentiality,
+  device attestation. Step 5 not started.
