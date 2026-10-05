@@ -178,6 +178,15 @@ try {
     await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
     ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
+    // the anchor is reviewed like a file: fee, the paying address and "cannot be undone", before any signature
+    await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+    const anchorPlan = await page.locator('#arw-file-plan').textContent();
+    const vaultAddr = await page.evaluate(() => (window.BNRVAULT.list().filter(e => e.type === 'arweave')[0] || { meta: {} }).meta.address);
+    ok('the anchor waits for review: exact fee, the paying address, cannot be undone, nothing posted yet',
+      /Exact fee: [0-9.]+ AR/.test(anchorPlan) && anchorPlan.includes('Paying address: ' + vaultAddr) && /cannot be undone/.test(anchorPlan) && posted.length === 0 &&
+      await page.locator('#arw-file-confirm').isVisible() && /estate anchor/.test(await page.locator('#arw-file-dialog-title').textContent()), anchorPlan.slice(0, 160));
+    ok('both publish buttons wait while the review is open', await page.locator('#arw-go').isDisabled() && await page.locator('#arw-file-review').isDisabled());
+    await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(() => /does not hold enough AR/.test(document.getElementById('arw-stat').innerText), null, { timeout: 10000 })
       .catch(() => {});
     const after = await page.locator('#arw-stat').innerText();
@@ -286,6 +295,10 @@ try {
     await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
     ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
+    await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+    ok('the extension is not asked to sign before the review is confirmed', await page.evaluate(() => (window.__arSignCount || 0) === 0) && posted.length === 0 &&
+      (await page.locator('#arw-file-plan').textContent()).includes('Paying address: ' + addr));
+    await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';
@@ -302,13 +315,38 @@ try {
     ok('inject sign path spoke honestly, in the Arweave panel and nowhere else', /enough AR|said no|confirmed|sent/i.test(arwStat) && txOut === '', (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
     ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    // a publish still on its way is never signed twice: a second press points to it instead
+    {
+      const signs0 = await page.evaluate(() => window.__arSignCount || 0), posts0 = posted.length;
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave').at(-1); if (e) { e.phase = 'submitted'; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); } });
+      await page.locator('#arw-go').click();
+      await page.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').innerText), null, { timeout: 8000 }).catch(() => {});
+      ok('a second press while the first is on its way signs nothing and names where it waits',
+        /still on its way, so nothing new was signed/.test(await page.locator('#arw-stat').innerText()) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#outbox-sec"]')) &&
+        await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0 && !(await page.locator('#arw-file-dialog').isVisible()));
+      await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); l.filter(x => x.rail === 'arweave').forEach(x => { if (x.phase === 'submitted') x.phase = 'failed'; }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    }
+    // the extension now pays from another account than the one shown: the review stops it before signing
+    {
+      const signs0 = await page.evaluate(() => window.__arSignCount || 0), posts0 = posted.length;
+      await page.evaluate(() => window.__arInjectBoot());   // the extension switches to another account
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.locator('#arw-go').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      ok('another paying account is named and cannot be confirmed', /not the one your wallet showed/.test(await page.locator('#arw-file-plan').innerText()) && !(await page.locator('#arw-file-confirm').isVisible()));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => /nothing was signed/.test(document.getElementById('arw-stat').innerText), null, { timeout: 8000 }).catch(() => {});
+      ok('closing it says why, and nothing was signed or sent', /not the one your wallet showed/.test(await page.locator('#arw-stat').innerText()) &&
+        await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0);
+    }
     await page.setViewportSize({width:390,height:844});
     const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
     const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');
     await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
     await page.locator('#arw-file-review').click();
     await page.locator('#arw-file-dialog').waitFor({state:'visible'});
-    ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').textContent())&&/for [0-9.]+ AR, paid from your Arweave address ending in .{6}\. it is public for good and cannot be undone/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
     ok('mobile review keeps its title and both decisions visible',await page.locator('#arw-file-dialog-title').isVisible()&&await page.locator('#arw-file-dialog').evaluate(el=>{const box=el.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth&&box.top>=0&&box.bottom<=innerHeight})&&await page.locator('#arw-file-cancel').isVisible()&&await page.locator('#arw-file-confirm').isVisible());
     ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
     await page.locator('#arw-file-cancel').click();

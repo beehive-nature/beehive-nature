@@ -2223,8 +2223,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       <button type="button" id="arw-file-review">Review file &amp; fee</button>
       <div id="arw-file-status" class="wa-note" role="status" aria-live="polite"></div>
       <dialog id="arw-file-dialog" aria-labelledby="arw-file-dialog-title" style="margin:auto;padding:24px;max-width:min(92vw,520px);background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:16px">
-        <h2 id="arw-file-dialog-title">bPay · publish to Arweave</h2><div id="arw-file-plan" style="overflow-wrap:anywhere"></div>
-        <div class="wa-toolbar"><button type="button" id="arw-file-confirm">Confirm &amp; sign</button><button type="button" id="arw-file-cancel">Cancel</button></div>
+        <h2 id="arw-file-dialog-title">publish this file to Arweave?</h2><div id="arw-file-plan" style="overflow-wrap:anywhere"></div>
+        <div class="wa-toolbar"><button type="button" id="arw-file-confirm">confirm &amp; sign</button><button type="button" id="arw-file-cancel">cancel</button></div>
       </dialog>
     </div>
     <div class="wa-note" style="margin-top:18px">Or publish the estate's pinned reference anchor:</div>
@@ -2360,11 +2360,76 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             wlSay(stat, ['your Arweave extension did not connect. ', { btn: 'try again', on: function () { conn.click(); } }, { cy: err && err.message ? err.message : String(err) }]);
           } finally { conn.disabled = false; }
         });
+        /* one publish at a time, and both buttons say so: while one is in flight the other waits */
+        function busy(on) {
+          publishing = on;
+          var rv = $('arw-file-review'), fi = $('arw-file');
+          if (rv) rv.disabled = on; if (fi) fi.disabled = on;
+          if (on) go.disabled = true;   /* off: the next refresh decides from the balance and the signer */
+        }
+        /* a publish that is signed or sent but not settled is never signed again: a second
+           press would build, sign and pay for a second copy while the first is on its way */
+        var onTheWay = { anchor: null, file: {} };
+        function stillOut(id) {
+          if (!id) return false;
+          try {
+            var l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]');
+            for (var i = 0; i < l.length; i++) if (l[i] && l[i].intent_id === id) return l[i].phase === 'signed' || l[i].phase === 'submitted';
+          } catch (e) {}
+          return false;
+        }
+        function tail(a) { return String(a || '').slice(-6); }
+        /* the review before anything is signed, for the anchor and for a file alike: what is
+           published, the exact fee, the address that really pays (it must be the one the wallet
+           shows) and whether it holds enough AR. resolves true only on "confirm & sign". */
+        function reviewer(what, shown, stop) {
+          return async function (plan) {
+            var dialog = $('arw-file-dialog'), details = $('arw-file-plan'), title = $('arw-file-dialog-title');
+            var yes = $('arw-file-confirm'), no = $('arw-file-cancel');
+            details.replaceChildren();
+            var line = function (parts) { var d = document.createElement('div'); d.style.marginBottom = '10px'; wlSay(d, parts); details.appendChild(d); };
+            var fee = BigInt(plan.feeWinston), feeAr = arUnits(fee), ok = true;
+            var cy = [{ cy: 'Paying address: ' + plan.address }, { cy: 'Exact fee: ' + feeAr + ' AR (' + plan.feeWinston + ' winston)' },
+              { cy: plan.bytes.toLocaleString('en-US') + ' bytes · Network: Arweave mainnet' }, what.sha ? { cy: 'SHA-256: ' + what.sha } : null];
+            if (title) title.textContent = what.title;
+            if (shown && plan.address !== shown) {
+              ok = false;
+              stop.say = ['this would pay from an Arweave address ending in ' + tail(plan.address) + ', not the one your wallet showed (ending in ' + tail(shown) + '), so nothing was signed. the wallet now shows the address that would pay; publish again if it is the one you mean.', { cy: 'paying address ' + plan.address + ' differs from the shown address ' + shown }];
+              stop.moved = true;
+              line(stop.say.slice(0, 1).concat(cy));
+            } else {
+              line(['publish ' + what.name + ' to Arweave for ' + feeAr + ' AR, paid from your Arweave address ending in ' + tail(plan.address) + '. it is public for good and cannot be undone.'].concat(cy));
+              var bal = null;
+              try { var b = await window.BNRAR.balance(plan.address); if (/^\d+$/.test(String(b))) bal = BigInt(b); } catch (be) { bal = null; }
+              if (bal === null) line(['your balance could not be checked just now. if it is too low, Arweave turns it down and nothing is spent.', { cy: 'balance read failed before signing' }]);
+              else if (bal < fee) {
+                ok = false;
+                stop.say = ['this address holds ' + arUnits(bal) + ' AR and publishing costs ' + feeAr + ' AR, so nothing was signed. add ' + arUnits(fee - bal) + ' AR to it, then publish again. ', { to: 'ch-arweave', t: 'see your Arweave address' }, { cy: 'balance ' + bal + ' winston < fee ' + plan.feeWinston + ' winston' }];
+                line(['this address holds ' + arUnits(bal) + ' AR, so add ' + arUnits(fee - bal) + ' AR to it first. nothing is signed now.']);
+              }
+            }
+            yes.hidden = !ok;
+            no.textContent = ok ? 'cancel' : 'close';
+            return new Promise(function (resolve) {
+              var finish = function (accepted) { dialog.close(); resolve(accepted && ok); };
+              yes.onclick = function () { finish(true); }; no.onclick = function () { finish(false); };
+              dialog.oncancel = function (e) { e.preventDefault(); finish(false); };
+              dialog.showModal(); no.focus();
+            });
+          };
+        }
         go.addEventListener('click', async function () {
           var W = window.BNRWALLET, V = window.BNRVAULT;
           if (!W) { wlSay(stat, ['the wallet did not finish loading. ', { btn: 'reload the page', on: function () { location.reload(); } }]); return; }
-          if(publishing)return;publishing=true;go.disabled = true;held=true;   /* the line keeps this result until the reader acts again */
-          try { var inj0 = arInject(); heldFor = ((await resolveAddr()) || '') + '|' + ((inj0 && inj0.signLane ? inj0.signLane() : null) || ''); } catch (h0) { heldFor = ''; }
+          if (publishing) return;
+          held = true;   /* the line keeps this result until the reader acts again */
+          if (stillOut(onTheWay.anchor)) {
+            wlSay(stat, ['your last publish is still on its way, so nothing new was signed. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'intent ' + onTheWay.anchor + ' is signed or submitted and not settled' }]);
+            return;
+          }
+          busy(true);
+          var shown = null;
+          try { shown = await resolveAddr(); var inj0 = arInject(); heldFor = (shown || '') + '|' + ((inj0 && inj0.signLane ? inj0.signLane() : null) || ''); } catch (h0) { heldFor = ''; }
           var arSay = function (parts) { wlSay(stat, parts); };
           arSay(['checking the anchor file…']);
           try {
@@ -2383,17 +2448,24 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               if (e && V) jwk = JSON.parse(V.reveal(e.id).secret);
             }
             if (!lane || (lane === 'vault' && !jwk)) {
-              wlSay(stat, ['Nothing here signs for this address yet. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to publish from your own Arweave address.']);
+              wlSay(stat, ['nothing here signs for this address yet. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to publish from your own Arweave address.', { cy: 'sign lane ' + (lane || 'none') }]);
               return;
             }
-            arSay(['signing…', { cy: 'payload verified (' + bytes.length + ' B, sha256 pinned) · ' + (lane === 'inject' ? 'the extension signs' : lane === 'derived' ? 'your own key signs' : 'the vault key signs') }]);
+            arSay(['preparing the anchor and its exact fee. nothing is signed yet.', { cy: 'payload verified (' + bytes.length + ' B, sha256 pinned) · ' + (lane === 'inject' ? 'the extension signs' : lane === 'derived' ? 'your own key signs' : 'the vault key signs') }]);
+            var stop = {};
             var o = lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false };
             o.say = arSay; o.again = { btn: 'try again', on: function () { go.click(); } };
+            o.review = reviewer({ title: 'publish the estate anchor to Arweave?', name: 'the estate anchor', sha: sha }, shown, stop);
             var r = await W.walletPublish(bytes, ORBIT.tags, o);
+            if (r && r.phase === 'cancelled') {
+              if (stop.moved) { try { var inj1 = arInject(); heldFor = ((await resolveAddr()) || '') + '|' + ((inj1 && inj1.signLane ? inj1.signLane() : null) || ''); } catch (h1) {} }
+              arSay(stop.say || ['cancelled before signing. nothing was published.']); return;
+            }
+            if (r && r.intent_id) onTheWay.anchor = r.intent_id;
             if (r && r.phase === 'confirmed') {
               arSay(['anchored. the network confirmed it.', { cy: 'ANCHORED: read back from the gateway: ' + (r.evidence && r.evidence.read) + ' · tx ' + r.ref }]);
               var a = document.createElement('a');
-              a.href = 'https://arweave.net/' + r.ref;
+              a.href = 'https://arweave.net/' + encodeURIComponent(r.ref);
               a.target = '_blank'; a.rel = 'noopener noreferrer';
               a.textContent = 'see it on Arweave';
               stat.appendChild(document.createTextNode(' '));
@@ -2402,33 +2474,34 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           } catch (err) {
             arSay([(err && err.calm) || 'something went wrong, so nothing was published. ', { btn: 'try again', on: function () { go.click(); } }, { cy: 'publish failed: ' + (err && err.message ? err.message : err) }]);
           } finally {
-            publishing=false;go.disabled = false;
+            busy(false); refresh();
           }
         });
         function arUnits(raw){var n=BigInt(raw),f=(n%1000000000000n).toString().padStart(12,'0').replace(/0+$/,'');return (n/1000000000000n).toString()+(f?'.'+f:'')}
         $('arw-file-review').onclick=async function(){
-          var button=$('arw-file-review'),note=$('arw-file-status'),file=$('arw-file').files[0];
+          var note=$('arw-file-status'),file=$('arw-file').files[0];
           if(publishing)return;
           if(!file||file.size===0||file.size>30000){wlSay(note,[file&&file.size>30000?'this file is larger than 30,000 bytes. choose a smaller one.':'choose a file first, up to 30,000 bytes.']);$('arw-file').focus();return;}
           var W=window.BNRWALLET;
           var lane=arInject()&&arInject().signLane?arInject().signLane():null, viaInject=lane==='inject', viaKeys=lane==='derived';
-          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'connect your keychain'},' to publish from your own Arweave address.']);return;}
-          publishing=true;button.disabled=true;$('arw-file').disabled=true;
+          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'connect your keychain'},' to publish from your own Arweave address.',{cy:'sign lane '+(lane||'none')+(W?'':'; BNRWALLET missing')}]);return;}
+          busy(true);
           wlSay(note,['preparing this file and its exact fee. nothing is signed yet.']);
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
+            if(stillOut(onTheWay.file[sha])){wlSay(note,['this file is still on its way, so nothing new was signed. ',{to:'outbox-sec',t:'see it in waiting to be sent'},{cy:'intent '+onTheWay.file[sha]+' is signed or submitted and not settled'}]);return;}
+            var shown=null;try{shown=await resolveAddr()}catch(se){shown=null}
+            var stop={};
             var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
-            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,again:{btn:'try again',on:function(){$('arw-file-review').click()}},say:function(parts,phase){wlSay(note,parts);note.setAttribute('data-phase',phase||'')},review:async function(plan){
-              var dialog=$('arw-file-dialog'),details=$('arw-file-plan');details.replaceChildren();
-              [file.name,bytes.length.toLocaleString()+' bytes','Network: Arweave','Paying address: '+plan.address,'Exact fee: '+arUnits(plan.feeWinston)+' AR','SHA-256: '+sha,'Public storage. Publication cannot be undone.'].forEach(function(text){var line=document.createElement('div');line.style.marginBottom='10px';line.textContent=text;details.appendChild(line)});
-              return new Promise(function(resolve){var finish=function(accepted){dialog.close();resolve(accepted)};$('arw-file-confirm').onclick=function(){finish(true)};$('arw-file-cancel').onclick=function(){finish(false)};dialog.oncancel=function(e){e.preventDefault();finish(false)};dialog.showModal();$('arw-file-cancel').focus()});
-            }});
+            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,again:{btn:'try again',on:function(){$('arw-file-review').click()}},say:function(parts,phase){wlSay(note,parts);note.setAttribute('data-phase',phase||'')},
+              review:reviewer({title:'publish this file to Arweave?',name:file.name,sha:sha},shown,stop)});
             if(!result)return;   /* walletPublish already said why, in this line */
-            if(result.phase==='cancelled'){wlSay(note,['cancelled before signing. nothing was published.']);return;}
+            if(result.phase==='cancelled'){wlSay(note,stop.say||['cancelled before signing. nothing was published.']);return;}
+            if(result.intent_id)onTheWay.file[sha]=result.intent_id;
             if(result.phase==='confirmed'){wlSay(note,['published. the network confirmed it.',{cy:'tx '+result.ref}]);}
             if(result.ref&&result.phase==='confirmed'){var link=document.createElement('a');link.href='https://arweave.net/'+encodeURIComponent(result.ref);link.target='_blank';link.rel='noopener noreferrer';link.textContent='see it on Arweave';note.appendChild(document.createTextNode(' '));note.appendChild(link)}
           }catch(error){wlSay(note,[(error&&error.calm)||'something went wrong, so nothing was published. ',{btn:'try again',on:function(){$('arw-file-review').click()}},{cy:'file publication did not complete: '+((error&&error.message)||'unknown error')}])}
-          finally{publishing=false;button.disabled=false;$('arw-file').disabled=false}
+          finally{busy(false);refresh()}
         };
         box.hidden = false;
         wlSay(stat, ['reading your Arweave address…']);

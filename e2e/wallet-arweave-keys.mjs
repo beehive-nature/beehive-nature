@@ -99,6 +99,14 @@ try {
     ok('the address lives only while the keychain does: nothing about it is stored', await page.evaluate(() => Object.keys(localStorage).every(k => !/ar_derived/.test(k))));
     await page.waitForFunction(() => /empty for now/.test(document.getElementById('ar-stat').textContent), null, { timeout: 15000 });
     ok('an empty address reads calmly, with the one next step', await page.evaluate(() => { const e = document.getElementById('ar-stat'); const calm = [...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join('').trim(); return calm === 'your Arweave address is empty for now. add AR to publish' && /balance 0 winston/.test(e.textContent) && !!e.querySelector('a[href="#arw-sec"]') && !/err/.test(e.className); }), await page.textContent('#ar-stat'));
+    // an empty address cannot confirm a fee it cannot pay: the review says how much to add, and nothing is signed
+    await page.setInputFiles('#arw-file', { name: 'hello.txt', mimeType: 'text/plain', buffer: Buffer.from('hello from my own keys') });
+    await page.evaluate(() => document.getElementById('arw-file-review').click());
+    await page.waitForFunction(() => document.getElementById('arw-file-dialog').open, null, { timeout: 20000 });
+    ok('an empty address gets no confirm button, only how much AR to add', await page.evaluate(() => /add [0-9.]+ AR to it first/.test(document.getElementById('arw-file-plan').textContent) && document.getElementById('arw-file-confirm').hidden));
+    await page.evaluate(() => document.getElementById('arw-file-cancel').click());
+    await page.waitForFunction(() => /nothing was signed/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 10000 }).catch(() => {});
+    ok('closing it says what to do, and nothing was posted', !state.posted && /add [0-9.]+ AR to it, then publish again/.test(await page.textContent('#arw-file-status')), await page.textContent('#arw-file-status'));
     // publish a small file from it
     state.balance = '5000000000000';
     await page.setInputFiles('#arw-file', { name: 'hello.txt', mimeType: 'text/plain', buffer: Buffer.from('hello from my own keys') });
