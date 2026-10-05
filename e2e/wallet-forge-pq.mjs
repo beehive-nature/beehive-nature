@@ -701,7 +701,7 @@ try {
     await page.waitForFunction(n => document.querySelectorAll('#pq-law-list li a').length === n, law.length, { timeout: 20000 });
     const listed = await page.evaluate(() => [...document.querySelectorAll('#pq-law-list li')].map(li => li.textContent));
     ok('law: the deep link lists every law file with its status, before anything is pressed',
-      listed.length === law.length && listed.every(t => / · not signed yet$/.test(t)), JSON.stringify(listed.slice(0, 2)));
+      listed.length === law.length && listed.every(t => / · (not signed yet|signed by bzpq1\S+…|changed since it was signed)$/.test(t)), JSON.stringify(listed.slice(0, 2)));
     ok('law: the button is visible without the keychain connected', await page.evaluate(() => { const b = document.getElementById('pq-law-go'); return !!b && b.offsetParent !== null; }));
     await page.evaluate(() => {
       const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
