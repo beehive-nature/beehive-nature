@@ -892,13 +892,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="kc-sec" data-wl-task="key">
   <h2>🗝 the keychain: <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
-  <div class="law" data-wl-tech><b>Automatic:</b> your first tap or keypress on a control of this page (moving between its parts does not count) connects the
-  keychain by itself (the WebAuthn ceremony needs one touch of yours: browsers' law, not ours).
+  <div class="law" data-wl-tech><b>Automatic, once your name is connected:</b> your first tap or keypress on this page connects the
+  keychain by itself, except inside the vault, your accounts, storage, bPay, the sign sheets and the keychain's own buttons, and moving between its parts does not count (the WebAuthn ceremony needs one touch of yours: browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
   onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
   and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
-  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b> — never paste a secret.
+  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b>: never paste a secret.
   A recovery phrase paste stays under <b>scaffold · recovery</b> for import only (same soul, same keys).</div>
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
@@ -944,13 +944,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div style="flex:1;min-width:250px">
       <div class="row" style="margin-top:0">
         <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
-        <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ create your bzDiD passkey here</button>
-        <button id="kc-qr" class="gold" style="background:#231a0e;color:var(--amber);border-color:#4a3a1d">📷 QR bridge (phone ⇄ desk)</button>
-        <button id="kc-hw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔑 create on a hardware key</button>
+        <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make a new bzDiD on this device</button>
+        <button id="kc-qr" class="gold" style="background:#231a0e;color:var(--amber);border-color:#4a3a1d">📷 sign in with your phone</button>
+        <button id="kc-hw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔑 make a new bzDiD on a hardware key</button>
       </div>
       <div id="qr-sec" style="display:none;margin-top:10px;border:1px solid #4a3a1d;border-radius:10px;padding:12px;background:#140f06">
         <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
-          <b style="color:var(--amber)" id="qr-title">📷 QR BRIDGE</b>
+          <b style="color:var(--amber)" id="qr-title">📷 sign in with your phone</b>
           <button id="qr-x" style="font-size:11px">✕ close</button>
         </div>
         <div id="qr-body" style="margin-top:8px"></div>
@@ -958,18 +958,18 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       </div>
       <div id="dm-sec" style="display:none;margin-top:10px;border:1px solid #1d4655;border-radius:10px;padding:12px;background:#081820">
         <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
-          <b style="color:var(--cyan)">🛡 DEVICE MANAGER</b>
+          <b style="color:var(--cyan)">🛡 your devices</b>
           <button id="dm-x" style="font-size:11px">✕ close</button>
         </div>
-        <div class="law" style="margin-top:4px">every device that permanently holds this soul, as a seal under its own
-        passkey — the registry is a soul-signed nostr event (kind 30078) any device can read, extend, revoke.
-        Revoke de-syncs a device (its cached seal keeps working offline — honest limit; a full kill is the recovery-rotate
-        lane). Sessions via the QR bridge never enter this list.</div>
+        <div class="law" style="margin-top:4px">these devices keep your soul under their own passkey. removing one stops it syncing, though a copy it already holds still opens offline.<span class="wl-cyd">every device that permanently holds this soul, as a seal under its own
+        passkey; the registry is a soul-signed nostr event (kind 30078) any device can read, extend, revoke.
+        Revoke de-syncs a device (its cached seal keeps working offline: honest limit; a full kill is the recovery-rotate
+        lane). Sessions via the QR bridge never enter this list.</span></div>
         <div id="dm-body" style="margin-top:8px"></div>
-        <div class="law" id="dm-stat" style="margin-top:6px">registry not loaded</div>
+        <div class="law" id="dm-stat" style="margin-top:6px">loading your devices…</div>
       </div>
       <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.passkey">Which devices and keys can make your bzDiD: the full compatibility check</summary>
-  <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
+  <div class="law" style="margin-top:4px">your passkey needs to live in your device's own keychain, like Windows Hello, your Chrome profile, Google or iCloud. if you already have a bzDiD, open it with your passkey instead of making a new one, because a new passkey is a new soul.<span class="wl-cyd"> The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
       most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
       manager's word for it:</b> after the "confirmed" the wallet immediately re-touches the exact
@@ -978,7 +978,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       passkey confirming instantly is fine; PRF is proven by the touch, not the speed. Hardware keys
       must be FIDO2.1-class with a PIN set and room for a resident credential. Older U2F keys won't
       be offered. If Windows said "unrecognized" when you inserted your key, use the dedicated
-      <b>🔑 create on a hardware key</b> button: it routes through the browser's native USB lane
+      <b>🔑 make a new bzDiD on a hardware key</b> button: it routes through the browser's native USB lane
       (no Windows passkey picker at all), which is the fix for exactly that error. Cross-device (the phone-camera QR) works only when the <b>phone's</b> provider has
       PRF: on the phone set the default passkey provider to Google/iCloud, or simply open this wallet
       on the phone itself. After a successful create, this wallet re-touches that same passkey
@@ -987,32 +987,31 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       account, say) can never connect here: it signs at its own site only. Your account's existing
       key still bridges you in via the bridge scaffold (not the New-bee primary path).
       <b>Already hold a bzDiD elsewhere? Don't create a second.</b> Prefer connecting the existing
-      passkey; recovery-phrase import lives under <b>scaffold · recovery</b> (a new passkey = a new soul).</div>
+      passkey; recovery-phrase import lives under <b>scaffold · recovery</b> (a new passkey = a new soul).</span></div>
   </details>
       <details id="kc-rec-scaffold" style="margin-top:10px">
-        <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
-        <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Import / labs only: paste a 24-word recovery phrase or bdidrec to restore an existing soul.
-        Prefer <b>connect keychain (passkey)</b> — New-bee never needs to paste.</div>
+        <summary style="font-size:14px;cursor:pointer;color:var(--dim)">bring your soul back with your recovery words<span class="wl-cyd"> · scaffold · recovery</span></summary>
+        <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">type the 24 recovery words you wrote down, and your soul opens here as it was.<span class="wl-cyd"> Import: a 24-word BIP-39 phrase or a bdidrec1… code restores an existing soul (same soul, same keys); the gold path never pastes a secret.</span></div>
         <div class="row" style="margin-top:8px">
-          <input id="kc-rec" aria-label="Recovery phrase or bdidrec code" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+          <input id="kc-rec" aria-label="your 24 recovery words or recovery code" class="small" type="password" placeholder="your 24 recovery words" spellcheck="false" autocomplete="off">
           <button id="kc-recgo">recover</button>
         </div>
       </details>
-      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">keychain not connected</div>
+      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">your keychain opens with one touch of your passkey.</div>
       <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
         <div class="keycard" style="flex:1 1 100%">
-          <div class="kt">SOUL FINGERPRINT (ed25519 record · bnr.b)</div>
+          <div class="kt">your soul's six words<span class="wl-cyd"> · SOUL FINGERPRINT (ed25519 record · bnr.b)</span></div>
           <div class="kp" id="kc-soul-fp">—</div>
-          <div class="kd" id="kc-soul-pub">—</div>
+          <div class="kd" id="kc-soul-pub" data-wl-tech>—</div>
         </div>
         <div class="keycard" style="flex:1 1 100%;border-color:#2c552c">
-          <div class="kt">VAULTA K1 SIGNING KEY (vaulta:<span id="kc-soul-name">…</span>)</div>
-          <div class="kp" id="kc-k1-pub" style="color:var(--leaf)">—</div>
-          <div class="kd">chain authority: <span id="kc-bridge-verdict" class="stamp">checking…</span></div>
+          <div class="kt">your signing key for <span id="kc-k1-acct">your account</span><span class="wl-cyd"> · VAULTA K1 SIGNING KEY (vaulta:<span id="kc-soul-name">…</span>)</span></div>
+          <div class="kp" id="kc-k1-pub" style="color:var(--leaf)" data-wl-tech>—</div>
+          <div class="kd"><span class="wl-cyd">chain authority: </span><span id="kc-bridge-verdict" class="stamp">checking your account…</span></div>
         </div>
       </div>
       <div class="row" id="kc-outrow" style="display:none">
-        <button id="kc-out" style="font-size:10px;padding:6px 12px;min-height:32px">disconnect + scrub keys from memory</button>
+        <button id="kc-out" style="font-size:10px;padding:6px 12px;min-height:32px">close keychain</button>
         <button id="dm-open" style="font-size:10px;padding:6px 12px;min-height:32px">🛡 devices</button>
       </div>
     </div>
@@ -2822,6 +2821,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     K1={seed:seed,wif:w,eosPub:eos,pubK1:pub1};
     if($('kc-soul-name'))$('kc-soul-name').textContent=k1Ctx().replace(/^vaulta:/,'');   /* the context this key really comes from */
+    kcCard();
+  }
+  /* the signing-key card: the account it signs for in words, the key itself for cypherpunk */
+  function kcCard(){
+    var a=$('kc-k1-acct'), p=$('kc-k1-pub'); if(!a||!p)return;
+    a.textContent=(K1&&vacct())||'your account';
+    if(K1){ p.textContent=K1.eosPub; return }
+    p.textContent='';
+    if(MPRK&&!SOUL) wlSay($('kc-bridge-verdict'),['connect your name to get your signing key. ',{to:'connect-sec',t:'connect your name'},{cy:'K1 not derived: no SOUL (deriveK1 needs a name)'}]);
   }
   function scrubAll(){
     if(BSIGNER && typeof BSIGNER.wipe==='function') BSIGNER.wipe();
@@ -5000,7 +5008,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function checkBridge(){
     if(!K1||!SOUL){BRIDGED=null;return}
     if(!vacctKnown()){BRIDGED=null;setBridgeState(false,'could not read where '+SOUL+'.b points','unknown');return}
-    $('kc-bridge-verdict').textContent='checking…';$('kc-bridge-verdict').className='stamp';
+    $('kc-bridge-verdict').textContent='checking '+vacct()+'…';$('kc-bridge-verdict').className='stamp';
     var a=vacct();
     sumAuth('checking');
     var acc=await post(VH,'/v1/chain/get_account',{account_name:a});
@@ -5040,7 +5048,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function setBridgeState(ok,label,kind){
     var v=$('kc-bridge-verdict');
-    if(label) v.textContent=label; else wlSay(v,['not on '+vacct()+' yet · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
+    if(kind==='unread'||kind==='unknown') wlSay(v,[(kind==='unknown'?'could not read where '+SOUL+'.b points':'could not read '+vacct())+' just now. ',{btn:'try again',on:function(){ if(kind==='unknown')readAll(); else checkBridge() }},{cy:'chain authority: '+(label||kind)}]);
+    else if(kind==='noperm') wlSay(v,[vacct()+' has no active key this wallet can join. ',{to:'bridge-sec',t:'see what to do'},{cy:'chain authority: '+(label||kind)}]);
+    else if(label) v.textContent=label; else wlSay(v,['not on '+vacct()+' yet · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
     v.className='stamp'+(ok?' ok':'');
     BR_OK=!!ok; BR_KIND=kind||null;
     var n=$('k1node'),c=$('k1core'),arc=$('bridgearc'),an=$('anchornode');
@@ -5284,16 +5294,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* ── keychain connect ceremony ────────────────────────────── */
   function keychainOn(id){
+    if(MPRK)scrubAll();          // a soul opened in place of another leaves no copy of the old root or its keys
     MPRK=id.masterPrk.slice();
     id.masterPrk.fill&&id.masterPrk.fill(0);
     deriveK1();
     if(SOUL) publishSoul(SOUL);
     $('kc-soul-fp').textContent=(id.fingerprint&&id.fingerprint.words)||'—';
     $('kc-soul-pub').textContent='ed25519: '+Array.from(id.record.publicKey).slice(0,8).map(function(b){return b.toString(16).padStart(2,'0')}).join('')+'…';
-    $('kc-k1-pub').textContent=K1?K1.eosPub:'—';
+    kcCard();
     $('kc-cards').style.display='flex';
     $('kc-outrow').style.display='flex';
-    kcLive();
+    kcLive(); kcQrLabel();
     wlSay($('sum-kc'),['your keychain is connected in this tab.',{cy:'connected ✓'}]);$('sum-kc').style.color='var(--leaf)';
     var arOwn=arDeriveNow();
     seedContexts(); renderForge(); pqPanel();
@@ -5302,19 +5313,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
       $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
-  function kcLive(){ $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored' }
+  /* the keychain's resting lines: one calm sentence and the way on */
+  function kcLive(){ wlSay($('kc-stat'),['your keychain is open on this page and closes when you leave. ',{to:'bal-sec',t:'see your accounts'},{cy:'keychain live · keys in tab memory only, never stored in the clear (a permanent device keeps the soul sealed under its own passkey, bnr_seal)'}]) }
+  function kcNot(){ wlSay($('kc-stat'),['your keychain opens with one touch of your passkey. ',{btn:'connect keychain',on:kcConnect},{cy:'keychain not connected · masterPRK not in tab memory'}]) }
+  function kcIdle(){ if(MPRK)kcLive(); else kcNot() }
+  function kcQrLabel(){ var q=$('kc-qr'); if(q)q.textContent=MPRK?'📷 let a desktop sign in':'📷 sign in with your phone' }
+  function kcReload(t){ return {btn:t||'reload',on:function(){ location.reload() }} }
+  function kcNoEngine(el){ wlSay(el||$('kc-stat'),['the keychain could not load on this page. ',kcReload('reload to try again'),{cy:'BZDIDKEY engine missing (onboarding/bzdid-key.js did not load)'}]) }
   function kcConnect(){ $('kc-pass').click() }
   $('kc-pass').onclick=async function(){
-    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    if(!BZDIDKEY){kcNoEngine();return}
+    if(CEREMONY){ wlSay($('kc-stat'),['a passkey prompt is already open. finish it, then press again.',{cy:'one WebAuthn ceremony at a time (CEREMONY set)'}]); return }
+    autoTried=true;          // a press is the visit's one attempt: no second prompt from a later tap
+    CEREMONY=true;
     try{
       var sup=await BZDIDKEY.prfBrowserSupport();
-      if(sup===false){$('kc-stat').textContent='this browser lacks PRF — use the recovery lane below';return}
-      $('kc-stat').textContent=CRED_ID?'touching your bzDiD passkey (the exact one this wallet made)…':'touch your passkey…';
+      if(sup===false){ wlSay($('kc-stat'),['this browser cannot open a passkey keychain. bring your soul in with ',{to:'kc-rec-scaffold',t:'your recovery words'},' instead.',{cy:"PublicKeyCredential.getClientCapabilities()['extension:prf'] === false"}]); return }
+      wlSay($('kc-stat'),['touch your passkey to open your keychain.',{cy:CRED_ID&&!isWrap(CRED_ID)?'targeted get: allowCredentials = bnr_cred, no picker':loadSeal()?'targeted get on this device\'s seal credential':'discoverable get: the picker'}]);
       var id=await connectSoul();
       keychainOn(id);
     }catch(e){
       wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect));
-    }
+    }finally{ CEREMONY=false }
   };
   /* AUTO-CONNECT (founder law: connect bzDiD should be automatic): the WebAuthn
      ceremony needs a user gesture, so the FIRST tap/keypress anywhere arms the
@@ -5330,6 +5350,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
+    // the keychain's own buttons run their own ceremony on click (connect, make, phone, hardware,
+    // the status line's try again), and the recovery words, the device list and the phone sheet
+    // are their own way in: a pointerdown there must not open a second prompt first
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-pass,#kc-hw,#kc-qr,#kc-rec-scaffold,#kc-sec details,#qr-sec,#dm-sec,#kc-outrow,#kc-stat button'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more,#wl-bee,#wl-rave,#summary-sec,#connect-sec,footer,#chains .va-total,[data-vaulta-toggle],[data-hive-toggle],[data-ant-toggle],[data-ar-toggle],#chains .stat'))return;
@@ -5339,10 +5363,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     autoTried=true;
     window.removeEventListener('pointerdown',autoConnect);
     window.removeEventListener('keydown',autoConnect);
-    $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
+    wlSay($('kc-stat'),['touch your passkey to open your keychain.',{cy:'auto-connect: the first gesture of the visit (one attempt) runs connectSoul()'}]);
     CEREMONY=true;
     connectSoul().then(keychainOn).catch(function(e){
-      if(!MPRK)wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect,'auto-connect'));
+      if(MPRK)return;
+      wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect,'auto-connect'));
+      /* the reader may be on another task: the glance says it too, with the way in */
+      wlSay($('sum-kc'),['not connected · ',{to:'kc-sec',t:'open my keychain'}]);$('sum-kc').style.color='var(--amber)';
     }).finally(function(){CEREMONY=false});
   }
   window.addEventListener('pointerdown',autoConnect);
@@ -5368,7 +5395,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return [made?'this passkey cannot hold a bzDiD, so nothing changed here. bring your soul in with ':'this passkey cannot hold your bzDiD. bring your soul in with ',rec,'.',
         {cy:raw+' · no_prf_output: the authenticator returned no PRF secret (Bitwarden-class managers do not carry it); delete it where it was saved; a platform provider (Windows Hello, Chrome profile, Google, iCloud) carries PRF'}];
     if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN)
-      return ['passkeys only work on the wallet\'s own site, so open it there to connect.',{cy:raw+' · WebAuthn rejects this origin ('+location.hostname+'): an IP address is never a passkey domain'}];
+      return BAD_ORIGIN&&window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home
+        ?['passkeys only work on the wallet\'s own site. ',{btn:'open the wallet there',on:function(){ location.href=WALLET_PROFILE.canonical_home }},{cy:raw+' · WebAuthn rejects this origin ('+location.hostname+'): an IP address is never a passkey domain'}]
+        :['passkeys only work on the wallet\'s own site, so open it there to connect.',{cy:raw+' · WebAuthn rejects this origin ('+location.hostname+'): an IP address is never a passkey domain'}];
     if(/pending/i.test(m))
       return ['another passkey prompt is still open. finish it, then ',tryB,'.',{cy:raw}];
     if(/NotAllowed|No available|not.*found|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m))
@@ -5386,21 +5415,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var KIT_HOME=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
     var b=document.createElement('div');
     b.style.cssText='position:sticky;top:0;z-index:50;background:var(--well);color:var(--amber);border:2px solid var(--amber);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.6';
-    b.innerHTML='<b>⚠ THIS IS A LOCAL BUILD SERVER ('+location.hostname+') — passkeys cannot work here.</b><br>'+
-      'WebAuthn requires a real domain, and an IP address is never one: every passkey ceremony on this origin will fail with "invalid domain".<br>'+
-      (KIT_HOME?'<b>The wallet\'s real home:</b> <a href="'+KIT_HOME+'" style="color:var(--amber);text-decoration:underline">'+KIT_HOME.replace(/^https?:\/\//,'')+'</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.'
-               :'<b>Open this wallet on its real domain</b> — the kit profile carries no canonical home, so this copy\'s home is wherever you deployed it.');
+    b.innerHTML='<b>⚠ passkeys only work on the wallet\'s own site, and this copy runs at an address ('+esc(location.hostname)+') that can hold none.</b> '+
+      (KIT_HOME?'open the wallet at <a href="'+esc(KIT_HOME)+'" style="color:var(--amber);text-decoration:underline">'+esc(KIT_HOME.replace(/^https?:\/\//,''))+'</a> to connect.'
+               :'open this wallet on its own site to connect.')+
+      '<span class="wl-cyd"> local build server: WebAuthn requires a registrable domain and an IP address is never one, so every passkey ceremony on this origin fails with "invalid domain".'+(KIT_HOME?'':' The kit profile carries no canonical home.')+'</span>';
     var main=document.querySelector('main');
     if(main)main.insertBefore(b,main.firstChild);
   }
   $('kc-create').onclick=function(){
-    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    if(!BZDIDKEY){kcNoEngine();return}
     // The picker trap: a create that "confirms" instantly (a software passkey
     // saved into the browser profile / a manager) still ends with a REAL PRF
     // test inside runCreate — we never trust the enrollment's own prfEnabled
     // report; the re-touch of the exact credential just made is the proof.
     runCreate(function(){ return BZDIDKEY.enrollPasskey(SOUL||'you') },
-      'creating your bzDiD passkey — confirm with Hello / touch / device…');
+      ['confirm on your device to make your bzDiD.',{cy:'enrollPasskey: a new platform passkey, then a targeted PRF re-touch (the enrollment\'s prfEnabled is never trusted)'}]);
   };
 
   /* ── HARDWARE-KEY lane ────────────────────────────────────────
@@ -5439,19 +5468,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     st.appendChild(say); st.appendChild(box); st.appendChild(done);
   }
   async function runCreate(enrollFn,label){
-    if(CEREMONY){$('kc-stat').textContent='a passkey prompt is already open — finish or dismiss it, then try again';return}
+    if(CEREMONY){ wlSay($('kc-stat'),['a passkey prompt is already open. finish it, then press again.',{cy:'one WebAuthn ceremony at a time (CEREMONY set)'}]); return }
     CEREMONY=true;
+    var again=function(){ runCreate(enrollFn,label) };
     try{
-      $('kc-stat').textContent=label;
+      wlSay($('kc-stat'),label);
       var en=await enrollFn();
-      $('kc-stat').textContent='passkey created — touching THAT passkey once to prove PRF and derive your soul…';
+      wlSay($('kc-stat'),['touch the same passkey once more to finish.',{cy:'targeted re-touch of the new credentialId demands a real 32-byte PRF secret; the enrollment\'s prfEnabled is not trusted'}]);
       var id;
       try{ id=await identityFromTargeted(en.credentialId); }
       catch(e2){
         var m2=(e2&&e2.message)||String(e2||'');
-        $('kc-stat').innerHTML='✗ <b style="color:var(--amber)">created but unusable</b> — '+(/no_prf/i.test(m2)
-          ?'that key lacks PRF (U2F-only or pre-FIDO2.1 firmware). Delete it, or keep it for signing Vaulta transactions with a passkey — but it cannot hold a bzDiD.'
-          :m2);
+        if(/no_prf/i.test(m2)) wlSay($('kc-stat'),['this key cannot hold a bzDiD, so nothing changed here. you can remove it in the key\'s own settings. ',{btn:'try a different key',on:again},
+          {cy:'created but unusable: no_prf (U2F-only or pre-FIDO2.1 firmware); it can still sign Vaulta transactions as a passkey, never hold a bzDiD · '+m2}]);
+        else wlSay($('kc-stat'),['the new passkey did not answer, so nothing changed here. ',{btn:'try again',on:again},{cy:'created but unusable: '+((e2&&e2.name)||'')+' '+m2+' · the passkey stays in the authenticator, unused'}]);
         return;
       }
       saveCred(en.credentialId);
@@ -5460,14 +5490,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       kcBorn(words); words=null;
     }catch(e){
       var m=(e&&e.message)||String(e||'');
-      if(/pending|abort/i.test(m))$('kc-stat').textContent='create: another passkey prompt was still open — try again now';
-      else if(/InvalidState/i.test(m))$('kc-stat').textContent='create: this device already holds one — use connect instead';
-      else wlSay($('kc-stat'),passkeyFallbackMsg(e,function(){ runCreate(enrollFn,label) },'create'));
+      if(/pending|abort/i.test(m)) wlSay($('kc-stat'),['another passkey prompt was still open. ',{btn:'press again',on:again},{cy:'create: '+((e&&e.name)||'')+' '+m}]);
+      else if(/InvalidState/i.test(m)) wlSay($('kc-stat'),['this device already holds your bzDiD. ',{btn:'open it with your passkey',on:kcConnect},{cy:'create: InvalidStateError '+m}]);
+      else wlSay($('kc-stat'),passkeyFallbackMsg(e,again,'create'));
     }finally{ CEREMONY=false }
   }
   $('kc-hw').onclick=function(){
-    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
-    runCreate(enrollHardware,'creating on the hardware key — insert it, enter its PIN, tap when it blinks…');
+    if(!BZDIDKEY){kcNoEngine();return}
+    runCreate(enrollHardware,['insert your key, enter its PIN, and tap it when it blinks.',{cy:'enrollHardware: cross-platform authenticator over the browser\'s native USB lane (no platform picker), then a targeted PRF re-touch'}]);
   };
 
   /* ── DEVICE MANAGER — add and revoke permanent soul-holders ── */
@@ -5554,38 +5584,46 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {devices:newest.o.devices, reg:{n:newest.o.devices.length, at:newest.created, trust:newest.trust}, base:newest.trust==='unchecked', pqServed:pqServed};
   }
   var DM_REG=[], DM_BASE=false, DM_PUB=null, DM_PQ_SERVED=false;
+  function dmN(n){ return n+' device'+(n===1?'':'s') }
+  function dmDay(at){ var t=Date.parse(at||''); return isFinite(t)?'added '+new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short'}):'added on a day not known yet' }
+  function dmCy(t){ return '<span class="wl-cyd"> '+esc(t)+'</span>' }
+  var DM_LASTREG=null;
   function dmRender(devices,reg){
+    DM_LASTREG=reg;
     var me=dmLocal();
     var rows=(devices||[]).map(function(d){
       var here=me&&me.credId===d.credId;
       return '<div class="row" style="justify-content:space-between;align-items:center;border-top:1px solid #123;padding:6px 0">'+
-        '<div style="flex:1;min-width:120px"><b style="color:'+(here?'var(--leaf)':'var(--ink)')+'">'+(d.name||'device')+(here?' · this browser':'')+'</b>'+
-        '<div style="font-size:9px;color:var(--faint)">'+d.fp+' · added '+(d.at||'?')+'</div></div>'+
-        '<button class="dm-rv" data-c="'+d.credId+'" style="font-size:10px;color:#e08;border-color:#412">revoke</button></div>';
+        '<div style="flex:1;min-width:120px"><b style="color:'+(here?'var(--leaf)':'var(--ink)')+'">'+esc(d.name||'device')+(here?' · this device':'')+'</b>'+
+        '<div style="font-size:9px;color:var(--faint)">'+esc(dmDay(d.at))+dmCy(String(d.fp||'')+' · '+String(d.credId||'')+' · added '+String(d.at||'unknown'))+'</div></div>'+
+        '<button class="dm-rv" data-c="'+esc(d.credId)+'" style="font-size:10px;color:#e08;border-color:#412">remove</button></div>';
     }).join('');
-    if(!rows)rows='<div class="law">no permanent devices registered yet</div>';
+    if(!rows)rows='<div class="law" id="dm-empty">no device keeps your soul yet. keep it on this device to add this one.'+dmCy('registry holds no devices')+'</div>';
+    var head=
+      reg&&reg.refused?['your device list is not ready yet','registry: refused, and nothing was changed','var(--amber)']:
+      reg&&reg.missing?['your device list is not ready yet','registry: not found on the relays this time, though this browser saw one signed at '+reg.missing,'var(--amber)']:
+      reg&&reg.partial?['your device list is not ready yet','registry: not found, but only '+reg.partial.eose+' of '+reg.partial.queried+' relays answered in full','var(--amber)']:
+      reg&&reg.local?[dmN(reg.n)+' · only this device\'s own view, not saved yet','registry: '+reg.n+' device(s) · this browser\'s own view, not published yet','var(--leaf)']:
+      reg?[dmN(reg.n)+' · checked at '+new Date(reg.at*1000).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}),'registry: '+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString(),'var(--leaf)']:
+      ['no device list yet','registry: not found on relays (new soul, or never published)'];
+    var trust=reg&&reg.trust?(
+      reg.trust==='pq'?['this list is yours and checked ✓','signed post-quantum (ML-DSA-65) by this soul ✓']:
+      reg.trust==='classical'?['this list could not be proven yours, so changes wait.','signed classically only, so this page will not add or revoke on top of it']:
+      reg.trust==='bad'?['⚠ this list was not signed by you, so do not trust it.','its post-quantum signature does NOT verify for this soul. Do not trust this list; this page will not add or revoke on top of it']:
+      ['this list could not be checked on this page.','post-quantum check unavailable here (bpq-lib.js did not load)']):null;
     $('dm-body').innerHTML=
-      '<div style="font-size:10px;color:var(--faint)" data-dm-reg>registry: '+
-        (reg&&reg.refused?'<span style="color:var(--amber)">refused, and nothing was changed</span>':
-         reg&&reg.missing?'<span style="color:var(--amber)">not found on the relays this time, though this browser saw one signed at '+reg.missing+'</span>':
-         reg&&reg.partial?'<span style="color:var(--amber)">not found, but only '+reg.partial.eose+' of '+reg.partial.queried+' relays answered in full</span>':
-         reg&&reg.local?'<span style="color:var(--leaf)">'+reg.n+' device(s) · this browser\'s own view, not published yet</span>':
-         reg?('<span style="color:var(--leaf)">'+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString()+'</span>'):'not found on relays (new soul, or never published)')+'</div>'+
-      (reg&&reg.trust?'<div style="font-size:10px;color:'+(reg.trust==='pq'?'var(--leaf)':'var(--amber)')+'" data-dm-trust="'+reg.trust+'">'+
-        (reg.trust==='pq'?'signed post-quantum (ML-DSA-65) by this soul ✓':
-         reg.trust==='classical'?'signed classically only, so this page will not add or revoke on top of it':
-         reg.trust==='bad'?'⚠ its post-quantum signature does NOT verify for this soul. Do not trust this list; this page will not add or revoke on top of it':
-         'post-quantum check unavailable here (bpq-lib.js did not load)')+'</div>':'')+
+      '<div style="font-size:10px;color:var(--faint)" data-dm-reg>'+(head[2]?'<span style="color:'+head[2]+'">'+esc(head[0])+'</span>':esc(head[0]))+dmCy(head[1])+'</div>'+
+      (trust?'<div style="font-size:10px;color:'+(reg.trust==='pq'?'var(--leaf)':'var(--amber)')+'" data-dm-trust="'+esc(reg.trust)+'">'+esc(trust[0])+dmCy(trust[1])+'</div>':'')+
       rows+
       '<div class="row" style="margin-top:10px">'+
-        (DM_BASE?'':'<button id="dm-own" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">start from this device\'s own view</button>')+
-        '<button id="dm-add" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make THIS device permanent</button>'+
-        '<button id="dm-addhw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ on a hardware key</button>'+
+        (DM_BASE?'':'<button id="dm-own" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">start a new list from this device</button>')+
+        '<button id="dm-add" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ keep my soul on this device</button>'+
+        '<button id="dm-addhw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ keep it on a hardware key</button>'+
       '</div>'+
-      (DM_BASE?'':'<div class="law" style="margin-top:4px">this device\'s own view holds only the seal this browser keeps, or nothing. Publishing it replaces the list on the relays, so any other device must be added again from that device.</div>')+
-      '<div class="law" style="margin-top:4px">add = a passkey on THIS browser wraps the soul (platform, or a FIDO key via its native USB lane). The soul must be live here first — connect, QR-bridge from another device, or recovery.</div>';
+      (DM_BASE?'':'<div class="law" style="margin-top:4px">a new list holds only this device, and your other devices join it again from themselves.'+dmCy('this device\'s own view holds only the seal this browser keeps, or nothing. Publishing it replaces the list on the relays, so any other device must be added again from that device.')+'</div>')+
+      '<div class="law" style="margin-top:4px">adding keeps your soul on this device under its own passkey.'+dmCy('add = a passkey on THIS browser wraps the soul (platform, or a FIDO key via its native USB lane). The soul must be live here first: connect, QR-bridge from another device, or recovery.')+'</div>';
     Array.prototype.forEach.call(document.querySelectorAll('.dm-rv'),function(b){
-      b.onclick=function(){ dmRevoke(b.getAttribute('data-c')); };
+      b.onclick=function(){ dmAsk(b); };
     });
     var own=$('dm-own'); if(own)own.onclick=dmOwnView;
     var add=$('dm-add'); if(add)add.onclick=function(){dmAdd(false)};
@@ -5626,10 +5664,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!open){ setTimeout(finish,0); return; }
     timer=setTimeout(finish,6000);
   }
+  /* one press on remove asks first, in the row itself; a list that would be refused says so at once */
+  function dmAsk(b){
+    var no=dmRefuse(); if(no){ dmNo(no); return }
+    var c=b.getAttribute('data-c'), me=dmLocal(), self=!!(me&&me.credId===c);
+    var box=document.createElement('div'); box.className='dm-ask'; box.style.fontSize='12px';
+    wlSay(box,[self?'stop keeping your soul on this device? to use it here again you will need your recovery words or your phone. ':'remove this device? it will have to be added again from that device. ',
+      {btn:'remove it',on:function(){ dmRevoke(c) }},{btn:'keep it',on:function(){ box.replaceWith(b) }},{cy:'revoke '+c+(self?' (this browser: its seal and its wrapper pointer go too)':'')}]);
+    var bs=box.querySelectorAll('button'); bs[0].classList.add('dm-rv-yes'); bs[1].classList.add('dm-rv-no');
+    b.replaceWith(box);
+  }
+  /* a refused add or remove: the reason in words, the raw reason for cypherpunk */
+  function dmNo(no){
+    var calm=/open the device list first/.test(no)?['open your device list first.']:
+      /cannot sign post-quantum/.test(no)?['this page cannot sign your device list right now, so nothing changed. ',kcReload('reload to try again')]:
+      ['this list could not be proven yours, so nothing changed. start a new list from this device.'];
+    wlSay($('dm-stat'),calm.concat([{cy:no}]));
+  }
   function dmOpen(){
-    if(!MPRK){$('kc-stat').textContent='connect the keychain first — the manager is soul-held';return}
+    if(!MPRK){ wlSay($('kc-stat'),['open your keychain first to see your devices. ',{btn:'connect keychain',on:kcConnect},{cy:'the device manager is soul-held: connect the keychain first'}]); return }
     $('dm-sec').style.display='block';
-    $('dm-stat').textContent='loading registry from relays…';
+    wlSay($('dm-stat'),['loading your devices…',{cy:'loading registry from relays…'}]);
     var sn=soulNostr(); DM_PUB=sn.pubHex; sn.sk.fill(0);
     DM_REG=[]; DM_BASE=false; DM_PQ_SERVED=false;
     dmWs(DM_PUB,function(res){
@@ -5637,19 +5692,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(res.refused){
         DM_REG=[]; DM_BASE=false;
         dmRender([],{refused:true});
-        $('dm-stat').textContent='registry not used: '+res.refused+'. Nothing was changed.';
+        wlSay($('dm-stat'),['your device list could not be loaded safely, so nothing changed. ',{btn:'try again',on:dmOpen},' or start a new list from this device.',{cy:'registry not used: '+res.refused+'. Nothing was changed.'}]);
         return;
       }
       DM_REG=res.devices||[]; DM_BASE=res.base;
       DM_REG.forEach(function(d){ if(d)wrapKeep(d.credId) });   // every device in the soul's own list is a wrapper
       dmRender(DM_REG,res.reg);
-      var r=res.reg||{};
-      $('dm-stat').textContent=
-        r.missing?'no registry came back from the relays, though this browser saw one signed at '+r.missing+'. Adding or revoking from an empty list would replace it, so this page waits until you choose this device\'s own view':
-        r.partial?'no registry came back, but only '+r.partial.eose+' of '+r.partial.queried+' relays answered in full, so a list may still exist. Adding or revoking from an empty list could replace it, so this page waits until you choose this device\'s own view':
-        res.reg?(!DM_BASE?'registry loaded, but it is not signed post-quantum by this soul, so this page will not add or revoke on top of it':
-          res.ahead?'registry loaded. It says it was signed at '+res.ahead+', more than 10 minutes ahead of this device\'s clock, so this browser does not remember that time as the newest it has seen':'registry loaded'):
-        'no registry on the relays yet, so this soul\'s device list starts here';
+      var r=res.reg||{}, st=$('dm-stat');
+      if(r.missing) wlSay(st,['your device list did not come back this time, so nothing changed. ',{btn:'try again',on:dmOpen},' or start a new list from this device.',{cy:'no registry came back from the relays, though this browser saw one signed at '+r.missing+'. Adding or revoking from an empty list would replace it, so this page waits until you choose this device\'s own view'}]);
+      else if(r.partial) wlSay(st,['your device list did not come back in full, so nothing changed. ',{btn:'try again',on:dmOpen},{cy:'no registry came back, but only '+r.partial.eose+' of '+r.partial.queried+' relays answered in full, so a list may still exist. Adding or revoking from an empty list could replace it, so this page waits until you choose this device\'s own view'}]);
+      else if(res.reg&&!DM_BASE) wlSay(st,['this list could not be proven yours, so changes wait. start a new list from this device.',{cy:'registry loaded, but it is not signed post-quantum by this soul, so this page will not add or revoke on top of it'}]);
+      else if(res.reg) wlSay(st,['your device list is ready.',{cy:res.ahead?'registry loaded. It says it was signed at '+res.ahead+', more than 10 minutes ahead of this device\'s clock, so this browser does not remember that time as the newest it has seen':'registry loaded'}]);
+      else wlSay(st,['this is your first device list, and it starts here.',{cy:'no registry on the relays yet, so this soul\'s device list starts here'}]);
     });
   }
   // a fresh start the human chose: only what this browser itself holds
@@ -5658,7 +5712,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     DM_REG=(me&&me.credId)?[{credId:me.credId,name:me.name,fp:me.fp,at:me.at}]:[];
     DM_BASE=true;
     dmRender(DM_REG,{n:DM_REG.length,local:true});
-    $('dm-stat').textContent='the list now holds only what this browser knows ('+DM_REG.length+' device'+(DM_REG.length===1?'':'s')+'). The next add or revoke publishes it, signed post-quantum, and it replaces the list on the relays.';
+    wlSay($('dm-stat'),[DM_REG.length?'your list now holds only this device, and your next change replaces the list everywhere.':'your list is now empty, and your next change replaces the list everywhere.',
+      {cy:'the list now holds only what this browser knows ('+DM_REG.length+' device'+(DM_REG.length===1?'':'s')+'). The next add or revoke publishes it, signed post-quantum, and it replaces the list on the relays.'}]);
   }
   // why an add or revoke must not happen now, or null
   function dmRefuse(){
@@ -5669,6 +5724,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   $('dm-open').onclick=dmOpen;
   $('dm-x').onclick=function(){ $('dm-sec').style.display='none'; };
+  function dmAddRetry(cross){ return {btn:'try again',on:function(){ dmAdd(cross) }} }
   /* one signed list, sent to every relay. Only a relay's own ["OK", id, true]
      counts as published: a socket that opened is not an answer. send() can run
      again with the identical signed bytes (a relay that already holds them
@@ -5713,7 +5769,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* a change is applied here only after a relay accepted it; with none, nothing
      changed and the identical signed list can go again */
   var DM_BUSY=false;
-  function dmSettle(pub,apply,say){
+  function dmSettle(pub,apply,say,miss){
     var st=$('dm-stat');
     DM_BUSY=true;
     wlSay(st,['saving your device list…',{cy:'publishing '+pub.ev.id.slice(0,16)+'… to '+QR_RELAYS.length+' relays'}]);
@@ -5725,7 +5781,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         apply();
         wlSay($('dm-stat'),say(r).concat([{cy:cy}]));
       } else {
-        wlSay($('dm-stat'),['the change did not reach any relay, so nothing changed yet. ',{btn:'try again',on:function(){ dmSettle(pub,apply,say) }},{cy:cy}]);
+        if(miss)miss();
+        wlSay($('dm-stat'),['the change did not reach any relay, so nothing changed yet. ',{btn:'try again',on:function(){ dmSettle(pub,apply,say,miss) }},{cy:cy}]);
       }
     });
   }
@@ -5746,21 +5803,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return {credentialId:cred.id};
   }
   async function dmAdd(cross){
-    if(!MPRK){$('dm-stat').textContent='soul not live here';return}
+    if(!MPRK){ wlSay($('dm-stat'),['open your keychain first to add this device. ',{btn:'connect keychain',on:kcConnect},{cy:'MPRK null: the soul is not live here'}]); return }
     if(DM_BUSY){ wlSay($('dm-stat'),['your last change is still being saved. press again in a moment.']); return }
     var me=dmLocal();
-    if(me){ $('dm-stat').textContent='this browser already holds a permanent seal (made '+me.at+')'; return; }
-    var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
-    if(CEREMONY){$('dm-stat').textContent='a passkey prompt is already open';return}
+    if(me){ wlSay($('dm-stat'),['this device already keeps your soul.',{cy:'bnr_seal present, made '+me.at}]); return; }
+    var no=dmRefuse(); if(no){ dmNo(no); return; }
+    if(CEREMONY){ wlSay($('dm-stat'),['a passkey prompt is still open. finish or close it, then press again.',{cy:'CEREMONY set: one WebAuthn ceremony at a time'}]); return }
     CEREMONY=true;
     var seal, devs, prf=null;
+    var follow=function(step){ wlSay($('dm-stat'),['follow your device\'s prompts to keep your soul here.',{cy:step}]) };
     try{
-      $('dm-stat').textContent='step 1 — create the device passkey…';
+      follow('step 1: enroll the device passkey (a marked wrapper)');
       var en=await enrollWrap(!!cross);
       wrapKeep(en.credentialId);   // a wrapper from the moment it exists: never a soul of its own
-      $('dm-stat').textContent='step 2 — proving PRF on the new passkey…';
+      follow('step 2: targeted PRF on the new passkey');
       prf=await prfEvalTargeted(en.credentialId);
-      $('dm-stat').textContent='step 3 — sealing the soul under it…';
+      follow('step 3: AES-256-GCM seal of masterPRK under it');
       seal=await sealSoul(prf,MPRK);
       seal.credId=en.credentialId;
       seal.name=(navigator.userAgent||'').match(/Windows|Mac|Linux|Android|iPhone|iPad/)||['device'];
@@ -5771,7 +5829,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       devs=devs.filter(function(d){return d.credId!==seal.credId});
       devs.push({credId:seal.credId,name:seal.name,fp:seal.fp,at:seal.at});
     }catch(e){
-      $('dm-stat').textContent='add failed: '+((e&&e.message)||e)+' — nothing was stored';
+      wlSay($('dm-stat'),['this device was not added. ',dmAddRetry(cross),{cy:'add failed: '+((e&&e.name)||'')+' '+((e&&e.message)||e)+' · nothing was stored here; a passkey the prompt made may stay in the authenticator, unused (refused if it ever answers the picker)'}]);
       return;
     }finally{ if(prf)prf.fill(0); CEREMONY=false }
     /* the seal is kept, and the founding passkey pointer (bnr_cred) left alone,
@@ -5784,9 +5842,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     },function(r){ return ['this device now keeps your soul, and your device list says so on '+r.ok+' of '+r.total+' relays.'] });
   }
   function dmRevoke(credId){
-    if(!MPRK)return;
+    if(!MPRK){ wlSay($('dm-stat'),['open your keychain first to change your devices. ',{btn:'connect keychain',on:kcConnect},{cy:'MPRK null'}]); return }
     if(DM_BUSY){ wlSay($('dm-stat'),['your last change is still being saved. press again in a moment.']); return }
-    var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
+    var no=dmRefuse(); if(no){ dmNo(no); return; }
     var devs=(DM_REG||[]).filter(function(d){return d.credId!==credId});
     var me=dmLocal(), selfGone=!!(me&&me.credId===credId);
     var pub=dmPublish(devs);
@@ -5804,7 +5862,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
     },function(r){ return selfGone
       ?['this device no longer keeps your soul. to use it here again, bring it back with ',{to:'kc-rec-scaffold',t:'your recovery words'},' or your phone.']
-      :['removed on '+r.ok+' of '+r.total+' relays. that device stops syncing, though a copy it already holds still opens offline.'] });
+      :['removed on '+r.ok+' of '+r.total+' relays. that device stops syncing, though a copy it already holds still opens offline.'] },
+    function(){ dmRender(DM_REG,DM_LASTREG) });
   }
 
   /* ── QR BRIDGE v2 — phone ⇄ desk login, first-party, post-quantum ─────
@@ -5895,9 +5954,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(QRB.raf)cancelAnimationFrame(QRB.raf);
     }
     QRB=null;
-    if(msg)$('qr-law').textContent=msg;
+    if(msg){ if(Array.isArray(msg))wlSay($('qr-law'),msg); else $('qr-law').textContent=msg; }
   }
-  function qrClose(){ qrEnd(); $('qr-sec').style.display='none'; $('kc-stat').textContent='— QR bridge closed —'; }
+  /* a #qr= request is spent once it was answered, cancelled or timed out: a reload never offers it again */
+  function qrDropHash(){ if(location.hash.indexOf('#qr=')===0){ try{ history.replaceState(history.state,'',location.pathname+location.search) }catch(e){} } }
+  function qrClose(){ qrEnd(); $('qr-sec').style.display='none'; qrDropHash(); kcIdle(); }
+  /* every relay socket of this sheet failed or closed: the code cannot work, so the sheet says so */
+  function qrDead(w){
+    var q=QRB; if(!q||!q.sock||q.sock.indexOf(w)<0)return;
+    w.__dead=true;
+    if(q.sock.some(function(x){ return x&&!x.__dead }))return;
+    var cy={cy:'every relay socket failed or closed: '+QR_RELAYS.join(', ')};
+    if(q.mode==='ask'){ $('qr-body').textContent=''; $('qr-title').textContent='📷 sign in with your phone'; qrEnd(['the relays could not be reached, so this code cannot work right now. ',{btn:'try again',on:function(){ $('kc-qr').click() }},cy]) }
+    else if(q.mode==='confirm'&&q.req&&!q.sent){ var rq=q.req; $('qr-body').textContent=''; qrEnd(['the relays could not be reached, so nothing was sent. ',{btn:'try again',on:function(){ qrConfirmSheet(rq) }},cy]) }
+  }
   $('qr-x').onclick=qrClose;
 
   function qrSvg(text){
@@ -5909,10 +5979,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* desktop side — ask a phone to log me in */
   $('kc-qr').onclick=async function(){
-    if(!BN||!BNRQR||!BZDIDKEY){$('kc-stat').textContent='QR bridge needs the vendor bundle (bnr-qr.js)';return}
-    if(!window.BPQ_LIB){$('kc-stat').textContent='QR bridge needs the post-quantum bundle (bpq-lib.js)';return}
-    if(typeof WebSocket==='undefined'){$('kc-stat').textContent='this browser lacks WebSockets — QR bridge unavailable';return}
-    if(!window.BIP39_WORDLIST||window.BIP39_WORDLIST.length!==2048){$('kc-stat').textContent='QR bridge needs the full word list (bip39-wordlist.js, 2048 words) for its check words';return}
+    var miss=!BN?'vendor/bnr-sign.js (window.BnrSign)':!BNRQR?'vendor/bnr-qr.js':!BZDIDKEY?'bzdid-key.js':!window.BPQ_LIB?'vendor/bpq-lib.js (the X-Wing half)':(!window.BIP39_WORDLIST||window.BIP39_WORDLIST.length!==2048)?'vendor/bip39-wordlist.js (2048 words, for the six check words)':null;
+    if(typeof WebSocket==='undefined'){ wlSay($('kc-stat'),['this browser cannot sign in with your phone. use ',{to:'kc-rec-scaffold',t:'your recovery words'},' instead.',{cy:'no WebSocket in this browser: the QR bridge rides nostr relays'}]); return }
+    if(miss){ wlSay($('kc-stat'),['signing in with your phone could not load on this page. ',kcReload('reload to try again'),{cy:'QR bridge needs '+miss}]); return }
     qrEnd();
     $('qr-sec').style.display='block';
     if(MPRK){ return qrGrantUI(null); }   // keychain live => this device is the GRANTING side
@@ -5925,17 +5994,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var url=location.origin+location.pathname+'#qr='+bytesToB64u(concatB(sid,pub,commit));
     var words=qrWords(pub,sid,commit).join(' ');
     QRB={mode:'ask',sid:sid,sk:sk,pub:pub,xsk:xsk,xpk:xpk,commit:commit,nsk:BN.secp.utils.randomPrivateKey(),sock:[],nopen:0};
-    $('qr-title').textContent='📷 QR BRIDGE — waiting for your phone';
+    $('qr-title').textContent='📷 waiting for your phone';
     $('qr-body').innerHTML='<div class="row" style="align-items:flex-start;gap:14px;flex-wrap:wrap">'+
       qrSvg(url)+
       '<div style="flex:1;min-width:170px">'+
-        '<div style="font-size:11px;color:var(--dim)">scan with your phone camera — the wallet opens there already asking to grant</div>'+
+        '<div style="font-size:11px;color:var(--dim)">scan this with your phone camera, and the wallet opens there ready to let you in.</div>'+
         '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace" id="qr-words">'+words+'</div>'+
         '<div style="font-size:11px;color:var(--dim)">the phone will show these same six words before it sends anything. If any word differs, the QR was swapped: walk away.</div>'+
-        '<div id="qr-relaystat" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
+        '<div id="qr-relaystat" class="wl-cyd" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
         '<div id="qr-count" style="font-size:11px;color:var(--dim)">expires in 120s</div>'+
       '</div></div>';
-    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays, keyed by secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519) together (ephemeral kind they never store, throwaway keys both ends); tab memory only, wiped when this page closes';
+    wlSay($('qr-law'),['only your phone can answer this code, and your keys come to this page alone.',{cy:'your soul travels to this tab only, as AES-256-GCM ciphertext over public nostr relays, keyed by secp256k1 ECDH and X-Wing (ML-KEM-768 + X25519) together (ephemeral kind they never store, throwaway keys both ends); tab memory only, wiped when this page closes'}]);
     var sidHex=toHex(sid), got=0;
     var hello=function(){ return JSON.stringify(['EVENT',nostrEvent(QRB.nsk,JSON.stringify({v:2,xpk:bytesToB64u(QRB.xpk)}),[['sid',sidHex]])]) };
     QRB.sock=QR_RELAYS.map(function(rs){
@@ -5965,9 +6034,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           qrEnd();
           keychainOn(id2);
           $('qr-sec').style.display='none';
-          $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">logged in via phone</b> — soul in tab memory, handshake keys scrubbed';
+          wlSay($('kc-stat'),['you are signed in with your phone, and your keychain is open on this page. ',{to:'bal-sec',t:'see your accounts'},{cy:'logged in via phone · soul in tab memory · handshake keys scrubbed'}]);
         }catch(e){ /* garbage or replay — AEAD discarded it */ }
       };
+      w.onerror=function(){ qrDead(w) }; w.onclose=function(){ qrDead(w) };
       return w;
     });
     QRB.nopen=0;
@@ -5983,28 +6053,31 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var left=120-Math.floor((Date.now()-t0)/1000);
       var cd=$('qr-count');
       if(cd)cd.textContent='expires in '+left+'s';
-      if(left<=0){qrEnd('expired — press the QR bridge button for a fresh code');return}
+      if(left<=0){ $('qr-body').textContent=''; $('qr-title').textContent='📷 sign in with your phone'; qrEnd(['this code has expired. ',{btn:'make a fresh code',on:function(){ $('kc-qr').click() }},{cy:'session expired after 120 s; handshake keys scrubbed'}]); return }
       QRB.raf=requestAnimationFrame(tick);
     })();
   };
 
   /* phone side — grant a desktop session (from #qr= hash or camera) */
   function qrGrantUI(req){
-    $('qr-title').textContent='📷 QR BRIDGE — grant a desktop';
+    $('qr-title').textContent='📷 let a desktop sign in';
     if(!req){
-      $('qr-body').innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">point the camera at the QR on the desktop wallet</div>'+
+      qrEnd(); QRB={mode:'grant'};
+      $('qr-body').innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">point the camera at the code on the desktop wallet.</div>'+
         '<video id="qr-cam" playsinline style="width:100%;max-width:280px;border-radius:8px;background:#000"></video>'+
-        '<div id="qr-camstat" style="font-size:11px;color:var(--dim);margin-top:6px">starting camera…</div>';
+        '<div id="qr-camstat" style="font-size:11px;color:var(--dim);margin-top:6px">starting the camera…</div>';
       qrStartCam();
     } else {
       qrConfirmSheet(req);
     }
-    $('qr-law').textContent='only scan QRs on a desktop you are driving — you are sending your soul\'s master key, encrypted to that tab alone';
+    wlSay($('qr-law'),['only scan a code on a desktop you are using right now, because it receives your whole soul.',{cy:'you are sending the soul\'s masterPRK, AEAD-encrypted to that tab\'s ephemeral keys'}]);
   }
   async function qrStartCam(){
+    var mine=QRB;
     try{
       var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-      if(!QRB)QRB={mode:'grant'};
+      /* closed (or closed and reopened) while the camera prompt was open: this stream goes off */
+      if(!mine||QRB!==mine||mine.mode!=='grant'||!$('qr-cam')){ try{stream.getTracks().forEach(function(t){t.stop()})}catch(e){} return }
       QRB.camStream=stream;
       var v=$('qr-cam'); v.srcObject=stream; await v.play();
       var cnv=document.createElement('canvas'), ctx=cnv.getContext('2d');
@@ -6030,7 +6103,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       })();
     }catch(e){
       var st=$('qr-camstat');
-      if(st)st.textContent='camera unavailable ('+(e&&e.name||'error')+') — open this page on the phone via the QR link itself, or use recovery';
+      if(st&&QRB===mine)wlSay(st,['the camera did not open. you can open the desktop\'s code link on this phone instead. ',{btn:'try the camera again',on:function(){ qrGrantUI(null) }},{cy:'getUserMedia: '+((e&&e.name)||'error')+' '+((e&&e.message)||'')}]);
     }
   }
   function qrForeignCode(from,raw){
@@ -6053,8 +6126,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function qrOldCode(){
     QRB={mode:'confirm'};
-    $('qr-title').textContent='📷 QR BRIDGE — this desktop code is out of date';
-    $('qr-body').innerHTML='<div style="font-size:12px">that code comes from an older wallet page that sends your soul under a classical key exchange only. Reload the wallet on the desktop and scan its new code — nothing was sent.</div>'+
+    $('qr-title').textContent='📷 this desktop code is out of date';
+    $('qr-body').innerHTML='<div style="font-size:12px">that code comes from an older wallet page, so nothing was sent. reload the wallet on the desktop and scan its new code.<span class="wl-cyd"> v1 code (49 bytes, no X-Wing half) refused: the root never travels under a classical-only key exchange</span></div>'+
       '<div class="row" style="margin-top:12px"><button id="qr-deny">close</button></div>';
     $('qr-deny').onclick=qrClose;
   }
@@ -6063,9 +6136,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     QRB={mode:'confirm',req:req};
     var w=qrWords(req.pub,req.sid,req.commit);
     if(!w){
-      $('qr-body').innerHTML='<div style="font-size:12px">this page could not load its word list, so it cannot show the six check words. Nothing was sent. Reload the wallet here and scan again.</div>'+
-        '<div class="row" style="margin-top:12px"><button id="qr-deny">close</button></div>';
-      $('qr-deny').onclick=qrClose;
+      $('qr-body').innerHTML='<div style="font-size:12px">this page could not show the six check words, so nothing was sent. reload and scan again.<span class="wl-cyd"> BIP39_WORDLIST missing or not 2048 words</span></div>'+
+        '<div class="row" style="margin-top:12px"><button id="qr-reload" class="gold">reload</button><button id="qr-deny">close</button></div>';
+      $('qr-deny').onclick=qrClose; $('qr-reload').onclick=function(){ location.reload() };
       return;
     }
     $('qr-body').innerHTML='<div style="font-size:12px">a desktop on <b>'+esc(location.host)+'</b> wants to sign in as you.</div>'+
@@ -6075,15 +6148,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       '<button id="qr-deny">cancel</button></div>';
     $('qr-deny').onclick=qrClose;
     $('qr-allow').onclick=async function(){
-      if(!MPRK){$('kc-stat').textContent='keychain not live — connect first, the request is gone after close';return}
-      if(!window.BPQ_LIB){$('kc-stat').textContent='QR bridge needs the post-quantum bundle (bpq-lib.js)';return}
+      if(!MPRK){ wlSay($('qr-law'),['open your keychain on this phone first, then press allow again. ',{btn:'connect keychain',on:kcConnect},{cy:'MPRK null at grant time'}]); return }
+      if(!window.BPQ_LIB){ wlSay($('qr-law'),['this page could not load what keeps the code safe, so nothing was sent. ',kcReload('reload to try again'),{cy:'QR bridge needs vendor/bpq-lib.js (the X-Wing half)'}]); return }
       var req=QRB.req, sidHex=toHex(req.sid), sent=0, done=false;
-      $('qr-body').innerHTML='<div id="qr-sendstat" style="font-size:12px">finding the desktop\'s post-quantum key…</div><div id="qr-relaystat" style="font-size:11px;color:var(--dim);margin-top:6px">relays: connecting…</div>';
+      $('qr-body').innerHTML='<div id="qr-sendstat" style="font-size:12px">reaching the desktop. keep this page open.<span class="wl-cyd"> waiting for the X-Wing key matching the QR commit</span></div><div id="qr-relaystat" class="wl-cyd" style="font-size:11px;color:var(--dim);margin-top:6px">relays: connecting…</div>';
+      $('qr-law').textContent='';
       /* the desktop announces its X-Wing key every 2 s; take the first one that
          hashes to the QR's commitment, then seal the grant to it */
       async function grant(xpk){
         if(done||!MPRK)return;
-        done=true;
+        done=true; if(QRB)QRB.sent=true;
         var sk=BN.secp.utils.randomPrivateKey();               // throwaway nostr key
         var esk=BN.secp.utils.randomPrivateKey();              // throwaway ECDH key
         var epk=BN.secp.getPublicKey(esk);
@@ -6097,9 +6171,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var msg=JSON.stringify(['EVENT',ev]);
         (QRB&&QRB.sock||[]).forEach(function(w){ if(w&&w.readyState===1){ try{w.send(msg);sent++}catch(e){} } });
         var st=$('qr-relaystat'); if(st)st.textContent='relays: '+sent+' ok';
-        var ss=$('qr-sendstat'); if(ss)ss.textContent='encrypted grant sent';
-        $('qr-law').textContent='sent — ciphertext only, sealed with secp256k1 ECDH and X-Wing together, one-time session id, relays drop ephemeral events by design. The desktop signs in the moment it decrypts.';
-        setTimeout(function(){ if(QRB&&QRB.mode==='confirm') qrEnd('grant sent — this phone can close the bridge now'); },4000);
+        var ss=$('qr-sendstat'); if(ss)wlSay(ss,['sent. the desktop signs in as soon as it opens it, and you can close this now. ',{btn:'close',on:qrClose},{cy:'encrypted grant sent'}]);
+        wlSay($('qr-law'),[{cy:'sent: ciphertext only, sealed with secp256k1 ECDH and X-Wing together, one-time session id, relays drop ephemeral events by design. The desktop signs in the moment it decrypts.'}]);
+        qrDropHash();
+        setTimeout(function(){ if(QRB&&QRB.mode==='confirm') qrEnd([{cy:'grant sent; this phone\'s bridge keys are scrubbed'}]); },4000);
       }
       QRB.sock=QR_RELAYS.map(function(rs){
         var w; try{w=new WebSocket(rs)}catch(e){return null}
@@ -6119,10 +6194,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             grant(xpk);
           }catch(e){}
         };
+        w.onerror=function(){ qrDead(w) }; w.onclose=function(){ qrDead(w) };
         return w;
       });
       QRB.nopen=0;
-      QRB.waitT=setTimeout(function(){ if(!done&&QRB) qrEnd('the desktop did not answer in 30 s — nothing was sent; rescan its code'); },30000);
+      QRB.waitT=setTimeout(function(){
+        if(done||!QRB)return;
+        var reached=(QRB.sock||[]).some(function(x){ return x&&x.readyState===1 });
+        $('qr-body').textContent=''; qrDropHash();
+        qrEnd(reached
+          ?['the desktop did not answer, so nothing was sent. ',{btn:'scan again',on:function(){ qrGrantUI(null) }},{cy:'no X-Wing announce matching the commit within 30 s'}]
+          :['the relays could not be reached, so nothing was sent. ',{btn:'try again',on:function(){ qrConfirmSheet(req) }},{cy:'no relay socket open after 30 s: '+QR_RELAYS.join(', ')}]);
+      },30000);
     };
   }
   /* boot detect: opened via the desktop's QR (#qr=…)? stash the request; once the
@@ -6135,27 +6218,52 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('qr-sec').style.display='block';
     if(MPRK)qrGrantUI(req);
     else{
-      $('qr-title').textContent='📷 QR BRIDGE — a desktop is waiting';
-      $('qr-body').innerHTML='<div style="font-size:12px">a desktop asked to sign in via this phone. Connect your bzDiD here first (passkey above or recovery below) — the request stays ready.</div>';
-      $('qr-law').textContent='the desktop\'s code expires in ~2 minutes; you can rescan after';
+      $('qr-title').textContent='📷 a desktop is waiting';
+      var qb=$('qr-body'); qb.textContent=''; var qp=document.createElement('div'); qp.style.fontSize='12px'; qb.appendChild(qp);
+      wlSay(qp,['a desktop wants to sign in with this phone. open your keychain here first, and the request waits for you. ',{btn:'connect keychain',on:kcConnect},{cy:'QR_PENDING held until the keychain is live'}]);
+      wlSay($('qr-law'),['the desktop\'s code lasts about two minutes, so scan it again after that.',{cy:'the desktop\'s code expires 120 s after it was shown'}]);
     }
   })();
 
+  /* the engine's reasons, said as what to do (the raw reason stays for cypherpunk) */
+  function recFail(e){
+    var c=(e&&e.code)||'', m=(e&&e.message)||String(e||''), n=(m.match(/got (\d+)/)||[])[1];
+    var calm=c==='word_count'?(/12-word/.test(m)?'this has 12 words, and your recovery words are 24. check your paper and try again.':'your recovery words are 24 words, and this has '+(n||'a different number')+'. check your paper and try again.')
+      :'those words did not open a soul. check each word against your paper and try again.';
+    wlSay($('kc-stat'),[calm,{cy:(c?c+': ':'')+m}]);
+  }
+  if(!MPRK){ kcNot() } kcQrLabel();
+  /* a link to the recovery words opens them, ready to type */
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="#kc-rec-scaffold"]'); if(!a)return;
+    var d=$('kc-rec-scaffold'); if(d){ d.open=true; setTimeout(function(){ try{ $('kc-rec').focus({preventScroll:true}) }catch(x){} },0) }
+  });
   $('kc-recgo').onclick=function(){
     var raw=$('kc-rec').value;
-    if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
-    try{
-      var id=BZDIDKEY.identityFromRecovery(raw,'bnr.b');
-      $('kc-rec').value='';
-      keychainOn(id);
-    }catch(e){$('kc-stat').textContent=e.message}
+    if(!BZDIDKEY){kcNoEngine();return}
+    if(!raw.trim()){ wlSay($('kc-stat'),['type your 24 recovery words first.',{cy:'accepts a 24-word phrase or a bdidrec1… code'}]); return }
+    var id;
+    try{ id=BZDIDKEY.identityFromRecovery(raw,'bnr.b') }catch(e){ recFail(e); return }
+    $('kc-rec').value='';
+    if(MPRK){
+      /* one soul at a time: another soul's words never replace the open one in place */
+      var same=(id.fingerprint&&id.fingerprint.words)===$('kc-soul-fp').textContent;
+      var fpNew=(id.fingerprint&&id.fingerprint.words)||'';
+      id.masterPrk.fill(0); id=null;
+      if(same) wlSay($('kc-stat'),['this soul is already open here.',{cy:'same fingerprint: '+fpNew}]);
+      else wlSay($('kc-stat'),['you are connected as another soul. close your keychain first to open a different one. ',{btn:'close keychain',on:function(){ $('kc-out').click() }},{cy:'open soul '+$('kc-soul-fp').textContent+' · pasted soul '+fpNew}]);
+      return;
+    }
+    keychainOn(id);
   };
 
   $('kc-out').onclick=function(){
     scrubAll(); EVMADDR=null; AR_DERIVED=null; balKeyless();
     $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
     $('bridge-sec').style.display='none';
-    $('kc-stat').textContent='— keychain scrubbed from memory —';
+    /* the phone sheet, its camera and sockets, and the device list close with the keys */
+    try{ qrEnd() }catch(e){} $('qr-sec').style.display='none'; $('dm-sec').style.display='none'; kcQrLabel();
+    wlSay($('kc-stat'),['your keychain is closed and its keys are gone from this page. ',{btn:'open it again',on:kcConnect},{cy:'keychain scrubbed from memory (masterPRK, K1 seed and the signer wiped)'}]);
     wlSay($('sum-kc'),['your keychain is not connected in this tab. ',{to:'kc-sec',t:'connect your keychain'}]);$('sum-kc').style.color='var(--amber)';
     BRIDGED=null; sumAuth('');
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
@@ -9001,9 +9109,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   })();
   BN=window.BnrSign||null;
   if(!BN){
-    var s=document.createElement('div');s.className='law';
+    var s=document.createElement('div');s.className='law';s.id='kc-bnfail';
     s.style.color='var(--amber)';
-    s.textContent='⚠ signing bundle (vendor/bnr-sign.js) failed to load — balances still work, signing disabled';
+    wlSay(s,['⚠ this page could not load the part that signs, so it shows balances but cannot sign yet. ',kcReload('reload to try again'),{cy:'vendor/bnr-sign.js failed to load (window.BnrSign missing): balances still work, signing disabled'}]);
     $('kc-sec').prepend(s);
   } else { pickHost(); }
   if(window.BNRKEYS){

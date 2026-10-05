@@ -474,8 +474,11 @@ try {
     const openDm = async () => {
       await page.evaluate(() => { document.getElementById('dm-stat').textContent = ''; document.getElementById('dm-open').click(); });
       await page.waitForFunction(() => { const t = document.getElementById('dm-stat').textContent; return t && !/^loading/.test(t); }, null, { timeout: 10000 });
+      await page.evaluate(CALM);
       return page.evaluate(() => ({
         stat: document.getElementById('dm-stat').textContent,
+        calm: window.__calm(document.getElementById('dm-stat')).trim(),
+        cy: [...document.querySelectorAll('#dm-stat .wl-cyd')].map(x => x.textContent.trim()).join(' '),
         head: document.querySelector('[data-dm-reg]')?.textContent || '',
         trust: document.querySelector('[data-dm-trust]')?.getAttribute('data-dm-trust') || null,
         rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')),
@@ -495,7 +498,8 @@ try {
     // 0 · nothing anywhere, every relay said so: a new soul may start here
     await setRelays([[], [], []]);
     const s0 = await openDm();
-    ok('registry: every relay answered in full with nothing, so a new list may start (no dash in the words)', !s0.own && /^no registry on the relays yet, so this soul's device list starts here$/.test(s0.stat), JSON.stringify(s0));
+    ok('registry: every relay answered in full with nothing, so a new list may start (no dash in the words)',
+      !s0.own && s0.calm === 'this is your first device list, and it starts here.' && /^no registry on the relays yet, so this soul's device list starts here$/.test(s0.cy) && !/[—–]/.test(s0.calm), JSON.stringify(s0));
     // 0b · only one relay answered in full, two failed: never "nothing here"
     await setRelays([[], [], []], { fail: { [R[1]]: 1, [R[2]]: 1 } });
     const s0b = await openDm();
@@ -602,6 +606,13 @@ try {
     await setRelays([[v2ok], [v2ok], [v2ok]]);
     const s6 = await openDm();
     ok('registry (control): a fresh post-quantum list loads with both devices', s6.trust === 'pq' && s6.rows.join() === 'devA,devB', JSON.stringify(s6));
+    await page.evaluate(() => { window.__wsSent.length = 0; document.querySelector('.dm-rv[data-c="devB"]').click(); });
+    await page.waitForTimeout(150);
+    const ask = await page.evaluate(() => ({ yes: !!document.querySelector('.dm-rv-yes'), words: window.__calm(document.querySelector('.dm-ask')), sent: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    await page.evaluate(() => document.querySelector('.dm-rv-no').click());
+    const kept = await page.evaluate(() => [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')).join());
+    ok('registry: one press on remove asks first in the row and sends nothing; keep it puts the row back',
+      ask.yes && /remove this device\? it will have to be added again from that device\./.test(ask.words) && ask.sent === 0 && kept === 'devA,devB', JSON.stringify({ ask, kept }));
     await page.evaluate(R => { R.forEach(u => { window.__dmFail[u] = 1; }); window.__wsSent.length = 0; }, R);
     await revoke('devB');
     await page.waitForFunction(() => /did not reach any relay/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
@@ -826,7 +837,22 @@ try {
     ok('qr words: on a 390 px phone the six words fit without a sideways scroll', P.fits);
     ok('qr words: the phone shows the very same six words for the same QR, before anything is sent', P.words === D.words, P.words + ' vs ' + D.words);
     ok('qr words: the phone says cancel if any word differs', /these six words must match the desktop's\. If any word differs, cancel\./.test(P.body) && !/digit/.test(P.body), P.body.slice(0, 200));
+    await phone.evaluate(() => document.getElementById('qr-deny').click());
+    ok('qr: a cancelled request is spent: the #qr= link leaves the address, so a reload never offers it again', await phone.evaluate(() => location.hash === '' && document.getElementById('qr-sec').style.display === 'none'));
     await phone.close();
+
+    // desktop: no relay can be reached, so the code says it cannot work, with try again
+    const dead = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await dead.addInitScript(() => { class DeadWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 3; this.onerror && this.onerror({}); this.onclose && this.onclose({}); }, 5); } send() {} close() {} } window.WebSocket = DeadWS; });
+    await dead.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await dead.waitForFunction(() => window.BNRQR && window.BnrSign && window.BPQ_LIB && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    await dead.evaluate(() => document.getElementById('kc-qr').click());
+    await dead.waitForFunction(() => /relays could not be reached/.test(document.getElementById('qr-law').textContent), null, { timeout: 10000 });
+    await dead.evaluate(CALM);
+    const DD = await dead.evaluate(() => ({ law: window.__calm(document.getElementById('qr-law')), btn: !!document.querySelector('#qr-law button.wl-act'), code: !!document.getElementById('qr-svg') }));
+    ok('qr: with no relay reachable the desktop says the code cannot work, takes it down and offers try again',
+      /the relays could not be reached, so this code cannot work right now\./.test(DD.law) && DD.btn && !DD.code, JSON.stringify(DD));
+    await dead.close();
 
     // phone camera: the scanned code must come from this very site; one from any other origin sends nothing
     const cam = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -835,9 +861,10 @@ try {
       class RecWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send(x) { window.__sent.push(x); } close() { this.readyState = 3; } }
       window.WebSocket = RecWS;
       if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => {
+        if (window.__camHold) await new Promise(r => { window.__camRelease = r; });
         const c = document.createElement('canvas'); c.width = 64; c.height = 48; const g = c.getContext('2d');
         const paint = () => { g.fillStyle = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); g.fillRect(0, 0, 64, 48); };
-        paint(); setInterval(paint, 50); return c.captureStream(20);
+        paint(); setInterval(paint, 50); const st = c.captureStream(20); window.__lastStream = st; return st;
       };
     });
     await cam.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
@@ -863,6 +890,26 @@ try {
     const F2 = await cam.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: document.getElementById('qr-body').innerText }));
     ok('qr camera (control): the same code from this site offers allow with the same six words and names this site',
       F2.words === D.words && F2.body.includes('a desktop on ' + new URL(BASE).host + ' wants to sign in as you.'), JSON.stringify(F2));
+    // the sheet closed while the camera prompt was still open: the camera the browser hands over goes off at once
+    await cam.evaluate(() => { document.getElementById('qr-x').click(); window.__camHold = true; window.__lastStream = null; document.getElementById('kc-qr').click(); });
+    await cam.waitForFunction(() => typeof window.__camRelease === 'function', null, { timeout: 5000 });
+    await cam.evaluate(() => { document.getElementById('qr-x').click(); window.__camHold = false; window.__camRelease(); });
+    await cam.waitForFunction(() => !!window.__lastStream, null, { timeout: 5000 });
+    await cam.waitForTimeout(300);
+    const off = await cam.evaluate(() => ({ ended: window.__lastStream.getTracks().every(t => t.readyState === 'ended'), shown: document.getElementById('qr-sec').style.display, stat: window.__calm(document.getElementById('kc-stat')) }));
+    ok('qr camera: a camera allowed after the sheet was closed is stopped, and the keychain line comes back',
+      off.ended && off.shown === 'none' && /your keychain is open on this page/.test(off.stat), JSON.stringify(off));
+    // another soul's recovery words never replace the open soul in place
+    const fp0 = await cam.evaluate(() => document.getElementById('kc-soul-fp').textContent);
+    await cam.evaluate(() => { document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2b)); document.getElementById('kc-recgo').click(); });
+    const other = await cam.evaluate(() => ({ stat: window.__calm(document.getElementById('kc-stat')), fp: document.getElementById('kc-soul-fp').textContent, btn: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent).join() }));
+    ok('recovery: words for another soul are refused while a soul is open, and the open one stays',
+      /you are connected as another soul\. close your keychain first to open a different one\./.test(other.stat) && other.fp === fp0 && other.btn === 'close keychain', JSON.stringify(other));
+    // closing the keychain closes the phone sheet and the device list with it
+    await cam.evaluate(() => { document.getElementById('kc-qr').click(); document.getElementById('dm-sec').style.display = 'block'; document.getElementById('kc-out').click(); });
+    const closed = await cam.evaluate(() => ({ qr: document.getElementById('qr-sec').style.display, dm: document.getElementById('dm-sec').style.display, stat: window.__calm(document.getElementById('kc-stat')), label: document.getElementById('kc-qr').textContent }));
+    ok('keychain: closing it closes the phone sheet and the device list, and says so calmly',
+      closed.qr === 'none' && closed.dm === 'none' && /your keychain is closed and its keys are gone from this page\./.test(closed.stat) && closed.label === '📷 sign in with your phone', JSON.stringify(closed));
     await cam.close();
 
     const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
@@ -1003,6 +1050,20 @@ try {
     ok('keychain (control): the founding passkey opens exactly its own soul',
       await page.evaluate(() => document.getElementById('kc-soul-fp').textContent === window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'bnr.b').fingerprint.words));
     await page.close();
+
+    // 4b · a press on connect (pointerdown, then click) opens ONE prompt: the auto-connect hands off
+    const one = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await one.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await one.addInitScript(stub);
+    await one.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await one.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await one.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }, { fail: 'NotAllowedError' }]; });
+    await one.locator('#kc-pass').dispatchEvent('pointerdown');
+    await one.evaluate(() => document.getElementById('kc-pass').click());
+    await one.waitForFunction(() => window.__gets.length && /did not open/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await one.waitForTimeout(300);
+    ok('keychain: a press on connect opens exactly one passkey prompt', await one.evaluate(() => window.__gets.length === 1), String(await one.evaluate(() => window.__gets.join())));
+    await one.close();
 
     // 5 · a bzDiD made here: its own 24 words, shown once on request, then gone from the page
     const mk2 = await browser.newPage({ viewport: { width: 1100, height: 900 } });
