@@ -48,12 +48,21 @@ while :; do
   IFS= read -r T || true
   stty echo 2>/dev/null || true
   echo
-  # Terminals can wrap a paste in bracketed-paste markers or add a CR or spaces.
-  T=$(printf '%s' "$T" | tr -d '\033\r\t ' | sed 's/\[20[01]~//g')
   [ -n "$T" ] || refuse "no token given"
-  printf '%s\n' "$T" > "$TOK"
+  # A messy paste is fine: a selection that caught the label, role, date or
+  # bracketed-paste markers still contains the token, a 43-character run of
+  # letters, digits, - and _. Try each such run; doxx says which one is right.
+  CANDS=$(printf '%s' "$T" | sed 's/\x1b\[20[01]~/ /g' | tr -c 'A-Za-z0-9_-' '\n' | awk 'length($0)==43')
+  [ -n "$CANDS" ] || CANDS=$(printf '%s' "$T" | tr -d '\033\r\t ')
   T=
-  if node "$DIR/tools/net-doxx/tungsten.mjs" --check --token-file "$TOK"; then break; fi
+  ok=0
+  for C in $CANDS; do
+    printf '%s\n' "$C" > "$TOK"
+    if node "$DIR/tools/net-doxx/tungsten.mjs" --check --token-file "$TOK"; then ok=1; break; fi
+  done
+  CANDS=
+  C=
+  [ "$ok" = 1 ] && break
   [ "$tries" -lt 3 ] || refuse "three codes were not accepted; nothing was changed at doxx"
   echo "Try again: on doxx, Account > Auth Tokens, copy the token you just made."
 done
