@@ -1336,6 +1336,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       </div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
       <div class="stat" id="h-stat">waiting…</div>
+      <div id="hv-add" hidden>
+        <div class="row" style="margin-top:8px">
+          <input id="hv-key" type="password" autocomplete="off" spellcheck="false" aria-label="your Hive active private key" placeholder="paste your Hive active key" style="flex:2;min-height:44px">
+          <button type="button" id="hv-add-go" style="min-height:44px">add</button>
+        </div>
+      </div>
+      <div id="hv-add-stat" role="status" aria-live="polite" style="margin-top:6px;min-height:18px"></div>
+      <button type="button" id="hv-other" hidden style="min-height:44px;margin-top:4px">use a different Hive account</button>
     </div>
     <div class="chain" id="ch-arb">
       <div class="cn">🔵 Arbitrum <span class="badge">ETH</span></div>
@@ -1444,6 +1452,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <option value="USDC">USDC</option>
       <option value="ANT">ANT</option>
       <option value="sats">sats</option>
+      <option value="HIVE">HIVE</option>
+      <option value="HBD">HBD</option>
     </select>
     <button id="cap-set" class="gold" style="min-height:34px">set</button>
     <button id="cap-clear" class="gold" style="min-height:34px">clear</button>
@@ -1466,6 +1476,17 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <button id="tx-tab-e" class="gold" style="flex:1">EVM · Base / Arbitrum</button>
       <button id="tx-tab-l" class="gold" style="flex:1">⚡ Lightning</button>
       <button id="tx-tab-n" class="gold" style="flex:1">🏷 payment name</button>
+      <button id="tx-tab-h" class="gold" style="flex:1">🐝 Hive</button>
+    </div>
+    <div id="tx-h" style="display:none;margin-top:8px">
+      <div class="row">
+        <input id="hs-to" aria-label="Recipient Hive account" placeholder="to: Hive account" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="hs-amt" aria-label="Amount" class="small" inputmode="decimal" placeholder="0.000" style="max-width:130px;flex:0 1 130px">
+        <select id="hs-sym" aria-label="Coin" style="max-width:110px;flex:0 1 110px"><option value="HIVE">HIVE</option><option value="HBD">HBD</option></select>
+        <input id="hs-memo" aria-label="Memo, optional and public" class="small" placeholder="memo (optional, public)" style="flex:2">
+        <button id="hs-go" class="gold">📤 send</button>
+      </div>
+      <div class="law" id="hs-stat" style="margin-top:4px;min-height:18px"></div>
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
@@ -2784,9 +2805,171 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* Public-only forge rails. hive: is the account name (balances already use
      SOUL). ar: is an Arweave address (43-char base64url) — never a private JWK,
      never invented RSA from masterPRK. Bound address lives in localStorage. */
+  /* ══ HIVE: a real chain, like every rail here. Hive keys cannot derive from the soul,
+     so ONE PASTE: the account's active key names its own account (key references),
+     proves itself on that account's active authority, and is sealed under the keychain
+     (AES-256-GCM, key from the masterPRK by HKDF, per soul). It never leaves this page and
+     is never stored in the clear; an owner key is refused (it stays offline). Balances
+     read for THAT account, never for the soul's name. Sending follows the outbox law:
+     the signed transaction is kept BEFORE it is broadcast, a retry resends those exact
+     bytes and never signs again, and "done" is said only after the chain shows it.
+     Serialization and signature match Hive's own library (e2e/wallet-hive.mjs). ══ */
+  var HIVE_NODES=['https://api.hive.blog','https://api.openhive.network'];
+  var HIVE_CHAIN='beeab0de00000000000000000000000000000000000000000000000000000000'; // PUBLIC-CONSTANT: Hive mainnet chain id
+  var HIVE_NAME=/^[a-z][a-z0-9.-]{2,15}$/, HIVE_MAX=(1n<<63n);
+  async function hiveRpc(method,params){
+    for(var i=0;i<HIVE_NODES.length;i++){
+      var d=null;
+      try{ var r=await fetchT(HIVE_NODES[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:method,params:params,id:1})}); if(r.ok)d=await r.json() }catch(e){}
+      if(d&&('result' in d))return d.result;
+      if(d&&d.error){ var er=new Error('hive'); er.hive=String(d.error.message||'')+' '+JSON.stringify(d.error.data||''); throw er }
+    }
+    var off=new Error('The Hive network did not answer. Try again in a moment.'); off.offline=true; throw off;
+  }
+  // the node's refusal, in one calm sentence (never the node's own text)
+  function hiveSay(e){
+    if(!e)return 'Something went wrong, so nothing was sent.';
+    if(e.offline||!e.hive)return e.message||'Something went wrong, so nothing was sent.';
+    var t=e.hive;
+    if(/insufficient|does not have sufficient|balance/i.test(t))return 'That account does not hold enough for this.';
+    if(/unknown key|missing required active authority|missing authority/i.test(t))return 'Hive did not accept this key for the account. Paste its current active key.';
+    if(/(to|account).*(does not exist|unknown)|unknown account|account_name.*not found/i.test(t))return 'That Hive account does not exist.';
+    if(/expir/i.test(t))return 'It did not land in time, so nothing was sent.';
+    if(/memo/i.test(t))return 'Hive refused that memo.';
+    if(/duplicate/i.test(t))return 'Hive already has this transaction.';
+    return 'Hive refused it, so nothing was sent.';
+  }
+  function hivePubOf(wif){ return 'STM'+BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString().slice(3) }
+  function hiveSlot(k){ return 'bnr_hive_'+k+':'+SOUL }
+  function hiveBound(){ if(!SOUL)return null; try{ var c=JSON.parse(localStorage.getItem(hiveSlot('acct'))||'null'); return (c&&HIVE_NAME.test(c.acct||''))?c.acct:null }catch(e){ return null } }
+  async function hiveSealKey(acct){
+    var base=await crypto.subtle.importKey('raw',MPRK,'HKDF',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:new TextEncoder().encode('bnr/hive-active-seal/v1'),info:new TextEncoder().encode(SOUL+'\n'+acct)},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function hiveSeal(acct,wif){
+    var k=await hiveSealKey(acct), iv=crypto.getRandomValues(new Uint8Array(12));
+    var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv,additionalData:new TextEncoder().encode('hive:'+SOUL+':'+acct)},k,new TextEncoder().encode(wif)));
+    localStorage.setItem(hiveSlot('seal'),JSON.stringify({acct:acct,iv:bytesToB64u(iv),ct:bytesToB64u(ct)}));
+  }
+  // null when there is no seal, or it was made by another keychain: then one paste reseals it
+  async function hiveUnseal(acct){
+    var c=null; try{ c=JSON.parse(localStorage.getItem(hiveSlot('seal'))||'null') }catch(e){}
+    if(!c||c.acct!==acct||!MPRK)return null;
+    try{ var k=await hiveSealKey(acct);
+      var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64uToBytes(c.iv),additionalData:new TextEncoder().encode('hive:'+SOUL+':'+acct)},k,b64uToBytes(c.ct));
+      return new TextDecoder().decode(pt) }catch(e){ return null }
+  }
+  function hiveForget(){ try{ localStorage.removeItem(hiveSlot('acct')); localStorage.removeItem(hiveSlot('seal')) }catch(e){} }
+  // one amount, one form: "1" and "1.0" are "1.000", used for the bytes, the broadcast, the cap and the words
+  function hiveAmount(t){
+    var m=/^(\d+)(?:\.(\d{1,3}))?$/.exec(String(t||'').trim()); if(!m)return null;
+    var v=BigInt(m[1])*1000n+BigInt((m[2]||'').padEnd(3,'0')||'0');
+    if(v<=0n||v>=HIVE_MAX)return null;
+    return (v/1000n).toString()+'.'+(v%1000n).toString().padStart(3,'0');
+  }
+  // graphene transaction bytes for transfers (HIVE and HBD keep their legacy symbol bytes STEEM / SBD)
+  function hiveSer(tx){
+    var out=[];
+    var u8=function(n){out.push(n&255)}, u16=function(n){u8(n);u8(n>>8)}, u32=function(n){u8(n);u8(n>>>8);u8(n>>>16);u8(n>>>24)};
+    var vu=function(n){ while(n>=0x80){u8((n&0x7f)|0x80);n>>>=7} u8(n) };
+    var str=function(t){ var b=new TextEncoder().encode(t); vu(b.length); for(var i=0;i<b.length;i++)u8(b[i]) };
+    var asset=function(amount,sym){
+      var canon=hiveAmount(amount); if(!canon)throw new Error('amount: more than 0, up to 3 decimals');
+      var p=canon.split('.'), v=BigInt(p[0])*1000n+BigInt(p[1]);
+      for(var i=0;i<8;i++){ u8(Number(v&0xffn)); v>>=8n }
+      u8(3); var t=sym==='HIVE'?'STEEM':sym==='HBD'?'SBD':''; if(!t)throw new Error('coin: HIVE or HBD');
+      for(var j=0;j<7;j++)u8(j<t.length?t.charCodeAt(j):0);
+    };
+    u16(tx.ref_block_num); u32(tx.ref_block_prefix); u32(tx.expiration);
+    vu(tx.ops.length); tx.ops.forEach(function(o){ vu(2); str(o.from); str(o.to); asset(o.amount,o.sym); str(o.memo||'') });
+    vu(0);
+    return new Uint8Array(out);
+  }
+  function hiveDigest(bytes){ var c=hexB(HIVE_CHAIN), all=new Uint8Array(c.length+bytes.length); all.set(c,0); all.set(bytes,c.length); return BN.sha256(all) }
+  // a canonical recoverable signature, hex [recid+31] r s: the vendored eosjs signer retries until
+  // canonical (graphene's rule, the same on Hive and Vaulta); the noble signer here cannot retry
+  function hiveSign(wif,digest){ return hexS(BN.PrivateKey.fromString(wif).sign(digest,false).signature.data) }
+  // the one send that is not finished yet, kept BEFORE broadcast (the outbox law, Hive's slot)
+  function hivePending(){ try{ return JSON.parse(localStorage.getItem(hiveSlot('pending'))||'null') }catch(e){ return null } }
+  function hivePendingSet(p){ if(p)localStorage.setItem(hiveSlot('pending'),JSON.stringify(p)); else localStorage.removeItem(hiveSlot('pending')) }
+  async function hiveStatus(p){
+    try{ var st=await hiveRpc('transaction_status_api.find_transaction',{transaction_id:p.txid,expiration:p.exp}); return (st&&st.status)||'unknown' }
+    catch(e){ return 'unknown' }
+  }
+  // broadcast the KEPT bytes (first time or retry: never signed again), then read the chain back
+  async function hiveSettle(p){
+    var dup=false;
+    try{ await hiveRpc('condenser_api.broadcast_transaction',[p.tx]) }
+    catch(e){ if(e.hive&&/duplicate/i.test(e.hive))dup=true; else if(e.hive)return {phase:'refused',why:hiveSay(e)} }
+    for(var i=0;i<20;i++){
+      var st=await hiveStatus(p);
+      if(/within_(reversible|irreversible)_block/.test(st))return {phase:'confirmed'};
+      if(/expired_irreversible|too_old/.test(st))return {phase:'expired'};
+      await new Promise(function(r){setTimeout(r,1500)});
+    }
+    return {phase:dup?'submitted':'unknown'};
+  }
+  async function hiveBuild(wif,from,to,amount,sym,memo){
+    var dgp=await hiveRpc('condenser_api.get_dynamic_global_properties',[]);
+    var id=hexB(String(dgp.head_block_id||'')), now=Date.parse(String(dgp.time||'')+'Z');
+    if(id.length<8||!isFinite(now))throw new Error('The Hive network did not answer. Try again in a moment.');
+    var tx={ref_block_num:dgp.head_block_number&0xffff,ref_block_prefix:(id[4]|(id[5]<<8)|(id[6]<<16)|(id[7]<<24))>>>0,
+      expiration:Math.floor(now/1000)+60,ops:[{from:from,to:to,amount:amount,sym:sym,memo:memo}]};
+    var bytes=hiveSer(tx), sig=hiveSign(wif,hiveDigest(bytes)), exp=new Date(tx.expiration*1000).toISOString().slice(0,19);
+    return {txid:hexS(BN.sha256(bytes)).slice(0,40),exp:exp,from:from,to:to,amount:amount,sym:sym,at:Date.now(),
+      tx:{ref_block_num:tx.ref_block_num,ref_block_prefix:tx.ref_block_prefix,expiration:exp,
+        operations:[['transfer',{from:from,to:to,amount:amount+' '+sym,memo:memo||''}]],extensions:[],signatures:[sig]}};
+  }
+  // one paste: the key names its account, proves itself there, and is sealed under the keychain
+  async function hiveAdd(wif,say,choose){
+    if(!SOUL)throw new Error('Connect your name first.');
+    if(!MPRK){
+      say('Confirm with your passkey…');
+      CEREMONY=true;
+      try{ keychainOn(await connectSoul()) }
+      catch(e){ throw new Error(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
+      finally{ CEREMONY=false }
+    }
+    var pub=hivePubOf(wif);
+    say('Finding the Hive account this key belongs to…');
+    var refs=await hiveRpc('condenser_api.get_key_references',[[pub]]);
+    var names=((refs&&refs[0])||[]).filter(function(n){return HIVE_NAME.test(n)});
+    if(!names.length)throw new Error('No Hive account uses this key. Paste the account’s active key.');
+    var accs=(await hiveRpc('condenser_api.get_accounts',[names]))||[];
+    var keyIn=function(auth){ return ((auth||{}).key_auths||[]).some(function(k){return k[0]===pub}) };
+    if(accs.some(function(a){return keyIn(a.owner)}))throw new Error('That key also controls an account’s owner authority, and an owner key stays offline. Paste an active key that is not the owner key.');
+    var hits=accs.filter(function(a){ var aa=a.active||{}; return names.indexOf(a.name)>=0&&(aa.key_auths||[]).some(function(k){return k[0]===pub&&k[1]>=aa.weight_threshold}) });
+    if(!hits.length)throw new Error('That key is on '+names[0]+' but is not its active key. Paste the active key.');
+    var pick=hits.length===1?hits[0].name:await choose(hits.map(function(a){return a.name}));
+    if(!pick)throw new Error('Nothing was kept.');
+    await hiveSeal(pick,wif);
+    localStorage.setItem(hiveSlot('acct'),JSON.stringify({acct:pick}));
+    hiveShow();
+    return pick;
+  }
+  // the Hive card: the bound account, or one calm sentence and the one field
+  function hiveShow(repaste){
+    var acct=hiveBound(), box=$('hv-add'), st=$('h-stat'), alt=$('hv-other');
+    if(alt)alt.hidden=!acct;
+    if(acct&&!repaste){ if(box)box.hidden=true; readHive(acct); renderForge(); sumChains(); return }
+    if(box)box.hidden=false;
+    if(!acct){
+      if(window.wlClearRollup)window.wlClearRollup('hive');
+      $('h-info').textContent='liquid + Hive Power + HBD'; $('ch-hive').classList.remove('connected');
+      st.textContent='add your Hive account: paste its active key'; st.className='stat'; wlRead(st,true);
+    }
+    sumChains();
+  }
+  // a paste that is not a key, said in one sentence
+  function hiveParse(t){ try{ return parseWifAny(t) }catch(e){ return null } }
+  function hiveMemoUnsafe(m){
+    return String(m||'').split(/\s+/).some(function(w){
+      return /^5[HJK][1-9A-HJ-NP-Za-km-z]{49}$/.test(w)||/^[KL][1-9A-HJ-NP-Za-km-z]{51}$/.test(w)||/^PVT_K1_/.test(w)||/^[0-9a-fA-F]{64}$/.test(w) });
+  }
   function hiveNameOf(ctx){
     var n=(ctx||'').replace(/^hive:/,'');
-    return n||SOUL||'';
+    if(!n||n===SOUL)return hiveBound()||'';
+    return n;
   }
   function arBindKey(ctx){ return 'bnr_ar_pub:'+(ctx||('ar:'+(SOUL||''))) }
   function loadArPublic(ctx){
@@ -2949,7 +3132,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* hive: public account name — no private material, works without MPRK */
     if(/^hive:/.test(ctx)){
       var hn=hiveNameOf(ctx);
-      if(!hn) return null;
+      if(!hn) return {kind:'Hive account', value:null, publicOnly:true, hiveAdd:true};
       return {kind:'Hive account', value:hn, publicOnly:true};
     }
     /* ar: a bound or vault address first; else the secp256k1 address that derives
@@ -2997,7 +3180,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function forgeChipNote(d){
     if(!d) return 'context saved, key never stored';
     if(d.kind==='EVM 0x') return 'arbitrum reads auto-connect in balances';
-    if(d.kind==='Hive account') return 'public Hive account — same name the balance rail reads';
+    if(d.kind==='Hive account') return 'your Hive account · the one its active key named';
     if(d.kind==='Arweave address') return d.source==='vault-meta'?'public address from vault meta (JWK never shown)':'public Arweave address — never a private JWK';
     if(d.needsWasm) return 'bsigner registry · core derives when WASM armed — never a fake PQ key';
     if(d.derived && d.alg) return d.alg==='ml-dsa-65'?'your PQ id · tap to copy your public card · seed never stored':'seal-to-me key · tap to copy your public card · seed never stored';
@@ -3080,6 +3263,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return;
       }
       if(d.needsConnect){ renderArConnectChip(box, c); return }
+      if(d.hiveAdd){
+        var hc=document.createElement('div'); hc.className='chip'; hc.style.borderStyle='dashed';
+        hc.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Hive account</span></div><div class="cv"><a href="#ch-hive">add your Hive account</a>: paste its active key</div>';
+        box.appendChild(hc); return;
+      }
       if(d.needsWasm){ renderPqWasmChip(box, c, d); return }
       var note=forgeChipNote(d);
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
@@ -3111,7 +3299,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+vacct()); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+esc(vacct())+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
-  $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
+  $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); var hb=hiveBound(); $('forge-stat').innerHTML=hb?'✓ your Hive account is <b>'+esc(hb)+'</b>':'✓ hive card · add your Hive account on the Hive card: paste its active key'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?'✓ your Arweave address for <b>'+esc(SOUL)+'</b> · made from your keys (secp256k1), never stored':'✓ ar card for <b>'+esc(SOUL)+'</b> · connect your keychain to make its address, or bind a public one (never a private JWK)'; };
   $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
   /* ── only me: seal / open / bind (SPEC-BPQ-1). Everything happens in this tab;
@@ -6484,7 +6672,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      This registry also populates the account picker. Counts are computed. */
   var CHAIN_MATRIX = [
     { family: 'Antelope', name: 'Vaulta', unit: 'A', watch: 'vaulta', read: 'Public account balance; connected account also shows RAM, CPU and permissions.', sign: 'Native action/transfer adapter and browser K1/passkey path exist. Custom EOS firmware and host integration have separate acceptance.', state: 'READ' },
-    { family: 'Graphene', name: 'Hive', unit: 'HIVE · HBD · HP', watch: 'hive', read: 'Public account reader: liquid HIVE and HBD. Savings, Hive Power and resource-credit expansion remain due.', sign: 'The Hive worker is read-only. Hardware operation encoding and account-key mapping remain integration work.', state: 'READ' },
+    { family: 'Graphene', name: 'Hive', unit: 'HIVE · HBD · HP', watch: 'hive', read: 'Public account reader: liquid HIVE and HBD. Savings, Hive Power and resource-credit expansion remain due.', sign: 'HIVE and HBD transfers sign in this page with the account active key, pasted once and sealed under the keychain; the signed transaction is kept before broadcast and confirmed by a chain read. Hardware (bSAFE 7) operation encoding remains integration work.', state: 'READ' },
     { family: 'EVM', name: 'ETH', unit: 'ETH · ERC-20i', watch: 'ethereum', read: 'Public ETH balance and token balances from the ERC-20i census, including PEPi-item. Additional token contracts can be read.', sign: 'EVM firmware family exists; Ethereum is not enabled in this page’s payment rail table.', state: 'READ' },
     { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', watch: 'arbitrum', read: 'Public ETH and Autonomi ANT balances, with network identity checked.', sign: 'Browser EVM signing exists. Trezor public import is separate from bPay authorization and settlement.', state: 'READ' },
     { family: 'EVM', name: 'Base', unit: 'ETH · USDC · ERC-20i', watch: 'base', read: 'Public ETH/USDC and on-demand holdings across the complete ERC-20i census, with per-contract decimals and visible failures. Additional contracts can be read.', sign: 'Browser EVM signing and spend-cap code exist. ERC-20i inscription transfers require their own measured contract semantics.', state: 'READ' },
@@ -6580,10 +6768,71 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('tx-e').style.display=which==='e'?'block':'none';
     $('tx-l').style.display=which==='l'?'block':'none';
     $('tx-n').style.display=which==='n'?'block':'none';
+    $('tx-h').style.display=which==='h'?'block':'none';
     if(which==='v')svRefresh();
     else if(which==='e')seRefresh();
   }
   $('tx-tab-v').onclick=function(){txTab('v')};
+  $('tx-tab-h').onclick=function(){txTab('h')};
+  $('hv-key').addEventListener('keydown',function(e){ if(e.key==='Enter')$('hv-add-go').click() });
+  // one key, several accounts: one tap picks
+  function hiveChoose(names){
+    return new Promise(function(resolve){
+      var st=$('hv-add-stat'); st.textContent='This key controls more than one Hive account. Which one is yours here? ';
+      names.forEach(function(n){ var b=document.createElement('button'); b.type='button'; b.textContent=n; b.style.minHeight='44px'; b.onclick=function(){ resolve(n) }; st.appendChild(b) });
+    });
+  }
+  $('hv-add-go').onclick=async function(){
+    var btn=this, st=$('hv-add-stat'), w=hiveParse($('hv-key').value); $('hv-key').value='';
+    if(!w){ st.textContent='That is not a Hive private key. Paste the account\u2019s active key.'; return }
+    btn.disabled=true;
+    try{ var name=await hiveAdd(w,function(t){st.textContent=t},hiveChoose); w=null; st.textContent='Done. '+name+' is your Hive account here, and its key is sealed by your keychain.' }
+    catch(e){ w=null; st.textContent=hiveSay(e) }
+    finally{ btn.disabled=false }
+  };
+  $('hv-other').onclick=function(){ hiveForget(); hivePendingSet(null); $('hv-add-stat').textContent=''; hiveShow() };
+  $('hs-go').onclick=async function(){
+    var st=$('hs-stat'), acct=hiveBound(), btn=this;
+    if(!acct){ wlSay(st,['add your Hive account first · ',{to:'ch-hive',t:'paste its active key'}]); return }
+    if(btn.disabled)return;
+    btn.disabled=true;
+    var w=null;
+    try{
+      // a send that has not settled comes first: its kept bytes, never a second signature
+      var p0=hivePending();
+      if(p0){
+        st.textContent='Checking your last send…';
+        var r0=await hiveSettle(p0);
+        if(r0.phase==='confirmed'){ hivePendingSet(null); st.textContent='Your last send went through: '+p0.amount+' '+p0.sym+' to '+p0.to+'. Press send again for a new one.'; readHive(acct); return }
+        if(r0.phase!=='expired'&&r0.phase!=='refused'){ st.textContent='Your last send ('+p0.amount+' '+p0.sym+' to '+p0.to+') has not settled yet, so nothing new was signed. Press send again in a minute.'; return }
+        hivePendingSet(null);
+      }
+      var to=($('hs-to').value||'').trim().toLowerCase().replace(/^@/,''), amt=hiveAmount($('hs-amt').value), sym=$('hs-sym').value, memo=$('hs-memo').value||'';
+      if(!HIVE_NAME.test(to)){ st.textContent='to: a Hive account name'; return }
+      if(!amt){ st.textContent='amount: more than 0, up to 3 decimals'; return }
+      if(hiveMemoUnsafe(memo)){ st.textContent='That memo holds what looks like a private key. Memos are public, so nothing was sent.'; return }
+      if(!capGate(sym,amt)){ st.textContent='Your daily spend cap stops this, so nothing was sent.'; return }
+      if(!MPRK){
+        st.textContent='Confirm with your passkey…'; CEREMONY=true;
+        try{ keychainOn(await connectSoul()) }
+        catch(e){ st.textContent=/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was sent. Press send again when you are ready.':'Your keychain did not connect, so nothing was sent.'; return }
+        finally{ CEREMONY=false }
+      }
+      w=await hiveUnseal(acct);
+      if(!w){ hiveShow(true); st.textContent='Paste '+acct+'\u2019s active key once more on the Hive card; then one press sends.'; return }
+      st.textContent='Signing…';
+      var pend=await hiveBuild(w,acct,to,amt,sym,memo); w=null;
+      hivePendingSet(pend);                       // kept BEFORE it is broadcast
+      capRecord(sym,Number(amt));
+      st.textContent='Sending…';
+      var r=await hiveSettle(pend);
+      if(r.phase==='confirmed'){ hivePendingSet(null); st.textContent='Done. '+amt+' '+sym+' went to '+to+'. The chain confirmed it.'; readHive(acct) }
+      else if(r.phase==='refused'){ hivePendingSet(null); st.textContent=r.why }
+      else if(r.phase==='expired'){ hivePendingSet(null); st.textContent='It did not land in time, so nothing was sent. Press send to try again.' }
+      else st.textContent='It is on its way, and the chain has not shown it yet. Press send again to check; nothing new is signed until it settles.';
+    }catch(e){ st.textContent=hiveSay(e) }
+    finally{ w=null; btn.disabled=false }
+  };
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
   $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
@@ -6839,6 +7088,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      returns, or transmits a seed. This is also the gate's handle on the rail
      core — every primitive below is proven against a published vector in
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
+  window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny,
     rails:EVM_RAILS,
     ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
@@ -7178,8 +7428,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var a=d.result[0];
         var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
         upsertHiveBalance(acct,a.balance);
-        $('h-info').textContent=hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
-        $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
+        $('h-info').textContent=acct+' · '+hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
+        $('h-stat').textContent='✓ live · '+acct; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
         $('ch-hive').classList.add('connected');
       } else { $('h-stat').textContent='account not found on Hive'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
     }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
@@ -7221,7 +7471,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(vacctKnown())acctDirAdd(vacct());
     var who=vacct()!==SOUL?' · Vaulta account <b style="color:var(--leaf)">'+esc(vacct())+'</b>':'';
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · reading balances…';
-    await Promise.all([readVaulta(vacct()), readHive(SOUL), arPub?readArBound(arPub):Promise.resolve()]);
+    var hv=hiveBound(); hiveShow();
+    await Promise.all([readVaulta(vacct()), arPub?readArBound(arPub):Promise.resolve()]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · balances live';
     wlSay($('sum-soul'),[SOUL+'.b'+(vacct()!==SOUL?' · Vaulta '+vacct():'')]);document.body.setAttribute('data-wl-soul','true');
     sumChains();

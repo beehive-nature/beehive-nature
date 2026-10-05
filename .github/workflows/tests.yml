@@ -903,6 +903,9 @@ jobs:
       - name: Arweave from your own keys — native secp256k1 address, keyless reads, a publish the network would attribute to you
         if: always()
         run: node e2e/wallet-arweave-keys.mjs
+      - name: Hive — one paste adds the account its active key controls; bytes and digest equal Hive's own library; one press sends
+        if: always()
+        run: node e2e/wallet-hive.mjs
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
         run: node e2e/wallet-accounts.mjs
