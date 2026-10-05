@@ -219,6 +219,19 @@ export function lineView(corpus, lineKey, focusId, depth = DEPTH) {
   const focus = focusId && P[focusId] && !P[focusId].living ? focusId : null;
   const starts = focus ? [focus] : (line.entries || []).filter((id) => P[id] && !P[id].living);
   if (!starts.length && line.root && P[line.root] && !P[line.root].living) starts.push(line.root);
+  const publicParents = (id) => {
+    const out = [], seen = new Set(), queue = [...(E[id] || [])];
+    while (queue.length) {
+      const parent = queue.shift();
+      if (seen.has(parent)) continue;
+      seen.add(parent);
+      const p = P[parent];
+      if (!p) continue;
+      if (p.living) queue.push(...(E[parent] || []));
+      else out.push(parent);
+    }
+    return [...new Set(out)];
+  };
   const seedCount = Math.max(1, starts.length);
   const nodes = [], links = [], at = new Map();
   let frontier = starts.map((id, slot) => ({ id, slot }));
@@ -228,7 +241,7 @@ export function lineView(corpus, lineKey, focusId, depth = DEPTH) {
       if (at.has(id)) continue;
       const p = P[id];
       if (!p || p.living) continue;
-      const parents = (E[id] || []).filter((x) => P[x] && !P[x].living);
+      const parents = publicParents(id);
       const node = { id, gen, pos: (slot + 0.5) / (seedCount * 2 ** gen), living: false,
         name: p.name, lifespan: p.lifespan || null,
         support: (p.evidence && p.evidence.support) || null,
