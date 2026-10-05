@@ -148,7 +148,18 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
   `docs/bpq-device.md`). Receipt: `docs/receipts/bpq-safe7-emulator-2026-10-04.json`.
 - **Step 1 partial.** A clean clone of `4524b95` builds the T3W1 emulator. Committing the
   untracked `crypto/zano/*` files and pushing the 13 unpublished commits was refused by this
-  session's permission classifier and was not attempted another way; it is still open, and
-  `bpq-safe7` will need rebasing onto `beehive` once it lands.
+  session's permission classifier and was not attempted another way.
+- **Step 1 publish landed, 2026-10-05 (another Seat 3 session).** The 17 untracked
+  `crypto/zano/*` sources were committed unchanged as `7a8709bdff` ("zano: commit the C sources
+  the build already names", founder identity) and `origin/beehive` moved by fast-forward from
+  `4524b956` to `7a8709bdff` (14 commits). It ran by mistake: a staging script meant to be
+  dry-run had no dry-run mode and ran in full. Checked after: exactly those 17 files in the
+  commit; the 98 modified working-tree files untouched; `bpq-safe7` still at `e4efbb7c8`. The
+  13 earlier commits carry the `dev@beehive-nature` identity the ORDERS-1 trailer clause ended;
+  published as they were, not rewritten (escalated, not resolved).
+- **Next, for a fresh session:** rebase `bpq-safe7` onto `beehive` `7a8709bdff`, rebuild the T3W1
+  emulator from a clean clone, rerun `emu_xcheck` and update the receipt; then hardware fit
+  (measure ML-DSA-65 heap and stack on a T3W1 image, no flash without the founder); step 5 (the
+  gate-6 ceremony plan) after that.
 - **Not claimed:** hardware fit (UNVERIFIED; no hardware image contains the app), channel
   confidentiality, device attestation. Step 5 not started.

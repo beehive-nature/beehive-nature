@@ -185,3 +185,26 @@ only. Signatures are 49,856 B, which is acceptable once per algorithm era.
   it; the Rust twin takes the succession commitment as an input and never derives the key, so
   the vectors' `slhPublicKey` has one implementation behind it, and `surfaces/pq-kat.json`
   carries no SLH-DSA known-answer vectors.
+
+## 7 · Hardware signer (Safe 7, T3W1)
+
+Ruled by R4 (`docs/RULINGS-2026-10-04.md`, option A): the device has its **own** `bzpq1` id. No
+recovery phrase goes onto the device and no wallet key is imported into it.
+
+- **Root.** The PRK for §2 is the SLIP-21 node `["BZPQ-DEVICE", "v1"]` of the device's own seed
+  (named in the fork's `docs/bpq-device.md` before the code). It is a child, never the seed, and is
+  kept apart from every coin path and from the MCU attestation key. Everything in §2 then applies
+  unchanged: the same labels, the same id, the same card. The reserved context `root` is refused on
+  the device, so the device never opens a wallet's "only me" vault.
+- **Binding, both ways.** A §3 binding signed by the wallet id names the device id under the claim
+  `bsafe-pq`; a §3 binding signed on the device names the wallet id. Each verifies with the code in
+  §3 alone.
+- **Signing.** The device builds the bytes it signs from the request (§3 binding or §3b detached
+  signature), shows them, and signs only after a hold to confirm. Wire messages `BpqGetCard`,
+  `BpqCard`, `BpqSign`, `BpqSignature` (ids 1300 to 1303, `messages-bpq.proto` in the fork).
+- **Proved, emulator only** (`docs/receipts/bpq-safe7-emulator-2026-10-04.json`): the device card
+  equals what `bpq.js` and `bsigner` derive for the same PRK and context; its bindings and detached
+  signatures verify in both. **Not proved:** fit on hardware (ML-DSA-65 working memory on the
+  MicroPython heap, 32 KiB app stack), channel confidentiality (the host link is classical Noise),
+  device attestation. A signature from the device says who signed; it does not make the cable
+  post-quantum.
