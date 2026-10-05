@@ -5196,16 +5196,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
-  function signGuard(el,retry,checked){
-    /* a lane that can press itself again gets the button; the pointer and the account are read first, then the lane */
-    var again=function(read){ return retry?{btn:'try again',on:function(){ Promise.resolve(read()).then(function(){ return checkBridge() }).then(retry,retry) }}:'try again in a moment.' };
+  /* what a press was made for: the name, the open keychain (by its soul, not the key object a check may
+     re-derive), the account it signs from, and everything typed or chosen in its part of the page */
+  function guardPin(el){
+    var part=(el&&el.closest&&el.closest('section'))||document.body;
+    var form=Array.prototype.map.call(part.querySelectorAll('input,select,textarea'),function(i){ return (i.id||i.name||'')+'='+(i.type==='checkbox'||i.type==='radio'?i.checked:i.value) }).join('\u0001');
+    return {soul:SOUL, kc:MPRK?(typeof KC_FP!=='undefined'?KC_FP:'open'):null, acct:vacctKnown()?vacct():null, form:form};
+  }
+  /* the press goes on only if nothing it was made for changed while it waited; otherwise it is said, and signs nothing */
+  function guardHolds(el,pin,retry){
+    var now=guardPin(el), again={btn:'press it now',on:retry};
+    if(now.soul!==pin.soul){ wlSay(el,['you connected another name while this was being checked, so nothing was signed. ',again]); return false }
+    if(now.kc!==pin.kc){ wlSay(el,[(now.kc?'your keychain changed':'your keychain closed')+' while this was being checked, so nothing was signed. ',now.kc?again:{to:'kc-sec',t:'connect your keychain'}]); return false }
+    if(pin.acct&&now.acct&&now.acct!==pin.acct){ wlSay(el,[SOUL+'.b now points to '+now.acct+', so nothing was signed. ',again]); return false }
+    if(now.form!==pin.form){ wlSay(el,['you changed it while this was being checked, so nothing was signed. ',again]); return false }
+    return true;
+  }
+  function signGuard(el,retry,checked,pinned){
+    /* a lane that can press itself again gets the button; the pointer and the account are read first, then the
+       lane, and only if nothing the press was made for changed while it waited */
+    var again=function(read){ return retry?{btn:'try again',on:function(){ var pin=guardPin(el); Promise.resolve(read()).then(function(){ return checkBridge() }).then(function(){ if(guardHolds(el,pin,retry))retry() },function(){ if(guardHolds(el,pin,retry))retry() }) }}:'try again in a moment.' };
     if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
     if(BRIDGED===null&&retry&&(BR_CHECK||!checked)){   /* not checked yet, or being checked: check it, say so, and go on once it answers */
-      var w=BR_CHECK||checkBridge(), pressedFor={soul:SOUL,acct:vacct(),key:K1}; wlSay(el,['checking '+vacct()+', one moment.']);
+      var w=BR_CHECK||checkBridge(), pin=pinned||guardPin(el); wlSay(el,['checking '+vacct()+', one moment.']);
       var on=function(){
-        /* the press goes on only for the name, account and keychain it was made for */
-        if(SOUL!==pressedFor.soul||vacct()!==pressedFor.acct||K1!==pressedFor.key){ wlSay(el,['you connected another name while this was being checked, so nothing was signed. press it again to send from '+vacct()+'.']); return }
-        if(BRIDGED!==null)retry(); else signGuard(el,retry,true) };
+        if(!guardHolds(el,pin,retry))return;
+        if(BRIDGED!==null)retry(); else signGuard(el,retry,true,pin) };
       w.then(on,on); return false }
     if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }

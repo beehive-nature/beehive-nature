@@ -308,7 +308,32 @@ try {
     await page.waitForTimeout(1500);
     const said = await page.evaluate(() => window.__acSaid);
     ok('the press waits for the check it needs, and says so', waited, JSON.stringify(said.slice(0, 4)));
-    ok('once the name changed, the waiting press signs nothing and says why', said.some(s => /^you connected another name while this was being checked, so nothing was signed\. press it again to send from bobaccount11\./.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-4)) + ' · posts ' + state.posts.length);
+    ok('once the name changed, the waiting press signs nothing and says why', said.some(s => /^you connected another name while this was being checked, so nothing was signed\. press it now$/.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-4)) + ' · posts ' + state.posts.length);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* Q5 · a press whose typing changed while it waited signs nothing: what is signed is what was pressed */
+  {
+    console.log('Q5 · a press, then the name typed again, while the account is checked (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await toKey(page);
+    state.acctDelay = { kingbeelovis: 4000 };
+    await page.evaluate(() => {
+      window.__acSaid = []; const st = document.getElementById('ac-stat');
+      new MutationObserver(() => window.__acSaid.push(st.innerText.trim())).observe(st, { childList: true, subtree: true, characterData: true });
+      document.getElementById('wgo').click();
+    });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamed'; document.getElementById('ac-go').click(); });
+    await page.waitForFunction(() => window.__acSaid.some(s => /^checking kingbeelovis, one moment\./.test(s)), null, { timeout: 5000 }).catch(() => {});
+    await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamee'; });   // typed again, never pressed
+    await page.waitForFunction(() => window.__acSaid.some(s => /^you changed it while this was being checked, so nothing was signed\./.test(s)), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const said = await page.evaluate(() => window.__acSaid);
+    ok('a name typed again while the press waited is never signed: it is said, with the one press that would sign it', said.some(s => /^you changed it while this was being checked, so nothing was signed\. press it now$/.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-3)) + ' · posts ' + state.posts.length);
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
