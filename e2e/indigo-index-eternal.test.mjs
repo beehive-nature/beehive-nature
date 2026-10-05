@@ -42,10 +42,13 @@ const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getC
 const page = p => p.evaluate(() => { const t = id => document.getElementById(id).textContent.trim(); return { r: +document.getElementById('reductionSlider').value, s25: t('sim_25yr'), remaining: t('sim_annual'), saved: t('sim_save_yr'), healed: t('sim_healed') }; });
 const store = p => p.evaluate(() => Object.keys(localStorage).filter(k => k !== 'bregister' && k !== 'blang').sort());
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint, laid on the front, not the body) with plain
+// bold sans titles and its magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress; the piece keeps its own ground', async () => {
   const want = {
-    bee: { bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+    bee: { bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+    raver: { bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
     cypherpunk: { bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
