@@ -7,9 +7,26 @@ adapter and no vendor is constitutional. Doxx tunnel tokens, IPs and keys
 appear in BNR records only as run-salted adapter references
 (`doxx:tunnel:<hash>`).
 
-**Status: harness built, live run not yet done.** The live run needs a doxx
-account on the 30-day Pro trial and a net-admin token. Only the founder can
-create either. No verdict exists until a receipt does.
+**Status: live verdict FAIL** (run `tt-20261005031759-e336b5`, 2026-10-05,
+harness `fcf6a2029`, reconciliation `reconciled`). Every network check
+passed:
+
+- Deny by default held.
+- The grant opened in about 40 s.
+- The other port and the outsider were denied, with paths proven alive.
+- The seat's device credential was walled off (403 ×3).
+- Revocation took effect in 12 s.
+- Cleanup removed all three tunnels.
+- The net-admin token could not see any other token. Live disproved
+  finding 1 below.
+
+The single blocker is that a role=device credential still worked 150 s and
+more after the `expires_at` the harness set. `create_token` did not echo an
+expiry, so doxx either ignored the requested expiry or stored a different
+one. A credential BNR cannot time-bound fails least privilege.
+
+An earlier run's FAIL on revoke was this harness's bug: the delete left out
+`src_port`. It is fixed in `fcf6a2029`.
 
 ## What the run does
 
@@ -77,7 +94,7 @@ Sources: the `config.doxx.net` self-description, v1.1.0, fetched
 2026-10-05T01:15Z, and `doxxcorp/config.doxx.net` at `e57b777`. Both are
 pinned in `tungsten.mjs`.
 
-1. **Authority escape, probable.** `user_list_tokens` is "Available to any
+1. **Authority escape: disproved live.** The net-admin token listed only itself. Docs-era note: `user_list_tokens` is "Available to any
    token role" and returns "token (full)". If that is true live, a net-admin
    or read-only token can read the admin token, and least privilege is
    void. The older GitHub reference shows masked tokens (`...gtGwEnvY`).
