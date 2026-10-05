@@ -2681,7 +2681,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
-<script src="vault.js?v=2"></script>
+<script src="vault.js?v=3"></script>
 <script src="onboarding/vendor/bpq-lib.js?v=1"></script>
 <script src="bpq.js?v=1"></script>
 <script src="arweave.js?v=4"></script>
@@ -4148,8 +4148,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
          name; the account itself is named only when the .b pointer or a proof says so */
       try{
         var vctx=k1Ctx(), vd=vctx&&deriveFor(vctx);
-        if(vd&&vd.value&&vacctKnown()&&BRIDGED===true){ claims['vaulta-k1']=String(vd.value); claims['vaulta-account']=vacct() }
-        else left.push('vaulta-k1 (the account does not carry this key yet)')
+        if(vd&&vd.value&&vacctKnown()){ claims['vaulta-k1']=String(vd.value);
+          if(BRIDGED===true)claims['vaulta-account']=vacct(); else left.push('vaulta-account ('+vacct()+' does not carry this key yet)') }
+        else left.push('vaulta-k1 (the .b pointer is not read yet)')
       }catch(e){ left.push('vaulta-k1 ('+((e&&e.message)||e)+')') }
       var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
       claims['bzdid-ed25519']=toHex(rec.publicKey);
@@ -10107,14 +10108,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   prfNote();
 })();
 </script>
-<script src="spend-audit.js?v=3"></script>
+<script src="spend-audit.js?v=4"></script>
 <script>(function(){
   var el = document.getElementById('receiptsBody'), OPTS = { sample: { say: 'these are sample bills that show how the checking works in your browser; none of them are yours. your own spending is in ', to: 'voucher-sec', t: 'prepay for compute' } };
   /* the receipts engine did not load (offline, blocked): said calmly, with a way to load it again */
   function missing(why){
     wlSay(el, ['the receipts could not load just now. ', {btn: 'try again', on: function(){
       wlSay(el, ['loading the receipts now.']);
-      var sc = document.createElement('script'); sc.src = 'spend-audit.js?v=3&r=' + Date.now();
+      var sc = document.createElement('script'); sc.src = 'spend-audit.js?v=4&r=' + Date.now();
       sc.onload = function(){ if (window.SpendAudit) SpendAudit.mountPanel(el, OPTS); else missing('loaded, but empty') };
       sc.onerror = function(){ missing('spend-audit.js did not load') };
       document.body.appendChild(sc);

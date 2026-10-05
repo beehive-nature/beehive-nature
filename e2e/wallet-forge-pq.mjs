@@ -207,7 +207,7 @@ try {
       acctKey: BNRWALLET.forgePq.derive('vaulta:gatebeelovis').value, soulKey: BNRWALLET.forgePq.derive('vaulta:gatesoul').value }));
     ok('binding: vaulta-k1 is the key the account gatebeelovis signs with, never the soul\'s by name',
       !!bnd.acctKey && bnd.b.claims['vaulta-k1'] === bnd.acctKey && bnd.acctKey !== bnd.soulKey && NODE_BPQ.verifyBind(bnd.b), JSON.stringify(bnd.b.claims));
-    ok('binding: the claims name the Vaulta account the pointer gave', bnd.b.claims['vaulta-account'] === 'gatebeelovis', JSON.stringify(bnd.b.claims));
+    ok('binding: the account is named only once it carries the key: unread here, so it is left out and said', !('vaulta-account' in bnd.b.claims) && /vaulta-account \(gatebeelovis does not carry this key yet\)/.test(await page.textContent('#pq-bind-stat')), JSON.stringify(bnd.b.claims) + ' · ' + await page.textContent('#pq-bind-stat'));
     await page.close();
   }
 
