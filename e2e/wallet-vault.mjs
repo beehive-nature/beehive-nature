@@ -203,8 +203,11 @@ await page.evaluate(() => {
   };
 });
 await page.click('#vlt-rekey'); await page.waitForTimeout(200);
-await page.fill('#vlt-ask-in', kp); await page.click('#vlt-ask-go'); await page.waitForTimeout(2500);
-await page.click('#vlt-ask-go'); await page.waitForTimeout(3500);
+await page.fill('#vlt-ask-in', kp); await page.click('#vlt-ask-go');
+// each step waits for the page, not the clock: a loaded machine runs 600 000 rounds slower
+await page.waitForFunction(() => document.getElementById('vlt-ask-in').type === 'text', null, { timeout: 30000 }).catch(() => {});
+await page.click('#vlt-ask-go');
+await page.waitForFunction(() => /would not save|keypass works|did not change/.test(document.getElementById('vlt-stat').textContent), null, { timeout: 30000 }).catch(() => {});
 await page.evaluate(() => { Storage.prototype.setItem = window.__setItem; });
 t('a re-key this browser would not save says so: the keypass is the same as before',
   /would not save the change, so your keypass is the same as before/.test(await page.innerText('#vlt-stat')), await page.innerText('#vlt-stat'));
@@ -212,7 +215,8 @@ t('and the keypass in use still opens the open slot', await page.evaluate(k => w
 // a later save must not carry the refused re-key into storage
 await page.evaluate(async () => { const V = window.BNRVAULT; const e = await V.addEntry({ type: 'note', label: 'probe', secret: 'probe' }); await V.removeEntry(e.id); });
 await page.click('#vlt-lock'); await page.waitForTimeout(200);
-await page.fill('#vlt-pass', kp); await page.click('#vlt-unlock'); await page.waitForTimeout(2500);
+await page.fill('#vlt-pass', kp); await page.click('#vlt-unlock');
+await page.waitForFunction(() => { const o = document.getElementById('vlt-open'); return (o && o.getClientRects().length > 0) || /does not match/.test(document.getElementById('vlt-stat').textContent); }, null, { timeout: 30000 }).catch(() => {});
 t('after a later save, the keypass in use still opens the vault', await page.locator('#vlt-open').isVisible(), await page.textContent('#vlt-stat'));
 t('and nothing else changed with it', (await page.locator('#vlt-list .chip').count()) === 2);
 await page.click('#vlt-rekey'); await page.waitForTimeout(200);

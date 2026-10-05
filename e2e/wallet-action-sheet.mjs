@@ -82,6 +82,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       const body = JSON.parse(route.request().postData() || '{}');
       if (u.pathname.endsWith('/get_table_rows')) {
         if (body.code === 'kingbeelovis' && body.table === 'domains' && state.regDown) return json({ error: { what: 'registry down (fixture)' } }, 500);
+        if (body.code === 'kingbeelovis' && body.table === 'domains' && state.slowRows) await new Promise(r => setTimeout(r, state.slowRows));
         if (body.code === 'kingbeelovis' && body.table === 'domains') {
           const rows = body.lower_bound ? ROWS.filter(r => r.id === String(body.lower_bound)) : ROWS;
           return json({ rows: rows.slice(0, body.limit || 500), more: false, next_key: '' });
@@ -92,6 +93,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       if (u.pathname.endsWith('/get_account')) {
         (state.reads = state.reads || []).push(body.account_name);
         if (state.slowAcct) await new Promise(r => setTimeout(r, state.slowAcct));
+        if (state.acctDown) return route.abort();   // no node answers the account read
         // a name the forge has not made yet does not exist: nodes answer 500 "unknown key"
         if (/^newacctname/.test(body.account_name) && !state.keys[body.account_name]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + body.account_name + ')' }] } }, 500);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
@@ -1042,6 +1044,94 @@ try {
     await signLine(); await page.waitForTimeout(1500); await signLine();
     const k1 = (await page.textContent('#kc-k1-pub')).trim(), acctKey = await k1Of(page, 'vaulta:bobaccount11');
     ok('a plain account connected after the keychain derives its Vaulta key and checks it (no "connect your keychain")', k1 === acctKey && (await page.textContent('#sum-bridge')).trim() === 'bobaccount11 · let this wallet sign for it', JSON.stringify({ k1, acctKey, bridge: await page.textContent('#sum-bridge') }));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* P · the receive card while the pointer and the account are read: reading is never said as failed, an
+     account a node says does not exist is said as that (never a try again that cannot work), and a key placed
+     for the bridge never waits in a field nobody can see or press */
+  {
+    console.log('P · reading, no such account, and the bridge field:');
+    const { ctx, state } = await context(browser, 'bee');
+    state.slowRows = 2500;   // the first pointer read is still out when the card is drawn
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BNRPAY, null, { timeout: 20000 });
+    const openRx = () => page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-rx').click(); });
+    const vcard = () => page.evaluate(() => { const c = [...document.getElementById('rx-cards').children].find(x => /Vaulta/.test(x.textContent)); const say = c && c.querySelector('.rx-say');
+      return c ? { t: say ? say.innerText.trim() : '', btn: ((c.querySelector('button.wl-act') || {}).textContent) || null, addr: (c.querySelector('.rx-addr') || {}).textContent || null } : null; });
+    await openRx();
+    let vc = await vcard();
+    ok('while the first pointer read is out, the card says it is reading, never that the read failed', !!vc && vc.t === 'reading your Vaulta account, one moment.' && !vc.btn && vc.addr === null, JSON.stringify(vc));
+    state.slowRows = 0;
+    await page.waitForFunction(() => /once your keychain is connected/.test(document.getElementById('rx-cards').innerText), null, { timeout: 15000 }).catch(() => {});
+    vc = await vcard();
+    ok('once it answers, the card follows without a press', !!vc && /^your Vaulta address shows here once your keychain is connected\.( connect your keychain)?$/.test(vc.t), JSON.stringify(vc));
+    // a registry that does not answer is said as that, and its try again works
+    state.regDown = true;
+    await page.evaluate(() => localStorage.removeItem('bnr_vacct'));
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BNRPAY, null, { timeout: 20000 });
+    await page.waitForFunction(() => /could not check which account king\.b points to/.test(document.getElementById('wstat').textContent), null, { timeout: 20000 }).catch(() => {});
+    await openRx();
+    vc = await vcard();
+    ok('a registry read that failed is said as failed, with try again', !!vc && /^we could not read your Vaulta account just now, so no address is shown\. try again$/.test(vc.t) && vc.btn === 'try again', JSON.stringify(vc));
+    state.regDown = false;
+    await page.evaluate(() => [...document.getElementById('rx-cards').children].find(x => /Vaulta/.test(x.textContent)).querySelector('button.wl-act').click());
+    await page.waitForFunction(() => /once your keychain is connected/.test(document.getElementById('rx-cards').innerText), null, { timeout: 15000 }).catch(() => {});
+    vc = await vcard();
+    ok('and try again reads it, and the card follows', !!vc && /^your Vaulta address shows here once your keychain is connected/.test(vc.t), JSON.stringify(vc));
+    // a name with no row whose account a node says does not exist
+    await page.evaluate(() => { localStorage.setItem('bnr_soul', 'newacctnamez'); localStorage.removeItem('bnr_vacct'); });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRPAY, null, { timeout: 20000 });
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /is not a Vaulta account yet/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    const na = await page.evaluate(() => ({ sum: document.getElementById('sum-bridge').textContent.trim(), sumLink: !!document.querySelector('#sum-bridge a[href="#connect-sec"]'),
+      verdict: document.getElementById('kc-bridge-verdict').textContent, card: window.BNRPAY.railAddresses(null, 'newacctnamez')[0] }));
+    ok('at a glance says the account does not exist, with its one link, never "could not read"', na.sum === 'newacctnamez is not a Vaulta account yet, so this wallet cannot sign for it. choose the account' && na.sumLink, JSON.stringify(na));
+    ok('the keychain\'s verdict says the same', /^newacctnamez is not a Vaulta account yet\. choose the account/.test(na.verdict), na.verdict);
+    ok('the receive card says no Vaulta account, never a try again that cannot work', na.card.v === null && na.card.why === 'vacct-noacct', JSON.stringify(na.card));
+    await openRx();
+    vc = await vcard();
+    ok('and the open card says it in one sentence with its one link', !!vc && /^newacctnamez is not a Vaulta account yet, so there is no Vaulta address to share\. choose the account$/.test(vc.t) && !vc.btn, JSON.stringify(vc));
+    const p0 = (state.posts || []).length;
+    await page.evaluate(() => { document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click();
+      document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.1'; document.getElementById('sv-go').click(); });
+    await page.waitForFunction(() => /nothing was signed/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    ok('a send from it is refused in the same words, and nothing is signed', /^newacctnamez is not a Vaulta account yet, so nothing was signed\./.test((await page.innerText('#sv-stat')).trim()) && (state.posts || []).length === p0, await page.innerText('#sv-stat'));
+    // a read that gets no answer at all keeps its try again, and the try again can succeed
+    state.acctDown = true;
+    await page.evaluate(() => { document.getElementById('wq').value = 'someoneelse1'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => /could not read someoneelse1/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await openRx();
+    vc = await vcard();
+    ok('an account read that got no answer says so on the card, with try again', !!vc && /^we could not check someoneelse1 just now, so no Vaulta address is shown\. try again$/.test(vc.t) && vc.btn === 'try again', JSON.stringify(vc));
+    state.acctDown = false;
+    await page.evaluate(() => [...document.getElementById('rx-cards').children].find(x => /Vaulta/.test(x.textContent)).querySelector('button.wl-act').click());
+    await page.waitForFunction(() => /once this wallet can sign for someoneelse1/.test(document.getElementById('rx-cards').innerText), null, { timeout: 15000 }).catch(() => {});
+    vc = await vcard();
+    ok('and its try again reads the account, and the card follows', !!vc && /^your Vaulta address shows here once this wallet can sign for someoneelse1\./.test(vc.t), JSON.stringify(vc));
+    // a key placed in the bridge's field (as the vault places it) goes when the bridge hides
+    await page.waitForFunction(() => document.getElementById('bridge-sec').style.display === 'block' && !!document.getElementById('br-paste'), null, { timeout: 15000 }).catch(() => {});
+    await page.evaluate(w => { document.getElementById('br-paste').value = w; }, DEV_WIF);
+    state.acctDown = true;
+    await page.evaluate(() => { document.getElementById('wq').value = 'someoneelse1'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => /could not read someoneelse1/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    let fld = await page.evaluate(() => ({ shown: document.getElementById('bridge-sec').style.display !== 'none', v: (document.getElementById('br-paste') || {}).value || '' }));
+    ok('when the bridge hides (its account unread), a key placed in its field goes with it', !fld.shown && fld.v === '', JSON.stringify({ shown: fld.shown, held: fld.v.length }));
+    state.acctDown = false;
+    await page.evaluate(() => document.querySelector('#sum-bridge button').click());
+    await page.waitForFunction(() => document.getElementById('bridge-sec').style.display === 'block' && !!document.getElementById('br-paste'), null, { timeout: 15000 }).catch(() => {});
+    fld = await page.evaluate(() => ({ shown: document.getElementById('bridge-sec').style.display !== 'none', v: (document.getElementById('br-paste') || {}).value || '' }));
+    ok('and the bridge comes back with an empty field', fld.shown && fld.v === '', JSON.stringify({ shown: fld.shown, held: fld.v.length }));
+    // a key placed for one account is never carried to another account's field
+    await page.evaluate(w => { document.getElementById('br-paste').value = w; }, DEV_WIF);
+    await page.evaluate(() => { document.getElementById('wq').value = 'king'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => { const f = document.getElementById('br-paste'); return f && /kingbeelovis/.test(f.placeholder); }, null, { timeout: 20000 }).catch(() => {});
+    fld = await page.evaluate(() => { const f = document.getElementById('br-paste'); return { ph: f ? f.placeholder : null, v: f ? f.value : '' }; });
+    ok('a key placed for someoneelse1 is not carried into kingbeelovis\'s field', /kingbeelovis/.test(fld.ph || '') && fld.v === '', JSON.stringify({ ph: fld.ph, held: fld.v.length }));
+    ok('no key is left in this browser\'s storage', await page.evaluate(() => !JSON.stringify(localStorage).includes('5KQwrPbw')));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
