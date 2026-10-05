@@ -19,6 +19,16 @@ const MAIN_CHAIN = 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0
 const RPC_RE = /^https:\/\/(eos\.api\.eosnation\.io|eos\.greymass\.com)(\/|$)/;
 const EVIL = '<img src=x onerror=window.__xss=1>';
 const STRANGER_KEY = 'EOS7g7tqRsKpAh2ZDtyqzmjWVkrcdGHGx16D1xeWBZcxQbaqfvBGq'; // PUBLIC-CONSTANT: test fixture public key
+const DEV_WIF = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'; // TESTNET-ONLY: eosio's documented dev key, chain-significant nowhere
+const DEV_PUB = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'; // PUBLIC-CONSTANT: the dev key's public half
+const EOSIO_ABI = { account_name: 'eosio', abi: { version: 'eosio::abi/1.2', actions: [{ name: 'updateauth', type: 'updateauth' }], types: [],
+  structs: [
+    { name: 'permission_level', fields: [{ name: 'actor', type: 'name' }, { name: 'permission', type: 'name' }] },
+    { name: 'key_weight', fields: [{ name: 'key', type: 'public_key' }, { name: 'weight', type: 'uint16' }] },
+    { name: 'permission_level_weight', fields: [{ name: 'permission', type: 'permission_level' }, { name: 'weight', type: 'uint16' }] },
+    { name: 'wait_weight', fields: [{ name: 'wait_sec', type: 'uint32' }, { name: 'weight', type: 'uint16' }] },
+    { name: 'authority', fields: [{ name: 'threshold', type: 'uint32' }, { name: 'keys', type: 'key_weight[]' }, { name: 'accounts', type: 'permission_level_weight[]' }, { name: 'waits', type: 'wait_weight[]' }] },
+    { name: 'updateauth', fields: [{ name: 'account', type: 'name' }, { name: 'permission', type: 'name' }, { name: 'parent', type: 'name' }, { name: 'auth', type: 'authority' }] }] } };
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -67,7 +77,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         return json({ account_name: a, core_liquid_balance: '5.0000 A', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
       }
-      if (u.pathname.endsWith('/get_abi')) return json(ABI);
+      if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
       if (u.pathname.endsWith('/get_block')) {
         const num = body.block_num_or_id;
@@ -76,7 +86,8 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       }
       if (u.pathname.endsWith('/send_transaction')) {
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
-        state.submits++;
+        state.submits++; state.packed = body.packed_trx;
+        if (state.onSend) state.onSend(body);
         let id = state.byPacked.get(body.packed_trx);
         if (!id) { id = 'MOCKTXID' + body.packed_trx.slice(0, 16); state.byPacked.set(body.packed_trx, id); state.head = 123499; }
         return json({ transaction_id: id, processed: { block_num: 123460, status: 'executed' } });
@@ -97,7 +108,7 @@ const intentFor = (page, id, data) => page.evaluate(([i, d]) => localStorage.set
 const sheet = page => page.evaluate(() => {
   const d = document.getElementById('act-sheet'); if (!d) return null;
   return { h: document.getElementById('act-h').textContent, say: document.getElementById('act-say').textContent, stat: document.getElementById('act-stat').textContent,
-    state: document.getElementById('act-stat').getAttribute('data-state'), buttons: d.querySelectorAll('button').length, goHidden: document.getElementById('act-go').hidden,
+    state: document.getElementById('act-stat').getAttribute('data-state'), buttons: [...d.querySelectorAll('button')].filter(b => b.offsetParent !== null).length, goHidden: document.getElementById('act-go').hidden,
     text: d.innerText, wide: d.scrollWidth > innerWidth + 1, cred: window.__cred, url: location.href };
 });
 const settled = page => page.waitForFunction(() => { const e = document.getElementById('act-stat'); return e && /^(done|fail|wait)$/.test(e.getAttribute('data-state') || ''); }, null, { timeout: 40000 });
@@ -254,6 +265,63 @@ try {
     await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
     await page.waitForFunction(() => window.BNRPAY && /gonesoul/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
     ok('a lapsed row is not followed', await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_vacct') || '{}').state) === 'self' && !/attacker/.test(await page.textContent('#sum-soul')), await page.textContent('#sum-soul'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* F · the account already carries this keychain's key from an earlier name: found, no paste */
+  {
+    console.log('F · an earlier key on the account is found:');
+    const { ctx, state } = await context(browser, 'bee');
+    await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('__ctx')) { localStorage.setItem('bnr_contexts', JSON.stringify(['vaulta:oldsoul'])); sessionStorage.setItem('__ctx', '1'); } } catch (e) {} });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [DEV_PUB, await k1Of(page, 'vaulta:oldsoul')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    ok('the wallet finds its own earlier key on kingbeelovis and signs with it: no paste, no other wallet', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓' && (await page.textContent('#kc-k1-pub')).trim() === state.keys.kingbeelovis[1], await page.textContent('#sum-bridge'));
+    ok('it keeps only the context name, never a key', await page.evaluate(() => localStorage.getItem('bnr_k1ctx')) === JSON.stringify({ acct: 'kingbeelovis', ctx: 'vaulta:oldsoul' }));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* G · one paste, one press: the account's active key adds this wallet AND renews, in one transaction */
+  {
+    console.log('G · one paste, one press (virtual authenticator):');
+    const { ctx, state } = await context(browser, 'bee', { realPasskey: true });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    const cdp = await ctx.newCDPSession(page);
+    await cdp.send('WebAuthn.enable');
+    let prf = true;
+    try { await cdp.send('WebAuthn.addVirtualAuthenticator', { options: { protocol: 'ctap2', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true, hasPrf: true } }); }
+    catch (e) { prf = false; }
+    if (!prf) console.log('  (this Chromium has no PRF virtual authenticator; the paste path is not exercised here)');
+    else {
+      state.keys.kingbeelovis = [DEV_PUB];
+      await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+      await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+      await page.evaluate(() => document.getElementById('kc-create').click());
+      await page.waitForFunction(() => /keychain live|bzDiD born/.test(document.getElementById('kc-stat').textContent), null, { timeout: 30000 });
+      const k1 = (await page.textContent('#kc-k1-pub')).trim();
+      // the bridge page: one sentence, one field, one button; no copy button, no other wallet named
+      await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+      ok('the bridge page is one sentence, one field and one button', await page.evaluate(() => { const c = document.getElementById('br-calm'); return !!c && !document.getElementById('br-copy') && !/Anchor|permissions →|copy/i.test(c.textContent) && /Paste kingbeelovis\u2019s active key once/.test(c.textContent) && !!document.getElementById('br-paste-go'); }), await page.textContent('#br-calm'));
+      state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };   // the chain applies the updateauth the transaction carried
+      await intentFor(page, 'live-0004', RENEW);
+      await page.goto(sheetUrl(RENEW, 'live-0004'), { waitUntil: 'load' });
+      await page.waitForSelector('#act-sheet', { timeout: 20000 });
+      await page.waitForFunction(() => !document.getElementById('act-paste').hidden, null, { timeout: 40000 });
+      let s = await sheet(page);
+      ok('not signing for kingbeelovis yet: the sheet asks for one paste, right there', /Paste kingbeelovis\u2019s active key once/.test(s.stat) && s.goHidden && !/Anchor|bridge/i.test(s.text), JSON.stringify(s));
+      await page.fill('#act-key', DEV_WIF);
+      await page.click('#act-paste-go');
+      await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
+      s = await sheet(page);
+      ok('one press: added and renewed', s.state === 'done' && s.stat === 'Done. king.b is renewed for 365 days. This wallet now signs for kingbeelovis with one press.', JSON.stringify(s));
+      ok('in ONE transaction carrying two actions (updateauth, then renew)', state.submits === 1 && parseInt(String(state.packed).slice(28, 30), 16) === 2, String(state.packed).slice(0, 40));
+      ok('the pasted key is gone from the page', await page.evaluate(() => document.getElementById('act-key').value === '' && !JSON.stringify(localStorage).includes('5KQwrPbw')));
+      ok('the wallet now signs for kingbeelovis itself', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓', await page.textContent('#sum-bridge'));
+    }
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

@@ -1381,14 +1381,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   on your account (nothing removed, threshold 1: <b>the derived key AND the account passkey can
   both sign</b>). The pasted key stays in tab memory only and is scrubbed the moment the
   transaction is sent.</div>
-  <div class="row">
+  <div class="row" data-reg="cypherpunk">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
       <input type="checkbox" id="br-wa" checked style="flex:0;min-width:14px;height:14px">
       also enroll an account passkey on this origin (PUB_WA at threshold 1 — touch/passkey can sign too)
     </label>
   </div>
-  <details id="br-wif-scaffold" style="margin-top:10px">
-    <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (optional — gold path does not paste secrets)</summary>
+  <details id="br-wif-scaffold" style="margin-top:10px" data-reg="cypherpunk">
+    <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (cypherpunk)</summary>
     <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / migration only: paste the account's existing ACTIVE private key to bridge your derived bzDiD.
     Prefer connect/inject when available — this paste is never required for New-bee.</div>
     <div class="row" style="margin-top:8px">
@@ -2555,6 +2555,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function vacct(){ return (SOUL&&VACCT_FOR===SOUL&&VACCT)||SOUL }
   function vrecv(){ return (SOUL&&VACCT_FOR===SOUL&&(VRECV||VACCT))||SOUL }
   function vacctKnown(){ return !!(SOUL&&VACCT_FOR===SOUL) }
+  /* the context this keychain signs the account with: normally vaulta:<account>; when an
+     earlier bridge put a key from another context on the account (a soul renamed since),
+     the wallet finds that key and keeps the context NAME (never a key) */
+  var K1CTX=null, K1CTX_FOR=null;
+  function k1Ctx(){
+    var a=vacct(); if(!a)return null;
+    if(K1CTX_FOR!==a){ K1CTX=null; K1CTX_FOR=a;
+      try{ var c=JSON.parse(localStorage.getItem('bnr_k1ctx')||'null'); if(c&&c.acct===a&&/^vaulta:[a-z1-5.\/]{1,48}$/.test(c.ctx||''))K1CTX=c.ctx }catch(e){} }
+    return K1CTX||'vaulta:'+a;
+  }
   var BN=null;            // BnrSign bundle (vendored eosjs lane)
   var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
   var BSIGNER=null;       // bsigner PQ WASM (ml-dsa / ml-kem) — armed only when browser-ready; never invent PQ
@@ -2659,7 +2669,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function deriveK1(){
     if(!MPRK||!SOUL)return;
-    var rec=BZDIDKEY.deriveK1Key(MPRK,'vaulta:'+vacct());
+    var rec=BZDIDKEY.deriveK1Key(MPRK,k1Ctx());
     var seed=rec.seed.slice();
     var w,eos,pub1;
     if(CORE){
@@ -4219,6 +4229,55 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* canonical key compare: both to PUB_* canonical strings */
   function canon(k){try{return BN.PublicKey.fromString(k).toString()}catch(e){return k}}
 
+  /* ONE PASTE: the account's own active key signs, once, one transaction that adds this
+     wallet's key to the account (nothing removed) and, when given, the action that was
+     waiting. The pasted key is used for that one signature and dropped; it is never
+     stored or sent. Afterwards the wallet's own key signs with one press. */
+  function sortAuthKeys(keys){
+    var kt=function(s){ try{ var q=BN.PublicKey.fromString(s); return [((q.key&&q.key.type)|0),((q.key&&q.key.data)||new Uint8Array(0))] }catch(e){ return [9,new Uint8Array(0)] } };
+    return keys.slice().sort(function(x,y){ var A=kt(x.key),B=kt(y.key); if(A[0]!==B[0])return A[0]-B[0];
+      for(var i=0;i<Math.min(A[1].length,B[1].length);i++) if(A[1][i]!==B[1][i]) return A[1][i]-B[1][i];
+      return A[1].length-B[1].length });
+  }
+  async function serialized(contract,action,actz,data){
+    var abi=await rpc().get_abi(contract);
+    var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi), amap=new Map();
+    for(const x of abi.abi.actions)amap.set(x.name,BN.Serialize.getType(types,x.type));
+    return BN.Serialize.serializeAction({types:types,actions:amap},contract,action,actz,data,new TextEncoder(),new TextDecoder()).data;
+  }
+  async function pasteBridge(wif,extra){
+    var a=vacct();
+    if(!MPRK||!K1)throw new Error('Connect your keychain first.');
+    if(!vacctKnown())throw new Error('Could not read which account '+SOUL+'.b points at. Try again in a moment.');
+    if(!LIVE_HOST){ await pickHost(); if(!LIVE_HOST)throw new Error('The network did not answer. Try again in a moment.') }
+    var pub=BN.PrivateKey.fromString(wif).getPublicKey().toString();
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:a});
+    if(!acc)throw new Error('Could not read '+a+' just now. Try again in a moment.');
+    var act=(acc.permissions||[]).filter(function(q){return q.perm_name==='active'})[0];
+    if(!act||!act.required_auth)throw new Error(a+' has no active permission this wallet can join.');
+    var ra=act.required_auth, existing=(ra.keys||[]).map(function(k){return {key:k.key,weight:k.weight}});
+    if(!existing.some(function(k){return canon(k.key)===pub}))throw new Error('That key is not one of '+a+'\u2019s active keys, so nothing was sent.');
+    var actz=[{actor:a,permission:'active'}], acts=[];
+    if(!existing.some(function(k){return canon(k.key)===K1.pubK1})){
+      var auth={threshold:ra.threshold,keys:sortAuthKeys(existing.concat([{key:K1.eosPub,weight:1}])),accounts:ra.accounts||[],waits:ra.waits||[]};
+      acts.push({account:'eosio',name:'updateauth',authorization:actz,data:await serialized('eosio','updateauth',actz,{account:a,permission:'active',parent:act.parent||'owner',auth:auth})});
+    }
+    if(extra) acts.push({account:extra.contract,name:extra.action,authorization:actz,data:await serialized(extra.contract,extra.action,actz,extra.data)});
+    if(!acts.length) return {tx:null};
+    var prov=new BN.JsSignatureProvider([wif]); wif=null;
+    var info=await rpc().get_info(), ref=await rpc().get_block(info.head_block_num-3);
+    var packed=await api(prov).serializeTransaction({expiration:new Date(Date.now()+120000).toISOString().slice(0,19),
+      ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,
+      context_free_actions:[],actions:acts,transaction_extensions:[]});
+    var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[pub],serializedTransaction:packed,abis:[]});
+    prov=null;
+    var res=await postAny(VH,'/v1/chain/send_transaction',{signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hexS(packed)});
+    if(!res||!res.transaction_id)throw new Error(actRefusal(JSON.stringify((res&&res.error)||res||{}))+' Nothing changed.');
+    // the chain is the receipt: the account now carries this wallet's key (the same transaction carried the action)
+    for(var i=0;i<10;i++){ await checkBridge(); if(BRIDGED===true)break; await new Promise(function(r){setTimeout(r,1500)}) }
+    if(BRIDGED!==true)throw new Error('It was sent, but '+a+' does not show this wallet yet. Check again in a minute.');
+    return {tx:res.transaction_id};
+  }
   function k1PubFor(ctx){
     var rec=BZDIDKEY.deriveK1Key(MPRK,ctx), seed=rec.seed.slice();
     try{ return CORE?CORE.pubK1(seed):BN.PrivateKey.fromString(wif37(seed)).getPublicKey().toString() } finally { seed.fill(0) }
@@ -4233,6 +4292,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     VACCT=VRECV=VACCT_FOR=SOUL; VACCT_STATE='self'; VACCT_PROVEN=true; vacctKeep(); vacctRederive();
     return true;
   }
+  async function findOwnKey(keys,a){
+    if(!MPRK)return false;
+    var have={}; keys.forEach(function(k){ have[canon(k.key)]=1 });
+    var cands=['vaulta:'+a,'vaulta:'+a+'/active','vaulta:'+SOUL].concat(CONTEXTS.filter(function(c){return /^vaulta:[a-z1-5.\/]{1,48}$/.test(c)}));
+    var seen={}, cur=k1Ctx();
+    for(var i=0;i<cands.length;i++){
+      var c=cands[i]; if(seen[c]||c===cur)continue; seen[c]=1;
+      var pub; try{ pub=k1PubFor(c) }catch(e){ continue }
+      if(have[pub]){
+        K1CTX=c; K1CTX_FOR=a; try{ localStorage.setItem('bnr_k1ctx',JSON.stringify({acct:a,ctx:c})) }catch(e){}
+        deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub;
+        return true;
+      }
+    }
+    return false;
+  }
   async function checkBridge(){
     if(!K1||!SOUL){BRIDGED=null;return}
     if(!vacctKnown()){BRIDGED=null;setBridgeState(false,'could not read where '+SOUL+'.b points','unknown');return}
@@ -4246,6 +4321,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!act){BRIDGED=false;setBridgeState(false,a+' has no active key','noperm');return}
     var keys=(act.required_auth&&act.required_auth.keys)||[];
     BRIDGED=keys.some(function(k){return canon(k.key)===K1.pubK1});
+    if(!BRIDGED&&await findOwnKey(keys,a))return checkBridge();
     if(!BRIDGED&&VACCT_STATE==='name'&&a!==SOUL&&await bareAccountIsMine())return checkBridge();
     setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
@@ -4287,12 +4363,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function brCalm(kind){
     var el=$('br-calm'); if(!el)return;
     var a=vacct();
-    if(kind==='noperm'){ el.textContent=a+' has no active permission this wallet can join. Open the details to see its keys.'; return }
-    el.textContent='This wallet does not sign for '+a+' yet. Add its key to '+a+' once, and every sign after that is one press. ';
-    var c=document.createElement('button'); c.type='button'; c.id='br-copy'; c.textContent='copy this wallet’s key';
-    c.onclick=function(){ if(K1)copyText(K1.eosPub,c) };
-    el.appendChild(c);
-    el.appendChild(document.createTextNode(' Add it under '+a+' → permissions → active in the wallet that already signs for '+a+', then come back. Or, if you hold its active key, open the recovery fold here.'));
+    el.textContent='';
+    if(kind==='noperm'){ el.textContent=a+' has no active permission this wallet can join.'; return }
+    var say=document.createElement('div');
+    say.textContent='This wallet does not sign for '+a+' yet. Paste '+a+'\u2019s active key once, and every sign after that is one press. The key is used once and never kept.';
+    var row=document.createElement('div'); row.className='row'; row.style.marginTop='10px';
+    var inp=document.createElement('input'); inp.type='password'; inp.id='br-paste'; inp.autocomplete='off'; inp.spellcheck=false;
+    inp.setAttribute('aria-label',a+' active private key'); inp.placeholder=a+' active private key'; inp.style.cssText='flex:2;min-height:44px';
+    var go=document.createElement('button'); go.type='button'; go.id='br-paste-go'; go.className='gold'; go.textContent='Add this wallet';
+    var st=document.createElement('div'); st.id='br-paste-stat'; st.setAttribute('role','status'); st.style.cssText='margin-top:8px;min-height:20px';
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter')go.click() });
+    go.onclick=async function(){
+      var w; try{ w=parseWifAny(inp.value) }catch(e){ st.textContent=e.message; return } finally{ inp.value='' }
+      go.disabled=true; st.textContent='Adding this wallet to '+a+'…';
+      try{ await pasteBridge(w,null); w=null; st.textContent='Done. This wallet now signs for '+a+' with one press.' }
+      catch(e){ w=null; st.textContent=(e&&e.message)||'Something went wrong, so nothing was sent.' }
+      finally{ go.disabled=false }
+    };
+    row.appendChild(inp); row.appendChild(go);
+    el.appendChild(say); el.appendChild(row); el.appendChild(st);
   }
 
   /* ── targeted PRF ceremony (the fix for the picker trap) ────
@@ -5971,6 +6060,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '#act-go{width:100%;min-height:56px;border:0;border-radius:999px;background:#264d36;color:#fff;font:700 20px/1 "Segoe UI",system-ui,sans-serif;cursor:pointer}'+
         '#act-go:focus-visible{outline:2px solid #264d36;outline-offset:3px}'+
         '#act-go:disabled{opacity:.6;cursor:default}'+
+        '#act-paste{display:flex;flex-direction:column;gap:12px}'+
+        '#act-paste[hidden]{display:none}'+
+        '#act-key{min-height:52px;border-radius:12px;border:1px solid #c9c2b4;padding:0 16px;font:16px/1 "IBM Plex Mono",ui-monospace,monospace;background:#fff;color:#0c1412}'+
+        '#act-paste-go{width:100%;min-height:56px;border:0;border-radius:999px;background:#264d36;color:#fff;font:700 18px/1.2 "Segoe UI",system-ui,sans-serif;cursor:pointer;padding:0 16px}'+
+        '#act-paste-go:disabled{opacity:.6}'+
+        'body[data-reg="raver"] #act-paste-go{background:#d655b8;color:#140f1f}'+
+        'body[data-reg="raver"] #act-key{background:#1b1730;color:#fff;border-color:#3a3352}'+
+        'body[data-reg="cypherpunk"] #act-paste-go{border-radius:6px;background:#44c2dc;color:#061012;font:700 16px/1.2 "IBM Plex Mono",ui-monospace,monospace}'+
+        'body[data-reg="cypherpunk"] #act-key{border-radius:6px;background:#0f1a18;color:#e6f2ee;border-color:#24403a}'+
         '#act-stat{margin:18px 0 0;min-height:24px;font-size:17px;line-height:1.5;overflow-wrap:anywhere}'+
         '#act-stat a,#act-back{display:inline-flex;align-items:center;min-height:44px;color:inherit}'+
         '#act-read{margin-top:24px;text-align:start;font-size:15px;color:#45574e}'+
@@ -6003,7 +6101,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var ref=''; try{ var r=new URL(document.referrer); if(r.origin===location.origin&&/\/bnames\.html$/.test(r.pathname))ref=r.pathname+r.search }catch(e){}
     back.href=ref||'bnames.html';
     back.textContent='back to the name desk';
-    [h,say,go,st,rd,back].forEach(function(n){sg.appendChild(n)});
+    // the one-paste row, shown only when this wallet does not sign for the account yet
+    var pasteRow=document.createElement('div'); pasteRow.id='act-paste'; pasteRow.hidden=true;
+    var pasteIn=document.createElement('input'); pasteIn.type='password'; pasteIn.id='act-key'; pasteIn.autocomplete='off'; pasteIn.spellcheck=false;
+    pasteIn.setAttribute('aria-label',actor+' active private key'); pasteIn.placeholder=actor+' active private key';
+    var pasteGo=document.createElement('button'); pasteGo.type='button'; pasteGo.id='act-paste-go';
+    pasteGo.textContent='Add this wallet and '+w.h.charAt(0).toLowerCase()+w.h.slice(1);
+    pasteIn.addEventListener('keydown',function(e){ if(e.key==='Enter')pasteGo.click() });
+    pasteGo.onclick=async function(){
+      if(busy)return;
+      var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',[e.message]); return } finally{ pasteIn.value='' }
+      busy=true; pasteGo.disabled=true; tell('busy',['Signing with that key…']);
+      try{
+        if(actor!==vacct())throw new Error('This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.');
+        await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
+        tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
+        pasteRow.hidden=true;
+      }catch(e){ k=null; tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.']) }
+      finally{ busy=false; pasteGo.disabled=false }
+    };
+    pasteRow.appendChild(pasteIn); pasteRow.appendChild(pasteGo);
+    [h,say,go,pasteRow,st,rd,back].forEach(function(n){sg.appendChild(n)});
     d.appendChild(sg); document.body.appendChild(d);
     document.documentElement.style.overflow='hidden';
     function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to)location.hash=to }
@@ -6025,6 +6143,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       busy=false;
       // once bytes are signed, the sheet never offers a second signature: the outbox holds them
       if(res==='done'||res==='held'){ go.hidden=true } else go.disabled=false;
+      if(res==='paste'){ go.hidden=true; pasteRow.hidden=false; pasteIn.focus() }
     }
     go.onclick=function(){ run(false) };
     if(auto) run(true); else go.focus();
@@ -6054,7 +6173,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     await checkBridge();
     if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
     if(BRIDGED===null){tell('fail',['Could not read '+vacct()+' just now. Press Sign to try again.']);return 'fail'}
-    if(BRIDGED!==true){tell('fail',['This wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]);return 'fail'}
+    if(BRIDGED!==true){tell('wait',['This wallet does not sign for '+vacct()+' yet. Paste '+vacct()+'\u2019s active key once: one press adds this wallet to the account and does this too. The key is used once and never kept.']);return 'paste'}
     for(var i=0;i<40&&!(ADAPTERS.vaulta&&ADAPTERS.vaulta.attached);i++) await new Promise(function(r){setTimeout(r,200)});
     tell('busy',['Signing…']);
     var sent=false;
@@ -7430,6 +7549,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var w=$('br-wif');
       if(!w){ say('the bridge lane is not on this page','var(--amber)'); return }
       w.value=r.secret;
+      var pasteField=$('br-paste'); if(pasteField)pasteField.value=r.secret;   // the one-press field bee and raver see
       var sec=$('bridge-sec');
       if(sec&&sec.style.display==='none'){
         say('key placed in the bridge field — connect your keychain above to use it','var(--amber)');
