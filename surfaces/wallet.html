@@ -5274,7 +5274,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if(BRIDGED!==null)retry(); else signGuard(el,retry,true,pin) };
       w.then(on,on); return false }
     if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
-    if(BRIDGED===false&&VACCT_NOACCT===vacct()){ var na=vacct(); wlSay(el,[noAcctWords(na)+', so nothing was signed. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(na,function(){ checkBridge().then(function(){ if(retry)signGuard(el,retry) }) }),[{cy:'get_account '+na+': '+(acctNameOk(na)?'unknown account':'not a valid account name')}])); return false }
+    if(BRIDGED===false&&VACCT_NOACCT===vacct()){ var na=vacct(); wlSay(el,[noAcctWords(na)+', so nothing was signed. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(na,function(){ checkBridge().then(function(){   /* a read, never a press: once it signs, the reader presses */
+        if(BRIDGED===true) wlSay(el,[na+' is ready to sign now. ',retry?{btn:'press it now',on:retry}:'press it again.']); else signGuard(el,null,true) }) }),[{cy:'get_account '+na+': '+(acctNameOk(na)?'unknown account':'not a valid account name')}])); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -7552,32 +7553,45 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     });
     return OBX_KNOWN;
   }
-  function obxAcked(id) { var k = OBX_KNOWN[id]; return !!(k && k.acked) }
+  function obxAcked(id) { var k = OBX_KNOWN[id]; return !!(k && k.acked && !k.reserved) }
+  /* the kept records, newest 40 within three days */
+  function obxAckRaw() {
+    var keep = {};
+    Object.keys(OBX_KNOWN).filter(function (id) { return Date.now() - (OBX_KNOWN[id].at || 0) < 3 * 86400000 })
+      .sort(function (x, y) { return (OBX_KNOWN[x].at || 0) - (OBX_KNOWN[y].at || 0) }).slice(-40).forEach(function (id) { keep[id] = OBX_KNOWN[id] });
+    return JSON.stringify(keep);
+  }
+  /* room for a node's answer is taken when the signed copy is first kept, while there is still room: the
+     record that answer becomes is never larger than this, so it fits exactly when the outbox write after the
+     answer does not (a browser out of room refuses writes that grow storage) */
+  function obxReserve(id) {
+    obxAckLoad(); if (OBX_KNOWN[id]) return;
+    OBX_KNOWN[id] = { reserved: true, at: Date.now(), pad: new Array(1001).join('0') };
+    try { localStorage.setItem(OBX_ACK_KEY, obxAckRaw()) } catch (x) { delete OBX_KNOWN[id] }   /* no room even now: an answer falls back to this tab, as before */
+  }
   function obxKnow(e, what) {
     obxAckLoad();
-    var k = Object.assign({}, OBX_KNOWN[e.intent_id] || {});
+    var k0 = OBX_KNOWN[e.intent_id], k = Object.assign({}, (k0 && !k0.reserved) ? k0 : {});
     if (e.ref) k.ref = e.ref;
     if (e.block_hint) k.block_hint = e.block_hint;
     k.acked = !!(k.acked || what.acked);   /* always written, so a record is never read as an older page's */
     if (what.phase) {
       var ev = what.evidence ? Object.assign({}, what.evidence) : null;
       if (ev && typeof ev.detail === 'string') ev.detail = ev.detail.slice(0, 200);   /* the key stays small enough to fit when the outbox does not */
+      if (ev && JSON.stringify(ev).length > 480) ev = { detail: String(ev.detail || '').slice(0, 200), duplicate: !!ev.duplicate, definite: !!ev.definite, maybe_in: !!ev.maybe_in, read: String(ev.read || '').slice(0, 60) };   /* never larger than its reserved room */
       if (!k.phase || obxRank(what.phase) > obxRank(k.phase)) { k.phase = what.phase; k.evidence = ev }
       else if (obxRank(what.phase) === obxRank(k.phase) && ev) k.evidence = Object.assign({}, k.evidence || {}, ev);
     }
     k.at = Date.now();
     OBX_KNOWN[e.intent_id] = k;
-    var keep = {};
-    Object.keys(OBX_KNOWN).filter(function (id) { return Date.now() - (OBX_KNOWN[id].at || 0) < 3 * 86400000 })
-      .sort(function (x, y) { return (OBX_KNOWN[x].at || 0) - (OBX_KNOWN[y].at || 0) }).slice(-40).forEach(function (id) { keep[id] = OBX_KNOWN[id] });
-    var raw = JSON.stringify(keep);
+    var raw = obxAckRaw();
     try { localStorage.setItem(OBX_ACK_KEY, raw); if (localStorage.getItem(OBX_ACK_KEY) !== raw) throw new Error('read-back mismatch') }
     catch (x) { try { sessionStorage.setItem(OBX_ACK_KEY, raw) } catch (y) {} }
   }
   function obxFold(list) {
     obxAckLoad();
     list.forEach(function (e) {
-      var k = OBX_KNOWN[e.intent_id]; if (!k) return;
+      var k = OBX_KNOWN[e.intent_id]; if (!k || k.reserved) return;   /* room taken, nothing known yet */
       e.maybe_out = true;
       /* the record written after the outbox's own copy carries the latest transaction id and block */
       var newer = (k.at || 0) >= (Date.parse(e.updated_at || 0) || 0);
@@ -7628,8 +7642,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (old.phase === 'confirmed' && entry.phase !== 'confirmed') throw obxClash(old, entry);
       list[i] = entry; break;
     }
-    if (i === list.length) list.push(entry);
+    var isNew = i === list.length;
+    if (isNew) list.push(entry);
     outboxWrite(list);
+    if (isNew && entry.phase === 'signed') obxReserve(entry.intent_id);
     renderOutbox();
   }
   function outboxGet(id) {

@@ -537,7 +537,7 @@ try {
   const commitOf = epoch => ({ committer: 'banchor22222', epoch: String(epoch), new_root: '0'.repeat(64), prev_root: '0'.repeat(64), tree_size: '19', delta_id: '0'.repeat(64), forced_watermark: String(epoch) });
   const j4Action = (pg, epoch) => pg.evaluate(([w, d]) => window.BNRWALLET.walletAction('banchor22222', 'commit', d, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: w }).then(e => e && e.phase), [J4_WIF, commitOf(epoch)]);
   /* a browser out of room for the outbox, switched on by the test */
-  const quota = pg => pg.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && k === 'bnr_outbox_v1') throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
+  const quota = pg => pg.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && this === window.localStorage && String(v).length > String(this.getItem(k) || '').length) throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
   const stored = pg => pg.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
   {
     const c13 = await cyContext(); const r13 = mockChain(c13); r13.blockCarries = false; r13.noHint = true;
@@ -643,7 +643,7 @@ try {
   {
     const c16 = await cyContext(); const r16 = mockChain(c16); r16.blockCarries = false;
     const now = Date.now();
-    await c16.addInitScript(e => { try { if (!sessionStorage.getItem('__obx16')) { localStorage.setItem('bnr_outbox_v1', JSON.stringify([e])); sessionStorage.setItem('__obx16', '1'); } } catch (x) {} },
+    await c16.addInitScript(e => { try { if (!sessionStorage.getItem('__obx16')) { localStorage.setItem('bnr_outbox_v1', JSON.stringify([e])); localStorage.setItem('bnr_outbox_ack', JSON.stringify({ [e.intent_id]: { reserved: true, at: Date.now(), pad: '0'.repeat(1000) } })); sessionStorage.setItem('__obx16', '1'); }   /* as outboxPut keeps it: with room reserved for an answer */ } catch (x) {} },
       { intent_id: 'vaulta:fixture-dup16', rail: 'vaulta', network: 'jungle4', phase: 'submitted', ref: 'MOCKREFDUP16', block_hint: 123460, maybe_out: true, evidence: null,
         words: 'run commit on banchor22222 with the parts shown, on the Jungle4 test network.', signed_bytes: JSON.stringify({ network: 'jungle4', packed_hex: '00', signatures: ['SIG_K1_fixture'] }),
         expires_at: new Date(now + 600000).toISOString(), created_at: new Date(now).toISOString(), updated_at: new Date(now - 5000).toISOString() });

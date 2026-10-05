@@ -780,7 +780,7 @@ try {
     const toSend = pg => pg.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click();
       document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.2'; document.getElementById('sv-memo').value = ''; });
     const ledger = pg => pg.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0));
-    await page.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && k === 'bnr_outbox_v1') throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
+    await page.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && this === window.localStorage && String(v).length > String(this.getItem(k) || '').length) throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
     state.noHint = true;
     state.beforeAck = () => page.evaluate(() => { window.__full = true; });
     await toSend(page);

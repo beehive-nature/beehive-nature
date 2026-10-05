@@ -389,6 +389,27 @@ try {
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
+  /* Q8 · "check again" on an account that does not exist only reads: once it signs, the reader presses */
+  {
+    console.log('Q8 · check again on a missing account (bee):');
+    const { ctx, state } = await context(browser, 'bee', { soul: 'newacctnameg' });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRPAY, null, { timeout: 20000 });
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /is not a Vaulta account yet/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click();
+      document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.1'; document.getElementById('sv-go').click(); });
+    await page.waitForFunction(() => /is not a Vaulta account yet, so nothing was signed/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    state.keys.newacctnameg = [await k1Of(page, 'vaulta:newacctnameg')];   // the account exists now, and carries this wallet's key
+    await page.evaluate(() => { const b = [...document.querySelectorAll('#sv-stat button.wl-act')].find(x => x.textContent === 'check again'); if (b) b.click(); });
+    await page.waitForFunction(() => /is ready to sign now/.test(document.getElementById('sv-stat').innerText), null, { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const line = (await page.innerText('#sv-stat')).trim();
+    ok('check again only reads: once the account signs, the line says so and waits for the reader\'s own press', line === 'newacctnameg is ready to sign now. press it now' && state.posts.length === 0, line + ' · posts ' + state.posts.length);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
   /* R · an account that needs two keys to sign is said, never "ready", never half-joined */
   {
     console.log('R · a multisig account (bee):');
