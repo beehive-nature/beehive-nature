@@ -135,3 +135,20 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
 > its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Then
 > execute its §5 steps 1 to 4 on the emulator only. No flashing, no unlock, no real
 > phrase, no mainnet. Report done and pending only, with receipts.
+
+## 8 · Status, 2026-10-04 (Seat 3, emulator only)
+
+- **Steps 2 to 4 done on the emulator.** Fork branch `bpq-safe7` (private repo), code at
+  `db92c2566`, receipts at `e4efbb7c8`, based on the published `beehive` commit `4524b95`.
+  The device card equals what `bpq.js` and `bsigner` derive for the same PRK and context; its
+  binding and detached signature verify in both; the R4 binding holds both ways (device names
+  the wallet id, wallet names the device id under `bsafe-pq`); `root`, a two-statement request,
+  a malformed `at` and an on-screen cancel are refused; a second fresh profile gives the same
+  card. Derivation: SLIP-21 `["BZPQ-DEVICE", "v1"]` of the device seed (fork
+  `docs/bpq-device.md`). Receipt: `docs/receipts/bpq-safe7-emulator-2026-10-04.json`.
+- **Step 1 partial.** A clean clone of `4524b95` builds the T3W1 emulator. Committing the
+  untracked `crypto/zano/*` files and pushing the 13 unpublished commits was refused by this
+  session's permission classifier and was not attempted another way; it is still open, and
+  `bpq-safe7` will need rebasing onto `beehive` once it lands.
+- **Not claimed:** hardware fit (UNVERIFIED; no hardware image contains the app), channel
+  confidentiality, device attestation. Step 5 not started.
