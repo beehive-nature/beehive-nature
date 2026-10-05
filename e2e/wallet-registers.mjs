@@ -251,15 +251,11 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // reviews it: across tasks, a message names its target as a link instead.
   const REVIEWED = [
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-    ['addresses below are yours to hand out', 'within pay'],
-    ['Each address above falls out of the', 'within pay'],
-    ['choose a lane above', 'within pay'],
     ['(rate cited below)', 'within the voucher'],
     ['The key in the config below is', 'within fund'],
     ['its Base address below is a bare', 'within fiat in'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
-    ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
   ];
   const blank = m => m.replace(/[^\n]/g, ' ');
   let code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);

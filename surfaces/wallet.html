@@ -801,7 +801,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.wallet.keep">bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, buy RAM with A</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.wallet.keep">bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -1464,21 +1464,21 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
   <h2>💸 bPay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
-    <button id="pay-rx" class="gold">📥 receive</button>
-    <button id="pay-tx" class="gold">📤 send</button>
-    <button id="pay-sw" class="gold">🔁 swap</button>
+    <button id="pay-rx" class="gold" aria-pressed="false">📥 receive</button>
+    <button id="pay-tx" class="gold" aria-pressed="false">📤 send</button>
+    <button id="pay-sw" class="gold" aria-pressed="false">🔁 swap</button>
   </div>
-  <div class="law" id="pay-law" data-wl-tech>receive needs nothing (addresses below are yours to hand out) ·
-  send signs with your bzDiD keys exactly like every lane here · swap rides the chain's own market</div>
+  <div class="law" id="pay-law" data-wl-tech>receive needs nothing: your addresses are yours to hand out. send signs with your own keychain,
+  like every part of this wallet. swap uses the chain's own market.<span class="wl-cyd"> send signs with your bzDiD keys exactly like every lane here; swap rides the RAM market of core.vaulta.</span></div>
 
   <!-- ══ SPEND CAP — the owner's optional tool. Set it, forget it: the engine
        refuses to SIGN past it (a policy you wrote, enforced at your own key —
        never a human gate, never an approval step; unset = no limit). ══ -->
   <div class="row" id="cap-row" data-wl-tech style="margin-top:8px;align-items:center;flex-wrap:wrap">
-    <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
-    <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset: no limit</span>
-    <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount/day" title="amount per rolling day, per unit" style="max-width:110px;flex:0 1 110px">
-    <select id="cap-unit" title="unit — caps are per-unit, never price-converted" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
+    <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 0 auto">a daily cap, if you want one:<span class="wl-cyd"> spend cap · optional, owner's tool; per unit, never price-converted; the ledger lives in this browser and starts fresh at local midnight</span></span>
+    <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">no daily cap is set.</span>
+    <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount a day" aria-label="Daily cap amount" title="the cap starts fresh at midnight on this device" style="max-width:110px;flex:0 1 110px">
+    <select id="cap-unit" aria-label="Coin the cap is for" title="each coin has its own cap" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
       <option value="A">A</option>
       <option value="ETH">ETH</option>
       <option value="USDC">USDC</option>
@@ -1487,28 +1487,28 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <option value="HIVE">HIVE</option>
       <option value="HBD">HBD</option>
     </select>
-    <button id="cap-set" class="gold" style="min-height:34px">set</button>
-    <button id="cap-clear" class="gold" style="min-height:34px">clear</button>
+    <button id="cap-set" class="gold" style="min-height:34px">set cap</button>
+    <button id="cap-clear" class="gold" style="min-height:34px">remove cap</button>
   </div>
 
   <div id="rx-panel" style="display:none;margin-top:10px">
     <div style="display:flex;gap:14px;flex-wrap:wrap" id="rx-cards"></div>
-    <div class="law" style="margin-top:6px"><b>One soul, every rail.</b> Each address above falls out of the
-    <b>same masterPRK</b> by context tag — Vaulta, one 0x address serving <b>both</b> EVM rails (Base and
-    Arbitrum share it), Solana, Bitcoin L1, Lightning, nostr. There is no second seed, no import, and no
-    "connect a wallet" step anywhere: a new bzDiD is never a keyless supplicant. A fresh address for any
-    rail can be forged in <a href="#forge-sec">the key forge</a> (<b>evm:</b>name, <b>sol:</b>name, <b>btc:</b>name …).
-    QRs are drawn locally — nothing leaves this page. Where a rail cannot be derived honestly the card says
-    so and shows <b>no address</b>: a wrong receive address is the one mistake that cannot be undone.</div>
+    <div class="law" data-wl-tech style="margin-top:6px">every address here comes from your own keychain, and a fresh one for any coin
+    can be made in <a href="#forge-sec">the key forge</a>.<span class="wl-cyd"> One soul, every rail: each address here falls out of the
+    same masterPRK by context tag (Vaulta, one 0x address serving both EVM rails, Solana, Bitcoin L1). Lightning and nostr derive keys,
+    not payment addresses, so neither is offered as one. There is no second seed and no "connect a wallet" step for these rails;
+    Hive alone takes one pasted active key, sealed under the keychain. Contexts: evm:name, sol:name, btc:name. QRs are drawn
+    locally and nothing leaves this page. Where a rail cannot be derived honestly the card says so and shows no address:
+    a wrong receive address is the one mistake that cannot be undone.</span></div>
   </div>
 
   <div id="tx-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
-      <button id="tx-tab-v" class="gold" style="flex:1">Vaulta · A</button>
-      <button id="tx-tab-e" class="gold" style="flex:1">EVM · Base / Arbitrum</button>
-      <button id="tx-tab-l" class="gold" style="flex:1">⚡ Lightning</button>
-      <button id="tx-tab-n" class="gold" style="flex:1">🏷 payment name</button>
-      <button id="tx-tab-h" class="gold" style="flex:1">🐝 Hive</button>
+      <button id="tx-tab-v" class="gold" style="flex:1" aria-pressed="false">Vaulta · A</button>
+      <button id="tx-tab-e" class="gold" style="flex:1" aria-pressed="false" title="EVM: Base (chain 8453) and Arbitrum One (chain 42161)">Base · Arbitrum</button>
+      <button id="tx-tab-l" class="gold" style="flex:1" aria-pressed="false">⚡ Lightning</button>
+      <button id="tx-tab-n" class="gold" style="flex:1" aria-pressed="false">🏷 payment name</button>
+      <button id="tx-tab-h" class="gold" style="flex:1" aria-pressed="false">🐝 Hive</button>
     </div>
     <div id="tx-h" style="display:none;margin-top:8px">
       <div class="row">
@@ -1522,24 +1522,24 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="sv-to" aria-label="Recipient Vaulta account" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
-        <input id="sv-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount in A">
-        <input id="sv-memo" aria-label="Transfer memo, optional" class="small" placeholder="memo (optional)" style="flex:2">
+        <input id="sv-to" aria-label="Recipient Vaulta account" placeholder="send to: a Vaulta account" title="letters a to z, digits 1 to 5 and dots, up to 12" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="sv-amt" aria-label="Amount in A" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount in A, up to 4 digits after the point">
+        <input id="sv-memo" aria-label="Transfer memo, optional and public" class="small" placeholder="memo (optional, public)" style="flex:2">
         <button id="sv-go" class="gold">📤 send A</button>
       </div>
-      <div class="law" id="sv-stat" style="margin-top:4px;min-height:18px">liquid: — </div>
+      <div class="law" id="sv-stat" style="margin-top:4px;min-height:18px"></div>
     </div>
     <div id="tx-e" style="display:none;margin-top:8px">
       <div class="row">
-        <select id="se-rail" style="max-width:150px;flex:0 1 150px" title="EVM rail — chain id and token decimals come from the rail, never from this box"></select>
-        <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset carried on the chosen rail"></select>
-        <input id="se-to" aria-label="Recipient EVM address" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
-        <input id="se-amt" class="small" inputmode="decimal" placeholder="0.00" style="max-width:130px;flex:0 1 130px" title="amount, in the asset's own units — typed exactly, never rounded">
+        <select id="se-rail" aria-label="Chain" style="max-width:150px;flex:0 1 150px" title="Base or Arbitrum"></select>
+        <select id="se-asset" aria-label="Coin" style="max-width:110px;flex:0 1 110px" title="the coin to send"></select>
+        <input id="se-to" aria-label="Recipient EVM address" placeholder="send to: a 0x address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="se-amt" aria-label="Amount" class="small" inputmode="decimal" placeholder="0.00" style="max-width:130px;flex:0 1 130px" title="how much to send, typed exactly as you mean it">
         <button id="se-go" class="gold">📤 send</button>
       </div>
       <div class="law" id="se-stat" style="margin-top:4px;min-height:18px"></div>
       <div class="law" style="margin-top:6px">this sends from your own Base and Arbitrum address, so add coins to it from 📥 receive first.
-      one press reads the fee, signs and sends; the fee is said while it goes out.<span class="wl-cyd">the address is the derived evm:&lt;soul&gt; keypair, not the Vaulta account. ETH moves native (21000 gas); USDC and ANT move through their token contracts (eth_estimateGas plus 20%). Chain ids 8453 and 42161 are signed into every transaction (EIP-155). The signed bytes and their hash are kept before broadcast, so a lost answer, "already known" or "nonce too low" resends the identical bytes and never signs a second nonce.</span></div>
+      one press reads the fee, signs and sends; the fee is said while it goes out.<span class="wl-cyd"> The address is the derived evm:&lt;soul&gt; keypair, not the Vaulta account. ETH moves native (21000 gas); USDC and ANT move through their token contracts (eth_estimateGas plus 20%). Chain ids 8453 and 42161 are signed into every transaction (EIP-155). The signed bytes and their hash are kept before broadcast, so a lost answer, "already known" or "nonce too low" resends the identical bytes and never signs a second nonce.</span></div>
     </div>
 
     <!-- ══ LIGHTNING — a MODULE of the orchestration, never a merge into the
@@ -1547,12 +1547,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
          BOLT-12 offer, both, no node and no third party touched. ══ -->
     <div id="tx-l" style="display:none;margin-top:8px">
       <div class="row">
-        <input id="ln-req" aria-label="Lightning invoice or offer" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
+        <input id="ln-req" aria-label="Lightning invoice or offer" placeholder="paste a Lightning invoice" title="a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
         <button id="ln-read" class="gold">🔎 read it</button>
       </div>
       <div id="ln-card" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
-      <div class="law" id="ln-stat" style="margin-top:4px;min-height:18px">nothing pasted yet — reading happens entirely in this tab.</div>
-      <div class="law" style="margin-top:6px">Both standards, one door: the prefix decides which is read, and
+      <div class="law" id="ln-stat" style="margin-top:4px;min-height:18px">paste a Lightning invoice to see what it asks for. this wallet cannot pay it yet.<span class="wl-cyd"> read offline in this tab: no node, no lookup.</span></div>
+      <div class="law" data-wl-tech style="margin-top:6px">Both standards, one door: the prefix decides which is read, and
       <b>the read is offline</b> — no node, no lookup, nobody told what you are about to pay. Your
       <b>spend cap runs on the decoded amount in sats</b> before anything could be sent. Honest limit,
       stated because it is one: <b>paying</b> from this page is not wired — the estate's LN seam pays through
@@ -1565,19 +1565,19 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
          ONE name, BOTH rails, and the paying wallet chooses. ══ -->
     <div id="tx-n" style="display:none;margin-top:8px">
       <div class="row" style="margin-top:0">
-        <button id="pn-mine" class="gold" style="flex:1">🏷 mine — publish</button>
-        <button id="pn-theirs" class="gold" style="flex:1">🔎 theirs — resolve</button>
+        <button id="pn-mine" class="gold" style="flex:1" aria-pressed="false" title="build your BIP-353 payment name record">🏷 my payment name</button>
+        <button id="pn-theirs" class="gold" style="flex:1" aria-pressed="false" title="resolve someone's BIP-353 payment name">🔎 look up a name</button>
       </div>
 
       <div id="pn-mine-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-name" aria-label="Payment name to publish" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
-          <input id="pn-offer" aria-label="BOLT-12 offer, optional" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-name" aria-label="Payment name to publish" class="small" placeholder="your name, like you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-offer" aria-label="Lightning offer, optional" class="small" placeholder="your Lightning offer, if you have one" title="a BOLT-12 offer (lno1…) minted by your own node" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
           <button id="pn-build" class="gold">build the record</button>
         </div>
         <div id="pn-out" style="display:none;margin-top:8px"></div>
-        <div class="law" id="pn-mine-stat" style="margin-top:4px;min-height:18px">your silent-payment address derives from your soul — the record is built here, in this tab.</div>
-        <div class="law" style="margin-top:6px"><b>Self-hosted by construction.</b> A payment name is a
+        <div class="law" id="pn-mine-stat" style="margin-top:4px;min-height:18px">a payment name lets people pay you as you@yourdomain. it needs a domain of your own.<span class="wl-cyd"> your silent-payment address derives from your soul; the record is built here, in this tab.</span></div>
+        <div class="law" data-wl-tech style="margin-top:6px"><b>Self-hosted by construction.</b> A payment name is a
         <b>DNS TXT record on a domain you already own</b> — no service, no account, nothing to depend on.
         This builds the exact record; you publish it. The offer must be minted by <b>your own node</b>
         (the estate's LDK / Alby-Hub per RAIL-FORMULARY-1) — this page will not mint one for you and will
@@ -1590,12 +1590,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
       <div id="pn-theirs-panel" style="display:none;margin-top:8px">
         <div class="row">
-          <input id="pn-lookup" aria-label="Recipient payment name" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
-          <button id="pn-resolve" class="gold">🔎 resolve</button>
+          <input id="pn-lookup" aria-label="Payment name to look up" class="small" placeholder="a name, like name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
+          <button id="pn-resolve" class="gold">🔎 look up</button>
         </div>
         <div id="pn-res" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
-        <div class="law" id="pn-theirs-stat" style="margin-top:4px;min-height:18px">nothing looked up yet.</div>
-        <div class="law" style="margin-top:6px">Resolution is the one leg that cannot be first-party in a
+        <div class="law" id="pn-theirs-stat" style="margin-top:4px;min-height:18px">type a name like name@domain and press look up. a public directory sees the name you look up.<span class="wl-cyd"> DNS-over-HTTPS (cloudflare-dns.com) sees the query; its AD flag is trusted as the resolver's word.</span></div>
+        <div class="law" data-wl-tech style="margin-top:6px">Resolution is the one leg that cannot be first-party in a
         browser: a page cannot validate a DNSSEC chain without shipping a validating resolver. So this asks
         a <b>DNS-over-HTTPS</b> resolver and reports whether <b>that resolver</b> says the answer was
         authenticated. <b>Trusting that flag is trusting the resolver</b> — and the resolver sees which name
@@ -1607,18 +1607,17 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
   <div id="sw-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
-      <button id="sw-dir" class="gold" style="flex:0 1 220px">direction: buy RAM with A</button>
-      <input id="sw-amt" aria-label="Swap amount" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
-      <div class="law" style="flex:2;min-width:200px" id="sw-quote">quote: reading rammarket…</div>
+      <button id="sw-dir" class="gold" style="flex:0 1 220px">buy RAM with A</button>
+      <input id="sw-amt" aria-label="Bytes of RAM" class="small" type="number" value="8192" min="1024" step="1024" style="max-width:150px;flex:0 1 150px">
+      <div class="law" style="flex:2;min-width:200px" id="sw-quote">reading today's RAM price…</div>
       <button id="sw-go" class="gold">🔁 swap</button>
     </div>
-    <div class="law" id="sw-stat" style="margin-top:4px;min-height:18px">—</div>
-    <div class="law" style="margin-top:6px">the chain's own market (Bancor-shaped RAM curve — the bmesh-ram
-    receipts measured it): buy RAM for your account with liquid A, sell RAM you own back for A.
-    Token-for-token DEX swaps land on this lane next — same law, no third-party router in your face.</div>
+    <div class="law" id="sw-stat" style="margin-top:4px;min-height:18px"></div>
+    <div class="law" data-wl-tech style="margin-top:6px">swap buys RAM for your Vaulta account with A, or sells RAM you own back for A,
+    on the chain's own market.<span class="wl-cyd"> A Bancor-shaped RAM curve (the bmesh-ram receipts measured it), core.vaulta buyrambytes / sellram, 0.5% fee each way.</span></div>
   </div>
 
-  <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">choose a lane above</div>
+  <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">pick receive, send or swap to begin.</div>
 </section>
 
 <!-- ══ bPAY — the preservation invoice (Phase A: render-only; the carried quote
@@ -4768,8 +4767,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }catch(e){ out.push({t:t,ctx:ctx,unit:unit,note:note,v:null,err:e.message}) }
     }
     if(soul&&soul!==SOUL) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,note:'your account name receives A directly · memo optional'});
-    else if(soul&&!vacctKnown()) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:null,err:'could not read which account '+soul+'.b points at yet'});
-    else if(soul&&VACCT_STATE==='name'&&BRIDGED!==true) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:null,
+    else if(soul&&!vacctKnown()) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:null,why:'vacct-unread',err:'could not read which account '+soul+'.b points at yet'});
+    else if(soul&&VACCT_STATE==='name'&&BRIDGED!==true) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:null,why:'vacct-unbridged',
       err:soul+'.b points at '+vrecv()+'. This wallet shows it here once it signs for '+vacct()});
     else if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:vrecv(),
       note:vrecv()!==soul?soul+'.b points at '+vrecv()+', which receives A directly · memo optional':'your account name receives A directly · memo optional'});
@@ -4802,9 +4801,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     });
     /* an npub is a public KEY, not a way to be paid: no payer can send sats or coins to
        it. These two cards are marked so the receive panel never offers them as an address. */
+    /* each card's name and one calm sentence for the reader; t, note and ctx stay for cypherpunk */
     out.forEach(function(c){
-      if(c.ctx==='ln:'+soul){ c.pay=false; c.say='this wallet cannot take Lightning payments yet, so there is no Lightning address to share.' }
-      if(c.ctx==='nostr:'+soul){ c.pay=false; c.cyOnly=true; c.say='this is your message key, and nobody can pay you here.' }
+      var k=c.ctx.split(':')[0];
+      if(k==='vaulta'){ c.name='Vaulta'; c.say='send A to this account name.' }
+      else if(k==='evm'){ c.name='Base and Arbitrum'; c.say='send ETH or USDC on Base, or ETH or ANT on Arbitrum, to this address.' }
+      else if(k==='sol'){ c.name='Solana'; c.more=true; c.say='you can receive SOL here, but this wallet cannot show or send it yet.' }
+      else if(k==='btc'){ c.name='Bitcoin'; c.more=true; c.say='you can receive bitcoin here, but this wallet cannot show or send it yet.' }
+      else if(k==='ln'){ c.name='Lightning'; c.pay=false; c.say='this wallet cannot take Lightning payments yet, so there is no Lightning address to share.' }
+      else if(k==='nostr'){ c.name='nostr'; c.pay=false; c.cyOnly=true; c.say='this is your message key, and nobody can pay you here.' }
+      else { c.name='Bitcoin, reusable'; c.more=true; c.say='a bitcoin address you can share many times. this wallet does not watch it for payments yet.' }
     });
     return out;
   }
@@ -5031,9 +5037,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
   function signGuard(el,retry){
-    var again=function(read){ return async function(){ await read(); if(retry)retry() } };
-    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now, so nothing was signed. ',{btn:'try again',on:again(readAll)}]); return false }
-    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now, so nothing was signed. ',{btn:'try again',on:again(checkBridge)}]); return false }
+    /* a lane that can press itself again gets the button; the read runs first, then the lane */
+    var again=function(read){ return retry?{btn:'try again',on:function(){ read().then(retry,retry) }}:'try again in a moment.' };
+    if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
+    if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(checkBridge)]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -6526,7 +6533,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL){ wlSay(stat,[{to:'connect-sec',t:'connect your name'},' to make a new account.']); return }
     if(!K1){ wlSay(stat,[{to:'kc-sec',t:'connect your keychain'},' to make a new account.']); return }
     if(!/^[a-z][a-z1-5]{11}$/.test(name)){ wlSay(stat,['type a name of exactly 12 characters: letters a to z and digits 1 to 5, starting with a letter.']); $('ac-name').focus(); return }
-    if(!signGuard(stat))return;
+    if(!signGuard(stat,function(){ $('ac-go').click() }))return;
     if(acBytes()===null){ wlSay(stat,['the new account needs at least 3072 bytes of room, so type a whole number from 3072 up.']); $('ac-ram').focus(); return }
     stat.setAttribute('data-act','');   /* from here the line holds what this press did, until the reader types again */
     if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){ wlSay(stat,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }}]); return }}
@@ -7254,7 +7261,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* one signer here: the keychain's key on the account. The account passkey
        (PUB_WA) the bridge can enroll has no signing lane on this page yet, so
        nothing offers it and nothing skips the check for it */
-    if (!signGuard(out)) return;
+    if (!signGuard(out, function(){ $('tx-go').click() })) return;
     var actor2 = data.registrant || data.owner || data.from || data.account || vacct();
     if (actor2 !== vacct()) { wlSay(out, ['this action is for ' + actor2 + ', and this wallet signs for ' + vacct() + '. Nothing was signed.']); return }
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
@@ -7697,7 +7704,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (!/^\d+(\.\d{1,4})?$/.test(raw) || !(Number(raw) > 0)) { wlSay(st, ['type how much A to add, with at most 4 digits after the point.']); $v('vc-top-amt').focus(); return }
       if (!SOUL) { wlSay(st, [{to: 'connect-sec', t: 'connect your name'}, ' to top up from this wallet.']); return }
       if (!K1) { wlSay(st, [{to: 'kc-sec', t: 'connect your keychain'}, ' to top up from this wallet.']); return }
-      if (!signGuard(st)) return;
+      if (!signGuard(st, function(){ $v('vc-top-go').click() })) return;
       var amt = Number(raw), q = amt.toFixed(4) + ' A';
       var liq = (LAST_A && LAST_A.acct === vacct()) ? LAST_A.a : null;
       if (liq !== null && amt > liq + 1e-9) { wlSay(st, ['you have ' + aAmount(liq) + ', so add that much or less.']); $v('vc-top-amt').focus(); return }
@@ -7907,54 +7914,61 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var w; try{ w=navigator.clipboard.writeText(t) }catch(e){ refused(e); return }
     Promise.resolve(w).then(function(){ flash('✓ copied') },refused);
   }
-  /* RECEIVE — every address of this soul, QRs drawn locally */
+  /* RECEIVE — every address of this soul, QRs drawn locally. Each card says in one calm
+     sentence what it takes; the derivation detail (title, context, standard) is cypherpunk's. */
+  function rxSay(c){
+    var more={to:'matrix-sec',t:'see what each coin can do here'};
+    if(c.v) return (c.more||(c.pay===false&&!c.cyOnly))?[c.say,' ',more]:[c.say];
+    if(c.why==='vacct-unread') return ['we could not read your Vaulta account just now, so no address is shown. ',{btn:'try again',on:function(){ resolveVacct().then(rxRender,rxRender) }}];
+    if(c.why==='vacct-unbridged') return ['your Vaulta address shows here once this wallet can sign for '+vacct()+'. ',{to:'bridge-sec',t:'let it sign'}];
+    return ['this address could not be made here, so none is shown. ',{btn:'try again',on:rxRender}];
+  }
   function rxRender(){
-    var cards=railAddresses(MPRK,SOUL);
-    if(!cards.length){ $('rx-cards').innerHTML='<div class="law">connect your keychain first — the addresses derive from your soul.</div>'; return }
-    $('rx-cards').innerHTML=cards.map(function(c,i){
+    var cards=railAddresses(MPRK,SOUL), box=$('rx-cards');
+    var dash='flex:1 1 220px;max-width:280px;border:1px dashed var(--line2);border-radius:10px;padding:10px;background:var(--well)';
+    if(!cards.length){ box.innerHTML='<div class="law" id="rx-none"></div>'; wlSay($('rx-none'),[{to:'kc-sec',t:'connect your keychain'},' to see your addresses.',{cy:'every address derives from your soul (the masterPRK, by context tag)'}]); return }
+    box.innerHTML=cards.map(function(c,i){
+      var title='<div style="font-size:10px;color:var(--faint)">'+esc(c.name||c.t)+(c.name&&c.name!==c.t?'<span class="wl-cyd"> · '+esc(c.t)+'</span>':'')+'</div>';
+      var say='<div class="rx-say" data-i="'+i+'" style="font-size:10.5px;color:var(--amber);margin-top:8px;line-height:1.7"></div>';
       /* a key nobody can pay (Lightning's and nostr's npub) is never drawn as an address
          to hand out: one calm sentence, and the key itself only for cypherpunk */
-      if(c.v&&c.pay===false) return '<div'+(c.cyOnly?' data-reg="cypherpunk"':'')+' style="flex:1 1 220px;max-width:280px;border:1px dashed var(--line2);border-radius:10px;padding:10px;background:var(--well)">'+
-        '<div style="font-size:10px;color:var(--faint)">'+esc(c.t)+'</div>'+
-        '<div class="rx-say" data-i="'+i+'" style="font-size:10.5px;color:var(--amber);margin-top:8px;line-height:1.7"></div>'+
+      if(c.v&&c.pay===false) return '<div'+(c.cyOnly?' data-reg="cypherpunk"':'')+' style="'+dash+'">'+title+say+
         '<div data-reg="cypherpunk" style="font-size:9px;color:var(--dim);margin-top:6px;word-break:break-all">not a payment address · '+esc(c.v)+' · '+esc(c.note)+' · context <b>'+esc(c.ctx)+'</b></div></div>';
       /* honest-empty: a rail this page could not derive shows the REASON and
          no address at all. Half an address is worse than none. */
-      if(!c.v) return '<div style="flex:1 1 220px;max-width:280px;border:1px dashed var(--line2);border-radius:10px;padding:10px;background:var(--well)">'+
-        '<div style="font-size:10px;color:var(--faint)">'+esc(c.t)+'</div>'+
-        '<div style="font-size:10.5px;color:var(--amber);margin-top:8px;line-height:1.7">no address shown — '+esc(c.err||'not derivable here')+'</div>'+
-        '<div style="font-size:9px;color:var(--dim);margin-top:6px">a wrong receive address cannot be undone, so this page shows none.</div></div>';
-      return '<div style="flex:1 1 220px;max-width:280px;border:1px solid #2c4a3a;border-radius:10px;padding:10px;background:#081810">'+
-        '<div style="font-size:10px;color:var(--faint)">'+esc(c.t)+'</div>'+
+      if(!c.v) return '<div style="'+dash+'">'+title+say+
+        '<div data-reg="cypherpunk" style="font-size:9px;color:var(--dim);margin-top:6px">'+esc(c.err||'not derivable here')+' · a wrong receive address cannot be undone, so this page shows none.</div></div>';
+      return '<div style="flex:1 1 220px;max-width:280px;border:1px solid #2c4a3a;border-radius:10px;padding:10px;background:#081810">'+title+
         qrSvg(c.v)+
         '<div class="rx-addr" style="font-size:11px;font-family:IBM Plex Mono,monospace;word-break:break-all;color:var(--leaf);margin-top:6px">'+esc(c.v)+'</div>'+
-        '<div style="font-size:9px;color:var(--dim);margin:4px 0">'+esc(c.note)+'</div>'+
-        '<div style="font-size:8.5px;color:var(--faint);margin-bottom:4px">context <b>'+esc(c.ctx)+'</b></div>'+
+        '<div class="rx-say" data-i="'+i+'" style="font-size:9px;color:var(--dim);margin:4px 0"></div>'+
+        '<div data-reg="cypherpunk" style="font-size:8.5px;color:var(--faint);margin-bottom:4px">'+esc(c.note)+' · context <b>'+esc(c.ctx)+'</b></div>'+
         '<button class="rxc" data-i="'+i+'" style="font-size:10px;padding:4px 10px">copy</button></div>';
-    }).join('');
-    Array.prototype.forEach.call(document.querySelectorAll('#rx-cards .rx-say'),function(el){
-      var c=cards[+el.getAttribute('data-i')];
-      wlSay(el,c.cyOnly?[c.say]:[c.say,' ',{to:'matrix-sec',t:'see what each coin can do here'}]);
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.rxc'),function(b){
+    }).join('')+(MPRK?'':'<div class="law" id="rx-more" style="flex:1 1 100%"></div>');
+    if(!MPRK) wlSay($('rx-more'),[{to:'kc-sec',t:'connect your keychain'},' to see your other addresses.']);
+    Array.prototype.forEach.call(box.querySelectorAll('.rx-say'),function(el){ wlSay(el,rxSay(cards[+el.getAttribute('data-i')])) });
+    Array.prototype.forEach.call(box.querySelectorAll('.rxc'),function(b){
       b.onclick=function(){ copyText(cards[+b.getAttribute('data-i')].v,b,b.parentNode.querySelector('.rx-addr'),$('pay-stat')) };
     });
   }
-  $('pay-rx').onclick=function(){ $('tx-panel').style.display='none';$('sw-panel').style.display='none';
-    $('rx-panel').style.display='block'; rxRender(); payStat('📥 receive — QRs drawn locally, nothing leaves this page'); };
-  $('pay-tx').onclick=function(){ $('rx-panel').style.display='none';$('sw-panel').style.display='none';
-    $('tx-panel').style.display='block'; txTab(localStorage.getItem('bnr_tx_tab')||'v'); };
-  $('pay-sw').onclick=function(){ $('rx-panel').style.display='none';$('tx-panel').style.display='none';
-    $('sw-panel').style.display='block'; swQuote(); };
+  /* the open lane and tab read as pressed, so a restored tab is never a mystery */
+  function payLane(k){ ['rx','tx','sw'].forEach(function(x){ $('pay-'+x).setAttribute('aria-pressed',String(x===k)) }) }
+  $('pay-rx').onclick=function(){ $('tx-panel').style.display='none';$('sw-panel').style.display='none'; payLane('rx');
+    $('rx-panel').style.display='block'; rxRender();
+    wlSay($('pay-stat'),MPRK?['these are your addresses. let the payer scan one, or copy it.',{cy:'QRs drawn locally, nothing leaves this page'}]:[]); };
+  $('pay-tx').onclick=function(){ $('rx-panel').style.display='none';$('sw-panel').style.display='none'; payLane('tx');
+    $('tx-panel').style.display='block'; wlSay($('pay-stat'),['pick the coin you want to send.']);
+    var last='v'; try{ last=localStorage.getItem('bnr_tx_tab')||'v' }catch(e){}
+    txTab(/^[velnh]$/.test(last)?last:'v'); };
+  $('pay-sw').onclick=function(){ $('rx-panel').style.display='none';$('tx-panel').style.display='none'; payLane('sw');
+    $('sw-panel').style.display='block'; wlSay($('pay-stat'),[]); swQuote({open:true}); };
   function txTab(which){
-    localStorage.setItem('bnr_tx_tab',which);
-    $('tx-v').style.display=which==='v'?'block':'none';
-    $('tx-e').style.display=which==='e'?'block':'none';
-    $('tx-l').style.display=which==='l'?'block':'none';
-    $('tx-n').style.display=which==='n'?'block':'none';
-    $('tx-h').style.display=which==='h'?'block':'none';
+    try{ localStorage.setItem('bnr_tx_tab',which) }catch(e){}
+    ['v','e','l','n','h'].forEach(function(k){ $('tx-'+k).style.display=which===k?'block':'none'; $('tx-tab-'+k).setAttribute('aria-pressed',String(which===k)) });
     if(which==='v')svRefresh();
     else if(which==='e')seRefresh();
+    else if(which==='h')hsRefresh();
+    else if(which==='n')pnSide(PN_SIDE);
   }
   $('tx-tab-v').onclick=function(){txTab('v')};
   $('tx-tab-h').onclick=function(){txTab('h')};
@@ -8003,9 +8017,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     p.cap.back=true; try{ hivePendingSet(p) }catch(e){}
     capRecord(p.cap.unit,-p.cap.amt,p.cap.day);
   }
+  /* the Hive lane speaks in lower case like every lane here; a sentence that opens on a name keeps its capital */
+  function hsLow(t){ t=String(t||''); return /^(Hive|HIVE|HBD)\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1) }
+  /* the Hive lane's line when it opens: the one step before a send, or the send still settling */
+  function hsRefresh(){
+    var st=$('hs-stat'), acct=hiveBound(), p0=SOUL?hivePending():null;
+    if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send HIVE or HBD.']);
+    else if(!acct) wlSay(st,['add your Hive account first: ',{to:'ch-hive',t:'paste its active key once'},'.']);
+    else if(p0) wlSay(st,['your last send ('+p0.amount+' '+p0.sym+' to '+p0.to+') has not settled yet. press send to check it; nothing new is signed until it does.']);
+    else wlSay(st,['you send from '+acct+' on Hive.']);
+    st._pre=st.textContent;
+  }
   $('hs-go').onclick=async function(){
-    var st=$('hs-stat'), acct=hiveBound(), btn=this;
-    if(!acct){ wlSay(st,['add your Hive account first · ',{to:'ch-hive',t:'paste its active key'}]); return }
+    var st=$('hs-stat'), acct=hiveBound(), btn=this, again={btn:'try again',on:function(){ $('hs-go').click() }};
+    if(!SOUL||!acct){ hsRefresh(); return }
     if(btn.disabled)return;
     btn.disabled=true;
     var w=null;
@@ -8013,123 +8038,147 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       // a send that has not settled comes first: its kept bytes, never a second signature
       var p0=hivePending();
       if(p0){
-        st.textContent='Checking your last send…';
+        st.textContent='checking your last send…';
         var r0=await hiveSettle(p0), last=p0.amount+' '+p0.sym+' to '+p0.to;
-        if(r0.phase==='confirmed'){ hivePendingSet(null); st.textContent='Your last send went through: '+last+'. Press send again for a new one.'; readHive(acct); return }
-        if(r0.phase==='old'){ hivePendingSet(null); wlSay(st,['This wallet can no longer tell whether your last send ('+last+') went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'},{cy:'find_transaction: too_old; the kept bytes are past their expiration and can never land now'}]); return }
-        if(r0.phase!=='expired'&&r0.phase!=='refused'){ st.textContent='Your last send ('+last+') has not settled yet, so nothing new was signed. Press send again in a minute.'; return }
+        if(r0.phase==='confirmed'){ hivePendingSet(null); st.textContent='your last send went through: '+last+'. press send again for a new one.'; readHive(acct); return }
+        if(r0.phase==='old'){ hivePendingSet(null); wlSay(st,['this wallet can no longer tell whether your last send ('+last+') went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'},{cy:'find_transaction: too_old; the kept bytes are past their expiration and can never land now'}]); return }
+        if(r0.phase!=='expired'&&r0.phase!=='refused'){ st.textContent='your last send ('+last+') has not settled yet, so nothing new was signed. press send again in a minute.'; return }
         hiveCapBack(p0); hivePendingSet(null);
         if(!($('hs-to').value||'').trim()&&!($('hs-amt').value||'').trim()){
-          st.textContent=r0.phase==='expired'?'Your last send ('+last+') did not land in time, so nothing was sent. Fill in a new one and press send.':r0.why;
+          st.textContent=r0.phase==='expired'?'your last send ('+last+') did not land in time, so nothing was sent. fill in a new one and press send.':hsLow(r0.why);
           return;
         }
       }
       var to=($('hs-to').value||'').trim().toLowerCase().replace(/^@/,''), amt=hiveAmount($('hs-amt').value), sym=$('hs-sym').value, memo=$('hs-memo').value||'';
-      if(!HIVE_NAME.test(to)){ st.textContent='to: a Hive account name'; return }
-      if(!amt){ st.textContent='amount: more than 0, up to 3 decimals'; return }
-      if(hiveMemoUnsafe(memo)){ st.textContent='That memo holds what looks like a private key. Memos are public, so nothing was sent.'; return }
+      if(!HIVE_NAME.test(to)){ wlSay(st,['type the Hive account to send to.']); $('hs-to').focus(); return }
+      if(!amt){ wlSay(st,['type an amount, with up to 3 digits after the point.']); $('hs-amt').focus(); return }
+      if(hiveMemoUnsafe(memo)){ st.textContent='that memo holds what looks like a private key. memos are public, so nothing was sent.'; return }
       if(!capGate(sym,amt,st))return;
       if(!MPRK){
-        st.textContent='Confirm with your passkey…'; CEREMONY=true;
+        st.textContent='confirm with your passkey…'; CEREMONY=true;
         try{ keychainOn(await connectSoul()) }
-        catch(e){ st.textContent=/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was sent. Press send again when you are ready.':'Your keychain did not connect, so nothing was sent.'; return }
+        catch(e){ wlSay(st,/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?['nothing was sent. press send again when you are ready.']:['your keychain did not connect, so nothing was sent. ',again,{cy:(e&&e.message)||String(e)}]); return }
         finally{ CEREMONY=false }
       }
       w=await hiveUnseal(acct);
-      if(!w){ hiveShow(true); st.textContent='Paste '+acct+'\u2019s active key once more on the Hive card; then one press sends.'; return }
-      st.textContent='Signing…';
+      if(!w){ hiveShow(true); wlSay(st,['paste '+acct+'’s active key once more, then press send. ',{to:'ch-hive',t:'paste it'},{cy:'no seal for this account, or it was made by another keychain'}]); return }
+      st.textContent='signing '+amt+' '+sym+' to '+to+'…';
       var pend=await hiveBuild(w,acct,to,amt,sym,memo); w=null;
       try{ hivePendingSet(pend) }                 // kept BEFORE it is broadcast
-      catch(se){ wlSay(st,['This browser is out of room for the signed copy, so nothing was sent. Free some browser storage, then press send again.',{cy:'pending write failed: '+((se&&se.message)||se)}]); return }
+      catch(se){ wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then press send again.',{cy:'pending write failed: '+((se&&se.message)||se)}]); return }
       pend.cap={unit:sym,amt:Number(amt),day:capRecord(sym,Number(amt))};   // counted once signed and kept
       try{ hivePendingSet(pend) }catch(se2){}
       $('hs-to').value=''; $('hs-amt').value=''; $('hs-memo').value='';   // signed: a second press never signs this again
-      st.textContent='Sending…';
+      st.textContent='sending '+amt+' '+sym+' to '+to+'…';
       var r=await hiveSettle(pend);
-      if(r.phase==='confirmed'){ hivePendingSet(null); st.textContent='Done. '+amt+' '+sym+' went to '+to+'. The chain confirmed it.'; readHive(acct) }
-      else if(r.phase==='refused'){ hiveCapBack(pend); hivePendingSet(null); st.textContent=r.why; $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
-      else if(r.phase==='expired'){ hiveCapBack(pend); hivePendingSet(null); st.textContent='It did not land in time, so nothing was sent. Press send to try again.'; $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
-      else if(r.phase==='old'){ hivePendingSet(null); wlSay(st,['This wallet can no longer tell whether it went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'}]) }
-      else if(r.phase==='offline') wlSay(st,['The Hive network did not answer, so this wallet cannot tell yet whether it went out. Press send to check; nothing new is signed until it settles.',{cy:'broadcast reached no node; the signed bytes are kept and a press resends them identically'}]);
-      else if(r.phase==='unknown') wlSay(st,['Hive did not take it this time, and an earlier try may still go in, so nothing new was signed. Press send again in a minute to check.',{cy:r.said||'no verdict'}]);
-      else st.textContent='It is on its way, and the chain has not shown it yet. Press send again to check; nothing new is signed until it settles.';
-    }catch(e){ st.textContent=hiveSay(e) }
+      if(r.phase==='confirmed'){ hivePendingSet(null); st.textContent='done. '+amt+' '+sym+' went to '+to+', and the chain confirmed it.'; readHive(acct) }
+      else if(r.phase==='refused'){ hiveCapBack(pend); hivePendingSet(null); st.textContent=hsLow(r.why); $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
+      else if(r.phase==='expired'){ hiveCapBack(pend); hivePendingSet(null); st.textContent='it did not land in time, so nothing was sent. press send to try again.'; $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
+      else if(r.phase==='old'){ hivePendingSet(null); wlSay(st,['this wallet can no longer tell whether it went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'}]) }
+      else if(r.phase==='offline') wlSay(st,['the Hive network did not answer, so this wallet cannot tell yet whether it went out. press send to check; nothing new is signed until it settles.',{cy:'broadcast reached no node; the signed bytes are kept and a press resends them identically'}]);
+      else if(r.phase==='unknown') wlSay(st,['Hive did not take it this time, and an earlier try may still go in, so nothing new was signed. press send again in a minute to check.',{cy:r.said||'no verdict'}]);
+      else st.textContent='it is on its way, and the chain has not shown it yet. press send again to check; nothing new is signed until it settles.';
+    }catch(e){
+      var kept=hivePending();
+      if(kept&&kept.out) wlSay(st,['this send stopped partway. press send to check where it is; nothing is signed twice.',{cy:(e&&e.message)||String(e)}]);
+      else if(e&&e.hive) st.textContent=hsLow(hiveSay(e));
+      else if(e&&(e.offline||/did not answer/i.test(e.message||''))) wlSay(st,['the Hive network did not answer, so nothing was sent. ',again,{cy:(e&&e.message)||''}]);
+      else wlSay(st,['something went wrong before anything was sent. ',again,{cy:(e&&e.message)||String(e)}]);
+    }
     finally{ w=null; btn.disabled=false }
   };
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
-  $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
+  $('tx-tab-n').onclick=function(){txTab('n')};
 
   /* ── PAYMENT NAME — one name, both rails ─────────────────────────────── */
+  var PN_SIDE='mine';
   function pnSide(which){
-    $('pn-mine-panel').style.display=which==='mine'?'block':'none';
-    $('pn-theirs-panel').style.display=which==='theirs'?'block':'none';
+    PN_SIDE=which==='theirs'?'theirs':'mine';
+    $('pn-mine-panel').style.display=PN_SIDE==='mine'?'block':'none';
+    $('pn-theirs-panel').style.display=PN_SIDE==='theirs'?'block':'none';
+    $('pn-mine').setAttribute('aria-pressed',String(PN_SIDE==='mine')); $('pn-theirs').setAttribute('aria-pressed',String(PN_SIDE==='theirs'));
   }
   $('pn-mine').onclick=function(){pnSide('mine')};
   $('pn-theirs').onclick=function(){pnSide('theirs')};
+  function pnRows(rows){
+    return rows.map(function(r){
+      return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 108px">'+
+        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('');
+  }
+  /* the rails a payment name carries, in the words a payer knows */
+  function pnRails(rails){
+    var b=rails.some(function(r){ return /silent|on-chain|address/i.test(r) }), l=rails.some(function(r){ return /BOLT/i.test(r) });
+    return b&&l?'bitcoin and Lightning':b?'bitcoin':l?'Lightning':'nothing this wallet knows';
+  }
 
   $('pn-build').onclick=function(){
+    var st=$('pn-mine-stat');
     $('pn-out').style.display='none';
-    if(!MPRK||!SOUL){ $('pn-mine-stat').textContent='connect your keychain first — the address derives from your soul'; return }
+    if(!MPRK||!SOUL){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to make your payment name.',{cy:'the silent-payment address derives from your soul'}]); return }
     var name=($('pn-name').value||'').trim();
     var offer=($('pn-offer').value||'').trim();
-    if(!name){ $('pn-mine-stat').textContent='type the name you want to publish, as you@yourdomain'; return }
+    if(!name){ wlSay(st,['type the name you want, as you@yourdomain.']); $('pn-name').focus(); return }
     var sp,rec,uri;
-    try{
-      sp=soulSilentPaymentAddress(MPRK,SOUL,'mainnet');
-      /* an offer that will not decode is REFUSED rather than published — a
-         broken lno1 under your own name is worse than no Lightning leg */
-      if(offer){
+    /* an offer that will not decode is REFUSED rather than published — a
+       broken lno1 under your own name is worse than no Lightning leg */
+    if(offer){
+      try{
         var od=decodeLnRequest(offer);
         if(od.standard!=='BOLT-12'||od.kind!=='offer')
-          throw new Error('that is a '+od.standard+(od.kind?' '+od.kind:'')+', not a BOLT-12 offer — the name needs an lno1… offer');
-      }
+          throw new Error('that is a '+od.standard+(od.kind?' '+od.kind:'')+', not a BOLT-12 offer; the name needs an lno1… offer');
+      }catch(e){ wlSay(st,['that Lightning offer cannot be used, so the record was not made.',{cy:'not built: '+e.message}]); $('pn-offer').focus(); return }
+    }
+    try{
+      sp=soulSilentPaymentAddress(MPRK,SOUL,'mainnet');
       uri=buildBip321Uri({silentPayment:sp,offer:offer||null,label:SOUL});
       rec=buildBip353Record(name,uri);
-    }catch(e){ $('pn-mine-stat').innerHTML='<b style="color:var(--amber)">not built:</b> '+esc(e.message); return }
+    }catch(e){ wlSay(st,['type the name as you@yourdomain.',{cy:'not built: '+e.message}]); $('pn-name').focus(); return }
+    var rails=parseBip321Uri(uri).rails;
     var rows=[
       ['payment name',esc(name)],
       ['DNS record',esc(rec.name)+' <span style="color:var(--faint)">TXT · DNSSEC required</span>'],
       ['silent payment',esc(sp)],
-      ['BOLT-12 offer',offer?esc(offer):'<span style="color:var(--faint)">none — the name will reach on-chain only until your node mints one</span>'],
+      ['BOLT-12 offer',offer?esc(offer):'<span style="color:var(--faint)">none: the name reaches on-chain only until your node mints one</span>'],
       ['the URI',esc(uri)],
-      ['rails carried',parseBip321Uri(uri).rails.map(esc).join(' + ')],
+      ['rails carried',rails.map(esc).join(' + ')],
       ['scan context',esc(SP_SCAN_CTX(SOUL))+' <span style="color:var(--faint)">(reproduce your keys from this)</span>'],
       ['spend context',esc(SP_SPEND_CTX(SOUL))]
     ];
+    /* the record and its zone line are cypherpunk's: in bee and raver the record belongs in the
+       reader's own domain settings, which this wallet cannot change, so no copy button there
+       sends anyone elsewhere */
     $('pn-out').innerHTML=
-      '<div style="border:1px solid #2c4a3a;border-radius:10px;padding:11px 13px;background:#081810">'+
-      rows.map(function(r){
-        return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 108px">'+
-          r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('')+
+      '<div data-reg="cypherpunk" style="border:1px solid #2c4a3a;border-radius:10px;padding:11px 13px;background:#081810">'+
+      pnRows(rows)+
       '<div style="margin-top:9px;font-size:9.5px;color:var(--faint)">paste this line into your zone file:</div>'+
       '<pre style="margin-top:4px;white-space:pre-wrap;word-break:break-all">'+esc(rec.zoneLine)+'</pre>'+
       '<button id="pn-copy" style="font-size:10px;padding:5px 12px;margin-top:6px">copy the zone line</button>'+
       '</div>';
     $('pn-out').style.display='block';
     $('pn-copy').onclick=function(){ copyText(rec.zoneLine,$('pn-copy'),$('pn-out').querySelector('pre'),$('pn-mine-stat')) };
-    $('pn-mine-stat').innerHTML='✓ built in this tab — <b>'+esc(name)+'</b> will reach '+
-      parseBip321Uri(uri).rails.length+' rail'+(parseBip321Uri(uri).rails.length===1?'':'s')+
-      ' once you publish it. Nothing was sent anywhere.';
+    wlSay(st,['the record for '+name+' is ready, and nothing was sent anywhere. it goes in your domain’s settings, which this wallet cannot change for you.',
+      {cy:'built in this tab; it reaches '+rails.length+' rail'+(rails.length===1?'':'s')+' ('+rails.join(' + ')+') once you publish it'}]);
   };
 
   $('pn-resolve').onclick=async function(){
+    var st=$('pn-theirs-stat');
     $('pn-res').style.display='none';
     var name=($('pn-lookup').value||'').trim();
-    if(!name){ $('pn-theirs-stat').textContent='type a payment name — name@domain'; return }
+    if(!name){ wlSay(st,['type a name like name@domain first.']); $('pn-lookup').focus(); return }
     var q;
     try{ q=bip353Query(name) }
-    catch(e){ $('pn-theirs-stat').innerHTML='<b style="color:var(--amber)">not a payment name:</b> '+esc(e.message); return }
-    $('pn-theirs-stat').textContent='asking DNS for '+q.recordName+' — the resolver sees this lookup…';
-    var ans;
-    try{
-      var r=await fetchT(q.url,{headers:{'Accept':q.accept}},12000);
-      ans=readBip353Answer(await r.json(),q.recordName);
-    }catch(e){ $('pn-theirs-stat').innerHTML='<b style="color:var(--amber)">no payment instructions:</b> '+esc(e.message); return }
+    catch(e){ wlSay(st,['that does not look like name@domain. check it and try again.',{cy:'not a payment name: '+e.message}]); $('pn-lookup').focus(); return }
+    wlSay(st,['looking up '+name+'…',{cy:'asking DNS-over-HTTPS for '+q.recordName+'; the resolver sees this lookup'}]);
+    var json, ans;
+    try{ var r=await fetchT(q.url,{headers:{'Accept':q.accept}},12000); json=await r.json() }
+    catch(e){ wlSay(st,['the lookup did not answer just now. ',{btn:'try again',on:function(){ $('pn-resolve').click() }},{cy:(e&&e.message)||String(e)}]); return }
+    try{ ans=readBip353Answer(json,q.recordName) }
+    catch(e){ wlSay(st,[/status|TXT/.test(e.message)?name+' has no payment details.':'the payment details of '+name+' cannot be read, so do not pay it.',{cy:'no payment instructions: '+e.message}]); return }
     var rows=[['name',esc(name)],['record',esc(ans.recordName)],
       ['DNSSEC',ans.authenticated
-        ? '<b style="color:var(--leaf)">authenticated</b> <span style="color:var(--faint)">— by the resolver you asked; trusting this is trusting it</span>'
-        : '<b style="color:var(--amber)">NOT authenticated</b> — do not pay on this'],
+        ? '<b style="color:var(--leaf)">authenticated</b> <span style="color:var(--faint)">by the resolver you asked; trusting this is trusting it</span>'
+        : '<b style="color:var(--amber)">not authenticated</b>: do not pay on this'],
       ['rails',ans.parsed.rails.map(esc).join(' + ')]];
     if(ans.parsed.silentPayment) rows.push(['silent payment',esc(ans.parsed.silentPayment)]);
     if(ans.parsed.offer) rows.push(['BOLT-12 offer',esc(ans.parsed.offer)]);
@@ -8137,36 +8186,42 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(ans.parsed.address) rows.push(['on-chain address',esc(ans.parsed.address)]);
     /* if the name carries an offer, read it the same way the LN lane would —
        the amount is what the sats cap would speak on */
+    var offerBad=false;
     if(ans.parsed.offer){
       try{
         var od=decodeLnRequest(ans.parsed.offer);
         rows.push(['the offer says',od.pricedInSats
           ? esc(String(od.sats))+' sat'+(od.description?' · '+esc(od.description):'')
-          : (od.currency?esc(String(od.amount))+' minor units of '+esc(od.currency)+' — <b>no satoshi price offline</b>':'any amount')]);
-      }catch(e){ rows.push(['the offer','<b style="color:var(--amber)">does not decode:</b> '+esc(e.message)]) }
+          : (od.currency?esc(String(od.amount))+' minor units of '+esc(od.currency)+': <b>no satoshi price offline</b>':'any amount')]);
+      }catch(e){ offerBad=true; rows.push(['the offer','<b style="color:var(--amber)">does not decode:</b> '+esc(e.message)]) }
     }
-    $('pn-res').innerHTML=rows.map(function(r){
-      return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 108px">'+
-        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('');
+    /* one calm line for the reader; the rows are cypherpunk's */
+    $('pn-res').innerHTML='<div class="pn-calm" style="font-size:10.5px;line-height:1.7"></div><div data-reg="cypherpunk">'+pnRows(rows)+'</div>';
+    wlSay($('pn-res').querySelector('.pn-calm'),[name+' takes '+pnRails(ans.parsed.rails)+'.']);
     $('pn-res').style.display='block';
-    $('pn-theirs-stat').innerHTML=ans.authenticated
-      ? '✓ resolved — <b>one name, '+ans.parsed.rails.length+' rail'+(ans.parsed.rails.length===1?'':'s')+'</b>. Paying is not wired from this page.'
-      : '<b style="color:var(--amber)">resolved, but UNSIGNED.</b> The record exists; nothing proves it is the real one. Refuse it.';
+    if(!ans.authenticated) wlSay(st,['this name’s record is not signed, so it may not be theirs. do not pay it.',{cy:'resolved, but AD=false from the resolver: nothing proves it is the real record'}]);
+    else if(offerBad) wlSay(st,['this name carries a Lightning offer that cannot be read, so do not pay it.']);
+    else wlSay(st,['found '+name+', and its record is signed. this wallet cannot pay it yet.',{cy:'AD=true from the resolver you asked · one name, '+ans.parsed.rails.length+' rail'+(ans.parsed.rails.length===1?'':'s')}]);
   };
   $('pn-lookup').addEventListener('keydown',function(e){ if(e.key==='Enter')$('pn-resolve').click() });
   $('pn-name').addEventListener('keydown',function(e){ if(e.key==='Enter')$('pn-build').click() });
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   /* the Vaulta lane's line: what can be sent, or the one step before it */
-  function svRefresh(){
+  function svRefresh(after){
     var st=$('sv-stat'), liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
-    if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']); return }
-    if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']); return }
-    if(BRIDGED!==true){ wlSay(st,['this wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]); return }
-    if(liq===null){ wlSay(st,['your A is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()).then(svRefresh) }}]); return }
-    wlSay(st,['you can send up to '+aAmount(liq)+' from '+vacct()+'.',{cy:'liquid A at '+A_TOKEN+' · signed by the keychain K1 key · cap unit A'}]);
+    st.style.color='';
+    if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']);
+    else if(!K1) wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']);
+    else if(!vacctKnown()) wlSay(st,['we could not read which account '+SOUL+'.b points at just now. ',{btn:'try again',on:function(){ resolveVacct().then(function(){ svRefresh() },function(){ svRefresh() }) }}]);
+    else if(BRIDGED===null) wlSay(st,['whether this wallet signs for '+vacct()+' is not known yet. ',{btn:'check again',on:function(){ checkBridge().then(function(){ svRefresh() },function(){ svRefresh() }) }},{cy:'BRIDGED unknown: the check is running, or get_account / the registry read failed'}]);
+    else if(BRIDGED!==true) wlSay(st,['this wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]);
+    else if(liq===null) wlSay(st,[after?'we could not read your A just now. ':'your A is not known yet. ',{btn:after?'try again':'read it',on:function(){ readVaulta(vacct()).then(function(){ svRefresh(true) },function(){ svRefresh(true) }) }},after?{cy:'get_account / get_currency_balance at '+A_TOKEN+' answered nothing'}:null]);
+    else wlSay(st,['you can send up to '+aAmount(liq)+' from '+vacct()+'.',{cy:'liquid A at '+A_TOKEN+' · signed by the keychain K1 key · cap unit A'}]);
+    st._pre=st.textContent;
   }
-  function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
+  /* an Antelope account name: a to z, 1 to 5 and dots, up to 12, never ending on a dot */
+  function validAcct(s){ return /^[a-z1-5.]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'')&&!/\.$/.test(s||'') }
   /* ── SPEND CAP — the owner's optional tool, enforced at SIGN time. A per-unit
      rolling-day ledger in this browser's storage. capGate() runs in every send
      and buy lane BEFORE a tx is built: over-cap ⇒ the engine refuses to sign —
@@ -8177,12 +8232,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function capLedger(){ try{ return JSON.parse(localStorage.getItem(CAP_LEDGER))||[] }catch(e){ return [] } }
   function capToday(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
   function capUsed(unit){ var t=capToday(); return capLedger().reduce(function(s,e){ return (e.d===t&&e.u===unit)?s+e.a:s },0) }
+  function capNum(x){ return String(+Number(x).toFixed(4)) }
   function capView(){
-    var caps=capLoad(), units=Object.keys(caps);
-    $('cap-view').innerHTML=units.length?units.map(function(u){
+    var caps=capLoad(), units=Object.keys(caps), el=$('cap-view');
+    if(!units.length){ wlSay(el,['no daily cap is set.',{cy:'spend cap unset: no limit (the autonomy default)'}]); return }
+    wlSay(el,units.map(function(u){
       var used=capUsed(u);
-      return u+': <b>'+caps[u]+'</b>/day · '+used.toFixed(4)+' signed today'+(used>=caps[u]?' — <b style="color:var(--amber)">cap hit</b>':'');
-    }).join(' · '):'unset: no limit';
+      return used>=caps[u]-1e-9?'you reached today’s '+capNum(caps[u])+' '+u+' cap. ':'you can sign up to '+capNum(caps[u])+' '+u+' a day, and '+capNum(used)+' '+u+' is used today. ';
+    }).concat([{cy:units.map(function(u){ return u+': '+caps[u]+'/day · '+capUsed(u).toFixed(4)+' signed today' }).join(' · ')+' · per-unit ledger in this browser, by local calendar day'}]));
   }
   /* ── capAssert IS THE CAP. It THROWS, and it is called from inside the
      signing primitives themselves — not from the buttons. That is the whole
@@ -8233,18 +8290,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     capView();
     return d;
   }
+  /* a cap the owner believes in must exist: a write the browser refused is said, never announced as set */
+  function capSave(caps){ try{ localStorage.setItem(CAP_KEY,JSON.stringify(caps)); return JSON.stringify(capLoad())===JSON.stringify(caps) }catch(e){ return false } }
   $('cap-set').onclick=function(){
-    var u=$('cap-unit').value, a=parseFloat($('cap-amt').value);
-    if(!(a>0)){$('cap-view').textContent='enter an amount > 0 first';return}
+    var u=$('cap-unit').value, a=parseFloat($('cap-amt').value), st=$('pay-stat');
+    if(!(a>0)){ wlSay(st,['type a daily amount first.']); $('cap-amt').focus(); return }
     var caps=capLoad(); caps[u]=a;
-    try{ localStorage.setItem(CAP_KEY,JSON.stringify(caps)) }catch(e){}
+    if(!capSave(caps)){ capView(); wlSay(st,['this browser would not save your cap, so there is no '+u+' cap yet. ',{btn:'try again',on:function(){ $('cap-amt').value=a; $('cap-unit').value=u; $('cap-set').click() }}]); return }
     $('cap-amt').value=''; capView();
-    $('pay-stat').textContent='cap set — '+a+' '+u+'/day. Signs past it are refused locally; nothing else changes.';
+    wlSay(st,['your daily cap is now '+capNum(a)+' '+u+'. anything more is not signed.',{cy:'signs past it are refused locally by capAssert inside the signer; nothing else changes'}]);
   };
   $('cap-clear').onclick=function(){
-    var u=$('cap-unit').value, caps=capLoad(); delete caps[u];
-    try{ localStorage.setItem(CAP_KEY,JSON.stringify(caps)) }catch(e){}
-    capView(); $('pay-stat').textContent='cap cleared for '+u+' — no limit again';
+    var u=$('cap-unit').value, caps=capLoad(), st=$('pay-stat');
+    if(!(u in caps)){ wlSay(st,['there was no daily cap for '+u+'.']); return }
+    delete caps[u];
+    if(!capSave(caps)){ capView(); wlSay(st,['this browser would not save the change, so the '+u+' cap is still on. ',{btn:'try again',on:function(){ $('cap-unit').value=u; $('cap-clear').click() }}]); return }
+    capView(); wlSay(st,['the daily cap for '+u+' is off.']);
   };
   capView();
 
@@ -8291,7 +8352,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     try{
-      wlSay(st,['signing…']);
+      wlSay(st,['signing it with your keychain: '+summary+'.',{cy:'get_info, get_block, buildSigned'}]);
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
       var built=await buildSigned(info,ref,actions,null,null,spend);
@@ -8339,11 +8400,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var st=$('sv-stat'), to=$('sv-to').value.trim(), raw=String($('sv-amt').value||'').trim(), memo=$('sv-memo').value;
     st.style.color='';
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']); return }
-    if(!validAcct(to)){ wlSay(st,['type the Vaulta account to send to: up to 12 letters a to z and digits 1 to 5.']); $('sv-to').focus(); return }
+    if(!validAcct(to)){ wlSay(st,['type the Vaulta account to send to: up to 12 letters a to z, digits 1 to 5 and dots.']); $('sv-to').focus(); return }
     if(!/^\d+(\.\d{1,4})?$/.test(raw)){ wlSay(st,['type how much A to send, with at most 4 digits after the point.']); $('sv-amt').focus(); return }
     var q=Number(raw).toFixed(4)+' A', amt=Number(raw);   /* the amount checked, capped and sent is the one that goes on chain */
     if(!(amt>0)){ wlSay(st,['type how much A to send.']); $('sv-amt').focus(); return }
-    if(keyInMemo(memo)){ wlSay(st,['that memo holds what looks like a private key. memos are public, so nothing was sent.']); $('sv-memo').focus(); return }
+    if(keyInMemo(memo)||hiveMemoUnsafe(memo)){ wlSay(st,['that memo holds what looks like a private key. memos are public, so nothing was sent.']); $('sv-memo').focus(); return }
     if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']); return }
     if(!signGuard(st,function(){ $('sv-go').click() }))return;
     var liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
@@ -8398,7 +8459,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny,
-    rails:EVM_RAILS,
+    rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
     ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
     toBaseUnits:toBaseUnits,fromBaseUnits:fromBaseUnits,
     decodeBolt11:decodeBolt11,decodeBolt12:decodeBolt12,decodeLnRequest:decodeLnRequest,
@@ -8439,11 +8500,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var SE_SEQ=0;
   function evmHex(v){ return typeof v==='string'&&/^0x[0-9a-f]+$/i.test(v) }
   function evmShort(a){ return a.slice(0,6)+'…'+a.slice(-4) }
+  /* EIP-55: a mixed-case address carries its own checksum, so a one-character typo is caught
+     before anything is signed (an all-lower or all-upper address carries none) */
+  function evmChecksumOk(a){
+    var h=String(a||'').slice(2); if(!/^[0-9a-fA-F]{40}$/.test(h))return false;
+    if(h===h.toLowerCase()||h===h.toUpperCase())return true;
+    var k=hexS(BN.keccak_256(new TextEncoder().encode(h.toLowerCase())));
+    for(var i=0;i<40;i++){ var c=h[i]; if(/[a-f]/i.test(c)&&((parseInt(k[i],16)>=8)!==(c!==c.toLowerCase())))return false }
+    return true;
+  }
   async function seRefresh(){
     var st=$('se-stat'); st.style.color='';
-    if(!MPRK||!SOUL){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send from Base or Arbitrum.']); return }
+    if(!MPRK||!SOUL){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send from Base or Arbitrum.']); st._pre=st.textContent; return }
     var p0=evmPending();
-    if(p0){ wlSay(st,['your last send ('+p0.amount+' '+p0.sym+' on '+p0.label+') has not settled yet, so nothing new is signed until it does. ',{btn:'check it',on:function(){ $('se-go').click() }},{cy:'kept tx '+p0.hash+' · nonce '+p0.nonce}]); return }
+    if(p0){ wlSay(st,['your last send ('+p0.amount+' '+p0.sym+' on '+p0.label+') has not settled yet, so nothing new is signed until it does. ',{btn:'check it',on:function(){ $('se-go').click() }},{cy:'kept tx '+p0.hash+' · nonce '+p0.nonce}]); st._pre=st.textContent; return }
     var seq=++SE_SEQ, railKey=seRailKey(), rail=railOf(railKey), asset=assetOf(railKey,seAssetKey());
     var p=evmAddrOf(); var addr=p.addr; p.seed.fill(0);
     wlSay(st,['reading '+rail.label+'…']);
@@ -8459,7 +8529,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(asset.contract&&!tok) parts.push(' we could not read your '+asset.symbol+' just now. ',{btn:'try again',on:seRefresh});
       else if(BigInt(wei)===0n&&(tokB===null||tokB===0n)) parts.push(' ',{btn:'add coins',on:function(){ $('pay-rx').click() }});
       parts.push({cy:'chain '+rail.chainId+' · derived '+addr+' · nonce '+(evmHex(nonce)?parseInt(nonce,16):'not read')+' · gas '+(evmHex(gp)?(parseInt(gp,16)/1e9).toFixed(4)+' gwei':'not read')+(asset.contract&&!tok?' · '+asset.symbol+' balanceOf answered '+JSON.stringify(b):'')});
-      wlSay(st,parts);
+      wlSay(st,parts); st._pre=st.textContent;
     }catch(e){ if(seq===SE_SEQ) wlSay(st,['we could not read '+rail.label+' just now. ',{btn:'try again',on:seRefresh},{cy:(e&&e.message)||String(e)}]) }
   }
   /* ══ THE EVM SIGNER — one function for every EVM rail and every asset on it.
@@ -8632,6 +8702,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var to=$('se-to').value.trim(), amt=$('se-amt').value.trim();
     var railKey=seRailKey(), assetKey=seAssetKey(), rail=railOf(railKey), asset=assetOf(railKey,assetKey);
     if(!/^0x[0-9a-fA-F]{40}$/.test(to)){ wlSay(st,['type the 0x address to send to.']); $('se-to').focus(); return }
+    if(!evmChecksumOk(to)){ wlSay(st,['that address has a typo in it, so nothing was sent. check it with the person you are paying.',{cy:'EIP-55 checksum mismatch'}]); $('se-to').focus(); return }
     if(!/^\d+(\.\d+)?$/.test(amt)||!(Number(amt)>0)){ wlSay(st,['type how much '+asset.symbol+' to send, like 0.01.']); $('se-amt').focus(); return }
     if((amt.split('.')[1]||'').length>asset.decimals){ wlSay(st,[asset.symbol+' has '+asset.decimals+' decimals, so type at most '+asset.decimals+' digits after the point.']); $('se-amt').focus(); return }
     if(!capGate(asset.symbol,Number(amt),st))return;
@@ -8658,42 +8729,48 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* ── LIGHTNING — read a request, cap it, never pretend to pay it ── */
   $('ln-read').onclick=function(){
-    var raw=$('ln-req').value;
+    var raw=$('ln-req').value, st=$('ln-stat');
     $('ln-card').style.display='none';
-    if(!raw.trim()){ $('ln-stat').textContent='paste a BOLT-11 invoice or a BOLT-12 offer first'; return }
+    if(!raw.trim()){ wlSay(st,['paste a Lightning invoice first.',{cy:'a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)'}]); $('ln-req').focus(); return }
     var d;
     try{ d=decodeLnRequest(raw) }
-    catch(e){ $('ln-stat').innerHTML='<b style="color:var(--amber)">not read:</b> '+esc(e.message); return }
+    catch(e){ wlSay(st,['that is not a Lightning invoice we can read. check it and paste it again.',{cy:'not read: '+e.message}]); $('ln-req').focus(); return }
     /* every decoded field is the PAYEE's text (an invoice's signature is not checked here and an
        offer carries no checksum): it is escaped, never markup, so a crafted description cannot run */
     var rows=[['standard',esc(d.standard+(d.kind?' '+d.kind:'')+(d.network?' · '+d.network:''))]];
     if(d.pricedInSats) rows.push(['amount',esc(d.sats.toLocaleString()+' sat'+(d.msats!=null?' ('+d.msats+' msat)':''))]);
     else if(d.currency!=null&&d.amount!=null) rows.push(['amount',esc(String(d.amount)+' minor units of '+d.currency)+
-      ' — <b>no satoshi price until the invoice comes back</b>']);
+      ': <b>no satoshi price until the invoice comes back</b>']);
     else rows.push(['amount','any amount (the payer chooses)']);
     if(d.description) rows.push(['description',esc(d.description)]);
     if(d.issuer) rows.push(['issuer',esc(d.issuer)]);
     if(d.paymentHash) rows.push(['payment hash',esc(d.paymentHash)]);
     if(d.expiresAt) rows.push(['expires',esc(new Date(d.expiresAt*1000).toISOString().replace('T',' ').slice(0,19)+'Z')+
-      (d.expiresAt*1000<Date.now()?' — <b style="color:var(--amber)">already expired</b>':'')]);
+      (d.expiresAt*1000<Date.now()?': <b style="color:var(--amber)">already expired</b>':'')]);
     if(d.issuerId) rows.push(['issuer id',esc(d.issuerId)]);
-    $('ln-card').innerHTML=rows.map(function(r){
+    /* one calm sentence of what it asks for (the payee's words go in as text); the rows are cypherpunk's */
+    var ask=d.pricedInSats?'it asks for '+d.sats.toLocaleString()+' sats'
+      :(d.currency!=null&&d.amount!=null)?'it is priced in '+d.currency+', so its sats are not known until the invoice comes back'
+      :'it lets you choose the amount';
+    if(d.description) ask+=' for “'+d.description+'”';
+    ask+='.';
+    if(d.expiresAt) ask+=d.expiresAt*1000<Date.now()?' it has already run out.':' it runs out at '+new Date(d.expiresAt*1000).toLocaleString([],{dateStyle:'medium',timeStyle:'short'})+'.';
+    $('ln-card').innerHTML='<div class="ln-calm" style="font-size:10.5px;line-height:1.7"></div><div data-reg="cypherpunk">'+rows.map(function(r){
       return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 96px">'+
-        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('');
+        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('')+'</div>';
+    wlSay($('ln-card').querySelector('.ln-calm'),[ask]);
     $('ln-card').style.display='block';
     /* the cap speaks on the decoded amount — the same authority the EVM
        signer answers to, on a rail whose payment leg is not even wired */
     try{
       if(d.pricedInSats) capAssert('sats',d.sats);
       else capAssertUnpriced('sats',d.standard==='BOLT-12'?'this offer':'an any-amount invoice');
-      $('ln-stat').innerHTML='✓ read locally — nothing left this tab.'+
-        (('sats' in capLoad())
-          ? (d.pricedInSats?' <b style="color:var(--leaf)">Within your sats cap.</b>':'')
-          : ' <span style="color:var(--faint)">No sats cap set — set one above and this lane obeys it too.</span>')+
-        ' <b>Paying is not wired here</b> (the LN seam pays through NWC; its live leg is parked at a relay ACL).';
+      var capped='sats' in capLoad();
+      wlSay(st,['read here, and nothing left this page. '+(capped&&d.pricedInSats?'it is within your daily sats cap. ':'')+'this wallet cannot pay it yet.',
+        {cy:(capped?'':'no sats cap set; this lane obeys one once it is set. ')+'paying is not wired here: the LN seam pays through NWC, and its live leg is parked at a relay ACL'}]);
     }catch(e){
       if(!e.capRefused) throw e;
-      $('ln-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+esc(e.message);
+      wlSay(st,[e.capKind==='unsized'?'your daily sats cap cannot check this, because it carries no sats price here. ':'this is more than the daily sats cap you set. ',{to:'cap-row',t:'change the cap'},{cy:e.message}]);
     }
   };
   $('ln-req').addEventListener('keydown',function(e){ if(e.key==='Enter')$('ln-read').click() });
@@ -8701,28 +8778,60 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* SWAP · A ↔ RAM — core.vaulta buyrambytes / sellram (A in, A out), live rammarket quote */
   var SW_BUY=true;
   function kb(b){ return (Math.max(0,b)/1024).toFixed(1)+' KB' }
-  async function swQuote(){
-    var p=await ramPrice(), n=parseInt($('sw-amt').value,10)||0;
-    if(p===null) wlSay($('sw-quote'),['the RAM price is not known yet. ',{btn:'read it',on:swQuote},{cy:'eosio rammarket answered nothing'}]);
-    else if(SW_BUY) wlSay($('sw-quote'),['about '+aAmount(p*n*1.005)+' buys '+n.toLocaleString()+' bytes of RAM.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, plus the 0.5% fee, paid from liquid A at '+A_TOKEN}]);
-    else wlSay($('sw-quote'),['selling '+n.toLocaleString()+' bytes brings back about '+aAmount(p*n*0.995)+'.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, less the 0.5% fee, paid out by '+A_TOKEN}]);
+  var SW_SEQ=0;
+  async function swQuote(opt){
+    opt=opt||{};
+    var seq=++SW_SEQ, q=$('sw-quote');
+    if(opt.open) wlSay(q,['reading today’s RAM price…']);
+    var p=await ramPrice();
+    if(seq!==SW_SEQ)return;   /* a newer amount or direction owns the line */
+    var n=parseInt($('sw-amt').value,10)||0;
+    if(p===null) wlSay(q,[opt.price?'we could not read the RAM price just now. ':'the RAM price is not known yet. ',{btn:opt.price?'try again':'read it',on:function(){ swQuote({open:true,price:true}) }},{cy:'eosio rammarket answered nothing'}]);
+    else if(!(n>0)) wlSay(q,['type how many bytes of RAM to '+(SW_BUY?'buy.':'sell.')]);
+    else if(SW_BUY) wlSay(q,['about '+aAmount(p*n*1.005)+' buys '+n.toLocaleString()+' bytes of RAM, fee included.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, plus the 0.5% fee, paid from liquid A at '+A_TOKEN}]);
+    else wlSay(q,['selling '+n.toLocaleString()+' bytes brings back about '+aAmount(p*n*0.995)+', after the fee.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, less the 0.5% fee, paid out by '+A_TOKEN}]);
     var st=$('sw-stat');
     if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to see your RAM.']);
     else if(pointerUnread()) pointerSay(st);
-    else if(!LAST_ACC||LAST_ACC.account_name!==vacct()) wlSay(st,['your RAM is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()).then(swQuote) }}]);
+    else if(!LAST_ACC||LAST_ACC.account_name!==vacct()) wlSay(st,[opt.after?'we could not read your RAM just now. ':'your RAM is not known yet. ',{btn:opt.after?'try again':'read it',on:function(){ readVaulta(vacct()).then(function(){ swQuote({after:true}) },function(){ swQuote({after:true}) }) }}]);
     else wlSay(st,SW_BUY?['you own '+kb(LAST_ACC.ram_quota)+' of RAM and use '+kb(LAST_ACC.ram_usage)+'.']:['you can sell up to '+kb(LAST_ACC.ram_quota-LAST_ACC.ram_usage)+'.']);
+    st._pre=st.textContent;
   }
   $('sw-dir').onclick=function(){ SW_BUY=!SW_BUY;
-    $('sw-dir').textContent=SW_BUY?'direction: buy RAM with A':'direction: sell RAM for A';
-    $('sw-amt').min=SW_BUY?1:1024; $('sw-amt').step=SW_BUY?1024:1024;
+    $('sw-dir').textContent=SW_BUY?'buy RAM with A':'sell RAM for A';
     swQuote(); };
+  /* an open lane's first line follows the wallet: when the keychain, the bridge or the balance
+     changes, a line still showing the step before a send is redrawn. A result is never
+     overwritten: only a line nobody has written since its own refresh wrote it. */
+  function prePending(el){ return !!el&&el._pre!=null&&el.textContent===el._pre }
+  var PAY_T=null, PAY_KC=false;
+  function payRefresh(kc){
+    if(kc)PAY_KC=true;
+    clearTimeout(PAY_T);
+    PAY_T=setTimeout(function(){
+      var all=PAY_KC; PAY_KC=false;
+      if(VBUSY||EVBUSY)return;
+      if($('tx-panel').style.display==='block'){
+        if($('tx-v').style.display==='block'&&prePending($('sv-stat')))svRefresh();
+        if(all&&$('tx-e').style.display==='block'&&prePending($('se-stat')))seRefresh();
+        if($('tx-h').style.display==='block'&&prePending($('hs-stat'))&&!$('hs-go').disabled)hsRefresh();
+      }
+      if($('sw-panel').style.display==='block'&&prePending($('sw-stat')))swQuote();
+      if(all&&$('rx-panel').style.display==='block')rxRender();
+    },400);
+  }
+  if(window.MutationObserver){
+    var kcEl=$('kc-stat'); if(kcEl)new MutationObserver(function(){ payRefresh(true) }).observe(kcEl,{childList:true,characterData:true,subtree:true});
+    ['sum-bridge','v-bal'].forEach(function(id){ var el=$(id); if(el)new MutationObserver(function(){ payRefresh(false) }).observe(el,{childList:true,characterData:true,subtree:true}) });
+  }
+  document.addEventListener('bnr-soul',function(){ payRefresh(true) });
   $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
   $('sw-go').onclick=function(){ vaultaLane($('sw-go'),swGo,$('sw-stat')) };
   async function swGo(){
     var st=$('sw-stat'); st.style.color='';
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to buy or sell RAM.']); return }
     if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to buy or sell RAM.']); return }
-    if(!signGuard(st))return;
+    if(!signGuard(st,function(){ $('sw-go').click() }))return;
     var n=parseInt($('sw-amt').value,10)||0, buy=SW_BUY;
     if(!(n>0)){ wlSay(st,['type how many bytes of RAM.']); $('sw-amt').focus(); return }
     var spend=null;
@@ -8938,7 +9047,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(offered&&offered!==acct){ readVaulta(acct); return }   /* the offer was for another account: read this one instead of signing */
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to turn your EOS into A.']); return }
     if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to turn your EOS into A.']); return }
-    if(!signGuard(st))return;
+    if(!signGuard(st,function(){ eosToA(btn,offered) }))return;
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
     if(!d||!d.account_name){ wlSay(st,['could not read '+acct+' just now, so nothing was signed. ',{btn:'try again',on:function(){ readVaulta(acct) }}]); return }
     var q=String(d.core_liquid_balance||''), eos=assetNumber(q);

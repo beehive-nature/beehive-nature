@@ -525,8 +525,8 @@ try {
       cards.filter(c => c.v).length === cards.length - 1, JSON.stringify(cards.map(c => [c.ctx, !!c.v])));
     await page.evaluate(() => { document.getElementById('pay-rx').click() });
     const html = await page.locator('#rx-cards').innerHTML();
-    ok('the receive panel prints the reason instead of an address',
-      /no address shown/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
+    ok('the receive panel says calmly that no address is shown, with try again, and keeps the reason for cypherpunk',
+      /could not be made here, so none is shown/.test(html) && /deliberately broken/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
     // an npub is a key, not a way to be paid: the Lightning card offers no address to hand out
     const rx = await page.evaluate(() => {
       const box = document.getElementById('rx-cards');
@@ -584,7 +584,7 @@ try {
       }
     });
     const page = await connectedPage(ctx);
-    const TO = '0x742c8f2e0ce07Dd3f7E78A31E5A97D45c50fF2c8';
+    const TO = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';   // EIP-55's own published vector: the lane checks the checksum
     await page.evaluate(() => { localStorage.removeItem('bnr-cap-ledger'); localStorage.removeItem('bnr-spend-cap');
       document.getElementById('pay-tx').click(); document.getElementById('tx-tab-e').click(); });
     const press = async (to, amt, twice) => {
@@ -602,11 +602,11 @@ try {
     ok('the chain is asked by the kept hash', S.receiptAsks.length > 0 && S.receiptAsks.every(h => h === r1.pend.hash), JSON.stringify(S.receiptAsks.slice(0, 2)));
     const r2 = await press(TO, '0.02', true);
     ok('a second press (twice, quickly) checks the kept send and resends its identical bytes; no second nonce is signed',
-      /^your last send \(0\.01 ETH to 0x742c…f2c8\) is with Base/i.test(r2.say) && new Set(S.raws).size === 1 && r2.pend && r2.pend.hash === r1.pend.hash, r2.say + ' · ' + new Set(S.raws).size);
+      /^your last send \(0\.01 ETH to 0x5aae…eaed\) is with Base/i.test(r2.say) && new Set(S.raws).size === 1 && r2.pend && r2.pend.hash === r1.pend.hash, r2.say + ' · ' + new Set(S.raws).size);
     S.receipt = { blockNumber: '0x10', status: '0x1', transactionHash: r1.pend.hash };
     const r3 = await press(null, null);
     ok('once a block shows it, the next press says the last send went through and frees the lane',
-      /^your last send went through: 0\.01 ETH to 0x742c…f2c8 on Base/i.test(r3.say) && !r3.pend && new Set(S.raws).size === 1, r3.say);
+      /^your last send went through: 0\.01 ETH to 0x5aae…eaed on Base/i.test(r3.say) && !r3.pend && new Set(S.raws).size === 1, r3.say);
     S.receipt = null; S.mode = 'lost';
     const r4 = await press(TO, '0.03');
     ok('a lost answer says it cannot tell yet, keeps the bytes, and offers check again (never send again)',
@@ -620,6 +620,10 @@ try {
       /does not hold enough on Base for this and its fee, so nothing was sent/.test(r6.say) && !r6.pend && r6.to === TO, r6.say);
     ok('…and only then is the cap given back: 0.01 + 0.03 counted, 0.04 returned on the day it was counted',
       Math.abs(r6.eth - 0.04) < 1e-9, String(r6.eth));
+    const ck = await page.evaluate(() => ['0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed', '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD', '0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed'].map(a => window.BNRPAY.evmChecksumOk(a)));
+    ok('EIP-55: the published vector passes, a one-letter case typo fails, an all-lowercase address carries no checksum', ck[0] === true && ck[1] === false && ck[2] === true, JSON.stringify(ck));
+    const n0 = S.raws.length, typo = await press('0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD', '0.01');
+    ok('a mixed-case address with a typo is refused before anything is signed', /has a typo in it, so nothing was sent/.test(typo.say) && S.raws.length === n0 && !typo.pend, typo.say);
     ok('no raw RPC text reaches the reader\'s sentence (it stays in the cypherpunk detail)',
       [r1, r2, r4, r6].every(r => !/already known|insufficient funds|0x[0-9a-f]{64}/.test(r.say)) || REG === 'cypherpunk', [r1, r4, r6].map(r => r.say).join(' | ').slice(0, 200));
     await ctx.close();

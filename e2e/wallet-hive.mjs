@@ -145,8 +145,8 @@ try {
     ok('a memo holding a private key is refused (memos are public)', /looks like a private key/.test(await page.textContent('#hs-stat')) && state.broadcasts.length === 0);
     await fill('1', 'hi');
     await page.evaluate(() => document.getElementById('hs-go').click());
-    await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat');
-    ok('one press sends 1 HIVE, written 1.000 HIVE, and the chain confirms it in words', (await page.textContent('#hs-stat')) === 'Done. 1.000 HIVE went to someoneelse. The chain confirmed it.' && state.broadcasts.length === 1 && state.broadcasts[0].operations[0][1].amount === '1.000 HIVE', await page.textContent('#hs-stat'));
+    await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat');
+    ok('one press sends 1 HIVE, written 1.000 HIVE, and the chain confirms it in words', (await page.textContent('#hs-stat')) === 'done. 1.000 HIVE went to someoneelse, and the chain confirmed it.' && state.broadcasts.length === 1 && state.broadcasts[0].operations[0][1].amount === '1.000 HIVE', await page.textContent('#hs-stat'));
     ok('the node would recover loviswater\'s active key from the signature', await recovers(state.broadcasts[0]));
     ok('nothing is left waiting once the chain confirmed it', await page.evaluate(() => localStorage.getItem('bnr_hive_pending:gatesoul')) === null);
     if (reg === 'bee') {
@@ -154,7 +154,7 @@ try {
       state.landed = false; state.failNext = 2; state.broadcasts = [];
       await fill('0.5', 'again');
       await page.evaluate(() => document.getElementById('hs-go').click());
-      await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_hive_pending:gatesoul') || 'null'));
       ok('a dropped broadcast is not called done, and its signed bytes are kept', /did not answer, so this wallet cannot tell yet whether it went out/.test(await page.textContent('#hs-stat')) && !!kept && kept.amount === '0.500', await page.textContent('#hs-stat'));
       // "use a different Hive account" never throws away an unsettled send or its sealed key
@@ -163,9 +163,9 @@ try {
       ok('while a Hive send is unsettled, a different account is refused in words and nothing is forgotten', /has not settled yet, so loviswater stays here/.test(held.t) && held.link === 'see your last send' && held.acct === JSON.stringify({ acct: 'loviswater' }) && held.seal && held.pend, JSON.stringify(held));
       await fill('7', 'a different send');
       await page.evaluate(() => document.getElementById('hs-go').click());
-      await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       const sigs = new Set(state.broadcasts.map(b => b.signatures[0]));
-      ok('the next press resends the kept bytes, signs nothing new, and says the last send went through', /^Your last send went through: 0\.500 HIVE to someoneelse/.test(await page.textContent('#hs-stat')) && sigs.size === 1 && state.broadcasts.every(b => b.operations[0][1].amount === '0.500 HIVE'), (await page.textContent('#hs-stat')) + ' · ' + sigs.size);
+      ok('the next press resends the kept bytes, signs nothing new, and says the last send went through', /^your last send went through: 0\.500 HIVE to someoneelse/.test(await page.textContent('#hs-stat')) && sigs.size === 1 && state.broadcasts.every(b => b.operations[0][1].amount === '0.500 HIVE'), (await page.textContent('#hs-stat')) + ' · ' + sigs.size);
       // with nothing pending, forgetting is said first and pressed once more; "keep it" keeps it
       await page.evaluate(() => document.getElementById('hv-other').click());
       const ask = await page.evaluate(() => ({ t: document.getElementById('hv-add-stat').innerText, btns: [...document.querySelectorAll('#hv-add-stat button.wl-act')].map(b => b.textContent), acct: localStorage.getItem('bnr_hive_acct:gatesoul') }));
@@ -180,26 +180,26 @@ try {
       // window a node answers "expired", not "duplicate", and a landed send must never be cleared
       state.landed = false; state.failNext = 2; state.broadcasts = [];
       await fill('0.25', 'third'); await press();
-      await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       const form = await page.evaluate(() => ['hs-to', 'hs-amt', 'hs-memo'].map(i => document.getElementById(i).value).join(''));
       ok('once a send is signed the form is cleared, so a press can never sign it a second time', form === '' && !!(await pend()), form);
       state.refuse = 'transaction expired'; state.status = 'within_irreversible_block'; const nb = state.broadcasts.length;
-      await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await press(); await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       ok('the chain is read first: it shows the send, so it went through, no refusal is believed and nothing is re-signed',
-        /^Your last send went through: 0\.250 HIVE/.test(await said()) && state.broadcasts.length === nb && (await pend()) === null, (await said()) + ' · ' + (state.broadcasts.length - nb));
+        /^your last send went through: 0\.250 HIVE/.test(await said()) && state.broadcasts.length === nb && (await pend()) === null, (await said()) + ' · ' + (state.broadcasts.length - nb));
       // the cap: counted once signed, given back only on the chain's proof that it never ran
       delete state.refuse; delete state.status; state.landed = false; state.failNext = 2;
       const before = await hiveSum();
-      await fill('2', 'fourth'); await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await fill('2', 'fourth'); await press(); await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       ok('a signed send counts against the daily cap at once, also when its answer is lost', Math.abs((await hiveSum()) - before - 2) < 1e-9, String((await hiveSum()) - before));
       state.status = 'expired_irreversible';
-      await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await press(); await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       ok('expired_irreversible is the chain\'s proof it never ran: the 2 HIVE come back to the cap and the lane is free',
         /did not land in time, so nothing was sent/.test(await said()) && Math.abs((await hiveSum()) - before) < 1e-9 && (await pend()) === null, (await said()) + ' · ' + ((await hiveSum()) - before));
       delete state.status; state.refuse = 'Account does not have sufficient funds for balance adjustment'; state.broadcasts = [];
-      await fill('3', 'fifth'); await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      await fill('3', 'fifth'); await press(); await until(page, /^(done|it |your|hive|that|the )/i, 'hs-stat', 60000);
       ok('a sure refusal of a first broadcast is said, the cap is given back and the typing comes back',
-        (await said()) === 'That account does not hold enough for this.' && Math.abs((await hiveSum()) - before) < 1e-9 && (await page.evaluate(() => document.getElementById('hs-amt').value)) === '3.000' && (await pend()) === null, await said());
+        (await said()) === 'that account does not hold enough for this.' && Math.abs((await hiveSum()) - before) < 1e-9 && (await page.evaluate(() => document.getElementById('hs-amt').value)) === '3.000' && (await pend()) === null, await said());
       delete state.refuse;
       // a second soul does not see or erase the first soul's Hive account
       await page.evaluate(() => { localStorage.setItem('bnr_soul', 'othersoul'); });
