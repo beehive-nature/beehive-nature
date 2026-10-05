@@ -2964,6 +2964,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(MPRK&&!SOUL) wlSay($('kc-bridge-verdict'),['connect your name to get your signing key. ',{to:'connect-sec',t:'connect your name'},{cy:'K1 not derived: no SOUL (deriveK1 needs a name)'}]);
   }
   function scrubAll(){
+    if(KC_ASK)KC_ASK.drop('the keychain closed while it waited for your answer');
     if(BSIGNER && typeof BSIGNER.wipe==='function') BSIGNER.wipe();
     setTimeout(pqPanel,0);
     if(MPRK){MPRK.fill(0);MPRK=null}
@@ -3232,7 +3233,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!MPRK){
       say('Confirm with your passkey…');
       CEREMONY=true;
-      try{ keychainOn(await connectSoul()) }
+      try{ keychainOn(await connectSoul($('hv-add-stat'))) }
       catch(e){ throw calm(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
       finally{ CEREMONY=false }
     }
@@ -4111,7 +4112,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var sup=BZDIDKEY&&await BZDIDKEY.prfBrowserSupport();
         if(sup===false){say('fail','This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.',null,{code:'prf'});return false}
         CEREMONY=true;
-        try{ keychainOn(await connectSoul()); }
+        try{ keychainOn(await connectSoul($('sign-sheet')?$('sign-stat'):$('pq-law-stat'))); }
         catch(e){ var cancel=/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''); say('fail',cancel?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.',null,{code:cancel?'cancel':'nopasskey',err:e});return false }
         finally{ CEREMONY=false }
       }
@@ -5526,9 +5527,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      page cannot prove (the picker, or a founding pointer from before its mark)
      must open a soul this browser knows: the name's own soul, or, for a name
      with none yet, one this browser opened or keeps a device list for. Another
-     soul is refused and wiped before anything opens. A browser that knows no
-     soul yet takes the first answer. The recovery words and a bzDiD made here
-     are the soul by the reader's own act, so they set the name's soul. */
+     soul is refused and wiped before anything opens. On a browser that knows
+     no soul yet, the first answer opens only after the reader confirms its six
+     words, and nothing is bound before that yes. The recovery words, the phone
+     and a bzDiD made here are the soul by the reader's own act, so they set the
+     name's soul (and so undo a wrong earlier one). */
   var BIND_KEY='bnr_bind';
   function bindAll(){
     var o=null; try{ o=JSON.parse(localStorage.getItem(BIND_KEY)||'null') }catch(e){}
@@ -5555,23 +5558,75 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var sd=BZDIDKEY.deriveK1Key(mprk,'nostr:bnr-devices').seed;
     try{ return toHex(BN.schnorr.getPublicKey(sd)).slice(0,16) }finally{ sd.fill(0) }
   }
-  function soulGuard(id2,how){
-    var fp=soulFp(id2), o=bindAll(), want=SOUL?o.name[SOUL]||null:null, hw=Object.keys(dmHwmAll()), known;
-    if(want) known=fp===want;
-    else if(!o.souls.length&&!hw.length) known=true;
-    else { var reg=null; try{ reg=soulRegKey(id2.masterPrk) }catch(e){} known=o.souls.indexOf(fp)>=0||(!!reg&&hw.indexOf(reg)>=0) }
-    if(!known){
-      soulDrop(id2);
-      var x=new Error('other_soul: the '+how+' opened soul "'+(fp||'?')+'", but this browser keeps '+(want?'"'+want+'" for '+SOUL:'other souls ('+o.souls.length+' opened here, '+hw.length+' device lists seen)')+'; nothing was opened and its keys were wiped');
-      x.code='other_soul'; throw x;
-    }
-    bindSoul(fp,false);
-    return id2;
+  /* what this browser knows about an answer: 'known' (it is the soul kept for
+     this name, or for a name with none yet one this browser opened or keeps a
+     device list for), 'other' (this browser keeps another soul), or 'none'
+     (this browser keeps no soul at all, so only the reader can say) */
+  function soulVerdict(id2){
+    var fp=soulFp(id2), o=bindAll(), want=SOUL?o.name[SOUL]||null:null, hw=Object.keys(dmHwmAll());
+    if(want) return fp===want?'known':'other';
+    if(!o.souls.length&&!hw.length) return 'none';
+    var reg=null; try{ reg=soulRegKey(id2.masterPrk) }catch(e){}
+    return (o.souls.indexOf(fp)>=0||(!!reg&&hw.indexOf(reg)>=0))?'known':'other';
+  }
+  function soulEvidence(){ var o=bindAll(); return !!((SOUL&&o.name[SOUL])||o.souls.length||Object.keys(dmHwmAll()).length) }
+  /* an answer this page cannot prove: a known soul opens, another soul is
+     refused and wiped, and with nothing known the reader is asked */
+  function soulHold(id2,credId,where,how){
+    var v=soulVerdict(id2), fp=soulFp(id2);
+    if(v==='known'){ bindSoul(fp,false); return Promise.resolve(id2) }
+    if(v==='none') return soulAsk(id2,credId,where,how);
+    var o=bindAll(), want=SOUL?o.name[SOUL]||null:null, hw=Object.keys(dmHwmAll()).length;
+    soulDrop(id2);
+    var x=new Error('other_soul: the '+how+' opened soul "'+(fp||'?')+'", but this browser keeps '+(want?'"'+want+'" for '+SOUL:'other souls ('+o.souls.length+' opened here, '+hw+' device lists seen)')+'; nothing was opened and its keys were wiped');
+    x.code='other_soul'; return Promise.reject(x);
+  }
+  /* the one calm check on a browser that keeps no soul yet: the soul that
+     answered is named by its six words, and it opens only on the reader's yes.
+     Nothing is bound (bnr_bind, bnr_cred_fp) before that yes. No wipes it and
+     runs the picker again; with no answer it is wiped after two minutes. The
+     question shows in the keychain's line and in the line of the job that asked
+     (where), with the way to it on the glance. */
+  var KC_ASK=null;
+  function soulAsk(id2,credId,where,how){
+    if(KC_ASK)KC_ASK.drop('another check replaced it');
+    return new Promise(function(resolve,reject){
+      var fp=soulFp(id2), done=false, timer=null, ask=null;
+      function end(){ done=true; clearTimeout(timer); if(KC_ASK===ask)KC_ASK=null }
+      function lines(){ var a=[$('kc-stat')]; if(where&&a.indexOf(where)<0)a.push(where); return a.filter(Boolean) }
+      function say(parts){ lines().forEach(function(e){ wlSay(e,parts) }) }
+      function drop(why){
+        if(done)return; end(); soulDrop(id2);
+        var x=new Error('soul_unconfirmed: '+why+'; soul "'+fp+'" was wiped and nothing opened'); x.code='soul_unconfirmed'; reject(x);
+      }
+      function yes(){
+        if(done)return; end();
+        bindSoul(fp,false);
+        /* an old pointer (from before its mark) stays only as the passkey the reader just confirmed */
+        if(CRED_ID&&!credFp()){ if(CRED_ID===credId)saveCred(credId,fp); else saveCred(null) }
+        resolve(id2);
+      }
+      function no(){
+        if(done)return; end(); soulDrop(id2);
+        if(CRED_ID&&CRED_ID===credId&&!credFp())saveCred(null);   // not theirs: never touched again as the founding passkey
+        say(['touch another passkey.',{cy:'soul "'+fp+'" is not the reader\'s: it was wiped, nothing was bound, and the picker runs again'}]);
+        identityFromDiscoverable(where).then(resolve,reject);   // inside the press, so the browser lets the prompt open
+      }
+      function show(){
+        say(['this opens the soul '+fp+'. is it yours? ',{btn:'yes, open it',on:yes},{btn:'no, try another passkey',on:no},
+          {cy:'the '+how+' ('+String(credId||'?').slice(0,12)+'…) opened soul "'+fp+'", and this browser keeps no soul yet to hold it to: nothing opens and nothing is bound (bnr_bind, bnr_cred_fp) until you say yes; it is wiped if nobody answers within 2 minutes'}]);
+        var g=$('sum-kc'); if(g){ wlSay(g,['one check before your keychain opens. ',{to:'kc-sec',t:'open my keychain'}]); g.style.color='var(--amber)' }
+      }
+      ask={drop:drop,show:show};
+      KC_ASK=ask;
+      timer=setTimeout(function(){ drop('nobody answered within 2 minutes') },120000);
+      show();
+    });
   }
   /* the picker path (no remembered founding passkey): the same PRF ceremony as
      identityFromPasskey, but it reads WHICH passkey answered, refuses one that
-     is not a soul, and holds the soul it opens to the binding */
-  function identityFromDiscoverable(){
+     is not a soul, and holds the soul it opens to what this browser knows */
+  function identityFromDiscoverable(where){
     return navigator.credentials.get({publicKey:{
       challenge: crypto.getRandomValues(new Uint8Array(32)),
       timeout: 6e4,
@@ -5579,7 +5634,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       extensions: { prf: { eval: { first: BZDIDKEY.PRF_INPUT_SALT } } }
     }}).then(function(ass){
       if(!ass)throw new Error('assertion returned null');
-      refuseNotSoul(ass);
+      try{ refuseNotSoul(ass) }
+      catch(e){
+        /* a marked answer is kept as what it is, and an old founding pointer to it goes */
+        var keep=e&&e.code==='wrap_cred'?wrapKeep:notSoulKeep;
+        if(handleTag(ass.response&&ass.response.userHandle))keep(ass.id);
+        if(CRED_ID&&CRED_ID===ass.id){ keep(ass.id); saveCred(null) }
+        throw e;
+      }
       var ex=ass.getClientExtensionResults&&ass.getClientExtensionResults();
       var first=ex&&ex.prf&&ex.prf.results&&ex.prf.results.first;
       if(!first)throw new Error('no_prf_output: that passkey exists but lacks PRF (Bitwarden-class managers don\'t carry it)');
@@ -5589,7 +5651,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       out.fill(0);
       var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
       id2.masterPrk=mprk;
-      return soulGuard(id2,'picker answer');
+      return soulHold(id2,ass.id,where,'picker answer');
     });
   }
   /* connect order: a sealed device opens the soul through its seal, and ONLY
@@ -5598,19 +5660,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      device's wrapper passkey is a different soul. Without a seal, the founding
      passkey (CRED_ID, never a wrapper, a vault or an account passkey) is touched
      directly: one marked with its soul opens exactly that soul, and one from
-     before the mark is held to the binding (and dropped if it opens another
-     soul). A marked one whose soul is not this name's goes to the picker, and
-     with none remembered the picker runs. */
+     before the mark is held to what this browser knows (and dropped if it
+     opens another soul). On a browser that knows no soul, an old pointer goes
+     to the picker instead, whose labels the reader sees (an older add left its
+     wrapper there, and only the reader can tell). A marked one whose soul is
+     not this name's goes to the picker, and with none remembered the picker
+     runs. where: the line of the job that asked, where a check is also shown. */
   function connectPath(){
     var seal=loadSeal(); if(seal&&seal.credId)return 'seal';
     if(CRED_ID&&!isWrap(CRED_ID)&&!isNotSoul(CRED_ID)){
       var cfp=credFp(), want=SOUL?bindAll().name[SOUL]||null:null;
-      if(!cfp)return 'legacy';
+      if(!cfp)return soulEvidence()?'legacy':'picker';
       if(!want||want===cfp)return 'cred';
     }
     return 'picker';
   }
-  function connectSoul(){
+  function connectSoul(where){
     var path=connectPath(), seal=loadSeal();
     if(path==='seal'){
       return prfEvalTargeted(seal.credId).then(async function(prf){
@@ -5632,10 +5697,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(fp!==cfp){ soulDrop(id2); var x=new Error('other_soul: the remembered passkey opened soul "'+fp+'", not the soul it is marked with ("'+cfp+'"); nothing was opened'); x.code='other_soul'; throw x }
           bindSoul(fp,false); return id2;
         }
-        try{ soulGuard(id2,'remembered passkey (bnr_cred from before its mark)') }
-        catch(e){ if(CRED_ID===c)saveCred(null); throw e }   /* a pointer that opens another soul is never followed again */
-        if(CRED_ID===c)saveCred(c,fp);
-        return id2;
+        return soulHold(id2,c,where,'remembered passkey (bnr_cred from before its mark)').then(function(id3){
+          if(CRED_ID===c&&!credFp())saveCred(c,fp);
+          return id3;
+        },function(e){
+          if(e&&e.code==='other_soul'&&CRED_ID===c)saveCred(null);   /* a pointer that opens another soul is never followed again */
+          throw e;
+        });
       },function(e){
         /* the remembered passkey answered with a mark that says it is not a soul: it is
            kept as what it is and never touched again as the founding passkey */
@@ -5643,7 +5711,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         throw e;
       });
     }
-    return identityFromDiscoverable();
+    return identityFromDiscoverable(where);
   }
   /* what connect will touch, for cypherpunk, read from the same order connectSoul takes */
   function connectPathSay(){
@@ -5651,7 +5719,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return p==='seal'?'targeted get on this device\'s seal credential (bnr_seal): the soul opens through the seal and only through it'
       :p==='cred'?'targeted get: allowCredentials = bnr_cred, marked with soul "'+credFp()+'", no picker'
       :p==='legacy'?'targeted get: allowCredentials = bnr_cred from before its mark; the soul it opens must be one this browser keeps'
-      :'discoverable get: the picker; a wrapper, a vault or account passkey, or a soul this browser does not keep for this name is refused';
+      :'discoverable get: the picker; a wrapper, a vault or account passkey, or a soul this browser does not keep for this name is refused; on a browser that keeps no soul yet the answer opens only after you confirm its six words'+(CRED_ID&&!credFp()?' (bnr_cred from before its mark is not touched directly here)':'');
   }
 
   /* ── keychain connect ceremony ────────────────────────────── */
@@ -5666,6 +5734,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var qs=$('qr-sec'); if(qs)qs.style.display='none';
   }
   function keychainOn(id){
+    if(KC_ASK)KC_ASK.drop('another way opened the keychain');
     var fp=soulFp(id);
     if(MPRK){ scrubAll(); if(fp!==KC_FP)kcSoulGone() }   // a soul opened in place of another leaves no copy of the old root, its keys or its sheets
     MPRK=id.masterPrk.slice();
@@ -5699,6 +5768,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function kcConnect(){ $('kc-pass').click() }
   $('kc-pass').onclick=async function(){
     if(!BZDIDKEY){kcNoEngine();return}
+    if(KC_ASK){ KC_ASK.show(); return }   // the check is still waiting for its answer
     if(CEREMONY){ wlSay($('kc-stat'),['a passkey prompt is already open. finish it, then press again.',{cy:'one WebAuthn ceremony at a time (CEREMONY set)'}]); return }
     autoTried=true;          // a press is the visit's one attempt: no second prompt from a later tap
     CEREMONY=true;
@@ -5735,7 +5805,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more,#wl-bee,#wl-rave,#summary-sec,#connect-sec,footer,#chains .va-total,[data-vaulta-toggle],[data-hive-toggle],[data-ant-toggle],[data-ar-toggle],#chains .stat'))return;
     if(ev&&ev.type==='keydown'&&['Tab','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Shift','Control','Alt','Meta'].includes(ev.key))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
-    if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
+    if(autoTried||MPRK||CEREMONY||KC_ASK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
     window.removeEventListener('pointerdown',autoConnect);
     window.removeEventListener('keydown',autoConnect);
@@ -5767,6 +5837,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return ['that passkey keeps your soul sealed on one device and is not your bzDiD itself, so nothing opened. ',tryB,' with your bzDiD passkey, or bring your soul back with ',rec,'.',{cy:raw}];
     if(e&&e.code==='not_soul'||/^not_soul/.test(m))
       return ['that passkey opens your vault or your account and is not your bzDiD itself, so nothing opened. ',tryB,' with your bzDiD passkey, or bring your soul back with ',rec,'.',{cy:raw}];
+    if(e&&e.code==='soul_unconfirmed'||/^soul_unconfirmed/.test(m))
+      return ['the check was not answered, so nothing opened. ',tryB,' or bring your soul back with ',rec,'.',{cy:raw}];
     if(e&&e.code==='other_soul'||/^other_soul/.test(m))
       return ['that passkey opens a different soul than the one this browser keeps for you, so nothing opened. ',tryB,' with your bzDiD passkey, or bring your soul back with ',rec,'.',{cy:raw+' · your recovery words, or a bzDiD made here, set the soul this browser keeps for your name'}];
     if(e&&e.code==='seal_closed'||/^seal_closed/.test(m))
@@ -6252,8 +6324,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       seal.credId=en.credentialId;
       seal.name=(navigator.userAgent||'').match(/Windows|Mac|Linux|Android|iPhone|iPad/)||['device'];
       seal.name=seal.name[0]+' · '+(SOUL||'bzDiD');
-      var id2=BZDIDKEY.deriveIdentity(MPRK.slice(),'bnr.b');
-      seal.fp=id2.fingerprint.words;
+      seal.fp=KC_FP;   // the open soul's public fingerprint: no second copy of the root is made for it
       devs=(DM_REG&&DM_REG.length?DM_REG.slice():[]);
       devs=devs.filter(function(d){return d.credId!==seal.credId});
       devs.push({credId:seal.credId,name:seal.name,fp:seal.fp,at:seal.at});
@@ -6475,7 +6546,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           got=1;
           var id2=BZDIDKEY.deriveIdentity(pt,'bnr.b'); id2.masterPrk=pt;
           qrEnd();
-          bindSoul(soulFp(id2),false);
+          bindSoul(soulFp(id2),true);   // the reader brought it from their phone: this name's soul now
           keychainOn(id2);
           $('qr-sec').style.display='none';
           wlSay($('kc-stat'),['you are signed in with your phone, and your keychain is open on this page. ',{to:'bal-sec',t:'see your accounts'},{cy:'logged in via phone · soul in tab memory · handshake keys scrubbed'}]);
@@ -6699,7 +6770,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       /* one soul at a time: another soul's words never replace the open one in place */
       var same=(id.fingerprint&&id.fingerprint.words)===$('kc-soul-fp').textContent;
       var fpNew=(id.fingerprint&&id.fingerprint.words)||'';
-      id.masterPrk.fill(0); id=null;
+      soulDrop(id); id=null;
       if(same) wlSay($('kc-stat'),['this soul is already open here.',{cy:'same fingerprint: '+fpNew}]);
       else wlSay($('kc-stat'),['you are connected as another soul. close your keychain first to open a different one. ',{btn:'close keychain',on:function(){ $('kc-out').click() }},{cy:'open soul '+$('kc-soul-fp').textContent+' · pasted soul '+fpNew}]);
       return;
@@ -8225,7 +8296,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var sup=await BZDIDKEY.prfBrowserSupport();
       if(sup===false){tell('fail',['This browser cannot use your passkey here, so nothing was signed. Open the name desk in Chrome, Edge or Safari and press it there again. ',{href:'bnames.html',t:'go back to the name desk'}]);return 'stop'}
       CEREMONY=true;
-      try{ keychainOn(await connectSoul()) }
+      try{ keychainOn(await connectSoul($('act-stat'))) }
       catch(e){
         // a page that opened by itself may not ask for a passkey: the press asks
         if(isAuto){tell('wait',['Press Sign, then confirm with your passkey.']);return 'fail'}
@@ -9029,7 +9100,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!capGate(sym,amt,st))return;
       if(!MPRK){
         st.textContent='confirm with your passkey…'; CEREMONY=true;
-        try{ keychainOn(await connectSoul()) }
+        try{ keychainOn(await connectSoul(st)) }
         catch(e){ wlSay(st,/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?['nothing was sent. press send again when you are ready.']:['your keychain did not connect, so nothing was sent. ',again,{cy:(e&&e.message)||String(e)}]); return }
         finally{ CEREMONY=false }
       }
