@@ -1332,27 +1332,27 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
-      <button type="button" class="va-total" data-vaulta-toggle aria-expanded="false" aria-controls="vaulta-breakdown">
-        <span class="cb" id="v-bal" data-hero-number></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      <button type="button" class="va-total" data-vaulta-toggle aria-expanded="false" aria-controls="vaulta-breakdown" disabled>
+        <span class="cb" id="v-bal" data-hero-number></span><span class="va-total-caret" aria-hidden="true" hidden>⌄</span>
       </button>
       <div class="va-breakdown" id="vaulta-breakdown" data-vaulta-breakdown hidden>
         <div class="va-breakdown-head">A held on Vaulta</div>
         <div data-vaulta-rows></div>
       </div>
       <div class="cd" id="v-info">core balance + RAM + resources</div>
-      <div class="stat" id="v-stat">waiting…</div>
+      <div class="stat" id="v-stat"><a href="#connect-sec">connect your name</a> to see your Vaulta balance.</div>
     </div>
     <div class="chain" id="ch-hive">
       <div class="cn">🐝 Hive <span class="badge">HB/Hive</span></div>
-      <button type="button" class="va-total" data-hive-toggle aria-expanded="false" aria-controls="hive-breakdown">
-        <span class="cb" id="h-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      <button type="button" class="va-total" data-hive-toggle aria-expanded="false" aria-controls="hive-breakdown" disabled>
+        <span class="cb" id="h-bal"></span><span class="va-total-caret" aria-hidden="true" hidden>⌄</span>
       </button>
       <div class="va-breakdown" id="hive-breakdown" data-hive-breakdown hidden>
         <div class="va-breakdown-head">HB/Hive held</div>
         <div data-hive-rows></div>
       </div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
-      <div class="stat" id="h-stat">waiting…</div>
+      <div class="stat" id="h-stat"><a href="#connect-sec">connect your name</a>, then add your Hive account here.</div>
       <div id="hv-add" hidden>
         <div class="row" style="margin-top:8px">
           <input id="hv-key" type="password" autocomplete="off" spellcheck="false" aria-label="your Hive active private key" placeholder="paste your Hive active key" style="flex:2;min-height:44px">
@@ -1366,24 +1366,24 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="cn">🔵 Arbitrum <span class="badge">ETH</span></div>
       <div class="cb" id="a-bal"></div>
       <div class="cd" id="a-info">ETH of your derived bzDiD 0x address (evm:yourname)</div>
-      <div class="stat" id="a-stat">connect keychain to derive</div>
+      <div class="stat" id="a-stat"><a href="#kc-sec">connect your keychain</a> to see your Arbitrum balance.</div>
     </div>
     <div class="chain" id="ch-autonomi">
       <div class="cn">🐜 Autonomi <span class="badge">ANT</span></div>
-      <button type="button" class="va-total" data-ant-toggle aria-expanded="false" aria-controls="ant-breakdown">
-        <span class="cb" id="ant-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      <button type="button" class="va-total" data-ant-toggle aria-expanded="false" aria-controls="ant-breakdown" disabled>
+        <span class="cb" id="ant-bal"></span><span class="va-total-caret" aria-hidden="true" hidden>⌄</span>
       </button>
       <div class="va-breakdown" id="ant-breakdown" data-ant-breakdown hidden>
         <div class="va-breakdown-head">ANT held</div>
         <div data-ant-rows></div>
       </div>
       <div class="cd" id="ant-info">ANT on Arbitrum, of your derived 0x address</div>
-      <div class="stat" id="ant-stat">connect keychain to derive</div>
+      <div class="stat" id="ant-stat"><a href="#kc-sec">connect your keychain</a> to see your ANT balance.</div>
     </div>
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
-      <button type="button" class="va-total" data-ar-toggle aria-expanded="false" aria-controls="ar-breakdown">
-        <span class="cb" id="ar-bal"></span><span class="va-total-caret" aria-hidden="true">⌄</span>
+      <button type="button" class="va-total" data-ar-toggle aria-expanded="false" aria-controls="ar-breakdown" disabled>
+        <span class="cb" id="ar-bal"></span><span class="va-total-caret" aria-hidden="true" hidden>⌄</span>
       </button>
       <div class="va-breakdown" id="ar-breakdown" data-ar-breakdown hidden>
         <div class="va-breakdown-head">AR held</div>
@@ -4052,24 +4052,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   var ANT='0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684'; // ANT (Autonomi) on Arbitrum One — arbiscan-verified PUBLIC-CONSTANT
   async function readEvm(addr){
+    balFor(); var gen=BAL_GEN;
     $('a-info').textContent='derived bzDiD address';$('a-stat').textContent='reading…';
     var wei=await evmCall('eth_getBalance',[addr,'latest']);
-    if(wei!==null){
+    if(gen!==BAL_GEN||addr!==EVMADDR)return;   /* the keychain or the name changed while this read was out */
+    if(typeof wei==='string'&&/^0x[0-9a-f]+$/i.test(wei)){
       var eth=parseInt(wei,16)/1e18;
       $('a-bal').textContent=eth.toFixed(6)+' ETH';
       $('a-info').textContent=addr;
       $('a-stat').textContent='✓ live';$('a-stat').className='stat ok';wlRead($('a-stat'),true);
       $('ch-arb').classList.add('connected');
-    } else { $('a-stat').textContent='arbitrum read failed';$('a-stat').className='stat err';wlRead($('a-stat'),false); }
+    } else { wlSay($('a-stat'),['your Arbitrum balance did not load just now. ',{btn:'try again',on:function(){ if(EVMADDR)readEvm(EVMADDR) }},{cy:'eth_getBalance '+addr+': '+((wei&&wei.message)||'no host answered')}]);$('a-stat').className='stat err';wlRead($('a-stat'),false); }
     // ANT balanceOf — honest EVM lane (the old vaulta-side read never worked)
     $('ant-info').textContent='ANT of '+addr.slice(0,10)+'…';$('ant-stat').textContent='reading…';
     var bal=await evmCall('eth_call',[{to:ANT,data:'0x70a08231'+'0'.repeat(24)+addr.slice(2)},'latest']);
-    if(bal!==null&&/^0x[0-9a-f]+$/i.test(bal)){
+    if(gen!==BAL_GEN||addr!==EVMADDR)return;
+    if(typeof bal==='string'&&/^0x[0-9a-f]+$/i.test(bal)){
       var ant=parseInt(bal,16)/1e18;
       upsertAntBalance(addr,ant);
       $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';wlRead($('ant-stat'),true);
       $('ch-autonomi').classList.add('connected');
-    } else { $('ant-stat').textContent='ANT read failed';$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
+    } else { wlSay($('ant-stat'),['your ANT balance did not load just now. ',{btn:'try again',on:function(){ if(EVMADDR)readEvm(EVMADDR) }},{cy:'ANT balanceOf '+addr+': '+((bal&&bal.message)||'no host answered')}]);$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
     sumChains();
   }
 
@@ -5704,7 +5707,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
 
   $('kc-out').onclick=function(){
-    scrubAll(); EVMADDR=null; AR_DERIVED=null;
+    scrubAll(); EVMADDR=null; AR_DERIVED=null; balKeyless();
     $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
@@ -7245,7 +7248,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     catch(e){ w=null; st.textContent=hiveSay(e) }
     finally{ btn.disabled=false }
   };
-  $('hv-other').onclick=function(){ hiveForget(); hivePendingSet(null); $('hv-add-stat').textContent=''; hiveShow() };
+  /* forgetting the Hive account also deletes its sealed key: said first, pressed once more,
+     and never while a signed send is still unsettled (its kept bytes are the outbox law) */
+  $('hv-other').onclick=function(){
+    var st=$('hv-add-stat'), acct=hiveBound(), p=hivePending();
+    if(!acct){ st.textContent=''; hiveShow(); return }
+    if(p){
+      wlSay(st,['your last Hive send has not settled yet, so '+acct+' stays here until it does. ',{to:'pay-sec',t:'see your last send'},{cy:'pending '+p.txid+' · expires '+p.exp+' · kept in '+hiveSlot('pending')}]);
+      var go=st.querySelector('a'); if(go)go.addEventListener('click',function(){ $('pay-tx').click(); txTab('h') });
+      return;
+    }
+    wlSay(st,['this forgets '+acct+' and its sealed key in this browser. you can add it again with its active key. ',
+      {btn:'forget '+acct,on:function(){ if(hivePending()||hiveBound()!==acct){ $('hv-other').click(); return } hiveForget(); st.textContent=''; hiveShow() }},
+      {btn:'keep it',on:function(){ st.textContent='' }},
+      {cy:'clears '+hiveSlot('acct')+' and '+hiveSlot('seal')}]);
+  };
   $('hs-go').onclick=async function(){
     var st=$('hs-stat'), acct=hiveBound(), btn=this;
     if(!acct){ wlSay(st,['add your Hive account first · ',{to:'ch-hive',t:'paste its active key'}]); return }
@@ -7877,6 +7894,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           item.appendChild(label); item.appendChild(value); list.appendChild(item);
         });
       });
+      toggles();
     }
     function upsert(acct,raw){
       var next={adapter:cfg.adapter,chain:cfg.chain,account:acct,amount:assetNumber(raw)};
@@ -7891,6 +7909,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         list.textContent='';
         var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent=cfg.empty; list.appendChild(empty);
       });
+      toggles();
+    }
+    /* a total not read yet has nothing to open: no lone caret, no empty button */
+    function toggles(){
+      document.querySelectorAll(cfg.toggleSel).forEach(function(t){
+        var on=rows.length>0, c=t.querySelector('.va-total-caret');
+        t.disabled=!on; if(c)c.hidden=!on;
+        if(!on&&t.getAttribute('aria-expanded')==='true'){ t.setAttribute('aria-expanded','false'); var p=$(t.getAttribute('aria-controls')); if(p)p.hidden=true }
+      });
     }
     document.querySelectorAll(cfg.toggleSel).forEach(function(toggle){
       toggle.addEventListener('click',function(){
@@ -7898,6 +7925,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         toggle.setAttribute('aria-expanded',String(!open)); if(panel)panel.hidden=open;
       });
     });
+    toggles();
     return {upsert:upsert,render:render,clear:clear,rows:rows};
   }
   var VAULTA_ROLLUP=makeAssetRollup({
@@ -7935,6 +7963,46 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var m={vaulta:VAULTA_ROLLUP,hive:HIVE_ROLLUP,ant:ANT_ROLLUP,ar:AR_ROLLUP};
     if(m[key]) m[key].clear();
   };
+  /* each card's line before it is read: one sentence and the one place that makes it readable */
+  var BAL_CARD={v:'ch-vaulta',h:'ch-hive',a:'ch-arb',ant:'ch-autonomi',ar:'ch-arweave'};
+  var BAL_CAP={v:'core balance + RAM + resources',h:'liquid + Hive Power + HBD',a:'ETH of your derived bzDiD 0x address (evm:yourname)',ant:'ANT on Arbitrum, of your derived 0x address',ar:'your Arweave address comes from your keys · reads stay keyless'};
+  var BAL_UNREAD={
+    v:[{to:'connect-sec',t:'connect your name'},' to see your Vaulta balance.'],
+    h:[{to:'connect-sec',t:'connect your name'},', then add your Hive account here.'],
+    a:[{to:'kc-sec',t:'connect your keychain'},' to see your Arbitrum balance.'],
+    ant:[{to:'kc-sec',t:'connect your keychain'},' to see your ANT balance.'],
+    ar:[{to:'kc-sec',t:'connect your keychain'},' to see your Arweave address']
+  };
+  function balUnread(keys){
+    keys.forEach(function(k){
+      var st=$(k+'-stat'); wlSay(st,BAL_UNREAD[k]); st.className='stat'; wlRead(st,true);
+      $(k+'-info').textContent=BAL_CAP[k]; $(BAL_CARD[k]).classList.remove('connected');
+    });
+    sumChains();
+  }
+  /* one name's coins: a total never adds the last name's accounts to the next one's.
+     Every reader asks first; the first read after the name changes starts the cards over. */
+  var BAL_SOUL=null, BAL_GEN=0;
+  function balFor(){
+    if(!VAULTA_ROLLUP||BAL_SOUL===SOUL)return;
+    var first=BAL_SOUL===null; BAL_SOUL=SOUL;
+    if(first)return;
+    BAL_GEN++;
+    [VAULTA_ROLLUP,HIVE_ROLLUP,ANT_ROLLUP,AR_ROLLUP].forEach(function(r){ r.clear() });
+    $('a-bal').textContent='';
+    balUnread(['v','h','a','ant','ar']);
+  }
+  /* the keychain is gone: what was read from its derived addresses is no longer this wallet's to show */
+  function balKeyless(){
+    if(!VAULTA_ROLLUP)return;
+    BAL_GEN++;
+    ANT_ROLLUP.clear(); AR_ROLLUP.clear(); $('a-bal').textContent='';
+    balUnread(['a','ant','ar']);
+    var arPub=SOUL?(loadArPublic('ar:'+SOUL)||vaultArPublic()):null;
+    if(arPub)readArBound(arPub);
+  }
+  /* a node that answers "no such account" is not a read that failed */
+  function vaultaMissing(e){ return !!e&&/account_query_exception|unknown key|unable to retrieve account|unknown account|does not exist/i.test(JSON.stringify(e)) }
   /* A is the token of core.vaulta. The chain's older core coin, EOS (eosio.token,
      what get_account calls core_liquid_balance), is a different token that swaps
      1:1 into A at core.vaulta but is not A until it does: the founder's account
@@ -7945,11 +8013,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return r.length?assetNumber(r[0]):0;
   }
   async function readVaulta(acct){
-    var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
+    balFor();
+    var raw=await post(VH,'/v1/chain/get_account',{account_name:acct}), d=(raw&&raw.account_name)?raw:null;
     var a=d?await readA(acct):null;
     if(!d||a===null){
       if(LAST_A&&LAST_A.acct===acct)LAST_A=null;
-      wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
+      var why=d?null:((raw&&raw.error)?raw:await postAny(VH,'/v1/chain/get_account',{account_name:acct}));
+      if(!d&&vaultaMissing(why)) wlSay($('v-stat'),['there is no Vaulta account named '+acct+' yet. ',{to:'acct-sec',t:'make one'},{cy:'get_account '+acct+': '+JSON.stringify(why).slice(0,160)}]);
+      else wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
       $('v-stat').className='stat err'; wlRead($('v-stat'),false); return;
     }
     LAST_ACC=d; LAST_A={acct:acct,a:a};
@@ -7958,32 +8029,71 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/')+
       ' · A from '+A_TOKEN+(eos>0?' · also '+eos.toFixed(4)+' EOS on eosio.token, which swaps 1:1 into A and is not counted here':'');
-    if(eos>0) wlSay($('v-stat'),['✓ live · '+acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A.',{cy:'EOS on eosio.token; it swaps 1:1 into A at '+A_TOKEN}]);
+    if(eos>0) wlSay($('v-stat'),['✓ live · '+acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A. ',{btn:'turn it into A',on:function(){ eosToA(this) }},{cy:'EOS on eosio.token; sent to '+A_TOKEN+' it comes back 1:1 as A'}]);
     else $('v-stat').textContent='✓ live';
     $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
     $('ch-vaulta').classList.add('connected');
     if(vacct()===acct)refreshAcctPanel();
   }
 
+  /* EOS held on the account turns into A in one press. Read on Vaulta mainnet 2026-10-05:
+     get_abi core.vaulta has no swap action a holder calls, and a plain eosio.token transfer
+     {from, to: core.vaulta, quantity, memo ""} is answered inside the same transaction by
+     core.vaulta::transfer of the same amount of A back to the sender (tx c3c79e92d87e9463…,
+     2.5624 EOS in, 2.5624 A out). Same lane as every Vaulta send: the cap (unit EOS, never
+     price-converted), sign once, kept before it goes out, read back. */
+  function eosToA(btn){ vaultaLane(btn,function(){ return eosToAGo(btn) },$('v-stat')) }
+  async function eosToAGo(btn){
+    var st=$('v-stat'), acct=vacct();
+    if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to turn your EOS into A.']); return }
+    if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to turn your EOS into A.']); return }
+    if(!signGuard(st))return;
+    var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
+    if(!d||!d.account_name){ wlSay(st,['could not read '+acct+' just now, so nothing was signed. ',{btn:'try again',on:function(){ readVaulta(acct) }}]); return }
+    var q=String(d.core_liquid_balance||''), eos=assetNumber(q);
+    if(!/^\d+\.\d{4} EOS$/.test(q)||!(eos>0)){ readVaulta(acct); return }
+    if(!capGate('EOS',eos,st))return;
+    var actz=[{actor:acct,permission:'active'}];
+    try{ var act=await vaultaSerialize('eosio.token','transfer',actz,{from:acct,to:A_TOKEN,quantity:q,memo:''}) }
+    catch(e){ wlSay(st,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:(e&&e.message)||String(e)}]); return }
+    await vaultaSend(st,[act],{unit:'EOS',amt:eos},'turn '+q+' into A for '+acct,function(fin){
+      if(fin.phase==='confirmed')wlSay(st,['your '+q+' is now A.',{cy:'eosio.token transfer to '+A_TOKEN+' · tx '+(fin.ref||fin.txid)}]);
+    },btn);
+  }
+
+  /* the chain's reputation score (25 for a new account) from its raw integer */
+  function hiveRep(raw){ var n=Number(raw); if(!isFinite(n)||n===0)return 25; var s=Math.max(Math.log10(Math.abs(n))-9,0); return Math.round((s*9*(n<0?-1:1)+25)*10)/10 }
+  /* Hive Power is vesting shares at the chain's own rate (total_vesting_fund_hive /
+     total_vesting_shares); a rate not read stays unread, never a VESTS figure called HP */
   async function readHive(acct){
-    try{
-      var r=await fetchT(HH,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.get_accounts',params:[[acct]],id:1})});
-      var d=await r.json();
-      if(d.result&&d.result[0]){
-        var a=d.result[0];
-        var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
-        upsertHiveBalance(acct,a.balance);
-        $('h-info').textContent=acct+' · '+hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
-        $('h-stat').textContent='✓ live · '+acct; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
-        $('ch-hive').classList.add('connected');
-      } else { $('h-stat').textContent='account not found on Hive'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
-    }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
+    balFor();
+    var st=$('h-stat'), res=null, err=null;
+    try{ res=await hiveRpc('condenser_api.get_accounts',[[acct]]) }catch(e){ err=e }
+    if(acct!==hiveBound())return;
+    if(err||!Array.isArray(res)){
+      wlSay(st,['Hive did not answer just now. ',{btn:'try again',on:function(){ readHive(acct) }},{cy:err?(err.hive||err.message):'get_accounts answered '+JSON.stringify(res).slice(0,80)}]);
+      st.className='stat err'; wlRead(st,false); return;
+    }
+    var a=res[0];
+    if(!a){
+      wlSay(st,['Hive has no account named '+acct+'. ',{btn:'use a different Hive account',on:function(){ $('hv-other').click() }}]);
+      st.className='stat err'; wlRead(st,false); return;
+    }
+    upsertHiveBalance(acct,a.balance);
+    var vests=assetNumber(a.vesting_shares), hbd=assetNumber(a.hbd_balance).toFixed(3), hp=null, rate='rate not read';
+    try{ var g=await hiveRpc('condenser_api.get_dynamic_global_properties',[]), f=assetNumber(g&&g.total_vesting_fund_hive), s=assetNumber(g&&g.total_vesting_shares);
+      if(f>0&&s>0){ hp=(vests*f/s).toFixed(3); rate=g.total_vesting_fund_hive+' / '+g.total_vesting_shares } }catch(e){}
+    if(acct!==hiveBound())return;
+    wlSay($('h-info'),[hp!==null?acct+' also holds '+hp+' Hive Power and '+hbd+' HBD.':acct+' also holds '+hbd+' HBD; its Hive Power is not known yet because the chain\u2019s rate did not load.',
+      {cy:'vesting_shares '+a.vesting_shares+' · '+rate+' · reputation '+a.reputation+' (score '+hiveRep(a.reputation)+')'}]);
+    st.textContent='✓ live · '+acct; st.className='stat ok'; wlRead(st,true);
+    $('ch-hive').classList.add('connected');
   }
 
   /* AR public balance from a bound forge address — no JWK paste required for reads */
   async function readArBound(addr){
     if(!isArAddress(addr)) return;
+    balFor(); var gen=BAL_GEN;
     var balEl=$('ar-bal'), statEl=$('ar-stat'), infoEl=$('ar-info');
     try{
       if(infoEl) infoEl.textContent=(addr===arDerivedAddr()?'your Arweave address, made from your keys · ':'public address · ')+addr+' · reads stay keyless';
@@ -7992,15 +8102,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(window.BNRAR&&typeof BNRAR.balance==='function') winston=await BNRAR.balance(addr);
       else {
         var r=await fetchT('https://arweave.net/wallet/'+encodeURIComponent(addr)+'/balance');
+        if(!r.ok)throw new Error('gateway HTTP '+r.status);
         winston=await r.text();
       }
-      var ar=(Number(winston)/1e12);
-      if(isFinite(ar)) upsertArBalance(addr,ar);
-      else if(balEl) balEl.textContent='? AR';
+      winston=String(winston==null?'':winston).trim();
+      if(!/^\d+$/.test(winston))throw new Error('gateway answered '+JSON.stringify(winston.slice(0,40)));
+      if(gen!==BAL_GEN)return;
+      upsertArBalance(addr,Number(winston)/1e12);
       if(statEl){ statEl.textContent=addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
       $('ch-arweave').classList.add('connected');
     }catch(e){
-      if(statEl){ statEl.textContent='AR read failed'; statEl.className='stat err'; wlRead(statEl,false) }
+      if(gen!==BAL_GEN)return;
+      if(statEl){ wlSay(statEl,['could not read your AR just now. ',{btn:'try again',on:function(){ readArBound(addr) }},{cy:'arweave balance '+addr+': '+((e&&e.message)||e)}]); statEl.className='stat err'; wlRead(statEl,false) }
     }
   }
 

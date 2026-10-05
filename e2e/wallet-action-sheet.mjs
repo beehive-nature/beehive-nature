@@ -32,6 +32,9 @@ const EOSIO_ABI = { account_name: 'eosio', abi: { version: 'eosio::abi/1.2', act
     { name: 'newaccount', fields: [{ name: 'creator', type: 'name' }, { name: 'name', type: 'name' }, { name: 'owner', type: 'authority' }, { name: 'active', type: 'authority' }] }] } };
 EOSIO_ABI.abi.actions.push({ name: 'newaccount', type: 'newaccount' });
 // mainnet's eosio has no transfer action; A is core.vaulta's token (shapes as get_abi core.vaulta returns them)
+// eosio.token's transfer, for EOS held on an account (shape as get_abi eosio.token returns it)
+const EOSIO_TOKEN_ABI = { account_name: 'eosio.token', abi: { version: 'eosio::abi/1.2', types: [], actions: [{ name: 'transfer', type: 'transfer' }],
+  structs: [{ name: 'transfer', fields: [{ name: 'from', type: 'name' }, { name: 'to', type: 'name' }, { name: 'quantity', type: 'asset' }, { name: 'memo', type: 'string' }] }] } };
 const CORE_VAULTA_ABI = { account_name: 'core.vaulta', abi: { version: 'eosio::abi/1.2', types: [],
   actions: [{ name: 'transfer', type: 'transfer' }, { name: 'buyrambytes', type: 'buyrambytes' }, { name: 'sellram', type: 'sellram' }],
   structs: [
@@ -89,12 +92,12 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       if (u.pathname.endsWith('/get_account')) {
         (state.reads = state.reads || []).push(body.account_name);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
-        return json({ account_name: a, core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
+        return json({ account_name: a, core_liquid_balance: (state.eos && state.eos[a]) || '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
       }
       if (u.pathname.endsWith('/get_currency_balance') && state.aDown) return json({ error: { what: 'down (fixture)' } }, 500);
       if (u.pathname.endsWith('/get_currency_balance')) return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
-      if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : ABI);
+      if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : body.account_name === 'eosio.token' ? EOSIO_TOKEN_ABI : ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
       if (u.pathname.endsWith('/get_block')) {
         const num = body.block_num_or_id;
@@ -522,6 +525,56 @@ try {
     await page.waitForFunction(() => /^sent 0\.0500 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     const posted = state.posts.slice(b2);
     ok('a double press signs and sends one transaction', posted.length === 1, String(posted.length));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* N · EOS held on the account turns into A in one press: an eosio.token transfer to core.vaulta, signed once, under the cap */
+  {
+    console.log('N · EOS held turns into A in one press:');
+    const { ctx, state } = await context(browser, 'bee');
+    state.eos = { kingbeelovis: '1.2345 EOS' };
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    await page.waitForFunction(() => /also holds 1\.2345 EOS/.test(document.getElementById('v-stat').textContent), null, { timeout: 20000 }).catch(() => {});
+    const offer = await page.evaluate(() => ({ t: document.getElementById('v-stat').innerText, btn: (document.querySelector('#v-stat button.wl-act') || {}).textContent }));
+    ok('EOS held is said as a fact with its one action, and is not counted as A', /also holds 1\.2345 EOS/.test(offer.t) && offer.btn === 'turn it into A' && /5\.0000 A/.test(await page.textContent('#v-bal')), JSON.stringify(offer));
+    await page.evaluate(() => document.querySelector('#v-stat button.wl-act').click());
+    await page.waitForFunction(() => /connect your keychain/.test(document.getElementById('v-stat').innerText), null, { timeout: 10000 }).catch(() => {});
+    ok('without the keychain nothing is signed and the line names the one step', /connect your keychain/.test(await page.innerText('#v-stat')) && !(state.posts || []).length, await page.innerText('#v-stat'));
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    // the cap is asked first: an owner's EOS cap below the amount refuses before anything is signed
+    await page.evaluate(() => localStorage.setItem('bnr-spend-cap', JSON.stringify({ EOS: 1 })));
+    await page.evaluate(() => { document.getElementById('wq').value = 'king'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => document.querySelector('#v-stat button.wl-act') && /turn it into A/.test(document.querySelector('#v-stat button.wl-act').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1200); await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => document.querySelector('#v-stat button.wl-act').click());
+    await page.waitForFunction(() => /past the daily cap/.test(document.getElementById('v-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    ok('an EOS cap below the amount refuses before anything is signed', /past the daily cap/.test(await page.innerText('#v-stat')) && !(state.posts || []).length, await page.innerText('#v-stat'));
+    await page.evaluate(() => localStorage.removeItem('bnr-spend-cap'));
+    let sent = null; state.onSend = b => { sent = b.packed_trx; state.eos.kingbeelovis = '0.0000 EOS'; };
+    // read again so the offer is back, then one press
+    await page.evaluate(() => { document.getElementById('wq').value = 'king'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => document.querySelector('#v-stat button.wl-act') && /turn it into A/.test(document.querySelector('#v-stat button.wl-act').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1200); await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => document.querySelector('#v-stat button.wl-act').click());
+    const landed = await page.waitForFunction(() => /is now A/.test(document.getElementById('v-stat').innerText) && document.getElementById('v-stat').innerText, null, { timeout: 30000 }).then(h => h.jsonValue()).catch(() => '');
+    ok('one press signs one eosio.token transfer of exactly 1.2345 EOS from kingbeelovis to core.vaulta', !!sent && (state.posts || []).length === 1 && sent.includes(actHex('eosio.token', 'transfer')) && sent.includes(nameHex('kingbeelovis') + nameHex('core.vaulta') + '3930000000000000' + '04454f5300000000'), String(sent).slice(0, 120));
+    ok('and it lands in words', /your 1\.2345 EOS is now A\./.test(landed), landed);
+    // every Arbitrum host is down here: the card says so calmly, with try again, and shows no figure
+    await page.waitForFunction(() => /did not load/.test(document.getElementById('a-stat').innerText), null, { timeout: 20000 }).catch(() => {});
+    const arb = await page.evaluate(() => ({ t: document.getElementById('a-stat').innerText, btn: (document.querySelector('#a-stat button.wl-act') || {}).textContent, fig: document.getElementById('a-bal').textContent }));
+    ok('a failed Arbitrum read is one calm sentence and try again, never a bare "read failed" or a figure', /^your Arbitrum balance did not load just now\./.test(arb.t) && arb.btn === 'try again' && arb.fig === '', JSON.stringify(arb));
+    // a new name's total counts only its own accounts (each reads 5.0000 A here): never 10.0000 A
+    await page.evaluate(() => { document.getElementById('wq').value = 'bobsoul'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => /bobsoul/.test(document.getElementById('vaulta-breakdown').textContent), null, { timeout: 20000 }).catch(() => {});
+    const tot = await page.evaluate(() => ({ bal: document.getElementById('v-bal').textContent, rows: [...document.querySelectorAll('#vaulta-breakdown .va-rollup-row')].map(r => r.textContent) }));
+    ok('a new name\'s total counts only its own accounts, never the last name\'s', tot.bal === '5.0000 A' && tot.rows.length === 1 && /bobsoul/.test(tot.rows[0]), JSON.stringify(tot));
+    await page.evaluate(() => document.getElementById('kc-out').click());
+    const out = await page.evaluate(() => ({ a: document.getElementById('a-stat').innerText, ant: document.getElementById('ant-stat').innerText, antBal: document.getElementById('ant-bal').textContent, lit: document.getElementById('ch-arb').classList.contains('connected') || document.getElementById('ch-autonomi').classList.contains('connected') }));
+    ok('disconnecting the keychain stops the cards made from it claiming a read', /^connect your keychain to see your Arbitrum balance\.$/.test(out.a) && /^connect your keychain/.test(out.ant) && out.antBal === '' && !out.lit, JSON.stringify(out));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

@@ -54,7 +54,7 @@ try {
         if (b.method === 'condenser_api.get_accounts') return R(b.params[0].filter(n => n === 'loviswater').map(n => ({ name: n, balance: '12.345 HIVE', hbd_balance: '1.000 HBD', vesting_shares: '1000.000000 VESTS', reputation: '0',
           active: { weight_threshold: 1, key_auths: [[DEV_STM, 1]].concat(state.ownerStm ? [[state.ownerStm, 1]] : []), account_auths: [] },
           owner: { weight_threshold: 1, key_auths: state.ownerStm ? [[state.ownerStm, 1]] : [], account_auths: [] } })));
-        if (b.method === 'condenser_api.get_dynamic_global_properties') return R({ head_block_number: 100000, head_block_id: '000186a0aabbccdd11223344556677889900aabb', time: '2026-10-05T12:00:00' });
+        if (b.method === 'condenser_api.get_dynamic_global_properties') return R({ head_block_number: 100000, head_block_id: '000186a0aabbccdd11223344556677889900aabb', time: '2026-10-05T12:00:00', total_vesting_fund_hive: '180000.000 HIVE', total_vesting_shares: '360000000.000000 VESTS' });
         if (b.method === 'condenser_api.broadcast_transaction') {
           state.broadcasts.push(b.params[0]);
           if (state.failNext > 0) { state.failNext--; return route.abort('connectionfailed'); }
@@ -131,6 +131,9 @@ try {
     ok('the key is sealed per soul, never kept in the clear, and the field is empty', store.bind === JSON.stringify({ acct: 'loviswater' }) && /"ct":"/.test(store.seal || '') && !store.all.includes(DEV_WIF) && store.field === '', store.bind);
     await until(page, /✓ live · loviswater/, 'h-stat', 15000);
     ok('balances read for loviswater', /12\.345/.test(await page.textContent('#h-bal')) && /loviswater/.test(await page.textContent('#h-info')), await page.textContent('#h-bal'));
+    // 1000 VESTS at the chain's rate (180000 HIVE / 360000000 VESTS) is 0.500 Hive Power, never "1000 HP"; the raw figures stay for cypherpunk
+    const info = await page.evaluate(() => { const e = document.getElementById('h-info'), c = e.querySelector('.wl-cyd'); return { calm: [...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join(''), cy: c ? c.textContent : '' }; });
+    ok('Hive Power is vesting shares at the chain\'s rate, and the raw VESTS and reputation stay in the detail', info.calm === 'loviswater also holds 0.500 Hive Power and 1.000 HBD.' && /1000\.000000 VESTS/.test(info.cy) && /score 25/.test(info.cy), JSON.stringify(info));
     // one press to send: a whole number is written as Hive writes it
     const fill = (amt, memo) => page.evaluate(([a, m]) => { document.getElementById('tx-tab-h').click();
       document.getElementById('hs-to').value = 'someoneelse'; document.getElementById('hs-amt').value = a; document.getElementById('hs-sym').value = 'HIVE'; document.getElementById('hs-memo').value = m; }, [amt, memo]);
@@ -151,11 +154,21 @@ try {
       await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
       const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_hive_pending:gatesoul') || 'null'));
       ok('a dropped broadcast is not called done, and its signed bytes are kept', /has not shown it yet/.test(await page.textContent('#hs-stat')) && !!kept && kept.amount === '0.500', await page.textContent('#hs-stat'));
+      // "use a different Hive account" never throws away an unsettled send or its sealed key
+      await page.evaluate(() => { const b = document.getElementById('hv-other'); b.hidden = false; b.click(); });
+      const held = await page.evaluate(() => ({ t: document.getElementById('hv-add-stat').innerText, acct: localStorage.getItem('bnr_hive_acct:gatesoul'), seal: !!localStorage.getItem('bnr_hive_seal:gatesoul'), pend: !!localStorage.getItem('bnr_hive_pending:gatesoul'), link: (document.querySelector('#hv-add-stat a') || {}).textContent }));
+      ok('while a Hive send is unsettled, a different account is refused in words and nothing is forgotten', /has not settled yet, so loviswater stays here/.test(held.t) && held.link === 'see your last send' && held.acct === JSON.stringify({ acct: 'loviswater' }) && held.seal && held.pend, JSON.stringify(held));
       await fill('7', 'a different send');
       await page.evaluate(() => document.getElementById('hs-go').click());
       await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
       const sigs = new Set(state.broadcasts.map(b => b.signatures[0]));
       ok('the next press resends the kept bytes, signs nothing new, and says the last send went through', /^Your last send went through: 0\.500 HIVE to someoneelse/.test(await page.textContent('#hs-stat')) && sigs.size === 1 && state.broadcasts.every(b => b.operations[0][1].amount === '0.500 HIVE'), (await page.textContent('#hs-stat')) + ' · ' + sigs.size);
+      // with nothing pending, forgetting is said first and pressed once more; "keep it" keeps it
+      await page.evaluate(() => document.getElementById('hv-other').click());
+      const ask = await page.evaluate(() => ({ t: document.getElementById('hv-add-stat').innerText, btns: [...document.querySelectorAll('#hv-add-stat button.wl-act')].map(b => b.textContent), acct: localStorage.getItem('bnr_hive_acct:gatesoul') }));
+      ok('a different Hive account first says it forgets the sealed key, and forgets nothing yet', /this forgets loviswater and its sealed key/.test(ask.t) && JSON.stringify(ask.btns) === JSON.stringify(['forget loviswater', 'keep it']) && !!ask.acct, JSON.stringify(ask));
+      await page.evaluate(() => document.querySelectorAll('#hv-add-stat button.wl-act')[1].click());
+      ok('keep it keeps the account and its seal', !!(await page.evaluate(() => localStorage.getItem('bnr_hive_acct:gatesoul') && localStorage.getItem('bnr_hive_seal:gatesoul'))));
       // a second soul does not see or erase the first soul's Hive account
       await page.evaluate(() => { localStorage.setItem('bnr_soul', 'othersoul'); });
       await page.reload({ waitUntil: 'load' });
