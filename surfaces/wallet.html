@@ -1668,6 +1668,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
+  <!-- a top up still on its way while another key, or none, is on screen says its words here, named -->
+  <div class="law" id="vc-top-away" style="display:none;margin-top:8px"></div>
 
   <div id="vc-panel" style="display:none;margin-top:12px">
     <!-- 1 · SEE MY BALANCE -->
@@ -7902,9 +7904,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
        sent or asked about for a key the reader is not looking at. */
     var LOADED = null, SEQ = 0;
     function clearPanel(){
-      $v('vc-panel').style.display = 'none'; LOADED = null; TOPPING = null;
+      $v('vc-panel').style.display = 'none'; LOADED = null;
+      if (TOPPING) TOPPING.closed = true; TOPPING = null;     /* an open question closes with the panel it asked about */
       $v('vc-afford-out').textContent = '';
+      if (TOPLINE && !TOPLINE.live) topDrop();                 /* a settled outcome was on screen; the next look up starts clean */
       wlSay($v('vc-top-stat'), ['top up your voucher straight from this wallet; the memo is filled in for you.']);
+      topPlace();                                               /* a top up still on its way keeps its line, named, where it can be seen */
     }
     async function load(key){
       var my = ++SEQ;
@@ -7952,6 +7957,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         }).join('') : '<div style="color:var(--faint)">no metered charges yet: top up and the first receipt lands here</div>';
         LOADED = { key: key, dest: a.send_to || '', memo: a.memo || key };
         $v('vc-panel').style.display = 'block';
+        topPlace();
         say(null);
         $v('vc-src').textContent = 'source: ' + d.source;
         try { localStorage.setItem('bnr-vc-key', key) } catch(e) {}
@@ -7982,9 +7988,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
        asks first, in words, with the amount, the account and the memo; the yes signs
        once through vaultaSend (the outbox, the daily cap, the read back). */
     var TOPPING = null;
+    /* the line of a top up on its way follows its key: under the panel while that key is on
+       screen, otherwise under the key field, named, so an outcome never lands under another
+       key's balance or out of sight. {ask, line, live} */
+    var TOPLINE = null;
+    function topPlace(){
+      var t = TOPLINE, st = $v('vc-top-stat'), away = $v('vc-top-away');
+      if (!t) return;
+      if (LOADED && LOADED.key === t.ask.key) {
+        away.style.display = 'none'; away.textContent = '';
+        if (t.line.parentNode !== st) { st.textContent = ''; st.appendChild(t.line) }
+      } else if (t.line.parentNode !== away) {
+        wlSay(away, ['your top up of ' + t.ask.q + ' for the voucher ' + t.ask.key + ':']);
+        away.appendChild(t.line); away.style.display = 'block';
+      }
+    }
+    function topDrop(){ TOPLINE = null; var away = $v('vc-top-away'); away.style.display = 'none'; away.textContent = '' }
+    /* the question names the account it sends from: connecting another name closes it, nothing sent */
+    document.addEventListener('bnr-soul', function(){
+      var t = TOPPING; if (!t || t.closed || t.soul === SOUL) return;
+      t.closed = true; TOPPING = null;
+      var st = $v('vc-top-stat'); st.style.color = '';
+      wlSay(st, ['you connected another name, so nothing was sent. press top up from my wallet again.', {cy: 'asked to send from ' + t.from + ' as ' + t.soul + '; now ' + (SOUL || 'no name')}]);
+    });
     $v('vc-top-go').onclick = function(){
       var st = $v('vc-top-stat'), raw = String($v('vc-top-amt').value || '').trim();
       st.style.color = '';
+      if (TOPPING) TOPPING.closed = true; TOPPING = null;      /* a new press replaces the old question */
       if (!LOADED) { wlSay(st, ['look up your meter key first, then top up.']); return }
       var dest = LOADED.dest, memo = LOADED.memo, key = LOADED.key;
       if (!validAcct(dest)) { wlSay(st, ['this voucher did not say where top ups go, so nothing can be sent now. ', {btn: 'try again', on: function(){ load(key) }}, {cy: 'rail_a.send_to: ' + (dest || 'missing')}]); return }
@@ -7996,23 +8026,53 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var liq = (LAST_A && LAST_A.acct === vacct()) ? LAST_A.a : null;
       if (liq !== null && amt > liq + 1e-9) { wlSay(st, ['you have ' + aAmount(liq) + ', so add that much or less.']); $v('vc-top-amt').focus(); return }
       if (!capGate('A', amt, st)) return;
-      var ask = TOPPING = { key: key, dest: dest, memo: memo, q: q, amt: amt };
-      wlSay(st, ['send ' + q + ' from ' + vacct() + ' to ' + dest + ' with the memo ' + memo + '? it tops up the voucher for ' + key + '. ',
-        {btn: 'yes, send it', on: function(){
-          if (TOPPING !== ask || !LOADED || LOADED.key !== ask.key || LOADED.dest !== ask.dest || LOADED.memo !== ask.memo) { wlSay(st, ['the voucher on screen changed, so nothing was sent. press top up from my wallet again.']); return }
-          TOPPING = null;
-          vaultaLane($v('vc-top-go'), function(){ return topSend(st, ask) }, st);
-        }},
-        {btn: 'not now', on: function(){ TOPPING = null; wlSay(st, ['nothing was sent.']) }}]);
+      /* the question records what it names; yes signs exactly that, or nothing */
+      var ask = TOPPING = { key: key, dest: dest, memo: memo, q: q, amt: amt, soul: SOUL, from: vacct(), closed: false };
+      wlSay(st, ['send ' + q + ' from ' + ask.from + ' to ' + dest + ' with the memo ' + memo + '? it tops up the voucher for ' + key + '. ',
+        {btn: 'yes, send it', on: function(){ topYes(st, ask) }},
+        {btn: 'not now', on: function(){ if (ask.closed) return; ask.closed = true; if (TOPPING === ask) TOPPING = null; wlSay(st, ['nothing was sent.']) }}]);
     };
+    /* yes closes the choice at once (neither button survives the press), checks again what may
+       have changed since the question, and only then makes the transfer ready to sign */
+    function topYes(st, ask){
+      if (ask.closed) return;
+      ask.closed = true;
+      st.style.color = '';
+      var again = function(){ $v('vc-top-go').click() };      /* every way back asks the question again: nothing signs without it */
+      if (TOPPING !== ask || !LOADED || LOADED.key !== ask.key || LOADED.dest !== ask.dest || LOADED.memo !== ask.memo) { wlSay(st, ['the voucher on screen changed, so nothing was sent. press top up from my wallet again.']); return }
+      TOPPING = null;
+      if (!SOUL) { wlSay(st, [{to: 'connect-sec', t: 'connect your name'}, ' to top up from this wallet. nothing was sent.']); return }
+      if (!K1) { wlSay(st, [{to: 'kc-sec', t: 'connect your keychain'}, ' to top up from this wallet. nothing was sent.']); return }
+      if (SOUL !== ask.soul || vacct() !== ask.from) { wlSay(st, ['the account to send from changed since you were asked, so nothing was sent. ', {btn: 'ask me again', on: again}, {cy: 'asked to send from ' + ask.from + '; now ' + vacct()}]); return }
+      if (!signGuard(st, again)) return;
+      var liq = (LAST_A && LAST_A.acct === ask.from) ? LAST_A.a : null;
+      if (liq !== null && ask.amt > liq + 1e-9) { wlSay(st, ['you have ' + aAmount(liq) + ' now, so nothing was sent. add that much or less.']); $v('vc-top-amt').focus(); return }
+      if (!capGate('A', ask.amt, st)) return;
+      var line = document.createElement('div');
+      st.textContent = ''; st.appendChild(line);
+      wlSay(line, ['getting it ready to sign, one moment.']);
+      vaultaLane($v('vc-top-go'), function(){ return topSend(line, ask) }, line);
+    }
     async function topSend(st, ask){
-      var actz = [{actor: vacct(), permission: 'active'}];
-      try { var act = await vaultaSerialize(A_TOKEN, 'transfer', actz, {from: vacct(), to: ask.dest, quantity: ask.q, memo: ask.memo}) }
-      catch(e) { wlSay(st, ['the network did not answer, so nothing was signed. ', {btn: 'try again', on: function(){ $v('vc-top-go').click() }}, {cy: (e && e.message) || String(e)}]); return }
-      await vaultaSend(st, [act], {unit: 'A', amt: ask.amt}, 'top up ' + ask.q + ' to ' + ask.dest + ' from ' + vacct() + ' · memo ' + ask.memo, function(fin){
-        if (fin.phase === 'confirmed') wlSay(st, ['added ' + ask.q + ' to your voucher; your balance shows it once the estate counts it. ', {btn: 'read my balance', on: function(){ load(ask.key) }}, {cy: 'tx ' + (fin.ref || fin.txid)}]);
-        $v('vc-top-amt').value = '';
-      }, $v('vc-top-go'));
+      if (TOPLINE && TOPLINE.line !== st) topDrop();
+      var t = TOPLINE = { ask: ask, line: st, live: true };
+      topPlace();
+      var again = function(){ $v('vc-top-go').click() };
+      try {
+        var actz = [{actor: ask.from, permission: 'active'}];
+        try { var act = await vaultaSerialize(A_TOKEN, 'transfer', actz, {from: ask.from, to: ask.dest, quantity: ask.q, memo: ask.memo}) }
+        catch(e) { wlSay(st, ['the network did not answer, so nothing was signed. ', {btn: 'try again', on: again}, {cy: (e && e.message) || String(e)}]); return }
+        /* the keychain or the account may have changed, or be checked again, while the transfer was made ready */
+        if (!K1) { wlSay(st, [{to: 'kc-sec', t: 'connect your keychain'}, ' to top up from this wallet. nothing was signed.']); return }
+        if (SOUL !== ask.soul || vacct() !== ask.from) { wlSay(st, ['the account to send from changed since you were asked, so nothing was signed. ', {btn: 'ask me again', on: again}, {cy: 'asked to send from ' + ask.from + '; now ' + vacct()}]); return }
+        if (!signGuard(st, again)) return;
+        await vaultaSend(st, [act], {unit: 'A', amt: ask.amt}, 'top up ' + ask.q + ' to ' + ask.dest + ' from ' + ask.from + ' · memo ' + ask.memo, function(fin){
+          var home = !!(LOADED && LOADED.key === ask.key);
+          if (fin.phase === 'confirmed') wlSay(st, ['added ' + ask.q + ' to the voucher for ' + ask.key + '; its balance shows it once the estate counts it. ', {btn: home ? 'read my balance' : 'read its balance', on: function(){ load(ask.key) }}, {cy: 'tx ' + (fin.ref || fin.txid)}]);
+          var f = $v('vc-top-amt');
+          if (home && Number(f.value) === ask.amt) f.value = '';      /* never an amount typed since, or for another key */
+        }, $v('vc-top-go'));
+      } finally { t.live = false }
     }
     $v('vc-afford-go').onclick = async function(){
       var amt = parseFloat($v('vc-afford-amt').value), out = $v('vc-afford-out'), again = function(){ $v('vc-afford-go').click() };

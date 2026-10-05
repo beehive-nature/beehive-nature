@@ -99,6 +99,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       }
       if (u.pathname.endsWith('/get_currency_balance') && state.aDown) return json({ error: { what: 'down (fixture)' } }, 500);
       if (u.pathname.endsWith('/get_currency_balance')) return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
+      if (u.pathname.endsWith('/get_abi') && state.abiDelay && body.account_name === 'core.vaulta') await new Promise(r => setTimeout(r, state.abiDelay));
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : body.account_name === 'eosio.token' ? EOSIO_TOKEN_ABI : ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
       if (u.pathname.endsWith('/get_block')) {
@@ -634,11 +635,15 @@ try {
     await page.fill('#vc-top-amt', '0.5'); await page.click('#vc-top-go');
     ok('the press asks first, in one sentence naming the amount, the account and the memo, and signs nothing yet',
       /^send 0\.5000 A from kingbeelovis to bnrvoucher11 with the memo gatekey\? it tops up the voucher for gatekey\./.test(await topText()) && !(state.posts || []).length, await topText());
+    state.abiDelay = 1500;   // the transfer takes a while to make ready after yes
     await page.click('#vc-top-stat button.wl-act >> text=yes, send it');
-    await page.waitForFunction(() => /^added 0\.5000 A to your voucher/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    const closed = await page.evaluate(() => ({ t: document.getElementById('vc-top-stat').innerText.trim(), btns: document.querySelectorAll('#vc-top-stat button').length }));
+    ok('yes closes the choice at once: one calm sentence, no yes or not now left to press while it is made ready', closed.t === 'getting it ready to sign, one moment.' && closed.btns === 0, JSON.stringify(closed));
+    state.abiDelay = 0;
+    await page.waitForFunction(() => /^added 0\.5000 A to the voucher for gatekey/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     const posts = state.posts || [];
     ok('yes signs ONE core.vaulta transfer to the voucher account with the memo filled in', posts.length === 1 && posts[0].includes(actHex('core.vaulta', 'transfer')) && posts[0].includes(nameHex('bnrvoucher11')) && posts[0].includes(Buffer.from('gatekey').toString('hex')), JSON.stringify({ n: posts.length }));
-    ok('and it lands in words with its one next step', /^added 0\.5000 A to your voucher/.test((await topText()).trim()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'read my balance', await topText());
+    ok('and it lands in words naming the key it credited, with its one next step', /^added 0\.5000 A to the voucher for gatekey; its balance shows it once the estate counts it\./.test((await topText()).trim()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'read my balance', await topText());
     ok('the top up counts against the daily cap like every send', Math.abs(await page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0)) - 0.5) < 1e-9);
     // can I afford it asks about the key on screen, never what the field holds now, and answers in words
     let asked = '';
@@ -684,6 +689,88 @@ try {
     ok('the total says which bills it leaves out', /the bills that add up; .* are left out\./.test(words.text));
     await page.fill('#sa-paste', '{"not":"a receipt"}'); await page.click('#sa-paste-go');
     ok('a pasted text that is not a receipt is said calmly, never as a raw error', /^that is not a receipt this page can read; paste the whole receipt and press check it\.$/.test((await page.innerText('#sa-paste-out')).trim()), await page.innerText('#sa-paste-out'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* O2 · the top up signs only what its question named. Connecting another name closes the question; yes
+     checks the account, its keychain and its signing again; a top up still on its way when another key is
+     looked up keeps its words, named, with the key it credited, never under the other key's balance. */
+  {
+    console.log('O2 · voucher top up: the question binds the account, the key and the outcome:');
+    const { ctx, state } = await context(browser, 'bee');
+    const V = (dest, memo) => ({ balance: '12.5000', topup: { rail_a: { send_to: dest, memo }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
+      spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' });
+    state.voucher = url => ({ body: /\/otherkey\//.test(url) ? V('bnrvoucher22', 'otherkey') : V('bnrvoucher11', 'gatekey') });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    state.keys.bobsoul = [await k1Of(page, 'vaulta:bobsoul')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => document.querySelector('[data-wl-go="add"]').click());
+    const lookUp = async key => { await page.fill('#vc-key', key); await page.click('#vc-go');
+      await page.waitForFunction(k => document.getElementById('vc-panel').style.display === 'block' && document.getElementById('vc-a-memo').textContent === k, key, { timeout: 10000 }); };
+    const topText = async () => (await page.innerText('#vc-top-stat')).trim();
+    const nPosts = () => (state.posts || []).length;
+    const pressYes = () => page.evaluate(() => [...document.querySelectorAll('#vc-top-stat button.wl-act')].find(b => b.textContent === 'yes, send it').click());
+    const connectAs = async (name, ready) => { await page.evaluate(n => { document.getElementById('wq').value = n; document.getElementById('wgo').click(); }, name);
+      await page.waitForFunction(r => new RegExp(r).test(document.getElementById('sum-bridge').textContent), ready, { timeout: 20000 }).catch(() => {}); };
+    await lookUp('gatekey');
+    // a top up still on its way when another key is looked up lands in sight, named, never under that key
+    await page.fill('#vc-top-amt', '0.5'); await page.click('#vc-top-go');
+    await pressYes();
+    for (let w = 0; w < 300 && !nPosts(); w++) await page.waitForTimeout(50);
+    await lookUp('otherkey');
+    await page.fill('#vc-top-amt', '0.7');
+    await page.waitForFunction(() => /added 0\.5000 A/.test(document.getElementById('vc-top-away').innerText), null, { timeout: 40000 }).catch(() => {});
+    const away = await page.evaluate(() => ({ t: document.getElementById('vc-top-away').innerText.trim(), seen: document.getElementById('vc-top-away').getClientRects().length > 0,
+      btn: (document.querySelector('#vc-top-away button.wl-act') || {}).textContent, here: document.getElementById('vc-top-stat').innerText.trim(), amt: document.getElementById('vc-top-amt').value }));
+    ok('a top up on its way when another key is looked up lands in sight, naming the key it credited', nPosts() === 1 && away.seen && /^your top up of 0\.5000 A for the voucher gatekey:\s*added 0\.5000 A to the voucher for gatekey;/.test(away.t) && away.btn === 'read its balance', JSON.stringify(away));
+    ok('and never under the other key\'s balance, nor wiping the amount typed for it', !/added|gatekey/.test(away.here) && away.amt === '0.7', JSON.stringify(away));
+    await page.click('#vc-top-away button.wl-act');
+    await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block' && document.getElementById('vc-a-memo').textContent === 'gatekey', null, { timeout: 10000 }).catch(() => {});
+    ok('its one next step reads the balance of the key it credited', await page.textContent('#vc-a-memo') === 'gatekey' && !(await page.evaluate(() => document.getElementById('vc-top-away').getClientRects().length)), await page.textContent('#vc-a-memo'));
+    // the question names the account it sends from; connecting another name closes it and nothing is sent
+    await page.fill('#vc-top-amt', '0.25'); await page.click('#vc-top-go');
+    ok('the question names the account it sends from', /^send 0\.2500 A from kingbeelovis to bnrvoucher11 with the memo gatekey\?/.test(await topText()), await topText());
+    await page.evaluate(() => { window.__yes = [...document.querySelectorAll('#vc-top-stat button.wl-act')].find(b => b.textContent === 'yes, send it'); });
+    await page.evaluate(() => { document.getElementById('wq').value = 'bobsoul'; document.getElementById('wgo').click(); });
+    const swapped = await page.evaluate(() => ({ t: document.getElementById('vc-top-stat').innerText.trim(), btns: document.querySelectorAll('#vc-top-stat button').length }));
+    ok('connecting another name closes the question: nothing is sent, said calmly with what to do', swapped.t === 'you connected another name, so nothing was sent. press top up from my wallet again.' && swapped.btns === 0 && nPosts() === 1, JSON.stringify(swapped));
+    await page.evaluate(() => window.__yes.click());
+    await page.waitForTimeout(1500);
+    ok('a yes left over from the old question signs nothing', nPosts() === 1 && /^you connected another name/.test(await topText()), await topText());
+    await page.waitForFunction(() => /bobsoul · ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.click('#vc-top-go');
+    ok('asked again, the question names the account now connected', /^send 0\.2500 A from bobsoul to bnrvoucher11 with the memo gatekey\?/.test(await topText()), await topText());
+    await pressYes();
+    await page.waitForFunction(() => /^added 0\.2500 A to the voucher for gatekey/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    ok('and yes signs exactly that: one transfer from bobsoul to the voucher account', nPosts() === 2 && state.posts[1].includes(actHex('core.vaulta', 'transfer')) && state.posts[1].includes(nameHex('bobsoul') + nameHex('bnrvoucher11')), await topText());
+    // yes runs the signing check again: a key that left the account since the question signs nothing
+    await page.fill('#vc-top-amt', '0.25'); await page.click('#vc-top-go');
+    state.keys.bobsoul = [STRANGER_KEY];
+    await connectAs('bobsoul', 'let this wallet sign for it');
+    ok('the question stays open while the same name is read again', /^send 0\.2500 A from bobsoul/.test(await topText()), await topText());
+    await pressYes();
+    await page.waitForTimeout(300);
+    ok('yes checks again that this wallet signs for the account, and signs nothing when it does not', /^this wallet does not sign for bobsoul yet/.test(await topText()) && nPosts() === 2, await topText());
+    // another name connected while the transfer is made ready (a slow host) signs nothing
+    state.keys.bobsoul = [await k1Of(page, 'vaulta:bobsoul')];
+    await connectAs('bobsoul', 'bobsoul · ready to sign');
+    await page.click('#vc-top-go');
+    state.abiDelay = 1500;
+    await pressYes();
+    await page.evaluate(() => { document.getElementById('wq').value = 'king'; document.getElementById('wgo').click(); });
+    await page.waitForFunction(() => /changed since you were asked/.test(document.getElementById('vc-top-stat').innerText), null, { timeout: 10000 }).catch(() => {});
+    state.abiDelay = 0;
+    ok('another name connected while the transfer is made ready signs nothing, and offers to ask again', /^the account to send from changed since you were asked, so nothing was signed\./.test(await topText()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'ask me again' && nPosts() === 2, await topText());
+    // a keychain closed since the question signs nothing
+    await page.waitForFunction(() => /kingbeelovis · ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await page.click('#vc-top-go');
+    await page.evaluate(() => document.getElementById('kc-out').click());
+    await pressYes();
+    ok('a keychain closed since the question signs nothing, and the line names the one step', await topText() === 'connect your keychain to top up from this wallet. nothing was sent.' && nPosts() === 2, await topText());
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
