@@ -331,7 +331,7 @@ try {
       await page.locator('#arw-go').click();
       await page.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').innerText), null, { timeout: 8000 }).catch(() => {});
       ok('a second press while the first is on its way signs nothing and names where it waits',
-        /still on its way, so nothing new was signed/.test(await page.locator('#arw-stat').innerText()) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#outbox-sec"]')) &&
+        /still on its way, so nothing new was signed/.test(await page.locator('#arw-stat').innerText()) && await page.evaluate(() => [...document.querySelectorAll('#arw-stat button.wl-act')].some(b => b.textContent === 'check again')) &&
         await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0 && !(await page.locator('#arw-file-dialog').isVisible()));
       await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); l.filter(x => x.rail === 'arweave').forEach(x => { if (x.phase === 'submitted') x.phase = 'failed'; }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
     }
@@ -402,14 +402,14 @@ try {
       await tab2.evaluate(() => document.getElementById('arw-go').click());
       await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
       ok('in a second tab (or after a reload) the anchor still on its way is not signed again',
-        /still on its way, so nothing new was signed/.test(await tab2.locator('#arw-stat').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && !!document.querySelector('#arw-stat a[href="#outbox-sec"]')) && posted.length === posts0,
+        /still on its way, so nothing new was signed/.test(await tab2.locator('#arw-stat').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && [...document.querySelectorAll('#arw-stat button.wl-act')].some(b => b.textContent === 'check again')) && posted.length === posts0,
         await tab2.locator('#arw-stat').textContent());
       if (await tab2.evaluate(() => document.getElementById('arw-file-dialog').open)) { await tab2.evaluate(() => document.getElementById('arw-file-cancel').click()); await tab2.waitForTimeout(500); }
       await tab2.locator('#arw-file').setInputFiles({ name: 'again.txt', mimeType: 'text/plain', buffer: fileBytes });
       await tab2.evaluate(() => document.getElementById('arw-file-review').click());
       await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-file-status').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
       ok('and the same file still on its way is not signed again there either',
-        /this file is still on its way, so nothing new was signed/.test(await tab2.locator('#arw-file-status').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && posted.length === posts0,
+        /this file is still on its way, so nothing new was signed/.test(await tab2.locator('#arw-file-status').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && [...document.querySelectorAll('#arw-file-status button.wl-act')].some(b => b.textContent === 'check again')) && posted.length === posts0,
         await tab2.locator('#arw-file-status').textContent());
       await tab2.close();
       // two tabs reviewing the same file at once: the one confirmed second finds the first already signed, and signs nothing
@@ -422,6 +422,95 @@ try {
       ok('a file another tab signed while this review was open is not signed again on confirm',
         /this file is still on its way, so nothing new was signed/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs1 && posted.length === posts1,
         await page.locator('#arw-file-status').innerText());
+      // a copy is on its way only while its anchor can still be mined (50 blocks; the wallet allows 3 hours from
+      // created_at). past that, every gateway is read: only a copy they ALL lack is settled, as expired with
+      // maybe_in (never failed), and a new copy may go. inside it, the press is held and "check again" reads the network
+      let statusMode = null; const statusHosts = [];
+      await ctx.route(GW_RE, async route => {
+        const u = new URL(route.request().url());
+        if (statusMode && route.request().method() === 'GET' && /^\/tx\/[^/]+\/status$/.test(u.pathname)) {
+          statusHosts.push(u.host);
+          const cors = { 'access-control-allow-origin': '*' };
+          if (statusMode === 'abort-one' && u.host === 'arweave.net') return route.abort();
+          if (statusMode === '202') return route.fulfill({ status: 202, headers: cors, body: 'Pending' });
+          if (statusMode === 'confirmed') return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ block_height: 1600000, block_indep_hash: 'B'.repeat(64), number_of_confirmations: 3 }) });
+          return route.fulfill({ status: 404, headers: cors, body: 'Not Found.' });
+        }
+        await route.fallback();
+      });
+      const fileB64 = fileBytes.toString('base64url');
+      const entryOf = (pg, b64) => pg.evaluate(d => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === d).at(-1), b64);
+      const setEntry = (pg, b64, fields) => pg.evaluate(([d, f]) => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === d).at(-1); Object.assign(e, f); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); }, [b64, fields]);
+      const pressBtn = (sel, label) => page.evaluate(([s, t]) => [...document.querySelectorAll(s + ' button.wl-act')].find(b => b.textContent === t).click(), [sel, label]);
+      const hoursAgo4 = new Date(Date.now() - 4 * 3600e3).toISOString();
+      const signs2 = await page.evaluate(() => window.__arSignCount || 0), posts2 = posted.length;
+      // past its window, but one gateway does not answer: nothing is settled and nothing is signed
+      await setEntry(page, fileB64, { phase: 'submitted', created_at: hoursAgo4, maybe_out: true });
+      statusMode = 'abort-one'; statusHosts.length = 0;
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('past its window, a copy one gateway did not answer for is not settled and nothing new is signed',
+        /the network did not answer just now/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => [...document.querySelectorAll('#arw-file-status button.wl-act')].some(b => b.textContent === 'check again')) &&
+        (await entryOf(page, fileB64)).phase === 'submitted' && !(await page.evaluate(() => document.getElementById('arw-file-dialog').open)) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        await page.locator('#arw-file-status').innerText());
+      // past its window and every gateway lacks it: settled as expired (maybe_in, never failed), and a new copy goes to review
+      statusMode = '404'; statusHosts.length = 0;
+      await page.locator('#arw-file-review').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      const expired = await entryOf(page, fileB64);
+      ok('past its window, a copy every gateway lacks is settled as expired, maybe in, never failed',
+        expired.phase === 'expired' && expired.evidence && expired.evidence.maybe_in === true && !expired.evidence.definite && ['arweave.net', 'ar-io.dev', 'gateway.ardrive.io'].every(h => statusHosts.includes(h)), JSON.stringify({ phase: expired.phase, ev: expired.evidence, statusHosts }));
+      ok('and the new copy is reviewed, saying the earlier one did not land; nothing is signed yet',
+        /your earlier copy did not land in time, so this is a new copy/.test(await page.locator('#arw-file-plan').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2);
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      // the outbox says it calmly, with the check for coins kept honest (it may have gone in)
+      ok('the outbox row says its time ran out and offers the coins to check, never "failed"',
+        await page.evaluate(id => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === id); return !!r && /its time ran out/.test(r.querySelector('.obx-stat').textContent) && !r.querySelector('.obx-retry'); }, expired.intent_id));
+      // inside its window: the press is held, and "check again" reads the network and says what it found
+      await setEntry(page, fileB64, { phase: 'submitted', created_at: new Date().toISOString(), evidence: null });
+      statusMode = '404';
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('inside its window the copy holds the press, with one action: check again',
+        /this file is still on its way, so nothing new was signed\. check again/.test(await page.locator('#arw-file-status').innerText()) && !(await page.evaluate(() => document.getElementById('arw-file-dialog').open)),
+        await page.locator('#arw-file-status').innerText());
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, inside its window and nowhere held: it says the same copy can still go out, and nothing is settled',
+        /the network does not hold it yet\. its signed copy can still go out until about/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && (await entryOf(page, fileB64)).phase === 'submitted',
+        await page.locator('#arw-file-status').innerText());
+      statusMode = '202';
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, while the network holds it: it says so and offers to check again',
+        /the network holds it and has not put it in a block yet\. check again/.test(await page.locator('#arw-file-status').innerText()) && (await entryOf(page, fileB64)).phase === 'submitted',
+        await page.locator('#arw-file-status').innerText());
+      statusMode = 'confirmed';
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      const landed = await entryOf(page, fileB64);
+      ok('check again, once a block holds it: it landed, the entry is confirmed, and the link shows it',
+        /it landed\. the network confirmed it/.test(await page.locator('#arw-file-status').innerText()) && landed.phase === 'confirmed' && landed.evidence && landed.evidence.block_height === 1600000 &&
+        await page.evaluate(() => /^https:\/\/arweave\.net\//.test((document.querySelector('#arw-file-status a[target="_blank"]') || {}).href || '')) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        await page.locator('#arw-file-status').innerText());
+      // the anchor takes the same window: past it, a copy every gateway lacks lets a new anchor be reviewed
+      const anchorB64 = await page.evaluate(async p => window.BNRAR.b64u(new Uint8Array(await (await fetch(p)).arrayBuffer())), '/surfaces/forge/orbit-manifests.md');
+      await setEntry(page, anchorB64, { phase: 'submitted', created_at: hoursAgo4, maybe_out: true });
+      statusMode = '404';
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.evaluate(() => document.getElementById('arw-go').click());
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      const anchorExp = await entryOf(page, anchorB64);
+      ok('the anchor past its window: settled as expired (maybe in), and a new anchor is reviewed, nothing signed',
+        anchorExp.phase === 'expired' && anchorExp.evidence.maybe_in === true && /estate anchor/.test(await page.locator('#arw-file-dialog-title').textContent()) &&
+        /your earlier copy did not land in time/.test(await page.locator('#arw-file-plan').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        JSON.stringify({ phase: anchorExp.phase, ev: anchorExp.evidence }));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      statusMode = null;
       await setArPhase(page, 'failed');
     }
     const beforeBlockedPosts=posted.length;

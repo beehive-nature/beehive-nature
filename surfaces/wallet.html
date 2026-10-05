@@ -2420,19 +2420,81 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
            record, not this page's memory: each entry carries the exact bytes it publishes, so the same
            anchor or file is found there from this tab, another tab, or after a reload */
         function dataOf(bytes) { return window.BNRAR && typeof BNRAR.b64u === 'function' ? BNRAR.b64u(bytes) : null; }
-        function onItsWay(data) {
-          if (!data) return null;
+        function waiting(data) {
+          var found = [];
+          if (!data) return found;
           var l = null;
-          try { l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); } catch (e) { return null; }   /* unreadable: the publish refuses to keep a signed copy there, so nothing is sent */
-          if (!Array.isArray(l)) return null;
+          try { l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); } catch (e) { return found; }   /* unreadable: the publish refuses to keep a signed copy there, so nothing is sent */
+          if (!Array.isArray(l)) return found;
           for (var i = 0; i < l.length; i++) {
             var e = l[i];
             if (!e || e.rail !== 'arweave' || (e.phase !== 'signed' && e.phase !== 'submitted')) continue;
-            try { if (JSON.parse(JSON.parse(e.signed_bytes).wire).data === data) return e.intent_id || 'unnamed'; } catch (pe) {}
+            try { if (JSON.parse(JSON.parse(e.signed_bytes).wire).data === data) found.push(e); } catch (pe) {}
           }
-          return null;
+          return found;
         }
-        function onWaySay(first, id) { return [first + ', so nothing new was signed. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'intent ' + id + ' is signed or submitted and not settled (read from bnr_outbox_v1)' }]; }
+        function onItsWay(data) { var w = waiting(data); return w.length ? (w[0].intent_id || 'unnamed') : null; }
+        /* a copy can be on its way only for a while: its anchor runs out (arWindowEnd in the wallet
+           script cites the gateway's 50-block anchor rule). inside that window the press is held and
+           "check again" reads the network; past it, a copy every gateway lacks is settled as expired */
+        function arOut() { return window.BNRWALLET && BNRWALLET.arweaveOut; }
+        function clock(t) { try { return new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
+        function onWaySay(first, id, el, data, again) {
+          var O = arOut(), w = waiting(data)[0], end = O && w ? O.windowEnd(w) : NaN;
+          return [first + ', so nothing new was signed. ', { btn: 'check again', on: function () { checkNow(el, data, again); } },
+            { cy: 'intent ' + id + ' is signed or submitted and not settled (read from bnr_outbox_v1)' + (isFinite(end) ? '; its anchor window runs to ' + new Date(end).toISOString() : '') }];
+        }
+        function seeIt(el, ref) {
+          if (!ref) return;
+          var a = document.createElement('a'); a.href = 'https://arweave.net/' + encodeURIComponent(ref); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = 'see it on Arweave';
+          el.appendChild(document.createTextNode(' ')); el.appendChild(a);
+        }
+        /* one answer of the network, said calmly with its one action */
+        function sayChecked(el, c, data, again) {
+          var cy = { cy: 'status read: ' + (c.words || c.state) + ' · ' + c.state };
+          var check = { btn: 'check again', on: function () { checkNow(el, data, again); } };
+          if (c.state === 'confirmed' || (c.state === 'settled' && c.entry && c.entry.phase === 'confirmed')) { wlSay(el, ['it landed. the network confirmed it, so there is nothing to publish again.', cy]); seeIt(el, c.entry && (c.entry.ref || null)); return; }
+          if (c.state === 'expired') { wlSay(el, ['it did not land in time, so it most likely did not go through and took no AR. you can publish it again. ', { btn: 'publish it again', on: again }, cy]); return; }
+          if (c.state === 'settled' || c.state === 'gone' || c.state === 'clear') { wlSay(el, ['it is no longer on its way, so you can publish it again. ', { btn: 'publish it again', on: again }, { cy: 'outbox: ' + (c.entry ? c.entry.intent_id + ' is ' + c.entry.phase : 'no entry of these bytes is signed or submitted') }]); return; }
+          if (c.state === 'pending') { wlSay(el, ['the network holds it and has not put it in a block yet. ', check, cy]); return; }
+          if (c.state === 'absent') { wlSay(el, ['the network does not hold it yet. its signed copy can still go out ' + (isFinite(c.until) ? 'until about ' + clock(c.until) : 'for a while') + ', and sending that same copy again is safe. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, cy]); return; }
+          wlSay(el, ['the network did not answer just now, so this wallet cannot tell yet. ', check, cy]);
+        }
+        /* "check again": every copy of these bytes still on its way is read on every gateway */
+        async function checkNow(el, data, again) {
+          var O = arOut();
+          if (el === stat) held = true;
+          wlSay(el, ['checking it on the network…']);
+          if (!O) { wlSay(el, ['the wallet did not finish loading. ', { btn: 'reload the page', on: function () { location.reload(); } }]); return; }
+          var w = waiting(data), last = { state: 'clear' };
+          try {
+            for (var i = 0; i < w.length; i++) {
+              var c = await O.check(w[i].intent_id);
+              if (c.state === 'expired') { last = c; continue; }
+              if (c.state === 'gone' || (c.state === 'settled' && !(c.entry && c.entry.phase === 'confirmed'))) { if (last.state !== 'expired') last = c; continue; }
+              if (el === stat) held = true;
+              sayChecked(el, c, data, again); return;
+            }
+          } catch (ce) { wlSay(el, ['the list of things waiting to be sent cannot be read on this device just now. ', { to: 'outbox-sec', t: 'open waiting to be sent' }, { cy: (ce && ce.message) || String(ce) }]); return; }
+          if (el === stat) held = true;
+          sayChecked(el, last, data, again);
+        }
+        /* before a new copy is built: a copy inside its window holds the press; one past it is read on
+           every gateway and lets the new copy go only once it is settled. null: go on; {cleared}: an
+           earlier copy did not land; {stop:true}: the line already says why */
+        async function holdFor(data, first, el, again) {
+          var w = waiting(data), O = arOut(), cleared = false;
+          for (var i = 0; i < w.length; i++) {
+            var e = w[i], end = O ? O.windowEnd(e) : NaN;
+            if (!O || !isFinite(end) || Date.now() <= end) { wlSay(el, onWaySay(first, e.intent_id || 'unnamed', el, data, again)); return { stop: true }; }
+            wlSay(el, ['checking whether your earlier copy landed…']);
+            var c = await O.check(e.intent_id);
+            if (c.state === 'expired' || c.state === 'gone' || (c.state === 'settled' && !(c.entry && c.entry.phase === 'confirmed'))) { cleared = cleared || c.state === 'expired'; continue; }
+            sayChecked(el, c, data, again); return { stop: true };
+          }
+          return cleared ? { cleared: true } : null;
+        }
+        var CLEARED_NOTE = ['your earlier copy did not land in time, so this is a new copy.', { cy: 'the earlier entry is settled as expired (maybe_in): its anchor window passed and every gateway answered that it does not hold it' }];
         function tail(a) { return String(a || '').slice(-6); }
         /* the review before anything is signed, for the anchor and for a file alike: what is
            published, the exact fee, the address that really pays (it must be the one the wallet
@@ -2447,6 +2509,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var cy = [{ cy: 'Paying address: ' + plan.address }, { cy: 'Exact fee: ' + feeAr + ' AR (' + plan.feeWinston + ' winston)' },
               { cy: plan.bytes.toLocaleString('en-US') + ' bytes · Network: Arweave mainnet' }, what.sha ? { cy: 'SHA-256: ' + what.sha } : null];
             if (title) title.textContent = what.title;
+            if (what.note) line(what.note);
             if (shown && plan.address !== shown) {
               ok = false;
               stop.say = ['this would pay from an Arweave address ending in ' + tail(plan.address) + ', not the one your wallet showed (ending in ' + tail(shown) + '), so nothing was signed. the wallet now shows the address that would pay; publish again if it is the one you mean.', { cy: 'paying address ' + plan.address + ' differs from the shown address ' + shown }];
@@ -2468,7 +2531,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             return new Promise(function (resolve) {
               var finish = function (accepted) {
                 var late = accepted && ok && what.data ? onItsWay(what.data) : null;   /* another tab signed the same thing while this review was open */
-                if (late) stop.say = onWaySay(what.onWay, late);
+                if (late) stop.say = onWaySay(what.onWay, late, what.el, what.data, what.again);
                 dialog.close(); resolve(accepted && ok && !late);
               };
               yes.onclick = function () { finish(true); }; no.onclick = function () { finish(false); };
@@ -2496,8 +2559,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               arSay(['the file on this site no longer matches the pinned anchor, so nothing was published.', { cy: 'REFUSED: deployed sha256 ' + sha + ' differs from the pinned ' + ORBIT.sha256 + '; a drifted file is never anchored' }]);
               return;
             }
-            var data = dataOf(bytes), out = onItsWay(data);
-            if (out) { arSay(onWaySay('your last publish is still on its way', out)); return; }
+            var data = dataOf(bytes), againGo = function () { if (go.disabled) { held = false; refresh(); return; } go.click(); };
+            var hold = await holdFor(data, 'your last publish is still on its way', stat, againGo);
+            if (hold && hold.stop) return;
             var inj = arInject(), lane = inj && inj.signLane ? inj.signLane() : null;
             var jwk = null;
             if (lane === 'vault') {
@@ -2512,7 +2576,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var stop = {};
             var o = lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false };
             o.say = arSay; o.again = { btn: 'try again', on: function () { go.click(); } };
-            o.review = reviewer({ title: 'publish the estate anchor to Arweave?', name: 'the estate anchor', sha: sha, data: data, onWay: 'your last publish is still on its way' }, shown, stop);
+            o.review = reviewer({ title: 'publish the estate anchor to Arweave?', name: 'the estate anchor', sha: sha, data: data, onWay: 'your last publish is still on its way', el: stat, again: againGo, note: hold && hold.cleared ? CLEARED_NOTE : null }, shown, stop);
             var r = await W.walletPublish(bytes, ORBIT.tags, o);
             if (r && r.phase === 'cancelled') {
               if (stop.moved) { try { var inj1 = arInject(); heldFor = ((await resolveAddr()) || '') + '|' + ((inj1 && inj1.signLane ? inj1.signLane() : null) || ''); } catch (h1) {} }
@@ -2545,13 +2609,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           wlSay(note,['preparing this file and its exact fee. nothing is signed yet.']);
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
-            var data=dataOf(bytes),out=onItsWay(data);
-            if(out){wlSay(note,onWaySay('this file is still on its way',out));return;}
+            var data=dataOf(bytes),againFile=function(){$('arw-file-review').click()};
+            var hold=await holdFor(data,'this file is still on its way',note,againFile);
+            if(hold&&hold.stop)return;
             var shown=null;try{shown=await resolveAddr()}catch(se){shown=null}
             var stop={};
             var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
             var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,again:{btn:'try again',on:function(){$('arw-file-review').click()}},say:function(parts,phase){wlSay(note,parts);note.setAttribute('data-phase',phase||'')},
-              review:reviewer({title:'publish this file to Arweave?',name:file.name,sha:sha,data:data,onWay:'this file is still on its way'},shown,stop)});
+              review:reviewer({title:'publish this file to Arweave?',name:file.name,sha:sha,data:data,onWay:'this file is still on its way',el:note,again:againFile,note:hold&&hold.cleared?CLEARED_NOTE:null},shown,stop)});
             if(!result)return;   /* walletPublish already said why, in this line */
             if(result.phase==='cancelled'){wlSay(note,stop.say||['cancelled before signing. nothing was published.']);return;}
             if(result.phase==='confirmed'){wlSay(note,['published. the network confirmed it.',{cy:'tx '+result.ref}]);}
@@ -8195,6 +8260,65 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=4');
 
+  /* ── an Arweave publish on its way has a window. its anchor (last_tx) "may be either a hash of
+     one of the last 50 blocks or the last outgoing transaction ID from the sending wallet"
+     (docs.arweave.org, node HTTP API, transaction field definitions); GET /tx_anchor hands out the
+     block SUGGESTED_TX_ANCHOR_DEPTH = 6 behind the tip, at a TARGET_BLOCK_TIME of 120 s (both in
+     ArweaveTeam/arweave apps/arweave/include/ar.hrl). so a copy that is not in a block about 44
+     blocks (about 88 minutes) after it was built can never be mined. the window here is 3 hours
+     from the entry's created_at: room for blocks twice as slow as the target. the adapter's
+     expires_at stays null, because the shared confirm loop would end an entry on one gateway's
+     404, or on no answer at all; this settles an Arweave entry only on what every gateway says.
+     It writes the outbox's own fields (phase, ref, evidence, updated_at) through outboxPut. ── */
+  var AR_ANCHOR_WINDOW_MS = 3 * 60 * 60 * 1000;
+  function arWindowEnd(e) { var t = Date.parse(e && e.created_at); return isFinite(t) ? t + AR_ANCHOR_WINDOW_MS : NaN }
+  function arTxIdOf(e) { if (e.ref) return e.ref; try { var s = JSON.parse(e.signed_bytes); return s && s.id || null } catch (x) { return null } }
+  async function arReadEvery(id) {
+    var G = (window.BNRAR && BNRAR.GATEWAYS) || [];
+    var reads = await Promise.all(G.map(async function (g) {
+      var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort() }, 6000);
+      try {
+        var r = await fetch(g + '/tx/' + encodeURIComponent(id) + '/status', { signal: ctl.signal });
+        var text = await r.text(), b = null; try { b = JSON.parse(text) } catch (je) {}
+        if (r.status === 200 && b && Number.isSafeInteger(b.block_height) && b.block_height >= 0 && Number.isSafeInteger(b.number_of_confirmations) && b.number_of_confirmations > 0 && /^[A-Za-z0-9_-]{64}$/.test(b.block_indep_hash))
+          return { g: g, k: 'confirmed', s: 200, b: b };
+        return { g: g, k: r.status === 202 ? 'pending' : (r.status === 404 || r.status === 410) ? 'absent' : 'unread', s: r.status };
+      } catch (fe) { return { g: g, k: 'unread', s: 0 } }
+      finally { clearTimeout(tm) }
+    }));
+    return { all: G.length, reads: reads, words: reads.map(function (x) { return x.g + ' ' + (x.s || 'no answer') }).join(', ') };
+  }
+  /* reads one Arweave entry that is signed or sent, on every gateway: confirmed on a confirming
+     read; expired (maybe_in, never failed: nothing proves it did not go in) only once its window
+     has passed AND every gateway answers that it does not hold it. anything else leaves it as it is */
+  async function arweaveCheck(intentId) {
+    var e = outboxGet(intentId);
+    if (!e) return { state: 'gone' };
+    if (e.rail !== 'arweave') throw new Error('not an Arweave entry: ' + intentId);
+    if (e.phase !== 'signed' && e.phase !== 'submitted') return { state: 'settled', entry: e };
+    var id = arTxIdOf(e), end = arWindowEnd(e);
+    if (!id) return { state: 'unread', entry: e, until: end, words: 'the entry carries no transaction id' };
+    var r = await arReadEvery(id);
+    var cur = outboxGet(intentId);   /* another flow may have settled it while the gateways answered */
+    if (!cur || (cur.phase !== 'signed' && cur.phase !== 'submitted')) return { state: cur ? 'settled' : 'gone', entry: cur };
+    var ok = r.reads.filter(function (x) { return x.k === 'confirmed' })[0];
+    if (ok) {
+      cur.phase = 'confirmed'; cur.ref = cur.ref || id; cur.maybe_out = true;
+      cur.evidence = { read: 'GET /tx/' + id.slice(0, 12) + '…/status @ ' + ok.g, status: 'confirmed', confirmations: ok.b.number_of_confirmations, block_height: ok.b.block_height, block_indep_hash: ok.b.block_indep_hash };
+      cur.updated_at = new Date().toISOString(); outboxPut(cur);
+      return { state: 'confirmed', entry: cur, words: r.words };
+    }
+    var absent = r.reads.filter(function (x) { return x.k === 'absent' }).length;
+    var pending = r.reads.some(function (x) { return x.k === 'pending' });
+    if (r.all && absent === r.all && isFinite(end) && Date.now() > end) {
+      cur.phase = 'expired';
+      cur.evidence = { read: 'GET /tx/' + id.slice(0, 12) + '…/status on every gateway: ' + r.words, maybe_in: true, anchor_window_ended: new Date(end).toISOString() };
+      cur.updated_at = new Date().toISOString(); outboxPut(cur);
+      return { state: 'expired', entry: cur, words: r.words };
+    }
+    return { state: pending ? 'pending' : (r.all && absent === r.all) ? 'absent' : 'unread', entry: cur, until: end, words: r.words };
+  }
+
   /* ── walletPublish() — Arweave anchor seam (Gold #1): PRIMARY path is
      window.arweaveWallet inject (public key + extension sign). Vault JWK is
      secondary scaffold only. Never invent RSA from masterPRK; agents never
@@ -8584,6 +8708,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     adapters: ADAPTERS,
     walletAction: walletAction,
     walletPublish: walletPublish,
+    arweaveOut: { windowEnd: arWindowEnd, check: arweaveCheck },
     callAdapter: callAdapter,
     hasCap: hasCap,
     capGate: capGate,
