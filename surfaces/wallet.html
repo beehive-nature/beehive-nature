@@ -3076,8 +3076,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      the transaction goes out with an empty owner and a 65-byte recoverable
      signature. So, unlike RSA, an Arweave key DOES derive from masterPRK: context
      ar:<soul>, the same K1 derivation as every secp256k1 rail here. The address is
-     public and kept so reads stay keyless; the key lives in tab memory only. An
-     extension address or a bound address the person chose still comes first. */
+     public and kept so reads stay keyless; the key lives in tab memory only. Order
+     of ways: the address your own keys make comes first; an address bound by hand
+     or by an extension is only followed (read), never shown as yours. */
   var AR_DERIVED=null;   // {soul, addr}: public, tab memory only, made fresh by each keychain
   function arDeriveAddr(mprk,soul){
     var r=BZDIDKEY.deriveK1Key(mprk,'ar:'+soul);
@@ -3094,9 +3095,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{ var a=arDeriveAddr(MPRK,SOUL); AR_DERIVED={soul:SOUL,addr:a}; return a }catch(e){ return null }
   }
   function arInjectBoundAddress(){
-    if(AR_INJECT_ACTIVE)return AR_INJECT_ACTIVE;
-    if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a }
-    return vaultArPublic()||arDerivedAddr();
+    if(AR_INJECT_ACTIVE)return AR_INJECT_ACTIVE;              // an extension the person connected in this very visit
+    var own=arDerivedAddr(); if(own)return own;               // the address your own keys make
+    var v=vaultArPublic(); if(v)return v;                     // the vault's key, which this wallet also signs with
+    if(SOUL){ var a=loadArPublic('ar:'+SOUL); if(a) return a } // a bound address: followed, read only
+    return null;
   }
   /* the address shown is the address that pays: 'inject' when it is the
      extension's, 'vault' when it is the vault key's, 'derived' when it is made
@@ -3147,13 +3150,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!hn) return {kind:'Hive account', value:null, publicOnly:true, hiveAdd:true};
       return {kind:'Hive account', value:hn, publicOnly:true};
     }
-    /* ar: a bound or vault address first; else the secp256k1 address that derives
-       from masterPRK (Arweave 2.9+). RSA-JWK still never derives from it. */
+    /* ar: order of ways. The secp256k1 address that derives from masterPRK
+       (Arweave 2.9+) under ar:<soul> comes first; then the vault's key (this
+       wallet signs with it too); an address bound by hand or by an extension is
+       never shown as yours: it rides along as 'followed', read only. RSA-JWK
+       still never derives from masterPRK. */
     if(/^ar:/.test(ctx)){
-      var addr=loadArPublic(ctx)||vaultArPublic();
-      if(addr&&isArAddress(addr)) return {kind:'Arweave address', value:addr, publicOnly:true, source:loadArPublic(ctx)?'bound':'vault-meta'};
-      if(MPRK&&ctx==='ar:'+SOUL){ var own=arDerivedAddr(); if(own) return {kind:'Arweave address (from your keys)', value:own, publicOnly:true, source:'derived'} }
-      return {kind:'Arweave address', value:null, publicOnly:true, needsConnect:true};
+      var mine=ctx==='ar:'+SOUL, bound=loadArPublic(ctx), followed=(bound&&isArAddress(bound))?bound:null;
+      if(MPRK&&mine){ var own=arDerivedAddr(); if(own) return {kind:'Arweave address (from your keys)', value:own, publicOnly:true, source:'derived', followed:followed!==own?followed:null} }
+      var vlt=mine?vaultArPublic():null;
+      if(vlt&&isArAddress(vlt)) return {kind:'Arweave address', value:vlt, publicOnly:true, source:'vault-meta', followed:followed!==vlt?followed:null};
+      return {kind:'Arweave address', value:null, publicOnly:true, needsConnect:true, followed:followed};
     }
     if(!MPRK)return null;
     /* sol: is the one context on a DIFFERENT curve — a Solana address is an
@@ -3247,6 +3254,40 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     inp.onkeydown=function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); bind.click() } };
     box.appendChild(el);
   }
+  /* an address bound by hand or by an extension: shown apart from yours, read
+     only, and one press lets it go (the context name stays) */
+  function renderArFollowChip(box, c, addr){
+    var el=document.createElement('div'); el.className='chip'; el.style.borderStyle='dashed'; el.setAttribute('data-ar-followed', c);
+    el.innerHTML='<div class="cc">an arweave address you follow <span class="wl-cyd">'+esc(c)+' · bound public address</span></div>'+
+      '<div class="cv">'+esc(addr)+'</div><div class="cx"></div>';
+    wlSay(el.querySelector('.cx'),['you added this address, so this wallet only reads it. ',
+      {btn:'stop following it',on:function(ev){
+        if(ev)ev.stopPropagation();
+        saveArPublic(c,null); if(AR_INJECT_ACTIVE===addr)AR_INJECT_ACTIVE=null;
+        renderForge();
+        var shown=arInjectBoundAddress(); if(shown&&typeof readArBound==='function')readArBound(shown);
+      }},
+      {cy:'kept in this browser as '+arBindKey(c)+' (bound by hand or by an extension); a bound address never outranks the one your keys make; signs through: '+(arSignLane()==='inject'&&arInjectBoundAddress()===addr?'the extension':'nothing here')}]);
+    box.appendChild(el);
+  }
+  /* copy, and say "copied" only when the browser says it copied */
+  function forgeSelect(node){
+    try{ var r=document.createRange(); r.selectNodeContents(node); var s=getSelection(); s.removeAllRanges(); s.addRange(r) }catch(e){}
+  }
+  function forgeCopy(el, text, okWords, restore){
+    var cx=el.querySelector('.cx'), p;
+    try{ p=(navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(text):Promise.reject(new Error('this browser has no clipboard here')) }
+    catch(e){ p=Promise.reject(e) }
+    return Promise.resolve(p).then(function(){
+      wlSay(cx,[okWords,{cy:text}]);
+      setTimeout(function(){ if(el.isConnected)restore() },2400);
+      return true;
+    },function(e){
+      wlSay(cx,['this browser did not copy it, so press and hold the address to copy it yourself.',{cy:'clipboard refused: '+((e&&e.message)||e)}]);
+      forgeSelect(el.querySelector('.cv'));
+      return false;
+    });
+  }
   function renderForge(){
     var box=$('forge-chips');
     if(!CONTEXTS.length){box.innerHTML='<div class="law">no contexts yet — forge one below</div>';return}
@@ -3274,7 +3315,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         box.appendChild(wait);
         return;
       }
-      if(d.needsConnect){ renderArConnectChip(box, c); return }
+      if(d.needsConnect){ renderArConnectChip(box, c); if(d.followed)renderArFollowChip(box, c, d.followed); return }
       if(d.hiveAdd){
         var hc=document.createElement('div'); hc.className='chip'; hc.style.borderStyle='dashed';
         hc.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· Hive account</span></div><div class="cv"><a href="#ch-hive">add your Hive account</a>: paste its active key</div>';
@@ -3288,16 +3329,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '<div class="cv">'+esc(d.value)+'</div>'+
         '<div class="cx">'+esc(note)+'</div>';
       el.onclick=function(){
-        try{navigator.clipboard.writeText(d.copy||d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=note},1200)}catch(e){}
+        forgeCopy(el, d.copy||d.value, d.copy?'copied your card, so share it with whoever seals files for you or checks what you sign.':'copied, so paste it where you want to be paid.', function(){ el.querySelector('.cx').textContent=note });
       };
       box.appendChild(el);
+      if(d.followed)renderArFollowChip(box, c, d.followed);
       if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
         EVMADDR=d.value;
         $('ethg').setAttribute('opacity','1');
         $('ethnode').removeAttribute('stroke-dasharray');
         readEvm(EVMADDR);
       }
-      if(/^ar:/.test(c)&&d.value&&typeof readArBound==='function') readArBound(d.value);
+      if(c==='ar:'+SOUL&&d.value&&d.value===arInjectBoundAddress()&&typeof readArBound==='function') readArBound(d.value);
     });
   }
   $('forge-go').onclick=function(){
@@ -3312,7 +3354,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+vacct()); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+esc(vacct())+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); var hb=hiveBound(); $('forge-stat').innerHTML=hb?'✓ your Hive account is <b>'+esc(hb)+'</b>':'✓ hive card · add your Hive account on the Hive card: paste its active key'; };
-  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?'✓ your Arweave address for <b>'+esc(SOUL)+'</b> · made from your keys (secp256k1), never stored':'✓ ar card for <b>'+esc(SOUL)+'</b> · connect your keychain to make its address, or bind a public one (never a private JWK)'; };
+  $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge();
+    var d=null, st=$('forge-stat'); try{ d=deriveFor('ar:'+SOUL) }catch(e){}
+    if(d&&d.source==='derived') wlSay(st,['your arweave address, made from your keys, is in your list, so tap it to copy it.',{cy:'ar:'+SOUL+' · secp256k1 (Arweave 2.9+) · '+d.value+' · never stored'}]);
+    else if(d&&d.source==='vault-meta') wlSay(st,['your vault’s arweave address is in your list, and your vault holds its key.',{cy:'vault meta address '+d.value}]);
+    else if(MPRK) wlSay(st,['your arweave address could not be made on this page, so reload it to try again. ',{btn:'reload',on:function(){ location.reload() }},{cy:'arDeriveNow returned null: '+(!window.BNRAR?'arweave.js (BNRAR) did not load':'BN.secp did not load')}]);
+    else wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' and your keys make your arweave address.',{cy:'ar:'+SOUL+' saved; its address derives from masterPRK when the keychain connects'+(d&&d.followed?'; followed (read only): '+d.followed:'')}]);
+  };
   $('forge-pq-dsa').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('pq:ml-dsa-65:'+SOUL); renderForge(); $('forge-stat').innerHTML=MPRK?('✓ your post-quantum id for <b>'+SOUL+'</b> — derived from your masterPRK, never stored'):('✓ pq:ml-dsa-65 saved for <b>'+SOUL+'</b> — connect your keychain to derive it'); };
   /* ── only me: seal / open / bind (SPEC-BPQ-1). Everything happens in this tab;
      the plaintext never leaves it, the keys come from MPRK and die with it. ── */
@@ -3722,9 +3770,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL){st.textContent='name your soul first';return}
     try{
       var k=BSIGNER.keysFor(MPRK,SOUL), claims={};
-      [['evm','evm:'],['vaulta-k1','vaulta:'],['solana','sol:'],['bitcoin','btc:'],['nostr','nostr:']].forEach(function(p){
+      [['evm','evm:'],['solana','sol:'],['bitcoin','btc:'],['nostr','nostr:']].forEach(function(p){
         try{ var d=deriveFor(p[1]+SOUL); if(d&&d.value) claims[p[0]]=String(d.value) }catch(e){}
       });
+      /* the Vaulta claim is the key the account really signs with: context k1Ctx()
+         (vaulta:<account>, or the older context found on it), never vaulta:<soul> by
+         name; the account itself is named only when the .b pointer or a proof says so */
+      try{
+        var vctx=k1Ctx(), vd=vctx&&deriveFor(vctx);
+        if(vd&&vd.value){ claims['vaulta-k1']=String(vd.value); if(vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))claims['vaulta-account']=vacct() }
+      }catch(e){}
       var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
       claims['bzdid-ed25519']=toHex(rec.publicKey);
       var succ=$('pq-succ').value.trim();

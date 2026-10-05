@@ -152,6 +152,63 @@ try {
     await page.close();
   }
 
+  /* B2 · honesty on money and keys: "copied" only when the browser copied; your own
+     Arweave address before a bound one (the bound one is followed, and can be let go);
+     the binding vouches for the key the Vaulta account signs with, not the soul's */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    const BOUND = 'B'.repeat(43);
+    await page.addInitScript(b => { try {
+      localStorage.setItem('bnr_soul', 'gatesoul');
+      localStorage.setItem('bnr_vacct', JSON.stringify({ soul: 'gatesoul', acct: 'gatebeelovis', recv: 'gatebeelovis', state: 'name', proven: false }));
+      localStorage.setItem('bnr_ar_pub:ar:gatesoul', b);
+    } catch (e) {} }, BOUND);
+    await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());   // no chain answers: the cached pointer stands
+    await page.goto(`${BASE}/surfaces/wallet.html#forge-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BNRWALLET.forgePq && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    // copy: a refused clipboard never says copied
+    const chipOf = ctx => `[...document.querySelectorAll('#forge-chips .chip')].find(el => (el.querySelector('.cc')||{}).textContent && el.querySelector('.cc').textContent.includes(${JSON.stringify(ctx)}) && !el.hasAttribute('data-ar-followed'))`;
+    await page.evaluate(() => Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: () => Promise.reject(new Error('denied')) }));
+    await page.evaluate(new Function('(' + chipOf('btc:gatesoul') + ').click()'));
+    await page.waitForFunction(new Function('return /did not copy/.test((' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent)'), null, { timeout: 5000 });
+    const refused = await page.evaluate(new Function('const el=' + chipOf('btc:gatesoul') + ';return {t:el.querySelector(".cx").textContent, sel:String(getSelection())===el.querySelector(".cv").textContent}'));
+    ok('a refused clipboard says it did not copy, never "copied", and selects the address to copy by hand', /did not copy/.test(refused.t) && !/(^|\s)copied/.test(refused.t.replace(/did not copy/, '')) && refused.sel, JSON.stringify(refused));
+    await page.evaluate(() => { window.__copied = null; Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: t => new Promise(r => setTimeout(() => { window.__copied = t; r(); }, 300)) }); });
+    await page.evaluate(new Function('(' + chipOf('btc:gatesoul') + ').click()'));
+    const early = await page.evaluate(new Function('return (' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent'));
+    await page.waitForFunction(() => window.__copied, null, { timeout: 5000 });
+    await page.waitForFunction(new Function('return /^copied/.test((' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent)'), null, { timeout: 5000 });
+    const copied = await page.evaluate(new Function('return {c:window.__copied, v:(' + chipOf('btc:gatesoul') + ').querySelector(".cv").textContent}'));
+    ok('"copied" shows only after the clipboard answered, and it holds the address shown', !/^copied/.test(early) && copied.c === copied.v && /^bc1q/.test(copied.v), JSON.stringify({ early, copied }));
+    // Arweave: the address your keys make comes first; the bound one is followed
+    const ar = await page.evaluate(new Function('const el=' + chipOf('ar:gatesoul') + ';const f=document.querySelector("#forge-chips [data-ar-followed]");return {own:el&&el.querySelector(".cv").textContent, derived:BNRWALLET.arInject.derivedAddress(), shown:BNRWALLET.arInject.boundAddress(), followed:f&&f.querySelector(".cv").textContent, words:f&&f.querySelector(".cx").innerText}'));
+    ok('ar: the chip shows the address your own keys make, not the bound one', !!ar.derived && ar.own === ar.derived && ar.own !== BOUND, JSON.stringify(ar));
+    ok('ar: the wallet\'s shown Arweave address is the one your keys make', ar.shown === ar.derived, JSON.stringify(ar));
+    ok('ar: the bound address stays, apart, as one you follow and only read', ar.followed === BOUND && /only reads it/.test(ar.words || ''), JSON.stringify(ar));
+    await page.click('#forge-ar');
+    const arSay = await page.evaluate(() => document.getElementById('forge-stat').innerText);
+    ok('+ ar: says made from your keys only because the card shows exactly that', /made from your keys/.test(arSay), arSay);
+    await page.evaluate(() => [...document.querySelectorAll('#forge-chips [data-ar-followed] button')].find(b => /stop following/.test(b.textContent)).click());
+    const let_go = await page.evaluate(() => ({ key: localStorage.getItem('bnr_ar_pub:ar:gatesoul'), chip: !!document.querySelector('#forge-chips [data-ar-followed]'), ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').includes('ar:gatesoul') }));
+    ok('ar: "stop following it" lets the bound address go and keeps the context name', let_go.key === null && !let_go.chip && let_go.ctx, JSON.stringify(let_go));
+    // the binding: the Vaulta claim is the key of vaulta:<account>, and names the account
+    await page.evaluate(() => { const d = document.getElementById('pq-more'); if (d) d.open = true; document.getElementById('pq-bind').click(); });
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const bnd = await page.evaluate(async () => ({ b: JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()),
+      acctKey: BNRWALLET.forgePq.derive('vaulta:gatebeelovis').value, soulKey: BNRWALLET.forgePq.derive('vaulta:gatesoul').value }));
+    ok('binding: vaulta-k1 is the key the account gatebeelovis signs with, never the soul\'s by name',
+      !!bnd.acctKey && bnd.b.claims['vaulta-k1'] === bnd.acctKey && bnd.acctKey !== bnd.soulKey && NODE_BPQ.verifyBind(bnd.b), JSON.stringify(bnd.b.claims));
+    ok('binding: the claims name the Vaulta account the pointer gave', bnd.b.claims['vaulta-account'] === 'gatebeelovis', JSON.stringify(bnd.b.claims));
+    await page.close();
+  }
+
   /* D · only me: seal in the page, open in the page, open the same bytes in Node;
      bind the classical accounts to the PQ id and verify the binding in Node */
   {
