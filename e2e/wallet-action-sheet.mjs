@@ -91,6 +91,8 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       }
       if (u.pathname.endsWith('/get_account')) {
         (state.reads = state.reads || []).push(body.account_name);
+        // a name the forge has not made yet does not exist: nodes answer 500 "unknown key"
+        if (/^newacctname/.test(body.account_name) && !state.keys[body.account_name]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + body.account_name + ')' }] } }, 500);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
         return json({ account_name: a, core_liquid_balance: (state.eos && state.eos[a]) || '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
