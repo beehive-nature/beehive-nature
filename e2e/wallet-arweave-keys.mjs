@@ -98,7 +98,7 @@ try {
     ok('the balance is read keyless and the card says where the address comes from', await page.evaluate(() => /from your keys|made from your keys/.test(document.getElementById('ar-stat').textContent + document.getElementById('ar-info').textContent)), await page.textContent('#ar-stat'));
     ok('the address lives only while the keychain does: nothing about it is stored', await page.evaluate(() => Object.keys(localStorage).every(k => !/ar_derived/.test(k))));
     await page.waitForFunction(() => /empty for now/.test(document.getElementById('ar-stat').textContent), null, { timeout: 15000 });
-    ok('an empty address reads calmly, with the one next step', await page.evaluate(() => { const e = document.getElementById('ar-stat'); return /^empty for now · add AR to publish$/.test(e.textContent.trim()) && !!e.querySelector('a[href="#arw-sec"]') && !/err/.test(e.className); }), await page.textContent('#ar-stat'));
+    ok('an empty address reads calmly, with the one next step', await page.evaluate(() => { const e = document.getElementById('ar-stat'); const calm = [...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join('').trim(); return calm === 'your Arweave address is empty for now. add AR to publish' && /balance 0 winston/.test(e.textContent) && !!e.querySelector('a[href="#arw-sec"]') && !/err/.test(e.className); }), await page.textContent('#ar-stat'));
     // publish a small file from it
     state.balance = '5000000000000';
     await page.setInputFiles('#arw-file', { name: 'hello.txt', mimeType: 'text/plain', buffer: Buffer.from('hello from my own keys') });

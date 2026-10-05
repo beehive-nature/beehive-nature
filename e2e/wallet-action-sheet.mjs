@@ -572,6 +572,8 @@ try {
     await page.waitForFunction(() => /bobsoul/.test(document.getElementById('vaulta-breakdown').textContent), null, { timeout: 20000 }).catch(() => {});
     const tot = await page.evaluate(() => ({ bal: document.getElementById('v-bal').textContent, rows: [...document.querySelectorAll('#vaulta-breakdown .va-rollup-row')].map(r => r.textContent) }));
     ok('a new name\'s total counts only its own accounts, never the last name\'s', tot.bal === '5.0000 A' && tot.rows.length === 1 && /bobsoul/.test(tot.rows[0]), JSON.stringify(tot));
+    // let the new name's signing check settle first (a disconnect in the middle of it is the bridge lane's own race, not this card's)
+    await page.waitForTimeout(400); await page.waitForFunction(() => !/checking/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
     await page.evaluate(() => document.getElementById('kc-out').click());
     const out = await page.evaluate(() => ({ a: document.getElementById('a-stat').innerText, ant: document.getElementById('ant-stat').innerText, antBal: document.getElementById('ant-bal').textContent, lit: document.getElementById('ch-arb').classList.contains('connected') || document.getElementById('ch-autonomi').classList.contains('connected') }));
     ok('disconnecting the keychain stops the cards made from it claiming a read', /^connect your keychain to see your Arbitrum balance\.$/.test(out.a) && /^connect your keychain/.test(out.ant) && out.antBal === '' && !out.lit, JSON.stringify(out));

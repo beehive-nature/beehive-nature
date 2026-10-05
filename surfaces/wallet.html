@@ -1294,7 +1294,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <input type="file" id="wa-import-file" accept="application/json,.json" hidden aria-label="Import public accounts JSON">
     </div>
     <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
-    <p class="wa-note">Vaulta and Hive accounts are included. The network picker shows the full wallet scope; entries awaiting a reader are marked unavailable. <a href="#matrix-sec">See every chain, read capability and signing status</a>.</p>
+    <p class="wa-note">Vaulta and Hive accounts work here too. see which chains this wallet can read on <a href="#matrix-sec">every rail</a>.<span class="wl-cyd"> The network picker shows the full wallet scope; entries awaiting a reader are marked not readable here yet.</span></p>
     <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
       <p class="wa-note">Open Trezor Suite on this computer for Bluetooth or USB, or plug the Trezor in and use Chrome. Then press Import and confirm on your Trezor. SAFE 7 end-to-end device verification is pending; you can add its verified public addresses manually.</p>
       <div class="wa-fields">
@@ -1325,9 +1325,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div id="wa-mine" class="wa-list"></div>
     <h4>Following <span id="wa-following-count"></span></h4>
     <div id="wa-following" class="wa-list"></div>
-    <div class="wa-note">Followed balances stay in their own list. Refresh to check again; this page does not send activity alerts. Explorer links show transaction history in a new tab.</div>
+    <div class="wa-note">press refresh to check followed balances again; this page sends no alerts.<span class="wl-cyd"> Followed balances stay in their own list. Explorer links show transaction history in a new tab.</span></div>
   </div>
-  <h3>Connected signing wallet</h3>
+  <h3>your own coins, read from your name and your keychain</h3>
   <div class="law" data-wl-tech>Balances come from public chain services. These services receive the public addresses you read.</div>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
@@ -1343,15 +1343,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div class="stat" id="v-stat"><a href="#connect-sec">connect your name</a> to see your Vaulta balance.</div>
     </div>
     <div class="chain" id="ch-hive">
-      <div class="cn">🐝 Hive <span class="badge">HB/Hive</span></div>
+      <div class="cn">🐝 Hive <span class="badge">HIVE</span></div>
       <button type="button" class="va-total" data-hive-toggle aria-expanded="false" aria-controls="hive-breakdown" disabled>
         <span class="cb" id="h-bal"></span><span class="va-total-caret" aria-hidden="true" hidden>⌄</span>
       </button>
       <div class="va-breakdown" id="hive-breakdown" data-hive-breakdown hidden>
-        <div class="va-breakdown-head">HB/Hive held</div>
+        <div class="va-breakdown-head">HIVE ready to spend</div>
         <div data-hive-rows></div>
       </div>
-      <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
+      <div class="cd" id="h-info">the HIVE you can spend now</div>
       <div class="stat" id="h-stat"><a href="#connect-sec">connect your name</a>, then add your Hive account here.</div>
       <div id="hv-add" hidden>
         <div class="row" style="margin-top:8px">
@@ -2311,8 +2311,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
             else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
             if (statEl) {
-              if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['empty for now · ', { to: 'arw-sec', t: 'add AR to publish' }]); }
-              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); statEl.textContent = winston >= need ? 'ready to publish' : 'needs ' + arUnits(need-winston) + ' more AR to publish'; }
+              if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['your Arweave address is empty for now. ', { to: 'arw-sec', t: 'add AR to publish' }, { cy: 'balance 0 winston · anchor fee ' + arUnits(need) + ' AR' }]); }
+              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); wlSay(statEl, winston >= need ? ['you hold enough AR to publish on Arweave.', { cy: 'live · anchor fee ' + arUnits(need) + ' AR covered' }] : ['you need ' + arUnits(need-winston) + ' AR more to publish on Arweave. ', { to: 'arw-sec', t: 'add AR' }, { cy: 'live · short ' + arUnits(need-winston) + ' AR for the anchor' }]); }
             }
             var detail = 'address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' + arUnits(need) + ' AR (gateway-quoted)' +
               (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
@@ -2946,26 +2946,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   // one paste: the key names its account, proves itself there, and is sealed under the keychain
   async function hiveAdd(wif,say,choose){
-    if(!SOUL)throw new Error('Connect your name first.');
+    var calm=function(m){ var e=new Error(m); e.calm=true; return e };
+    if(!SOUL)throw calm('Connect your name first.');
     if(!MPRK){
       say('Confirm with your passkey…');
       CEREMONY=true;
       try{ keychainOn(await connectSoul()) }
-      catch(e){ throw new Error(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
+      catch(e){ throw calm(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
       finally{ CEREMONY=false }
     }
     var pub=hivePubOf(wif);
     say('Finding the Hive account this key belongs to…');
     var refs=await hiveRpc('condenser_api.get_key_references',[[pub]]);
     var names=((refs&&refs[0])||[]).filter(function(n){return HIVE_NAME.test(n)});
-    if(!names.length)throw new Error('No Hive account uses this key. Paste the account’s active key.');
+    if(!names.length)throw calm('No Hive account uses this key. Paste the account’s active key.');
     var accs=(await hiveRpc('condenser_api.get_accounts',[names]))||[];
     var keyIn=function(auth){ return ((auth||{}).key_auths||[]).some(function(k){return k[0]===pub}) };
-    if(accs.some(function(a){return keyIn(a.owner)}))throw new Error('That key also controls an account’s owner authority, and an owner key stays offline. Paste an active key that is not the owner key.');
+    if(accs.some(function(a){return keyIn(a.owner)}))throw calm('That key also controls an account’s owner authority, and an owner key stays offline. Paste an active key that is not the owner key.');
     var hits=accs.filter(function(a){ var aa=a.active||{}; return names.indexOf(a.name)>=0&&(aa.key_auths||[]).some(function(k){return k[0]===pub&&k[1]>=aa.weight_threshold}) });
-    if(!hits.length)throw new Error('That key is on '+names[0]+' but is not its active key. Paste the active key.');
+    if(!hits.length)throw calm('That key is on '+names[0]+' but is not its active key. Paste the active key.');
     var pick=hits.length===1?hits[0].name:await choose(hits.map(function(a){return a.name}));
-    if(!pick)throw new Error('Nothing was kept.');
+    if(!pick)throw calm('Nothing was kept.');
     await hiveSeal(pick,wif);
     localStorage.setItem(hiveSlot('acct'),JSON.stringify({acct:pick}));
     hiveShow();
@@ -2977,9 +2978,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(alt)alt.hidden=!acct;
     if(acct&&!repaste){ if(box)box.hidden=true; readHive(acct); renderForge(); sumChains(); return }
     if(box)box.hidden=false;
+    /* a send found its seal made by another keychain: the card says why the field is back */
+    if(acct&&repaste){ HV_RESEND=true; wlSay($('hv-add-stat'),['paste '+acct+'\u2019s active key once more to send from it.',{cy:'the seal was made by another keychain; one paste reseals it under this one'}]) }
     if(!acct){
       if(window.wlClearRollup)window.wlClearRollup('hive');
-      $('h-info').textContent='liquid + Hive Power + HBD'; $('ch-hive').classList.remove('connected');
+      $('h-info').textContent='the HIVE you can spend now'; $('ch-hive').classList.remove('connected');
       st.textContent='add your Hive account: paste its active key'; st.className='stat'; wlRead(st,true);
     }
     sumChains();
@@ -4060,7 +4063,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var eth=parseInt(wei,16)/1e18;
       $('a-bal').textContent=eth.toFixed(6)+' ETH';
       $('a-info').textContent=addr;
-      $('a-stat').textContent='✓ live';$('a-stat').className='stat ok';wlRead($('a-stat'),true);
+      balReadAt($('a-stat'),'✓ live · '+addr,function(){ if(EVMADDR)readEvm(EVMADDR) });
       $('ch-arb').classList.add('connected');
     } else { wlSay($('a-stat'),['your Arbitrum balance did not load just now. ',{btn:'try again',on:function(){ if(EVMADDR)readEvm(EVMADDR) }},{cy:'eth_getBalance '+addr+': '+((wei&&wei.message)||'no host answered')}]);$('a-stat').className='stat err';wlRead($('a-stat'),false); }
     // ANT balanceOf — honest EVM lane (the old vaulta-side read never worked)
@@ -4070,7 +4073,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(typeof bal==='string'&&/^0x[0-9a-f]+$/i.test(bal)){
       var ant=parseInt(bal,16)/1e18;
       upsertAntBalance(addr,ant);
-      $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';wlRead($('ant-stat'),true);
+      balReadAt($('ant-stat'),'✓ live · ANT of '+addr,function(){ if(EVMADDR)readEvm(EVMADDR) });
       $('ch-autonomi').classList.add('connected');
     } else { wlSay($('ant-stat'),['your ANT balance did not load just now. ',{btn:'try again',on:function(){ if(EVMADDR)readEvm(EVMADDR) }},{cy:'ANT balanceOf '+addr+': '+((bal&&bal.message)||'no host answered')}]);$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
     sumChains();
@@ -7236,16 +7239,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // one key, several accounts: one tap picks
   function hiveChoose(names){
     return new Promise(function(resolve){
-      var st=$('hv-add-stat'); st.textContent='This key controls more than one Hive account. Which one is yours here? ';
+      var st=$('hv-add-stat'); st.textContent='this key runs more than one Hive account. pick yours. ';
       names.forEach(function(n){ var b=document.createElement('button'); b.type='button'; b.textContent=n; b.style.minHeight='44px'; b.onclick=function(){ resolve(n) }; st.appendChild(b) });
+      var no=document.createElement('button'); no.type='button'; no.className='wl-act'; no.textContent='not now'; no.onclick=function(){ resolve(null) }; st.appendChild(no);
     });
   }
+  var HV_RESEND=false;   /* the field came back for a send: after the paste, lead back to it */
   $('hv-add-go').onclick=async function(){
     var btn=this, st=$('hv-add-stat'), w=hiveParse($('hv-key').value); $('hv-key').value='';
     if(!w){ st.textContent='That is not a Hive private key. Paste the account\u2019s active key.'; return }
     btn.disabled=true;
-    try{ var name=await hiveAdd(w,function(t){st.textContent=t},hiveChoose); w=null; st.textContent='Done. '+name+' is your Hive account here, and its key is sealed by your keychain.' }
-    catch(e){ w=null; st.textContent=hiveSay(e) }
+    try{ var name=await hiveAdd(w,function(t){st.textContent=t},hiveChoose); w=null;
+      if(HV_RESEND){ HV_RESEND=false; wlSay(st,['done. your Hive send is ready. ',{to:'pay-sec',t:'back to your Hive send'},{cy:name+' resealed under this keychain'}]); var back=st.querySelector('a'); if(back)back.addEventListener('click',function(){ $('pay-tx').click(); txTab('h') }) }
+      else st.textContent='Done. '+name+' is your Hive account here, and its key is sealed by your keychain.' }
+    catch(e){ w=null;
+      if(e&&(e.calm||e.hive||e.offline)) st.textContent=hiveSay(e);
+      else wlSay(st,['that key could not be added, so nothing was kept. paste the active key again.',{cy:(e&&e.message)||String(e)}]) }
     finally{ btn.disabled=false }
   };
   /* forgetting the Hive account also deletes its sealed key: said first, pressed once more,
@@ -7883,13 +7892,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       document.querySelectorAll(cfg.rowsSel).forEach(function(list){
         list.textContent='';
         if(!rows.length){
-          var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent=cfg.empty; list.appendChild(empty); return;
+          var empty=document.createElement('div'); empty.className='va-rollup-empty'; wlSay(empty,cfg.empty); list.appendChild(empty); return;
         }
         rows.forEach(function(row){
           var item=document.createElement('div'); item.className='va-rollup-row';
           var label=document.createElement('span'); label.className='va-rollup-label';
-          var source=document.createElement('b'); source.textContent=row.adapter; label.appendChild(source);
-          var path=document.createElement('small'); path.textContent=row.chain+' · '+row.account; label.appendChild(path);
+          var who=String(row.account), shortWho=who.length>16?who.slice(0,6)+'\u2026'+who.slice(-4):who;
+          var source=document.createElement('b'); source.textContent=shortWho+' on '+row.chain; label.appendChild(source);
+          var path=document.createElement('small'); path.className='wl-cyd'; path.textContent=' '+row.adapter+' · '+row.chain+' · '+row.account; label.appendChild(path);
           var value=document.createElement('strong'); value.textContent=format(row.amount);
           item.appendChild(label); item.appendChild(value); list.appendChild(item);
         });
@@ -7907,7 +7917,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var el=$(cfg.balId); if(el) el.textContent='';
       document.querySelectorAll(cfg.rowsSel).forEach(function(list){
         list.textContent='';
-        var empty=document.createElement('div'); empty.className='va-rollup-empty'; empty.textContent=cfg.empty; list.appendChild(empty);
+        var empty=document.createElement('div'); empty.className='va-rollup-empty'; wlSay(empty,cfg.empty); list.appendChild(empty);
       });
       toggles();
     }
@@ -7930,22 +7940,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   var VAULTA_ROLLUP=makeAssetRollup({
     balId:'v-bal', rowsSel:'[data-vaulta-rows]', toggleSel:'[data-vaulta-toggle]',
-    adapter:'Vaulta adapter', chain:'Vaulta', empty:'read an account to see its A row',
+    adapter:'Vaulta adapter', chain:'Vaulta', empty:[{to:'connect-sec',t:'connect your name'},' to see which Vaulta accounts hold your A.'],
     format:function(n){ return n.toFixed(4)+' A'; }
   });
   var HIVE_ROLLUP=makeAssetRollup({
     balId:'h-bal', rowsSel:'[data-hive-rows]', toggleSel:'[data-hive-toggle]',
-    adapter:'Hive adapter', chain:'Hive', empty:'read an account to see its HB/Hive row',
-    format:function(n){ return n.toFixed(3)+' HB/Hive'; }
+    adapter:'Hive adapter', chain:'Hive', empty:[{to:'ch-hive',t:'add your Hive account'},' to see it here.'],
+    format:function(n){ return n.toFixed(3)+' HIVE'; }
   });
   var ANT_ROLLUP=makeAssetRollup({
     balId:'ant-bal', rowsSel:'[data-ant-rows]', toggleSel:'[data-ant-toggle]',
-    adapter:'Autonomi adapter', chain:'Arbitrum', empty:'read an account to see its ANT row',
+    adapter:'Autonomi adapter', chain:'Arbitrum', empty:[{to:'kc-sec',t:'connect your keychain'},' to see it here.'],
     format:function(n){ return n.toFixed(4)+' ANT'; }
   });
   var AR_ROLLUP=makeAssetRollup({
     balId:'ar-bal', rowsSel:'[data-ar-rows]', toggleSel:'[data-ar-toggle]',
-    adapter:'Arweave adapter', chain:'Arweave', empty:'read an account to see its AR row',
+    adapter:'Arweave adapter', chain:'Arweave', empty:[{to:'kc-sec',t:'connect your keychain'},' to see it here.'],
     format:function(n){ return n.toFixed(6)+' AR'; }
   });
   var VAULTA_BALANCES=VAULTA_ROLLUP.rows;
@@ -7965,7 +7975,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
   /* each card's line before it is read: one sentence and the one place that makes it readable */
   var BAL_CARD={v:'ch-vaulta',h:'ch-hive',a:'ch-arb',ant:'ch-autonomi',ar:'ch-arweave'};
-  var BAL_CAP={v:'core balance + RAM + resources',h:'liquid + Hive Power + HBD',a:'ETH of your derived bzDiD 0x address (evm:yourname)',ant:'ANT on Arbitrum, of your derived 0x address',ar:'your Arweave address comes from your keys · reads stay keyless'};
+  var BAL_CAP={v:'core balance + RAM + resources',h:'the HIVE you can spend now',a:'ETH of your derived bzDiD 0x address (evm:yourname)',ant:'ANT on Arbitrum, of your derived 0x address',ar:'your Arweave address comes from your keys · reads stay keyless'};
   var BAL_UNREAD={
     v:[{to:'connect-sec',t:'connect your name'},' to see your Vaulta balance.'],
     h:[{to:'connect-sec',t:'connect your name'},', then add your Hive account here.'],
@@ -8001,6 +8011,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var arPub=SOUL?(loadArPublic('ar:'+SOUL)||vaultArPublic()):null;
     if(arPub)readArBound(arPub);
   }
+  /* a read is said with its time, never as "live" forever: two minutes on, it offers read again */
+  function balReadAt(st,cy,again){
+    var at=new Date(), t='read at '+at.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase()+'.', stamp=String(at.getTime());
+    var line=function(more){ wlSay(st,[t,more?' ':null,more?{btn:'read again',on:again}:null,{cy:cy+' · '+at.toISOString()}]); st.setAttribute('data-read-at',stamp) };
+    line(false); st.className='stat ok'; wlRead(st,true);
+    if(again)setTimeout(function(){ if(st.getAttribute('data-read-at')===stamp&&st.className==='stat ok'&&st.textContent.indexOf(t)===0)line(true) },120000);
+  }
   /* a node that answers "no such account" is not a read that failed */
   function vaultaMissing(e){ return !!e&&/account_query_exception|unknown key|unable to retrieve account|unknown account|does not exist/i.test(JSON.stringify(e)) }
   /* A is the token of core.vaulta. The chain's older core coin, EOS (eosio.token,
@@ -8029,9 +8046,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/')+
       ' · A from '+A_TOKEN+(eos>0?' · also '+eos.toFixed(4)+' EOS on eosio.token, which swaps 1:1 into A and is not counted here':'');
-    if(eos>0) wlSay($('v-stat'),['✓ live · '+acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A. ',{btn:'turn it into A',on:function(){ eosToA(this) }},{cy:'EOS on eosio.token; sent to '+A_TOKEN+' it comes back 1:1 as A'}]);
-    else $('v-stat').textContent='✓ live';
-    $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
+    if(eos>0){ wlSay($('v-stat'),[acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A. ',{btn:'turn it into A',on:function(){ eosToA(this) }},{cy:'✓ live · '+new Date().toISOString()+' · EOS on eosio.token; sent to '+A_TOKEN+' it comes back 1:1 as A'}]); $('v-stat').className='stat ok'; wlRead($('v-stat'),true) }
+    else balReadAt($('v-stat'),'✓ live · '+acct,function(){ readVaulta(acct) });
     $('ch-vaulta').classList.add('connected');
     if(vacct()===acct)refreshAcctPanel();
   }
@@ -8086,7 +8102,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(acct!==hiveBound())return;
     wlSay($('h-info'),[hp!==null?acct+' also holds '+hp+' Hive Power and '+hbd+' HBD.':acct+' also holds '+hbd+' HBD; its Hive Power is not known yet because the chain\u2019s rate did not load.',
       {cy:'vesting_shares '+a.vesting_shares+' · '+rate+' · reputation '+a.reputation+' (score '+hiveRep(a.reputation)+')'}]);
-    st.textContent='✓ live · '+acct; st.className='stat ok'; wlRead(st,true);
+    balReadAt(st,'✓ live · '+acct,function(){ readHive(acct) });
     $('ch-hive').classList.add('connected');
   }
 
@@ -8109,7 +8125,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!/^\d+$/.test(winston))throw new Error('gateway answered '+JSON.stringify(winston.slice(0,40)));
       if(gen!==BAL_GEN)return;
       upsertArBalance(addr,Number(winston)/1e12);
-      if(statEl){ statEl.textContent=addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address'; statEl.className='stat ok'; wlRead(statEl,true) }
+      if(statEl) balReadAt(statEl,addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address',function(){ readArBound(addr) });
       $('ch-arweave').classList.add('connected');
     }catch(e){
       if(gen!==BAL_GEN)return;
@@ -9314,13 +9330,24 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   (window.__CHAIN_MATRIX||[]).forEach(function(rail){
     var option=document.createElement('option'),ready=Object.prototype.hasOwnProperty.call(NETWORKS,rail.watch||'');
     option.value=ready?rail.watch:'';option.disabled=!ready;
-    option.textContent=rail.name+' · '+rail.unit+(ready?'':' · reader not available here');
+    option.textContent=rail.name+' · '+rail.unit+(ready?'':' · not readable here yet');
     el('wa-chain').appendChild(option);
     if(rail.watch==='bitcoin'){
       var account=document.createElement('option');account.value='bitcoin-account';account.textContent='Bitcoin · account public key';el('wa-chain').appendChild(account);
     }
   });
   var status=function(message){el('wa-status').textContent=message};
+  var say=function(parts){window.wlSay(el('wa-status'),parts)};
+  var storeErr=function(message,kind){var e=new Error(message);e.waStore=kind;return e};
+  var reloadErr=function(message){var e=new Error(message);e.waReload=true;return e};
+  function retryLoad(){load();render();if(!storageBlocked)say(['your saved list is open again.'])}
+  /* a refusal the reader can act on is one calm sentence and its one button; the raw reason stays for cypherpunk */
+  function sayErr(e){
+    if(e&&e.waStore==='blocked')say(['your saved list could not be opened, so nothing changed. ',{btn:'try again',on:retryLoad},{cy:e.message}]);
+    else if(e&&e.waStore==='full')say(['this browser would not keep it, so nothing changed. ',{btn:'export accounts',on:function(){el('wa-export').click()}},{cy:e.message}]);
+    else if(e&&e.waReload)say(['this page did not finish loading. reload it, then save again. ',{btn:'reload',on:function(){location.reload()}},{cy:e.message}]);
+    else status((e&&e.message)||String(e));
+  }
   var idOf=function(row){return row.chain+':'+row.address};
   function base58Bytes(value){
     var alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',n=0n;
@@ -9345,7 +9372,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       if(!/^0x[0-9a-fA-F]{40}$/.test(a))throw new Error('Enter a public 0x address with 40 hexadecimal characters');
       var hex=a.slice(2);
       if(hex!==hex.toLowerCase()&&hex!==hex.toUpperCase()){
-        if(!window.BnrSign)throw new Error('Address checksum checker is unavailable');
+        if(!window.BnrSign)throw reloadErr('Address checksum checker is unavailable (vendor/bnr-sign.js keccak missing)');
         var hash=Array.from(window.BnrSign.keccak_256(new TextEncoder().encode(hex.toLowerCase()))).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
         for(var pos=0;pos<hex.length;pos++)if(/[a-f]/i.test(hex[pos])&&((parseInt(hash[pos],16)>=8)!==(hex[pos]===hex[pos].toUpperCase())))throw new Error('EVM address checksum failed; copy the address again');
       }
@@ -9365,7 +9392,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       if(/^bc1/i.test(a)){
         if(a!==a.toLowerCase()&&a!==a.toUpperCase())throw new Error('Bitcoin address cannot mix letter cases');
         var core=window.BNRPAY, decoded;
-        if(!core)throw new Error('Bitcoin address checker is unavailable');
+        if(!core)throw reloadErr('Bitcoin address checker is unavailable (BNRPAY bech32 missing)');
         try{decoded=core.bech32mDecode(a,core.BECH32_CONST,90)}
         catch(e){decoded=core.bech32mDecode(a,core.BECH32M_CONST,90)}
         var version=decoded.words[0],program=core.convertBits(decoded.words.slice(1),5,8,false);
@@ -9403,16 +9430,16 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       var seen=new Set(),next=saved.entries.map(normalize);
       next.forEach(function(row){if(seen.has(idOf(row)))throw new Error('Duplicate address');seen.add(idOf(row))});
       entries=next;storageBlocked=false;
-    }catch(e){entries=[];storageBlocked=true;status('The saved list could not be read. Saving is paused to protect it. Check browser storage access.');}
+    }catch(e){entries=[];storageBlocked=true;say(['your saved list could not be opened, so nothing will change it. ',{btn:'try again',on:retryLoad},{cy:'The saved list could not be read. Saving is paused to protect it. '+(e&&e.message||e)}]);}
   }
   function save(next){
-    if(storageBlocked)throw new Error('Browser storage is unavailable or the saved list is unreadable. Nothing was changed.');
+    if(storageBlocked)throw storeErr('Browser storage is unavailable or the saved list is unreadable. Nothing was changed.','blocked');
     if(next.length>LIMIT)throw new Error('This browser list holds up to '+LIMIT+' accounts. Remove one before adding another.');
     var latest;
-    try{latest=localStorage.getItem(KEY)}catch(e){throw new Error('Browser storage is unavailable. Nothing was saved.');}
+    try{latest=localStorage.getItem(KEY)}catch(e){throw storeErr('Browser storage is unavailable. Nothing was saved. '+(e&&e.name||''),'full');}
     if(latest!==snapshot){load();render();throw new Error('The list changed in another tab. Review the updated list and try again.');}
     var json=JSON.stringify({v:1,entries:next});
-    try{localStorage.setItem(KEY,json)}catch(e){throw new Error('Browser storage is full or blocked. Nothing was saved.');}
+    try{localStorage.setItem(KEY,json)}catch(e){throw storeErr('Browser storage is full or blocked. Nothing was saved. '+(e&&e.name||''),'full');}
     snapshot=json;entries=next;
   }
   function node(tag,text,className){var n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n}
@@ -9426,7 +9453,12 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     ['mine','following'].forEach(function(kind){
       var list=el('wa-'+kind),rows=entries.filter(function(row){return row.kind===kind&&(!query||(row.label+' '+row.address+' '+NETWORKS[row.chain].name).toLowerCase().includes(query))});list.replaceChildren();
       el('wa-'+kind+'-count').textContent='('+rows.length+')';
-      if(!rows.length){list.appendChild(node('div',query?'No accounts match this search.':kind==='mine'?'Add your first account to read its balance here.':'Follow a public address to keep it within reach.','wa-note'));return;}
+      if(!rows.length){
+        var empty=node('div',query?'nothing matches that search. ':kind==='mine'?'add your first account to see its balance here. ':'follow a public address to keep it within reach. ','wa-note');
+        var next=node('button',query?'clear search':kind==='mine'?'add account':'follow an address');next.type='button';
+        next.onclick=query?function(){el('wa-search').value='';query='';render();el('wa-search').focus()}:function(){showForm(kind)};
+        empty.appendChild(next);list.appendChild(empty);return;
+      }
       rows.forEach(function(row){
         var id=idOf(row),read=reads.get(id),state=read?read.state:'unread';
         var previous=priorCards.get(id),coin=coinReads.get(id),view=[row,read,state,coin,coin&&coin.state];
@@ -9438,7 +9470,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
         if(state==='ready')read.value.amounts.forEach(function(amount){card.appendChild(node('div',amount,'wa-amount'))});
         var msg=state==='ready'?'Read '+new Date(read.at).toLocaleTimeString()+' · '+read.value.source
           :state==='reading'?'Reading public balance…':state==='failed'?'Read unavailable · '+read.error
-          :state==='stale'?'Out of date · refresh to read again':'Not read yet';
+          :state==='stale'?'Out of date · refresh to read again':'not read yet. press refresh to read it.';
         card.appendChild(node('div',msg,'wa-state'));
         if(state==='ready'&&read.value.note)card.appendChild(node('div',read.value.note,'wa-note'));
         var actions=node('div',undefined,'wa-actions');
@@ -9448,19 +9480,23 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
           var coins=button('Read token balances','coins',id);coins.disabled=coinReads.get(id)?.state==='reading';actions.appendChild(coins);
         }
         if(row.trezor)card.appendChild(node('div','Trezor public export · '+row.trezor.path,'wa-note'));
-        if(NETWORKS[row.chain].explorer){var link=node('a','Activity ↗ (new tab)');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);}
+        if(NETWORKS[row.chain].explorer){var link=node('a','history on '+NETWORKS[row.chain].explorer.replace(/^https:\/\//,'').split('/')[0]+' ↗');link.href=NETWORKS[row.chain].explorer+encodeURIComponent(row.address);link.target='_blank';link.rel='noopener noreferrer';actions.appendChild(link);}
         card.appendChild(actions);
         var coinRead=coinReads.get(id);
         if(coinRead){
           var section=node('div',undefined,'wa-coins');section.appendChild(node('h4','Token balances · '+NETWORKS[row.chain].name));
-          section.appendChild(node('div',coinRead.state==='ready'?'Read '+new Date(coinRead.at).toLocaleTimeString()+' · '+coinRead.rows.length+' contracts':coinRead.state==='reading'?'Reading token balances…':coinRead.state==='stale'?'Out of date · read token balances again':'Token reads unavailable · '+coinRead.error,'wa-note'));
+          var coinsOff=coinRead.state==='failed'||(coinRead.state==='ready'&&coinRead.rows.length>0&&coinRead.rows.every(function(t){return t.state==='unavailable'}));
+          if(coinsOff){
+            var off=node('div','the coins this address holds did not load. ','wa-note');off.appendChild(button('try again','coins',id));
+            off.appendChild(node('span',coinRead.state==='failed'?' Token reads unavailable · '+coinRead.error:' every contract read failed','wl-cyd'));section.appendChild(off);
+          }else section.appendChild(node('div',coinRead.state==='ready'?'Read '+new Date(coinRead.at).toLocaleTimeString()+' · '+coinRead.rows.length+' contracts':coinRead.state==='reading'?'Reading token balances…':'Out of date · read token balances again','wa-note'));
           if(coinRead.state==='ready')coinRead.rows.forEach(function(token){
             var item=node('div',undefined,'wa-token');item.dataset.contract=token.address.toLowerCase();
             item.appendChild(node('div',token.name+' · '+(token.state==='unavailable'?'unavailable':token.quantity),'wa-amount'));
             var contract=node('a',token.address+' ↗ (new tab)','wa-address');contract.href=NETWORKS[row.chain].explorer+token.address;contract.target='_blank';contract.rel='noopener noreferrer';item.appendChild(contract);
-            item.appendChild(node('div',token.state==='unavailable'?token.error:'Block '+BigInt(token.block).toString()+' · decimals '+token.decimals+' · '+token.source,'wa-note'));section.appendChild(item);
+            item.appendChild(node('div',token.state==='unavailable'?token.error:'Block '+BigInt(token.block).toString()+' · decimals '+token.decimals+' · '+token.source,'wa-note'));if(token.state!=='unavailable')item.lastChild.setAttribute('data-wl-tech','');section.appendChild(item);
           });
-          section.appendChild(node('div','Additional token contracts are kept for this tab. Reads never grant spending access.','wa-note'));
+          section.appendChild(node('div','Additional token contracts are kept for this tab. Reads never grant spending access.','wa-note'));section.lastChild.setAttribute('data-wl-tech','');
           var form=node('form');form.dataset.waToken=id;
           var label=node('label','Read another token contract '),input=node('input');input.name='contract';input.required=true;input.maxLength=42;input.placeholder='Public 0x token contract';input.autocomplete='off';input.spellcheck=false;input.value=drafts.get(id)||'';label.appendChild(input);form.appendChild(label);
           var add=node('button','Add token & read');add.type='submit';add.disabled=coinRead.state==='reading';form.appendChild(add);section.appendChild(form);
@@ -9470,6 +9506,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       });
     });
     el('wa-refresh').disabled=refreshingAll||!entries.length||entries.every(function(row){return reads.get(idOf(row))?.state==='reading'});
+    el('wa-refresh').hidden=!entries.length;   /* nothing saved, nothing to refresh: the empty list offers add instead */
     if(focusAction)Array.from(document.querySelectorAll('[data-wa-action]')).find(function(b){return b.dataset.waAction===focusAction&&b.dataset.waId===focusId})?.focus({preventScroll:true});
     if(focusToken){var form=Array.from(document.querySelectorAll('[data-wa-token]')).find(function(form){return form.dataset.waToken===focusToken});if(form){form.elements.contract.focus({preventScroll:true});form.elements.contract.setSelectionRange(selection[0],selection[1])}}
 
@@ -9519,7 +9556,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       var extra=extraTokens.get(id)||[];if(!extra.includes(contract))extra=extra.concat(contract);
       if(extra.length>20)throw new Error('This read supports 20 additional contracts');
       extraTokens.set(id,extra);await refreshCoins(id);
-    }catch(e){status(e.message)}
+    }catch(e){sayErr(e)}
   });
   async function refreshAll(userGesture){
     if(refreshingAll)return;
@@ -9538,7 +9575,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   }
   el('wa-search').addEventListener('input',function(){query=this.value.trim().toLowerCase();render()});
   el('wa-export').onclick=function(){
-    if(storageBlocked){status('The saved list could not be read. Export is paused to protect it.');return;}
+    if(storageBlocked){say(['your saved list could not be opened, so it cannot be exported yet. ',{btn:'try again',on:retryLoad},{cy:'The saved list could not be read. Export is paused to protect it.'}]);return;}
     var blob=new Blob([JSON.stringify({v:1,entries:entries},null,2)],{type:'application/json'});
     var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='skaists-wallet-public-accounts.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000);
     status('Exported public addresses and labels only. Keep this file private if you do not want these accounts linked.');
@@ -9558,8 +9595,14 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       }
       var existing=new Set(entries.map(idOf)),added=imported.filter(function(r){return !existing.has(idOf(r))});
       save(entries.concat(added));query='';el('wa-search').value='';render();
-      status('Imported '+added.length+' public accounts; '+(imported.length-added.length)+' already saved. Press Refresh all to read balances.');
-    }catch(e){status('Import refused: '+(e.message||'invalid account file')+' Existing accounts are unchanged.');}
+      var n=added.length;
+      if(!n){say(['those accounts are already in your list.',{cy:imported.length+' already saved'}]);return;}
+      say(['added '+n+' account'+(n===1?'':'s')+'. reading '+(n===1?'its balance':'their balances')+' now.',{cy:(imported.length-n)+' already saved'}]);
+      added.forEach(function(row){refresh(idOf(row),false)});
+    }catch(e){
+      if(e&&(e.waStore||e.waReload))sayErr(e);
+      else say(['that file could not be imported, so nothing changed. ',{btn:'choose another file',on:function(){el('wa-import').click()}},{cy:'Import refused: '+((e&&e.message)||'invalid account file')+' Existing accounts are unchanged.'}]);
+    }
   };
   el('wa-add').onclick=function(){showForm('mine')};
   el('wa-follow').onclick=function(){showForm('following')};
@@ -9579,9 +9622,10 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
       if(at<0)next.push(row);else next[at]=row;
       save(next);
       if(original&&original!==id){reads.delete(original);coinReads.delete(original);extraTokens.delete(original)}
-      el('wa-form').hidden=true;editing=null;render();status('Saved in this browser. Reading '+NETWORKS[row.chain].name+'…');el('wa-add').focus();
-      refresh(id,true);status('Saved in this browser. See the read status on the account.');
-    }catch(e){status(e.message)}finally{submit.disabled=false}
+      el('wa-form').hidden=true;editing=null;render();el('wa-add').focus();
+      say(['saved. reading its balance now. ',{btn:'see it',on:function(){var c=Array.from(document.querySelectorAll('.wa-card')).find(function(n){return n.dataset.waId===id});if(c){c.scrollIntoView({block:'center'});var r=c.querySelector('[data-wa-action="refresh"]');if(r)r.focus({preventScroll:true})}}}]);
+      refresh(id,true);
+    }catch(e){sayErr(e)}finally{submit.disabled=false}
   };
   el('wallet-accounts').addEventListener('click',async function(event){
     var b=event.target.closest('[data-wa-action]');if(!b)return;
@@ -9594,18 +9638,18 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
         case 'edit':showForm(row.kind,row);break;
         case 'remove':
           save(entries.filter(function(r){return idOf(r)!==id}));reads.delete(id);coinReads.delete(id);extraTokens.delete(id);removed=row;render();
-          status('Removed '+(row.label||row.address)+' from this browser list.');
-          undo.hidden=false;el('wa-add').focus();break;
+          /* the undo sits in the sentence it undoes, and brings back exactly this account */
+          say(['removed '+(row.label||row.address)+' from your list. ']);undo.hidden=false;el('wa-status').appendChild(undo);el('wa-add').focus();break;
       }
-    }catch(e){status(b.dataset.waAction==='copy'?'Clipboard unavailable. Select and copy the address shown on the card.':e.message)}
+    }catch(e){if(b.dataset.waAction==='copy')status('Clipboard unavailable. Select and copy the address shown on the card.');else sayErr(e)}
   });
-  var undo=node('button','Undo remove');undo.type='button';undo.hidden=true;undo.id='wa-undo';el('wallet-accounts').querySelector('.wa-toolbar').appendChild(undo);
+  var undo=node('button','undo');undo.type='button';undo.hidden=true;undo.id='wa-undo';
   undo.onclick=function(){
     if(!removed)return;
     try{
       if(entries.some(function(r){return idOf(r)===idOf(removed)}))throw new Error('That address is already in the list.');
-      save(entries.concat([removed]));var id=idOf(removed);removed=null;undo.hidden=true;render();status('Account restored.');refresh(id);
-    }catch(e){status(e.message)}
+      var back=removed;save(entries.concat([back]));var id=idOf(back);removed=null;undo.hidden=true;render();say([(back.label||back.address)+' is back in your list.']);refresh(id);
+    }catch(e){sayErr(e)}
   };
   // Official stock-device bridge. No signer or firmware-update method is
   // exposed here. A loaded public address never becomes the bPay signer.
@@ -9698,7 +9742,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   };
   window.addEventListener('storage',function(event){
     if(event.key!==KEY&&event.key!==null)return;
-    load();reads.clear();coinReads.clear();extraTokens.clear();render();if(!storageBlocked)status('List updated in another tab. Refresh to read its balances.');
+    load();reads.clear();coinReads.clear();extraTokens.clear();render();if(!storageBlocked)say(['your list changed in another tab. ',{btn:'read balances',on:function(){refreshAll(true)}},{cy:'List updated in another tab.'}]);
   });
   // A successful historical read is never dressed as a current balance.
   function expire(){var changed=false;[reads,coinReads].forEach(function(map){map.forEach(function(read){if(read.state==='ready'&&Date.now()-read.at>=FRESH_MS){read.state='stale';changed=true}})});if(changed)render()}

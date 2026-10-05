@@ -133,6 +133,8 @@ try {
     ok('balances read for loviswater', /12\.345/.test(await page.textContent('#h-bal')) && /loviswater/.test(await page.textContent('#h-info')), await page.textContent('#h-bal'));
     // 1000 VESTS at the chain's rate (180000 HIVE / 360000000 VESTS) is 0.500 Hive Power, never "1000 HP"; the raw figures stay for cypherpunk
     const info = await page.evaluate(() => { const e = document.getElementById('h-info'), c = e.querySelector('.wl-cyd'); return { calm: [...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join(''), cy: c ? c.textContent : '' }; });
+    const hstat = await page.evaluate(() => [...document.getElementById('h-stat').childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join('').trim());
+    ok('a read says when it was read, never a bare live mark (the live mark stays for cypherpunk)', /^read at \d/.test(hstat) && !/live/.test(hstat) && /✓ live · loviswater/.test(await page.textContent('#h-stat')), hstat);
     ok('Hive Power is vesting shares at the chain\'s rate, and the raw VESTS and reputation stay in the detail', info.calm === 'loviswater also holds 0.500 Hive Power and 1.000 HBD.' && /1000\.000000 VESTS/.test(info.cy) && /score 25/.test(info.cy), JSON.stringify(info));
     // one press to send: a whole number is written as Hive writes it
     const fill = (amt, memo) => page.evaluate(([a, m]) => { document.getElementById('tx-tab-h').click();

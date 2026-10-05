@@ -94,6 +94,7 @@ async function settled(locator) {
 try {
   await open();
   check('address book accessible without identity', await page.locator('#wa-add').isVisible());
+  check('an empty list offers its one action, and refresh all waits until there is something to refresh', (await page.locator('#wa-mine .wa-note button').textContent()) === 'add account' && await page.locator('#wa-refresh').isHidden());
   await add('vaulta', 'Alice.b', 'mine', 'Everyday');
   await settled(card('alice'));
   await add('vaulta', 'bob', 'mine', 'Savings');
@@ -122,7 +123,7 @@ try {
   await page.locator('#wa-save').click();
   await settled(arb);
   check('labels render as text, never markup', await arb.locator('img').count() === 0 && (await arb.locator('h4').textContent()).startsWith('<img'));
-  const explorer = arb.getByRole('link', { name: 'Activity' });
+  const explorer = arb.getByRole('link', { name: 'history on arbiscan.io' });
   check('activity uses chain-specific new-tab links with isolation', await explorer.getAttribute('href') === 'https://arbiscan.io/address/' + EVM && await explorer.getAttribute('target') === '_blank' && await explorer.getAttribute('rel') === 'noopener noreferrer');
   outage = true;
   await arb.getByRole('button', { name: 'Refresh', exact: true }).click();
@@ -142,6 +143,7 @@ try {
   release(); deferred = null;
   await page.waitForTimeout(100);
   check('removing during a read cannot resurrect the account', await page.locator('#wa-following .wa-card').count() === 0);
+  check('the undo sits in the sentence it undoes', /^removed .+ from your list\./.test(await page.locator('#wa-status').innerText()) && await page.locator('#wa-status #wa-undo').isVisible());
   await page.locator('#wa-undo').click(); await settled(arb);
   check('undo restores the public account', await page.locator('#wa-following .wa-card').count() === 1);
   await add('bitcoin', BTC, 'following', 'Bitcoin genesis'); await settled(card(BTC));
@@ -272,6 +274,7 @@ try {
   outage=true;await coinsCard.locator('[data-wa-action="coins"]').click();
   await page.waitForFunction(()=>document.querySelector('.wa-coins')?.textContent.includes('Contract read failed'));
   check('token failure removes prior balances instead of reporting zero', !(await coinsCard.locator('.wa-coins').textContent()).includes('1.25')&&(await coinsCard.locator('.wa-coins').textContent()).includes('unavailable'));
+  check('a failed token read is one calm sentence and try again, the raw reason kept for cypherpunk', /the coins this address holds did not load/.test(await coinsCard.locator('.wa-coins').innerText()) && await coinsCard.locator('.wa-coins button', { hasText: 'try again' }).count() === 1);
   check('coin reads request no credentials', await page.evaluate(()=>window.credentialCalls)===0);
   outage=false;
   const draftAddress='0x'+'56'.repeat(20);

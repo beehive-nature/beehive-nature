@@ -75,15 +75,15 @@ try {
    check(label+' account action reveals account book',await page.locator('#wallet-accounts').isVisible());
    const publicRows=[{chain:'vaulta',address:'alice',label:'Savings',kind:'mine'},{chain:'hive',address:'alice',label:'Creator',kind:'following'}];
    const upload=entries=>page.locator('#wa-import-file').setInputFiles({name:'accounts.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({v:1,entries}))});
-   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('Imported'));
+   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('added 2 accounts.'));
    check(label+' public backup imports both lists',await page.locator('.wa-card').count()===2);
    await page.locator('#wa-search').fill('hive');
    check(label+' network search preserves following distinction',await page.locator('#wa-mine .wa-card').count()===0&&await page.locator('#wa-following .wa-card').count()===1);
    await page.locator('#wa-search').fill('');
    await upload([...publicRows,{chain:'base',address:'private key is invalid',label:'bad',kind:'mine'}]);
-   await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('Import refused'));
+   await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('that file could not be imported'));
    check(label+' malformed import is atomic',await page.locator('.wa-card').count()===2);
-   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('Imported'));
+   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('those accounts are already in your list'));
    check(label+' reimport does not duplicate accounts',await page.locator('.wa-card').count()===2);
    const downloading=page.waitForEvent('download');await page.locator('#wa-export').click();const download=await downloading;
    const backup=JSON.parse(await readFile(await download.path(),'utf8'));

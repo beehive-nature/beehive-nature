@@ -38,7 +38,7 @@ try{
  await last.locator('[data-wa-action="refresh"]').click();
  await last.locator('[data-wa-action="coins"]').click();
  await last.locator('[data-wa-action="remove"]').click();
- check('search and removal remain usable during blocked reads',await page.locator('.wa-card').count()===0&&(await page.locator('#wa-status').innerText()).includes('Removed'));
+ check('search and removal remain usable during blocked reads',await page.locator('.wa-card').count()===0&&(await page.locator('#wa-status').innerText()).includes('removed'));
  release();
  await page.locator('#wa-search').fill('');
  await page.waitForFunction(()=>!document.querySelector('#wa-refresh').disabled,{},{timeout:30000});
