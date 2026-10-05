@@ -167,31 +167,43 @@
       --reg-flow:90deg;--reg-hatch:45deg;
     }
     body[dir="rtl"][data-reg-dress="contract"]{--reg-flow:270deg;--reg-hatch:135deg}
-    #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#857d70;--reg-active:#0c1412;--reg-on:#fbf7f0;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
-    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-track:#15241f;--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
-    body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-track:#0c1412;--reg-radius:4px;--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#45c2dc;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}
+    /* THE CHOSEN FACE (founder's chosen UI: his My Space screens 2026-10-04, rolled to this shared
+       chrome 2026-10-05). The wordmark in the house hand with its small ring, then a rounded track of
+       three equal segments; the chosen one is filled and its label underlined. The underline and the
+       weight say "pressed" without colour, so the check mark retires.
+         new bee     forest pill, white label, on a paper track over paper
+         raver       magenta pill, dark label, on a dark track over the violet night
+         cypherpunk  cyan block on 6px corners, dark mono label, on a near-black track
+       Every value is a skaists token of its register (skaists.css: --sk-bg, --sk-bg-well, --sk-line,
+       --sk-ink, --sk-forest, --sk-primary, --sk-on-primary, --sk-font-ui, --sk-font-mono), written out
+       because this chrome rides pages that never load skaists.css; raver's ground and rule are the
+       founder's own screen (#121021, #59496b: the reading room's raver night). Every label clears
+       4.5:1 on its own ground: ink on track, white on forest 9.5:1, dark on magenta 5.4:1, dark on cyan 9.1:1. */
+    #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#e6dfd2;--reg-active:#264d36;--reg-on:#ffffff;--reg-font:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;--reg-weight:400;color-scheme:light}
+    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-bg:#121021;--reg-ink:#e9f2ec;--reg-track:#15241f;--reg-line:#59496b;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
+    body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-track:#0c1412;--reg-line:#1e2b26;--reg-active:#45c2dc;--reg-on:#06110c;--reg-radius:6px;--reg-font:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;--reg-weight:500;color-scheme:dark}
     #bregbar{position:relative;inset:auto;z-index:auto;display:flex;flex:0 0 auto;order:-1;grid-column:1/-1;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-sizing:border-box;width:100%;min-width:0;max-width:none;height:auto;min-height:68px;margin:0 0 16px;padding:12px clamp(12px,3vw,40px);border:0;border-bottom:1px solid var(--reg-line);background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font);text-align:start}
     #bregbar [data-register-host]{display:block;flex:0 1 auto;min-width:0;max-width:100%;margin:0;padding:0}
     #bregctl{position:static;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;min-width:0;max-width:100%;height:auto;min-height:0;margin:0;padding:0;border:0;background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font)}
-    #bregctl button{appearance:none;position:relative;inset:auto;display:inline-flex;flex:1 1 auto;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:auto;min-width:0;max-width:100%;height:auto;min-height:44px;margin:0;padding:10px 14px;border:1px solid var(--reg-line);border-radius:6px;background:var(--reg-bg);color:var(--reg-ink);font:400 .875rem/1.4 var(--reg-font);letter-spacing:normal;text-transform:none;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:pointer;box-shadow:none;transform:none;text-decoration:none;opacity:1}
+    #bregctl button{appearance:none;position:relative;inset:auto;display:inline-flex;flex:1 1 auto;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:auto;min-width:0;max-width:100%;height:auto;min-height:44px;margin:0;padding:10px 14px;border:1px solid var(--reg-line);border-radius:6px;background:var(--reg-bg);color:var(--reg-ink);font:var(--reg-weight) .875rem/1.4 var(--reg-font);letter-spacing:normal;text-transform:none;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:pointer;box-shadow:none;transform:none;text-decoration:none;opacity:1}
     #bregctl button span{display:inline;position:static;width:auto;height:auto;min-height:0;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit}
     #bregctl button[aria-pressed="true"]{background:var(--reg-active);border-color:var(--reg-active);color:var(--reg-on);font-weight:600}
-    #bregctl button::before{content:'✓';display:inline-block;visibility:hidden;font:inherit}
-    #bregctl button[aria-pressed="true"]::before{visibility:visible}
-    #bregctl button:hover{border-color:var(--reg-active);text-decoration:underline;text-underline-offset:3px}
-    /* THE RULED FACE (2026-09-19): one row where the words fit (it wraps for long tongues, never overflows), a pill track, the pressed pill filled;
-       the check mark still says "pressed" without colour. Emoji give way to words. */
+    /* hover outlines a segment you could choose; the underline belongs to the chosen one alone */
+    #bregctl button:hover:not([aria-pressed="true"]){border-color:currentColor}
+    /* THE RULED FACE (2026-09-19), worn in the chosen dress: one row where the words fit (it wraps
+       for long tongues, never overflows), a pill track, the pressed pill filled. Emoji give way to
+       words. Segments share the track equally and never shrink below their own words. */
     #bregctl{flex-wrap:wrap;gap:2px;padding:4px;border-radius:var(--reg-radius,26px);background:var(--reg-track)}
     #bregctl button{border-color:transparent;border-radius:var(--reg-radius,999px);background:transparent;padding:8px 12px;white-space:normal;overflow-wrap:anywhere;gap:6px}
+    body[data-reg] #bregctl button{flex:1 1 0;min-width:fit-content}
+    body[data-reg] #bregctl button[aria-pressed="true"]{text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:4px}
     #bregctl button>span[aria-hidden="true"]{display:none}
-    #bregctl button::before{display:none}
-    #bregctl button[aria-pressed="true"]::before{display:inline-block}
-    #bregctl button:focus-visible{outline:2px solid var(--reg-ink);outline-offset:3px}
-    #bregctl button:focus-visible,#bregbar a:focus-visible{outline:2px solid var(--reg-active);outline-offset:3px}
-    #bregbar .breg-home{position:static;display:inline-flex;flex:0 0 auto;align-items:center;box-sizing:border-box;min-height:44px;width:auto;height:auto;margin:0;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--reg-ink);font:600 1rem/1.5 var(--reg-font);text-transform:none;letter-spacing:normal;text-decoration:none}
-    #bregbar .breg-home:hover{text-decoration:underline}
+    #bregctl button:focus-visible,#bregbar a:focus-visible{outline:2px solid var(--reg-ink);outline-offset:3px}
+    #bregbar .breg-home{position:static;display:inline-flex;flex:0 0 auto;align-items:center;gap:8px;box-sizing:border-box;min-height:44px;width:auto;height:auto;margin:0;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--reg-ink);font:400 18px/1.2 'skaists','burti',var(--reg-font);text-transform:none;letter-spacing:normal;text-decoration:none}
+    #bregbar .breg-home::before{content:'';flex:none;box-sizing:border-box;width:10px;height:10px;border:2px solid currentColor;border-radius:50%}
+    #bregbar .breg-home:hover{text-decoration:underline;text-underline-offset:4px}
     #bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-    @media(max-width:600px){#bregbar{gap:4px;padding:8px 10px}#bregbar [data-register-host]{flex:1 1 100%}#bregctl{gap:4px}#bregctl button{padding:8px;font-size:.875rem}}
+    @media(max-width:600px){#bregbar{gap:8px 4px;padding:10px 12px 8px}#bregbar [data-register-host]{flex:1 1 100%}#bregctl{gap:4px}#bregctl button{padding:8px;font-size:.875rem}}
     @media(forced-colors:active){#bregctl button[aria-pressed="true"]{outline:2px solid Highlight;outline-offset:-3px}}
 
     /* Shared wayfinding for the five connected first-click experiences. */
@@ -202,19 +214,13 @@
     [data-experience-nav] a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
     body[data-reg="cypherpunk"] [data-experience-nav]{font-family:ui-monospace,Consolas,monospace;font-size:.875rem}
     body[data-reg="raver"] [data-experience-nav] a{border-radius:99px}
-    body[data-experience] #tbar{background:var(--bg,#0e1b19)!important;border-color:var(--line,#42574a)!important;font:500 .875rem/1.4 system-ui,sans-serif!important}
-    body[data-experience] #tbar a{color:var(--ink,#e9f2ec)!important;min-height:44px!important;box-shadow:none!important;background:transparent!important}
-    body[data-experience] #tbar a[aria-current="page"]{font-weight:700;text-decoration:underline!important;text-underline-offset:4px}
-    body[data-experience] #tbarMore{background:var(--panel,#0e1b19)!important;color:var(--ink,#e9f2ec)!important;border-color:var(--line,#42574a)!important;min-width:44px!important;min-height:44px!important;font-size:1rem!important}
-    body[data-experience][data-reg="bee"] #tbar,body[data-experience][data-reg="bee"] #tbarMore{background:#fbf7f0!important;color:#0c1412!important;border-color:#e6dfd2!important}
-    body[data-experience][data-reg="bee"] #tbar a{color:#0c1412!important}
-    /* the bar follows the LIGHT canvas wherever New bee is light (data-bee-theme
-       shared/custom) — not only on data-experience pages: a dark strip under a
-       light page was the last dark thing on My Data */
-    html[data-bee-light="true"] #tbar,html[data-bee-light="true"] #tbarMore{background:#fbf7f0!important;color:#0c1412!important;border-color:#e6dfd2!important}
-    html[data-bee-light="true"] #tbar a{color:#0c1412!important}
-    html[data-bee-light="true"] #tbar a[aria-current="page"]{background:#e2f0ee!important;box-shadow:inset 0 0 0 1px #176879!important;font-weight:700}
-    html[data-bee-light="true"] #tbar .tsep{background:#e6dfd2!important}
+    /* The estate bar's colours are tour.js's: it wears the chosen dress of the register in force
+       on every page (paper for new bee everywhere, so no dark strip sits under a light page and no
+       page has to ask). Experience pages keep only their sizes and their here-mark. */
+    body[data-experience] #tbar a{min-height:44px!important;box-shadow:none!important}
+    body[data-experience] #tbar a:not([aria-current="page"]){background:transparent!important}
+    body[data-experience] #tbar a[aria-current="page"]{font-weight:700;text-decoration-line:underline!important;text-underline-offset:4px}
+    body[data-experience] #tbarMore{min-width:44px!important;min-height:44px!important;font-size:1rem!important}
     body[data-experience] #tbar :is(a,button):focus-visible,body[data-experience] #tbarMore:focus-visible{outline:3px solid currentColor!important;outline-offset:-3px}
     body[data-experience] [data-view]{display:none}
     body[data-experience][data-reg="bee"] [data-view="bee"],body[data-experience][data-reg="raver"] [data-view="raver"],body[data-experience][data-reg="cypherpunk"] [data-view="cypherpunk"]{display:revert}
@@ -424,7 +430,7 @@
     if(!host){
       var bar=document.createElement('div'); bar.id='bregbar';
       var link=document.createElement('a'); link.className='breg-home'; link.href=home;
-      link.textContent='⬡ skaists'; link.setAttribute('aria-label','skaists home'); bar.appendChild(link);
+      link.textContent='skaists'; link.setAttribute('aria-label','skaists home'); bar.appendChild(link);
       host=document.createElement('div'); host.setAttribute('data-register-host','');
       host.setAttribute('aria-describedby','bregdescription'); bar.appendChild(host);
       var description=document.createElement('span'); description.id='bregdescription';

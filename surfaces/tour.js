@@ -64,11 +64,39 @@
      drawer on a phone, inline where there is room. */
   var lane=document.createElement('div');lane.id='tlinks';
   var css=document.createElement('style');css.id='tbarstyle';
-  css.textContent='#tbar{position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 8px;background:#0b0d0c;color:#d7dcd9;border-top:1px solid #1c211e;font:500 13px/1 ui-sans-serif,system-ui,sans-serif;box-sizing:border-box}'
+  /* THE CHOSEN DRESS (founder's chosen UI, rolled to the shared chrome 2026-10-05): the bar wears
+     the register in force, on every page, in the same grammar as the view switcher above it.
+       new bee     paper ground, ink links; here = a paper-well pill, forest underline
+       raver       the violet night (#121021, rule #59496b), soft ink; here = dark track pill, magenta underline
+       cypherpunk  #06110c, mono, 6px corners; here = near-black block, cyan underline
+     The riders (language, rails) read the same tokens. The ☰ is a ghost control, as on My Space,
+     and fills with the register's primary while the drawer is open. Values are skaists tokens
+     (skaists.css) written out, since the bar rides pages that never load it; every text clears
+     4.5:1 on its own ground. Dress only: the lanes, sizes and order below are unchanged. */
+  css.textContent='#tbar{--tb-bg:#fbf7f0;--tb-line:#e6dfd2;--tb-ink:#38463f;--tb-here:#0c1412;--tb-well:#efe9dd;--tb-mark:#264d36;--tb-on:#ffffff;--tb-edge:rgba(106,115,110,.4);--tb-dim:#4a5f55;--tb-ok:#2e6b1e;--tb-link:#6e3fb8;--tb-warn:#4a3aa8;--tb-radius:999px;--tb-font:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color-scheme:light}'
+    +'body[data-reg="raver"] #tbar{--tb-bg:#121021;--tb-line:#59496b;--tb-ink:#c9d6ce;--tb-here:#e9f2ec;--tb-well:#15241f;--tb-mark:#d655bb;--tb-on:#06110c;--tb-edge:rgba(156,111,214,.55);--tb-dim:#8fa79c;--tb-ok:#86cc72;--tb-link:#b79fe0;--tb-warn:#b7a8f7;color-scheme:dark}'
+    +'body[data-reg="cypherpunk"] #tbar{--tb-bg:#06110c;--tb-line:#1e2b26;--tb-ink:#c9d6ce;--tb-here:#e9f2ec;--tb-well:#0c1412;--tb-mark:#45c2dc;--tb-on:#06110c;--tb-edge:rgba(100,129,118,.7);--tb-dim:#8fa79c;--tb-ok:#86cc72;--tb-link:#45c2dc;--tb-warn:#b7a8f7;--tb-radius:6px;--tb-font:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;color-scheme:dark}'
+    +'#tbar{position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 8px;background:var(--tb-bg);color:var(--tb-ink);border-top:1px solid var(--tb-line);font:500 14px/1 var(--tb-font);box-sizing:border-box}'
     +'#tlinks{flex:1 1 auto;min-width:0;display:flex;flex-wrap:nowrap;align-items:center;gap:0 2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}'
     +'#tlinks::-webkit-scrollbar{display:none}'
-    +'#tlinks a{min-height:44px!important;padding:0 10px!important}'
-    +'#tbarMore{order:99;flex:none}'
+    +'#tlinks a{min-height:44px!important;padding:0 10px!important;color:var(--tb-ink);background:transparent;border-radius:var(--tb-radius);font-family:var(--tb-font);text-decoration:none}'
+    +'#tlinks a:hover{color:var(--tb-here);text-decoration:underline;text-underline-offset:4px}'
+    +'#tlinks a[aria-current="page"]{color:var(--tb-here);background:var(--tb-well);font-weight:600;text-decoration:underline;text-decoration-color:var(--tb-mark);text-decoration-thickness:2px;text-underline-offset:4px}'
+    +'#tlinks .tsep{background:var(--tb-line)}'
+    +'#tbarMore{order:99;flex:none;color:var(--tb-here);background:transparent;border:1.5px solid var(--tb-edge);border-radius:var(--tb-radius);font:600 16px/1 var(--tb-font)}'
+    +'#tbarMore[aria-expanded="true"]{color:var(--tb-on);background:var(--tb-mark);border-color:var(--tb-mark)}'
+    +'#tlinks a:focus-visible,#tbarMore:focus-visible{outline:2px solid var(--tb-here);outline-offset:-2px}'
+    /* the riders: lang.js and rails-badge.js paint inline (dark-only values); the bar re-dresses them per register */
+    +'#tbar #blangctl{border-left-color:var(--tb-line)!important}'
+    +'#tbar #blangsel{color:var(--tb-here)!important;background:transparent!important;border:1.5px solid var(--tb-edge)!important;border-radius:var(--tb-radius)!important;font:500 14px/1 var(--tb-font)!important;padding:0 10px!important}'
+    +'#tbar #blangnote{color:var(--tb-dim)!important;font-family:var(--tb-font)!important}'
+    +'#tbar #railsbadge{color:var(--tb-ink)!important;border-left-color:var(--tb-line)!important;font-family:var(--tb-font)!important}'
+    +'#tbar #rb-txt b,#tbar #rb-trust{color:var(--tb-ok)!important}'
+    +'#tbar #rb-trust[style*="ffb347"]{color:var(--tb-warn)!important}'
+    +'#tbar #rb-txt a{color:var(--tb-link)!important}'
+    +'#tbar #rb-recheck{color:var(--tb-ink)!important}'
+    +'#tbar #rb-txt span[style*="5f6f61"]{color:var(--tb-dim)!important}'
+    +'#tbar #rb-txt span[style*="e2efdb"]{color:var(--tb-here)!important}'
     /* the old floating "⌂ hub" pill (30 pages) repeats the bar's own ⌂ and sat where the orb floats: the bar is the one way home */
     +'#bnr-beta-badge{display:none!important}'
     +'@media(max-width:520px){#tbar:not(.t-open) #railsbadge{display:none!important}}'
@@ -83,9 +111,9 @@
   document.head.appendChild(css);
   b.appendChild(lane);
   lane.innerHTML=L.map(function(x){
-    if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
+    if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
-    return '<a'+(h?' aria-current="page"':'')+' href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#9aa39d')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;flex-shrink:0;white-space:nowrap">'+x[0]+'</a>';
+    return '<a'+(h?' aria-current="page"':'')+' href="'+R+x[1]+'" style="display:inline-flex;align-items:center;flex-shrink:0;white-space:nowrap">'+x[0]+'</a>';
   }).join('');
   if(inlineHost){
     b.style.cssText='position:static;display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;font:14px/1.5 system-ui,sans-serif;background:none;border:0';
@@ -97,7 +125,7 @@
   var tg=document.createElement('button');tg.id='tbarMore';tg.type='button';
   tg.setAttribute('aria-controls','tbar');tg.setAttribute('aria-expanded','false');
   tg.setAttribute('aria-label','Show all navigation');
-  tg.style.cssText='min-width:44px;min-height:44px;border:1px solid #2b4a3b;border-radius:8px;background:#0f1512;color:#8fbf9f;font:600 16px/1 ui-sans-serif,system-ui,sans-serif;cursor:pointer;display:none;align-items:center;justify-content:center;margin:0;padding:0 10px';
+  tg.style.cssText='min-width:44px;min-height:44px;cursor:pointer;display:none;align-items:center;justify-content:center;margin:0;padding:0 10px';
   b.appendChild(tg);
 
   /* MOBILE-FIRST: if the strip cannot fit, the grid is the DEFAULT, not a tap away.
@@ -108,9 +136,9 @@
     if(inlineHost){ tg.style.display='none'; return; }
     b.classList.toggle('t-open',!!open);
     if(open){
-      tg.textContent='×'; tg.style.background='#0f1512'; tg.style.color='#8fbf9f'; tg.setAttribute('aria-expanded','true'); tg.setAttribute('aria-label','Hide navigation');
+      tg.textContent='×'; tg.setAttribute('aria-expanded','true'); tg.setAttribute('aria-label','Hide navigation');
     }else{
-      tg.textContent='☰'; tg.style.background='#16241d'; tg.style.color='#6f6'; tg.setAttribute('aria-expanded','false'); tg.setAttribute('aria-label','Show all navigation');
+      tg.textContent='☰'; tg.setAttribute('aria-expanded','false'); tg.setAttribute('aria-label','Show all navigation');
     }
   }
   function sync(){ if(inlineHost) return; tg.style.display = (open||overflowing()||window.innerWidth<=520) ? 'inline-flex' : 'none'; }
