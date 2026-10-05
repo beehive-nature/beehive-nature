@@ -2332,6 +2332,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
           }
           var lane = inj && inj.signLane ? inj.signLane() : null;
+          /* yours (your keys, this visit's extension, the vault) is counted and offered to fund. an address
+             you only follow is read for this panel alone: the balances card already says it is one you follow */
+          var own = !!(addr && inj && typeof inj.isOwn === 'function' && inj.isOwn(addr));
           if (held && heldFor && heldFor !== (addr || '') + '|' + (lane || '')) held = false;   /* a new address or signer: the old result no longer applies */
           /* order of ways: your own keys first; an Arweave extension is a quiet last
              resort, offered only when one is actually present in this browser */
@@ -2344,8 +2347,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             go.disabled = true;
             return;
           }
-          if (statEl) statEl.textContent = 'reading your AR…';
-          sayStat(['reading your AR…', { cy: addr }]);
+          if (statEl && own) statEl.textContent = 'reading your AR…';
+          sayStat([own ? 'reading your AR…' : 'reading the address you follow…', { cy: addr }]);
           refreshing=true;
           try {
             var bal = await A.balance(addr);
@@ -2356,9 +2359,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var spot = null;
             if (winston > 0n) { try { spot = await A.spotPrice(); } catch (e2) { /* optional */ } }
             if (addr !== await resolveAddr()) { rerun = true; return; }   /* the address changed mid-read: read the new one */
-            if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
+            if (publishing) return;   /* a publish began while this read waited: it holds the buttons, and reads again when it ends */
+            if (!own) { if (window.wlClearRollup) window.wlClearRollup('ar'); }   /* followed: read, never summed */
+            else if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
             else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
-            if (statEl) {
+            if (statEl && own) {
               var copyAr = { btn: 'copy my Arweave address', on: function () { copyAddr(statEl, addr); } };
               if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['your Arweave address is empty; send AR to it to publish. ', copyAr, { cy: 'balance 0 winston · anchor fee ' + arUnits(need) + ' AR' }]); }
               else if (winston >= need) { statEl.className = 'stat ok'; wlSay(statEl, ['ready to publish. ', { to: 'arw-sec', t: 'publish a file' }, { cy: 'live · anchor fee ' + arUnits(need) + ' AR covered' }]); }
@@ -2367,14 +2372,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var detail = 'address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' + arUnits(need) + ' AR (gateway-quoted)' +
               (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
               (lane === 'inject' ? ' · signs via the extension' : lane === 'derived' ? ' · made from your keys' : lane === 'vault' ? ' · signs via the vault JWK' : ' · nothing here signs for it');
-            if (!lane) sayStat(['nothing here signs for this address yet. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to publish from your own Arweave address.', { cy: detail }]);
+            if (!lane) sayStat([own ? 'nothing here signs for this address yet. ' : 'you follow this address, so nothing here signs for it. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to publish from your own Arweave address.', { cy: detail + (own ? '' : ' · followed, never counted as yours') }]);
             else if (winston < need) sayStat(['this address holds ' + arUnits(winston) + ' AR, and publishing needs ' + arUnits(need) + ' AR. add AR to it, then publish. ', { to: 'ch-arweave', t: 'see your Arweave address' }, { cy: detail }]);
             else sayStat(['ready to publish. this address holds ' + arUnits(winston) + ' AR.', { cy: detail }]);
-            go.disabled = winston < need || !lane;
-            if (typeof wlRead === 'function') wlRead(statEl, true);
+            go.disabled = publishing || winston < need || !lane;
+            if (own && typeof wlRead === 'function') wlRead(statEl, true);   /* a followed address: the balance read owns that line */
           } catch (err) {
-            if (statEl) { wlSay(statEl, ['could not read your AR just now. ', { btn: 'try again', on: function () { refresh(); } }]); if (typeof wlRead === 'function') wlRead(statEl, false); }
             go.disabled=true;
+            if (publishing) return;   /* the publish reads again when it ends */
+            if (statEl && own) { wlSay(statEl, ['could not read your AR just now. ', { btn: 'try again', on: function () { refresh(); } }]); if (typeof wlRead === 'function') wlRead(statEl, false); }
             sayStat(['the Arweave network did not answer just now. ', { btn: 'try again', on: function () { refresh(); } }, { cy: 'gateway read failed: ' + (err && err.message ? err.message : err) }]);
           } finally { refreshing = false; if (rerun) { rerun = false; setTimeout(refresh, 0); } }
         }
@@ -2406,17 +2412,24 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if (rv) rv.disabled = on; if (fi) fi.disabled = on;
           if (on) go.disabled = true;   /* off: the next refresh decides from the balance and the signer */
         }
-        /* a publish that is signed or sent but not settled is never signed again: a second
-           press would build, sign and pay for a second copy while the first is on its way */
-        var onTheWay = { anchor: null, file: {} };
-        function stillOut(id) {
-          if (!id) return false;
-          try {
-            var l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]');
-            for (var i = 0; i < l.length; i++) if (l[i] && l[i].intent_id === id) return l[i].phase === 'signed' || l[i].phase === 'submitted';
-          } catch (e) {}
-          return false;
+        /* a publish that is signed or sent but not settled is never signed again: a second press
+           would build, sign and pay for a second copy while the first is on its way. the outbox is the
+           record, not this page's memory: each entry carries the exact bytes it publishes, so the same
+           anchor or file is found there from this tab, another tab, or after a reload */
+        function dataOf(bytes) { return window.BNRAR && typeof BNRAR.b64u === 'function' ? BNRAR.b64u(bytes) : null; }
+        function onItsWay(data) {
+          if (!data) return null;
+          var l = null;
+          try { l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); } catch (e) { return null; }   /* unreadable: the publish refuses to keep a signed copy there, so nothing is sent */
+          if (!Array.isArray(l)) return null;
+          for (var i = 0; i < l.length; i++) {
+            var e = l[i];
+            if (!e || e.rail !== 'arweave' || (e.phase !== 'signed' && e.phase !== 'submitted')) continue;
+            try { if (JSON.parse(JSON.parse(e.signed_bytes).wire).data === data) return e.intent_id || 'unnamed'; } catch (pe) {}
+          }
+          return null;
         }
+        function onWaySay(first, id) { return [first + ', so nothing new was signed. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'intent ' + id + ' is signed or submitted and not settled (read from bnr_outbox_v1)' }]; }
         function tail(a) { return String(a || '').slice(-6); }
         /* the review before anything is signed, for the anchor and for a file alike: what is
            published, the exact fee, the address that really pays (it must be the one the wallet
@@ -2450,7 +2463,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             yes.hidden = !ok;
             no.textContent = ok ? 'cancel' : 'close';
             return new Promise(function (resolve) {
-              var finish = function (accepted) { dialog.close(); resolve(accepted && ok); };
+              var finish = function (accepted) {
+                var late = accepted && ok && what.data ? onItsWay(what.data) : null;   /* another tab signed the same thing while this review was open */
+                if (late) stop.say = onWaySay(what.onWay, late);
+                dialog.close(); resolve(accepted && ok && !late);
+              };
               yes.onclick = function () { finish(true); }; no.onclick = function () { finish(false); };
               dialog.oncancel = function (e) { e.preventDefault(); finish(false); };
               dialog.showModal(); no.focus();
@@ -2462,10 +2479,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if (!W) { wlSay(stat, ['the wallet did not finish loading. ', { btn: 'reload the page', on: function () { location.reload(); } }]); return; }
           if (publishing) return;
           held = true;   /* the line keeps this result until the reader acts again */
-          if (stillOut(onTheWay.anchor)) {
-            wlSay(stat, ['your last publish is still on its way, so nothing new was signed. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'intent ' + onTheWay.anchor + ' is signed or submitted and not settled' }]);
-            return;
-          }
           busy(true);
           var shown = null;
           try { shown = await resolveAddr(); var inj0 = arInject(); heldFor = (shown || '') + '|' + ((inj0 && inj0.signLane ? inj0.signLane() : null) || ''); } catch (h0) { heldFor = ''; }
@@ -2480,6 +2493,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               arSay(['the file on this site no longer matches the pinned anchor, so nothing was published.', { cy: 'REFUSED: deployed sha256 ' + sha + ' differs from the pinned ' + ORBIT.sha256 + '; a drifted file is never anchored' }]);
               return;
             }
+            var data = dataOf(bytes), out = onItsWay(data);
+            if (out) { arSay(onWaySay('your last publish is still on its way', out)); return; }
             var inj = arInject(), lane = inj && inj.signLane ? inj.signLane() : null;
             var jwk = null;
             if (lane === 'vault') {
@@ -2494,13 +2509,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var stop = {};
             var o = lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false };
             o.say = arSay; o.again = { btn: 'try again', on: function () { go.click(); } };
-            o.review = reviewer({ title: 'publish the estate anchor to Arweave?', name: 'the estate anchor', sha: sha }, shown, stop);
+            o.review = reviewer({ title: 'publish the estate anchor to Arweave?', name: 'the estate anchor', sha: sha, data: data, onWay: 'your last publish is still on its way' }, shown, stop);
             var r = await W.walletPublish(bytes, ORBIT.tags, o);
             if (r && r.phase === 'cancelled') {
               if (stop.moved) { try { var inj1 = arInject(); heldFor = ((await resolveAddr()) || '') + '|' + ((inj1 && inj1.signLane ? inj1.signLane() : null) || ''); } catch (h1) {} }
               arSay(stop.say || ['cancelled before signing. nothing was published.']); return;
             }
-            if (r && r.intent_id) onTheWay.anchor = r.intent_id;
             if (r && r.phase === 'confirmed') {
               arSay(['anchored. the network confirmed it.', { cy: 'ANCHORED: read back from the gateway: ' + (r.evidence && r.evidence.read) + ' · tx ' + r.ref }]);
               var a = document.createElement('a');
@@ -2528,15 +2542,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           wlSay(note,['preparing this file and its exact fee. nothing is signed yet.']);
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
-            if(stillOut(onTheWay.file[sha])){wlSay(note,['this file is still on its way, so nothing new was signed. ',{to:'outbox-sec',t:'see it in waiting to be sent'},{cy:'intent '+onTheWay.file[sha]+' is signed or submitted and not settled'}]);return;}
+            var data=dataOf(bytes),out=onItsWay(data);
+            if(out){wlSay(note,onWaySay('this file is still on its way',out));return;}
             var shown=null;try{shown=await resolveAddr()}catch(se){shown=null}
             var stop={};
             var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
             var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,again:{btn:'try again',on:function(){$('arw-file-review').click()}},say:function(parts,phase){wlSay(note,parts);note.setAttribute('data-phase',phase||'')},
-              review:reviewer({title:'publish this file to Arweave?',name:file.name,sha:sha},shown,stop)});
+              review:reviewer({title:'publish this file to Arweave?',name:file.name,sha:sha,data:data,onWay:'this file is still on its way'},shown,stop)});
             if(!result)return;   /* walletPublish already said why, in this line */
             if(result.phase==='cancelled'){wlSay(note,stop.say||['cancelled before signing. nothing was published.']);return;}
-            if(result.intent_id)onTheWay.file[sha]=result.intent_id;
             if(result.phase==='confirmed'){wlSay(note,['published. the network confirmed it.',{cy:'tx '+result.ref}]);}
             if(result.ref&&result.phase==='confirmed'){var link=document.createElement('a');link.href='https://arweave.net/'+encodeURIComponent(result.ref);link.target='_blank';link.rel='noopener noreferrer';link.textContent='see it on Arweave';note.appendChild(document.createTextNode(' '));note.appendChild(link)}
           }catch(error){wlSay(note,[(error&&error.calm)||'something went wrong, so nothing was published. ',{btn:'try again',on:function(){$('arw-file-review').click()}},{cy:'file publication did not complete: '+((error&&error.message)||'unknown error')}])}
@@ -3305,6 +3319,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(shown===arDerivedAddr())return 'derived';
     return null;
   }
+  /* yours: the address your keys make, the address the extension gave in this visit, or the
+     vault's. it is counted and it signs; an address you only follow is read, never summed,
+     never signs, and is never offered as yours to fund */
+  function arIsOwn(a){ return !!a&&(a===AR_INJECT_ACTIVE||a===arDerivedAddr()||a===vaultArPublic()) }
   function parsePqCtx(ctx){
     var m=/^pq:(ml-dsa-65|ml-kem-768)(?::(.{1,48}))?$/.exec(ctx||'');
     if(!m) return null;
@@ -8083,6 +8101,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       derivedAddress: function () { return arDerivedAddr(); },
       derivedReady: function () { return !!(MPRK && SOUL && arDerivedAddr()); },
       signLane: function () { return arSignLane(); },
+      isOwn: function (a) { return arIsOwn(a); },
       connect: function () { return connectArweaveInject(SOUL ? ('ar:'+SOUL) : null); },
       activeAddress: async function () {
         if (!arInjectPresent()) return arInjectBoundAddress();
@@ -9209,8 +9228,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function upsertVaultaBalance(acct,raw){ VAULTA_ROLLUP.upsert(acct,raw); }
   function upsertHiveBalance(acct,raw){ HIVE_ROLLUP.upsert(acct,raw); }
   function upsertAntBalance(acct,raw){ ANT_ROLLUP.upsert(acct,raw); }
-  function upsertArBalance(acct,raw){ AR_ROLLUP.upsert(acct,raw); }
+  /* the AR total sums only your own addresses: a followed one is refused here, whoever asks, and a
+     row left by an address that is no longer yours (the vault locked, the extension let go) leaves first */
+  function upsertArBalance(acct,raw){
+    if(!arIsOwn(acct))return;
+    var rows=AR_ROLLUP.rows;
+    for(var i=rows.length-1;i>=0;i--)if(!arIsOwn(rows[i].account))rows.splice(i,1);
+    AR_ROLLUP.upsert(acct,raw);
+  }
   window.wlUpsertRollup=function(key,acct,raw){
+    if(key==='ar'){ upsertArBalance(acct,raw); return }
     var m={vaulta:VAULTA_ROLLUP,hive:HIVE_ROLLUP,ant:ANT_ROLLUP,ar:AR_ROLLUP};
     if(m[key]) m[key].upsert(acct,raw);
   };
@@ -9382,7 +9409,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       winston=String(winston==null?'':winston).trim();
       if(!/^\d+$/.test(winston))throw new Error('gateway answered '+JSON.stringify(winston.slice(0,40)));
       if(gen!==BAL_GEN)return;
-      var mine=addr===AR_INJECT_ACTIVE||addr===arDerivedAddr()||addr===vaultArPublic();
+      var mine=arIsOwn(addr);
       if(mine) upsertArBalance(addr,Number(winston)/1e12);
       else if(window.wlClearRollup) window.wlClearRollup('ar');   /* a followed address is read, never counted as yours */
       if(statEl&&!mine){ wlSay(statEl,['an address you follow holds '+(Number(winston)/1e12).toFixed(6)+' AR; it is not counted as yours. ',{to:'forge-sec',t:'see your own Arweave address'},{cy:'followed '+addr+' · read '+new Date().toISOString()}]); statEl.className='stat ok'; wlRead(statEl,true) }

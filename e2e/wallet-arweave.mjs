@@ -225,7 +225,7 @@ try {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.addInitScript(() => {
+    const arWalletMock = () => {
       let _jwk = null, _addr = null, _key = null;
       const b64uDec = (s) => {
         s = String(s).replace(/-/g, '+').replace(/_/g, '/');
@@ -264,7 +264,8 @@ try {
             { name: 'RSA-PSS', saltLength: (alg && alg.saltLength) || 32 }, _key, u8));
         }
       };
-    });
+    };
+    await page.addInitScript(arWalletMock);
     await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
     ok('arInject API exposed on BNRWALLET', await page.evaluate(() =>
@@ -360,10 +361,69 @@ try {
     await page.locator('#arw-file-cancel').click();
     await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('cancelled before signing'));
     ok('cancel refuses signing and publication',posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    // a balance read already on its way when a publish starts never wakes the anchor button in the middle of it
+    {
+      let slow = true;
+      await ctx.route(GW_RE, async route => {
+        if (slow && route.request().method() === 'GET' && new URL(route.request().url()).pathname.includes('/wallet/')) await new Promise(r => setTimeout(r, 1500));
+        await route.fallback();
+      });
+      await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));   // the panel starts reading the balance
+      await page.waitForTimeout(150);
+      await page.locator('#arw-file').setInputFiles({ name: 'wait.txt', mimeType: 'text/plain', buffer: Buffer.from('a read in flight, then a publish') });
+      await page.locator('#arw-file-review').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      await page.waitForTimeout(900);   // the read that was already on its way has answered by now
+      ok('a balance read that answers in the middle of a publish leaves the anchor button waiting',
+        await page.evaluate(() => document.getElementById('arw-go').disabled && document.getElementById('arw-file-review').disabled && document.getElementById('arw-file-dialog').open));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      slow = false;
+      await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
+    }
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});
     await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
     ok('confirmed file uses the existing signed publication adapter',posted.length>beforeFilePosts&&Buffer.from(posted.at(-1).data,'base64url').equals(fileBytes));
+    // a reload or a second tab starts with no memory of its own: the outbox is the record, so a publish
+    // that is signed or sent and not settled is never signed again, the anchor or the file
+    {
+      const setArPhase = (pg, phase) => pg.evaluate(p => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); l.filter(x => x.rail === 'arweave').forEach(x => { x.phase = p; }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); }, phase);
+      const posts0 = posted.length;
+      await setArPhase(page, 'submitted');   // the anchor and the file are both still on their way
+      const tab2 = await ctx.newPage();
+      tab2.on('pageerror', e => errors.push(e.message));
+      await tab2.addInitScript(arWalletMock);
+      await tab2.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
+      await tab2.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
+      await tab2.waitForFunction(() => !document.getElementById('arw-connect').hidden, null, { timeout: 15000 });
+      await tab2.evaluate(() => document.getElementById('arw-connect').click());
+      await tab2.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 20000 });
+      await tab2.evaluate(() => document.getElementById('arw-go').click());
+      await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
+      ok('in a second tab (or after a reload) the anchor still on its way is not signed again',
+        /still on its way, so nothing new was signed/.test(await tab2.locator('#arw-stat').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && !!document.querySelector('#arw-stat a[href="#outbox-sec"]')) && posted.length === posts0,
+        await tab2.locator('#arw-stat').textContent());
+      if (await tab2.evaluate(() => document.getElementById('arw-file-dialog').open)) { await tab2.evaluate(() => document.getElementById('arw-file-cancel').click()); await tab2.waitForTimeout(500); }
+      await tab2.locator('#arw-file').setInputFiles({ name: 'again.txt', mimeType: 'text/plain', buffer: fileBytes });
+      await tab2.evaluate(() => document.getElementById('arw-file-review').click());
+      await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-file-status').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
+      ok('and the same file still on its way is not signed again there either',
+        /this file is still on its way, so nothing new was signed/.test(await tab2.locator('#arw-file-status').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && posted.length === posts0,
+        await tab2.locator('#arw-file-status').textContent());
+      await tab2.close();
+      // two tabs reviewing the same file at once: the one confirmed second finds the first already signed, and signs nothing
+      await setArPhase(page, 'failed');
+      await page.locator('#arw-file-review').click(); await page.locator('#arw-file-dialog').waitFor({ state: 'visible' });
+      await page.evaluate(b64 => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === b64).at(-1); if (e) { e.phase = 'signed'; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); } }, fileBytes.toString('base64url'));
+      const signs1 = await page.evaluate(() => window.__arSignCount || 0), posts1 = posted.length;
+      await page.locator('#arw-file-confirm').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('a file another tab signed while this review was open is not signed again on confirm',
+        /this file is still on its way, so nothing new was signed/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs1 && posted.length === posts1,
+        await page.locator('#arw-file-status').innerText());
+      await setArPhase(page, 'failed');
+    }
     const beforeBlockedPosts=posted.length;
     await page.evaluate(()=>{window.__outboxBackup=localStorage.getItem('bnr_outbox_v1');window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='bnr_outbox_v1')throw new DOMException('Storage full','QuotaExceededError');return window.__storageSet.call(this,key,value);};});
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();

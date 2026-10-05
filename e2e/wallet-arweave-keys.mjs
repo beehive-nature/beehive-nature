@@ -130,6 +130,64 @@ try {
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
+
+  /* B · an address you only follow (bound by hand, or by an extension on an earlier visit) is read and
+     shown apart: never summed into your AR, never offered as yours to fund, and your own address,
+     once the keychain makes it, is counted alone */
+  console.log('B · an Arweave address you follow:');
+  {
+    const F = 'F'.repeat(43), FEE = '3000000000000';   // F holds 2 AR, every other address 1 AR; publishing costs 3 AR
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 860 }, serviceWorkers: 'block', reducedMotion: 'reduce' });
+    await ctx.addInitScript(f => { try { if (!sessionStorage.getItem('__s')) { localStorage.setItem('bregister', 'bee'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_ar_pub:ar:gatesoul', f); sessionStorage.setItem('__s', '1'); } } catch (e) {}
+      if (navigator.credentials) navigator.credentials.get = navigator.credentials.create = async () => { throw new DOMException('test', 'NotAllowedError'); }; }, F);
+    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type' };
+    const reads = { followed: 0 };
+    await ctx.route('**/*', async route => {
+      const url = route.request().url(), u = new URL(url);
+      if (AR_RE.test(url)) {
+        if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+        const text = (t, status = 200) => route.fulfill({ status, headers: cors, body: String(t) });
+        if (u.pathname.startsWith('/price/')) return text(FEE);
+        if (u.pathname === '/spot_price') return text('20.5');
+        const m = /^\/wallet\/([^/]+)\/balance$/.exec(u.pathname);
+        if (m) { if (m[1] === F) reads.followed++; return text(m[1] === F ? '2000000000000' : '1000000000000'); }
+        return text('');
+      }
+      if (u.origin !== ORIGIN) return route.abort();
+      const path = resolve(ROOT, '.' + decodeURIComponent(u.pathname));
+      if (!path.startsWith(ROOT + sep)) return route.abort();
+      try { return route.fulfill({ body: await readFile(path), contentType: MIME[extname(path)] || 'application/octet-stream' }); }
+      catch { return route.fulfill({ status: 404, body: 'not found' }); }
+    });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html#arw-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BNRWALLET && window.BZDIDKEY && window.BNRAR, null, { timeout: 20000 });
+    // the balance read and the Arweave panel's own read have both read the followed address
+    await page.waitForFunction(() => /you follow this address, so nothing here signs for it|nothing here signs for this address/.test(document.getElementById('arw-stat').textContent), null, { timeout: 15000 }).catch(() => {});
+    const r0 = reads.followed;
+    await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));   // the panel reads it once more
+    for (let i = 0; i < 80 && reads.followed <= r0; i++) await page.waitForTimeout(100);
+    await page.waitForTimeout(1000);   // its answer has been written by now
+    const seen = await page.evaluate(() => { const s = document.getElementById('ar-stat'); return { stat: s.textContent, buttons: [...s.querySelectorAll('button')].map(b => b.textContent), bal: document.getElementById('ar-bal').textContent,
+      rows: [...document.querySelectorAll('[data-ar-rows] .va-rollup-row')].map(r => r.textContent) }; });
+    ok('the followed address was read by the panel too (the case under test)', reads.followed >= 2, 'reads ' + reads.followed);
+    ok('the Arweave panel says the address is one you follow and that nothing here signs for it', /you follow this address, so nothing here signs for it/.test(await page.textContent('#arw-stat')) && await page.evaluate(() => document.getElementById('arw-go').disabled), await page.textContent('#arw-stat'));
+    ok('an address you follow is never summed: no AR total and no row for it', seen.bal === '' && seen.rows.length === 0, JSON.stringify(seen));
+    ok('the card says it is one you follow, not yours, and never offers it as yours to fund',
+      /an address you follow holds 2\.000000 AR; it is not counted as yours/.test(seen.stat) && !seen.buttons.some(b => /copy my Arweave address/.test(b)) && !/ready to publish|AR to publish on Arweave|your Arweave address is empty/.test(seen.stat), JSON.stringify(seen));
+    // the keychain makes your own address: it alone is counted, the followed one never joins the total
+    await page.evaluate(() => { const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a)); document.getElementById('kc-recgo').click(); });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const want = await page.evaluate(() => window.BNRWALLET.arInject.derivedAddress());
+    await page.waitForFunction(w => document.getElementById('arw-addr').textContent.trim() === w, want, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => document.getElementById('ar-bal').textContent !== '', null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    const own = await page.evaluate(() => ({ bal: document.getElementById('ar-bal').textContent, rows: [...document.querySelectorAll('[data-ar-rows] .va-rollup-row')].map(r => r.textContent) }));
+    ok('with the keychain, your own address is counted alone: 1 AR, not the followed 2 AR on top', own.bal === '1.000000 AR' && own.rows.length >= 1 && own.rows.every(t => !/FFFFFF/.test(t)), JSON.stringify(own));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
 } finally { await browser.close(); }
 console.log(`\nwallet arweave keys: ${pass} pass, ${fail} fail`);
 if (fail) process.exit(1);
