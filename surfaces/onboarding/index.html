@@ -913,14 +913,10 @@ const SCREENS = {
     <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
     ${crumbs}
     ${kind==='trezor' ? `
-    <button class="btn primary" onclick="trezorNativeReal(this)">Connect via BNR native bridge <span class="muted">(localhost — no third-party page)</span></button>
-    <button class="btn ghost" onclick="trezorConnectReal(this)">Connect via Trezor's own rail (Connect popup)</button>
+    ${servedByRelay() ? `<button class="btn ghost" onclick="trezorNativeReal(this)">Connect via BNR native bridge <span class="muted">(this computer, no third-party page)</span></button>` : ''}
+    <button class="btn primary" onclick="trezorConnectReal(this)">Connect your Trezor</button>
     <div id="tz-status" class="muted" style="min-height:1.2em;margin-bottom:var(--s2)"></div>
-    <p class="muted" style="margin:0 0 var(--s2)">Uses Trezor's official Connect rail (their consent
-      popup; Bridge via Trezor Suite, or WebUSB). Their script loads when you enter this step —
-      you chose the Trezor rail by arriving here. <b>If no popup appears, allow popups for this
-      site</b> — the connect flow opens one. On a phone: the Trezor must be plugged into the
-      <b>phone itself</b> (USB-OTG) — a device on your laptop can't answer your phone's browser.</p>
+    <p class="muted" style="margin:0 0 var(--s2)">Open Trezor Suite on this computer for Bluetooth or USB, or plug the Trezor in and use Chrome. Then press Connect and confirm on your Trezor.</p>
     <button class="btn ghost" onclick="APP.hardwareDone()">Walk through without the device <span class="muted">(custody stays "declared")</span></button>
     ` : `
     <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
@@ -1336,6 +1332,9 @@ function drawPairQr(){
    to the LOCAL Trezor Bridge itself — /v1/trezor/native/features — so this works
    only when the wizard is SERVED BY THE RELAY (same origin). On Pages/file://
    the fetch fails and says so honestly. */
+// The native lane exists only where the relay serves this page (same origin, /onboard or a
+// loopback host). Anywhere else, such as skaists.dev, it cannot reach the bridge, so it is not offered.
+function servedByRelay(){ return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /\/onboard\/?$/.test(location.pathname); }
 async function trezorNativeReal(btn){
   const st=document.getElementById('tz-status');
   btn.disabled=true; st.textContent='Asking the BNR relay to handshake with the device…';
@@ -1360,7 +1359,19 @@ async function trezorNativeReal(btn){
   }
 }
 
-let _tcReady=null;
+let _tcReady=null, _tcMode=null;
+// Trezor Suite desktop carries Bluetooth and USB (and the SAFE 7's paired channel). It is asked for
+// once, on the press. Without it, hosted Suite web opens in a window and reaches the device over
+// browser USB. Never Connect's automatic mode and never its legacy in-page iframe transport.
+function suiteDesktopRunning(){
+  return new Promise(resolve=>{
+    let done=false, ws, timer;
+    const end=v=>{ if(done) return; done=true; clearTimeout(timer); try{ ws&&ws.close(); }catch(e){} resolve(v); };
+    try{ ws=new WebSocket('ws://127.0.0.1:21335/connect-ws'); }catch(e){ return resolve(false); }
+    ws.onopen=()=>end(true); ws.onerror=()=>end(false); ws.onclose=()=>end(false);
+    timer=setTimeout(()=>end(false),1500);
+  });
+}
 function preloadTrezorConnect(){
   // Fired on ENTERING the Trezor step (explicit user intent — they clicked the
   // card). Preloading here means the CLICK only opens the popup, inside the
@@ -1374,13 +1385,12 @@ function preloadTrezorConnect(){
         // PROBE-VERIFIED 2026-08-14: /9/trezor-connect.js -> 200 text/javascript.
         // (/10/trezor-connect.js is a 404 -- the round-8 "no popup anywhere" root
         // cause: a guessed URL. Verify the URL, not just the API.)
-        s.src='https://connect.trezor.io/9/trezor-connect.js';
-        s.onload=res; s.onerror=()=>rej(new Error('connect.trezor.io unreachable'));
+        // the same pinned, integrity-checked build the wallet loads
+        s.src='https://connect.trezor.io/9.7.3/trezor-connect.js';
+        s.integrity='sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6'; s.crossOrigin='anonymous';
+        s.onload=()=>window.TrezorConnect?res():rej(new Error('Trezor Connect did not start'));
+        s.onerror=()=>{ s.remove(); rej(new Error('connect.trezor.io unreachable')); };
         document.head.appendChild(s);
-      });
-      await TrezorConnect.init({
-        lazyLoad:true,
-        manifest:{ email:'loviswater44@gmail.com', appUrl:'https://beehive-nature.github.io/beehive-nature/' },
       });
     }
   })();
@@ -1391,12 +1401,20 @@ async function trezorConnectReal(btn){
   const st=document.getElementById('tz-status');
   btn.disabled=true;
   try{
-    st.textContent='Readying Trezor’s rail…';
+    st.textContent='Looking for your Trezor…';
     await preloadTrezorConnect();
-    st.textContent='Look for Trezor’s popup (allow popups if nothing appears) — approve, then check the device…';
+    const mode=(await suiteDesktopRunning())?'suite-desktop':'suite-web';
+    if(mode==='suite-web'&&!(navigator&&navigator.usb)) throw new Error('no Trezor connection in this browser. Open Trezor Suite on this computer for Bluetooth or USB, or open this page in Chrome with the Trezor plugged in');
+    if(_tcMode!==mode){
+      if(_tcMode&&typeof TrezorConnect.dispose==='function'){ try{ await TrezorConnect.dispose(); }catch(e){} }
+      await TrezorConnect.init({ coreMode:mode, lazyLoad:true,
+        manifest:{ email:'lovis@skaists.dev', appName:'skaists heART WALLet', appUrl:'https://skaists.dev/surfaces/onboarding/' } });
+      _tcMode=mode;
+    }
+    st.textContent= mode==='suite-desktop' ? 'Trezor Suite is open: confirm on your Trezor…' : 'A Trezor Suite window opens: approve there, then confirm on your Trezor…';
     const r=await Promise.race([
       TrezorConnect.getFeatures(),
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timed out after 30s — a popup blocker is the usual cause; allow popups for this site and retry')),30000)),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('nothing answered in 30 s. If a Trezor Suite window did not open, allow popups for this site and press again')),30000)),
     ]);
     if(!r.success) throw new Error(r.payload?.error||'device did not answer');
     const p=r.payload||{};
@@ -1413,7 +1431,7 @@ async function trezorConnectReal(btn){
     setTimeout(()=>{ if(APP.current==='hardware'&&APP.ctx.custody==='trezor') APP.hardwareDone(); }, 900);
   }catch(e){
     btn.disabled=false;
-    st.textContent=`Refused/failed honestly: ${e.message}. Is the device plugged in and unlocked? (If Suite is mid-update, Bridge may be restarting — try again after.)`;
+    st.textContent=`Not connected: ${e.message}.`;
   }
 }
 
