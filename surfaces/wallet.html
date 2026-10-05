@@ -5079,23 +5079,74 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(pt.length!==32)throw new Error('seal opened to '+pt.length+'B, expected 32');
     return pt;
   }
-  /* connect order: a sealed device opens the soul through its wrap; the founding
-     device (whose PRF IS the soul) falls through to the direct path */
+  /* WRAPPER credentials: a device passkey made by "keep my soul on this device"
+     only WRAPS the soul, so its own PRF output is NOT the soul: deriving from it
+     makes a different soul with other keys. This browser remembers every wrapper
+     id it has seen (public identifiers, never a key): its own seal's, the ones it
+     made, and the ones its soul-signed device list names. A wrapper made from now
+     on also carries a marked user handle, so a synced copy of it on another
+     device is recognised by the picker answer alone. */
+  var WRAP_TAG=[0x62,0x6e,0x72,0x77,0x72,0x61,0x70,0x31];   // "bnrwrap1"
+  function wrapUserId(){ var u=crypto.getRandomValues(new Uint8Array(16)); u.set(WRAP_TAG,0); return u }
+  function isWrapHandle(h){
+    if(!h)return false; var u=new Uint8Array(h); if(u.length<WRAP_TAG.length)return false;
+    for(var i=0;i<WRAP_TAG.length;i++)if(u[i]!==WRAP_TAG[i])return false;
+    return true;
+  }
+  function wrapIds(){ try{ var a=JSON.parse(localStorage.getItem('bnr_wraps')||'[]'); return Array.isArray(a)?a.filter(function(x){return typeof x==='string'}):[] }catch(e){ return [] } }
+  function wrapKeep(id){
+    if(typeof id!=='string'||!id)return; var a=wrapIds(); if(a.indexOf(id)>=0)return;
+    a.push(id); try{ localStorage.setItem('bnr_wraps',JSON.stringify(a.slice(-64))) }catch(e){}
+  }
+  function isWrap(id){ if(!id)return false; var s=loadSeal(); return !!(s&&s.credId===id)||wrapIds().indexOf(id)>=0 }
+  /* an earlier "make this device permanent" overwrote bnr_cred with its wrapper:
+     the seal path reaches that credential by itself, so the stale pointer goes */
+  (function(){ var s=loadSeal(); if(s&&s.credId){ wrapKeep(s.credId); if(CRED_ID===s.credId)saveCred(null) } })();
+  /* the picker path (no remembered founding passkey): the same PRF ceremony as
+     identityFromPasskey, but it reads WHICH passkey answered and refuses a wrapper */
+  function identityFromDiscoverable(){
+    return navigator.credentials.get({publicKey:{
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      timeout: 6e4,
+      userVerification: 'required',
+      extensions: { prf: { eval: { first: BZDIDKEY.PRF_INPUT_SALT } } }
+    }}).then(function(ass){
+      if(!ass)throw new Error('assertion returned null');
+      if(isWrap(ass.id)||isWrapHandle(ass.response&&ass.response.userHandle)){
+        var w=new Error('wrap_cred: the passkey that answered ('+String(ass.id).slice(0,12)+'…) is a device seal wrapper, never a soul of its own; nothing was derived from it'); w.code='wrap_cred'; throw w }
+      var ex=ass.getClientExtensionResults&&ass.getClientExtensionResults();
+      var first=ex&&ex.prf&&ex.prf.results&&ex.prf.results.first;
+      if(!first)throw new Error('no_prf_output: that passkey exists but lacks PRF (Bitwarden-class managers don\'t carry it)');
+      var out=new Uint8Array(first);
+      if(out.length!==32)throw new Error('PRF output '+out.length+' bytes, expected 32');
+      var mprk=BZDIDKEY.masterPrkFromPrfSecret(out);
+      out.fill(0);
+      var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
+      id2.masterPrk=mprk;
+      return id2;
+    });
+  }
+  /* connect order: a sealed device opens the soul through its seal, and ONLY
+     through it. A closed prompt, a timeout or a seal that will not open stops
+     here and says so: it never falls through to a direct derive, which from the
+     device's wrapper passkey is a different soul. Without a seal, the founding
+     passkey (CRED_ID, never a wrapper) is touched directly; with none
+     remembered, the picker runs and a wrapper that answers is refused. */
   function connectSoul(){
     var seal=loadSeal();
     if(seal&&seal.credId){
       return prfEvalTargeted(seal.credId).then(async function(prf){
-        var mprk=await unsealSoul(seal,prf);
-        prf.fill(0);
+        var mprk;
+        try{ mprk=await unsealSoul(seal,prf) }
+        catch(e){ var x=new Error('seal_closed: this device\'s seal did not open ('+((e&&e.name)||'error')+': '+((e&&e.message)||'')+')'); x.code='seal_closed'; throw x }
+        finally{ prf.fill(0) }
         var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
         id2.masterPrk=mprk;
         return id2;
-      }).catch(function(e){
-        if(/no_prf/i.test(e&&e.message||''))throw e;   // real refusal — don't mask it
-        return (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
       });
     }
-    return (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
+    if(CRED_ID&&!isWrap(CRED_ID))return identityFromTargeted(CRED_ID);
+    return identityFromDiscoverable();
   }
 
   /* ── keychain connect ceremony ────────────────────────────── */
@@ -5109,7 +5160,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-k1-pub').textContent=K1?K1.eosPub:'—';
     $('kc-cards').style.display='flex';
     $('kc-outrow').style.display='flex';
-    $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
+    kcLive();
     wlSay($('sum-kc'),['your keychain is connected in this tab.',{cy:'connected ✓'}]);$('sum-kc').style.color='var(--leaf)';
     var arOwn=arDeriveNow();
     seedContexts(); renderForge(); pqPanel();
@@ -5118,6 +5169,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
       $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
+  function kcLive(){ $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored' }
+  function kcConnect(){ $('kc-pass').click() }
   $('kc-pass').onclick=async function(){
     if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
     try{
@@ -5127,7 +5180,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var id=await connectSoul();
       keychainOn(id);
     }catch(e){
-      $('kc-stat').textContent=passkeyFallbackMsg(e);
+      wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect));
     }
   };
   /* AUTO-CONNECT (founder law: connect bzDiD should be automatic): the WebAuthn
@@ -5156,7 +5209,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
     CEREMONY=true;
     connectSoul().then(keychainOn).catch(function(e){
-      if(!MPRK)$('kc-stat').textContent='auto-connect: '+passkeyFallbackMsg(e);
+      if(!MPRK)wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect,'auto-connect'));
     }).finally(function(){CEREMONY=false});
   }
   window.addEventListener('pointerdown',autoConnect);
@@ -5164,22 +5217,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* CREATE lane: no bzDiD passkey on this device? make one HERE — enrollment + PRF eval in
      one visit. If the authenticator lacks PRF we say so and never pretend. */
-  function passkeyFallbackMsg(e){
-    var m=(e&&e.message)||String(e||'');
-    if(/no_prf|no PRF|prf/i.test(m)){
-      return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, create one here with a platform provider (Windows Hello / Chrome profile / Google / iCloud), or import your soul with the recovery phrase';
-    }
-    if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN){
-      var homeMsg=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
-      return 'passkeys CANNOT exist on this origin ('+location.hostname+' — WebAuthn needs a real domain, never an IP). You are on a local build server.'+
-        (homeMsg?' The wallet lives at '+homeMsg.replace(/^https?:\/\//,'')+' — open the public link in the banner and every passkey lane works there.':' Open this wallet on its real domain and every passkey lane works there.');
-    }
-    if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m)){
-      // covers: user cancelled the picker, the QR cross-device dead end (the
+  /* why a passkey ceremony did not open the keychain, as wlSay parts: one calm
+     sentence and the way on. The remedy is ALWAYS the same soul again (try
+     again, or the recovery words), never "create one": a passkey made here is a
+     new soul with new keys. The raw reason stays for cypherpunk. */
+  function passkeyFallbackMsg(e,again,how){
+    var m=(e&&e.message)||String(e||''), nm=(e&&e.name)||'';
+    var raw=(how?how+': ':'')+(nm&&m.indexOf(nm)<0?nm+': ':'')+m;
+    var rec={to:'kc-rec-scaffold',t:'your recovery words'};
+    var tryB=again?{btn:'try again',on:again}:'try again';
+    var made=how==='create';
+    if(e&&e.code==='wrap_cred'||/^wrap_cred/.test(m))
+      return ['that passkey keeps your soul sealed on one device and is not your bzDiD itself, so nothing opened. ',tryB,' with your bzDiD passkey, or bring your soul back with ',rec,'.',{cy:raw}];
+    if(e&&e.code==='seal_closed'||/^seal_closed/.test(m))
+      return ['this device\'s saved key did not open your soul, so nothing opened. ',tryB,' or bring your soul back with ',rec,'.',{cy:raw+' · no soul is ever derived straight from the device passkey'}];
+    if(/no_prf|no PRF|prf/i.test(m))
+      return [made?'this passkey cannot hold a bzDiD, so nothing changed here. bring your soul in with ':'this passkey cannot hold your bzDiD. bring your soul in with ',rec,'.',
+        {cy:raw+' · no_prf_output: the authenticator returned no PRF secret (Bitwarden-class managers do not carry it); delete it where it was saved; a platform provider (Windows Hello, Chrome profile, Google, iCloud) carries PRF'}];
+    if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN)
+      return ['passkeys only work on the wallet\'s own site, so open it there to connect.',{cy:raw+' · WebAuthn rejects this origin ('+location.hostname+'): an IP address is never a passkey domain'}];
+    if(/pending/i.test(m))
+      return ['another passkey prompt is still open. finish it, then ',tryB,'.',{cy:raw}];
+    if(/NotAllowed|No available|not.*found|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m))
+      // covers: the reader closed the prompt, the QR cross-device dead end (the
       // phone's provider had nothing to give), and "no passkey here at all".
-      return 'no usable bzDiD passkey came through — if the browser offered a QR for your phone, know that path only works when the phone\'s provider carries PRF (Bitwarden there intercepts; set the phone\'s default passkey provider to Google/iCloud, or just open the wallet ON the phone and create it there). Here: ＋ create one (cyan button) or import your soul with the recovery phrase';
-    }
-    return 'passkey lane: '+m+' — ＋ create one here, or use recovery below';
+      return [made?'no new bzDiD was made. ':'your passkey did not open the keychain. ',tryB,made?'.':' or bring your soul back with ',made?'':rec,made?'':'.',
+        {cy:raw+' · a phone QR offered by the browser works only when the phone\'s passkey provider carries PRF (Bitwarden there intercepts; set the phone\'s default provider to Google or iCloud, or open the wallet on the phone) · creating a passkey here makes a NEW soul, never this one'}];
+    return ['the passkey did not answer. ',tryB,' in a moment, or bring your soul back with ',rec,'.',{cy:'passkey lane: '+raw}];
   }
   /* ORIGIN GUARD: a wallet opened on an IP (a local build server) can never run
      a passkey lane — WebAuthn requires a registrable domain. Say it up front,
@@ -5225,6 +5289,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!cred)throw new Error('hardware create returned null');
     return {credentialId:cred.id};
   }
+  /* a bzDiD made here is a NEW soul (a new passkey, a new PRF secret): its
+     recovery words are its own, never the onboarding ones. The wallet hands
+     them over once, right here, and keeps no copy. */
+  function kcBorn(words){
+    wlSay($('kc-stat'),['your new bzDiD is ready on this device. write down its 24 recovery words now, they are the only way back if this device is lost. ',
+      {btn:'show my recovery words',on:function(){ var w=words; words=null; if(w)kcShowWords(w) }},
+      {cy:'bzDiD born on this device · bnr_cred saved, connect re-touches this exact credential (allowCredentials) · its recovery words are the BIP-39 of THIS passkey\'s masterPRK: a new soul, not the onboarding phrase'}]);
+  }
+  function kcShowWords(w){
+    var st=$('kc-stat'); st.textContent='';
+    var say=document.createElement('div'); say.textContent='write these 24 words on paper, in this order, and keep them where only you can reach them.';
+    var box=document.createElement('div'); box.id='kc-words'; box.className='kp'; box.style.margin='8px 0'; box.textContent=w; w=null;
+    var done=document.createElement('button'); done.type='button'; done.className='wl-act'; done.textContent='they are written down';
+    done.onclick=function(){ box.textContent=''; kcLive() };
+    st.appendChild(say); st.appendChild(box); st.appendChild(done);
+  }
   async function runCreate(enrollFn,label){
     if(CEREMONY){$('kc-stat').textContent='a passkey prompt is already open — finish or dismiss it, then try again';return}
     CEREMONY=true;
@@ -5243,12 +5323,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       saveCred(en.credentialId);
       keychainOn(id);
-      $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — connect now re-touches this exact passkey automatically. Write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
+      var words=id.phrase; id.phrase=null; id.recoveryCode=null;
+      kcBorn(words); words=null;
     }catch(e){
       var m=(e&&e.message)||String(e||'');
       if(/pending|abort/i.test(m))$('kc-stat').textContent='create: another passkey prompt was still open — try again now';
       else if(/InvalidState/i.test(m))$('kc-stat').textContent='create: this device already holds one — use connect instead';
-      else $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
+      else wlSay($('kc-stat'),passkeyFallbackMsg(e,function(){ runCreate(enrollFn,label) },'create'));
     }finally{ CEREMONY=false }
   }
   $('kc-hw').onclick=function(){
@@ -5374,8 +5455,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       b.onclick=function(){ dmRevoke(b.getAttribute('data-c')); };
     });
     var own=$('dm-own'); if(own)own.onclick=dmOwnView;
-    var add=$('dm-add'); if(add)add.onclick=function(){dmAdd(function(){return BZDIDKEY.enrollPasskey(SOUL||'this-device')})};
-    var addhw=$('dm-addhw'); if(addhw)addhw.onclick=function(){dmAdd(enrollHardware)};
+    var add=$('dm-add'); if(add)add.onclick=function(){dmAdd(false)};
+    var addhw=$('dm-addhw'); if(addhw)addhw.onclick=function(){dmAdd(true)};
   }
   function dmWs(pubHex,cb){
     var socks=[],cands=[],seen={},open=0,queried=0,eose=0,done=false,timer;
@@ -5427,6 +5508,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return;
       }
       DM_REG=res.devices||[]; DM_BASE=res.base;
+      DM_REG.forEach(function(d){ if(d)wrapKeep(d.credId) });   // every device in the soul's own list is a wrapper
       dmRender(DM_REG,res.reg);
       var r=res.reg||{};
       $('dm-stat').textContent=
@@ -5454,6 +5536,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   $('dm-open').onclick=dmOpen;
   $('dm-x').onclick=function(){ $('dm-sec').style.display='none'; };
+  /* one signed list, sent to every relay. Only a relay's own ["OK", id, true]
+     counts as published: a socket that opened is not an answer. send() can run
+     again with the identical signed bytes (a relay that already holds them
+     answers OK too). The high-water mark rises only once a relay accepted. */
   function dmPublish(devices){
     var sn=soulNostr(), k=dmPqKeys(), body, at=null;
     if(k){
@@ -5464,60 +5550,128 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       body={v:2,at:at,devices:devices,pqsig:window.BPQ.signFile(k,dmSignedBytes(at,devices),at)};
     } else body={v:1,devices:devices};
     var ev=nostrEvent(sn.sk,JSON.stringify(body),[['d','bnr-devices-v1'],['alt','BNR bzDiD device registry']],30078);
-    if(at) dmHwmSet(sn.pubHex,at);
+    var pubHex=sn.pubHex;
     sn.sk.fill(0);
-    var sent=0;
-    QR_RELAYS.forEach(function(rs){
-      var w; try{w=new WebSocket(rs)}catch(e){return}
-      w.onopen=function(){ w.send(JSON.stringify(['EVENT',ev])); sent++;
-        $('dm-stat').textContent='registry published to '+sent+' relay(s)'; };
-    });
-    return {ev:ev, trust:at?'pq':'unchecked'};
+    function send(){ return new Promise(function(resolve){
+      var r={ok:0,total:QR_RELAYS.length,lines:[]}, left=QR_RELAYS.length, socks=[], seen={}, fin=false, timer;
+      function end(){ if(fin)return; fin=true; clearTimeout(timer); socks.forEach(function(w){ try{w.close()}catch(e){} }); resolve(r) }
+      function settle(rs,ok,why){
+        if(fin||seen[rs])return; seen[rs]=1;
+        if(ok)r.ok++;
+        r.lines.push(rs.replace(/^wss:\/\//,'')+': '+(ok?'accepted':'not accepted ('+why+')'));
+        if(--left<=0)end();
+      }
+      QR_RELAYS.forEach(function(rs){
+        var w; try{ w=new WebSocket(rs) }catch(e){ settle(rs,false,'could not open'); return }
+        socks.push(w);
+        w.onopen=function(){ try{ w.send(JSON.stringify(['EVENT',ev])) }catch(e){ settle(rs,false,'send failed') } };
+        w.onmessage=function(m){
+          var t; try{ t=JSON.parse(m.data) }catch(e){ return }
+          if(Array.isArray(t)&&t[0]==='OK'&&t[1]===ev.id) settle(rs,t[2]===true,String(t[3]||'refused').slice(0,120));
+        };
+        w.onerror=function(){ settle(rs,false,'unreachable') };
+        w.onclose=function(){ settle(rs,false,'closed before it answered') };
+      });
+      timer=setTimeout(function(){ QR_RELAYS.forEach(function(rs){ settle(rs,false,'no answer in 8 s') }); end() },8000);
+      if(left<=0)end();
+    }) }
+    return {ev:ev, at:at, pubHex:pubHex, trust:at?'pq':'unchecked', send:send};
   }
-  async function dmAdd(enrollFn){
+  /* a change is applied here only after a relay accepted it; with none, nothing
+     changed and the identical signed list can go again */
+  var DM_BUSY=false;
+  function dmSettle(pub,apply,say){
+    var st=$('dm-stat');
+    DM_BUSY=true;
+    wlSay(st,['saving your device list…',{cy:'publishing '+pub.ev.id.slice(0,16)+'… to '+QR_RELAYS.length+' relays'}]);
+    pub.send().then(function(r){
+      DM_BUSY=false;
+      var cy='device list '+pub.ev.id.slice(0,16)+'… '+(pub.at?'signed at '+pub.at+' · ':'')+r.ok+' of '+r.total+' relays accepted · '+r.lines.join(' · ');
+      if(r.ok>0){
+        if(pub.at) dmHwmSet(pub.pubHex,pub.at);
+        apply();
+        wlSay($('dm-stat'),say(r).concat([{cy:cy}]));
+      } else {
+        wlSay($('dm-stat'),['the change did not reach any relay, so nothing changed yet. ',{btn:'try again',on:function(){ dmSettle(pub,apply,say) }},{cy:cy}]);
+      }
+    });
+  }
+  /* the device passkey that WRAPS the soul: its user handle is marked, so a
+     picker that later returns it (here, or a synced copy elsewhere) is refused */
+  async function enrollWrap(cross){
+    var pk={
+      rp:{name:cross?'skaists heART WALLet':'BNR'},
+      user:{id:wrapUserId(),name:(SOUL||'bzDiD')+' · device seal',displayName:(SOUL||'bzDiD')+' · device seal'},
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      pubKeyCredParams:cross?[{type:'public-key',alg:-7},{type:'public-key',alg:-257}]:[{type:'public-key',alg:-8},{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:cross?{residentKey:'required',userVerification:'required',authenticatorAttachment:'cross-platform'}:{residentKey:'required',userVerification:'required'},
+      timeout:cross?9e4:6e4,
+      extensions:{prf:{}}
+    };
+    var cred=await navigator.credentials.create({publicKey:pk});
+    if(!cred)throw new Error('device passkey create returned null');
+    return {credentialId:cred.id};
+  }
+  async function dmAdd(cross){
     if(!MPRK){$('dm-stat').textContent='soul not live here';return}
+    if(DM_BUSY){ wlSay($('dm-stat'),['your last change is still being saved. press again in a moment.']); return }
     var me=dmLocal();
     if(me){ $('dm-stat').textContent='this browser already holds a permanent seal (made '+me.at+')'; return; }
     var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
     if(CEREMONY){$('dm-stat').textContent='a passkey prompt is already open';return}
     CEREMONY=true;
+    var seal, devs, prf=null;
     try{
       $('dm-stat').textContent='step 1 — create the device passkey…';
-      var en=await enrollFn();
+      var en=await enrollWrap(!!cross);
+      wrapKeep(en.credentialId);   // a wrapper from the moment it exists: never a soul of its own
       $('dm-stat').textContent='step 2 — proving PRF on the new passkey…';
-      var prf=await prfEvalTargeted(en.credentialId);
+      prf=await prfEvalTargeted(en.credentialId);
       $('dm-stat').textContent='step 3 — sealing the soul under it…';
-      var seal=await sealSoul(prf,MPRK);
-      prf.fill(0);
+      seal=await sealSoul(prf,MPRK);
       seal.credId=en.credentialId;
       seal.name=(navigator.userAgent||'').match(/Windows|Mac|Linux|Android|iPhone|iPad/)||['device'];
       seal.name=seal.name[0]+' · '+(SOUL||'bzDiD');
       var id2=BZDIDKEY.deriveIdentity(MPRK.slice(),'bnr.b');
       seal.fp=id2.fingerprint.words;
-      saveCred(en.credentialId);
-      saveSeal(seal);
-      var devs=(DM_REG&&DM_REG.length?DM_REG.slice():[]);
+      devs=(DM_REG&&DM_REG.length?DM_REG.slice():[]);
       devs=devs.filter(function(d){return d.credId!==seal.credId});
       devs.push({credId:seal.credId,name:seal.name,fp:seal.fp,at:seal.at});
-      DM_REG=devs;
-      var pub=dmPublish(devs);
-      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
-      $('dm-stat').textContent='✓ this device now holds the soul permanently — connect lands here without QR or recovery';
     }catch(e){
       $('dm-stat').textContent='add failed: '+((e&&e.message)||e)+' — nothing was stored';
-    }finally{ CEREMONY=false }
+      return;
+    }finally{ if(prf)prf.fill(0); CEREMONY=false }
+    /* the seal is kept, and the founding passkey pointer (bnr_cred) left alone,
+       only once a relay holds the list that names this device */
+    var pub=dmPublish(devs);
+    dmSettle(pub,function(){
+      saveSeal(seal);
+      DM_REG=devs;
+      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
+    },function(r){ return ['this device now keeps your soul, and your device list says so on '+r.ok+' of '+r.total+' relays.'] });
   }
   function dmRevoke(credId){
     if(!MPRK)return;
+    if(DM_BUSY){ wlSay($('dm-stat'),['your last change is still being saved. press again in a moment.']); return }
     var no=dmRefuse(); if(no){ $('dm-stat').textContent=no; return; }
     var devs=(DM_REG||[]).filter(function(d){return d.credId!==credId});
+    var me=dmLocal(), selfGone=!!(me&&me.credId===credId);
     var pub=dmPublish(devs);
-    DM_REG=devs;
-    var me=dmLocal();
-    var selfGone=me&&me.credId===credId;
-    if(selfGone){ saveSeal(null); }
-    dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
-    $('dm-stat').textContent='revoked'+(selfGone?' (this browser\'s seal deleted too — connect falls back to passkey/recovery)':' — the device keeps any cached copy offline; full kill is the recovery-rotate lane');
+    dmSettle(pub,function(){
+      DM_REG=devs;
+      if(selfGone){
+        /* this browser stops keeping the soul: the seal goes, and so does any
+           pointer to its wrapper, so the next connect can never derive a soul
+           from the wrapper passkey itself */
+        wrapKeep(credId);
+        saveSeal(null);
+        var c=CRED_ID; try{ c=localStorage.getItem('bnr_cred')||c }catch(e){}
+        if(c&&(c===credId||isWrap(c)))saveCred(null);
+      }
+      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000),trust:pub.trust});
+    },function(r){ return selfGone
+      ?['this device no longer keeps your soul. to use it here again, bring it back with ',{to:'kc-rec-scaffold',t:'your recovery words'},' or your phone.']
+      :['removed on '+r.ok+' of '+r.total+' relays. that device stops syncing, though a copy it already holds still opens offline.'] });
   }
 
   /* ── QR BRIDGE v2 — phone ⇄ desk login, first-party, post-quantum ─────
@@ -5731,7 +5885,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(s&&s.indexOf('#qr=')>0){
             var req=qrParseHash(s.substr(s.indexOf('#qr=')+4));
             if(req){ try{stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
-              QRB.camStream=null; return qrConfirmSheet(req); }
+              QRB.camStream=null;
+              /* the scanned link must come from this very site: a code from any
+                 other origin is a page asking for the soul, so nothing goes out */
+              var from=null; try{ from=new URL(s).origin }catch(e){}
+              if(from!==location.origin) return qrForeignCode(from,s);
+              return qrConfirmSheet(req); }
           }
         }
         QRB.raf=requestAnimationFrame(loop);
@@ -5740,6 +5899,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var st=$('qr-camstat');
       if(st)st.textContent='camera unavailable ('+(e&&e.name||'error')+') — open this page on the phone via the QR link itself, or use recovery';
     }
+  }
+  function qrForeignCode(from,raw){
+    QRB={mode:'confirm'};
+    $('qr-title').textContent='📷 a code from another site';
+    var b=$('qr-body'); b.textContent='';
+    var p=document.createElement('div'); p.style.fontSize='12px';
+    wlSay(p,['this code comes from another site, so nothing was sent. scan only the code your own wallet shows on '+location.host+'. ',{btn:'close',on:qrClose},
+      {cy:'scanned origin '+(from||'unreadable')+' is not this page\'s origin '+location.origin+' · scanned text: '+String(raw).slice(0,300)}]);
+    b.appendChild(p);
+    $('qr-law').textContent='';
   }
   function qrParseHash(b64){
     try{
@@ -5766,7 +5935,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('qr-deny').onclick=qrClose;
       return;
     }
-    $('qr-body').innerHTML='<div style="font-size:12px">a desktop at <b>'+location.host+'</b> asks to sign in</div>'+
+    $('qr-body').innerHTML='<div style="font-size:12px">a desktop on <b>'+esc(location.host)+'</b> wants to sign in as you.</div>'+
       '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace" id="qr-words">'+w.join(' ')+'</div>'+
       '<div style="font-size:11px;color:var(--dim)">these six words must match the desktop\'s. If any word differs, cancel.</div>'+
       '<div class="row" style="margin-top:12px"><button id="qr-allow" class="gold">allow this desktop</button>'+

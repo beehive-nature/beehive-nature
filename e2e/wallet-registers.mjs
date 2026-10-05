@@ -259,7 +259,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['The key in the config below is', 'within fund'],
     ['its Base address below is a bare', 'within fiat in'],
     ['use the recovery lane below', 'within the keychain'],
-    ['create one here, or use recovery below', 'within the keychain'],
     ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],

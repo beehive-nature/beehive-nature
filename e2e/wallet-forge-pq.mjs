@@ -57,6 +57,8 @@ const ok = (name, cond, note = '') => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// the words a bee or raver reader gets: an element's text without its cypherpunk-only spans
+const CALM = "window.__calm = e => { if (!e) return ''; const c = e.cloneNode(true); c.querySelectorAll('.wl-cyd').forEach(x => x.remove()); return c.textContent; }";
 
 try {
   /* A · cold forge — no soul: pq buttons present, no fake cards forced */
@@ -428,6 +430,7 @@ try {
         deliver(msg) { if (this.readyState !== 1) return; window.__wsDelivered[this.url] = (window.__wsDelivered[this.url] || 0) + 1; this.onmessage && this.onmessage({ data: JSON.stringify(msg) }); }
         send(s) {
           const m = JSON.parse(s); window.__wsSent.push([this.url, m]);
+          if (m[0] === 'EVENT') { if (!(window.__dmNoOk || {})[this.url]) setTimeout(() => this.deliver(['OK', m[1].id, true, '']), 2); return; }
           if (m[0] !== 'REQ') return;
           const evs = window.__dmRelays[this.url] || [], flood = window.__dmFlood[this.url];
           setTimeout(() => {
@@ -484,6 +487,7 @@ try {
       window.__wsDelivered = {}; window.__dmFail = extra.fail || {}; window.__dmFlood = extra.flood || {}; window.__dmDelay = extra.delay || {};
       R.forEach((u, i) => { window.__dmRelays[u] = all[i] || []; });
     }, { R, all, extra });
+    const revoke = id => page.evaluate(id => { document.querySelector('.dm-rv[data-c="' + id + '"]').click(); const y = document.querySelector('.dm-rv-yes'); if (y) y.click(); }, id);
     const T1 = '2026-10-01T00:00:00.000Z', T2 = '2026-10-02T00:00:00.000Z', T3 = '2026-10-03T00:00:00.000Z';
     const A = { credId: 'devA', name: 'A', fp: 'fa', at: T1 }, B = { credId: 'devB', name: 'B', fp: 'fb', at: T1 };
     const mk = (body, created) => page.evaluate(({ body, created }) => window.__mkEv(body, created), { body, created });
@@ -538,8 +542,10 @@ try {
     await setRelays([[nearEv], [nearEv], [nearEv]]);
     await page.evaluate(T2 => localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 })), T2);
     const s3e = await openDm();
-    await page.evaluate(() => { window.__wsSent.length = 0; document.querySelector('.dm-rv[data-c="devA"]').click(); });
+    await page.evaluate(() => { window.__wsSent.length = 0; });
+    await revoke('devA');
     await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT'), null, { timeout: 5000 });
+    await page.waitForFunction(() => !/saving your device list/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
     const pubNear = await page.evaluate(() => window.__lastEvent());
     ok('registry: a publish signs a time after the mark even when this clock is behind it',
       s3e.trust === 'pq' && pubNear.v === 2 && Date.parse(pubNear.at) === near + 1, JSON.stringify({ s: s3e.stat, at: pubNear.at, near: nearIso }));
@@ -553,14 +559,16 @@ try {
     await setRelays([[badEv], [badEv], [badEv]]);
     const s4 = await openDm();
     ok('registry: a list with a foreign PQ signature is shown as bad and offers this device\'s own view', s4.trust === 'bad' && s4.own && s4.rows.join() === 'devA,devB', JSON.stringify(s4));
-    await page.evaluate(() => document.querySelector('.dm-rv[data-c="devB"]').click());
+    await revoke('devB');
     const s4b = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, events: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
     ok('registry: revoke on an unverified list is refused and nothing is published', /Nothing was changed/.test(s4b.stat) && s4b.events === 0, JSON.stringify(s4b));
     await page.evaluate(() => document.getElementById('dm-own').click());
     const s4c = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), own: !!document.getElementById('dm-own') }));
     ok('registry: this device\'s own view holds only this browser\'s seal', s4c.rows.join() === 'devA' && !s4c.own && /only what this browser knows/.test(s4c.stat), JSON.stringify(s4c));
-    await page.evaluate(() => document.querySelector('.dm-rv[data-c="devA"]').click());
+    await revoke('devA');
     await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT'), null, { timeout: 5000 });
+    // the mark rises once a relay ACCEPTED the list, not when it was sent
+    await page.waitForFunction(() => { const x = window.__lastEvent(), h = JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'); return !!x && Object.values(h)[0]?.at === x.at; }, null, { timeout: 12000 });
     const pub = await page.evaluate(() => {
       const o = window.__lastEvent();
       const r = window.BPQ.verifyFile(o.pqsig, new TextEncoder().encode(JSON.stringify({ at: o.at, devices: o.devices })));
@@ -578,11 +586,40 @@ try {
     }, T2);
     await setRelays([[v2Ev], [v2Ev], [v2Ev]]);
     const s5 = await openDm();
-    await page.evaluate(() => document.querySelector('.dm-rv[data-c="devB"]').click());
+    await revoke('devB');
     const s5b = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, events: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
     await page.evaluate(() => { window.BPQ = window.__savedBPQ; });
     ok('registry: without the PQ bundle, a classical list never replaces a post-quantum one',
       s5.trust === 'unchecked' && /cannot sign post-quantum right now/.test(s5b.stat) && /Nothing was changed/.test(s5b.stat) && s5b.events === 0, JSON.stringify({ s5, s5b }));
+    // 6 · a change counts only what a relay ACCEPTED: with every relay down nothing changes and the
+    //     same signed list can go again; a self-revoke also drops the wrapper pointer (bnr_cred)
+    const v2ok = await mk(await v2(T3, [A, B]), 10000);
+    await page.evaluate(T2 => {
+      localStorage.removeItem('bnr_dm_hwm');
+      localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 }));
+      localStorage.setItem('bnr_cred', 'devA');
+    }, T2);
+    await setRelays([[v2ok], [v2ok], [v2ok]]);
+    const s6 = await openDm();
+    ok('registry (control): a fresh post-quantum list loads with both devices', s6.trust === 'pq' && s6.rows.join() === 'devA,devB', JSON.stringify(s6));
+    await page.evaluate(R => { R.forEach(u => { window.__dmFail[u] = 1; }); window.__wsSent.length = 0; }, R);
+    await revoke('devB');
+    await page.waitForFunction(() => /did not reach any relay/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6b = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), again: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: with every relay down a revoke claims nothing, changes nothing, and offers try again',
+      /the change did not reach any relay, so nothing changed yet/.test(s6b.stat) && s6b.rows.join() === 'devA,devB' && Object.values(s6b.hwm)[0]?.at === T3 && s6b.again, JSON.stringify(s6b));
+    await page.evaluate(() => { window.__dmFail = {}; window.__wsSent.length = 0; document.querySelector('#dm-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /removed on 3 of 3 relays/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s6c = await page.evaluate(() => ({ rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), ids: [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].id))], at: window.__lastEvent().at, hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}') }));
+    ok('registry: try again sends one signed list to every relay and removes the device only once they accepted it',
+      s6c.rows.join() === 'devA' && s6c.ids.length === 1 && Object.values(s6c.hwm)[0]?.at === s6c.at, JSON.stringify(s6c));
+    await page.evaluate(() => { window.__wsSent.length = 0; });
+    await revoke('devA');
+    await page.waitForFunction(() => /no longer keeps your soul/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s6d = await page.evaluate(() => ({ cred: localStorage.getItem('bnr_cred'), seal: localStorage.getItem('bnr_seal'), link: document.querySelector('#dm-stat a')?.getAttribute('href'), wraps: JSON.parse(localStorage.getItem('bnr_wraps') || '[]') }));
+    ok('registry: a self-revoke drops the seal AND the wrapper pointer, and names the recovery words',
+      s6d.cred === null && s6d.seal === null && s6d.link === '#kc-rec-scaffold' && s6d.wraps.includes('devA'), JSON.stringify(s6d));
     ok('registry: only the mocked relay URLs were ever opened', (await page.evaluate(() => window.__wsOpened)).every(u => R.includes(u)));
     await page.close();
   }
@@ -791,6 +828,43 @@ try {
     ok('qr words: the phone says cancel if any word differs', /these six words must match the desktop's\. If any word differs, cancel\./.test(P.body) && !/digit/.test(P.body), P.body.slice(0, 200));
     await phone.close();
 
+    // phone camera: the scanned code must come from this very site; one from any other origin sends nothing
+    const cam = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await cam.addInitScript(() => {
+      window.__sent = [];
+      class RecWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send(x) { window.__sent.push(x); } close() { this.readyState = 3; } }
+      window.WebSocket = RecWS;
+      if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => {
+        const c = document.createElement('canvas'); c.width = 64; c.height = 48; const g = c.getContext('2d');
+        const paint = () => { g.fillStyle = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); g.fillRect(0, 0, 64, 48); };
+        paint(); setInterval(paint, 50); return c.captureStream(20);
+      };
+    });
+    await cam.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await cam.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BIP39_WORDLIST && window.BNRQR && window.BPQ_LIB, null, { timeout: 20000 });
+    await cam.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await cam.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const foreign = 'https://evil.example/surfaces/wallet.html#qr=' + payload.toString('base64url');
+    await cam.evaluate(t => { window.__scan = t; window.BNRQR.scan = () => window.__scan; document.getElementById('kc-qr').click(); }, foreign);
+    await cam.waitForFunction(() => /another site/.test(document.getElementById('qr-body').textContent), null, { timeout: 15000 });
+    await cam.evaluate(CALM);
+    const F1 = await cam.evaluate(() => ({ text: window.__calm(document.getElementById('qr-body')), raw: document.getElementById('qr-body').textContent, allow: !!document.getElementById('qr-allow'), words: !!document.getElementById('qr-words'), sent: window.__sent.filter(x => /EVENT/.test(x)).length }));
+    ok('qr camera: a code from another site is refused before any check word or allow, and nothing is sent',
+      /this code comes from another site, so nothing was sent/.test(F1.text) && !/evil\.example/.test(F1.text) && /evil\.example/.test(F1.raw) && !F1.allow && !F1.words && F1.sent === 0, JSON.stringify(F1));
+    // control: the very same code, from this site, offers the six words and allow
+    const same = BASE + '/surfaces/wallet.html#qr=' + payload.toString('base64url');
+    await cam.evaluate(t => { window.__scan = t; document.getElementById('qr-x').click(); document.getElementById('kc-qr').click(); }, same);
+    await cam.waitForFunction(() => document.getElementById('qr-allow'), null, { timeout: 15000 });
+    const F2 = await cam.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: document.getElementById('qr-body').innerText }));
+    ok('qr camera (control): the same code from this site offers allow with the same six words and names this site',
+      F2.words === D.words && F2.body.includes('a desktop on ' + new URL(BASE).host + ' wants to sign in as you.'), JSON.stringify(F2));
+    await cam.close();
+
     const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
     const block = src.slice(src.indexOf('QR BRIDGE v2'), src.indexOf('boot detect: opened via the desktop'));
     ok('qr words: no four-digit pre-check is left, and the comment names its honest limit',
@@ -858,6 +932,99 @@ try {
     ok('sign sheet: one press signs every law file and says Done',
       rc.card.id === SIGNER.id && rc.signatures.length === n && /^Done\./.test(done.stat) && done.go, JSON.stringify(done));
     await page.close();
+  }
+  /* J · the keychain opens only its own soul (WebAuthn stubbed; the PRF bytes are
+     TEST-ONLY constants): a sealed device never derives a soul from its wrapper
+     passkey, a closed prompt opens nothing and offers the same soul again, a
+     wrapper that answers the picker is refused, and a bzDiD made here hands over
+     ITS OWN recovery words, never the onboarding ones */
+  {
+    const stub = () => {
+      window.__gets = []; window.__plan = [];
+      if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': true });
+      const b64u = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      navigator.credentials.get = async o => {
+        const pk = o.publicKey, step = window.__plan.shift() || { fail: 'NotAllowedError' };
+        window.__gets.push(pk.allowCredentials ? 'targeted' : 'picker');
+        if (step.fail) throw new DOMException('The operation either timed out or was not allowed.', step.fail);
+        return { id: step.id, rawId: b64u(step.id).buffer, type: 'public-key', response: { userHandle: step.handle ? Uint8Array.from(step.handle).buffer : null },
+          getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(step.prf).buffer } } }) };
+      };
+      navigator.credentials.create = async () => ({ id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) });
+    };
+    const BASE_N = BASE.replace('127.0.0.1', 'localhost');   // a name, not an IP: an IP origin can hold no passkey at all
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => {
+      try {
+        if (!sessionStorage.getItem('j-seeded')) {
+          sessionStorage.setItem('j-seeded', '1');
+          localStorage.setItem('bnr_soul', 'gatesoul');
+          localStorage.setItem('bnr_seal', JSON.stringify({ v: 1, iv: 'AQIDBAUGBwgJCgsM', ct: 'AQID'.repeat(16), at: '2026-10-01T00:00:00.000Z', credId: 'c2VhbA' }));
+          localStorage.setItem('bnr_cred', 'c2VhbA');   // an older add pointed the founding pointer at its own wrapper
+        }
+      } catch (e) {}
+    });
+    await page.addInitScript(stub);
+    await page.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    const stat = () => page.evaluate(CALM).then(() => page.evaluate(() => { const e = document.getElementById('kc-stat'); return { text: window.__calm(e), raw: e.textContent, again: !!e.querySelector('button.wl-act'), rec: e.querySelector('a')?.getAttribute('href') || null, gets: window.__gets.slice() }; }));
+    ok('keychain: an older add\'s wrapper pointer is dropped on load (the seal reaches its credential by itself)', await page.evaluate(() => localStorage.getItem('bnr_cred') === null && JSON.parse(localStorage.getItem('bnr_wraps') || '[]').includes('c2VhbA')));
+    // 1 · the seal's prompt is closed: nothing opens, no second prompt, the same soul is offered again
+    await page.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }, { id: 'c2VhbA', prf: 7 }]; document.getElementById('kc-pass').click(); });
+    await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const j1 = await stat();
+    ok('keychain: a closed seal prompt opens nothing, asks once, and offers try again or the recovery words (never "create one")',
+      j1.gets.join() === 'targeted' && !/keychain live/.test(j1.raw) && j1.again && j1.rec === '#kc-rec-scaffold' && /your passkey did not open the keychain/.test(j1.text) && !/create/i.test(j1.text) && !/[—–]/.test(j1.text), JSON.stringify(j1));
+    // 2 · the seal's passkey answers but the seal does not open: no fallback derive from that passkey
+    await page.evaluate(() => { window.__plan = [{ id: 'c2VhbA', prf: 7 }, { id: 'c2VhbA', prf: 9 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => window.__gets.length >= 2 && /did not open your soul/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await page.waitForTimeout(300);
+    const j2 = await stat();
+    ok('keychain: a seal that will not open never falls back to deriving a soul from the device passkey',
+      j2.gets.join() === 'targeted,targeted' && !/keychain live/.test(j2.raw) && /this device's saved key did not open your soul/.test(j2.text) && j2.again, JSON.stringify(j2));
+    // 3 · no seal, the remembered pointer is a known wrapper: the picker runs and a wrapper answer is refused
+    await page.evaluate(() => { localStorage.removeItem('bnr_seal'); localStorage.setItem('bnr_cred', 'd3JhcA'); localStorage.setItem('bnr_wraps', JSON.stringify(['d3JhcA'])); });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await page.evaluate(() => { window.__plan = [{ id: 'd3JhcA', prf: 7 }]; document.getElementById('kc-pass').click(); });
+    await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const j3 = await stat();
+    ok('keychain: a remembered wrapper is never touched directly, and a wrapper that answers the picker is refused',
+      j3.gets.join() === 'picker' && !/keychain live/.test(j3.raw) && /is not your bzDiD itself/.test(j3.text), JSON.stringify(j3));
+    // 3b · a wrapper this browser never saw, recognised by its marked user handle (a synced copy)
+    await page.evaluate(() => { window.__plan = [{ id: 'b3RoZXI', prf: 7, handle: [0x62, 0x6e, 0x72, 0x77, 0x72, 0x61, 0x70, 0x31, 1, 2, 3, 4, 5, 6, 7, 8] }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => window.__gets.length >= 2, null, { timeout: 10000 });
+    await page.waitForTimeout(300);
+    const j3b = await stat();
+    ok('keychain: a wrapper known only by its marked user handle is refused too', !/keychain live/.test(j3b.raw) && /is not your bzDiD itself/.test(j3b.text), JSON.stringify(j3b));
+    // 4 · control: the founding passkey answering the picker opens exactly its soul
+    await page.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain (control): the founding passkey opens exactly its own soul',
+      await page.evaluate(() => document.getElementById('kc-soul-fp').textContent === window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'bnr.b').fingerprint.words));
+    await page.close();
+
+    // 5 · a bzDiD made here: its own 24 words, shown once on request, then gone from the page
+    const mk2 = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await mk2.addInitScript(stub);
+    await mk2.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await mk2.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await mk2.evaluate(() => { window.__plan = [{ id: 'bmV3', prf: 11 }]; document.getElementById('kc-create').click(); });
+    await mk2.waitForFunction(() => [...document.querySelectorAll('#kc-stat button')].some(b => /show my recovery words/.test(b.textContent)), null, { timeout: 10000 });
+    await mk2.evaluate(CALM);
+    const j5 = await mk2.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, cred: localStorage.getItem('bnr_cred') }));
+    ok('create: the new bzDiD asks for ITS OWN recovery words, never the onboarding phrase',
+      /write down its 24 recovery words now/.test(j5.text) && !/onboarding/.test(j5.text) && /bzDiD born/.test(j5.raw) && j5.cred === 'bmV3' && !/[—–]|NOW/.test(j5.text), JSON.stringify(j5));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /show my recovery words/.test(b.textContent)).click());
+    const j5b = await mk2.evaluate(() => {
+      const w = (document.getElementById('kc-words') || {}).textContent || '';
+      let fp = null; try { fp = window.BZDIDKEY.identityFromRecovery(w, 'bnr.b').fingerprint.words; } catch (e) {}
+      return { n: w.trim().split(/\s+/).length, same: fp === document.getElementById('kc-soul-fp').textContent };
+    });
+    ok('create: the words shown are 24 and open exactly the soul just made', j5b.n === 24 && j5b.same, JSON.stringify(j5b));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /written down/.test(b.textContent)).click());
+    ok('create: once written down, the words leave the page', await mk2.evaluate(() => !document.getElementById('kc-words') && /keychain live/.test(document.getElementById('kc-stat').textContent)));
+    await mk2.close();
   }
 } finally {
   await browser.close();
