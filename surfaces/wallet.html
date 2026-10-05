@@ -2610,14 +2610,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if(publishing)return;
           if(!file||file.size===0||file.size>30000){wlSay(note,[file&&file.size>30000?'this file is larger than 30,000 bytes. choose a smaller one.':'choose a file first, up to 30,000 bytes.']);$('arw-file').focus();return;}
           var W=window.BNRWALLET;
+          /* a copy of this file still on its way is said first, whatever would sign it: nothing new is made */
+          var held0=null; busy(true);   /* the lane is busy while this read is out */
+          try{ held0=await holdFor(dataOf(new Uint8Array(await file.arrayBuffer())),'this file is still on its way',note,function(){ $('arw-file-review').click() }); }catch(he){ held0=null }
+          if(held0&&held0.stop){ busy(false); refresh(); return }
           var lane=arInject()&&arInject().signLane?arInject().signLane():null, viaInject=lane==='inject', viaKeys=lane==='derived';
-          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'connect your keychain'},' to publish from your own Arweave address.',{cy:'sign lane '+(lane||'none')+(W?'':'; BNRWALLET missing')}]);return;}
+          if(!W||(!viaInject&&!viaKeys)){busy(false);refresh();wlSay(note,[{to:'kc-sec',t:'connect your keychain'},' to publish from your own Arweave address.',{cy:'sign lane '+(lane||'none')+(W?'':'; BNRWALLET missing')}]);return;}
           busy(true);
           wlSay(note,['preparing this file and its exact fee. nothing is signed yet.']);
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
             var data=dataOf(bytes),againFile=function(){$('arw-file-review').click()};
-            var hold=await holdFor(data,'this file is still on its way',note,againFile);
+            var hold=held0||await holdFor(data,'this file is still on its way',note,againFile);   /* the answer read before the sign lane, when there was one */
             if(hold&&hold.stop)return;
             var shown=null;try{shown=await resolveAddr()}catch(se){shown=null}
             var stop={};
