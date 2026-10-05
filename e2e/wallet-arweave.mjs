@@ -423,15 +423,16 @@ try {
         /this file is still on its way, so nothing new was signed/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs1 && posted.length === posts1,
         await page.locator('#arw-file-status').innerText());
       // a copy is on its way only while its anchor can still be mined (50 blocks; the wallet allows 3 hours from
-      // created_at). past that, every gateway is read: only a copy they ALL lack is settled, as expired with
-      // maybe_in (never failed), and a new copy may go. inside it, the press is held and "check again" reads the network
+      // created_at). past that, every gateway is read: a copy is settled, as expired with maybe_in (never failed),
+      // only when none holds it, one answered 404, and any other has been silent for the whole silent span (an
+      // hour, across two reads). inside the window the press is held and "check again" reads the network
       let statusMode = null; const statusHosts = [];
       await ctx.route(GW_RE, async route => {
         const u = new URL(route.request().url());
         if (statusMode && route.request().method() === 'GET' && /^\/tx\/[^/]+\/status$/.test(u.pathname)) {
           statusHosts.push(u.host);
           const cors = { 'access-control-allow-origin': '*' };
-          if (statusMode === 'abort-one' && u.host === 'arweave.net') return route.abort();
+          if (statusMode === 'nxdomain-one' && u.host === 'ar-io.dev') return route.abort('namenotresolved');   // a gateway whose name does not resolve
           if (statusMode === '202') return route.fulfill({ status: 202, headers: cors, body: 'Pending' });
           if (statusMode === 'confirmed') return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ block_height: 1600000, block_indep_hash: 'B'.repeat(64), number_of_confirmations: 3 }) });
           return route.fulfill({ status: 404, headers: cors, body: 'Not Found.' });
@@ -444,22 +445,30 @@ try {
       const pressBtn = (sel, label) => page.evaluate(([s, t]) => [...document.querySelectorAll(s + ' button.wl-act')].find(b => b.textContent === t).click(), [sel, label]);
       const hoursAgo4 = new Date(Date.now() - 4 * 3600e3).toISOString();
       const signs2 = await page.evaluate(() => window.__arSignCount || 0), posts2 = posted.length;
-      // past its window, but one gateway does not answer: nothing is settled and nothing is signed
+      ok('the gateway list holds only gateways that serve the status API (gateway.ardrive.io no longer resolves)',
+        await page.evaluate(() => JSON.stringify(window.BNRAR.GATEWAYS) === JSON.stringify(['https://arweave.net', 'https://ar-io.dev'])), await page.evaluate(() => JSON.stringify(window.BNRAR.GATEWAYS)));
+      // past its window, the one gateway that answers says 404 and the other's name does not resolve: newly silent,
+      // so it is waited for, said calmly with its one action; nothing is settled and nothing is signed
+      await page.evaluate(() => localStorage.removeItem('bnr_ar_gw_silent_v1'));
       await setEntry(page, fileB64, { phase: 'submitted', created_at: hoursAgo4, maybe_out: true });
-      statusMode = 'abort-one'; statusHosts.length = 0;
+      statusMode = 'nxdomain-one'; statusHosts.length = 0;
       await page.locator('#arw-file-review').click();
       await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
-      ok('past its window, a copy one gateway did not answer for is not settled and nothing new is signed',
-        /the network did not answer just now/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => [...document.querySelectorAll('#arw-file-status button.wl-act')].some(b => b.textContent === 'check again')) &&
+      ok('past its window, a gateway that just went silent is waited for, in one calm sentence and check again; nothing settled or signed',
+        /the network does not hold it, but one of the Arweave servers this wallet reads has not answered since .+, so the wallet waits for it until about .+ before it lets the earlier copy go\. check again/.test(await page.locator('#arw-file-status').innerText()) &&
+        await page.evaluate(() => /silent: https:\/\/ar-io\.dev since /.test((document.querySelector('#arw-file-status .wl-cyd') || {}).textContent || '')) &&
         (await entryOf(page, fileB64)).phase === 'submitted' && !(await page.evaluate(() => document.getElementById('arw-file-dialog').open)) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
         await page.locator('#arw-file-status').innerText());
-      // past its window and every gateway lacks it: settled as expired (maybe_in, never failed), and a new copy goes to review
-      statusMode = '404'; statusHosts.length = 0;
+      // the same gateway has given no answer for the whole silent span: it abstains, and the copy is settled as
+      // expired (maybe_in, never failed) on the 404 of the gateway that answers; a new copy goes to review
+      await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('bnr_ar_gw_silent_v1') || '{}'); s['https://ar-io.dev'].since = new Date(Date.now() - 2 * 3600e3).toISOString(); localStorage.setItem('bnr_ar_gw_silent_v1', JSON.stringify(s)); });
+      statusHosts.length = 0;
       await page.locator('#arw-file-review').click();
       await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
       const expired = await entryOf(page, fileB64);
-      ok('past its window, a copy every gateway lacks is settled as expired, maybe in, never failed',
-        expired.phase === 'expired' && expired.evidence && expired.evidence.maybe_in === true && !expired.evidence.definite && ['arweave.net', 'ar-io.dev', 'gateway.ardrive.io'].every(h => statusHosts.includes(h)), JSON.stringify({ phase: expired.phase, ev: expired.evidence, statusHosts }));
+      ok('a gateway silent for the whole span abstains: the copy is settled as expired, maybe in, never failed, on the 404 of the gateway that answers',
+        expired.phase === 'expired' && expired.evidence && expired.evidence.maybe_in === true && !expired.evidence.definite && JSON.stringify(expired.evidence.abstained) === JSON.stringify(['https://ar-io.dev']) &&
+        /arweave\.net 404/.test(expired.evidence.read) && statusHosts.includes('arweave.net'), JSON.stringify({ phase: expired.phase, ev: expired.evidence, statusHosts }));
       ok('and the new copy is reviewed, saying the earlier one did not land; nothing is signed yet',
         /your earlier copy did not land in time, so this is a new copy/.test(await page.locator('#arw-file-plan').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2);
       await page.locator('#arw-file-cancel').click();
@@ -477,8 +486,18 @@ try {
         await page.locator('#arw-file-status').innerText());
       await pressBtn('#arw-file-status', 'check again');
       await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
-      ok('check again, inside its window and nowhere held: it says the same copy can still go out, and nothing is settled',
-        /the network does not hold it yet\. its signed copy can still go out until about/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && (await entryOf(page, fileB64)).phase === 'submitted',
+      ok('check again, fresh inside its window and nowhere held: it can still land if the same copy is sent soon; no time is promised, nothing settled',
+        /the network does not hold it yet\. it can still land if its same signed copy is sent again soon, and that is safe/.test(await page.locator('#arw-file-status').innerText()) && !/until about/.test(await page.locator('#arw-file-status').innerText()) &&
+        await page.evaluate(() => !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && (await entryOf(page, fileB64)).phase === 'submitted' && await page.evaluate(() => !localStorage.getItem('bnr_ar_gw_silent_v1') || !JSON.parse(localStorage.getItem('bnr_ar_gw_silent_v1'))['https://ar-io.dev']),
+        await page.locator('#arw-file-status').innerText());
+      // older than its anchor lasts (about 88 minutes), still inside the 3-hour hold: it is most likely too old to land
+      await setEntry(page, fileB64, { created_at: new Date(Date.now() - 2 * 3600e3).toISOString() });
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, past its anchor but inside the hold: most likely too old to land, publish again after about the end of the hold',
+        /the network does not hold it, and it is most likely too old to land now\. you can publish it again after about .+ if the network still does not hold it then\. check again/.test(await page.locator('#arw-file-status').innerText()) && (await entryOf(page, fileB64)).phase === 'submitted',
         await page.locator('#arw-file-status').innerText());
       statusMode = '202';
       await page.locator('#arw-file-review').click();

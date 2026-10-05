@@ -18,7 +18,7 @@
 // surfaces/arweave.js (format-2 data tx, deepHash SHA-384, merkle notes) —
 // vendored same-origin, proven working inside the worker (the stack law:
 // present-but-inert does not count).
-importScripts('arweave.js?v=4');
+importScripts('arweave.js?v=5');
 var A = globalThis.BNRAR;
 
 var E = { RAIL_UNREACHABLE: -32001, BAD_PARAMS: -32007, SUBMIT_REFUSED: -32005, UNSUPPORTED: -32008, SERIALIZE: -32004 };

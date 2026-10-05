@@ -20,10 +20,13 @@
 (function () {
   'use strict';
 
+  /* gateways that answer GET /info and GET /tx/{id}/status (200 for a mined tx, 404 for an unknown
+     id), read-only, 2026-10-05: arweave.net from this box and from check-host.net nodes; ar-io.dev
+     from check-host.net nodes (br, de, nl, fr, ru, sg, uk). gateway.ardrive.io is gone: NXDOMAIN at
+     dns.google and cloudflare-dns.com, "no such device or address" from every check-host.net node */
   var GATEWAYS = [ // PUBLIC-CONSTANT: public Arweave gateways, CORS-open, fee-bearing
     'https://arweave.net',
-    'https://ar-io.dev',
-    'https://gateway.ardrive.io'
+    'https://ar-io.dev'
   ];
 
   /* ── encodings ────────────────────────────────────────────────────────── */
