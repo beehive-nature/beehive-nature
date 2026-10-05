@@ -909,6 +909,9 @@ jobs:
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
         run: node e2e/wallet-accounts.mjs
+      - name: Bridge and account forge — one paste never signs twice; the forge reads the name and says its price
+        if: always()
+        run: node e2e/wallet-bridge-acct.mjs
       - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
         if: always()
         run: node e2e/wallet-unified.mjs
