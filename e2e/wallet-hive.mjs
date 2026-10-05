@@ -58,9 +58,10 @@ try {
         if (b.method === 'condenser_api.broadcast_transaction') {
           state.broadcasts.push(b.params[0]);
           if (state.failNext > 0) { state.failNext--; return route.abort('connectionfailed'); }
+          if (state.refuse) return json({ jsonrpc: '2.0', id: b.id, error: { code: -32000, message: state.refuse } });
           state.landed = true; return R({});
         }
-        if (b.method === 'transaction_status_api.find_transaction') return R({ status: state.landed ? 'within_irreversible_block' : 'unknown' });
+        if (b.method === 'transaction_status_api.find_transaction') return R({ status: state.status || (state.landed ? 'within_irreversible_block' : 'unknown') });
         return R(null);
       }
       if (VAULTA_RE.test(url)) {
@@ -155,7 +156,7 @@ try {
       await page.evaluate(() => document.getElementById('hs-go').click());
       await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
       const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_hive_pending:gatesoul') || 'null'));
-      ok('a dropped broadcast is not called done, and its signed bytes are kept', /has not shown it yet/.test(await page.textContent('#hs-stat')) && !!kept && kept.amount === '0.500', await page.textContent('#hs-stat'));
+      ok('a dropped broadcast is not called done, and its signed bytes are kept', /did not answer, so this wallet cannot tell yet whether it went out/.test(await page.textContent('#hs-stat')) && !!kept && kept.amount === '0.500', await page.textContent('#hs-stat'));
       // "use a different Hive account" never throws away an unsettled send or its sealed key
       await page.evaluate(() => { const b = document.getElementById('hv-other'); b.hidden = false; b.click(); });
       const held = await page.evaluate(() => ({ t: document.getElementById('hv-add-stat').innerText, acct: localStorage.getItem('bnr_hive_acct:gatesoul'), seal: !!localStorage.getItem('bnr_hive_seal:gatesoul'), pend: !!localStorage.getItem('bnr_hive_pending:gatesoul'), link: (document.querySelector('#hv-add-stat a') || {}).textContent }));
@@ -171,6 +172,35 @@ try {
       ok('a different Hive account first says it forgets the sealed key, and forgets nothing yet', /this forgets loviswater and its sealed key/.test(ask.t) && JSON.stringify(ask.btns) === JSON.stringify(['forget loviswater', 'keep it']) && !!ask.acct, JSON.stringify(ask));
       await page.evaluate(() => document.querySelectorAll('#hv-add-stat button.wl-act')[1].click());
       ok('keep it keeps the account and its seal', !!(await page.evaluate(() => localStorage.getItem('bnr_hive_acct:gatesoul') && localStorage.getItem('bnr_hive_seal:gatesoul'))));
+      const press = () => page.evaluate(() => { document.getElementById('hs-stat').textContent = ''; document.getElementById('hs-go').click(); });
+      const said = () => page.textContent('#hs-stat');
+      const pend = () => page.evaluate(() => localStorage.getItem('bnr_hive_pending:gatesoul'));
+      const hiveSum = () => page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'HIVE').reduce((s, e) => s + e.a, 0));
+      // a kept send that may already be out is READ before any refusal is believed: after its
+      // window a node answers "expired", not "duplicate", and a landed send must never be cleared
+      state.landed = false; state.failNext = 2; state.broadcasts = [];
+      await fill('0.25', 'third'); await press();
+      await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      const form = await page.evaluate(() => ['hs-to', 'hs-amt', 'hs-memo'].map(i => document.getElementById(i).value).join(''));
+      ok('once a send is signed the form is cleared, so a press can never sign it a second time', form === '' && !!(await pend()), form);
+      state.refuse = 'transaction expired'; state.status = 'within_irreversible_block'; const nb = state.broadcasts.length;
+      await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      ok('the chain is read first: it shows the send, so it went through, no refusal is believed and nothing is re-signed',
+        /^Your last send went through: 0\.250 HIVE/.test(await said()) && state.broadcasts.length === nb && (await pend()) === null, (await said()) + ' · ' + (state.broadcasts.length - nb));
+      // the cap: counted once signed, given back only on the chain's proof that it never ran
+      delete state.refuse; delete state.status; state.landed = false; state.failNext = 2;
+      const before = await hiveSum();
+      await fill('2', 'fourth'); await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      ok('a signed send counts against the daily cap at once, also when its answer is lost', Math.abs((await hiveSum()) - before - 2) < 1e-9, String((await hiveSum()) - before));
+      state.status = 'expired_irreversible';
+      await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      ok('expired_irreversible is the chain\'s proof it never ran: the 2 HIVE come back to the cap and the lane is free',
+        /did not land in time, so nothing was sent/.test(await said()) && Math.abs((await hiveSum()) - before) < 1e-9 && (await pend()) === null, (await said()) + ' · ' + ((await hiveSum()) - before));
+      delete state.status; state.refuse = 'Account does not have sufficient funds for balance adjustment'; state.broadcasts = [];
+      await fill('3', 'fifth'); await press(); await until(page, /^(Done|It |Your|Hive|That|The )/, 'hs-stat', 60000);
+      ok('a sure refusal of a first broadcast is said, the cap is given back and the typing comes back',
+        (await said()) === 'That account does not hold enough for this.' && Math.abs((await hiveSum()) - before) < 1e-9 && (await page.evaluate(() => document.getElementById('hs-amt').value)) === '3.000' && (await pend()) === null, await said());
+      delete state.refuse;
       // a second soul does not see or erase the first soul's Hive account
       await page.evaluate(() => { localStorage.setItem('bnr_soul', 'othersoul'); });
       await page.reload({ waitUntil: 'load' });

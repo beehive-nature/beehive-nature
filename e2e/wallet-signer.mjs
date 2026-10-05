@@ -21,7 +21,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -426,6 +426,24 @@ try {
     ok('a bitcoin address is not accepted as a Lightning request', r.notLn === 'refused', r.notLn);
     ok('reading a Lightning request touched NO network at all',
       seen.filter(s => /invoice|bolt/i.test(JSON.stringify(s))).length === 0);
+    // the payee writes the description: an offer whose text is markup must show as text, never run
+    const x = await page.evaluate(async () => {
+      const CH = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+      const enc = bytes => { let acc = 0, bits = 0, w = '';
+        for (const b of bytes) { acc = (acc << 8) | b; bits += 8; while (bits >= 5) { bits -= 5; w += CH[(acc >> bits) & 31] } }
+        if (bits) w += CH[(acc << (5 - bits)) & 31]; return 'lno1' + w };
+      const s2b = s => [...new TextEncoder().encode(s)];
+      const tlv = (t, v) => [t, v.length, ...v];
+      const evil = '<img src=x onerror="window.__lnx=1">';
+      document.getElementById('pay-tx').click(); document.getElementById('tx-tab-l').click();
+      document.getElementById('ln-req').value = enc([...tlv(8, [150]), ...tlv(10, s2b(evil)), ...tlv(18, s2b('<b id="lnx-b">x</b>'))]);
+      document.getElementById('ln-read').click();
+      await new Promise(r => setTimeout(r, 400));
+      const card = document.getElementById('ln-card');
+      return { ran: window.__lnx === 1, img: !!card.querySelector('img'), bold: !!document.getElementById('lnx-b'), text: card.textContent.includes(evil) };
+    });
+    ok('a Lightning description or issuer that is markup is shown as text and never runs (stored XSS closed)',
+      !x.ran && !x.img && !x.bold && x.text, JSON.stringify(x));
     await ctx.close();
   }
 
@@ -509,6 +527,101 @@ try {
     const html = await page.locator('#rx-cards').innerHTML();
     ok('the receive panel prints the reason instead of an address',
       /no address shown/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
+    // an npub is a key, not a way to be paid: the Lightning card offers no address to hand out
+    const rx = await page.evaluate(() => {
+      const box = document.getElementById('rx-cards');
+      const ln = [...box.children].find(c => /Lightning/.test(c.textContent));
+      return { said: ln && /cannot take Lightning payments yet/.test(ln.textContent), qr: !!(ln && ln.querySelector('svg')), copy: !!(ln && ln.querySelector('.rxc')),
+        seen: box.innerText, link: !!(ln && ln.querySelector('a[href="#matrix-sec"]')) };
+    });
+    ok('the Lightning card says it cannot take payments yet, with no QR and no copy button',
+      rx.said && !rx.qr && !rx.copy && rx.link, JSON.stringify(rx).slice(0, 200));
+    ok(REG === 'cypherpunk' ? 'cypherpunk still reads the Lightning key, marked not a payment address' : REG + ' never sees an npub as something to hand out',
+      REG === 'cypherpunk' ? /not a payment address · npub1/.test(rx.seen) : !/npub1/.test(rx.seen), rx.seen.slice(0, 200));
+    // "copied" is said only when the clipboard took it
+    const cp = await page.evaluate(async () => {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new DOMException('denied', 'NotAllowedError')) } });
+      const b = document.querySelector('#rx-cards .rxc'); b.click();
+      await new Promise(r => setTimeout(r, 100));
+      const refused = { btn: b.textContent, stat: document.getElementById('pay-stat').textContent, sel: String(window.getSelection()) };
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.resolve() } });
+      await new Promise(r => setTimeout(r, 1700));
+      b.click(); await new Promise(r => setTimeout(r, 100));
+      return { refused, okBtn: b.textContent, addr: b.parentNode.querySelector('.rx-addr').textContent };
+    });
+    ok('a refused clipboard never says copied: the button says not copied, the address is selected, the line says why',
+      cp.refused.btn === 'not copied' && /did not let us copy it/.test(cp.refused.stat) && cp.refused.sel === cp.addr, JSON.stringify(cp.refused));
+    ok('a clipboard that takes it says copied', cp.okBtn === '✓ copied', cp.okBtn);
+    await ctx.close();
+  }
+
+  /* ══ J · THE EVM LANE KEEPS ITS SIGNED BYTES — a lost or "already known" answer
+     never signs a second nonce; the cap counts it once signed and gives it back
+     only on a refusal that proves it never ran ══ */
+  console.log('J · the EVM lane follows the outbox law:');
+  {
+    const ctx = await browser.newContext(); await mockOther(ctx);
+    const S = { raws: [], mode: 'known', receipt: null, latest: '0x7', receiptAsks: [] };
+    await ctx.route(RAIL_RE, async route => {
+      const req = route.request();
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS, body: '' });
+      let body = {}; try { body = JSON.parse(req.postData() || '{}') } catch {}
+      const send = o => route.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: body.id ?? 1, ...o }) });
+      switch (body.method) {
+        case 'eth_sendRawTransaction':
+          S.raws.push(body.params[0]);
+          if (S.mode === 'lost') return route.abort('timedout');
+          if (S.mode === 'known') return send({ error: { code: -32000, message: 'already known' } });
+          if (S.mode === 'poor') return send({ error: { code: -32000, message: 'insufficient funds for gas * price + value' } });
+          return send({ result: '0x' + 'cd'.repeat(32) });
+        case 'eth_getTransactionReceipt': S.receiptAsks.push(body.params[0]); return send({ result: S.receipt });
+        case 'eth_getTransactionCount': return send({ result: body.params[1] === 'latest' ? S.latest : MOCK.nonce });
+        case 'eth_gasPrice': return send({ result: MOCK.gasPrice });
+        case 'eth_estimateGas': return send({ result: MOCK.estimate });
+        case 'eth_getBalance': return send({ result: '0x16345785d8a0000' });
+        case 'eth_call': return send({ result: '0x' + (1000000n).toString(16).padStart(64, '0') });
+        default: return send({ result: null });
+      }
+    });
+    const page = await connectedPage(ctx);
+    const TO = '0x742c8f2e0ce07Dd3f7E78A31E5A97D45c50fF2c8';
+    await page.evaluate(() => { localStorage.removeItem('bnr-cap-ledger'); localStorage.removeItem('bnr-spend-cap');
+      document.getElementById('pay-tx').click(); document.getElementById('tx-tab-e').click(); });
+    const press = async (to, amt, twice) => {
+      await page.evaluate(([t, a, two]) => { if (t !== null) { document.getElementById('se-to').value = t; document.getElementById('se-amt').value = a; }
+        const b = document.getElementById('se-go'); b.click(); if (two) b.click(); }, [to, amt, !!twice]);
+      await page.waitForFunction(() => !document.getElementById('se-go').disabled, null, { timeout: 40000 });
+      return page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), all: document.getElementById('se-stat').textContent,
+        pend: JSON.parse(localStorage.getItem('bnr_evm_pending:gatesoul') || 'null'), to: document.getElementById('se-to').value,
+        eth: JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'ETH').reduce((s, e) => s + e.a, 0) }));
+    };
+    const r1 = await press(TO, '0.01', true);
+    ok('"already known" is not a refusal: it is sent, kept, and nothing new is signed until a block shows it',
+      /in a block yet, so nothing new is signed/.test(r1.say) && !/refused/i.test(r1.say) && r1.pend && /^0x[0-9a-f]{64}$/.test(r1.pend.hash) && new Set(S.raws).size === 1, r1.say + ' · ' + new Set(S.raws).size);
+    ok('the cap counts it once it is signed, and the form is cleared so a press cannot sign it twice', Math.abs(r1.eth - 0.01) < 1e-9 && r1.to === '', JSON.stringify({ eth: r1.eth, to: r1.to }));
+    ok('the chain is asked by the kept hash', S.receiptAsks.length > 0 && S.receiptAsks.every(h => h === r1.pend.hash), JSON.stringify(S.receiptAsks.slice(0, 2)));
+    const r2 = await press(TO, '0.02', true);
+    ok('a second press (twice, quickly) checks the kept send and resends its identical bytes; no second nonce is signed',
+      /^your last send \(0\.01 ETH to 0x742c…f2c8\) is with Base/i.test(r2.say) && new Set(S.raws).size === 1 && r2.pend && r2.pend.hash === r1.pend.hash, r2.say + ' · ' + new Set(S.raws).size);
+    S.receipt = { blockNumber: '0x10', status: '0x1', transactionHash: r1.pend.hash };
+    const r3 = await press(null, null);
+    ok('once a block shows it, the next press says the last send went through and frees the lane',
+      /^your last send went through: 0\.01 ETH to 0x742c…f2c8 on Base/i.test(r3.say) && !r3.pend && new Set(S.raws).size === 1, r3.say);
+    S.receipt = null; S.mode = 'lost';
+    const r4 = await press(TO, '0.03');
+    ok('a lost answer says it cannot tell yet, keeps the bytes, and offers check again (never send again)',
+      /did not answer, so this wallet cannot tell yet/.test(r4.say) && r4.pend && r4.pend.amount === '0.03' && /check again/.test(r4.say), r4.say);
+    const r5 = await press(null, null);
+    ok('check again resends the SAME bytes: two sends, two raw transactions, never a third', new Set(S.raws).size === 2 && r5.pend && r5.pend.hash === r4.pend.hash, String(new Set(S.raws).size));
+    S.receipt = { blockNumber: '0x11', status: '0x1' }; await press(null, null); S.receipt = null;
+    S.mode = 'poor';
+    const r6 = await press(TO, '0.04');
+    ok('a sure refusal of a first broadcast (not enough ETH) says so, frees the lane and gives the typing back',
+      /does not hold enough on Base for this and its fee, so nothing was sent/.test(r6.say) && !r6.pend && r6.to === TO, r6.say);
+    ok('…and only then is the cap given back: 0.01 + 0.03 counted, 0.04 returned on the day it was counted',
+      Math.abs(r6.eth - 0.04) < 1e-9, String(r6.eth));
+    ok('no raw RPC text reaches the reader\'s sentence (it stays in the cypherpunk detail)',
+      [r1, r2, r4, r6].every(r => !/already known|insufficient funds|0x[0-9a-f]{64}/.test(r.say)) || REG === 'cypherpunk', [r1, r4, r6].map(r => r.say).join(' | ').slice(0, 200));
     await ctx.close();
   }
 
