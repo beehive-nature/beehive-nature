@@ -571,7 +571,27 @@ try {
     ok('a failed read never says "balances live": it names what was not read and offers try again', g.btn && !g.live, JSON.stringify(g));
     ok('connecting the new name closes the field again', !g.field, JSON.stringify(g));
     ok('the earlier name\'s Vaulta figure leaves with it (the total never sums a name you left)', g.rows.length === 0, JSON.stringify(g.rows));
+    // the bee card's stale line carries the read's own try again, and pressing it reads again
+    await page.evaluate(() => { const v = document.getElementById('v-bal'); v.textContent = '5.0000 A'; });
+    await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(300);
+    g = await page.evaluate(() => { const b = document.querySelector('#wl-bee .wlb-stale [data-wl-retry]'); return { shown: !!b && b.getClientRects().length > 0, said: document.querySelector('#wl-bee .wlb-stale').innerText }; });
+    ok('a figure whose last read failed says so and offers try again right there', g.shown && /out of date/.test(g.said), JSON.stringify(g));
     state.aDown = false;
+    const before = (state.reads || []).length;
+    await page.click('#wl-bee .wlb-stale [data-wl-retry]');
+    await page.waitForFunction(() => /read just now|✓ live/.test(document.getElementById('v-stat').textContent), null, { timeout: 20000 }).catch(() => {});
+    ok('try again beside the figure presses the read\'s own try again (one more read, now live)', (state.reads || []).length > before && /live/.test(await page.textContent('#v-stat')), (state.reads || []).length + ' reads, v-stat ' + await page.textContent('#v-stat'));
+    // a misspelt name is said calmly and is not kept
+    await page.click('#wl-bee [data-wl-go="have"]'); await page.waitForTimeout(300);
+    await page.click('#wl-rename');
+    await page.fill('#wq', 'hello world'); await page.click('#wgo');
+    g = await page.evaluate(() => ({ wstat: document.getElementById('wstat').innerText, soul: localStorage.getItem('bnr_soul'), field: document.querySelector('.wl-connect-cta').getClientRects().length > 0 }));
+    ok('text that cannot be a name is refused in one sentence, the field stays, and the name is not kept', /does not look like a name/.test(g.wstat) && g.soul === 'oliver' && g.field, JSON.stringify(g));
+    // a plain account (no current row) is said as itself, never with ".b"
+    await page.fill('#wq', 'bobaccount11'); await page.click('#wgo');
+    await page.waitForFunction(() => /bobaccount11/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    g = await page.evaluate(() => ({ soul: document.getElementById('sum-soul').textContent.trim(), live: document.getElementById('wl-soul-name').textContent, wstat: document.getElementById('wstat').innerText }));
+    ok('a plain Vaulta account is named as itself, never as a .b name nobody may own', g.soul === 'bobaccount11' && g.live === 'bobaccount11' && !/bobaccount11\.b/.test(g.wstat), JSON.stringify(g));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

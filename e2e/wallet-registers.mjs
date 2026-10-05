@@ -250,7 +250,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // own order, so it is true in every register. A new one fails until someone
   // reviews it: across tasks, a message names its target as a link instead.
   const REVIEWED = [
-    ['the glyphs above open each part', 'raver stage: the dock sits above it'],
     ['more as you forge below', 'keychain → key forge, same task, after it'],
         ['Any device in the list above', 'within the vault'],
     ['(live price below)', 'within the account forge'],

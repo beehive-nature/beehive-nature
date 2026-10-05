@@ -224,6 +224,9 @@ try {
   await page.locator('#wallet-storage a[href="#arw-sec"]').click();
   await page.locator('#wallet-identity a[href="#wallet-accounts"]').click();
   check('returning identity can navigate accounts and storage without a passkey request',await page.evaluate(()=>window.credentialCalls)===0);
+  for (const sel of ['#wl-bee .wlb-total', '#summary-sec a', 'footer .wl-foot>summary', '#wl-rave', '#wq']) await page.locator(sel).first().dispatchEvent('pointerdown');
+  await page.locator('#wq').dispatchEvent('keydown', { key: 'Enter' });
+  check('looking never asks for the passkey: the glance total, its links, the raver stage, the footer and the name field',await page.evaluate(()=>window.credentialCalls)===0);
   await page.locator('#kc-stat').dispatchEvent('pointerdown');
   await page.waitForFunction(() => window.credentialCalls > 0);
   check('negative control: the existing keychain gesture would request credentials', await page.evaluate(() => window.credentialCalls) === 1);

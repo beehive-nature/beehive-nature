@@ -567,7 +567,13 @@ body[data-reg="bee"] .ring-key{font-size:14px}
 body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-reg="bee"] #kc-sec svg [fill="#FFD700"]{fill:#6e3fb8}
 .wlb-un a{display:inline-flex;align-items:center;min-height:44px;font-size:16px}
 .wlb-stat{display:block;font-size:16px;color:var(--dim)}
-body[data-wl-soul="true"] .wlb-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
+body[data-wl-soul="true"] .wlb-connect,body[data-wl-soul="true"] .wlr-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
+/* an unread Vaulta total has nothing to open: the caret, its hint and the empty list wait for a figure */
+#wl-bee .wlb-card:not([data-read="true"]) :is(.wlb-total,.wlb-rollup-hint,.va-breakdown){display:none!important}
+/* a first read that failed is said as failed (never "not known yet" as if it were still coming) */
+.wlr-caps li[data-err="true"]:not([data-read="true"]) .wl-un{display:none} .wlr-caps li[data-err="true"]:not([data-read="true"]) .wl-stale{display:block}
+.wlr-connect{display:inline-flex;align-items:center;min-height:44px}
+[data-wl-retry][hidden]{display:none}
 /* FOUNDER BUG 2026-10-01: when a .b soul is live, remove connect / create bzDiD
    CTAs from the wallet shell — show the live identity only. */
 body[data-wl-soul="true"] .wl-create-bzdid,body[data-wl-soul="true"] #connect-sec:not([data-wl-rename]) .wl-connect-cta{display:none!important}
@@ -738,13 +744,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <nav aria-label="Wallet actions"><a href="#wallet-accounts" data-i18n="wl.wallet.accounts">Accounts &amp; coins</a><a href="#pay-sec" aria-label="bPay: send, receive or swap">bPay</a><a href="#bpay-sec" data-wallet-store data-i18n="wl.wallet.store">bPay · store</a></nav>
 </div>
 <div id="wallet-storage">
-  <h2>bPay once · choose your storage network</h2>
-  <p>Autonomi uses ANT on Arbitrum. Arweave uses AR. Review the quote and network before authorizing payment.</p>
-  <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>Quotes only · ANT plus ETH network fees</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>Publish small files · keep the receipt</span></a></div>
+  <h2>store a file once and keep the receipt</h2>
+  <p>Arweave stores a file today. Autonomi can show you its price for now.<span class="wl-cyd">Autonomi uses ANT on Arbitrum plus ETH network fees, quotes only; Arweave uses AR. Review the quote and network before authorizing payment.</span></p>
+  <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>see the price, not stored yet</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>store a small file, keep the receipt</span></a></div>
 </div>
 <header>
-  <p data-reg="bee" data-i18n="wl.wallet.intro">Accounts, coins and public addresses.</p>
-  <p data-reg="raver">Your coins. Your chains. Follow an address, read a balance, bPay when you choose.</p>
+  <p data-reg="bee" data-i18n="wl.wallet.intro">accounts, coins and public addresses.</p>
+  <p data-reg="raver">your coins, your chains. follow an address, read a balance, bPay when you choose.</p>
   <p data-reg="cypherpunk">Public account reads · explicit signing · network-specific storage and transaction receipts.</p>
 </header>
 
@@ -759,11 +765,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </button>
     <div class="wlb-rollup-hint" data-i18n="wl.wallet.rollup">tap the total for chain and account</div>
     <div class="va-breakdown" id="wlb-vaulta-breakdown" data-vaulta-breakdown hidden>
-      <div class="va-breakdown-head">A held on Vaulta</div>
+      <div class="va-breakdown-head">your A on Vaulta, account by account</div>
       <div data-vaulta-rows></div>
     </div>
     <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" class="wlb-connect" data-i18n="wl.bee.connect">connect your name or account to read it</a><span class="wlb-stat" data-wl-src="v-stat"></span></div>
-    <div class="wlb-stale wl-stale" data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</div>
+    <div class="wlb-stale wl-stale"><span data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</span><button type="button" class="wl-act" data-wl-retry="v-stat" hidden>try again</button></div>
   </div>
   <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
   <div class="wlb-list">
@@ -779,11 +785,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </div>
 <div id="wl-bar" data-reg="bee">
   <button type="button" class="wlb-back" data-wl-go="home"><span aria-hidden="true">‹</span> <span data-i18n="wl.bee.back">wallet</span></button>
-  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" >bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
+  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" data-i18n="wl.wallet.keep">bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
 </div>
 
 <nav id="wl-dock" data-reg="raver" aria-label="wallet">
-  <button type="button" data-wl-go="home" aria-pressed="false"><span class="g" aria-hidden="true">✦</span><span class="w" data-i18n="wl.rv.stage">stage</span></button>
+  <button type="button" data-wl-go="home" aria-pressed="false"><span class="g" aria-hidden="true">✦</span><span class="w" data-i18n="wl.bee.back">wallet</span></button>
   <button type="button" data-wl-go="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.have">have</span></button>
   <button type="button" data-wl-go="move" aria-pressed="false"><span class="g" aria-hidden="true">💸</span><span class="w" data-i18n="wl.rv.move">move</span></button>
   <button type="button" data-wl-go="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.add">add</span></button>
@@ -795,7 +801,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
 </div>
-<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" >bPay once · Autonomi / ANT or Arweave / AR</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.wallet.accounts">Accounts &amp; coins</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, two ways</span><span data-wl-for="keep" data-i18n="wl.wallet.keep">bPay once · store a file</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
 <div id="wl-cards" data-reg="raver">
   <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
@@ -838,13 +844,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <g class="wlr-node" data-wl-rail="ar-bal" transform="translate(56.4 119.1)"><circle r="21"/><text y="7" text-anchor="middle">🕸</text></g>
   </svg>
   <ul class="wlr-caps">
-    <li data-wl-card data-wl-stat="v-stat"><span class="g" aria-hidden="true">⚓</span><b>Vaulta</b><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
-    <li data-wl-card data-wl-stat="h-stat"><span class="g" aria-hidden="true">🐝</span><b>Hive</b><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
-    <li data-wl-card data-wl-stat="a-stat"><span class="g" aria-hidden="true">🔵</span><b>Arbitrum</b><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
-    <li data-wl-card data-wl-stat="ant-stat"><span class="g" aria-hidden="true">🐜</span><b>Autonomi</b><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
-    <li data-wl-card data-wl-stat="ar-stat"><span class="g" aria-hidden="true">🕸</span><b>Arweave</b><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
+    <li data-wl-card data-wl-stat="v-stat"><span class="g" aria-hidden="true">⚓</span><b>Vaulta</b><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span><span class="wl-stale"><span data-i18n="wl.rv.stale">last read failed</span><button type="button" class="wl-act" data-wl-retry="v-stat" aria-label="try again" hidden>↻</button></span></li>
+    <li data-wl-card data-wl-stat="h-stat"><span class="g" aria-hidden="true">🐝</span><b>Hive</b><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span><span class="wl-stale"><span data-i18n="wl.rv.stale">last read failed</span><button type="button" class="wl-act" data-wl-retry="h-stat" aria-label="try again" hidden>↻</button></span></li>
+    <li data-wl-card data-wl-stat="a-stat"><span class="g" aria-hidden="true">🔵</span><b>Arbitrum</b><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span><span class="wl-stale"><span data-i18n="wl.rv.stale">last read failed</span><button type="button" class="wl-act" data-wl-retry="a-stat" aria-label="try again" hidden>↻</button></span></li>
+    <li data-wl-card data-wl-stat="ant-stat"><span class="g" aria-hidden="true">🐜</span><b>Autonomi</b><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span><span class="wl-stale"><span data-i18n="wl.rv.stale">last read failed</span><button type="button" class="wl-act" data-wl-retry="ant-stat" aria-label="try again" hidden>↻</button></span></li>
+    <li data-wl-card data-wl-stat="ar-stat"><span class="g" aria-hidden="true">🕸</span><b>Arweave</b><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span><span class="wl-stale"><span data-i18n="wl.rv.stale">last read failed</span><button type="button" class="wl-act" data-wl-retry="ar-stat" aria-label="try again" hidden>↻</button></span></li>
   </ul>
-  <p class="wlr-hint" data-i18n="wl.rv.hint">lit means read. the glyphs above open each part of the wallet.</p>
+  <a href="#connect-sec" class="wlr-connect" data-i18n="wl.bee.connect">connect your name or account to read it</a>
+  <p class="wlr-hint" data-i18n="wl.rv.hint">lit means read.</p>
 </div>
 
 <aside id="wl-cy" data-reg="cypherpunk" aria-labelledby="wl-cy-state">
@@ -859,9 +866,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <tr data-wl-card data-wl-stat="ar-stat"><td>Arweave</td><td><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ar-stat"></td></tr>
     </tbody>
     <tbody>
-      <tr data-wl-card><td data-i18n="wl.cy.soul">soul</td><td colspan="2"><span class="wl-fig" data-wl-src="sum-soul" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td></tr>
+      <tr><td data-i18n="wl.cy.soul">soul</td><td colspan="2" data-wl-src="sum-soul"></td></tr>
       <tr><td data-i18n="wl.cy.kc">keychain</td><td colspan="2" data-wl-src="sum-kc"></td></tr>
-      <tr data-wl-card><td data-i18n="wl.cy.auth">Vaulta authority</td><td colspan="2"><span class="wl-fig" data-wl-src="sum-bridge" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td></tr>
+      <tr><td data-i18n="wl.cy.auth">Vaulta authority</td><td colspan="2" data-wl-src="sum-bridge"></td></tr>
       <tr><td data-i18n="wl.cy.chains">chains connected</td><td colspan="2" data-wl-src="sum-chains"></td></tr>
       <tr><td data-i18n="wl.cy.core">core</td><td colspan="2" data-wl-src="core-badge"></td></tr>
     </tbody>
@@ -872,15 +879,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </aside>
 
 <section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
-  <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
-  <div class="law wl-create-bzdid">Connect your soul (your .b name or account). New here?
-  <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
+  <h2 data-reg="cypherpunk">🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
+  <h2 data-reg="bee">🔗 <span data-i18n="wl.rv.s.connect-sec">your name</span></h2>
+  <div class="law wl-create-bzdid" id="wl-create">type your .b name to see your coins. new here? <a href="./onboarding/">make your name</a>, it takes two minutes.<span class="wl-cyd">your soul is your .b name or Vaulta account; a new one is a bzDiD, born in the held-hand ceremony</span></div>
   <div class="law wl-soul-live" id="wl-soul-live">connected as <b id="wl-soul-name" style="color:var(--leaf)">…</b>. not you? <button type="button" class="wl-act" id="wl-rename">change the name</button><span class="wl-cyd">the rails bar carries this name and its short 0x fingerprint, an identifier and never a key</span></div>
   <div class="row wl-connect-cta">
     <input id="wq" aria-label="Account or .b name" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
-  <div class="law" id="wstat" style="margin-top:8px;min-height:20px">not connected</div>
+  <div class="law" id="wstat" style="margin-top:8px;min-height:20px">type your .b name and press connect to see your coins.</div>
 </section>
 
 <section id="kc-sec" data-wl-task="key">
@@ -2526,12 +2533,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="summary-sec" data-wl-task="have">
-  <h2 data-wl-tech>📊 <span data-i18n="wl.h.summary">summary</span></h2>
+  <h2 data-reg="cypherpunk">📊 <span data-i18n="wl.h.summary">summary</span></h2>
   <h2 data-reg="bee">📊 <span data-i18n="wl.bee.h.summary">at a glance</span></h2>
   <div class="readout">
-    <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px"><a href="#connect-sec">connect your name</a></div></div>
-    <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">0 · <a href="#bal-sec">see them</a></div></div>
-    <div class="rd"><div class="k" data-i18n="wl.cy.kc">keychain</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected · <a href="#kc-sec">connect it</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.rv.s.connect-sec">your name</div><div class="v" id="sum-soul" style="font-size:13px"><a href="#connect-sec">connect your name</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">no coins read yet. <a href="#connect-sec">connect your name</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.kc">keychain</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">your keychain is not connected in this tab. <a href="#kc-sec">connect your keychain</a></div></div>
     <div class="rd"><div class="k" data-i18n="wl.cy.auth">Vaulta authority</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)"><a href="#kc-sec">connect your keychain</a> to check</div></div>
   </div>
 </section>
@@ -2585,6 +2592,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function vacct(){ return (SOUL&&VACCT_FOR===SOUL&&VACCT)||SOUL }
   function vrecv(){ return (SOUL&&VACCT_FOR===SOUL&&(VRECV||VACCT))||SOUL }
   function vacctKnown(){ return !!(SOUL&&VACCT_FOR===SOUL) }
+  /* the name as it is: a .b name, or a plain account (no current row) said without ".b" */
+  function soulLbl(){ return SOUL?SOUL+(VACCT_FOR===SOUL&&VACCT_STATE==='self'?'':'.b'):'' }
+  /* what the name field takes: a .b name (bdomain.cpp is_valid_name: 1 to 32 of a-z 0-9, inner single hyphens) or a Vaulta account */
+  var BNAME_RE=/^(?!.*--)[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
   /* the context this keychain signs the account with: normally vaulta:<account>; when an
      earlier bridge put a key from another context on the account (a soul renamed since),
      the wallet finds that key and keeps the context NAME (never a key) */
@@ -4805,7 +4816,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(kind==='ok') wlSay(el,[a+' · ready to sign ✓']);
     else if(kind==='checking') wlSay(el,['checking '+a+'…']);
     else if(kind==='missing') wlSay(el,[a+' · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
-    else if(kind==='noperm') wlSay(el,[a+' has no active key · ',{to:'bridge-sec',t:'see what to do'}]);
+    else if(kind==='noperm') wlSay(el,[a+' has no active key, so this wallet cannot sign for it. ',{to:'bal-sec',t:'see your coins'}]);
     else if(kind==='unread'){ wlSay(el,['could not read '+a+' · ']); var b=document.createElement('button'); b.type='button'; b.textContent='try again'; b.onclick=function(){ checkBridge() }; el.appendChild(b) }
     else if(kind==='unknown'){ wlSay(el,['could not read where '+SOUL+'.b points · ']); var b2=document.createElement('button'); b2.type='button'; b2.textContent='try again'; b2.onclick=function(){ readAll() }; el.appendChild(b2) }
     else wlSay(el,[{to:'kc-sec',t:'connect your keychain'},' to check '+(SOUL?a:'it')]);
@@ -4953,7 +4964,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-cards').style.display='flex';
     $('kc-outrow').style.display='flex';
     $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
-    wlSay($('sum-kc'),['connected ✓']);$('sum-kc').style.color='var(--leaf)';
+    wlSay($('sum-kc'),['your keychain is connected in this tab.',{cy:'connected ✓'}]);$('sum-kc').style.color='var(--leaf)';
     var arOwn=arDeriveNow();
     seedContexts(); renderForge(); pqPanel();
     checkBridge();
@@ -4989,7 +5000,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more,#wl-bee,#wl-rave,#summary-sec,#connect-sec,footer'))return;
     if(ev&&ev.type==='keydown'&&['Tab','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Shift','Control','Alt','Meta'].includes(ev.key))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
@@ -5697,7 +5708,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
-    wlSay($('sum-kc'),['not connected · ',{to:'kc-sec',t:'connect it'}]);$('sum-kc').style.color='var(--amber)';
+    wlSay($('sum-kc'),['your keychain is not connected in this tab. ',{to:'kc-sec',t:'connect your keychain'}]);$('sum-kc').style.color='var(--amber)';
     BRIDGED=null; sumAuth('');
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
     renderForge();
@@ -7993,13 +8004,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
   }
 
-  function sumChains(){ wlSay($('sum-chains'),[document.querySelectorAll('.chain.connected').length+' · ',{to:'bal-sec',t:'see them'}]) }
+  function sumChains(){ var n=document.querySelectorAll('.chain.connected').length;
+    if(!n) wlSay($('sum-chains'),['no coins read yet. ',SOUL?{to:'bal-sec',t:'see your coins'}:{to:'connect-sec',t:'connect your name'},{cy:'chains connected 0'}]);
+    else wlSay($('sum-chains'),[n+(n===1?' chain':' chains')+' read. ',{to:'bal-sec',t:'see your coins'},{cy:'chains connected '+n}]) }
   async function readAll(){
+    var s0=SOUL;
+    try{ await readAllNow() }
+    catch(e){ if(s0&&s0===SOUL) wlSay($('wstat'),['something went wrong while reading '+s0+', so press try again. ',{btn:'try again',on:function(){ readAll() }},{cy:(e&&e.message)||String(e)}]) }
+  }
+  async function readAllNow(){
     if(!SOUL)return;
     /* the soul is known and the reads are in flight: say so NOW, not after the round-trip */
     document.body.setAttribute('data-wl-soul','true');
     ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
-    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'</b> · reading balances…';
+    wlSay($('wstat'),['looking up '+SOUL+', this takes a moment.',{cy:'resolving '+SOUL+' in the '+REG+' registry'}]);
+    wlSay($('sum-soul'),['looking it up, this takes a moment.']);
     var arCtx='ar:'+SOUL;
     var arPub=loadArPublic(arCtx)||vaultArPublic()||arDerivedAddr();   // derived: only while the keychain is connected
     var s=SOUL;
@@ -8021,8 +8040,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     acctDirAdd(vacct());
-    var who=vacct()!==SOUL?' · Vaulta account <b style="color:var(--leaf)">'+esc(vacct())+'</b>':'';
-    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · reading balances…';
+    if($('wl-soul-name'))$('wl-soul-name').textContent=soulLbl();
+    wlSay($('wstat'),['reading the coins of '+soulLbl()+', this takes a moment.',{cy:'✓ connected as '+soulLbl()+(vacct()!==SOUL?' · Vaulta account '+vacct():'')+' · reading Vaulta, Arweave and Hive'}]);
     var hv=hiveBound(); hiveShow();
     await Promise.all([readVaulta(vacct()), arPub?readArBound(arPub):Promise.resolve()]);
     if(s!==SOUL)return;
@@ -8030,10 +8049,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var missed=[];
     if($('v-stat').getAttribute('data-read-failed')==='true')missed.push('Vaulta');
     if(arPub&&$('ar-stat')&&$('ar-stat').getAttribute('data-read-failed')==='true')missed.push('Arweave');
-    var cyw='✓ connected as '+SOUL+'.b'+(vacct()!==SOUL?' · Vaulta account '+vacct():'');
-    if(missed.length) wlSay($('wstat'),[SOUL+'.b is connected, but its '+missed.join(' and ')+' coins could not be read just now. ',{btn:'try again',on:function(){ readAll() }},{cy:cyw+' · unread: '+missed.join(', ')}]);
-    else wlSay($('wstat'),[SOUL+'.b is connected and its coins were read just now. ',{to:'bal-sec',t:'see your coins'},{cy:cyw+' · balances live'}]);
-    wlSay($('sum-soul'),[SOUL+'.b'+(vacct()!==SOUL?' · Vaulta '+vacct():'')]);document.body.setAttribute('data-wl-soul','true');
+    var cyw='✓ connected as '+soulLbl()+(vacct()!==SOUL?' · Vaulta account '+vacct():'');
+    if(missed.length) wlSay($('wstat'),[soulLbl()+' is connected, but its '+missed.join(' and ')+' coins could not be read just now. ',{btn:'try again',on:function(){ readAll() }},{cy:cyw+' · unread: '+missed.join(', ')}]);
+    else wlSay($('wstat'),[soulLbl()+' is connected and its coins were read just now. ',{to:'bal-sec',t:'see your coins'},{cy:cyw+' · balances live'}]);
+    wlSay($('sum-soul'),[soulLbl()+(vacct()!==SOUL?' · Vaulta '+vacct():'')]);document.body.setAttribute('data-wl-soul','true');
     sumChains();
     if(K1)checkBridge(); else if(!MPRK)sumAuth(vacctKnown()?'':'unknown');
   }
@@ -8046,7 +8065,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   $('wgo').onclick=function(){
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
-    if(!v){ $('wstat').textContent='type your name first'; return; }
+    if(!v){ wlSay($('wstat'),['type your .b name or account first, then press connect.']); $('wq').focus(); return; }
+    if(!ACCT_RE.test(v)&&!BNAME_RE.test(v)){ wlSay($('wstat'),['that does not look like a name, so check the spelling and press connect.',{cy:'refused '+JSON.stringify(v)+': a .b name is 1 to 32 of a-z 0-9 with inner single hyphens; a Vaulta account is 1 to 12 of a-z 1-5 and dots'}]); $('wq').focus(); return; }
     var was=SOUL, wasAcct=SOUL?vacct():null;
     SOUL=v; vacctCacheLoad();
     $('connect-sec').removeAttribute('data-wl-rename');
@@ -8103,7 +8123,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         b.innerHTML='<span style="color:var(--dim)">core: vendored eosjs lane (Rust core unavailable here)</span>';
       }
     });
-  }
+  } else { var cb=$('core-badge'); if(cb)cb.textContent='core: vendored eosjs lane (the Rust core script did not load)'; }
   /* bsigner PQ WASM — optional. Estate has crates/bsigner (CLI) today; browser
      arming lands when a WASM/worker is loadable. Until then forge pq: cards are
      honest stubs. Never invent PQ material in JS. */
@@ -8717,9 +8737,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      ONE toggle (its words differ by register); nothing folded is ever deleted ── */
   var FOLD_BEE='[data-wl-tech],.ring-wrap>svg,.ring-key,.chain .cd';
   var FOLD_RV='h2,[data-wl-tech],.law:not([id]),#pay-law,#cap-lbl,p,.lcap,.ring-key,details[data-reg-disclose]';
+  /* a node another register owns (data-reg) never shows here, so it needs no toggle */
+  function folds(s,sel,r){ return [].some.call(s.querySelectorAll(sel),function(e){ var d=e.closest('[data-reg]:not(body)'); return !d||d.getAttribute('data-reg')===r }) }
   secs.forEach(function(s){
-    if(s.querySelector(FOLD_BEE))s.setAttribute('data-wl-fold-bee','');
-    if(s.querySelector(FOLD_RV))s.setAttribute('data-wl-fold-raver','');
+    if(folds(s,FOLD_BEE,'bee'))s.setAttribute('data-wl-fold-bee','');
+    if(folds(s,FOLD_RV,'raver'))s.setAttribute('data-wl-fold-raver','');
     if(!s.hasAttribute('data-wl-fold-bee')&&!s.hasAttribute('data-wl-fold-raver'))return;
     var b=document.createElement('button');b.type='button';b.className='wl-more';b.setAttribute('aria-expanded','false');
     [['m-bee','wl.bee.more','show the details'],['l-bee','wl.bee.less','hide the details'],['m-rv','wl.rv.more','the words'],['l-rv','wl.rv.less','fewer words']].forEach(function(x){
@@ -8790,7 +8812,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(card){card.setAttribute('data-read',String(read));card.setAttribute('data-err',String(err))}
     });
     [].forEach.call(document.querySelectorAll('[data-wl-rail="'+id+'"]'),function(n){n.setAttribute('data-lit',String(read&&!err))});
+    retries(STAT[id]);
   }
+  /* "try again" beside a stale or failed figure presses that read's own try again; with none to press it does not show */
+  function retries(stid){
+    if(!stid)return;
+    var st=document.getElementById(stid), own=st&&st.querySelector('button');
+    [].forEach.call(document.querySelectorAll('[data-wl-retry="'+stid+'"]'),function(b){ b.hidden=!own });
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-wl-retry]'); if(!b)return;
+    var st=document.getElementById(b.getAttribute('data-wl-retry')), own=st&&st.querySelector('button');
+    if(own){ e.preventDefault(); own.click() }
+  });
   var ids={};
   mirrors.forEach(function(m){ids[m.getAttribute('data-wl-src')]=1});
   [].forEach.call(document.querySelectorAll('[data-wl-rail]'),function(n){ids[n.getAttribute('data-wl-rail')]=1});
