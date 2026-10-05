@@ -171,8 +171,7 @@ try {
     await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
     ok('seal tools appear with the keychain', await page.evaluate(() => !document.getElementById('pq-tools').hidden));
     const secret = 'only me — ' + 'x'.repeat(70000);
-    await page.setInputFiles('#pq-file', { name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from(secret) });
-    await page.evaluate(() => document.getElementById('pq-seal').click());
+    await page.setInputFiles('#pq-file', { name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from(secret) });   // the pick is the press
     await page.waitForSelector('#pq-seal-stat a', { state: 'attached', timeout: 20000 });
     const sealed = Buffer.from(await page.evaluate(async () => Array.from(new Uint8Array(await (await fetch(document.querySelector('#pq-seal-stat a').href)).arrayBuffer()))));
     ok('sealed file is a bpq1 object that does not contain the plaintext', NODE_BPQ.isSealed(new Uint8Array(sealed)) && sealed.indexOf('only me') < 0, String(sealed.length));
@@ -186,22 +185,20 @@ try {
     let strangerOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: NODE_BPQ.rootVault(new Uint8Array(32).fill(0x2b)) }); strangerOpened = true; } catch (e) {}
     try { await NODE_BPQ.open(new Uint8Array(sealed), { self: stranger, kem: stranger }); strangerOpened = true; } catch (e) {}
     ok('a different root cannot open it (neither its root vault nor its persona keys)', !strangerOpened);
-    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: sealed });
-    await page.evaluate(() => document.getElementById('pq-open').click());
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: sealed });   // the pick is the press
     await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
     const opened = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent }));
     ok('the page opens its own sealed file back to the same bytes and name', opened.text === secret && opened.name === 'note.txt', opened.stat.slice(0, 120));
     ok('an only-me file says so: its one slot opened with your own key', /unsigned, an only-me file: its one key slot opens with your own key/.test(opened.stat), opened.stat.slice(0, 160));
     // sealed in Node by a stranger, to this soul as a READER, unsigned: never called only-me
     const toMe = await NODE_BPQ.seal(new TextEncoder().encode('for a reader'), { self: stranger, to: [EXPECT.kem.publicKey], meta: { name: 'shared.txt', type: 'text/plain' } });
-    await page.setInputFiles('#pq-open-file', { name: 'shared.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toMe) });
-    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; document.getElementById('pq-open').click(); });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'shared.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toMe) });   // the pick is the press
     await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
     const readerStat = await page.evaluate(() => document.getElementById('pq-open-stat').textContent);
     ok('a file opened through a reader slot says nothing proves who sealed it, never only-me',
       /unsigned: nothing proves who sealed it \(opened through a reader slot\)/.test(readerStat) && !/only-me/.test(readerStat), readerStat.slice(0, 160));
-    await page.setInputFiles('#pq-sign-file', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });
-    await page.evaluate(() => document.getElementById('pq-sign').click());
+    await page.setInputFiles('#pq-sign-file', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });   // the pick is the press
     await page.waitForSelector('#pq-sign-stat a', { state: 'attached', timeout: 20000 });
     const sigJson = await page.evaluate(async () => (await (await fetch(document.querySelector('#pq-sign-stat a').href)).text()));
     ok('page-made detached signature verifies in Node for that file only', NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling\n')).id === EXPECT.id && !NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling!\n')).ok);
@@ -527,8 +524,7 @@ try {
     const forgot = await page.evaluate(() => ({ soul: localStorage.getItem('bnr_soul'), ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
     ok('forgotten soul: no soul name and no pq context in this browser', forgot.soul === null && forgot.ctx.length === 0, JSON.stringify(forgot));
     // 1 · the only-me file block D sealed opens here with no soul name at all
-    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: ONLY_ME.sealed });
-    await page.evaluate(() => document.getElementById('pq-open').click());
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: ONLY_ME.sealed });   // the pick is the press
     await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
     const g1 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), stat: document.getElementById('pq-open-stat').textContent, field: !!document.getElementById('pq-open-soul') }));
     ok('forgotten soul: an only-me file opens from the recovery code alone, and says so',
@@ -536,8 +532,8 @@ try {
     // 2 · shared to the soul (pq:gatesoul) through X-Wing by a stranger: nothing known opens it, so the page asks
     const strangerRoot = new Uint8Array(32).fill(0x2b);
     const toSoul = await NODE_BPQ.seal(new TextEncoder().encode('shared to gatesoul'), { self: NODE_BPQ.rootVault(strangerRoot), to: [EXPECT.kem.publicKey], meta: { name: 'to-soul.txt', type: 'text/plain' } });
-    await page.setInputFiles('#pq-open-file', { name: 'to-soul.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toSoul) });
-    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; document.getElementById('pq-open').click(); });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'to-soul.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toSoul) });   // the pick is the press
     await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
     const g2 = await page.evaluate(() => ({ stat: document.getElementById('pq-open-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, label: document.querySelector('label[for="pq-open-soul"]')?.textContent || '' }));
     ok('forgotten soul: a file shared to the soul asks for the soul name it was shared to, and opens nothing yet',
@@ -571,8 +567,8 @@ try {
     await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
     const oldStyle = await NODE_BPQ.seal(new TextEncoder().encode('sealed before the ruling'), { self: EXPECT, meta: { name: 'old.txt', type: 'text/plain' } });
     ok('pre-ruling only-me file: one self slot, no X-Wing slot', NODE_BPQ.inspect(oldStyle).slots.map(s => s.to).join() === 'self');
-    await page.setInputFiles('#pq-open-file', { name: 'old.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(oldStyle) });
-    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; document.getElementById('pq-open').click(); });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'old.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(oldStyle) });   // the pick is the press
     await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
     const g5 = await page.evaluate(() => ({ links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
     ok('forgotten soul: a pre-ruling only-me file (no reader slot) still offers the soul name field', g5.links === 0 && g5.ctx.length === 0, JSON.stringify(g5));

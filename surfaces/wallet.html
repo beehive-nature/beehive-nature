@@ -1155,6 +1155,46 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
   <div id="pq-sec" style="margin-top:22px">
     <h3>🔒 only me: <span data-i18n="wl.h.pqseal">seal files only you, or people you pick, can open</span></h3>
+    <p data-reg="bee">seal a file with your recovery words. any phone opens it again with the same words, and no one else can.</p>
+    <div class="law" data-wl-tech>bpq1 sealed object · AES-256-GCM segments under a random key per file · your own slot: HKDF of the phrase root vault (ruling R2), no public-key step · a slot per person you pick: X-Wing (ML-KEM-768 + X25519), naming no one · the sealer's ML-DSA-65 signature sits inside the encryption · SPEC-BPQ-1</div>
+    <div class="law" id="pq-gate"><a href="#kc-sec">connect your keychain</a> to seal or open</div>
+    <div id="pq-tools" hidden>
+      <input type="file" id="pq-file" hidden aria-label="file to seal">
+      <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" hidden aria-label="sealed file to open">
+      <div class="row">
+        <button type="button" id="pq-seal" class="gold">🔒 <span data-reg="bee">seal a file</span><span data-reg="raver">lock it</span><span data-reg="cypherpunk">seal · bpq1</span></button>
+        <button type="button" id="pq-open">🔓 <span data-reg="bee">open a sealed file</span><span data-reg="raver">unlock</span><span data-reg="cypherpunk">open .bpq</span></button>
+      </div>
+      <div class="law" id="pq-seal-stat" role="status" aria-live="polite"></div>
+      <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
+    </div>
+    <details class="tnote" data-reg-disclose id="pq-more"><summary>share, sign, check or bind</summary>
+      <div id="pq-tools-more" hidden>
+        <label for="pq-to">people who may also open what you seal: paste each person's card, one per line</label>
+        <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
+        <input type="file" id="pq-sign-file" hidden aria-label="file to sign">
+        <div class="row"><button type="button" id="pq-sign">✍ <span data-reg="bee">sign a file</span><span data-reg="raver">sign it</span><span data-reg="cypherpunk">sign · ml-dsa-65</span></button></div>
+        <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
+        <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
+        <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
+        <div class="row"><button type="button" id="pq-bind">✍ <span data-reg="bee">bind my accounts to this id</span><span data-reg="raver">bind my accounts</span><span data-reg="cypherpunk">bind · claims + ed25519 cosign</span></button></div>
+        <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
+      </div>
+      <div id="pq-law" style="margin:14px 0 0">
+        <div class="law"><b>Sign the law.</b> Press Sign, then confirm with your passkey.</div>
+        <ul id="pq-law-list" class="law" style="margin:8px 0;padding-left:18px"><li><button type="button" id="pq-law-show">show the law files</button></li></ul>
+        <div class="row"><button type="button" id="pq-law-go">✍ Sign</button></div>
+        <div class="law" id="pq-law-stat" role="status" aria-live="polite"></div>
+      </div>
+      <div id="pq-check" style="margin-top:14px">
+        <label for="pq-ver-target">check a signature: the file</label>
+        <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
+        <label for="pq-ver-sig">and its .bpqsig.json</label>
+        <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
+        <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
+        <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
+      </div>
+    </details>
     <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.pqseal">How sealing works, and why it is post-quantum</summary>
     <div class="law">Sealing happens here, in this tab, before the file goes anywhere. Each file gets its
     own random 256-bit key (AES-256-GCM). That key is locked once per reader: for you, under a key
@@ -1173,41 +1213,6 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     Make new recovery words, then, still connected with your old words, paste the new bzpq1 id into
     the binding field here and bind: the old id then vouches for the new one while its keys still hold.</div>
     </details>
-    <div id="pq-law" style="margin:12px 0 16px">
-      <div class="law"><b>Sign the law.</b> Press Sign, then confirm with your passkey.</div>
-      <ul id="pq-law-list" class="law" style="margin:8px 0;padding-left:18px"><li><button type="button" id="pq-law-show" style="font-size:12px;padding:4px 10px;min-height:32px">show the law files</button></li></ul>
-      <div class="row"><button type="button" id="pq-law-go" class="gold">✍ Sign</button></div>
-      <div class="law" id="pq-law-stat" role="status" aria-live="polite"></div>
-    </div>
-    <div class="law" id="pq-gate">connect your keychain to seal or open</div>
-    <div id="pq-tools" hidden>
-      <label for="pq-file">file to seal</label>
-      <input type="file" id="pq-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
-      <label for="pq-to">people who may also open it (optional): paste each person's PQ card, one per line</label>
-      <textarea id="pq-to" class="small" rows="3" spellcheck="false" style="display:block;width:100%;margin:8px 0" placeholder='{"bpq":1,"id":"bzpq1…",…}'></textarea>
-      <div class="row"><button type="button" id="pq-seal" class="gold">🔒 seal</button></div>
-      <div class="law" id="pq-seal-stat" role="status" aria-live="polite"></div>
-      <label for="pq-open-file" style="display:block;margin-top:14px">sealed file to open (.bpq)</label>
-      <input type="file" id="pq-open-file" accept=".bpq,application/octet-stream" style="display:block;max-width:100%;width:100%;margin:8px 0">
-      <div class="row"><button type="button" id="pq-open">🔓 open</button></div>
-      <div class="law" id="pq-open-stat" role="status" aria-live="polite"></div>
-      <label for="pq-sign-file" style="display:block;margin-top:14px">file to sign (the signature travels beside it)</label>
-      <input type="file" id="pq-sign-file" style="display:block;max-width:100%;width:100%;margin:8px 0">
-      <div class="row"><button type="button" id="pq-sign">✍ sign</button></div>
-      <div class="law" id="pq-sign-stat" role="status" aria-live="polite"></div>
-      <label for="pq-succ" style="display:block;margin-top:14px">moving to new recovery words? the new bzpq1 id (optional)</label>
-      <input id="pq-succ" class="small" spellcheck="false" autocomplete="off" placeholder="bzpq1…" style="display:block;width:100%;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace">
-      <div class="row"><button type="button" id="pq-bind">✍ bind my accounts to my PQ id</button></div>
-      <div class="law" id="pq-bind-stat" role="status" aria-live="polite"></div>
-    </div>
-    <div id="pq-check" style="margin-top:14px">
-      <label for="pq-ver-target">check a signature: the file</label>
-      <input type="file" id="pq-ver-target" style="display:block;max-width:100%;width:100%;margin:8px 0">
-      <label for="pq-ver-sig">and its .bpqsig.json</label>
-      <input type="file" id="pq-ver-sig" accept=".json,application/json" style="display:block;max-width:100%;width:100%;margin:8px 0">
-      <div class="row"><button type="button" id="pq-verify">✔ check</button></div>
-      <div class="law" id="pq-verify-stat" role="status" aria-live="polite"></div>
-    </div>
   </div>
 </section>
 
@@ -2974,10 +2979,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var PQ_MAX=256*1024*1024;
   function pqReady(){ return !!(MPRK && BSIGNER && typeof BSIGNER.keysFor==='function' && window.BPQ) }
   function pqPanel(){
-    var g=$('pq-gate'), t=$('pq-tools'); if(!g||!t)return;
+    var g=$('pq-gate'), t=$('pq-tools'), m=$('pq-tools-more'); if(!g||!t)return;
     var on=pqReady();
-    t.hidden=!on; g.hidden=on;
-    if(!on) g.textContent=window.BPQ?'connect your keychain to seal or open':'sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
+    t.hidden=!on; g.hidden=on; if(m)m.hidden=!on;
+    if(!on&&!window.BPQ) g.textContent='sealing needs the post-quantum bundle (bpq-lib.js), which did not load';
   }
   function pqSize(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB' }
   function pqSave(bytes,name,label){
@@ -3016,7 +3021,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var out=[], lines=String(text||'').split(/\n+/).map(function(l){return l.trim()}).filter(Boolean);
     for(var i=0;i<lines.length;i++){
       var c; try{ c=JSON.parse(lines[i]) }catch(e){ throw new Error('line '+(i+1)+' is not a PQ card (paste the card exactly as copied)') }
-      if(!window.BPQ.verifyCard(c)) throw new Error('the card on line '+(i+1)+' does not verify — ask its owner to copy it again');
+      if(!window.BPQ.verifyCard(c)) throw new Error('the card on line '+(i+1)+' does not verify. ask its owner to copy it again');
       out.push({id:c.id, kem:window.BPQ.unb64u(c.kem)});
     }
     return out;
@@ -3199,7 +3204,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var d=window.BPQ.signFile(k,new Uint8Array(await f.arrayBuffer()),new Date().toISOString());
       st.textContent='✓ signed by '+k.id+' · ';
       st.appendChild(pqSave(new TextEncoder().encode(JSON.stringify(d,null,1)),f.name+'.bpqsig.json','save '+f.name+'.bpqsig.json'));
-      st.appendChild(document.createTextNode(' — keep it beside the file; anyone can check it here or with bsigner bpq-verify'));
+      st.appendChild(document.createTextNode('. keep it beside the file; anyone can check it here'));
     }catch(e){ st.textContent='could not sign: '+(e.message||e) }
   };
   /* ── sign the law: one press. The list is docs/PQ-LAW.json; each file is
@@ -3337,6 +3342,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   addEventListener('hashchange',signSheet);
   if(/^#pq-law/.test(location.hash))lawRead();
   $('pq-law-show').onclick=function(){ lawRead() };
+  /* choosing the file IS the press: the button opens the picker, the pick runs
+     the job. A pick made during a run waits its turn; the picker resets after. */
+  [['pq-file','pq-seal'],['pq-open-file','pq-open'],['pq-sign-file','pq-sign']].forEach(function(p){
+    var inp=$(p[0]), btn=$(p[1]), run=btn.onclick, busy=false, again=false;
+    function go(){
+      if(busy){ again=true; return }
+      busy=true;
+      Promise.resolve().then(function(){ return run.call(btn) }).catch(function(){}).then(function(){
+        busy=false;
+        if(again){ again=false; go() } else inp.value='';
+      });
+    }
+    btn.onclick=function(){ if(busy)return; if(inp.files&&inp.files.length) go(); else inp.click() };
+    inp.addEventListener('change',function(){ if(inp.files&&inp.files.length) go() });
+  });
+  /* a #pq-law link lands on the law with its fold open; the file inputs are
+     hidden, so a link to one lands on the panel */
+  function pqLand(){
+    if(/^#pq-law/.test(location.hash)){ var d=$('pq-more'); if(d){ d.open=true; d.dataset.userTouched='1' } }
+    else if(/^#pq-(file|open-file)$/.test(location.hash)) requestAnimationFrame(function(){ requestAnimationFrame(function(){ $('pq-sec').scrollIntoView({block:'start'}) }) });
+  }
+  pqLand(); addEventListener('hashchange',pqLand);
   addEventListener('hashchange',function(){ if(/^#pq-law/.test(location.hash)&&!LAW)lawRead() });
   $('pq-verify').onclick=async function(){
     var st=$('pq-verify-stat');
@@ -3362,11 +3389,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       claims['bzdid-ed25519']=toHex(rec.publicKey);
       var succ=$('pq-succ').value.trim();
       if(succ){
-        if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); st.textContent='that is not a bzpq1 id — copy it from the new words\' PQ card'; return }
+        if(!/^bzpq1[02-9ac-hj-np-z]{58}$/.test(succ)){ rec.seed.fill(0); st.textContent='that is not a bzpq1 id. copy it from the new words\' card'; return }
         var succOk=false;
         try{ var dec=window.BPQ_LIB.bech32m.decode(succ,120); succOk=dec.prefix==='bzpq'&&window.BPQ_LIB.bech32m.fromWords(dec.words).length===32 }catch(e){}
         if(!succOk){ rec.seed.fill(0); st.textContent='that bzpq1 id fails its checksum, so a letter is wrong. Nothing was signed. Copy it again from the new words\' PQ card'; return }
-        if(succ===k.id){ rec.seed.fill(0); st.textContent='that is this same id — connect with your OLD words to vouch for the new one'; return }
+        if(succ===k.id){ rec.seed.fill(0); st.textContent='that is this same id. connect with your old words to vouch for the new one'; return }
         claims['successor-bzpq']=succ;
       }
       var b=window.BPQ.bind(k,claims,new Date().toISOString());
@@ -3376,7 +3403,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var json=JSON.stringify(b,null,1), jsonBytes=new TextEncoder().encode(json), fname='pq-binding-'+SOUL+'.json';
       st.textContent='✓ '+Object.keys(claims).length+' accounts bound to '+k.id+' · ';
       st.appendChild(pqSave(jsonBytes,fname,'save the binding'));
-      st.appendChild(document.createTextNode(' — keep a copy somewhere permanent. '));
+      st.appendChild(document.createTextNode('. keep a copy somewhere permanent. '));
       var tb=document.createElement('button'); tb.type='button'; tb.id='pq-ots'; tb.textContent='⏱ timestamp it on Bitcoin';
       tb.onclick=async function(){
         tb.disabled=true; tb.textContent='asking OpenTimestamps calendars…';
