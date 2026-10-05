@@ -11,16 +11,20 @@
          ML-DSA-65 signing key ......... FIPS 204, every-day signatures
          X-Wing (ML-KEM-768 + X25519) .. draft-connolly-cfrg-xwing-kem, so others can
                                           seal things TO you
-         vault key ...................... 256-bit symmetric, seals things for "only me"
+         vault key ...................... 256-bit symmetric, per persona
          SLH-DSA-SHAKE-256f succession .. FIPS 205, hash-only security; only its HASH is
                                           published now (pre-rotation), so a lattice
                                           break later still leaves you a key to rotate to
        and a self-certifying id `bzpq1…` = hash(signing key, succession commitment).
        No registry, no chain row, no server: the id proves itself.
+     · rootVault(masterPrk): the "only me" vault key, the same vault label under
+       the reserved context 'root' (never a persona: those start 'pq:'), so a
+       file sealed for "only me" opens from the phrase alone, no soul name needed.
      · seal(bytes, {self, to, signer, meta}): one self-contained sealed object.
        Segments are AES-256-GCM under a fresh random file key; the file key is
-       wrapped once per reader ("self" = vault key, "x-wing" = a recipient's
-       public key). Readers need nothing but the object and their own phrase.
+       wrapped once per reader ("self" = a vault key, "x-wing" = a recipient's
+       public key). An "only me" slot under rootVault opens with the phrase
+       alone; an X-Wing slot opens with the phrase plus the persona's soul name.
      · open / opener: whole-object and per-segment decryption (seek and stream);
        who sealed it is itself sealed, so only readers can see it.
      · card / bind: a signed public key card, and a signed statement binding
@@ -141,6 +145,14 @@
   function expandLabel(masterPrk, label, context, len) {
     return L.hkdfExpand(L.sha256, masterPrk, concat(utf8(label), utf8(context)), len);
   }
+  // The phrase-only vault key (SPEC-BPQ-1 §2, founder ruling 2026-10-04): the
+  // frozen vault label under the reserved context 'root'. Persona contexts
+  // always start 'pq:', so 'root' never equals one. Returns only the 32 bytes;
+  // the caller zeroes them.
+  var ROOT_CONTEXT = 'root';
+  function rootVault(masterPrk) {
+    return expandLabel(bytes(masterPrk, 'masterPrk', 32), LABEL.VAULT, ROOT_CONTEXT, 32);
+  }
   function successionCommit(slhPk) { return H(concat(utf8(DOM.SUCC), slhPk)); }
   function idFrom(dsaPk, succCommit) {
     var d = H(concat(utf8(DOM.ID), bytes(dsaPk, 'ML-DSA-65 public key', 1952), bytes(succCommit, 'succession commitment', 32)));
@@ -159,6 +171,8 @@
   function keys(masterPrk, context) {
     bytes(masterPrk, 'masterPrk', 32);
     if (typeof context !== 'string' || !context) throw BpqError('context must be a non-empty string', 'context_empty');
+    // 'root' belongs to the phrase-only vault (rootVault) and never names a signing or X-Wing key
+    if (context === ROOT_CONTEXT) throw BpqError('context "root" is reserved for the phrase-only vault (use rootVault)', 'context_reserved');
     var dsaSeed = expandLabel(masterPrk, LABEL.DSA, context, 32);
     var kemSeed = expandLabel(masterPrk, LABEL.KEM, context, 32);
     var vault = expandLabel(masterPrk, LABEL.VAULT, context, 32);
@@ -196,6 +210,7 @@
   // A rotation to the succession key reveals it and signs with it. Re-derives
   // the SLH-DSA secret from the root on demand; never stored.
   function successionKeys(masterPrk, context) {
+    if (context === ROOT_CONTEXT) throw BpqError('context "root" is reserved for the phrase-only vault (use rootVault)', 'context_reserved');
     var seed = expandLabel(bytes(masterPrk, 'masterPrk', 32), LABEL.SUCC, context, 96);
     var k = L.slh_dsa_shake_256f.keygen(seed);
     seed.fill(0);
@@ -522,6 +537,7 @@
     algorithms: Object.freeze({ sign: 'ml-dsa-65', kem: 'x-wing', aead: 'aes-256-gcm', kdf: 'hkdf-sha256', hash: 'sha3-256', succession: 'slh-dsa-shake-256f' }),
     library: L.versions,
     keys: keys,
+    rootVault: rootVault,
     successionKeys: successionKeys,
     idFrom: idFrom,
     card: card, verifyCard: verifyCard,

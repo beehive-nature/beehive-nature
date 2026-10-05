@@ -3018,20 +3018,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('pq-seal').onclick=async function(){
     var st=$('pq-seal-stat');
     if(!pqReady()){st.textContent='connect your keychain first';return}
-    if(!SOUL){st.textContent='name your soul first — your post-quantum keys are named by it';return}
     var f=$('pq-file').files[0];
     if(!f){st.textContent='choose a file first';return}
     if(f.size>PQ_MAX){st.textContent='this tab seals files up to '+pqSize(PQ_MAX)+'; '+f.name+' is '+pqSize(f.size);return}
     var to;
     try{ to=pqCards($('pq-to').value) }catch(e){ st.textContent=e.message; return }
+    // only me needs no soul name; a shared file is signed by the soul's post-quantum keys
+    if(to.length&&!SOUL){st.textContent='name your soul first: a shared file is signed with your post-quantum keys, and they are named by it';return}
     st.textContent='sealing '+f.name+'…';
+    var rv=null;
     try{
-      var k=BSIGNER.keysFor(MPRK,SOUL);
+      var k=to.length?BSIGNER.keysFor(MPRK,SOUL):null;
       var plain=new Uint8Array(await f.arrayBuffer());
-      // shared files carry the sealer's signature, itself sealed; only-me files need none
-      var sealed=await window.BPQ.seal(plain,{self:k, to:to.map(function(r){return r.kem}), signer:to.length?k:null, meta:{name:f.name, type:f.type||'application/octet-stream'}});
+      // your own slot: the phrase-only root vault (SPEC-BPQ-1 §2), so it opens
+      // from your recovery words alone. Shared files carry the sealer's
+      // signature, itself sealed; only-me files need none.
+      rv=pqRootVault();
+      var sealed=await window.BPQ.seal(plain,{self:rv.key, to:to.map(function(r){return r.kem}), signer:k, meta:{name:f.name, type:f.type||'application/octet-stream'}});
+      pqDone(rv); rv=null;
       plain.fill(0);
-      st.textContent='✓ sealed for you'+(to.length?' and '+to.length+' '+(to.length===1?'person':'people')+' you picked':'')+' · '+pqSize(sealed.length)+' · ';
+      st.textContent='✓ sealed for you'+(to.length?' and '+to.length+' '+(to.length===1?'person':'people')+' you picked':'')+' · your own slot opens from your recovery words alone · '+pqSize(sealed.length)+' · ';
       st.appendChild(pqSave(sealed,f.name+'.bpq','save '+f.name+'.bpq'));
       st.appendChild(document.createTextNode(' · keep it anywhere; it opens only for these readers · '));
       var md=document.createElement('button'); md.type='button'; md.id='pq-to-mydata'; md.textContent='add to My Data';
@@ -3043,7 +3049,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         },function(e){ md.disabled=false; md.textContent='add to My Data (it did not keep: '+(e.message||e)+')'; });
       };
       st.appendChild(md);
-    }catch(e){ st.textContent='could not seal: '+(e.message||e) }
+    }catch(e){ pqDone(rv); st.textContent='could not seal: '+(e.message||e) }
   };
   $('pq-open').onclick=async function(){
     var st=$('pq-open-stat');
@@ -3054,22 +3060,66 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{
       var bytes=new Uint8Array(await f.arrayBuffer());
       if(!window.BPQ.isSealed(bytes)){st.textContent=f.name+' is not a sealed file';return}
-      // try the self slot first, then the reader (X-Wing) slots, so we know which one opened it
-      var names=pqNames(), r=null, via=null, i, p;
+      // the phrase-only root vault first (every only-me file sealed since 4 October 2026),
+      // then each known soul: its own vault slot (files sealed before), then its reader
+      // (X-Wing) slots, so we know which one opened it
+      var names=pqNames(), r=null, via=null, i, p, rv=pqRootVault();
+      try{ r=await window.BPQ.open(bytes,{self:rv.key}); via='root' }catch(e){ if(e.code!=='no_key')throw e }finally{ pqDone(rv) }
       for(p=0;p<2&&!r;p++) for(i=0;i<names.length&&!r;i++){
         var k=BSIGNER.keysFor(MPRK,names[i]);
         try{ r=await window.BPQ.open(bytes,p===0?{self:k}:{kem:k}); via=p===0?'self':'reader' }catch(e){ if(e.code!=='no_key')throw e }
       }
-      if(!r){st.textContent='none of your keys opens '+f.name+' — it was sealed for someone else';return}
-      var name=(r.meta&&r.meta.name)||f.name.replace(/\.bpq$/,'');
-      var slots=window.BPQ.inspect(bytes).slots, sb=r.sealedBy, who;
-      if(!sb) who=(via==='self'&&slots.length===1)?'unsigned, an only-me file: its one key slot opens with your own key':'unsigned: nothing proves who sealed it (opened through '+(via==='self'?'your own key slot':'a reader slot')+')';
-      else if(!sb.ok) who='⚠ the sealer signature does NOT verify, so treat the contents as unauthenticated';
-      else who=sb.id?'sealed and signed by '+sb.id:'signed by a key the seal does not name (fingerprint '+window.BPQ.fingerprint(sb.publicKey)+'), so it does not say who sealed it';
-      st.textContent='✓ opened · '+pqSize(r.bytes.length)+' · '+who+' · ';
-      st.appendChild(pqSave(r.bytes,name,'save '+name));
+      if(r){ pqOpened(st,f,bytes,r,via,null); return }
+      pqAskSoul(st,f,bytes);
     }catch(e){ st.textContent='could not open: '+(e.message||e) }
   };
+  // the phrase-only "only me" key (context 'root', SPEC-BPQ-1 §2). From BSIGNER's
+  // cache when it keeps one (wiped with the persona keys by scrubAll); otherwise
+  // derived here and zeroed by pqDone right after use.
+  function pqRootVault(){
+    if(typeof BSIGNER.rootVault==='function') return {key:BSIGNER.rootVault(MPRK), own:false};
+    return {key:window.BPQ.rootVault(MPRK), own:true};
+  }
+  function pqDone(rv){ if(rv&&rv.own) rv.key.fill(0) }
+  function pqOpened(st,f,bytes,r,via,typed){
+    var name=(r.meta&&r.meta.name)||f.name.replace(/\.bpq$/,'');
+    var slots=window.BPQ.inspect(bytes).slots, sb=r.sealedBy, who, own=via!=='reader';
+    if(!sb) who=(own&&slots.length===1)?'unsigned, an only-me file: its one key slot opens with your own key'+(via==='root'?', from your recovery words alone':''):'unsigned: nothing proves who sealed it (opened through '+(own?'your own key slot':'a reader slot')+')';
+    else if(!sb.ok) who='⚠ the sealer signature does NOT verify, so treat the contents as unauthenticated';
+    else who=sb.id?'sealed and signed by '+sb.id:'signed by a key the seal does not name (fingerprint '+window.BPQ.fingerprint(sb.publicKey)+'), so it does not say who sealed it';
+    st.textContent='✓ opened · '+pqSize(r.bytes.length)+' · '+who+(typed?' · opened as '+typed+', and this browser now knows that name':'')+' · ';
+    st.appendChild(pqSave(r.bytes,name,'save '+name));
+  }
+  // Nothing this browser knows opens it: it may have been sealed (before 4 October
+  // 2026, under that soul's own vault) or shared (through X-Wing) under one of your
+  // souls whose name this browser forgot. The typed name is kept only if it opens
+  // the file.
+  function pqAskSoul(st,f,bytes){
+    st.textContent='none of the keys this browser knows opens '+f.name+'. It was sealed for someone else, or sealed or shared under one of your souls whose name this browser does not know. If it is yours, type that soul name (the name on its card) and try again. ';
+    var lab=document.createElement('label'); lab.htmlFor='pq-open-soul'; lab.textContent='the soul name this file was sealed or shared under';
+    var inp=document.createElement('input'); inp.type='text'; inp.id='pq-open-soul'; inp.autocomplete='off'; inp.spellcheck=false; inp.maxLength=48;
+    inp.style.cssText='display:block;max-width:100%;width:100%;margin:8px 0';
+    var go=document.createElement('button'); go.type='button'; go.id='pq-open-soul-go'; go.textContent='try this name';
+    var msg=document.createElement('span'); msg.id='pq-open-soul-stat'; msg.setAttribute('role','status');
+    inp.onkeydown=function(e){ if(e.key==='Enter') go.click() };
+    go.onclick=async function(){
+      var typed=inp.value.trim(), k=null, r=null, via=null;
+      if(!/^[\x20-\x7e]{1,48}$/.test(typed)){ msg.textContent=' type the soul name: plain letters, numbers or symbols, up to 48'; return }
+      if(!pqReady()){ msg.textContent=' connect your keychain first'; return }
+      go.disabled=true; msg.textContent=' trying '+typed+'…';
+      try{
+        k=window.BPQ.keys(MPRK,'pq:'+typed);
+        try{ r=await window.BPQ.open(bytes,{self:k}); via='self' }catch(e){ if(e.code!=='no_key')throw e }
+        if(!r){ try{ r=await window.BPQ.open(bytes,{kem:k}); via='reader' }catch(e){ if(e.code!=='no_key')throw e } }
+      }catch(e){ go.disabled=false; msg.textContent=' could not open: '+(e.message||e); return }
+      finally{ if(k) k.wipe() }
+      go.disabled=false;
+      if(!r){ msg.textContent=' '+typed+' does not open it; the name was not kept'; return }
+      ensureCtx('pq:ml-kem-768:'+typed); renderForge();
+      pqOpened(st,f,bytes,r,via,typed);
+    };
+    st.appendChild(lab); st.appendChild(inp); st.appendChild(go); st.appendChild(msg);
+  }
   /* OpenTimestamps: a binding is only worth something if it provably existed
      BEFORE a quantum break. Only the SHA-256 of the binding leaves this tab; the
      calendars aggregate it into a Bitcoin block. The file below is the standard
@@ -6573,10 +6623,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* PQ in the browser: bpq.js (spec docs/specs/SPEC-BPQ-1.md; vectors shared
      with crates/bsigner, which derives the same keys natively). One PQ identity
      per soul: context 'pq:'+name gives ML-DSA-65, X-Wing and the SLH-DSA
-     succession commitment. Secret halves live in this cache only while MPRK
+     succession commitment; "only me" uses the phrase-only root vault (context
+     'root', no soul name). Secret halves live in this cache only while MPRK
      does; scrubAll() wipes them. */
   if(!BSIGNER && window.BPQ){
-    var PQKEYS={};
+    var PQKEYS={}, PQROOT=null;
     BSIGNER={
       source:'bpq.js',
       entry:function(mprk,name){
@@ -6588,13 +6639,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return hit;
       },
       keysFor:function(mprk,name){ return this.entry(mprk,name).keys },
+      // the phrase-only "only me" vault key (context 'root', no soul name):
+      // kept beside the persona keys and wiped with them
+      rootVault:function(mprk){
+        if(PQROOT && PQROOT.mprk===mprk) return PQROOT.key;
+        if(PQROOT) PQROOT.key.fill(0);
+        PQROOT={mprk:mprk, key:window.BPQ.rootVault(mprk)};
+        return PQROOT.key;
+      },
       publicFingerprint:function(mprk,alg,name){
         var e=this.entry(mprk,name), k=e.keys;
         if(alg==='ml-dsa-65') return {short:k.id, fp:k.words||k.id, copy:e.card};
         if(alg==='ml-kem-768') return {short:'x-wing '+window.BPQ.fingerprint(k.kem.publicKey), fp:k.id, copy:e.card};
         return null;
       },
-      wipe:function(){ for(var c in PQKEYS){ PQKEYS[c].keys.wipe() } PQKEYS={} }
+      wipe:function(){ for(var c in PQKEYS){ PQKEYS[c].keys.wipe() } PQKEYS={}; if(PQROOT){ PQROOT.key.fill(0); PQROOT=null } }
     };
   }
   try{

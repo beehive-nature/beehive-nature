@@ -18,12 +18,18 @@ HKDF implementation and FIPS 203 / 204 / 205 can open and verify every object be
   revealed until it is needed (pre-rotation), so a break of the lattice signature still leaves the
   owner a key the attacker never saw.
 - Nothing needs a registry, a chain row or a server. The id proves itself; a sealed object
-  carries its own key slots; readers need only the object and their own phrase.
+  carries its own key slots. Files the wallet seals for "only me" open from the phrase alone
+  (context `root`, §2). A file shared to a persona opens with the phrase plus that persona's
+  soul name (the name on its card). Objects sealed before this change opened only with the
+  persona context, and the wallet still tries every persona it knows.
+  (Founder ruling 2026-10-04: the soul name lives only in a browser's storage, so "only me"
+  must not depend on it.)
 
 ## 2 · Keys from the bzDiD root
 
 Input: the 32-byte `masterPrk` (the 24-word phrase is its BIP-39 encoding; a passkey PRF gives it
-via `onboarding/bzdid-key.js`) and a context string. In the wallet the context is `pq:<name>`.
+via `onboarding/bzdid-key.js`) and a context string. In the wallet a persona context is
+`pq:<name>`; the "only me" vault uses the reserved context `root` (below).
 
 `expand(label, L) = HKDF-Expand(SHA-256, PRK = masterPrk, info = UTF-8(label) ‖ UTF-8(context), L)`
 
@@ -35,6 +41,24 @@ via `onboarding/bzdid-key.js`) and a context string. In the wallet the context i
 | succession | `BDID-v1/slh-dsa-shake-256f-succession` | 96 | SLH-DSA-SHAKE-256f seed (FIPS 205) |
 
 No label is a byte-prefix of another bzDiD label, so label ‖ context never collides.
+
+Phrase-only vault (founder ruling 2026-10-04). The reserved context string `root` (no `pq:`
+prefix, so it never equals a wallet persona context, which always starts `pq:`) gives the
+**root vault key** = `expand("BDID-v1/vault-key", 32)` with context `root`: the same HKDF, the
+same frozen label, only the context differs. No new label and no object-format change: the
+`self` slot (§4) is the same AES-256-GCM wrap, only the key fed to it differs, and its bytes
+name neither the persona nor the root. JS `BPQ.rootVault(masterPrk)`, Rust
+`bpq::root_vault(prk)`. The wallet seals every new file's own slot under the root vault, so
+files it seals for "only me" open from the phrase alone; a file shared to a persona opens with
+the phrase plus that persona's soul name (the name on its card), through its X-Wing slot, and
+its optional SEAL is signed by the persona keys (`pq:<name>`), unchanged. Objects sealed before
+this change opened only with the persona context; the wallet opens with the root vault first,
+then every persona it knows, and when nothing opens an object it asks for the soul name it was
+sealed or shared under, tries that persona's vault slot and then its X-Wing slot, and keeps the
+name only if it opens the object. `root` is reserved: `keys` (JS `BPQ.keys`, Rust `bpq::keys`)
+refuses it, so no signing, X-Wing or succession key is ever derived under it. `bsigner bpq-open`
+with no `--context` opens with the root vault; with `--context` it tries the root vault, then
+that context's vault and X-Wing key.
 
 X-Wing: `SHAKE-256(seed, 96)`; bytes 0–63 are the ML-KEM-768 seed d‖z, bytes 64–95 the X25519
 secret. Public key = ML-KEM-768 encapsulation key (1184 B) ‖ X25519 public key (32 B). Shared

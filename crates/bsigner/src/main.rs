@@ -30,10 +30,18 @@
 //!      remaining budget BEFORE any signing, validates the exact-multi split
 //!      invariants, then emits ONE signed instruction paying seller + tithe
 //!      together — signed, never submitted; see src/x402.rs for the laws)
-//!   bsigner bpq-open --object PATH --rec-env VAR --context CTX [--out PATH]
+//!   bsigner bpq-open --object PATH --rec-env VAR [--context CTX] [--out PATH]
 //!     (opens a bpq1 sealed object made in the browser — surfaces/bpq.js —
 //!      with the keys your bzDiD recovery code derives; the code is read from
-//!      the environment variable VAR, never from argv, and never printed)
+//!      the environment variable VAR, never from argv, and never printed.
+//!      Without --context it opens with the phrase-only vault (context
+//!      "root"), which opens every "only me" file the wallet seals; with
+//!      --context pq:NAME it tries that vault, then NAME's vault, then NAME's
+//!      X-Wing key, for files shared to NAME or sealed before 2026-10-04.
+//!      The context "root" is reserved and refused. Prints JSON with
+//!      "opened_with" = root | context | x-wing; without --context the
+//!      you.context, you.ml_dsa_65_public_sha3 and you.x_wing_public_sha3
+//!      fields are null)
 //!   bsigner bpq-verify --file PATH [--target FILE]
 //!     (a bpq1 public key card or binding; or a detached signature, checked
 //!      against the file named by --target)
@@ -380,9 +388,10 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(e) => return fail(e),
     };
-    let (Some(path), Some(var), Some(context)) = (o.object, o.rec_env, o.context) else {
-        return fail("bpq-open needs --object PATH --rec-env VAR --context CTX".into());
+    let (Some(path), Some(var)) = (o.object, o.rec_env) else {
+        return fail("bpq-open needs --object PATH --rec-env VAR [--context CTX]".into());
     };
+    let context = o.context;
     let obj = match std::fs::read(&path) {
         Ok(b) => b,
         Err(e) => return fail(format!("read {path}: {e}")),
@@ -395,11 +404,31 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
         Ok(p) => p,
         Err(e) => return fail(e.to_string()),
     };
-    let keys = bpq::keys(&prk, &context);
-    let opened = bpq::open(&obj, &bpq::Reader::SelfVault(keys.vault()))
-        .or_else(|_| bpq::open(&obj, &bpq::Reader::XWing(&keys)));
-    let opened = match opened {
+    // The phrase-only vault (context "root") first: every "only me" file the
+    // wallet seals since 2026-10-04 opens with it. Then, when a context is
+    // named, that persona's vault (files sealed before) and its X-Wing key
+    // (files shared to that persona).
+    let root = bpq::root_vault(&prk);
+    let keys = match context.as_deref().map(|c| bpq::keys(&prk, c)).transpose() {
+        Ok(k) => k,
+        Err(e) => return fail(e.to_string()),
+    };
+    let mut opened = bpq::open(&obj, &bpq::Reader::SelfVault(&root)).map(|x| (x, "root"));
+    if let Some(k) = &keys {
+        opened = opened
+            .or_else(|_| {
+                bpq::open(&obj, &bpq::Reader::SelfVault(k.vault())).map(|x| (x, "context"))
+            })
+            .or_else(|_| bpq::open(&obj, &bpq::Reader::XWing(k)).map(|x| (x, "x-wing")));
+    }
+    let (opened, via) = match opened {
         Ok(x) => x,
+        Err(bpq::BpqError::NoKey) if keys.is_none() => {
+            return fail(format!(
+                "{}; files sealed before 2026-10-04 open with --context pq:NAME",
+                bpq::BpqError::NoKey
+            ))
+        }
         Err(e) => return fail(e.to_string()),
     };
     let sealed_by = opened.sealed_by.as_ref().map(
@@ -418,10 +447,11 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
             "plaintext_sha3": b64::sha3_256_b64u(&opened.bytes),
             "meta": opened.meta,
             "sealed_by": sealed_by,
+            "opened_with": via,
             "you": {
                 "context": context,
-                "ml_dsa_65_public_sha3": b64::sha3_256_b64u(&keys.dsa_public),
-                "x_wing_public_sha3": b64::sha3_256_b64u(&keys.kem_public),
+                "ml_dsa_65_public_sha3": keys.as_ref().map(|k| b64::sha3_256_b64u(&k.dsa_public)),
+                "x_wing_public_sha3": keys.as_ref().map(|k| b64::sha3_256_b64u(&k.kem_public)),
             },
             "written": o.out,
         })

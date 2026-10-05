@@ -200,6 +200,7 @@ pub enum BpqError {
     Format(&'static str),
     NoKey,
     Auth(&'static str),
+    ReservedContext,
 }
 
 impl std::fmt::Display for BpqError {
@@ -208,6 +209,10 @@ impl std::fmt::Display for BpqError {
             BpqError::Format(w) => write!(f, "not a valid bpq1 object: {w}"),
             BpqError::NoKey => write!(f, "none of the keys you hold opens this object"),
             BpqError::Auth(w) => write!(f, "{w} failed authentication"),
+            BpqError::ReservedContext => write!(
+                f,
+                "context \"root\" is reserved for the phrase-only vault; omit --context to use it"
+            ),
         }
     }
 }
@@ -269,8 +274,13 @@ fn xwing_expand(seed: &[u8; 32]) -> (ml_kem::DecapsulationKey<MlKem768>, StaticS
 
 /// Derive the ML-DSA-65 and X-Wing public keys and the vault key for one
 /// context. (The SLH-DSA succession key is derived in the browser; here its
-/// commitment is an input wherever the id is checked.)
-pub fn keys(master_prk: &[u8; 32], context: &str) -> PqKeys {
+/// commitment is an input wherever the id is checked.) The reserved context
+/// `root` is refused: it belongs to the phrase-only vault, reached only through
+/// `root_vault`, and never names a signing or X-Wing key.
+pub fn keys(master_prk: &[u8; 32], context: &str) -> Result<PqKeys, BpqError> {
+    if context == ROOT_CONTEXT {
+        return Err(BpqError::ReservedContext);
+    }
     let mut dsa_seed = Zeroizing::new([0u8; 32]);
     expand_label(master_prk, LABEL_DSA, context, dsa_seed.as_mut());
     let mut kem_seed = Zeroizing::new([0u8; 32]);
@@ -283,12 +293,25 @@ pub fn keys(master_prk: &[u8; 32], context: &str) -> PqKeys {
     let (dk, _x_sk, x_pk) = xwing_expand(&kem_seed);
     let mut kem_public = dk.encapsulation_key().to_bytes().to_vec();
     kem_public.extend_from_slice(x_pk.as_bytes());
-    PqKeys {
+    Ok(PqKeys {
         dsa_public,
         kem_public,
         kem_seed,
         vault,
-    }
+    })
+}
+
+/// The reserved context of the phrase-only vault key. Wallet persona contexts
+/// always start `pq:`, so this never equals one (SPEC-BPQ-1 §2).
+pub const ROOT_CONTEXT: &str = "root";
+
+/// The "only me" vault key that opens from the phrase alone: the frozen vault
+/// label under the reserved context `root` (founder ruling 2026-10-04). The
+/// twin of `BPQ.rootVault` in surfaces/bpq.js.
+pub fn root_vault(master_prk: &[u8; 32]) -> Zeroizing<[u8; 32]> {
+    let mut vault = Zeroizing::new([0u8; 32]);
+    expand_label(master_prk, LABEL_VAULT, ROOT_CONTEXT, vault.as_mut());
+    vault
 }
 
 /// The self-certifying id: bech32m("bzpq", SHA3-256("bpq1/id" || ML-DSA-65
@@ -641,6 +664,7 @@ mod tests {
             &root(row["rootFrom"].as_str().unwrap()),
             row["context"].as_str().unwrap(),
         )
+        .unwrap()
     }
 
     #[test]
@@ -650,7 +674,8 @@ mod tests {
             let k = keys(
                 &root(row["rootFrom"].as_str().unwrap()),
                 row["context"].as_str().unwrap(),
-            );
+            )
+            .unwrap();
             assert_eq!(
                 b64::b64u(&k.dsa_public),
                 row["dsaPublicKey"],
@@ -728,6 +753,84 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// Founder ruling 2026-10-04: "only me" opens from the phrase alone. The
+    /// browser's `BPQ.rootVault` and this `root_vault` derive the same key, and
+    /// objects the browser sealed under it open here for the same readers.
+    #[test]
+    fn root_vault_matches_the_browser_and_opens_its_objects() {
+        let v = vectors();
+        let rv = &v["rootVault"];
+        assert_eq!(rv["context"], ROOT_CONTEXT);
+        assert_eq!(rv["label"], LABEL_VAULT);
+        for row in rv["keys"].as_array().unwrap() {
+            let prk = root(row["rootFrom"].as_str().unwrap());
+            let k = root_vault(&prk);
+            assert_eq!(
+                b64::b64u(&sha3(&[&k[..]])),
+                row["rootVaultKeySha3"],
+                "root vault {}",
+                row["name"]
+            );
+            assert_ne!(&k[..], &keys(&prk, "pq:vector").unwrap().vault()[..]);
+            // "root" is reserved: no signing or X-Wing key is ever derived under it
+            assert_eq!(
+                keys(&prk, ROOT_CONTEXT).err(),
+                Some(BpqError::ReservedContext)
+            );
+        }
+        let open_as = |obj: &[u8], who: &str| {
+            let (name, how) = who.split_once(':').unwrap();
+            let k = keys_named(&v, name);
+            match how {
+                "root" => {
+                    let row = v["keys"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|r| r["name"] == name)
+                        .unwrap();
+                    let r = root_vault(&root(row["rootFrom"].as_str().unwrap()));
+                    open(obj, &Reader::SelfVault(&r))
+                }
+                "self" => open(obj, &Reader::SelfVault(k.vault())),
+                _ => open(obj, &Reader::XWing(&k)),
+            }
+        };
+        for o in rv["objects"].as_array().unwrap() {
+            let obj = unb64(&o["object"]).unwrap();
+            for who in o["opens"].as_array().unwrap() {
+                let who = who.as_str().unwrap();
+                let r = open_as(&obj, who).unwrap_or_else(|e| panic!("{} {who}: {e}", o["name"]));
+                assert_eq!(b64::b64u(&sha3(&[&r.bytes])), o["plaintextSha3"]);
+                assert_eq!(r.meta.unwrap_or(Value::Null), o["meta"]);
+                match o["sealedBy"].as_str() {
+                    Some(id) => {
+                        let s = r.sealed_by.expect("signed object carries a seal");
+                        assert!(s.ok && s.id.as_deref() == Some(id), "{} seal", o["name"]);
+                    }
+                    None => assert!(r.sealed_by.is_none()),
+                }
+            }
+            for who in o["refuses"].as_array().unwrap() {
+                let who = who.as_str().unwrap();
+                assert_eq!(
+                    open_as(&obj, who).err(),
+                    Some(BpqError::NoKey),
+                    "{} must refuse {who}",
+                    o["name"]
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn root_context_is_reserved_for_the_vault() {
+        let prk = root("bpq1 test vector root A");
+        assert_eq!(keys(&prk, "root").err(), Some(BpqError::ReservedContext));
+        // a persona named root is still an ordinary pq: context
+        assert!(keys(&prk, "pq:root").is_ok());
     }
 
     #[test]

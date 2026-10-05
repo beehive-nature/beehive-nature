@@ -24,7 +24,9 @@ require(join(SURF, 'bpq.js'));
 const NODE_BPQ = globalThis.BPQ;
 // the BIP-39 English list the page loads, read in Node for the QR check words
 const NODE_WORDS = (() => { const sb = { window: {} }; runInNewContext(readFileSync(join(SURF, 'onboarding', 'vendor', 'bip39-wordlist.js'), 'utf8'), sb); return [...sb.window.BIP39_WORDLIST]; })();
-const EXPECT = NODE_BPQ.keys(new Uint8Array(32).fill(0x2a), 'pq:gatesoul');
+const ROOT_A = new Uint8Array(32).fill(0x2a);   // TEST-ONLY root, public
+const EXPECT = NODE_BPQ.keys(ROOT_A, 'pq:gatesoul');
+let ONLY_ME = null;   // the only-me file block D seals in the page, reopened by block G
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.wasm': 'application/wasm',
@@ -173,11 +175,16 @@ try {
     await page.waitForSelector('#pq-seal-stat a', { state: 'attached', timeout: 20000 });
     const sealed = Buffer.from(await page.evaluate(async () => Array.from(new Uint8Array(await (await fetch(document.querySelector('#pq-seal-stat a').href)).arrayBuffer()))));
     ok('sealed file is a bpq1 object that does not contain the plaintext', NODE_BPQ.isSealed(new Uint8Array(sealed)) && sealed.indexOf('only me') < 0, String(sealed.length));
-    const inNode = await NODE_BPQ.open(new Uint8Array(sealed), { self: EXPECT });
-    ok('Node opens the page-sealed file with keys from the same root', Buffer.from(inNode.bytes).toString() === secret && inNode.meta.name === 'note.txt');
+    ONLY_ME = { sealed, secret };
+    // founder ruling 2026-10-04: the own slot is the phrase-only root vault, so Node needs no soul name
+    const inNode = await NODE_BPQ.open(new Uint8Array(sealed), { self: NODE_BPQ.rootVault(ROOT_A) });
+    ok('Node opens the page-sealed file with ONLY the root vault of the same root (no soul name)', Buffer.from(inNode.bytes).toString() === secret && inNode.meta.name === 'note.txt');
+    let personaOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: EXPECT, kem: EXPECT }); personaOpened = true; } catch (e) {}
+    ok('the soul-named persona keys are not what seals a new only-me file', !personaOpened);
     const stranger = NODE_BPQ.keys(new Uint8Array(32).fill(0x2b), 'pq:gatesoul');
-    let strangerOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: stranger, kem: stranger }); strangerOpened = true; } catch (e) {}
-    ok('a different root cannot open it', !strangerOpened);
+    let strangerOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: NODE_BPQ.rootVault(new Uint8Array(32).fill(0x2b)) }); strangerOpened = true; } catch (e) {}
+    try { await NODE_BPQ.open(new Uint8Array(sealed), { self: stranger, kem: stranger }); strangerOpened = true; } catch (e) {}
+    ok('a different root cannot open it (neither its root vault nor its persona keys)', !strangerOpened);
     await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: sealed });
     await page.evaluate(() => document.getElementById('pq-open').click());
     await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
@@ -496,6 +503,89 @@ try {
     ok('a page restored from the back/forward cache reloads and starts disconnected', await page.evaluate(() => !/keychain live/.test(document.getElementById('kc-stat').textContent) && document.getElementById('pq-tools').hidden));
     const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
     ok('the QR bridge promises only what holds: wiped when this page closes', /tab memory only, wiped when this page closes'/.test(src) && !/scrubbed on close like every lane here|close or leave this page/.test(src));
+    await page.close();
+  }
+
+  /* G · a forgotten soul (founder ruling 2026-10-04): this browser lost bnr_soul and
+     bnr_contexts; the keychain reconnects from the recovery code alone. An only-me
+     file opens from the phrase alone; a file shared to the soul through X-Wing asks
+     for the soul name, opens with the right one, never with a wrong one, and keeps
+     only a name that opened it. */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.removeItem('bnr_soul'); localStorage.removeItem('bnr_contexts'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
+    const forgot = await page.evaluate(() => ({ soul: localStorage.getItem('bnr_soul'), ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
+    ok('forgotten soul: no soul name and no pq context in this browser', forgot.soul === null && forgot.ctx.length === 0, JSON.stringify(forgot));
+    // 1 · the only-me file block D sealed opens here with no soul name at all
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: ONLY_ME.sealed });
+    await page.evaluate(() => document.getElementById('pq-open').click());
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g1 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), stat: document.getElementById('pq-open-stat').textContent, field: !!document.getElementById('pq-open-soul') }));
+    ok('forgotten soul: an only-me file opens from the recovery code alone, and says so',
+      g1.text === ONLY_ME.secret && !g1.field && /an only-me file: its one key slot opens with your own key, from your recovery words alone/.test(g1.stat), g1.stat.slice(0, 200));
+    // 2 · shared to the soul (pq:gatesoul) through X-Wing by a stranger: nothing known opens it, so the page asks
+    const strangerRoot = new Uint8Array(32).fill(0x2b);
+    const toSoul = await NODE_BPQ.seal(new TextEncoder().encode('shared to gatesoul'), { self: NODE_BPQ.rootVault(strangerRoot), to: [EXPECT.kem.publicKey], meta: { name: 'to-soul.txt', type: 'text/plain' } });
+    await page.setInputFiles('#pq-open-file', { name: 'to-soul.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toSoul) });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; document.getElementById('pq-open').click(); });
+    await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
+    const g2 = await page.evaluate(() => ({ stat: document.getElementById('pq-open-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, label: document.querySelector('label[for="pq-open-soul"]')?.textContent || '' }));
+    ok('forgotten soul: a file shared to the soul asks for the soul name it was shared to, and opens nothing yet',
+      g2.links === 0 && /the soul name this file was sealed or shared under/.test(g2.label) && /sealed or shared under one of your souls/.test(g2.stat) && /type that soul name \(the name on its card\)/.test(g2.stat) && !/[–—]/.test(g2.stat + g2.label), g2.stat.slice(0, 200));
+    // 3 · a wrong name does not open it and is not kept
+    await page.fill('#pq-open-soul', 'notmysoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForFunction(() => /does not open it/.test(document.getElementById('pq-open-soul-stat').textContent), null, { timeout: 20000 });
+    const g3 = await page.evaluate(() => ({ msg: document.getElementById('pq-open-soul-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: a wrong name does not open the file and is not kept',
+      g3.links === 0 && /notmysoul does not open it; the name was not kept/.test(g3.msg) && !g3.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g3));
+    // 4 · the right name opens it, and only then is the name kept, as the forge keeps it
+    await page.fill('#pq-open-soul', 'gatesoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g4 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: the right soul name opens the shared file through its reader slot',
+      g4.text === 'shared to gatesoul' && g4.name === 'to-soul.txt' && /opened through a reader slot/.test(g4.stat) && /opened as gatesoul/.test(g4.stat), g4.stat.slice(0, 200));
+    ok('forgotten soul: the name that opened it is kept as a forge context, nothing else',
+      g4.ctx.includes('pq:ml-kem-768:gatesoul') && !g4.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g4.ctx));
+    // 5 · forget again (the reload clears the soul and the contexts), then an only-me file sealed the
+    //     pre-ruling way (one self slot under the pq:gatesoul vault) asks for the name and opens with it
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
+    const oldStyle = await NODE_BPQ.seal(new TextEncoder().encode('sealed before the ruling'), { self: EXPECT, meta: { name: 'old.txt', type: 'text/plain' } });
+    ok('pre-ruling only-me file: one self slot, no X-Wing slot', NODE_BPQ.inspect(oldStyle).slots.map(s => s.to).join() === 'self');
+    await page.setInputFiles('#pq-open-file', { name: 'old.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(oldStyle) });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; document.getElementById('pq-open').click(); });
+    await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
+    const g5 = await page.evaluate(() => ({ links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
+    ok('forgotten soul: a pre-ruling only-me file (no reader slot) still offers the soul name field', g5.links === 0 && g5.ctx.length === 0, JSON.stringify(g5));
+    await page.fill('#pq-open-soul', 'notmysoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForFunction(() => /does not open it/.test(document.getElementById('pq-open-soul-stat').textContent), null, { timeout: 20000 });
+    const g6 = await page.evaluate(() => ({ links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: a wrong name neither opens the pre-ruling file nor is kept', g6.links === 0 && !g6.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g6));
+    await page.fill('#pq-open-soul', 'gatesoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g7 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), stat: document.getElementById('pq-open-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: the soul name opens the pre-ruling only-me file through its own slot, and is kept',
+      g7.text === 'sealed before the ruling' && /an only-me file: its one key slot opens with your own key/.test(g7.stat) && !/recovery words alone/.test(g7.stat) && /opened as gatesoul/.test(g7.stat) && g7.ctx.includes('pq:ml-kem-768:gatesoul') && !g7.ctx.some(c => /notmysoul/.test(c)), g7.stat.slice(0, 200));
     await page.close();
   }
 

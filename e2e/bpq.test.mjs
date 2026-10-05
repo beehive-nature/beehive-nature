@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { createHash, createCipheriv, hkdfSync } from 'node:crypto';
+import { createHash, createHmac, createCipheriv, hkdfSync } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -310,4 +310,65 @@ test('wiped keys refuse to sign or decapsulate', () => {
   k.wipe();
   assert.throws(() => k.dsa.sign(new Uint8Array(1)), e => e.code === 'wiped');
   assert.throws(() => k.kem.decapsulate(new Uint8Array(1120)), e => e.code === 'wiped');
+});
+
+// Founder ruling 2026-10-04 (SPEC-BPQ-1 §1, §2): "only me" opens from the phrase alone.
+const hkdfExpand32 = (prk, info) => new Uint8Array(createHmac('sha256', prk).update(Buffer.concat([Buffer.from(info, 'utf8'), Buffer.from([1])])).digest());
+
+test('the phrase-only vault key is the vault label under context root (an independent HKDF-Expand agrees), and is no persona vault', () => {
+  assert.equal(V.rootVault.context, 'root');
+  assert.equal(V.rootVault.label, 'BDID-v1/vault-key');
+  for (const row of V.rootVault.keys) {
+    const prk = rootOf(row.rootFrom), rv = B.rootVault(prk);
+    assert.equal(rv.length, 32);
+    assert.deepEqual(rv, hkdfExpand32(prk, 'BDID-v1/vault-keyroot'));
+    assert.equal(B.b64u(createHash('sha3-256').update(rv).digest()), row.rootVaultKeySha3);
+    assert.notDeepEqual(rv, B.keys(prk, 'pq:vector').vault.key);
+  }
+  assert.throws(() => B.rootVault(new Uint8Array(31)), e => e.code === 'length');
+});
+
+test('root vault vector objects open for their readers and refuse everyone else', async () => {
+  const cred = (n, how) => {
+    const r = V.keys.find(k => k.name === n);
+    return how === 'root' ? { self: B.rootVault(rootOf(r.rootFrom)) } : how === 'self' ? { self: keysOf(n) } : { kem: keysOf(n) };
+  };
+  for (const o of V.rootVault.objects) {
+    const obj = B.unb64u(o.object);
+    for (const who of o.opens) {
+      const r = await B.open(obj, cred(...who.split(':')));
+      assert.equal(B.b64u(createHash('sha3-256').update(r.bytes).digest()), o.plaintextSha3, `${o.name} ${who}`);
+      assert.deepEqual(r.meta, o.meta);
+      if (o.sealedBy) { assert.equal(r.sealedBy.ok, true); assert.equal(r.sealedBy.id, o.sealedBy); }
+      else assert.equal(r.sealedBy, null);
+    }
+    for (const who of o.refuses) {
+      await assert.rejects(B.open(obj, cred(...who.split(':'))), e => e.code === 'no_key', `${o.name} must refuse ${who}`);
+    }
+  }
+});
+
+test('a self slot under the root vault looks like one under a persona vault, and two root seals share no slot bytes', async () => {
+  const prk = rootOf(V.keys[0].rootFrom), plain = new TextEncoder().encode('same shape');
+  // every field: its name, its JSON type, its length (and `to`, the only fixed value)
+  const shape = slots => slots.map(s => Object.keys(s).sort().map(k => `${k}:${typeof s[k]}:${String(s[k]).length}${k === 'to' ? '=' + s[k] : ''}`).join(','));
+  const root1 = B.inspect(await B.seal(plain, { self: B.rootVault(prk) }));
+  const root2 = B.inspect(await B.seal(plain, { self: B.rootVault(prk) }));
+  const persona = B.inspect(await B.seal(plain, { self: B.keys(prk, 'pq:vector') }));
+  assert.deepEqual(shape(root1.slots), ['to:string:4=self,w:string:64']);
+  assert.deepEqual(shape(root1.slots), shape(persona.slots));
+  assert.deepEqual(Object.keys(root1.core).sort(), Object.keys(persona.core).sort());
+  // the same key and the same plaintext still give unrelated slots: fresh oid and file key each time
+  const w1 = B.unb64u(root1.slots[0].w), w2 = B.unb64u(root2.slots[0].w);
+  assert.equal(w1.length, 48);
+  assert.notEqual(root1.core.oid, root2.core.oid);
+  assert.equal(includes(root2.keysBytes, root1.slots[0].w), false);
+  for (let i = 0; i + 8 <= w1.length; i++) assert.equal(includes(w2, w1.subarray(i, i + 8)), false, 'an 8-byte run of one slot appears in the other');
+});
+
+test('the context "root" is reserved: keys() and successionKeys() refuse it, rootVault is the only way in', () => {
+  const prk = rootOf(V.keys[0].rootFrom);
+  assert.throws(() => B.keys(prk, 'root'), e => e.code === 'context_reserved');
+  assert.throws(() => B.successionKeys(prk, 'root'), e => e.code === 'context_reserved');
+  assert.equal(B.keys(prk, 'pq:root').context, 'pq:root');   // a persona named root is still a pq: context
 });
