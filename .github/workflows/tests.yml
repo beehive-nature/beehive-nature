@@ -912,6 +912,9 @@ jobs:
       - name: Bridge and account forge — one paste never signs twice; the forge reads the name and says its price
         if: always()
         run: node e2e/wallet-bridge-acct.mjs
+      - name: Composer — what a link, a contract or a worker says is shown as text and never runs, in all three registers
+        if: always()
+        run: node e2e/wallet-compose-xss.mjs
       - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
         if: always()
         run: node e2e/wallet-unified.mjs
