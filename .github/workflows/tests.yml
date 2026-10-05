@@ -173,6 +173,10 @@ jobs:
           npm ci --ignore-scripts
           npm test
           npm run prove
+      - name: doxx tungsten harness — no false success, no secret in a receipt
+        if: always()
+        working-directory: tools/net-doxx
+        run: npm test
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh

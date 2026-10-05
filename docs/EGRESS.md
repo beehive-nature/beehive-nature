@@ -63,6 +63,13 @@ row below is a data-plane call the user's operation asked for.
 | price-feed | `ams.usda.gov/mnreports/fvhemp` | hemp-seed price series (documented source, not an oracle) |
 | ceremony scripts (`docs/dispatches/ceremony/`) | npm registry, Turbo (`upload.ardrive.io` family), Stripe checkout | founder-run, one-time, by design |
 
+## tools/net-doxx (tungsten test harness, founder-run only)
+
+| endpoint | purpose | when it fires | override / kill |
+|---|---|---|---|
+| `config.doxx.net/v1/` | doxx NETWORK adapter: read state, create and delete three test tunnels, add and remove firewall rules, mint one role=device credential | only when the founder runs `tools/net-doxx/live.sh`; never in CI (tests use a fake) | do not run the script; the token is typed per run and never stored |
+| doxx WireGuard servers (`wireguard.*.doxx.net:51820`) | the test tunnels, inside network namespaces bnrtt-A/B/C | same run | the namespaces are deleted on exit |
+
 ## Flagged, not yet uniform
 
 1. **Adapter overrides are code-level (`with_url`), not env-level.** The relay binary
