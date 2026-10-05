@@ -9705,6 +9705,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
          pending count: a cleared send that still sits in some pool is REPLACED at its own nonce and
          priced above it (a pool replaces only at 10% more), never joined by nonce + 1 */
       var over=opt&&opt.over||null;
+      if(over&&String(over.from||'').toLowerCase()!==from.toLowerCase())over=null;   /* a mark is only ever this address's */
       var nonceHex=await evmCall('eth_getTransactionCount',[from,over?'latest':'pending'],railKey);
       if(!evmHex(nonceHex)) throw new Error(rail.label+' gave no nonce — refusing to guess it');
       var nonce=parseInt(nonceHex,16);
@@ -9801,25 +9802,56 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(a&&a.result&&a.result.blockNumber)return {phase:a.result.status==='0x0'?'reverted':'confirmed'};
     return null;
   }
-  /* every host is asked whether it holds these very bytes (in its pool or a block): true when one
-     does; false only when EVERY host answered that it does not (result null); null when any host
-     timed out, errored, was rate limited or sent something else. The host whose answer was lost is
-     often the one that took the bytes, so its silence is never read as a no. */
-  async function evmKnown(p){
-    var hosts=railOf(p.rail).hosts, quiet=false;
+  /* one question to EVERY host of the rail. k is true when one host says yes (yes(result)); false
+     only when every host answered no (result null); null when any host timed out, errored, was
+     rate limited or sent something else. A host behind the chain, or the host whose answer was
+     lost (often the one that took the bytes), is never read as a no. */
+  function evmHostName(h){ return String(h).replace(/^https?:\/\//,'') }
+  async function evmAll(method,params,railKey,yes){
+    var hosts=railOf(railKey).hosts, answered=0, silent=[];
     for(var i=0;i<hosts.length;i++){
       var d=null;
-      try{ var r=await fetchT(hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getTransactionByHash',params:[p.hash]})}); d=r.ok?await r.json():null }catch(e){ d=null }
-      if(d&&d.result)return true;
-      if(!(d&&!d.error&&('result' in d)&&d.result===null))quiet=true;
+      try{ var r=await fetchT(hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})}); d=r.ok?await r.json():null }catch(e){ d=null }
+      if(d&&d.result&&yes(d.result))return {k:true,result:d.result};
+      if(d&&!d.error&&('result' in d)&&d.result===null)answered++; else silent.push(evmHostName(hosts[i]));
     }
-    return quiet?null:false;
+    return {k:silent.length?null:false,answered:answered,silent:silent,n:hosts.length};
+  }
+  /* does any host hold these very bytes, in its pool or a block */
+  function evmKnown(p){ return evmAll('eth_getTransactionByHash',[p.hash],p.rail,function(){ return true }) }
+  /* is this hash in a block on any host */
+  function evmReceiptAll(hash,railKey){ return evmAll('eth_getTransactionReceipt',[hash],railKey,function(r){ return !!r.blockNumber }) }
+  /* silence is never read as a no, but a host that never answers must not hold a lane for good:
+     once EVM_QUIET_TRIES checks across at least EVM_QUIET_MS each had at least half of the rail's
+     hosts answer no and none answer yes, the hosts that answered decide, and the silent ones are
+     named. The count lives on the record it decides for (rec.quiet), so it carries across presses
+     and reloads, and any yes, or too few answers, starts it again. */
+  var EVM_QUIET_TRIES=3, EVM_QUIET_MS=120000;
+  function evmQuorum(rec,a){
+    if(a.k!==null||!(a.answered>=1&&a.answered*2>=a.n)){ delete rec.quiet; return false }
+    var q=rec.quiet||{first:Date.now(),tries:0,silent:[]};
+    q.tries++; a.silent.forEach(function(h){ if(q.silent.indexOf(h)<0)q.silent.push(h) });
+    rec.quiet=q;
+    return q.tries>=EVM_QUIET_TRIES&&Date.now()-q.first>=EVM_QUIET_MS;
+  }
+  function evmQuietSay(q,silent){
+    var who=(q&&q.silent&&q.silent.length?q.silent:silent||[]).join(', ')||'a host';
+    return who+' did not answer'+(q?' · '+q.tries+' quiet checks since '+new Date(q.first).toISOString().slice(11,19)+' UTC; the hosts that answered decide after '+EVM_QUIET_TRIES+' checks across '+(EVM_QUIET_MS/60000)+' minutes':'');
   }
   /* a send the reader cleared may still sit in some pool: until its nonce is used on chain, the
-     next send on that rail is signed at that nonce and priced above it (see evmSendRaw opt.over) */
+     next send from THAT address on that rail is signed at that nonce and priced over every
+     cleared one (see evmSendRaw opt.over). A mark is keyed by rail and address and keeps every
+     cleared hash at its nonce; one without an address or a list is not this design's and is dropped. */
   function evmDropKey(slot){ return String(slot).replace('bnr_evm_pending:','bnr_evm_dropped:') }
-  function evmDrops(slot){ try{ return JSON.parse(localStorage.getItem(evmDropKey(slot))||'{}')||{} }catch(e){ return {} } }
+  function evmMarkKey(rail,from){ return rail+':'+String(from||'').toLowerCase() }
+  function evmDrops(slot){
+    var d={}; try{ d=JSON.parse(localStorage.getItem(evmDropKey(slot))||'{}')||{} }catch(e){ d={} }
+    Object.keys(d).forEach(function(k){ var m=d[k]; if(!m||!m.from||!Array.isArray(m.sends)||k!==evmMarkKey(k.split(':')[0],m.from))delete d[k] });
+    return d;
+  }
   function evmDropsSet(slot,d){ if(Object.keys(d).length)localStorage.setItem(evmDropKey(slot),JSON.stringify(d)); else localStorage.removeItem(evmDropKey(slot)) }
+  /* our own replacement went into a block at the cleared nonce: no cleared send can land now */
+  function evmMarkUsed(p){ if(!p.mark)return; try{ var d=evmDrops(p.slot), m=d[p.mark]; if(m&&m.nonce===p.nonce){ delete d[p.mark]; evmDropsSet(p.slot,d) } }catch(e){} }
   async function evmSettle(p,fresh){
     if(!fresh){ var r0=await evmReceipt(p); if(r0)return r0 }
     var b=await evmBroadcast(p);
@@ -9832,16 +9864,24 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(b.low||b.no){   /* the nonce is used, or a node turned these very bytes away: the chain says which */
       var n=await evmAsk('eth_getTransactionCount',[p.from,'latest'],p.rail), rc=await evmAsk('eth_getTransactionReceipt',[p.hash],p.rail);
       var used=n&&evmHex(n.result)?parseInt(n.result,16):null, none=!!(rc&&('result' in rc)&&rc.result===null);
-      /* that nonce is used and no receipt carries our hash: another send took its place */
-      if(used!==null&&used>p.nonce&&none)return {phase:'replaced',why:b.said||b.no};
+      /* that nonce is used and no receipt carries our hash: another send took its place. Said only
+         when EVERY host has no receipt for our hash (a host behind the chain is never a no) */
+      if(used!==null&&used>p.nonce&&none){
+        var ra=await evmReceiptAll(p.hash,p.rail), rq=evmQuorum(p,ra);
+        try{ if(evmHeld(p))evmPendingSet(p) }catch(e){}
+        if(ra.k)return {phase:ra.result.status==='0x0'?'reverted':'confirmed'};
+        if(ra.k===false||rq)return {phase:'replaced',why:(b.said||b.no||'')+(rq?' · decided by the hosts that answered; '+evmQuietSay(p.quiet):'')};
+        return {phase:'quiet',why:b.said||b.no,quiet:p.quiet||null,silent:ra.silent};
+      }
       /* turned away before it ran, its nonce still unused and no block holds it: it is not in, and
          it goes in later only if these bytes are sent again once the address can pay. A press of
          check again cannot settle that, so the reader may clear it on purpose (never given back) */
       if(b.no&&used!==null&&used<=p.nonce&&none){
-        var k=await evmKnown(p);   /* a refusal is believed only when no host holds these bytes */
-        if(k===false)return {phase:'held',why:b.no};
-        if(k)return {phase:'submitted',why:b.no};
-        return {phase:'quiet',why:b.no};   /* a host did not answer: the refusal is not believed */
+        var a=await evmKnown(p), qd=evmQuorum(p,a);   /* a refusal is believed only when no host holds these bytes */
+        try{ if(evmHeld(p))evmPendingSet(p) }catch(e){}
+        if(a.k)return {phase:'submitted',why:b.no};
+        if(a.k===false||qd)return {phase:'held',why:b.no,quiet:qd?p.quiet:null};
+        return {phase:'quiet',why:b.no,quiet:p.quiet||null,silent:a.silent};   /* a host did not answer: the refusal is not believed yet */
       }
     }
     return {phase:b.sent?'submitted':b.off?'offline':'unknown',why:b.said||b.no||null};
@@ -9858,19 +9898,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(rc&&rc.result&&rc.result.blockNumber){ evmSay(st,p,{phase:rc.result.status==='0x0'?'reverted':'confirmed'},true); return }
       var used=n&&evmHex(n.result)?parseInt(n.result,16):null, none=!!(rc&&('result' in rc)&&rc.result===null);
       if(!none||used===null){ wlSay(st,[p.label+' did not answer, so your last send is kept for now. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'receipt '+JSON.stringify(rc)+' · latest nonce '+JSON.stringify(n)}]); return }
-      if(used>p.nonce){ evmSay(st,p,{phase:'replaced'},true); return }
-      var k=await evmKnown(p);
-      if(k){ evmSay(st,p,{phase:'submitted'},true); return }   /* a host holds it after all: it stays kept */
-      if(k===null){ wlSay(st,[p.label+' did not answer, so your last send is kept for now. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'eth_getTransactionByHash: a host did not answer, so it is not known that no pool holds these bytes'}]); return }
+      if(used>p.nonce){   /* the nonce is used: every host is asked for OUR receipt first */
+        var ra=await evmReceiptAll(p.hash,p.rail), rq=evmQuorum(p,ra);
+        try{ if(evmHeld(p))evmPendingSet(p) }catch(e){}
+        if(ra.k){ evmSay(st,p,{phase:ra.result.status==='0x0'?'reverted':'confirmed'},true); return }
+        if(ra.k===false||rq){ evmSay(st,p,{phase:'replaced',why:rq?'decided by the hosts that answered; '+evmQuietSay(p.quiet):null},true); return }
+        wlSay(st,[p.label+' did not answer, so your last send is kept for now. try again in a minute. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'eth_getTransactionReceipt: '+evmQuietSay(p.quiet,ra.silent)}]); return }
+      var a=await evmKnown(p), qd=evmQuorum(p,a);
+      try{ if(evmHeld(p))evmPendingSet(p) }catch(e){}
+      if(a.k){ evmSay(st,p,{phase:'submitted'},true); return }   /* a host holds it after all: it stays kept */
+      if(a.k===null&&!qd){ wlSay(st,[p.label+' did not answer, so your last send is kept for now. try again in a minute. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'eth_getTransactionByHash: '+evmQuietSay(p.quiet,a.silent)+', so it is not known that no pool holds these bytes'}]); return }
       if(!evmHeld(p)){ seRefresh(); return }   /* another tab settled it first: the lane says where it stands */
-      var dr=evmDrops(p.slot), was=dr[p.rail];
-      var gp=evmHex(p.gp)?p.gp:null;   /* the highest price seen at this nonce, so the next send outbids every cleared one */
-      if(was&&was.nonce===p.nonce&&evmHex(was.gp)&&(!gp||BigInt(was.gp)>BigInt(gp)))gp=was.gp;
-      dr[p.rail]={nonce:p.nonce,gp:gp,hash:p.hash,what:p.amount+' '+p.sym+' to '+evmShort(p.to)};
+      var dr=evmDrops(p.slot), mk=evmMarkKey(p.rail,p.from), was=dr[mk];
+      var gp=evmHex(p.gp)?p.gp:null;   /* the highest price of every cleared send, so the next send outbids them all */
+      if(was&&evmHex(was.gp)&&(!gp||BigInt(was.gp)>BigInt(gp)))gp=was.gp;
+      var sends=(was?was.sends:[]).filter(function(x){ return x.hash!==p.hash }).concat([{hash:p.hash,what:p.amount+' '+p.sym+' to '+evmShort(p.to)}]);
+      dr[mk]={from:p.from,nonce:was?Math.min(was.nonce,p.nonce):p.nonce,gp:gp,sends:sends};   /* every cleared hash is kept, never overwritten */
       try{ evmDropsSet(p.slot,dr) }   /* the mark first: the bytes are never let go before the next send knows their nonce */
       catch(se){ wlSay(st,['this browser is out of room to note the cleared send, so it stays kept. free some browser storage, then ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'drop mark write failed: '+((se&&se.message)||se)}]); return }
       if(!evmDone(p,false)){ seRefresh(); return }
-      wlSay(st,['cleared. you can fill in a new send now.',{cy:'cleared by the reader: tx '+p.hash+' · nonce '+p.nonce+' unused on '+p.label+' · the cap entry stays · the signed bytes stay valid on chain until nonce '+p.nonce+' is used, so the next send on '+p.label+' is signed at nonce '+p.nonce+' at a higher price, to replace it'}]);
+      wlSay(st,['cleared. you can fill in a new send now.',{cy:'cleared by the reader: tx '+p.hash+' · nonce '+p.nonce+' unused on '+p.label+' · the cap entry stays · the signed bytes stay valid on chain until nonce '+p.nonce+' is used, so the next send on '+p.label+' is signed at nonce '+p.nonce+' at a higher price, to replace it'+(qd?' · cleared on the hosts that answered; '+evmQuietSay(p.quiet):'')}]);
     } finally { EVBUSY=false; $('se-go').disabled=false }
   }
   /* one calm sentence per settled state; true when the send is finished (the slot is cleared) */
@@ -9878,10 +9925,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var what=p.amount+' '+p.sym+' to '+evmShort(p.to), cy='tx '+p.hash+' · nonce '+p.nonce+' · '+p.explorer+p.hash+(r.why?' · '+r.why:'');
     var again={btn:'check again',on:function(){ $('se-go').click() }};
     st.style.color='';
-    if(r.phase==='confirmed'){ evmDone(p,false);
+    if(r.phase==='confirmed'){ evmDone(p,false); evmMarkUsed(p);
       wlSay(st,[last?'your last send went through: '+what+' on '+p.label+'. press send again for a new one.':'done. '+what+' went out on '+p.label+', and it is in a block.',{cy:cy}]);
       payStat(esc('📤 '+what+' on '+p.label+'.')); return true }
-    if(r.phase==='reverted'){ evmDone(p,false);
+    if(r.phase==='reverted'){ evmDone(p,false); evmMarkUsed(p);
       wlSay(st,[(last?'your last send':'this send')+' ('+what+') reached '+p.label+' but did not go through there, so only its fee was paid.',{cy:'receipt status 0x0 · '+cy}]); return true }
     if(r.phase==='refused'){ evmDone(p,true);
       $('se-to').value=p.to; $('se-amt').value=p.amount;   /* nothing went out: the typing comes back */
@@ -9894,10 +9941,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var why=/insufficient funds/i.test(r.why)?'because your address does not hold enough for it and its fee. press send once coins arrive to finish it, or clear it to send something else. '
         :/underpriced|fee cap less than|max fee per gas less than/i.test(r.why)?'because the fee it was signed with is too low there now. press send later to try it again, or clear it to send something else. '
         :'because it cannot run there. clear it to send something else. ';
-      wlSay(st,[p.label+' turns down '+(last?'your last send':'this send')+' ('+what+') '+why,{btn:'clear it',on:function(){ evmDrop(st,p) }},{cy:'refused before it ran: '+r.why+' · nonce '+p.nonce+' is still unused, so these bytes go in later only if they are sent again once the address can pay · clearing keeps the cap entry · '+cy}]);
+      wlSay(st,[p.label+' turns down '+(last?'your last send':'this send')+' ('+what+') '+why,{btn:'clear it',on:function(){ evmDrop(st,p) }},{cy:'refused before it ran: '+r.why+' · nonce '+p.nonce+' is still unused, so these bytes go in later only if they are sent again once the address can pay · clearing keeps the cap entry'+(r.quiet?' · decided by the hosts that answered; '+evmQuietSay(r.quiet):'')+' · '+cy}]);
       return false }
     if(r.phase==='submitted') wlSay(st,[(last?'your last send ('+what+') is with '+p.label+' and not in a block yet':'sent. '+p.label+' has it and has not put it in a block yet')+', so nothing new is signed until it is. ',again,{cy:cy}]);
-    else if(r.phase==='offline'||r.phase==='quiet') wlSay(st,[p.label+' did not answer, so this wallet cannot tell yet whether '+(last?'your last send':'it')+' went out. nothing new is signed until it is known. ',again,{cy:(r.phase==='quiet'?'a node turned these bytes away, but a host did not answer whether it holds them (eth_getTransactionByHash), so the refusal is not believed':'no node answered the broadcast')+'; the identical bytes are kept · '+cy}]);
+    else if(r.phase==='quiet') wlSay(st,[p.label+' did not answer, so this wallet cannot tell yet whether '+(last?'your last send':'it')+' went out. check again in a minute; nothing new is signed until it is known. ',again,{cy:'not every host answered ('+evmQuietSay(r.quiet,r.silent)+'), so no refusal and no missing receipt is believed yet; the identical bytes are kept · '+cy}]);
+    else if(r.phase==='offline') wlSay(st,[p.label+' did not answer, so this wallet cannot tell yet whether '+(last?'your last send':'it')+' went out. nothing new is signed until it is known. ',again,{cy:'no node answered the broadcast; the identical bytes are kept · '+cy}]);
     else wlSay(st,[p.label+' did not say yet whether '+(last?'your last send':'it')+' went in, so nothing new is signed until it does. ',again,{cy:cy}]);
     return false;
   }
@@ -9927,7 +9975,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if((amt.split('.')[1]||'').length>asset.decimals){ wlSay(st,[asset.symbol+' has '+asset.decimals+' decimals, so type at most '+asset.decimals+' digits after the point.']); $('se-amt').focus(); return }
     if(!capGate(asset.symbol,Number(amt),st))return;
     wlSay(st,['reading the fee and signing…',{cy:'EIP-155 on chain '+rail.chainId+', signed in this tab'}]);
-    var t, drops=evmDrops(slot), over=drops[railKey]||null;   /* a send cleared on this rail whose nonce may be unused */
+    var me=evmAddrOf(), mk=evmMarkKey(railKey,me.addr); me.seed.fill(0);
+    var t, over=evmDrops(slot)[mk]||null;   /* a send THIS address cleared on this rail, whose nonce may be unused */
     /* the amount is a STRING all the way to the signer — parseFloat here
        would re-introduce exactly the drift toBaseUnits exists to remove */
     try{ t=await evmSendRaw(railKey,to,assetKey,amt,over?{over:over}:null) }
@@ -9937,19 +9986,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     if(SOUL!==soul){ wlSay(st,['you connected another name while this was signing, so nothing was sent. press send to start again.',{cy:'signed for '+soul+' while '+SOUL+' is connected: dropped before any broadcast, nothing counted on the cap'}]); return }
-    if(over&&t.nonce>over.nonce){   /* that nonce is used on chain: by the cleared send itself, or by another */
-      var orc=await evmAsk('eth_getTransactionReceipt',[over.hash],railKey);
+    if(over&&t.nonce>over.nonce){   /* that nonce is used on chain: by a cleared send, or by another */
+      /* every cleared hash is asked of EVERY host: one receipt anywhere wins, and a host that is
+         behind or silent never reads as "not in" (until the named quorum of evmQuorum) */
+      var hit=null, spent=false, unk=null;
+      for(var ci=0;ci<over.sends.length&&!hit&&!spent;ci++){
+        var ra=await evmReceiptAll(over.sends[ci].hash,railKey);
+        if(ra.k){ if(ra.result.status==='0x0')spent=true; else hit=over.sends[ci] }   /* reverted: its nonce is used, nothing moved */
+        else if(ra.k===null) unk=unk?{k:null,answered:Math.min(unk.answered,ra.answered),silent:unk.silent.concat(ra.silent.filter(function(h){ return unk.silent.indexOf(h)<0 })),n:ra.n}:ra;
+      }
       if(SOUL!==soul){ wlSay(st,['you connected another name while this was signing, so nothing was sent. press send to start again.',{cy:'signed for '+soul+' while '+SOUL+' is connected: dropped before any broadcast, nothing counted on the cap'}]); return }
-      if(!(orc&&('result' in orc))){ wlSay(st,[rail.label+' did not answer just now, so nothing was sent. ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:'the receipt of the cleared send '+over.hash+' (nonce '+over.nonce+') could not be read; the new one was signed and dropped unsent, nothing counted'}]); return }
-      delete drops[railKey]; try{ evmDropsSet(slot,drops) }catch(x){}
-      if(orc.result&&orc.result.blockNumber&&orc.result.status!=='0x0'){   /* it went in after all: never a second payment on top */
+      var dm=evmDrops(slot), m=dm[mk];
+      if(!hit&&!spent&&unk&&m){
+        var qd=evmQuorum(m,unk); try{ evmDropsSet(slot,dm) }catch(x){}
+        if(!qd){ wlSay(st,[rail.label+' did not answer just now, so nothing was sent. try again in a minute. ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:'the receipt of a cleared send at nonce '+over.nonce+' was not known on every host: '+evmQuietSay(m.quiet,unk.silent)+'; the new one was signed and dropped unsent, nothing counted'}]); return }
+      }
+      if(m){ delete dm[mk]; try{ evmDropsSet(slot,dm) }catch(x){} }
+      if(hit){   /* it went in after all: never a second payment on top */
         $('se-to').value=to; $('se-amt').value=amt;
-        wlSay(st,['the send you cleared ('+(over.what||'nonce '+over.nonce)+') went in after all, so nothing new was sent. check your coins, then press send again if you still mean it. ',{btn:'see your coins',on:seRefresh},{cy:'cleared tx '+over.hash+' has a receipt at nonce '+over.nonce+'; the new one was signed and dropped unsent, nothing counted'}]);
+        wlSay(st,['the send you cleared ('+(hit.what||'nonce '+over.nonce)+') went in after all, so nothing new was sent. check your coins, then press send again if you still mean it. ',{btn:'see your coins',on:seRefresh},{cy:'cleared tx '+hit.hash+' has a receipt at nonce '+over.nonce+'; the new one was signed and dropped unsent, nothing counted'}]);
         return;
       }
     }
     var fee=fromBaseUnits(t.gas*t.gasPrice,18);
-    var p={slot:slot,gp:'0x'+t.gasPrice.toString(16),rail:railKey,label:rail.label,raw:t.rawHex,hash:t.hash,nonce:t.nonce,from:t.from,to:to,amount:amt,sym:asset.symbol,fee:fee,explorer:rail.explorer,at:Date.now()};
+    var p={slot:slot,mark:(over&&t.nonce===over.nonce)?mk:null,gp:'0x'+t.gasPrice.toString(16),rail:railKey,label:rail.label,raw:t.rawHex,hash:t.hash,nonce:t.nonce,from:t.from,to:to,amount:amt,sym:asset.symbol,fee:fee,explorer:rail.explorer,at:Date.now()};
     try{ evmPendingSet(p) }   /* PERSIST BEFORE BROADCAST — the law */
     catch(se){ wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:'pending write failed: '+((se&&se.message)||se)}]); return }
     p.cap={unit:asset.symbol,amt:Number(amt),day:capRecord(asset.symbol,Number(amt))};   /* counted once signed and kept */
