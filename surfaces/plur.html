@@ -493,10 +493,10 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 </style>
 <script>
 (function(){
- var frame=document.getElementById('plurFestival'),enter=document.getElementById('plurFestivalEnter'),observer,focusOnLoad;
+ var frame=document.getElementById('plurFestival'),enter=document.getElementById('plurFestivalEnter'),observer,focusOnLoad,landOnLoad;
  // Explicit entry: the frame has no src until the reader presses an "Enter the festival" control,
  // so reading or scrolling PLUR never starts the festival's own chain reads.
- function open(e){if(frame.getAttribute('src'))return;frame.src=frame.dataset.src;frame.hidden=false;focusOnLoad=enter.contains(e.target);enter.hidden=true;}
+ function open(e){if(frame.getAttribute('src'))return;frame.src=frame.dataset.src;frame.hidden=false;focusOnLoad=enter.contains(e.target);landOnLoad=true;enter.hidden=true;}
  document.addEventListener('click',function(e){if(e.target.closest('a[href="#festival"]'))open(e);});
  function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
  frame.addEventListener('load',function(){
@@ -504,6 +504,10 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
   function resize(){var h=Math.ceil(doc.body.getBoundingClientRect().height)+8;if(h>0&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';}
   if(observer)observer.disconnect();observer=new ResizeObserver(function(){sync();resize();});observer.observe(doc.body);sync();resize();
   if(focusOnLoad){focusOnLoad=false;frame.focus({preventScroll:true});}
+  // The press lands on the section once the frame and its faces have settled: a face that
+  // arrives after the jump reflows the page, and the reader should still be where they pressed.
+  if(landOnLoad){landOnLoad=false;var land=function(){resize();document.getElementById('festival').scrollIntoView({block:'start'});};
+   land();Promise.all([document.fonts?document.fonts.ready:0,doc.fonts?doc.fonts.ready:0]).then(land);}
  });
  document.addEventListener('bregister',sync);
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
