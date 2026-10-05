@@ -1282,10 +1282,109 @@ try {
     const sgq = await sg.evaluate(() => ({ text: window.__calm(document.getElementById('sign-stat')), btns: document.querySelectorAll('#sign-stat button').length }));
     ok('sign sheet: on a browser that keeps no soul, the check shows on the sheet itself with its two answers',
       sgq.text.indexOf('this opens the soul ' + FP7 + '. is it yours?') === 0 && sgq.btns === 2, JSON.stringify(sgq));
-    const [sgdl] = await Promise.all([sg.waitForEvent('download', { timeout: 30000 }), sg.evaluate(() => [...document.querySelectorAll('#sign-stat button')].find(b => /yes, open it/.test(b.textContent)).click())]);
+    // review6 [2][5] · the check ends without a yes (the page is hidden): the sheet says so truly, and
+    //               the keychain's line and the glance keep no dead yes or no
+    await sg.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+    await sg.waitForFunction(() => /not answered/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.evaluate(CALM);
+    const sgx = await sg.evaluate(() => ({ sheet: document.getElementById('sign-stat').textContent, kc: window.__calm(document.getElementById('kc-stat')), kcBtns: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent), glance: window.__calm(document.getElementById('sum-kc')), go: !document.getElementById('sign-go').disabled }));
+    ok('sign sheet: an unanswered check is said as that, never "no wallet passkey answered", and Sign can be pressed again',
+      sgx.sheet === 'The check was not answered, so nothing was signed. Press Sign again.' && sgx.go, JSON.stringify(sgx));
+    ok('keychain: a check that ended without a yes leaves no dead buttons in the keychain line or the glance',
+      !sgx.kcBtns.some(t => /yes, open it|no, try another/.test(t)) && sgx.kcBtns.includes('connect keychain') && /not connected/.test(sgx.glance) && !/one check/.test(sgx.glance), JSON.stringify(sgx));
+    // review6 [0] · yes opens the keychain and stops: the yes is never also the signature
+    let sgDl = 0; sg.on('download', () => { sgDl++; });
+    await sg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.getElementById('sign-go').click(); });
+    await sg.waitForFunction(() => /is it yours/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.evaluate(() => [...document.querySelectorAll('#sign-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await sg.waitForFunction(() => /keychain is open/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.waitForTimeout(500);
+    const sgo = await sg.evaluate(() => ({ t: document.getElementById('sign-stat').textContent, go: !document.getElementById('sign-go').disabled && !document.getElementById('sign-go').hidden, live: /keychain live/.test(document.getElementById('kc-stat').textContent) }));
+    ok('sign sheet: the yes opens the keychain and stops there, nothing is signed, and Sign waits for its own press',
+      sgo.t === 'Your keychain is open. Press Sign to sign the law.' && sgo.go && sgo.live && sgDl === 0, JSON.stringify(sgo) + ' downloads ' + sgDl);
+    const [sgdl] = await Promise.all([sg.waitForEvent('download', { timeout: 30000 }), sg.evaluate(() => document.getElementById('sign-go').click())]);
     await sg.waitForFunction(() => /^Done\./.test(document.getElementById('sign-stat').textContent), null, { timeout: 30000 });
-    ok('sign sheet: after yes the one press goes on and signs', !!sgdl);
+    ok('sign sheet: its own press then signs, in one press', !!sgdl);
     await sg.close();
+
+    // review6 [3][4] · while a check waits: make a new bzDiD points at the check, and the recovery words
+    //                 that open the keychain are not written over by the waiting press
+    const rw = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await rw.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await rw.addInitScript(stub);
+    await rw.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await rw.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await rw.evaluate(() => { window.__plan = [{ id: 'b2xkdmx0', prf: 13 }]; document.getElementById('kc-pass').click(); });
+    await rw.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await rw.evaluate(() => { window.__creates = 0; document.getElementById('kc-create').click(); });
+    await rw.evaluate(CALM);
+    const rwc = await rw.evaluate(() => ({ t: window.__calm(document.getElementById('kc-stat')), btns: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent), creates: window.__creates }));
+    ok('keychain: make a new bzDiD while the check waits points at the check, never "a prompt is already open"',
+      rwc.t.indexOf('answer this first. this opens the soul ') === 0 && rwc.btns.join('|') === 'yes, open it|no, try another passkey' && rwc.creates === 0 && !/already open/.test(rwc.t), JSON.stringify(rwc));
+    await rw.evaluate(() => {
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a)); document.getElementById('kc-recgo').click();
+    });
+    await rw.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    await rw.waitForTimeout(400);
+    const rwr = await rw.evaluate(() => ({ kc: document.getElementById('kc-stat').textContent, glance: document.getElementById('sum-kc').textContent }));
+    ok('keychain: the recovery words that open the keychain during a check are not written over by the waiting press',
+      /keychain live/.test(rwr.kc) && !/not answered|did not open/.test(rwr.kc) && /^your keychain is connected in this tab/.test(rwr.glance), JSON.stringify(rwr));
+    await rw.close();
+
+    // review6 [1] · a phone sign-in with another soul than the one kept for the name opens it for this
+    //               visit, and makes it the name's soul only on the reader's yes
+    const ph = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await ph.addInitScript(() => {
+      window.__socks = []; window.__sent = [];
+      class QWS { constructor(u) { this.url = u; this.readyState = 0; window.__socks.push(this); setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send(x) { window.__sent.push(x); } close() { this.readyState = 3; } }
+      window.WebSocket = QWS;
+    });
+    await ph.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await ph.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ_LIB && window.BNRQR && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    const FPA = await ph.evaluate(() => window.BZDIDKEY.deriveIdentity(new Uint8Array(32).fill(0x2a), 'bnr.b').fingerprint.words);
+    const FPB = await ph.evaluate(() => window.BZDIDKEY.deriveIdentity(new Uint8Array(32).fill(0x2b), 'bnr.b').fingerprint.words);
+    await ph.evaluate(fp => { localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_bind', JSON.stringify({ name: { gatesoul: fp }, souls: [fp] })); }, FPA);
+    await ph.reload({ waitUntil: 'load' });
+    await ph.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ_LIB && window.BNRQR && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    /* the phone's half, written here from the protocol: sealed to the desktop's two ephemerals */
+    const phoneGrant = () => ph.evaluate(async () => {
+      const BN = window.BnrSign, X = window.BPQ_LIB.xwing;
+      const b64d = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      const b64e = u => btoa(String.fromCharCode.apply(null, u)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; a.forEach(x => { o.set(x, p); p += x.length; }); return o; };
+      const hex = u => Array.from(u, b => b.toString(16).padStart(2, '0')).join('');
+      const q = b64d(window.__qrText.slice(window.__qrText.indexOf('#qr=') + 4)), sid = q.slice(0, 16), pub = q.slice(16, 49), commit = q.slice(49);
+      const hello = window.__sent.map(x => JSON.parse(x)).filter(m => m[0] === 'EVENT').map(m => JSON.parse(m[1].content)).find(o => o.xpk);
+      const xpk = b64d(hello.xpk), esk = BN.secp.utils.randomPrivateKey(), epk = BN.secp.getPublicKey(esk), enc = X.encapsulate(xpk);
+      const ikm = cat(BN.sha256(BN.secp.getSharedSecret(esk, pub)), enc.sharedSecret);
+      const info = cat(new TextEncoder().encode('bnr-qr-bridge-v2'), commit, epk, BN.sha256(enc.cipherText));
+      const ik = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: sid, info }, ik, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: sid }, key, new Uint8Array(32).fill(0x2b)));
+      const content = JSON.stringify({ v: 2, epk: b64e(epk), xct: b64e(enc.cipherText), iv: b64e(iv), ct: b64e(ct) });
+      const s = window.__socks.find(w => w.readyState === 1 && w.onmessage);
+      s.onmessage({ data: JSON.stringify(['EVENT', 'bnrqr' + hex(sid), { content }]) });
+    });
+    const askPhone = async () => {
+      await ph.evaluate(() => { window.__sent.length = 0; const m = window.BNRQR.make; if (!window.__qrHooked) { window.__qrHooked = 1; window.BNRQR.make = t => { window.__qrText = t; return m(t); }; } document.getElementById('kc-qr').click(); });
+      await ph.waitForFunction(() => window.__qrText && window.__sent.some(x => /xpk/.test(x)), null, { timeout: 10000 });
+      await phoneGrant();
+      await ph.waitForFunction(() => /your phone opened the soul/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+      await ph.evaluate(CALM);
+      return ph.evaluate(() => ({ t: window.__calm(document.getElementById('kc-stat')), fp: document.getElementById('kc-soul-fp').textContent, bind: JSON.parse(localStorage.getItem('bnr_bind') || 'null') }));
+    };
+    const p1 = await askPhone();
+    ok('phone: another soul than the one kept for the name opens for this visit and asks before it becomes the name\'s soul',
+      p1.fp === FPB && p1.t === 'your phone opened the soul ' + FPB + ', and this browser keeps another for gatesoul.b. make it gatesoul.b\u2019s soul? yes, make it gatesoul.b\u2019s soulno, only for now' && p1.bind.name.gatesoul === FPA, JSON.stringify(p1));
+    await ph.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /only for now/.test(b.textContent)).click());
+    ok('phone: no, only for now keeps the name\'s soul as it was', await ph.evaluate(fp => JSON.parse(localStorage.getItem('bnr_bind')).name.gatesoul === fp && /keychain live/.test(document.getElementById('kc-stat').textContent), FPA));
+    await ph.evaluate(() => document.getElementById('kc-out').click());
+    await askPhone();
+    await ph.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, make it/.test(b.textContent)).click());
+    ok('phone: yes makes the phone\'s soul the name\'s soul', await ph.evaluate(fp => JSON.parse(localStorage.getItem('bnr_bind')).name.gatesoul === fp && /soul now, and your keychain is open/.test(document.getElementById('kc-stat').textContent), FPB));
+    await ph.close();
 
     // 4b · a press on connect (pointerdown, then click) opens ONE prompt: the auto-connect hands off
     const one = await browser.newPage({ viewport: { width: 1100, height: 900 } });

@@ -442,6 +442,23 @@ try {
       const box = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
       const e = (Array.isArray(box) ? box : (box.entries || [])).find(x => x && x.phase === 'confirmed');
       ok('the outbox holds the signed bytes as confirmed (persist before submit)', !!e && /kingbeelovis::renew by kingbeelovis@active/.test(e.human_summary || ''), JSON.stringify(e || box).slice(0, 200));
+      // the keychain opened on the reader's check (an old pointer, a browser that keeps no soul): the
+      // sheet opens it and stops, and Sign then signs with its own press
+      const subs0 = state.submits;
+      await page.evaluate(() => { localStorage.removeItem('bnr_bind'); localStorage.removeItem('bnr_cred_fp'); });
+      await intentFor(page, 'live-0003', RENEW);
+      await page.goto(sheetUrl(RENEW, 'live-0003'), { waitUntil: 'load' });
+      await page.waitForSelector('#act-sheet', { timeout: 20000 });
+      await page.waitForFunction(() => /is it yours/.test(document.getElementById('act-stat').textContent), null, { timeout: 30000 });
+      await page.evaluate(() => [...document.querySelectorAll('#act-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+      await page.waitForFunction(() => /keychain is open/.test(document.getElementById('act-stat').textContent), null, { timeout: 30000 });
+      const s2 = await sheet(page);
+      ok('a sheet whose keychain opened on the reader\'s check stops there: nothing is signed, and Sign waits for its own press',
+        s2.state === 'wait' && /^Your keychain is open\. Press Sign to sign it\./.test(s2.stat) && !s2.goHidden && state.submits === subs0, JSON.stringify(s2) + ' submits ' + state.submits);
+      await page.evaluate(() => document.getElementById('act-go').click());
+      await page.waitForFunction(() => { const e = document.getElementById('act-stat'); return e && /^(done|fail)$/.test(e.getAttribute('data-state') || ''); }, null, { timeout: 60000 });
+      const s3 = await sheet(page);
+      ok('its own press then signs and sends once', s3.state === 'done' && state.submits === subs0 + 1, JSON.stringify(s3) + ' submits ' + state.submits);
       ok('at a glance now reads ready, and the receive address is the account', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓' && await page.evaluate(() => window.BNRPAY.railAddresses(null, 'king')[0].v) === 'kingbeelovis', await page.textContent('#sum-bridge'));
     }
     ok('no page errors in the one-press run', errors.length === 0, errors.join(' | '));

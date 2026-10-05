@@ -3245,9 +3245,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!MPRK){
       say('Confirm with your passkey…');
       CEREMONY=true;
-      try{ keychainOn(await connectSoul($('hv-add-stat'))) }
-      catch(e){ throw calm(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
+      var kid=null;
+      try{ kid=await connectSoul($('hv-add-stat')); keychainOn(kid) }
+      catch(e){
+        if(MPRK)throw calm('Your keychain is open. Paste the key again and press add to keep it.');
+        throw calm(e&&e.code==='soul_unconfirmed'?'The check was not answered, so nothing was kept. Press add again when you are ready.':/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was kept. Press add again when you are ready.':'Your keychain did not connect, so nothing was kept.') }
       finally{ CEREMONY=false }
+      /* the keychain opened on the reader's check: that press keeps nothing */
+      if(kid&&kid.asked)throw calm('Your keychain is open. Paste the key again and press add to keep it.');
     }
     var pub=hivePubOf(wif);
     say('Finding the Hive account this key belongs to…');
@@ -4124,9 +4129,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var sup=BZDIDKEY&&await BZDIDKEY.prfBrowserSupport();
         if(sup===false){say('fail','This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.',null,{code:'prf'});return false}
         CEREMONY=true;
-        try{ keychainOn(await connectSoul($('sign-sheet')?$('sign-stat'):$('pq-law-stat'))); }
-        catch(e){ var cancel=/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''); say('fail',cancel?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.',null,{code:cancel?'cancel':'nopasskey',err:e});return false }
+        var kid=null;
+        try{ kid=await connectSoul($('sign-sheet')?$('sign-stat'):$('pq-law-stat')); keychainOn(kid); }
+        catch(e){
+          if(MPRK){ say('wait','Your keychain is open. Press Sign to sign the law.',null,{code:'opened'}); return false }
+          var unc=e&&e.code==='soul_unconfirmed', cancel=!unc&&/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'');
+          say('fail',unc?'The check was not answered, so nothing was signed. Press Sign again.':cancel?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.',null,{code:unc?'unconfirmed':cancel?'cancel':'nopasskey',err:e});return false }
         finally{ CEREMONY=false }
+        /* the keychain opened on the reader's check: that press signs nothing */
+        if(kid&&kid.asked){ say('wait','Your keychain is open. Press Sign to sign the law.',null,{code:'opened'}); return false }
       }
       say('busy','Signing…',null,{code:'signing'});
       var law=LAW||await lawRead();
@@ -4158,6 +4169,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(i.code==='noload') wlSay(st,['this page did not finish loading, so reload it and press sign again. ',reload]);
     else if(i.code==='prf') wlSay(st,['this browser cannot use your passkey here, so open the wallet in Chrome, Edge or Safari.']);
     else if(i.code==='cancel') wlSay(st,['nothing was signed, so press sign when you are ready. ',again,cy]);
+    else if(i.code==='opened') wlSay(st,['your keychain is open. press ',again,' to sign.',{cy:'the keychain opened on your answer to the check (or another way), so that press signed nothing'}]);
+    else if(i.code==='unconfirmed') wlSay(st,['the check was not answered, so nothing was signed. ',again,cy]);
     else if(i.code==='nopasskey') wlSay(st,['no wallet passkey answered, so open the wallet on the device you use for it.',cy]);
     else if(i.code==='nolaw') wlSay(st,['the law files did not load, so check your connection and press sign again. ',again]);
     else wlSay(st,['nothing was signed, so press sign to try again. ',again,cy]);
@@ -5553,9 +5566,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      with none yet, one this browser opened or keeps a device list for. Another
      soul is refused and wiped before anything opens. On a browser that knows
      no soul yet, the first answer opens only after the reader confirms its six
-     words, and nothing is bound before that yes. The recovery words, the phone
-     and a bzDiD made here are the soul by the reader's own act, so they set the
-     name's soul (and so undo a wrong earlier one). */
+     words, and nothing is bound before that yes. The recovery words and a bzDiD
+     made here are the soul by the reader's own act, so they set the name's soul
+     (and so undo a wrong earlier one); a phone sign-in sets it when the name has
+     none, and replaces another only on the reader's yes. */
   var BIND_KEY='bnr_bind';
   function bindAll(){
     var o=null; try{ o=JSON.parse(localStorage.getItem(BIND_KEY)||'null') }catch(e){}
@@ -5610,8 +5624,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      Nothing is bound (bnr_bind, bnr_cred_fp) before that yes. No wipes it and
      runs the picker again; with no answer it is wiped after two minutes. The
      question shows in the keychain's line and in the line of the job that asked
-     (where), with the way to it on the glance. */
+     (where), with the way to it on the glance. A soul opened on this yes comes
+     back marked (asked): the job that asked stops there, so the yes is never
+     also the signature. A check that ends without a yes rewrites its lines,
+     unless another check has taken its place. */
   var KC_ASK=null;
+  /* nothing is open: the keychain's line and the glance say so, with the way in */
+  function kcNotAll(){
+    kcNot();
+    var g=$('sum-kc'); if(g){ wlSay(g,['your keychain is not connected in this tab. ',{to:'kc-sec',t:'connect your keychain'}]); g.style.color='var(--amber)' }
+  }
   function soulAsk(id2,credId,where,how){
     if(KC_ASK)KC_ASK.drop('another check replaced it');
     return new Promise(function(resolve,reject){
@@ -5621,6 +5643,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       function say(parts){ lines().forEach(function(e){ wlSay(e,parts) }) }
       function drop(why){
         if(done)return; end(); soulDrop(id2);
+        if(!MPRK&&!KC_ASK)kcNotAll();   // no dead yes or no is left behind
         var x=new Error('soul_unconfirmed: '+why+'; soul "'+fp+'" was wiped and nothing opened'); x.code='soul_unconfirmed'; reject(x);
       }
       function yes(){
@@ -5628,16 +5651,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         bindSoul(fp,false);
         /* an old pointer (from before its mark) stays only as the passkey the reader just confirmed */
         if(CRED_ID&&!credFp()){ if(CRED_ID===credId)saveCred(credId,fp); else saveCred(null) }
+        id2.asked=true;   // opened on this press of yes: a job that asked stops here and signs nothing
         resolve(id2);
       }
       function no(){
         if(done)return; end(); soulDrop(id2);
         if(CRED_ID&&CRED_ID===credId&&!credFp())saveCred(null);   // not theirs: never touched again as the founding passkey
         say(['touch another passkey.',{cy:'soul "'+fp+'" is not the reader\'s: it was wiped, nothing was bound, and the picker runs again'}]);
-        identityFromDiscoverable(where).then(resolve,reject);   // inside the press, so the browser lets the prompt open
+        identityFromDiscoverable(where).then(resolve,function(e){ if(!MPRK&&!KC_ASK)kcNotAll(); reject(e) });   // inside the press, so the browser lets the prompt open
       }
-      function show(){
-        say(['this opens the soul '+fp+'. is it yours? ',{btn:'yes, open it',on:yes},{btn:'no, try another passkey',on:no},
+      function show(lead){
+        say([(lead||'')+'this opens the soul '+fp+'. is it yours? ',{btn:'yes, open it',on:yes},{btn:'no, try another passkey',on:no},
           {cy:'the '+how+' ('+String(credId||'?').slice(0,12)+'…) opened soul "'+fp+'", and this browser keeps no soul yet to hold it to: nothing opens and nothing is bound (bnr_bind, bnr_cred_fp) until you say yes; it is wiped if nobody answers within 2 minutes'}]);
         var g=$('sum-kc'); if(g){ wlSay(g,['one check before your keychain opens. ',{to:'kc-sec',t:'open my keychain'}]); g.style.color='var(--amber)' }
       }
@@ -5792,10 +5816,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function kcConnect(){ $('kc-pass').click() }
   $('kc-pass').onclick=async function(){
     if(!BZDIDKEY){kcNoEngine();return}
-    if(KC_ASK){ KC_ASK.show(); return }   // the check is still waiting for its answer
+    if(KC_ASK){ KC_ASK.show('answer this first. '); return }   // the check is still waiting for its answer
     if(CEREMONY){ wlSay($('kc-stat'),['a passkey prompt is already open. finish it, then press again.',{cy:'one WebAuthn ceremony at a time (CEREMONY set)'}]); return }
     autoTried=true;          // a press is the visit's one attempt: no second prompt from a later tap
     CEREMONY=true;
+    var before=MPRK;
     try{
       var sup=await BZDIDKEY.prfBrowserSupport();
       if(sup===false){ wlSay($('kc-stat'),['this browser cannot open a passkey keychain. bring your soul in with ',{to:'kc-rec-scaffold',t:'your recovery words'},' instead.',{cy:"PublicKeyCredential.getClientCapabilities()['extension:prf'] === false"}]); return }
@@ -5803,6 +5828,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var id=await connectSoul();
       keychainOn(id);
     }catch(e){
+      /* another way opened the keychain while this waited, or a newer check now asks: their lines stand */
+      if((MPRK&&MPRK!==before)||KC_ASK)return;
       wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect));
     }finally{ CEREMONY=false }
   };
@@ -5836,7 +5863,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     wlSay($('kc-stat'),['touch your passkey to open your keychain.',{cy:'auto-connect: the first gesture of the visit (one attempt) runs connectSoul()'}]);
     CEREMONY=true;
     connectSoul().then(keychainOn).catch(function(e){
-      if(MPRK)return;
+      if(MPRK||KC_ASK)return;   // opened another way, or a newer check now asks
       wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect,'auto-connect'));
       /* the reader may be on another task: the glance says it too, with the way in */
       wlSay($('sum-kc'),['not connected · ',{to:'kc-sec',t:'open my keychain'}]);$('sum-kc').style.color='var(--amber)';
@@ -5959,6 +5986,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     b.appendChild(say); b.appendChild(box); b.appendChild(done);
   }
   async function runCreate(enrollFn,label){
+    if(KC_ASK){ KC_ASK.show('answer this first. '); return }   // the waiting check is the prompt that is open
     if(CEREMONY){ wlSay($('kc-stat'),['a passkey prompt is already open. finish it, then press again.',{cy:'one WebAuthn ceremony at a time (CEREMONY set)'}]); return }
     /* a device that keeps a soul opens that soul through its seal, and only
        through it: a bzDiD made now could never be opened by its passkey here */
@@ -6570,10 +6598,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           got=1;
           var id2=BZDIDKEY.deriveIdentity(pt,'bnr.b'); id2.masterPrk=pt;
           qrEnd();
-          bindSoul(soulFp(id2),true);   // the reader brought it from their phone: this name's soul now
+          /* the phone's soul opens for this visit. When this browser keeps another soul
+             for the name, the name's soul changes only on the reader's yes */
+          var fpP=soulFp(id2), keptP=SOUL?bindAll().name[SOUL]||null:null, ownP=SOUL;
+          bindSoul(fpP,false);
           keychainOn(id2);
           $('qr-sec').style.display='none';
-          wlSay($('kc-stat'),['you are signed in with your phone, and your keychain is open on this page. ',{to:'bal-sec',t:'see your accounts'},{cy:'logged in via phone · soul in tab memory · handshake keys scrubbed'}]);
+          if(keptP&&keptP!==fpP){
+            var nmP=ownP+'.b';
+            wlSay($('kc-stat'),['your phone opened the soul '+fpP+', and this browser keeps another for '+nmP+'. make it '+nmP+'\u2019s soul? ',
+              {btn:'yes, make it '+nmP+'\u2019s soul',on:function(){
+                if(KC_FP!==fpP||SOUL!==ownP){ kcIdle(); return }
+                bindSoul(fpP,true);
+                wlSay($('kc-stat'),['it is '+nmP+'\u2019s soul now, and your keychain is open on this page. ',{to:'bal-sec',t:'see your accounts'},{cy:'bnr_bind: '+ownP+' now keeps "'+fpP+'" (was "'+keptP+'")'}]) }},
+              {btn:'no, only for now',on:function(){ kcIdle() }},
+              {cy:'phone sign-in opened soul "'+fpP+'"; this browser keeps "'+keptP+'" for '+ownP+' (bnr_bind), and it stays unless you say yes'}]);
+          }
+          else wlSay($('kc-stat'),['you are signed in with your phone, and your keychain is open on this page. ',{to:'bal-sec',t:'see your accounts'},{cy:'logged in via phone · soul in tab memory · handshake keys scrubbed'}]);
         }catch(e){ /* garbage or replay — AEAD discarded it */ }
       };
       w.onerror=function(){ qrDead(w) }; w.onclose=function(){ qrDead(w) };
@@ -8376,15 +8417,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var sup=await BZDIDKEY.prfBrowserSupport();
       if(sup===false){tell('fail',['This browser cannot use your passkey here, so nothing was signed. Open the name desk in Chrome, Edge or Safari and press it there again. ',{href:'bnames.html',t:'go back to the name desk'}]);return 'stop'}
       CEREMONY=true;
-      try{ keychainOn(await connectSoul($('act-stat'))) }
+      var kid=null;
+      try{ kid=await connectSoul($('act-stat')); keychainOn(kid) }
       catch(e){
+        if(MPRK){tell('wait',['Your keychain is open. Press Sign to sign it.']);return 'fail'}
         // a page that opened by itself may not ask for a passkey: the press asks
         if(isAuto){tell('wait',['Press Sign, then confirm with your passkey.']);return 'fail'}
-        if(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''))tell('fail',['Nothing was signed. Press Sign again when you are ready.']);
+        if(e&&e.code==='soul_unconfirmed')tell('fail',['The check was not answered, so nothing was signed. Press Sign again.',{cy:(e&&e.message)||''}]);
+        else if(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''))tell('fail',['Nothing was signed. Press Sign again when you are ready.']);
         else tell('fail',['No wallet passkey answered, so nothing was signed. Open the name desk on the device you use for your wallet and press it there again. ',{href:'bnames.html',t:'go back to the name desk'}]);
         return 'fail'
       }
       finally{ CEREMONY=false }
+      /* the keychain opened on the reader's check: that press signs nothing */
+      if(kid&&kid.asked){tell('wait',['Your keychain is open. Press Sign to sign it.',{cy:'the keychain opened on your answer to the check, so that press signed nothing'}]);return 'fail'}
     }
     tell('busy',['Checking '+vacct()+'…']);
     await checkBridge();
@@ -9209,9 +9255,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!capGate(sym,amt,st))return;
       if(!MPRK){
         st.textContent='confirm with your passkey…'; CEREMONY=true;
-        try{ keychainOn(await connectSoul(st)) }
-        catch(e){ wlSay(st,/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?['nothing was sent. press send again when you are ready.']:['your keychain did not connect, so nothing was sent. ',again,{cy:(e&&e.message)||String(e)}]); return }
+        var kid=null, waits=['your keychain is open. press send to send '+amt+' '+sym+' to '+to+'.',{cy:'the keychain opened on your answer to the check (or another way), so this press signed and sent nothing'}];
+        try{ kid=await connectSoul(st); keychainOn(kid) }
+        catch(e){
+          if(MPRK){ wlSay(st,waits); return }
+          wlSay(st,e&&e.code==='soul_unconfirmed'?['the check was not answered, so nothing was sent. ',again,{cy:(e&&e.message)||''}]:/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?['nothing was sent. press send again when you are ready.']:['your keychain did not connect, so nothing was sent. ',again,{cy:(e&&e.message)||String(e)}]); return }
         finally{ CEREMONY=false }
+        /* the keychain opened on the reader's check: the send needs its own press, with the form as it is then */
+        if(kid&&kid.asked){ wlSay(st,waits); return }
+        if(!capGate(sym,amt,st))return;   // the cap is read again after the wait: another tab may have spent meanwhile
       }
       w=await hiveUnseal(acct);
       if(moved())return;

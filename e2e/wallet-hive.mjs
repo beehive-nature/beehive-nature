@@ -157,6 +157,25 @@ try {
     ok('one press sends 1 HIVE, written 1.000 HIVE, and the chain confirms it in words', (await page.textContent('#hs-stat')) === 'done. 1.000 HIVE went to someoneelse, and the chain confirmed it.' && state.broadcasts.length === 1 && state.broadcasts[0].operations[0][1].amount === '1.000 HIVE', await page.textContent('#hs-stat'));
     ok('the node would recover loviswater\'s active key from the signature', await recovers(state.broadcasts[0]));
     ok('nothing is left waiting once the chain confirmed it', await page.evaluate(() => localStorage.getItem('bnr_hive_pending:gatesoul')) === null);
+    if (reg === 'cypherpunk') {
+      // the keychain opened on the reader's check inside a send: it opens, and the send waits for its own press
+      await page.evaluate(() => {
+        document.getElementById('kc-out').click(); localStorage.removeItem('bnr_bind');
+        const b64u = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+        if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': true });
+        navigator.credentials.get = async () => ({ id: 'Zm91bmQ', rawId: b64u('Zm91bmQ').buffer, type: 'public-key', response: { userHandle: null }, getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(7).buffer } } }) });
+      });
+      const b0 = state.broadcasts.length;
+      await fill('1', 'after the check');
+      await page.evaluate(() => { document.getElementById('hs-stat').textContent = ''; document.getElementById('hs-go').click(); });
+      await until(page, /is it yours/, 'hs-stat', 20000);
+      await page.evaluate(() => [...document.querySelectorAll('#hs-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+      await until(page, /your keychain is open/, 'hs-stat', 20000);
+      await page.waitForTimeout(400);
+      const ck = await page.evaluate(() => ({ t: [...document.getElementById('hs-stat').childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join(''), to: document.getElementById('hs-to').value, amt: document.getElementById('hs-amt').value, live: /keychain live/.test(document.getElementById('kc-stat').textContent), kept: localStorage.getItem('bnr_hive_pending:gatesoul') }));
+      ok('a send whose keychain opened on the reader\'s check stops there: nothing is signed or sent, and the send waits for its own press',
+        ck.t === 'your keychain is open. press send to send 1.000 HIVE to someoneelse.' && state.broadcasts.length === b0 && ck.to === 'someoneelse' && ck.amt === '1' && ck.live && ck.kept === null, JSON.stringify(ck));
+    }
     if (reg === 'bee') {
       // the outbox law: a broadcast that drops is resent as the SAME bytes, never signed again
       state.landed = false; state.failNext = 2; state.broadcasts = [];
