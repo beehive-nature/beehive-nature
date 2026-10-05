@@ -67,7 +67,7 @@
         + icon + ' <b data-i18n="' + labelKey + '">' + T(labelKey,labelFallback) + '</b>'
         + ' <span style="font-size:11px;opacity:.85">· ' + T('bd.aud.notyet','Not available yet') + '</span>'
         + '<div style="font-size:12px;opacity:.85;margin-top:2px">' + T(why[0],why[1]) + '</div>'
-        + '<div style="font-size:11px;opacity:.65;margin-top:1px">' + T(tech[0],tech[1]) + '</div></div>';
+        + '<div data-min-insp="cypherpunk" style="font-size:11px;opacity:.65;margin-top:1px;display:none">' + T(tech[0],tech[1]) + '</div></div>';
     }
     var h = '<button type="button" class="bpay-aud' + (st.audience===id ? ' bpay-aud-on' : '') + '" role="radio" aria-checked="' + (st.audience===id ? 'true' : 'false') + '" data-audience="' + id + '" style="' + box + 'border:1px solid #1d4655;background:transparent;cursor:pointer">';
     h += icon + ' <b data-i18n="' + labelKey + '">' + T(labelKey,labelFallback) + '</b>';
@@ -77,12 +77,12 @@
   }
 
   function renderChooser(){
-    var h = '<div class="wa-note">Check Autonomi quote availability for your file. Payment and publication through this wallet are not available yet.</div>';
+    var h = '<div class="wa-note">see what storing a file on Autonomi would cost; paying for it is not in this wallet yet.</div>';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
     h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
     h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
     h += audBtn('selected-people','👥','wl.bpay.aud.selected','Selected people',false,['bd.aud.selected.why','Sharing with people you pick is not ready.'],['bd.aud.selected.tech','recipient capability/key granting not yet qualified']);
-    h += '<div style="font-size:10px;opacity:.6;margin-top:6px">' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting, never silently inferred') + '</div>';
+    h += '<div style="font-size:10px;opacity:.6;margin-top:6px">' + T('wl.bpay.sharenote','you choose who can open the file before any price is asked') + '</div>';
     // Inspection follows the wallet register; there is no second view selector.
     // the quote-service endpoint is cypherpunk-view configuration
     h += '<div class="row" data-min-insp="cypherpunk" style="margin-top:6px;gap:8px;align-items:center;display:none">';
@@ -93,15 +93,17 @@
     if (st.audience === 'public') {
       h += '<div class="wa-note"><label for="ant-quote-file">File to quote' + (antLimits ? ' (' + sizeRange() + ', the Autonomi browser kit\'s limits; your browser may allow less)' : '') + '</label><input id="ant-quote-file" type="file" style="display:block;width:100%;max-width:100%;margin:8px 0"><div>This browser splits the file into chunks itself and asks Autonomi storage nodes for a price using only addresses and sizes. The file\'s contents stay in this browser, and nothing is paid or published.</div><button type="button" id="ant-quote-go">Get Autonomi quote</button> <button type="button" id="ant-quote-cancel" hidden>Stop request</button><div id="ant-quote-status" role="status" aria-live="polite"></div></div>';
       h += '<div style="margin-top:10px;font-size:12px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b>';
-      if (st.selectedAt) h += ' <span style="opacity:.65;font-size:10px">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(st.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
+      if (st.selectedAt) h += ' <span data-min-insp="cypherpunk" style="opacity:.65;font-size:10px;display:none">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(st.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
       h += '</div>';
+      // a reference quote service is cypherpunk configuration: its button and its line never reach bee or raver
+      h += '<span data-min-insp="cypherpunk" style="display:none">';
       if(st.bridge) h += '<button type="button" id="bpay-quote-go" style="margin-top:6px;padding:8px 14px;border:1px solid #2c4a5a;border-radius:8px;background:#0e2d3a;color:var(--cyan);cursor:pointer;font-size:13px">♡ ' + T('wl.bpay.getquote','Get a fresh quote') + '</button>';
-      h += '<span id="bpay-quote-stat" style="font-size:11px;opacity:.75;margin-left:8px"></span>';
+      h += '<span id="bpay-quote-stat" style="font-size:11px;opacity:.75;margin-left:8px"></span></span>';
     }
     // the honest waiting state — until Phase C earns the authorization route
     h += '<div style="margin-top:12px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
-    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','Quote only · payment unavailable in this panel') + '</b>';
-    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.quoteonly.note','A quote shows the storage cost. No payment is requested here.') + '</div>';
+    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','quote only · payment unavailable here for now') + '</b>';
+    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">this shows the price only. to keep a file today, <a href="#arw-sec">publish it on Arweave</a>.</div>';
     h += '</div>';
     return h;
   }
@@ -111,7 +113,7 @@
     var line = (inv.lines||[]).filter(function(l){return l.asset==='ANT';})[0];
     if(!line) return '';
     var sum = line.quotes.reduce(function(s,x){ return s+BigInt(x.amount_atto); }, 0n).toString();
-    if(sum !== line.amountAtto) return '<div style="color:var(--amber)">quote sum mismatch — refused</div>';
+    if(sum !== line.amountAtto) return '<div style="color:var(--amber)">this price did not add up, so it is not shown.<span class="wl-cyd"> quote sum mismatch, refused: the carried quotes sum to ' + esc(sum) + ' atto, the line says ' + esc(line.amountAtto) + '</span></div>';
     var sha = a.sha256 || '';
     var h = '<div style="margin-top:14px;padding:10px;border:1px solid ' + (current?'#2c4a5a':'#1d4655') + ';border-radius:10px' + (current?'':';opacity:.8') + '">';
     h += '<div style="font-size:11px;letter-spacing:.08em;color:' + (current?'var(--cyan)':'var(--amber)') + '">' + (current
@@ -149,7 +151,7 @@
   function render(){
     stopQuote();
     var h = renderChooser();
-    if (refInvoice) h += '<details id="bpay-reference"><summary>Reference invoice</summary>'+invoiceBlock(refInvoice, false)+'</details>';
+    if (refInvoice) h += '<details id="bpay-reference" data-min-insp="cypherpunk" style="display:none"><summary>Reference invoice</summary>'+invoiceBlock(refInvoice, false)+'</details>';
     h += '<div id="bpay-fresh"></div>';
     card.innerHTML = h;
     applyInspection();
@@ -159,6 +161,7 @@
       b.addEventListener('click', function(){
         if (b.getAttribute('aria-disabled') === 'true') return;
         if (b.dataset.audience !== 'public') return; // unavailable modes are never selectable
+        if (st.audience === 'public') return;        // already chosen: a second tap never drops a quote on its way
         st.audience = 'public'; st.selectedAt = new Date().toISOString();
         save({ audience: 'public', selectedAt: st.selectedAt }); // policy-owned merge write — service fields of other tabs survive
         render();
@@ -199,7 +202,7 @@
     var file=input.files&&input.files[0];output.textContent='';
     if(!antLimits){output.textContent='Quote unavailable: the Autonomi browser kit did not load. Reload and try again.';return;}
     // The kit's own limits gate the file before any Autonomi call.
-    if(st.audience!=='public'||!file||!(file.size>=antLimits.minFileBytes&&file.size<=antLimits.maxFileBytes)){output.textContent='Choose Public and a file from '+sizeRange()+'.';return;}
+    if(st.audience!=='public'||!file||!(file.size>=antLimits.minFileBytes&&file.size<=antLimits.maxFileBytes)){output.textContent='choose a file from '+sizeRange()+' to see its price.';return;}
     var run={stop:new AbortController()};quoteRun=run;quoteControls(true);
     output.textContent='Connecting to Autonomi storage nodes from this browser…';
     // The kit pauses every upload at the payment step and hands this page the
@@ -250,7 +253,7 @@
   function freshQuote(){
     var stat = document.getElementById('bpay-quote-stat');
     var fresh = document.getElementById('bpay-fresh');
-    if (!st.bridge) { if(stat) stat.textContent = 'Use the hosted file flow above. No reference quote service is configured.'; return; }
+    if (!st.bridge) { if(stat) stat.textContent = 'no reference quote service is set; get Autonomi quote prices your own file.'; return; }
     if (!PIN) { if(stat) stat.textContent = '⚠ ' + T('wl.bpay.loadfail','no invoice loaded'); return; }
     if (stat) stat.textContent = '…';
     // the RESOLVED policy rides the request: audience chosen by the founder,

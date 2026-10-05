@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -146,6 +146,10 @@ try {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.body.dataset.reg, null, { timeout: 10000 });
+    ok('the estate anchor (and the JWK scaffold) are cypherpunk controls: ' + REG + (REG === 'cypherpunk' ? ' shows them' : ' never offers them'),
+      REG === 'cypherpunk' ? await page.locator('#arw-anchor').isVisible() : !(await page.locator('#arw-go').isVisible()) && !(await page.locator('#arw-jwk-scaffold').isVisible()));
+    if (REG !== 'cypherpunk') await page.evaluate(() => document.getElementById('breg-cypherpunk').click());
     await page.evaluate(async () => {
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
         publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
@@ -292,6 +296,7 @@ try {
     // Production refresh owns enablement; Playwright supplies trusted input.
     await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));
     await page.waitForFunction(() => !document.getElementById('arw-go').disabled);
+    if (REG !== 'cypherpunk') await page.evaluate(() => document.getElementById('breg-cypherpunk').click());   // the anchor is cypherpunk's control
     await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
     ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
@@ -342,6 +347,7 @@ try {
       ok('closing it says why, and nothing was signed or sent', /not the one your wallet showed/.test(await page.locator('#arw-stat').innerText()) &&
         await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0);
     }
+    if (REG !== 'cypherpunk') { await page.evaluate(r => document.getElementById('breg-' + r).click(), REG); await page.waitForFunction(r => document.body.dataset.reg === r, REG); }   // the file flow runs in the register under test
     await page.setViewportSize({width:390,height:844});
     const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
     const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');

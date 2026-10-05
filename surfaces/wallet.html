@@ -744,9 +744,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <nav aria-label="Wallet actions"><a href="#wallet-accounts" data-i18n="wl.wallet.accounts">Accounts &amp; coins</a><a href="#pay-sec" aria-label="bPay: send, receive or swap">bPay</a><a href="#bpay-sec" data-wallet-store data-i18n="wl.wallet.store">bPay · store</a></nav>
 </div>
 <div id="wallet-storage">
-  <h2>store a file once and keep the receipt</h2>
-  <p>Arweave stores a file today. Autonomi can show you its price for now.<span class="wl-cyd">Autonomi uses ANT on Arbitrum plus ETH network fees, quotes only; Arweave uses AR. Review the quote and network before authorizing payment.</span></p>
-  <div class="wallet-storage-options"><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>see the price, not stored yet</span></a><a href="#arw-sec"><strong>Arweave · AR</strong><span>store a small file, keep the receipt</span></a></div>
+  <h2>choose where to keep your file<span class="wl-cyd"> · bPay once</span></h2>
+  <p>Arweave publishes a small file for good today. Autonomi can show you a price; paying for it is not in this wallet yet.<span class="wl-cyd"> Autonomi uses ANT on Arbitrum, plus ETH network fees; Arweave uses AR.</span></p>
+  <div class="wallet-storage-options"><a href="#arw-sec"><strong>Arweave · AR</strong><span>publish small files · keep the receipt</span></a><a href="#bpay-sec"><strong>Autonomi · ANT</strong><span>see a price · paying is not here yet</span></a></div>
 </div>
 <header>
   <p data-reg="bee" data-i18n="wl.wallet.intro">accounts, coins and public addresses.</p>
@@ -1628,22 +1628,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
 <section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
   <h2>🧾 <span >Autonomi · ANT storage quote</span></h2>
-  <div class="law" id="bpay-accounts">Check your other balances in <a href="#wallet-accounts">accounts &amp; following</a>. Saved public addresses do not grant spending access.</div>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
-  <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
-  asking for a fresh quote sends your resolved policy to the keyless bridge. no hidden network
-  default gets promoted into a choice. 🔒 private audiences stay visibly unavailable until their
-  paths are qualified. the view toggle (newbee / raver / cypherpunk) only changes what you can
-  inspect, never the audience, never your authority. no ANT figure is typed by anyone: the bridge
-  hashed the exact file and quoted every chunk; those quotes (each a <b>quote hash + amount</b>
-  pair) are the carried commitment (INVOICE-1 law: owed is <b>derived</b>, never asserted). native
-  gas is a <b>separate</b> wallet-side obligation. when the authorization surface is earned, your own
-  button press, and only that, crosses the waiting state; no chat text, no terminal, no agent
-  receipt substitutes for it.</p></details>
-  <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
+  <div class="law" id="bpay-accounts">your other balances are in <a href="#wallet-accounts">accounts &amp; coins</a>.<span class="wl-cyd"> Saved public addresses do not grant spending access.</span></div>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">how this price is made: Autonomi prices your exact file, and nothing is paid here</summary>
+  <p class="law">the sharing choice is yours and comes before any price. with 🌐 public chosen, this
+  browser splits your file into chunks itself and asks Autonomi storage nodes for a price using only
+  addresses and sizes; the file itself stays in this browser. no hidden default is turned into a
+  choice, and 🔒 private ways stay visibly unavailable until they are ready. the register (new bee /
+  raver / cypherpunk) only changes what you can inspect, never who can open the file or what you may
+  do. nothing is paid or stored here: the price is read and the payment request is cancelled. no ANT
+  figure is typed by anyone; every figure is a network quote, and what is owed is <b>derived</b> from
+  the quotes, never asserted (INVOICE-1). network gas (ETH on Arbitrum) is a <b>separate</b> cost. when
+  paying is earned, only your own button press crosses the waiting state; no chat text, no terminal
+  and no agent receipt substitutes for it.</p></details>
+  <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">loading the Autonomi price panel.</div>
 </section>
 <script src="adapter-seam.js" defer></script>
-<script src="bpay-invoice.js?v=6" defer></script>
+<script src="bpay-invoice.js?v=7" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
@@ -2216,35 +2216,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <!-- ══ ARWEAVE — publish & anchor (inject-first · vault JWK scaffold) ══ -->
 
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
-  <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: inject signs, this page builds and posts</summary>
-  <div class="law">Another adapter on the wallet shell, with balance, receive address, send, and
-  one new capability: <b>PUBLISH</b>. <b>Primary path:</b> connect an injected Arweave wallet
-  (<code>window.arweaveWallet</code> — Wander / arweave.app style). The extension holds the RSA
-  key; this page builds the format-2 tx from the <b>public</b> key only, asks the extension to
-  sign, and posts to <b>public gateways picked at random per call</b>. Agents never see private
-  keys. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling). Vault JWK paste is a
-  secondary scaffold for labs — New-bee never needs it to publish.</div>
+  <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish a file for good</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">how publishing works: your own key signs, and this page sends the file to Arweave</summary>
+  <div class="law">your Arweave address is made from your own keychain, and your own key signs what
+  you publish. this page builds the transaction from the public key only and sends it to a public
+  Arweave gateway picked at random each time, so nothing passes through a middleman.<span class="wl-cyd">
+  Another adapter on the wallet shell, with balance, receive address, send, and one more capability:
+  PUBLISH. Lanes, in order: the secp256k1 key derived under ar:&lt;soul&gt; (Arweave 2.9+, empty owner,
+  65-byte recoverable signature); an injected window.arweaveWallet (Wander / arweave.app style) only
+  as a quiet last resort, where the extension holds the RSA key and signs a format-2 tx this page
+  built from the public key; a vault-sealed RSA JWK as a labs scaffold. Agents never see private keys.
+  No bundler, no Turbo, no third-party UI (founder ruling).</span></div>
   </details>
-  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built here and signed
-  by your Arweave extension; with scripting off this panel stays asleep.</div></noscript>
+  <noscript><div class="fund-nojs">📡 publishing to Arweave needs JavaScript; turn it on to use this panel.</div></noscript>
   <div id="arw-js" hidden>
     <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
       <span class="fund-coin" aria-hidden="true" style="background:radial-gradient(circle at 35% 30%,#c8f4ff,var(--cyan) 62%,#003a44);border-color:#1d4655"></span>
       <button type="button" id="arw-connect" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔌 connect Arweave wallet</button>
-      <span id="arw-addr" class="law" style="font:14px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)">not connected</span>
+      <span id="arw-addr" class="law" style="font:14px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)"></span>
     </div>
     <div id="arw-file-flow" style="margin-top:18px">
-      <label for="arw-file">Choose a small file to publish (up to 30 KB)</label>
+      <label for="arw-file">choose a small file to publish (up to 30 KB)</label>
       <input type="file" id="arw-file" style="display:block;max-width:100%;width:100%;margin:8px 0" aria-describedby="arw-file-note">
-      <div id="arw-file-note" class="wa-note">Published files are public and cannot be deleted from the network. Larger files need the chunked upload flow, which is not available here yet.</div>
-      <button type="button" id="arw-file-review">Review file &amp; fee</button>
+      <div id="arw-file-note" class="wa-note">published files are public and stay on Arweave for good; they cannot be deleted. files up to 30 KB for now.<span class="wl-cyd"> Larger files need the chunked upload lane, which is not built yet (a 30,000-byte cap here).</span></div>
+      <button type="button" id="arw-file-review">review file &amp; fee</button>
       <div id="arw-file-status" class="wa-note" role="status" aria-live="polite"></div>
       <dialog id="arw-file-dialog" aria-labelledby="arw-file-dialog-title" style="margin:auto;padding:24px;max-width:min(92vw,520px);background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:16px">
         <h2 id="arw-file-dialog-title">publish this file to Arweave?</h2><div id="arw-file-plan" style="overflow-wrap:anywhere"></div>
         <div class="wa-toolbar"><button type="button" id="arw-file-confirm">confirm &amp; sign</button><button type="button" id="arw-file-cancel">cancel</button></div>
       </dialog>
     </div>
+    <div id="arw-anchor" data-reg="cypherpunk">
     <div class="wa-note" style="margin-top:18px">Or publish the estate's pinned reference anchor:</div>
     <div class="row" style="align-items:center;flex-wrap:wrap;margin-top:8px">
       <select id="arw-what" title="what to publish" style="width:100%;min-width:0;max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
@@ -2252,11 +2254,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       </select>
       <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
     </div>
-    <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">…</div>
-    <details id="arw-jwk-scaffold" style="margin-top:10px">
-      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">advanced · vault JWK scaffold (optional — not required for New-bee)</summary>
+    </div>
+    <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">checking your Arweave address.</div>
+    <details id="arw-jwk-scaffold" data-reg="cypherpunk" style="margin-top:10px">
+      <summary style="font-size:14px;cursor:pointer;color:var(--dim)">advanced · vault JWK scaffold (optional, not required for New-bee)</summary>
       <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">Labs / offline only: seal an Arweave JWK in
-      <a href="#vault-sec">the vault</a>. Prefer <b>connect Arweave wallet</b> on this panel — never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
+      <a href="#vault-sec">the vault</a>. Your own keys come first; an extension or a sealed JWK is only a last resort. Never paste a private JWK unless you mean to. RSA is never invented from masterPRK.</div>
     </details>
   </div>
   <script>
@@ -2295,11 +2298,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var e = vaultArEntry();
           return (e && e.meta && e.meta.address) || null;
         }
-        var arWaits = 0;
+        var arWaits = 0, rerun = false;
         var heldFor = '';   /* the address and signer a held result was written for */
         function sayStat(parts) { if (!held) wlSay(stat, parts); }
+        /* the reader's own address, copied only when the browser says it copied */
+        function copyAddr(el, a) {
+          var done = function (ok) { wlSay(el, ok ? ['copied. send AR to it from wherever you hold AR.', { cy: a }] : ['this browser did not copy it. your Arweave address is ' + a + '.']); };
+          try { navigator.clipboard.writeText(a).then(function () { done(true); }, function () { done(false); }); } catch (ce) { done(false); }
+        }
         async function refresh() {
-          if(publishing||refreshing)return;
+          if (publishing) return;
+          if (refreshing) { rerun = true; return; }
           var A = window.BNRAR;
           // a slow page load is not a failure: wait for the module a little before saying so
           if (!A) { if (++arWaits < 20) { setTimeout(refresh, 500); return; } sayStat(['the Arweave part of the wallet did not load. ', { btn: 'reload the page', on: function () { location.reload(); } }, { cy: 'window.BNRAR missing after 10 s' }]); return; }
@@ -2309,7 +2318,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var addr = null;
           try { addr = await resolveAddr(); } catch (e) { addr = null; }
           if (addrEl) {
-            addrEl.textContent = addr ? addr : 'your Arweave address appears when your keychain is connected';
+            addrEl.textContent = addr || '';   /* with no address the status line carries the one sentence */
             addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
           }
           var lane = inj && inj.signLane ? inj.signLane() : null;
@@ -2336,12 +2345,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             // a price only for an address that holds AR: an empty one never asks a third party
             var spot = null;
             if (winston > 0n) { try { spot = await A.spotPrice(); } catch (e2) { /* optional */ } }
-            if(addr!==await resolveAddr())return;
+            if (addr !== await resolveAddr()) { rerun = true; return; }   /* the address changed mid-read: read the new one */
             if (window.wlUpsertRollup) window.wlUpsertRollup('ar', addr, Number(winston) / 1e12);
             else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
             if (statEl) {
-              if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['your Arweave address is empty for now. ', { to: 'arw-sec', t: 'add AR to publish' }, { cy: 'balance 0 winston · anchor fee ' + arUnits(need) + ' AR' }]); }
-              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); wlSay(statEl, winston >= need ? ['you hold enough AR to publish on Arweave.', { cy: 'live · anchor fee ' + arUnits(need) + ' AR covered' }] : ['you need ' + arUnits(need-winston) + ' AR more to publish on Arweave. ', { to: 'arw-sec', t: 'add AR' }, { cy: 'live · short ' + arUnits(need-winston) + ' AR for the anchor' }]); }
+              var copyAr = { btn: 'copy my Arweave address', on: function () { copyAddr(statEl, addr); } };
+              if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['your Arweave address is empty; send AR to it to publish. ', copyAr, { cy: 'balance 0 winston · anchor fee ' + arUnits(need) + ' AR' }]); }
+              else if (winston >= need) { statEl.className = 'stat ok'; wlSay(statEl, ['ready to publish. ', { to: 'arw-sec', t: 'publish a file' }, { cy: 'live · anchor fee ' + arUnits(need) + ' AR covered' }]); }
+              else { statEl.className = 'stat err'; wlSay(statEl, ['add ' + arUnits(need - winston) + ' AR to publish on Arweave. ', copyAr, { cy: 'live · short ' + arUnits(need - winston) + ' AR for the anchor' }]); }
             }
             var detail = 'address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' + arUnits(need) + ' AR (gateway-quoted)' +
               (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
@@ -2355,7 +2366,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             if (statEl) { wlSay(statEl, ['could not read your AR just now. ', { btn: 'try again', on: function () { refresh(); } }]); if (typeof wlRead === 'function') wlRead(statEl, false); }
             go.disabled=true;
             sayStat(['the Arweave network did not answer just now. ', { btn: 'try again', on: function () { refresh(); } }, { cy: 'gateway read failed: ' + (err && err.message ? err.message : err) }]);
-          }finally{refreshing=false}
+          } finally { refreshing = false; if (rerun) { rerun = false; setTimeout(refresh, 0); } }
         }
         if (conn) conn.addEventListener('click', async function () {
           var inj = arInject();

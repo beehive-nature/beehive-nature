@@ -89,6 +89,7 @@ try {
     await page.waitForFunction(() => window.BNRWALLET && window.BZDIDKEY && window.BNRAR, null, { timeout: 20000 });
     await page.waitForTimeout(900);
     ok('before the keychain, the Arweave card is one sentence and the way to the keychain', await page.evaluate(() => { const e = document.getElementById('ar-stat'); return /connect your keychain to see your Arweave address/.test(e.textContent) && !!e.querySelector('a[href="#kc-sec"]') && !/bind a public address/.test(e.textContent); }), await page.textContent('#ar-stat'));
+    ok('with no address yet, the address line stays empty and the panel line carries the one sentence and its link', await page.evaluate(() => document.getElementById('arw-addr').textContent === '' && /connect your keychain/.test(document.getElementById('arw-stat').textContent) && !!document.querySelector('#arw-stat a[href="#kc-sec"]')));
     await page.evaluate(() => { const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
       document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a)); document.getElementById('kc-recgo').click(); });
     await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
@@ -97,8 +98,12 @@ try {
     ok('the keychain makes a native Arweave address (context ar:gatesoul), no extension', /^[A-Za-z0-9_-]{43}$/.test(want));
     ok('the balance is read keyless and the card says where the address comes from', await page.evaluate(() => /from your keys|made from your keys/.test(document.getElementById('ar-stat').textContent + document.getElementById('ar-info').textContent)), await page.textContent('#ar-stat'));
     ok('the address lives only while the keychain does: nothing about it is stored', await page.evaluate(() => Object.keys(localStorage).every(k => !/ar_derived/.test(k))));
-    await page.waitForFunction(() => /empty for now/.test(document.getElementById('ar-stat').textContent), null, { timeout: 15000 });
-    ok('an empty address reads calmly, with the one next step', await page.evaluate(() => { const e = document.getElementById('ar-stat'); const calm = [...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join('').trim(); return calm === 'your Arweave address is empty for now. add AR to publish' && /balance 0 winston/.test(e.textContent) && !!e.querySelector('a[href="#arw-sec"]') && !/err/.test(e.className); }), await page.textContent('#ar-stat'));
+    await page.waitForFunction(() => /is empty/.test(document.getElementById('ar-stat').textContent), null, { timeout: 15000 });
+    ok('an empty address reads calmly, with the one next step: copy it to receive AR', await page.evaluate(() => { const e = document.getElementById('ar-stat'); return /^your Arweave address is empty; send AR to it to publish\. copy my Arweave address$/.test([...e.childNodes].filter(n => !(n.classList && n.classList.contains('wl-cyd'))).map(n => n.textContent).join('').trim()) && /balance 0 winston/.test(e.textContent) && !!e.querySelector('button.wl-act') && !/err/.test(e.className); }), await page.textContent('#ar-stat'));
+    await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {});
+    await page.evaluate(() => document.querySelector('#ar-stat button.wl-act').click());
+    await page.waitForFunction(() => /copied|did not copy/.test(document.getElementById('ar-stat').textContent), null, { timeout: 5000 }).catch(() => {});
+    ok('"copied" only when the browser copied; otherwise the address is shown to copy by hand', await page.evaluate(async w => { const t = document.getElementById('ar-stat').textContent; if (/^copied\./.test(t)) { try { return (await navigator.clipboard.readText()) === w; } catch (e) { return true; } } return t.includes('did not copy it. your Arweave address is ' + w); }, want), await page.textContent('#ar-stat'));
     // an empty address cannot confirm a fee it cannot pay: the review says how much to add, and nothing is signed
     await page.setInputFiles('#arw-file', { name: 'hello.txt', mimeType: 'text/plain', buffer: Buffer.from('hello from my own keys') });
     await page.evaluate(() => document.getElementById('arw-file-review').click());

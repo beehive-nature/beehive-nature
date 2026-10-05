@@ -104,10 +104,10 @@ try {
     check(label+' quote words name only addresses and sizes leaving',(await page.locator('#bpay-card').innerText()).includes('asks Autonomi storage nodes for a price using only addresses and sizes'));
     await page.locator('#ant-quote-file').setInputFiles({name:'tiny.txt',mimeType:'text/plain',buffer:Buffer.from('ab')});
     await page.locator('#ant-quote-go').click();
-    check(label+' a file below the kit minimum is refused before any Autonomi call',(await status())==='Choose Public and a file from 3 bytes to 1 GB.'&&kitLoads===0&&(await ant()).uploads===0&&await idle());
+    check(label+' a file below the kit minimum is refused before any Autonomi call',(await status())==='choose a file from 3 bytes to 1 GB to see its price.'&&kitLoads===0&&(await ant()).uploads===0&&await idle());
     await page.evaluate(()=>Object.defineProperty(document.querySelector('#ant-quote-file'),'files',{configurable:true,value:[{name:'huge.bin',size:1000000001,type:''}]}));
     await page.locator('#ant-quote-go').click();
-    check(label+' a file above the kit maximum is refused before any Autonomi call',(await status())==='Choose Public and a file from 3 bytes to 1 GB.'&&kitLoads===0&&(await ant()).connects===0);
+    check(label+' a file above the kit maximum is refused before any Autonomi call',(await status())==='choose a file from 3 bytes to 1 GB to see its price.'&&kitLoads===0&&(await ant()).connects===0);
     await page.evaluate(()=>delete document.querySelector('#ant-quote-file').files);
     await page.locator('#ant-quote-file').setInputFiles({name:'public-fixture.txt',mimeType:'text/plain',buffer:Buffer.from('fixture')});
     check(label+' choosing a file loads no kit and opens no connection',kitLoads===0&&(await ant()).connects===0);
