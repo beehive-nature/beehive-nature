@@ -3280,13 +3280,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     d.id='sign-sheet'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','sign-h');
     d.style.cssText='position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto';
     d.innerHTML='<div style="max-width:420px;width:100%;text-align:center">'+
-      '<h2 id="sign-h" style="margin:0 0 12px">Sign the law</h2>'+
+      '<div id="sign-h" role="heading" aria-level="1" style="margin:0 0 12px;font-size:30px;font-weight:600;line-height:1.2">Sign the law</div>'+
       '<p id="sign-say" style="margin:0 0 20px;line-height:1.5">Press Sign, then confirm with your passkey.</p>'+
       '<button type="button" id="sign-go" class="gold" style="min-width:200px;min-height:52px;font-size:18px">✍ Sign</button>'+
       '<p id="sign-stat" role="status" aria-live="polite" style="margin:16px 0 0;min-height:24px;line-height:1.5"></p>'+
       '<details id="sign-read" style="margin-top:24px;text-align:left"><summary style="cursor:pointer;color:var(--dim)">read what you are signing</summary><ul id="sign-list" style="margin:8px 0;padding-left:18px"></ul></details>'+
       '</div>';
     document.body.appendChild(d);
+    document.documentElement.style.overflow='hidden';
     $('sign-read').addEventListener('toggle',async function(){
       if(!this.open||$('sign-list').childElementCount)return;
       var law=LAW||await lawRead()||[];
