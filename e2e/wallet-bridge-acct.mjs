@@ -292,7 +292,7 @@ try {
     await recoveryConnect(page);
     await page.waitForFunction(() => /more than one key/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
     const sum = await page.evaluate(() => ({ t: document.getElementById('sum-bridge').textContent.trim(), a: !!document.querySelector('#sum-bridge a[href="#bridge-sec"]') }));
-    ok('at a glance says it needs more than one key, with its one link, never ready', sum.t === 'kingbeelovis needs more than one key to sign · see what to do' && sum.a, JSON.stringify(sum));
+    ok('at a glance says it needs more than one key, with its one link, never ready', sum.t === 'kingbeelovis needs more than one key to sign, so this wallet cannot sign for it alone. see what to do' && sum.a, JSON.stringify(sum));
     await toKey(page);
     const br = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), field: !!document.getElementById('br-paste') }));
     ok('the bridge says why this wallet cannot sign alone and offers no paste', /^kingbeelovis needs more than one key to sign, so this wallet cannot sign for it alone\. choose the account$/.test(br.t) && !br.field && state.posts.length === 0, JSON.stringify(br));

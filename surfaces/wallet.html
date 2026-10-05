@@ -3125,8 +3125,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      from your keys; null when nothing here can sign for it */
   function arSignLane(){
     var shown=arInjectBoundAddress(); if(!shown)return null;
-    if(shown===AR_INJECT_ACTIVE&&arInjectPresent())return 'inject';
-    if(SOUL&&shown===loadArPublic('ar:'+SOUL)&&arInjectPresent())return 'inject';
+    if(shown===AR_INJECT_ACTIVE&&arInjectPresent())return 'inject';   /* only the address the extension gave this visit: a hand-followed one never signs */
     if(shown===vaultArPublic())return 'vault';
     if(shown===arDerivedAddr())return 'derived';
     return null;
@@ -3233,7 +3232,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function forgePlain(ctx){
     if(/^vaulta:/.test(ctx)){
       /* the account is named only when the .b pointer or a proof gave it; the soul's own name may be a stranger's account */
-      if(ctx===k1Ctx())return (vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))?'the key your vaulta account '+vacct()+' signs with':'your vaulta key';
+      if(ctx===k1Ctx())return (vacctKnown()&&BRIDGED===true)?'the key your vaulta account '+vacct()+' signs with':'your vaulta key for '+vacct()+'; it does not sign there yet';
       var am=/^vaulta:([a-z1-5.]{1,12})\/(owner|active)$/.exec(ctx);
       return am?'the '+am[2]+' key of your account '+am[1]:'a vaulta key named '+ctx.replace(/^vaulta:/,'');
     }
@@ -3342,6 +3341,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       {btn:'stop following it',on:function(ev){
         if(ev)ev.stopPropagation();
         saveArPublic(c,null); if(AR_INJECT_ACTIVE===addr)AR_INJECT_ACTIVE=null;
+        if(window.wlClearRollup) window.wlClearRollup('ar');   /* its balance leaves the total with it */
         renderForge();
         var shown=arInjectBoundAddress(); if(shown&&typeof readArBound==='function')readArBound(shown);
       }},
@@ -3988,7 +3988,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
          name; the account itself is named only when the .b pointer or a proof says so */
       try{
         var vctx=k1Ctx(), vd=vctx&&deriveFor(vctx);
-        if(vd&&vd.value){ claims['vaulta-k1']=String(vd.value); if(vacctKnown()&&(VACCT_STATE==='name'||VACCT_PROVEN))claims['vaulta-account']=vacct() } else left.push('vaulta-k1')
+        if(vd&&vd.value&&vacctKnown()&&BRIDGED===true){ claims['vaulta-k1']=String(vd.value); claims['vaulta-account']=vacct() }
+        else left.push('vaulta-k1 (the account does not carry this key yet)')
       }catch(e){ left.push('vaulta-k1 ('+((e&&e.message)||e)+')') }
       var rec=BZDIDKEY.deriveIdentity(MPRK,'bnr.b').record;
       claims['bzdid-ed25519']=toHex(rec.publicKey);
@@ -4728,6 +4729,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var BR_BUSY=false, BR_OK=false, BR_KIND=null, BR_SAID=null, BR_DONE=null, BR_PENDING=null;
   function brScrub(){ ['br-paste','br-wif'].forEach(function(id){ var f=$(id); if(f)f.value='' }) }
   function brErr(msg,kind,cy){ var e=new Error(msg); e.brKind=kind; e.cy=cy||''; return e }
+  /* a held paste proven never to have landed gives back what the cap counted for its action, on that day */
+  function brGiveBack(p){ if(p&&p.cap&&!p.cap.given){ p.cap.given=true; capRecord(p.cap.unit,-p.cap.amt,p.cap.day) } }
   function brExtraKey(x){ return x?JSON.stringify([x.contract,x.action,x.data]):'' }
   /* the bridge's own line starts every sentence lower case (names keep theirs) */
   function lcAll(t){ return String(t||'').replace(/(^|[.!?]\s+)([A-Z])(?=[a-z ])/g,function(m,p,c){ return p+c.toLowerCase() }) }
@@ -4766,10 +4769,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var held=BR_PENDING&&BR_PENDING.acct===a?BR_PENDING:null;
     if(held){
       await checkBridge();
-      if(BRIDGED===true&&held.extra===brExtraKey(extra)){ BR_PENDING=null; return {tx:held.tx,earlier:true} }
-      if(BRIDGED!==true&&Date.now()<held.exp+30000)
-        throw brErr('The last paste may still go in, so nothing new was signed. Check again in a minute.','held','tx '+held.tx+' · valid until '+new Date(held.exp).toISOString());
-      BR_PENDING=null;   /* its window closed without it: provably nothing changed */
+      if(BRIDGED===true&&held.adds&&held.extra===brExtraKey(extra)){ BR_PENDING=null; return {tx:held.tx,earlier:true} }
+      if(BRIDGED===null)
+        throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held','get_account '+a+' answered nothing · tx '+held.tx);
+      /* proof it never landed: its window is over and the account, read, lacks the key it added */
+      var proven=held.adds&&BRIDGED===false&&Date.now()>=held.exp+30000;
+      if(!proven&&(held.adds||Date.now()<held.exp+86400000))
+        throw brErr('The last paste may still go in, so nothing new was signed. Check again in a minute.','held','tx '+held.tx+' · valid until '+new Date(held.exp).toISOString()+(held.adds?'':' · it carried no key change, so the account cannot prove it'));
+      if(proven)brGiveBack(held); BR_PENDING=null;
     }
     var acc=await post(VH,'/v1/chain/get_account',{account_name:a});
     if(!acc)throw brErr('Could not read '+a+' just now, so nothing was sent.','read','get_account '+a+' answered nothing');
@@ -4778,13 +4785,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var ra=act.required_auth, existing=(ra.keys||[]).map(function(k){return {key:k.key,weight:k.weight}});
     if(!existing.some(function(k){return canon(k.key)===pub}))
       throw brErr('That key is not one of '+a+'\u2019s active keys, so nothing was sent.','wrongkey','pasted '+pub+' · '+a+'@active holds '+existing.map(function(k){return k.key}).join(', '));
-    /* one key at weight 1 signs alone only where the threshold is 1: a multisig is said, never half-joined */
-    if((ra.threshold||1)>1)
-      throw brErr(a+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was sent.','multisig','threshold '+ra.threshold+' · '+existing.map(function(k){return k.key+' weight '+k.weight}).join(', '));
+    /* the pasted key must sign alone, or this wallet would be half-joined to an account that needs several keys */
+    var th=ra.threshold||1, pw=((existing.filter(function(k){return canon(k.key)===pub})[0])||{}).weight||0;
+    if(pw<th)
+      throw brErr(a+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was sent.','multisig','threshold '+th+' · the pasted key weighs '+pw+' · '+existing.map(function(k){return k.key+' weight '+k.weight}).join(', '));
     var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, packed, sgn, txid;
     try{
-      if(!existing.some(function(k){return canon(k.key)===K1.pubK1})){
-        var auth={threshold:ra.threshold,keys:sortAuthKeys(existing.concat([{key:K1.eosPub,weight:1}])),accounts:ra.accounts||[],waits:ra.waits||[]};
+      var k1w=((existing.filter(function(k){return canon(k.key)===K1.pubK1})[0])||{}).weight||0;
+      if(k1w<th){   /* absent, or present too lightly to sign alone: it is set at the weight that signs, once */
+        var auth={threshold:th,keys:sortAuthKeys(existing.filter(function(k){return canon(k.key)!==K1.pubK1}).concat([{key:K1.eosPub,weight:th}])),accounts:ra.accounts||[],waits:ra.waits||[]};   /* this wallet's key joins at the weight that signs alone */
         acts.push({account:'eosio',name:'updateauth',authorization:actz,data:await serialized('eosio','updateauth',actz,{account:a,permission:'active',parent:act.parent||'owner',auth:auth})});
         adds=true;
       }
@@ -4811,8 +4820,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(res&&!took&&(!sent.lost||authorityNo(why)))            /* refused, and no earlier host can hold it */
       throw brErr(brRefusal(why,a),'refused',why.slice(0,400));
     var tx=(res&&res.transaction_id)||txid;
-    if(xsp)capRecord(xsp.unit,xsp.amt);   /* it went out, or may have: it counts, like every send that may be in */
-    BR_PENDING={acct:a,tx:tx,exp:exp,extra:brExtraKey(extra)};
+    var xday=xsp?capRecord(xsp.unit,xsp.amt):null;   /* it went out, or may have: it counts, like every send that may be in */
+    BR_PENDING={acct:a,tx:tx,exp:exp,extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
     /* the chain is the receipt: the account carries this wallet's key (the same transaction carried the action) */
     try{ if(adds) for(var i=0;i<10;i++){ await checkBridge(); if(BRIDGED===true)break; await new Promise(function(r){setTimeout(r,1500)}) } }catch(ce){}
     if(adds?BRIDGED===true:took){ BR_PENDING=null; return {tx:tx} }
@@ -4829,7 +4838,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var s=SOUL, acc=await post(VH,'/v1/chain/get_account',{account_name:s});
     if(s!==SOUL)return false;
     var act=acc&&(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
-    var have={}; ((act&&act.required_auth&&act.required_auth.keys)||[]).forEach(function(k){ have[canon(k.key)]=1 });
+    var th0=(act&&act.required_auth&&act.required_auth.threshold)||1, have={};
+    ((act&&act.required_auth&&act.required_auth.keys)||[]).forEach(function(k){ if((k.weight||0)>=th0)have[canon(k.key)]=1 });   /* only a key that signs alone proves it */
     /* the two keys this keychain could have put on its own bare account: vaulta:<name>, or
        vaulta:<name>/active for an account the forge made */
     var ctx=['vaulta:'+s,'vaulta:'+s+'/active'].filter(function(c){ try{ return !!have[k1PubFor(c)] }catch(e){ return false } })[0];
@@ -4870,13 +4880,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     BRIDGED=alone.some(function(k){return canon(k.key)===K1.pubK1});
     if(!BRIDGED&&await findOwnKey(alone,a))return checkBridge();
     if(!BRIDGED&&VACCT_STATE==='name'&&a!==SOUL&&await bareAccountIsMine())return checkBridge();
-    if(!BRIDGED&&th>1){ setBridgeState(false,a+' needs more than one key to sign','multisig'); return }
+    if(!BRIDGED&&th>1&&!alone.length){ setBridgeState(false,a+' needs more than one key to sign','multisig'); return }
     setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
-  function signGuard(el){
-    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now, so nothing was signed. ',{btn:'try again',on:function(){ readAll() }}]); return false }
-    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now, so nothing was signed. ',{btn:'try again',on:function(){ checkBridge() }}]); return false }
+  function signGuard(el,retry){
+    var again=function(read){ return async function(){ await read(); if(retry)retry() } };
+    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now, so nothing was signed. ',{btn:'try again',on:again(readAll)}]); return false }
+    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now, so nothing was signed. ',{btn:'try again',on:again(checkBridge)}]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -4916,7 +4927,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('bridge-sec').style.display=(MPRK&&K1&&(done||BR_BUSY||said||(!BR_OK&&BR_KIND!=='unread'&&BR_KIND!=='unknown')))?'block':'none';
   }
   function brRender(){
-    if(BR_OK&&!BR_BUSY&&!(BR_DONE&&BR_DONE.acct===vacct()))BR_SAID=null;   /* signing by another way: old words go */
+    if(BR_OK&&!BR_BUSY&&!(BR_DONE&&BR_DONE.acct===vacct())&&!(BR_PENDING&&BR_PENDING.acct===vacct()))BR_SAID=null;   /* signing by another way: old words go (a held paste keeps its words) */
     brShow(); brCalm();
   }
   /* the bridge, said calmly: one sentence, the one field and the one button */
@@ -4939,6 +4950,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var st=document.createElement('div'); st.id='br-paste-stat'; st.setAttribute('role','status'); st.style.cssText='margin-top:8px;min-height:20px';
     var hold=!!(BR_PENDING&&BR_PENDING.acct===a);   /* a paste that may still land: the account is read first */
     inp.disabled=hold; go.disabled=hold;
+    if(hold&&!(BR_SAID&&BR_SAID.acct===a))BR_SAID={acct:a,parts:['the last paste may still go in, so nothing new can be signed until '+a+' is read. ',{btn:'check again',on:brRecheck},{cy:'tx '+BR_PENDING.tx+' · valid until '+new Date(BR_PENDING.exp).toISOString()}]};
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter')go.click() });
     go.onclick=brPress;
     if(BR_SAID&&BR_SAID.acct===a)wlSay(st,BR_SAID.parts);
@@ -4988,8 +5000,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var p=BR_PENDING&&BR_PENDING.acct===a?BR_PENDING:null;
     if(BRIDGED===true){ BR_PENDING=null; BR_SAID=null; BR_DONE={acct:a,tx:p?p.tx:null}; brRender(); return }
     if(BRIDGED===null)brSay(a,['could not read '+a+' just now. ',{btn:'check again',on:brRecheck},{cy:'get_account '+a+' answered nothing'}]);
-    else if(p&&Date.now()<p.exp+30000)brSay(a,[a+' does not show this wallet yet, and the last paste may still go in. ',{btn:'check again',on:brRecheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]);
-    else { BR_PENDING=null; brSay(a,['the last paste did not go in, so nothing changed. paste '+a+'\u2019s active key here to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+a:a+'@active does not carry this wallet\u2019s key'}]) }
+    else if(p&&(Date.now()<p.exp+30000||(!p.adds&&Date.now()<p.exp+86400000)))brSay(a,[a+' does not show this wallet yet, and the last paste may still go in. ',{btn:'check again',on:brRecheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]);
+    else { if(p&&p.adds)brGiveBack(p); BR_PENDING=null; brSay(a,['the last paste did not go in, so nothing changed. paste '+a+'\u2019s active key here to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+a:a+'@active does not carry this wallet\u2019s key'}]) }
     brRender();
   }
   /* the keychain leaves: both paste fields and the lane's words go with it */
@@ -5131,10 +5143,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more,#wl-bee,#wl-rave,#summary-sec,#connect-sec,footer'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more,#wl-bee,#wl-rave,#summary-sec,#connect-sec,footer,#chains .va-total,[data-vaulta-toggle],[data-hive-toggle],[data-ant-toggle],[data-ar-toggle],#chains .stat'))return;
     if(ev&&ev.type==='keydown'&&['Tab','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Shift','Control','Alt','Meta'].includes(ev.key))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
@@ -5882,7 +5894,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var live=$('wl-soul-name'); if(live) live.textContent=name?name+'.b':'…';
   }
   async function setSoul(name){
-    SOUL=name; vacctCacheLoad();
+    SOUL=name; vacctCacheLoad(); balFor();
     publishSoul(SOUL);
     $('wq').value=SOUL;
     if(MPRK){ deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub }
@@ -5937,8 +5949,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('br-wif').value='';
       return;
     }
-    var already=existing.some(function(k){return canon(k.key)===K1.pubK1});
-    if(already){setBridgeState(true,'already bridged');stat.textContent='already bridged: nothing to do';$('br-wif').value='';return}
+    var thS=ra.threshold||1, pwS=((existing.filter(function(k){return canon(k.key)===canon(pastedPub)})[0])||{}).weight||0;
+    if(pwS<thS){ wlSay(stat,[vacct()+' needs more than one key to sign, so this wallet cannot sign for it alone. nothing was sent.',{cy:'threshold '+thS+' · the pasted key weighs '+pwS}]); $('br-wif').value=''; return }
+    var already=existing.some(function(k){return canon(k.key)===K1.pubK1&&(k.weight||0)>=thS});
+    if(already){ $('br-wif').value=''; wlSay(stat,['this wallet already signs for '+vacct()+', so nothing was sent.']); checkBridge(); return }
     // dual-signer law: derived K1 + our-origin account passkey, both at threshold 1
     var waAdd=[], waSave=null;
     if($('br-wa').checked){
@@ -5948,13 +5962,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         /* kept only once the chain carries it: a bridge that fails leaves no stale credential */
         waSave={pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex};
         if(existing.some(function(k){return canon(k.key)===wa.canon})) saveWaCred(waSave);
-        else waAdd=[{key:wa.pub,weight:1}];
+        else waAdd=[{key:wa.pub,weight:thS}];
       }catch(e){
         stat.textContent='passkey enrollment skipped ('+e.message+'); bridging with the derived key only';
         await new Promise(function(r){setTimeout(r,1200)});   // let the message be read before the lane continues
       }
     }
-    var newKeys=existing.concat([{key:K1.eosPub,weight:1}],waAdd).sort(function(a,b){
+    var newKeys=existing.filter(function(k){return canon(k.key)!==K1.pubK1}).concat([{key:K1.eosPub,weight:thS}],waAdd).sort(function(a,b){
       var keyBytes=function(s){try{var p=BN.PublicKey.fromString(s);return (p.key&&p.key.data)||new Uint8Array(0)}catch(e){return new Uint8Array(0)}};
       var da=keyBytes(a.key),db=keyBytes(b.key);
       for(var i=0;i<Math.min(da.length,db.length);i++)if(da[i]!==db[i])return da[i]-db[i];
@@ -6039,6 +6053,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var a=vacct(), liq=(LAST_A&&LAST_A.acct===a)?LAST_A.a:null;
     if(st.hasAttribute('data-act'))return;   /* the line holds what the last press did, until the reader types again */
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to make a new Vaulta account.']); return }
+    if(pointerUnread()){ pointerSay(st); return }
     var cy={cy:'sending draws on staked CPU '+cpuAvail+'μs and NET '+(netAvail/1024).toFixed(0)+' KB available, not on liquid A; the RAM purchase draws on liquid A'};
     if(liq===null){
       if(why==='failed') wlSay(st,['could not read the A on '+a+' just now, so the cost of a new account is not known yet. ',{btn:'try again',on:acReread},{cy:'get_account / get_currency_balance '+A_TOKEN+' answered nothing'}]);
@@ -7004,6 +7019,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     await checkBridge();
     if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
     if(BRIDGED===null){tell('fail',['Could not read '+vacct()+' just now. Press Sign to try again.']);return 'fail'}
+    if(BRIDGED!==true&&BR_KIND==='multisig'){tell('fail',[vacct()+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was signed.']);return 'fail'}
+    if(BRIDGED!==true&&BR_KIND==='noperm'){tell('fail',['This wallet cannot be added to '+vacct()+', so nothing was signed.']);return 'fail'}
     if(BRIDGED!==true){tell('wait',['This wallet does not sign for '+vacct()+' yet. Paste '+vacct()+'\u2019s active key once: one press adds this wallet to the account and does this too. The key is used once and never kept.']);return 'paste'}
     for(var i=0;i<40&&!(ADAPTERS.vaulta&&ADAPTERS.vaulta.attached);i++) await new Promise(function(r){setTimeout(r,200)});
     tell('busy',['Signing…']);
@@ -7807,7 +7824,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!(amt>0)){ wlSay(st,['type how much A to send.']); $('sv-amt').focus(); return }
     if(keyInMemo(memo)){ wlSay(st,['that memo holds what looks like a private key. memos are public, so nothing was sent.']); $('sv-memo').focus(); return }
     if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']); return }
-    if(!signGuard(st))return;
+    if(!signGuard(st,function(){ $('sv-go').click() }))return;
     var liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
     if(liq!==null&&amt>liq+1e-9){ wlSay(st,['you have '+aAmount(liq)+', so send that much or less.']); $('sv-amt').focus(); return }
     if(!capGate('A',amt,st))return;
@@ -8051,6 +8068,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     else wlSay($('sw-quote'),['selling '+n.toLocaleString()+' bytes brings back about '+aAmount(p*n*0.995)+'.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, less the 0.5% fee, paid out by '+A_TOKEN}]);
     var st=$('sw-stat');
     if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to see your RAM.']);
+    else if(pointerUnread()) pointerSay(st);
     else if(!LAST_ACC||LAST_ACC.account_name!==vacct()) wlSay(st,['your RAM is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()).then(swQuote) }}]);
     else wlSay(st,SW_BUY?['you own '+kb(LAST_ACC.ram_quota)+' of RAM and use '+kb(LAST_ACC.ram_usage)+'.']:['you can sell up to '+kb(LAST_ACC.ram_quota-LAST_ACC.ram_usage)+'.']);
   }
@@ -8212,7 +8230,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     BAL_GEN++;
     ANT_ROLLUP.clear(); AR_ROLLUP.clear(); $('a-bal').textContent='';
     balUnread(['a','ant','ar']);
-    var arPub=SOUL?(loadArPublic('ar:'+SOUL)||vaultArPublic()):null;
+    var arPub=SOUL?arInjectBoundAddress():null;
     if(arPub)readArBound(arPub);
   }
   /* a read is said with its time, never as "live" forever: two minutes on, it offers read again */
@@ -8233,13 +8251,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!Array.isArray(r))return null;
     return r.length?assetNumber(r[0]):0;
   }
+  /* while the .b pointer is unread the bare name may be a stranger's account: nothing is read as yours */
+  function pointerUnread(){ return !!SOUL&&!vacctKnown() }
+  function pointerSay(st){ wlSay(st,['could not check which account '+SOUL+'.b points to just now, so nothing is shown for it yet. ',{btn:'try again',on:function(){ readAll() }},{cy:'the registry row for '+SOUL+'.b was not read; the bare account '+SOUL+' is not read because it may not be yours'}]) }
   async function readVaulta(acct){
     balFor();
+    if(pointerUnread()&&acct===vacct()){ pointerSay($('v-stat')); $('v-stat').className='stat err'; wlRead($('v-stat'),false); refreshAcctPanel('pointer'); return }
+    var gen=BAL_GEN, stale=function(){ return gen!==BAL_GEN||acct!==vacct() };   /* the name changed while this read was out */
     var raw=await post(VH,'/v1/chain/get_account',{account_name:acct}), d=(raw&&raw.account_name)?raw:null;
+    if(stale())return;
     var a=d?await readA(acct):null;
+    if(stale())return;
     if(!d||a===null){
       if(LAST_A&&LAST_A.acct===acct)LAST_A=null;
       var why=d?null:((raw&&raw.error)?raw:await postAny(VH,'/v1/chain/get_account',{account_name:acct}));
+      if(stale())return;
       if(!d&&vaultaMissing(why)) wlSay($('v-stat'),['there is no Vaulta account named '+acct+' yet. ',{to:'acct-sec',t:'make one'},{cy:'get_account '+acct+': '+JSON.stringify(why).slice(0,160)}]);
       else wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
       $('v-stat').className='stat err'; wlRead($('v-stat'),false);
@@ -8252,7 +8278,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/')+
       ' · A from '+A_TOKEN+(eos>0?' · also '+eos.toFixed(4)+' EOS on eosio.token, which swaps 1:1 into A and is not counted here':'');
-    if(eos>0){ wlSay($('v-stat'),[acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A. ',{btn:'turn it into A',on:function(){ eosToA(this) }},{cy:'✓ live · '+new Date().toISOString()+' · EOS on eosio.token; sent to '+A_TOKEN+' it comes back 1:1 as A'}]); $('v-stat').className='stat ok'; wlRead($('v-stat'),true) }
+    var eosHeld=eos>0?pendingSame('turn '+String(d.core_liquid_balance)+' into A for '+acct):null;
+    if(eosHeld){ wlSay($('v-stat'),['your '+String(d.core_liquid_balance)+' is on its way to becoming A. ',{to:'outbox-sec',t:'see it in the outbox'},{cy:'outbox '+eosHeld.e.intent_id+' · '+eosHeld.e.phase}]); $('v-stat').className='stat ok'; wlRead($('v-stat'),true) }
+    else if(eos>0){ wlSay($('v-stat'),[acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A. read at '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase()+'. ',{btn:'turn it into A',on:function(){ eosToA(this,acct) }},{cy:'✓ live · '+new Date().toISOString()+' · EOS on eosio.token; sent to '+A_TOKEN+' it comes back 1:1 as A'}]); $('v-stat').className='stat ok'; wlRead($('v-stat'),true) }
     else balReadAt($('v-stat'),'✓ live · '+acct,function(){ readVaulta(acct) });
     $('ch-vaulta').classList.add('connected');
     if(vacct()===acct)refreshAcctPanel();
@@ -8264,9 +8292,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      core.vaulta::transfer of the same amount of A back to the sender (tx c3c79e92d87e9463…,
      2.5624 EOS in, 2.5624 A out). Same lane as every Vaulta send: the cap (unit EOS, never
      price-converted), sign once, kept before it goes out, read back. */
-  function eosToA(btn){ vaultaLane(btn,function(){ return eosToAGo(btn) },$('v-stat')) }
-  async function eosToAGo(btn){
+  function eosToA(btn,offered){ vaultaLane(btn,function(){ return eosToAGo(btn,offered) },$('v-stat')) }
+  async function eosToAGo(btn,offered){
     var st=$('v-stat'), acct=vacct();
+    if(offered&&offered!==acct){ readVaulta(acct); return }   /* the offer was for another account: read this one instead of signing */
     if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to turn your EOS into A.']); return }
     if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to turn your EOS into A.']); return }
     if(!signGuard(st))return;
@@ -8330,8 +8359,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       winston=String(winston==null?'':winston).trim();
       if(!/^\d+$/.test(winston))throw new Error('gateway answered '+JSON.stringify(winston.slice(0,40)));
       if(gen!==BAL_GEN)return;
-      upsertArBalance(addr,Number(winston)/1e12);
-      if(statEl) balReadAt(statEl,addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address',function(){ readArBound(addr) });
+      var mine=addr===AR_INJECT_ACTIVE||addr===arDerivedAddr()||addr===vaultArPublic();
+      if(mine) upsertArBalance(addr,Number(winston)/1e12);
+      else if(window.wlClearRollup) window.wlClearRollup('ar');   /* a followed address is read, never counted as yours */
+      if(statEl&&!mine){ wlSay(statEl,['an address you follow holds '+(Number(winston)/1e12).toFixed(6)+' AR; it is not counted as yours. ',{to:'forge-sec',t:'see your own Arweave address'},{cy:'followed '+addr+' · read '+new Date().toISOString()}]); statEl.className='stat ok'; wlRead(statEl,true) }
+      else if(statEl) balReadAt(statEl,addr===arDerivedAddr()?'✓ live · from your keys':'✓ live · public address',function(){ readArBound(addr) });
       $('ch-arweave').classList.add('connected');
     }catch(e){
       if(gen!==BAL_GEN)return;
@@ -8355,7 +8387,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     wlSay($('wstat'),['looking up '+SOUL+', this takes a moment.',{cy:'resolving '+SOUL+' in the '+REG+' registry'}]);
     wlSay($('sum-soul'),['looking it up, this takes a moment.']);
     var arCtx='ar:'+SOUL;
-    var arPub=loadArPublic(arCtx)||vaultArPublic()||arDerivedAddr();   // derived: only while the keychain is connected
+    var arPub=arInjectBoundAddress();   // the same order everywhere: this visit's extension, your keys, the vault, then a followed address
     var s=SOUL;
     await resolveVacct();
     if(s!==SOUL)return;
@@ -8403,7 +8435,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!v){ wlSay($('wstat'),['type your .b name or account first, then press connect.']); $('wq').focus(); return; }
     if(!ACCT_RE.test(v)&&!BNAME_RE.test(v)){ wlSay($('wstat'),['that does not look like a name, so check the spelling and press connect.',{cy:'refused '+JSON.stringify(v)+': a .b name is 1 to 32 of a-z 0-9 with inner single hyphens; a Vaulta account is 1 to 12 of a-z 1-5 and dots'}]); $('wq').focus(); return; }
     var was=SOUL, wasAcct=SOUL?vacct():null;
-    SOUL=v; vacctCacheLoad();
+    SOUL=v; vacctCacheLoad(); balFor();
     $('connect-sec').removeAttribute('data-wl-rename');
     if(was&&was!==v)dropVaultaRows([was,wasAcct]);
     publishSoul(SOUL);
