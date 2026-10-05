@@ -570,7 +570,7 @@ body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-re
 body[data-wl-soul="true"] .wlb-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
 /* FOUNDER BUG 2026-10-01: when a .b soul is live, remove connect / create bzDiD
    CTAs from the wallet shell — show the live identity only. */
-body[data-wl-soul="true"] .wl-create-bzdid,body[data-wl-soul="true"] .wl-connect-cta{display:none!important}
+body[data-wl-soul="true"] .wl-create-bzdid,body[data-wl-soul="true"] #connect-sec:not([data-wl-rename]) .wl-connect-cta{display:none!important}
 body:not([data-wl-soul="true"]) .wl-soul-live{display:none!important}
 body[data-reg] #fund-sec .fund-coin{background:radial-gradient(circle at 35% 30%,#dbeafb,#6fa9e0 62%,#29628f);border-color:#29628f;animation:none}
 body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
@@ -875,7 +875,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law wl-create-bzdid">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
-  <div class="law wl-soul-live" id="wl-soul-live">live as <b id="wl-soul-name" style="color:var(--leaf)">…</b> — your name and short addr ride the bottom rails bar.</div>
+  <div class="law wl-soul-live" id="wl-soul-live">connected as <b id="wl-soul-name" style="color:var(--leaf)">…</b>. not you? <button type="button" class="wl-act" id="wl-rename">change the name</button><span class="wl-cyd">the rails bar carries this name and its short 0x fingerprint, an identifier and never a key</span></div>
   <div class="row wl-connect-cta">
     <input id="wq" aria-label="Account or .b name" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
@@ -5740,7 +5740,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     SOUL=name; vacctCacheLoad();
     publishSoul(SOUL);
     $('wq').value=SOUL;
-    if(K1&&MPRK)deriveK1();
+    if(MPRK){ deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub }
     readAll();
     acctDirAdd(name);
   }
@@ -8002,27 +8002,66 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'</b> · reading balances…';
     var arCtx='ar:'+SOUL;
     var arPub=loadArPublic(arCtx)||vaultArPublic()||arDerivedAddr();   // derived: only while the keychain is connected
+    var s=SOUL;
     await resolveVacct();
-    if(vacctKnown())acctDirAdd(vacct());
+    if(s!==SOUL)return;
+    if(!vacctKnown()){
+      /* the registry did not answer and this browser has no earlier answer: the bare
+         name may be a stranger's account, so its balance is never read or shown */
+      var vs=$('v-stat'), why='registry '+REG+' domains row for '+s+' unread · the bare account '+s+' is not read, it may be a stranger\u2019s';
+      wlSay(vs,['we could not check which account '+s+'.b points to just now, so no Vaulta balance is shown yet. ',{btn:'try again',on:function(){ readAll() }},{cy:why}]);
+      vs.className='stat err'; wlRead(vs,false);
+      wlSay($('wstat'),['we could not check which account '+s+'.b points to just now, so no balance is shown yet. ',{btn:'try again',on:function(){ readAll() }},{cy:why}]);
+      hiveShow();
+      if(arPub)await readArBound(arPub);
+      if(s!==SOUL)return;
+      wlSay($('sum-soul'),[s+'.b']);
+      sumChains();
+      if(K1)checkBridge(); else if(!MPRK)sumAuth('unknown');
+      return;
+    }
+    acctDirAdd(vacct());
     var who=vacct()!==SOUL?' · Vaulta account <b style="color:var(--leaf)">'+esc(vacct())+'</b>':'';
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · reading balances…';
     var hv=hiveBound(); hiveShow();
     await Promise.all([readVaulta(vacct()), arPub?readArBound(arPub):Promise.resolve()]);
-    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · balances live';
+    if(s!==SOUL)return;
+    /* "read" is said only for a read that answered: each read marks its own line */
+    var missed=[];
+    if($('v-stat').getAttribute('data-read-failed')==='true')missed.push('Vaulta');
+    if(arPub&&$('ar-stat')&&$('ar-stat').getAttribute('data-read-failed')==='true')missed.push('Arweave');
+    var cyw='✓ connected as '+SOUL+'.b'+(vacct()!==SOUL?' · Vaulta account '+vacct():'');
+    if(missed.length) wlSay($('wstat'),[SOUL+'.b is connected, but its '+missed.join(' and ')+' coins could not be read just now. ',{btn:'try again',on:function(){ readAll() }},{cy:cyw+' · unread: '+missed.join(', ')}]);
+    else wlSay($('wstat'),[SOUL+'.b is connected and its coins were read just now. ',{to:'bal-sec',t:'see your coins'},{cy:cyw+' · balances live'}]);
     wlSay($('sum-soul'),[SOUL+'.b'+(vacct()!==SOUL?' · Vaulta '+vacct():'')]);document.body.setAttribute('data-wl-soul','true');
     sumChains();
     if(K1)checkBridge(); else if(!MPRK)sumAuth(vacctKnown()?'':'unknown');
+  }
+  /* a name that is changed takes its Vaulta figure with it: the total never sums an earlier name's account */
+  function dropVaultaRows(accts){
+    var rows=VAULTA_ROLLUP.rows;
+    for(var i=rows.length-1;i>=0;i--)if(accts.indexOf(rows[i].account)>=0)rows.splice(i,1);
+    if(rows.length)VAULTA_ROLLUP.render(); else VAULTA_ROLLUP.clear();
   }
 
   $('wgo').onclick=function(){
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
     if(!v){ $('wstat').textContent='type your name first'; return; }
+    var was=SOUL, wasAcct=SOUL?vacct():null;
     SOUL=v; vacctCacheLoad();
+    $('connect-sec').removeAttribute('data-wl-rename');
+    if(was&&was!==v)dropVaultaRows([was,wasAcct]);
     publishSoul(SOUL);
     acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
-    if(K1)deriveK1();
+    if(MPRK){ if(K1&&K1.seed)K1.seed.fill(0); K1=null; deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub }
     seedContexts(); renderForge();
     readAll();
+  };
+  /* "not you?": the name field comes back, holding the name, ready to be replaced */
+  $('wl-rename').onclick=function(){
+    $('connect-sec').setAttribute('data-wl-rename','');
+    var q=$('wq'); q.value=SOUL||''; q.focus(); q.select();
+    wlSay($('wstat'),['type your own .b name or account, then press connect.']);
   };
   $('wq').addEventListener('keydown',function(e){if(e.key==='Enter')$('wgo').click()});
   $('kc-rec').addEventListener('keydown',function(e){if(e.key==='Enter')$('kc-recgo').click()});

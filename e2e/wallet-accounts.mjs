@@ -59,6 +59,8 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
     if (body.code !== 'core.vaulta' || body.symbol !== 'A') return json([]);
     return json(vaultMalformed ? { error: 'fixture' } : body.account === 'alice' ? ['12.3456 A'] : ['7.0000 A']);
   }
+  // the .b registry answers: no row, so a soul is a plain account (an unanswered registry reads nothing)
+  if (url.pathname === '/v1/chain/get_table_rows') return json({ rows: [], more: false });
   if (url.pathname === '/v1/chain/get_account') {
     calls.push('get_account');
     if (body.account_name === 'missing') return json({ error: { message: 'unknown account' } });

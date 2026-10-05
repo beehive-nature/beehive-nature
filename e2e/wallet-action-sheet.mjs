@@ -78,6 +78,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       const json = (o, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(o) });
       const body = JSON.parse(route.request().postData() || '{}');
       if (u.pathname.endsWith('/get_table_rows')) {
+        if (body.code === 'kingbeelovis' && body.table === 'domains' && state.regDown) return json({ error: { what: 'registry down (fixture)' } }, 500);
         if (body.code === 'kingbeelovis' && body.table === 'domains') {
           const rows = body.lower_bound ? ROWS.filter(r => r.id === String(body.lower_bound)) : ROWS;
           return json({ rows: rows.slice(0, body.limit || 500), more: false, next_key: '' });
@@ -86,10 +87,12 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         return json(state.ramDown ? { rows: [], more: false } : { rows: [{ base: { balance: '100000000000 RAM' }, quote: { balance: '1000000.0000 A' } }], more: false });
       }
       if (u.pathname.endsWith('/get_account')) {
+        (state.reads = state.reads || []).push(body.account_name);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
         return json({ account_name: a, core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
       }
+      if (u.pathname.endsWith('/get_currency_balance') && state.aDown) return json({ error: { what: 'down (fixture)' } }, 500);
       if (u.pathname.endsWith('/get_currency_balance')) return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
@@ -533,6 +536,59 @@ try {
     await page.waitForTimeout(800);
     const r = await page.evaluate(() => ({ xss: window.__xss, shown: document.getElementById('tx-preview').style.display, text: document.getElementById('tx-preview-body').textContent, tags: document.querySelectorAll('#tx-preview-body img, #tx-preview-body svg').length }));
     ok('the link\'s arguments are shown as text and nothing in them runs', r.shown === 'block' && r.xss === undefined && r.tags === 0 && /<img src=x/.test(r.text), JSON.stringify(r).slice(0, 200));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* M · at a glance tells the truth about its reads, and the name can be changed */
+  {
+    console.log('M · the glance and the name:');
+    const { ctx, state } = await context(browser, 'bee');
+    state.regDown = true;
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => /could not check which account king\.b points to/.test(document.getElementById('wstat').textContent), null, { timeout: 20000 });
+    let g = await page.evaluate(() => ({ wstat: document.getElementById('wstat').innerText, btn: !!document.querySelector('#wstat button.wl-act'), vbal: document.getElementById('v-bal').textContent.trim(),
+      bee: document.querySelector('#wl-bee .wlb-fig').textContent.trim(), beeSays: document.querySelector('#wl-bee .wlb-stat').innerText }));
+    ok('the registry unread on a first visit: the bare name "king" (a stranger\'s) is never read, and no balance is shown', !(state.reads || []).includes('king') && g.vbal === '' && g.bee === '', JSON.stringify({ reads: state.reads, g }));
+    ok('the glance says why in one sentence and offers try again, never "balances live"', g.btn && !/balances live|✓/.test(g.wstat) && /no balance is shown yet/.test(g.wstat) && /could not check/.test(g.beeSays), JSON.stringify(g));
+    state.regDown = false;
+    await page.click('#wl-bee [data-wl-go="have"]'); await page.waitForTimeout(300);
+    await page.click('#wstat button.wl-act');
+    await page.waitForFunction(() => /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    await page.waitForFunction(() => /read just now/.test(document.getElementById('wstat').textContent), null, { timeout: 20000 });
+    g = await page.evaluate(() => ({ wstat: document.getElementById('wstat').innerText, link: !!document.querySelector('#wstat a[href="#bal-sec"]'), vbal: document.getElementById('v-bal').textContent.trim() }));
+    ok('try again reads where king.b points, then its own account, and says the coins were read', g.vbal === '5.0000 A' && g.link && /^king\.b is connected and its coins were read just now\./.test(g.wstat) && !(state.reads || []).includes('king'), JSON.stringify({ g, reads: state.reads }));
+    // a read that fails is said as failed, with try again
+    state.aDown = true;
+    await page.evaluate(() => { document.getElementById('wq').value = ''; });
+    await page.click('#wl-rename');
+    g = await page.evaluate(() => ({ field: document.querySelector('.wl-connect-cta').getClientRects().length > 0, focus: document.activeElement && document.activeElement.id, val: document.getElementById('wq').value }));
+    ok('"not you? change the name" brings the name field back, holding the name, ready to replace', g.field && g.focus === 'wq' && g.val === 'king', JSON.stringify(g));
+    await page.fill('#wq', 'oliver'); await page.click('#wgo');
+    await page.waitForFunction(() => /oliver\.b is connected, but its Vaulta coins could not be read just now/.test(document.getElementById('wstat').textContent), null, { timeout: 20000 });
+    g = await page.evaluate(() => ({ btn: !!document.querySelector('#wstat button.wl-act'), live: /balances live/.test(document.getElementById('wstat').innerText), field: document.querySelector('.wl-connect-cta').getClientRects().length > 0,
+      rows: [...document.querySelectorAll('#bal-sec [data-vaulta-rows] .va-rollup-row small')].map(e => e.textContent) }));
+    ok('a failed read never says "balances live": it names what was not read and offers try again', g.btn && !g.live, JSON.stringify(g));
+    ok('connecting the new name closes the field again', !g.field, JSON.stringify(g));
+    ok('the earlier name\'s Vaulta figure leaves with it (the total never sums a name you left)', g.rows.length === 0, JSON.stringify(g.rows));
+    state.aDown = false;
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* N · keychain first, name second: the Vaulta key is derived and checked */
+  {
+    console.log('N · keychain before the name:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRPAY, null, { timeout: 20000 });
+    await recoveryConnect(page);
+    await page.click('#wl-bee [data-wl-go="have"]'); await page.waitForTimeout(300);
+    await page.fill('#wq', 'bobaccount11'); await page.click('#wgo');
+    const signLine = () => page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    await signLine(); await page.waitForTimeout(1500); await signLine();
+    const k1 = (await page.textContent('#kc-k1-pub')).trim(), acctKey = await k1Of(page, 'vaulta:bobaccount11');
+    ok('a plain account connected after the keychain derives its Vaulta key and checks it (no "connect your keychain")', k1 === acctKey && (await page.textContent('#sum-bridge')).trim() === 'bobaccount11 · let this wallet sign for it', JSON.stringify({ k1, acctKey, bridge: await page.textContent('#sum-bridge') }));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
