@@ -564,7 +564,7 @@ try {
   console.log('J · the EVM lane follows the outbox law:');
   {
     const ctx = await browser.newContext(); await mockOther(ctx);
-    const S = { raws: [], mode: 'known', receipt: null, latest: '0x7', receiptAsks: [] };
+    const S = { raws: [], mode: 'known', receipt: null, receipts: {}, latest: '0x7', receiptAsks: [] };
     await ctx.route(RAIL_RE, async route => {
       const req = route.request();
       if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS, body: '' });
@@ -578,8 +578,8 @@ try {
           if (S.mode === 'known') return send({ error: { code: -32000, message: 'already known' } });
           if (S.mode === 'poor') return send({ error: { code: -32000, message: 'insufficient funds for gas * price + value' } });
           return send({ result: '0x' + 'cd'.repeat(32) });
-        case 'eth_getTransactionReceipt': S.receiptAsks.push(body.params[0]); return send({ result: S.receipt });
-        case 'eth_getTransactionCount': return send({ result: body.params[1] === 'latest' ? S.latest : MOCK.nonce });
+        case 'eth_getTransactionReceipt': S.receiptAsks.push(body.params[0]); return send({ result: S.receipts[body.params[0]] || S.receipt });
+        case 'eth_getTransactionCount': S.countTags = (S.countTags || []).concat(body.params[1]); return send({ result: body.params[1] === 'latest' ? S.latest : (S.pendingNonce || MOCK.nonce) });
         case 'eth_gasPrice':
           /* another name is connected while THIS press reads its fee (never a background read) */
           if (S.switchOnGas && /^reading the fee and signing/.test(await page.evaluate(() => document.getElementById('se-stat').textContent))) {
@@ -587,7 +587,13 @@ try {
             await page.evaluate(v => { document.getElementById('wq').value = v; document.getElementById('wgo').click(); }, n);
           }
           return send({ result: MOCK.gasPrice });
-        case 'eth_getTransactionByHash': S.byHash = (S.byHash || 0) + 1; return send({ result: S.known ? { hash: body.params[0], blockNumber: null } : null });
+        case 'eth_getTransactionByHash': {
+          S.byHash = (S.byHash || 0) + 1;
+          const host = new URL(req.url()).host;
+          if (S.silent === host) return route.abort('timedout');   // the host whose answer is lost
+          if (S.rate === host) return route.fulfill({ status: 429, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: body.id ?? 1, error: { code: -32005, message: 'rate limited' } }) });
+          return send({ result: S.known ? { hash: body.params[0], blockNumber: null } : null });
+        }
         case 'eth_estimateGas': return send({ result: MOCK.estimate });
         case 'eth_getBalance': return send({ result: '0x16345785d8a0000' });
         case 'eth_call': return send({ result: '0x' + (1000000n).toString(16).padStart(64, '0') });
@@ -652,16 +658,55 @@ try {
     const h2 = await press(null, null);
     ok('while any host still holds those bytes, the refusal is not believed: it is with Base, kept, and nothing new is signed',
       /^your last send \(0\.05 ETH to 0x5aae…eaed\) is with Base/i.test(h2.say) && !/clear it/.test(h2.say) && h2.pend && h2.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h2.say);
-    S.known = false;
+    S.known = false; S.silent = 'base.drpc.org';
+    const hq = await press(null, null);
+    ok('one host that does not answer is never read as "it does not hold them": the send stays kept, no clear is offered, and check again is',
+      /^Base did not answer, so this wallet cannot tell yet whether your last send went out/i.test(hq.say) && /check again/.test(hq.say) && !/clear it/.test(hq.say) && hq.pend && hq.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, hq.say);
+    S.silent = null;
     const h3 = await press(null, null);
     ok('once no host holds them, the next press says the one way out again (never "did not say yet") and signs nothing new',
       /^Base turns down your last send \(0\.05 ETH/.test(h3.say) && !/did not say yet/.test(h3.say) && h3.pend && h3.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h3.say);
-    const clicked = await page.evaluate(() => { const c = [...document.querySelectorAll('#se-stat button.wl-act')].find(b => b.textContent === 'clear it'); if (c) c.click(); return !!c; });
-    if (clicked) await page.waitForFunction(() => /^cleared/.test(document.getElementById('se-stat').innerText.trim()), null, { timeout: 40000 }).catch(() => {});
+    const tap = async (label, until) => { const c = await page.evaluate(l => { const b = [...document.querySelectorAll('#se-stat button.wl-act')].find(x => x.textContent === l); if (b) b.click(); return !!b; }, label);
+      if (c) await page.waitForFunction(re => new RegExp(re).test(document.getElementById('se-stat').innerText.trim()), until.source, { timeout: 40000 }).catch(() => {}); return c; };
+    S.rate = 'base.drpc.org';
+    await tap('clear it', /kept for now|^cleared/);
+    const hr = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), pend: localStorage.getItem('bnr_evm_pending:gatesoul') }));
+    ok('clear it while one host is rate limited: nothing is cleared, the send stays kept, and try again is offered',
+      /^Base did not answer, so your last send is kept for now/i.test(hr.say) && /try again/.test(hr.say) && hr.pend !== null, JSON.stringify(hr));
+    S.rate = null;
+    await tap('try again', /^cleared|kept for now/);
     const h4 = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), pend: localStorage.getItem('bnr_evm_pending:gatesoul'),
       eth: JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'ETH').reduce((s, e) => s + e.a, 0) }));
     ok('clear it, pressed on purpose: the lane is free, and the cap is not given back (nothing proves it never ran)',
       /^cleared\. you can fill in a new send now/.test(h4.say) && h4.pend === null && Math.abs(h4.eth - typo.eth - 0.05) < 1e-9 && new Set(S.raws).size === d0 + 1, JSON.stringify(h4));
+    /* after a clear, the next send on that rail reads its nonce as 'latest' and is priced above the
+       cleared one: a cleared send still in some pool is REPLACED at its own nonce, never joined by
+       nonce + 1 (two payments) */
+    const lastRaw = () => rlpDecode(Buffer.from(S.raws[S.raws.length - 1].slice(2), 'hex'));
+    S.mode = 'ok'; S.pendingNonce = '0x8'; S.countTags = [];   // a pool still holds the cleared send at nonce 7
+    const n1 = await press(TO, '0.07'); const t1 = lastRaw();
+    ok('the send after a clear reads its nonce as latest (not the pool\'s pending 8), is signed at the cleared nonce 7, and priced at least 10% above it',
+      S.countTags.includes('latest') && !S.countTags.includes('pending') && big(t1[0]) === 7n && big(t1[1]) >= 1100000001n && n1.pend && n1.pend.nonce === 7,
+      'tags ' + S.countTags.join(',') + ' · nonce ' + big(t1[0]) + ' · gas price ' + big(t1[1]) + ' · ' + n1.say);
+    S.receipts[n1.pend.hash] = { blockNumber: '0x12', status: '0x1' }; await press(null, null); S.latest = '0x8';
+    S.countTags = [];
+    const n2 = await press(TO, '0.08'); const t2 = lastRaw();
+    const mk2 = await page.evaluate(() => localStorage.getItem('bnr_evm_dropped:gatesoul'));
+    ok('once that nonce is used by another send, the mark is gone and the next send is signed at the next nonce, priced as usual',
+      big(t2[0]) === 8n && big(t2[1]) === 1000000000n && mk2 === null && /^sent\./.test(n2.say), 'nonce ' + big(t2[0]) + ' · ' + big(t2[1]) + ' · ' + mk2 + ' · ' + n2.say);
+    S.receipts[n2.pend.hash] = { blockNumber: '0x13', status: '0x1' }; await press(null, null); S.latest = '0x9'; S.pendingNonce = '0x9';
+    /* a cleared send that goes in after all (a pool still had it) stops the next send before anything leaves */
+    S.mode = 'lostThenPoor';
+    const h5 = await press(TO, '0.09');
+    await tap('clear it', /^cleared|kept for now/);
+    S.receipts[h5.pend.hash] = { blockNumber: '0x14', status: '0x1' }; S.latest = '0xa'; S.mode = 'ok';
+    const r0n = S.raws.length;
+    const n3 = await press(TO, '0.1');
+    const mk3 = await page.evaluate(() => localStorage.getItem('bnr_evm_dropped:gatesoul'));
+    ok('a cleared send that went in after all: the next send is signed but never sent or counted, the typing comes back, and the line says so',
+      /^the send you cleared \(0\.09 ETH to 0x5aae…eaed\) went in after all, so nothing new was sent/i.test(n3.say) && S.raws.length === r0n && !n3.pend && Math.abs(n3.eth - h5.eth) < 1e-9 && n3.to === TO && mk3 === null,
+      n3.say + ' · ' + (S.raws.length - r0n) + ' · ' + (n3.eth - h5.eth));
+    S.pendingNonce = null; S.latest = '0x7';
     /* another name connected while a send is signing: dropped before any broadcast, kept nowhere,
        never counted, and that name's own kept send is untouched */
     const OTHER = JSON.stringify({ rail: 'base', label: 'Base', raw: '0x00', hash: '0x' + 'ef'.repeat(32), nonce: 3, from: '0x' + '11'.repeat(20), to: TO, amount: '9', sym: 'ETH', explorer: '', at: 1 });
@@ -671,7 +716,7 @@ try {
     const mv = await press(TO, '0.06');
     const mvo = await page.evaluate(() => localStorage.getItem('bnr_evm_pending:othersoul'));
     ok('another name connected while a send signs: nothing is broadcast, kept or counted, that name\'s kept send is untouched, and the line says so',
-      /^you connected another name while this was signing, so nothing was sent/.test(mv.say) && S.switchOnGas === null && new Set(S.raws).size === d1 && !mv.pend && mvo === OTHER && Math.abs(mv.eth - h4.eth) < 1e-9,
+      /^you connected another name while this was signing, so nothing was sent/.test(mv.say) && S.switchOnGas === null && new Set(S.raws).size === d1 && !mv.pend && mvo === OTHER && Math.abs(mv.eth - n3.eth) < 1e-9,
       mv.say + ' · ' + mvo);
     await ctx.close();
   }
