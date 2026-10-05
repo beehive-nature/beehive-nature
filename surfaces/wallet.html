@@ -3078,17 +3078,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // a canonical recoverable signature, hex [recid+31] r s: the vendored eosjs signer retries until
   // canonical (graphene's rule, the same on Hive and Vaulta); the noble signer here cannot retry
   function hiveSign(wif,digest){ return hexS(BN.PrivateKey.fromString(wif).sign(digest,false).signature.data) }
-  // the one send that is not finished yet, kept BEFORE broadcast (the outbox law, Hive's slot)
-  function hivePending(){ try{ return JSON.parse(localStorage.getItem(hiveSlot('pending'))||'null') }catch(e){ return null } }
-  function hivePendingSet(p){ if(p)localStorage.setItem(hiveSlot('pending'),JSON.stringify(p)); else localStorage.removeItem(hiveSlot('pending')) }
+  // the one send that is not finished yet, kept BEFORE broadcast (the outbox law, Hive's slot).
+  // The slot is named once, for the soul that signed (p.slot): connecting another name later never
+  // reads, marks or clears this send under that name.
+  function hivePending(){ var k=hiveSlot('pending'); try{ var p=JSON.parse(localStorage.getItem(k)||'null'); if(p)p.slot=k; return p }catch(e){ return null } }
+  function hivePendingSet(p){ localStorage.setItem(p.slot,JSON.stringify(p)) }
+  // the stored copy, only while its slot still holds this very send (another tab may have settled it)
+  function hiveHeld(p){ try{ var q=JSON.parse(localStorage.getItem(p.slot)||'null'); return (q&&q.txid===p.txid)?q:null }catch(e){ return null } }
   async function hiveStatus(p){
     try{ var st=await hiveRpc('transaction_status_api.find_transaction',{transaction_id:p.txid,expiration:p.exp}); return (st&&st.status)||'unknown' }
     catch(e){ return 'unknown' }
   }
+  // a node's answer that proves the transfer never ran: hived's own checks before it executes
+  // (funds, authority, accounts, memo, expiration and TaPoS, resource credits). Any other error
+  // body (a gateway's timeout or internal error in front of hived) proves nothing: hived may
+  // already hold the bytes, so the next node is asked and the chain is read back.
+  function hiveNo(t){ return /sufficient funds|insufficient|does not have sufficient|missing (required )?(active |owner |posting )?authority|irrelevant signature|unknown key|does not exist|unknown account|memo is too|memo must|trx\.expiration|transaction_expiration|transaction expired|tapos|ref_block_(num|prefix)|\d+ RC\b|not_enough_rc|rc_plugin_exception|negative amount|amount\.amount > 0|is_valid_account_name/i.test(String(t||'')) }
   // the KEPT bytes go to the nodes in turn: ok, duplicate (a node holds them), a refusal (sure only
-  // when no node before it may have taken them), or nobody answered
+  // when hived's own check said it and no node before it may have taken them), an answer without
+  // a verdict, or nobody answered
   async function hiveBroadcast(p){
-    var lost=false;
+    var lost=false, said=null;
     for(var i=0;i<HIVE_NODES.length;i++){
       var d=null;
       try{ var r=await fetchT(HIVE_NODES[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.broadcast_transaction',params:[p.tx],id:1})}); if(r.ok)d=await r.json() }catch(e){}
@@ -3096,27 +3106,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(d&&d.error){
         var t=String(d.error.message||'')+' '+JSON.stringify(d.error.data||'');
         if(/duplicate/i.test(t))return {dup:true};
-        var er=new Error('hive'); er.hive=t; return {no:er,sure:!lost};
+        if(hiveNo(t)){ var er=new Error('hive'); er.hive=t; return {no:er,sure:!lost} }
+        said=t;   /* an answer without a verdict: the next node is asked, and the send stays kept */
       }
       lost=true;
     }
-    return {off:true};
+    return {off:!said,said:said};
   }
   // broadcast the KEPT bytes (first time or retry: never signed again), then read the chain back.
   // A send that may already be out is read FIRST: after its window a node answers "expired", not
   // "duplicate", so a refusal is never trusted over the chain's own record. Cleared only on
   // inclusion, on expired_irreversible (proof it never ran), or on too_old (it can never land now).
-  async function hiveSettle(p){
-    var fresh=!p.out, s0;
+  // fresh is said by the caller, never read from storage: only the press that signed these bytes,
+  // in this tab, before any of them left, is fresh. A send loaded back from its slot (a reload, a
+  // closed tab, another tab, a later press) may already be out, so the chain is read first.
+  async function hiveSettle(p,fresh){
     if(!fresh){
-      s0=await hiveStatus(p);
+      var s0=await hiveStatus(p);
       if(/within_(reversible|irreversible)_block/.test(s0))return {phase:'confirmed'};
       if(/expired_irreversible/.test(s0))return {phase:'expired'};
       if(/too_old/.test(s0))return {phase:'old'};
     }
+    p.out=true; try{ if(hiveHeld(p))hivePendingSet(p) }catch(e){}   /* marked before the first byte leaves */
     var b=await hiveBroadcast(p);
     if(b.no&&b.sure&&fresh)return {phase:'refused',why:hiveSay(b.no)};
-    p.out=true; try{ if(hivePending())hivePendingSet(p) }catch(e){}
     for(var i=0;i<(b.off?3:20);i++){
       var st=await hiveStatus(p);
       if(/within_(reversible|irreversible)_block/.test(st))return {phase:'confirmed'};
@@ -3124,7 +3137,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(/too_old/.test(st))return {phase:'old'};
       await new Promise(function(r){setTimeout(r,1500)});
     }
-    return {phase:b.off?'offline':(b.ok||b.dup)?'submitted':'unknown',said:b.no?b.no.hive:null};
+    return {phase:b.off?'offline':(b.ok||b.dup)?'submitted':'unknown',said:b.no?b.no.hive:(b.said||null)};
   }
   async function hiveBuild(wif,from,to,amount,sym,memo){
     var dgp=await hiveRpc('condenser_api.get_dynamic_global_properties',[]);
@@ -8391,13 +8404,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       {btn:'keep it',on:function(){ st.textContent='' }},
       {cy:'clears '+hiveSlot('acct')+' and '+hiveSlot('seal')}]);
   };
-  /* the daily cap counted this send when it was signed; it is given back only on the chain's
-     proof that it never ran (a node's sure refusal of a send that was never out before, or
-     expired_irreversible), and on the day it was counted. Marked first, so never twice. */
-  function hiveCapBack(p){
-    if(!p||!p.cap||p.cap.back)return;
-    p.cap.back=true; try{ hivePendingSet(p) }catch(e){}
-    capRecord(p.cap.unit,-p.cap.amt,p.cap.day);
+  /* a settled send leaves its own slot. The daily cap counted it when it was signed; it is given
+     back (back=true) only on the chain's proof that it never ran (hived's sure refusal of the first
+     broadcast, from the press that signed it, or expired_irreversible), and on the day it was
+     counted. The slot is read again and emptied BEFORE the cap entry is written, in one
+     synchronous block: another tab checking the same send then finds nothing to give back. */
+  function hiveDone(p,back){
+    var q=hiveHeld(p); if(!q)return false;
+    try{ localStorage.removeItem(p.slot) }catch(e){ return false }
+    var c=q.cap||p.cap;
+    if(back&&c&&!c.back)capRecord(c.unit,-c.amt,c.day);
+    return true;
   }
   /* the Hive lane speaks in lower case like every lane here; a sentence that opens on a name keeps its capital */
   function hsLow(t){ t=String(t||''); return /^(Hive|HIVE|HBD)\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1) }
@@ -8415,19 +8432,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL||!acct){ hsRefresh(); return }
     if(btn.disabled)return;
     btn.disabled=true;
-    var w=null;
+    var w=null, soul=SOUL, slot=hiveSlot('pending');   /* the name that pressed, and its slot, for the whole press */
+    var moved=function(){ if(SOUL===soul)return false; w=null;
+      wlSay(st,['you connected another name while this was signing, so nothing was sent. press send to start again.',{cy:'signed for '+soul+' while '+SOUL+' is connected: dropped before any broadcast, nothing counted on the cap'}]); return true };
     try{
       // a send that has not settled comes first: its kept bytes, never a second signature
       var p0=hivePending();
       if(p0){
         st.textContent='checking your last send…';
-        var r0=await hiveSettle(p0), last=p0.amount+' '+p0.sym+' to '+p0.to;
-        if(r0.phase==='confirmed'){ hivePendingSet(null); st.textContent='your last send went through: '+last+'. press send again for a new one.'; readHive(acct); return }
-        if(r0.phase==='old'){ hivePendingSet(null); wlSay(st,['this wallet can no longer tell whether your last send ('+last+') went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'},{cy:'find_transaction: too_old; the kept bytes are past their expiration and can never land now'}]); return }
-        if(r0.phase!=='expired'&&r0.phase!=='refused'){ st.textContent='your last send ('+last+') has not settled yet, so nothing new was signed. press send again in a minute.'; return }
-        hiveCapBack(p0); hivePendingSet(null);
+        var r0=await hiveSettle(p0,false), last=p0.amount+' '+p0.sym+' to '+p0.to;   /* from its slot: never fresh */
+        if(r0.phase==='confirmed'){ hiveDone(p0,false); st.textContent='your last send went through: '+last+'. press send again for a new one.'; readHive(acct); return }
+        if(r0.phase==='old'){ hiveDone(p0,false); wlSay(st,['this wallet can no longer tell whether your last send ('+last+') went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'},{cy:'find_transaction: too_old; the kept bytes are past their expiration and can never land now'}]); return }
+        if(r0.phase!=='expired'){ st.textContent='your last send ('+last+') has not settled yet, so nothing new was signed. press send again in a minute.'; return }
+        hiveDone(p0,true);   /* expired_irreversible: the chain's proof it never ran */
         if(!($('hs-to').value||'').trim()&&!($('hs-amt').value||'').trim()){
-          st.textContent=r0.phase==='expired'?'your last send ('+last+') did not land in time, so nothing was sent. fill in a new one and press send.':hsLow(r0.why);
+          st.textContent='your last send ('+last+') did not land in time, so nothing was sent. fill in a new one and press send.';
           return;
         }
       }
@@ -8443,25 +8462,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         finally{ CEREMONY=false }
       }
       w=await hiveUnseal(acct);
+      if(moved())return;
       if(!w){ hiveShow(true); wlSay(st,['paste '+acct+'’s active key once more, then press send. ',{to:'ch-hive',t:'paste it'},{cy:'no seal for this account, or it was made by another keychain'}]); return }
       st.textContent='signing '+amt+' '+sym+' to '+to+'…';
       var pend=await hiveBuild(w,acct,to,amt,sym,memo); w=null;
+      if(moved())return;                          // kept for the name that pressed, or dropped unsent
+      pend.slot=slot;
       try{ hivePendingSet(pend) }                 // kept BEFORE it is broadcast
       catch(se){ wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then press send again.',{cy:'pending write failed: '+((se&&se.message)||se)}]); return }
       pend.cap={unit:sym,amt:Number(amt),day:capRecord(sym,Number(amt))};   // counted once signed and kept
       try{ hivePendingSet(pend) }catch(se2){}
       $('hs-to').value=''; $('hs-amt').value=''; $('hs-memo').value='';   // signed: a second press never signs this again
       st.textContent='sending '+amt+' '+sym+' to '+to+'…';
-      var r=await hiveSettle(pend);
-      if(r.phase==='confirmed'){ hivePendingSet(null); st.textContent='done. '+amt+' '+sym+' went to '+to+', and the chain confirmed it.'; readHive(acct) }
-      else if(r.phase==='refused'){ hiveCapBack(pend); hivePendingSet(null); st.textContent=hsLow(r.why); $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
-      else if(r.phase==='expired'){ hiveCapBack(pend); hivePendingSet(null); st.textContent='it did not land in time, so nothing was sent. press send to try again.'; $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
-      else if(r.phase==='old'){ hivePendingSet(null); wlSay(st,['this wallet can no longer tell whether it went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'}]) }
+      var r=await hiveSettle(pend,true);          // the press that signed it: its one fresh try
+      if(r.phase==='confirmed'){ hiveDone(pend,false); st.textContent='done. '+amt+' '+sym+' went to '+to+', and the chain confirmed it.'; readHive(acct) }
+      else if(r.phase==='refused'){ hiveDone(pend,true); st.textContent=hsLow(r.why); $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
+      else if(r.phase==='expired'){ hiveDone(pend,true); st.textContent='it did not land in time, so nothing was sent. press send to try again.'; $('hs-to').value=to; $('hs-amt').value=amt; $('hs-memo').value=memo }
+      else if(r.phase==='old'){ hiveDone(pend,false); wlSay(st,['this wallet can no longer tell whether it went in, so check your Hive coins before you send it again. ',{to:'ch-hive',t:'see your Hive coins'}]) }
       else if(r.phase==='offline') wlSay(st,['the Hive network did not answer, so this wallet cannot tell yet whether it went out. press send to check; nothing new is signed until it settles.',{cy:'broadcast reached no node; the signed bytes are kept and a press resends them identically'}]);
-      else if(r.phase==='unknown') wlSay(st,['Hive did not take it this time, and an earlier try may still go in, so nothing new was signed. press send again in a minute to check.',{cy:r.said||'no verdict'}]);
+      else if(r.phase==='unknown') wlSay(st,['Hive did not say yet whether it went in, so nothing new is signed. press send again in a minute to check.',{cy:r.said||'no verdict'}]);
       else st.textContent='it is on its way, and the chain has not shown it yet. press send again to check; nothing new is signed until it settles.';
     }catch(e){
-      var kept=hivePending();
+      var kept=null; try{ kept=JSON.parse(localStorage.getItem(slot)||'null') }catch(x){}
       if(kept&&kept.out) wlSay(st,['this send stopped partway. press send to check where it is; nothing is signed twice.',{cy:(e&&e.message)||String(e)}]);
       else if(e&&e.hive) st.textContent=hsLow(hiveSay(e));
       else if(e&&(e.offline||/did not answer/i.test(e.message||''))) wlSay(st,['the Hive network did not answer, so nothing was sent. ',again,{cy:(e&&e.message)||''}]);
@@ -8980,9 +9002,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      The cap counts the send once it is signed and gives it back only when a node refused it
      before it ran (not enough funds, a fee below the floor), and only for a first broadcast
      that no earlier node may have taken. ══ */
+  /* the slot is named once, for the soul that signed (p.slot): connecting another name later never
+     reads, marks or clears this send under that name */
   function evmSlot(){ return 'bnr_evm_pending:'+SOUL }
-  function evmPending(){ try{ return JSON.parse(localStorage.getItem(evmSlot())||'null') }catch(e){ return null } }
-  function evmPendingSet(p){ if(p)localStorage.setItem(evmSlot(),JSON.stringify(p)); else localStorage.removeItem(evmSlot()) }
+  function evmPending(){ var k=evmSlot(); try{ var p=JSON.parse(localStorage.getItem(k)||'null'); if(p)p.slot=k; return p }catch(e){ return null } }
+  function evmPendingSet(p){ localStorage.setItem(p.slot,JSON.stringify(p)) }
+  function evmHeld(p){ try{ var q=JSON.parse(localStorage.getItem(p.slot)||'null'); return (q&&q.hash===p.hash)?q:null }catch(e){ return null } }
+  /* a settled send leaves its own slot; the slot is read again and emptied BEFORE a cap entry is
+     given back (back=true), in one synchronous block, so a second tab finds nothing to give back */
+  function evmDone(p,back){
+    var q=evmHeld(p); if(!q)return false;
+    try{ localStorage.removeItem(p.slot) }catch(e){ return false }
+    var c=q.cap||p.cap;
+    if(back&&c&&!c.back)capRecord(c.unit,-c.amt,c.day);
+    return true;
+  }
   function evmHosts(railKey){
     var h=railOf(railKey).hosts.slice();
     for(var j=h.length-1;j>0;j--){ var r0=Math.floor(Math.random()*(j+1)); var t=h[j]; h[j]=h[r0]; h[r0]=t }
@@ -9024,43 +9058,85 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(a&&a.result&&a.result.blockNumber)return {phase:a.result.status==='0x0'?'reverted':'confirmed'};
     return null;
   }
+  /* every host is asked whether it holds these very bytes (in its pool or a block): true when one
+     does, false when every host that answered said no, null when nobody answered */
+  async function evmKnown(p){
+    var hosts=railOf(p.rail).hosts, said=null;
+    for(var i=0;i<hosts.length;i++){
+      try{ var r=await fetchT(hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getTransactionByHash',params:[p.hash]})}); var d=await r.json();
+        if(d&&d.result)return true;
+        if(d&&d.result===null)said=false }catch(e){}
+    }
+    return said;
+  }
   async function evmSettle(p,fresh){
     if(!fresh){ var r0=await evmReceipt(p); if(r0)return r0 }
     var b=await evmBroadcast(p);
     if(b.no&&b.sure&&fresh)return {phase:'refused',why:b.no};
-    p.out=true; try{ if(evmPending())evmPendingSet(p) }catch(e){}
+    p.out=true; try{ if(evmHeld(p))evmPendingSet(p) }catch(e){}
     for(var i=0;i<(b.off?2:5);i++){
       await new Promise(function(r){ setTimeout(r,1500) });
       var r1=await evmReceipt(p); if(r1)return r1;
     }
-    if(b.low){   /* that nonce is used and no receipt carries our hash: another send took its place */
+    if(b.low||b.no){   /* the nonce is used, or a node turned these very bytes away: the chain says which */
       var n=await evmAsk('eth_getTransactionCount',[p.from,'latest'],p.rail), rc=await evmAsk('eth_getTransactionReceipt',[p.hash],p.rail);
-      if(n&&evmHex(n.result)&&parseInt(n.result,16)>p.nonce&&rc&&('result' in rc)&&rc.result===null)return {phase:'replaced',why:b.said};
+      var used=n&&evmHex(n.result)?parseInt(n.result,16):null, none=!!(rc&&('result' in rc)&&rc.result===null);
+      /* that nonce is used and no receipt carries our hash: another send took its place */
+      if(used!==null&&used>p.nonce&&none)return {phase:'replaced',why:b.said||b.no};
+      /* turned away before it ran, its nonce still unused and no block holds it: it is not in, and
+         it goes in later only if these bytes are sent again once the address can pay. A press of
+         check again cannot settle that, so the reader may clear it on purpose (never given back) */
+      if(b.no&&used!==null&&used<=p.nonce&&none){
+        var k=await evmKnown(p);   /* a refusal is believed only when no host holds these bytes */
+        if(k===false)return {phase:'held',why:b.no};
+        if(k)return {phase:'submitted',why:b.no};
+      }
     }
     return {phase:b.sent?'submitted':b.off?'offline':'unknown',why:b.said||b.no||null};
   }
-  function evmCapBack(p){
-    if(!p||!p.cap||p.cap.back)return;
-    p.cap.back=true; try{ evmPendingSet(p) }catch(e){}
-    capRecord(p.cap.unit,-p.cap.amt,p.cap.day);
+  /* the reader clears, on purpose, a send no node will take: the chain is read once more first (it
+     may have gone in since), it is cleared only while its nonce is still unused and no block holds
+     it, and its cap entry stays (nothing proves it never ran) */
+  async function evmDrop(st,p){
+    if(EVBUSY)return;
+    EVBUSY=true; $('se-go').disabled=true;
+    try{
+      wlSay(st,['checking it once more…']);
+      var rc=await evmAsk('eth_getTransactionReceipt',[p.hash],p.rail), n=await evmAsk('eth_getTransactionCount',[p.from,'latest'],p.rail);
+      if(rc&&rc.result&&rc.result.blockNumber){ evmSay(st,p,{phase:rc.result.status==='0x0'?'reverted':'confirmed'},true); return }
+      var used=n&&evmHex(n.result)?parseInt(n.result,16):null, none=!!(rc&&('result' in rc)&&rc.result===null);
+      if(!none||used===null){ wlSay(st,[p.label+' did not answer, so your last send is kept for now. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'receipt '+JSON.stringify(rc)+' · latest nonce '+JSON.stringify(n)}]); return }
+      if(used>p.nonce){ evmSay(st,p,{phase:'replaced'},true); return }
+      var k=await evmKnown(p);
+      if(k){ evmSay(st,p,{phase:'submitted'},true); return }   /* a host holds it after all: it stays kept */
+      if(k===null){ wlSay(st,[p.label+' did not answer, so your last send is kept for now. ',{btn:'try again',on:function(){ evmDrop(st,p) }},{cy:'eth_getTransactionByHash: no host answered'}]); return }
+      if(!evmDone(p,false)){ seRefresh(); return }   /* another tab settled it first: the lane says where it stands */
+      wlSay(st,['cleared. you can fill in a new send now.',{cy:'cleared by the reader: tx '+p.hash+' · nonce '+p.nonce+' unused on '+p.label+' · the cap entry stays · the signed bytes stay valid on chain until nonce '+p.nonce+' is used'}]);
+    } finally { EVBUSY=false; $('se-go').disabled=false }
   }
   /* one calm sentence per settled state; true when the send is finished (the slot is cleared) */
   function evmSay(st,p,r,last){
     var what=p.amount+' '+p.sym+' to '+evmShort(p.to), cy='tx '+p.hash+' · nonce '+p.nonce+' · '+p.explorer+p.hash+(r.why?' · '+r.why:'');
     var again={btn:'check again',on:function(){ $('se-go').click() }};
     st.style.color='';
-    if(r.phase==='confirmed'){ evmPendingSet(null);
+    if(r.phase==='confirmed'){ evmDone(p,false);
       wlSay(st,[last?'your last send went through: '+what+' on '+p.label+'. press send again for a new one.':'done. '+what+' went out on '+p.label+', and it is in a block.',{cy:cy}]);
       payStat(esc('📤 '+what+' on '+p.label+'.')); return true }
-    if(r.phase==='reverted'){ evmPendingSet(null);
+    if(r.phase==='reverted'){ evmDone(p,false);
       wlSay(st,[(last?'your last send':'this send')+' ('+what+') reached '+p.label+' but did not go through there, so only its fee was paid.',{cy:'receipt status 0x0 · '+cy}]); return true }
-    if(r.phase==='refused'){ evmCapBack(p); evmPendingSet(null);
+    if(r.phase==='refused'){ evmDone(p,true);
       $('se-to').value=p.to; $('se-amt').value=p.amount;   /* nothing went out: the typing comes back */
       if(/insufficient funds/i.test(r.why)) wlSay(st,['your address does not hold enough on '+p.label+' for this and its fee, so nothing was sent. ',{btn:'add coins',on:function(){ $('pay-rx').click() }},{cy:'refused before it ran: '+r.why}]);
       else wlSay(st,[p.label+' did not take it, so nothing was sent. ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:'refused before it ran: '+r.why}]);
       return true }
-    if(r.phase==='replaced'){ evmPendingSet(null);
+    if(r.phase==='replaced'){ evmDone(p,false);
       wlSay(st,['another send from this address took its place, so '+(last?'your last send':'this send')+' ('+what+') cannot go through. check your coins before you send it again. ',{btn:'see your coins',on:seRefresh},{cy:'nonce '+p.nonce+' is used and no receipt carries '+p.hash+(r.why?' · '+r.why:'')}]); return true }
+    if(r.phase==='held'){
+      var why=/insufficient funds/i.test(r.why)?'because your address does not hold enough for it and its fee. press send once coins arrive to finish it, or clear it to send something else. '
+        :/underpriced|fee cap less than|max fee per gas less than/i.test(r.why)?'because the fee it was signed with is too low there now. press send later to try it again, or clear it to send something else. '
+        :'because it cannot run there. clear it to send something else. ';
+      wlSay(st,[p.label+' turns down '+(last?'your last send':'this send')+' ('+what+') '+why,{btn:'clear it',on:function(){ evmDrop(st,p) }},{cy:'refused before it ran: '+r.why+' · nonce '+p.nonce+' is still unused, so these bytes go in later only if they are sent again once the address can pay · clearing keeps the cap entry · '+cy}]);
+      return false }
     if(r.phase==='submitted') wlSay(st,[(last?'your last send ('+what+') is with '+p.label+' and not in a block yet':'sent. '+p.label+' has it and has not put it in a block yet')+', so nothing new is signed until it is. ',again,{cy:cy}]);
     else if(r.phase==='offline') wlSay(st,[p.label+' did not answer, so this wallet cannot tell yet whether '+(last?'your last send':'it')+' went out. nothing new is signed until it is known. ',again,{cy:'no node answered the broadcast; the identical bytes are kept · '+cy}]);
     else wlSay(st,[p.label+' did not say yet whether '+(last?'your last send':'it')+' went in, so nothing new is signed until it does. ',again,{cy:cy}]);
@@ -9077,6 +9153,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function seGo(st){
     st.style.color='';
     if(!MPRK||!SOUL){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send from Base or Arbitrum.']); return }
+    var soul=SOUL, slot=evmSlot();   /* the name that pressed, and its slot, for the whole press */
     var p0=evmPending();
     if(p0){   /* the last send comes first: its kept bytes, never a second signature */
       wlSay(st,['checking your last send…']);
@@ -9100,8 +9177,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       wlSay(st,[rail.label+' did not answer just now, so nothing was signed. ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:(e&&e.message)||String(e)}]);
       return;
     }
+    if(SOUL!==soul){ wlSay(st,['you connected another name while this was signing, so nothing was sent. press send to start again.',{cy:'signed for '+soul+' while '+SOUL+' is connected: dropped before any broadcast, nothing counted on the cap'}]); return }
     var fee=fromBaseUnits(t.gas*t.gasPrice,18);
-    var p={rail:railKey,label:rail.label,raw:t.rawHex,hash:t.hash,nonce:t.nonce,from:t.from,to:to,amount:amt,sym:asset.symbol,fee:fee,explorer:rail.explorer,at:Date.now()};
+    var p={slot:slot,rail:railKey,label:rail.label,raw:t.rawHex,hash:t.hash,nonce:t.nonce,from:t.from,to:to,amount:amt,sym:asset.symbol,fee:fee,explorer:rail.explorer,at:Date.now()};
     try{ evmPendingSet(p) }   /* PERSIST BEFORE BROADCAST — the law */
     catch(se){ wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then ',{btn:'try again',on:function(){ $('se-go').click() }},{cy:'pending write failed: '+((se&&se.message)||se)}]); return }
     p.cap={unit:asset.symbol,amt:Number(amt),day:capRecord(asset.symbol,Number(amt))};   /* counted once signed and kept */

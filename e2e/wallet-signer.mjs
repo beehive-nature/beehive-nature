@@ -574,19 +574,28 @@ try {
         case 'eth_sendRawTransaction':
           S.raws.push(body.params[0]);
           if (S.mode === 'lost') return route.abort('timedout');
+          if (S.mode === 'lostThenPoor') { S.mode = 'poor'; return route.abort('timedout'); }   // the first answer is lost, every later node says no
           if (S.mode === 'known') return send({ error: { code: -32000, message: 'already known' } });
           if (S.mode === 'poor') return send({ error: { code: -32000, message: 'insufficient funds for gas * price + value' } });
           return send({ result: '0x' + 'cd'.repeat(32) });
         case 'eth_getTransactionReceipt': S.receiptAsks.push(body.params[0]); return send({ result: S.receipt });
         case 'eth_getTransactionCount': return send({ result: body.params[1] === 'latest' ? S.latest : MOCK.nonce });
-        case 'eth_gasPrice': return send({ result: MOCK.gasPrice });
+        case 'eth_gasPrice':
+          /* another name is connected while THIS press reads its fee (never a background read) */
+          if (S.switchOnGas && /^reading the fee and signing/.test(await page.evaluate(() => document.getElementById('se-stat').textContent))) {
+            const n = S.switchOnGas; S.switchOnGas = null;
+            await page.evaluate(v => { document.getElementById('wq').value = v; document.getElementById('wgo').click(); }, n);
+          }
+          return send({ result: MOCK.gasPrice });
+        case 'eth_getTransactionByHash': S.byHash = (S.byHash || 0) + 1; return send({ result: S.known ? { hash: body.params[0], blockNumber: null } : null });
         case 'eth_estimateGas': return send({ result: MOCK.estimate });
         case 'eth_getBalance': return send({ result: '0x16345785d8a0000' });
         case 'eth_call': return send({ result: '0x' + (1000000n).toString(16).padStart(64, '0') });
         default: return send({ result: null });
       }
     });
-    const page = await connectedPage(ctx);
+    let page = null;
+    page = await connectedPage(ctx);
     const TO = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';   // EIP-55's own published vector: the lane checks the checksum
     await page.evaluate(() => { localStorage.removeItem('bnr-cap-ledger'); localStorage.removeItem('bnr-spend-cap');
       document.getElementById('pay-tx').click(); document.getElementById('tx-tab-e').click(); });
@@ -629,6 +638,41 @@ try {
     ok('a mixed-case address with a typo is refused before anything is signed', /has a typo in it, so nothing was sent/.test(typo.say) && S.raws.length === n0 && !typo.pend, typo.say);
     ok('no raw RPC text reaches the reader\'s sentence (it stays in the cypherpunk detail)',
       [r1, r2, r4, r6].every(r => !/already known|insufficient funds|0x[0-9a-f]{64}/.test(r.say)) || REG === 'cypherpunk', [r1, r4, r6].map(r => r.say).join(' | ').slice(0, 200));
+    /* a kept send every node turns away (the first answer was lost, so that refusal was not sure):
+       read by hash on every host before the refusal is believed, said plainly, and cleared only
+       on purpose, without giving the cap back */
+    S.mode = 'lostThenPoor'; S.known = false;
+    const d0 = new Set(S.raws).size;
+    const h1 = await press(TO, '0.05');
+    ok('a send turned away after a lost answer is not called refused: it is kept, counted, and said plainly with one way out',
+      /^Base turns down this send \(0\.05 ETH to 0x5aae…eaed\) because your address does not hold enough for it and its fee/i.test(h1.say) && /clear it/.test(h1.say) && h1.pend && h1.pend.amount === '0.05' && Math.abs(h1.eth - typo.eth - 0.05) < 1e-9 && S.byHash > 0,
+      h1.say + ' · ' + (h1.eth - typo.eth));
+    ok('that sentence carries no raw RPC text (it stays in the cypherpunk detail)', !/insufficient funds|0x[0-9a-f]{64}/.test(h1.say) || REG === 'cypherpunk', h1.say);
+    S.known = true;
+    const h2 = await press(null, null);
+    ok('while any host still holds those bytes, the refusal is not believed: it is with Base, kept, and nothing new is signed',
+      /^your last send \(0\.05 ETH to 0x5aae…eaed\) is with Base/i.test(h2.say) && !/clear it/.test(h2.say) && h2.pend && h2.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h2.say);
+    S.known = false;
+    const h3 = await press(null, null);
+    ok('once no host holds them, the next press says the one way out again (never "did not say yet") and signs nothing new',
+      /^Base turns down your last send \(0\.05 ETH/.test(h3.say) && !/did not say yet/.test(h3.say) && h3.pend && h3.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h3.say);
+    const clicked = await page.evaluate(() => { const c = [...document.querySelectorAll('#se-stat button.wl-act')].find(b => b.textContent === 'clear it'); if (c) c.click(); return !!c; });
+    if (clicked) await page.waitForFunction(() => /^cleared/.test(document.getElementById('se-stat').innerText.trim()), null, { timeout: 40000 }).catch(() => {});
+    const h4 = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), pend: localStorage.getItem('bnr_evm_pending:gatesoul'),
+      eth: JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'ETH').reduce((s, e) => s + e.a, 0) }));
+    ok('clear it, pressed on purpose: the lane is free, and the cap is not given back (nothing proves it never ran)',
+      /^cleared\. you can fill in a new send now/.test(h4.say) && h4.pend === null && Math.abs(h4.eth - typo.eth - 0.05) < 1e-9 && new Set(S.raws).size === d0 + 1, JSON.stringify(h4));
+    /* another name connected while a send is signing: dropped before any broadcast, kept nowhere,
+       never counted, and that name's own kept send is untouched */
+    const OTHER = JSON.stringify({ rail: 'base', label: 'Base', raw: '0x00', hash: '0x' + 'ef'.repeat(32), nonce: 3, from: '0x' + '11'.repeat(20), to: TO, amount: '9', sym: 'ETH', explorer: '', at: 1 });
+    await page.evaluate(o => localStorage.setItem('bnr_evm_pending:othersoul', o), OTHER);
+    S.mode = 'ok'; S.switchOnGas = 'othersoul';
+    const d1 = new Set(S.raws).size;
+    const mv = await press(TO, '0.06');
+    const mvo = await page.evaluate(() => localStorage.getItem('bnr_evm_pending:othersoul'));
+    ok('another name connected while a send signs: nothing is broadcast, kept or counted, that name\'s kept send is untouched, and the line says so',
+      /^you connected another name while this was signing, so nothing was sent/.test(mv.say) && S.switchOnGas === null && new Set(S.raws).size === d1 && !mv.pend && mvo === OTHER && Math.abs(mv.eth - h4.eth) < 1e-9,
+      mv.say + ' · ' + mvo);
     await ctx.close();
   }
 

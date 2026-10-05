@@ -50,16 +50,24 @@ try {
       if (HIVE_RE.test(url)) {
         const b = JSON.parse(route.request().postData() || '{}'); state.calls.push([b.method, JSON.stringify(b.params)]);
         const R = v => json({ jsonrpc: '2.0', id: b.id, result: v });
+        const tab = () => route.request().frame().page();
+        const switchTo = n => tab().evaluate(v => { document.getElementById('wq').value = v; document.getElementById('wgo').click(); }, n);
         if (b.method === 'condenser_api.get_key_references') return R([b.params[0][0] === DEV_STM || b.params[0][0] === state.ownerStm ? ['loviswater'] : []]);
         if (b.method === 'condenser_api.get_accounts') return R(b.params[0].filter(n => n === 'loviswater').map(n => ({ name: n, balance: '12.345 HIVE', hbd_balance: '1.000 HBD', vesting_shares: '1000.000000 VESTS', reputation: '0',
           active: { weight_threshold: 1, key_auths: [[DEV_STM, 1]].concat(state.ownerStm ? [[state.ownerStm, 1]] : []), account_auths: [] },
           owner: { weight_threshold: 1, key_auths: state.ownerStm ? [[state.ownerStm, 1]] : [], account_auths: [] } })));
+        if (b.method === 'condenser_api.get_dynamic_global_properties' && state.switchOnDgp) { const n = state.switchOnDgp; state.switchOnDgp = null; await switchTo(n); }
         if (b.method === 'condenser_api.get_dynamic_global_properties') return R({ head_block_number: 100000, head_block_id: '000186a0aabbccdd11223344556677889900aabb', time: '2026-10-05T12:00:00', total_vesting_fund_hive: '180000.000 HIVE', total_vesting_shares: '360000000.000000 VESTS' });
         if (b.method === 'condenser_api.broadcast_transaction') {
           state.broadcasts.push(b.params[0]);
+          if (state.peek) { state.peek = false; state.peeked = await tab().evaluate(() => localStorage.getItem('bnr_hive_pending:gatesoul')); }
           if (state.failNext > 0) { state.failNext--; return route.abort('connectionfailed'); }
           if (state.refuse) return json({ jsonrpc: '2.0', id: b.id, error: { code: -32000, message: state.refuse } });
           state.landed = true; return R({});
+        }
+        if (b.method === 'transaction_status_api.find_transaction') {
+          if (state.hold && tab() === state.hold) { state.held = true; await state.holdP; }
+          if (state.switchOnStatus) { const n = state.switchOnStatus; state.switchOnStatus = null; await switchTo(n); }
         }
         if (b.method === 'transaction_status_api.find_transaction') return R({ status: state.status || (state.landed ? 'within_irreversible_block' : 'unknown') });
         return R(null);
@@ -201,6 +209,72 @@ try {
       ok('a sure refusal of a first broadcast is said, the cap is given back and the typing comes back',
         (await said()) === 'that account does not hold enough for this.' && Math.abs((await hiveSum()) - before) < 1e-9 && (await page.evaluate(() => document.getElementById('hs-amt').value)) === '3.000' && (await pend()) === null, await said());
       delete state.refuse;
+      const settled = p => until(p, /^(done|it |you |your|[Hh]ive|that|the )/, 'hs-stat', 60000);   // until() drops regex flags: the capital is spelled out
+      // a gateway's own error (not hived's verdict) proves nothing: the send stays kept and the chain is read back
+      state.refuse = 'Internal Error'; state.status = 'within_irreversible_block'; state.broadcasts = [];
+      const gw0 = await hiveSum();
+      await fill('4', 'gateway'); await press(); await settled(page);
+      ok('a gateway error is no refusal: every node is asked, the chain is read, it went through, the cap stays counted and nothing is typed back',
+        (await said()) === 'done. 4.000 HIVE went to someoneelse, and the chain confirmed it.' && state.broadcasts.length === 2 && Math.abs((await hiveSum()) - gw0 - 4) < 1e-9 && (await page.evaluate(() => document.getElementById('hs-amt').value)) === '' && (await pend()) === null,
+        (await said()) + ' · ' + state.broadcasts.length + ' · ' + ((await hiveSum()) - gw0));
+      delete state.refuse; delete state.status;
+      // a send loaded back from its slot is never fresh: it is marked as possibly out before a byte
+      // leaves, and the next press reads the chain before an expiry answer is believed
+      state.landed = false; state.failNext = 2; state.peek = true; state.broadcasts = [];
+      const rl0 = await hiveSum();
+      await fill('5', 'reload'); await press(); await settled(page);
+      const peeked = JSON.parse(state.peeked || 'null');
+      ok('the kept copy is marked as possibly out before the first byte leaves', !!peeked && peeked.out === true && peeked.amount === '5.000', state.peeked);
+      await page.evaluate(() => { const k = 'bnr_hive_pending:gatesoul', p = JSON.parse(localStorage.getItem(k)); delete p.out; localStorage.setItem(k, JSON.stringify(p)); });
+      state.refuse = 'Assert Exception:now < trx.expiration: '; state.status = 'within_irreversible_block'; const nb5 = state.broadcasts.length;
+      await press(); await settled(page);
+      ok('a stored send (even one never marked out) is read on chain first: it went through, no expiry answer is believed, nothing is given back',
+        /^your last send went through: 5\.000 HIVE/.test(await said()) && state.broadcasts.length === nb5 && Math.abs((await hiveSum()) - rl0 - 5) < 1e-9 && (await pend()) === null,
+        (await said()) + ' · ' + (state.broadcasts.length - nb5) + ' · ' + ((await hiveSum()) - rl0));
+      delete state.refuse; delete state.status;
+      // the slot is the signing soul's: another name connected mid-check never has its own kept send cleared
+      const OTHER = JSON.stringify({ txid: 'ab'.repeat(20), exp: '2026-10-05T12:01:00', from: 'otherhive', to: 'someoneelse', amount: '9.000', sym: 'HIVE', tx: {} });
+      const backTo = async n => { await page.evaluate(v => { document.getElementById('wq').value = v; document.getElementById('wgo').click(); }, n); };
+      state.landed = false; state.failNext = 2;
+      await fill('6', 'soul'); await press(); await settled(page);
+      await page.evaluate(o => localStorage.setItem('bnr_hive_pending:othersoul', o), OTHER);
+      state.switchOnStatus = 'othersoul'; state.status = 'within_irreversible_block';
+      await press(); await settled(page);
+      const sl = await page.evaluate(() => ({ g: localStorage.getItem('bnr_hive_pending:gatesoul'), o: localStorage.getItem('bnr_hive_pending:othersoul') }));
+      ok('another name connected mid-check: the send settles in its own soul\'s slot, and that name\'s kept send is untouched',
+        /^your last send went through: 6\.000 HIVE/.test(await said()) && sl.g === null && sl.o === OTHER, (await said()) + ' · ' + JSON.stringify(sl));
+      delete state.status;
+      await page.evaluate(() => localStorage.removeItem('bnr_hive_pending:othersoul'));
+      await backTo('gatesoul'); await until(page, /✓ live · loviswater/, 'h-stat', 20000);
+      // another name connected while a send is signing: dropped before any broadcast, kept nowhere, never counted
+      state.switchOnDgp = 'othersoul'; state.broadcasts = [];
+      const mv0 = await hiveSum();
+      await fill('7', 'moved'); await press(); await settled(page);
+      const mv = await page.evaluate(() => ({ g: localStorage.getItem('bnr_hive_pending:gatesoul'), o: localStorage.getItem('bnr_hive_pending:othersoul') }));
+      ok('another name connected while a send signs: nothing is broadcast, kept or counted, and the line says so',
+        /^you connected another name while this was signing, so nothing was sent/.test(await said()) && state.broadcasts.length === 0 && mv.g === null && mv.o === null && Math.abs((await hiveSum()) - mv0) < 1e-9,
+        (await said()) + ' · ' + state.broadcasts.length + ' · ' + JSON.stringify(mv));
+      await backTo('gatesoul'); await until(page, /✓ live · loviswater/, 'h-stat', 20000);
+      // two tabs checking one kept send: the cap comes back once, never twice
+      state.landed = false; state.failNext = 2; state.switchOnDgp = null;
+      const tb0 = await hiveSum();
+      await fill('8', 'two tabs'); await press(); await settled(page);
+      const page2 = await ctx.newPage(); page2.on('pageerror', e => errors.push('tab 2: ' + e.message));
+      await page2.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+      await page2.waitForFunction(() => window.BNRHIVE && window.BNRHIVE.bound() === 'loviswater', null, { timeout: 20000 });
+      let release; state.holdP = new Promise(r => { release = r; }); state.hold = page2; state.held = false;
+      state.status = 'expired_irreversible';
+      await page2.evaluate(() => { document.getElementById('hs-stat').textContent = ''; document.getElementById('hs-go').click(); });
+      await new Promise((r, j) => { const t0 = Date.now(), t = setInterval(() => { if (state.held || Date.now() - t0 > 20000) { clearInterval(t); state.held ? r() : j(new Error('tab 2 never asked the chain')); } }, 50); });
+      await press(); await until(page, /did not land in time/, 'hs-stat', 60000);
+      const once = await hiveSum();
+      release(); state.hold = null;
+      await settled(page2);
+      const twice = await page2.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'HIVE').reduce((s, e) => s + e.a, 0));
+      ok('two tabs checking one expired send: the 8 HIVE come back to the cap once, never twice',
+        Math.abs(once - tb0) < 1e-9 && Math.abs(twice - tb0) < 1e-9 && (await pend()) === null && /did not land in time/.test(await page2.textContent('#hs-stat')),
+        (once - tb0) + ' then ' + (twice - tb0) + ' · ' + (await page2.textContent('#hs-stat')));
+      await page2.close(); delete state.status;
       // a second soul does not see or erase the first soul's Hive account
       await page.evaluate(() => { localStorage.setItem('bnr_soul', 'othersoul'); });
       await page.reload({ waitUntil: 'load' });
