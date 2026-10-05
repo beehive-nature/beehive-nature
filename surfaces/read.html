@@ -6,14 +6,15 @@
 <meta name="theme-color" content="#fbf7f0">
 <meta name="description" content="Read a public Buzz message in the browser. No app, no account. Private channels are never shown.">
 <title>read a Buzz message — skaists.dev</title>
-<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/skaists.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:skaists;src:url(fonts/skaists.woff2) format("woff2");font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
 :root{--paper:#fbf7f0;--ink:#0c1412;--well:#efe9dd;--line:#e6dfd2;--dim:#4a5f55;--edge:#857d70;--link:#6e3fb8;--act:#a8238c;--on:#fff;--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 *{box-sizing:border-box;margin:0}
 body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);min-height:100dvh;padding:20px 16px 72px}
 main{max-width:720px;margin:0 auto}
-.brand{font-family:burti,var(--mono);font-size:1.15rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+.brand{font-family:skaists,burti,var(--mono);font-size:1.15rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
 h1{font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.15;margin:.5rem 0 .4rem;font-weight:650;letter-spacing:-.01em}
 .lead{color:var(--dim);margin-bottom:1.2rem}
 form{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.4rem}

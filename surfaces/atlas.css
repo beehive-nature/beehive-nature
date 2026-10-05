@@ -120,6 +120,7 @@ body[data-reg=cypherpunk] .start-help{display:none}
      cypherpunk  mono — the same tree as a graph with every count in the open
    Accent moves OFF biomass green (which means living systems) and onto each
    register's own action hue. Honey stays reserved for b. Guard stays lilac. */
+@font-face{font-family:skaists;src:url(fonts/skaists.woff2) format('woff2');font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format('woff2');font-display:swap}
 body[data-reg=raver]{--accent:var(--you);--accent-strong:#f0a3e2}
 a:hover{color:var(--accent-strong)}
@@ -133,11 +134,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .st.live{color:var(--verified)}
 :is(.start-link,.keep-link,.keep-plain)>span:last-child{color:var(--accent)}
 
-/* the house hand — names only, never sentences; the fallback keeps the old mono mark */
-.wordmark.house{font:400 clamp(2.5rem,5.2vw,4.25rem)/1 burti,var(--mono);letter-spacing:0;padding-block:4px}
+/* the house hand (skaists, burti behind it) — names only, never sentences; the fallback keeps the old mono mark */
+.wordmark.house{font:400 clamp(2.5rem,5.2vw,4.25rem)/1 skaists,burti,var(--mono);letter-spacing:0;padding-block:4px}
 .wordmark.house span{font-weight:400;color:var(--faint)}
-.footer .wordmark{font:400 1.75rem/1.1 burti,var(--mono);letter-spacing:0}
-.bgene{display:block;font:400 1.75rem/1.2 burti,var(--sans);letter-spacing:.07em}
+.footer .wordmark{font:400 1.75rem/1.1 skaists,burti,var(--mono);letter-spacing:0}
+.bgene{display:block;font:400 1.75rem/1.2 skaists,burti,var(--sans);letter-spacing:.07em}
 .bgene b{font-weight:400;-webkit-text-stroke:.05em currentColor;paint-order:stroke fill}
 @supports not (-webkit-text-stroke:1px currentColor){.bgene b{font-weight:700}}
 body[data-reg] .keep-plain strong.bgene{font-size:1.75rem;font-weight:400;letter-spacing:.07em}

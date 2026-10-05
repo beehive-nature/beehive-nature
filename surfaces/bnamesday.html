@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="tokens.css">
 <style>
 @property --day{syntax:"<color>";inherits:true;initial-value:#d7263d}
+@font-face{font-family:skaists;src:url(fonts/skaists.woff2) format("woff2");font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
 *{box-sizing:border-box}html{scroll-behavior:smooth}[hidden]{display:none!important}
 body{margin:0;min-height:100dvh;font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;--day:#d7263d;
@@ -47,7 +48,7 @@ input,select,textarea{min-height:46px;padding:10px 14px;border:1px solid var(--e
 label{font-size:.875rem;color:var(--quiet);display:grid;gap:6px;min-width:0}p,h1,h2,h3{margin:0}
 .shell{max-width:1240px;margin-inline:auto;padding:0 clamp(16px,4vw,48px) 56px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-block:14px}
-.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:burti,system-ui,sans-serif;font-size:1.35rem}
+.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:skaists,burti,system-ui,sans-serif;font-size:1.35rem}
 .brand svg{width:30px;height:30px}
 .nodata{margin-block:24px;padding:18px;border:1.5px dashed var(--edge);border-radius:14px}
 [data-tour-host]{margin-top:18px;padding-block:14px;border-top:1px solid var(--line);max-inline-size:100%;overflow-x:clip}
@@ -57,7 +58,7 @@ label{font-size:.875rem;color:var(--quiet);display:grid;gap:6px;min-width:0}p,h1
 .dot{display:inline-block;inline-size:.85em;block-size:.85em;border-radius:50%;background:var(--c);border:1px solid var(--edge);vertical-align:-.06em}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:.9375rem}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.row>label{flex:1 1 150px}
-.quiet{color:var(--quiet)}.burti{font-family:burti,system-ui,sans-serif}
+.quiet{color:var(--quiet)}.burti{font-family:skaists,burti,system-ui,sans-serif}
 .empty{padding:16px;border:1.5px dashed var(--edge);border-radius:12px;color:var(--quiet)}
 /* letters: identity never rides colour alone — a letter to leave out is dashed AND crossed */
 .lt{display:inline-grid;place-items:center;min-inline-size:2.2em;block-size:2.5em;margin:2px;border-radius:9px;border:2px solid var(--c,var(--edge));font-size:1.3rem;position:relative;background:color-mix(in srgb,var(--c,transparent) 12%,var(--card))}
@@ -85,13 +86,13 @@ details.hsd>summary{cursor:pointer;list-style:none}details.hsd>summary::-webkit-
 .b-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:18px}
 .b-card h2{font-size:1.3rem;letter-spacing:-.02em;margin-bottom:12px}
 .b-hero{text-align:center;padding:34px 22px}
-.b-hero h1{font-family:burti,system-ui,sans-serif;font-weight:400;font-size:clamp(2.1rem,8vw,3.3rem);line-height:1.12;margin-block:6px 12px;overflow-wrap:anywhere}
+.b-hero h1{font-family:skaists,burti,system-ui,sans-serif;font-weight:400;font-size:clamp(2.1rem,8vw,3.3rem);line-height:1.12;margin-block:6px 12px;overflow-wrap:anywhere}
 .b-hero .sep{color:var(--sov)}.b-idea{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);font-size:1.0625rem}
 .b-out{margin-top:16px;display:grid;gap:12px}.b-res{padding:18px;border-radius:16px;background:var(--well)}
-.b-res .nm{font-family:burti,system-ui,sans-serif;font-size:2rem;line-height:1.15;overflow-wrap:anywhere}.b-res .when{font-size:1.125rem;margin-top:2px}
+.b-res .nm{font-family:skaists,burti,system-ui,sans-serif;font-size:2rem;line-height:1.15;overflow-wrap:anywhere}.b-res .when{font-size:1.125rem;margin-top:2px}
 .b-res p+p{margin-top:8px}.b-two{display:grid;gap:12px}.b-th{border-top:6px solid var(--c)}
 .b-fam{display:grid;gap:8px}.b-ev{display:grid;grid-template-columns:4.6rem 1fr;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--well)}
-.b-ev .d{font-family:burti,system-ui,sans-serif;font-size:1.2rem;line-height:1.1;text-align:center}.b-ev .d small{display:block;font:.875rem system-ui,sans-serif;color:var(--quiet)}
+.b-ev .d{font-family:skaists,burti,system-ui,sans-serif;font-size:1.2rem;line-height:1.1;text-align:center}.b-ev .d small{display:block;font:.875rem system-ui,sans-serif;color:var(--quiet)}
 .b-ev .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 details.b-more{border-top:1px solid var(--line);padding-block:4px}details.b-more>summary{cursor:pointer;min-height:46px;display:flex;align-items:center;font-weight:600}
 details.b-more>div{padding-bottom:14px;display:grid;gap:10px}
@@ -102,8 +103,8 @@ details.b-more>div{padding-bottom:14px;display:grid;gap:10px}
 .r-wheelwrap{position:relative;inline-size:min(100%,82vh,760px);aspect-ratio:1}
 #wheel{inline-size:100%;block-size:100%;display:block;touch-action:pan-y;cursor:crosshair;border-radius:50%}
 .r-hub{position:absolute;inset:23%;border-radius:50%;display:grid;place-content:center;justify-items:center;text-align:center;gap:2px;padding:6%;pointer-events:none;overflow:hidden}
-.r-hub>*{pointer-events:auto}.r-date{font-family:burti,system-ui,sans-serif;font-size:clamp(1.6rem,6vw,3rem);line-height:1;letter-spacing:.04em}.r-date i{color:var(--you);font-style:normal;color:var(--you)}
-.r-day{font-size:clamp(.8rem,2.4vw,1.05rem);color:var(--c)}.r-names{font-family:burti,system-ui,sans-serif;font-size:clamp(1rem,3.4vw,1.6rem);line-height:1.15;overflow-wrap:anywhere;margin-top:4px}
+.r-hub>*{pointer-events:auto}.r-date{font-family:skaists,burti,system-ui,sans-serif;font-size:clamp(1.6rem,6vw,3rem);line-height:1;letter-spacing:.04em}.r-date i{color:var(--you);font-style:normal;color:var(--you)}
+.r-day{font-size:clamp(.8rem,2.4vw,1.05rem);color:var(--c)}.r-names{font-family:skaists,burti,system-ui,sans-serif;font-size:clamp(1rem,3.4vw,1.6rem);line-height:1.15;overflow-wrap:anywhere;margin-top:4px}
 .r-names mark{background:none;color:var(--you)}.r-more{font-size:max(.8125rem,var(--fmin,12px));color:var(--quiet)}
 .r-fam{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 .spoke{stroke-linecap:round}.spoke.x{opacity:.34}
@@ -816,7 +817,7 @@ function buildWheel(){let s='<circle cx="500" cy="500" r="492" fill="none" strok
   const a=P(318,seat),b=P(318+d.t.length*17,seat),e=P(326+d.t.length*17,seat),g=P(326+d.t.length*17+Math.min(d.x.length,38)*2.2,seat);
   s+=`<line class="spoke" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="${c}" stroke-width="3.6"/>`;
   if(d.x.length)s+=`<line class="spoke x" x1="${f1(e[0])}" y1="${f1(e[1])}" x2="${f1(g[0])}" y2="${f1(g[1])}" stroke="${c}" stroke-width="2.4"/>`}
- let acc=0;B.MLEN.forEach((len,i)=>{const a=P(296,acc-.5),b=P(312,acc-.5),n=P(474,acc+len/2-.5);s+=`<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="var(--quiet)" stroke-width="2"/><text x="${f1(n[0])}" y="${f1(n[1]+6)}" text-anchor="middle" font-size="17" fill="var(--quiet)" font-family="burti,system-ui,sans-serif">${i+1}</text>`;acc+=len});
+ let acc=0;B.MLEN.forEach((len,i)=>{const a=P(296,acc-.5),b=P(312,acc-.5),n=P(474,acc+len/2-.5);s+=`<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="var(--quiet)" stroke-width="2"/><text x="${f1(n[0])}" y="${f1(n[1]+6)}" text-anchor="middle" font-size="17" fill="var(--quiet)" font-family="skaists,burti,system-ui,sans-serif">${i+1}</text>`;acc+=len});
  $('#w-static').innerHTML=s}
 const hex=(x,y,r)=>'M'+[0,1,2,3,4,5].map(i=>{const a=Math.PI/3*i-Math.PI/2;return f1(x+r*Math.cos(a))+','+f1(y+r*Math.sin(a))}).join('L')+'Z';
 function renderRaver(){

@@ -12,8 +12,11 @@
   var home=new URL('index.html',script&&script.src||location.href).href;
   /* THE KIT FACES (#257 follow-through 2026-09-28, design-system/manifest.json):
      the sheet's families are self-hosted in-tree — fonts/eternal/*.woff2 under
-     SIL OFL 1.1 (fonts/eternal/OFL.md) plus the house hand burti at
-     fonts/burti.woff2. Same-origin beside this script, never a font CDN; a
+     SIL OFL 1.1 (fonts/eternal/OFL.md) plus the house hand skaists at
+     fonts/skaists.woff2 (the founder's own face, cut by his skaists_dna.py,
+     v1.000 2026-09-19; his work, not a third-party licence) with burti at
+     fonts/burti.woff2 (the founder's burti-dna.js) kept as the fallback for
+     glyphs skaists lacks. Same-origin beside this script, never a font CDN; a
      tongue a face does not cover falls to the system face already in each
      register's stack. Pages with their own @font-face for the same family
      (skaists.css, atlas.css) coexist: identical descriptors resolve to one fetch. */
@@ -24,6 +27,12 @@
       var l=document.createElement('link');
       l.id='bkitfonts';l.rel='stylesheet';l.href=base+'fonts/eternal-fonts.css';
       h.appendChild(l);
+    }
+    if(!document.getElementById('bkitskaists')){
+      var sk=document.createElement('style');
+      sk.id='bkitskaists';
+      sk.textContent="@font-face{font-family:'skaists';font-style:normal;font-weight:400;font-display:swap;src:url('"+base+"fonts/skaists.woff2') format('woff2')}";
+      h.appendChild(sk);
     }
     if(!document.getElementById('bkitburti')){
       var st=document.createElement('style');

@@ -13,9 +13,10 @@
    skaists design system (claude.ai/artifact/FAw4pbmMfrKNX6ffA1cDsj): one set
    of facts read three ways; lowercase; guard is lilac and never red; honey is
    the colour of b only; an unknown is a word, never 0, never a dash; one
-   primary per view; 44px floor; estate surfaces fetch no fonts (burti rides
+   primary per view; 44px floor; estate surfaces fetch no fonts (skaists, burti behind it, ride
    beside the page). Entity colours: you = magenta (the one acting), ai =
    teal (the network), sovereign = purple (people). */
+@font-face{font-family:skaists;src:url(fonts/skaists.woff2) format("woff2");font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
 *{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;min-height:100dvh;font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -39,10 +40,10 @@ label{font-size:.9375rem;color:var(--quiet);display:grid;gap:6px;min-width:0}
 p,h1,h2,h3,dl,dd,dt,ol,ul{margin:0}ol,ul{padding:0;list-style:none}
 .shell{max-width:920px;margin-inline:auto;padding:0 clamp(16px,4vw,48px) 56px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-block:14px}
-.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:burti,system-ui,sans-serif;font-size:1.35rem}
+.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:skaists,burti,system-ui,sans-serif;font-size:1.35rem}
 .brand svg{width:30px;height:30px}
 .crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.9375rem;color:var(--quiet);padding-block:6px}
-h1{font:400 clamp(2rem,6vw,3.2rem)/1.05 burti,system-ui,sans-serif;margin-top:18px}
+h1{font:400 clamp(2rem,6vw,3.2rem)/1.05 skaists,burti,system-ui,sans-serif;margin-top:18px}
 .lead{margin-top:12px;max-width:62ch;color:var(--quiet)}
 .brief{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
 .brief .words{flex:1 1 260px;display:grid;gap:4px}.brief .clock{color:var(--quiet);font-size:.9375rem}
@@ -50,7 +51,7 @@ h1{font:400 clamp(2rem,6vw,3.2rem)/1.05 burti,system-ui,sans-serif;margin-top:18
 .deck{display:grid;gap:18px;margin-top:24px}
 .card{display:grid;grid-template-columns:56px 1fr;gap:6px 18px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);border-inline-start:6px solid var(--c)}
 .card[data-entity="you"]{--c:var(--you)}.card[data-entity="ai"]{--c:var(--ai)}.card[data-entity="sovereign"]{--c:var(--sov)}
-.glyph{grid-row:1/span 3;width:56px;height:56px;display:grid;place-items:center;border:1.5px solid var(--c);border-radius:50%;color:var(--c);font:400 1.4rem/1 burti,system-ui,sans-serif}
+.glyph{grid-row:1/span 3;width:56px;height:56px;display:grid;place-items:center;border:1.5px solid var(--c);border-radius:50%;color:var(--c);font:400 1.4rem/1 skaists,burti,system-ui,sans-serif}
 body[data-reg="raver"] .glyph{box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
 body[data-reg="cypherpunk"] .glyph{border-radius:4px}
 .card h2{font:600 1.25rem/1.3 system-ui,-apple-system,'Segoe UI',sans-serif}body[data-reg="cypherpunk"] .card h2{font-family:inherit}

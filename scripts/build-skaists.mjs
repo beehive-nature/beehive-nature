@@ -8,7 +8,8 @@
 //   --sk-font-<family> the named stacks (house, bee-serif, bee-sans, raver-display, raver-body, mono, ui)
 //   .sk-<style>        every type style (bee-display, raver-action, cypher-body, house-name …)
 //   --sk-s1..s6, --sk-radius*, --sk-control-*, --sk-glow-*, --sk-rainbow, --sk-flow/hatch
-//   @font-face         the faces, self-hosted (fonts/eternal/*, fonts/burti.woff2): no font CDN.
+//   @font-face         the faces, self-hosted (fonts/eternal/*, fonts/skaists.woff2, fonts/burti.woff2): no font CDN.
+//                      skaists is the house hand (the founder's own face, skaists_dna.py); burti its fallback.
 //
 // Run: node scripts/build-skaists.mjs            (writes surfaces/skaists.css)
 //      node scripts/build-skaists.mjs --check    (exit 1 if the committed file is stale)
@@ -48,6 +49,7 @@ const out = [
   '   Do not edit by hand: change the tokens and rebuild (CI checks it is fresh).',
   '   new bee is the default; raver and cypherpunk ride [data-reg] on <html> or <body>. */',
   ...FONTS,
+  '@font-face{font-family:\'skaists\';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/skaists.woff2) format(\'woff2\')}',
   '@font-face{font-family:\'burti\';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/burti.woff2) format(\'woff2\')}',
   `:root{${[...colours('bee'), ...families, ...flat(T.spacing.tokens), ...flat(T.radius.tokens), ...flat(T.control.tokens), ...perReg(T.shadow.tokens, 'bee'), ...flat(T.gradient.tokens), ...flat(T.direction.tokens)].join(';')}}`,
   ...REGS.filter(r => r !== 'bee').map(r => `${sel(r)}{${[...colours(r), ...perReg(T.shadow.tokens, r)].join(';')}}`),
@@ -62,4 +64,4 @@ if (process.argv.includes('--check')) {
   console.log('skaists.css matches tokens.json'); process.exit(0);
 }
 writeFileSync(dest, out);
-console.log(`skaists.css — ${T.color.tokens.length} colours x ${REGS.length} registers · ${styles.length} type styles · ${FONTS.length + 1} faces`);
+console.log(`skaists.css — ${T.color.tokens.length} colours x ${REGS.length} registers · ${styles.length} type styles · ${FONTS.length + 2} faces`);

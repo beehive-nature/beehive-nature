@@ -8,7 +8,7 @@
    in-page JS adds search and reading preferences. Run after editing estate.json:
      node scripts/build-atlas.mjs
    CI (scripts/estate-check.mjs) fails if the page drifts from the registry.
-   THE TREE OF LIFE PASS (2026-09-19, hub lane): the house hand (burti) names
+   THE TREE OF LIFE PASS (2026-09-19, hub lane): the house hand (skaists, burti behind it) names
    the page, and Austras koks — drawn from these same counts by
    scripts/atlas-tree.mjs — is the hero in three readings: a fir bearing comb
    (new bee), a wheel of light (raver), a graph you can check (cypherpunk).
@@ -178,8 +178,8 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="atlas.css?v=4">
+<link rel="preload" href="fonts/skaists.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="atlas.css?v=5">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
