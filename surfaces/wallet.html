@@ -194,6 +194,15 @@ body:is([data-wl-view="keep"],[data-wl-view="all"]) #wallet-storage,body[data-re
 .wallet-storage-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .wallet-storage-options a{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid var(--line);border-radius:16px;text-decoration:none}
 .wallet-storage-options strong{font-size:20px}.wallet-storage-options span{font-size:14px}
+/* the chosen UI's choice cards: a card on the ground, the title in ink, the line under it muted;
+   the action colour rings the card you point at or tab to */
+body[data-reg] .wallet-storage-options a{background:var(--panel);border:1px solid var(--line2);border-radius:var(--reg-radius-card);color:var(--ink);transition:border-color .14s ease,box-shadow .14s ease}
+body[data-reg] .wallet-storage-options a:is(:hover,:focus-visible){color:var(--ink);border-color:var(--reg-primary);box-shadow:inset 0 0 0 1px var(--reg-primary)}
+body[data-reg] .wallet-storage-options strong{font:700 18px/1.3 var(--reg-font-title);color:var(--ink)}
+body[data-reg] .wallet-storage-options span{font-size:15px;line-height:1.5;color:var(--dim)}
+body[data-reg="cypherpunk"] .wallet-storage-options strong{font-size:15px}
+body[data-reg="cypherpunk"] .wallet-storage-options span{font-size:13px}
+#wallet-storage h2{font-family:var(--reg-font-title);font-weight:700}
 body[data-wl-view="keep"] #wl-deck,body[data-wl-view="keep"] #wl-lines,body[data-wl-view="keep"] #wl-cards{display:none!important}
 @media(max-width:520px){.wallet-storage-options{grid-template-columns:1fr}#wallet-identity nav a{padding:10px 8px}}
 </style>
@@ -238,33 +247,48 @@ var WALLET_PROFILE = {
    raver: the black ground, you magenta, the purples as light; raver-display
         over raver-body; pills everywhere; glow-sovereign is the one glow.
    cypherpunk: the same black, mono top to bottom, ai teal for every action,
-        corners cut, dense — the pipeline is the interface. */
+        corners cut, dense — the pipeline is the interface.
+   THE FOUNDER'S CHOSEN UI (his My Space screens, 2026-10-04; rolled to the
+   wallet 2026-10-05, after surfaces/myspace.html and the sign sheet): new bee
+   is paper, ink, bold system sans titles, forest green for the one action,
+   white cards, pill controls; raver is night purple (the sovereign wash and
+   tint), white bold titles, you magenta pills with their glow; cypherpunk is
+   the black, mono, cyan, thin lines and cut corners. Only the DRESS moved:
+   the grammar sheet below (arrival, navigation, disclosure, density) is
+   unchanged. Values ride the contract (register.js) wherever it names one. */
 :root{--reg-link:#86CC72;--reg-link-hover:#A9E29A}
 body[data-reg="bee"]{
   --bg:#fbf7f0;--panel:#ffffff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#6a736e;
   --line2:#e6dfd2;
   --sem-harm:#4a3aa8;--sem-solution:#2e6b1e;--sem-system:#4d759b;--sem-science:#0f6f82;
   --sem-value:#7a5209; /* honey stepped darker INSIDE its own ramp for paper — honey never sits raw on a light ground (1.88:1) */
-  --reg-primary:#a8238c;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
-  --reg-radius-card:18px;--reg-radius-btn:12px;--reg-glow:none;
-  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:'Instrument Serif',Georgia,serif;
+  --reg-primary:#264d36;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
+  --reg-radius-card:18px;--reg-radius-btn:999px;--reg-glow:none;
+  --reg-font-body:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --reg-font-title:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  /* the chosen UI's soft edge for a secondary pill, and its red for a press that deletes */
+  --wl-edge:rgba(106,115,110,.4);--wl-danger:var(--reg-rose,#a3122b);
   background:#fbf7f0;color:#0c1412;color-scheme:light;
   font:16px/1.65 var(--reg-font-body);
 }
 body[data-reg="raver"]{
-  --bg:#06110c;--panel:#0c1412;--well:#0c1412;--ink:#e9f2ec;--dim:#8fa79c;--faint:#648176;
-  --line2:#1e2b26;
+  /* night purple: the ground is the sovereign tint, every card the sovereign wash */
+  --bg:var(--reg-sovereign-tint,#120e1e);--panel:var(--reg-sovereign-wash,#171028);--well:var(--reg-sovereign-tint,#120e1e);
+  --ink:#e9f2ec;--dim:var(--reg-sovereign-soft,#b79fe0);--faint:var(--reg-sovereign-soft,#b79fe0);
+  --line2:rgba(156,111,214,.34);
   --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
   --sem-value:#e8b54b;
   --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
   --reg-radius-card:18px;--reg-radius-btn:999px;
   --reg-glow:0 0 14px rgba(156,111,214,0.45); /* glow-sovereign — the sheet's own value */
-  --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --reg-font-title:'Unbounded',system-ui,sans-serif;
-  /* the purples as light: a sovereign wash rises behind the fold and melts
-     into the black ground — light behind the page, never on the words */
-  background:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
+  --reg-font-body:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --reg-font-title:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --wl-edge:rgba(156,111,214,.55);--wl-danger:var(--reg-primary);
+  /* the purples as light: the wash at the top melts into the tint, a breath of
+     info blue rises from the lower corner. Light behind the page, never on the words */
+  background:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),
+    linear-gradient(180deg,var(--reg-sovereign-wash,#171028),var(--reg-sovereign-tint,#120e1e) 42%) var(--reg-sovereign-tint,#120e1e);
+  background-attachment:fixed;
   color:#e9f2ec;color-scheme:dark;
   font:15px/1.7 var(--reg-font-body);
 }
@@ -277,6 +301,7 @@ body[data-reg="cypherpunk"]{
   --reg-radius-card:6px;--reg-radius-btn:6px;--reg-glow:none;
   --reg-font-body:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
   --reg-font-title:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --wl-edge:#33473f;--wl-danger:var(--reg-cat-bug,#c07f1c);
   background:#06110c;color:#e9f2ec;color-scheme:dark;
   font:13px/1.5 var(--reg-font-body);
 }
@@ -289,14 +314,23 @@ body[data-reg] button:active{transform:scale(.97)}
 body[data-reg] button:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
 body[data-reg] button.gold{background:var(--reg-primary);border-color:var(--reg-primary);color:var(--reg-on-primary)}
 body[data-reg] input,body[data-reg] select,body[data-reg] textarea{border-radius:var(--reg-radius-btn);font-family:var(--reg-font-body)}
+/* the chosen UI's controls: a secondary press is an outlined pill (cut 6px in
+   cypherpunk) on the card itself, never a filled block; the action's own colour
+   carries the label. A press that deletes or revokes wears the register's danger
+   outline (new bee red, raver magenta, cypherpunk orange), inline colours included */
+body[data-reg] main button:where(:not(.wlb-total,.va-total)){background:transparent;border:1.5px solid var(--wl-edge)}
+body[data-reg] main :is(#vlt-panic,.dm-rv,[data-act="del"],[data-revoke],[data-wa-action="remove"]){color:var(--wl-danger)!important;border-color:var(--wl-danger)!important}
+body[data-reg] main :is(#vlt-panic,.dm-rv,[data-act="del"],[data-revoke],[data-wa-action="remove"]):hover{background:var(--wl-danger);color:var(--reg-on-primary)!important}
+/* a field is a well with soft corners in new bee (a pill is for a press) */
+body[data-reg="bee"] :is(input,select,textarea){border-radius:14px}
 body[data-reg] a{color:var(--reg-link)}
 body[data-reg] a:hover{color:var(--reg-link-hover)}
 h2::before{background:var(--sem-solution)}
 .crumbs .badge-live i{background:var(--sem-solution)}
-/* new bee: serif titles over sans reading, generous, soft; reading text 16px */
-body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.02em;font-size:clamp(34px,6.2vw,48px);text-wrap:balance}
+/* new bee: bold sans titles over sans reading (the chosen UI), generous, soft; reading text 16px */
+body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.025em;font-size:clamp(34px,6.2vw,48px);text-wrap:balance}
 body[data-reg="bee"] h1 .h1-arg{background:none;color:var(--dim)}
-body[data-reg="bee"] h2{font-family:var(--reg-font-title);font-size:17px;letter-spacing:.01em}
+body[data-reg="bee"] h2{font-family:var(--reg-font-title);font-weight:700;font-size:17px;letter-spacing:-.01em}
 body[data-reg="bee"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px)} /* the thesis figure earns the room */
 body[data-reg="bee"] .law{font-size:14px;line-height:1.65}
 body[data-reg="bee"] #ch-vaulta .cn{font-size:14px;letter-spacing:.06em}
@@ -304,21 +338,29 @@ body[data-reg="bee"] .crumbs,body[data-reg="bee"] .kicker,body[data-reg="bee"] .
 body[data-reg="bee"] header p{font-size:14px;line-height:1.7}
 body[data-reg="bee"] footer{font-size:14px}
 body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
-body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
-/* raver: display titles, you magenta as light, pills everywhere, the one glow */
-body[data-reg="raver"] h1{font-weight:700;letter-spacing:-.02em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
- background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
-body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
-body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
+body[data-reg="bee"] button{font:700 16px/1.3 var(--reg-font-body)}
+/* raver: white bold titles, you magenta as light, pills everywhere, the one glow */
+body[data-reg="raver"] h1{font-weight:700;letter-spacing:-.03em;color:var(--ink);background:none;font-size:clamp(32px,6.2vw,48px);text-wrap:balance}
+body[data-reg="raver"] h1 .h1-arg{background:none;color:var(--reg-primary)}
+body[data-reg="raver"] h2{font-weight:700;letter-spacing:-.01em}
 body[data-reg="raver"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px);text-shadow:0 0 26px #d655bb33} /* the figure carries the light */
-body[data-reg="raver"] button{font:500 14px/1.4 var(--reg-font-body)}
-body[data-reg="raver"] #sa-paste-go{font:500 14px/1.4 var(--reg-font-body)!important}
+body[data-reg="raver"] button{font:700 15px/1.3 var(--reg-font-body)}
+body[data-reg="raver"] #sa-paste-go{font:700 15px/1.3 var(--reg-font-body)!important}
+body[data-reg="raver"] main button:where(:not(.wlb-total,.va-total)){border-color:rgba(214,85,187,.6)}
+body[data-reg="raver"] main button.gold{border-color:var(--reg-primary);box-shadow:0 0 18px rgba(214,85,187,.28)}
 body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .lcap{letter-spacing:.1em}
-/* cypherpunk: mono top to bottom, dense; ai teal for every action */
+/* cypherpunk: mono top to bottom, dense; ai teal for every action, thin lines, corners cut */
 body[data-reg="cypherpunk"] h1{font-weight:600}
 body[data-reg="cypherpunk"] h1 .h1-arg{background:linear-gradient(92deg,#45c2dc,#86cc72);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="cypherpunk"] section{padding:12px}
 body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
+body[data-reg="cypherpunk"] button{font:600 13px/1.3 var(--reg-font-body)}
+body[data-reg="cypherpunk"] main button:where(:not(.wlb-total,.va-total)){border-width:1px}
+body[data-reg="cypherpunk"] #wallet-identity nav a{border-radius:var(--reg-radius-btn)}
+body[data-reg="cypherpunk"] main>section{border-color:var(--line2)!important}
+/* a sans title is wider than the serif it replaced: the hexagon stays beside its words
+   and the words wrap under themselves, never the whole title dropping a line */
+body:is([data-reg="bee"],[data-reg="raver"]) main :is(section,#wallet-storage)>h2{flex-wrap:nowrap}
 /* ── THE LOWER HALF AT 390 (2026-09-26, footer audit) ── the rail matrix,
    the receipts, the composer ladder, the summary tiles and the footer were
    drawn at 8.5–11.5 px, much of it by script with inline sizes, and the
@@ -415,7 +457,7 @@ body[data-reg="bee"] header{padding-top:22px}
 body[data-reg="bee"] header p{font-size:16px}
 body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
 #wl-bee{margin-top:6px}
-.wlb-card{background:var(--panel);border-radius:20px;padding:22px 20px;box-shadow:0 0 0 1px var(--line2)}
+.wlb-card{background:var(--panel);border-radius:var(--reg-radius-card);padding:22px 20px;box-shadow:0 0 0 1px var(--line2)}
 .wlb-cap{font-size:14px;color:var(--dim)}
 .wlb-fig{font:700 clamp(38px,11vw,56px)/1.1 var(--reg-font-title);color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .wlb-total,.va-total{display:flex;align-items:baseline;gap:10px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:start;cursor:pointer}
@@ -428,7 +470,7 @@ body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
 .wlb-un{font-size:16px;color:var(--dim);margin-top:6px;line-height:1.6}
 .wlb-un b{font:700 22px/1.3 var(--reg-font-title);color:var(--ink);display:block}
 #wl-bee .wlb-q{font:700 22px/1.3 var(--reg-font-title);letter-spacing:-.01em;margin:30px 4px 12px;display:block}
-.wlb-list{background:var(--panel);border-radius:20px;box-shadow:0 0 0 1px var(--line2);overflow:hidden}
+.wlb-list{background:var(--panel);border-radius:var(--reg-radius-card);box-shadow:0 0 0 1px var(--line2);overflow:hidden}
 body[data-reg="bee"] .wlb-row{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:12px 18px;border:0;border-radius:0;
   background:transparent;color:var(--ink);text-align:start;font:inherit;cursor:pointer}
 body[data-reg="bee"] .wlb-row+.wlb-row{border-top:1px solid var(--line2)}
@@ -439,7 +481,7 @@ body[data-reg="bee"] .wlb-row:focus-visible{outline:2px solid var(--ink);outline
 .wlb-t b{font:600 17px/1.35 var(--reg-font-body)}
 .wlb-t small{font-size:14px;color:var(--dim);line-height:1.5}
 .wlb-c{font-size:26px;line-height:1;color:var(--faint);flex:none}
-body[data-reg="bee"] .wlb-all{margin-top:14px;border-radius:20px;background:var(--panel);box-shadow:0 0 0 1px var(--line2)}
+body[data-reg="bee"] .wlb-all{margin-top:14px;border-radius:var(--reg-radius-card);background:var(--panel);box-shadow:0 0 0 1px var(--line2)}
 .wlb-note{font-size:14px;color:var(--dim);margin:16px 4px 0;line-height:1.6}
 #wl-bar{position:sticky;top:0;z-index:6;align-items:center;gap:6px;margin:0 -10px;padding:8px 10px;
   background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line2)}
@@ -465,7 +507,7 @@ body[data-reg="bee"] #fund-sec .fund-launch{font-size:16px}
 body[data-reg="bee"] main section details>summary{font-size:14px}
 body[data-reg="bee"] #kc-sec svg text{font-size:14px}
 body[data-reg="bee"] #ch-vaulta .cn .badge{font-size:14px}
-body[data-reg="bee"] main>section button{font-size:14px!important}
+body[data-reg="bee"] main>section :is(button,button[style]){font-size:16px!important}
 body[data-reg="bee"] main>section .ldot{font-size:14px}
 body[data-reg="bee"] .stat.ok{color:#2e6b1e} body[data-reg="bee"] .chain.connected{border-color:#2e6b1e}
 /* the sections' own inline colours were drawn for the black ground; on paper
@@ -562,8 +604,8 @@ body[data-reg="raver"][data-wl-view="add"] #wl-cards [data-wl-card-task="add"],b
 body[data-reg="raver"][data-wl-view="key"] #wl-cards [data-wl-card-task="key"],body[data-reg="raver"][data-wl-view="proof"] #wl-cards [data-wl-card-task="proof"]{display:flex}
 #wl-cards .wlr-card[hidden]{display:none!important}
 body[data-reg="raver"] .wlr-card{flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:108px;padding:12px 6px;border:0;border-radius:26px;
-  background:radial-gradient(circle at 50% 32%,#171028,#0c1412 72%);box-shadow:0 0 0 1px #1e2b26;color:var(--ink);font:inherit;text-align:center}
-body[data-reg="raver"] .wlr-card:hover{background:radial-gradient(circle at 50% 32%,#2a1640,#0c1412 72%);color:var(--ink)}
+  background:radial-gradient(circle at 50% 32%,#231a3a,var(--panel) 72%);box-shadow:0 0 0 1px var(--line2);color:var(--ink);font:inherit;text-align:center}
+body[data-reg="raver"] .wlr-card:hover{background:radial-gradient(circle at 50% 32%,#33204f,var(--panel) 72%);color:var(--ink)}
 body[data-reg="raver"] .wlr-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 body[data-reg="raver"] .wlr-card .g{font-size:36px;line-height:1;filter:drop-shadow(0 0 10px #9c6fd666)}
 body[data-reg="raver"] .wlr-card .w{font-size:14px;line-height:1.25;color:var(--dim)}
@@ -587,14 +629,14 @@ body[data-reg] #bpay-sec :is(span,div,p,small,em,b)[style*="opacity"]{opacity:1!
 .wlr-soul{animation:wlr-breathe 5s ease-in-out infinite}
 .wlr-thread{stroke:#648176;stroke-width:1.3;stroke-dasharray:3 6;opacity:.7}
 .wlr-thread[data-lit="true"]{stroke:#45c2dc;stroke-dasharray:none;opacity:1}
-.wlr-node circle{fill:#0c1412;stroke:#648176;stroke-width:1.6;stroke-dasharray:4 4}
+.wlr-node circle{fill:#171028;stroke:#8a7aa8;stroke-width:1.6;stroke-dasharray:4 4}
 .wlr-node[data-lit="true"] circle{stroke:#45c2dc;stroke-dasharray:none;filter:drop-shadow(0 0 9px #45c2dc)}
 .wlr-node text{font-size:20px}
 .wlr-node:not([data-lit="true"]) text{opacity:.5}
 @keyframes wlr-drift{to{transform:rotate(360deg)}}
 @keyframes wlr-breathe{0%,100%{opacity:.7}50%{opacity:1}}
 .wlr-caps{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0 0;padding:0}
-.wlr-caps li{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:96px;padding:10px 12px;border-radius:22px;background:#0c1412;box-shadow:0 0 0 1px #1e2b26}
+.wlr-caps li{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:96px;padding:10px 12px;border-radius:22px;background:var(--panel);box-shadow:0 0 0 1px var(--line2)}
 .wlr-caps li[data-read="true"]{box-shadow:0 0 0 1px #45c2dc66,0 0 18px #45c2dc22}
 .wlr-caps .g{font-size:22px;line-height:1.2}
 .wlr-caps b{font-size:14px;font-weight:700}
@@ -602,18 +644,18 @@ body[data-reg] #bpay-sec :is(span,div,p,small,em,b)[style*="opacity"]{opacity:1!
 .wlr-caps .wl-un{font-size:13px;color:var(--dim)}
 .wlr-hint{text-align:center;color:var(--dim);font-size:14px;margin:14px 0 0}
 #wl-dock{position:sticky;top:0;z-index:6;gap:4px;overflow-x:auto;scroll-snap-type:x proximity;padding:10px 6px;margin:0 -10px;
-  background:linear-gradient(#06110cf2,#06110cd9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);scrollbar-width:none}
+  background:linear-gradient(#171028f2,#120e1ed9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);scrollbar-width:none}
 #wl-dock::-webkit-scrollbar{display:none}
 body[data-reg="raver"] #wl-dock button{flex:1 0 auto;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:62px;min-height:74px;
   padding:4px 2px;border:0;border-radius:18px;background:transparent;color:var(--ink);font:inherit}
 body[data-reg="raver"] #wl-dock button:hover{background:transparent;color:var(--ink)}
 body[data-reg="raver"] #wl-dock button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-#wl-dock .g{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:#0c1412;box-shadow:0 0 0 1px #1e2b26;font-size:23px;
+#wl-dock .g{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:var(--panel);box-shadow:0 0 0 1px var(--line2);font-size:23px;
   transition:box-shadow .26s ease,background-color .26s ease}
 #wl-dock .w{font-size:13px;line-height:1.2;color:var(--dim)}
 #wl-dock button[aria-pressed="true"] .g{background:radial-gradient(circle at 50% 38%,#d655bb66,#171028 72%);box-shadow:0 0 0 2px #d655bb,0 0 24px #d655bb88}
 #wl-dock button[aria-pressed="true"] .w{color:var(--ink);font-weight:700}
-body[data-reg="raver"] main>section{border-color:#2a1f3d!important}
+body[data-reg="raver"] main>section{border-color:var(--line2)!important}
 body[data-reg="raver"] main>section .law{font-size:14px}
 body[data-reg="raver"] main>section[data-wl-task]{animation:wlr-arrive .52s cubic-bezier(.2,.8,.2,1) both}
 @keyframes wlr-arrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}

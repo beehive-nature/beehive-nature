@@ -95,12 +95,17 @@
        against the contract, never silently re-dressed. A register changes
        voice, density and dress — never a number, a price, a limit, an address,
        or what a person may do. Token values are the ruled sheet (2026-09-19),
-       columns new bee / raver / cypherpunk; e2e/register-contract.mjs is the
-       instrument that measures any adopting surface against THIS block. */
+       columns new bee / raver / cypherpunk, as amended by the founder's chosen
+       UI (his My Space screens, 2026-10-04; rolled to the wallet 2026-10-05):
+       new bee's one action is forest green on pill controls, and new bee and
+       raver read bold system sans titles over system sans text, exactly as
+       surfaces/myspace.html wears them (skaists.css --sk-font-ui, --sk-forest).
+       e2e/register-contract.mjs is the instrument that measures any adopting
+       surface against THIS block. */
     body[data-reg="bee"][data-reg-dress="contract"]{
       --reg-bg:#fbf7f0;--reg-card:#ffffff;--reg-well:#efe9dd;--reg-ink:#0c1412;
       --reg-ink-mut:#4a5f55;--reg-ink-dim:#6a736e;--reg-line:#e6dfd2;--reg-line-soft:#efe9dd;
-      --reg-primary:#a8238c;--reg-on-primary:#ffffff;
+      --reg-primary:#264d36;--reg-on-primary:#ffffff;
       --reg-sovereign:#6e3fb8;--reg-sovereign-strong:#4f2a8c;--reg-sovereign-soft:#865fb8;
       --reg-sovereign-wash:#eadff8;--reg-sovereign-tint:#f7f2fc;
       --reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
@@ -108,10 +113,10 @@
       --reg-ai:#0f6f82;--reg-info:#4d759b;--reg-biomass:#527c46;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
       --reg-rose:#a3122b;--reg-rose-deep:#6e0c1f;
       --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
-      --reg-font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-      --reg-font-title:'Instrument Serif',Georgia,serif;
+      --reg-font-body:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      --reg-font-title:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
       --reg-font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
-      --reg-radius-card:18px;--reg-radius-btn:12px;--reg-radius-cut:6px;
+      --reg-radius-card:18px;--reg-radius-btn:999px;--reg-radius-cut:6px;
       --reg-bg-wash:#fbf7f0;--reg-glow:none;
       --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
     }
@@ -126,8 +131,8 @@
       --reg-ai:#45c2dc;--reg-info:#6fa9e0;--reg-biomass:#86cc72;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
       --reg-rose:#c41e3a;--reg-rose-deep:#8e1230;
       --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
-      --reg-font-body:'Sora',system-ui,-apple-system,'Segoe UI',sans-serif;
-      --reg-font-title:'Unbounded',system-ui,sans-serif;
+      --reg-font-body:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      --reg-font-title:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
       --reg-font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
       --reg-radius-card:18px;--reg-radius-btn:999px;--reg-radius-cut:6px;
       --reg-bg-wash:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;

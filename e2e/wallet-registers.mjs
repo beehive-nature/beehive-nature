@@ -108,10 +108,15 @@ const arrival = page => page.evaluate(() => {
       return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
     },
   });
-  ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-  ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
-  ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
-  ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
+  // the founder's chosen UI (his My Space screens, 2026-10-04; the wallet 2026-10-05):
+  // bee's titles are BOLD SYSTEM SANS over the same sans, its controls pills, its action forest
+  const SANS = 'ui-sans-serif,system-ui,SegoeUI,Roboto,Helvetica,Arial,sans-serif';
+  const flat = s => String(s).replace(/["'\s]/g, '');
+  ok('bee reads in BOLD SYSTEM SANS titles (≥ 700) over the same system sans body (the chosen UI)',
+    flat(seen.bee.h1Font) === SANS && flat(seen.bee.bodyFont) === SANS && parseInt(seen.bee.h1Weight, 10) >= 700, seen.bee.h1Font.split(',').slice(0, 3).join(',') + ' · ' + seen.bee.h1Weight);
+  ok('bee corners are SOFT (18px radius-xl cards) and its controls are PILLS (999px) — the chosen UI', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '999px', seen.bee.cardRadius + ' · ' + seen.bee.btnRadius);
+  ok('bee action is the ONE forest green (rgb(38, 77, 54), --sk-forest)', seen.bee.btnColor === 'rgb(38, 77, 54)', seen.bee.btnColor);
+  ok('raver shouts in a heavy title, bold system sans (the chosen UI)', parseInt(seen.raver.h1Weight, 10) >= 700 && flat(seen.raver.h1Font) === SANS && flat(seen.raver.bodyFont) === SANS, 'weight ' + seen.raver.h1Weight + ' · ' + seen.raver.h1Font.split(',').slice(0, 3).join(','));
   ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
   ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
   ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
