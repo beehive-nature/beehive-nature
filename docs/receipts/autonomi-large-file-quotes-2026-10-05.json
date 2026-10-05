@@ -1,0 +1,972 @@
+{
+ "receipt": "autonomi-large-file-quotes-2026-10-05",
+ "law": "QUOTE ONLY. Nothing was paid, stored, signed or uploaded. No wallet, no private key, no key file was read. Any request to the relay write door (/ant/v1/upload*) was set to be aborted; none was made (method.refusedWriteDoorRequests is empty). The 100 MB run reached no payment request and was stopped by the harness at the 600 s cap. The page cancels the kit payment request; request.pay() is never called (surfaces/bpay-invoice.js:211).",
+ "measuredAt": {
+  "browserQuotes": [
+   "2026-10-05T14:02:53.784Z",
+   "2026-10-05T14:17:25.573Z"
+  ],
+  "publicReads": "2026-10-05T14:03:17.516Z"
+ },
+ "method": {
+  "page": "https://skaists.dev/surfaces/wallet.html#bpay-sec",
+  "tool": "bigquote.mjs (headless Chromium via Playwright 1.62.1)",
+  "browser": "headless Chromium, throwaway persistent profile (deleted after), service workers blocked, window.ethereum undefined",
+  "storageEstimate": {
+   "quota": 10737418240,
+   "usage": 0
+  },
+  "fileLabelVerbatim": "File to quote (3 bytes to 1 GB, the Autonomi browser kit's limits; your browser may allow less)",
+  "files": "fresh crypto.randomBytes per size (no dedupe possible), written to scratch, set on #ant-quote-file, deleted after",
+  "steps": "[data-audience=\"public\"] click, setInputFiles #ant-quote-file, click #ant-quote-go, wait (<= 600 s) for #ant-quote-status to leave Connecting/Asking and the button to re-enable",
+  "observationLayer": "kit index.js served as a pass-through that re-exports the LIVE kit (index.js?real from skaists.dev) and records kit progress events and the payment request fields before handing the request to the page unchanged; every other file loaded live from skaists.dev",
+  "kitWrapperServed": 1,
+  "refusedWriteDoorRequests": [],
+  "httpHostsSeen": {
+   "skaists.dev": 67,
+   "eos.api.eosnation.io": 1
+  },
+  "pageErrors": [],
+  "consoleWarnings": [],
+  "bigRunDecision": "skipped 500 MB: 100 MB took 600.77 s"
+ },
+ "provenance_liveEqualsRepo": [
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/index.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 643,
+   "sha256": { "hex": "84fb90cb0daae708314a38d1e6dc1dd926e6e99b980b61a5ad0ddd2d9048f6f8", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/limits.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 907,
+   "sha256": { "hex": "fcb0e6119e64cbf983bcd41922f6d525bb3ec48c9b908ac12b78045f896d5d61", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/client.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 40820,
+   "sha256": { "hex": "9ed0d3a1e041035e62c3f0d43fec1aa3286f6c1570446426d0539792e7135e7a", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/manual-payment.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 5887,
+   "sha256": { "hex": "d52d1c68d99944b0f68d6dbf8b8d64993891467982143e572fda17376a08963c", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/wasm/ant_core.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 66806,
+   "sha256": { "hex": "9dbd8184d49902e7b4a912f68cacc56f4a64cf88d397cb028bd9822d99fdedf7", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "vendor/ant-browser-sdk/0.1.1/wasm/ant_core_bg.wasm",
+   "http": 200,
+   "identical": true,
+   "bytes": 5546075,
+   "sha256": { "hex": "8fa35e58927fd3f5190ec43b1989313de3cc8968cac1bfa373247d4b3842fcd1", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  },
+  {
+   "path": "surfaces/bpay-invoice.js",
+   "http": 200,
+   "identical": true,
+   "bytes": 25910,
+   "sha256": { "hex": "e2159a3ba400176a401dc71f0d10d689927fabb6ee56358cdb17a82c4d6e7a8f", "scan": "PUBLIC-CONSTANT: public artifact digest" }
+  }
+ ],
+ "browserQuotes": [
+  {
+   "bytes": 1000000,
+   "fileSha256": { "hex": "05f3e619827c6429774379a9acc7d05310f3af0b31670b9b06b0a671e964361d", "scan": "PUBLIC-CONSTANT: sha256 of discarded random test bytes" },
+   "secondsClickToFinalStatus": 128.388,
+   "timedOut": false,
+   "secondsClickToAsking": 1.89,
+   "statusVerbatim": "0.2897592509765625 ANT · 1,000,000 bytes · quoted 8:05:09 AM · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid.",
+   "priceLabelledPartial": false,
+   "priceLabelledUpTo": false,
+   "windowedByBrowserStorage": false,
+   "recordsReportedByKit": 4,
+   "quotedRecordEvents": 4,
+   "alreadyPresentRecords": 0,
+   "quoteTiming": {
+    "firstQuotedRecordSecondsAfterClick": 86.454,
+    "lastQuotedRecordSecondsAfterClick": 128.116,
+    "secondsPerRecordAfterFirst": 13.89,
+    "kitQuoteConcurrency": "4 (https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/browser/wasm_transport.rs#L83 DEFAULT_BROWSER_QUOTE_CONCURRENCY)"
+   },
+   "recordsPredictedByChunkModel": 4,
+   "dataChunksPredicted": 3,
+   "paymentRequest": {
+    "kind": "wave (single-node quotes)",
+    "count": 1,
+    "quoteEntries": 4,
+    "nonzeroQuoteEntries": 4,
+    "quoteFields": [
+     "quote",
+     "quoteHash",
+     "rewardsAddress",
+     "amount"
+    ],
+    "distinctRewardsAddresses": 1,
+    "chainId": 42161,
+    "totalAmountAtto": "289759250976562500",
+    "totalANT": "0.2897592509765625",
+    "merkle": null,
+    "perQuoteAmountsAtto": [
+     "94169018554687500",
+     "70230354492187500",
+     "59370377929687500",
+     "65989500000000000"
+    ],
+    "perRecordANT": {
+     "min": "0.0593703779296875",
+     "median": "0.0702303544921875",
+     "max": "0.0941690185546875",
+     "mean": 0.07244
+    },
+    "billableUnits": 4
+   },
+   "statusLog": [
+    {
+     "ms": 11,
+     "text": "Connecting to Autonomi storage nodes from this browser…"
+    },
+    {
+     "ms": 1890,
+     "text": "Asking Autonomi storage nodes for a price…"
+    },
+    {
+     "ms": 128221,
+     "text": "0.2897592509765625 ANT · 1,000,000 bytes · quoted 8:05:09 AM · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid."
+    }
+   ]
+  },
+  {
+   "bytes": 10000000,
+   "fileSha256": { "hex": "8fad81b414888cc80dfc60753334be3ce77dc45493f6a7e6c30926baa26ef835", "scan": "PUBLIC-CONSTANT: sha256 of discarded random test bytes" },
+   "secondsClickToFinalStatus": 133.488,
+   "timedOut": false,
+   "secondsClickToAsking": 0.01,
+   "statusVerbatim": "0.404113353515625 ANT · 10,000,000 bytes · quoted 8:07:22 AM · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid.",
+   "priceLabelledPartial": false,
+   "priceLabelledUpTo": false,
+   "windowedByBrowserStorage": false,
+   "recordsReportedByKit": 4,
+   "quotedRecordEvents": 4,
+   "alreadyPresentRecords": 0,
+   "quoteTiming": {
+    "firstQuotedRecordSecondsAfterClick": 67.447,
+    "lastQuotedRecordSecondsAfterClick": 133.069,
+    "secondsPerRecordAfterFirst": 21.87,
+    "kitQuoteConcurrency": "4 (https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/browser/wasm_transport.rs#L83 DEFAULT_BROWSER_QUOTE_CONCURRENCY)"
+   },
+   "recordsPredictedByChunkModel": 4,
+   "dataChunksPredicted": 3,
+   "paymentRequest": {
+    "kind": "wave (single-node quotes)",
+    "count": 1,
+    "quoteEntries": 4,
+    "nonzeroQuoteEntries": 4,
+    "quoteFields": [
+     "quote",
+     "quoteHash",
+     "rewardsAddress",
+     "amount"
+    ],
+    "distinctRewardsAddresses": 2,
+    "chainId": 42161,
+    "totalAmountAtto": "404113353515625000",
+    "totalANT": "0.404113353515625",
+    "merkle": null,
+    "perQuoteAmountsAtto": [
+     "48390949218750000",
+     "123864166992187500",
+     "70282737304687500",
+     "161575500000000000"
+    ],
+    "perRecordANT": {
+     "min": "0.04839094921875",
+     "median": "0.1238641669921875",
+     "max": "0.1615755",
+     "mean": 0.101028
+    },
+    "billableUnits": 4
+   },
+   "statusLog": [
+    {
+     "ms": 8,
+     "text": "Connecting to Autonomi storage nodes from this browser…"
+    },
+    {
+     "ms": 10,
+     "text": "Asking Autonomi storage nodes for a price…"
+    },
+    {
+     "ms": 133253,
+     "text": "0.404113353515625 ANT · 10,000,000 bytes · quoted 8:07:22 AM · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid."
+    }
+   ]
+  },
+  {
+   "bytes": 100000000,
+   "fileSha256": { "hex": "837e85a653e0178eabf1596566ad4922bbb8f39c6736c7fef06d9a37b6e7abf4", "scan": "PUBLIC-CONSTANT: sha256 of discarded random test bytes" },
+   "secondsClickToFinalStatus": 600.77,
+   "timedOut": true,
+   "secondsClickToAsking": 0.013,
+   "statusVerbatim": "Asking Autonomi storage nodes for a price…",
+   "priceLabelledPartial": false,
+   "priceLabelledUpTo": false,
+   "windowedByBrowserStorage": false,
+   "recordsReportedByKit": 28,
+   "quotedRecordEvents": 20,
+   "alreadyPresentRecords": 0,
+   "quoteTiming": {
+    "firstQuotedRecordSecondsAfterClick": 61.031,
+    "lastQuotedRecordSecondsAfterClick": 600.854,
+    "secondsPerRecordAfterFirst": 28.41,
+    "kitQuoteConcurrency": "4 (https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/browser/wasm_transport.rs#L83 DEFAULT_BROWSER_QUOTE_CONCURRENCY)",
+    "extrapolatedWholeQuoteSeconds": 828,
+    "extrapolationStatus": "UNVERIFIED linear extrapolation of this run's quote rate"
+   },
+   "recordsPredictedByChunkModel": 28,
+   "dataChunksPredicted": 24,
+   "paymentRequest": null,
+   "statusLog": [
+    {
+     "ms": 12,
+     "text": "Connecting to Autonomi storage nodes from this browser…"
+    },
+    {
+     "ms": 13,
+     "text": "Asking Autonomi storage nodes for a price…"
+    },
+    {
+     "ms": 600853,
+     "text": "Request stopped. Nothing was paid."
+    }
+   ]
+  }
+ ],
+ "perRecordPrice": {
+  "evidence": [
+   {
+    "source": "live browser quote 1,000,000 B (this receipt)",
+    "records": 4,
+    "totalANT": "0.2897592509765625",
+    "perRecordANT": 0.07244,
+    "kind": "wave (single-node quotes)"
+   },
+   {
+    "source": "live browser quote 10,000,000 B (this receipt)",
+    "records": 4,
+    "totalANT": "0.404113353515625",
+    "perRecordANT": 0.101028,
+    "kind": "wave (single-node quotes)"
+   },
+   {
+    "source": "live browser quote 4,146 B, 2026-10-05 (task context; harness scratchpad livequote.mjs, raw output not retained) UNVERIFIED here",
+    "records": 4,
+    "totalANT": "0.214479087890625",
+    "perRecordANT": 0.05362,
+    "kind": "wave",
+    "recordsAssumed": "records(4146 B) = 3 data + 1 DataMap by the chunk model, the same shape the 1 MB run reported"
+   },
+   {
+    "source": "keyless bridge quote 214,091,829 B, 2026-09-17, docs/receipts/bpay-quote-try-autonomi-2026-09-17.md:39-40",
+    "records": 56,
+    "totalANT": "4.245934921875",
+    "perRecordANT": 0.07582,
+    "kind": "wave_batch"
+   },
+   {
+    "source": "paid upload 214,091,829 B, 2026-09-21, docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md:12-13",
+    "records": 56,
+    "totalANT": "4.2125503974609375",
+    "perRecordANT": 0.075224,
+    "kind": "wave (paid)"
+   }
+  ],
+  "runMeanRangeTodayANTPerRecord": [
+   0.07244,
+   0.101028
+  ],
+  "runMeanRangeAllEvidenceANTPerRecord": [
+   0.05362,
+   0.101028
+  ],
+  "projectionPerRecordANT": {
+   "central": 0.077184,
+   "low95": 0.069488,
+   "high95": 0.084881,
+   "median": 0.068579
+  },
+  "projectionBasis": "pooled independent per-record amounts: today's live wave entries + the 56 per-chunk amounts of the 2026-09-17 quote (surfaces/bpay-invoice.json lines[0].quotes[].amount_atto). low95/high95 = mean +/- 1.96 x sd/sqrt(n). The 2026-09-21 paid upload is the same file and is not pooled twice. The 4,146 B task-context quote has no per-record amounts and is not pooled.",
+  "samples": {
+   "liveToday": {
+    "n": 8,
+    "meanANT": 0.086734,
+    "medianANT": 0.070257,
+    "sdANT": 0.038224,
+    "seANT": 0.013514,
+    "minANT": 0.048391,
+    "maxANT": 0.161576
+   },
+   "quote2026_09_17_214MB": {
+    "n": 56,
+    "meanANT": 0.07582,
+    "medianANT": 0.067925,
+    "sdANT": 0.030482,
+    "seANT": 0.004073,
+    "minANT": 0.03273,
+    "maxANT": 0.152295
+   },
+   "pooled": {
+    "n": 64,
+    "meanANT": 0.077184,
+    "medianANT": 0.068579,
+    "sdANT": 0.031412,
+    "seANT": 0.003927,
+    "minANT": 0.03273,
+    "maxANT": 0.161576
+   }
+  },
+  "liveNonzeroQuoteEntriesToday": {
+   "n": 8,
+   "minANT": "0.04839094921875",
+   "medianANT": "0.0702827373046875",
+   "maxANT": "0.1615755"
+  },
+  "impliedCloseRecordsStored": {
+   "atPooledMedian": 4406,
+   "atPooledMean": 4727,
+   "atLowestRecord": 2678,
+   "atHighestRecord": 7152,
+   "formula": "paid per record = 3 x median quote (payment_policy.rs:9,63); quote = 0.00390625 + 0.03515625 x (n/6000)^2 ANT (ant-protocol 3.1.0 payment/pricing.rs:28,36,41,83); n solved from the paid amount"
+  },
+  "sizeIndependent": "quote price depends only on the quoting node's stored-record count, not on chunk bytes (pricing.rs:83 takes close_records_stored only), so a 1-byte third of a tiny file costs the same as a full 4,190,208 B chunk"
+ },
+ "linearity": {
+  "verdict": "LINEAR in billable records (wave mode: records; merkle mode: power-of-two padded leaves per <=256 batch), with per-record noise of a few percent from which nodes answer. Not linear in bytes below 3 chunks (3 data records minimum) and stepwise at merkle padding.",
+  "model": "records = dataChunks + (dataChunks > 3 ? 3 : 0) + 1; dataChunks = max(3, ceil(bytes / 4,190,208)). Checked: 214,091,829 B -> 52 + 3 + 1 = 56 = both 214 MB receipts; live runs compare recordsReportedByKit to recordsPredictedByChunkModel in browserQuotes."
+ },
+ "projections": {
+  "10 GB (10,000,000,000 B)": {
+   "bytes": 10000000000,
+   "dataChunks": 2387,
+   "recordsToPay": 2391,
+   "nativeOneFile_autoMode": {
+    "paymentMode": "merkle (records >= 64)",
+    "merkleBatches": 10,
+    "billablePaddedLeaves": 2432,
+    "storageANT": {
+     "units": 2432,
+     "centralANT": 187.71,
+     "lowANT": 169,
+     "highANT": 206.43,
+     "medianBasedANT": 166.79,
+     "runLevelLowANT": 130.4,
+     "runLevelHighANT": 245.7,
+     "centralUSD": 5.99,
+     "lowUSD": 5.39,
+     "highUSD": 6.58
+    },
+    "gas": {
+     "txs": 10,
+     "gasUnits": "5000000",
+     "wei": "100200000000000",
+     "ETH": "0.0001002",
+     "USD": 0.2725,
+     "atUpstreamAdvisory0_1gweiETH": "0.0005"
+    }
+   },
+   "nativeOneFile_singleMode": {
+    "paymentMode": "waves of 64 (PaymentMode::Single, or the Auto fallback on InsufficientPeers, upload.rs:863)",
+    "waves": 38,
+    "billableRecords": 2391,
+    "storageANT": {
+     "units": 2391,
+     "centralANT": 184.55,
+     "lowANT": 166.15,
+     "highANT": 202.95,
+     "medianBasedANT": 163.97,
+     "runLevelLowANT": 128.21,
+     "runLevelHighANT": 241.56,
+     "centralUSD": 5.88,
+     "lowUSD": 5.3,
+     "highUSD": 6.47
+    },
+    "gas": {
+     "txs": 38,
+     "gasUnits": "57000000",
+     "wei": "1142280000000000",
+     "ETH": "0.00114228",
+     "USD": 3.1068,
+     "atUpstreamAdvisory0_1gweiETH": "0.0057"
+    }
+   },
+   "browserKit": {
+    "oneFile": "REFUSED by the kit: above SDK_LIMITS.maxFileBytes 1,000,000,000 (vendor/ant-browser-sdk/0.1.1/limits.js:2,14-15)",
+    "asParts": {
+     "parts": 10,
+     "partBytes": 1000000000,
+     "lastPartBytes": 1000000000,
+     "recordsToPay": 2430,
+     "billablePaddedLeaves": 2560,
+     "merkleTxs": 10,
+     "waveTxs": 0,
+     "storageANT": {
+      "units": 2560,
+      "centralANT": 197.59,
+      "lowANT": 177.89,
+      "highANT": 217.29,
+      "medianBasedANT": 175.56,
+      "runLevelLowANT": 137.27,
+      "runLevelHighANT": 258.63,
+      "centralUSD": 6.3,
+      "lowUSD": 5.67,
+      "highUSD": 6.93
+     },
+     "gas": {
+      "txs": 10,
+      "gasUnits": "5000000",
+      "wei": "100200000000000",
+      "ETH": "0.0001002",
+      "USD": 0.2725,
+      "atUpstreamAdvisory0_1gweiETH": "0.0005"
+     }
+    }
+   }
+  },
+  "100 GB (100,000,000,000 B)": {
+   "bytes": 100000000000,
+   "dataChunks": 23866,
+   "recordsToPay": 23870,
+   "nativeOneFile_autoMode": {
+    "paymentMode": "merkle (records >= 64)",
+    "merkleBatches": 94,
+    "billablePaddedLeaves": 23872,
+    "storageANT": {
+     "units": 23872,
+     "centralANT": 1842.55,
+     "lowANT": 1658.83,
+     "highANT": 2026.27,
+     "medianBasedANT": 1637.13,
+     "runLevelLowANT": 1280.02,
+     "runLevelHighANT": 2411.74,
+     "centralUSD": 58.75,
+     "lowUSD": 52.89,
+     "highUSD": 64.61
+    },
+    "gas": {
+     "txs": 94,
+     "gasUnits": "47000000",
+     "wei": "941880000000000",
+     "ETH": "0.00094188",
+     "USD": 2.5617,
+     "atUpstreamAdvisory0_1gweiETH": "0.0047"
+    }
+   },
+   "nativeOneFile_singleMode": {
+    "paymentMode": "waves of 64 (PaymentMode::Single, or the Auto fallback on InsufficientPeers, upload.rs:863)",
+    "waves": 373,
+    "billableRecords": 23870,
+    "storageANT": {
+     "units": 23870,
+     "centralANT": 1842.39,
+     "lowANT": 1658.69,
+     "highANT": 2026.1,
+     "medianBasedANT": 1636.99,
+     "runLevelLowANT": 1279.91,
+     "runLevelHighANT": 2411.54,
+     "centralUSD": 58.75,
+     "lowUSD": 52.89,
+     "highUSD": 64.6
+    },
+    "gas": {
+     "txs": 373,
+     "gasUnits": "559500000",
+     "wei": "11212380000000000",
+     "ETH": "0.01121238",
+     "USD": 30.4953,
+     "atUpstreamAdvisory0_1gweiETH": "0.05595"
+    }
+   },
+   "browserKit": {
+    "oneFile": "REFUSED by the kit: above SDK_LIMITS.maxFileBytes 1,000,000,000 (vendor/ant-browser-sdk/0.1.1/limits.js:2,14-15)",
+    "asParts": {
+     "parts": 100,
+     "partBytes": 1000000000,
+     "lastPartBytes": 1000000000,
+     "recordsToPay": 24300,
+     "billablePaddedLeaves": 25600,
+     "merkleTxs": 100,
+     "waveTxs": 0,
+     "storageANT": {
+      "units": 25600,
+      "centralANT": 1975.92,
+      "lowANT": 1778.9,
+      "highANT": 2172.94,
+      "medianBasedANT": 1755.63,
+      "runLevelLowANT": 1372.67,
+      "runLevelHighANT": 2586.32,
+      "centralUSD": 63,
+      "lowUSD": 56.72,
+      "highUSD": 69.29
+     },
+     "gas": {
+      "txs": 100,
+      "gasUnits": "50000000",
+      "wei": "1002000000000000",
+      "ETH": "0.001002",
+      "USD": 2.7252,
+      "atUpstreamAdvisory0_1gweiETH": "0.005"
+     }
+    }
+   }
+  },
+  "10 GiB (10,737,418,240 B)": {
+   "bytes": 10737418240,
+   "dataChunks": 2563,
+   "recordsToPay": 2567,
+   "nativeOneFile_autoMode": {
+    "paymentMode": "merkle (records >= 64)",
+    "merkleBatches": 11,
+    "billablePaddedLeaves": 2568,
+    "storageANT": {
+     "units": 2568,
+     "centralANT": 198.21,
+     "lowANT": 178.45,
+     "highANT": 217.97,
+     "medianBasedANT": 176.11,
+     "runLevelLowANT": 137.7,
+     "runLevelHighANT": 259.44,
+     "centralUSD": 6.32,
+     "lowUSD": 5.69,
+     "highUSD": 6.95
+    },
+    "gas": {
+     "txs": 11,
+     "gasUnits": "5500000",
+     "wei": "110220000000000",
+     "ETH": "0.00011022",
+     "USD": 0.2998,
+     "atUpstreamAdvisory0_1gweiETH": "0.00055"
+    }
+   },
+   "nativeOneFile_singleMode": {
+    "paymentMode": "waves of 64 (PaymentMode::Single, or the Auto fallback on InsufficientPeers, upload.rs:863)",
+    "waves": 41,
+    "billableRecords": 2567,
+    "storageANT": {
+     "units": 2567,
+     "centralANT": 198.13,
+     "lowANT": 178.38,
+     "highANT": 217.89,
+     "medianBasedANT": 176.04,
+     "runLevelLowANT": 137.64,
+     "runLevelHighANT": 259.34,
+     "centralUSD": 6.32,
+     "lowUSD": 5.69,
+     "highUSD": 6.95
+    },
+    "gas": {
+     "txs": 41,
+     "gasUnits": "61500000",
+     "wei": "1232460000000000",
+     "ETH": "0.00123246",
+     "USD": 3.352,
+     "atUpstreamAdvisory0_1gweiETH": "0.00615"
+    }
+   },
+   "browserKit": {
+    "oneFile": "REFUSED by the kit: above SDK_LIMITS.maxFileBytes 1,000,000,000 (vendor/ant-browser-sdk/0.1.1/limits.js:2,14-15)",
+    "asParts": {
+     "parts": 11,
+     "partBytes": 1000000000,
+     "lastPartBytes": 737418240,
+     "recordsToPay": 2610,
+     "billablePaddedLeaves": 2816,
+     "merkleTxs": 11,
+     "waveTxs": 0,
+     "storageANT": {
+      "units": 2816,
+      "centralANT": 217.35,
+      "lowANT": 195.68,
+      "highANT": 239.02,
+      "medianBasedANT": 193.12,
+      "runLevelLowANT": 150.99,
+      "runLevelHighANT": 284.49,
+      "centralUSD": 6.93,
+      "lowUSD": 6.24,
+      "highUSD": 7.62
+     },
+     "gas": {
+      "txs": 11,
+      "gasUnits": "5500000",
+      "wei": "110220000000000",
+      "ETH": "0.00011022",
+      "USD": 0.2998,
+      "atUpstreamAdvisory0_1gweiETH": "0.00055"
+     }
+    }
+   }
+  },
+  "100 GiB (107,374,182,400 B)": {
+   "bytes": 107374182400,
+   "dataChunks": 25626,
+   "recordsToPay": 25630,
+   "nativeOneFile_autoMode": {
+    "paymentMode": "merkle (records >= 64)",
+    "merkleBatches": 101,
+    "billablePaddedLeaves": 25632,
+    "storageANT": {
+     "units": 25632,
+     "centralANT": 1978.39,
+     "lowANT": 1781.13,
+     "highANT": 2175.66,
+     "medianBasedANT": 1757.83,
+     "runLevelLowANT": 1374.39,
+     "runLevelHighANT": 2589.55,
+     "centralUSD": 63.08,
+     "lowUSD": 56.79,
+     "highUSD": 69.37
+    },
+    "gas": {
+     "txs": 101,
+     "gasUnits": "50500000",
+     "wei": "1012020000000000",
+     "ETH": "0.00101202",
+     "USD": 2.7525,
+     "atUpstreamAdvisory0_1gweiETH": "0.00505"
+    }
+   },
+   "nativeOneFile_singleMode": {
+    "paymentMode": "waves of 64 (PaymentMode::Single, or the Auto fallback on InsufficientPeers, upload.rs:863)",
+    "waves": 401,
+    "billableRecords": 25630,
+    "storageANT": {
+     "units": 25630,
+     "centralANT": 1978.24,
+     "lowANT": 1780.99,
+     "highANT": 2175.49,
+     "medianBasedANT": 1757.69,
+     "runLevelLowANT": 1374.28,
+     "runLevelHighANT": 2589.35,
+     "centralUSD": 63.08,
+     "lowUSD": 56.79,
+     "highUSD": 69.37
+    },
+    "gas": {
+     "txs": 401,
+     "gasUnits": "601500000",
+     "wei": "12054060000000000",
+     "ETH": "0.01205406",
+     "USD": 32.7845,
+     "atUpstreamAdvisory0_1gweiETH": "0.06015"
+    }
+   },
+   "browserKit": {
+    "oneFile": "REFUSED by the kit: above SDK_LIMITS.maxFileBytes 1,000,000,000 (vendor/ant-browser-sdk/0.1.1/limits.js:2,14-15)",
+    "asParts": {
+     "parts": 108,
+     "partBytes": 1000000000,
+     "lastPartBytes": 374182400,
+     "recordsToPay": 26095,
+     "billablePaddedLeaves": 27520,
+     "merkleTxs": 108,
+     "waveTxs": 0,
+     "storageANT": {
+      "units": 27520,
+      "centralANT": 2124.12,
+      "lowANT": 1912.32,
+      "highANT": 2335.91,
+      "medianBasedANT": 1887.3,
+      "runLevelLowANT": 1475.62,
+      "runLevelHighANT": 2780.29,
+      "centralUSD": 67.73,
+      "lowUSD": 60.98,
+      "highUSD": 74.48
+     },
+     "gas": {
+      "txs": 108,
+      "gasUnits": "54000000",
+      "wei": "1082160000000000",
+      "ETH": "0.00108216",
+      "USD": 2.9432,
+      "atUpstreamAdvisory0_1gweiETH": "0.0054"
+     }
+    }
+   }
+  }
+ },
+ "projectionAssumptions": [
+  "network price level stays where it was 2026-09-17 .. 2026-10-05: central/low/high = pooled per-record mean and its 95% band (perRecordPrice.projectionPerRecordANT); runLevelLow/High = lowest/highest per-run mean of any evidence point (small runs, very wide); medianBased = pooled median, the better guide for merkle batches because each batch is billed 3 x median16 of one 16-node pool",
+  "records(bytes) chunk model above (shrink_data_map adds 3 child chunks once; a second shrink level would add 3 more, negligible)",
+  "Auto mode pays merkle for >= 64 records: per batch of <= 256 leaves the vault charges 3 x median16 x 2^depth (merkle.rs:143-170; evmlib 0.10.0 lib.rs:206-226), so a non-power-of-two last batch is billed up to 2x its records; the browser shows the merkle maximum across candidate pools (\"up to\"), the paid amount can be lower",
+  "quoted prices rise quadratically as close-group nodes fill (pricing.rs:83); 10 GB adds ~2,391 records x 7 replicas (CLOSE_GROUP_SIZE 7, ant-protocol chunk.rs:125) to the network, effect on n UNVERIFIED (network size unknown here)",
+  "ANT/USD, ETH/USD and Arbitrum gas are single live reads at measuredAt.publicReads",
+  "gas units are upstream advisory budgets (native.rs:248 wave 1,500,000; native.rs:254 merkle 500,000), not measured; ERC-20 approval transactions are not counted (UNVERIFIED count)"
+ ],
+ "gas": {
+  "rpc": "https://arb1.arbitrum.io/rpc",
+  "chainIdRaw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0xa4b1\"}",
+  "eth_gasPriceRaw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x131c940\"}",
+  "gasPriceWei": "20040000",
+  "gasPriceGwei": 0.02004,
+  "latestBlock": {
+   "ok": true,
+   "ms": 68,
+   "http": 200,
+   "number": "0x1e83a3c1",
+   "timestamp": "0x6ac3ae22",
+   "baseFeePerGas": "0x131c940"
+  },
+  "baseFeeLast21BlocksGwei": [
+   0.02014,
+   0.020198,
+   0.02,
+   0.020034,
+   0.02005,
+   0.020084,
+   0.02,
+   0.020004,
+   0.020052,
+   0.02009,
+   0.02,
+   0.02002,
+   0.02003,
+   0.020188,
+   0.02,
+   0.020006,
+   0.020096,
+   0.02012,
+   0.02,
+   0.02004,
+   0.020052
+  ],
+  "perWave": {
+   "gasUnits": "1500000",
+   "wei": "30060000000000",
+   "ETH": "0.00003006",
+   "USD": 0.0818
+  },
+  "perMerkleTx": {
+   "gasUnits": "500000",
+   "wei": "10020000000000",
+   "ETH": "0.00001002",
+   "USD": 0.0273
+  },
+  "upstreamAdvisoryGasPriceWei": "100000000",
+  "measuredOneWave2026_09_21": {
+   "wei": "44461821504000",
+   "ETH": 0.000044461821504,
+   "chunks": 56,
+   "source": "docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md:14,28",
+   "note": "gas price at that moment not recorded, so gas units UNVERIFIED"
+  }
+ },
+ "usd": {
+  "source": "CoinGecko public simple price (no key)",
+  "url": "https://api.coingecko.com/api/v3/simple/price?ids=ethereum,autonomi,arweave&vs_currencies=usd&include_last_updated_at=true",
+  "raw": "{\"ethereum\":{\"usd\":2719.79,\"last_updated_at\":1791208910},\"autonomi\":{\"usd\":0.03188575,\"last_updated_at\":1791208910},\"arweave\":{\"usd\":4.46,\"last_updated_at\":1791208910}}",
+  "antId": [
+   {
+    "id": "autonomi",
+    "symbol": "ANT",
+    "name": "Autonomi"
+   }
+  ],
+  "crossCheck_Coinbase": {
+   "ETH": "2720.3",
+   "AR": "4.4568919500257"
+  },
+  "ETHUSD": 2719.79,
+  "ANTUSD": 0.03188575,
+  "ARUSD": 4.46,
+  "note": "ant-protocol pricing.rs:6-8 anchors K to ~$0.10/ANT; the live ANT price is 0.03188575"
+ },
+ "arweave": {
+  "endpoint": "GET https://arweave.net/price/<bytes> -> winston; 1 AR = 1e12 winston",
+  "prices": {
+   "1MB": {
+    "url": "https://arweave.net/price/1000000",
+    "http": 200,
+    "bytes": 1000000,
+    "winston": "13213599833",
+    "AR": 0.013214,
+    "USD": 0.0589,
+    "ms": 216
+   },
+   "10MB": {
+    "url": "https://arweave.net/price/10000000",
+    "http": 200,
+    "bytes": 10000000,
+    "winston": "128479734781",
+    "AR": 0.12848,
+    "USD": 0.573,
+    "ms": 216
+   },
+   "100MB": {
+    "url": "https://arweave.net/price/100000000",
+    "http": 200,
+    "bytes": 100000000,
+    "winston": "1258087857272",
+    "AR": 1.258088,
+    "USD": 5.6111,
+    "ms": 85
+   },
+   "500MB": {
+    "url": "https://arweave.net/price/500000000",
+    "http": 200,
+    "bytes": 500000000,
+    "winston": "6283691341009",
+    "AR": 6.283691,
+    "USD": 28.0253,
+    "ms": 127
+   },
+   "1GB": {
+    "url": "https://arweave.net/price/1000000000",
+    "http": 200,
+    "bytes": 1000000000,
+    "winston": "12564049036609",
+    "AR": 12.564049,
+    "USD": 56.0357,
+    "ms": 111
+   },
+   "10GB": {
+    "url": "https://arweave.net/price/10000000000",
+    "http": 200,
+    "bytes": 10000000000,
+    "winston": "125630247466266",
+    "AR": 125.630247,
+    "USD": 560.3109,
+    "ms": 81
+   },
+   "100GB": {
+    "url": "https://arweave.net/price/100000000000",
+    "http": 200,
+    "bytes": 100000000000,
+    "winston": "1256302111717259",
+    "AR": 1256.302112,
+    "USD": 5603.1074,
+    "ms": 1495
+   },
+   "networkInfo": {
+    "ok": true,
+    "ms": 65,
+    "http": 200,
+    "height": 2015128,
+    "network": "arweave.N.1",
+    "release": 110
+   }
+  }
+ },
+ "comparisonSameSizes": {
+  "1000000": {
+   "autonomiANT": 0.2897592509765625,
+   "autonomiUSD": 0.0092,
+   "labelledUpTo": false,
+   "partial": false,
+   "arweaveAR": 0.013214,
+   "arweaveUSD4": 0.0589
+  },
+  "10000000": {
+   "autonomiANT": 0.404113353515625,
+   "autonomiUSD": 0.0129,
+   "labelledUpTo": false,
+   "partial": false,
+   "arweaveAR": 0.12848,
+   "arweaveUSD4": 0.573
+  }
+ },
+ "comparisonModelled": {
+  "100 MB": {
+   "autonomiBillableUnits": 28,
+   "autonomiCentralANT": 2.16,
+   "autonomiCentralUSD": 0.07,
+   "autonomiBandUSD": [
+    0.06,
+    0.08
+   ],
+   "arweaveAR": 1.258088,
+   "arweaveUSD": 5.6111,
+   "ratioArweaveToAutonomiUSD": 81.43,
+   "basis": "Autonomi = chunk model x pooled per-record central (no live whole price at this size); Arweave = live /price"
+  },
+  "10 GB": {
+   "autonomiBillableUnits": 2432,
+   "autonomiCentralANT": 187.71,
+   "autonomiCentralUSD": 5.99,
+   "autonomiBandUSD": [
+    5.39,
+    6.58
+   ],
+   "arweaveAR": 125.630247,
+   "arweaveUSD": 560.3109,
+   "ratioArweaveToAutonomiUSD": 93.61,
+   "basis": "Autonomi = chunk model x pooled per-record central (no live whole price at this size); Arweave = live /price"
+  },
+  "100 GB": {
+   "autonomiBillableUnits": 23872,
+   "autonomiCentralANT": 1842.55,
+   "autonomiCentralUSD": 58.75,
+   "autonomiBandUSD": [
+    52.89,
+    64.61
+   ],
+   "arweaveAR": 1256.302112,
+   "arweaveUSD": 5603.1074,
+   "ratioArweaveToAutonomiUSD": 95.37,
+   "basis": "Autonomi = chunk model x pooled per-record central (no live whole price at this size); Arweave = live /price"
+  }
+ },
+ "timePrognosis": {
+  "quote": {
+   "browser": "per size in browserQuotes; opening the connection took about 2 s on the first run, the rest is quoting at the kit concurrency of 4: 13.9 / 21.9 / 28.4 s per record after the first (1 MB / 10 MB / 100 MB)",
+   "oneGBPart": "a 1 GB part is 243 records, so the kit takes the merkle path (pool quotes, not per-record quotes); its quote time was not measured here (UNVERIFIED)",
+   "hundredMB": "100 MB did not finish inside the 600 s cap: 20 of 28 records quoted, no payment request reached, the harness pressed Stop; at the measured rate the whole quote needs about 828 s (UNVERIFIED extrapolation)"
+  },
+  "upload": {
+   "measured": "214,091,829 B stored in 289.0 s, 56/56 chunks, 0 retries (docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md:12,15,28) = 0.74 MB/s native CLI",
+   "tenGB_hours_linear": 3.75,
+   "hundredGB_hours_linear": 37.5,
+   "status": "UNVERIFIED linear extrapolation from one 214 MB run"
+  },
+  "read": {
+   "measured": "relay ~50 s, ants.tube 83.6 s, bViEw direct 286.1 s (~0.75 MB/s), unmodified SDK 456 s for the same 214 MB (docs/dispatches/2026-10-03-bview-direct-sdk-011.md:98-107,133-134,149-151)",
+   "tenGB_minutes_relay": 38.92,
+   "tenGB_hours_direct": 3.7,
+   "hundredGB_hours_relay": 6.49,
+   "hundredGB_hours_direct": 37.04,
+   "status": "UNVERIFIED linear extrapolation"
+  }
+ },
+ "citations": {
+  "browserMaxFile": "vendor/ant-browser-sdk/0.1.1/limits.js:2 MAX_FILE_BYTES = 1_000_000_000; :5 minFileBytes 3",
+  "chunkSize": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/self_encryption-0.36.0/src/lib.rs:152-160 MAX_CHUNK_SIZE default 4_190_208; utils.rs:107-119 get_num_chunks (3 minimum)",
+  "minEncryptable": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/self_encryption-0.36.0/src/lib.rs:150 MIN_ENCRYPTABLE_BYTES = 3 * MIN_CHUNK_SIZE",
+  "dataMapShrink": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/self_encryption-0.36.0/src/lib.rs:381-410 shrink_data_map (while data_map.len() > 3)",
+  "protocolChunkCap": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ant-protocol-3.1.0/src/chunk.rs:19 MAX_CHUNK_SIZE = 4 MiB; :125 CLOSE_GROUP_SIZE = 7",
+  "pricing": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ant-protocol-3.1.0/src/payment/pricing.rs:28 D=6000, :36 BASELINE 0.00390625 ANT, :41 K 0.03515625 ANT, :83 calculate_price(close_records_stored)",
+  "multiplier": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/payment_policy.rs#L9 SINGLE_NODE_PAYMENT_MULTIPLIER = 3; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/payment_policy.rs#L63 enhanced_payment_amount",
+  "waveSize": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/batch.rs#L36 PAYMENT_WAVE_SIZE = 64",
+  "merkleThreshold": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L44 DEFAULT_MERKLE_THRESHOLD = 64; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L720 should_use_merkle",
+  "merkleMultiplier": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L155 pool_commitment_with_payment_multiplier (3x on merkle too)",
+  "merkleBatches": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L566 merkle_batch_sizes; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L665 padded_leaf_count; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/merkle.rs#L684 merkle_billable_leaves",
+  "maxLeaves": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/evmlib-0.10.0/src/merkle_payments/merkle_tree.rs:25 MAX_LEAVES = 1 << MAX_MERKLE_DEPTH; merkle_batch_payment.rs:26 MAX_MERKLE_DEPTH = 8; :23 CANDIDATES_PER_POOL = 16",
+  "merkleMaximum": "WSL ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/evmlib-0.10.0/src/lib.rs:206-226 estimate_merkle_payment_cost = max over pools of median16 x 2^depth; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/browser/payment.rs#L597 maximum_amount handed to the browser",
+  "gasBudgets": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L248 GAS_PER_WAVE_TX = 1_500_000; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L254 GAS_PER_MERKLE_TX = 500_000; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L263 ARBITRUM_GAS_PRICE_WEI = 100_000_000",
+  "nativeEstimator": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L1772 per_chunk_cost = 3 x median; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L1781 billable_units; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L1803 waves; https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/file/native.rs#L1806 merkle_batches",
+  "autoFallback": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/data/client/upload.rs#L863 Auto falls back from merkle on InsufficientPeers",
+  "kitProgress": "https://github.com/WithAutonomi/ant-client/blob/db85c72515f9c1061ef78c9663e79621e2816170/ant-core/src/browser/wasm_transport/upload_adapter.rs#L379 \"Quoted record n/total\"",
+  "pageQuote": "surfaces/bpay-invoice.js:196 quoteFile; :211 cancel, never pay; :219 windowed; :233 merkle \"up to\"; :237 whole vs partial",
+  "sourceNote": "ant-client checkout at db85c72515f9c1061ef78c9663e79621e2816170 has local edits only in browser/wasm_transport.rs, wasm_transport/shared.rs, data/client/adaptive.rs; no file cited above is among them"
+ }
+}
