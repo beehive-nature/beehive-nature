@@ -816,7 +816,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <button type="button" class="wlr-card" data-wl-card-for="kc-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🗝</span><span class="w" data-i18n="wl.rv.s.kc-sec">keychain</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="vault-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🔐</span><span class="w" data-i18n="wl.rv.s.vault-sec">vault</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="forge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">♾</span><span class="w" data-i18n="wl.rv.s.forge-sec">key forge</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="bridge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🌉</span><span class="w" data-i18n="wl.rv.s.bridge-sec">bridge</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bridge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🌉</span><span class="w" data-i18n="wl.rv.s.bridge-sec">let it sign</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="acct-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🏭</span><span class="w" data-i18n="wl.rv.s.acct-sec">new account</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="receipts-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.receipts-sec">receipts</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="composer-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">✍</span><span class="w" data-i18n="wl.rv.s.composer-sec">composer</span></button>
@@ -1397,7 +1397,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
-  <h2>🌉 the bridge: one time, then never manual again</h2>
+  <h2>🌉 let this wallet sign for your account<span class="wl-cyd"> · the bridge: one time, then never manual again</span></h2>
   <div class="law" id="br-calm" style="font-size:15px;line-height:1.6"></div>
   <div class="law" data-wl-tech>this adds this wallet’s own key to your account beside the keys already there. nothing is removed, and the key you paste is wiped from the page right after the press.</div>
   <div class="law" data-reg="cypherpunk">updateauth on the account’s active permission: your bzDiD-derived K1 key joins every key already there, nothing removed, the threshold unchanged. the one-paste lane (add this wallet) adds the K1 key only and signs once with the pasted key. scaffold · recovery can also enroll an account passkey (PUB_WA), which joins the account, though this page does not sign with it yet. either way the pasted key lives in tab memory for that one signature, and both paste fields are cleared on the press.</div>
@@ -1422,25 +1422,28 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="acct-sec" data-wl-task="key" style="border-color:#2c4a5a">
-  <h2>🏭 the account forge: <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born: your bridged key signs it into being</summary>
-  <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
+  <h2>🏭 <span class="wl-cyd">the account forge: </span><span data-i18n="wl.h.acctforge">make a new Vaulta account</span><span class="wl-cyd"> (born from your bzDiD)</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">how a new account is made: your keychain signs it, and holds its keys</summary>
+  <div class="law">your keychain signs the new account into being and holds its keys. nothing is written down, and it costs its room on the chain, paid from your A.</div>
+  <div class="law" data-reg="cypherpunk">your bridged account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
-  <b>vaulta:&#8203;name/active</b>). No key is exported, written down, or imported, ever.
-  Vaulta economics, stated honestly: <b>broadcasting draws on staked CPU/NET, not liquid</b>
-  (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid</b>
-  (live price below). Near infinite: every account born this way signs with your keychain.</div>
+  <b>vaulta:&#8203;name/active</b>). no key is exported, written down, or imported, ever.
+  Vaulta economics: <b>broadcasting draws on staked CPU/NET, not liquid</b>
+  (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid A</b>
+  at core.vaulta, priced live from the rammarket. every account born this way signs with your keychain.</div>
   </details>
   <div class="row">
-    <input id="ac-name" aria-label="New Vaulta account name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
-    <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
+    <input id="ac-name" aria-label="New Vaulta account name" placeholder="a name of 12 letters a to z or digits 1 to 5, starting with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
+    <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 make this account</button>
   </div>
-  <div class="row">
-    <input id="ac-ram" class="small" type="number" value="8192" min="3072" step="1024" style="max-width:160px;flex:0 1 160px" title="RAM bytes the creator buys for the new account">
-    <div class="law" style="flex:2;min-width:220px" id="ac-cost" data-wl-tech>RAM cost: reading live market…</div>
+  <div data-reg="cypherpunk">
+    <div class="row">
+      <input id="ac-ram" aria-label="RAM bytes for the new account" class="small" type="number" value="8192" min="3072" step="1024" style="max-width:160px;flex:0 1 160px" title="RAM bytes the creator buys for the new account">
+      <div class="law" style="flex:2;min-width:220px" id="ac-cost">RAM cost: reading live market…</div>
+    </div>
   </div>
   <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px"><a href="#connect-sec">connect your name</a> to make a new Vaulta account.</div>
-  <pre id="ac-out" style="display:none"></pre>
+  <div data-reg="cypherpunk"><pre id="ac-out" style="display:none"></pre></div>
 </section>
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
   <h2>💸 bPay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
@@ -4775,6 +4778,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var ra=act.required_auth, existing=(ra.keys||[]).map(function(k){return {key:k.key,weight:k.weight}});
     if(!existing.some(function(k){return canon(k.key)===pub}))
       throw brErr('That key is not one of '+a+'\u2019s active keys, so nothing was sent.','wrongkey','pasted '+pub+' · '+a+'@active holds '+existing.map(function(k){return k.key}).join(', '));
+    /* one key at weight 1 signs alone only where the threshold is 1: a multisig is said, never half-joined */
+    if((ra.threshold||1)>1)
+      throw brErr(a+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was sent.','multisig','threshold '+ra.threshold+' · '+existing.map(function(k){return k.key+' weight '+k.weight}).join(', '));
     var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, packed, sgn, txid;
     try{
       if(!existing.some(function(k){return canon(k.key)===K1.pubK1})){
@@ -4859,16 +4865,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!acc){BRIDGED=null;setBridgeState(false,'could not read '+a,'unread');return}
     var act=(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
     if(!act){BRIDGED=false;setBridgeState(false,a+' has no active key','noperm');return}
-    var keys=(act.required_auth&&act.required_auth.keys)||[];
-    BRIDGED=keys.some(function(k){return canon(k.key)===K1.pubK1});
-    if(!BRIDGED&&await findOwnKey(keys,a))return checkBridge();
+    var keys=(act.required_auth&&act.required_auth.keys)||[], th=(act.required_auth&&act.required_auth.threshold)||1;
+    var alone=keys.filter(function(k){return (k.weight||0)>=th});   /* a key that signs by itself */
+    BRIDGED=alone.some(function(k){return canon(k.key)===K1.pubK1});
+    if(!BRIDGED&&await findOwnKey(alone,a))return checkBridge();
     if(!BRIDGED&&VACCT_STATE==='name'&&a!==SOUL&&await bareAccountIsMine())return checkBridge();
+    if(!BRIDGED&&th>1){ setBridgeState(false,a+' needs more than one key to sign','multisig'); return }
     setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
   function signGuard(el){
-    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now. Try again in a moment.']); return false }
-    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now. Try again in a moment.']); return false }
+    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now, so nothing was signed. ',{btn:'try again',on:function(){ readAll() }}]); return false }
+    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now, so nothing was signed. ',{btn:'try again',on:function(){ checkBridge() }}]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -4879,7 +4887,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(kind==='ok') wlSay(el,[a+' · ready to sign ✓']);
     else if(kind==='checking') wlSay(el,['checking '+a+'…']);
     else if(kind==='missing') wlSay(el,[a+' · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
-    else if(kind==='noperm') wlSay(el,[a+' has no active key, so this wallet cannot sign for it. ',{to:'bal-sec',t:'see your coins'}]);
+    else if(kind==='noperm') wlSay(el,[a+' has no active key, so this wallet cannot sign for it. ',{to:'bridge-sec',t:'see what to do'}]);
+    else if(kind==='multisig') wlSay(el,[a+' needs more than one key to sign, so this wallet cannot sign for it alone. ',{to:'bridge-sec',t:'see what to do'}]);
     else if(kind==='unread'){ wlSay(el,['could not read '+a+' · ']); var b=document.createElement('button'); b.type='button'; b.textContent='try again'; b.onclick=function(){ checkBridge() }; el.appendChild(b) }
     else if(kind==='unknown'){ wlSay(el,['could not read where '+SOUL+'.b points · ']); var b2=document.createElement('button'); b2.type='button'; b2.textContent='try again'; b2.onclick=function(){ readAll() }; el.appendChild(b2) }
     else wlSay(el,[{to:'kc-sec',t:'connect your keychain'},' to check '+(SOUL?a:'it')]);
@@ -4898,6 +4907,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
     sumAuth(kind||(ok?'ok':(MPRK?'missing':'')));
     brRender();
+    refreshAcctPanel();
   }
   /* the bridge shows while it has something to say: the paste to make, a paste in flight
      or its outcome, and the done line where the reader pressed */
@@ -4919,12 +4929,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     if(BR_KIND==='noperm'){ wlSay(el,['this wallet cannot be added to '+a+', so choose the account you want to use. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': no active permission'}]); return }
+    if(BR_KIND==='multisig'){ wlSay(el,[a+' needs more than one key to sign, so this wallet cannot sign for it alone. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': its active threshold is more than 1; one key at weight 1 cannot meet it'}]); return }
     var say=document.createElement('div');
-    say.textContent='This wallet does not sign for '+a+' yet. Paste '+a+'\u2019s active key once, and every sign after that is one press. The key is used for this one press and wiped from the page right after.';
+    say.textContent='this wallet does not sign for '+a+' yet, so paste its active key once and every sign after is one press. the key is used for this one press and wiped from the page right after.';
     var row=document.createElement('div'); row.className='row'; row.style.marginTop='10px';
     var inp=document.createElement('input'); inp.type='password'; inp.id='br-paste'; inp.autocomplete='off'; inp.spellcheck=false; inp.value=keep;
     inp.setAttribute('aria-label',a+' active private key'); inp.placeholder=a+' active private key'; inp.style.cssText='flex:2;min-height:44px';
-    var go=document.createElement('button'); go.type='button'; go.id='br-paste-go'; go.className='gold'; go.textContent='Add this wallet';
+    var go=document.createElement('button'); go.type='button'; go.id='br-paste-go'; go.className='gold'; go.textContent='add this wallet';
     var st=document.createElement('div'); st.id='br-paste-stat'; st.setAttribute('role','status'); st.style.cssText='margin-top:8px;min-height:20px';
     var hold=!!(BR_PENDING&&BR_PENDING.acct===a);   /* a paste that may still land: the account is read first */
     inp.disabled=hold; go.disabled=hold;
@@ -4963,6 +4974,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(k==='noperm')return [m+' ',{to:'connect-sec',t:'choose the account'},cy];
     if(k==='wrongkey')return [m+' paste '+a+'\u2019s active key here.',cy];
     if(k==='refused')return [m,cy];
+    if(k==='multisig')return [m+' ',{to:'connect-sec',t:'choose the account'},cy];
     if(k==='read'||k==='pre'||k==='parse')return [m+' paste the key again to try once more.',cy];
     return ['something stopped this before anything was sent, so nothing changed. paste the key again to try once more.',cy];
   }
@@ -6020,8 +6032,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function refreshAcctPanel(why){
     var st=$('ac-stat'); if(!st)return;
     var p=await acPrice(why==='retry');
-    var bytes=parseInt($('ac-ram').value,10)||8192;
-    $('ac-cost').textContent=p!==null?('RAM: about '+aAmount(p*bytes*1.005)+' for '+bytes+' bytes, from the live rammarket, paid in A at '+A_TOKEN):'RAM cost: the rammarket did not answer';
+    var bytes=acBytes()||8192;
+    $('ac-cost').textContent=acBytes()===null?'RAM: type a whole number of bytes from 3072 up':p!==null?('RAM: about '+aAmount(p*bytes*1.005)+' for '+bytes+' bytes, from the live rammarket, paid in A at '+A_TOKEN):'RAM cost: the rammarket did not answer';
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
     var a=vacct(), liq=(LAST_A&&LAST_A.acct===a)?LAST_A.a:null;
@@ -6035,8 +6047,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     var need=p!==null?p*bytes*1.005:null;
     if(need===null){ wlSay(st,['the price of a new account is not known yet, so nothing can be made right now. ',{btn:'try again',on:function(){ refreshAcctPanel('retry') }},{cy:'the eosio rammarket table answered nothing'}]); return }
-    if(liq<need){ wlSay(st,['a new account needs about '+aAmount(need)+' for its room on the chain, and you have '+aAmount(liq)+'. ',{to:'pay-sec',t:'get A'},cy]); return }
-    wlSay(st,['a new account costs about '+aAmount(need)+' of your '+aAmount(liq)+'. type its name to make it.',cy]);
+    /* the one next step: the keychain first, then this wallet signing, then A, then the name */
+    var step=!K1?[{to:'kc-sec',t:'connect your keychain'},' to make it.']
+      :BRIDGED===false?['this wallet does not sign for '+a+' yet, so ',{to:'bridge-sec',t:'let it sign'},' first.']
+      :null;
+    if(liq<need){ wlSay(st,['a new account needs about '+aAmount(need)+' for its room on the chain, and you have '+aAmount(liq)+'. '].concat(step||[{to:'pay-sec',t:'get A'}],[cy])); return }
+    wlSay(st,['a new account costs about '+aAmount(need)+' of your '+aAmount(liq)+'. '].concat(step||['type its name and press make this account.'],[cy]));
+  }
+  /* the RAM bytes the forge buys: a whole number from 3072 up (the floor this field has always set), else null */
+  function acBytes(){
+    var raw=String($('ac-ram').value==null?'':$('ac-ram').value).trim();
+    if(raw==='')return 8192;
+    var n=Number(raw);
+    return Number.isInteger(n)&&n>=3072&&n<=4294967295?n:null;
   }
   function acReread(){ var st=$('ac-stat'); st.removeAttribute('data-act'); wlSay(st,['reading your A, one moment.']); readVaulta(vacct()) }
   /* a new name: the forge's line never keeps a figure or an answer from the account before
@@ -6068,12 +6091,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('ac-go').onclick=function(){ vaultaLane($('ac-go'),acGo,$('ac-stat')) };
   async function acGo(){
     var out=$('ac-out'),stat=$('ac-stat'); stat.style.color='';
-    stat.setAttribute('data-act','');
+    stat.removeAttribute('data-act');   /* a step still to take is said, and goes once it is taken */
     var name=$('ac-name').value.trim();
     if(!SOUL){ wlSay(stat,[{to:'connect-sec',t:'connect your name'},' to make a new account.']); return }
     if(!K1){ wlSay(stat,[{to:'kc-sec',t:'connect your keychain'},' to make a new account.']); return }
     if(!/^[a-z][a-z1-5]{11}$/.test(name)){ wlSay(stat,['type a name of exactly 12 characters: letters a to z and digits 1 to 5, starting with a letter.']); $('ac-name').focus(); return }
     if(!signGuard(stat))return;
+    if(acBytes()===null){ wlSay(stat,['the new account needs at least 3072 bytes of room, so type a whole number from 3072 up.']); $('ac-ram').focus(); return }
+    stat.setAttribute('data-act','');   /* from here the line holds what this press did, until the reader types again */
     if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){ wlSay(stat,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }}]); return }}
     /* the name is read before anything is signed: one this keychain already made is said as
        yours (a forge whose answer was lost may have landed), a stranger's as taken */
@@ -6090,20 +6115,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       wlSay(stat,['that name is taken, so nothing was signed. type another name.',{cy:'get_account '+name+': the account exists'}]); $('ac-name').focus(); return;
     }
-    var bytes=parseInt($('ac-ram').value,10)||8192;
+    var bytes=acBytes();
     /* the RAM is bought in A from your liquid balance: it meets your daily cap first */
     var cp=await ramPrice(), spend=null;
-    if(cp!==null){ spend={unit:'A',amt:cp*bytes*1.005}; if(!capGate('A',spend.amt,stat))return }
+    if(cp!==null){
+      spend={unit:'A',amt:cp*bytes*1.005};
+      var have=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
+      if(have!==null&&have<spend.amt){ wlSay(stat,['a new account needs about '+aAmount(spend.amt)+' for its room on the chain, and you have '+aAmount(have)+', so nothing was signed. ',{to:'pay-sec',t:'get A'}]); return }
+      if(!capGate('A',spend.amt,stat))return;
+    }
     else if('A' in capLoad()){ wlSay(stat,['the RAM price is not known yet, so your daily cap cannot be checked and nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }}]); return }
     var kd, ka, acts, actz=[{actor:vacct(),permission:'active'}];
     try{
-      wlSay(stat,['making the keys for '+name+'…']);
+      wlSay(stat,['making '+name+' with your keychain, one moment.']);
       kd=deriveFor('vaulta:'+name+'/owner'); ka=deriveFor('vaulta:'+name+'/active');
       acts=[await vaultaSerialize('eosio','newaccount',actz,{creator:vacct(),name:name,
           owner:{threshold:1,keys:[{key:kd.value,weight:1}],accounts:[],waits:[]},
           active:{threshold:1,keys:[{key:ka.value,weight:1}],accounts:[],waits:[]}}),
         await vaultaSerialize(A_TOKEN,'buyrambytes',actz,{payer:vacct(),receiver:name,bytes:bytes})];
-    }catch(e){ wlSay(stat,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }},{cy:(e&&e.message)||String(e)}]); return }
+    }catch(e){ wlSay(stat,['something stopped this before anything was signed, so nothing changed. ',{btn:'try again',on:function(){ $('ac-go').click() }},{cy:(e&&e.message)||String(e)}]); return }
     await vaultaSend(stat,acts,spend,'make the account '+name+', paid by '+vacct(),function(fin){
       var tx=fin.ref||fin.txid;
       ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');

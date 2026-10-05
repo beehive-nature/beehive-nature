@@ -330,7 +330,7 @@ try {
       const k1 = (await page.textContent('#kc-k1-pub')).trim();
       // the bridge page: one sentence, one field, one button; no copy button, no other wallet named
       await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
-      ok('the bridge page is one sentence, one field and one button', await page.evaluate(() => { const c = document.getElementById('br-calm'); return !!c && !document.getElementById('br-copy') && !/Anchor|permissions →|copy/i.test(c.textContent) && /Paste kingbeelovis\u2019s active key once/.test(c.textContent) && !!document.getElementById('br-paste-go'); }), await page.textContent('#br-calm'));
+      ok('the bridge page is one sentence, one field and one button', await page.evaluate(() => { const c = document.getElementById('br-calm'); return !!c && !document.getElementById('br-copy') && !/Anchor|permissions →|copy/i.test(c.textContent) && /^this wallet does not sign for kingbeelovis yet, so paste its active key once/.test(c.textContent) && document.getElementById('br-paste-go').textContent === 'add this wallet'; }), await page.textContent('#br-calm'));
       state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };   // the chain applies the updateauth the transaction carried
       await intentFor(page, 'live-0004', RENEW);
       await page.goto(sheetUrl(RENEW, 'live-0004'), { waitUntil: 'load' });

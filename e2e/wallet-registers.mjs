@@ -252,7 +252,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const REVIEWED = [
     ['more as you forge below', 'keychain → key forge, same task, after it'],
         ['Any device in the list above', 'within the vault'],
-    ['(live price below)', 'within the account forge'],
     ['addresses below are yours to hand out', 'within pay'],
     ['Each address above falls out of the', 'within pay'],
     ['choose a lane above', 'within pay'],

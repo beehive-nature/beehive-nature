@@ -71,11 +71,11 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
         if (/^(newacct|freename)/.test(a) && !state.keys[a]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + a + ')' }] } }, 500);
         const keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
         return json({ account_name: a, core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
-          permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
+          permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: (state.threshold && state.threshold[a]) || 1, keys, accounts: [], waits: [] } }] });
       }
       if (u.pathname.endsWith('/get_currency_balance')) {
         if (state.aDown) return json({ code: 500, error: { what: 'the test drops this read' } }, 500);
-        return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
+        return json(body.code === 'core.vaulta' && body.symbol === 'A' ? [state.aBal || '5.0000 A'] : []);
       }
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : CORE_VAULTA_ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
@@ -135,6 +135,11 @@ try {
     await toKey(page);
     await page.waitForFunction(() => !!document.getElementById('br-paste') && document.getElementById('bridge-sec').style.display === 'block', null, { timeout: 15000 });
     const k1 = (await page.textContent('#kc-k1-pub')).trim();
+    const head = await page.evaluate(() => ({ h: document.querySelector('#bridge-sec h2').innerText.trim(), say: document.querySelector('#br-calm > div').innerText.trim(), go: document.getElementById('br-paste-go').textContent }));
+    ok('the bridge is named by what it does, in one lower case sentence and its one button', head.h === '🌉 let this wallet sign for your account' && /^this wallet does not sign for kingbeelovis yet, so paste its active key once and every sign after is one press\./.test(head.say) && head.go === 'add this wallet', JSON.stringify(head));
+    await waitIn(page, 'ac-stat', /let it sign/, 15000);
+    const unb = await page.evaluate(() => ({ t: document.getElementById('ac-stat').innerText.trim(), a: !!document.querySelector('#ac-stat a[href="#bridge-sec"]') }));
+    ok('the forge says its price and the one step before it can make anything: let it sign', /^a new account costs about 0\.0823 A of your 5\.0000 A\. this wallet does not sign for kingbeelovis yet, so let it sign first\.$/.test(unb.t) && unb.a, JSON.stringify(unb));
     const hidden = await page.evaluate(() => ({ stat: document.getElementById('br-stat').getClientRects().length, out: document.getElementById('br-out').getClientRects().length, btn: document.getElementById('br-go').getClientRects().length }));
     ok('bee never sees the scaffold lane: no step line, no receipt, no shouting button', hidden.stat === 0 && hidden.out === 0 && hidden.btn === 0, JSON.stringify(hidden));
     const law = await page.evaluate(() => [...document.querySelectorAll('#bridge-sec [data-wl-tech]')].map(e => e.textContent).join(' '));
@@ -223,7 +228,9 @@ try {
     await toKey(page);
     await waitIn(page, 'ac-stat', /costs about/, 20000);
     const line = (await page.innerText('#ac-stat')).trim();
-    ok('the forge says the price of a new account and what you have, in the line bee reads', /^a new account costs about 0\.0823 A of your 5\.0000 A\. type its name to make it\.$/.test(line), line);
+    ok('the forge says the price of a new account and what you have, in the line bee reads', /^a new account costs about 0\.0823 A of your 5\.0000 A\. type its name and press make this account\.$/.test(line), line);
+    const forge = await page.evaluate(() => ({ go: document.getElementById('ac-go').textContent, ram: document.getElementById('ac-ram').getClientRects().length, out: document.getElementById('ac-out').closest('[data-reg]') && document.getElementById('ac-out').closest('[data-reg]').getAttribute('data-reg'), ph: document.getElementById('ac-name').placeholder, h: document.querySelector('#acct-sec h2').innerText.replace(/\s+/g, ' ').trim(), sum: document.querySelector('#acct-sec summary').textContent }));
+    ok('the forge speaks bee: its button, name hint, heading and note carry no shouting, no dash, no jargon', forge.go === '🏭 make this account' && forge.ram === 0 && forge.out === 'cypherpunk' && !/[—–]/.test(forge.ph) && forge.h === '🏭 make a new Vaulta account' && /^how a new account is made: your keychain signs it/.test(forge.sum), JSON.stringify(forge));
     await page.evaluate(() => { document.getElementById('ac-name').value = 'someoneelse1'; document.getElementById('ac-go').click(); });
     await waitIn(page, 'ac-stat', /taken/, 20000);
     ok('a name someone else holds is read first and said as taken; nothing is signed', /^that name is taken, so nothing was signed\. type another name\.$/.test((await page.innerText('#ac-stat')).trim()) && state.posts.length === 0, await page.innerText('#ac-stat'));
@@ -254,6 +261,60 @@ try {
     await waitIn(page, 'ac-stat', /could not read the A on someoneelse1/, 20000);
     const sw = (await page.innerText('#ac-stat')).trim();
     ok('another account whose read fails never shows the figure from the one before', /^could not read the A on someoneelse1 just now/.test(sw) && !/5\.0000/.test(sw), sw);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* Q3 · the forge checks what you have before it signs */
+  {
+    console.log('Q3 · the forge with too little A (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    state.aBal = '0.0100 A';
+    await page.evaluate(() => document.getElementById('wgo').click());   // the account is read again: it holds less now
+    await toKey(page);
+    await waitIn(page, 'ac-stat', /needs about/, 20000);
+    const low = await page.evaluate(() => ({ t: document.getElementById('ac-stat').innerText.trim(), a: !!document.querySelector('#ac-stat a[href="#pay-sec"]') }));
+    ok('too little A is said with its price, and its one link gets A', /^a new account needs about 0\.0823 A for its room on the chain, and you have 0\.0100 A\. get A$/.test(low.t) && low.a, JSON.stringify(low));
+    await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamea'; document.getElementById('ac-go').click(); });
+    await waitIn(page, 'ac-stat', /so nothing was signed/, 20000);
+    ok('the press is refused before signing, never by the chain', /^a new account needs about 0\.0823 A for its room on the chain, and you have 0\.0100 A, so nothing was signed\./.test((await page.innerText('#ac-stat')).trim()) && state.posts.length === 0, await page.innerText('#ac-stat'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* R · an account that needs two keys to sign is said, never "ready", never half-joined */
+  {
+    console.log('R · a multisig account (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.threshold = { kingbeelovis: 2 };
+    state.keys.kingbeelovis = [DEV_PUB];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /more than one key/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    const sum = await page.evaluate(() => ({ t: document.getElementById('sum-bridge').textContent.trim(), a: !!document.querySelector('#sum-bridge a[href="#bridge-sec"]') }));
+    ok('at a glance says it needs more than one key, with its one link, never ready', sum.t === 'kingbeelovis needs more than one key to sign · see what to do' && sum.a, JSON.stringify(sum));
+    await toKey(page);
+    const br = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), field: !!document.getElementById('br-paste') }));
+    ok('the bridge says why this wallet cannot sign alone and offers no paste', /^kingbeelovis needs more than one key to sign, so this wallet cannot sign for it alone\. choose the account$/.test(br.t) && !br.field && state.posts.length === 0, JSON.stringify(br));
+    // the key on the account at weight 1 under threshold 2 still is not "ready"
+    state.keys.kingbeelovis = [DEV_PUB, (await page.textContent('#kc-k1-pub')).trim()];
+    await page.evaluate(() => { document.getElementById('wgo').click(); });
+    await page.waitForTimeout(1500);
+    ok('a key that cannot meet the threshold by itself is never read as ready', !/ready to sign/.test(await page.textContent('#sum-bridge')), await page.textContent('#sum-bridge'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* S · cypherpunk keeps the RAM field, and a byte count the chain cannot use is said before signing */
+  {
+    console.log('S · the forge RAM field (cypherpunk):');
+    const { ctx, state, page, errors } = await open(browser, 'cypherpunk');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    ok('cypherpunk sees the RAM field and its live price', await page.evaluate(() => document.getElementById('ac-ram').getClientRects().length > 0 && document.getElementById('ac-cost').getClientRects().length > 0));
+    await page.evaluate(() => { document.getElementById('ac-ram').value = '0'; document.getElementById('ac-name').value = 'newacctnameb'; document.getElementById('ac-go').click(); });
+    await waitIn(page, 'ac-stat', /3072/, 15000);
+    ok('a byte count below the floor is said and nothing is signed, never quietly swapped for 8192', /^the new account needs at least 3072 bytes of room, so type a whole number from 3072 up\.$/.test((await page.textContent('#ac-stat')).trim()) && state.posts.length === 0, await page.textContent('#ac-stat'));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
