@@ -4415,10 +4415,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      ephemeral (81 bytes); the 1216-byte X-Wing key itself is announced on the
      relays every 2 s and the phone accepts it only if it hashes to the QR's
      value. Relays carry ephemeral events (kind 20107) they don't store, signed
-     by throwaway BIP-340 keys. Pre-check digits (from the QR data, computable
-     by both sides before any secret moves) let the human catch a swapped QR;
-     AEAD failure silently discards garbage/replays. A v1 code (49 bytes, no
-     PQ half) is refused: the root never travels under a classical-only key. */
+     by throwaway BIP-340 keys. Six check words (qrWords: 66 bits of SHA-256
+     over every byte of the QR payload, so a swapper must try about 2^66
+     payloads to match them, where the old four digits took about 10^4),
+     computed the same way by both sides before any secret moves, let the
+     human catch a QR swapped under a genuine desktop.
+     Limit: they cannot catch a page that is itself fake and shows its own QR
+     and its own words. AEAD failure silently discards garbage/replays. A v1
+     code (49 bytes, no PQ half) is refused: the root never travels under a
+     classical-only key. */
   var QR_RELAYS=['wss://relay.damus.io','wss://nos.lol','wss://relay.snort.social'];
   var QRB=null;   // live bridge state — keys scrubbed on end
   var QR_PENDING=null;  // a desktop's request opened via #qr= — offered once the keychain is live
@@ -4427,9 +4432,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     for(i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
     return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
-  function qrDigits(pub33,sid){
-    var m=BN.sha256(concatB(pub33,sid));
-    return String(((m[0]<<8|m[1])%10000+10000)%10000).padStart(4,'0');
+  /* the six check words. h = SHA-256(UTF-8("bnr-qr-check/v2") ‖ pub33 ‖ sid ‖
+     commit): pub33 is the desktop's secp256k1 ephemeral, sid the session id,
+     commit the SHA-256 of its X-Wing ephemeral; together they are the whole
+     81-byte QR payload. The first 66 bits of h, read as six 11-bit indexes,
+     pick six words from the BIP-39 English list (window.BIP39_WORDLIST from
+     onboarding/vendor/bip39-wordlist.js, the same 2048 words bzdid-key.js
+     carries from @scure/bip39). Returns null when the list is not loaded. */
+  function qrWords(pub33,sid,commit){
+    var W=window.BIP39_WORDLIST;
+    if(!W||W.length!==2048||!BN)return null;
+    var h=BN.sha256(concatB(new TextEncoder().encode('bnr-qr-check/v2'),pub33,sid,commit));
+    var out=[],acc=0,bits=0,i=0;
+    while(out.length<6){
+      acc=(acc<<8)|h[i++]; bits+=8;
+      if(bits>=11){ bits-=11; out.push(W[(acc>>>bits)&2047]); acc&=(1<<bits)-1; }
+    }
+    return out;
   }
   function toHex(u){ return BZDIDKEY.toHex(u) }
   function concatB(){var n=0,i,a;for(i=0;i<arguments.length;i++)n+=arguments[i].length;
@@ -4489,6 +4508,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!BN||!BNRQR||!BZDIDKEY){$('kc-stat').textContent='QR bridge needs the vendor bundle (bnr-qr.js)';return}
     if(!window.BPQ_LIB){$('kc-stat').textContent='QR bridge needs the post-quantum bundle (bpq-lib.js)';return}
     if(typeof WebSocket==='undefined'){$('kc-stat').textContent='this browser lacks WebSockets — QR bridge unavailable';return}
+    if(!window.BIP39_WORDLIST||window.BIP39_WORDLIST.length!==2048){$('kc-stat').textContent='QR bridge needs the full word list (bip39-wordlist.js, 2048 words) for its check words';return}
     qrEnd();
     $('qr-sec').style.display='block';
     if(MPRK){ return qrGrantUI(null); }   // keychain live => this device is the GRANTING side
@@ -4499,15 +4519,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var xpk=window.BPQ_LIB.xwing.keygen(xsk).publicKey;          // 1216B, announced on the relays
     var commit=BN.sha256(xpk);                                  // 32B, rides in the QR
     var url=location.origin+location.pathname+'#qr='+bytesToB64u(concatB(sid,pub,commit));
-    var dig=qrDigits(concatB(pub,commit),sid);
+    var words=qrWords(pub,sid,commit).join(' ');
     QRB={mode:'ask',sid:sid,sk:sk,pub:pub,xsk:xsk,xpk:xpk,commit:commit,nsk:BN.secp.utils.randomPrivateKey(),sock:[],nopen:0};
     $('qr-title').textContent='📷 QR BRIDGE — waiting for your phone';
     $('qr-body').innerHTML='<div class="row" style="align-items:flex-start;gap:14px;flex-wrap:wrap">'+
       qrSvg(url)+
       '<div style="flex:1;min-width:170px">'+
         '<div style="font-size:11px;color:var(--dim)">scan with your phone camera — the wallet opens there already asking to grant</div>'+
-        '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace">'+dig+'</div>'+
-        '<div style="font-size:11px;color:var(--dim)">the phone will show these same four digits before it sends anything — mismatch means a swapped QR, walk away</div>'+
+        '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace" id="qr-words">'+words+'</div>'+
+        '<div style="font-size:11px;color:var(--dim)">the phone will show these same six words before it sends anything. If any word differs, the QR was swapped: walk away.</div>'+
         '<div id="qr-relaystat" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
         '<div id="qr-count" style="font-size:11px;color:var(--dim)">expires in 120s</div>'+
       '</div></div>';
@@ -4622,10 +4642,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function qrConfirmSheet(req){
     if(req.v!==2)return qrOldCode();
     QRB={mode:'confirm',req:req};
-    var dig=qrDigits(concatB(req.pub,req.commit),req.sid);
+    var w=qrWords(req.pub,req.sid,req.commit);
+    if(!w){
+      $('qr-body').innerHTML='<div style="font-size:12px">this page could not load its word list, so it cannot show the six check words. Nothing was sent. Reload the wallet here and scan again.</div>'+
+        '<div class="row" style="margin-top:12px"><button id="qr-deny">close</button></div>';
+      $('qr-deny').onclick=qrClose;
+      return;
+    }
     $('qr-body').innerHTML='<div style="font-size:12px">a desktop at <b>'+location.host+'</b> asks to sign in</div>'+
-      '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace">'+dig+'</div>'+
-      '<div style="font-size:11px;color:var(--dim)">these digits must match the desktop\'s — mismatch means a swapped QR, cancel</div>'+
+      '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace" id="qr-words">'+w.join(' ')+'</div>'+
+      '<div style="font-size:11px;color:var(--dim)">these six words must match the desktop\'s. If any word differs, cancel.</div>'+
       '<div class="row" style="margin-top:12px"><button id="qr-allow" class="gold">allow this desktop</button>'+
       '<button id="qr-deny">cancel</button></div>';
     $('qr-deny').onclick=qrClose;
@@ -5646,6 +5672,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   })();
 
   window.BNRWALLET = {
+    /* the QR bridge's six check words: a pure function of public QR bytes,
+       the very function both sides render with */
+    qrWords: qrWords,
     /* Public reads deliberately do not set SOUL, EVMADDR, LAST_ACC, forge
        contexts, signing caps or the connected-wallet rollups. */
     readPublicBalance: async function(chain,address) {

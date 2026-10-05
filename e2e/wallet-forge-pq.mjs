@@ -10,6 +10,9 @@ import { extname, join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -19,6 +22,8 @@ const require = createRequire(import.meta.url);
 require(join(SURF, 'onboarding', 'vendor', 'bpq-lib.js'));
 require(join(SURF, 'bpq.js'));
 const NODE_BPQ = globalThis.BPQ;
+// the BIP-39 English list the page loads, read in Node for the QR check words
+const NODE_WORDS = (() => { const sb = { window: {} }; runInNewContext(readFileSync(join(SURF, 'onboarding', 'vendor', 'bip39-wordlist.js'), 'utf8'), sb); return [...sb.window.BIP39_WORDLIST]; })();
 const EXPECT = NODE_BPQ.keys(new Uint8Array(32).fill(0x2a), 'pq:gatesoul');
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -513,6 +518,86 @@ try {
     ok('without MPRK derive returns null (honest connect path)', cold.dsaNull);
     ok('chip says derives when keychain connects', /derives when keychain connects/i.test(cold.waitText), cold.waitText);
     await page.close();
+  }
+
+  /* D · QR bridge check words: six BIP-39 words over the whole QR payload
+     (sid ‖ secp256k1 pub33 ‖ SHA-256 of the X-Wing key), the same function on
+     the desktop that shows the QR and on the phone that scans it. The old four
+     digits fell to a ~10^4 key grind by anyone who could swap the QR. */
+  {
+    const nodeWords = (pub, sid, commit) => {
+      // an independent reading (BigInt bit slicing, not the page's accumulator)
+      const h = createHash('sha256').update(Buffer.from('bnr-qr-check/v2', 'utf8')).update(pub).update(sid).update(commit).digest();
+      const top = BigInt('0x' + h.toString('hex')) >> 190n;   // first 66 bits
+      return [5, 4, 3, 2, 1, 0].map(i => NODE_WORDS[Number((top >> BigInt(11 * i)) & 2047n)]);
+    };
+    // pinned vector: a future change to the derivation turns this red
+    const VSID = Buffer.from([...Array(16).keys()]);
+    const VPUB = Buffer.concat([Buffer.from([2]), Buffer.alloc(32, 0x11)]);
+    const VCOM = Buffer.alloc(32, 0x33);
+    const VECTOR = 'bright sock clump negative symptom legend';
+    ok('qr words: the Node reference gives the pinned vector', nodeWords(VPUB, VSID, VCOM).join(' ') === VECTOR, nodeWords(VPUB, VSID, VCOM).join(' '));
+
+    // desktop: no keychain, so the QR button asks a phone; relays are faked
+    const fakeWs = () => {
+      class FakeWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send() {} close() { this.readyState = 3; } }
+      window.WebSocket = FakeWS;
+    };
+    const desk = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await desk.addInitScript(fakeWs);
+    await desk.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await desk.waitForFunction(() => window.BNRQR && window.BnrSign && window.BPQ_LIB && window.BIP39_WORDLIST && window.BNRWALLET, null, { timeout: 20000 });
+    const fn = await desk.evaluate(({ sid, pub, com }) => {
+      const f = window.BNRWALLET.qrWords, U = a => Uint8Array.from(a);
+      const base = f(U(pub), U(sid), U(com));
+      const flip = (a, i) => { const b = a.slice(); b[i] ^= 1; return U(b); };
+      return {
+        base, again: f(U(pub), U(sid), U(com)),
+        pubFlip: f(flip(pub, 32), U(sid), U(com)), sidFlip: f(U(pub), flip(sid, 15), U(com)), comFlip: f(U(pub), U(sid), flip(com, 31)),
+        listLen: window.BIP39_WORDLIST.length, listHead: window.BIP39_WORDLIST.slice(0, 3), listTail: window.BIP39_WORDLIST.slice(-1),
+      };
+    }, { sid: [...VSID], pub: [...VPUB], com: [...VCOM] });
+    ok('qr words: the page gives the pinned vector', fn.base.join(' ') === VECTOR, fn.base.join(' '));
+    ok('qr words: deterministic (same QR, same six words)', fn.again.join(' ') === fn.base.join(' '));
+    ok('qr words: one changed bit in pub33, sid or the X-Wing commit changes the words',
+      [fn.pubFlip, fn.sidFlip, fn.comFlip].every(w => w.join(' ') !== VECTOR), JSON.stringify([fn.pubFlip, fn.sidFlip, fn.comFlip]));
+    ok('qr words: the page uses the vendored BIP-39 English list (2048 words, abandon … zoo)',
+      fn.listLen === 2048 && fn.listHead.join() === 'abandon,ability,able' && fn.listTail[0] === 'zoo' && fn.listLen === NODE_WORDS.length);
+    await desk.evaluate(() => { const m = window.BNRQR.make; window.BNRQR.make = t => { window.__qrText = t; return m(t); }; document.getElementById('kc-qr').click(); });
+    await desk.waitForFunction(() => document.getElementById('qr-words') && window.__qrText, null, { timeout: 10000 });
+    const D = await desk.evaluate(() => ({ words: document.getElementById('qr-words').textContent, url: window.__qrText, body: document.getElementById('qr-body').textContent }));
+    const payload = Buffer.from(D.url.slice(D.url.indexOf('#qr=') + 4), 'base64url');
+    const dw = D.words.split(' ');
+    ok('qr words: the desktop shows six words from the BIP-39 list', dw.length === 6 && dw.every(w => NODE_WORDS.includes(w)), D.words);
+    ok('qr words: the desktop words are the Node reading of its own 81-byte QR (sid ‖ pub33 ‖ commit)',
+      payload.length === 81 && D.words === nodeWords(payload.subarray(16, 49), payload.subarray(0, 16), payload.subarray(49)).join(' '), D.words);
+    ok('qr words: the desktop says the phone shows the same six words, a difference means a swapped QR',
+      /the phone will show these same six words before it sends anything\. If any word differs, the QR was swapped: walk away\./.test(D.body) && !/digit/.test(D.body), D.body.slice(0, 200));
+    await desk.close();
+
+    // phone: keychain live, opened on the desktop's own QR link
+    const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await phone.addInitScript(fakeWs);
+    await phone.goto(`${BASE}/surfaces/wallet.html#qr=` + payload.toString('base64url'), { waitUntil: 'load' });
+    await phone.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    await phone.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await phone.waitForFunction(() => document.getElementById('qr-words') && document.getElementById('qr-allow'), null, { timeout: 15000 });
+    const P = await phone.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: document.getElementById('qr-body').textContent, fits: (() => { const e = document.getElementById('qr-words'); return e.scrollWidth <= e.clientWidth + 1 && document.documentElement.scrollWidth <= innerWidth; })() }));
+    ok('qr words: on a 390 px phone the six words fit without a sideways scroll', P.fits);
+    ok('qr words: the phone shows the very same six words for the same QR, before anything is sent', P.words === D.words, P.words + ' vs ' + D.words);
+    ok('qr words: the phone says cancel if any word differs', /these six words must match the desktop's\. If any word differs, cancel\./.test(P.body) && !/digit/.test(P.body), P.body.slice(0, 200));
+    await phone.close();
+
+    const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
+    const block = src.slice(src.indexOf('QR BRIDGE v2'), src.indexOf('boot detect: opened via the desktop'));
+    ok('qr words: no four-digit pre-check is left, and the comment names its honest limit',
+      !/qrDigits|%10000\)/.test(src) && /cannot catch a page that is itself fake/.test(block));
+    ok('qr words: the new QR words carry no em or en dash', !/[–—]/.test((D.body.match(/the phone will show[^]*?walk away\./) || [''])[0] + (P.body.match(/these six words[^]*?cancel\./) || [''])[0]));
   }
 } finally {
   await browser.close();
