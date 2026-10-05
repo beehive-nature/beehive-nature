@@ -3278,13 +3278,44 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(location.hash!=='#sign'||$('sign-sheet'))return;
     var d=document.createElement('div');
     d.id='sign-sheet'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','sign-h');
-    d.style.cssText='position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto';
-    d.innerHTML='<div style="max-width:420px;width:100%;text-align:center">'+
-      '<div id="sign-h" role="heading" aria-level="1" style="margin:0 0 12px;font-size:30px;font-weight:600;line-height:1.2">Sign the law</div>'+
-      '<p id="sign-say" style="margin:0 0 20px;line-height:1.5">Press Sign, then confirm with your passkey.</p>'+
-      '<button type="button" id="sign-go" class="gold" style="min-width:200px;min-height:52px;font-size:18px">✍ Sign</button>'+
-      '<p id="sign-stat" role="status" aria-live="polite" style="margin:16px 0 0;min-height:24px;line-height:1.5"></p>'+
-      '<details id="sign-read" style="margin-top:24px;text-align:left"><summary style="cursor:pointer;color:var(--dim)">read what you are signing</summary><ul id="sign-list" style="margin:8px 0;padding-left:18px"></ul></details>'+
+    if(!$('sign-style')){
+      /* the founder's chosen UI (2026-10-04): new bee is paper and forest green,
+         raver is night purple and magenta, cypherpunk is black, mono and cyan */
+      var css=document.createElement('style'); css.id='sign-style';
+      css.textContent=
+        '#sign-sheet{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;'+
+          'background:#faf6f0;color:#0c1412;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}'+
+        '#sign-sheet .sg{max-width:420px;width:100%;text-align:center}'+
+        '#sign-h{margin:0 0 12px;font-size:36px;font-weight:700;line-height:1.1;letter-spacing:-.01em}'+
+        '#sign-say{margin:0 0 28px;font-size:18px;line-height:1.5;color:#45574e}'+
+        '#sign-go{width:100%;min-height:56px;border:0;border-radius:999px;background:#264d36;color:#fff;font:700 20px/1 "Segoe UI",system-ui,sans-serif;cursor:pointer}'+
+        '#sign-go:focus-visible{outline:2px solid #264d36;outline-offset:3px}'+
+        '#sign-go:disabled{opacity:.6;cursor:default}'+
+        '#sign-stat{margin:18px 0 0;min-height:24px;font-size:17px;line-height:1.5}'+
+        '#sign-stat a{display:block;margin-top:8px;color:inherit}'+
+        '#sign-read{margin-top:28px;text-align:start;font-size:15px;color:#45574e}'+
+        '#sign-read summary{cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:center}'+
+        '#sign-read a{color:#264d36}'+
+        '#sign-list{margin:8px 0;padding-inline-start:18px;line-height:2}'+
+        'body[data-reg="raver"] #sign-sheet{background:linear-gradient(160deg,#171326 0%,#100d1b 60%,#1b1d2b 100%);color:#fff}'+
+        'body[data-reg="raver"] #sign-say,body[data-reg="raver"] #sign-read{color:#cfc6e2}'+
+        'body[data-reg="raver"] #sign-go{background:#d655b8;color:#140f1f;box-shadow:0 0 28px rgba(214,85,184,.35)}'+
+        'body[data-reg="raver"] #sign-go:focus-visible{outline-color:#d655b8}'+
+        'body[data-reg="raver"] #sign-read a{color:#f08ad6}'+
+        'body[data-reg="cypherpunk"] #sign-sheet{background:#0a1110;color:#e6f2ee;font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}'+
+        'body[data-reg="cypherpunk"] #sign-h{font-size:30px;letter-spacing:0}'+
+        'body[data-reg="cypherpunk"] #sign-say,body[data-reg="cypherpunk"] #sign-read{color:#a9bdb6}'+
+        'body[data-reg="cypherpunk"] #sign-go{border-radius:6px;background:#44c2dc;color:#061012;font:700 18px/1 "IBM Plex Mono",ui-monospace,monospace}'+
+        'body[data-reg="cypherpunk"] #sign-go:focus-visible{outline-color:#44c2dc}'+
+        'body[data-reg="cypherpunk"] #sign-read a{color:#7fdcef}';
+      document.head.appendChild(css);
+    }
+    d.innerHTML='<div class="sg">'+
+      '<div id="sign-h" role="heading" aria-level="1">Sign the law</div>'+
+      '<p id="sign-say">Press Sign, then confirm with your passkey.</p>'+
+      '<button type="button" id="sign-go">Sign</button>'+
+      '<p id="sign-stat" role="status" aria-live="polite"></p>'+
+      '<details id="sign-read"><summary>read what you are signing</summary><ul id="sign-list"></ul></details>'+
       '</div>';
     document.body.appendChild(d);
     document.documentElement.style.overflow='hidden';
@@ -3301,7 +3332,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       });
       if(ok){ btn.hidden=true; $('sign-say').hidden=true } else btn.disabled=false;
     };
-    $('sign-go').focus();
   }
   signSheet();
   addEventListener('hashchange',signSheet);
