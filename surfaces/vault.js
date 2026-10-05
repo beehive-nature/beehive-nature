@@ -731,16 +731,28 @@ window.BNRVAULT = (function () {
 
   /* Re-key the slot you are currently using. Other devices' slots are untouched —
      which is the point: changing this laptop's keypass must not lock out the phone. */
+  /* The keypass the open slot was made with, typed again. An open vault is not proof of
+     who is at the screen, so a re-key checks it before a new keypass replaces it. */
+  async function checkKeypass(pass) {
+    requireUnlocked();
+    var cur = (state.env.slots || []).filter(function (s) { return s.id === state.slotId; })[0];
+    if (!cur || cur.type !== 'keypass') return false;
+    try { zero(await unwrapSlot(cur, { type: 'keypass', keypass: String(pass || '') })); return true; }
+    catch (e) { return false; }
+  }
+
   async function changeKeypass(oldPass, newPass) {
     var env = readEnvelope();
     if (!env) throw new Error('no vault to re-key');
-    if (env.format === 1) { await unlock(oldPass); env = state.env; }
-    else if (!state.unlocked) { await unlock(oldPass); }
-    var st = keypassStrength(newPass);
-    if (st.bits < 50) throw new Error('new keypass too weak (' + st.bits + ' bits)');
+    var proven = false;                         // unlocking with oldPass right here proves it
+    if (env.format === 1) { await unlock(oldPass); env = state.env; proven = true; }
+    else if (!state.unlocked) { await unlock(oldPass); proven = true; }
     var cur = (state.env.slots || []).filter(function (s) { return s.id === state.slotId; })[0];
     if (!cur) throw new Error('cannot tell which slot you are using — unlock again');
     if (cur.type !== 'keypass') throw new Error('you are unlocked with a passkey — re-key from a keypass slot instead');
+    if (!proven && !(await checkKeypass(oldPass))) throw new Error('that is not the keypass this vault was opened with');
+    var st = keypassStrength(newPass);
+    if (st.bits < 50) throw new Error('new keypass too weak (' + st.bits + ' bits)');
     var fresh = await makeSlot({ type: 'keypass', keypass: newPass }, cur.label, state.vmk);
     var slots = state.env.slots.map(function (s) { return s.id === cur.id ? fresh : s; });
     state.env = Object.assign({}, state.env, { slots: slots, updated: new Date().toISOString() });
@@ -775,7 +787,7 @@ window.BNRVAULT = (function () {
       // checksum over the same wordlist — so it is stored verbatim. The page validates
       // it through BZDIDKEY before calling this; we record what it claimed.
       secret = secret.trim();
-      meta = { words: secret.split(/s+/).length, fingerprint: String(e.fingerprint || '') };
+      meta = { words: secret.split(/\s+/).length, fingerprint: String(e.fingerprint || '') };
     } else if (type === 'note') {
       meta = {};
     } else if (type === 'arweave') {
@@ -856,7 +868,7 @@ window.BNRVAULT = (function () {
   return {
     exists: exists, isUnlocked: isUnlocked, list: list, reveal: reveal,
     create: create, unlock: unlock, unlockWithPasskey: unlockWithPasskey,
-    lock: lock, destroy: destroy, changeKeypass: changeKeypass,
+    lock: lock, destroy: destroy, changeKeypass: changeKeypass, checkKeypass: checkKeypass,
     listSlots: listSlots, addKeypassSlot: addKeypassSlot, addPasskeySlot: addPasskeySlot,
     removeSlot: removeSlot, renameSlot: renameSlot, revokeAllExcept: revokeAllExcept,
     addEntry: addEntry, removeEntry: removeEntry,

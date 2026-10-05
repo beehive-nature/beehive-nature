@@ -1128,10 +1128,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div id="vlt-list" class="chips"></div>
     <pre id="vlt-revealed" style="display:none"></pre>
 
-    <div class="law" style="margin-top:18px;color:var(--ink)"><b>④ Your devices.</b>
-    Every one of these opens this vault on its own, and none of them can read the others.
-    Add each device you own — that is what makes losing one a non-event, and it is how your
-    <b>bzDiD survives a lost laptop</b>. Revoking one leaves every other device working.</div>
+    <div class="law" style="margin-top:18px;color:var(--ink)"><b>Ways in.</b>
+    Each keypass and passkey here opens the vault on this browser, and none of them can read another.
+    The vault itself lives only in this browser, so to open it on another device, save it as a file and
+    import that file there with your keypass. <button type="button" class="wl-act" data-vlt-export>export sealed vault</button><span class="wl-cyd">The slot model: one random
+    vault master key, wrapped once per keypass (PBKDF2) or passkey (PRF, HKDF), like LUKS keyslots. The slots live in
+    this browser's copy (localStorage bnr_vault) and in each file exported from it; nothing syncs them, and a file
+    imports through a keypass slot only.</span></div>
     <div class="law" style="font-size:10px;color:var(--faint);margin-top:4px">
     Evidence class follows <b>T3 §6b</b> — a credential is ranked by where its private key
     actually lives, not by brand. <b>E3</b> = device-bound in a hardware keystore (Windows
@@ -1153,15 +1156,18 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       </label>
     </div>
     <div class="row">
-      <button id="vlt-panic" style="font-size:10px;padding:6px 12px;min-height:32px;color:var(--amber)">⚠ panic — revoke every device except this one</button>
+      <button id="vlt-panic" style="font-size:10px;padding:6px 12px;min-height:32px;color:var(--amber)">⚠ keep only the way you opened it</button>
     </div>
 
-    <div class="law" style="margin-top:18px;color:var(--ink)"><b>⑤ Your bzDiD.</b>
-    Seal your soul’s recovery phrase in here and it stops living on one device’s passkey.
-    Any device in the list above can then restore the same bzDiD — same soul, same keys,
-    same .b name. <b>The DID persists; keys rotate under it.</b></div>
+    <div class="law" style="margin-top:18px;color:var(--ink)"><b>Your recovery words.</b>
+    Seal the recovery words of the keychain you are connected with, and your keypass opens them here
+    whenever you need to restore your bzDiD. They live in this browser, so export sealed vault keeps a copy
+    that opens anywhere with your keypass. <span class="wl-cyd">The words sealed are the ones of the soul this
+    keychain holds in this tab (deriveIdentity over its masterPRK), never a fresh passkey ceremony, which on a
+    sealed device or with a second passkey for this site could open a different soul. The DID persists; keys
+    rotate under it.</span></div>
     <div class="row">
-      <button id="vlt-sealbzdid" class="gold" style="flex:1">🐝 seal my bzDiD recovery phrase</button>
+      <button id="vlt-sealbzdid" class="gold" style="flex:1">🐝 seal my recovery words</button>
     </div>
 
     <div class="row" style="margin-top:14px">
@@ -1171,6 +1177,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     </div>
   </div>
 
+  <div class="row" id="vlt-ask" style="display:none;margin-top:10px;align-items:center">
+    <label class="law" id="vlt-ask-q" for="vlt-ask-in" style="flex:1 1 100%"></label>
+    <input id="vlt-ask-in" aria-label="Vault keypass" type="password" autocomplete="off" spellcheck="false" style="flex:2">
+    <button id="vlt-ask-go" class="gold">continue</button>
+    <button id="vlt-ask-no" style="font-size:11px">cancel</button>
+  </div>
   <div class="law" id="vlt-stat" style="margin-top:10px;min-height:20px">— </div>
   <input type="file" id="vlt-file" aria-label="Import encrypted vault file" accept=".json,.bnrvault,application/json" style="display:none">
 </section>
@@ -8709,6 +8721,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       wipe:function(){ for(var c in PQKEYS){ PQKEYS[c].keys.wipe() } PQKEYS={}; if(PQROOT){ PQROOT.key.fill(0); PQROOT=null } }
     };
   }
+  /* the vault seals the recovery words of the soul THIS keychain holds now, read from
+     tab memory. Never a second passkey ceremony: on a sealed device, or with more than
+     one passkey for this site, that could open a different soul and seal its words as
+     "mine". The soul lives only in this closure, so the vault's button is wired here. */
+  (function(){
+    var btn=$('vlt-sealbzdid'), V=window.BNRVAULT, st=$('vlt-stat');
+    if(!btn||!V||!st)return;
+    function sayV(parts,c){ wlSay(st,parts); st.style.color=c||'var(--dim)' }
+    btn.onclick=async function(){
+      if(!V.isUnlocked()){ sayV(['your vault locked itself, so type your keypass and press unlock first.'],'var(--amber)'); return }
+      if(!MPRK){ sayV(['your recovery words come from your keychain, so ',{to:'kc-sec',t:'connect your keychain'},' first, then press seal my recovery words.',{cy:'no soul in this tab; the vault never runs a passkey ceremony of its own for this'}],'var(--amber)'); return }
+      var m=MPRK.slice(), id=null, phrase=null, fp='';
+      try{
+        id=BZDIDKEY.deriveIdentity(m,'bnr.b');
+        phrase=id.phrase||null; fp=(id.fingerprint&&id.fingerprint.words)||'';
+        if(id.record&&id.record.seed&&id.record.seed.fill) id.record.seed.fill(0);
+      }catch(e){ sayV(['your recovery words could not be read from the keychain, so connect it again and press seal my recovery words.',{cy:String(e&&e.message||e)}],'var(--amber)'); return }
+      finally{ m.fill(0); id=null }
+      if(!phrase){ sayV(['your recovery words could not be read from the keychain, so connect it again and press seal my recovery words.',{cy:'deriveIdentity returned no phrase'}],'var(--amber)'); return }
+      var dup=V.list().some(function(e){ return e.type==='bzdid'&&e.meta&&e.meta.fingerprint===fp });
+      if(dup){ phrase=null; sayV(['your recovery words are already sealed in this vault, so there is nothing to add.',{cy:'bzDiD '+fp+' already sealed'}]); return }
+      try{
+        await V.addEntry({type:'bzdid',label:'my recovery words'+(fp?' · '+fp:''),secret:phrase,chain:'bzDiD',fingerprint:fp});
+        phrase=null;
+        if(window.__vaultRepaint) window.__vaultRepaint();
+        sayV(['your recovery words are sealed in this browser, so save a copy that opens anywhere with your keypass.',
+          {btn:'export sealed vault',on:function(){ $('vlt-export').click() }},
+          {cy:'sealed bzDiD '+fp+', the soul this keychain holds now'}],'var(--leaf)');
+      }catch(e){ phrase=null; sayV(['your recovery words were not sealed, so press seal my recovery words again.',{cy:String(e&&e.message||e)}],'var(--amber)') }
+    };
+  })();
   try{
     var saved=localStorage.getItem('bnr_soul');
     if(saved){ SOUL=saved; vacctCacheLoad(); $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
@@ -8735,6 +8778,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function say(msg,color){ var e=$('vlt-stat'); e.innerHTML=msg; e.style.color=color||'var(--dim)' }
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] }) }
+  /* a state is one calm sentence and its one action, built as DOM (never HTML) */
+  function sayP(parts,color){ var e=$('vlt-stat'); wlSay(e,parts); e.style.color=color||'var(--dim)' }
+  function count(n){ return n===1?'1 secret':n+' secrets' }
+
+  /* a keypass is typed into this page, hidden as it is typed, never into a browser
+     prompt (a prompt shows it in the clear). A NEW keypass is shown once on purpose,
+     so it can be written down. Resolves the text, or null when cancelled or locked. */
+  var asking=null;
+  function ask(q,opts){
+    opts=opts||{};
+    if(asking) asking(null);
+    var row=$('vlt-ask'), inp=$('vlt-ask-in');
+    $('vlt-ask-q').textContent=q;
+    inp.type=opts.show?'text':'password';
+    inp.value=opts.value||'';
+    inp.setAttribute('aria-label',q);
+    $('vlt-ask-go').textContent=opts.go||'continue';
+    row.style.display='flex';
+    try{ inp.focus() }catch(e){}
+    return new Promise(function(res){
+      asking=function(v){ asking=null; row.style.display='none'; inp.value=''; inp.type='password'; res(v) };
+    });
+  }
+  $('vlt-ask-go').onclick=function(){ if(asking) asking($('vlt-ask-in').value) };
+  $('vlt-ask-no').onclick=function(){ if(asking) asking(null) };
+  $('vlt-ask-in').addEventListener('keydown',function(e){ if(e.key==='Enter') $('vlt-ask-go').click(); else if(e.key==='Escape') $('vlt-ask-no').click() });
 
   /* ── which of the three states are we in ─────────────────────────────── */
   function paint(){
@@ -8751,6 +8820,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('vlt-revealed').style.display='none'; $('vlt-revealed').innerHTML='';
       $('vlt-list').innerHTML=''; $('vlt-count').textContent='0 entries';
       $('vlt-secret').value=''; $('vlt-bip39pass').value='';
+      wipeHanded();
     }
     if(window.__vaultDevices) window.__vaultDevices();
   }
@@ -8770,9 +8840,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('vault-sec').addEventListener('input',touch);
   $('vault-sec').addEventListener('click',touch);
   // Leaving the page locks it — do not leave a vault open behind a switched tab.
-  window.addEventListener('pagehide',function(){ if(V.isUnlocked()) V.lock() });
+  // The paint matters too: a page kept in the back/forward cache keeps its DOM, so the
+  // inventory and any key handed to the bridge are wiped, not just the engine locked.
+  window.addEventListener('pagehide',function(){ if(asking) asking(null); wipeHanded(); if(V.isUnlocked()){ V.lock(); paint() } });
 
   function doLock(why){
+    if(asking) asking(null);
     V.lock(); $('vlt-pass').value=''; clearForm(); paint();
     say(why||'— locked —','var(--dim)');
   }
@@ -8905,7 +8978,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         '<div class="cx">'+meta+'</div>'+
         '<div class="row" style="margin-top:7px;gap:6px">'+
           '<button data-act="reveal" data-id="'+e.id+'" style="font-size:9px;padding:5px 9px;min-height:26px">reveal</button>'+
-          (e.type==='vaulta'?'<button data-act="bridge" data-id="'+e.id+'" class="gold" style="font-size:9px;padding:5px 9px;min-height:26px">→ bridge</button>':'')+
+          (e.type==='vaulta'?'<button data-act="bridge" data-id="'+e.id+'" class="gold" style="font-size:9px;padding:5px 9px;min-height:26px">let this wallet sign</button>':'')+
           '<button data-act="del" data-id="'+e.id+'" style="font-size:9px;padding:5px 9px;min-height:26px;color:var(--amber)">delete</button>'+
         '</div></div>';
     }).join('');
@@ -8923,95 +8996,192 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       catch(e){ say(esc(e.message),'var(--amber)') }
       return;
     }
-    var r;
-    try{ r=V.reveal(id) }catch(e){ say(esc(e.message),'var(--amber)'); return }
-    if(act==='bridge'){
-      var w=$('br-wif');
-      if(!w){ say('the bridge lane is not on this page','var(--amber)'); return }
-      w.value=r.secret;
-      var pasteField=$('br-paste'); if(pasteField)pasteField.value=r.secret;   // the one-press field bee and raver see
-      var sec=$('bridge-sec');
-      if(sec&&sec.style.display==='none'){
-        say('key placed in the bridge field — connect your keychain above to use it','var(--amber)');
-      } else {
-        say('key placed in the bridge field below — it is scrubbed the moment you broadcast','var(--amber)');
-      }
-      if(sec&&sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth',block:'center'});
+    if(act==='bridge'){ handToBridge(id); return }
+    showSecret(id);
+  };
+
+  /* a Vaulta key goes to the one-press field every register sees (#br-paste), and
+     only while that field is showing: never into a hidden field, and nowhere at all
+     while the bridge is closed. It is wiped there when the vault locks or the page
+     hides; the press itself clears the field too. */
+  var handed=false;
+  function wipeHanded(){ if(!handed) return; var bp=$('br-paste'); if(bp) bp.value=''; handed=false }
+  function handToBridge(id){
+    var sec=$('bridge-sec'), field=$('br-paste');
+    var showing=!!(sec&&sec.style.display!=='none');
+    if(!showing||!field){
+      var kc=$('kc-cards'), kcOn=!!(kc&&kc.style.display&&kc.style.display!=='none');
+      var vd=$('kc-bridge-verdict'), signs=!!(vd&&/(^|\s)ok(\s|$)/.test(vd.className));
+      if(!kcOn) sayP(['this key lets your keychain sign for your account, so ',{to:'kc-sec',t:'connect your keychain'},' first, then press let this wallet sign on this key again.',{cy:'#bridge-sec closed: no keychain in this tab. The key was placed nowhere.'}],'var(--amber)');
+      else if(signs) sayP(['this wallet already signs for your account, so this key is not needed here.',{cy:'#bridge-sec closed: the account already carries this wallet\'s key. The key was placed nowhere.'}]);
+      else if(showing) sayP(['your account has no active key this wallet can join, so this key cannot be used here. ',{to:'bridge-sec',t:'see why'},{cy:'no #br-paste: the account has no active permission. The key was placed nowhere.'}],'var(--amber)');
+      else sayP(['your account could not be read just now, so wait a moment and press let this wallet sign again.',{cy:'#bridge-sec closed: the account read failed. The key was placed nowhere.'}],'var(--amber)');
       return;
     }
-    // reveal
+    var r;
+    try{ r=V.reveal(id) }catch(e){ sayP(['your vault locked itself, so type your keypass and press unlock first.',{cy:e.message}],'var(--amber)'); return }
+    if(r.type!=='vaulta'){ r=null; return }
+    field.value=r.secret; r=null; handed=true;
+    sayP(['your key is ready in ',{to:'bridge-sec',t:'let this wallet sign'},', so press add this wallet there and it is used once, never kept.',{cy:'placed in #br-paste only, never the hidden #br-wif; wiped there when the vault locks, the page hides, or the press runs.'}],'var(--amber)');
+  }
+
+  /* reveal: on screen until hidden. No copy button in bee or raver: a copy sends the
+     key elsewhere, and clipboard history keeps it in the clear. A key this wallet can
+     use is offered for use right here instead. Cypherpunk keeps the copy, with its warning. */
+  function showSecret(id){
+    var r;
+    try{ r=V.reveal(id) }catch(e){ sayP(['your vault locked itself, so type your keypass and press unlock first.',{cy:e.message}],'var(--amber)'); return }
     var out=$('vlt-revealed');
     out.style.display='block';
     out.innerHTML='<b>'+esc(r.label)+'</b>\n\n<span style="color:var(--ink);font-size:12px">'+
       esc(r.secret)+'</span>'+
-      (r.passphrase?'\n\n<b>25th-word passphrase:</b> <span style="color:var(--ink)">'+esc(r.passphrase)+'</span>':'')+
-      '\n\n<span style="color:var(--faint)">on screen until you hide it — nothing was copied automatically</span>';
+      (r.passphrase?'\n\n<b>extra word:</b> <span style="color:var(--ink)">'+esc(r.passphrase)+'</span><span class="wl-cyd">(the BIP-39 25th-word passphrase)</span>':'')+
+      '\n\n<span style="color:var(--faint)">this stays on screen until you press hide, so check nobody is looking.</span><span class="wl-cyd">nothing was copied automatically</span>';
+    var type=r.type; r=null;
     var bar=document.createElement('div');
     bar.className='row'; bar.style.marginTop='8px';
-    var cp=document.createElement('button');
-    cp.textContent='copy to clipboard'; cp.style.cssText='font-size:9px;padding:5px 9px;min-height:26px';
+    function mk(t){ var x=document.createElement('button'); x.type='button'; x.textContent=t; x.style.cssText='font-size:9px;padding:5px 9px;min-height:26px'; return x }
+    if(type==='vaulta'){
+      var use=mk('use it here: let this wallet sign'); use.className='gold';
+      use.onclick=function(){ out.style.display='none'; out.innerHTML=''; handToBridge(id) };
+      bar.appendChild(use);
+    }
+    var cp=mk('copy to clipboard'); cp.setAttribute('data-reg','cypherpunk');
     cp.onclick=function(){
-      navigator.clipboard.writeText(r.secret).then(function(){
-        say('copied — your clipboard now holds a private key. Paste it where you need it, then copy something else.','var(--amber)');
-      },function(){ say('clipboard refused — select the text above and copy it manually','var(--amber)') });
+      var s; try{ s=V.reveal(id).secret }catch(e){ sayP(['your vault locked itself, so type your keypass and press unlock first.',{cy:e.message}],'var(--amber)'); return }
+      navigator.clipboard.writeText(s).then(function(){
+        sayP(['copied: your clipboard now holds a private key and clipboard history may keep it, so paste it once and copy something else.'],'var(--amber)');
+      },function(){ sayP(['the clipboard refused, so select the words on screen and copy them yourself.'],'var(--amber)') });
+      s=null;
     };
-    var hd=document.createElement('button');
-    hd.textContent='hide'; hd.style.cssText='font-size:9px;padding:5px 9px;min-height:26px';
+    var hd=mk('hide');
     hd.onclick=function(){ out.style.display='none'; out.innerHTML='' };
     bar.appendChild(cp); bar.appendChild(hd); out.appendChild(bar);
+    if(type==='arweave'){
+      var note=document.createElement('div'); note.className='law'; note.id='vlt-reveal-use'; note.style.marginTop='6px';
+      wlSay(note,['this key signs your Arweave publishing from the vault while it is open, so it never needs to leave. ',{to:'arw-sec',t:'publish on Arweave'}]);
+      out.appendChild(note);
+    }
     if(out.scrollIntoView) out.scrollIntoView({behavior:'smooth',block:'nearest'});
-  };
+  }
 
   /* ── portability ─────────────────────────────────────────────────────── */
-  $('vlt-export').onclick=function(){
+  function saveFile(){
+    var json=V.exportEnvelope();
+    var blob=new Blob([json],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    var name='bnr-vault-'+stamp+'.json';
+    a.href=url; a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},1000);
+    return name;
+  }
+  /* a file opens through a keypass slot only (importEnvelope), so a vault no keypass
+     opens would save as a file nothing can open: say so, and offer the fix */
+  function keypassSlots(){ try{ return V.listSlots().filter(function(s){ return s.type==='keypass' }).length }catch(e){ return 0 } }
+  function exportNow(){
+    if(!V.exists()&&!V.isUnlocked()){ sayP(['there is no vault on this browser to save yet.'],'var(--amber)'); return }
+    if(!keypassSlots()){
+      sayP(['this vault opens only with a passkey right now, so a saved copy could not be opened anywhere else. add a keypass first, then save the copy.',
+        V.isUnlocked()?{btn:'add a keypass',on:function(){ $('vlt-addkp').click() }}:null,
+        {cy:'no keypass slot: importEnvelope opens a file through a keypass slot only, so no file was written'}],'var(--amber)');
+      return;
+    }
     try{
-      var json=V.exportEnvelope();
-      var blob=new Blob([json],{type:'application/json'});
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement('a');
-      var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-      a.href=url; a.download='bnr-vault-'+stamp+'.json';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){URL.revokeObjectURL(url)},1000);
-      say('exported — that file is ciphertext, useless without your keypass. Keep a copy off this machine.','var(--leaf)');
-    }catch(e){ say(esc(e.message),'var(--amber)') }
-  };
+      var name=saveFile();
+      sayP(['your vault file is saved and only opens with your keypass, so keep a copy somewhere other than this computer.',{cy:'ciphertext only, '+name}],'var(--leaf)');
+    }catch(e){ sayP(['the vault file was not saved, so try again.',{cy:e.message}],'var(--amber)') }
+  }
+  $('vlt-export').onclick=exportNow;
+  $('vault-sec').addEventListener('click',function(ev){ if(ev.target&&ev.target.closest&&ev.target.closest('[data-vlt-export]')) exportNow() });
 
-  function askImport(){ $('vlt-file').click() }
+  /* a file you import REPLACES the vault on this browser. The vault here is saved as
+     a file first, and the replace is confirmed by name: an import never loses what
+     is sealed here without a copy. */
+  var savedAs=null;
+  function askImport(){
+    if(!V.exists()){ savedAs=null; $('vlt-file').click(); return }
+    if(!keypassSlots()){
+      sayP(['this vault opens only with a passkey, so a saved copy could not be opened again. unlock it with your passkey and add a keypass first, or destroy this vault if you no longer need it.',
+        {cy:'no keypass slot: a file of this vault could not be imported anywhere, so the import waits'}],'var(--amber)');
+      return;
+    }
+    sayP(['a vault already lives on this browser and the file you import replaces it, so save a copy of this one first.',
+      {btn:'save this vault first',on:function(){
+        try{ savedAs=saveFile() }catch(e){ sayP(['the vault file was not saved, so nothing changed. try again.',{cy:e.message}],'var(--amber)'); return }
+        sayP(['this vault is saved as '+savedAs+', so keep that file, then choose the vault file to bring in.',
+          {btn:'choose the vault file',on:function(){ $('vlt-file').click() }}]);
+      }},
+      {cy:'importEnvelope overwrites localStorage bnr_vault; the old envelope comes back only when the new file fails to open'}],'var(--amber)');
+  }
   $('vlt-importbtn').onclick=askImport;
   $('vlt-importbtn2').onclick=askImport;
   $('vlt-file').onchange=function(){
     var f=this.files&&this.files[0]; if(!f) return;
     var fr=new FileReader();
     fr.onload=async function(){
-      var pass=prompt('Keypass for this vault file:');
-      if(pass===null) return;
-      say('deriving key…');
+      var replacing=V.exists();
+      if(replacing&&!confirm('This file replaces the vault on this browser.\n\n'+
+          (savedAs?'The vault here now is saved as '+savedAs+'.':'The vault here now has not been saved as a file, so everything sealed in it will be gone.')+
+          '\n\nReplace it?')){
+        sayP(['nothing changed, and the vault on this browser is as it was.']); return }
+      var pass=await ask('type the keypass of this vault file',{go:'open the file'});
+      if(pass===null){ sayP(['nothing changed, and the vault on this browser is as it was.']); return }
+      sayP(['opening your vault file, which takes a few seconds on purpose.',{cy:'600 000 PBKDF2 rounds per keypass slot'}]);
       await new Promise(function(r){setTimeout(r,20)});
       try{
         var r=await V.importEnvelope(String(fr.result),pass);
-        paint();
-        say('✓ imported and unlocked — '+r.entries+' entries. This replaced any vault previously '+
-            'held in this browser.','var(--leaf)');
-      }catch(e){ say(esc(e.message),'var(--amber)') }
+        pass=null; savedAs=null; paint();
+        sayP(['the vault from your file is open here and holds '+count(r.entries)+'.',
+          {cy:replacing?'replaced the vault held in this browser (localStorage bnr_vault)':'imported into localStorage bnr_vault'}],'var(--leaf)');
+      }catch(e){
+        pass=null;
+        if(/JSON|not a BNR vault/.test(e.message)) sayP(['that file is not a vault this wallet can open, so pick your own saved vault file. nothing changed here.',{cy:e.message}],'var(--amber)');
+        else sayP(['that file did not open with this keypass, so check both and press import a vault file again. nothing changed here.',{cy:e.message}],'var(--amber)');
+      }
     };
     fr.readAsText(f);
     this.value='';
   };
 
+  /* change keypass: the keypass this vault was opened with is typed again and checked
+     before a new one replaces it. An open screen is not proof of who sits at it. */
   $('vlt-rekey').onclick=async function(){
-    var oldp=prompt('Current keypass:'); if(oldp===null) return;
+    var cur=V.listSlots().filter(function(s){ return s.current })[0];
+    if(cur&&cur.type==='passkey'){
+      sayP(['you opened the vault with a passkey, so lock it and unlock with your keypass, then press change keypass.',
+        {btn:'lock now',on:function(){ doLock() }},{cy:'the current slot "'+cur.label+'" is a passkey slot; only a keypass slot re-keys'}],'var(--amber)');
+      return;
+    }
+    var oldp=await ask('type the keypass you use now',{go:'check it'});
+    if(oldp===null) return;
+    sayP(['checking your keypass, which takes a few seconds on purpose.']);
+    await new Promise(function(r){setTimeout(r,20)});
+    if(typeof V.checkKeypass==='function'){
+      var good=false; try{ good=await V.checkKeypass(oldp) }catch(e){ good=false }
+      if(!good){ oldp=null;
+        sayP(['that is not the keypass you use now, so nothing changed. press change keypass to try again.',{cy:'checkKeypass: the slot this vault was opened with did not open with it'}],'var(--amber)');
+        return;
+      }
+    }
     var g=V.generateKeypass(8);
-    var newp=prompt('New keypass:\n\n(suggestion — '+g.bits+' bits, write it down first)\n\n'+g.phrase, g.phrase);
-    if(newp===null||!newp) return;
-    say('re-keying — two KDF passes, this takes a moment…');
+    var newp=await ask('your new keypass: write these words on paper first, or type your own',{show:true,value:g.phrase,go:'change keypass'});
+    if(newp===null||!newp){ oldp=null; sayP(['nothing changed, and your keypass is the same.']); return }
+    sayP(['changing your keypass, which takes a few seconds on purpose.',{cy:'two KDF passes, fresh salt'}]);
     await new Promise(function(r){setTimeout(r,20)});
     try{
-      await V.changeKeypass(oldp,newp);
+      await V.changeKeypass(oldp,newp); oldp=null; newp=null;
       paint();
-      say('✓ re-keyed with a fresh salt. The old keypass no longer opens this vault — and any '+
-          'exported file you already made still opens with the OLD one.','var(--leaf)');
-    }catch(e){ say(esc(e.message),'var(--amber)') }
+      sayP(['your new keypass works now, and a vault file you saved earlier still opens with the old one, so save a fresh copy.',
+        {btn:'export sealed vault',on:exportNow},{cy:'re-keyed with a fresh salt; only this slot was re-wrapped, every other slot untouched'}],'var(--leaf)');
+    }catch(e){
+      oldp=null; newp=null;
+      if(/too weak/.test(e.message)) sayP(['that new keypass is too easy to guess, so nothing changed. press change keypass and take the generated words.',{cy:e.message}],'var(--amber)');
+      else if(/not the keypass/.test(e.message)) sayP(['that is not the keypass you use now, so nothing changed. press change keypass to try again.',{cy:e.message}],'var(--amber)');
+      else sayP(['your keypass did not change, so press change keypass to try again.',{cy:e.message}],'var(--amber)');
+    }
   };
 
   function destroy(){
@@ -9038,6 +9208,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   if(!V||!$("vlt-devices"))return;
 
   function say(m,c){ var e=$("vlt-stat"); if(e){e.innerHTML=m; e.style.color=c||"var(--dim)"} }
+  function sayP(parts,c){ var e=$("vlt-stat"); if(e){ wlSay(e,parts); e.style.color=c||"var(--dim)" } }
+  function exportBtn(){ return {btn:"export sealed vault",on:function(){ $("vlt-export").click() }} }
+  function addKpBtn(){ return {btn:"add a keypass",on:function(){ $("vlt-addkp").click() }} }
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c] }) }
   function repaint(){ if(window.__vaultRepaint) window.__vaultRepaint(); else renderSlots() }
@@ -9198,56 +9371,56 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         "<div class=\"cc\">"+icon+" "+esc(s.label)+(s.current?" <span style=\"color:var(--leaf)\">\u2190 you are here</span>":"")+"</div>"+
         "<div class=\"cx\">"+ev+" \u00b7 "+esc(s.kdf||"")+"</div>"+
         (s.current?"":"<div class=\"row\" style=\"margin-top:7px;gap:6px\">"+
-          "<button data-revoke=\""+s.id+"\" style=\"font-size:9px;padding:5px 9px;min-height:26px;color:var(--amber)\">revoke</button>"+
+          "<button data-revoke=\""+s.id+"\" style=\"font-size:9px;padding:5px 9px;min-height:26px;color:var(--amber)\">remove</button>"+
         "</div>")+
       "</div>";
     }).join("");
   }
   window.__vaultDevices=renderSlots;
 
+  /* removing a way in edits the vault on THIS browser only: a file saved earlier, or a
+     copy another device holds, keeps every way in it had. Said before and after. */
   $("vlt-devices").onclick=async function(ev){
     var b=ev.target.closest("button[data-revoke]"); if(!b)return;
     var id=b.getAttribute("data-revoke");
-    var slot=V.listSlots().filter(function(x){return x.id===id})[0];
-    if(!confirm("Revoke \""+(slot?slot.label:id)+"\"?\n\nThat device can no longer open this vault. "+
-                "Every other device keeps working.")) return;
-    try{ await V.removeSlot(id); renderSlots(); say("revoked \u2014 "+esc(slot?slot.label:id)+" can no longer open this vault","var(--dim)") }
-    catch(e){ say(esc(e.message),"var(--amber)") }
-  };
-
-  $("vlt-panic").onclick=async function(){
-    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
-    var n=V.listSlots().length-1;
-    if(n<1){ say("this is already the only way in","var(--amber)"); return }
-    if(!confirm("PANIC \u2014 revoke all "+n+" other device(s)?\n\nOnly the device you are holding "+
-                "right now will still open this vault. Use this when something is lost or stolen.")) return;
-    try{ var r=await V.revokeAllExcept(); renderSlots();
-         say("\u2713 revoked "+r.revoked+" device(s) \u2014 this device is now the only way in. "+
-             "Add your other devices back when you are safe.","var(--leaf)") }
-    catch(e){ say(esc(e.message),"var(--amber)") }
-  };
-
-  /* ── seal the bzDiD ──────────────────────────────────────────────────── */
-  $("vlt-sealbzdid").onclick=async function(){
-    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
-    if(!(window.BZDIDKEY&&BZDIDKEY.identityFromPasskey)){ say("the bzDiD engine is not loaded","var(--amber)"); return }
-    say("touch your bzDiD passkey \u2014 deriving the soul so its phrase can be sealed\u2026");
-    var id;
-    try{ id=await BZDIDKEY.identityFromPasskey("bnr.b") }
-    catch(e){ say(esc(prfFail(e)),"var(--amber)"); return }
+    var slots=V.listSlots(), slot=slots.filter(function(x){return x.id===id})[0];
+    var name=slot?slot.label:id;
+    var lastKp=!!(slot&&slot.type==="keypass"&&slots.filter(function(x){return x.type==="keypass"}).length===1);
+    if(!confirm("Remove \""+name+"\" from the vault on this browser?\n\nIt can no longer open the vault here. A vault file saved earlier, or a copy that device already holds, still opens with it."+
+                (lastKp?"\n\nThis is the last keypass, so after this only a passkey opens the vault and a saved file of it cannot be opened anywhere.":""))) return;
     try{
-      if(!id||!id.phrase) throw new Error("that identity carried no recovery phrase");
-      var fp=(id.fingerprint&&id.fingerprint.words)||"";
-      await V.addEntry({type:"bzdid", label:"my bzDiD soul"+(fp?" \u00b7 "+fp:""),
-        secret:id.phrase, chain:"bzDiD", fingerprint:fp});
-      if(id.masterPrk&&id.masterPrk.fill) id.masterPrk.fill(0);
-      repaint();
-      say("\u2713 <b style=\"color:var(--leaf)\">bzDiD sealed</b>"+(fp?" \u2014 "+esc(fp):"")+
-          ". Any device in your list can now restore this same soul.","var(--dim)");
-    }catch(e){
-      if(id&&id.masterPrk&&id.masterPrk.fill) id.masterPrk.fill(0);
-      say(esc(e.message),"var(--amber)");
-    }
+      await V.removeSlot(id); renderSlots();
+      var detail={cy:"slot "+id+" ("+(slot?slot.type+", "+slot.evidence:"unknown")+") removed from this browser's envelope only"};
+      if(lastKp) sayP([name+" can no longer open the vault on this browser and only a passkey opens it now, so add a keypass to be able to save a copy that opens anywhere.",addKpBtn(),detail],"var(--amber)");
+      else sayP([name+" can no longer open the vault on this browser, and a copy saved earlier still opens with it, so save a fresh copy.",exportBtn(),detail]);
+    }catch(e){ sayP(["that way in was not removed, so nothing changed. try again.",{cy:e.message}],"var(--amber)") }
+  };
+
+  /* the panic path keeps the ONE way in this vault was opened with. Anyone who knows
+     that keypass still gets in, and earlier copies keep every slot they had: said so. */
+  $("vlt-panic").onclick=async function(){
+    if(!V.isUnlocked()){ sayP(["your vault locked itself, so type your keypass and press unlock first."],"var(--amber)"); return }
+    var slots=V.listSlots(), cur=slots.filter(function(s){return s.current})[0], n=slots.length-1;
+    if(n<1){ sayP(["the way you opened the vault is already the only way in on this browser, so there is nothing to remove."]); return }
+    var kp=!!(cur&&cur.type==="keypass");
+    var kept=!cur?"the way you opened it":kp?"the keypass \""+cur.label+"\"":"the passkey \""+cur.label+"\"";
+    var noKpLeft=!kp&&slots.some(function(s){return s.type==="keypass"});
+    if(!confirm("Remove every other way in ("+n+") from the vault on this browser?\n\n"+
+                "Only "+kept+" will still open it here"+(kp?", for anyone who knows that keypass, so change it next if it may be known.":".")+
+                "\n\nA vault file saved earlier, or a copy on another device, still opens with every old way in, so move what matters to fresh keys next."+
+                (noKpLeft?"\n\nNo keypass will be left, so a saved file of this vault cannot be opened anywhere until you add one.":""))) return;
+    try{
+      var r=await V.revokeAllExcept(); renderSlots();
+      var detail={cy:"revoked "+r.revoked+" slot(s), kept "+r.kept+" (T3 §Failure panic path), on this browser's envelope only"};
+      if(kp) sayP(["only "+kept+" opens the vault on this browser now, and a copy saved earlier still opens the old ways, so save a fresh copy.",exportBtn(),detail],"var(--leaf)");
+      else sayP(["only "+kept+" opens the vault on this browser now, and a copy saved earlier still opens the old ways, so add a keypass to be able to save a fresh copy.",addKpBtn(),detail],"var(--leaf)");
+    }catch(e){ sayP(["nothing was removed, so try again.",{cy:e.message}],"var(--amber)") }
+  };
+
+  /* "seal my recovery words" is wired inside the keychain, where the soul lives. If the
+     keychain did not start, the button still answers instead of doing nothing. */
+  if(!$("vlt-sealbzdid").onclick) $("vlt-sealbzdid").onclick=function(){
+    sayP(["your recovery words come from your keychain, which did not start on this page, so reload it and try again.",{btn:"reload",on:function(){ location.reload() }}],"var(--amber)");
   };
 
   renderSlots();

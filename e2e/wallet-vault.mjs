@@ -3,7 +3,7 @@
 // null-deref or a WebCrypto call that only fails in a browser; this can.
 // Run:  cd e2e && node wallet-vault.mjs
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -79,6 +79,7 @@ await page.waitForTimeout(150);
 const gen = await page.inputValue('#vlt-newpass');
 t('generator filled both fields', gen.length > 0 && gen === await page.inputValue('#vlt-newpass2'));
 t('8 words by default', gen.split('-').length === 8, gen);
+let kp = gen;                               // the keypass in use; change keypass moves it
 t('strength shown as strong', /strong/i.test(await page.textContent('#vlt-strength')));
 
 console.log('\n── create ──');
@@ -113,20 +114,39 @@ await page.click('#vlt-add');
 await page.waitForTimeout(700);
 t('two entries listed', (await page.locator('#vlt-list .chip').count()) === 2, await page.textContent('#vlt-count'));
 
-console.log('\n── reveal + send to bridge ──');
+console.log('\n── reveal + hand a key to the bridge ──');
 await page.locator('#vlt-list .chip button[data-act="reveal"]').first().click();
 await page.waitForTimeout(300);
 t('reveal shows the secret', /KwDiBf89/.test(await page.textContent('#vlt-revealed')));
+const copyShown = await page.locator('#vlt-revealed button', { hasText: 'copy to clipboard' }).isVisible();
+t(REG === 'cypherpunk' ? 'cypherpunk keeps the copy button, with its warning' : 'no copy button in ' + REG + ' (a copy sends the key elsewhere)',
+  REG === 'cypherpunk' ? copyShown : !copyShown);
+t('a revealed Vaulta key is offered for use right here', await page.locator('#vlt-revealed button', { hasText: 'let this wallet sign' }).isVisible());
 await page.locator('#br-wif-scaffold').evaluate(el => { el.open = true; });
+// no keychain in this tab: the bridge is closed, so the key goes nowhere
 await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
 await page.waitForTimeout(300);
-t('key handed to the bridge field',
-  (await page.inputValue('#br-wif')) === 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn'); // PUBLIC-CONSTANT: published compressed WIF test vector
+t('with the bridge closed, the key is placed nowhere (never the hidden #br-wif)',
+  (await page.inputValue('#br-wif')) === '' && (await page.locator('#br-paste').count()) === 0);
+t('and the line names the keychain to connect', await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#kc-sec"]')));
+// the bridge open with its one-press field, as brCalm paints it once the keychain reads the account
+await page.evaluate(() => {
+  document.getElementById('bridge-sec').style.display = 'block';
+  const i = document.createElement('input'); i.type = 'password'; i.id = 'br-paste'; document.getElementById('br-calm').appendChild(i);
+});
+await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
+await page.waitForTimeout(300);
+t('key handed to the one-press field every register sees',
+  (await page.inputValue('#br-paste')) === 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn'); // PUBLIC-CONSTANT: published compressed WIF test vector
+t('and never to the hidden #br-wif', (await page.inputValue('#br-wif')) === '');
+t('the line links to where the key is used', await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#bridge-sec"]')));
 
 console.log('\n── lock / unlock round trip ──');
 await page.click('#vlt-lock');
 await page.waitForTimeout(300);
 t('locked state shown', await page.locator('#vlt-locked').isVisible());
+t('the key handed to the bridge is wiped when the vault locks', (await page.inputValue('#br-paste')) === '');
+await page.evaluate(() => { document.getElementById('br-paste').remove(); document.getElementById('bridge-sec').style.display = 'none'; });
 t('entries not in the DOM while locked', (await page.locator('#vlt-list .chip').count()) === 0);
 await page.fill('#vlt-pass', gen);
 await page.click('#vlt-unlock');
@@ -142,6 +162,71 @@ await page.waitForTimeout(2500);
 t('refused, still locked', await page.locator('#vlt-locked').isVisible());
 t('says it matched no slot', /does not match any slot/.test(await page.textContent('#vlt-stat')));
 await page.fill('#vlt-pass', gen); await page.click('#vlt-unlock'); await page.waitForTimeout(2500);
+
+console.log('\n── change keypass checks the keypass in use ──');
+await page.click('#vlt-rekey');
+await page.waitForTimeout(200);
+t('change keypass asks in the page, hidden as typed (no browser prompt)',
+  await page.locator('#vlt-ask').isVisible() && (await page.getAttribute('#vlt-ask-in', 'type')) === 'password');
+await page.fill('#vlt-ask-in', 'definitely-not-the-keypass');
+await page.click('#vlt-ask-go');
+await page.waitForTimeout(2500);
+t('a wrong current keypass is refused, and nothing changed',
+  /not the keypass you use now/.test(await page.textContent('#vlt-stat')) && !(await page.locator('#vlt-ask').isVisible()),
+  await page.textContent('#vlt-stat'));
+await page.click('#vlt-rekey'); await page.waitForTimeout(200);
+await page.fill('#vlt-ask-in', kp);
+await page.click('#vlt-ask-go');
+await page.waitForTimeout(2500);
+const newPass = await page.inputValue('#vlt-ask-in');
+t('the right one moves on to the new keypass, shown once to write down',
+  newPass.split('-').length === 8 && newPass !== kp && (await page.getAttribute('#vlt-ask-in', 'type')) === 'text', newPass);
+await page.click('#vlt-ask-go');
+await page.waitForTimeout(3500);
+t('says the new keypass works', /new keypass works/.test(await page.textContent('#vlt-stat')), await page.textContent('#vlt-stat'));
+await page.click('#vlt-lock'); await page.waitForTimeout(200);
+await page.fill('#vlt-pass', kp); await page.click('#vlt-unlock'); await page.waitForTimeout(2500);
+t('the old keypass no longer opens it', await page.locator('#vlt-locked').isVisible());
+kp = newPass;
+await page.fill('#vlt-pass', kp); await page.click('#vlt-unlock'); await page.waitForTimeout(2500);
+t('the new keypass does', await page.locator('#vlt-open').isVisible());
+
+console.log('\n── import never replaces this vault without a copy ──');
+await page.click('#vlt-lock'); await page.waitForTimeout(200);
+let chooserOpened = false;
+const onChooser = () => { chooserOpened = true; };
+page.on('filechooser', onChooser);
+await page.click('#vlt-importbtn2');
+await page.waitForTimeout(400);
+page.off('filechooser', onChooser);
+t('with a vault here, import first offers to save it (no file picker yet)',
+  !chooserOpened && await page.locator('#vlt-stat button', { hasText: 'save this vault first' }).isVisible());
+const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#vlt-stat button:has-text("save this vault first")')]);
+const savedPath = await dl.path();
+const savedEnv = JSON.parse(fs.readFileSync(savedPath, 'utf8'));
+t('the vault here is saved as a file first', savedEnv.magic === 'BNRVAULT' && Array.isArray(savedEnv.slots));
+const [fc] = await Promise.all([page.waitForEvent('filechooser'), page.click('#vlt-stat button:has-text("choose the vault file")')]);
+page.once('dialog', d => d.dismiss());
+await fc.setFiles(savedPath);
+await page.waitForTimeout(700);
+t('declining the replace changes nothing',
+  await page.locator('#vlt-locked').isVisible() && /nothing changed/.test(await page.textContent('#vlt-stat')) && !(await page.locator('#vlt-ask').isVisible()));
+await page.click('#vlt-importbtn2'); await page.waitForTimeout(200);
+const [dl2] = await Promise.all([page.waitForEvent('download'), page.click('#vlt-stat button:has-text("save this vault first")')]);
+const saved2 = await dl2.path();
+const [fc2] = await Promise.all([page.waitForEvent('filechooser'), page.click('#vlt-stat button:has-text("choose the vault file")')]);
+let confirmText = '';
+page.once('dialog', d => { confirmText = d.message(); d.accept(); });
+await fc2.setFiles(saved2);
+await page.waitForTimeout(700);
+t('the replace is confirmed, naming the copy just saved',
+  /replaces the vault on this browser/.test(confirmText) && /saved as bnr-vault-/.test(confirmText), confirmText.slice(0, 120));
+t('the file keypass is asked in the page, hidden as typed', await page.locator('#vlt-ask').isVisible() && (await page.getAttribute('#vlt-ask-in', 'type')) === 'password');
+await page.fill('#vlt-ask-in', kp);
+await page.click('#vlt-ask-go');
+await page.waitForTimeout(2500);
+t('the file opened with its keypass, every secret in it', await page.locator('#vlt-open').isVisible() && (await page.locator('#vlt-list .chip').count()) === 2,
+  await page.textContent('#vlt-stat'));
 
 console.log('\n── add this device as a passkey slot ──');
 if (hasPrf) {
@@ -177,6 +262,38 @@ if (hasPrf) {
 } else {
   console.log('  (skipped — this Chromium build has no PRF virtual authenticator)');
 }
+
+console.log('\n── seal my recovery words: only the soul the keychain holds ──');
+await page.evaluate(() => {
+  window.__credGets = 0;
+  const g = navigator.credentials.get.bind(navigator.credentials);
+  navigator.credentials.get = (...a) => { window.__credGets++; return g(...a); };
+});
+const chips0 = await page.locator('#vlt-list .chip').count();
+await page.click('#vlt-sealbzdid');
+await page.waitForTimeout(400);
+t('with no keychain connected, nothing is sealed and the line names the keychain',
+  (await page.locator('#vlt-list .chip').count()) === chips0 && await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#kc-sec"]')));
+// connect the keychain from a fixed TEST soul's recovery words (a throwaway vector, never a real key)
+const soulPhrase = await page.evaluate(() => BZDIDKEY.deriveIdentity(new Uint8Array(32).fill(0x2a), 'bnr.b').phrase);
+await page.evaluate(p => { document.getElementById('kc-rec').value = p; document.getElementById('kc-recgo').click(); }, soulPhrase);
+await page.waitForTimeout(500);
+const kcFp = ((await page.textContent('#kc-soul-fp')) || '').trim();
+await page.click('#vlt-sealbzdid');
+await page.waitForTimeout(800);
+const sealed = await page.evaluate(() => {
+  const V = window.BNRVAULT;
+  return V.list().filter(x => x.type === 'bzdid').map(x => ({ fp: x.meta.fingerprint, words: x.meta.words, secret: V.reveal(x.id).secret }));
+});
+t('sealed the recovery words of the soul the keychain holds, with no passkey ceremony of its own',
+  sealed.length === 1 && sealed[0].secret === soulPhrase && kcFp.length > 0 && sealed[0].fp === kcFp && await page.evaluate(() => window.__credGets === 0),
+  JSON.stringify(sealed.map(s => s.fp)) + ' vs ' + kcFp);
+t('its word count is counted on whitespace', sealed.length === 1 && sealed[0].words === soulPhrase.trim().split(/\s+/).length);
+await page.click('#vlt-sealbzdid');
+await page.waitForTimeout(500);
+t('pressing again seals no second copy',
+  await page.evaluate(() => window.BNRVAULT.list().filter(x => x.type === 'bzdid').length) === 1 && /already sealed/.test(await page.textContent('#vlt-stat')));
+await page.evaluate(() => document.getElementById('kc-out').click());
 
 console.log('\n── the create-passkey fix ──');
 // The reported bug: pointerdown auto-connect fired a credentials.get() first, so

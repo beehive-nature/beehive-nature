@@ -251,7 +251,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // reviews it: across tasks, a message names its target as a link instead.
   const REVIEWED = [
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-        ['Any device in the list above', 'within the vault'],
     ['addresses below are yours to hand out', 'within pay'],
     ['Each address above falls out of the', 'within pay'],
     ['choose a lane above', 'within pay'],
@@ -264,9 +263,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['the TESTNET key you paste below', 'within the composer'],
     ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
     ['filled into both fields below', 'within the vault'],
-    ['connect your keychain above to use it', 'vault → keychain, same task, before it'],
-    ['bridge field below', 'vault → bridge, same task, after it'],
-    ['select the text above and copy it manually', 'within the vault'],
     ['unlock with a keypass below', 'within the vault'],
   ];
   const blank = m => m.replace(/[^\n]/g, ' ');
