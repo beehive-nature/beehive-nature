@@ -1662,6 +1662,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   table on the USDC rail, every deposit cites its tx. This panel is a read-only view over
   that ledger via the estate oracle; the box owns the writes.</p>
 
+  <div class="law" id="vc-what">type the meter key you were given to see your prepaid compute balance.</div>
   <div class="row" style="align-items:center;flex-wrap:wrap">
     <input id="vc-key" aria-label="Meter key" placeholder="your meter key" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
@@ -1733,7 +1734,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" data-wl-task="proof" style="border-color:var(--gold)">
   <h2>🧾 the receipts: <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill: recomputed here, never trusted</summary>
+  <details class="tnote" data-reg-disclose data-wl-tech><summary data-i18n="wl.d.receipts">How this panel checks every bill: recomputed here, never trusted</summary>
   <p class="law"><a href="#voucher-sec">the voucher panel</a> reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
   writes) and recomputes every bill in-page: <b>price × burned = owed</b>, summed from the line items,
@@ -1780,14 +1781,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   #vcomb .cell{min-height:44px}}
 </style>
   <h2 data-wl-tech>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
-  <h2 data-reg="bee">💳 <span data-i18n="wl.bee.h.fund">buy USDC with a card</span></h2>
+  <h2 data-reg="bee">💳 <span data-i18n="wl.bee.h.fund">buy USDC with a card</span><span id="fund-h-off" hidden>, not open yet</span></h2>
   <div class="law" id="fund-apart" data-i18n="wl.fund.apart">this is a separate card route and it is not wired to bPay yet: bPay cannot spend what it buys.</div>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">how the card checkout works: who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b>: it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
   stores nothing. Your address rides in the checkout URL (the fiat rail's law) and Meld sees
-  what any checkout sees. The key in the config below is <b>PUBLIC</b>
+  what any checkout sees. The key this page carries is <b>public</b>
   (a publishable Checkout key): a secret key never touches a page, by Meld's law and ours.
   <b>Names welcome:</b> type a <b>.eth name</b> (Basename or ENS-style) and the button resolves
   it to its raw 0x address on <b>Base's own resolver</b> before anything launches, by a keyless
@@ -1796,10 +1797,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   the lookup</b>: your IP plus the name you asked about. <b>Pasting a raw 0x address skips
   resolution entirely</b>. If you'd rather not be seen asking, that is a real choice.</div>
   </details>
-  <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
-  link in your browser, so with scripting off it stays right here, asleep. Everything else on
-  this page renders fine.</div></noscript>
+  <noscript><div class="fund-nojs">💳 card checkout needs JavaScript turned on in this browser; it builds
+  the checkout link in your browser. everything else on this page works without it.</div></noscript>
   <div id="fund-js" hidden>
+    <div class="law" id="fund-now" hidden>to add money now, use <a href="#pay-sec">receive</a>.</div>
     <div class="law" id="fund-off" hidden data-i18n="wl.fund.off">funding not configured: card checkout is not switched on here yet, so there is no buy button to press. it switches on when this site sets its public checkout key.</div>
     <div class="row" id="fund-row" style="align-items:center;flex-wrap:wrap">
       <span class="fund-coin" aria-hidden="true"></span>
@@ -1807,8 +1808,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <option value="USDC_BASE">USDC · Base</option>
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
-      <input id="fund-addr" aria-label="Buy destination address or ENS name, optional" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
-      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
+      <input id="fund-addr" aria-label="Buy destination address or ENS name, optional" class="small" placeholder="your 0x address or .eth name (optional)" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
+      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC with a card<span class="wl-cyd"> (opens Meld)</span></a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
   </div>
@@ -1845,7 +1846,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         };
         var $ = function (id) { return document.getElementById(id); };
         var box = $('fund-js'), pick = $('fund-asset'), addr = $('fund-addr'),
-            go = $('fund-go'), stat = $('fund-stat'), off = $('fund-off'), row = $('fund-row');
+            go = $('fund-go'), stat = $('fund-stat'), off = $('fund-off'), row = $('fund-row'), now = $('fund-now'), hOff = $('fund-h-off');
         if (!box || !pick || !addr || !go || !stat) return; // panel markup absent — nothing to wire
         var keyOk = BNR_MELD_PUBLIC_KEY.length > 0;
 
@@ -1954,8 +1955,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
         var resolved = null;   // {name, addr} once the user has SEEN the resolved hex
         var resolving = false;
-        var note = '';         // honest failure text, cleared on any input edit
-        var GO_LABEL = go.textContent;
+        var note = null;       // the honest state (wlSay parts), cleared on any input edit
+        var GO_LABEL = go.innerHTML;
+        var TEST = BNR_MELD_ENV !== 'production' ? 'this checkout is a test and moves no real money. ' : '';
+        /* the receive address, shown in one press: bPay's receive panel opened, not a link to a closed one */
+        var toReceive = { btn: 'show my receive address', on: function () { location.hash = '#pay-sec'; var rx = document.getElementById('pay-rx'); if (rx) rx.click(); } };
 
         function buildUrl() {
           var u = new URL(MELD_HOSTS[BNR_MELD_ENV]);
@@ -1981,6 +1985,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
             go.setAttribute('href', '#');
             if (row) row.style.display = 'none';
             if (off) off.hidden = false;
+            if (now) now.hidden = false;
+            if (hOff) hOff.hidden = false;
             stat.innerHTML = '<span data-wl-tech>why: the public Meld Checkout key is not set on this deployment ' +
               '(BNR_MELD_PUBLIC_KEY / data-meld-public-key). environment selected: <b>' + BNR_MELD_ENV + '</b>' +
               (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') +
@@ -1989,31 +1995,29 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
           }
           if (row) row.style.display = '';
           if (off) off.hidden = true;
+          if (now) now.hidden = true;
+          if (hOff) hOff.hidden = true;
           var a = addr.value.trim();
           go.setAttribute('href', buildUrl().href);
           go.setAttribute('aria-disabled', 'false');
-          if (note) { stat.innerHTML = note; return; }
+          if (note) { wlSay(stat, note); return; }
           if (a && !addrOk(a)) {
-            stat.innerHTML = '<b style="color:var(--amber)">that does not read as an address</b> — ' +
-              'an 0x… hex address, or a name form like name.base.eth. It is left out of the link until it parses.';
+            wlSay(stat, ['that is not an address yet: paste one that starts with 0x, or a name ending in .eth.',
+              { cy: 'that does not read as an address: an 0x… hex address, or a name form like name.base.eth. it is left out of the link until it parses.' }]);
             return;
           }
           if (a && isName(a)) {
-            stat.textContent = (resolved && resolved.name === a)
-              ? resolved.name + ' \u2192 ' + resolved.addr + ' (resolved on Base, shown to you before launch — ' +
-                'this buy locks to that hex). Tap the button to open the checkout. [' + BNR_MELD_ENV + ']'
-              : a + ' is a name — the checkout needs raw hex, so the button resolves it first via Base\u2019s own ' +
-                'resolver: a keyless read from your browser, no server of ours, but the public RPC you land on ' +
-                'CAN see the lookup (your IP + this name) — paste a raw 0x address instead if you\u2019d rather ' +
-                'skip that entirely. Nothing launches until you see the 0x.';
+            wlSay(stat, (resolved && resolved.name === a)
+              ? [TEST + resolved.name + ' is ' + resolved.addr + ': your card buy will land on this address.',
+                { cy: 'resolved on Base, shown to you before launch; this buy locks to that hex. [' + BNR_MELD_ENV + ']' }]
+              : [TEST + 'press buy once to look up this name, then check the address it shows.',
+                { cy: 'the checkout needs raw hex, so the button resolves the name first via Base\u2019s own resolver: a keyless read from your browser, no server of ours, but the public RPC you land on can see the lookup (your IP and this name); paste a raw 0x address instead to skip that. nothing launches until you see the 0x.' }]);
             return;
           }
-          stat.textContent = a
-            ? 'destination locked: ' + pick.value + ' \u2192 ' + a + ' [' + BNR_MELD_ENV +
-              ']. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
-            : 'destination asset locked: ' + pick.value + ' [' + BNR_MELD_ENV +
-              '] — no address typed, the checkout will ask for one.' +
-              ' Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.';
+          var cyLocked = 'destination locked: ' + pick.value + (a ? ' \u2192 ' + a : ', no address typed') + ' [' + BNR_MELD_ENV + ']. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.';
+          wlSay(stat, [TEST + (a
+            ? 'this opens a card checkout in a new tab and sends the USDC to ' + a + '.'
+            : 'this opens a card checkout in a new tab; it asks where to send the USDC.'), { cy: cyLocked }]);
         }
         go.addEventListener('click', function (e) {
           var href = go.getAttribute('href');
@@ -2025,27 +2029,24 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
             if (!(window.BnrSign && window.BnrSign.keccak_256)) {
               // the crypto bundle is still loading — NOT a resolution failure;
               // never blame the name or the RPC for a page that isn't ready
-              note = '<b style="color:var(--amber)">the page\u2019s crypto bundle hasn\u2019t finished ' +
-                'loading yet</b> \u2014 one more tap in a moment and the name resolves. Nothing was sent.';
+              note = ['one moment, the page is still loading; press buy again.', { cy: 'the keccak bundle has not finished loading yet; nothing was sent' }];
               paint();
               return;
             }
             resolving = true;
-            go.textContent = 'resolving ' + a.split('.')[0] + '\u2026';
-            note = 'resolving ' + a + ' on Base \u2014 random public RPC; its operator sees this lookup\u2026';
+            go.textContent = 'looking up ' + a.split('.')[0] + '\u2026';
+            note = ['looking up this name, one moment.', { cy: 'resolving ' + a + ' on Base: random public RPC; its operator sees this lookup' }];
             paint();
             resolveName(a).then(function (hexAddr) {
               resolving = false;
-              go.textContent = GO_LABEL;
+              go.innerHTML = GO_LABEL;
               if (hexAddr) {
                 resolved = { name: a, addr: hexAddr };
-                go.textContent = '\u2713 resolved \u2014 buy USDC';
-                note = '';
+                go.textContent = '\u2713 buy USDC to this address';
+                note = null;
               } else {
-                note = '<b style="color:var(--amber)">' + a + ' could not be resolved right now.</b> ' +
-                  'Either the name has no address record on Base\u2019s resolver (mainnet-ENS-only names ' +
-                  'don\u2019t live there) or the public RPC is unreachable. Nothing was sent. Your raw 0x ' +
-                  'address is in <a href="#pay-sec">\ud83d\udce5 receive</a> \u2014 paste that and the buy proceeds without resolution.';
+                note = ['that name could not be resolved; paste your 0x address instead. ', toReceive,
+                  { cy: a + ' could not be resolved right now: either the name has no address record on Base\u2019s resolver (mainnet ENS only names do not live there) or the public RPC is unreachable. nothing was sent.' }];
               }
               paint();
             });
@@ -2053,7 +2054,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         });
         pick.addEventListener('change', paint);
         addr.addEventListener('input', function () {
-          resolved = null; note = ''; go.textContent = GO_LABEL; paint();
+          resolved = null; note = null; go.innerHTML = GO_LABEL; paint();
         });
         box.hidden = false; // scripting is on — reveal the panel body
         paint();
@@ -2061,9 +2062,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         /* never throw, never fail silently: surface it in the panel itself */
         var statEl = document.getElementById('fund-stat');
         var jsEl = document.getElementById('fund-js');
+        var rowEl = document.getElementById('fund-row');
         if (jsEl) jsEl.hidden = false;
-        if (statEl) statEl.textContent = 'funding panel failed to start: ' +
-          (err && err.message ? err.message : err);
+        if (rowEl) rowEl.style.display = 'none';      /* a panel that did not start offers no buy link */
+        if (statEl) wlSay(statEl, ['this part of the wallet did not start. ', { btn: 'reload the page', on: function () { location.reload(); } },
+          { cy: 'funding panel failed to start: ' + (err && err.message ? err.message : err) }]);
       }
     })();
   </script>
@@ -2074,7 +2077,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <h2 data-wl-tech>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <h2 data-reg="bee">🏧 <span data-i18n="wl.bee.h.peer">money in, person to person</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">the fiat funnel’s role: the estate sells, it never operates</summary>
-  <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
+  <p class="law">the estate is a <b>seller, not an operator</b>: its Base address is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base). it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
   into it. the estate is <b>never the LP</b>: a third party holds the USDC and takes the fiat;
@@ -2094,7 +2097,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
   </div>
   <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
-    <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
+    <button class="gold" id="peer-read" style="min-height:40px">check payments to the estate</button>
     <span class="law" id="peer-stat" style="flex:2;min-width:200px"><span data-wl-tech>the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span></span>
   </div>
   <div id="peer-rows" class="law" style="margin-top:10px"></div>
@@ -2148,24 +2151,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             var tt = order[j2]; order[j2] = order[r2]; order[r2] = tt;
           }
           btn.disabled = true;
-          stat.textContent = 'reading USDC transfers from the orchestrator to the estate address (random public RPC, walking back \u22482 days of blocks)\u2026';
+          wlSay(stat, ['checking the last two days of payments to the estate now.', { cy: 'reading USDC transfers from the orchestrator to the estate address (random public RPC, walking back \u22482 days of blocks)\u2026' }]);
           rows.innerHTML = '';
           function finish(found, okChunks, failChunks) {
             btn.disabled = false;
+            var again = { btn: 'check again', on: function () { btn.click(); } };
             if (!found.length) {
-              stat.textContent = 'read complete \u2014 no funnel settlements yet (' + okChunks + ' chunks read clean' +
-                (failChunks ? ', ' + failChunks + ' chunk(s) refused by this RPC \u2014 their range was skipped' : '') +
+              var cyEmpty = 'read complete: no funnel settlements (' + okChunks + ' chunks read clean' +
+                (failChunks ? ', ' + failChunks + ' chunk(s) refused by this RPC; their range was skipped' : '') +
                 '). the honest-empty state: the path is live the moment a customer intent names this address.';
-              rows.innerHTML = '<span style="color:var(--faint)">\u2014 no rows \u2014</span>';
+              wlSay(stat, failChunks
+                ? ['no payments were found, but part of the last two days could not be read. ', again, { cy: cyEmpty }]
+                : ['no payments reached the estate in the last two days. ', again, { cy: cyEmpty }]);
+              rows.textContent = '';
               return;
             }
-            stat.textContent = found.length + ' settlement' + (found.length > 1 ? 's' : '') + ' read keylessly from public Base RPC \u2014 every row is the ONE seller-side event (USDC Transfer from the orchestrator):';
-            rows.innerHTML = found.slice(-20).reverse().map(function (lg) {
-              var amt = parseInt(lg.data, 16) / 1e6;
+            var shown = found.slice(-20);
+            wlSay(stat, [found.length + (found.length > 1 ? ' payments' : ' payment') + ' reached the estate recently, newest first' +
+              (found.length > shown.length ? ' (the newest ' + shown.length + ' shown)' : '') + '. ', again,
+              { cy: 'read keylessly from public Base RPC; every row is the one seller-side event (USDC Transfer from the orchestrator); the walk stops at the newest 10k-block window that holds any, so older ones are not counted' }]);
+            rows.innerHTML = shown.reverse().map(function (lg) {
+              var amt = parseInt(lg.data, 16) / 1e6, tx = /^0x[0-9a-fA-F]{64}$/.test(lg.transactionHash || '') ? lg.transactionHash : '';
               return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px">' +
-                '<b style="color:var(--leaf)">' + amt.toFixed(6) + ' USDC</b> from OrchestratorV3 \u00b7 ' +
-                '<a href="https://basescan.org/tx/' + lg.transactionHash + '" target="_blank" rel="noopener" style="color:var(--cyan)">' + lg.transactionHash.slice(0, 18) + '\u2026</a>' +
-                ' <span style="color:var(--faint)">block ' + parseInt(lg.blockNumber, 16) + '</span></div>';
+                '<b style="color:var(--leaf)">' + (isFinite(amt) ? amt.toFixed(6) : '?') + ' USDC</b>' +
+                '<span class="wl-cyd">from OrchestratorV3 \u00b7 ' +
+                (tx ? '<a href="https://basescan.org/tx/' + tx + '" target="_blank" rel="noopener" style="color:var(--cyan)">' + tx.slice(0, 18) + '\u2026</a>' : 'no tx hash') +
+                ' <span style="color:var(--faint)">block ' + parseInt(lg.blockNumber, 16) + '</span></span></div>';
             }).join('');
           }
           function walkOn(i) {
@@ -2173,7 +2184,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               btn.disabled = false;
               /* EVERY host refused — the wall, not the truth: never say "no
                  settlements" when the public record was never read */
-              stat.textContent = 'no public Base RPC could be read from this network. nothing was sent \u2014 the receive call only reads; try another network or in a moment.';
+              wlSay(stat, ['the payment record could not be read from here just now. ', { btn: 'try again', on: function () { btn.click(); } }, { cy: 'no public Base RPC could be read from this network. nothing was sent: the receive call only reads.' }]);
               return;
             }
             var host = order[i];
@@ -2190,8 +2201,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                   }]).then(function (logs) {
                     (logs || []).forEach(function (lg) { found.push(lg); });
                     okChunks++;
-                    if (!found.length) stat.textContent = 'walking the public record back\u2026 ' +
-                      ((chunk + 1) * 10) + 'k blocks read, no settlements yet\u2026';
+                    if (!found.length) wlSay(stat, ['still checking the last two days of payments.', { cy: ((chunk + 1) * 10) + 'k blocks read, no settlements yet' }]);
                     return null;
                   }).catch(function () { failChunks++; return null; });  // one chunk failing never kills the read
                 });
@@ -2207,7 +2217,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         });
       } catch (err) {
         var s = document.getElementById('peer-stat');
-        if (s) s.textContent = 'funnel panel failed to start: ' + (err && err.message ? err.message : err);
+        if (s) wlSay(s, ['this part of the wallet did not start. ', { btn: 'reload the page', on: function () { location.reload(); } }, { cy: 'funnel panel failed to start: ' + (err && err.message ? err.message : err) }]);
       }
     })();
   </script>
@@ -2631,13 +2641,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="matrix-sec" data-wl-task="proof">
-  <h2>🗺 chain matrix: <span>full wallet coverage</span></h2>
+  <h2>🗺 chain matrix: <span>which networks this wallet can read</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each: how it is read and signed</summary>
   <div class="law">The original wallet scope plus the Graphene and Cosmos studies, with separate <b>read</b> and <b>sign</b> capabilities. READ means this page has a public account reader; CODE means another implementation exists; EVALUATION means a bounded bench; GAP means required integration is missing; STUDY means researched scope. These labels do not certify a device, a payment or a deployment. Tokens, payment protocols and storage networks are identified separately from blockchains.</div>
   <p class="law"><a href="https://github.com/beehive-nature/beehive-nature/blob/499118bd646dbcefb1e52b0384c5a39296fa4cdb/docs/dispatches/2026-10-03-wallet-full-scope.md" target="_blank" rel="noopener noreferrer">Prior plans, adapter inventory and evidence — opens a new tab</a></p>
   </details>
   <div class="wallet-section-action"><a href="#wallet-accounts">Add or follow an account on a supported network</a></div>
-  <details class="tnote" data-reg-disclose><summary>Solana · Vaulta · x0x settlement evidence</summary>
+  <details class="tnote" data-reg-disclose data-wl-tech><summary>Solana · Vaulta · x0x settlement evidence</summary>
   <p>PR #338 records 111 receiver-verified x0x deliveries, private-validator Solana proof verification and settlement, and private-chain Vaulta PLONK fixture settlement. Reconciliation remains partial because the separate fixture fee was unpaid. These are private-network results; this wallet does not offer them as public settlement.</p>
   <a href="https://github.com/beehive-nature/beehive-nature/blob/09f3357a54c176bcdd1242bdf5bbe01c23b9a777/docs/dispatches/2026-10-03-tungsten-chain-acceptance.md" target="_blank" rel="noopener noreferrer">Pinned test evidence and source functions — opens a new tab</a>
   </details>
@@ -7662,16 +7672,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $v('vc-dep').textContent = d.deposited_total + ' A';
         $v('vc-tithe').textContent = d.tithe_total + ' A';
         $v('vc-receipts').innerHTML = (d.receipts || []).length ? (d.receipts || []).map(function(rc){
+          var when = isFinite(rc.ts) && rc.ts > 0 ? new Date(rc.ts*1000).toISOString().slice(0,16).replace('T',' ') + ' UTC' : 'at a time not given';
           return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px">' +
-            '<div style="font-size:10.5px;color:var(--dim)">receipt ' + new Date((rc.ts||0)*1000).toISOString().slice(0,16).replace('T',' ') +
-            ' · total <b style="color:var(--ink)">' + esc(rc.total) + ' A</b> · basis ' + esc(rc.cost_basis_ref) + '</div>' +
+            '<div style="font-size:10.5px;color:var(--dim)">charged ' + esc(when) +
+            ': <b style="color:var(--ink)">' + esc(rc.total) + ' A</b><span class="wl-cyd"> · basis ' + esc(rc.cost_basis_ref) + '</span></div>' +
             '<table style="width:100%;font-size:10px;color:var(--dim);border-collapse:collapse;margin-top:4px">' +
             (rc.line_items || []).map(function(li){
               var t = li.resource === 'tithe.founder';
-              return '<tr style="border-top:1px solid var(--line)"><td style="padding:3px 6px 3px 0">' + esc(li.resource) + '</td>' +
-                '<td style="padding:3px 6px 3px 0;text-align:right">× ' + esc(li.quantity) + ' @ ' + esc(li.rate) + '</td>' +
+              return '<tr style="border-top:1px solid var(--line)"><td style="padding:3px 6px 3px 0">' + (t ? 'tithe' : esc(li.resource)) + '</td>' +
+                '<td style="padding:3px 6px 3px 0;text-align:right"><span class="wl-cyd">× ' + esc(li.quantity) + ' @ ' + esc(li.rate) + '</span></td>' +
                 '<td style="padding:3px 0;text-align:right;color:var(--ink)"><b>' + esc(li.charged) + ' A</b>' +
-                (t ? ' (the tithe)' : '') + '</td></tr>';
+                (t ? ' (the estate\'s 10% share)' : '') + '</td></tr>';
             }).join('') + '</table></div>';
         }).join('') : '<div style="color:var(--faint)">no metered charges yet: top up and the first receipt lands here</div>';
         LOADED = { key: key, dest: a.send_to || '', memo: a.memo || key };
@@ -7739,17 +7750,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }, $v('vc-top-go'));
     }
     $v('vc-afford-go').onclick = async function(){
-      var k = $v('vc-key').value.trim(), amt = parseFloat($v('vc-afford-amt').value);
-      var out = $v('vc-afford-out');
-      if (!k) { out.textContent = 'look up your key first'; return }
-      if (!(amt > 0)) { out.textContent = 'enter what the job costs in A'; return }
-      out.textContent = 'asking the engine…';
+      var amt = parseFloat($v('vc-afford-amt').value), out = $v('vc-afford-out'), again = function(){ $v('vc-afford-go').click() };
+      out.style.color = '';
+      if (!LOADED) { wlSay(out, ['look up your meter key first, then ask.']); return }
+      if (!(amt > 0)) { wlSay(out, ['type what the job costs in A.']); return }
+      var k = LOADED.key;      /* the key whose balance is on screen, never what the field holds now */
+      wlSay(out, ['checking your balance now.', {cy: 'asking the engine: ' + API + '…/afford'}]);
       try {
         var r = await fetch(API + encodeURIComponent(k) + '/afford?amount=' + amt);
-        var d = await r.json();
-        out.textContent = d.message || '—';
+        var d = null; try { d = await r.json() } catch(je) {}
+        if (!LOADED || LOADED.key !== k) return;
+        if (!r.ok || !d || typeof d.ok !== 'boolean') { out.style.color = 'var(--amber)'; wlSay(out, ['the check could not run just now. ', {btn: 'try again', on: again}, {cy: 'HTTP ' + r.status + ' ' + ((d && d.message) || '')}]); return }
         out.style.color = d.ok ? 'var(--leaf)' : 'var(--amber)';
-      } catch(e) { out.textContent = 'the oracle is unreachable right now, try again in a moment'; out.style.color = 'var(--amber)' }
+        wlSay(out, d.ok ? ['yes, your voucher covers a job of ' + amt + ' A.', {cy: d.message || ''}] : ['not yet: your voucher does not cover a job of ' + amt + ' A, so top up from your wallet first.', {cy: d.message || ''}]);
+      } catch(e) { out.style.color = 'var(--amber)'; wlSay(out, ['the check could not run just now. ', {btn: 'try again', on: again}, {cy: 'estate oracle unreachable: ' + ((e && e.message) || e)}]) }
     };
     try { var saved = localStorage.getItem('bnr-vc-key');
       if (saved) { $v('vc-key').value = saved; load(saved) } } catch(e) {}
@@ -7885,9 +7899,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var byState = {}, byFamily = {};
     CHAIN_MATRIX.forEach(function (c) { byState[c.state] = (byState[c.state] || 0) + 1; byFamily[c.family] = (byFamily[c.family] || 0) + 1 });
     var sum = $('matrix-summary');
-    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' scope entries · computed</span>' +
+    /* one sentence for every register; the count chips are cypherpunk's */
+    sum.innerHTML = '<span id="matrix-say">this wallet can read ' + (byState.READ || 0) + ' of these ' + CHAIN_MATRIX.length + ' today; the rest cannot be read here yet.</span>' +
+      '<span data-reg="cypherpunk" style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' scope entries · computed</span>' +
       Object.keys(byState).map(function (s) {
-        return '<span style="border:1px solid ' + STATE_COLORS[s] + ';color:' + STATE_COLORS[s] + ';border-radius:6px;padding:2px 9px;font-size:10px">' + byState[s] + ' ' + s.toLowerCase() + '</span>';
+        return '<span data-reg="cypherpunk" style="border:1px solid ' + STATE_COLORS[s] + ';color:' + STATE_COLORS[s] + ';border-radius:6px;padding:2px 9px;font-size:10px">' + byState[s] + ' ' + s.toLowerCase() + '</span>';
       }).join('');
     var families = [];
     CHAIN_MATRIX.forEach(function (c) { if (families.indexOf(c.family) < 0) families.push(c.family) });
@@ -10092,7 +10108,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 })();
 </script>
 <script src="spend-audit.js?v=3"></script>
-<script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'), { sample: { say: 'these are sample bills that show how the checking works in your browser; none of them are yours. your own spending is in ', to: 'voucher-sec', t: 'prepay for compute' } });</script>
+<script>(function(){
+  var el = document.getElementById('receiptsBody'), OPTS = { sample: { say: 'these are sample bills that show how the checking works in your browser; none of them are yours. your own spending is in ', to: 'voucher-sec', t: 'prepay for compute' } };
+  /* the receipts engine did not load (offline, blocked): said calmly, with a way to load it again */
+  function missing(why){
+    wlSay(el, ['the receipts could not load just now. ', {btn: 'try again', on: function(){
+      wlSay(el, ['loading the receipts now.']);
+      var sc = document.createElement('script'); sc.src = 'spend-audit.js?v=3&r=' + Date.now();
+      sc.onload = function(){ if (window.SpendAudit) SpendAudit.mountPanel(el, OPTS); else missing('loaded, but empty') };
+      sc.onerror = function(){ missing('spend-audit.js did not load') };
+      document.body.appendChild(sc);
+    }}, {cy: why}]);
+  }
+  if (window.SpendAudit) SpendAudit.mountPanel(el, OPTS); else missing('spend-audit.js did not load');
+})();</script>
 <script>
 /* ══ THE THREE GRAMMARS — the presenter. It moves the reader through the one
    set of sections; it never reads a chain, holds a key, or writes a number.

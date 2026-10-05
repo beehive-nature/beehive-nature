@@ -618,6 +618,12 @@ try {
     ok('yes signs ONE core.vaulta transfer to the voucher account with the memo filled in', posts.length === 1 && posts[0].includes(actHex('core.vaulta', 'transfer')) && posts[0].includes(nameHex('bnrvoucher11')) && posts[0].includes(Buffer.from('gatekey').toString('hex')), JSON.stringify({ n: posts.length }));
     ok('and it lands in words with its one next step', /^added 0\.5000 A to your voucher/.test((await topText()).trim()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'read my balance', await topText());
     ok('the top up counts against the daily cap like every send', Math.abs(await page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0)) - 0.5) < 1e-9);
+    // can I afford it asks about the key on screen, never what the field holds now, and answers in words
+    let asked = '';
+    state.voucher = url => { if (/\/afford/.test(url)) { asked = url; return { body: { ok: true, message: 'ORACLE-AFFORD-FIXTURE' } }; } return { body: VOUCHER }; };
+    await page.fill('#vc-key', 'someoneelse'); await page.fill('#vc-afford-amt', '1'); await page.click('#vc-afford-go');
+    await page.waitForFunction(() => /^yes/.test(document.getElementById('vc-afford-out').innerText), null, { timeout: 10000 }).catch(() => {});
+    ok('can I afford it asks for the key whose balance is on screen and answers in one calm sentence', /\/gatekey\/afford/.test(asked) && /^yes, your voucher covers a job of 1 A\.$/.test((await page.innerText('#vc-afford-out')).trim()), asked + ' · ' + await page.innerText('#vc-afford-out'));
     // a second look up that fails: the last key's account and memo leave the screen
     state.voucher = () => 'abort';
     await page.fill('#vc-key', 'otherkey'); await page.click('#vc-go');
@@ -651,6 +657,11 @@ try {
       opened.push(await page.evaluate(() => [...document.querySelectorAll('#receiptsBody details[data-ri]')].filter(d => d.open).map(d => d.getAttribute('data-ri')).join()));
     }
     ok('tapping a receipt cell opens that receipt\'s own proof (first and last)', opened[0] === '0' && opened[1] === String(n - 1), JSON.stringify(opened));
+    const words = await page.evaluate(() => ({ text: document.getElementById('receiptsBody').innerText, raw: document.getElementById('receiptsBody').textContent, label: document.querySelector('#receiptsBody button[data-rc]').getAttribute('aria-label') }));
+    ok('bee reads each verdict in words; the state names stay in the page for cypherpunk', !/\b(PASSED|PENDING_ANCHOR|FAILED|INCONCLUSIVE)\b/.test(words.text) && /PENDING_ANCHOR/.test(words.raw) && /does not add up/.test(words.text) && !/[A-Z_]{6,}/.test(words.label), words.label);
+    ok('the total says which bills it leaves out', /the bills that add up; .* are left out\./.test(words.text));
+    await page.fill('#sa-paste', '{"not":"a receipt"}'); await page.click('#sa-paste-go');
+    ok('a pasted text that is not a receipt is said calmly, never as a raw error', /^that is not a receipt this page can read; paste the whole receipt and press check it\.$/.test((await page.innerText('#sa-paste-out')).trim()), await page.innerText('#sa-paste-out'));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

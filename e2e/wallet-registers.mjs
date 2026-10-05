@@ -252,8 +252,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const REVIEWED = [
     ['more as you forge below', 'keychain → key forge, same task, after it'],
     ['(rate cited below)', 'within the voucher'],
-    ['The key in the config below is', 'within fund'],
-    ['its Base address below is a bare', 'within fiat in'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
   ];
@@ -963,7 +961,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     [390, 1280].map(W => W + ': ' + at[W].raver.add.cards.join(',')).join(' · ') + (rvMeld.length ? ' · ' + rvMeld.slice(0, 3).join(' · ') : ''));
   // 2 · moved, not deleted; a reason in words, never a dead button
   const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
-  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC (opens Meld)', 'transactionType'].filter(m => !src.includes(m));
+  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC with a card', '(opens Meld)', 'transactionType'].filter(m => !src.includes(m));
   ok('2 · the card route\'s code and words stay in the file (moved, not deleted)', kept.length === 0, kept.join(', ') || 'launch, asset, address, key config, note, label, checkout builder all present');
   const says = both(a => ['cypherpunk', 'bee', 'raver'].filter(r => !(r === 'cypherpunk' ? a[r].add : a[r].all).sections.includes('fund-sec') || !a[r].fundAll.includes('not wired to bPay yet') || !a[r].fundAll.includes('card checkout is not switched on here yet')));
   ok('2 · wherever the card route still shows (cypherpunk\'s pipeline, bee\'s and raver\'s "show me everything") it says it is a separate card route not wired to bPay yet, and why checkout is off, in words',

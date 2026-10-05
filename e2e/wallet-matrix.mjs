@@ -66,7 +66,10 @@ try {
     ok('only implemented public readers can be selected', options.filter(o => !o.disabled).length === available.length && options.filter(o => !o.disabled).every(o => available.includes(o.value)));
     ok('every research/gap row is visible and unavailable in the picker', data.filter(c => !c.watch).every(c => options.some(o => o.disabled && o.value === '' && o.text.startsWith(c.name+' · '))));
     ok('Vaulta and Hive remain first-class selectable accounts', ['vaulta','hive'].every(value => options.some(o => o.value === value && !o.disabled)));
-    const summary = await page.locator('#matrix-summary').innerText();
+    // the count chips are cypherpunk's; every register reads one sentence (textContent carries both)
+    const summary = await page.locator('#matrix-summary').textContent();
+    const said = await page.locator('#matrix-say').innerText();
+    ok('every register reads the coverage as one sentence computed from the data', said === 'this wallet can read ' + data.filter(c => c.state === 'READ').length + ' of these ' + data.length + ' today; the rest cannot be read here yet.', said);
     const tally = await page.evaluate(d => {
       const t = {}; d.forEach(c => t[c.state] = (t[c.state] || 0) + 1); return t;
     }, data);
@@ -90,7 +93,7 @@ try {
     await page.waitForFunction(() => window.__CHAIN_MATRIX, null, { timeout: 15000 });
     const body = await page.evaluate(() => document.getElementById('matrix-body').innerText);
     ok('removed rail disappears from the matrix and picker', !/Arweave/.test(body) && await page.locator('#wa-chain option[value="arweave"]').count() === 0);
-    const sum2 = await page.locator('#matrix-summary').innerText();
+    const sum2 = await page.locator('#matrix-summary').textContent();
     ok('removal recomputes the summary count', sum2.includes((originalCount-1)+' scope entries · computed'), sum2.slice(0, 60));
     await ctx.close();
   }
