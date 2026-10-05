@@ -26,6 +26,7 @@ const NODE_BPQ = globalThis.BPQ;
 const NODE_WORDS = (() => { const sb = { window: {} }; runInNewContext(readFileSync(join(SURF, 'onboarding', 'vendor', 'bip39-wordlist.js'), 'utf8'), sb); return [...sb.window.BIP39_WORDLIST]; })();
 const ROOT_A = new Uint8Array(32).fill(0x2a);   // TEST-ONLY root, public
 const EXPECT = NODE_BPQ.keys(ROOT_A, 'pq:gatesoul');
+const SIGNER = NODE_BPQ.keys(ROOT_A, 'pq:signer');   // the one id that signs the law, whatever the soul
 let ONLY_ME = null;   // the only-me file block D seals in the page, reopened by block G
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -694,8 +695,7 @@ try {
      every one with this soul's id and saves a single receipt, which Node checks file by file */
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
-    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
-    await page.goto(`${BASE}/surfaces/wallet.html#pq-law`, { waitUntil: 'load' });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-law`, { waitUntil: 'load' });   // no soul named on purpose: signing never needs one
     await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
     const law = JSON.parse(await readFile(join(ROOT, 'docs', 'PQ-LAW.json'), 'utf8')).files;
     await page.waitForFunction(n => document.querySelectorAll('#pq-law-list li a').length === n, law.length, { timeout: 20000 });
@@ -715,12 +715,41 @@ try {
     const each = await Promise.all(rc.signatures.map(async s => ({ path: s.path, r: NODE_BPQ.verifyFile(s.sig, new Uint8Array(await readFile(join(ROOT, s.path)))) })));
     ok('law: one press saves one receipt signing every listed file, each verifying in Node against the file on disk',
       /^law-signatures-[a-z0-9]{8}-\d{4}-\d\d-\d\d\.json$/.test(dl.suggestedFilename()) && rc.kind === 'law-signatures' &&
-      each.length === law.length && each.every((x, i) => x.path === law[i] && x.r.ok && x.r.id === EXPECT.id),
+      each.length === law.length && each.every((x, i) => x.path === law[i] && x.r.ok && x.r.id === SIGNER.id),
       dl.suggestedFilename() + ' ' + JSON.stringify(each.filter(x => !x.r.ok)));
     ok('law: the receipt carries the public card of that id and no soul name or secret',
-      NODE_BPQ.verifyCard(rc.card) && rc.card.id === EXPECT.id && !/gatesoul/.test(JSON.stringify(rc)) && Object.keys(rc).sort().join() === 'at,bpq,card,kind,signatures');
-    ok('law: the page says it signed them, in plain words',
-      /^✓ signed \d+ law files as bzpq1/.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
+      NODE_BPQ.verifyCard(rc.card) && rc.card.id === SIGNER.id && !/gatesoul/.test(JSON.stringify(rc)) && Object.keys(rc).sort().join() === 'at,bpq,card,kind,signatures');
+    ok('law: the page says it is done, in one plain sentence',
+      /^Done\. You signed \d+ law files\./.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
+    await page.close();
+  }
+
+  /* I · wallet.html#sign: the whole job on one sheet: one sentence, one button, no soul name */
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+    await page.goto(`${BASE}/surfaces/wallet.html#sign`, { waitUntil: 'load' });
+    await page.waitForSelector('#sign-sheet #sign-go', { timeout: 20000 });
+    const sheet = await page.evaluate(() => {
+      const d = document.getElementById('sign-sheet'), r = d.getBoundingClientRect();
+      return { cover: r.width >= innerWidth - 1 && r.height >= innerHeight - 1, say: document.getElementById('sign-say').textContent,
+        buttons: d.querySelectorAll('button').length, words: d.innerText, wide: document.documentElement.scrollWidth <= innerWidth + 1 };
+    });
+    ok('sign sheet: covers the wallet, one sentence, one button, no soul or Vaulta words',
+      sheet.cover && sheet.say === 'Press Sign, then confirm with your passkey.' && sheet.buttons === 1 && !/soul|vaulta|keychain|post-quantum|bzpq/i.test(sheet.words) && sheet.wide,
+      JSON.stringify(sheet));
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.click('#sign-go')]);
+    const rc = JSON.parse(await readFile(await dl.path(), 'utf8'));
+    const n = JSON.parse(await readFile(join(ROOT, 'docs', 'PQ-LAW.json'), 'utf8')).files.length;
+    const done = await page.evaluate(() => ({ stat: document.getElementById('sign-stat').textContent, go: document.getElementById('sign-go').hidden }));
+    ok('sign sheet: one press signs every law file and says Done',
+      rc.card.id === SIGNER.id && rc.signatures.length === n && /^Done\./.test(done.stat) && done.go, JSON.stringify(done));
     await page.close();
   }
 } finally {

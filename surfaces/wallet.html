@@ -1174,9 +1174,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     the binding field here and bind: the old id then vouches for the new one while its keys still hold.</div>
     </details>
     <div id="pq-law" style="margin:12px 0 16px">
-      <div class="law"><b>Sign the law.</b> One press signs every law file listed here with your post-quantum id. If your keychain is not connected yet, the same press connects it with your passkey first. You get one receipt file; nothing else to do.</div>
+      <div class="law"><b>Sign the law.</b> Press Sign, then confirm with your passkey.</div>
       <ul id="pq-law-list" class="law" style="margin:8px 0;padding-left:18px"><li><button type="button" id="pq-law-show" style="font-size:12px;padding:4px 10px;min-height:32px">show the law files</button></li></ul>
-      <div class="row"><button type="button" id="pq-law-go" class="gold">✍ sign the law</button></div>
+      <div class="row"><button type="button" id="pq-law-go" class="gold">✍ Sign</button></div>
       <div class="law" id="pq-law-stat" role="status" aria-live="polite"></div>
     </div>
     <div class="law" id="pq-gate">connect your keychain to seal or open</div>
@@ -3236,35 +3236,74 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return out;
     }catch(e){ ul.textContent=''; var li=document.createElement('li'); li.textContent='the list of law files did not load: '+(e.message||e); ul.appendChild(li); return null }
   }
-  function lawWaitKeys(ms){
-    return new Promise(function(resolve){
-      var t0=Date.now(), iv=setInterval(function(){ if(pqReady()||Date.now()-t0>ms){clearInterval(iv);resolve(pqReady())} },300);
-    });
-  }
-  $('pq-law-go').onclick=async function(){
-    var st=$('pq-law-stat'), btn=this;
-    if(!window.BPQ){st.textContent='signing needs the post-quantum bundle (bpq-lib.js), which did not load';return}
-    btn.disabled=true;
+  /* One signing identity for the law, whatever souls this keychain has named:
+     the persona context 'pq:signer'. A person signing never meets a soul name. */
+  var LAW_SIGNER='signer';
+  // say(kind, text): kind is 'busy' | 'done' | 'fail'; returns true when signed
+  async function lawSign(say){
+    if(!window.BPQ||!BSIGNER){say('fail','This page did not finish loading. Reload it and press again.');return false}
     try{
-      if(!pqReady()){
-        st.textContent='connecting your keychain: confirm with your passkey…';
-        if($('kc-pass'))$('kc-pass').click();
-        if(!(await lawWaitKeys(120000))){st.textContent='the keychain did not connect, so nothing was signed. Press again to retry.';return}
+      if(!MPRK){
+        say('busy','Confirm with your passkey…');
+        var sup=BZDIDKEY&&await BZDIDKEY.prfBrowserSupport();
+        if(sup===false){say('fail','This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.');return false}
+        CEREMONY=true;
+        try{ keychainOn(await connectSoul()); }
+        catch(e){ say('fail',/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.');return false }
+        finally{ CEREMONY=false }
       }
-      if(!SOUL){st.textContent='this keychain has no soul name yet, so there is no post-quantum id to sign with. Name your soul in the key forge, then press again.';return}
+      say('busy','Signing…');
       var law=LAW||await lawRead();
-      if(!law||!law.length){st.textContent='no law files to sign';return}
-      var k=BSIGNER.keysFor(MPRK,SOUL), at=new Date().toISOString(), sigs=[];
+      if(!law||!law.length){say('fail','The law files did not load. Check your connection and press again.');return false}
+      var k=BSIGNER.keysFor(MPRK,LAW_SIGNER), at=new Date().toISOString(), sigs=[];
       for(var i=0;i<law.length;i++){ if(law[i].bytes) sigs.push({path:law[i].path, sig:window.BPQ.signFile(k,law[i].bytes,at)}) }
       var bundle={bpq:1, kind:'law-signatures', at:at, card:window.BPQ.card(k), signatures:sigs};
       var name='law-signatures-'+k.id.slice(5,13)+'-'+at.slice(0,10)+'.json';
-      var a=pqSave(new TextEncoder().encode(JSON.stringify(bundle,null,1)),name,'save '+name+' again');
-      st.textContent='✓ signed '+sigs.length+' law files as '+k.id+'. The receipt '+name+' was saved to your downloads; agents take it from there. ';
-      st.appendChild(a);
+      var a=pqSave(new TextEncoder().encode(JSON.stringify(bundle,null,1)),name,'save the receipt again');
+      a.id='law-receipt';
       a.click();
-    }catch(e){ st.textContent='could not sign: '+(e.message||e) }
+      say('done','Done. You signed '+sigs.length+' law files. You can close this page.',a);
+      return true;
+    }catch(e){ say('fail','Something went wrong, so nothing was signed. Press Sign again.'); return false }
+  }
+  $('pq-law-go').onclick=async function(){
+    var st=$('pq-law-stat'), btn=this;
+    btn.disabled=true;
+    try{ await lawSign(function(kind,text,a){ st.textContent=text; if(a){st.appendChild(document.createTextNode(' '));st.appendChild(a)} }) }
     finally{ btn.disabled=false }
   };
+  /* wallet.html#sign: the whole job on one sheet. One sentence, one button; the
+     rest of the wallet stays out of sight. */
+  function signSheet(){
+    if(location.hash!=='#sign'||$('sign-sheet'))return;
+    var d=document.createElement('div');
+    d.id='sign-sheet'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','sign-h');
+    d.style.cssText='position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto';
+    d.innerHTML='<div style="max-width:420px;width:100%;text-align:center">'+
+      '<h2 id="sign-h" style="margin:0 0 12px">Sign the law</h2>'+
+      '<p id="sign-say" style="margin:0 0 20px;line-height:1.5">Press Sign, then confirm with your passkey.</p>'+
+      '<button type="button" id="sign-go" class="gold" style="min-width:200px;min-height:52px;font-size:18px">✍ Sign</button>'+
+      '<p id="sign-stat" role="status" aria-live="polite" style="margin:16px 0 0;min-height:24px;line-height:1.5"></p>'+
+      '<details id="sign-read" style="margin-top:24px;text-align:left"><summary style="cursor:pointer;color:var(--dim)">read what you are signing</summary><ul id="sign-list" style="margin:8px 0;padding-left:18px"></ul></details>'+
+      '</div>';
+    document.body.appendChild(d);
+    $('sign-read').addEventListener('toggle',async function(){
+      if(!this.open||$('sign-list').childElementCount)return;
+      var law=LAW||await lawRead()||[];
+      law.forEach(function(x){ var li=document.createElement('li'), a=document.createElement('a'); a.href='../'+x.path; a.target='_blank'; a.rel='noopener'; a.textContent=x.path.replace(/^docs\//,'').replace(/\.md$/,''); li.appendChild(a); $('sign-list').appendChild(li) });
+    });
+    $('sign-go').onclick=async function(){
+      var btn=this; btn.disabled=true;
+      var ok=await lawSign(function(kind,text,a){
+        var st=$('sign-stat'); st.textContent=text; st.setAttribute('data-state',kind);
+        if(a){ a.style.display='block'; a.style.marginTop='8px'; st.appendChild(a) }
+      });
+      if(ok){ btn.hidden=true; $('sign-say').hidden=true } else btn.disabled=false;
+    };
+    $('sign-go').focus();
+  }
+  signSheet();
+  addEventListener('hashchange',signSheet);
   if(/^#pq-law/.test(location.hash))lawRead();
   $('pq-law-show').onclick=function(){ lawRead() };
   addEventListener('hashchange',function(){ if(/^#pq-law/.test(location.hash)&&!LAW)lawRead() });
@@ -4148,7 +4187,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#pq-law'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
