@@ -12,7 +12,11 @@
    the page, and Austras koks — drawn from these same counts by
    scripts/atlas-tree.mjs — is the hero in three readings: a fir bearing comb
    (new bee), a wheel of light (raver), a graph you can check (cypherpunk).
-   The keep rows reuse their destinations' own words (bd.*, watch.*). */
+   The keep rows reuse their destinations' own words (bd.*, watch.*).
+   THE CHOSEN UI PASS (2026-10-05): the founder's chosen UI is worn by all three
+   readings. skaists.css (the compiled token sheet) is linked ahead of atlas.css
+   so the hub paints with skaists tokens; only the dress moved, the markup and
+   every register's structure are as before. */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { countSurfacesOnDisk, listSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
@@ -179,7 +183,8 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
 <link rel="preload" href="fonts/skaists.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="atlas.css?v=5">
+<link rel="stylesheet" href="skaists.css">
+<link rel="stylesheet" href="atlas.css?v=6">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
