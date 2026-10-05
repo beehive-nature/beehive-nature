@@ -62,7 +62,8 @@ const mockOther = ctx => ctx.route(OTHER_RE, async route => {
   // PUBLIC-CONSTANT: Vaulta mainnet chain id (public network identifier, mirrored from the vaulta adapter)
   if (/get_info/.test(u)) return J({ chain_id: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', head_block_num: 100, head_block_id: '00'.repeat(32) }); // PUBLIC-CONSTANT
   if (/get_table_rows/.test(u)) return J({ rows: [], more: false, next_key: '' });
-  if (/get_account/.test(u)) return J({ account_name: 'gatesoul', core_liquid_balance: '0.0000 A', ram_usage: 100, ram_quota: 8192, permissions: [] });
+  if (/get_currency_balance/.test(u)) return J(['0.0000 A']);
+  if (/get_account/.test(u)) return J({ account_name: 'gatesoul', core_liquid_balance: '0.0000 EOS', ram_usage: 100, ram_quota: 8192, permissions: [] });
   if (/hive/.test(u)) return J({ jsonrpc: '2.0', id: 1, result: [] });
   return J({});
 });
@@ -349,14 +350,14 @@ try {
   console.log('D2 · MUTATION — the button forgets the cap; the signer must not:');
   {
     const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
-    const anchor = `if(!capGate('A',amt))return;`;
+    const anchor = `if(!capGate('A',amt,st))return;`;
     const page = await connectedPage(ctx, src => {
       if (!src.includes(anchor)) return null;
       // strip EVERY call-site cap check in the page — the buttons now "forget"
       return src.split(anchor).join('/* cap check DELETED by the gate */')
                 .replace(/capAssert\(asset\.symbol,Number\(amount\)\);/, 'capAssert(asset.symbol,Number(amount));');
     });
-    const mutatedOk = await page.evaluate(() => !/if\(!capGate\('A',amt\)\)return;/.test(document.documentElement.innerHTML));
+    const mutatedOk = await page.evaluate(() => !/if\(!capGate\('A',amt,st\)\)return;/.test(document.documentElement.innerHTML));
     ok('the mutation landed (the Vaulta call-site check is gone from the served page)', mutatedOk);
     const r = await page.evaluate(async () => {
       const P = window.BNRPAY;

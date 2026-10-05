@@ -158,10 +158,10 @@ try {
     // vault section where a reader can reach it, clear of that banner, never under it
     await page.evaluate(() => window.scrollBy(0, document.getElementById('vault-sec').getBoundingClientRect().top - 240));
     await page.locator('#vault-sec').click({ position: { x: 8, y: 8 } }); // wakes the panel's vault hook
-    await page.waitForFunction(() => /short by/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
+    await page.waitForFunction(() => /publishing needs/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
     await page.waitForTimeout(600);
     const armed = await page.locator('#arw-stat').innerText();
-    ok('panel armed with fee + shortfall honesty (unfunded)', /short by/.test(armed) && /AR/.test(armed), armed.slice(0, 90));
+    ok('panel armed with fee + shortfall honesty (unfunded), in one sentence and its one link', /publishing needs [0-9.]+ AR/.test(armed) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#ch-arweave"]')), armed.slice(0, 120));
     ok('publish control disabled while unfunded', await page.locator('#arw-go').isDisabled());
     // arm the funds: balance mock flips to funded, publish should go through
     await page.evaluate(() => { window.__flipFunded = true; });
@@ -178,10 +178,11 @@ try {
     await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
     ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
-    await page.waitForFunction(() => document.getElementById('arw-stat').textContent.includes('expected verdict'), null, { timeout: 10000 })
+    await page.waitForFunction(() => /does not hold enough AR/.test(document.getElementById('arw-stat').innerText), null, { timeout: 10000 })
       .catch(() => {});
     const after = await page.locator('#arw-stat').innerText();
-    ok('unfunded verdict explained honestly (arweave-js identical)', /expected verdict/.test(after), after.slice(0, 120));
+    ok('unfunded verdict said calmly where the reader pressed, the gateway\'s own words kept for cypherpunk', /does not hold enough AR for the fee, so nothing was published/.test(after) &&
+      await page.evaluate(() => /FAILED: .*verification/i.test((document.querySelector('#arw-stat .wl-cyd') || {}).textContent || '') && (document.getElementById('tx-out').textContent || '') === ''), after.slice(0, 160));
     ok('tx actually POSTed (built + signed + sent)', posted.length === 1, 'posted=' + posted.length);
     if (posted[0]) {
       const tx = posted[0];
@@ -288,9 +289,9 @@ try {
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';
-      return /expected verdict|ANCHORED|signed|outbox|verification|FAILED|SUBMITTED|arweaveWallet/i.test(a + o);
+      return /does not hold enough AR|said no|confirmed|did not answer|could not sign/i.test(a + o);   // a settled state, not a step on the way
     }, null, { timeout: 25000 }).catch(() => {});
-    ok('inject path POSTed a signed tx (no vault JWK)', posted.length >= 1, 'posted=' + posted.length);
+    ok('inject path POSTed a signed tx (no vault JWK)', posted.length >= 1, 'posted=' + posted.length + ' · ' + await page.locator('#arw-stat').textContent());
     if (posted[0]) {
       ok('inject-signed tx format 2', posted[0].format === 2);
       ok('inject signature 512-byte RSA-PSS', unb64len(posted[0].signature) === 512);
@@ -298,7 +299,7 @@ try {
     }
     const txOut = await page.locator('#tx-out').innerText().catch(() => '');
     const arwStat = await page.locator('#arw-stat').innerText();
-    ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
+    ok('inject sign path spoke honestly, in the Arweave panel and nowhere else', /enough AR|said no|confirmed|sent/i.test(arwStat) && txOut === '', (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
     ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
     await page.setViewportSize({width:390,height:844});
@@ -311,7 +312,7 @@ try {
     ok('mobile review keeps its title and both decisions visible',await page.locator('#arw-file-dialog-title').isVisible()&&await page.locator('#arw-file-dialog').evaluate(el=>{const box=el.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth&&box.top>=0&&box.bottom<=innerHeight})&&await page.locator('#arw-file-cancel').isVisible()&&await page.locator('#arw-file-confirm').isVisible());
     ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
     await page.locator('#arw-file-cancel').click();
-    await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('Cancelled'));
+    await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('cancelled before signing'));
     ok('cancel refuses signing and publication',posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});
     await page.locator('#arw-file-confirm').click();
@@ -321,11 +322,11 @@ try {
     await page.evaluate(()=>{window.__outboxBackup=localStorage.getItem('bnr_outbox_v1');window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='bnr_outbox_v1')throw new DOMException('Storage full','QuotaExceededError');return window.__storageSet.call(this,key,value);};});
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
-    ok('blocked outbox stops submission and preserves the prior receipt',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox could not save')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')===window.__outboxBackup));
+    ok('blocked outbox stops submission and preserves the prior receipt',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('out of room for the signed copy')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')===window.__outboxBackup));
     await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;localStorage.setItem('bnr_outbox_v1','not valid JSON');});
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
-    ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('outbox is unavailable')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
+    ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('cannot be read on this device')&&await page.evaluate(()=>!!document.querySelector('#arw-file-status a[href="#outbox-sec"]'))&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
     await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
     await page.evaluate(()=>{const seed=JSON.parse(window.__outboxBackup)[0];localStorage.setItem('bnr_outbox_v1',JSON.stringify(Array.from({length:80},(_,i)=>({...seed,intent_id:'retention-fixture-'+i,phase:i<40?'signed':'confirmed'}))));});
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
@@ -334,7 +335,7 @@ try {
     const beforeBadSignature=posted.length;
     await page.evaluate(()=>{window.__originalSignature=arweaveWallet.signature;arweaveWallet.signature=async()=>new Uint8Array(512)});
     await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
-    ok('wrong signing key or invalid extension signature is refused before submission',posted.length===beforeBadSignature&&(await page.locator('#arw-file-status').innerText()).includes('signature did not match'));
+    ok('wrong signing key or invalid extension signature is refused before submission',posted.length===beforeBadSignature&&(await page.locator('#arw-file-status').innerText()).includes('signature that does not match this file')&&await page.evaluate(()=>!!document.querySelector('#arw-file-status button.wl-act')));
     await page.evaluate(()=>{arweaveWallet.signature=window.__originalSignature});
     const beforeOversize=posted.length;
     await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
@@ -355,7 +356,7 @@ try {
     const t = await page.locator('#arw-stat').innerText();
     ok('empty path names connect / Wander / public bind', /Wander|connect|public address|forge/i.test(t), t.slice(0, 120));
     ok('empty path does not demand vault JWK as required', !/seal your JWK|paste it; the type is detected/i.test(t), t.slice(0, 120));
-    ok('connect button is the primary control', await page.locator('#arw-connect').isVisible());
+    ok('with no Arweave extension in this browser, no extension button shows: your own keys come first', !(await page.locator('#arw-connect').isVisible()) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#kc-sec"]')));
     ok('JWK scaffold is in a demoted details', await page.locator('#arw-jwk-scaffold summary').innerText().then(x => /scaffold|optional|advanced/i.test(x)));
     ok('kc-rec demoted to scaffold', await page.locator('#kc-rec-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
     ok('vlt-secret demoted to scaffold', await page.locator('#vlt-secret-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));

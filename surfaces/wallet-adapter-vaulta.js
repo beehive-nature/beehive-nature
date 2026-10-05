@@ -34,6 +34,7 @@ var RPC_TIMEOUT = 9000;
 
 /* RPC account rows still use the historical EOS symbol on Vaulta. Keep the
    numeric text exactly as returned; only the display unit belongs to this UI. */
+var A_TOKEN = 'core.vaulta';   // the A token contract on Vaulta (mainnet and Jungle4)
 function displayA(raw) {
   if(typeof raw!=='string'||!/^\d+\.\d{4} (EOS|A)$/.test(raw))throw new Error('Vaulta returned no valid liquid balance');
   return raw.replace(/ EOS$/, ' A');
@@ -69,6 +70,7 @@ async function railPost(net, path, body) {
       var d = null; try { d = await res.json() } catch (e) {}
       if (d && d.error) {
         var msg = (d.error.details && d.error.details[0] && d.error.details[0].message) || d.error.what || 'rail refused';
+        if (d.error.name && msg.indexOf(d.error.name) < 0) msg += ' [' + d.error.name + ']';
         var err = new Error(msg); err.code = E.SUBMIT_REFUSED; throw err;
       }
       lastErr = new Error('host ' + hs[i] + ' said ' + res.status);
@@ -221,16 +223,22 @@ var METHODS = {
   },
   balance: async function (p) {
     if (!p || !p.address) throw bad('balance needs {address}');
-    var d = await railPost(p.network === 'jungle4' ? 'jungle4' : 'mainnet', '/v1/chain/get_account', { account_name: p.address });
+    var net = p.network === 'jungle4' ? 'jungle4' : 'mainnet';
+    var d = await railPost(net, '/v1/chain/get_account', { account_name: p.address });
     if (!d || d.error) { var e = new Error('account ' + p.address + ' unreadable'); e.code = E.NOT_FOUND; throw e }
-    return { unit: 'A', quantity: displayA(d.core_liquid_balance) };
+    // A is the token of core.vaulta. get_account's core_liquid_balance is EOS
+    // (eosio.token), a different token that swaps 1:1 into A but is not A until it does
+    var a = await railPost(net, '/v1/chain/get_currency_balance', { code: A_TOKEN, account: p.address, symbol: 'A' });
+    if (!Array.isArray(a)) { var e2 = new Error('A balance of ' + p.address + ' unreadable'); e2.code = E.RAIL_UNREACHABLE; throw e2 }
+    return { unit: 'A', quantity: a.length ? displayA(a[0]) : '0.0000 A' };
   },
   buildSend: async function (p) {
     p = p || {};
     if (!p.from || !p.to || !p.quantity) throw bad('buildSend needs {from,to,quantity}');
     var actz = [{ actor: p.from, permission: p.auth || 'active' }];
     var data = { from: p.from, to: p.to, quantity: p.quantity, memo: p.memo || '' };
-    return buildIntent(netOf(p), 'eosio.token', 'transfer', data, actz,
+    // A moves through core.vaulta; EOS (the old core coin) through eosio.token
+    return buildIntent(netOf(p), / A$/.test(String(p.quantity)) ? A_TOKEN : 'eosio.token', 'transfer', data, actz,
       'Vaulta transfer ' + p.quantity + ' from ' + p.from + ' to ' + p.to + (p.memo ? ' — memo "' + p.memo + '"' : '') + ' on ' + netOf(p));
   },
   buildAction: async function (p) {

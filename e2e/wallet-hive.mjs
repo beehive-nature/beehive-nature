@@ -65,7 +65,8 @@ try {
       }
       if (VAULTA_RE.test(url)) {
         if (u.pathname.endsWith('/get_table_rows')) return json({ rows: [], more: false, next_key: '' });
-        return json({ account_name: 'gatesoul', core_liquid_balance: '0.0000 A', permissions: [] });
+        if (u.pathname.endsWith('/get_currency_balance')) return json(['0.0000 A']);
+        return json({ account_name: 'gatesoul', core_liquid_balance: '0.0000 EOS', permissions: [] });
       }
       if (u.origin !== ORIGIN) return route.abort();
       const path = resolve(ROOT, '.' + decodeURIComponent(u.pathname));

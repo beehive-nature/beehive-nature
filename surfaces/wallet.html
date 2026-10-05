@@ -443,6 +443,9 @@ body[data-reg] main section summary{min-height:44px;box-sizing:border-box}
 #wl-bee,#wl-bar,#wl-dock,#wl-rave,#wl-cy,#wl-deck,#wl-cards,#wl-lines{display:none}
 body[data-reg="bee"] #wl-bee,body[data-reg="raver"] #wl-rave,body[data-reg="cypherpunk"] #wl-cy{display:block}
 body[data-reg="bee"] #wl-bar,body[data-reg="raver"] #wl-dock{display:flex}
+/* the raw detail of a state (wlSay {cy}) is cypherpunk's alone, even before register.js mounts */
+.wl-cyd{display:none} body[data-reg="cypherpunk"] .wl-cyd{display:inline}
+.wl-act{margin-inline-start:8px}
 [data-wl-card][data-read="true"] .wl-un,[data-wl-card]:not([data-read="true"]) .wl-fig{display:none}
 .wl-stale{display:none} [data-wl-card][data-read="true"][data-err="true"] .wl-stale{display:block}
 [data-wl-card][data-err="true"] .wl-fig{opacity:.62}
@@ -725,7 +728,9 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
 /* a balance read marks its own stat line: failed or not. "err" is a colour the
    page also uses for "live, but short of a fee", so the mirrors never guess from it */
 window.wlRead=function(el,ok){if(!el)return;if(ok)el.removeAttribute('data-read-failed');else el.setAttribute('data-read-failed','true');};
-window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(typeof p==='string')el.appendChild(document.createTextNode(p));else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
+/* a state is one calm sentence and its one action: parts are text, a link
+   {to,t}, a button {btn,on}, and the raw detail {cy}, which only cypherpunk shows */
+window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(p==null||p==='')return;if(typeof p==='string')el.appendChild(document.createTextNode(p));else if(p.cy!=null){var s=document.createElement('span');s.className='wl-cyd';s.textContent=' '+p.cy;el.appendChild(s);}else if(p.btn){var b=document.createElement('button');b.type='button';b.className='wl-act';b.textContent=p.btn;if(p.on)b.addEventListener('click',p.on);el.appendChild(b);}else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
 <div id="wallet-identity">
@@ -1386,13 +1391,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <b>Gold:</b> connect / inject / derive enrolls the key — New-bee never pastes a private key.
   <b>While finalizing:</b> open <b>scaffold · recovery</b> to paste your existing <b>active</b> key
   <b>once</b> to build an updateauth that <b>adds</b> your bzDiD keys alongside every key already
-  on your account (nothing removed, threshold 1: <b>the derived key AND the account passkey can
-  both sign</b>). The pasted key stays in tab memory only and is scrubbed the moment the
+  on your account (nothing removed, threshold 1: <b>this page signs with the derived key; an account passkey, if ticked, joins the account but this page cannot sign with it yet</b>). The pasted key stays in tab memory only and is scrubbed the moment the
   transaction is sent.</div>
   <div class="row" data-reg="cypherpunk">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
       <input type="checkbox" id="br-wa" checked style="flex:0;min-width:14px;height:14px">
-      also enroll an account passkey on this origin (PUB_WA at threshold 1 — touch/passkey can sign too)
+      also enroll an account passkey on this origin (PUB_WA at threshold 1 on the account; this page does not sign with it yet)
     </label>
   </div>
   <details id="br-wif-scaffold" style="margin-top:10px" data-reg="cypherpunk">
@@ -2220,7 +2224,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       try {
         var $ = function (id) { return document.getElementById(id); };
         var box = $('arw-js'), go = $('arw-go'), stat = $('arw-stat');
-        var conn = $('arw-connect'), addrEl = $('arw-addr'), publishing=false, refreshing=false;
+        var conn = $('arw-connect'), addrEl = $('arw-addr'), publishing=false, refreshing=false, held=false;
         if (!box || !go || !stat) return;
         var ORBIT = (window.WALLET_PROFILE && WALLET_PROFILE.anchor) || { path: '', sha256: '', tags: [] };
         var optLabel = document.querySelector('#arw-what option[value="orbit-anchor"]');
@@ -2251,33 +2255,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           return (e && e.meta && e.meta.address) || null;
         }
         var arWaits = 0;
+        var heldFor = '';   /* the address and signer a held result was written for */
+        function sayStat(parts) { if (!held) wlSay(stat, parts); }
         async function refresh() {
           if(publishing||refreshing)return;
           var A = window.BNRAR;
           // a slow page load is not a failure: wait for the module a little before saying so
-          if (!A) { if (++arWaits < 20) { setTimeout(refresh, 500); return; } paint('The Arweave part of the wallet did not load. Reload the page.', 'var(--amber)'); return; }
+          if (!A) { if (++arWaits < 20) { setTimeout(refresh, 500); return; } sayStat(['the Arweave part of the wallet did not load. ', { btn: 'reload the page', on: function () { location.reload(); } }, { cy: 'window.BNRAR missing after 10 s' }]); return; }
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
           var inj = arInject();
           var hasInj = !!(inj && inj.present && inj.present());
           var addr = null;
           try { addr = await resolveAddr(); } catch (e) { addr = null; }
           if (addrEl) {
-            addrEl.textContent = addr ? addr : (hasInj ? 'an Arweave extension is here · tap connect to use it' : 'your Arweave address appears when your keychain is connected');
+            addrEl.textContent = addr ? addr : 'your Arweave address appears when your keychain is connected';
             addrEl.style.color = addr ? 'var(--leaf)' : 'var(--dim)';
           }
           var lane = inj && inj.signLane ? inj.signLane() : null;
-          if (conn) conn.textContent = lane === 'inject' ? '✓ Arweave wallet' : '🔌 connect Arweave wallet';
+          if (held && heldFor && heldFor !== (addr || '') + '|' + (lane || '')) held = false;   /* a new address or signer: the old result no longer applies */
+          /* order of ways: your own keys first; an Arweave extension is a quiet last
+             resort, offered only when one is actually present in this browser */
+          if (conn) { conn.hidden = !hasInj; conn.textContent = lane === 'inject' ? '✓ using your Arweave extension' : 'use an Arweave extension instead'; }
           if (!addr) {
             if (window.wlClearRollup) window.wlClearRollup('ar');
             else if (balEl) balEl.textContent = '';
-            if (statEl) { if (hasInj) statEl.textContent = 'an extension is ready · tap connect'; else wlSay(statEl, [{ to: 'kc-sec', t: 'connect your keychain' }, ' to see your Arweave address']); statEl.className = 'stat'; }
-            if (hasInj) paint('An Arweave extension is here. Tap connect Arweave wallet to use its address, or connect your keychain to use the address made from your own keys.');
-            else wlSay(stat, ['Your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to see it.']);
+            if (statEl) { wlSay(statEl, [{ to: 'kc-sec', t: 'connect your keychain' }, ' to see your Arweave address']); statEl.className = 'stat'; }
+            sayStat(['your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to see it.', hasInj ? { cy: 'an injected window.arweaveWallet is also present' } : null]);
             go.disabled = true;
             return;
           }
-          if (statEl) statEl.textContent = 'reading ' + addr.slice(0, 10) + '…';
-          paint('reading ' + addr + '…');
+          if (statEl) statEl.textContent = 'reading your AR…';
+          sayStat(['reading your AR…', { cy: addr }]);
           refreshing=true;
           try {
             var bal = await A.balance(addr);
@@ -2292,54 +2300,57 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             else if (balEl) balEl.textContent = arUnits(winston) + ' AR';
             if (statEl) {
               if (winston === 0n && addr === ownAr()) { statEl.className = 'stat'; wlSay(statEl, ['empty for now · ', { to: 'arw-sec', t: 'add AR to publish' }]); }
-              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + arUnits(need-winston) + ' AR for the anchor'; }
+              else { statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'); statEl.textContent = winston >= need ? 'ready to publish' : 'needs ' + arUnits(need-winston) + ' more AR to publish'; }
             }
-            paint('address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' +
-              arUnits(need) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
-              (winston < need ? ' — ⚠ short by ' + arUnits(need-winston) + ' AR: fund the address, the tx is ready' : ' — funded, ready') +
-              (lane === 'inject' ? ' · sign via extension' : lane === 'derived' ? ' · made from your keys' : lane === 'vault' ? ' · sign via vault scaffold if publishing' : ' · nothing here signs for it'));
+            var detail = 'address ' + addr + ' · balance ' + arUnits(winston) + ' AR · anchor fee ' + arUnits(need) + ' AR (gateway-quoted)' +
+              (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
+              (lane === 'inject' ? ' · signs via the extension' : lane === 'derived' ? ' · made from your keys' : lane === 'vault' ? ' · signs via the vault JWK' : ' · nothing here signs for it');
+            if (!lane) sayStat(['nothing here signs for this address yet. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to publish from your own Arweave address.', { cy: detail }]);
+            else if (winston < need) sayStat(['this address holds ' + arUnits(winston) + ' AR, and publishing needs ' + arUnits(need) + ' AR. add AR to it, then publish. ', { to: 'ch-arweave', t: 'see your Arweave address' }, { cy: detail }]);
+            else sayStat(['ready to publish. this address holds ' + arUnits(winston) + ' AR.', { cy: detail }]);
             go.disabled = winston < need || !lane;
             if (typeof wlRead === 'function') wlRead(statEl, true);
           } catch (err) {
-            if (statEl) { statEl.textContent = 'read failed'; if (typeof wlRead === 'function') wlRead(statEl, false); }
+            if (statEl) { wlSay(statEl, ['could not read your AR just now. ', { btn: 'try again', on: function () { refresh(); } }]); if (typeof wlRead === 'function') wlRead(statEl, false); }
             go.disabled=true;
-            paint(esc('gateway read failed: ' + (err && err.message ? err.message : err)), 'var(--amber)');
+            sayStat(['the Arweave network did not answer just now. ', { btn: 'try again', on: function () { refresh(); } }, { cy: 'gateway read failed: ' + (err && err.message ? err.message : err) }]);
           }finally{refreshing=false}
         }
         if (conn) conn.addEventListener('click', async function () {
           var inj = arInject();
           if (!inj || !inj.connect) {
-            paint('wallet shell still loading — try again in a moment', 'var(--amber)');
+            wlSay(stat, ['the wallet is still loading. ', { btn: 'try again', on: function () { conn.click(); } }]);
             return;
           }
           if (!inj.present()) {
-            if (ownAr()) paint('Your Arweave address already comes from your own keys, so no extension is needed.');
-            else wlSay(stat, ['Your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to see it.']);
+            if (ownAr()) wlSay(stat, ['your Arweave address already comes from your own keys, so no extension is needed.']);
+            else wlSay(stat, ['your Arweave address comes from your own keys. ', { to: 'kc-sec', t: 'connect your keychain' }, ' to see it.']);
             return;
           }
           conn.disabled = true;
-          paint('asking the injected Arweave wallet…');
+          wlSay(stat, ['asking your Arweave extension…']);
           try {
             var a = await inj.connect();
-            paint('✓ connected ' + a + ' — public only; private key stays in the extension');
+            wlSay(stat, ['your Arweave extension is connected. its key stays in the extension.', { cy: 'connected ' + a + ' · public only' }]);
             await refresh();
           } catch (err) {
-            paint(esc(err && err.message ? err.message : String(err)), 'var(--amber)');
+            wlSay(stat, ['your Arweave extension did not connect. ', { btn: 'try again', on: function () { conn.click(); } }, { cy: err && err.message ? err.message : String(err) }]);
           } finally { conn.disabled = false; }
         });
         go.addEventListener('click', async function () {
           var W = window.BNRWALLET, V = window.BNRVAULT;
-          if (!W) { paint('the wallet shell did not load', 'var(--amber)'); return; }
-          if(publishing)return;publishing=true;go.disabled = true;
-          paint('fetching the committed manifest…');
+          if (!W) { wlSay(stat, ['the wallet did not finish loading. ', { btn: 'reload the page', on: function () { location.reload(); } }]); return; }
+          if(publishing)return;publishing=true;go.disabled = true;held=true;   /* the line keeps this result until the reader acts again */
+          try { var inj0 = arInject(); heldFor = ((await resolveAddr()) || '') + '|' + ((inj0 && inj0.signLane ? inj0.signLane() : null) || ''); } catch (h0) { heldFor = ''; }
+          var arSay = function (parts) { wlSay(stat, parts); };
+          arSay(['checking the anchor file…']);
           try {
             var res = await fetch(ORBIT.path);
             if (!res.ok) throw new Error('could not fetch ' + ORBIT.path + ' (' + res.status + ')');
             var bytes = new Uint8Array(await res.arrayBuffer());
             var sha = await hexSha(bytes);
             if (sha !== ORBIT.sha256) {
-              paint('REFUSED — the deployed file\'s sha256 is ' + sha.slice(0, 16) + '… but the pinned anchor hash is ' +
-                ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
+              arSay(['the file on this site no longer matches the pinned anchor, so nothing was published.', { cy: 'REFUSED: deployed sha256 ' + sha + ' differs from the pinned ' + ORBIT.sha256 + '; a drifted file is never anchored' }]);
               return;
             }
             var inj = arInject(), lane = inj && inj.signLane ? inj.signLane() : null;
@@ -2352,25 +2363,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               wlSay(stat, ['Nothing here signs for this address yet. ', { to: 'kc-sec', t: 'Connect your keychain' }, ' to publish from your own Arweave address.']);
               return;
             }
-            paint('payload verified (' + bytes.length + ' B, sha256 pinned) · ' +
-              (lane === 'inject' ? 'the extension signs…' : lane === 'derived' ? 'your own key signs…' : 'the vault key signs…'));
-            var r = await W.walletPublish(bytes, ORBIT.tags, lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false });
+            arSay(['signing…', { cy: 'payload verified (' + bytes.length + ' B, sha256 pinned) · ' + (lane === 'inject' ? 'the extension signs' : lane === 'derived' ? 'your own key signs' : 'the vault key signs') }]);
+            var o = lane === 'inject' ? { inject: true } : lane === 'derived' ? { inject: false, derived: true } : { jwk: jwk, inject: false };
+            o.say = arSay; o.again = { btn: 'try again', on: function () { go.click(); } };
+            var r = await W.walletPublish(bytes, ORBIT.tags, o);
             if (r && r.phase === 'confirmed') {
-              paint('⚓ ANCHORED — read back from the gateway: ' + (r.evidence && r.evidence.read));
+              arSay(['anchored. the network confirmed it.', { cy: 'ANCHORED: read back from the gateway: ' + (r.evidence && r.evidence.read) + ' · tx ' + r.ref }]);
               var a = document.createElement('a');
               a.href = 'https://arweave.net/' + r.ref;
               a.target = '_blank'; a.rel = 'noopener noreferrer';
-              a.textContent = 'live on arweave: ' + r.ref;
-              a.style.color = 'var(--cyan)';
-              stat.appendChild(document.createElement('br'));
+              a.textContent = 'see it on Arweave';
+              stat.appendChild(document.createTextNode(' '));
               stat.appendChild(a);
-            } else if (r && r.phase === 'failed' && /verification|fund/i.test(JSON.stringify(r.evidence || {}))) {
-              paint('the gateway rejected the tx — for an UNFUNDED key this is the expected verdict ' +
-                '(arweave-js gets the identical answer): everything is proven except the money. ' +
-                'The signed anchor sits in the outbox; fund this address and tap again.', 'var(--amber)');
             }
           } catch (err) {
-            paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
+            arSay([(err && err.calm) || 'something went wrong, so nothing was published. ', { btn: 'try again', on: function () { go.click(); } }, { cy: 'publish failed: ' + (err && err.message ? err.message : err) }]);
           } finally {
             publishing=false;go.disabled = false;
           }
@@ -2379,30 +2386,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $('arw-file-review').onclick=async function(){
           var button=$('arw-file-review'),note=$('arw-file-status'),file=$('arw-file').files[0];
           if(publishing)return;
-          if(!file||file.size===0||file.size>30000){note.textContent='Choose a non-empty file up to 30,000 bytes.';return;}
+          if(!file||file.size===0||file.size>30000){wlSay(note,[file&&file.size>30000?'this file is larger than 30,000 bytes. choose a smaller one.':'choose a file first, up to 30,000 bytes.']);$('arw-file').focus();return;}
           var W=window.BNRWALLET;
           var lane=arInject()&&arInject().signLane?arInject().signLane():null, viaInject=lane==='inject', viaKeys=lane==='derived';
-          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'Connect your keychain'},' to publish from your own Arweave address.']);return;}
+          if(!W||(!viaInject&&!viaKeys)){wlSay(note,[{to:'kc-sec',t:'connect your keychain'},' to publish from your own Arweave address.']);return;}
           publishing=true;button.disabled=true;$('arw-file').disabled=true;
-          note.textContent='Preparing this file and its exact network fee. No payment has been signed.';
+          wlSay(note,['preparing this file and its exact fee. nothing is signed yet.']);
           try{
             var bytes=new Uint8Array(await file.arrayBuffer()),sha=await hexSha(bytes);
             var type=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(file.type)?file.type:'application/octet-stream';
-            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,review:async function(plan){
+            var result=await W.walletPublish(bytes,[['Content-Type',type],['App-Name','skaists heART WALLet'],['File-SHA256',sha]],{inject:viaInject,derived:viaKeys,again:{btn:'try again',on:function(){$('arw-file-review').click()}},say:function(parts,phase){wlSay(note,parts);note.setAttribute('data-phase',phase||'')},review:async function(plan){
               var dialog=$('arw-file-dialog'),details=$('arw-file-plan');details.replaceChildren();
               [file.name,bytes.length.toLocaleString()+' bytes','Network: Arweave','Paying address: '+plan.address,'Exact fee: '+arUnits(plan.feeWinston)+' AR','SHA-256: '+sha,'Public storage. Publication cannot be undone.'].forEach(function(text){var line=document.createElement('div');line.style.marginBottom='10px';line.textContent=text;details.appendChild(line)});
               return new Promise(function(resolve){var finish=function(accepted){dialog.close();resolve(accepted)};$('arw-file-confirm').onclick=function(){finish(true)};$('arw-file-cancel').onclick=function(){finish(false)};dialog.oncancel=function(e){e.preventDefault();finish(false)};dialog.showModal();$('arw-file-cancel').focus()});
             }});
-            if(!result){note.textContent='The wallet did not complete publication. No stored-file receipt is available.';return;}
-            note.textContent=result.phase==='cancelled'?'Cancelled before signing. Nothing was published.':'Publication '+result.phase+'.';
-            if(result.phase!=='cancelled'){var receipt=document.createElement('a');receipt.href='#outbox-sec';receipt.textContent='View the transaction receipt';note.appendChild(document.createElement('br'));note.appendChild(receipt)}
-            if(result.ref){var link=document.createElement('a');link.href='https://arweave.net/'+encodeURIComponent(result.ref);link.target='_blank';link.rel='noopener noreferrer';link.textContent='View transaction '+result.ref+' (new tab)';note.appendChild(document.createElement('br'));note.appendChild(link)}
-          }catch(error){note.textContent='File publication did not complete: '+(error.message||'unknown error')}
+            if(!result)return;   /* walletPublish already said why, in this line */
+            if(result.phase==='cancelled'){wlSay(note,['cancelled before signing. nothing was published.']);return;}
+            if(result.phase==='confirmed'){wlSay(note,['published. the network confirmed it.',{cy:'tx '+result.ref}]);}
+            if(result.ref&&result.phase==='confirmed'){var link=document.createElement('a');link.href='https://arweave.net/'+encodeURIComponent(result.ref);link.target='_blank';link.rel='noopener noreferrer';link.textContent='see it on Arweave';note.appendChild(document.createTextNode(' '));note.appendChild(link)}
+          }catch(error){wlSay(note,[(error&&error.calm)||'something went wrong, so nothing was published. ',{btn:'try again',on:function(){$('arw-file-review').click()}},{cy:'file publication did not complete: '+((error&&error.message)||'unknown error')}])}
           finally{publishing=false;button.disabled=false;$('arw-file').disabled=false}
         };
         box.hidden = false;
-        paint('…');
+        wlSay(stat, ['reading your Arweave address…']);
         setInterval(function () { if (!document.hidden&&!publishing) refresh(); }, 45000);
+        /* the held result clears on the reader's next act in this panel (not the publish press itself) */
+        ['click','input','change'].forEach(function (t) { box.addEventListener(t, function (ev) { if (!publishing && !(ev.target && ev.target.closest && ev.target.closest('#arw-go'))) held = false; }, true); });
+        ['ar-inject-connected','vault-unlocked'].forEach(function (t) { document.addEventListener(t, function () { if (!publishing) held = false; }, true); });
         setTimeout(refresh, 700);
         var vsec = document.getElementById('vault-sec');
         if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); });
@@ -2412,7 +2422,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var s = document.getElementById('arw-stat');
         var b = document.getElementById('arw-js');
         if (b) b.hidden = false;
-        if (s) s.textContent = 'arweave panel failed to start: ' + (err && err.message ? err.message : err);
+        if (s && window.wlSay) wlSay(s, ['the Arweave part of the wallet did not start. ', { btn: 'reload the page', on: function () { location.reload(); } }, { cy: 'arweave panel failed to start: ' + (err && err.message ? err.message : err) }]);
       }
     })();
   </script>
@@ -2428,7 +2438,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   and anything after work the same way. Mainnet signs with your bridged bzDiD key, zero paste;
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
   dependency is dead. This is ours, on the adapter contract: the worker builds, the vault signs,
-  the outbox persists, and nothing is called "sent" until the rail is read back.</div>
+  the outbox persists, and nothing is called "sent" until the rail is read back.<span class="wl-cyd">Mainnet signs with this wallet's derived K1 key only. An account passkey (PUB_WA) that the bridge may add to the account is not a signing lane on this page yet: the vendored eosjs WebAuthnSignatureProvider is unwired and untested.</span></div>
   </details>
   <div class="ladder" id="receipt-ladder" data-wl-tech aria-label="the receipt ladder — the order is law">
     <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder: every state is a first-class visual · the order is law</div>
@@ -2482,12 +2492,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
     <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
     <button id="tx-go" class="green" style="flex:1">COMPOSE: build · sign · outbox · read the rail back</button>
-  </div>
-  <div class="row" id="tx-wa-row" style="display:none">
-    <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer">
-      <input type="checkbox" id="tx-wa" style="flex:0;min-width:14px;height:14px">
-      ✋ sign with the account passkey instead (PUB_WA at threshold 1 — either signer works)
-    </label>
   </div>
   <pre id="tx-out" style="display:none"></pre>
 </section>
@@ -2592,10 +2596,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   // nothing freezes silently: surface any stray handler error in the page
   window.addEventListener('error',function(ev){
-    var el=$('tx-out'); if(el){el.style.display='block';el.textContent='page error: '+(ev.message||'')}
+    var el=$('tx-out'); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'page error: '+(ev.message||'')}])}
   });
   window.addEventListener('unhandledrejection',function(ev){
-    var el=$('tx-out'); if(el){el.style.display='block';el.textContent='unhandled: '+((ev.reason&&ev.reason.message)||String(ev.reason))}
+    var el=$('tx-out'); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'unhandled: '+((ev.reason&&ev.reason.message)||String(ev.reason))}])}
   });
 
   function fetchT(url,opts,ms){
@@ -2609,6 +2613,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return h.toString();
   }
   function vacctCacheLoad(){
+    BRIDGED=null;   /* a changed account never inherits the last one's verdict: nothing signs or receives until it is read */
     VACCT=VRECV=VACCT_FOR=VACCT_STATE=null; VACCT_PROVEN=false;
     try{ var c=JSON.parse(localStorage.getItem('bnr_vacct')||'null');
       if(c&&SOUL&&c.soul===SOUL&&ACCT_RE.test(c.acct||'')){ VACCT=c.acct; VRECV=ACCT_RE.test(c.recv||'')?c.recv:c.acct; VACCT_FOR=c.soul; VACCT_STATE=c.state==='self'?'self':'name'; VACCT_PROVEN=!!c.proven } }catch(e){}
@@ -2627,7 +2632,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     VACCT=live?row.owner:s; VRECV=live?row.account:s; VACCT_FOR=s; VACCT_STATE=live?'name':'self'; VACCT_PROVEN=false;
     vacctKeep();
     var changed=vacct()!==before;
-    if(changed&&MPRK){ vacctRederive(); checkBridge() }
+    if(changed){ BRIDGED=null; if(MPRK){ vacctRederive(); checkBridge() } }
     return changed;
   }
   async function post(hosts,path,body){
@@ -2701,6 +2706,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       eos=pk.getPublicKey().toLegacyString(); pub1=pk.getPublicKey().toString();
     }
     K1={seed:seed,wif:w,eosPub:eos,pubK1:pub1};
+    if($('kc-soul-name'))$('kc-soul-name').textContent=k1Ctx().replace(/^vaulta:/,'');   /* the context this key really comes from */
   }
   function scrubAll(){
     if(BSIGNER && typeof BSIGNER.wipe==='function') BSIGNER.wipe();
@@ -2778,6 +2784,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var CONTEXTS=[];   // context NAMES only (never keys) — persisted so the list survives visits
   var EVMADDR=null;  // derived 0x address for evm:soul — memory only
   var LAST_ACC=null; // last full get_account of SOUL (for the account forge cost panel)
+  var A_TOKEN='core.vaulta';   // the A token's contract on Vaulta: send, buy RAM and sell RAM in A all go through it
+  var LAST_A=null;   // {acct, a}: the last A balance read at A_TOKEN; a is a number, never a guess
   var EVRPC=['https://arb1.arbitrum.io/rpc','https://arbitrum-one-rpc.publicnode.com'];
 
   function loadContexts(){ try{CONTEXTS=JSON.parse(localStorage.getItem('bnr_contexts')||'[]');if(!Array.isArray(CONTEXTS))CONTEXTS=[]}catch(e){CONTEXTS=[]} }
@@ -2962,6 +2970,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   // a paste that is not a key, said in one sentence
   function hiveParse(t){ try{ return parseWifAny(t) }catch(e){ return null } }
+  function keyInMemo(m){
+    var b58='1-9A-HJ-NP-Za-km-z', t=String(m||'');
+    return new RegExp('(^|[^'+b58+'])(5[HJK]['+b58+']{49}|[KL]['+b58+']{51})(?![' + b58 + '])').test(t)||/PVT_(K1|R1)_[1-9A-HJ-NP-Za-km-z]{40,}/.test(t);
+  }
   function hiveMemoUnsafe(m){
     return String(m||'').split(/\s+/).some(function(w){
       return /^5[HJK][1-9A-HJ-NP-Za-km-z]{49}$/.test(w)||/^[KL][1-9A-HJ-NP-Za-km-z]{51}$/.test(w)||/^PVT_K1_/.test(w)||/^[0-9a-fA-F]{64}$/.test(w) });
@@ -3798,7 +3810,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return null;
   }
   function rpc(){
-    return new BN.JsonRpc(LIVE_HOST,{fetch:fetch});
+    return new BN.JsonRpc(LIVE_HOST,{fetch:function(u,o){ return fetchT(u,o,12000) }});
   }
   function api(provider){
     return new BN.Api({rpc:rpc(),signatureProvider:provider,textEncoder:new TextEncoder(),textDecoder:new TextDecoder()});
@@ -4375,9 +4387,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
 
   /* core-first signed-tx builder: the Rust core packs the envelope (byte-identical to eosjs,
-     proven) and signs; the account passkey (PUB_WA) rides the eosjs WebAuthn provider;
+     proven) and signs;
      falls back to the vendored eosjs key provider on any failure */
-  async function buildSigned(info,refBlock,actionList,wa,foreignKey){
+  async function buildSigned(info,refBlock,actionList,wa,foreignKey,spend){
+    /* the cap at the key: a mainnet lane that moves value names it ({unit, amt}) and
+       nothing signs past the owner's daily cap, whichever button asked */
+    if(spend&&!foreignKey)capAssert(spend.unit,spend.amt);
     var expSec=Math.floor(Date.now()/1000)+120;
     var refNum=(info.head_block_num-3)&0xffff;
     if(!wa&&CORE&&K1&&K1.seed){
@@ -4388,7 +4403,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if(packed){
           var digest=CORE.chainDigest(hexB(info.chain_id),packed);
           var sig65=CORE.sign(K1.seed,digest);
-          if(digest&&sig65)return {packedHex:hexS(packed),signatures:[CORE.sigK1(sig65)],by:'rust'};
+          if(digest&&sig65)return {packedHex:hexS(packed),signatures:[CORE.sigK1(sig65)],by:'rust',expires_at:new Date(expSec*1000).toISOString()};
         }
       }catch(e){}
     }
@@ -4396,10 +4411,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(foreignKey&&foreignKey.wif){        // Jungle4 rehearsal: a pasted TESTNET key, memory-only
       prov=new BN.JsSignatureProvider([foreignKey.wif]);
       reqKeys=[foreignKey.pub]; by='eosjs+testkey';
-    } else if(wa&&wa.pub&&wa.credIdHex){
-      prov=new BN.WebAuthnSignatureProvider();
-      prov.keys[wa.pub]=wa.credIdHex;
-      reqKeys=[wa.pub]; by='eosjs+passkey';
     } else {
       prov=new BN.JsSignatureProvider([K1.wif]);
       reqKeys=[K1.pubK1]; by='eosjs';
@@ -4411,7 +4422,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       actions:actionList,transaction_extensions:[]};
     var serialized=await A.serializeTransaction(txJson);
     var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:reqKeys,serializedTransaction:serialized,abis:[]});
-    return {packedHex:hexS(serialized),signatures:sgn.signatures,by:by};
+    return {packedHex:hexS(serialized),signatures:sgn.signatures,by:by,expires_at:new Date(expSec*1000).toISOString()};
   }
 
   /* canonical key compare: both to PUB_* canonical strings */
@@ -4450,6 +4461,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var auth={threshold:ra.threshold,keys:sortAuthKeys(existing.concat([{key:K1.eosPub,weight:1}])),accounts:ra.accounts||[],waits:ra.waits||[]};
       acts.push({account:'eosio',name:'updateauth',authorization:actz,data:await serialized('eosio','updateauth',actz,{account:a,permission:'active',parent:act.parent||'owner',auth:auth})});
     }
+    var xsp=extra?await vaultaSpendOf(extra.contract,extra.action,extra.data):null;
+    if(xsp)capAssert(xsp.unit,xsp.amt);   /* the action the paste carries meets the owner's daily cap like every other */
     if(extra) acts.push({account:extra.contract,name:extra.action,authorization:actz,data:await serialized(extra.contract,extra.action,actz,extra.data)});
     if(!acts.length) return {tx:null};
     var prov=new BN.JsSignatureProvider([wif]); wif=null;
@@ -4461,6 +4474,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     prov=null;
     var res=await postAny(VH,'/v1/chain/send_transaction',{signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hexS(packed)});
     if(!res||!res.transaction_id)throw new Error(actRefusal(JSON.stringify((res&&res.error)||res||{}))+' Nothing changed.');
+    if(xsp)capRecord(xsp.unit,xsp.amt);
     // the chain is the receipt: the account now carries this wallet's key (the same transaction carried the action)
     for(var i=0;i<10;i++){ await checkBridge(); if(BRIDGED===true)break; await new Promise(function(r){setTimeout(r,1500)}) }
     if(BRIDGED!==true)throw new Error('It was sent, but '+a+' does not show this wallet yet. Check again in a minute.');
@@ -4473,11 +4487,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // a bare account whose active permission already carries this wallet's key for it is this person's
   async function bareAccountIsMine(){
     if(!MPRK||!SOUL||!ACCT_RE.test(SOUL))return false;
-    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
+    var s=SOUL, acc=await post(VH,'/v1/chain/get_account',{account_name:s});
+    if(s!==SOUL)return false;
     var act=acc&&(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
-    var pub=k1PubFor('vaulta:'+SOUL);
-    if(!act||!((act.required_auth&&act.required_auth.keys)||[]).some(function(k){return canon(k.key)===pub}))return false;
-    VACCT=VRECV=VACCT_FOR=SOUL; VACCT_STATE='self'; VACCT_PROVEN=true; vacctKeep(); vacctRederive();
+    var have={}; ((act&&act.required_auth&&act.required_auth.keys)||[]).forEach(function(k){ have[canon(k.key)]=1 });
+    /* the two keys this keychain could have put on its own bare account: vaulta:<name>, or
+       vaulta:<name>/active for an account the forge made */
+    var ctx=['vaulta:'+s,'vaulta:'+s+'/active'].filter(function(c){ try{ return !!have[k1PubFor(c)] }catch(e){ return false } })[0];
+    if(!ctx)return false;
+    K1CTX=ctx; K1CTX_FOR=s; try{ localStorage.setItem('bnr_k1ctx',JSON.stringify({acct:s,ctx:ctx})) }catch(e){}
+    VACCT=VRECV=VACCT_FOR=s; VACCT_STATE='self'; VACCT_PROVEN=true; vacctKeep(); vacctRederive();
     return true;
   }
   async function findOwnKey(keys,a){
@@ -4671,7 +4690,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(SOUL) publishSoul(SOUL);
     $('kc-soul-fp').textContent=(id.fingerprint&&id.fingerprint.words)||'—';
     $('kc-soul-pub').textContent='ed25519: '+Array.from(id.record.publicKey).slice(0,8).map(function(b){return b.toString(16).padStart(2,'0')}).join('')+'…';
-    $('kc-soul-name').textContent=SOUL||'…';
     $('kc-k1-pub').textContent=K1?K1.eosPub:'—';
     $('kc-cards').style.display='flex';
     $('kc-outrow').style.display='flex';
@@ -5519,17 +5537,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var already=existing.some(function(k){return canon(k.key)===K1.pubK1});
     if(already){setBridgeState(true,'already bridged');stat.textContent='already bridged — nothing to do';$('br-wif').value='';return}
     // dual-signer law: derived K1 + our-origin account passkey, both at threshold 1
-    var waAdd=[];
+    var waAdd=[], waSave=null;
     if($('br-wa').checked){
       stat.textContent='1b/5 enrolling your account passkey (touch it)…';
       try{
         var wa=await enrollAccountPasskey();
-        if(existing.some(function(k){return canon(k.key)===wa.canon})){
-          saveWaCred({pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex});
-        } else {
-          waAdd=[{key:wa.pub,weight:1}];
-          saveWaCred({pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex});
-        }
+        /* kept only once the chain carries it: a bridge that fails leaves no stale credential */
+        waSave={pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex};
+        if(existing.some(function(k){return canon(k.key)===wa.canon})) saveWaCred(waSave);
+        else waAdd=[{key:wa.pub,weight:1}];
       }catch(e){
         stat.textContent='passkey enrollment skipped ('+e.message+') — bridging with the derived key only';
         await new Promise(function(r){setTimeout(r,1200)});   // let the message be read before the lane continues
@@ -5572,9 +5588,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           (SWITCHED_FROM?' <i>(wallet switched from '+SWITCHED_FROM+' — the key named the account itself)</i>':'');
         out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
-          '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys — derived key AND passkey can both sign (nothing removed)';
+          '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys, nothing removed'+(waAdd.length?' · the account passkey is on the account; this page does not sign with it yet':'');
+        if(waSave&&waAdd.length)saveWaCred(waSave);
         checkBridge();
-        if(loadWaCred())$('tx-wa-row').style.display='flex';
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         if(/provided keys|declares authority|unsatisfied/i.test(msg)){
@@ -5601,65 +5617,54 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function refreshAcctPanel(){
     var p=await ramPrice();
     var bytes=parseInt($('ac-ram').value,10)||8192;
-    $('ac-cost').textContent=p!==null?('RAM: ≈'+(p*bytes).toFixed(4)+' A for '+bytes+' B (live rammarket — draws from liquid)'):'RAM cost: rammarket unreadable';
+    $('ac-cost').textContent=p!==null?('RAM: about '+aAmount(p*bytes*1.005)+' for '+bytes+' bytes, from the live rammarket, paid in A at '+A_TOKEN):'RAM cost: the rammarket did not answer';
     var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
     var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
-    var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):'—';
-    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+esc(cpuAvail)+'μs · '+
-      (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
-      'liquid '+liquid+' covers the RAM purchase';
+    var liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
+    if($('ac-stat').hasAttribute('data-act'))return;   /* the line holds what the last press did, until the reader types again */
+    if(liq===null){ wlSay($('ac-stat'),['your A is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()) }}]); return }
+    var need=p!==null?p*bytes*1.005:null;
+    wlSay($('ac-stat'),[need!==null&&liq<need?'a new account needs about '+aAmount(need)+' for its RAM, and you have '+aAmount(liq)+'. ':'you have '+aAmount(liq)+' to pay for the new account’s RAM.',
+      need!==null&&liq<need?{to:'pay-sec',t:'get A'}:null,
+      {cy:'sending draws on staked CPU '+cpuAvail+'μs and NET '+(netAvail/1024).toFixed(0)+' KB available, not on liquid A; the RAM purchase draws on liquid A'}]);
   }
-  $('ac-ram').addEventListener('input',function(){ if(VH&&SOUL)refreshAcctPanel() });
-  $('ac-go').onclick=async function(){
-    var out=$('ac-out'),stat=$('ac-stat');
-    out.style.display='block';
+  $('ac-ram').addEventListener('input',function(){ $('ac-stat').removeAttribute('data-act'); if(VH&&SOUL)refreshAcctPanel() });
+  $('ac-name').addEventListener('input',function(){ $('ac-stat').removeAttribute('data-act') });
+  $('ac-go').onclick=function(){ vaultaLane($('ac-go'),acGo,$('ac-stat')) };
+  async function acGo(){
+    var out=$('ac-out'),stat=$('ac-stat'); stat.style.color='';
+    stat.setAttribute('data-act','');
     var name=$('ac-name').value.trim();
-    if(!K1||!SOUL){stat.textContent='connect your keychain first';return}
-    if(!/^[a-z][a-z1-5]{11}$/.test(name)){stat.textContent='name: exactly 12 chars, a-z and 1-5, starts with a letter';return}
+    if(!SOUL){ wlSay(stat,[{to:'connect-sec',t:'connect your name'},' to make a new account.']); return }
+    if(!K1){ wlSay(stat,[{to:'kc-sec',t:'connect your keychain'},' to make a new account.']); return }
+    if(!/^[a-z][a-z1-5]{11}$/.test(name)){ wlSay(stat,['type a name of exactly 12 characters: letters a to z and digits 1 to 5, starting with a letter.']); $('ac-name').focus(); return }
     if(!signGuard(stat))return;
-    if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){stat.textContent='no RPC host reachable';return}}
+    if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){ wlSay(stat,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }}]); return }}
+    var bytes=parseInt($('ac-ram').value,10)||8192;
+    /* the RAM is bought in A from your liquid balance: it meets your daily cap first */
+    var cp=await ramPrice(), spend=null;
+    if(cp!==null){ spend={unit:'A',amt:cp*bytes*1.005}; if(!capGate('A',spend.amt,stat))return }
+    else if('A' in capLoad()){ wlSay(stat,['the RAM price is not known yet, so your daily cap cannot be checked and nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }}]); return }
+    var kd, ka, acts, actz=[{actor:vacct(),permission:'active'}];
     try{
-      stat.textContent='1/5 deriving owner+active keys for '+name+'…';
-      var kd=deriveFor('vaulta:'+name+'/owner'), ka=deriveFor('vaulta:'+name+'/active');
-      var bytes=parseInt($('ac-ram').value,10)||8192;
-      var actz=[{actor:vacct(),permission:'active'}];
-      var args1={creator:vacct(),name:name,
-        owner:{threshold:1,keys:[{key:kd.value,weight:1}],accounts:[],waits:[]},
-        active:{threshold:1,keys:[{key:ka.value,weight:1}],accounts:[],waits:[]}};
-      var args2={payer:vacct(),receiver:name,bytes:bytes};
-      stat.textContent='2/5 serializing newaccount + buyrambytes…';
-      var abi=await rpc().get_abi('eosio');
-      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
-      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      var s1=BN.Serialize.serializeAction({types:types,actions:amap},'eosio','newaccount',actz,args1,new TextEncoder(),new TextDecoder());
-      var s2=BN.Serialize.serializeAction({types:types,actions:amap},'eosio','buyrambytes',actz,args2,new TextEncoder(),new TextDecoder());
-      stat.textContent='3/5 signing with your bridged bzDiD key ('+(CORE?'first-party Rust core':'vendored lane')+')…';
-      var info=await rpc().get_info();
-      var ref=await rpc().get_block(info.head_block_num-3);
-      var built=await buildSigned(info,ref,[
-        {account:'eosio',name:'newaccount',authorization:actz,data:s1.data},
-        {account:'eosio',name:'buyrambytes',authorization:actz,data:s2.data}]);
-      stat.textContent='4/5 broadcasting…';
-      var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
-      if(res&&res.transaction_id){
-        ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');ensureCtx('vaulta:'+name);
-        renderForge();
-        stat.innerHTML='<b style="color:var(--leaf)">5/5 FORGED</b> — '+name+' born, keys on your keychain';
-        out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
-          '<b>account:</b> '+name+String.fromCharCode(10)+
-          '<b>owner key:</b> '+kd.value+String.fromCharCode(10)+
-          '<b>active key:</b> '+ka.value+String.fromCharCode(10)+
-          '<b>RAM:</b> '+bytes+' B paid by '+vacct()+' · core: '+built.by;
-      } else {
-        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
-        stat.textContent='node refused:'; out.textContent=msg;
-      }
-    }catch(e){
-      stat.textContent='forge failed: '+(e&&e.message||String(e));
-      out.textContent=(e&&e.message||String(e));
-    }
-  };
+      wlSay(stat,['making the keys for '+name+'…']);
+      kd=deriveFor('vaulta:'+name+'/owner'); ka=deriveFor('vaulta:'+name+'/active');
+      acts=[await vaultaSerialize('eosio','newaccount',actz,{creator:vacct(),name:name,
+          owner:{threshold:1,keys:[{key:kd.value,weight:1}],accounts:[],waits:[]},
+          active:{threshold:1,keys:[{key:ka.value,weight:1}],accounts:[],waits:[]}}),
+        await vaultaSerialize(A_TOKEN,'buyrambytes',actz,{payer:vacct(),receiver:name,bytes:bytes})];
+    }catch(e){ wlSay(stat,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('ac-go').click() }},{cy:(e&&e.message)||String(e)}]); return }
+    await vaultaSend(stat,acts,spend,'make the account '+name+', paid by '+vacct(),function(fin){
+      var tx=fin.ref||fin.txid;
+      ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');
+      acctDirAdd(name);
+      renderForge();
+      if(fin.phase==='confirmed')wlSay(stat,[name+' is yours now. your keychain holds its keys. ',{btn:'switch the wallet to '+name,on:function(){ setSoul(name) }},
+        {cy:'tx '+tx+' · owner key vaulta:'+name+'/owner · active key vaulta:'+name+'/active · signing as '+name+' finds the active key by itself, no paste'}]);
+      out.style.display='block';
+      out.textContent='transaction_id: '+tx+'\naccount: '+name+'\nowner key: '+kd.value+' (vaulta:'+name+'/owner)\nactive key: '+ka.value+' (vaulta:'+name+'/active)\nRAM: '+bytes+' bytes bought in A by '+vacct()+' at '+A_TOKEN;
+    },$('ac-go'));
+  }
 
   /* ── SIGN lane: bzDiD key signs, zero paste ───────────────── */
   function preset(name){
@@ -5729,11 +5734,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var actor = netIsJ4() ? ($('tx-j4actor').value.trim() || '(the 12-char test actor above)')
       : (args.registrant || args.owner || args.from || args.account || vacct() || '(connects from your soul)');
     var p = $('tx-preview'), b = $('tx-preview-body');
+    /* contract, action, actor and args can all come from a link (?compose=…&args=…): text, never markup */
     b.innerHTML =
-      '<b>action</b>  ' + contract + ':' + action + '\n' +
-      '<b>auth</b>    ' + actor + '@active\n' +
-      '<b>args</b>    ' + JSON.stringify(args) + '\n' +
-      '<b>signer</b>  ' + signerLine + '\n' +
+      '<b>action</b>  ' + esc(contract) + ':' + esc(action) + '\n' +
+      '<b>auth</b>    ' + esc(actor) + '@active\n' +
+      '<b>args</b>    ' + esc(JSON.stringify(args)) + '\n' +
+      '<b>signer</b>  ' + esc(signerLine) + '\n' +
       '<b>network</b> ' + (netIsJ4() ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC');
     p.style.display = 'block';
   }
@@ -5966,36 +5972,64 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var el = $('outbox-list');
     if (!el) return;
     var saved=outboxRead();
-    if(saved===null){el.textContent='The saved outbox is unavailable or unreadable. Existing transactions have not been replaced.';return;}
+    var canStore=true; try{ localStorage.getItem(OUTBOX_KEY) }catch(se){ canStore=false }
+    if(!canStore){ wlSay(el,['this browser is not letting the wallet keep anything here, so nothing can be signed and kept. allow this site to store data, then ',{btn:'reload the page',on:function(){ location.reload() }},{cy:'localStorage access threw'}]); return }
+    if(saved===null){
+      wlSay(el,['the list of things waiting to be sent cannot be read on this device, so nothing new can be signed until it is set aside. ',
+        {btn:'set it aside and start a fresh list',on:function(){
+          if(!confirm('Set the unreadable list aside? It is kept on this device under its own name and nothing in it is deleted.'))return;
+          var ok=false;
+          try{ var raw=localStorage.getItem(OUTBOX_KEY), k=OUTBOX_KEY+'.unreadable.'+Date.now(); localStorage.setItem(k,raw==null?'':raw);
+            if(localStorage.getItem(k)===(raw==null?'':raw)){ localStorage.setItem(OUTBOX_KEY,'[]'); ok=true } }catch(e){}
+          if(!ok){ wlSay(el,['this browser has no room to keep a copy, so the list was left as it is. free some browser storage, then ',{btn:'set it aside and start a fresh list',on:function(){ renderOutbox(); var b1=el.querySelector('button.wl-act'); if(b1)b1.click() }}]); return }
+          renderOutbox();
+        }},{cy:'bnr_outbox_v1 did not parse as a list of entries; it is moved aside under bnr_outbox_v1.unreadable.<time>, never deleted'}]);
+      return;
+    }
     var list = saved.slice().reverse();
     if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)"><span data-wl-tech>empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</span><span data-reg="bee" data-i18n="wl.bee.outbox.empty">nothing is waiting to be sent</span></div>';
       var bx = el.querySelector('span[data-reg="bee"]');   /* rendered after the language pass: translate it once in place */
       if (bx && window.BNRLanguage && BNRLanguage.text) bx.textContent = BNRLanguage.text('wl.bee.outbox.empty', bx.textContent);
       return }
-    el.innerHTML = list.map(function (e) {
-      return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)">' +
-        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
-        '<span style="font-size:10px;color:var(--faint)">' + esc(e.intent_id.slice(0, 24)) + '… · ' + esc(e.rail) + ' · ' + esc(e.network) + '</span>' +
-        '<span style="font-size:10px;color:' + phaseColor(e.phase) + ';border:1px solid ' + phaseColor(e.phase) + ';border-radius:5px;padding:0 6px">' + esc(e.phase) + '</span></div>' +
-        '<div style="font-size:10.5px;color:var(--ink);margin-top:4px">' + esc(e.human_summary || '') + '</div>' +
-        (e.evidence ? '<div style="font-size:9.5px;color:var(--dim);margin-top:3px">read: ' + esc(typeof e.evidence === 'string' ? e.evidence : JSON.stringify(e.evidence)) + '</div>' : '') +
-        (e.ref ? '<div style="font-size:9.5px;color:var(--dim)">tx ' + esc(e.ref.slice(0, 32)) + '…</div>' : '') +
-        ((e.phase === 'signed' || e.phase === 'submitted') ? '<button class="obx-retry" data-id="' + esc(e.intent_id) + '" style="font-size:10px;margin-top:5px">resubmit the identical stored bytes</button>' : '') +
-        '</div>';
-    }).join('');
-    Array.prototype.forEach.call(el.querySelectorAll('.obx-retry'), function (b) {
-      b.onclick = async function () {
-        b.disabled=true;
-        try{await retryOutbox(b.getAttribute('data-id'))}catch(error){var out=$('tx-out');out.style.display='block';out.textContent=error.message||'Retry did not complete.';}finally{b.disabled=false}
-      };
+    /* each entry: what it does in words and where it stands, with its one button;
+       the intent id, rail, phase and the rail's own reading are cypherpunk's */
+    var SAYS = { signed: 'signed, not sent yet.', submitted: 'sent. the chain has not confirmed it yet.', confirmed: 'done. the chain confirmed it.',
+      failed: 'the chain said no, so nothing changed.', expired: 'it did not land in time, so nothing changed.' };
+    el.textContent = '';
+    list.forEach(function (e) {
+      var row = document.createElement('div'); row.className = 'obx-row'; row.setAttribute('data-id', e.intent_id);
+      row.style.cssText = 'border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)';
+      var what = document.createElement('div'); what.style.color = 'var(--ink)'; what.textContent = e.human_summary || '';
+      var st = document.createElement('div'); st.className = 'obx-stat'; st.setAttribute('role', 'status');
+      var words = (e.phase === 'confirmed' || e.phase === 'failed' || e.phase === 'expired') ? terminalWords(e).filter(function (p) { return typeof p === 'string' || p.to })
+        : [(e.phase === 'signed' && e.maybe_out) ? 'it may already be out. sending it again is safe.' : (SAYS[e.phase] || e.phase)];
+      wlSay(st, words.concat([{ cy: e.intent_id + ' · ' + e.rail + ' · ' + e.network + ' · ' + e.phase +
+        (e.evidence ? ' · read: ' + (typeof e.evidence === 'string' ? e.evidence : JSON.stringify(e.evidence)) : '') + (e.ref ? ' · tx ' + e.ref : '') }]));
+      st.style.color = phaseColor(e.phase);
+      row.appendChild(what); row.appendChild(st);
+      if (e.phase === 'signed' || e.phase === 'submitted') {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'obx-retry'; b.setAttribute('data-id', e.intent_id);
+        b.textContent = 'send it again';
+        b.title = 'the same signed copy goes out again; nothing is signed twice';
+        b.onclick = async function () {
+          b.disabled = true;
+          try { await retryOutbox(e.intent_id, st) }
+          catch (error) { wlSay(st, ['the saved copy could not be read, so nothing was sent. ', { btn: 'try again', on: function () { b.click() } }, { cy: (error && error.message) || String(error) }]) }
+          finally { b.disabled = false }
+        };
+        row.appendChild(b);
+      }
+      el.appendChild(row);
     });
   }
-  async function retryOutbox(intentId) {
+  async function retryOutbox(intentId, st) {
     var e = outboxGet(intentId);
     if (!e || !e.signed_bytes) return;
-    await submitAndConfirm(e, function (msg, phase) {
-      var o = $('tx-out'); o.style.display = 'block';
-      o.innerHTML = '<b style="color:' + phaseColor(phase) + '">' + esc(msg) + '</b>';
+    /* the list re-renders on every outbox write: the line is found again by its entry */
+    await submitAndConfirm(e, function (parts, phase) {
+      var rows = document.querySelectorAll('#outbox-list .obx-row'), cur = null;
+      for (var i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-id') === intentId) cur = rows[i].querySelector('.obx-stat');
+      if (cur) txSay(cur, parts, phase); else if (st && st.isConnected) txSay(st, parts, phase);
     });
   }
 
@@ -6027,6 +6061,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
     }
     var digestBytes = hexB(digest);
+    /* the cap at the key, for a composed mainnet action that moves value (walletAction names it) */
+    if (opts && opts.spend && !opts.wif) capAssert(opts.spend.unit, opts.spend.amt);
     if (opts && opts.wif) {                                  // Jungle4 rehearsal: pasted TESTNET key, memory-only
       return { signatures: [BN.PrivateKey.fromString(opts.wif).sign(digestBytes).toString()], by: 'eosjs+testkey' };
     }
@@ -6038,7 +6074,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var prov = new BN.JsSignatureProvider([K1.wif]);
       var chainId = hexS(payload.slice(0, 32));
       var packed = payload.slice(32, payload.length - 32);
-      var sgn = prov.sign({ chainId: chainId, requiredKeys: [K1.pubK1], serializedTransaction: packed, abis: [] });
+      var sgn = await prov.sign({ chainId: chainId, requiredKeys: [K1.pubK1], serializedTransaction: packed, abis: [] });
       return { signatures: sgn.signatures, by: 'eosjs' };
     }
     throw new Error('no signing lane: connect your keychain (mainnet) or paste a TESTNET key (jungle4 lane)');
@@ -6048,24 +6084,88 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      submit's clean return is an ack, never a terminal state. confirmed can
      only come from a confirm that read the block back and names what it
      read. The UI shows submitted as "not sent yet". */
+  /* every state of a send, said calmly; the rail's own words ride along for cypherpunk */
+  function onRail(r) { return r === 'vaulta' ? 'the chain' : 'the network' }
+  /* a refusal that proves the transaction did not run (and so may be built again) */
+  function definiteNo(t) {
+    t = String(t || '');
+    if (/duplicate|already known|tx_dup/i.test(t)) return false;
+    return /missing authority|unsatisfied|irrelevant|declares authority|assertion failure|eosio_assert|ram_usage_exceeded|insufficient ram|net usage is too high|already taken|does not exist|expiration is too far|overdrawn|no balance object|verification failed|gateway said 4(0[0-9]|1[0-8]|2[0-8])\b/i.test(t);
+  }
+  /* once an earlier attempt may have reached a node, only a refusal of the signature itself proves nothing ran */
+  function authorityNo(t) { return /missing authority|unsatisfied|irrelevant|declares authority/i.test(String(t || ''))
+  }
+  /* what a finished entry says when it is pressed again: never sent twice, never moved backward */
+  function terminalWords(e) {
+    return e.phase === 'confirmed' ? ['done. ' + onRail(e.rail) + ' confirmed it.', { cy: 'confirmed earlier · tx ' + (e.ref || e.txid || '') }]
+      : e.phase === 'failed' ? [lcFirst(actRefusal(JSON.stringify(e.evidence || {}))) + ' nothing changed.', { cy: 'failed earlier: ' + JSON.stringify(e.evidence || {}) }]
+      : (e.evidence && e.evidence.maybe_in) ? ['its time ran out before this wallet could tell whether it went in. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }]
+      : ['it did not go through in time, so nothing changed. you can make it again.', { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }];
+  }
+  /* the cap given back once, only for a send the rail proved never ran */
+  function capRefund(e) {
+    var live = e && outboxGet(e.intent_id);
+    if (!live || !live.cap || live.cap.refunded || !(live.evidence && live.evidence.definite)) return;
+    live.cap.refunded = true; try { outboxPut(live) } catch (x) { return }   /* marked first, so a second flow never gives it back twice */
+    if (e.cap) e.cap.refunded = true;
+    capRecord(live.cap.unit, -live.cap.amt, live.cap.day);
+  }
+  function isDuplicate(t) { return /duplicate transaction|tx_duplicate|already in the mempool|already on the weave|already known|already processed/i.test(String(t || '')) }
   async function submitAndConfirm(entry, ui) {
     var say = ui || function () {};
-    say('submitting the identical stored bytes…', 'signed');
+    var live = outboxGet(entry.intent_id);
+    if (live) entry = live;
+    if (entry.phase === 'confirmed' || entry.phase === 'failed' || entry.phase === 'expired') { say(terminalWords(entry), entry.phase); return entry }
+    var resend = { btn: 'send it again', on: function () { var c = outboxGet(entry.intent_id); if (c) submitAndConfirm(c, say) } };
+    var maybeOut = !!entry.maybe_out || entry.phase === 'submitted' || !!entry.ref;   /* an earlier attempt may already have reached a node */
+    /* another flow may have settled it while this one waited: never move a settled entry */
+    var settled = function () { var c = outboxGet(entry.intent_id); if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired')) { say(terminalWords(c), c.phase); return c } return null };
+    say(['sending the signed copy…', { cy: 'submit: the identical stored bytes to the ' + entry.rail + ' rail' + (maybeOut ? ' (again)' : '') }], 'signed');
     try {
       var r = await callAdapter(entry.rail, 'submit', { intent_id: entry.intent_id, signed_bytes: entry.signed_bytes }, 20000);
-      entry.ref = r.ref; entry.block_hint = r.block_hint;
+      var done0 = settled(); if (done0) return done0;
+      entry.ref = r.ref; entry.block_hint = r.block_hint; entry.maybe_out = true;
       entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
       outboxPut(entry);
-      say('SUBMITTED — the node accepted bytes. This is NOT "sent". Reading the rail back…', 'submitted');
+      say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
     } catch (e) {
-      if (e && e.code === -32005) {                          // the rail refused — duplicate window, auth, expiry
-        entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: e.message };
-        entry.updated_at = new Date().toISOString();
-        outboxPut(entry);
-        say('FAILED — the rail refused: ' + e.message, 'failed');
+      var why = String((e && e.message) || e || '');
+      var done1 = settled(); if (done1) return done1;
+      if (!(e && e.code) && /not attached|never spawned|crashed/i.test(why)) {   // the worker never got the bytes: nothing left this tab
+        say(['the wallet\u2019s ' + entry.rail + ' part stopped before sending, so nothing went out yet. the signed copy is kept. ', { btn: 'reload the page', on: function () { location.reload() } }, { cy: 'adapter not attached: ' + why }], 'signed');
         return entry;
       }
-      say('submit faulted (' + (e && e.message || e) + ') — the SIGNED BYTES ARE PERSISTED; the retry resubmits them identically, it never re-signs', 'signed');
+      if (e && e.code === -32005) {
+        if (isDuplicate(why)) {                                // a node already holds these exact bytes: they went in
+          entry.phase = 'submitted'; entry.ref = entry.ref || entry.txid || null; entry.maybe_out = true;
+          entry.evidence = { read: 'send_transaction: duplicate', detail: why, duplicate: true };
+          entry.updated_at = new Date().toISOString();
+          outboxPut(entry);
+          say(['this was already sent once, so nothing new was signed. it is most likely in; your balance shows it in a minute. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'duplicate: ' + why }], 'submitted');
+          return entry;
+        }
+        if (/expired transaction|expired_tx|expiration/i.test(why) && !/too far/i.test(why)) {   // its window is over: never sendable again
+          entry.phase = 'expired'; entry.updated_at = new Date().toISOString();
+          entry.evidence = { read: 'send_transaction refusal', detail: why, definite: !maybeOut, maybe_in: maybeOut };
+          outboxPut(entry); capRefund(entry);
+          say(terminalWords(entry), 'expired');
+          return entry;
+        }
+        if (maybeOut ? authorityNo(why) : definiteNo(why)) {  // the rail evaluated it and refused: nothing ran
+          entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: why, definite: true };
+          entry.updated_at = new Date().toISOString();
+          outboxPut(entry); capRefund(entry);
+          say([lcFirst(actRefusal(why)) + ' nothing changed.', { cy: 'FAILED: the rail refused: ' + why }], 'failed');
+          return entry;
+        }
+        say([(maybeOut ? 'this wallet still cannot tell whether it went in; an earlier try may have reached the chain. sending it again is safe. ' : 'the network was busy and did not take it. the signed copy is kept, so it can go out again. '), resend,
+          { cy: 'submit refused without a verdict: ' + why + '; the identical bytes are kept, never re-signed' }], 'signed');
+        return entry;                                          // not proven refused: stay 'signed', the entry is the state
+      }
+      entry.maybe_out = true; entry.updated_at = new Date().toISOString();   /* the answer was lost: the bytes may be out */
+      try { outboxPut(entry) } catch (x) {}
+      say(['the network did not answer, so this wallet cannot tell yet whether it went out. the signed copy is kept. ', resend,
+        { cy: 'submit faulted (' + why + '); the signed bytes are persisted and sending again resubmits them identically, never re-signs; a node that already has them answers duplicate' }], 'signed');
       return entry;                                          // network class: stay phase 'signed'; the entry IS the state
     }
     /* non-terminal chatter only speaks while this flow owns the entry — an
@@ -6077,6 +6177,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') && c !== entry) return;
       say(msg, ph);
     };
+    var readOk = false;
     for (var attempt = 0; attempt < 14; attempt++) {
       await new Promise(function (r2) { setTimeout(r2, 2200) });
       /* the outbox is the state, not this closure: if another flow (a retry,
@@ -6088,60 +6189,109 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       try {
         var c = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000);
+        readOk = true;
         if (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') {
           entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
           outboxPut(entry);
+          var ev = JSON.stringify(c.evidence || {});
           say(c.phase === 'confirmed'
-            ? 'CONFIRMED — read back from the rail: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref
-            : c.phase + ' — ' + JSON.stringify(c.evidence || {}),
+            ? ['done. ' + onRail(entry.rail) + ' confirmed it.', { cy: 'CONFIRMED by a block read: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref }]
+            : c.phase === 'expired'
+              ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
+              : [lcFirst(actRefusal(ev)) + ' nothing changed.', { cy: 'failed: ' + ev }],
             c.phase);
+          if (c.phase === 'failed') { entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true }); outboxPut(entry); capRefund(entry) }   /* a block read that shows it failed is proof */
           return entry;
         }
-        speak('submitted — rail read says: not visible yet (' + (c.evidence && c.evidence.read) + '). Reading again…', 'submitted');
+        speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'submitted; the rail read says not visible yet (' + (c.evidence && c.evidence.read) + '); reading again' }], 'submitted');
       } catch (e2) {
-        speak('confirm read faulted (' + (e2 && e2.message || e2) + ') — retrying the rail read; bytes are safe in the outbox', 'submitted');
+        readOk = false;
+        speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'confirm read faulted (' + ((e2 && e2.message) || e2) + '); retrying the rail read; the bytes are safe in the outbox' }], 'submitted');
       }
-      if (entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000) {
-        entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read' };
+      /* its window is over and the last read answered without it: most likely it did not go through,
+         but a read of its hinted block is not proof, so the reader checks before sending again */
+      if (readOk && entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000) {
+        entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read', maybe_in: true };
         entry.updated_at = new Date().toISOString();
         outboxPut(entry);
-        say('EXPIRED — the intent\'s window closed without landing. Build it again if you still want it.', 'expired');
+        say(['it did not show up on ' + onRail(entry.rail) + ' before its time ran out, so it most likely did not go through. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' },
+          { cy: 'EXPIRED: the window closed without a confirming block read; only the hinted block was read, so this is not proof' }], 'expired');
         return entry;
       }
     }
-    speak('still submitted after the read window — the entry stays in the outbox; its evidence updates on any later read', 'submitted');
+    speak(['sent, but ' + onRail(entry.rail) + ' has not confirmed it yet. ', { to: 'outbox-sec', t: 'see it in the outbox' }, { cy: 'still submitted after the read window; the entry stays in the outbox and its evidence updates on any later read' }], 'submitted');
     return entry;
   }
 
   /* ── walletAction() — THE SEAM that retired Unicove ──
      One call: compose an arbitrary Vaulta action through the adapter
      contract. bnames' walletAction() URL factory lands here via ?compose=. */
+  /* what a composed Vaulta action moves, in the cap's unit: every "x.xxxx A" in its
+     arguments, plus EOS (it swaps 1:1 into A, so it spends the same value), plus RAM
+     bought by bytes at the live price. null when it moves nothing the cap knows;
+     an amount the page cannot size is NaN, which a set cap refuses */
+  /* actions that bring value back, and the field naming who gets it */
+  var RECEIVES={'eosio:undelegatebw':'from','eosio:unstaketorex':'owner','eosio:withdraw':'owner','eosio:sellram':'account','core.vaulta:sellram':'account','eosio:sellrex':'from','eosio:refund':'owner','eosio:claimrewards':'owner','eosio:mvfrsavings':'owner'};
+  async function vaultaSpendOf(contract,action,data){
+    /* free of the cap only when the value comes back to the signer */
+    var who=RECEIVES[contract+':'+action];
+    if(who&&data&&data[who]===vacct()&&!['to','recipient','beneficiary'].some(function(k){ return data[k]&&data[k]!==vacct() }))return null;
+    var amt=0, any=false;
+    (function walk(v,d){
+      if(d>6)return;
+      if(typeof v==='string'){ var m=v.match(/^\s*(\d+(?:\.\d+)?)\s+(A|EOS)\s*$/); if(m){ amt+=parseFloat(m[1]); any=true } }
+      else if(v&&typeof v==='object') Object.keys(v).forEach(function(k){ walk(v[k],d+1) });
+    })(data,0);
+    if(/^(buyrambytes|ramtransfer|giftram)$/.test(action)&&data&&data.bytes!=null){
+      var p=await ramPrice(); any=true;
+      amt=p===null?NaN:amt+p*Number(data.bytes)*(action==='buyrambytes'?1.005:1);
+    }
+    return any?{unit:'A',amt:amt}:null;
+  }
   async function walletAction(contract, action, data, auth, opts) {
     opts = opts || {};
     var net = opts.network === 'j4' ? 'jungle4' : 'mainnet';
-    var out = $('tx-out'); out.style.display = 'block';
+    var out = $('tx-out'); out.style.display = 'block'; out.removeAttribute('data-fail'); out.style.color = '';
+    /* mainnet value meets the owner's daily cap before anything is built or signed */
+    var spend = net === 'mainnet' ? await vaultaSpendOf(contract, action, data) : null;
+    if (spend) {
+      try { capAssert(spend.unit, spend.amt) }
+      catch (ce) { if (!ce.capRefused) throw ce; out.setAttribute('data-fail', ce.capKind === 'unsized' ? 'cap-unsized' : 'cap'); capSay(out, ce, function () { vaultaLane($('tx-go'), function () { return walletAction(contract, action, data, auth, opts) }, out) }); return null }
+    }
+    var again = { btn: 'try again', on: function () { vaultaLane($('tx-go'), function () { return walletAction(contract, action, data, auth, opts) }, out) } };
     if (!ADAPTERS.vaulta || !ADAPTERS.vaulta.attached) {
-      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + esc((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
+      out.setAttribute('data-fail', 'start');
+      wlSay(out, ['the wallet’s Vaulta part did not start, so nothing was signed. ', { btn: 'reload the page', on: function () { location.reload() } },
+        { cy: 'vaulta adapter not attached: ' + ((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned') }]);
       return null;
     }
     if (!hasCap('vaulta', 'buildAction')) {                  // path GONE, not erroring (§9.2)
-      out.innerHTML = '<b style="color:var(--amber)">buildAction is not declared by the vaulta adapter</b> — the call path does not exist. Nothing was dispatched.';
+      out.setAttribute('data-fail', 'start');
+      wlSay(out, ['the wallet’s Vaulta part cannot build actions, so nothing was signed. ', { btn: 'reload the page', on: function () { location.reload() } },
+        { cy: 'buildAction is not declared by the vaulta adapter: the call path does not exist; nothing was dispatched' }]);
       return null;
     }
-    out.textContent = '1/5 building intent — ' + contract + ':' + action + ' on ' + net + ' (ABI → serialized action → envelope → digest)…';
+    wlSay(out, ['preparing it…', { cy: contract + '::' + action + ' on ' + net + ': ABI → serialized action → envelope → digest' }]);
     var intent;
     try {
       intent = await callAdapter('vaulta', 'buildAction', { account: contract, action: action, data: data, auth: auth, network: net }, 25000);
     } catch (e) {
-      out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + esc(e && e.message || e);
+      out.setAttribute('data-fail', 'build');
+      wlSay(out, ['it could not be prepared, so nothing was signed. ', again, { cy: 'build failed: ' + ((e && e.message) || e) }]);
       return null;
     }
     preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
     $('tx-preview-body').innerHTML += '<b>intent</b>   ' + esc(intent.intent_id) + '\n<b>digest</b>  ' + esc(intent.digest.slice(0, 32)) + '…\n<b>in words</b> ' + esc(intent.human_summary);
-    out.textContent = '2/5 the vault signs the digest…';
-    var sgn;
-    try { sgn = await vaultSign(intent, opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : null)) }
-    catch (e) { out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + esc(e && e.message || e); return null }
+    wlSay(out, ['signing…', { cy: 'the vault signs the digest' }]);
+    var sgn, so = opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : {});
+    if (spend) so.spend = spend;
+    try { sgn = await vaultSign(intent, so) }
+    catch (e) {
+      if (e && e.capRefused) { out.setAttribute('data-fail', e.capKind === 'unsized' ? 'cap-unsized' : 'cap'); capSay(out, e, again.on); return null }
+      out.setAttribute('data-fail', 'sign');
+      wlSay(out, ['your key could not sign this, so nothing was sent. ', again, { cy: 'vault refused: ' + ((e && e.message) || e) }]);
+      return null;
+    }
     var entry = {
       intent_id: intent.intent_id, rail: 'vaulta', network: net,
       human_summary: intent.human_summary, digest: intent.digest,
@@ -6151,17 +6301,29 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       expires_at: intent.expires_at, signed_by: sgn.by,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
-    try{outboxPut(entry)}catch(error){out.textContent=error.message;return null} // PERSIST BEFORE SUBMIT — the law
-    out.textContent = '3/5 signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes…';
-    return submitAndConfirm(entry, function (msg, phase) {
-      var color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : 'var(--cyan)';
-      out.innerHTML = '<b style="color:' + color + '">' + esc(msg) + '</b>';
-      if (opts.onPhase) try { opts.onPhase(phase, msg) } catch (e) {}
+    try{outboxPut(entry)}catch(error){                       // PERSIST BEFORE SUBMIT — the law
+      out.setAttribute('data-fail', /unavailable|unreadable/i.test(error.message || '') ? 'outbox' : 'store');
+      outboxFail(out, error, again.on);
+      return null;
+    }
+    if (spend) { entry.cap = { unit: spend.unit, amt: spend.amt, day: capRecord(spend.unit, spend.amt) }; try { outboxPut(entry) } catch (x) {} }   /* counted once signed and kept; given back only on proof */
+    wlSay(out, ['signed. sending it…', { cy: 'signed (' + sgn.by + ') and persisted in the outbox; submitting the identical bytes' }]);
+    var done = await submitAndConfirm(entry, function (parts, phase) {
+      txSay(out, parts, phase);
+      if (opts.onPhase) try { opts.onPhase(phase, parts) } catch (e) {}
     });
+    return done;
+  }
+  /* a pipeline state in its line: the words, coloured by phase */
+  function txSay(o, parts, phase) {
+    o.style.display = 'block';
+    wlSay(o, parts);
+    o.style.color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : '';
   }
 
   /* the composer's GO now walks the contract pipeline */
-  $('tx-go').onclick = async function () {
+  $('tx-go').onclick = function () { vaultaLane($('tx-go'), txGo, $('tx-out')) };
+  async function txGo() {
     var out = $('tx-out'); out.style.display = 'block';
     var pulse = $('sigpulse');
     pulse.style.animation = 'none'; void pulse.getBoundingClientRect();
@@ -6179,13 +6341,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     if (!K1 || !SOUL) { wlSay(out, ['connect ', { to: 'kc-sec', t: 'your keychain' }, ' first']); return }
-    var waCred = loadWaCred();
-    var useWa = $('tx-wa').checked && waCred;
-    if (!useWa && !signGuard(out)) return;
+    /* one signer here: the keychain's key on the account. The account passkey
+       (PUB_WA) the bridge can enroll has no signing lane on this page yet, so
+       nothing offers it and nothing skips the check for it */
+    if (!signGuard(out)) return;
     var actor2 = data.registrant || data.owner || data.from || data.account || vacct();
     if (actor2 !== vacct()) { wlSay(out, ['this action is for ' + actor2 + ', and this wallet signs for ' + vacct() + '. Nothing was signed.']); return }
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
-  };
+  }
 
   /* ── wallet.html?compose=<contract:action>&args=<json>#sign-action: one composed
      action on one sheet. The sheet says in words what will be signed and as
@@ -6222,7 +6385,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   // the chain's refusal, in words
   function actRefusal(t){
-    t=String(t||'');
+    t=String(t||'').replace(/\s*\[[a-z_]+\]/g,'');   /* the node's error name classifies; it is never said */
     if(/missing authority|unsatisfied|irrelevant|declares authority/i.test(t))return 'The account did not accept this wallet\'s key.';
     if(/ram_usage_exceeded|insufficient ram/i.test(t))return 'The account needs more RAM for this.';
     if(/cpu|net usage|billed|tx_net|leeway/i.test(t))return 'The account needs more CPU or NET to send this.';
@@ -6305,7 +6468,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
         tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
         pasteRow.hidden=true;
-      }catch(e){ k=null; tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.']) }
+      }catch(e){ k=null; tell('fail',[e&&e.capRefused?(e.capKind==='unsized'?'The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.':'This is past the daily cap you set, so nothing was signed.'):(e&&e.message)||'Something went wrong, so nothing was sent.']) }
       finally{ busy=false; pasteGo.disabled=false }
     };
     pasteRow.appendChild(pasteIn); pasteRow.appendChild(pasteGo);
@@ -6369,15 +6532,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(ph==='submitted'&&!sent){ sent=true; tell('busy',['Sent. Waiting for the chain to confirm it…']) }
     }});
     if(!entry){
-      var t=($('tx-out')&&$('tx-out').textContent)||'';
-      tell('fail',[/vault refused/i.test(t)?'Your key could not sign this, so nothing was sent.'
-        :/outbox|storage/i.test(t)?'This browser could not keep the signed copy, so nothing was sent. Free some browser storage and press Sign again.'
-        :/not attached|never spawned|not declared|down/i.test(t)?'The wallet\'s Vaulta part did not start. Reload the page and press Sign again.'
+      var why=($('tx-out')&&$('tx-out').getAttribute('data-fail'))||'';
+      tell('fail',[why==='sign'?'Your key could not sign this, so nothing was sent.'
+        :why==='store'?'This browser could not keep the signed copy, so nothing was sent. Free some browser storage and press Sign again.'
+        :why==='outbox'?'This device cannot read its list of things waiting to be sent, so nothing was signed. Open the wallet to set it aside.'
+        :why==='start'?'The wallet\'s Vaulta part did not start. Reload the page and press Sign again.'
+        :why==='cap'?'This is past the daily cap you set, so nothing was signed.'
+        :why==='cap-unsized'?'The price could not be read just now, so your daily cap cannot be checked. Press Sign to try again.'
         :'The network did not answer, so nothing was signed. Press Sign to try again.']);
       return 'fail';
     }
     if(entry.phase==='confirmed'){tell('done',['Done. '+w.d+' The chain confirmed it.']);return 'done'}
     if(entry.phase==='failed'){tell('fail',[actRefusal(entry.evidence&&entry.evidence.detail)+' Nothing changed.']);return 'fail'}
+    if(entry.phase==='expired'&&entry.evidence&&entry.evidence.maybe_in){tell('fail',['Its time ran out before this wallet could tell whether it went in, so check before you sign again. ',{to:'outbox-sec',t:'see it in the outbox'}]);return 'held'}
     if(entry.phase==='expired'){tell('fail',['It did not land in time, so nothing changed. Press Sign to try again.']);return 'fail'}
     if(entry.phase==='signed'){tell('fail',['It was signed, but it did not go out. Your outbox keeps the signed copy. ',{to:'outbox-sec',t:'send it from the outbox'}]);return 'held'}
     tell('done',['Sent. The chain has not confirmed it yet. ',{to:'outbox-sec',t:'see it in the outbox'}]);
@@ -6385,7 +6552,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   window.addEventListener('load',function(){ setTimeout(actSheet,0) });
 
-  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=4');   // document-relative: same dir as this page
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=5');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=4');
 
@@ -6396,13 +6563,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      before submit; confirm reads the gateway back. */
   async function walletPublish(bytes, tags, opts) {
     opts = opts || {};
-    var out = $('tx-out');
+    /* every state lands in the line of the button that asked (opts.say), never in another task */
+    var say = typeof opts.say === 'function' ? opts.say : function (parts, phase) { txSay($('tx-out'), parts, phase) };
+    var reload = { btn: 'reload the page', on: function () { location.reload() } };
+    var again = opts.again || null;   /* the caller's own retry, {btn, on} */
+    /* an integrity refusal keeps throwing (callers and tests rely on it) and carries its calm words */
+    function bad(msg, calm) { var e = new Error(msg); e.calm = calm; throw e }
+    var CALM_PREP = 'the prepared copy did not match the file you chose, so nothing was signed. ';
+    var CALM_SIG = 'your signer returned a signature that does not match this file, so nothing was sent. ';
     if (!ADAPTERS.arweave || !ADAPTERS.arweave.attached) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + esc((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
+      say(['the wallet’s Arweave part did not start, so nothing was published. ', reload, { cy: 'arweave adapter not attached: ' + ((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned') }], 'failed');
       return null;
     }
     if (!hasCap('arweave', 'buildPublish')) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">buildPublish is not declared by the arweave adapter</b> — the call path does not exist. Nothing was dispatched.'; }
+      say(['the wallet’s Arweave part cannot publish, so nothing was published. ', reload, { cy: 'buildPublish is not declared by the arweave adapter: the call path does not exist; nothing was dispatched' }], 'failed');
       return null;
     }
     var publicJwk = null, signOpts = null;
@@ -6420,7 +6594,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         signOpts = { inject: true };
       } catch (ie) {
         if (opts.inject === true && !(opts.jwk && opts.jwk.d)) {
-          if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">inject sign unavailable:</b> ' + esc(ie && ie.message || ie) + ' — install/connect Wander, or use the vault JWK scaffold.'; }
+          say(['your Arweave extension did not answer, so nothing was published. ', again, { cy: 'inject sign unavailable: ' + ((ie && ie.message) || ie) }], 'failed');
           return null;
         }
         publicJwk = null; signOpts = null;
@@ -6433,32 +6607,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     if (!publicJwk) {
       if (!opts.jwk || !opts.jwk.d) {
-        if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--ink)">connect an Arweave wallet</b> (primary — <code>window.arweaveWallet</code>) to publish. Vault JWK paste is optional scaffold only — New-bee never needs it. RSA is never invented from masterPRK.'; }
+        say([{ to: 'kc-sec', t: 'connect your keychain' }, ' to publish from your own Arweave address.', { cy: 'no signer: no derived ar: key (keychain), no injected window.arweaveWallet, no vault JWK; RSA is never invented from masterPRK' }], 'failed');
         return null;
       }
       publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
       signOpts = { jwk: opts.jwk };
     }
     var b64in = btoa(String.fromCharCode.apply(null, bytes.length > 30000 ? bytes.subarray(0, 30000) : bytes));
-    if (bytes.length > 30000) throw new Error('payload over 30 KB — chunked upload is a later lane; the anchor payload is small');
+    if (bytes.length > 30000) bad('payload over 30 KB — chunked upload is a later lane; the anchor payload is small', 'this file is larger than 30,000 bytes, so nothing was published. ');
     var intent;
     try {
       intent = await callAdapter('arweave', 'buildPublish', { public_jwk: publicJwk, payload_b64: b64in, tags: tags }, 25000);
     } catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + esc(e && e.message || e); }
+      say(['the Arweave network did not answer while preparing it, so nothing was published. ', again, { cy: 'build failed: ' + ((e && e.message) || e) }], 'failed');
       return null;
     }
-    var wire=JSON.parse(intent.wire_json);
-    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==(publicJwk.kty==='EC'?'':publicJwk.n)||wire.data!==window.BNRAR.b64u(bytes))throw new Error('The prepared file transaction has invalid fee, size or transfer fields');
+    var wire; try { wire=JSON.parse(intent.wire_json) } catch (je) { bad('The prepared file transaction is not readable JSON', CALM_PREP) }
+    if(!/^\d+$/.test(String(wire.reward))||!wire.last_tx||String(wire.data_size)!==String(bytes.length)||String(wire.quantity)!=='0'||wire.target!==''||wire.owner!==(publicJwk.kty==='EC'?'':publicJwk.n)||wire.data!==window.BNRAR.b64u(bytes))bad('The prepared file transaction has invalid fee, size or transfer fields', CALM_PREP);
     // Reconstruct the signing bytes from the exact public file, tags and fee.
     // A worker digest alone cannot bind what the user reviewed to the wire body.
     var rebuilt=await window.BNRAR.buildUnsigned(publicJwk,bytes,tags.map(function(tag){return {name:tag[0],value:tag[1]}}),{reward:String(wire.reward),anchor:wire.last_tx});
-    if(JSON.stringify(rebuilt.wire)!==JSON.stringify(wire)||window.BNRAR.b64u(rebuilt.sigData)!==window.BNRAR.b64u(b64ToBytes(intent.unsigned_bytes)))throw new Error('The signing bytes do not match the reviewed file transaction');
+    if(JSON.stringify(rebuilt.wire)!==JSON.stringify(wire)||window.BNRAR.b64u(rebuilt.sigData)!==window.BNRAR.b64u(b64ToBytes(intent.unsigned_bytes)))bad('The signing bytes do not match the reviewed file transaction', CALM_PREP);
     if(typeof opts.review==='function'&&!await opts.review({feeWinston:String(wire.reward),bytes:bytes.length,address:await window.BNRAR.addressOf(publicJwk)}))return {phase:'cancelled'};
     var sgn;
     try { sgn = await vaultSign(intent, signOpts) }
     catch (e) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">sign refused:</b> ' + esc(e && e.message || e); }
+      say(['your key could not sign this, so nothing was published. ', again, { cy: 'sign refused: ' + ((e && e.message) || e) }], 'failed');
       return null;
     }
     var signatureBytes=window.BNRAR.unb64u(sgn.signatures[0]);
@@ -6467,13 +6641,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var ecPub=window.BNRAR.unb64u(publicJwk.pub), ecMsg=BN.sha256(rebuilt.sigData), ecOk=false;
       try{ ecOk=signatureBytes.length===65&&BN.secp.verify(signatureBytes.slice(0,64),ecMsg,ecPub)&&
         hexS(BN.secp.Signature.fromCompact(signatureBytes.slice(0,64)).addRecoveryBit(signatureBytes[64]).recoverPublicKey(ecMsg).toRawBytes(true))===hexS(ecPub) }catch(e){ ecOk=false }
-      if(!ecOk)throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+      if(!ecOk)bad('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.', CALM_SIG);
     } else {
     var verifyKey=await crypto.subtle.importKey('jwk',publicJwk,{name:'RSA-PSS',hash:'SHA-256'},false,['verify']);
-    if(!await crypto.subtle.verify({name:'RSA-PSS',saltLength:32},verifyKey,signatureBytes,rebuilt.sigData))throw new Error('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.');
+    if(!await crypto.subtle.verify({name:'RSA-PSS',saltLength:32},verifyKey,signatureBytes,rebuilt.sigData))bad('The returned signature did not match the reviewed Arweave account and file. Nothing was submitted.', CALM_SIG);
     }
     var signedId=window.BNRAR.b64u(new Uint8Array(await crypto.subtle.digest('SHA-256',signatureBytes)));
-    if(signedId!==sgn.ar_id)throw new Error('The returned transaction ID did not match its signature. Nothing was submitted.');
+    if(signedId!==sgn.ar_id)bad('The returned transaction ID did not match its signature. Nothing was submitted.', CALM_SIG);
     var entry = {
       intent_id: intent.intent_id, rail: 'arweave', network: 'mainnet',
       human_summary: intent.human_summary, digest: intent.digest,
@@ -6483,11 +6657,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       expires_at: intent.expires_at, signed_by: sgn.by,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
-    outboxPut(entry);
-    if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--cyan)">signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes to a rotated gateway…</b>'; }
-    return submitAndConfirm(entry, function (msg, phase) {
-      var o = $('tx-out'); o.style.display = 'block';
-      o.innerHTML = '<b style="color:' + phaseColor(phase) + '">' + esc(msg) + '</b>';
+    try { outboxPut(entry) }
+    catch (oe) {
+      if (/unavailable|unreadable/i.test(oe.message)) say(['the list of things waiting to be sent cannot be read on this device, so nothing was published to keep it safe. ', { to: 'outbox-sec', t: 'open waiting to be sent' }, { cy: 'outbox read failed: ' + oe.message }], 'failed');
+      else say(['this browser is out of room for the signed copy, so nothing was published. free some browser storage, then ', again, { cy: 'outbox write failed: ' + oe.message }], 'failed');
+      return null;
+    }
+    say(['signed. sending it…', { cy: 'signed (' + sgn.by + ') and persisted in the outbox; submitting the identical bytes to a rotated gateway' }], 'signed');
+    /* the gateway's no, said for Arweave: an unfunded address is the usual cause once the signature checked out here */
+    return submitAndConfirm(entry, function (parts, phase) {
+      if (phase === 'failed') {
+        var cur = outboxGet(entry.intent_id) || entry, raw = (cur.evidence && (cur.evidence.detail || JSON.stringify(cur.evidence))) || '';
+        parts = /verification|fund|balance|insufficient/i.test(raw)
+          ? ['the network said no: this address does not hold enough AR for the fee, so nothing was published. ', { to: 'ch-arweave', t: 'see your Arweave address' }, { cy: 'FAILED: ' + raw }]
+          : ['the network said no, so nothing was published. ', again, { cy: 'FAILED: ' + raw }];
+      }
+      say(parts, phase);
     });
   }
 
@@ -6811,7 +6996,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!HIVE_NAME.test(to)){ st.textContent='to: a Hive account name'; return }
       if(!amt){ st.textContent='amount: more than 0, up to 3 decimals'; return }
       if(hiveMemoUnsafe(memo)){ st.textContent='That memo holds what looks like a private key. Memos are public, so nothing was sent.'; return }
-      if(!capGate(sym,amt)){ st.textContent='Your daily spend cap stops this, so nothing was sent.'; return }
+      if(!capGate(sym,amt,st))return;
       if(!MPRK){
         st.textContent='Confirm with your passkey…'; CEREMONY=true;
         try{ keychainOn(await connectSoul()) }
@@ -6934,10 +7119,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('pn-name').addEventListener('keydown',function(e){ if(e.key==='Enter')$('pn-build').click() });
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
+  /* the Vaulta lane's line: what can be sent, or the one step before it */
   function svRefresh(){
-    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)?aAmount(assetNumber(LAST_ACC.core_liquid_balance)):null;
-    $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'<a href="#bal-sec">not read yet</a>')+'</b>'+
-      (BRIDGED?' · bridge ✓ (K1 signs)':!K1?' · <b style="color:var(--amber)">not connected — <a href="#kc-sec">your keychain</a> comes first</b>':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
+    var st=$('sv-stat'), liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
+    if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']); return }
+    if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']); return }
+    if(BRIDGED!==true){ wlSay(st,['this wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]); return }
+    if(liq===null){ wlSay(st,['your A is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()).then(svRefresh) }}]); return }
+    wlSay(st,['you can send up to '+aAmount(liq)+' from '+vacct()+'.',{cy:'liquid A at '+A_TOKEN+' · signed by the keychain K1 key · cap unit A'}]);
   }
   function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
   /* ── SPEND CAP — the owner's optional tool, enforced at SIGN time. A per-unit
@@ -6969,35 +7158,42 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var caps=capLoad();
     if(!(unit in caps)) return;                       /* unset = no limit: the autonomy default */
     var a=Number(amt);
-    if(!isFinite(a)||a<0) throw CapRefused('the cap cannot size "'+amt+' '+unit+'" — refused rather than guessed');
+    if(!isFinite(a)||a<0){ var u0=CapRefused('the cap cannot size "'+amt+' '+unit+'" — refused rather than guessed'); u0.capKind='unsized'; throw u0 }
     var used=capUsed(unit);
     if(used+a<=caps[unit]+1e-9) return;
-    throw CapRefused(a+' '+unit+' would pass your '+caps[unit]+' '+unit+'/day cap ('+
-      used.toFixed(4)+' already signed today). The engine refuses to sign past the cap YOU set.');
+    var o0=CapRefused(a+' '+unit+' would pass your '+caps[unit]+' '+unit+'/day cap ('+
+      used.toFixed(4)+' already signed today). The engine refuses to sign past the cap YOU set.'); o0.capKind='over'; throw o0;
   }
   /* the UX skin over the same authority: buttons use this for a kind message,
      but nothing depends on them remembering to. */
-  function capGate(unit,amt){
+  function capGate(unit,amt,el){
     try{ capAssert(unit,amt); return true }
     catch(e){
       if(!e.capRefused) throw e;
-      $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+esc(e.message)+
-        ' Raise or clear it above. No one is asked.';
+      capSay(el||$('pay-stat'),e);
       return false;
     }
+  }
+  /* a cap refusal, said where the reader pressed: the cap row folds behind the
+     details in bee, so its link opens them */
+  function capSay(el,e,retry){
+    if(e&&e.capKind==='unsized') wlSay(el,['the price could not be read just now, so your daily cap cannot be checked and nothing was signed. ',retry?{btn:'try again',on:retry}:{to:'cap-row',t:'change the cap'},{cy:e.message}]);
+    else wlSay(el,['this is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'},{cy:e&&e.message}]);
   }
   /* An amount the cap CANNOT size (a BOLT-12 offer priced in fiat, say) is not
      the same as an amount under the cap. When a cap exists for the unit and the
      price is unknowable here, the honest answer is refusal, not a shrug. */
   function capAssertUnpriced(unit,what){
     if(unit in capLoad())
-      throw CapRefused('you set a '+capLoad()[unit]+' '+unit+'/day cap, and '+what+
-        ' carries no '+unit+' price this page can read — so it cannot be checked against your cap. Refused.');
+      { var u1=CapRefused('you set a '+capLoad()[unit]+' '+unit+'/day cap, and '+what+
+        ' carries no '+unit+' price this page can read — so it cannot be checked against your cap. Refused.'); u1.capKind='unsized'; throw u1 }
   }
-  function capRecord(unit,amt){
-    var l=capLedger(); l.push({d:capToday(),u:unit,a:amt});
+  function capRecord(unit,amt,day){
+    if(!isFinite(Number(amt)))return null;
+    var d=day||capToday(), l=capLedger(); l.push({d:d,u:unit,a:Number(amt)});
     try{ localStorage.setItem(CAP_LEDGER,JSON.stringify(l)) }catch(e){}
     capView();
+    return d;
   }
   $('cap-set').onclick=function(){
     var u=$('cap-unit').value, a=parseFloat($('cap-amt').value);
@@ -7014,42 +7210,116 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
   capView();
 
-  $('sv-go').onclick=async function(){
-    var to=$('sv-to').value.trim(), amt=parseFloat($('sv-amt').value), memo=$('sv-memo').value;
-    if(!SOUL){payStat('connect your soul first');return}
-    if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
-    if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
-    if(!K1){wlSay($('sv-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
-    if(!signGuard($('sv-stat')))return;
-    if(!capGate('A',amt))return;
-    var q=amt.toFixed(4)+' A';
-    $('sv-stat').textContent='1/4 serializing transfer…';
+  function lcFirst(s){ s=String(s||''); return s.charAt(0).toLowerCase()+s.slice(1) }
+  /* one Vaulta action serialized from its contract's live ABI */
+  async function vaultaSerialize(contract,action,actz,data){
+    var abi=await rpc().get_abi(contract);
+    var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
+    var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
+    if(!amap.has(action))throw new Error(contract+' has no '+action+' action');
+    return {account:contract,name:action,authorization:actz,data:BN.Serialize.serializeAction({types:types,actions:amap},contract,action,actz,data,new TextEncoder(),new TextDecoder()).data};
+  }
+  /* sign and send Vaulta actions with this wallet's key: one sentence per state in
+     the lane's own line, the raw answer for cypherpunk. The cap is asked again
+     inside buildSigned, so a lane that forgets it still cannot sign past it. */
+  /* sign once and keep the signed copy before anything goes out (the outbox law: build,
+     sign, persist, submit, read back). A lost answer never re-signs: sending again resends
+     these exact bytes, and a node that already has them says so, which means they went in. */
+  /* this same send still on its way (signed, or sent and not yet confirmed, inside its window) */
+  function pendingSame(summary){
+    var l=outboxRead()||[];
+    for(var i=l.length-1;i>=0;i--){ var e=l[i];
+      if(e.rail!=='vaulta'||e.human_summary!==summary)continue;
+      var maybeIn=e.phase==='submitted'||(e.phase==='signed'&&e.maybe_out)||(e.phase==='expired'&&e.evidence&&e.evidence.maybe_in);
+      if((e.phase==='signed'||e.phase==='submitted')&&Date.now()<Date.parse(e.expires_at||0)+60000)return {e:e,live:true};
+      if(maybeIn&&Date.now()<Date.parse(e.created_at||0)+86400000)return {e:e,live:false};
+    }
+    return null;
+  }
+  async function vaultaSend(st,actions,spend,summary,done,btn,force){
+    var entry, again=function(){ if(btn)btn.click() };   /* a retry goes back through its lane: one press at a time */
+    st.style.color='';
+    if(!ADAPTERS.vaulta||!ADAPTERS.vaulta.attached||!hasCap('vaulta','submit')){
+      wlSay(st,['the wallet\u2019s Vaulta part did not start, so nothing was signed. ',{btn:'reload the page',on:function(){ location.reload() }},{cy:'vaulta adapter not attached: '+((ADAPTERS.vaulta&&ADAPTERS.vaulta.state)||'never spawned')}]);
+      return null;
+    }
+    var held=force?null:pendingSame(summary);
+    if(held&&held.live){
+      wlSay(st,['this same send is still on its way, so nothing new was signed. ',{btn:'send it again',on:function(){ var c=outboxGet(held.e.intent_id); if(c)submitAndConfirm(c,function(p,ph){ txSay(st,p,ph) }) }},{cy:'outbox '+held.e.intent_id+' · '+held.e.phase}]);
+      return null;
+    }
+    if(held){
+      wlSay(st,['your last send of this may already be in, so nothing new was signed; your coins show whether it went. ',{btn:'send a new one',on:function(){ vaultaLane(btn,function(){ return vaultaSend(st,actions,spend,summary,done,btn,true) },st) }},{cy:'outbox '+held.e.intent_id+' · '+held.e.phase+' · not confirmed by a block read'}]);
+      return null;
+    }
     try{
-      var abi=await rpc().get_abi('eosio.token');   // the A token lives on eosio.token, not eosio (the node taught us)
-      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
-      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      var actz=[{actor:vacct(),permission:'active'}];
-      var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio.token','transfer',actz,
-        {from:vacct(),to:to,quantity:q,memo:memo||''},new TextEncoder(),new TextDecoder());
-      $('sv-stat').textContent='2/4 signing with your bzDiD key…';
+      wlSay(st,['signing…']);
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
-      var built=await buildSigned(info,ref,[{account:'eosio',name:'transfer',authorization:actz,data:sa.data}],null);
-      $('sv-stat').textContent='3/4 broadcasting '+q+' → '+to+'…';
-      var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
-      if(res&&res.transaction_id){
-        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
-        payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
-        capRecord('A',amt);
-        readVaulta(vacct());
-      } else {
-        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
-      }
-    }catch(e){ $('sv-stat').textContent='send error: '+e.message }
-    $('sv-to').value='';$('sv-amt').value='';
-  };
+      var built=await buildSigned(info,ref,actions,null,null,spend);
+      var txid=hexS(BN.sha256(hexB(built.packedHex)));   /* an Antelope transaction id is the sha256 of its packed bytes */
+      entry={intent_id:'vaulta:'+txid.slice(0,32),rail:'vaulta',network:'mainnet',human_summary:summary,digest:txid,txid:txid,
+        signed_bytes:JSON.stringify({network:'mainnet',packed_hex:built.packedHex,signatures:built.signatures}),
+        phase:'signed',ref:null,block_hint:null,expires_at:built.expires_at,signed_by:built.by,
+        created_at:new Date().toISOString(),updated_at:new Date().toISOString(),evidence:null};
+    }catch(e){
+      if(e&&e.capRefused){ capSay(st,e,again); return null }
+      wlSay(st,['the network did not answer before signing, so nothing was signed. ',{btn:'try again',on:again},{cy:(e&&e.message)||String(e)}]);
+      return null;
+    }
+    try{ outboxPut(entry) }   /* PERSIST BEFORE SUBMIT — the law */
+    catch(oe){ outboxFail(st,oe,again); return null }
+    if(spend){ entry.cap={unit:spend.unit,amt:spend.amt,day:capRecord(spend.unit,spend.amt)}; try{ outboxPut(entry) }catch(x){} }   /* counted once signed and kept; given back only on proof */
+    /* the lane's own words land once it went out, also when it went out on a later 'send it again' */
+    var landed=false, land=function(fin){
+      if(landed||!fin)return; landed=true;
+      try{ done(fin) }catch(de){}
+      if(LAST_A&&LAST_A.acct===vacct())LAST_A=null;   /* the old figure is no longer what can be sent */
+      setTimeout(function(){ readVaulta(vacct()) },2500);
+    };
+    var fin=await submitAndConfirm(entry,function(parts,phase){
+      txSay(st,parts,phase);
+      if(phase==='confirmed')land(outboxGet(entry.intent_id)||entry);
+    });
+    if(fin&&(fin.phase==='confirmed'||fin.phase==='submitted'))land(fin);
+    return fin;
+  }
+  /* a lane that moves value is pressed once until it settles: a second press never signs a second transaction */
+  var VBUSY=false;
+  async function vaultaLane(btn,run,st){
+    if(VBUSY){ if(st){ if(st.style.display==='none')st.style.display='block'; st.style.color=''; wlSay(st,['another send is still finishing. press again when it is done.']) } return }
+    VBUSY=true; if(btn)btn.disabled=true;
+    try{ await run() } finally { VBUSY=false; if(btn)btn.disabled=false }
+  }
+  /* the saved outbox cannot be read, or this browser is out of room: said honestly, never a re-sign loop */
+  function outboxFail(st,oe,again){
+    if(/unavailable|unreadable/i.test((oe&&oe.message)||'')) wlSay(st,['the list of things waiting to be sent cannot be read on this device, so nothing was sent. ',{to:'outbox-sec',t:'open waiting to be sent'},{cy:'outbox read failed: '+oe.message}]);
+    else wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then ',{btn:'try again',on:again},{cy:'outbox write failed: '+((oe&&oe.message)||oe)}]);
+  }
+  $('sv-go').onclick=function(){ vaultaLane($('sv-go'),svGo,$('sv-stat')) };
+  async function svGo(){
+    var st=$('sv-stat'), to=$('sv-to').value.trim(), raw=String($('sv-amt').value||'').trim(), memo=$('sv-memo').value;
+    st.style.color='';
+    if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to send A.']); return }
+    if(!validAcct(to)){ wlSay(st,['type the Vaulta account to send to: up to 12 letters a to z and digits 1 to 5.']); $('sv-to').focus(); return }
+    if(!/^\d+(\.\d{1,4})?$/.test(raw)){ wlSay(st,['type how much A to send, with at most 4 digits after the point.']); $('sv-amt').focus(); return }
+    var q=Number(raw).toFixed(4)+' A', amt=Number(raw);   /* the amount checked, capped and sent is the one that goes on chain */
+    if(!(amt>0)){ wlSay(st,['type how much A to send.']); $('sv-amt').focus(); return }
+    if(keyInMemo(memo)){ wlSay(st,['that memo holds what looks like a private key. memos are public, so nothing was sent.']); $('sv-memo').focus(); return }
+    if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to send A.']); return }
+    if(!signGuard(st))return;
+    var liq=(LAST_A&&LAST_A.acct===vacct())?LAST_A.a:null;
+    if(liq!==null&&amt>liq+1e-9){ wlSay(st,['you have '+aAmount(liq)+', so send that much or less.']); $('sv-amt').focus(); return }
+    if(!capGate('A',amt,st))return;
+    var actz=[{actor:vacct(),permission:'active'}];
+    try{ var act=await vaultaSerialize(A_TOKEN,'transfer',actz,{from:vacct(),to:to,quantity:q,memo:memo||''}) }
+    catch(e){ wlSay(st,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('sv-go').click() }},{cy:(e&&e.message)||String(e)}]); return }
+    await vaultaSend(st,[act],{unit:'A',amt:amt},'send '+q+' to '+to+' from '+vacct()+(memo?' · memo '+memo:''),function(fin){
+      if(fin.phase==='confirmed')wlSay(st,['sent '+q+' to '+to+'.',{cy:'tx '+(fin.ref||fin.txid)}]);
+      payStat('📤 sent '+esc(q)+' to '+esc(to)+'.');
+      $('sv-to').value='';$('sv-amt').value='';$('sv-memo').value='';
+    },$('sv-go'));
+  }
 
   /* SEND · EVM — first-party EIP-155 signer: RLP + keccak + noble secp, zero new vendors */
   function rlp(x){
@@ -7271,58 +7541,46 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
   $('ln-req').addEventListener('keydown',function(e){ if(e.key==='Enter')$('ln-read').click() });
 
-  /* SWAP · A ↔ RAM — eosio buyrambytes / sellram, live rammarket quote */
+  /* SWAP · A ↔ RAM — core.vaulta buyrambytes / sellram (A in, A out), live rammarket quote */
   var SW_BUY=true;
+  function kb(b){ return (Math.max(0,b)/1024).toFixed(1)+' KB' }
   async function swQuote(){
-    var p=await ramPrice();
-    if(p===null){$('sw-quote').textContent='quote: rammarket unreadable';return}
-    var n=parseInt($('sw-amt').value,10)||0;
-    if(SW_BUY)$('sw-quote').innerHTML='≈ <b>'+(p*n).toFixed(4)+' A</b> for '+n.toLocaleString()+' B of RAM (draws liquid)';
-    else $('sw-quote').innerHTML='≈ <b>'+((1/p)*n).toFixed(4)+' A</b> back for selling '+n.toLocaleString()+' B (chain sells at market)';
-    var ramQ=(LAST_ACC&&LAST_ACC.ram_quota)||0, ramU=(LAST_ACC&&LAST_ACC.ram_usage)||0;
-    $('sw-stat').innerHTML=SW_BUY?'RAM now: '+(ramU/1024).toFixed(1)+' KB used / '+(ramQ/1024).toFixed(1)+' KB owned — buy adds to the owned column'
-      :'sellable now: ≈'+((ramQ-ramU)/1024).toFixed(1)+' KB (owned − used)';
+    var p=await ramPrice(), n=parseInt($('sw-amt').value,10)||0;
+    if(p===null) wlSay($('sw-quote'),['the RAM price is not known yet. ',{btn:'read it',on:swQuote},{cy:'eosio rammarket answered nothing'}]);
+    else if(SW_BUY) wlSay($('sw-quote'),['about '+aAmount(p*n*1.005)+' buys '+n.toLocaleString()+' bytes of RAM.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, plus the 0.5% fee, paid from liquid A at '+A_TOKEN}]);
+    else wlSay($('sw-quote'),['selling '+n.toLocaleString()+' bytes brings back about '+aAmount(p*n*0.995)+'.',{cy:'rammarket marginal price '+p.toExponential(4)+' A per byte, less the 0.5% fee, paid out by '+A_TOKEN}]);
+    var st=$('sw-stat');
+    if(!SOUL) wlSay(st,[{to:'connect-sec',t:'connect your name'},' to see your RAM.']);
+    else if(!LAST_ACC||LAST_ACC.account_name!==vacct()) wlSay(st,['your RAM is not known yet. ',{btn:'read it',on:function(){ readVaulta(vacct()).then(swQuote) }}]);
+    else wlSay(st,SW_BUY?['you own '+kb(LAST_ACC.ram_quota)+' of RAM and use '+kb(LAST_ACC.ram_usage)+'.']:['you can sell up to '+kb(LAST_ACC.ram_quota-LAST_ACC.ram_usage)+'.']);
   }
   $('sw-dir').onclick=function(){ SW_BUY=!SW_BUY;
     $('sw-dir').textContent=SW_BUY?'direction: buy RAM with A':'direction: sell RAM for A';
     $('sw-amt').min=SW_BUY?1:1024; $('sw-amt').step=SW_BUY?1024:1024;
     swQuote(); };
   $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
-  $('sw-go').onclick=async function(){
-    if(!SOUL){wlSay($('sw-stat'),['connect ',{to:'connect-sec',t:'your name'},' first']);return}
-    if(!K1){wlSay($('sw-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
-    if(!signGuard($('sw-stat')))return;
-    var n=parseInt($('sw-amt').value,10)||0;
-    if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
-    var swCapCost=null;
-    if(SW_BUY){ var cp=await ramPrice(); if(cp!==null){ swCapCost=cp*n; if(!capGate('A',swCapCost))return; } }
-    var args=SW_BUY?{payer:vacct(),receiver:vacct(),bytes:n}:{account:vacct(),bytes:n};
-    var act=SW_BUY?'buyrambytes':'sellram';
-    $('sw-stat').textContent='1/3 serializing eosio::'+act+'…';
-    try{
-      var abi=await rpc().get_abi('eosio');
-      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
-      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      var actz=[{actor:vacct(),permission:'active'}];
-      var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio',act,actz,args,new TextEncoder(),new TextDecoder());
-      $('sw-stat').textContent='2/3 signing…';
-      var info=await rpc().get_info();
-      var ref=await rpc().get_block(info.head_block_num-3);
-      var built=await buildSigned(info,ref,[{account:'eosio',name:act,authorization:actz,data:sa.data}],null);
-      $('sw-stat').textContent='3/3 broadcasting…';
-      var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
-      if(res&&res.transaction_id){
-        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
-        payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
-        if(swCapCost!==null)capRecord('A',swCapCost);
-        readVaulta(vacct());
-      } else {
-        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
-        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
-      }
-    }catch(e){ $('sw-stat').textContent='swap error: '+e.message }
-  };
+  $('sw-go').onclick=function(){ vaultaLane($('sw-go'),swGo,$('sw-stat')) };
+  async function swGo(){
+    var st=$('sw-stat'); st.style.color='';
+    if(!SOUL){ wlSay(st,[{to:'connect-sec',t:'connect your name'},' to buy or sell RAM.']); return }
+    if(!K1){ wlSay(st,[{to:'kc-sec',t:'connect your keychain'},' to buy or sell RAM.']); return }
+    if(!signGuard(st))return;
+    var n=parseInt($('sw-amt').value,10)||0, buy=SW_BUY;
+    if(!(n>0)){ wlSay(st,['type how many bytes of RAM.']); $('sw-amt').focus(); return }
+    var spend=null;
+    if(buy){
+      var cp=await ramPrice();
+      if(cp!==null){ spend={unit:'A',amt:cp*n*1.005}; if(!capGate('A',spend.amt,st))return }
+      else if('A' in capLoad()){ wlSay(st,['the RAM price is not known yet, so your daily cap cannot be checked and nothing was signed. ',{btn:'try again',on:function(){ $('sw-go').click() }}]); return }
+    }
+    var actz=[{actor:vacct(),permission:'active'}], act;
+    try{ act=await vaultaSerialize(A_TOKEN,buy?'buyrambytes':'sellram',actz,buy?{payer:vacct(),receiver:vacct(),bytes:n}:{account:vacct(),bytes:n}) }
+    catch(e){ wlSay(st,['the network did not answer, so nothing was signed. ',{btn:'try again',on:function(){ $('sw-go').click() }},{cy:(e&&e.message)||String(e)}]); return }
+    await vaultaSend(st,[act],spend,(buy?'buy ':'sell ')+n.toLocaleString()+' bytes of RAM for '+vacct(),function(fin){
+      if(fin.phase==='confirmed')wlSay(st,[(buy?'bought ':'sold ')+n.toLocaleString()+' bytes of RAM.',{cy:A_TOKEN+'::'+(buy?'buyrambytes':'sellram')+' · tx '+(fin.ref||fin.txid)}]);
+      payStat('🔁 '+(buy?'bought ':'sold ')+n.toLocaleString()+' bytes of RAM.');
+    },$('sw-go'));
+  }
 
   /* ── balances (keyless, unchanged lane) ───────────────────── */
   function assetNumber(raw){
@@ -7407,14 +7665,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var m={vaulta:VAULTA_ROLLUP,hive:HIVE_ROLLUP,ant:ANT_ROLLUP,ar:AR_ROLLUP};
     if(m[key]) m[key].clear();
   };
+  /* A is the token of core.vaulta. The chain's older core coin, EOS (eosio.token,
+     what get_account calls core_liquid_balance), is a different token that swaps
+     1:1 into A at core.vaulta but is not A until it does: the founder's account
+     read 0.0001 A and 0.0000 EOS on 2026-10-05. A missing read stays unread (null). */
+  async function readA(acct){
+    var r=await post(VH,'/v1/chain/get_currency_balance',{code:A_TOKEN,account:acct,symbol:'A'});
+    if(!Array.isArray(r))return null;
+    return r.length?assetNumber(r[0]):0;
+  }
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
-    if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; wlRead($('v-stat'),false); return; }
-    LAST_ACC=d;
-    upsertVaultaBalance(acct,d.core_liquid_balance);
+    var a=d?await readA(acct):null;
+    if(!d||a===null){
+      if(LAST_A&&LAST_A.acct===acct)LAST_A=null;
+      wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
+      $('v-stat').className='stat err'; wlRead($('v-stat'),false); return;
+    }
+    LAST_ACC=d; LAST_A={acct:acct,a:a};
+    upsertVaultaBalance(acct,aAmount(a));
+    var eos=assetNumber(d.core_liquid_balance);
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
-      'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
-    $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
+      'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/')+
+      ' · A from '+A_TOKEN+(eos>0?' · also '+eos.toFixed(4)+' EOS on eosio.token, which swaps 1:1 into A and is not counted here':'');
+    if(eos>0) wlSay($('v-stat'),['✓ live · '+acct+' also holds '+eos.toFixed(4)+' EOS, the chain\u2019s older coin, which is not counted as A.',{cy:'EOS on eosio.token; it swaps 1:1 into A at '+A_TOKEN}]);
+    else $('v-stat').textContent='✓ live';
+    $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
     $('ch-vaulta').classList.add('connected');
     if(vacct()===acct)refreshAcctPanel();
   }
@@ -7584,7 +7860,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(saved){ SOUL=saved; vacctCacheLoad(); $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
-  if(loadWaCred())$('tx-wa-row').style.display='flex';
 })();
 </script>
 <script>
@@ -8191,11 +8466,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var STAT={'v-bal':'v-stat','h-bal':'h-stat','a-bal':'a-stat','ant-bal':'ant-stat','ar-bal':'ar-stat'};
   function failed(id){var st=document.getElementById(STAT[id]||'');return !!st&&st.getAttribute('data-read-failed')==='true'}
   var mirrors=[].slice.call(document.querySelectorAll('[data-wl-src]'));
+  /* a status line is mirrored as itself: its link still lands, its button presses the original */
+  function mirrorLine(m,src){
+    m.textContent='';
+    if(!src)return;
+    [].forEach.call(src.childNodes,function(n){
+      var c=n.cloneNode(true);
+      if(c.nodeType===1){
+        [].forEach.call(c.querySelectorAll?c.querySelectorAll('[id]'):[],function(x){x.removeAttribute('id')});
+        if(c.id)c.removeAttribute('id');
+        var bs=c.tagName==='BUTTON'?[c]:[].slice.call(c.querySelectorAll('button'));
+        var os=n.tagName==='BUTTON'?[n]:[].slice.call(n.querySelectorAll('button'));
+        bs.forEach(function(b,i){ b.addEventListener('click',function(e){ e.preventDefault(); if(os[i])os[i].click() }) });
+      }
+      m.appendChild(c);
+    });
+  }
   function sync(id){
     var src=document.getElementById(id), t=src?src.textContent.trim():'', read=!unread(t), err=failed(id);
     mirrors.forEach(function(m){
       if(m.getAttribute('data-wl-src')!==id)return;
-      if(!m.hasAttribute('data-wl-value')){m.textContent=t;return}
+      if(!m.hasAttribute('data-wl-value')){ mirrorLine(m,src); return }
       m.textContent=read?t:'';
       var card=m.closest('[data-wl-card]');
       if(card){card.setAttribute('data-read',String(read));card.setAttribute('data-err',String(err))}
@@ -8286,6 +8577,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(reg()==='bee'&&view()==='home')setView(t,{push:true,url:'#'+h});else setView(t,{replace:true,url:'#'+h});
     } else { try{history.replaceState(history.state,'','#'+h)}catch(x){} }
     if(reg()==='raver')openSec(el.closest('main>section'),false);
+    unfold(el);
     requestAnimationFrame(function(){
       if(!shown(el)){arrive(t);return}   /* the page holds the target hidden: land on its task, never on nothing */
       el.scrollIntoView({block:'start',behavior:(reduced()||reg()==='cypherpunk')?'auto':'smooth'});
@@ -8293,6 +8585,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     });
   });
 
+  /* the target sits in its section's folded part (bee's details, raver's words): open them */
+  function unfold(el){
+    var s=el&&el.closest&&el.closest('main>section'); if(!s||shown(el)||s.hasAttribute('data-wl-more'))return;
+    var b=s.querySelector('.wl-more'); if(!b)return;
+    s.setAttribute('data-wl-more',''); b.setAttribute('aria-expanded','true');
+    var d=el.closest('details'); if(d)d.open=true;
+  }
   /* a deep link lands in the task that holds its target, in every register */
   function taskOf(el){var s=el&&el.closest&&el.closest('main>section[data-wl-task]');return s?s.getAttribute('data-wl-task'):null}
   /* a section held out of its task (data-wl-held) lives only in "show me

@@ -268,7 +268,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
-    ['Raise or clear it above', 'within pay (the spend cap)'],
     ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
     ['filled into both fields below', 'within the vault'],
     ['connect your keychain above to use it', 'vault → keychain, same task, before it'],

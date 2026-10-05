@@ -28,7 +28,20 @@ const EOSIO_ABI = { account_name: 'eosio', abi: { version: 'eosio::abi/1.2', act
     { name: 'permission_level_weight', fields: [{ name: 'permission', type: 'permission_level' }, { name: 'weight', type: 'uint16' }] },
     { name: 'wait_weight', fields: [{ name: 'wait_sec', type: 'uint32' }, { name: 'weight', type: 'uint16' }] },
     { name: 'authority', fields: [{ name: 'threshold', type: 'uint32' }, { name: 'keys', type: 'key_weight[]' }, { name: 'accounts', type: 'permission_level_weight[]' }, { name: 'waits', type: 'wait_weight[]' }] },
-    { name: 'updateauth', fields: [{ name: 'account', type: 'name' }, { name: 'permission', type: 'name' }, { name: 'parent', type: 'name' }, { name: 'auth', type: 'authority' }] }] } };
+    { name: 'updateauth', fields: [{ name: 'account', type: 'name' }, { name: 'permission', type: 'name' }, { name: 'parent', type: 'name' }, { name: 'auth', type: 'authority' }] },
+    { name: 'newaccount', fields: [{ name: 'creator', type: 'name' }, { name: 'name', type: 'name' }, { name: 'owner', type: 'authority' }, { name: 'active', type: 'authority' }] }] } };
+EOSIO_ABI.abi.actions.push({ name: 'newaccount', type: 'newaccount' });
+// mainnet's eosio has no transfer action; A is core.vaulta's token (shapes as get_abi core.vaulta returns them)
+const CORE_VAULTA_ABI = { account_name: 'core.vaulta', abi: { version: 'eosio::abi/1.2', types: [],
+  actions: [{ name: 'transfer', type: 'transfer' }, { name: 'buyrambytes', type: 'buyrambytes' }, { name: 'sellram', type: 'sellram' }],
+  structs: [
+    { name: 'transfer', fields: [{ name: 'from', type: 'name' }, { name: 'to', type: 'name' }, { name: 'quantity', type: 'asset' }, { name: 'memo', type: 'string' }] },
+    { name: 'buyrambytes', fields: [{ name: 'payer', type: 'name' }, { name: 'receiver', type: 'name' }, { name: 'bytes', type: 'uint32' }] },
+    { name: 'sellram', fields: [{ name: 'account', type: 'name' }, { name: 'bytes', type: 'int64' }] }] } };
+// an Antelope name as its 8 little-endian bytes, to find an action's (account, name) in packed bytes
+const nameHex = n => { let v = 0n; for (let i = 0; i <= 12; i++) { const ch = n[i] || '.', c = ch === '.' ? 0 : ch >= 'a' ? ch.charCodeAt(0) - 91 : ch.charCodeAt(0) - 48;
+  v |= i < 12 ? BigInt(c & 0x1f) << BigInt(64 - 5 * (i + 1)) : BigInt(c & 0x0f); } return Buffer.from(new BigUint64Array([v]).buffer).toString('hex'); };
+const actHex = (acct, act) => nameHex(acct) + nameHex(act);
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -70,22 +83,26 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
           return json({ rows: rows.slice(0, body.limit || 500), more: false, next_key: '' });
         }
         if (body.table === 'config') return json({ rows: [{ admin: 'kingbeelovis', registration_fee: '0.0000 EOS', registration_days: 365 }], more: false });
-        return json({ rows: [{ base: { balance: '100000000000 RAM' }, quote: { balance: '1000000.0000 A' } }], more: false });
+        return json(state.ramDown ? { rows: [], more: false } : { rows: [{ base: { balance: '100000000000 RAM' }, quote: { balance: '1000000.0000 A' } }], more: false });
       }
       if (u.pathname.endsWith('/get_account')) {
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
-        return json({ account_name: a, core_liquid_balance: '5.0000 A', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
+        return json({ account_name: a, core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: 1, keys, accounts: [], waits: [] } }] });
       }
-      if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : ABI);
+      if (u.pathname.endsWith('/get_currency_balance')) return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
+      if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : ABI);
       if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
       if (u.pathname.endsWith('/get_block')) {
         const num = body.block_num_or_id;
         if (num === 123453) return json({ ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000' });
-        return json({ id: 'MOCKBLOCK' + num, block_num: num, transactions: [...state.byPacked.values()].map(id => ({ id, status: 'executed' })) });
+        return json({ id: 'MOCKBLOCK' + num, block_num: num, ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000', transactions: [...state.byPacked.values()].map(id => ({ id, status: 'executed' })) });
       }
       if (u.pathname.endsWith('/send_transaction')) {
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
+        (state.posts = state.posts || []).push(body.packed_trx);
+        if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
+        if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         state.submits++; state.packed = body.packed_trx;
         if (state.onSend) state.onSend(body);
         let id = state.byPacked.get(body.packed_trx);
@@ -322,6 +339,200 @@ try {
       ok('the pasted key is gone from the page', await page.evaluate(() => document.getElementById('act-key').value === '' && !JSON.stringify(localStorage).includes('5KQwrPbw')));
       ok('the wallet now signs for kingbeelovis itself', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓', await page.textContent('#sum-bridge'));
     }
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* H · the A lanes: send, RAM and a new account move A through core.vaulta, and the owner's daily cap holds on every lane, the composer included */
+  {
+    console.log('H · the A lanes and the daily cap:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.waitForFunction(() => document.getElementById('v-bal').textContent === '5.0000 A', null, { timeout: 15000 }).catch(() => {});
+    ok('the A figure is the core.vaulta balance, never the EOS core balance relabelled', (await page.textContent('#v-bal')) === '5.0000 A', await page.textContent('#v-bal'));
+    const sent = []; state.onSend = body => sent.push(body.packed_trx);
+    const press = id => page.evaluate(i => document.getElementById(i).click(), id);
+    const settle = (id, re) => page.waitForFunction(([i, r]) => new RegExp(r).test(document.getElementById(i).innerText), [id, re.source], { timeout: 20000 })
+      .catch(async () => console.log('  (waited for ' + re + ' in #' + id + ', it reads: ' + JSON.stringify(await page.innerText('#' + id)) + ')'));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click(); });
+    await page.evaluate(() => { document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '1.5'; });
+    await press('sv-go');
+    await settle('sv-stat', /^sent 1\.5000 A to someoneelse1\.$/);
+    ok('send A is one transfer on core.vaulta, never on eosio', sent.length === 1 && sent[0].includes(actHex('core.vaulta', 'transfer')) && !sent[0].includes(actHex('eosio', 'transfer')) && sent[0].includes('983a0000000000000441000000000000'), String(sent[0]).slice(0, 120));
+    await page.evaluate(() => localStorage.setItem('bnr-spend-cap', JSON.stringify({ A: 1 })));
+    await page.evaluate(() => { document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.1'; });
+    await press('sv-go');
+    await settle('sv-stat', /past the daily cap you set/);
+    ok('past the daily cap, send A says so in one sentence with its one link, and signs nothing', sent.length === 1 && await page.evaluate(() => !!document.querySelector('#sv-stat a[href="#cap-row"]')), await page.innerText('#sv-stat'));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="proof"]').click();
+      document.getElementById('tx-contract').value = 'core.vaulta'; document.getElementById('tx-action').value = 'transfer'; document.getElementById('tx-net').value = 'main';
+      document.getElementById('tx-data').value = JSON.stringify({ from: 'kingbeelovis', to: 'someoneelse1', quantity: '0.5000 A', memo: '' }); });
+    const boxBefore = await page.evaluate(() => (localStorage.getItem('bnr_outbox_v1') || '[]').length);
+    await press('tx-go');
+    await settle('tx-out', /past the daily cap you set/);
+    ok('a composed action that moves A meets the same cap: refused before anything is built or signed', sent.length === 1 && await page.evaluate(() => document.getElementById('tx-out').getAttribute('data-fail')) === 'cap' && await page.evaluate(() => (localStorage.getItem('bnr_outbox_v1') || '[]').length) === boxBefore, await page.innerText('#tx-out'));
+    ok('the composer offers no passkey lane it cannot sign with', await page.evaluate(() => !document.getElementById('tx-wa') && !document.getElementById('tx-wa-row')));
+    await page.evaluate(() => localStorage.removeItem('bnr-spend-cap'));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-sw').click(); document.getElementById('sw-amt').value = '4096'; });
+    await press('sw-go');
+    await settle('sw-stat', /^bought 4,096 bytes of RAM\.$/);
+    ok('buying RAM with A goes through core.vaulta buyrambytes', sent.length === 2 && sent[1].includes(actHex('core.vaulta', 'buyrambytes')) && !sent[1].includes(actHex('eosio', 'buyrambytes')), String(sent[1]).slice(0, 120));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="key"]').click(); document.getElementById('ac-name').value = 'newacctname1'; document.getElementById('ac-ram').value = '8192'; });
+    await press('ac-go');
+    await settle('ac-stat', /^newacctname1 is yours now\./);
+    ok('a new account is eosio newaccount plus RAM bought in A at core.vaulta, in one transaction', sent.length === 3 && sent[2].includes(actHex('eosio', 'newaccount')) && sent[2].includes(actHex('core.vaulta', 'buyrambytes')), String(sent[2]).slice(0, 120));
+    await page.evaluate(() => { localStorage.setItem('bnr-spend-cap', JSON.stringify({ A: 0.0001 })); document.getElementById('ac-name').value = 'newacctname2'; });
+    await press('ac-go');
+    await settle('ac-stat', /past the daily cap you set/);
+    ok('the account forge meets the daily cap too: its RAM is A spent', sent.length === 3, await page.innerText('#ac-stat'));
+    state.ramDown = true;
+    await page.evaluate(() => { localStorage.setItem('bnr-spend-cap', JSON.stringify({ A: 50 })); document.querySelector('[data-wl-go="proof"]').click();
+      document.getElementById('tx-contract').value = 'core.vaulta'; document.getElementById('tx-action').value = 'buyrambytes'; document.getElementById('tx-net').value = 'main';
+      document.getElementById('tx-data').value = JSON.stringify({ payer: 'kingbeelovis', receiver: 'kingbeelovis', bytes: 4096 }); document.getElementById('tx-go').click(); });
+    await settle('tx-out', /cannot be checked/);
+    ok('RAM the page cannot price is said as exactly that, and nothing is signed', sent.length === 3 && await page.evaluate(() => document.getElementById('tx-out').getAttribute('data-fail')) === 'cap-unsized', await page.innerText('#tx-out'));
+    state.ramDown = false;
+    await page.evaluate(d => { localStorage.setItem('bnr-spend-cap', JSON.stringify({ A: 0.0001 }));
+      document.getElementById('tx-contract').value = 'kingbeelovis'; document.getElementById('tx-action').value = 'renew'; document.getElementById('tx-data').value = JSON.stringify(d); document.getElementById('tx-go').click(); }, RENEW);
+    await settle('tx-out', /^(done|sent)./);
+    ok('a registry action moves no A, so even a tiny cap lets it through', sent.length === 4 && await page.evaluate(() => document.getElementById('tx-out').getAttribute('data-fail') === null), await page.innerText('#tx-out'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* I · a composed action for an account this wallet does not sign for stops at the guard */
+  {
+    console.log('I · the composer never skips the guard:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await ctx.addInitScript(() => { try { localStorage.setItem('bnr_wa', JSON.stringify({ pub: 'PUB_WA_fixture', canon: 'PUB_WA_fixture', credIdHex: '00' })); } catch (e) {} });
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(d => { document.querySelector('[data-wl-go="proof"]').click();
+      document.getElementById('tx-contract').value = 'kingbeelovis'; document.getElementById('tx-action').value = 'renew'; document.getElementById('tx-net').value = 'main';
+      document.getElementById('tx-data').value = JSON.stringify(d); document.getElementById('tx-go').click(); }, RENEW);
+    await page.waitForFunction(() => /does not sign for kingbeelovis yet/.test(document.getElementById('tx-out').innerText), null, { timeout: 15000 });
+    ok('even with an account passkey on file, an unbridged account gets the guard\'s one sentence and link, and nothing is sent or kept',
+      state.submits === 0 && await page.evaluate(() => !!document.querySelector('#tx-out a[href="#bridge-sec"]') && (localStorage.getItem('bnr_outbox_v1') || '[]') === '[]'), await page.innerText('#tx-out'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* J · an account the forge made is proven by its /active key, even under a hostile row */
+  {
+    console.log('J · a forged bare account under a hostile row:');
+    const { ctx, state } = await context(browser, 'bee', { soul: 'alicevaulta1' });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRPAY, null, { timeout: 20000 });
+    state.keys.alicevaulta1 = [await k1Of(page, 'vaulta:alicevaulta1/active')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
+    ok('the forge\'s /active key proves the bare account is this wallet\'s: it signs as itself', (await page.textContent('#sum-bridge')).trim() === 'alicevaulta1 · ready to sign ✓', await page.textContent('#sum-bridge'));
+    ok('it keeps only the context name', await page.evaluate(() => localStorage.getItem('bnr_k1ctx')) === JSON.stringify({ acct: 'alicevaulta1', ctx: 'vaulta:alicevaulta1/active' }));
+    ok('and it receives at itself, never at the hostile row\'s account', await page.evaluate(() => window.BNRPAY.railAddresses(null, 'alicevaulta1')[0].v) === 'alicevaulta1');
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* K · the forge's done line carries its one action: switch to the new account, which signs with no paste */
+  {
+    console.log('K · from the forge to the new account in one press:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => { document.querySelector('[data-wl-go="key"]').click(); document.getElementById('ac-name').value = 'newacctname1'; document.getElementById('ac-go').click(); });
+    await page.waitForFunction(() => /^newacctname1 is yours now\./.test(document.getElementById('ac-stat').innerText), null, { timeout: 20000 }).catch(() => {});
+    const btn = await page.evaluate(() => { const b = document.querySelector('#ac-stat button.wl-act'); return b ? b.textContent : null; });
+    ok('the done line is one sentence and its one button', btn === 'switch the wallet to newacctname1', await page.innerText('#ac-stat'));
+    state.keys.newacctname1 = [await k1Of(page, 'vaulta:newacctname1/active')];
+    await page.evaluate(() => document.querySelector('#ac-stat button.wl-act').click());
+    await page.waitForFunction(() => /^newacctname1 · ready to sign/.test(document.getElementById('sum-bridge').textContent.trim()), null, { timeout: 20000 }).catch(() => {});
+    ok('one press later the wallet signs as the new account: no paste, no bridge', (await page.textContent('#sum-bridge')).trim() === 'newacctname1 · ready to sign ✓' && await page.evaluate(() => document.getElementById('bridge-sec').style.display === 'none'), await page.textContent('#sum-bridge'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* L · a lost or duplicate answer never signs a second transaction */
+  {
+    console.log('L · one signature per send, whatever the network answers:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click(); });
+    const fill = (to, amt, memo) => page.evaluate(([t, a, m]) => { document.getElementById('sv-to').value = t; document.getElementById('sv-amt').value = a; document.getElementById('sv-memo').value = m || ''; }, [to, amt, memo]);
+    const svText = () => page.innerText('#sv-stat');
+    const ledger = () => page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0));
+    await fill('someoneelse1', '0.12345');
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    ok('an amount finer than A carries is refused in words, never rounded', /at most 4 digits/.test(await svText()) && !(state.posts || []).length, await svText());
+    await fill('someoneelse1', '0.1', '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');   // TESTNET-ONLY: eosio's documented dev key, as a careless memo
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    ok('a memo that holds a private key is never sent: memos are public', /looks like a private key/.test(await svText()) && !(state.posts || []).length, await svText());
+    // a duplicate answer: the bytes went in, nothing new is signed, the cap keeps the count
+    state.dupOnce = true;
+    await fill('someoneelse1', '0.2');
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    await page.waitForFunction(() => /already sent once/.test(document.getElementById('sv-stat').innerText), null, { timeout: 20000 }).catch(() => {});
+    ok('a duplicate answer reads as already sent, not as refused, and offers no second signature', /already sent once, so nothing new was signed/.test(await svText()) && !/nothing was sent/.test(await svText()) && !(await page.$('#sv-stat button.wl-act')), await svText());
+    ok('and the daily count keeps it (no refund for a send that went in)', Math.abs((await ledger()) - 0.2) < 1e-9, String(await ledger()));
+    // the same send again while that one may be in: nothing new is signed until the reader chooses
+    const p0 = (state.posts || []).length;
+    await fill('someoneelse1', '0.2');
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    await page.waitForFunction(() => /still on its way/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    ok('the identical send inside its window is held: still on its way, nothing new signed', /still on its way, so nothing new was signed/.test(await svText()) && state.posts.length === p0, await svText());
+    await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l.forEach(e => { if (/send 0\.2000 A/.test(e.human_summary)) e.expires_at = new Date(Date.now() - 600000).toISOString(); }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    await page.waitForFunction(() => /may already be in/.test(document.getElementById('sv-stat').innerText), null, { timeout: 15000 }).catch(() => {});
+    ok('past its window it may still be in: the reader is told and chooses, nothing is signed silently', /may already be in, so nothing new was signed/.test(await svText()) && state.posts.length === p0 && (await page.textContent('#sv-stat button.wl-act')) === 'send a new one', await svText());
+    await page.evaluate(() => document.querySelector('#sv-stat button.wl-act').click());
+    await page.waitForFunction(() => /^sent 0\.2000 A to someoneelse1\.$/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    ok('send a new one signs exactly one new transaction', state.posts.length === p0 + 1, String(state.posts.length - p0));
+    // a lost answer: kept, and "send it again" resends the identical bytes
+    const before = (state.posts || []).length;
+    state.abortN = 2;
+    await fill('someoneelse1', '0.3');
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    await page.waitForFunction(() => /cannot tell yet/.test(document.getElementById('sv-stat').innerText), null, { timeout: 30000 }).catch(() => {});
+    ok('a lost answer is said as unknown, never as nothing sent', /cannot tell yet whether it went out/.test(await svText()) && !/nothing was sent/.test(await svText()), await svText());
+    const lost = state.posts.slice(before);
+    await page.evaluate(() => document.querySelector('#sv-stat button.wl-act').click());
+    await page.waitForFunction(() => /^sent 0\.3000 A to someoneelse1\.$/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    const again = state.posts.slice(before + lost.length);
+    ok('send it again resends the identical signed bytes: one transaction, never a second signature', again.length >= 1 && again.every(p => p === lost[0]) && lost.every(p => p === lost[0]), JSON.stringify({ lost: lost.length, again: again.length }));
+    ok('and it then lands in words', /^sent 0\.3000 A to someoneelse1\.$/.test((await svText()).trim()), await svText());
+    // two quick presses sign once
+    const b2 = (state.posts || []).length;
+    await fill('someoneelse1', '0.05');
+    await page.evaluate(() => { const b = document.getElementById('sv-go'); b.click(); b.click(); });
+    await page.waitForFunction(() => /^sent 0\.0500 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    const posted = state.posts.slice(b2);
+    ok('a double press signs and sends one transaction', posted.length === 1, String(posted.length));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* M · a link's arguments land in the composer preview as text: a hostile one never runs */
+  for (const reg of ['bee', 'cypherpunk']) {
+    console.log(`M · a hostile compose link, ${reg}:`);
+    const { ctx } = await context(browser, reg);
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    const hostile = { owner: EVIL, domain_name: '<svg onload=window.__xss=2>', days: 365 };
+    await page.goto(`${ORIGIN}/surfaces/wallet.html?compose=${encodeURIComponent('kingbeelovis:renew')}&args=${encodeURIComponent(JSON.stringify(hostile))}`, { waitUntil: 'load' });
+    await page.waitForFunction(() => document.getElementById('tx-preview').style.display === 'block', null, { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(800);
+    const r = await page.evaluate(() => ({ xss: window.__xss, shown: document.getElementById('tx-preview').style.display, text: document.getElementById('tx-preview-body').textContent, tags: document.querySelectorAll('#tx-preview-body img, #tx-preview-body svg').length }));
+    ok('the link\'s arguments are shown as text and nothing in them runs', r.shown === 'block' && r.xss === undefined && r.tags === 0 && /<img src=x/.test(r.text), JSON.stringify(r).slice(0, 200));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

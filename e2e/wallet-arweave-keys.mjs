@@ -106,7 +106,7 @@ try {
     await page.waitForFunction(() => document.getElementById('arw-file-dialog').open, null, { timeout: 20000 });
     ok('the review names the paying address: yours', (await page.textContent('#arw-file-plan')).includes('Paying address: ' + want), await page.textContent('#arw-file-plan'));
     await page.evaluate(() => document.getElementById('arw-file-confirm').click());
-    await page.waitForFunction(() => /Publication /.test(document.getElementById('arw-file-status').textContent), null, { timeout: 30000 });
+    await page.waitForFunction(() => /published\. the network confirmed it|sent\. waiting for the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 30000 });
     ok('the file was posted', !!state.posted, await page.textContent('#arw-file-status'));
     if (state.posted) {
       const r = await ownerOf(state.posted);

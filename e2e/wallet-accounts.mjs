@@ -53,10 +53,16 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
     if (body.method === 'eth_getBalance') return json({ result: '0x' + (preview ? 12345000000000000n : 9007199254740993123456789n).toString(16) });
     if (body.method === 'eth_call') return json({ result: '0x' + (preview ? /base|1rpc/.test(url.host) ? 21000000n : 42000000000000000000n : 1234567890123456789n).toString(16) });
   }
+  // A is core.vaulta's token; get_account's core_liquid_balance is EOS, a different token
+  if (url.pathname === '/v1/chain/get_currency_balance') {
+    calls.push('get_currency_balance');
+    if (body.code !== 'core.vaulta' || body.symbol !== 'A') return json([]);
+    return json(vaultMalformed ? { error: 'fixture' } : body.account === 'alice' ? ['12.3456 A'] : ['7.0000 A']);
+  }
   if (url.pathname === '/v1/chain/get_account') {
     calls.push('get_account');
     if (body.account_name === 'missing') return json({ error: { message: 'unknown account' } });
-    return json({ account_name: body.account_name, core_liquid_balance: vaultMalformed ? null : body.account_name === 'alice' ? '12.3456 EOS' : '7.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
+    return json({ account_name: body.account_name, core_liquid_balance: '0.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
   }
   if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: hiveMalformed ? 'not a balance' : '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
   if (/blockstream|mempool/.test(url.host)) {
@@ -179,7 +185,7 @@ try {
   hiveMalformed=false;
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY);
   check('persistence contains only versioned public metadata', saved.v === 1 && saved.entries.length === 9 && saved.entries.every(row => Object.keys(row).sort().join(',') === 'address,chain,kind,label'));
-  check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
+  check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','get_currency_balance','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
   await open(); await settled(card(BTC));
   check('reload preserves all accounts and rereads', await cards().count() === 9);
   const second = await ctx.newPage(); await second.goto(origin + '/surfaces/wallet.html#wallet-accounts');

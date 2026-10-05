@@ -83,9 +83,13 @@ function mockChain(ctx, opts = {}) {
     }
     const isJ4Host = /jungle4/.test(u.host);
     const chain = opts.mainAsJ4 ? MAIN_CHAIN : (isJ4Host ? J4_CHAIN : MAIN_CHAIN);
+    if (u.pathname.endsWith('/get_currency_balance')) {
+      const q = JSON.parse(route.request().postData());
+      if (q.code !== 'core.vaulta' || q.symbol !== 'A') return json([]);
+      return json(q.account === 'emptyacct' ? { unreadable: true } : ['12.3456 A']);
+    }
     if (u.pathname.endsWith('/get_account')) {
-      const account = JSON.parse(route.request().postData()).account_name;
-      return json({ core_liquid_balance: account === 'emptyacct' ? null : '12.3456 EOS' });
+      return json({ core_liquid_balance: '0.0000 EOS' });
     }
     if (u.pathname.endsWith('/get_abi')) {
       const want = JSON.parse(route.request().postData()).account_name;
@@ -150,11 +154,11 @@ try {
     ok('hive describes: read rail, balance only', h.rail === 'hive' && JSON.stringify(h.capabilities) === '["balance"]', JSON.stringify(h));
     ok('adapter states painted in the composer', /vaulta ✓/.test(await page.locator('#adapter-states').innerText()));
     const balance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'banchor22222' }));
-    ok('Vaulta RPC EOS unit is normalized to A without changing digits',
+    ok('the A balance is read at core.vaulta, never the EOS core balance relabelled',
       balance.unit === 'A' && balance.quantity === '12.3456 A', JSON.stringify(balance));
     const emptyBalance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'emptyacct' }).then(()=>null,error=>error.message));
-    ok('Vaulta missing liquid balance is refused, never fabricated as zero',
-      /no valid liquid balance/.test(emptyBalance), String(emptyBalance));
+    ok('an unreadable A balance is refused, never fabricated as zero',
+      /A balance of emptyacct unreadable/.test(emptyBalance), String(emptyBalance));
   }
 
   /* ── 2 · the pipeline on the mock: build → sign → OUTBOX PERSISTED →
@@ -177,9 +181,9 @@ try {
     await page.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
     await page.click('#tx-go');
     await page.waitForFunction(() => /CONFIRMED|FAILED|EXPIRED|error|refused/i.test(document.getElementById('tx-out').textContent), null, { timeout: 30000 });
-    const out = await page.locator('#tx-out').innerText();
-    ok('CONFIRMED only from the block read, evidence names what was read',
-      /CONFIRMED — read back from the rail: get_block #123460/.test(out) && /MOCKTXID/.test(out), out.slice(0, 140));
+    const out = await page.locator('#tx-out').innerText(), outRaw = await page.locator('#tx-out').textContent();
+    ok('CONFIRMED only from the block read, evidence names what was read (kept for cypherpunk)',
+      /done\. the chain confirmed it/.test(out) && /CONFIRMED by a block read: get_block #123460/.test(outRaw) && /MOCKTXID/.test(outRaw), outRaw.slice(0, 160));
     ok('the intent is previewed in words before the go', /in words/.test(await page.locator('#tx-preview-body').innerText()));
     const obx = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
     ok('outbox holds the entry, phase confirmed, digest + human summary present',
@@ -204,9 +208,9 @@ try {
     const r = await p2.evaluate(() => window.BNRWALLET.walletAction('banchor22222', 'commit',
       { committer: 'x', epoch: '1' }, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' })); // TESTNET-ONLY: eosio documented dev key
     const sentAfter = await p2.evaluate(() => BNRWALLET._telemetry.vaulta.sent);
-    const out = await p2.locator('#tx-out').innerText();
+    const out = await p2.locator('#tx-out').innerText(), outRaw = await p2.locator('#tx-out').textContent();
     ok('undeclared capability: the shell refuses at the seam — ZERO messages dispatched',
-      r === null && sentAfter === sentBefore && /not declared/.test(out), `sent ${sentBefore}→${sentAfter} · ${out.slice(0, 80)}`);
+      r === null && sentAfter === sentBefore && /cannot build actions, so nothing was signed/.test(out) && /not declared/.test(outRaw), `sent ${sentBefore}→${sentAfter} · ${outRaw.slice(0, 120)}`);
     await c2.close();
   }
 
@@ -214,8 +218,8 @@ try {
   console.log('4 · redaction wall mutation (§9.3):');
   {
     const c3 = await browser.newContext(); mockChain(c3);
-    mutateVaulta(c3, "return { unit: 'A', quantity: displayA(d.core_liquid_balance) };",
-      "return { unit: 'A', quantity: displayA(d.core_liquid_balance), memo_hint: '" + J4_WIF + "' };");
+    mutateVaulta(c3, "return { unit: 'A', quantity: a.length ? displayA(a[0]) : '0.0000 A' };",
+      "return { unit: 'A', quantity: a.length ? displayA(a[0]) : '0.0000 A', memo_hint: '" + J4_WIF + "' };");
     const p3 = await c3.newPage();
     await p3.goto(WALLET, { waitUntil: 'load' });
     await p3.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
@@ -285,10 +289,10 @@ try {
     await p7.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
     await p7.click('#tx-go');
     await p7.waitForFunction(() => /not visible yet|reading again/i.test(document.getElementById('tx-out').textContent), null, { timeout: 20000 });
-    const midOut = await p7.locator('#tx-out').innerText();
+    const midOut = await p7.locator('#tx-out').innerText(), midRaw = await p7.locator('#tx-out').textContent();
     const midBox = await p7.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]);
-    ok('ack without a block: UI says submitted-not-sent, outbox phase submitted',
-      /submitted/i.test(midOut) && !/CONFIRMED/i.test(midOut) && !/✓/.test(midOut) && midBox.phase === 'submitted', midOut.slice(0, 100));
+    ok('ack without a block: UI says sent and waiting, never done; outbox phase submitted',
+      /waiting for the chain to confirm it/.test(midOut) && !/confirmed it\./.test(midOut) && !/CONFIRMED/.test(midRaw) && !/✓/.test(midOut) && midBox.phase === 'submitted', midRaw.slice(0, 120));
     // force the clock: the intent's window closes → the HONEST terminal is expired
     await p7.evaluate(() => {
       const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[l.length - 1].expires_at = new Date(Date.now() - 120000).toISOString();   // past the 30s grace — the honest terminal is due
@@ -299,10 +303,10 @@ try {
       const e = (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {};
       return e.phase === 'expired' || e.phase === 'confirmed';
     }, null, { timeout: 30000 });
-    const endOut = await p7.locator('#tx-out').innerText();
+    const endOut = await p7.locator('#outbox-list .obx-row .obx-stat').first().innerText(), endRaw = await p7.locator('#outbox-list .obx-row .obx-stat').first().textContent();
     const endBox = await p7.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]);
-    ok('terminal came from the rail/time (expired), never from the ack',
-      /EXPIRED/.test(endOut) && endBox.phase === 'expired' && !/CONFIRMED/i.test(endOut), endOut.slice(0, 100));
+    ok('terminal came from the rail/time (expired), never from the ack, said in the outbox row that was pressed',
+      /did not show up on the chain before its time ran out/.test(endOut) && /check your coins/.test(endOut) && /expired|EXPIRED/.test(endRaw) && endBox.phase === 'expired' && !/CONFIRMED/.test(endRaw), endRaw.slice(0, 120));
   }
 
   /* ── 8 · the chain-id guard still guards (worker-side now) ─────────────── */
