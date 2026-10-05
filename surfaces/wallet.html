@@ -5100,13 +5100,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
-  function signGuard(el,retry){
+  function signGuard(el,retry,checked){
     /* a lane that can press itself again gets the button; the pointer and the account are read first, then the lane */
     var again=function(read){ return retry?{btn:'try again',on:function(){ Promise.resolve(read()).then(function(){ return checkBridge() }).then(retry,retry) }}:'try again in a moment.' };
     if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
-    if(BRIDGED===null&&BR_CHECK&&retry){   /* still being checked: say so, and go on once the check answers */
-      var w=BR_CHECK; wlSay(el,['checking '+vacct()+', one moment.']);
-      var on=function(){ if(BRIDGED!==null)retry(); else signGuard(el,retry) }; w.then(on,on); return false }
+    if(BRIDGED===null&&retry&&(BR_CHECK||!checked)){   /* not checked yet, or being checked: check it, say so, and go on once it answers */
+      var w=BR_CHECK||checkBridge(); wlSay(el,['checking '+vacct()+', one moment.']);
+      var on=function(){ if(BRIDGED!==null)retry(); else signGuard(el,retry,true) }; w.then(on,on); return false }
     if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
@@ -8690,6 +8690,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   async function vaultaSend(st,actions,spend,summary,done,btn,force){
     var entry, again=function(){ if(btn)btn.click() };   /* a retry goes back through its lane: one press at a time */
+    var who=vacct(), key=K1;   /* the account and keychain this send was asked from */
     st.style.color='';
     if(!ADAPTERS.vaulta||!ADAPTERS.vaulta.attached||!hasCap('vaulta','submit')){
       wlSay(st,['the wallet\u2019s Vaulta part did not start, so nothing was signed. ',{btn:'reload the page',on:function(){ location.reload() }},{cy:'vaulta adapter not attached: '+((ADAPTERS.vaulta&&ADAPTERS.vaulta.state)||'never spawned')}]);
@@ -8708,6 +8709,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       wlSay(st,['signing it with your keychain: '+summary+'.',{cy:'get_info, get_block, buildSigned'}]);
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
+      if(vacct()!==who||K1!==key||!K1){ wlSay(st,['the name or the keychain changed while this was being made ready, so nothing was signed. ',{btn:'try again',on:again},{cy:'asked from '+who+'; now '+vacct()+(K1?'':' with no keychain')}]); return null }
       var built=await buildSigned(info,ref,actions,null,null,spend);
       var txid=hexS(BN.sha256(hexB(built.packedHex)));   /* an Antelope transaction id is the sha256 of its packed bytes */
       entry={intent_id:'vaulta:'+txid.slice(0,32),rail:'vaulta',network:'mainnet',human_summary:summary,digest:txid,txid:txid,
