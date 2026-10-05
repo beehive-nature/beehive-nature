@@ -132,9 +132,10 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
 ## 7 · Paste this to start the fresh session
 
 > Read `beehive-nature/docs/dispatches/2026-10-04-safe7-pq-signing-handoff.md` and every file in
-> its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Then
-> execute its §5 steps 1 to 4 on the emulator only. No flashing, no unlock, no real
-> phrase, no mainnet. Report done and pending only, with receipts.
+> its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Steps 1
+> to 4 are done (§8). Execute §8 "Next": rebase `bpq-safe7` onto `beehive` `7a8709bdff`, rebuild
+> and rerun the emulator cross-check, then measure hardware fit without flashing. No flashing, no
+> unlock, no real phrase, no mainnet. Report done and pending only, with receipts.
 
 ## 8 · Status, 2026-10-04 (Seat 3, emulator only)
 
