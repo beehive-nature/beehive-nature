@@ -807,7 +807,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="summary-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">📊</span><span class="w" data-i18n="wl.rv.s.summary-sec">summary</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="pay-sec" data-wl-card-task="move" aria-pressed="false"><span class="g" aria-hidden="true">💸</span><span class="w" data-i18n="wl.rv.s.pay-sec">pay</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="outbox-sec" data-wl-card-task="move" aria-pressed="false"><span class="g" aria-hidden="true">📤</span><span class="w" data-i18n="wl.rv.s.outbox-sec">outbox</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="outbox-sec" data-wl-card-task="move" aria-pressed="false"><span class="g" aria-hidden="true">📤</span><span class="w" data-i18n="wl.rv.s.outbox-sec">waiting</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="voucher-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🎟</span><span class="w" data-i18n="wl.rv.s.voucher-sec">voucher</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="fund-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.s.fund-sec">card</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="peer-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🏧</span><span class="w" data-i18n="wl.rv.s.peer-sec">fiat in</span></button>
@@ -819,7 +819,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <button type="button" class="wlr-card" data-wl-card-for="bridge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🌉</span><span class="w" data-i18n="wl.rv.s.bridge-sec">let it sign</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="acct-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🏭</span><span class="w" data-i18n="wl.rv.s.acct-sec">new account</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="receipts-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.receipts-sec">receipts</span></button>
-  <button type="button" class="wlr-card" data-wl-card-for="composer-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">✍</span><span class="w" data-i18n="wl.rv.s.composer-sec">composer</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="composer-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">✍</span><span class="w" data-i18n="wl.rv.s.composer-sec">sign</span></button>
   <button type="button" class="wlr-card" data-wl-card-for="matrix-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">🗺</span><span class="w" data-i18n="wl.rv.s.matrix-sec">every rail</span></button>
 </div>
 <div id="wl-rave" data-reg="raver">
@@ -2566,15 +2566,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <section id="composer-sec" data-wl-task="proof">
   <h2 data-wl-tech>✍ composer: <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
   <h2 data-reg="bee">✍ <span data-i18n="wl.bee.h.composer">write an action and see it before you sign</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
-  <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What you see before anything is signed</summary>
+  <div class="law" id="sign-law">you see every part of an action in words before anything is signed, and nothing is called sent until the chain shows it. every action is prepared, signed, kept, sent and then read back from the chain.<span class="wl-cyd"> Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> (action, authorization,
   parsed args, signer, endpoint) before anything broadcasts. ABI-driven: the six bnames actions
   and anything after work the same way. Mainnet signs with your bridged bzDiD key, zero paste;
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
   dependency is dead. This is ours, on the adapter contract: the worker builds, the vault signs,
-  the outbox persists, and nothing is called "sent" until the rail is read back.<span class="wl-cyd">Mainnet signs with this wallet's derived K1 key only. An account passkey (PUB_WA) that the bridge may add to the account is not a signing lane on this page yet: the vendored eosjs WebAuthnSignatureProvider is unwired and untested.</span></div>
+  the outbox persists, and nothing is called "sent" until the rail is read back.</span><span class="wl-cyd"> Mainnet signs with this wallet's derived K1 key only. An account passkey (PUB_WA) that the bridge may add to the account is not a signing lane on this page yet: the vendored eosjs WebAuthnSignatureProvider is unwired and untested.</span></div>
   </details>
+  <div data-reg="cypherpunk">
   <div class="ladder" id="receipt-ladder" data-wl-tech aria-label="the receipt ladder — the order is law">
     <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder: every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
@@ -2594,15 +2595,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       <div class="lline" data-i18n="wl.ld.confirm.l">a block read says so, or nothing does. the receipt names what was read. only the read-back earns the terminal look.</div></div></div>
   </div>
   <div id="adapter-states" data-wl-tech style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
   <div class="row">
-    <input id="tx-contract" aria-label="Contract account" placeholder="contract" value="" spellcheck="false">
-    <input id="tx-action" aria-label="Contract action" placeholder="action" value="" spellcheck="false">
-    <select id="tx-net" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+    <input id="tx-contract" aria-label="the account that runs the action" placeholder="the account that runs it, like kingbeelovis" value="" spellcheck="false">
+    <input id="tx-action" aria-label="what the action does" placeholder="what it does, like renew" value="" spellcheck="false">
+    <select id="tx-net" data-reg="cypherpunk" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
       <option value="main">Vaulta mainnet</option>
       <option value="j4">Jungle4 · testnet</option>
     </select>
-    <button id="tx-abi" class="green" style="font-size:11px">📥 load ABI</button>
+    <button id="tx-abi" class="green" style="font-size:11px">show its parts<span class="wl-cyd"> · 📥 load ABI</span></button>
   </div>
+  <div data-reg="cypherpunk">
   <div class="row" id="tx-j4row" style="display:none">
     <details id="tx-j4-scaffold" style="flex:1 1 100%">
       <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · Jungle4 test key (TESTNET-ONLY — gold mainnet never pastes)</summary>
@@ -2612,22 +2615,24 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       </div>
     </details>
   </div>
+  </div>
   <div id="tx-fields" style="display:none;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--well)">
-    <div style="font-size:9.5px;color:var(--violet);letter-spacing:.09em;margin-bottom:7px" id="tx-fields-title">FIELDS — from the live ABI</div>
+    <div style="font-size:9.5px;color:var(--violet);letter-spacing:.09em;margin-bottom:7px" id="tx-fields-title">the parts of this action</div>
     <div class="row" style="margin-top:0" id="tx-fields-row"></div>
   </div>
-  <div class="row">
+  <div data-reg="cypherpunk"><div class="row">
     <input id="tx-data" aria-label="Transaction arguments JSON" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
-  </div>
+  </div></div>
   <div id="tx-preview" style="display:none;margin-top:10px;border:1px solid #2c4a5a;border-radius:10px;padding:11px 13px;background:#081820">
-    <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">EXACTLY WHAT YOU ARE SIGNING</div>
+    <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">this is what you will sign</div>
     <pre id="tx-preview-body" style="margin-top:0;font-size:9.5px"></pre>
   </div>
   <div class="row">
-    <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
-    <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
-    <button id="tx-go" class="green" style="flex:1">COMPOSE: build · sign · outbox · read the rail back</button>
+    <button id="tx-k" class="green" data-reg="cypherpunk" style="font-size:11px">⏱ preset: reserve k.b</button>
+    <button id="tx-q" class="green" data-reg="cypherpunk" style="font-size:11px">⏱ preset: reserve q.b</button>
+    <button id="tx-go" class="green" style="flex:1">sign it<span class="wl-cyd">: build · sign · outbox · read the rail back</span></button>
   </div>
+  <div id="tx-desk">to make or renew a .b name, <a href="bnames.html">open the name desk</a>.</div>
   <pre id="tx-out" style="display:none"></pre>
 </section>
 
@@ -2733,12 +2738,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
   var BSIGNER=null;       // bsigner PQ WASM (ml-dsa / ml-kem) — armed only when browser-ready; never invent PQ
 
-  // nothing freezes silently: surface any stray handler error in the page
+  // nothing freezes silently: a stray handler error is said in the part of the wallet
+  // the reader last pressed (the composer's line when nothing was pressed yet)
+  var LAST_SEC=null;
+  document.addEventListener('click',function(ev){ var s0=ev.target&&ev.target.closest&&ev.target.closest('main>section[id]'); if(s0)LAST_SEC=s0 },true);
+  function pageErrLine(){
+    var sec=LAST_SEC&&LAST_SEC.isConnected?LAST_SEC:null;
+    if(!sec||sec.id==='composer-sec')return $('tx-out');
+    var id='err-'+sec.id, el=document.getElementById(id);
+    if(!el){ el=document.createElement('div'); el.id=id; el.className='law'; el.setAttribute('role','status'); sec.appendChild(el) }
+    return el;
+  }
   window.addEventListener('error',function(ev){
-    var el=$('tx-out'); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'page error: '+(ev.message||'')}])}
+    var el=pageErrLine(); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'page error: '+(ev.message||'')}])}
   });
   window.addEventListener('unhandledrejection',function(ev){
-    var el=$('tx-out'); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'unhandled: '+((ev.reason&&ev.reason.message)||String(ev.reason))}])}
+    var el=pageErrLine(); if(el){el.style.display='block';wlSay(el,['something on this page stopped. ',{btn:'reload the page',on:function(){location.reload()}},{cy:'unhandled: '+((ev.reason&&ev.reason.message)||String(ev.reason))}])}
   });
 
   function fetchT(url,opts,ms){
@@ -6617,24 +6632,41 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
 
   /* ── SIGN lane: bzDiD key signs, zero paste ───────────────── */
+  /* the estate's own presets (cypherpunk's); bee and raver make and renew names at the name desk */
   function preset(name){
     var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
     $('tx-contract').value=pc.contract||REG;
     $('tx-action').value=pc.action||'';
     $('tx-data').value=JSON.stringify({registrant:SOUL?vacct():(pc.contract||''),domain_name:name,target:SOUL?vacct():(pc.contract||'')});
+    composerPreview();   /* a preset is seen before it is signed, like anything else here */
   }
   $('tx-k').onclick=function(){preset('k')};
   $('tx-q').onclick=function(){preset('q')};
+  /* a line that ends on the name desk: the link is ours, it names where it goes */
+  function deskSay(el, words, cy) {
+    wlSay(el, [words]);
+    var a = document.createElement('a'); a.href = 'bnames.html'; a.textContent = 'go back to the name desk';
+    el.appendChild(a); el.appendChild(document.createTextNode('.'));
+    if (cy) { var c = document.createElement('span'); c.className = 'wl-cyd'; c.textContent = ' ' + cy; el.appendChild(c) }
+  }
   /* URL prefill — the bnames walletAction() factory lands here:
      wallet.html?compose=<contract:action>&args=<uri-encoded JSON> */
   try {
     var qp = new URLSearchParams(location.search);
     if (qp.get('compose')) {
       var parts = qp.get('compose').split(':');
+      var linkQS = location.search, linkHash = location.hash, argsOk = !!qp.get('args');
       $('tx-contract').value = parts[0] || ((window.WALLET_PROFILE && WALLET_PROFILE.composer) || {}).contract || '';
       $('tx-action').value = parts[1] || '';
-      if (qp.get('args')) { $('tx-data').value = JSON.stringify(JSON.parse(qp.get('args'))); }
-      setTimeout(loadAbiUi, 400); // after the vendored lane is up
+      try { if (argsOk) $('tx-data').value = JSON.stringify(JSON.parse(qp.get('args'))); } catch (pe) { argsOk = false; }
+      setTimeout(function () {   // after the vendored lane is up
+        Promise.resolve(loadAbiUi()).then(function () {
+          var out = $('tx-out'); out.style.display = 'block';
+          if (!argsOk) deskSay(out, 'this link did not carry a whole action, so nothing is filled in from it. ', 'compose=' + qp.get('compose') + ' · args=' + (qp.get('args') || '(none)'));
+          /* a sign link the sheet would not take: its parts are here to read, nothing signs from it */
+          else if (linkHash === '#sign-action' && !actParse(linkQS, linkHash)) deskSay(out, 'this link did not carry a whole action, so nothing was signed from it. read every part here, or ', 'the #sign-action link did not carry exactly the fields of ' + qp.get('compose'));
+        });
+      }, 400);
     }
   } catch (e) { /* bad params never break the page */ }
   /* ── COMPOSER — the BNR contract surface (kills the Unicove dependency) ──
@@ -6646,7 +6678,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     hosts: ['https://jungle4.cryptolions.io', 'https://jungle4.eosphere.io', 'https://jungle4.api.eosnation.io'],
     chainId: '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d' // PUBLIC-CONSTANT: Jungle4 chain id (live get_info)
   };
-  function netIsJ4() { return $('tx-net').value === 'j4' }
+  /* the Jungle4 rehearsal lane is cypherpunk's: bee and raver never sign on a test network */
+  function netIsJ4() { return $('tx-net').value === 'j4' && document.body.getAttribute('data-reg') === 'cypherpunk' }
   async function j4Rpc(path, body) { // rotated read: parsed JSON on 2xx, walk on failure
     var hs = J4.hosts.slice();
     for (var j = hs.length - 1; j > 0; j--) {
@@ -6692,6 +6725,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return netIsJ4() ? $('tx-j4actor').value.trim()
       : String((args && (args.registrant || args.owner || args.from || args.account)) || vacct() || '');
   }
+  function composerSigner() { return netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key' }
   function preview(contract, action, args, signerLine) {
     args = (args && typeof args === 'object') ? args : {};
     var actor = composeActor(args);
@@ -6712,24 +6746,53 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* the preview's raw lines: cypherpunk reads them, bee and raver read the words */
   function previewCy(t) { var c = document.createElement('span'); c.className = 'wl-cyd'; c.textContent = '\n' + t; $('tx-preview-body').appendChild(c) }
+  /* the preview follows the composer: whatever its fields hold is drawn before any press */
+  function composerPreview() {
+    var c = $('tx-contract').value.trim(), a = $('tx-action').value.trim(), d;
+    if (!c || !a) { $('tx-preview').style.display = 'none'; return }
+    try { d = JSON.parse($('tx-data').value || '{}') } catch (e) { return }   /* mid-typing */
+    preview(c, a, d, composerSigner());
+  }
+  /* the action a misspelt name most likely meant: one press fills it */
+  function nearestAction(want, names) {
+    function dist(a, b) {
+      var m = a.length, n = b.length, d = [], i, j;
+      for (i = 0; i <= m; i++) { d[i] = [i]; }
+      for (j = 1; j <= n; j++) d[0][j] = j;
+      for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      return d[m][n];
+    }
+    var best = null, bd = 3;
+    names.forEach(function (n) { var x = dist(String(want), String(n)); if (x < bd) { bd = x; best = n } });
+    return best;
+  }
   async function loadAbiUi() {
-    var out = $('tx-out'); out.style.display = 'block';
+    var out = $('tx-out'); out.style.display = 'block'; out.removeAttribute('data-fail'); out.style.color = '';
     var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
-    if (!contract) { out.textContent = 'name a contract first'; return }
-    out.textContent = 'fetching the live ABI of ' + contract + (netIsJ4() ? ' (Jungle4)…' : '…');
+    if (!contract) { wlSay(out, ['type the account that runs the action first, like kingbeelovis.']); $('tx-contract').focus(); return }
+    if (!action) { wlSay(out, ['type what the action does, like renew.']); $('tx-action').focus(); return }
+    wlSay(out, ['reading what ' + action + ' needs…', { cy: 'fetching the live ABI of ' + contract + (netIsJ4() ? ' (Jungle4)…' : '…') }]);
     try {
       var abi = await composerAbi(contract);
       if (!abi) throw new Error('no ABI on ' + contract + ' on ' + (netIsJ4() ? 'Jungle4' : 'mainnet'));
+      var names = abi.actions.map(function (a) { return a.name; });
       var act = abi.actions.filter(function (a) { return a.name === action; })[0];
-      if (!act) { out.textContent = 'action ' + action + ' not in the ABI. Has: ' + abi.actions.map(function (a) { return a.name; }).slice(0, 12).join(', '); return }
+      if (!act) {
+        var near = nearestAction(action, names);
+        wlSay(out, [contract + ' has no action called ' + action + '. ' + (names.length ? 'it can do ' + names.slice(0, 6).join(', ') + (names.length > 6 ? ' and more' : '') + '. ' : ''),
+          near ? { btn: 'use ' + near, on: function () { $('tx-action').value = near; loadAbiUi() } } : null,
+          { cy: 'action ' + action + ' not in the ABI. Has: ' + names.slice(0, 12).join(', ') }]);
+        return;
+      }
       var st = abi.structs.filter(function (s) { return s.name === act.type; })[0];
       var fields = (st && st.fields) || [];
-      $('tx-fields-title').textContent = 'FIELDS — from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')';
+      wlSay($('tx-fields-title'), ['the parts of ' + action, { cy: '· FIELDS from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')' }]);
       var frow = $('tx-fields-row'); frow.textContent = '';
       fields.forEach(function (f) {   /* names and types come from the chain: set as attribute text */
         var inp = document.createElement('input'); inp.className = 'small tx-f';
         inp.setAttribute('data-fn', String(f.name)); inp.setAttribute('data-ft', String(f.type || 'string'));
-        inp.placeholder = f.name + ' · ' + (f.type || 'string'); inp.spellcheck = false;
+        inp.placeholder = String(f.name).replace(/_/g, ' '); inp.title = f.name + ' · ' + (f.type || 'string');
+        inp.setAttribute('aria-label', String(f.name).replace(/_/g, ' ')); inp.spellcheck = false;
         inp.style.cssText = 'min-width:170px;flex:1 1 170px';
         frow.appendChild(inp);
       });
@@ -6738,29 +6801,34 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var prev = {}; try { prev = JSON.parse($('tx-data').value); } catch (e) {}
       Array.prototype.forEach.call(document.querySelectorAll('.tx-f'), function (el) {
         var k = el.getAttribute('data-fn');
-        if (prev[k] !== undefined) el.value = String(prev[k]);
+        if (prev && prev[k] !== undefined) el.value = String(prev[k]);
       });
-      out.textContent = 'ABI loaded — ' + fields.length + ' field' + (fields.length === 1 ? '' : 's') + '. Fill them; the preview shows exactly what you sign.';
+      var filled = Array.prototype.filter.call(document.querySelectorAll('.tx-f'), function (el) { return el.value.trim() !== '' }).length;
+      wlSay(out, [fields.length ? (filled === fields.length ? 'check ' : 'fill in ') + (fields.length === 1 ? 'its one part' : 'its ' + fields.length + ' parts') + ', then read what you will sign before you press sign it.'
+        : 'this action has no parts to fill in. read what you will sign, then press sign it.', { cy: 'ABI loaded, ' + fields.length + ' field' + (fields.length === 1 ? '' : 's') }]);
       var args = buildArgsFromFields();
       $('tx-data').value = JSON.stringify(args);
-      preview(contract, action, args, netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key');
+      preview(contract, action, args, composerSigner());
     } catch (e) { wlSay(out, ['could not read what this action needs just now, so nothing was signed. ', { btn: 'try again', on: loadAbiUi }, { cy: 'ABI error: ' + ((e && e.message) || e) }]) }
   }
   $('tx-abi').onclick = loadAbiUi;
   $('tx-net').onchange = function () {
     $('tx-j4row').style.display = netIsJ4() ? 'flex' : 'none';
-    loadAbiUi();
+    if ($('tx-contract').value.trim() && $('tx-action').value.trim()) loadAbiUi(); else composerPreview();
   };
   $('tx-fields-row') && document.addEventListener('input', function (ev) {
     if (ev.target && ev.target.classList && ev.target.classList.contains('tx-f')) {
       var args = buildArgsFromFields();
       $('tx-data').value = JSON.stringify(args);
-      var signerLine = netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key';
-      preview($('tx-contract').value.trim(), $('tx-action').value.trim(), args, signerLine);
+      preview($('tx-contract').value.trim(), $('tx-action').value.trim(), args, composerSigner());
     }
   });
-  $('tx-data').addEventListener('input', function () {
-    try { preview($('tx-contract').value.trim(), $('tx-action').value.trim(), JSON.parse($('tx-data').value), '— see fields / key lane —'); } catch (e) { /* mid-typing */ }
+  $('tx-data').addEventListener('input', composerPreview);
+  $('tx-contract').addEventListener('input', composerPreview);
+  $('tx-action').addEventListener('input', composerPreview);
+  /* leaving cypherpunk leaves its test network: bee and raver sign on Vaulta or not at all */
+  document.addEventListener('bregister', function () {
+    if (document.body.getAttribute('data-reg') !== 'cypherpunk' && $('tx-net').value === 'j4') { $('tx-net').value = 'main'; $('tx-j4row').style.display = 'none'; composerPreview() }
   });
 
   /* pushAction is retired: its lane IS the adapter contract now — the worker
@@ -6971,8 +7039,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return;
     }
     var list = saved.slice().reverse();
-    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)"><span data-wl-tech>empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</span><span data-reg="bee" data-i18n="wl.bee.outbox.empty">nothing is waiting to be sent</span></div>';
-      var bx = el.querySelector('span[data-reg="bee"]');   /* rendered after the language pass: translate it once in place */
+    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)"><span data-i18n="wl.bee.outbox.empty">nothing is waiting to be sent</span>. <a href="#pay-sec">send some coins</a><span class="wl-cyd"> · empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</span></div>';
+      var bx = el.querySelector('span[data-i18n]');   /* rendered after the language pass: translate it once in place */
       if (bx && window.BNRLanguage && BNRLanguage.text) bx.textContent = BNRLanguage.text('wl.bee.outbox.empty', bx.textContent);
       return }
     /* each entry: what it does in words and where it stands, with its one button;
@@ -6983,9 +7051,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     list.forEach(function (e) {
       var row = document.createElement('div'); row.className = 'obx-row'; row.setAttribute('data-id', e.intent_id);
       row.style.cssText = 'border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)';
-      var what = document.createElement('div'); what.style.color = 'var(--ink)'; what.textContent = e.human_summary || '';
+      /* what it does, in the words the composer showed; the adapter's own summary is cypherpunk's */
+      var what = document.createElement('div'); what.style.color = 'var(--ink)';
+      wlSay(what, [e.words || e.human_summary || '', e.words && e.human_summary ? { cy: '· ' + e.human_summary } : null]);
       var st = document.createElement('div'); st.className = 'obx-stat'; st.setAttribute('role', 'status');
-      var words = (e.phase === 'confirmed' || e.phase === 'failed' || e.phase === 'expired') ? terminalWords(e).filter(function (p) { return typeof p === 'string' || p.to })
+      var words = (e.phase === 'confirmed' || e.phase === 'failed' || e.phase === 'expired') ? terminalWords(e).filter(function (p) { return typeof p === 'string' || p.to || p.btn })
         : [(e.phase === 'signed' && e.maybe_out) ? 'it may already be out. sending it again is safe.' : (SAYS[e.phase] || e.phase)];
       wlSay(st, words.concat([{ cy: e.intent_id + ' · ' + e.rail + ' · ' + e.network + ' · ' + e.phase +
         (e.evidence ? ' · read: ' + (typeof e.evidence === 'string' ? e.evidence : JSON.stringify(e.evidence)) : '') + (e.ref ? ' · tx ' + e.ref : '') }]));
@@ -6993,8 +7063,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       row.appendChild(what); row.appendChild(st);
       if (e.phase === 'signed' || e.phase === 'submitted') {
         var b = document.createElement('button'); b.type = 'button'; b.className = 'obx-retry'; b.setAttribute('data-id', e.intent_id);
-        b.textContent = 'send it again';
-        b.title = 'the same signed copy goes out again; nothing is signed twice';
+        /* sent and not yet confirmed: the press reads the chain for it, and only a chain that lacks it gets the same copy again */
+        b.textContent = e.phase === 'submitted' ? 'check again' : e.maybe_out ? 'send it again' : 'send it';
+        b.title = e.phase === 'submitted' ? 'reads the chain for it; if the chain lacks it, the same signed copy goes out again. nothing is signed twice'
+          : 'the same signed copy goes out; nothing is signed twice';
         b.disabled = !!OBX_BUSY[e.intent_id];
         b.onclick = async function () {
           var id = e.intent_id;
@@ -7017,7 +7089,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   async function retryOutbox(intentId, st) {
     var e = outboxGet(intentId);
-    if (!e || !e.signed_bytes) return;
+    if (!e || !e.signed_bytes) {   /* pruned, or kept without its signed copy: nothing can go out from it */
+      var r0 = obxRow(intentId), s0 = (r0 && r0.querySelector('.obx-stat')) || st;
+      if (s0) wlSay(s0, ['this one can no longer be sent, so nothing was sent.', { cy: e ? 'the entry has no signed_bytes' : 'the entry is gone from bnr_outbox_v1' }]);
+      return;
+    }
     /* the list re-renders on every outbox write: the line is found again by its entry */
     await submitAndConfirm(e, function (parts, phase) {
       var rows = document.querySelectorAll('#outbox-list .obx-row'), cur = null;
@@ -7091,7 +7167,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* what a finished entry says when it is pressed again: never sent twice, never moved backward */
   function terminalWords(e) {
     return e.phase === 'confirmed' ? ['done. ' + onRail(e.rail) + ' confirmed it.', { cy: 'confirmed earlier · tx ' + (e.ref || e.txid || '') }]
-      : e.phase === 'failed' ? [lcFirst(actRefusal(JSON.stringify(e.evidence || {}))) + ' nothing changed.', { cy: 'failed earlier: ' + JSON.stringify(e.evidence || {}) }]
+      : e.phase === 'failed' ? refusalParts(JSON.stringify(e.evidence || {})).concat([{ cy: 'failed earlier: ' + JSON.stringify(e.evidence || {}) }])
       : (e.evidence && e.evidence.maybe_in) ? ['its time ran out before this wallet could tell whether it went in. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }]
       : ['it did not go through in time, so nothing changed. you can make it again.', { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }];
   }
@@ -7114,8 +7190,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* another flow may have settled it while this one waited: never move a settled entry */
     var settled = function () { var c = outboxGet(entry.intent_id); if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired')) { say(terminalWords(c), c.phase); return c } return null };
     say(['sending the signed copy…', { cy: 'submit: the identical stored bytes to the ' + entry.rail + ' rail' + (maybeOut ? ' (again)' : '') }], 'signed');
+    var acked = false;
     try {
       var r = await callAdapter(entry.rail, 'submit', { intent_id: entry.intent_id, signed_bytes: entry.signed_bytes }, 20000);
+      acked = true;
       var done0 = settled(); if (done0) return done0;
       entry.ref = r.ref; entry.block_hint = r.block_hint; entry.maybe_out = true;
       entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
@@ -7123,6 +7201,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
     } catch (e) {
       var why = String((e && e.message) || e || '');
+      if (acked) {   /* a node took the bytes, and this browser could not write that down */
+        var dA = null; try { dA = settled() } catch (x) {} if (dA) return dA;
+        entry.maybe_out = true; entry.updated_at = new Date().toISOString();
+        try { outboxPut(entry) } catch (x) {}
+        say(['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: 'check again', on: resend.on },
+          { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + why + '; the identical bytes are kept, never re-signed' }], 'submitted');
+        return entry;
+      }
       var done1 = settled(); if (done1) return done1;
       if (!(e && e.code) && /not attached|never spawned|crashed/i.test(why)) {   // the worker never got the bytes: nothing left this tab
         say(['the wallet\u2019s ' + entry.rail + ' part stopped before sending, so nothing went out yet. the signed copy is kept. ', { btn: 'reload the page', on: function () { location.reload() } }, { cy: 'adapter not attached: ' + why }], 'signed');
@@ -7148,7 +7234,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: why, definite: true };
           entry.updated_at = new Date().toISOString();
           outboxPut(entry); capRefund(entry);
-          say([lcFirst(actRefusal(why)) + ' nothing changed.', { cy: 'FAILED: the rail refused: ' + why }], 'failed');
+          say(refusalParts(why).concat([{ cy: 'FAILED: the rail refused: ' + why }]), 'failed');
           return entry;
         }
         say([(maybeOut ? 'this wallet still cannot tell whether it went in; an earlier try may have reached the chain. sending it again is safe. ' : 'the network was busy and did not take it. the signed copy is kept, so it can go out again. '), resend,
@@ -7191,7 +7277,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
             ? ['done. ' + onRail(entry.rail) + ' confirmed it.', { cy: 'CONFIRMED by a block read: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref }]
             : c.phase === 'expired'
               ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
-              : [lcFirst(actRefusal(ev)) + ' nothing changed.', { cy: 'failed: ' + ev }],
+              : refusalParts(ev).concat([{ cy: 'failed: ' + ev }]),
             c.phase);
           if (c.phase === 'failed') { entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true }); outboxPut(entry); capRefund(entry) }   /* a block read that shows it failed is proof */
           return entry;
@@ -7212,7 +7298,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         return entry;
       }
     }
-    speak(['sent, but ' + onRail(entry.rail) + ' has not confirmed it yet. ', { to: 'outbox-sec', t: 'see it in the outbox' }, { cy: 'still submitted after the read window; the entry stays in the outbox and its evidence updates on any later read' }], 'submitted');
+    speak(['sent, but ' + onRail(entry.rail) + ' has not confirmed it yet. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'still submitted after the read window; the entry stays in the outbox and its evidence updates on any later read' }], 'submitted');
     return entry;
   }
 
@@ -7281,13 +7367,24 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try { sgn = await vaultSign(intent, so) }
     catch (e) {
       if (e && e.capRefused) { out.setAttribute('data-fail', e.capKind === 'unsized' ? 'cap-unsized' : 'cap'); capSay(out, e, again.on); return null }
+      var em = String((e && e.message) || e);
+      if (/digest mismatch/.test(em)) {   /* a safety stop: what was prepared is not what was shown */
+        out.setAttribute('data-fail', 'sign-digest');
+        wlSay(out, ['the wallet stopped this because what was prepared did not match what you were shown, so nothing was signed. ', { btn: 'reload the page', on: function () { location.reload() } }, { cy: 'vault refused: ' + em }]);
+        return null;
+      }
+      if (/no signing lane/.test(em)) {
+        out.setAttribute('data-fail', 'sign-nokey');
+        wlSay(out, [{ to: 'kc-sec', t: 'connect your keychain' }, ' to sign this. nothing was signed.', { cy: 'vault refused: ' + em }]);
+        return null;
+      }
       out.setAttribute('data-fail', 'sign');
-      wlSay(out, ['your key could not sign this, so nothing was sent. ', again, { cy: 'vault refused: ' + ((e && e.message) || e) }]);
+      wlSay(out, ['your key could not sign this, so nothing was sent. ', again, { cy: 'vault refused: ' + em }]);
       return null;
     }
     var entry = {
       intent_id: intent.intent_id, rail: 'vaulta', network: net,
-      human_summary: intent.human_summary, digest: intent.digest,
+      human_summary: intent.human_summary, words: composeWords(contract, action, data), digest: intent.digest,
       unsigned_bytes: intent.unsigned_bytes,
       signed_bytes: JSON.stringify({ network: net, packed_hex: intent.packed_hex, signatures: sgn.signatures }),
       phase: 'signed', ref: null, block_hint: null,
@@ -7322,24 +7419,29 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     pulse.style.animation = 'none'; void pulse.getBoundingClientRect();
     pulse.style.animation = 'pulseout 1.2s ease-out 2';
     var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
-    var data; try { data = JSON.parse($('tx-data').value) } catch (e) { out.textContent = 'invalid JSON: ' + e.message; return }
-    if (!contract || !action) { out.textContent = 'contract + action required'; return }
-    if (netIsJ4()) {
+    out.removeAttribute('data-fail'); out.style.color = '';
+    if (!contract || !action) { wlSay(out, ['type the account and the action first, so there is something to sign.']); $(contract ? 'tx-action' : 'tx-contract').focus(); return }
+    var data, bad = null;
+    try { data = JSON.parse($('tx-data').value) } catch (e) { bad = 'invalid JSON: ' + e.message }
+    if (!bad && (!data || typeof data !== 'object' || Array.isArray(data))) bad = 'the args are not a JSON object';
+    if (bad) { wlSay(out, ['the parts of this action are not complete, so nothing was signed. ', { btn: 'show its parts', on: loadAbiUi }, { cy: bad }]); return }
+    preview(contract, action, data, composerSigner());   /* the words on screen are the action this press signs */
+    if (netIsJ4()) {   /* cypherpunk's rehearsal lane: a pasted test key, memory only */
       var wif;
-      try { wif = parseWifAny($('tx-j4key').value) } catch (e) { out.textContent = 'test key: ' + e.message; return }
-      if (!wif) { out.textContent = 'paste a Jungle4 TESTNET key (TESTNET-ONLY — never a mainnet key, never stored)'; return }
+      try { wif = parseWifAny($('tx-j4key').value) } catch (e) { wlSay(out, ['paste a Jungle4 test key in the test key field, never the key of a real account.', { cy: 'test key: ' + e.message }]); return }
       var actor = $('tx-j4actor').value.trim();
-      if (!/^[a-z1-5]{12}$/.test(actor)) { out.textContent = 'name the 12-char test actor that holds this key'; return }
+      if (!/^[a-z1-5]{12}$/.test(actor)) { wlSay(out, ['type the 12 character test account that holds this key in the test account field.']); $('tx-j4-scaffold').open = true; $('tx-j4actor').focus(); return }
       await walletAction(contract, action, data, [{ actor: actor, permission: 'active' }], { network: 'j4', wif: wif });
       return;
     }
-    if (!K1 || !SOUL) { wlSay(out, ['connect ', { to: 'kc-sec', t: 'your keychain' }, ' first']); return }
+    if (!SOUL) { wlSay(out, [{ to: 'connect-sec', t: 'connect your name' }, ' to sign this. nothing was signed.']); return }
+    if (!K1) { wlSay(out, [{ to: 'kc-sec', t: 'connect your keychain' }, ' to sign this. nothing was signed.']); return }
     /* one signer here: the keychain's key on the account. The account passkey
        (PUB_WA) the bridge can enroll has no signing lane on this page yet, so
        nothing offers it and nothing skips the check for it */
     if (!signGuard(out, function(){ $('tx-go').click() })) return;
     var actor2 = data.registrant || data.owner || data.from || data.account || vacct();
-    if (actor2 !== vacct()) { wlSay(out, ['this action is for ' + actor2 + ', and this wallet signs for ' + vacct() + '. Nothing was signed.']); return }
+    if (actor2 !== vacct()) { wlSay(out, ['this action is for ' + actor2 + ', and this wallet signs for ' + vacct() + ', so nothing was signed. ', { to: 'connect-sec', t: 'use the name that owns ' + actor2 }]); return }
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   }
 
@@ -7380,10 +7482,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     release:function(d){return {h:'Let '+d.domain_name+'.b go',s:'Let '+d.domain_name+'.b go. This cannot be undone.',d:d.domain_name+'.b is released.'}}
   };
   // only the registry's own actions, each with words; anything else stays in the composer
-  function actParse(){
-    if(location.hash!=='#sign-action')return null;
+  function actParse(qs,hash){
+    if((hash==null?location.hash:hash)!=='#sign-action')return null;
     try{
-      var qp=new URLSearchParams(location.search), c=(qp.get('compose')||'').split(':'), d=JSON.parse(qp.get('args')||'null');
+      var qp=new URLSearchParams(qs==null?location.search:qs), c=(qp.get('compose')||'').split(':'), d=JSON.parse(qp.get('args')||'null');
       if(c.length!==2||c[0]!==REG||!ACT_WORDS.hasOwnProperty(c[1])||!actWhole(c[1],d))return null;
       return {contract:c[0],action:c[1],data:d,intent:qp.get('intent')||''};
     }catch(e){return null}
@@ -7394,21 +7496,42 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return !!(it&&a.intent&&it.id===a.intent&&typeof it.at==='number'&&Date.now()-it.at<120000&&it.at<Date.now()+5000&&
       a.contract===REG&&ACT_WORDS[a.action]&&it.contract===a.contract&&it.action===a.action&&JSON.stringify(it.data)===JSON.stringify(a.data));
   }
-  // the chain's refusal, in words
-  function actRefusal(t){
-    t=String(t||'').replace(/\s*\[[a-z_]+\]/g,'');   /* the node's error name classifies; it is never said */
-    if(/missing authority|unsatisfied|irrelevant|declares authority/i.test(t))return 'The account did not accept this wallet\'s key.';
-    if(/ram_usage_exceeded|insufficient ram/i.test(t))return 'The account needs more RAM for this.';
-    if(/cpu|net usage|billed|tx_net|leeway/i.test(t))return 'The account needs more CPU or NET to send this.';
-    if(/expired/i.test(t))return 'It did not land in time.';
-    var m=t.match(/assertion failure with message: ([^"\]]{1,120})/i);
-    return m?'The contract said no: '+m[1]+'.':'The chain said no.';
+  /* the chain's refusal, in words: one calm sentence per kind. The node's own text (its error
+     name, a contract's assertion) only classifies here; callers carry it as cypherpunk detail */
+  function refusalKind(t){
+    t=String(t||'');
+    if(/missing authority|unsatisfied|irrelevant|declares authority/i.test(t))return 'key';
+    if(/ram_usage_exceeded|insufficient ram/i.test(t))return 'ram';
+    if(/cpu|net usage|billed|tx_net|leeway/i.test(t))return 'busy';
+    if(/expired/i.test(t))return 'late';
+    if(/assertion failure|eosio_assert/i.test(t))return 'contract';
+    return 'no';
   }
-  function actSheet(){
-    var a=actParse(); if(!a||$('act-sheet'))return;
-    var auto=actIntentOk(a);
+  var REFUSAL_SAYS={key:'The account did not accept this wallet\u2019s key.',ram:'The account needs more RAM for this.',
+    busy:'The chain is not letting the account send more right now.',late:'It did not land in time.',contract:'The contract refused it.',no:'The chain said no.'};
+  function actRefusal(t){ return REFUSAL_SAYS[refusalKind(t)] }
+  /* more RAM is bought only in the wallet's own swap (A in, RAM out): this opens it at "buy", and
+     the reader's own press there signs. No other signing path */
+  function ramBuyOpen(){
+    if(location.hash==='#pay-sec')try{ history.replaceState(history.state,'',location.pathname+location.search) }catch(e){}
+    location.hash='#pay-sec';
+    setTimeout(function(){ try{ $('pay-sw').click(); if(!SW_BUY)$('sw-dir').click(); $('sw-amt').focus() }catch(e){} },80);
+  }
+  /* the same refusal as a status line's parts, with its one action */
+  function refusalParts(t){
+    var k=refusalKind(t), w=lcAll(actRefusal(t)+' Nothing changed.')+' ';
+    if(k==='ram')return [w,{btn:'buy RAM with A',on:ramBuyOpen}];
+    if(k==='key')return [w,{to:'bridge-sec',t:'let this wallet sign for it'}];
+    if(k==='busy')return [w+'try again in a while.'];
+    if(k==='late')return [w+'you can make it again.'];
+    return [w];
+  }
+  function actSheet(again){
+    var a=(again&&again.contract)?again:actParse(); if(!a||$('act-sheet'))return;
+    /* a sheet that comes back once the name is connected never starts by itself: it waits for the press */
+    var auto=(again&&again.contract)?false:actIntentOk(a);
     // read once: a reload or a later hash change never reopens or re-signs it
-    try{ history.replaceState(null,'',location.pathname) }catch(e){}
+    if(!(again&&again.contract))try{ history.replaceState(null,'',location.pathname) }catch(e){}
     var actor=String(a.data[ACT_ACTOR[a.action]||'owner']||'');
     var w=ACT_WORDS[a.action](a.data);
     if(!$('act-style')){
@@ -7452,13 +7575,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     d.id='act-sheet'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','act-h');
     var sg=document.createElement('div'); sg.className='sg';
     var h=document.createElement('div'); h.id='act-h'; h.setAttribute('role','heading'); h.setAttribute('aria-level','1'); h.textContent=w.h;
-    var say=document.createElement('p'); say.id='act-say'; say.textContent=w.s+' Signed as '+actor+'.';
+    var say=document.createElement('p'); say.id='act-say'; say.textContent=w.s+' You sign as '+actor+'.';
     var go=document.createElement('button'); go.type='button'; go.id='act-go'; go.textContent='Sign';
     var st=document.createElement('p'); st.id='act-stat'; st.setAttribute('role','status'); st.setAttribute('aria-live','polite');
     var rd=document.createElement('details'); rd.id='act-read';
     var sm=document.createElement('summary'); sm.textContent='read what you are signing';
     var pre=document.createElement('pre'); pre.textContent=JSON.stringify({network:'Vaulta mainnet',contract:a.contract,action:a.action,authorization:actor+'@active',data:a.data},null,1);
-    rd.appendChild(sm); rd.appendChild(pre);
+    var rw=document.createElement('div'); rw.id='act-read-words'; rw.textContent=w.s+' You sign as '+actor+', on Vaulta.';
+    rd.appendChild(sm); rd.appendChild(rw); rd.appendChild(pre);
     var back=document.createElement('a'); back.id='act-back';
     var ref=''; try{ var r=new URL(document.referrer); if(r.origin===location.origin&&/\/bnames\.html$/.test(r.pathname))ref=r.pathname+r.search }catch(e){}
     back.href=ref||'bnames.html';
@@ -7472,14 +7596,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     pasteIn.addEventListener('keydown',function(e){ if(e.key==='Enter')pasteGo.click() });
     pasteGo.onclick=async function(){
       if(busy)return;
-      var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',[e.message]); return } finally{ pasteIn.value='' }
+      var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',['That is not a whole private key, so nothing was sent. Copy '+actor+'\u2019s whole active key again and paste it here.',{cy:(e&&e.message)||String(e)}]); return } finally{ pasteIn.value='' }
       busy=true; pasteGo.disabled=true; tell('busy',['Signing with that key…']);
       try{
         if(actor!==vacct())throw new Error('This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.');
         await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
         tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
         pasteRow.hidden=true;
-      }catch(e){ k=null; tell('fail',[e&&e.capRefused?(e.capKind==='unsized'?'The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.':'This is past the daily cap you set, so nothing was signed.'):(e&&e.message)||'Something went wrong, so nothing was sent.']) }
+      }catch(e){ k=null;
+        if(e&&e.capRefused) tell('fail',e.capKind==='unsized'?['The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.',{cy:e.message}]:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'},{cy:e.message}]);
+        /* this paste went out, or may have: the one next step reads the account, it never pastes or signs again */
+        else if(e&&/^(late|unknown)$/.test(e.brKind||'')) tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]);
+        else tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]);
+      }
       finally{ busy=false; pasteGo.disabled=false }
     };
     pasteRow.appendChild(pasteIn); pasteRow.appendChild(pasteGo);
@@ -7487,56 +7616,84 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     d.appendChild(sg); document.body.appendChild(d);
     document.documentElement.style.overflow='hidden';
     function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to)location.hash=to }
-    // a status line: words, and links that close the sheet onto a wallet section
+    // a status line: words; links that close the sheet onto a wallet section (or open the name desk);
+    // a button that stays on the sheet; and the raw detail, which only cypherpunk shows
     function tell(kind,parts){
       st.textContent=''; st.setAttribute('data-state',kind);
       parts.forEach(function(x){
+        if(x==null||x==='')return;
         if(typeof x==='string'){st.appendChild(document.createTextNode(x));return}
-        var l=document.createElement('a'); l.href='#'+x.to; l.textContent=x.t;
-        l.onclick=function(ev){ ev.preventDefault(); actClose(x.to) };
+        if(x.cy!=null){ if(x.cy==='')return; var c=document.createElement('span'); c.className='wl-cyd'; c.textContent=' '+x.cy; st.appendChild(c); return }
+        if(x.btn){ var b=document.createElement('button'); b.type='button'; b.className='wl-act'; b.textContent=x.btn; b.onclick=x.on; st.appendChild(b); return }
+        var l=document.createElement('a'); l.textContent=x.t;
+        if(x.href){ l.href=x.href; st.appendChild(l); return }
+        l.href='#'+x.to;
+        l.onclick=function(ev){ ev.preventDefault(); actClose(x.to); if(x.then)try{ x.then() }catch(e){} };
         st.appendChild(l);
       });
     }
     var busy=false;
+    /* a paste that went out but is not seen yet: read the account again, never paste or sign again */
+    async function recheck(){
+      if(busy)return; busy=true; pasteGo.disabled=true;
+      tell('busy',['Checking '+vacct()+'…']);
+      try{ await checkBridge() }catch(x){}
+      busy=false; pasteGo.disabled=false;
+      if(BRIDGED===true){ tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']); pasteRow.hidden=true; return }
+      tell('wait',[vacct()+' does not show this wallet yet. Check again in a minute. ',{btn:'check again',on:recheck}]);
+    }
+    function outboxIds(){ return (outboxRead()||[]).map(function(e){ return e.intent_id }) }
     async function run(isAuto){
       if(busy)return; busy=true; go.disabled=true;
-      var res='fail';
-      try{ res=await actRun(a,actor,w,tell,isAuto) }catch(e){ tell('fail',['Something went wrong, so nothing was signed. Press Sign again.']) }
+      var res='fail', before=outboxIds();
+      try{ res=await actRun(a,actor,w,tell,isAuto) }
+      catch(e){
+        /* it stopped part way: a signed copy kept on the way may have gone out, so Sign never offers a second one */
+        var kept=outboxIds().filter(function(id){ return before.indexOf(id)<0 });
+        if(kept.length){ res='held'; tell('fail',['It stopped before it finished, and the signed copy was kept. Check it before you sign again. ',{to:'outbox-sec',t:'see waiting to be sent'},{cy:(e&&e.message)||String(e)}]) }
+        else tell('fail',['Something went wrong, so nothing was signed. Press Sign again.',{cy:(e&&e.message)||String(e)}]);
+      }
       busy=false;
-      // once bytes are signed, the sheet never offers a second signature: the outbox holds them
-      if(res==='done'||res==='held'){ go.hidden=true } else go.disabled=false;
+      // once bytes are signed, the sheet never offers a second signature: the outbox holds them;
+      // a stop that pressing Sign again cannot change hides it too
+      if(res==='done'||res==='held'||res==='stop'){ go.hidden=true } else go.disabled=false;
       if(res==='paste'){ go.hidden=true; pasteRow.hidden=false; pasteIn.focus() }
     }
     go.onclick=function(){ run(false) };
     if(auto) run(true); else go.focus();
   }
   async function actRun(a,actor,w,tell,isAuto){
-    if(!window.BZDIDKEY||!BN){tell('fail',['This page did not finish loading. Reload it and press Sign again.']);return 'fail'}
-    if(!SOUL){tell('fail',['Connect your name first. ',{to:'connect-sec',t:'connect it'}]);return 'fail'}
+    if(!window.BZDIDKEY||!BN){tell('fail',['This page did not finish loading, so nothing was signed. Press it again on the name desk. ',{href:'bnames.html',t:'go back to the name desk'}]);return 'stop'}
+    if(!SOUL){
+      /* the sheet comes back by itself once the name is connected, and waits for its press */
+      try{ sessionStorage.setItem(ACT_PENDING,JSON.stringify({contract:a.contract,action:a.action,data:a.data,at:Date.now()})) }catch(e){}
+      tell('fail',['Connect your name first, and this comes back so you can sign it. ',{to:'connect-sec',t:'connect it'}]);return 'fail'}
     // whose action is it? asked before any passkey
     tell('busy',['Checking '+SOUL+'.b…']);
     await resolveVacct();
     if(!vacctKnown()){tell('fail',['Could not read which account '+SOUL+'.b points at. Press Sign to try again.']);return 'fail'}
-    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
+    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed. ',{to:'connect-sec',t:'use the name that owns '+actor}]);return 'stop'}
     if(!MPRK){
       tell('busy',['Confirm with your passkey…']);
       var sup=await BZDIDKEY.prfBrowserSupport();
-      if(sup===false){tell('fail',['This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.']);return 'fail'}
+      if(sup===false){tell('fail',['This browser cannot use your passkey here, so nothing was signed. Open the name desk in Chrome, Edge or Safari and press it there again. ',{href:'bnames.html',t:'go back to the name desk'}]);return 'stop'}
       CEREMONY=true;
       try{ keychainOn(await connectSoul()) }
       catch(e){
         // a page that opened by itself may not ask for a passkey: the press asks
         if(isAuto){tell('wait',['Press Sign, then confirm with your passkey.']);return 'fail'}
-        tell('fail',[/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.']);return 'fail'
+        if(/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||''))tell('fail',['Nothing was signed. Press Sign again when you are ready.']);
+        else tell('fail',['No wallet passkey answered, so nothing was signed. Open the name desk on the device you use for your wallet and press it there again. ',{href:'bnames.html',t:'go back to the name desk'}]);
+        return 'fail'
       }
       finally{ CEREMONY=false }
     }
     tell('busy',['Checking '+vacct()+'…']);
     await checkBridge();
-    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
+    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed. ',{to:'connect-sec',t:'use the name that owns '+actor}]);return 'stop'}
     if(BRIDGED===null){tell('fail',['Could not read '+vacct()+' just now. Press Sign to try again.']);return 'fail'}
-    if(BRIDGED!==true&&BR_KIND==='multisig'){tell('fail',[vacct()+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was signed.']);return 'fail'}
-    if(BRIDGED!==true&&BR_KIND==='noperm'){tell('fail',['This wallet cannot be added to '+vacct()+', so nothing was signed.']);return 'fail'}
+    if(BRIDGED!==true&&BR_KIND==='multisig'){tell('fail',[vacct()+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was signed. ',{to:'bridge-sec',t:'see what to do'}]);return 'stop'}
+    if(BRIDGED!==true&&BR_KIND==='noperm'){tell('fail',['This wallet cannot be added to '+vacct()+', so nothing was signed. ',{to:'bridge-sec',t:'see what to do'}]);return 'stop'}
     if(BRIDGED!==true){tell('wait',['This wallet does not sign for '+vacct()+' yet. Paste '+vacct()+'\u2019s active key once: one press adds this wallet to the account and does this too. The key is used once and never kept.']);return 'paste'}
     for(var i=0;i<40&&!(ADAPTERS.vaulta&&ADAPTERS.vaulta.attached);i++) await new Promise(function(r){setTimeout(r,200)});
     tell('busy',['Signing…']);
@@ -7545,25 +7702,42 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(ph==='submitted'&&!sent){ sent=true; tell('busy',['Sent. Waiting for the chain to confirm it…']) }
     }});
     if(!entry){
+      /* the composer line's failure code picks the sentence; its raw detail rides along for cypherpunk */
       var why=($('tx-out')&&$('tx-out').getAttribute('data-fail'))||'';
-      tell('fail',[why==='sign'?'Your key could not sign this, so nothing was sent.'
-        :why==='store'?'This browser could not keep the signed copy, so nothing was sent. Free some browser storage and press Sign again.'
-        :why==='outbox'?'This device cannot read its list of things waiting to be sent, so nothing was signed. Open the wallet to set it aside.'
-        :why==='start'?'The wallet\'s Vaulta part did not start. Reload the page and press Sign again.'
-        :why==='cap'?'This is past the daily cap you set, so nothing was signed.'
-        :why==='cap-unsized'?'The price could not be read just now, so your daily cap cannot be checked. Press Sign to try again.'
-        :'The network did not answer, so nothing was signed. Press Sign to try again.']);
-      return 'fail';
+      var desk={href:'bnames.html',t:'go back to the name desk'};
+      var says={sign:['Your key could not sign this, so nothing was sent. Press Sign to try again.'],
+        'sign-digest':['The wallet stopped this because what was prepared did not match what you were shown, so nothing was signed. Press it again on the name desk. ',desk],
+        'sign-nokey':['Your keychain could not sign for this account here, so nothing was signed. Press Sign to try again.'],
+        store:['This browser could not keep the signed copy, so nothing was sent. Free some browser storage and press Sign again.'],
+        outbox:['This device cannot read its list of things waiting to be sent, so nothing was signed. ',{to:'outbox-sec',t:'set it aside'}],
+        start:['The wallet\u2019s Vaulta part did not start, so nothing was signed. Press it again on the name desk. ',desk],
+        build:['It could not be prepared just now, so nothing was signed. Press Sign to try again.'],
+        cap:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'}],
+        'cap-unsized':['The price could not be read just now, so your daily cap cannot be checked. Press Sign to try again.']};
+      var raw=$('tx-out')&&$('tx-out').querySelector('.wl-cyd');
+      tell('fail',(says[why]||['The network did not answer, so nothing was signed. Press Sign to try again.']).concat([{cy:raw?raw.textContent.trim():''}]));
+      return /^(sign-digest|start|outbox)$/.test(why)?'stop':'fail';
     }
     if(entry.phase==='confirmed'){tell('done',['Done. '+w.d+' The chain confirmed it.']);return 'done'}
-    if(entry.phase==='failed'){tell('fail',[actRefusal(entry.evidence&&entry.evidence.detail)+' Nothing changed.']);return 'fail'}
-    if(entry.phase==='expired'&&entry.evidence&&entry.evidence.maybe_in){tell('fail',['Its time ran out before this wallet could tell whether it went in, so check before you sign again. ',{to:'outbox-sec',t:'see it in the outbox'}]);return 'held'}
+    if(entry.phase==='failed'){
+      var det=(entry.evidence&&entry.evidence.detail)||JSON.stringify(entry.evidence||{}), rk=refusalKind(det);
+      tell('fail',[actRefusal(det)+' Nothing changed. ',rk==='ram'?{to:'pay-sec',t:'buy RAM with A',then:ramBuyOpen}:rk==='key'?{to:'bridge-sec',t:'let this wallet sign for it'}:null,{cy:det}]);
+      return 'fail'}
+    if(entry.phase==='expired'&&entry.evidence&&entry.evidence.maybe_in){tell('fail',['Its time ran out before this wallet could tell whether it went in, so check before you sign again. ',{to:'outbox-sec',t:'see it in waiting to be sent'}]);return 'held'}
     if(entry.phase==='expired'){tell('fail',['It did not land in time, so nothing changed. Press Sign to try again.']);return 'fail'}
-    if(entry.phase==='signed'){tell('fail',['It was signed, but it did not go out. Your outbox keeps the signed copy. ',{to:'outbox-sec',t:'send it from the outbox'}]);return 'held'}
-    tell('done',['Sent. The chain has not confirmed it yet. ',{to:'outbox-sec',t:'see it in the outbox'}]);
+    if(entry.phase==='signed'){tell('fail',['It was signed, but it did not go out. This wallet keeps the signed copy. ',{to:'outbox-sec',t:'send it from waiting to be sent'}]);return 'held'}
+    tell('wait',['Sent. The chain has not confirmed it yet. ',{to:'outbox-sec',t:'see it in waiting to be sent'}]);
     return 'held';
   }
   window.addEventListener('load',function(){ setTimeout(actSheet,0) });
+  /* a sheet left to connect the name comes back once the name is connected, and waits for its press */
+  var ACT_PENDING='bnr_act_pending';
+  document.addEventListener('bnr-soul',function(ev){
+    if(!ev.detail||!ev.detail.soul)return;
+    var p=null; try{ p=JSON.parse(sessionStorage.getItem(ACT_PENDING)||'null'); sessionStorage.removeItem(ACT_PENDING) }catch(e){}
+    if(!p||typeof p.at!=='number'||Date.now()-p.at>1800000||p.contract!==REG||!ACT_WORDS.hasOwnProperty(p.action)||!actWhole(p.action,p.data))return;
+    setTimeout(function(){ actSheet({contract:p.contract,action:p.action,data:p.data,intent:''}) },300);
+  });
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=5');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
@@ -9316,10 +9490,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // boot: kit-profile defaults → composer, bundle check + Rust core arming + auto-connect balances from localStorage
   renderRailPickers();   // the send panel's rails are DATA — rendered before any read
   (function bootProfile(){
+    /* the profile's composer defaults are the estate's own action (kingbeelovis registering k.b).
+       Cypherpunk's composer starts from them; bee and raver start empty, so no visitor is shown
+       someone else's account as the thing to sign */
+    if(document.body.getAttribute('data-reg')!=='cypherpunk'){ composerPreview(); return }
     var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
     if(!$('tx-contract').value && pc.contract)$('tx-contract').value=pc.contract;
     if(!$('tx-action').value && pc.action)$('tx-action').value=pc.action;
     try{ if(!$('tx-data').value && pc.args)$('tx-data').value=JSON.stringify(pc.args); }catch(e){}
+    composerPreview();
   })();
   BN=window.BnrSign||null;
   if(!BN){

@@ -218,7 +218,7 @@ try {
     await page.waitForSelector('#act-sheet', { timeout: 20000 });
     await page.waitForTimeout(600);
     let s = await sheet(page);
-    ok('a link with no live intent shows the words and waits: no passkey, no send', s && s.h === 'Renew king.b' && s.say === 'Renew king.b for 365 days. Signed as kingbeelovis.' && s.cred === 0 && state.submits === 0 && s.buttons === 1, JSON.stringify(s));
+    ok('a link with no live intent shows the words and waits: no passkey, no send', s && s.h === 'Renew king.b' && s.say === 'Renew king.b for 365 days. You sign as kingbeelovis.' && s.cred === 0 && state.submits === 0 && s.buttons === 1, JSON.stringify(s));
     ok('the sheet carries no dash and fits a phone', !/[–—]/.test(s.text) && !s.wide, s.text.slice(0, 120));
     await page.evaluate(() => { location.hash = '#sign-action'; });
     await page.waitForTimeout(300);
@@ -240,8 +240,30 @@ try {
     await page.waitForSelector('#act-sheet', { timeout: 20000 });
     await settled(page);
     s = await sheet(page);
-    ok('signing as the stranger "king" is refused before any passkey prompt', s.stat === 'This is for king, and your wallet signs for kingbeelovis. Nothing was signed.' && s.cred === 0 && state.submits === 0, JSON.stringify(s));
+    ok('signing as the stranger "king" is refused before any passkey prompt, with its one link and no Sign to press again', s.stat === 'This is for king, and your wallet signs for kingbeelovis. Nothing was signed. use the name that owns king' && s.goHidden && s.cred === 0 && state.submits === 0 && await page.evaluate(() => !!document.querySelector('#act-stat a[href="#connect-sec"]')), JSON.stringify(s));
     ok('no page errors in the wallet', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C2 · no name connected: the sheet sends the reader to connect it, then comes back by itself and waits for the press */
+  {
+    console.log('C2 · connect the name, and the sheet comes back:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(sheetUrl(RENEW), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await page.click('#act-go');
+    await settled(page);
+    let s = await sheet(page);
+    ok('with no name connected, the sheet says so with its one link, before any passkey', s.stat === 'Connect your name first, and this comes back so you can sign it. connect it' && s.cred === 0 && state.submits === 0, JSON.stringify(s));
+    await page.click('#act-stat a[href="#connect-sec"]');
+    await page.waitForFunction(() => !document.getElementById('act-sheet'), null, { timeout: 5000 });
+    await page.fill('#wq', 'king'); await page.click('#wgo');
+    await page.waitForSelector('#act-sheet', { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(600);
+    s = await sheet(page);
+    ok('once the name is connected the same action comes back in words and waits for the press: no passkey, nothing sent', !!s && s.h === 'Renew king.b' && s.say === 'Renew king.b for 365 days. You sign as kingbeelovis.' && !s.goHidden && s.cred === 0 && state.submits === 0 && !s.stat, JSON.stringify(s));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
 

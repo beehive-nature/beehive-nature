@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -111,12 +111,15 @@ try {
       !!(prof.canonical_home && prof.composer && prof.composer.contract && Array.isArray(prof.discovery_seeds) &&
          prof.anchor && prof.anchor.path && prof.anchor.sha256 && Array.isArray(prof.anchor.tags)), JSON.stringify(prof).slice(0, 90));
     const booted = await page.evaluate(() => ({ c: document.getElementById('tx-contract').value, a: document.getElementById('tx-action').value, d: document.getElementById('tx-data').value }));
-    ok('composer boots FROM the profile (no hard-wired defaults in the markup)',
+    if (REG === 'cypherpunk') ok('composer boots FROM the profile (no hard-wired defaults in the markup)',
       booted.c === prof.composer.contract && booted.a === prof.composer.action &&
       JSON.parse(booted.d).registrant === prof.composer.args.registrant, JSON.stringify(booted));
+    else ok('bee and raver boot the composer empty: no visitor is shown the estate account as the thing to sign (the profile stays data, cypherpunk boots from it)',
+      booted.c === '' && booted.a === '' && booted.d === '' && prof.composer.contract === 'kingbeelovis', JSON.stringify(booted));
     await page.close();
 
-    const ctx = await browser.newContext();
+    const ctx = await (browser.newContextOwnRegister || browser.newContext).call(browser);
+    await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });   // the profile's composer defaults boot in cypherpunk
     await ctx.route(/surfaces\/wallet\.html/, async route => {
       const src = await readFile(join(ROOT, 'surfaces', 'wallet.html'), 'utf8');
       const anchor = "contract: 'kingbeelovis',";

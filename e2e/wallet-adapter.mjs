@@ -10,7 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -105,6 +105,7 @@ function mockChain(ctx, opts = {}) {
     }
     if (u.pathname.endsWith('/send_transaction')) {
       const body = JSON.parse(route.request().postData());
+      if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3050003, details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
       if (!body.packed_trx || !body.signatures || !body.signatures.length)
         return json({ error: { details: [{ message: 'malformed tx body — packing or signature missing' }] } }, 400);
       if (state.abortsRemaining > 0) { state.abortsRemaining--; return route.abort('connectionfailed'); }   // the whole rail is cut — rotation cannot walk around it
@@ -135,6 +136,9 @@ const browser = await chromium.launch({ args: ['--no-sandbox'] });
 await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
+// the Jungle4 rehearsal lane, its test key and the raw JSON are cypherpunk's: a pipeline that
+// rehearses on Jungle4 opens its own cypherpunk context in every battery
+const cyContext = async () => { const c = await browser.newContextOwnRegister(); await c.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} }); return c; };
 try {
   /* ── 1 · describe + attach: two adapters, contract v1, vendored lane works
          inside the worker (the stack-law proof — present-but-inert is not ok) */
@@ -153,6 +157,9 @@ try {
     const h = await page.evaluate(() => BNRWALLET.adapters.hive.caps);
     ok('hive describes: read rail, balance only', h.rail === 'hive' && JSON.stringify(h.capabilities) === '["balance"]', JSON.stringify(h));
     ok('adapter states painted in the composer', /vaulta ✓/.test(await page.locator('#adapter-states').innerText()));
+    const vis = await page.evaluate(() => ['tx-net', 'tx-data', 'tx-k', 'adapter-states', 'tx-go', 'tx-contract'].map(id => document.getElementById(id).getClientRects().length > 0));
+    ok(REG === 'cypherpunk' ? 'cypherpunk keeps the test network, the raw JSON, the presets and the adapter chips' : 'bee and raver show no test network, no raw JSON, no estate presets and no adapter chips: the account, the action and its parts carry it',
+      REG === 'cypherpunk' ? vis.every(Boolean) : (vis.slice(0, 4).every(v => !v) && vis[4] && vis[5]), JSON.stringify(vis));
     const balance = await page.evaluate(() => BNRWALLET.callAdapter('vaulta', 'balance', { address: 'banchor22222' }));
     ok('the A balance is read at core.vaulta, never the EOS core balance relabelled',
       balance.unit === 'A' && balance.quantity === '12.3456 A', JSON.stringify(balance));
@@ -165,29 +172,34 @@ try {
          submit → confirm reads the block → CONFIRMED with named evidence */
   console.log('2 · full pipeline (green path):');
   {
-    await page.selectOption('#tx-net', 'j4');
-    await page.fill('#tx-contract', 'banchor22222');
-    await page.fill('#tx-action', 'commit');
-    await page.click('#tx-abi');
-    await page.waitForFunction(() => document.querySelectorAll('.tx-f').length === 7, null, { timeout: 8000 });
-    const fields = await page.locator('.tx-f').evaluateAll(els =>
+    /* the Jungle4 rehearsal lane, its test key and the raw JSON are cypherpunk's: in bee and raver
+       this pipeline runs on a cypherpunk page of its own */
+    let cp = page;
+    if (REG !== 'cypherpunk') { const cc = await cyContext(); mockChain(cc); cp = await cc.newPage(); await cp.goto(WALLET, { waitUntil: 'load' });
+      await cp.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 }); }
+    await cp.selectOption('#tx-net', 'j4');
+    await cp.fill('#tx-contract', 'banchor22222');
+    await cp.fill('#tx-action', 'commit');
+    await cp.click('#tx-abi');
+    await cp.waitForFunction(() => document.querySelectorAll('.tx-f').length === 7, null, { timeout: 8000 });
+    const fields = await cp.locator('.tx-f').evaluateAll(els =>
       els.map(e => e.getAttribute('data-fn') + ':' + e.getAttribute('data-ft')));
     ok('seven ABI fields rendered, typed (vendored eosjs serializes IN the worker)',
       fields.length === 7 && fields[0] === 'committer:name' && fields[6] === 'forced_watermark:uint64', fields.join(' '));
-    await page.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
-    await page.fill('#tx-j4actor', 'banchor22222');
-    await page.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
-    await page.fill('#tx-j4key', J4_WIF);
-    await page.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
-    await page.click('#tx-go');
-    await page.waitForFunction(() => /CONFIRMED|FAILED|EXPIRED|error|refused/i.test(document.getElementById('tx-out').textContent), null, { timeout: 30000 });
-    const out = await page.locator('#tx-out').innerText(), outRaw = await page.locator('#tx-out').textContent();
+    await cp.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await cp.fill('#tx-j4actor', 'banchor22222');
+    await cp.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; }).catch(()=>{});
+    await cp.fill('#tx-j4key', J4_WIF);
+    await cp.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
+    await cp.click('#tx-go');
+    await cp.waitForFunction(() => /CONFIRMED|FAILED|EXPIRED|error|refused/i.test(document.getElementById('tx-out').textContent), null, { timeout: 30000 });
+    const out = await cp.locator('#tx-out').innerText(), outRaw = await cp.locator('#tx-out').textContent();
     ok('CONFIRMED only from the block read, evidence names what was read (kept for cypherpunk)',
       /done\. the chain confirmed it/.test(out) && /CONFIRMED by a block read: get_block #123460/.test(outRaw) && /MOCKTXID/.test(outRaw), outRaw.slice(0, 160));
     ok('the intent is previewed in words before the go (the words for every register, the raw lines for cypherpunk)',
-      /^run commit on banchor22222 with the parts shown\. you sign as banchor22222\.$/.test(await page.locator('#tx-preview-body .tx-words').textContent()) &&
-      /in words/.test(await page.locator('#tx-preview-body').textContent()), await page.locator('#tx-preview-body').textContent());
-    const obx = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
+      /^run commit on banchor22222 with the parts shown\. you sign as banchor22222\.$/.test(await cp.locator('#tx-preview-body .tx-words').textContent()) &&
+      /in words/.test(await cp.locator('#tx-preview-body').textContent()), await cp.locator('#tx-preview-body').textContent());
+    const obx = await cp.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
     ok('outbox holds the entry, phase confirmed, digest + human summary present',
       obx.length === 1 && obx[0].phase === 'confirmed' && /^[0-9a-f]{64}$/.test(obx[0].digest) &&
       /Vaulta action banchor22222::commit/.test(obx[0].human_summary), JSON.stringify(obx[0] && { phase: obx[0].phase }));
@@ -247,7 +259,7 @@ try {
          exactly ONE transaction id reaches the rail, identical stored bytes */
   console.log('6 · cut-then-retry (§9.5):');
   {
-    const c6 = await browser.newContext(); const rail6 = mockChain(c6); rail6.abortsRemaining = 5;
+    const c6 = await cyContext(); const rail6 = mockChain(c6); rail6.abortsRemaining = 5;
     const p6 = await c6.newPage();
     await p6.goto(WALLET, { waitUntil: 'load' });
     await p6.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
@@ -283,7 +295,7 @@ try {
          and the honest terminal is time (expiry), never the ack */
   console.log('7 · lying ack (§9.6):');
   {
-    const c7 = await browser.newContext(); const rail7 = mockChain(c7); rail7.blockCarries = false;
+    const c7 = await cyContext(); const rail7 = mockChain(c7); rail7.blockCarries = false;
     const p7 = await c7.newPage();
     await p7.goto(WALLET, { waitUntil: 'load' });
     await p7.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
@@ -436,6 +448,38 @@ try {
     await p.waitForFunction(()=>document.querySelectorAll('.tx-f').length===1);
     ok('hostile ABI names stay attribute text and cannot inject wallet HTML',await p.locator('.tx-f').getAttribute('data-fn')===payload&&await p.locator('#rpc-injection').count()===0&&await p.evaluate(()=>!window.rpcInjected));
     await hostile.close();
+  }
+
+  /* ── 12 · a refusal is one calm sentence and its one action; the node's own words are cypherpunk's ── */
+  console.log('12 · refusals in words:');
+  for (const [refuse, words, act] of [
+    ['account banchor22222 has insufficient ram; needs 9000 bytes has 8000 bytes [ram_usage_exceeded]', /^the account needs more RAM for this\. nothing changed\.\s*$/, 'buy RAM with A'],
+    ['transaction net usage is too high: 300 > 200 [tx_net_usage_exceeded]', /^the chain is not letting the account send more right now\. nothing changed\. try again in a while\.$/, null],
+    ['assertion failure with message: <img src=x onerror=window.__xss=9> is not yours [eosio_assert_message_exception]', /^the contract refused it\. nothing changed\.\s*$/, null]]) {
+    const c12 = await cyContext(); const r12 = mockChain(c12); r12.refuse = refuse;
+    const p12 = await c12.newPage();
+    await p12.goto(WALLET, { waitUntil: 'load' });
+    await p12.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    await p12.selectOption('#tx-net', 'j4');
+    await p12.fill('#tx-contract', 'banchor22222'); await p12.fill('#tx-action', 'commit');
+    await p12.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; });
+    await p12.fill('#tx-j4actor', 'banchor22222'); await p12.fill('#tx-j4key', J4_WIF);
+    await p12.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
+    await p12.click('#tx-go');
+    await p12.waitForFunction(() => ((JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {}).phase === 'failed', null, { timeout: 30000 }).catch(() => {});
+    const said = await p12.evaluate(() => { const o = document.getElementById('tx-out').cloneNode(true); o.querySelectorAll('.wl-cyd').forEach(x => x.remove()); const b = o.querySelector('button.wl-act'); if (b) b.remove();
+      return { words: o.textContent, btn: b ? b.textContent : null, cy: [...document.querySelectorAll('#tx-out .wl-cyd')].map(x => x.textContent).join(' '), xss: window.__xss }; });
+    ok('a refusal (' + refuse.slice(0, 28) + '…) is one calm sentence and its one action; the node\'s words stay in the detail',
+      words.test(said.words) && said.btn === act && !/ram_usage|tx_net|assertion|CPU|NET|<img|banchor22222 has/.test(said.words) && said.cy.includes(refuse.slice(0, 30)) && said.xss === undefined, JSON.stringify(said));
+    if (act) {
+      const before = r12.submits + (r12.refused || 0);
+      await p12.click('#tx-out button.wl-act');
+      await p12.waitForTimeout(500);
+      const sw = await p12.evaluate(() => ({ hash: location.hash, panel: document.getElementById('sw-panel').style.display, dir: document.getElementById('sw-dir').textContent }));
+      ok('its one action opens the wallet\'s own RAM buy at "buy RAM with A", and signs nothing by itself',
+        sw.hash === '#pay-sec' && sw.panel === 'block' && sw.dir === 'direction: buy RAM with A' && r12.submits + (r12.refused || 0) === before, JSON.stringify(sw));
+    }
+    await c12.close();
   }
 
   await ctx.close();
