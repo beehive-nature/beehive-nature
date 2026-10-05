@@ -27,7 +27,9 @@ function world(sab = {}) {
     const dev = s.devices.get(tok);
     if (ep !== "servers") {
       if (dev) {
-        if (clock.t > Date.parse(dev.expires_at) || !s.tunnels.find((x) => x.tunnel_token === dev.tunnel)) return reply(401, { status: "error", error: "invalid_token" });
+        if (!s.tunnels.find((x) => x.tunnel_token === dev.tunnel)) return reply(404, { status: "error" });
+        const grace = sab.expiryIgnored ? Infinity : sab.expiryLag ? 60000 : 0;
+        if (clock.t > Date.parse(dev.expires_at) + grace) return reply(401, { status: "error", error: "invalid_token" });
         const own = ep === "wireguard" && p.get("tunnel_token") === dev.tunnel && !sab.deviceInert;
         if (!own && !sab.deviceCanWrite) return reply(sab.device500 ? 500 : 403, { status: "error", error: "device_restricted" });
       } else if (tok !== NET && tok !== ADMIN) return reply(401, { status: "error" });
@@ -53,7 +55,7 @@ function world(sab = {}) {
         return reply(200, { status: "success", config: { interface: { private_key: x.private_key, address: x.assigned_ip.replace("/31", "/31") + ", fd00::1/128" }, peer: { public_key: "srvpub", endpoint: "wireguard.test.doxx.net:51820" } } });
       }
       case "delete_tunnel": s.tunnels = s.tunnels.filter((x) => x.tunnel_token !== p.get("tunnel_token")); return reply(200, { status: "success" });
-      case "firewall_rule_list": return reply(200, { status: "success", rules: s.rules.filter((r) => !p.get("tunnel_token") || r.tunnel_token === p.get("tunnel_token")).map((r) => (sab.leakyRuleList ? { ...r, tunnel: r.tunnel_token } : r)) });
+      case "firewall_rule_list": return reply(200, { status: "success", rules: s.rules.filter((r) => !p.get("tunnel_token") || r.tunnel_token === p.get("tunnel_token")).map((r) => (sab.leakyRuleList ? { ...r, tunnel: r.tunnel_token } : r)).map((r) => (sab.listOdd ? { ...r, dst_ip: r.dst_ip + "/32" } : r)) });
       case "firewall_rule_add": {
         const r = { tunnel_token: p.get("tunnel_token"), protocol: p.get("protocol"), src_ip: p.get("src_ip"), src_port: "ALL", dst_ip: p.get("dst_ip"), dst_port: p.get("dst_port") };
         s.rules.push(r);
@@ -62,6 +64,7 @@ function world(sab = {}) {
         return reply(200, { status: "success" });
       }
       case "firewall_rule_delete": {
+        if (sab.deleteRejected || !p.get("src_port")) return reply(400, { status: "error", message: "Missing required parameters" });
         const same = (r) => r.tunnel_token === p.get("tunnel_token") && r.dst_ip === p.get("dst_ip") && r.src_ip === p.get("src_ip") && String(r.dst_port) === p.get("dst_port");
         s.rules = s.rules.filter((r) => !same(r));
         s.deleted = (s.deleted || 0) + 1;
@@ -227,6 +230,30 @@ test("an edited receipt does not reconcile", async () => {
 
 test("a vendor echoing a credential under an unknown field: the receipt is refused, not emitted", async () => {
   await assert.rejects(world({ leakyRuleList: true }).run(), /secret-leak-refused/);
+});
+
+test("live run 4: a listing the matcher cannot read still revokes (src_port ALL)", async () => {
+  const { receipt } = await world({ listOdd: true }).run();
+  assert.equal(receipt.verdict, "PASS_WITH_LIMITATIONS", JSON.stringify(receipt.verdict_reasons));
+  assert.ok(receipt.verdict_reasons.includes("observation failed: grant.listed"));
+  assert.ok(receipt.observations.find((o) => o.check === "grant.listed").observed.listed.length > 0);
+  assert.ok(receipt.window.revoked_at);
+});
+
+test("a revoke call the API rejects is a harness fault, not a product escape", async () => {
+  const { receipt } = await world({ deleteRejected: true }).run();
+  assert.equal(receipt.verdict, "INCONCLUSIVE");
+  assert.ok(receipt.verdict_reasons.includes("harness: revoke-call-rejected"));
+  assert.ok(!receipt.observations.some((o) => o.check === "revoke.deny"));
+});
+
+test("expiry: a short lag is a limitation, no enforcement is a blocker", async () => {
+  const lag = (await world({ expiryLag: true }).run()).receipt;
+  assert.equal(lag.verdict, "PASS_WITH_LIMITATIONS");
+  assert.ok(lag.verdict_reasons.includes("limitation: expiry-lag"));
+  const none = (await world({ expiryIgnored: true }).run()).receipt;
+  assert.equal(none.verdict, "FAIL");
+  assert.ok(none.verdict_reasons.includes("blocker: expired-credential-accepted"));
 });
 
 test("missing evidence is INCONCLUSIVE, never PASS", () => {

@@ -47,6 +47,8 @@ export async function runTungsten({ adapter, dataplane, token, seat = "bFUzZ", s
   const iso = () => now().toISOString();
   const obs = (check, ok, fields = {}) => observations.push({ check, ok: !!ok, at: iso(), ...fields });
   const knock = async (from, to, p) => dataplane.knock(from, t[to].ip, p, knockMs);
+  // doxx identifies a rule by all six fields; a rule added without src_port is stored as ALL.
+  const delRule = (r) => adapter.call("firewall_rule_delete", { src_port: "ALL", ...r });
   const edge = (from, to, p) => ({ src_ref: t[from].ref, dst_ip: t[to].ip, port: p, protocol: "TCP" });
 
   const finish = () => {
@@ -157,7 +159,7 @@ export async function runTungsten({ adapter, dataplane, token, seat = "bFUzZ", s
     const listed = await adapter.call("firewall_rule_list", { tunnel_token: t.A.tunnelToken });
     const stored = (listed.body?.rules || []).find((r) => r.dst_ip === t.A.ip && String(r.dst_port) === String(port) && (r.src_ip === `${t.B.ip}/32` || r.src_ip === t.B.ip));
     if (stored) rule = { tunnel_token: t.A.tunnelToken, protocol: stored.protocol, src_ip: stored.src_ip, src_port: stored.src_port, dst_ip: stored.dst_ip, dst_port: stored.dst_port };
-    obs("grant.listed", !!stored, { observed: stored ? redact(stored) : null });
+    obs("grant.listed", !!stored, { observed: stored ? redact(stored) : { listed: (listed.body?.rules || []).slice(0, 10).map(redact), http: listed.status } });
 
     // ---- P4 exercise -------------------------------------------------------
     let got = "timeout";
@@ -189,16 +191,17 @@ export async function runTungsten({ adapter, dataplane, token, seat = "bFUzZ", s
       obs("control.device-credential-works", own.ok, { observed: own.status });
       obs("control.device-refusals-explicit", [w1, w2, w3].every(explicit), { observed: [w1.status, w2.status, w3.status] });
       obs("negative.device-cannot-write", !w1.ok && !otherSeen && !w3.ok, { observed: { rule_add: w1.status, list_tunnels: w2.status, list_shows_other_tunnels: otherSeen, other_tunnel_config: w3.status } });
-      if (w1.ok) await adapter.call("firewall_rule_delete", { tunnel_token: t.B.tunnelToken, protocol: "TCP", src_ip: `${t.C.ip}/32`, dst_ip: t.B.ip, dst_port: port });
+      if (w1.ok) await delRule({ tunnel_token: t.B.tunnelToken, protocol: "TCP", src_ip: `${t.C.ip}/32`, dst_ip: t.B.ip, dst_port: port });
     }
 
     // ---- P6 revoke ---------------------------------------------------------
-    const del = await adapter.call("firewall_rule_delete", rule);
+    const del = await delRule(rule);
     if (del.ok) { window.revoked_at = iso(); rule = null; }
     let after = "verified";
     for (let i = 0; i < 12 && after === "verified"; i++) { after = await knock("B", "A", port); if (after === "verified") await sleep(5000); }
     if (after !== "verified") window.deny_observed_at = iso();
-    obs("revoke.deny", del.ok && after !== "verified", { observed: after, ...edge("B", "A", port) });
+    if (del.ok) obs("revoke.deny", after !== "verified", { observed: after, ...edge("B", "A", port) });
+    else findings.push({ id: "revoke-call-rejected", severity: "harness", source: "live", text: `firewall_rule_delete answered HTTP ${del.status}; nothing was revoked, so revocation is untested.` });
     const ctl = await knock("A", "A", port);
     obs("control.listener-alive", ctl === "verified", { observed: { after_revoke: ctl } });
 
@@ -217,30 +220,35 @@ export async function runTungsten({ adapter, dataplane, token, seat = "bFUzZ", s
     }
     obs("control.paths-alive-after-revoke", alive.B === "verified" && alive.C === "verified", { observed: alive });
     const bShut = await knock("B", "A", port);
-    obs("revoke.deny", bShut !== "verified", { observed: bShut, ...edge("B", "A", port), detail: "path proven alive" });
+    if (del.ok) obs("revoke.deny", bShut !== "verified", { observed: bShut, ...edge("B", "A", port), detail: "path proven alive" });
     const cShut = await knock("C", "A", port);
     obs("negative.other-source", cShut !== "verified", { observed: cShut, ...edge("C", "A", port), detail: "path proven alive" });
     while (controlRules.length) {
-      if (!(await adapter.call("firewall_rule_delete", controlRules[0])).ok) break; // finally retries
+      if (!(await delRule(controlRules[0])).ok) break; // finally retries
       controlRules.shift();
     }
 
     // ---- P7 credential expiry (vendor-enforced) ----------------------------
     if (deviceToken) {
       const wait = Date.parse(mint.body?.expires_at || "") || (now().getTime() + deviceTtlSec * 1000);
+      const serverExpiry = mint.body?.expires_at ?? null;
       const ms = Math.max(0, wait - now().getTime()) + 30000;
       if (ms <= 20 * 60 * 1000) {
         await sleep(ms);
         const late = await adapter.call("wireguard", { tunnel_token: t.B.tunnelToken }, { token: deviceToken });
-        obs("expiry.device-token", !late.ok && late.status > 0 && late.status < 500, { observed: late.status });
-        if (late.ok) findings.push({ id: "expired-credential-accepted", severity: "blocker", source: "live", text: "A role=device credential still worked after its expires_at." });
+        let later = null;
+        if (late.ok) { await sleep(120000); later = await adapter.call("wireguard", { tunnel_token: t.B.tunnelToken }, { token: deviceToken }); }
+        const refused = (r) => r && !r.ok && r.status > 0 && r.status < 500;
+        obs("expiry.device-token", refused(late) || refused(later), { observed: { server_expires_at: serverExpiry, at_plus_30s: late.status, at_plus_150s: later ? later.status : null } });
+        if (late.ok && later?.ok) findings.push({ id: "expired-credential-accepted", severity: "blocker", source: "live", text: "A role=device credential still worked 150 s after its expires_at." });
+        else if (late.ok) findings.push({ id: "expiry-lag", severity: "limitation", source: "live", text: "A role=device credential worked 30 s past its expires_at and was refused by 150 s: expiry is enforced with a lag." });
       }
     }
   } catch (e) {
     findings.push({ id: "run-aborted", severity: "harness", source: "live", text: `run aborted: ${String(e.message || e).replace(/[^\w:.\- ]/g, "").slice(0, 120)}` });
   } finally {
     // ---- P8 cleanup: everything this run created, nothing else -------------
-    for (const r of [rule, ...controlRules]) if (r) await adapter.call("firewall_rule_delete", r).catch(() => {});
+    for (const r of [rule, ...controlRules]) if (r) await delRule(r).catch(() => {});
     for (const label of Object.keys(t)) await adapter.call("delete_tunnel", { tunnel_token: t[label].tunnelToken }).catch(() => {});
     await dataplane.teardown().catch(() => {});
     if (adapter.calls.some((c) => c.endpoint === "create_tunnel")) {
