@@ -137,6 +137,19 @@ await page.evaluate(() => {
   document.getElementById('bridge-sec').style.display = 'block';
   const i = document.createElement('input'); i.type = 'password'; i.id = 'br-paste'; document.getElementById('br-calm').appendChild(i);
 });
+// a paste in flight, or one held until the account is read: its field and button cannot be pressed, so no key goes there
+await page.evaluate(() => {
+  document.getElementById('br-paste').disabled = true;
+  const g = document.createElement('button'); g.id = 'br-paste-go'; g.disabled = true; document.getElementById('br-calm').appendChild(g);
+});
+await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
+await page.waitForTimeout(300);
+t('with a paste in flight or held, the key is placed nowhere',
+  (await page.inputValue('#br-paste')) === '' && (await page.inputValue('#br-wif')) === '');
+t('and the line says the last paste is still being checked, with its one link',
+  /^your last paste is still being checked, so this key stays in the vault for now\. see where it stands/.test((await page.innerText('#vlt-stat')).trim())
+    && await page.evaluate(() => !!document.querySelector('#vlt-stat a[href="#bridge-sec"]')), await page.innerText('#vlt-stat'));
+await page.evaluate(() => { document.getElementById('br-paste').disabled = false; document.getElementById('br-paste-go').disabled = false; });
 await page.locator('#vlt-list .chip button[data-act="bridge"]').first().click();
 await page.waitForTimeout(300);
 t('key handed to the one-press field every register sees',
@@ -151,7 +164,7 @@ t('locked state shown', await page.locator('#vlt-locked').isVisible());
 t('a vault no passkey opens offers no passkey button', !(await page.locator('#vlt-pkunlock').isVisible()));
 t('the key handed to the bridge is wiped when the vault locks', (await page.inputValue('#br-paste')) === '');
 await page.evaluate(() => { window.__vaultOpened = 0; document.addEventListener('vault-unlocked', () => { window.__vaultOpened++; }); });
-await page.evaluate(() => { document.getElementById('br-paste').remove(); document.getElementById('bridge-sec').style.display = 'none'; });
+await page.evaluate(() => { document.getElementById('br-paste').remove(); document.getElementById('br-paste-go').remove(); document.getElementById('bridge-sec').style.display = 'none'; });
 t('entries not in the DOM while locked', (await page.locator('#vlt-list .chip').count()) === 0);
 await page.fill('#vlt-pass', gen);
 await page.click('#vlt-unlock');
@@ -181,6 +194,27 @@ await page.waitForTimeout(2500);
 t('a wrong current keypass is refused, and nothing changed',
   /not the keypass you use now/.test(await page.textContent('#vlt-stat')) && !(await page.locator('#vlt-ask').isVisible()),
   await page.textContent('#vlt-stat'));
+// this browser refuses to save the re-key: the keypass in use stays in force, in this tab and in storage
+await page.evaluate(() => {
+  const o = Storage.prototype.setItem; window.__setItem = o; window.__failVault = 1;
+  Storage.prototype.setItem = function (k, v) {
+    if (k === 'bnr_vault' && window.__failVault > 0) { window.__failVault--; throw new DOMException('the test refuses this write', 'QuotaExceededError'); }
+    return o.call(this, k, v);
+  };
+});
+await page.click('#vlt-rekey'); await page.waitForTimeout(200);
+await page.fill('#vlt-ask-in', kp); await page.click('#vlt-ask-go'); await page.waitForTimeout(2500);
+await page.click('#vlt-ask-go'); await page.waitForTimeout(3500);
+await page.evaluate(() => { Storage.prototype.setItem = window.__setItem; });
+t('a re-key this browser would not save says so: the keypass is the same as before',
+  /would not save the change, so your keypass is the same as before/.test(await page.innerText('#vlt-stat')), await page.innerText('#vlt-stat'));
+t('and the keypass in use still opens the open slot', await page.evaluate(k => window.BNRVAULT.checkKeypass(k), kp));
+// a later save must not carry the refused re-key into storage
+await page.evaluate(async () => { const V = window.BNRVAULT; const e = await V.addEntry({ type: 'note', label: 'probe', secret: 'probe' }); await V.removeEntry(e.id); });
+await page.click('#vlt-lock'); await page.waitForTimeout(200);
+await page.fill('#vlt-pass', kp); await page.click('#vlt-unlock'); await page.waitForTimeout(2500);
+t('after a later save, the keypass in use still opens the vault', await page.locator('#vlt-open').isVisible(), await page.textContent('#vlt-stat'));
+t('and nothing else changed with it', (await page.locator('#vlt-list .chip').count()) === 2);
 await page.click('#vlt-rekey'); await page.waitForTimeout(200);
 await page.fill('#vlt-ask-in', kp);
 await page.click('#vlt-ask-go');

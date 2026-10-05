@@ -198,10 +198,13 @@ try {
   {
     const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
     const page = await connectedPage(ctx);
+    await page.waitForFunction(() => /has no active key/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 15000 }).catch(() => {});
     const cards = await page.evaluate(() => window.BNRPAY.railAddresses(
-      new Uint8Array(32).fill(0x2a), 'gatesoul').map(c => ({ t: c.t, ctx: c.ctx, v: c.v, err: c.err })));
+      new Uint8Array(32).fill(0x2a), 'gatesoul').map(c => ({ t: c.t, ctx: c.ctx, v: c.v, err: c.err, why: c.why })));
     const byCtx = k => cards.find(c => c.ctx === k) || {};
-    ok('the Vaulta rail carries the account name', byCtx('vaulta:gatesoul').v === 'gatesoul');
+    // gatesoul is a plain account with no key this wallet holds: a receive address is where people send money, so none is offered as yours
+    ok('the Vaulta rail offers no address for an account this wallet cannot show is yours, and says why',
+      byCtx('vaulta:gatesoul').v === null && byCtx('vaulta:gatesoul').why === 'vacct-unbridged' && /may be a stranger/.test(byCtx('vaulta:gatesoul').err || ''), JSON.stringify(byCtx('vaulta:gatesoul')));
     ok('the EVM rail derives one 0x address for BOTH chains',
       /^0x[0-9a-fA-F]{40}$/.test(byCtx('evm:gatesoul').v || ''), byCtx('evm:gatesoul').v || byCtx('evm:gatesoul').err);
     ok('the Solana rail derives a base58 address',
@@ -522,7 +525,7 @@ try {
     const sol = cards.find(c => c.ctx === 'sol:gatesoul');
     ok('a broken derivation yields NO address and a stated reason', sol && sol.v === null && /deliberately broken/.test(sol.err || ''), JSON.stringify(sol));
     ok('the other rails are unaffected — one broken rail does not blank the set',
-      cards.filter(c => c.v).length === cards.length - 1, JSON.stringify(cards.map(c => [c.ctx, !!c.v])));
+      cards.filter(c => c.v).length === cards.filter(c => !/^vaulta:/.test(c.ctx)).length - 1, JSON.stringify(cards.map(c => [c.ctx, !!c.v])));
     await page.evaluate(() => { document.getElementById('pay-rx').click() });
     const html = await page.locator('#rx-cards').innerHTML();
     ok('the receive panel says calmly that no address is shown, with try again, and keeps the reason for cypherpunk',

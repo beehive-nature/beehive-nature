@@ -2702,7 +2702,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
-<script src="vault.js?v=3"></script>
+<script src="vault.js?v=4"></script>
 <script src="onboarding/vendor/bpq-lib.js?v=1"></script>
 <script src="bpq.js?v=1"></script>
 <script src="arweave.js?v=4"></script>
@@ -2733,6 +2733,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      guessing. The answer is public and kept in this browser. */
   var REG='kingbeelovis', ACCT_RE=/^[a-z1-5.]{1,12}$/;
   var VACCT=null, VRECV=null, VACCT_FOR=null, VACCT_STATE=null, VACCT_PROVEN=false;   // state 'name' | 'self' | 'unknown'
+  var VACCT_LAPSED=false;   /* 'self' because the name's row ran out: the bare name may be a stranger's account */
   function vacct(){ return (SOUL&&VACCT_FOR===SOUL&&VACCT)||SOUL }
   function vrecv(){ return (SOUL&&VACCT_FOR===SOUL&&(VRECV||VACCT))||SOUL }
   function vacctKnown(){ return !!(SOUL&&VACCT_FOR===SOUL) }
@@ -2784,11 +2785,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function vacctCacheLoad(){
     BRIDGED=null;   /* a changed account never inherits the last one's verdict: nothing signs or receives until it is read */
-    VACCT=VRECV=VACCT_FOR=VACCT_STATE=null; VACCT_PROVEN=false;
+    VACCT=VRECV=VACCT_FOR=VACCT_STATE=null; VACCT_PROVEN=false; VACCT_LAPSED=false;
     try{ var c=JSON.parse(localStorage.getItem('bnr_vacct')||'null');
-      if(c&&SOUL&&c.soul===SOUL&&ACCT_RE.test(c.acct||'')){ VACCT=c.acct; VRECV=ACCT_RE.test(c.recv||'')?c.recv:c.acct; VACCT_FOR=c.soul; VACCT_STATE=c.state==='self'?'self':'name'; VACCT_PROVEN=!!c.proven } }catch(e){}
+      if(c&&SOUL&&c.soul===SOUL&&ACCT_RE.test(c.acct||'')){ VACCT=c.acct; VRECV=ACCT_RE.test(c.recv||'')?c.recv:c.acct; VACCT_FOR=c.soul; VACCT_STATE=c.state==='self'?'self':'name'; VACCT_PROVEN=!!c.proven; VACCT_LAPSED=VACCT_STATE==='self'&&!!c.lapsed } }catch(e){}
   }
-  function vacctKeep(){ try{ localStorage.setItem('bnr_vacct',JSON.stringify({soul:VACCT_FOR,acct:VACCT,recv:VRECV,state:VACCT_STATE,proven:!!VACCT_PROVEN})) }catch(e){} }
+  function vacctKeep(){ try{ localStorage.setItem('bnr_vacct',JSON.stringify({soul:VACCT_FOR,acct:VACCT,recv:VRECV,state:VACCT_STATE,proven:!!VACCT_PROVEN,lapsed:!!VACCT_LAPSED})) }catch(e){} }
   function rowLive(row,name){ return !!row&&row.domain_name===name&&ACCT_RE.test(row.owner||'')&&ACCT_RE.test(row.account||'')&&!(Date.parse(String(row.expires||'')+'Z')<=Date.now()) }
   function vacctRederive(){ if(!MPRK)return; deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub; seedContexts(); renderForge() }
   async function resolveVacct(){
@@ -2800,6 +2801,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(VACCT_FOR===s&&VACCT_PROVEN)return false;      // proven: this wallet signs for the bare account; a row cannot redirect it
     var row=r.rows[0], live=rowLive(row,s);
     VACCT=live?row.owner:s; VRECV=live?row.account:s; VACCT_FOR=s; VACCT_STATE=live?'name':'self'; VACCT_PROVEN=false;
+    VACCT_LAPSED=!live&&!!row&&row.domain_name===s&&Date.parse(String(row.expires||'')+'Z')<=Date.now();
     vacctKeep();
     var changed=vacct()!==before;
     if(changed){ BRIDGED=null; if(MPRK){ vacctRederive(); checkBridge() } }
@@ -3182,10 +3184,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function hiveParse(t){ try{ return parseWifAny(t) }catch(e){ return null } }
   function keyInMemo(m){
     var b58='1-9A-HJ-NP-Za-km-z', t=String(m||'');
-    return new RegExp('(^|[^'+b58+'])(5[HJK]['+b58+']{49}|[KL]['+b58+']{51})(?![' + b58 + '])').test(t)||/PVT_(K1|R1)_[1-9A-HJ-NP-Za-km-z]{40,}/.test(t);
+    return new RegExp('(^|[^'+b58+'])(5[HJK]['+b58+']{49}|[KL]['+b58+']{51})(?![' + b58 + '])').test(t)||/PVT_(K1|R1)_[1-9A-HJ-NP-Za-km-z]{40,}/.test(t)
+      ||/(^|[^0-9a-fA-F])[0-9a-fA-F]{64}(?![0-9a-fA-F])/.test(t);   /* 64 hex: an EVM key (0x or not), bare or wrapped in punctuation */
   }
   function hiveMemoUnsafe(m){
-    return String(m||'').split(/\s+/).some(function(w){
+    return keyInMemo(m)||String(m||'').split(/\s+/).some(function(w){
       return /^5[HJK][1-9A-HJ-NP-Za-km-z]{49}$/.test(w)||/^[KL][1-9A-HJ-NP-Za-km-z]{51}$/.test(w)||/^PVT_K1_/.test(w)||/^[0-9a-fA-F]{64}$/.test(w) });
   }
   function hiveNameOf(ctx){
@@ -4825,10 +4828,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     if(soul&&soul!==SOUL) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,note:'your account name receives A directly · memo optional'});
     else if(soul&&!vacctKnown()) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:null,why:'vacct-unread',err:'could not read which account '+soul+'.b points at yet'});
-    else if(soul&&VACCT_STATE==='name'&&BRIDGED!==true) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:null,why:'vacct-unbridged',
-      err:soul+'.b points at '+vrecv()+'. This wallet shows it here once it signs for '+vacct()});
-    else if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:vrecv(),
-      note:vrecv()!==soul?soul+'.b points at '+vrecv()+', which receives A directly · memo optional':'your account name receives A directly · memo optional'});
+    /* a receive address is where people send money, so the card offers one only once this
+       wallet has shown the account is yours: it signs for it now, or proved the bare account
+       on this browser and nothing since says otherwise. Until then it says why, and shows none */
+    else if(soul){
+      var va=vacct(), vr=vrecv(), bare=VACCT_STATE!=='name';
+      var mine=ACCT_RE.test(vr)&&(BRIDGED===true||(bare&&VACCT_PROVEN&&BRIDGED!==false));
+      if(mine) out.push({t:'Vaulta · A',ctx:'vaulta:'+va,unit:'A',v:vr,
+        note:vr!==soul?soul+'.b points at '+vr+', which receives A directly · memo optional':'your account name receives A directly · memo optional'});
+      else {
+        var why=bare&&!ACCT_RE.test(soul)?'vacct-noacct':bare&&VACCT_LAPSED?'vacct-lapsed':!MPRK?'vacct-nokc':BRIDGED===false?'vacct-unbridged':BR_CHECK?'vacct-checking':'vacct-unchecked';
+        out.push({t:'Vaulta · A',ctx:'vaulta:'+va,unit:'A',v:null,why:why,
+          err:!bare?soul+'.b points at '+vr+'. This wallet shows it here once it signs for '+va
+            :why==='vacct-noacct'?soul+' is not a Vaulta account name, and no current .b row points it at one'
+            :why==='vacct-lapsed'?soul+'.b has lapsed, so the bare account '+soul+' may be a stranger\u2019s; it shows here only once this wallet signs for it'
+            :'this wallet has not shown it signs for '+va+', so '+va+' may be a stranger\u2019s account; it shows here once it does'});
+      }
+    }
     if(!mprk) return out;
     add('Base + Arbitrum · ETH · USDC · ANT','evm:'+soul,'ETH',
       'ONE 0x address, both EVM rails — the same key signs on chain 8453 and 42161',function(){
@@ -5171,7 +5187,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var go=document.createElement('button'); go.type='button'; go.id='br-paste-go'; go.className='gold'; go.textContent='add this wallet';
     var st=document.createElement('div'); st.id='br-paste-stat'; st.setAttribute('role','status'); st.style.cssText='margin-top:8px;min-height:20px';
     var hold=!!(BR_PENDING&&BR_PENDING.acct===a);   /* a paste that may still land: the account is read first */
-    inp.disabled=hold; go.disabled=hold;
+    inp.disabled=hold; go.disabled=hold; if(hold)inp.value='';   /* a held lane's field cannot be pressed, so it carries no key */
     if(hold&&!(BR_SAID&&BR_SAID.acct===a))BR_SAID={acct:a,parts:['the last paste may still go in, so nothing new can be signed until '+a+' is read. ',{btn:'check again',on:brRecheck},{cy:'tx '+BR_PENDING.tx+' · valid until '+new Date(BR_PENDING.exp).toISOString()}]};
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter')go.click() });
     go.onclick=brPress;
@@ -8272,12 +8288,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function rxSay(c){
     var more={to:'matrix-sec',t:'see what each coin can do here'};
     if(c.v) return (c.more||(c.pay===false&&!c.cyOnly))?[c.say,' ',more]:[c.say];
-    if(c.why==='vacct-unread') return ['we could not read your Vaulta account just now, so no address is shown. ',{btn:'try again',on:function(){ resolveVacct().then(rxRender,rxRender) }}];
+    if(c.why==='vacct-unread') return ['we could not read your Vaulta account just now, so no address is shown. ',{btn:'try again',on:function(){
+      resolveVacct().then(function(){ rxShow(); if(K1&&BRIDGED===null)return BR_CHECK||checkBridge() }).then(rxShow,rxShow) }}];
     if(c.why==='vacct-unbridged') return ['your Vaulta address shows here once this wallet can sign for '+vacct()+'. ',{to:'bridge-sec',t:'let it sign'}];
+    if(c.why==='vacct-nokc') return ['your Vaulta address shows here once your keychain is connected. ',{to:'kc-sec',t:'connect your keychain'}];
+    if(c.why==='vacct-checking') return ['checking '+vacct()+', one moment.'];
+    if(c.why==='vacct-unchecked') return ['we could not check '+vacct()+' just now, so no Vaulta address is shown. ',{btn:'try again',on:function(){ var p=checkBridge(); rxShow(); p.then(rxShow,rxShow) }}];
+    if(c.why==='vacct-lapsed') return [SOUL+'.b has lapsed, so it points at no account and no Vaulta address is shown. ',{to:'connect-sec',t:'choose the account'}];
+    if(c.why==='vacct-noacct') return [SOUL+' is not a Vaulta account name, so there is no Vaulta address to share. ',{to:'connect-sec',t:'choose the account'}];
     return ['this address could not be made here, so none is shown. ',{btn:'try again',on:rxRender}];
   }
-  function rxRender(){
+  /* the open receive panel follows the wallet: rxShow redraws it, rxSoft only when a card would change */
+  function rxShow(){ if($('rx-panel').style.display==='block')rxRender() }
+  function rxSoft(){ if($('rx-panel').style.display==='block')rxRender(true) }
+  function rxRender(soft){
     var cards=railAddresses(MPRK,SOUL), box=$('rx-cards');
+    var sig=JSON.stringify([!!MPRK,cards.map(function(c){ return [c.ctx,c.v,c.why||'',c.err||''] })]);
+    if(soft&&box._sig===sig)return;   /* nothing changed: the cards (and a copy's flash) stay as they are */
+    box._sig=sig;
+    if(BR_CHECK&&cards.some(function(c){ return c.why==='vacct-checking' }))BR_CHECK.then(rxSoft,rxSoft);   /* the account check answers, and the card follows */
     var dash='flex:1 1 220px;max-width:280px;border:1px dashed var(--line2);border-radius:10px;padding:10px;background:var(--well)';
     if(!cards.length){ box.innerHTML='<div class="law" id="rx-none"></div>'; wlSay($('rx-none'),[{to:'kc-sec',t:'connect your keychain'},' to see your addresses.',{cy:'every address derives from your soul (the masterPRK, by context tag)'}]); return }
     box.innerHTML=cards.map(function(c,i){
@@ -8743,7 +8772,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function vaultaLane(btn,run,st){
     if(VBUSY){ if(st){ if(st.style.display==='none')st.style.display='block'; st.style.color=''; wlSay(st,['another send is still finishing. press again when it is done.']) } return }
     VBUSY=true; if(btn)btn.disabled=true;
-    try{ await run() } finally { VBUSY=false; if(btn)btn.disabled=false }
+    try{ await run() } finally { VBUSY=false; if(btn)btn.disabled=false; payRefresh() }   /* what changed while it ran is caught up now */
   }
   /* the saved outbox cannot be read, or this browser is out of room: said honestly, never a re-sign loop */
   function outboxFail(st,oe,again){
@@ -9043,7 +9072,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(EVBUSY)return;   /* one press at a time: a second press never signs a second nonce */
     EVBUSY=true; b.disabled=true;
     seGo(st).catch(function(e){ wlSay(st,['this send stopped partway. press send to check where it is; nothing is signed twice.',{cy:(e&&e.message)||String(e)}]) })
-      .finally(function(){ EVBUSY=false; b.disabled=false });
+      .finally(function(){ EVBUSY=false; b.disabled=false; payRefresh() });   /* what changed while it ran is caught up now */
   };
   async function seGo(st){
     st.style.color='';
@@ -9164,15 +9193,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(kc)PAY_KC=true;
     clearTimeout(PAY_T);
     PAY_T=setTimeout(function(){
+      rxSoft();   /* the receive cards show no send's result, so they follow the wallet even while a send is busy */
+      if(VBUSY||EVBUSY)return;   /* a busy lane's line is left alone; a keychain change waits here until the lane ends and calls payRefresh */
       var all=PAY_KC; PAY_KC=false;
-      if(VBUSY||EVBUSY)return;
       if($('tx-panel').style.display==='block'){
         if($('tx-v').style.display==='block'&&prePending($('sv-stat')))svRefresh();
         if(all&&$('tx-e').style.display==='block'&&prePending($('se-stat')))seRefresh();
         if($('tx-h').style.display==='block'&&prePending($('hs-stat'))&&!$('hs-go').disabled)hsRefresh();
       }
       if($('sw-panel').style.display==='block'&&prePending($('sw-stat')))swQuote();
-      if(all&&$('rx-panel').style.display==='block')rxRender();
     },400);
   }
   if(window.MutationObserver){
@@ -10011,6 +10040,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       else sayP(['your account could not be read just now, so wait a moment and press let this wallet sign again.',{cy:'#bridge-sec closed: the account read failed. The key was placed nowhere.'}],'var(--amber)');
       return;
     }
+    /* a paste in flight, or one held until the account is read: its field cannot be pressed, so no key is placed */
+    var fgo=$('br-paste-go');
+    if(field.disabled||(fgo&&fgo.disabled)){
+      sayP(['your last paste is still being checked, so this key stays in the vault for now. ',{to:'bridge-sec',t:'see where it stands'},{cy:'#br-paste is disabled: a paste is in flight or held until the account is read. The key was placed nowhere.'}],'var(--amber)');
+      return;
+    }
     var r;
     try{ r=V.reveal(id) }catch(e){ lockedLine(); return }
     if(r.type!=='vaulta'){ r=null; return }
@@ -10173,6 +10208,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       oldp=null; newp=null;
       if(/too weak/.test(e.message)) sayP(['that new keypass is too easy to guess, so nothing changed. press change keypass and take the generated words.',{cy:e.message}],'var(--amber)');
       else if(/not the keypass/.test(e.message)) sayP(['that is not the keypass you use now, so nothing changed. press change keypass to try again.',{cy:e.message}],'var(--amber)');
+      else if(/could not write/.test(e.message)) sayP(['this browser would not save the change, so your keypass is the same as before. free some browser storage, then press change keypass again.',{cy:e.message}],'var(--amber)');
       else sayP(['your keypass did not change, so press change keypass to try again.',{cy:e.message}],'var(--amber)');
     }
   };

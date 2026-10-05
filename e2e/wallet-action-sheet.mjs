@@ -91,6 +91,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       }
       if (u.pathname.endsWith('/get_account')) {
         (state.reads = state.reads || []).push(body.account_name);
+        if (state.slowAcct) await new Promise(r => setTimeout(r, state.slowAcct));
         // a name the forge has not made yet does not exist: nodes answer 500 "unknown key"
         if (/^newacctname/.test(body.account_name) && !state.keys[body.account_name]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + body.account_name + ')' }] } }, 500);
         const a = body.account_name, keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
@@ -110,6 +111,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       if (u.pathname.endsWith('/send_transaction')) {
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
         (state.posts = state.posts || []).push(body.packed_trx);
+        if (state.slowSend) await new Promise(r => setTimeout(r, state.slowSend));
         if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         state.submits++; state.packed = body.packed_trx;
@@ -308,8 +310,18 @@ try {
     await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
     await page.waitForFunction(() => window.BZDIDKEY && window.BNRPAY, null, { timeout: 20000 });
     state.keys.alicevaulta1 = [await k1Of(page, 'vaulta:alicevaulta1')];
+    // the receive panel open before the keychain: no address, one sentence and the one link
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-rx').click(); });
+    const vcard = () => page.evaluate(() => { const c = [...document.getElementById('rx-cards').children].find(x => /Vaulta/.test(x.textContent)); return c ? { t: c.innerText.trim(), addr: (c.querySelector('.rx-addr') || {}).textContent || null, kc: !!c.querySelector('a[href="#kc-sec"]') } : null; });
+    let vc = await vcard();
+    ok('before the keychain the Vaulta card offers no address, with one sentence and its one link', !!vc && vc.addr === null && /your Vaulta address shows here once your keychain is connected\./.test(vc.t) && vc.kc, JSON.stringify(vc));
+    state.slowAcct = 1200;   // the account check is still in flight when the card is first redrawn
     await recoveryConnect(page);
-    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 30000 });
+    state.slowAcct = 0;
+    await page.waitForFunction(() => { const a = document.querySelector('#rx-cards .rx-addr'); return a && a.textContent === 'alicevaulta1'; }, null, { timeout: 5000 }).catch(() => {});
+    vc = await vcard();
+    ok('once the check proves the account, the open card shows it without a press', !!vc && vc.addr === 'alicevaulta1', JSON.stringify(vc));
     ok('a bare account that carries this wallet\'s key stays itself, whatever a row says', (await page.textContent('#sum-bridge')).trim() === 'alicevaulta1 · ready to sign ✓', await page.textContent('#sum-bridge'));
     const rx = await page.evaluate(() => window.BNRPAY.railAddresses(null, 'alicevaulta1')[0]);
     ok('and it receives at itself, never at the hostile row\'s account', rx.v === 'alicevaulta1' && !/attacker/.test(JSON.stringify(rx)), JSON.stringify(rx));
@@ -318,6 +330,17 @@ try {
     await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
     await page.waitForFunction(() => window.BNRPAY && /gonesoul/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
     ok('a lapsed row is not followed', await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_vacct') || '{}').state) === 'self' && !/attacker/.test(await page.textContent('#sum-soul')), await page.textContent('#sum-soul'));
+    const gone = await page.evaluate(() => window.BNRPAY.railAddresses(null, 'gonesoul')[0]);
+    ok('a lapsed name offers no Vaulta receive address: the bare name may be a stranger\'s', gone.v === null && gone.why === 'vacct-lapsed', JSON.stringify(gone));
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-rx').click(); });
+    const goneCard = await page.innerText('#rx-cards');
+    ok('and its card says so in one sentence with its one link, with no address to copy',
+      /gonesoul\.b has lapsed, so it points at no account and no Vaulta address is shown\./.test(goneCard) && !(await page.$('#rx-cards .rxc')) && await page.evaluate(() => !!document.querySelector('#rx-cards a[href="#connect-sec"]')), goneCard);
+    await page.evaluate(() => { localStorage.setItem('bnr_soul', 'honey-bee7'); localStorage.removeItem('bnr_vacct'); });
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BNRPAY && /honey-bee7/.test(document.getElementById('sum-soul').textContent) && JSON.parse(localStorage.getItem('bnr_vacct') || '{}').soul === 'honey-bee7', null, { timeout: 20000 });
+    const noacct = await page.evaluate(() => window.BNRPAY.railAddresses(null, 'honey-bee7')[0]);
+    ok('a name that cannot be a Vaulta account offers no Vaulta receive address', noacct.v === null && noacct.why === 'vacct-noacct', JSON.stringify(noacct));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -515,6 +538,11 @@ try {
     await fill('someoneelse1', '0.1', '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');   // TESTNET-ONLY: eosio's documented dev key, as a careless memo
     await page.evaluate(() => document.getElementById('sv-go').click());
     ok('a memo that holds a private key is never sent: memos are public', /looks like a private key/.test(await svText()) && !(state.posts || []).length, await svText());
+    for (const [what, memo] of [['0x and 64 hex', '0x' + 'ab'.repeat(32)], ['64 hex after a word and a colon', 'key:' + 'cd'.repeat(32)], ['64 hex in quotes', '"' + 'EF'.repeat(32) + '"']]) {
+      await fill('someoneelse1', '0.1', memo);
+      await page.evaluate(() => document.getElementById('sv-go').click());
+      ok('a memo with ' + what + ' (an EVM style key) is never sent', /looks like a private key/.test(await svText()) && !(state.posts || []).length, await svText());
+    }
     // a duplicate answer: the bytes went in, nothing new is signed, the cap keeps the count
     state.dupOnce = true;
     await fill('someoneelse1', '0.2');
@@ -555,6 +583,23 @@ try {
     await page.waitForFunction(() => /^sent 0\.0500 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     const posted = state.posts.slice(b2);
     ok('a double press signs and sends one transaction', posted.length === 1, String(posted.length));
+    // a send still waiting for its answer, the receive panel open, and the keychain closes: the cards follow at once
+    await page.evaluate(() => document.getElementById('pay-rx').click());
+    const evmShown = () => page.evaluate(() => /0x[0-9a-fA-F]{40}/.test(document.getElementById('rx-cards').textContent));
+    ok('the receive panel shows this soul\'s derived addresses', await evmShown());
+    state.slowSend = 4000;
+    const b3 = (state.posts || []).length;
+    await page.evaluate(() => { document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click(); });
+    await fill('someoneelse1', '0.06');
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    for (let i = 0; i < 60 && (state.posts || []).length === b3; i++) await page.waitForTimeout(100);
+    await page.evaluate(() => { document.getElementById('pay-rx').click(); document.getElementById('kc-out').click(); });
+    await page.waitForTimeout(1200);
+    const busy = await page.evaluate(() => document.getElementById('sv-go').disabled);
+    ok('while that send is still busy, the open receive panel drops the closed keychain\'s addresses', (state.posts || []).length === b3 + 1 && busy && !(await evmShown()), JSON.stringify({ posted: state.posts.length - b3, busy }));
+    state.slowSend = 0;
+    await page.waitForFunction(() => /^sent 0\.0600 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    ok('and the send itself still lands in words', /^sent 0\.0600 A to someoneelse1\./.test((await svText()).trim()), await svText());
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
