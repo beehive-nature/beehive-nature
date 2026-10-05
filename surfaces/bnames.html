@@ -450,9 +450,7 @@ body[data-reg="bee"] #sky{display:none}
 
 <section>
   <h2>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></h2>
-  <div class="law" data-i18n="bnm.workshop.law">Every card is now an instrument — tap to expand, fill the fields
-  (pre-filled from your connected soul where possible), compose the paste-ready action.
-  You sign it; this page never does.</div>
+  <div class="law" data-i18n="bnm.workshop.law">Tap a card and fill it in (your connected name fills in what it can). One press opens your wallet, which signs it with your passkey. This page holds no key and signs nothing.</div>
   <div class="acts" id="workshop">
     <div class="act" data-action="registeracc" data-fields="registrant|domain_name|target" data-desc="reserve a name, pointing it at target. Fee 0.0000 today; you carry the RAM (resellable). Term 365 days.">
       <span class="an">registeracc</span>(registrant, domain_name, target) —
@@ -483,8 +481,14 @@ body[data-reg="bee"] #sky{display:none}
     <div style="font-size:max(11px,var(--fmin,12px));color:var(--gold);margin-bottom:8px" id="cz-title"></div>
     <div style="color:var(--dim);font-size:max(10px,var(--fmin,12px));margin-bottom:10px" id="cz-desc"></div>
     <div id="cz-fields" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-    <button class="act" style="margin-top:10px;background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace" id="cz-compose">compose the action</button>
-    <pre id="cz-out" style="margin-top:8px"></pre>
+    <button class="act" style="margin-top:10px;min-height:44px;background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace" id="cz-compose">✍ sign it in your wallet</button>
+    <div id="cz-stat" role="status" aria-live="polite" style="margin-top:8px;min-height:20px;font-size:max(12px,var(--fmin,12px))"></div>
+    <div style="color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:4px">
+      <span data-reg="bee">your wallet opens and asks for your passkey. that press signs it. nothing to copy or paste.</span>
+      <span data-reg="raver">one press. your passkey signs.</span>
+      <span data-reg="cypherpunk">→ wallet.html#sign-action · build · K1 vault · outbox · submit · read back. the recipe below is the same action, for signing by hand.</span>
+    </div>
+    <pre id="cz-out" data-reg="cypherpunk" style="margin-top:8px"></pre>
   </div>
 </section>
 
@@ -546,11 +550,45 @@ body[data-reg="bee"] #sky{display:none}
     return null;
   }
   function strip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]}); }
+  var ACCT_RE=/^[a-z1-5.]{1,12}$/;
+  /* a .b name points at a Vaulta account (the row's "account"): king.b points
+     at kingbeelovis, and the Vaulta account "king" is a stranger's. Actions
+     are signed as the account, never as the bare name. */
+  /* the owner signs for a name; its account is where it points. A row counts only
+     while it is current, and a bare account the wallet has proven is this person's
+     (bnr_vacct "proven") is never redirected by a row someone else registered. */
+  function rowLive(r){ return !!r&&ACCT_RE.test(r.owner||'')&&ACCT_RE.test(r.account||'')&&!(Date.parse(String(r.expires||'')+'Z')<=Date.now()); }
+  function vacctCache(){ try{ var c=JSON.parse(localStorage.getItem('bnr_vacct')||'null'); return (c&&c.soul===SOUL)?c:null }catch(e){ return null } }
+  function soulAcct(){
+    if(!SOUL)return null;
+    var c=vacctCache(); if(c&&c.proven&&ACCT_RE.test(c.acct||''))return c.acct;
+    var r=live.byName[SOUL]; if(rowLive(r))return r.owner;
+    if(live.reach==='ok')return SOUL;
+    if(c&&ACCT_RE.test(c.acct||''))return c.acct;
+    return SOUL;
+  }
+  function soulAcctKeep(){   // the wallet reads the same pointer, so it never has to ask twice
+    if(!SOUL||live.reach!=='ok')return;
+    var c=vacctCache(); if(c&&c.proven)return;
+    var r=live.byName[SOUL], ok=rowLive(r);
+    try{ localStorage.setItem('bnr_vacct',JSON.stringify({soul:SOUL,acct:ok?r.owner:SOUL,recv:ok?r.account:SOUL,state:ok?'name':'self',proven:false})) }catch(e){}
+  }
 
   /* --- .b wallet compose link factory (the Unicove dependency is dead —
      founder ruled it out; the BNR composer in the wallet takes the handoff) --- */
   var WALLET='./wallet.html';
   function walletAction(action,params){ return WALLET+'?compose='+encodeURIComponent('kingbeelovis:'+action)+'&args='+encodeURIComponent(JSON.stringify(params)); }
+  /* ONE PRESS: this press composes the action and hands it to your wallet,
+     which signs it with your passkey (that prompt is the confirmation). The
+     one-time intent tells the wallet the press already happened here, so it
+     starts by itself; a link from anywhere else only shows the words. This
+     page still holds no key and signs nothing. */
+  function signInWallet(action,params){
+    var id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+String(Math.random()).slice(2);
+    try{ localStorage.setItem('bnr_sign_intent',JSON.stringify({id:id,contract:'kingbeelovis',action:action,data:params,at:Date.now()})) }catch(e){}
+    location.href=walletAction(action,params)+'&intent='+encodeURIComponent(id)+'#sign-action';
+  }
 
   /* --- .b custody gate: DERIVED from independent reproduction, never typed ---
      DOUBLY INERT BY DESIGN and that is correct: verifyAtt() returns false and
@@ -606,7 +644,7 @@ body[data-reg="bee"] #sky{display:none}
     var btn=document.getElementById('sign-btn'); if(!btn) return;
     var ack=document.getElementById('ack');
     var cc=document.getElementById('consent-check');
-    var reg=(typeof SOUL!=='undefined'&&SOUL)?SOUL:null;
+    var reg=(typeof SOUL!=='undefined'&&SOUL)?soulAcct():null;
     var allowed=registrantAllowed(reg);
     var refusal=document.getElementById('nf-refusal');
     if(refusal) refusal.style.display=allowed?'none':'block';
@@ -695,7 +733,7 @@ body[data-reg="bee"] #sky{display:none}
       dot.setAttribute('class','sparkdot'); g.appendChild(dot);
       g.addEventListener('pointerenter',function(e){
         var tip=$('ctip'), w=$('constwrap').getBoundingClientRect();
-        tip.innerHTML='<b style="color:var(--gold)">'+opts.tip.name+'.b</b><br>'+opts.tip.body;
+        tip.innerHTML='<b style="color:var(--gold)">'+esc(opts.tip.name)+'.b</b><br>'+opts.tip.body;
         tip.style.left=Math.min(e.clientX-w.left+10,w.width-230)+'px'; tip.style.top=(e.clientY-w.top-10)+'px'; tip.style.opacity=1;
       });
       g.addEventListener('pointerleave',function(){ $('ctip').style.opacity=0; });
@@ -705,12 +743,12 @@ body[data-reg="bee"] #sky{display:none}
     var kingRow=null; rows.forEach(function(r){ if(r.domain_name==='king') kingRow=r; });
     var soulOwned=function(row){ return SOUL && row && (row.owner===SOUL||row.domain_name===SOUL||row.account===SOUL); };
     if(kingRow) node(cx,cy,'king',{big:true,mine:soulOwned(kingRow),tip:{name:'king',
-      body:'HELD · owner '+kingRow.owner+'<br>resolves → '+kingRow.account+'<br>expires '+kingRow.expires.slice(0,10)+(soulOwned(kingRow)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
+      body:'HELD · owner '+esc(kingRow.owner)+'<br>resolves → '+esc(kingRow.account)+'<br>expires '+esc(String(kingRow.expires).slice(0,10))+(soulOwned(kingRow)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
     var others=rows.filter(function(r){return r.domain_name!=='king';});
     others.forEach(function(r,i){
       var a=2*Math.PI*i/others.length + .4, rad=64+((i%2)*36)+Math.min(70,others.length*4);
       node(cx+rad*Math.cos(a)*1.5, cy+rad*Math.sin(a)*.82, r.domain_name, {mine:soulOwned(r),tip:{name:r.domain_name,
-        body:'HELD · owner '+r.owner+'<br>expires '+r.expires.slice(0,10)+(soulOwned(r)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
+        body:'HELD · owner '+esc(r.owner)+'<br>expires '+esc(String(r.expires).slice(0,10))+(soulOwned(r)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
     });
     node(cx-170,cy+95,'k',{ghost:true,tip:{name:'k',body:'AVAILABLE — the open jewel<br>fee 0.0000 · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4):'RAM not yet read')+' one-time'}});
     node(cx+170,cy+95,'q',{ghost:true,tip:{name:'q',body:'AVAILABLE — the open jewel<br>fee 0.0000 · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4):'RAM not yet read')+' one-time'}});
@@ -791,11 +829,11 @@ body[data-reg="bee"] #sky{display:none}
     st.textContent=row?'✕':'✓';
     if(!n){ wrap.innerHTML='<div class="vtext" style="color:var(--dim)">—</div>'; return; }
     if(live.reach==='failed'){ st.className='stamp no'; st.textContent='?'; tx.className='vtext no';
-      tx.innerHTML='<b>couldn’t reach the chain</b> — so the desk can’t say whether '+n+'.b is free. nothing is guessed.';
+      tx.innerHTML='<b>couldn’t reach the chain</b> — so the desk can’t say whether '+esc(n)+'.b is free. nothing is guessed.';
       wrap.appendChild(st); wrap.appendChild(tx); $('consent-card').style.display='none'; return; }
     tx.innerHTML = row
-      ? '<b>'+n+'.b is TAKEN</b> — owner '+row.owner+' · expires '+row.expires.slice(0,10)
-      : '<b>'+n+'.b is AVAILABLE</b> — fee '+(live.fee||'not yet read')+' · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4)+' core':'RAM not yet read')+' (resellable) · term '+(live.days||365)+' days';
+      ? '<b>'+esc(n)+'.b is TAKEN</b> — owner '+esc(row.owner)+' · expires '+esc(String(row.expires).slice(0,10))
+      : '<b>'+esc(n)+'.b is AVAILABLE</b> — fee '+esc(live.fee||'not yet read')+' · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4)+' core':'RAM not yet read')+' (resellable) · term '+(live.days||365)+' days';
     wrap.appendChild(st); wrap.appendChild(tx);
     // show/hide consent card
     var cc=$('consent-card');
@@ -822,24 +860,22 @@ body[data-reg="bee"] #sky{display:none}
          so past this line SOUL is guaranteed real and no default is needed.
          The `||'kingbeelovis'` form is the defect itself — it made the
          founder the fallback identity — so it does not survive here. */
-      if(!registrantAllowed(SOUL)) return;
-      var registrant=SOUL;
-      var out=$('sign-out'); out.style.display='block';
-      var txData = JSON.stringify({actions:[{account:"kingbeelovis",name:"registeracc",authorization:[{actor:registrant,permission:"active"}],data:{registrant:registrant,domain_name:n,target:registrant}}]},null,2);
-      var cleosCmd = 'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
-        '  ' + JSON.stringify({registrant:registrant,domain_name:n,target:registrant}) + ' -p ' + registrant;
-      out.innerHTML =
-        '<pre style="border-color:var(--leaf);font-size:max(10px,var(--fmin,12px))">' + txData + '</pre>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
-        '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:max(12px,var(--fmin,12px)) IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
-        '<a href="' + walletAction('registeracc', {registrant: registrant, domain_name: n, target: registrant}) + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:max(12px,var(--fmin,12px)) IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">COMPOSE IN THE WALLET</a>' +
-        '</div>' +
-        '<div style="font-size:max(9px,var(--fmin,12px));color:var(--dim);margin-top:6px">download for Anchor/cleos · the wallet composer opens the action pre-filled, ABI-rendered, showing exactly what you sign · the manual step IS the bot protection</div>';
-      // JSON download (Blob)
-      setTimeout(function(){
-        var blob = new Blob([txData], {type:'application/json'});
-        $('dl-json').href = URL.createObjectURL(blob);
-      }, 50);
+      var registrant=soulAcct();
+      if(!registrantAllowed(registrant)) return;
+      var args={registrant:registrant,domain_name:n,target:registrant};
+      if(document.body.getAttribute('data-reg')!=='cypherpunk'){ signInWallet('registeracc',args); return; }
+      var out=$('sign-out'); out.style.display='block'; out.textContent='';
+      var txData = JSON.stringify({actions:[{account:"kingbeelovis",name:"registeracc",authorization:[{actor:registrant,permission:"active"}],data:args}]},null,2);
+      var pre=document.createElement('pre'); pre.style.cssText='border-color:var(--leaf);font-size:max(10px,var(--fmin,12px))'; pre.textContent=txData;
+      var row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
+      var sg=document.createElement('button'); sg.type='button'; sg.id='sign-wallet'; sg.textContent='✍ sign it in your wallet'; sg.onclick=function(){ signInWallet('registeracc',args); };
+      var dl=document.createElement('a'); dl.id='dl-json'; dl.download='register-'+n+'b.json'; dl.textContent='download .json';
+      dl.href=URL.createObjectURL(new Blob([txData],{type:'application/json'}));
+      dl.style.cssText='display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--leaf);border-radius:8px;color:var(--leaf);text-decoration:none';
+      row.appendChild(sg); row.appendChild(dl);
+      var note=document.createElement('div'); note.style.cssText='font-size:max(9px,var(--fmin,12px));color:var(--dim);margin-top:6px';
+      note.textContent='→ wallet.html#sign-action: build · K1 vault · outbox · submit · read back. Or sign the .json by hand (Anchor, cleos). One press and a passkey stay the bot protection; registration is founder-only for now.';
+      out.appendChild(pre); out.appendChild(row); out.appendChild(note);
     }
   });
   function _old_check(n){
@@ -870,40 +906,61 @@ body[data-reg="bee"] #sky{display:none}
   $('go').onclick=function(){ check($('q').value); };
   $('q').addEventListener('keydown',function(e){ if(e.key==='Enter') check($('q').value); });
 
-  /* ── THE WORKSHOP: tap any action card to compose it ── */
+  /* ── THE WORKSHOP: tap a card, fill it, and one press signs it in your wallet ── */
   var czOpen=false, czAction=null;
+  var CZ_ACTOR={registeracc:'registrant',transfer:'from'};
+  var CZ_ACCT={owner:1,registrant:1,from:1,to:1,target:1};
+  function czLabel(action,name){
+    var nb=name?name+'.b':'this name';
+    return '✍ '+({registeracc:'register '+nb,renew:'renew '+nb,transfer:'give '+nb+' away',setaccount:'point '+nb+' at an account',setchain:'point '+nb+' at an address',release:'let '+nb+' go'}[action]||'sign '+action);
+  }
   document.querySelectorAll('#workshop .act').forEach(function(card){
     card.addEventListener('click',function(){
       var zone=$('composer-zone');
       czAction=card.dataset.action;
-      $('cz-title').textContent='▸ '+czAction+' — fill the fields, compose the action';
+      $('cz-title').textContent='▸ '+czAction+' · fill it in, then one press signs it in your wallet';
       $('cz-desc').textContent=card.dataset.desc;
-      var fields=card.dataset.fields.split('|');
-      var fw=$('cz-fields'); fw.innerHTML='';
+      var fields=card.dataset.fields.split('|'), actorF=CZ_ACTOR[czAction]||'owner';
+      var fw=$('cz-fields'); fw.innerHTML=''; $('cz-stat').textContent='';
       fields.forEach(function(f){
         var inp=document.createElement('input');
-        inp.placeholder=f; inp.id='cz-'+f; inp.style.cssText='flex:1;min-width:100px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:max(11px,var(--fmin,12px)) IBM Plex Mono,monospace';
+        inp.placeholder=f==='domain_name'?'name':f; inp.id='cz-'+f; inp.setAttribute('aria-label',f==='domain_name'?'name':f);
+        inp.spellcheck=false; inp.autocomplete='off';
+        inp.style.cssText='flex:1;min-width:100px;min-height:44px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:max(11px,var(--fmin,12px)) IBM Plex Mono,monospace';
         /* Blank when not connected. Pre-filling the founder's account for an
            anonymous visitor is the same defect one layer down: it presents
-           his identity as the default. */
-        if(f==='owner'||f==='registrant'||f==='from'){ inp.value=SOUL||''; }
+           his identity as the default. Connected, it is the account your
+           name points at. */
+        if(f===actorF){ inp.value=soulAcct()||''; inp.addEventListener('input',function(){ inp.dataset.touched='1'; }); }
         if(f==='days'){ inp.value='365'; }
+        inp.addEventListener('input',czPaint);
         fw.appendChild(inp);
       });
       zone.style.display='block'; czOpen=true;
+      czPaint();
       zone.scrollIntoView({behavior:'smooth',block:'nearest'});
+      function czVals(){ var v={}; fields.forEach(function(f){ v[f]=$('cz-'+f).value.trim(); }); if('domain_name' in v)v.domain_name=strip(v.domain_name); return v; }
+      // the name names its owner: a name on the chain fills the owner, unless you typed one
+      function czPaint(){
+        var v=czVals(), row=v.domain_name&&live.byName[v.domain_name], af=$('cz-'+actorF);
+        if(rowLive(row)&&af&&!af.dataset.touched&&czAction!=='registeracc'){ af.value=row.owner; v[actorF]=row.owner; }
+        $('cz-compose').textContent=czLabel(czAction,v.domain_name);
+        $('cz-out').textContent='action kingbeelovis::'+czAction+String.fromCharCode(10)+JSON.stringify(v,null,1)+String.fromCharCode(10,10)+
+          '# or by hand (Anchor, cleos):'+String.fromCharCode(10)+
+          'cleos -u https://eos.api.eosnation.io push action kingbeelovis '+czAction+" '"+JSON.stringify(v)+"' -p "+(v[actorF]||'YOUR_ACCOUNT')+'@active';
+      }
       $('cz-compose').onclick=function(){
-        var vals={};
-        fields.forEach(function(f){ vals[f]=$('cz-'+f).value.trim(); });
-        var missing=fields.filter(function(f){return !vals[f]});
-        if(missing.length){ $('cz-out').textContent='fill: '+missing.join(', '); return; }
-        $('cz-out').innerHTML='<b>action kingbeelovis::'+czAction+'</b>' + String.fromCharCode(10) +
-          JSON.stringify(vals,null,1) + String.fromCharCode(10,10) +
-          '# TO SECURE THIS NAME — paste into your Vaulta wallet (Anchor, cleos, or the bNRoSe wallet-gate when armed):' + String.fromCharCode(10) +
-          'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
-          '  the JSON above -p YOUR_ACCOUNT' + String.fromCharCode(10,10) +
-          '# fee 0.0000 + ~0.84 core RAM (resellable) + 365-day term' + String.fromCharCode(10) +
-          '# the rails badge in the bottom bar confirms you are on the real origin (TOFU lock) — this page composes, never signs';
+        var v=czVals(), st=$('cz-stat');
+        var missing=fields.filter(function(f){return !v[f]});
+        if(missing.length){ st.textContent='fill in: '+missing.map(function(f){return f==='domain_name'?'name':f}).join(', '); return; }
+        var bad=fields.filter(function(f){return CZ_ACCT[f]&&!ACCT_RE.test(v[f])});
+        if(bad.length){ st.textContent=bad.join(', ')+': a Vaulta account name (a to z, 1 to 5, dots, up to 12)'; return; }
+        if('days' in v){ var dn=Number(v.days); if(!(dn>=1&&dn<=65535&&Math.floor(dn)===dn)){ st.textContent='days: a whole number from 1 to 65535'; return; } v.days=dn; }
+        if(czAction==='registeracc'&&!registrantAllowed(v.registrant)){ st.textContent='registering a new name is founder-only for now, so nothing was handed to your wallet.'; return; }
+        var me=soulAcct();
+        if(me&&v[actorF]!==me){ st.textContent=(czAction==='registeracc'?'this registers for '+v[actorF]:v.domain_name+'.b belongs to '+v[actorF])+', and your wallet signs for '+me+'. only that account can do this.'; return; }
+        st.textContent='opening your wallet…';
+        signInWallet(czAction,v);
       };
     });
   });
@@ -927,8 +984,9 @@ body[data-reg="bee"] #sky{display:none}
     var chip=$('soul-chip'), out=$('soul-out'), go=$('soul-go'), create=$('soul-create');
     if(SOUL){ chip.textContent='connected · '+SOUL+'.b'; chip.style.color='var(--leaf)';
       out.style.display=''; if(go) go.style.display='none'; if(create) create.style.display='none';
-      $('creg').value=SOUL; $('ctgt').value=SOUL;
+      $('creg').value=soulAcct(); $('ctgt').value=soulAcct();
       try{localStorage.setItem('bnr_soul',SOUL);}catch(e){}
+      soulAcctKeep();
     } else { chip.textContent='not connected'; chip.style.color=''; out.style.display='none';
       if(go) go.style.display=''; if(create) create.style.display='';
       try{localStorage.removeItem('bnr_soul');}catch(e){} }

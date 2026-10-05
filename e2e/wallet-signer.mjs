@@ -61,6 +61,7 @@ const mockOther = ctx => ctx.route(OTHER_RE, async route => {
   const J = v => route.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify(v) });
   // PUBLIC-CONSTANT: Vaulta mainnet chain id (public network identifier, mirrored from the vaulta adapter)
   if (/get_info/.test(u)) return J({ chain_id: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', head_block_num: 100, head_block_id: '00'.repeat(32) }); // PUBLIC-CONSTANT
+  if (/get_table_rows/.test(u)) return J({ rows: [], more: false, next_key: '' });
   if (/get_account/.test(u)) return J({ account_name: 'gatesoul', core_liquid_balance: '0.0000 A', ram_usage: 100, ram_quota: 8192, permissions: [] });
   if (/hive/.test(u)) return J({ jsonrpc: '2.0', id: 1, result: [] });
   return J({});

@@ -897,6 +897,9 @@ jobs:
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
         run: node e2e/wallet-registers.mjs
+      - name: Wallet action sheet — one press composes and signs a .b action as the account the name points at
+        if: always()
+        run: node e2e/wallet-action-sheet.mjs
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
         run: node e2e/wallet-accounts.mjs

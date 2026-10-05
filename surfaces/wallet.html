@@ -1328,7 +1328,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
   <h2>🌉 the bridge: one time, then never manual again</h2>
-  <div class="law">Your bzDiD-derived K1 key is not on your account yet.
+  <div class="law" id="br-calm" style="font-size:15px;line-height:1.6"></div>
+  <div class="law" data-wl-tech>Your bzDiD-derived K1 key is not on your account yet.
   <b>Gold:</b> connect / inject / derive enrolls the key — New-bee never pastes a private key.
   <b>While finalizing:</b> open <b>scaffold · recovery</b> to paste your existing <b>active</b> key
   <b>once</b> to build an updateauth that <b>adds</b> your bzDiD keys alongside every key already
@@ -2446,10 +2447,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <h2 data-wl-tech>📊 <span data-i18n="wl.h.summary">summary</span></h2>
   <h2 data-reg="bee">📊 <span data-i18n="wl.bee.h.summary">at a glance</span></h2>
   <div class="readout">
-    <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px">not connected yet</div></div>
-    <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">0</div></div>
-    <div class="rd"><div class="k" data-i18n="wl.cy.kc">keychain</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
-    <div class="rd"><div class="k" data-i18n="wl.cy.auth">Vaulta authority</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">not known yet</div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px"><a href="#connect-sec">connect your name</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">0 · <a href="#bal-sec">see them</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.kc">keychain</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected · <a href="#kc-sec">connect it</a></div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.auth">Vaulta authority</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)"><a href="#kc-sec">connect your keychain</a> to check</div></div>
   </div>
 </section>
 
@@ -2487,6 +2488,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var MPRK=null;          // Uint8Array(32) masterPRK — tab memory only
   var K1=null;            // {seed, wif, eosPub, pubK1} — tab memory only
   var BRIDGED=null;       // true/false/unknown
+  /* a .b name is a pointer. Its registry row names an owner (who signs for the
+     name) and an account (where the name points; it receives). king.b: owner and
+     account are both kingbeelovis, and the Vaulta account "king" is a stranger's,
+     so the wallet never signs or receives as the bare name. A soul with no current
+     row is a plain account name, as before. Anyone can register a free name, so:
+     a row is followed only while it is current; a bare account this wallet has
+     proven it signs for is never redirected by a row; nothing receives at a pointer
+     until this wallet proves it signs for the name's owner; and while the pointer
+     is unread, the receive address and the signing checks say so instead of
+     guessing. The answer is public and kept in this browser. */
+  var REG='kingbeelovis', ACCT_RE=/^[a-z1-5.]{1,12}$/;
+  var VACCT=null, VRECV=null, VACCT_FOR=null, VACCT_STATE=null, VACCT_PROVEN=false;   // state 'name' | 'self' | 'unknown'
+  function vacct(){ return (SOUL&&VACCT_FOR===SOUL&&VACCT)||SOUL }
+  function vrecv(){ return (SOUL&&VACCT_FOR===SOUL&&(VRECV||VACCT))||SOUL }
+  function vacctKnown(){ return !!(SOUL&&VACCT_FOR===SOUL) }
   var BN=null;            // BnrSign bundle (vendored eosjs lane)
   var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
   var BSIGNER=null;       // bsigner PQ WASM (ml-dsa / ml-kem) — armed only when browser-ready; never invent PQ
@@ -2503,6 +2519,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var ctl=new AbortController();
     var t=setTimeout(function(){ctl.abort()},ms||9000);
     return fetch(url,Object.assign({},opts,{signal:ctl.signal})).finally(function(){clearTimeout(t)});
+  }
+  function fnv64(str){   // the registry's row id: FNV-1a 64 of the name (row "king" is 17265842021665813494)
+    var h=0xcbf29ce484222325n, m=0xffffffffffffffffn, b=new TextEncoder().encode(str);
+    for(var i=0;i<b.length;i++){ h^=BigInt(b[i]); h=(h*0x100000001b3n)&m }
+    return h.toString();
+  }
+  function vacctCacheLoad(){
+    VACCT=VRECV=VACCT_FOR=VACCT_STATE=null; VACCT_PROVEN=false;
+    try{ var c=JSON.parse(localStorage.getItem('bnr_vacct')||'null');
+      if(c&&SOUL&&c.soul===SOUL&&ACCT_RE.test(c.acct||'')){ VACCT=c.acct; VRECV=ACCT_RE.test(c.recv||'')?c.recv:c.acct; VACCT_FOR=c.soul; VACCT_STATE=c.state==='self'?'self':'name'; VACCT_PROVEN=!!c.proven } }catch(e){}
+  }
+  function vacctKeep(){ try{ localStorage.setItem('bnr_vacct',JSON.stringify({soul:VACCT_FOR,acct:VACCT,recv:VRECV,state:VACCT_STATE,proven:!!VACCT_PROVEN})) }catch(e){} }
+  function rowLive(row,name){ return !!row&&row.domain_name===name&&ACCT_RE.test(row.owner||'')&&ACCT_RE.test(row.account||'')&&!(Date.parse(String(row.expires||'')+'Z')<=Date.now()) }
+  function vacctRederive(){ if(!MPRK)return; deriveK1(); if(K1)$('kc-k1-pub').textContent=K1.eosPub; seedContexts(); renderForge() }
+  async function resolveVacct(){
+    var s=SOUL; if(!s)return false;
+    var before=vacct(), r=null;
+    try{ var id=fnv64(s); r=await post(VH,'/v1/chain/get_table_rows',{json:true,code:REG,scope:REG,table:'domains',lower_bound:id,upper_bound:id,limit:1}) }catch(e){ r=null }
+    if(s!==SOUL)return false;
+    if(!r||!Array.isArray(r.rows)){ if(VACCT_FOR!==s)VACCT_STATE='unknown'; return false }
+    if(VACCT_FOR===s&&VACCT_PROVEN)return false;      // proven: this wallet signs for the bare account; a row cannot redirect it
+    var row=r.rows[0], live=rowLive(row,s);
+    VACCT=live?row.owner:s; VRECV=live?row.account:s; VACCT_FOR=s; VACCT_STATE=live?'name':'self'; VACCT_PROVEN=false;
+    vacctKeep();
+    var changed=vacct()!==before;
+    if(changed&&MPRK){ vacctRederive(); checkBridge() }
+    return changed;
   }
   async function post(hosts,path,body){
     var hs=Array.isArray(hosts)?hosts:[hosts];
@@ -2564,7 +2607,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function deriveK1(){
     if(!MPRK||!SOUL)return;
-    var rec=BZDIDKEY.deriveK1Key(MPRK,'vaulta:'+SOUL);
+    var rec=BZDIDKEY.deriveK1Key(MPRK,'vaulta:'+vacct());
     var seed=rec.seed.slice();
     var w,eos,pub1;
     if(CORE){
@@ -2662,7 +2705,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* one soul, every rail — value rails + comms from masterPRK, plus the two
        public-only rails (hive account name, arweave address binding). AR never
        pretends RSA falls out of the PRK. */
-    ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
+    ensureCtx('vaulta:'+vacct()); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
     ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
     ensureCtx('hive:'+SOUL); ensureCtx('ar:'+SOUL);
     ensureCtx('pq:ml-dsa-65:'+SOUL); ensureCtx('pq:ml-kem-768:'+SOUL);
@@ -2969,7 +3012,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     renderForge();
   };
   $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
-  $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+SOUL+'</b>'; };
+  $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+vacct()); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+esc(vacct())+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
   $('forge-hive').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('hive:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ hive public card for <b>'+SOUL+'</b> — account name only, same rail as balances'; };
   $('forge-ar').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('ar:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ ar public card for <b>'+SOUL+'</b> — bind a public Arweave address (never a private JWK; RSA does not derive from masterPRK)'; };
@@ -3460,7 +3503,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';wlRead($('ant-stat'),true);
       $('ch-autonomi').classList.add('connected');
     } else { $('ant-stat').textContent='ANT read failed';$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
-    $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
+    sumChains();
   }
 
   async function pickHost(){
@@ -4010,8 +4053,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         out.push({t:t,ctx:ctx,unit:unit,note:note,v:rec});
       }catch(e){ out.push({t:t,ctx:ctx,unit:unit,note:note,v:null,err:e.message}) }
     }
-    if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,
-      note:'your account name receives A directly — memo optional'});
+    if(soul&&soul!==SOUL) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,note:'your account name receives A directly · memo optional'});
+    else if(soul&&!vacctKnown()) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:null,err:'could not read which account '+soul+'.b points at yet'});
+    else if(soul&&VACCT_STATE==='name'&&BRIDGED!==true) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:null,
+      err:soul+'.b points at '+vrecv()+'. This wallet shows it here once it signs for '+vacct()});
+    else if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+vacct(),unit:'A',v:vrecv(),
+      note:vrecv()!==soul?soul+'.b points at '+vrecv()+', which receives A directly · memo optional':'your account name receives A directly · memo optional'});
     if(!mprk) return out;
     add('Base + Arbitrum · ETH · USDC · ANT','evm:'+soul,'ETH',
       'ONE 0x address, both EVM rails — the same key signs on chain 8453 and 42161',function(){
@@ -4085,29 +4132,80 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* canonical key compare: both to PUB_* canonical strings */
   function canon(k){try{return BN.PublicKey.fromString(k).toString()}catch(e){return k}}
 
+  function k1PubFor(ctx){
+    var rec=BZDIDKEY.deriveK1Key(MPRK,ctx), seed=rec.seed.slice();
+    try{ return CORE?CORE.pubK1(seed):BN.PrivateKey.fromString(wif37(seed)).getPublicKey().toString() } finally { seed.fill(0) }
+  }
+  // a bare account whose active permission already carries this wallet's key for it is this person's
+  async function bareAccountIsMine(){
+    if(!MPRK||!SOUL||!ACCT_RE.test(SOUL))return false;
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
+    var act=acc&&(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
+    var pub=k1PubFor('vaulta:'+SOUL);
+    if(!act||!((act.required_auth&&act.required_auth.keys)||[]).some(function(k){return canon(k.key)===pub}))return false;
+    VACCT=VRECV=VACCT_FOR=SOUL; VACCT_STATE='self'; VACCT_PROVEN=true; vacctKeep(); vacctRederive();
+    return true;
+  }
   async function checkBridge(){
     if(!K1||!SOUL){BRIDGED=null;return}
+    if(!vacctKnown()){BRIDGED=null;setBridgeState(false,'could not read where '+SOUL+'.b points','unknown');return}
     $('kc-bridge-verdict').textContent='checking…';$('kc-bridge-verdict').className='stamp';
-    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
-    if(!acc){setBridgeState(false,'account unreadable');return}
+    var a=vacct();
+    sumAuth('checking');
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:a});
+    if(a!==vacct())return;
+    if(!acc){BRIDGED=null;setBridgeState(false,'could not read '+a,'unread');return}
     var act=(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
-    if(!act){setBridgeState(false,'no active perm');return}
+    if(!act){BRIDGED=false;setBridgeState(false,a+' has no active key','noperm');return}
     var keys=(act.required_auth&&act.required_auth.keys)||[];
     BRIDGED=keys.some(function(k){return canon(k.key)===K1.pubK1});
-    setBridgeState(BRIDGED,BRIDGED?'BRIDGED — bzDiD signs for '+SOUL:'NOT YET on chain — bridge below');
+    if(!BRIDGED&&VACCT_STATE==='name'&&a!==SOUL&&await bareAccountIsMine())return checkBridge();
+    setBridgeState(BRIDGED,BRIDGED?'ready: this wallet signs for '+a:null,BRIDGED?'ok':'missing');
   }
-  function setBridgeState(ok,label){
+  /* true when this wallet may sign as vacct(); otherwise one calm sentence */
+  function signGuard(el){
+    if(!vacctKnown()){ wlSay(el,['could not read where '+SOUL+'.b points just now. Try again in a moment.']); return false }
+    if(BRIDGED===null){ wlSay(el,['could not read '+vacct()+' just now. Try again in a moment.']); return false }
+    if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
+    return true;
+  }
+  /* "at a glance", Vaulta authority: one calm sentence and the one next step */
+  function sumAuth(kind){
+    var el=$('sum-bridge'); if(!el)return;
+    var a=vacct()||'your account', ok=kind==='ok';
+    if(kind==='ok') wlSay(el,[a+' · ready to sign ✓']);
+    else if(kind==='checking') wlSay(el,['checking '+a+'…']);
+    else if(kind==='missing') wlSay(el,[a+' · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
+    else if(kind==='noperm') wlSay(el,[a+' has no active key · ',{to:'bridge-sec',t:'see what to do'}]);
+    else if(kind==='unread'){ wlSay(el,['could not read '+a+' · ']); var b=document.createElement('button'); b.type='button'; b.textContent='try again'; b.onclick=function(){ checkBridge() }; el.appendChild(b) }
+    else if(kind==='unknown'){ wlSay(el,['could not read where '+SOUL+'.b points · ']); var b2=document.createElement('button'); b2.type='button'; b2.textContent='try again'; b2.onclick=function(){ readAll() }; el.appendChild(b2) }
+    else wlSay(el,[{to:'kc-sec',t:'connect your keychain'},' to check '+(SOUL?a:'it')]);
+    el.style.color=ok?'var(--leaf)':'var(--amber)';
+  }
+  function setBridgeState(ok,label,kind){
     var v=$('kc-bridge-verdict');
-    v.textContent=label; v.className='stamp'+(ok?' ok':'');
-    $('bridge-sec').style.display=(MPRK&&K1&&!ok)?'block':'none';
+    if(label) v.textContent=label; else wlSay(v,['not on '+vacct()+' yet · ',{to:'bridge-sec',t:'let this wallet sign for it'}]);
+    v.className='stamp'+(ok?' ok':'');
+    $('bridge-sec').style.display=(MPRK&&K1&&!ok&&kind!=='unread'&&kind!=='unknown')?'block':'none';
     var n=$('k1node'),c=$('k1core'),arc=$('bridgearc'),an=$('anchornode');
     if(ok){n.setAttribute('stroke','#7ddf8f');c.setAttribute('fill','#7ddf8f');
       arc.setAttribute('stroke','#FFD700');arc.setAttribute('opacity','.8');
       an.setAttribute('opacity','1')}
     else{n.setAttribute('stroke','#5f6f61');c.setAttribute('fill','#5f6f61');
       arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
-    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'not known yet');
-    $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
+    sumAuth(kind||(ok?'ok':(MPRK?'missing':'')));
+    brCalm(kind);
+  }
+  /* the bridge, said calmly: what it does, for which account, and the choices */
+  function brCalm(kind){
+    var el=$('br-calm'); if(!el)return;
+    var a=vacct();
+    if(kind==='noperm'){ el.textContent=a+' has no active permission this wallet can join. Open the details to see its keys.'; return }
+    el.textContent='This wallet does not sign for '+a+' yet. Add its key to '+a+' once, and every sign after that is one press. ';
+    var c=document.createElement('button'); c.type='button'; c.id='br-copy'; c.textContent='copy this wallet’s key';
+    c.onclick=function(){ if(K1)copyText(K1.eosPub,c) };
+    el.appendChild(c);
+    el.appendChild(document.createTextNode(' Add it under '+a+' → permissions → active in the wallet that already signs for '+a+', then come back. Or, if you hold its active key, open the recovery fold here.'));
   }
 
   /* ── targeted PRF ceremony (the fix for the picker trap) ────
@@ -4214,7 +4312,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-cards').style.display='flex';
     $('kc-outrow').style.display='flex';
     $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
-    $('sum-kc').textContent='connected ✓';$('sum-kc').style.color='var(--leaf)';
+    wlSay($('sum-kc'),['connected ✓']);$('sum-kc').style.color='var(--leaf)';
     seedContexts(); renderForge(); pqPanel();
     checkBridge();
     if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
@@ -4245,7 +4343,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#pq-law'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wallet-identity,#wallet-storage,#bregbar,#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
@@ -4956,8 +5054,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
-    $('sum-kc').textContent='not connected';$('sum-kc').style.color='var(--amber)';
-    $('sum-bridge').textContent='not known yet';$('sum-bridge').style.color='var(--amber)';
+    wlSay($('sum-kc'),['not connected · ',{to:'kc-sec',t:'connect it'}]);$('sum-kc').style.color='var(--amber)';
+    BRIDGED=null; sumAuth('');
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
     renderForge();
   };
@@ -4996,7 +5094,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var live=$('wl-soul-name'); if(live) live.textContent=name?name+'.b':'…';
   }
   async function setSoul(name){
-    SOUL=name;
+    SOUL=name; vacctCacheLoad();
     publishSoul(SOUL);
     $('wq').value=SOUL;
     if(K1&&MPRK)deriveK1();
@@ -5007,7 +5105,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('br-go').onclick=async function(){
     var out=$('br-out'),stat=$('br-stat');
     out.style.display='block';
-    if(!K1||!SOUL){stat.textContent='connect your keychain first';return}
+    if(!K1||!SOUL){wlSay(stat,['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
     if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){stat.textContent='no RPC host reachable';return}}
     try{
     var wif;
@@ -5021,19 +5119,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var owns=pastedPub?await findAccountsForPub(pastedPub):[];
     var ownsActive=owns.filter(function(o){return o.permission==='active'});
     var SWITCHED_FROM=null;
-    if(ownsActive.length===1&&ownsActive[0].account!==SOUL){
+    if(ownsActive.length===1&&ownsActive[0].account!==vacct()){
       var target=ownsActive[0].account;
-      SWITCHED_FROM=SOUL;
-      stat.innerHTML='this key runs <b>'+target+'@active</b> — you typed '+SOUL+'. Switching the wallet to '+target+' and bridging THAT.';
+      SWITCHED_FROM=vacct();
+      stat.innerHTML='this key runs <b>'+target+'@active</b> — you typed '+vacct()+'. Switching the wallet to '+target+' and bridging THAT.';
       await setSoul(target);
     } else if(ownsActive.length>1){
       stat.innerHTML='this key runs several accounts: '+ownsActive.map(function(o){return '<b>'+o.account+'</b>'}).join(', ')+
-        ' — press BRIDGE again after picking the account in <a href="#connect-sec">the name field</a> (the wallet is on '+SOUL+' now).';
+        ' — press BRIDGE again after picking the account in <a href="#connect-sec">the name field</a> (the wallet is on '+vacct()+' now).';
       $('br-wif').value='';
       return;
     }
     stat.textContent='1/5 reading live account authority…';
-    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:vacct()});
     if(!acc){stat.textContent='account read failed';return}
     var act=acc.permissions.filter(function(p){return p.perm_name==='active'})[0];
     if(!act||!act.required_auth){stat.textContent='account has no readable active permission';return}
@@ -5045,10 +5143,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pastedPub=null;
     try{ pastedPub=BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString(); }catch(e){}
     if(!pastedPub||!existing.some(function(k){return canon(k.key)===canon(pastedPub)})){
-      stat.innerHTML='✗ <b>this key ('+((pastedPub||'?').slice(0,14))+'…) is NOT on '+SOUL+
+      stat.innerHTML='✗ <b>this key ('+((pastedPub||'?').slice(0,14))+'…) is NOT on '+vacct()+
         '@active</b> — that account is controlled by '+existing.map(function(k){return k.key.slice(0,12)+'…'}).join(', ')+
-        '. Paste the ACTIVE private key of <b>'+SOUL+'</b>, or fix <a href="#connect-sec">the account name</a> (it currently targets '+
-        '<b>'+SOUL+'</b> — typing a .b name strips the .b and targets the raw account).';
+        '. Paste the ACTIVE private key of <b>'+vacct()+'</b>, or fix <a href="#connect-sec">the account name</a> (it currently targets '+
+        '<b>'+vacct()+'</b> — typing a .b name strips the .b and targets the raw account).';
       $('br-wif').value='';
       return;
     }
@@ -5077,9 +5175,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       for(var i=0;i<Math.min(da.length,db.length);i++)if(da[i]!==db[i])return da[i]-db[i];
       return da.length-db.length;
     });
-    var args={account:SOUL,permission:'active',parent:act.parent||'owner',
+    var args={account:vacct(),permission:'active',parent:act.parent||'owner',
       auth:{threshold:ra.threshold,keys:newKeys,accounts:ra.accounts||[],waits:ra.waits||[]}};
-    var actz=[{actor:SOUL,permission:'active'}];
+    var actz=[{actor:vacct(),permission:'active'}];
     var prov=new BN.JsSignatureProvider([wif]);
     $('br-wif').value=''; // scrub the paste immediately — provider holds it in memory for this tx only
     var A=api(prov);
@@ -5104,7 +5202,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
       if(res&&res.transaction_id){
-        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+esc(String(res.transaction_id).slice(0,16))+'…'+
+        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+vacct()+' — tx '+esc(String(res.transaction_id).slice(0,16))+'…'+
           (SWITCHED_FROM?' <i>(wallet switched from '+SWITCHED_FROM+' — the key named the account itself)</i>':'');
         out.innerHTML='<b>transaction_id:</b> '+esc(res.transaction_id)+String.fromCharCode(10)+
           '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
@@ -5114,7 +5212,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         if(/provided keys|declares authority|unsatisfied/i.test(msg)){
-          msg='the pasted key is NOT on '+SOUL+'@active — paste the ACTIVE key ('+
+          msg='the pasted key is NOT on '+vacct()+'@active — paste the ACTIVE key ('+
             existing.map(function(k){return k.key.slice(0,12)+'…'}).join(', ')+') — raw: '+msg;
         }
         stat.textContent='node refused:'; out.textContent=msg;
@@ -5152,17 +5250,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var name=$('ac-name').value.trim();
     if(!K1||!SOUL){stat.textContent='connect your keychain first';return}
     if(!/^[a-z][a-z1-5]{11}$/.test(name)){stat.textContent='name: exactly 12 chars, a-z and 1-5, starts with a letter';return}
-    if(!BRIDGED){stat.textContent='your bzDiD key must be bridged to '+SOUL+' first (above)';return}
+    if(!signGuard(stat))return;
     if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){stat.textContent='no RPC host reachable';return}}
     try{
       stat.textContent='1/5 deriving owner+active keys for '+name+'…';
       var kd=deriveFor('vaulta:'+name+'/owner'), ka=deriveFor('vaulta:'+name+'/active');
       var bytes=parseInt($('ac-ram').value,10)||8192;
-      var actz=[{actor:SOUL,permission:'active'}];
-      var args1={creator:SOUL,name:name,
+      var actz=[{actor:vacct(),permission:'active'}];
+      var args1={creator:vacct(),name:name,
         owner:{threshold:1,keys:[{key:kd.value,weight:1}],accounts:[],waits:[]},
         active:{threshold:1,keys:[{key:ka.value,weight:1}],accounts:[],waits:[]}};
-      var args2={payer:SOUL,receiver:name,bytes:bytes};
+      var args2={payer:vacct(),receiver:name,bytes:bytes};
       stat.textContent='2/5 serializing newaccount + buyrambytes…';
       var abi=await rpc().get_abi('eosio');
       var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
@@ -5186,7 +5284,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           '<b>account:</b> '+name+String.fromCharCode(10)+
           '<b>owner key:</b> '+kd.value+String.fromCharCode(10)+
           '<b>active key:</b> '+ka.value+String.fromCharCode(10)+
-          '<b>RAM:</b> '+bytes+' B paid by '+SOUL+' · core: '+built.by;
+          '<b>RAM:</b> '+bytes+' B paid by '+vacct()+' · core: '+built.by;
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         stat.textContent='node refused:'; out.textContent=msg;
@@ -5200,9 +5298,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* ── SIGN lane: bzDiD key signs, zero paste ───────────────── */
   function preset(name){
     var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
-    $('tx-contract').value=SOUL||pc.contract||'';
+    $('tx-contract').value=pc.contract||REG;
     $('tx-action').value=pc.action||'';
-    $('tx-data').value=JSON.stringify({registrant:SOUL||pc.contract||'',domain_name:name,target:SOUL||pc.contract||''});
+    $('tx-data').value=JSON.stringify({registrant:SOUL?vacct():(pc.contract||''),domain_name:name,target:SOUL?vacct():(pc.contract||'')});
   }
   $('tx-k').onclick=function(){preset('k')};
   $('tx-q').onclick=function(){preset('q')};
@@ -5263,7 +5361,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function preview(contract, action, args, signerLine) {
     var actor = netIsJ4() ? ($('tx-j4actor').value.trim() || '(the 12-char test actor above)')
-      : (args.registrant || args.owner || args.from || args.account || SOUL || '(connects from your soul)');
+      : (args.registrant || args.owner || args.from || args.account || vacct() || '(connects from your soul)');
     var p = $('tx-preview'), b = $('tx-preview-body');
     b.innerHTML =
       '<b>action</b>  ' + contract + ':' + action + '\n' +
@@ -5686,6 +5784,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return submitAndConfirm(entry, function (msg, phase) {
       var color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : 'var(--cyan)';
       out.innerHTML = '<b style="color:' + color + '">' + esc(msg) + '</b>';
+      if (opts.onPhase) try { opts.onPhase(phase, msg) } catch (e) {}
     });
   }
 
@@ -5710,10 +5809,179 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if (!K1 || !SOUL) { wlSay(out, ['connect ', { to: 'kc-sec', t: 'your keychain' }, ' first']); return }
     var waCred = loadWaCred();
     var useWa = $('tx-wa').checked && waCred;
-    if (!BRIDGED && !useWa) { wlSay(out, ['your bzDiD key is not on ' + SOUL + '@active yet — run ', { to: 'bridge-sec', t: 'the bridge' }, ' first']); return }
-    var actor2 = data.registrant || data.owner || data.from || data.account || SOUL;
+    if (!useWa && !signGuard(out)) return;
+    var actor2 = data.registrant || data.owner || data.from || data.account || vacct();
+    if (actor2 !== vacct()) { wlSay(out, ['this action is for ' + actor2 + ', and this wallet signs for ' + vacct() + '. Nothing was signed.']); return }
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   };
+
+  /* ── wallet.html?compose=<contract:action>&args=<json>#sign-action: one composed
+     action on one sheet. The sheet says in words what will be signed and as
+     which account, and one press signs it: the passkey prompt is the
+     confirmation. When a page of this origin composed it a moment ago (a
+     one-time intent in this browser, written on that page's press), the press
+     already happened there and the sheet starts by itself. Anything else, a
+     link from anywhere, shows the words and waits for the press. ── */
+  var ACT_INTENT='bnr_sign_intent';
+  var ACT_ACTOR={registeracc:'registrant',transfer:'from'};
+  var ACT_WORDS={
+    registeracc:function(d){return {h:'Register '+d.domain_name+'.b',s:'Register '+d.domain_name+'.b for '+d.registrant+', pointing at '+d.target+'.',d:d.domain_name+'.b is registered to '+d.registrant+'.'}},
+    renew:function(d){return {h:'Renew '+d.domain_name+'.b',s:'Renew '+d.domain_name+'.b for '+d.days+' days.',d:d.domain_name+'.b is renewed for '+d.days+' days.'}},
+    transfer:function(d){return {h:'Give '+d.domain_name+'.b',s:'Give '+d.domain_name+'.b to '+d.to+'. It stops being yours.',d:d.domain_name+'.b now belongs to '+d.to+'.'}},
+    setaccount:function(d){return {h:'Point '+d.domain_name+'.b',s:'Point '+d.domain_name+'.b at the account '+d.target+'.',d:d.domain_name+'.b now points at '+d.target+'.'}},
+    setchain:function(d){return {h:'Point '+d.domain_name+'.b',s:'Point '+d.domain_name+'.b at '+d.address+' on '+d.chain_key+'.',d:d.domain_name+'.b now points at '+d.address+' on '+d.chain_key+'.'}},
+    release:function(d){return {h:'Let '+d.domain_name+'.b go',s:'Let '+d.domain_name+'.b go. This cannot be undone.',d:d.domain_name+'.b is released.'}}
+  };
+  // only the registry's own actions, each with words; anything else stays in the composer
+  function actParse(){
+    if(location.hash!=='#sign-action')return null;
+    try{
+      var qp=new URLSearchParams(location.search), c=(qp.get('compose')||'').split(':'), d=JSON.parse(qp.get('args')||'null');
+      if(c.length!==2||c[0]!==REG||!ACT_WORDS.hasOwnProperty(c[1])||!d||typeof d!=='object'||Array.isArray(d))return null;
+      if(!ACCT_RE.test(String(d[ACT_ACTOR[c[1]]||'owner']||'')))return null;
+      return {contract:c[0],action:c[1],data:d,intent:qp.get('intent')||''};
+    }catch(e){return null}
+  }
+  // one-time: the intent is read and deleted, and it must name exactly this action
+  function actIntentOk(a){
+    var it=null; try{ it=JSON.parse(localStorage.getItem(ACT_INTENT)||'null'); localStorage.removeItem(ACT_INTENT) }catch(e){}
+    return !!(it&&a.intent&&it.id===a.intent&&typeof it.at==='number'&&Date.now()-it.at<120000&&it.at<Date.now()+5000&&
+      a.contract===REG&&ACT_WORDS[a.action]&&it.contract===a.contract&&it.action===a.action&&JSON.stringify(it.data)===JSON.stringify(a.data));
+  }
+  // the chain's refusal, in words
+  function actRefusal(t){
+    t=String(t||'');
+    if(/missing authority|unsatisfied|irrelevant|declares authority/i.test(t))return 'The account did not accept this wallet\'s key.';
+    if(/ram_usage_exceeded|insufficient ram/i.test(t))return 'The account needs more RAM for this.';
+    if(/cpu|net usage|billed|tx_net|leeway/i.test(t))return 'The account needs more CPU or NET to send this.';
+    if(/expired/i.test(t))return 'It did not land in time.';
+    var m=t.match(/assertion failure with message: ([^"\]]{1,120})/i);
+    return m?'The contract said no: '+m[1]+'.':'The chain said no.';
+  }
+  function actSheet(){
+    var a=actParse(); if(!a||$('act-sheet'))return;
+    var auto=actIntentOk(a);
+    // read once: a reload or a later hash change never reopens or re-signs it
+    try{ history.replaceState(null,'',location.pathname) }catch(e){}
+    var actor=String(a.data[ACT_ACTOR[a.action]||'owner']||'');
+    var w=ACT_WORDS[a.action](a.data);
+    if(!$('act-style')){
+      var css=document.createElement('style'); css.id='act-style';
+      css.textContent=
+        '#act-sheet{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;'+
+          'background:#faf6f0;color:#0c1412;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}'+
+        '#act-sheet .sg{max-width:440px;width:100%;text-align:center}'+
+        '#act-h{margin:0 0 12px;font-size:36px;font-weight:700;line-height:1.1;letter-spacing:-.01em;overflow-wrap:anywhere}'+
+        '#act-say{margin:0 0 28px;font-size:18px;line-height:1.5;color:#45574e;overflow-wrap:anywhere}'+
+        '#act-go{width:100%;min-height:56px;border:0;border-radius:999px;background:#264d36;color:#fff;font:700 20px/1 "Segoe UI",system-ui,sans-serif;cursor:pointer}'+
+        '#act-go:focus-visible{outline:2px solid #264d36;outline-offset:3px}'+
+        '#act-go:disabled{opacity:.6;cursor:default}'+
+        '#act-stat{margin:18px 0 0;min-height:24px;font-size:17px;line-height:1.5;overflow-wrap:anywhere}'+
+        '#act-stat a,#act-back{display:inline-flex;align-items:center;min-height:44px;color:inherit}'+
+        '#act-read{margin-top:24px;text-align:start;font-size:15px;color:#45574e}'+
+        '#act-read summary{cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:center}'+
+        '#act-read pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;margin:8px 0;max-height:40vh;overflow:auto}'+
+        'body[data-reg="raver"] #act-sheet{background:linear-gradient(160deg,#171326 0%,#100d1b 60%,#1b1d2b 100%);color:#fff}'+
+        'body[data-reg="raver"] #act-say,body[data-reg="raver"] #act-read{color:#cfc6e2}'+
+        'body[data-reg="raver"] #act-go{background:#d655b8;color:#140f1f;box-shadow:0 0 28px rgba(214,85,184,.35)}'+
+        'body[data-reg="raver"] #act-go:focus-visible{outline-color:#d655b8}'+
+        'body[data-reg="cypherpunk"] #act-sheet{background:#0a1110;color:#e6f2ee;font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}'+
+        'body[data-reg="cypherpunk"] #act-h{font-size:30px;letter-spacing:0}'+
+        'body[data-reg="cypherpunk"] #act-say,body[data-reg="cypherpunk"] #act-read{color:#a9bdb6}'+
+        'body[data-reg="cypherpunk"] #act-go{border-radius:6px;background:#44c2dc;color:#061012;font:700 18px/1 "IBM Plex Mono",ui-monospace,monospace}'+
+        'body[data-reg="cypherpunk"] #act-go:focus-visible{outline-color:#44c2dc}'+
+        'body[data-reg="cypherpunk"] #act-read{display:block}';
+      document.head.appendChild(css);
+    }
+    var d=document.createElement('div');
+    d.id='act-sheet'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','act-h');
+    var sg=document.createElement('div'); sg.className='sg';
+    var h=document.createElement('div'); h.id='act-h'; h.setAttribute('role','heading'); h.setAttribute('aria-level','1'); h.textContent=w.h;
+    var say=document.createElement('p'); say.id='act-say'; say.textContent=w.s+' Signed as '+actor+'.';
+    var go=document.createElement('button'); go.type='button'; go.id='act-go'; go.textContent='Sign';
+    var st=document.createElement('p'); st.id='act-stat'; st.setAttribute('role','status'); st.setAttribute('aria-live','polite');
+    var rd=document.createElement('details'); rd.id='act-read';
+    var sm=document.createElement('summary'); sm.textContent='read what you are signing';
+    var pre=document.createElement('pre'); pre.textContent=JSON.stringify({network:'Vaulta mainnet',contract:a.contract,action:a.action,authorization:actor+'@active',data:a.data},null,1);
+    rd.appendChild(sm); rd.appendChild(pre);
+    var back=document.createElement('a'); back.id='act-back';
+    var ref=''; try{ var r=new URL(document.referrer); if(r.origin===location.origin&&/\/bnames\.html$/.test(r.pathname))ref=r.pathname+r.search }catch(e){}
+    back.href=ref||'bnames.html';
+    back.textContent='back to the name desk';
+    [h,say,go,st,rd,back].forEach(function(n){sg.appendChild(n)});
+    d.appendChild(sg); document.body.appendChild(d);
+    document.documentElement.style.overflow='hidden';
+    function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to)location.hash=to }
+    // a status line: words, and links that close the sheet onto a wallet section
+    function tell(kind,parts){
+      st.textContent=''; st.setAttribute('data-state',kind);
+      parts.forEach(function(x){
+        if(typeof x==='string'){st.appendChild(document.createTextNode(x));return}
+        var l=document.createElement('a'); l.href='#'+x.to; l.textContent=x.t;
+        l.onclick=function(ev){ ev.preventDefault(); actClose(x.to) };
+        st.appendChild(l);
+      });
+    }
+    var busy=false;
+    async function run(isAuto){
+      if(busy)return; busy=true; go.disabled=true;
+      var res='fail';
+      try{ res=await actRun(a,actor,w,tell,isAuto) }catch(e){ tell('fail',['Something went wrong, so nothing was signed. Press Sign again.']) }
+      busy=false;
+      // once bytes are signed, the sheet never offers a second signature: the outbox holds them
+      if(res==='done'||res==='held'){ go.hidden=true } else go.disabled=false;
+    }
+    go.onclick=function(){ run(false) };
+    if(auto) run(true); else go.focus();
+  }
+  async function actRun(a,actor,w,tell,isAuto){
+    if(!window.BZDIDKEY||!BN){tell('fail',['This page did not finish loading. Reload it and press Sign again.']);return 'fail'}
+    if(!SOUL){tell('fail',['Connect your name first. ',{to:'connect-sec',t:'connect it'}]);return 'fail'}
+    // whose action is it? asked before any passkey
+    tell('busy',['Checking '+SOUL+'.b…']);
+    await resolveVacct();
+    if(!vacctKnown()){tell('fail',['Could not read which account '+SOUL+'.b points at. Press Sign to try again.']);return 'fail'}
+    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
+    if(!MPRK){
+      tell('busy',['Confirm with your passkey…']);
+      var sup=await BZDIDKEY.prfBrowserSupport();
+      if(sup===false){tell('fail',['This browser cannot use your passkey here. Open the link in Chrome, Edge or Safari.']);return 'fail'}
+      CEREMONY=true;
+      try{ keychainOn(await connectSoul()) }
+      catch(e){
+        // a page that opened by itself may not ask for a passkey: the press asks
+        if(isAuto){tell('wait',['Press Sign, then confirm with your passkey.']);return 'fail'}
+        tell('fail',[/NotAllowed|aborted|timed out|cancel/i.test((e&&e.message)||'')?'Nothing was signed. Press Sign again when you are ready.':'No wallet passkey answered. Open this link on the device you use for your wallet.']);return 'fail'
+      }
+      finally{ CEREMONY=false }
+    }
+    tell('busy',['Checking '+vacct()+'…']);
+    await checkBridge();
+    if(actor!==vacct()){tell('fail',['This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.']);return 'fail'}
+    if(BRIDGED===null){tell('fail',['Could not read '+vacct()+' just now. Press Sign to try again.']);return 'fail'}
+    if(BRIDGED!==true){tell('fail',['This wallet does not sign for '+vacct()+' yet. ',{to:'bridge-sec',t:'let it sign'}]);return 'fail'}
+    for(var i=0;i<40&&!(ADAPTERS.vaulta&&ADAPTERS.vaulta.attached);i++) await new Promise(function(r){setTimeout(r,200)});
+    tell('busy',['Signing…']);
+    var sent=false;
+    var entry=await walletAction(a.contract,a.action,a.data,[{actor:actor,permission:'active'}],{network:'main',onPhase:function(ph){
+      if(ph==='submitted'&&!sent){ sent=true; tell('busy',['Sent. Waiting for the chain to confirm it…']) }
+    }});
+    if(!entry){
+      var t=($('tx-out')&&$('tx-out').textContent)||'';
+      tell('fail',[/vault refused/i.test(t)?'Your key could not sign this, so nothing was sent.'
+        :/outbox|storage/i.test(t)?'This browser could not keep the signed copy, so nothing was sent. Free some browser storage and press Sign again.'
+        :/not attached|never spawned|not declared|down/i.test(t)?'The wallet\'s Vaulta part did not start. Reload the page and press Sign again.'
+        :'The network did not answer, so nothing was signed. Press Sign to try again.']);
+      return 'fail';
+    }
+    if(entry.phase==='confirmed'){tell('done',['Done. '+w.d+' The chain confirmed it.']);return 'done'}
+    if(entry.phase==='failed'){tell('fail',[actRefusal(entry.evidence&&entry.evidence.detail)+' Nothing changed.']);return 'fail'}
+    if(entry.phase==='expired'){tell('fail',['It did not land in time, so nothing changed. Press Sign to try again.']);return 'fail'}
+    if(entry.phase==='signed'){tell('fail',['It was signed, but it did not go out. Your outbox keeps the signed copy. ',{to:'outbox-sec',t:'send it from the outbox'}]);return 'held'}
+    tell('done',['Sent. The chain has not confirmed it yet. ',{to:'outbox-sec',t:'see it in the outbox'}]);
+    return 'held';
+  }
+  window.addEventListener('load',function(){ setTimeout(actSheet,0) });
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=4');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
@@ -6273,7 +6541,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
     if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
     if(!K1){wlSay($('sv-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
-    if(!BRIDGED){wlSay($('sv-stat'),['your bzDiD key is not on '+SOUL+'@active yet — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
+    if(!signGuard($('sv-stat')))return;
     if(!capGate('A',amt))return;
     var q=amt.toFixed(4)+' A';
     $('sv-stat').textContent='1/4 serializing transfer…';
@@ -6281,9 +6549,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var abi=await rpc().get_abi('eosio.token');   // the A token lives on eosio.token, not eosio (the node taught us)
       var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
       var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      var actz=[{actor:SOUL,permission:'active'}];
+      var actz=[{actor:vacct(),permission:'active'}];
       var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio.token','transfer',actz,
-        {from:SOUL,to:to,quantity:q,memo:memo||''},new TextEncoder(),new TextDecoder());
+        {from:vacct(),to:to,quantity:q,memo:memo||''},new TextEncoder(),new TextDecoder());
       $('sv-stat').textContent='2/4 signing with your bzDiD key…';
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
@@ -6295,7 +6563,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
         capRecord('A',amt);
-        readVaulta(SOUL);
+        readVaulta(vacct());
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
         $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
@@ -6543,19 +6811,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('sw-go').onclick=async function(){
     if(!SOUL){wlSay($('sw-stat'),['connect ',{to:'connect-sec',t:'your name'},' first']);return}
     if(!K1){wlSay($('sw-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
-    if(!BRIDGED){wlSay($('sw-stat'),['needs your bridged bzDiD key — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
+    if(!signGuard($('sw-stat')))return;
     var n=parseInt($('sw-amt').value,10)||0;
     if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
     var swCapCost=null;
     if(SW_BUY){ var cp=await ramPrice(); if(cp!==null){ swCapCost=cp*n; if(!capGate('A',swCapCost))return; } }
-    var args=SW_BUY?{payer:SOUL,receiver:SOUL,bytes:n}:{account:SOUL,bytes:n};
+    var args=SW_BUY?{payer:vacct(),receiver:vacct(),bytes:n}:{account:vacct(),bytes:n};
     var act=SW_BUY?'buyrambytes':'sellram';
     $('sw-stat').textContent='1/3 serializing eosio::'+act+'…';
     try{
       var abi=await rpc().get_abi('eosio');
       var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
       var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      var actz=[{actor:SOUL,permission:'active'}];
+      var actz=[{actor:vacct(),permission:'active'}];
       var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio',act,actz,args,new TextEncoder(),new TextDecoder());
       $('sw-stat').textContent='2/3 signing…';
       var info=await rpc().get_info();
@@ -6568,7 +6836,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+esc(String(res.transaction_id).slice(0,16))+'…';
         payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
         if(swCapCost!==null)capRecord('A',swCapCost);
-        readVaulta(SOUL);
+        readVaulta(vacct());
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
         $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+esc(msg);
@@ -6668,7 +6936,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
     $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
     $('ch-vaulta').classList.add('connected');
-    if(SOUL===acct)refreshAcctPanel();
+    if(vacct()===acct)refreshAcctPanel();
   }
 
   async function readHive(acct){
@@ -6710,25 +6978,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
   }
 
+  function sumChains(){ wlSay($('sum-chains'),[document.querySelectorAll('.chain.connected').length+' · ',{to:'bal-sec',t:'see them'}]) }
   async function readAll(){
     if(!SOUL)return;
     /* the soul is known and the reads are in flight: say so NOW, not after the round-trip */
     document.body.setAttribute('data-wl-soul','true');
     ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
-    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
+    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'</b> · reading balances…';
     var arCtx='ar:'+SOUL;
     var arPub=loadArPublic(arCtx)||vaultArPublic();
-    await Promise.all([readVaulta(SOUL), readHive(SOUL), arPub?readArBound(arPub):Promise.resolve()]);
-    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
-    $('sum-soul').textContent=SOUL+'.b';document.body.setAttribute('data-wl-soul','true');
-    $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
-    if(K1)checkBridge();
+    await resolveVacct();
+    if(vacctKnown())acctDirAdd(vacct());
+    var who=vacct()!==SOUL?' · Vaulta account <b style="color:var(--leaf)">'+esc(vacct())+'</b>':'';
+    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · reading balances…';
+    await Promise.all([readVaulta(vacct()), readHive(SOUL), arPub?readArBound(arPub):Promise.resolve()]);
+    $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+esc(SOUL)+'.b</b>'+who+' · balances live';
+    wlSay($('sum-soul'),[SOUL+'.b'+(vacct()!==SOUL?' · Vaulta '+vacct():'')]);document.body.setAttribute('data-wl-soul','true');
+    sumChains();
+    if(K1)checkBridge(); else if(!MPRK)sumAuth(vacctKnown()?'':'unknown');
   }
 
   $('wgo').onclick=function(){
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
     if(!v){ $('wstat').textContent='type your name first'; return; }
-    SOUL=v;
+    SOUL=v; vacctCacheLoad();
     publishSoul(SOUL);
     acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
     if(K1)deriveK1();
@@ -6827,7 +7100,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
+    if(saved){ SOUL=saved; vacctCacheLoad(); $('wq').value=saved; publishSoul(SOUL); loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; if($('fs4'))$('fs4').textContent=SOUL; if($('fs5'))$('fs5').textContent=SOUL; if($('fs6'))$('fs6').textContent=SOUL; if($('fs7'))$('fs7').textContent=SOUL; seedContexts(); renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
