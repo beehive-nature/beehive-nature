@@ -50,7 +50,7 @@ message).
   under `boot_ucb`). The firmware image itself is still checked with classical CoSi Ed25519.
 - No user-facing ML-DSA/ML-KEM message exists in `common/protob/*.proto`.
 
-## 3 · The founder decision this session must surface, not make
+## 3 · The identity root: RULED (A), 2026-10-04 (`docs/RULINGS-2026-10-04.md` R4)
 
 **Which root does the device's PQ identity come from?** Two shapes, each consistent with some law:
 
@@ -66,9 +66,11 @@ message).
   whether the user authorizes an existing Trezor-root derivation or an independently backed-up
   identity root") and with BSAFE-DEVICE-1 §4.
 
-Seat 3 leans (A): it matches the OS law, needs no phrase import, and SPEC-BPQ-1 bindings already
-exist to tie two ids. **Escalate by name; build (A) on the emulator only once the founder says
-which.** Until then, everything in §5 steps 1 to 3 is shared by both shapes.
+**Ruled (A)** by the founder on 2026-10-04 ("anchor away", R4). Build (A): a versioned,
+domain-separated child seed of the device's own seed (name the derivation path and version in the
+fork's docs before coding it, and keep it apart from every existing coin path and from the MCU
+attestation key); its own `bzpq1` id; the binding to the wallet id is signed by both ids, with the
+device's signature made on the device. (B) is closed: no phrase goes onto the device.
 
 ## 4 · Hard constraints measured
 
@@ -130,6 +132,6 @@ which.** Until then, everything in §5 steps 1 to 3 is shared by both shapes.
 ## 7 · Paste this to start the fresh session
 
 > Read `beehive-nature/docs/dispatches/2026-10-04-safe7-pq-signing-handoff.md` and every file in
-> its §0, in order. Then execute its §5 steps 1 to 4 on the emulator only, escalating §3 to me
-> before building anything that fixes the device's identity root. No flashing, no unlock, no real
+> its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Then
+> execute its §5 steps 1 to 4 on the emulator only. No flashing, no unlock, no real
 > phrase, no mainnet. Report done and pending only, with receipts.
