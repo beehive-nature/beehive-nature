@@ -6680,19 +6680,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     });
     return o;
   }
+  /* what a composed action does, in words: a registry action says every field it carries,
+     a token transfer says its amount and receiver, anything else names itself */
+  function composeWords(contract, action, args) {
+    if (contract === REG && actWhole(action, args)) return lcFirst(ACT_WORDS[action](args).s);
+    if (action === 'transfer' && args && typeof args.quantity === 'string' && typeof args.to === 'string')
+      return 'send ' + args.quantity + ' to ' + args.to + (args.memo ? ', with the memo ' + JSON.stringify(String(args.memo)) : '') + '.';
+    return 'run ' + (action || 'an action') + ' on ' + (contract || 'an account') + ' with the parts shown.';
+  }
+  function composeActor(args) {
+    return netIsJ4() ? $('tx-j4actor').value.trim()
+      : String((args && (args.registrant || args.owner || args.from || args.account)) || vacct() || '');
+  }
   function preview(contract, action, args, signerLine) {
-    var actor = netIsJ4() ? ($('tx-j4actor').value.trim() || '(the 12-char test actor above)')
-      : (args.registrant || args.owner || args.from || args.account || vacct() || '(connects from your soul)');
+    args = (args && typeof args === 'object') ? args : {};
+    var actor = composeActor(args);
     var p = $('tx-preview'), b = $('tx-preview-body');
-    /* contract, action, actor and args can all come from a link (?compose=…&args=…): text, never markup */
-    b.innerHTML =
-      '<b>action</b>  ' + esc(contract) + ':' + esc(action) + '\n' +
-      '<b>auth</b>    ' + esc(actor) + '@active\n' +
-      '<b>args</b>    ' + esc(JSON.stringify(args)) + '\n' +
-      '<b>signer</b>  ' + esc(signerLine) + '\n' +
-      '<b>network</b> ' + (netIsJ4() ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC');
+    /* contract, action, actor and args can all come from a link (?compose=…&args=…): text nodes, never markup */
+    b.textContent = '';
+    var w = document.createElement('div'); w.className = 'tx-words';
+    var words = composeWords(contract, action, args);
+    if (actor) w.textContent = words + ' you sign as ' + actor + '.';
+    else wlSay(w, [words + ' ', { to: 'connect-sec', t: 'connect your name' }, ' to see who signs it.']);
+    b.appendChild(w);
+    previewCy('action  ' + contract + ':' + action + '\n' +
+      'auth    ' + (actor || (netIsJ4() ? '(the 12-char test actor above)' : '(connects from your soul)')) + '@active\n' +
+      'args    ' + JSON.stringify(args) + '\n' +
+      'signer  ' + signerLine + '\n' +
+      'network ' + (netIsJ4() ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC'));
     p.style.display = 'block';
   }
+  /* the preview's raw lines: cypherpunk reads them, bee and raver read the words */
+  function previewCy(t) { var c = document.createElement('span'); c.className = 'wl-cyd'; c.textContent = '\n' + t; $('tx-preview-body').appendChild(c) }
   async function loadAbiUi() {
     var out = $('tx-out'); out.style.display = 'block';
     var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
@@ -6706,10 +6725,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var st = abi.structs.filter(function (s) { return s.name === act.type; })[0];
       var fields = (st && st.fields) || [];
       $('tx-fields-title').textContent = 'FIELDS — from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')';
-      $('tx-fields-row').innerHTML = fields.map(function (f) {
-        return '<input class="small tx-f" data-fn="' + esc(f.name) + '" data-ft="' + esc(f.type || 'string') +
-          '" placeholder="' + esc(f.name) + ' · ' + esc(f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
-      }).join('');
+      var frow = $('tx-fields-row'); frow.textContent = '';
+      fields.forEach(function (f) {   /* names and types come from the chain: set as attribute text */
+        var inp = document.createElement('input'); inp.className = 'small tx-f';
+        inp.setAttribute('data-fn', String(f.name)); inp.setAttribute('data-ft', String(f.type || 'string'));
+        inp.placeholder = f.name + ' · ' + (f.type || 'string'); inp.spellcheck = false;
+        inp.style.cssText = 'min-width:170px;flex:1 1 170px';
+        frow.appendChild(inp);
+      });
       $('tx-fields').style.display = fields.length ? 'block' : 'none';
       // keep any already-typed JSON that matches field names
       var prev = {}; try { prev = JSON.parse($('tx-data').value); } catch (e) {}
@@ -6721,7 +6744,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var args = buildArgsFromFields();
       $('tx-data').value = JSON.stringify(args);
       preview(contract, action, args, netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key');
-    } catch (e) { out.innerHTML = '<b style="color:var(--amber)">ABI error:</b> ' + esc(e.message) }
+    } catch (e) { wlSay(out, ['could not read what this action needs just now, so nothing was signed. ', { btn: 'try again', on: loadAbiUi }, { cy: 'ABI error: ' + ((e && e.message) || e) }]) }
   }
   $('tx-abi').onclick = loadAbiUi;
   $('tx-net').onchange = function () {
@@ -6875,12 +6898,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function paintAdapterStates() {
     var el = $('adapter-states');
     if (!el) return;
-    el.innerHTML = Object.keys(ADAPTERS).map(function (rail) {
+    el.textContent = '';
+    Object.keys(ADAPTERS).forEach(function (rail, i) {
       var a = ADAPTERS[rail];
       var color = a.attached ? 'var(--leaf)' : 'var(--amber)';
-      var label = a.attached ? rail + ' ✓ ' + a.caps.capabilities.length + ' caps' : rail + ' — ' + a.state;
-      return '<span style="border:1px solid ' + color + ';color:' + color + ';border-radius:6px;padding:2px 8px;font-size:9.5px">' + label + '</span>';
-    }).join(' ');
+      var chip = document.createElement('span');
+      chip.style.cssText = 'border:1px solid ' + color + ';color:' + color + ';border-radius:6px;padding:2px 8px;font-size:9.5px';
+      /* a.state can carry a worker's own error text: text, never markup */
+      chip.textContent = a.attached ? rail + ' ✓ ' + a.caps.capabilities.length + ' caps' : rail + ' — ' + a.state;
+      if (i) el.appendChild(document.createTextNode(' '));
+      el.appendChild(chip);
+    });
   }
 
   /* ── THE OUTBOX (wallet law L3, contract §6) — the shell owns it ──
@@ -6917,6 +6945,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   function phaseColor(p) {
     return p === 'confirmed' ? 'var(--leaf)' : (p === 'failed' || p === 'expired') ? 'var(--amber)' : 'var(--cyan)';
+  }
+  var OBX_BUSY = {};   /* intent_id -> a row press still running: its button stays pressed through every repaint */
+  function obxRow(id) {
+    var rows = document.querySelectorAll('#outbox-list .obx-row');
+    for (var i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-id') === id) return rows[i];
+    return null;
   }
   function renderOutbox() {
     var el = $('outbox-list');
@@ -6961,11 +6995,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var b = document.createElement('button'); b.type = 'button'; b.className = 'obx-retry'; b.setAttribute('data-id', e.intent_id);
         b.textContent = 'send it again';
         b.title = 'the same signed copy goes out again; nothing is signed twice';
+        b.disabled = !!OBX_BUSY[e.intent_id];
         b.onclick = async function () {
-          b.disabled = true;
-          try { await retryOutbox(e.intent_id, st) }
-          catch (error) { wlSay(st, ['the saved copy could not be read, so nothing was sent. ', { btn: 'try again', on: function () { b.click() } }, { cy: (error && error.message) || String(error) }]) }
-          finally { b.disabled = false }
+          var id = e.intent_id;
+          if (OBX_BUSY[id]) return;
+          OBX_BUSY[id] = true; b.disabled = true;
+          try { await retryOutbox(id, st) }
+          catch (error) {
+            var r0 = obxRow(id), s0 = (r0 && r0.querySelector('.obx-stat')) || st;
+            wlSay(s0, ['the saved copy could not be read, so nothing was sent. ', { btn: 'try again', on: function () { var r1 = obxRow(id), b1 = r1 && r1.querySelector('.obx-retry'); if (b1) b1.click() } }, { cy: (error && error.message) || String(error) }]);
+          }
+          finally {
+            delete OBX_BUSY[id]; b.disabled = false;
+            var r2 = obxRow(id), b2 = r2 && r2.querySelector('.obx-retry'); if (b2) b2.disabled = false;
+          }
         };
         row.appendChild(b);
       }
@@ -7231,7 +7274,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
-    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + esc(intent.intent_id) + '\n<b>digest</b>  ' + esc(intent.digest.slice(0, 32)) + '…\n<b>in words</b> ' + esc(intent.human_summary);
+    previewCy('intent  ' + intent.intent_id + '\ndigest  ' + String(intent.digest).slice(0, 32) + '…\nin words ' + intent.human_summary);
     wlSay(out, ['signing…', { cy: 'the vault signs the digest' }]);
     var sgn, so = opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : {});
     if (spend) so.spend = spend;
@@ -7309,12 +7352,31 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      link from anywhere, shows the words and waits for the press. ── */
   var ACT_INTENT='bnr_sign_intent';
   var ACT_ACTOR={registeracc:'registrant',transfer:'from'};
+  /* every field each registry action carries (the live kingbeelovis ABI). The sheet signs only an
+     action whose fields are exactly these, so its words say every field that is signed */
+  var ACT_FIELDS={registeracc:['registrant','domain_name','target'],renew:['owner','domain_name','days'],transfer:['from','domain_name','to'],
+    setaccount:['owner','domain_name','target'],setchain:['owner','domain_name','chain_key','address','addr_type','memo_tag'],release:['owner','domain_name']};
+  var ACT_ACCTS={registrant:1,owner:1,from:1,to:1,target:1}, ACT_MAY_BE_EMPTY={addr_type:1,memo_tag:1};
+  function actWhole(action,d){
+    var f=ACT_FIELDS.hasOwnProperty(action)?ACT_FIELDS[action]:null;
+    if(!f||!d||typeof d!=='object'||Array.isArray(d))return false;
+    var ks=Object.keys(d);
+    if(ks.length!==f.length||!f.every(function(k){ return ks.indexOf(k)>=0 }))return false;
+    return f.every(function(k){
+      var v=d[k];
+      if(k==='days'){ var n=Number(v); return (typeof v==='number'||(typeof v==='string'&&/^\d+$/.test(v)))&&n>=1&&n<=65535&&Math.floor(n)===n }
+      if(typeof v!=='string')return false;
+      if(ACT_ACCTS[k])return ACCT_RE.test(v);
+      return ACT_MAY_BE_EMPTY[k]?v.length<=128:(v.length>0&&v.length<=128);
+    });
+  }
   var ACT_WORDS={
     registeracc:function(d){return {h:'Register '+d.domain_name+'.b',s:'Register '+d.domain_name+'.b for '+d.registrant+', pointing at '+d.target+'.',d:d.domain_name+'.b is registered to '+d.registrant+'.'}},
     renew:function(d){return {h:'Renew '+d.domain_name+'.b',s:'Renew '+d.domain_name+'.b for '+d.days+' days.',d:d.domain_name+'.b is renewed for '+d.days+' days.'}},
     transfer:function(d){return {h:'Give '+d.domain_name+'.b',s:'Give '+d.domain_name+'.b to '+d.to+'. It stops being yours.',d:d.domain_name+'.b now belongs to '+d.to+'.'}},
     setaccount:function(d){return {h:'Point '+d.domain_name+'.b',s:'Point '+d.domain_name+'.b at the account '+d.target+'.',d:d.domain_name+'.b now points at '+d.target+'.'}},
-    setchain:function(d){return {h:'Point '+d.domain_name+'.b',s:'Point '+d.domain_name+'.b at '+d.address+' on '+d.chain_key+'.',d:d.domain_name+'.b now points at '+d.address+' on '+d.chain_key+'.'}},
+    setchain:function(d){var on=' on '+d.chain_key+(d.addr_type?' as '+d.addr_type:'')+(d.memo_tag?', with the memo tag '+d.memo_tag:', with no memo tag');
+      return {h:'Point '+d.domain_name+'.b',s:'Point '+d.domain_name+'.b at '+d.address+on+'.',d:d.domain_name+'.b now points at '+d.address+on+'.'}},
     release:function(d){return {h:'Let '+d.domain_name+'.b go',s:'Let '+d.domain_name+'.b go. This cannot be undone.',d:d.domain_name+'.b is released.'}}
   };
   // only the registry's own actions, each with words; anything else stays in the composer
@@ -7322,8 +7384,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(location.hash!=='#sign-action')return null;
     try{
       var qp=new URLSearchParams(location.search), c=(qp.get('compose')||'').split(':'), d=JSON.parse(qp.get('args')||'null');
-      if(c.length!==2||c[0]!==REG||!ACT_WORDS.hasOwnProperty(c[1])||!d||typeof d!=='object'||Array.isArray(d))return null;
-      if(!ACCT_RE.test(String(d[ACT_ACTOR[c[1]]||'owner']||'')))return null;
+      if(c.length!==2||c[0]!==REG||!ACT_WORDS.hasOwnProperty(c[1])||!actWhole(c[1],d))return null;
       return {contract:c[0],action:c[1],data:d,intent:qp.get('intent')||''};
     }catch(e){return null}
   }

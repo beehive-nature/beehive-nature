@@ -184,7 +184,9 @@ try {
     const out = await page.locator('#tx-out').innerText(), outRaw = await page.locator('#tx-out').textContent();
     ok('CONFIRMED only from the block read, evidence names what was read (kept for cypherpunk)',
       /done\. the chain confirmed it/.test(out) && /CONFIRMED by a block read: get_block #123460/.test(outRaw) && /MOCKTXID/.test(outRaw), outRaw.slice(0, 160));
-    ok('the intent is previewed in words before the go', /in words/.test(await page.locator('#tx-preview-body').innerText()));
+    ok('the intent is previewed in words before the go (the words for every register, the raw lines for cypherpunk)',
+      /^run commit on banchor22222 with the parts shown\. you sign as banchor22222\.$/.test(await page.locator('#tx-preview-body .tx-words').textContent()) &&
+      /in words/.test(await page.locator('#tx-preview-body').textContent()), await page.locator('#tx-preview-body').textContent());
     const obx = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
     ok('outbox holds the entry, phase confirmed, digest + human summary present',
       obx.length === 1 && obx[0].phase === 'confirmed' && /^[0-9a-f]{64}$/.test(obx[0].digest) &&
@@ -261,6 +263,10 @@ try {
     ok('network cut at submit: entry stays phase signed — bytes persisted, nothing lost',
       afterCut && afterCut.phase === 'signed' && afterCut.signed_bytes, JSON.stringify(afterCut && afterCut.phase));
     await p6.click('.obx-retry');
+    await p6.waitForFunction(() => ((JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {}).phase !== 'signed', null, { timeout: 30000 });
+    const inFlight = await p6.evaluate(() => { const b = document.querySelector('#outbox-list .obx-retry'); return { btn: b ? b.disabled : 'gone', phase: JSON.parse(localStorage.getItem('bnr_outbox_v1'))[0].phase }; });
+    ok('while a row is still sending, its repainted button stays pressed: a second press cannot start a second send',
+      inFlight.btn === true || (inFlight.btn === 'gone' && inFlight.phase === 'confirmed'), JSON.stringify(inFlight));
     await p6.waitForFunction(() => {
       const e = (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {};
       return e.phase === 'confirmed' || e.phase === 'failed' || e.phase === 'expired';
