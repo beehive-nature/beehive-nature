@@ -7267,7 +7267,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var a = ADAPTERS[rail];
       var color = a.attached ? 'var(--leaf)' : 'var(--amber)';
       var chip = document.createElement('span');
-      chip.style.cssText = 'border:1px solid ' + color + ';color:' + color + ';border-radius:6px;padding:2px 8px;font-size:9.5px';
+      chip.style.cssText = 'border:1px solid ' + color + ';color:' + color + ';border-radius:6px;padding:2px 8px;font-size:12px';   /* reading text: 12px floor */
       /* a.state can carry a worker's own error text: text, never markup */
       chip.textContent = a.attached ? rail + ' ✓ ' + a.caps.capabilities.length + ' caps' : rail + ' — ' + a.state;
       if (i) el.appendChild(document.createTextNode(' '));
