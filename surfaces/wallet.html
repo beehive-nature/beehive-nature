@@ -6948,7 +6948,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       setTimeout(function () {   // after the vendored lane is up
         Promise.resolve(loadAbiUi()).then(function () {
           var out = $('tx-out'); out.style.display = 'block';
-          if (!argsOk) deskSay(out, 'this link did not carry a whole action, so nothing is filled in from it. ', 'compose=' + qp.get('compose') + ' · args=' + (qp.get('args') || '(none)'));
+          if (!argsOk) deskSay(out, parts[1] ? 'this link named the action but not its parts, so its parts are empty here. fill them in, or ' : 'this link did not name a whole action, so only its account is filled in. type the action, or ', 'compose=' + qp.get('compose') + ' · args=' + (qp.get('args') || '(none)'));
           /* a sign link the sheet would not take: its parts are here to read, nothing signs from it */
           else if (linkHash === '#sign-action' && !actParse(linkQS, linkHash)) deskSay(out, 'this link did not carry a whole action, so nothing was signed from it. read every part here, or ', 'the #sign-action link did not carry exactly the fields of ' + qp.get('compose'));
         });
@@ -7001,33 +7001,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* what a composed action does, in words: a registry action says every field it carries,
      a token transfer says its amount and receiver, anything else names itself */
-  function composeWords(contract, action, args) {
-    if (contract === REG && actWhole(action, args)) return lcFirst(ACT_WORDS[action](args).s);
-    if (action === 'transfer' && args && typeof args.quantity === 'string' && typeof args.to === 'string')
-      return 'send ' + args.quantity + ' to ' + args.to + (args.memo ? ', with the memo ' + JSON.stringify(String(args.memo)) : '') + '.';
-    return 'run ' + (action || 'an action') + ' on ' + (contract || 'an account') + ' with the parts shown.';
+  function composeWords(contract, action, args, j4) {
+    var s = (contract === REG && actWhole(action, args)) ? lcFirst(ACT_WORDS[action](args).s)
+      : (action === 'transfer' && args && typeof args.quantity === 'string' && typeof args.to === 'string')
+        ? 'send ' + args.quantity + ' to ' + args.to + (args.memo ? ', with the memo ' + JSON.stringify(String(args.memo)) : '') + '.'
+        : 'run ' + (action || 'an action') + ' on ' + (contract || 'an account') + ' with the parts shown.';
+    /* a test network action says so in every register: it never reads as a Vaulta one */
+    return j4 ? s.replace(/\.$/, '') + ', on the Jungle4 test network.' : s;
   }
-  function composeActor(args) {
-    return netIsJ4() ? $('tx-j4actor').value.trim()
+  function composeActor(args, j4) {
+    if (j4 === undefined) j4 = netIsJ4();
+    return j4 ? $('tx-j4actor').value.trim()
       : String((args && (args.registrant || args.owner || args.from || args.account)) || vacct() || '');
   }
   function composerSigner() { return netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key' }
-  function preview(contract, action, args, signerLine) {
+  /* flow: {j4, actor} of a send already under way, so a register switch mid-flow never redraws it as another network or signer */
+  function preview(contract, action, args, signerLine, flow) {
     args = (args && typeof args === 'object') ? args : {};
-    var actor = composeActor(args);
+    var j4 = flow ? !!flow.j4 : netIsJ4();
+    var actor = (flow && flow.actor) ? String(flow.actor) : composeActor(args, j4);
     var p = $('tx-preview'), b = $('tx-preview-body');
     /* contract, action, actor and args can all come from a link (?compose=…&args=…): text nodes, never markup */
     b.textContent = '';
     var w = document.createElement('div'); w.className = 'tx-words';
-    var words = composeWords(contract, action, args);
+    var words = composeWords(contract, action, args, j4);
     if (actor) w.textContent = words + ' you sign as ' + actor + '.';
     else wlSay(w, [words + ' ', { to: 'connect-sec', t: 'connect your name' }, ' to see who signs it.']);
     b.appendChild(w);
     previewCy('action  ' + contract + ':' + action + '\n' +
-      'auth    ' + (actor || (netIsJ4() ? '(the 12-char test actor above)' : '(connects from your soul)')) + '@active\n' +
+      'auth    ' + (actor || (j4 ? '(the 12-char test actor above)' : '(connects from your soul)')) + '@active\n' +
       'args    ' + JSON.stringify(args) + '\n' +
       'signer  ' + signerLine + '\n' +
-      'network ' + (netIsJ4() ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC'));
+      'network ' + (j4 ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC'));
     p.style.display = 'block';
   }
   /* the preview's raw lines: cypherpunk reads them, bee and raver read the words */
@@ -7112,9 +7117,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('tx-data').addEventListener('input', composerPreview);
   $('tx-contract').addEventListener('input', composerPreview);
   $('tx-action').addEventListener('input', composerPreview);
-  /* leaving cypherpunk leaves its test network: bee and raver sign on Vaulta or not at all */
+  /* leaving cypherpunk leaves its test network: bee and raver sign on Vaulta or not at all. A send
+     already under way keeps the preview of what it signs, on its own network */
   document.addEventListener('bregister', function () {
-    if (document.body.getAttribute('data-reg') !== 'cypherpunk' && $('tx-net').value === 'j4') { $('tx-net').value = 'main'; $('tx-j4row').style.display = 'none'; composerPreview() }
+    if (document.body.getAttribute('data-reg') !== 'cypherpunk' && $('tx-net').value === 'j4') { $('tx-net').value = 'main'; $('tx-j4row').style.display = 'none'; if (!VBUSY) composerPreview() }
   });
 
   /* pushAction is retired: its lane IS the adapter contract now — the worker
@@ -7270,11 +7276,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      Retry resubmits the IDENTICAL stored bytes — never re-signs, never
      rebuilds. intent_id is the idempotency key on every resubmission. */
   var OUTBOX_KEY = 'bnr_outbox_v1';
+  /* what this tab learned about a send that the outbox could not write down (a browser out of room):
+     a node took it, or a block read settled it. It folds into every read of the outbox here, so no
+     press in this tab resends it as new, calls it not sent, or gives its cap back. A small copy rides
+     in sessionStorage, so a reload of this tab keeps it */
+  var OBX_KNOWN_KEY = 'bnr_outbox_known', OBX_KNOWN = {};
+  try { var kn0 = JSON.parse(sessionStorage.getItem(OBX_KNOWN_KEY) || '{}'); if (kn0 && typeof kn0 === 'object' && !Array.isArray(kn0)) OBX_KNOWN = kn0 } catch (e) {}
+  function obxDone(p) { return p === 'confirmed' || p === 'failed' || p === 'expired' }
+  function obxRank(p) { return obxDone(p) ? 2 : p === 'submitted' ? 1 : 0 }
+  function obxKnow(e, what) {
+    var k = OBX_KNOWN[e.intent_id] || {};
+    if (e.ref) k.ref = e.ref;
+    if (e.block_hint) k.block_hint = e.block_hint;
+    if (what && what.phase && obxRank(what.phase) >= obxRank(k.phase || 'signed')) { k.phase = what.phase; k.evidence = what.evidence || null }
+    OBX_KNOWN[e.intent_id] = k;
+    try { sessionStorage.setItem(OBX_KNOWN_KEY, JSON.stringify(OBX_KNOWN)) } catch (x) {}
+  }
+  function obxFold(list) {
+    list.forEach(function (e) {
+      var k = OBX_KNOWN[e.intent_id]; if (!k) return;
+      e.maybe_out = true;
+      if (!e.ref && k.ref) e.ref = k.ref;
+      if (!e.block_hint && k.block_hint) e.block_hint = k.block_hint;
+      if (k.phase && obxRank(k.phase) > obxRank(e.phase)) { e.phase = k.phase; if (k.evidence) e.evidence = k.evidence }
+    });
+    return list;
+  }
   function outboxRead(strict) {
     try {
       var list=JSON.parse(localStorage.getItem(OUTBOX_KEY)||'[]');
       if(!Array.isArray(list)||list.some(function(e){return !e||typeof e.intent_id!=='string'||typeof e.rail!=='string'||typeof e.phase!=='string'}))throw new Error('invalid outbox');
-      return list;
+      return obxFold(list);
     }catch(error){if(strict)throw new Error('The saved outbox is unavailable or unreadable. Submission stopped to protect existing transactions.');return null;}
   }
   function outboxWrite(list) {
@@ -7285,9 +7317,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     try{localStorage.setItem(OUTBOX_KEY,raw);if(localStorage.getItem(OUTBOX_KEY)!==raw)throw new Error('read-back mismatch');}
     catch(error){throw new Error('The outbox could not save the transaction. Submission stopped. Free browser storage and try again.');}
   }
+  /* one intent, one signed copy: a different copy of a send still on its way is never written over
+     it, and a done send keeps its receipt. The caller says nothing new was sent and where it waits */
+  function obxClash(old, e) {
+    var err = new Error('The outbox already holds ' + old.intent_id + ' as ' + old.phase + (old.signed_bytes !== e.signed_bytes ? ' with another signed copy' : '') + '; nothing was written over it and nothing new was sent.');
+    err.clash = old.phase === 'confirmed' ? 'done' : 'pending'; err.held = old;
+    return err;
+  }
+  function obxClashParts(oe, sent) {
+    sent = sent || 'sent';
+    return [oe.clash === 'done' ? 'this was already done, so nothing new was ' + sent + '. ' : 'this same one is already waiting to be sent, so nothing new was ' + sent + '. ',
+      { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: oe.message }];
+  }
   function outboxPut(entry) {
     var list = outboxRead(true);
-    for (var i = 0; i < list.length; i++) if (list[i].intent_id === entry.intent_id) { list[i] = entry; break }
+    for (var i = 0; i < list.length; i++) if (list[i].intent_id === entry.intent_id) {
+      var old = list[i];
+      if ((old.phase === 'signed' || old.phase === 'submitted') && old.signed_bytes && old.signed_bytes !== entry.signed_bytes) throw obxClash(old, entry);
+      if (old.phase === 'confirmed' && entry.phase !== 'confirmed') throw obxClash(old, entry);
+      list[i] = entry; break;
+    }
     if (i === list.length) list.push(entry);
     outboxWrite(list);
     renderOutbox();
@@ -7297,6 +7346,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     for (var i = 0; i < list.length; i++) if (list[i].intent_id === id) return list[i];
     return null;
   }
+  /* a read after the bytes may have left: a read that fails is never said as "nothing was sent" */
+  function obxPeek(id) { try { return outboxGet(id) } catch (x) { return null } }
   function phaseColor(p) {
     return p === 'confirmed' ? 'var(--leaf)' : (p === 'failed' || p === 'expired') ? 'var(--amber)' : 'var(--cyan)';
   }
@@ -7337,35 +7388,36 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     list.forEach(function (e) {
       var row = document.createElement('div'); row.className = 'obx-row'; row.setAttribute('data-id', e.intent_id);
       row.style.cssText = 'border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)';
-      /* what it does, in the words the composer showed; the adapter's own summary is cypherpunk's */
+      /* what it does, in the words the composer showed; the adapter's own summary is cypherpunk's.
+         A Jungle4 entry says its test network in every register */
       var what = document.createElement('div'); what.style.color = 'var(--ink)';
-      wlSay(what, [e.words || e.human_summary || '', e.words && e.human_summary ? { cy: '· ' + e.human_summary } : null]);
+      var w0 = e.words || e.human_summary || '';
+      if (e.network === 'jungle4' && e.words && !/Jungle4/.test(e.words)) w0 = String(e.words).replace(/\.$/, '') + ', on the Jungle4 test network.';
+      wlSay(what, [w0, e.words && e.human_summary ? { cy: '· ' + e.human_summary } : null]);
       var st = document.createElement('div'); st.className = 'obx-stat'; st.setAttribute('role', 'status');
-      var words = (e.phase === 'confirmed' || e.phase === 'failed' || e.phase === 'expired') ? terminalWords(e).filter(function (p) { return typeof p === 'string' || p.to || p.btn })
-        : [(e.phase === 'signed' && e.maybe_out) ? 'it may already be out. sending it again is safe.' : (SAYS[e.phase] || e.phase)];
+      var sendable = !!e.signed_bytes, canRead = obxCanRead(e), again = e.phase === 'submitted' || !!e.maybe_out;
+      var words = obxDone(e.phase) ? terminalWords(e).filter(function (p) { return typeof p === 'string' || p.to || p.btn })
+        : !sendable ? ['it was kept without its signed copy, so it cannot be sent from here. ', { to: 'bal-sec', t: 'see your coins' }]
+        : [(e.phase === 'signed' && e.maybe_out) ? (canRead ? 'it may already be out.' : 'it may already be out. sending it again is safe.') : (SAYS[e.phase] || e.phase)];
       wlSay(st, words.concat([{ cy: e.intent_id + ' · ' + e.rail + ' · ' + e.network + ' · ' + e.phase +
         (e.evidence ? ' · read: ' + (typeof e.evidence === 'string' ? e.evidence : JSON.stringify(e.evidence)) : '') + (e.ref ? ' · tx ' + e.ref : '') }]));
       st.style.color = phaseColor(e.phase);
       row.appendChild(what); row.appendChild(st);
-      if (e.phase === 'signed' || e.phase === 'submitted') {
+      if ((e.phase === 'signed' || e.phase === 'submitted') && sendable) {
         var b = document.createElement('button'); b.type = 'button'; b.className = 'obx-retry'; b.setAttribute('data-id', e.intent_id);
-        /* sent and not yet confirmed: the press reads the chain for it, and only a chain that lacks it gets the same copy again */
-        b.textContent = e.phase === 'submitted' ? 'check again' : e.maybe_out ? 'send it again' : 'send it';
-        b.title = e.phase === 'submitted' ? 'reads the chain for it; if the chain lacks it, the same signed copy goes out again. nothing is signed twice'
+        /* sent before, with a transaction id the chain can be read for: the press reads the chain first, and
+           only a chain that lacks it gets the same copy again. Otherwise the label says what the press does */
+        b.textContent = again ? (canRead ? 'check again' : 'send it again') : 'send it';
+        b.title = again && canRead ? 'reads the chain for it; if the chain lacks it, the same signed copy goes out again. nothing is signed twice'
           : 'the same signed copy goes out; nothing is signed twice';
         b.disabled = !!OBX_BUSY[e.intent_id];
         b.onclick = async function () {
           var id = e.intent_id;
           if (OBX_BUSY[id]) return;
-          OBX_BUSY[id] = true; b.disabled = true;
           try { await retryOutbox(id, st) }
           catch (error) {
             var r0 = obxRow(id), s0 = (r0 && r0.querySelector('.obx-stat')) || st;
-            wlSay(s0, ['the saved copy could not be read, so nothing was sent. ', { btn: 'try again', on: function () { var r1 = obxRow(id), b1 = r1 && r1.querySelector('.obx-retry'); if (b1) b1.click() } }, { cy: (error && error.message) || String(error) }]);
-          }
-          finally {
-            delete OBX_BUSY[id]; b.disabled = false;
-            var r2 = obxRow(id), b2 = r2 && r2.querySelector('.obx-retry'); if (b2) b2.disabled = false;
+            wlSay(s0, sendStopParts(error, function () { var r1 = obxRow(id), b1 = r1 && r1.querySelector('.obx-retry'); if (b1) b1.click() }));
           }
         };
         row.appendChild(b);
@@ -7373,11 +7425,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       el.appendChild(row);
     });
   }
+  /* a row's button follows its send: pressed while that entry is being sent, whichever button started it */
+  function obxPaint(id) { var r = obxRow(id), b = r && r.querySelector('.obx-retry'); if (b) b.disabled = !!OBX_BUSY[id] }
+  /* the chain can be read for it: a kept transaction id, and for Vaulta the block a node took it into */
+  function obxCanRead(e) { return !!(e && e.ref && (e.block_hint || e.rail !== 'vaulta')) }
+  /* a send that stopped part way, said by where it stopped: only a read before anything went out is "nothing was sent" */
+  function sendStopParts(error, again) {
+    var cy = { cy: (error && error.message) || String(error) };
+    return error && error.beforeSend
+      ? ['the saved copy could not be read, so nothing was sent. ', { btn: 'try again', on: again }, cy]
+      : ['something stopped this part way, so this wallet cannot tell yet whether it went out. the signed copy is kept, so sending it again sends that same copy. ', { btn: 'send it again', on: again }, cy];
+  }
   async function retryOutbox(intentId, st) {
-    var e = outboxGet(intentId);
-    if (!e || !e.signed_bytes) {   /* pruned, or kept without its signed copy: nothing can go out from it */
-      var r0 = obxRow(intentId), s0 = (r0 && r0.querySelector('.obx-stat')) || st;
-      if (s0) wlSay(s0, ['this one can no longer be sent, so nothing was sent.', { cy: e ? 'the entry has no signed_bytes' : 'the entry is gone from bnr_outbox_v1' }]);
+    var e;
+    try { e = outboxGet(intentId) } catch (re) { re.beforeSend = true; throw re }
+    if (!e || !e.signed_bytes) {   /* gone (set aside or cleared, maybe in another tab), or kept without its signed copy: nothing can go out from it */
+      renderOutbox();                /* the list shows what is kept now: a row whose entry is gone leaves, with its button */
+      var parts = [e ? 'it was kept without its signed copy, so nothing was sent. ' : 'that one is no longer in this list, so nothing was sent from here. ', { to: 'bal-sec', t: 'see your coins' },
+        { cy: e ? 'the entry has no signed_bytes' : intentId + ' is gone from bnr_outbox_v1 (set aside or cleared, maybe in another tab)' }];
+      var r0 = obxRow(intentId), s0 = r0 && r0.querySelector('.obx-stat'), box = $('outbox-list');
+      if (s0) wlSay(s0, parts);
+      else if (box) { var n = document.createElement('div'); n.className = 'obx-note'; n.setAttribute('role', 'status'); wlSay(n, parts); box.insertBefore(n, box.firstChild) }
       return;
     }
     /* the list re-renders on every outbox write: the line is found again by its entry */
@@ -7387,6 +7455,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (cur) txSay(cur, parts, phase); else if (st && st.isConnected) txSay(st, parts, phase);
     });
   }
+  /* another tab changed the list: this one redraws, so no stale row keeps a live button */
+  window.addEventListener('storage', function (ev) { if (ev.key === OUTBOX_KEY || ev.key === null) renderOutbox() });
 
   /* ── THE VAULT SIGNS (contract §4) — the only key-holding party. The
      adapter's digest is re-derived from the unsigned bytes and CHECKED
@@ -7452,94 +7522,172 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* what a finished entry says when it is pressed again: never sent twice, never moved backward */
   function terminalWords(e) {
+    var ev = e.evidence || {};
     return e.phase === 'confirmed' ? ['done. ' + onRail(e.rail) + ' confirmed it.', { cy: 'confirmed earlier · tx ' + (e.ref || e.txid || '') }]
-      : e.phase === 'failed' ? refusalParts(JSON.stringify(e.evidence || {})).concat([{ cy: 'failed earlier: ' + JSON.stringify(e.evidence || {}) }])
-      : (e.evidence && e.evidence.maybe_in) ? ['its time ran out before this wallet could tell whether it went in. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }]
-      : ['it did not go through in time, so nothing changed. you can make it again.', { cy: 'expired earlier: ' + JSON.stringify(e.evidence || {}) }];
+      : e.phase === 'failed' ? refusalParts(JSON.stringify(ev), e.network).concat([{ cy: 'failed earlier: ' + JSON.stringify(ev) }])
+      : (ev.maybe_in && ev.duplicate) ? ['a node already held it, so it most likely went in. your coins show whether it did. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'expired earlier, after a node answered duplicate: ' + JSON.stringify(ev) }]
+      : ev.maybe_in ? ['its time ran out before this wallet could tell whether it went in. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'expired earlier: ' + JSON.stringify(ev) }]
+      : ['it did not go through in time, so nothing changed. you can make it again.', { cy: 'expired earlier: ' + JSON.stringify(ev) }];
   }
   /* the cap given back once, only for a send the rail proved never ran */
   function capRefund(e) {
-    var live = e && outboxGet(e.intent_id);
+    var live = e && obxPeek(e.intent_id);
     if (!live || !live.cap || live.cap.refunded || !(live.evidence && live.evidence.definite)) return;
+    /* a node took it in this tab and the outbox could not write that down: only a block read gives it back */
+    if (OBX_KNOWN[live.intent_id] && !/^(get_block|GET \/tx)/.test(String(live.evidence.read || ''))) return;
     live.cap.refunded = true; try { outboxPut(live) } catch (x) { return }   /* marked first, so a second flow never gives it back twice */
     if (e.cap) e.cap.refunded = true;
     capRecord(live.cap.unit, -live.cap.amt, live.cap.day);
   }
   function isDuplicate(t) { return /duplicate transaction|tx_duplicate|already in the mempool|already on the weave|already known|already processed/i.test(String(t || '')) }
+  /* a write after a node answered: true, or the error. What the node said is kept in this tab
+     either way (OBX_KNOWN), so the words follow the answer, never the write */
+  function obxKeep(entry, what) {
+    try { outboxPut(entry); return true }
+    catch (x) { if (!x.clash && what) { obxKnow(entry, what); try { renderOutbox() } catch (y) {} } return x }   /* the list redraws from what this tab knows */
+  }
+  function obxUnsaved(w) { return { cy: ' · this browser could not save that: ' + ((w && w.message) || w) + '; this tab keeps what the node said, so nothing here sends it as new or gives its cap back' } }
+  /* every send of one entry, from whichever button pressed it: one at a time in this tab, and the
+     entry's row keeps its button pressed until it ends */
   async function submitAndConfirm(entry, ui) {
-    var say = ui || function () {};
-    var live = outboxGet(entry.intent_id);
+    var id = entry && entry.intent_id, say = ui || function () {};
+    if (OBX_BUSY[id]) {
+      say(['it is being sent right now, so nothing new went out. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'a send of ' + id + ' is already running in this tab; this press started nothing' }], 'submitted');
+      return obxPeek(id) || entry;
+    }
+    OBX_BUSY[id] = true; obxPaint(id);
+    try { return await sendRun(entry, say) }
+    finally { delete OBX_BUSY[id]; obxPaint(id) }
+  }
+  async function sendRun(entry, say) {
+    var live;
+    try { live = outboxGet(entry.intent_id) } catch (re) { re.beforeSend = true; throw re }   /* nothing has gone out on this press yet */
     if (live) entry = live;
-    if (entry.phase === 'confirmed' || entry.phase === 'failed' || entry.phase === 'expired') { say(terminalWords(entry), entry.phase); return entry }
-    var resend = { btn: 'send it again', on: function () { var c = outboxGet(entry.intent_id); if (c) submitAndConfirm(c, say) } };
-    var maybeOut = !!entry.maybe_out || entry.phase === 'submitted' || !!entry.ref;   /* an earlier attempt may already have reached a node */
+    if (obxDone(entry.phase)) { say(terminalWords(entry), entry.phase); return entry }
+    var id = entry.intent_id;
+    var againOn = function () { submitAndConfirm(obxPeek(id) || entry, say).catch(function (er) { say(sendStopParts(er, againOn), 'signed') }) };
+    var resend = { btn: 'send it again', on: againOn };
+    var knownHere = !!OBX_KNOWN[id];   /* a node took it in this tab, and the outbox could not write that down */
+    var maybeOut = !!entry.maybe_out || entry.phase === 'submitted' || !!entry.ref || knownHere;   /* an earlier attempt may already have reached a node */
     /* another flow may have settled it while this one waited: never move a settled entry */
-    var settled = function () { var c = outboxGet(entry.intent_id); if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired')) { say(terminalWords(c), c.phase); return c } return null };
+    var settled = function () { var c = obxPeek(id); if (c && obxDone(c.phase)) { say(terminalWords(c), c.phase); return c } return null };
+    var pastWindow = function () { return !!entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000 };
+    /* a read settled it: said and kept; a failure read from the block is proof, and gives the cap back */
+    var settleRead = function (c) {
+      entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
+      if (c.phase === 'failed') entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true });
+      var w = obxKeep(entry, { phase: entry.phase, evidence: entry.evidence });
+      if (w !== true && w.clash) { var dW = settled(); if (dW) return dW }
+      var ev = JSON.stringify(c.evidence || {});
+      say((c.phase === 'confirmed'
+        ? ['done. ' + onRail(entry.rail) + ' confirmed it.', { cy: 'CONFIRMED by a block read: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref }]
+        : c.phase === 'expired'
+          ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
+          : refusalParts(ev, entry.network).concat([{ cy: 'failed: ' + ev }])).concat(w === true ? [] : [obxUnsaved(w)]), c.phase);
+      if (c.phase === 'failed' && w === true) capRefund(entry);
+      return entry;
+    };
+    /* its window closed and the last read did not find it: most likely it did not go through, but a read
+       of its hinted block is not proof, so the reader checks before sending again. A send a node already
+       answered "duplicate" for is never filed this way */
+    var expireUnseen = function () {
+      if (entry.evidence && entry.evidence.duplicate) return null;
+      entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read', maybe_in: true };
+      entry.updated_at = new Date().toISOString();
+      var w = obxKeep(entry);
+      if (w !== true && w.clash) { var dX = settled(); if (dX) return dX }
+      say(['it did not show up on ' + onRail(entry.rail) + ' before its time ran out, so it most likely did not go through. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' },
+        { cy: 'EXPIRED: the window closed without a confirming block read; only the hinted block was read, so this is not proof' }].concat(w === true ? [] : [obxUnsaved(w)]), 'expired');
+      return entry;
+    };
+    /* sent before, and the chain can be read for its transaction id: read first, and only a chain that
+       lacks it gets the same signed copy again */
+    if (maybeOut && obxCanRead(entry)) {
+      say(['reading ' + onRail(entry.rail) + ' for it…', { cy: 'confirm read of tx ' + entry.ref + (entry.block_hint ? ' in block #' + entry.block_hint : '') + ' before any resend' }], 'submitted');
+      var pre = null;
+      try { pre = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000) } catch (pe) { pre = null }
+      var dP = settled(); if (dP) return dP;
+      if (pre && obxDone(pre.phase)) return settleRead(pre);
+      if (pre && pastWindow()) {   /* read, not there, and its window is over: a resend could only be refused as expired */
+        var xP = expireUnseen(); if (xP) return xP;
+        say(['a node already held it, so it is most likely in, but the chain has not shown it yet. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'a node answered duplicate earlier; the read of its block does not show it and its window is over, so it is not sent again' }], 'submitted');
+        return entry;
+      }
+    }
     say(['sending the signed copy…', { cy: 'submit: the identical stored bytes to the ' + entry.rail + ' rail' + (maybeOut ? ' (again)' : '') }], 'signed');
-    var acked = false;
-    try {
-      var r = await callAdapter(entry.rail, 'submit', { intent_id: entry.intent_id, signed_bytes: entry.signed_bytes }, 20000);
-      acked = true;
+    var r = null, subErr = null, why = '';
+    try { r = await callAdapter(entry.rail, 'submit', { intent_id: id, signed_bytes: entry.signed_bytes }, 20000) }
+    catch (e) { subErr = e || new Error('submit failed'); why = String((e && e.message) || e || '') }
+    if (!subErr) {
       var done0 = settled(); if (done0) return done0;
       entry.ref = r.ref; entry.block_hint = r.block_hint; entry.maybe_out = true;
       entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
-      outboxPut(entry);
-      say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
-    } catch (e) {
-      var why = String((e && e.message) || e || '');
-      if (acked) {   /* a node took the bytes, and this browser could not write that down */
-        var dA = null; try { dA = settled() } catch (x) {} if (dA) return dA;
-        entry.maybe_out = true; entry.updated_at = new Date().toISOString();
-        try { outboxPut(entry) } catch (x) {}
-        say(['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: 'check again', on: resend.on },
-          { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + why + '; the identical bytes are kept, never re-signed' }], 'submitted');
+      var wA = obxKeep(entry, { phase: 'submitted' });
+      if (wA !== true) {   /* a node took the bytes, and this browser could not write that down: this tab keeps it */
+        if (wA.clash) { var dA = settled(); if (dA) return dA }
+        say(['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: obxCanRead(entry) ? 'check again' : 'send it again', on: againOn },
+          { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + ((wA && wA.message) || wA) + '; this tab keeps the ack, so a later press reads or resends the identical bytes as sent, never as new' }], 'submitted');
         return entry;
       }
+      say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
+    } else {
       var done1 = settled(); if (done1) return done1;
-      if (!(e && e.code) && /not attached|never spawned|crashed/i.test(why)) {   // the worker never got the bytes: nothing left this tab
+      if (!subErr.code && /not attached|never spawned|crashed/i.test(why)) {   // the worker never got the bytes: nothing left this tab
         say(['the wallet\u2019s ' + entry.rail + ' part stopped before sending, so nothing went out yet. the signed copy is kept. ', { btn: 'reload the page', on: function () { location.reload() } }, { cy: 'adapter not attached: ' + why }], 'signed');
         return entry;
       }
-      if (e && e.code === -32005) {
+      if (subErr.code === -32005) {
         if (isDuplicate(why)) {                                // a node already holds these exact bytes: they went in
           entry.phase = 'submitted'; entry.ref = entry.ref || entry.txid || null; entry.maybe_out = true;
           entry.evidence = { read: 'send_transaction: duplicate', detail: why, duplicate: true };
           entry.updated_at = new Date().toISOString();
-          outboxPut(entry);
-          say(['this was already sent once, so nothing new was signed. it is most likely in; your balance shows it in a minute. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'duplicate: ' + why }], 'submitted');
-          return entry;
+          var wD = obxKeep(entry, { phase: 'submitted', evidence: entry.evidence });
+          if (wD !== true && wD.clash) { var dD = settled(); if (dD) return dD }
+          say(['this was already sent once, so nothing new was signed. it is most likely in; your balance shows it in a minute. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'duplicate: ' + why }].concat(wD === true ? [] : [obxUnsaved(wD)]), 'submitted');
+          if (!obxCanRead(entry)) return entry;
+          /* its block is known: the read below follows it to done */
         }
-        if (/expired transaction|expired_tx|expiration/i.test(why) && !/too far/i.test(why)) {   // its window is over: never sendable again
+        else if (/expired transaction|expired_tx|expiration/i.test(why) && !/too far/i.test(why)) {   // its window is over: never sendable again
+          var dupBefore = !!(entry.evidence && entry.evidence.duplicate);
           entry.phase = 'expired'; entry.updated_at = new Date().toISOString();
           entry.evidence = { read: 'send_transaction refusal', detail: why, definite: !maybeOut, maybe_in: maybeOut };
-          outboxPut(entry); capRefund(entry);
-          say(terminalWords(entry), 'expired');
+          if (dupBefore) entry.evidence.duplicate = true;
+          var wE = obxKeep(entry);
+          if (wE !== true && wE.clash) { var dE = settled(); if (dE) return dE }
+          if (wE === true) capRefund(entry);
+          say(terminalWords(entry).concat(wE === true ? [] : [obxUnsaved(wE)]), 'expired');
           return entry;
         }
-        if (maybeOut ? authorityNo(why) : definiteNo(why)) {  // the rail evaluated it and refused: nothing ran
+        else if (!knownHere && (maybeOut ? authorityNo(why) : definiteNo(why))) {  // the rail evaluated it and refused: nothing ran
           entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: why, definite: true };
           entry.updated_at = new Date().toISOString();
-          outboxPut(entry); capRefund(entry);
-          say(refusalParts(why).concat([{ cy: 'FAILED: the rail refused: ' + why }]), 'failed');
+          var wF = obxKeep(entry);
+          if (wF !== true && wF.clash) { var dF = settled(); if (dF) return dF }
+          if (wF === true) capRefund(entry);
+          say(refusalParts(why, entry.network).concat([{ cy: 'FAILED: the rail refused: ' + why }]).concat(wF === true ? [] : [obxUnsaved(wF)]), 'failed');
           return entry;
         }
-        say([(maybeOut ? 'this wallet still cannot tell whether it went in; an earlier try may have reached the chain. sending it again is safe. ' : 'the network was busy and did not take it. the signed copy is kept, so it can go out again. '), resend,
-          { cy: 'submit refused without a verdict: ' + why + '; the identical bytes are kept, never re-signed' }], 'signed');
-        return entry;                                          // not proven refused: stay 'signed', the entry is the state
+        else {
+          say([(maybeOut ? 'this wallet still cannot tell whether it went in; an earlier try may have reached the chain. sending it again is safe. ' : 'the network was busy and did not take it. the signed copy is kept, so it can go out again. '), resend,
+            { cy: 'submit refused without a verdict: ' + why + '; the identical bytes are kept, never re-signed' }], 'signed');
+          return entry;                                        // not proven refused: stay 'signed', the entry is the state
+        }
       }
-      entry.maybe_out = true; entry.updated_at = new Date().toISOString();   /* the answer was lost: the bytes may be out */
-      try { outboxPut(entry) } catch (x) {}
-      say(['the network did not answer, so this wallet cannot tell yet whether it went out. the signed copy is kept. ', resend,
-        { cy: 'submit faulted (' + why + '); the signed bytes are persisted and sending again resubmits them identically, never re-signs; a node that already has them answers duplicate' }], 'signed');
-      return entry;                                          // network class: stay phase 'signed'; the entry IS the state
+      else {
+        entry.maybe_out = true; entry.updated_at = new Date().toISOString();   /* the answer was lost: the bytes may be out */
+        obxKeep(entry, {});
+        say(['the network did not answer, so this wallet cannot tell yet whether it went out. the signed copy is kept. ', resend,
+          { cy: 'submit faulted (' + why + '); the signed bytes are persisted and sending again resubmits them identically, never re-signs; a node that already has them answers duplicate' }], 'signed');
+        return entry;                                          // network class: stay phase 'signed'; the entry IS the state
+      }
     }
     /* non-terminal chatter only speaks while this flow owns the entry — an
        in-flight confirm may return after another flow (a retry, a tampered
        window) already finished it, and the last honest message must stay
        the last on screen */
     var speak = function (msg, ph) {
-      var c = outboxGet(entry.intent_id);
-      if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') && c !== entry) return;
+      var c = obxPeek(id);
+      if (c && obxDone(c.phase)) return;
       say(msg, ph);
     };
     var readOk = false;
@@ -7547,42 +7695,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       await new Promise(function (r2) { setTimeout(r2, 2200) });
       /* the outbox is the state, not this closure: if another flow (a retry,
          a tampered window) moved the entry, this loop yields to it */
-      var cur = outboxGet(entry.intent_id);
-      if (cur && cur.phase !== entry.phase) {
-        if (cur.phase === 'confirmed' || cur.phase === 'failed' || cur.phase === 'expired') return cur;
-        entry.expires_at = cur.expires_at;      // adopt the live window
+      var cur = obxPeek(id);
+      if (cur) {
+        if (obxDone(cur.phase)) return cur;
+        if (cur.expires_at) entry.expires_at = cur.expires_at;      // adopt the kept window
       }
       try {
         var c = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000);
         readOk = true;
-        if (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') {
-          entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
-          outboxPut(entry);
-          var ev = JSON.stringify(c.evidence || {});
-          say(c.phase === 'confirmed'
-            ? ['done. ' + onRail(entry.rail) + ' confirmed it.', { cy: 'CONFIRMED by a block read: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref }]
-            : c.phase === 'expired'
-              ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
-              : refusalParts(ev).concat([{ cy: 'failed: ' + ev }]),
-            c.phase);
-          if (c.phase === 'failed') { entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true }); outboxPut(entry); capRefund(entry) }   /* a block read that shows it failed is proof */
-          return entry;
-        }
+        if (obxDone(c.phase)) return settleRead(c);
         speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'submitted; the rail read says not visible yet (' + (c.evidence && c.evidence.read) + '); reading again' }], 'submitted');
       } catch (e2) {
         readOk = false;
         speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'confirm read faulted (' + ((e2 && e2.message) || e2) + '); retrying the rail read; the bytes are safe in the outbox' }], 'submitted');
       }
-      /* its window is over and the last read answered without it: most likely it did not go through,
-         but a read of its hinted block is not proof, so the reader checks before sending again */
-      if (readOk && entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000) {
-        entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read', maybe_in: true };
-        entry.updated_at = new Date().toISOString();
-        outboxPut(entry);
-        say(['it did not show up on ' + onRail(entry.rail) + ' before its time ran out, so it most likely did not go through. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' },
-          { cy: 'EXPIRED: the window closed without a confirming block read; only the hinted block was read, so this is not proof' }], 'expired');
-        return entry;
-      }
+      if (readOk && pastWindow()) { var xL = expireUnseen(); if (xL) return xL; break }
     }
     speak(['sent, but ' + onRail(entry.rail) + ' has not confirmed it yet. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'still submitted after the read window; the entry stays in the outbox and its evidence updates on any later read' }], 'submitted');
     return entry;
@@ -7645,7 +7772,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       wlSay(out, ['it could not be prepared, so nothing was signed. ', again, { cy: 'build failed: ' + ((e && e.message) || e) }]);
       return null;
     }
-    preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
+    preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key', { j4: net === 'jungle4', actor: auth && auth[0] && auth[0].actor });
     previewCy('intent  ' + intent.intent_id + '\ndigest  ' + String(intent.digest).slice(0, 32) + '…\nin words ' + intent.human_summary);
     wlSay(out, ['signing…', { cy: 'the vault signs the digest' }]);
     var sgn, so = opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : {});
@@ -7670,7 +7797,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     var entry = {
       intent_id: intent.intent_id, rail: 'vaulta', network: net,
-      human_summary: intent.human_summary, words: composeWords(contract, action, data), digest: intent.digest,
+      human_summary: intent.human_summary, words: composeWords(contract, action, data, net === 'jungle4'), digest: intent.digest,
       unsigned_bytes: intent.unsigned_bytes,
       signed_bytes: JSON.stringify({ network: net, packed_hex: intent.packed_hex, signatures: sgn.signatures }),
       phase: 'signed', ref: null, block_hint: null,
@@ -7678,7 +7805,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
     try{outboxPut(entry)}catch(error){                       // PERSIST BEFORE SUBMIT — the law
-      out.setAttribute('data-fail', /unavailable|unreadable/i.test(error.message || '') ? 'outbox' : 'store');
+      out.setAttribute('data-fail', error.clash ? (error.clash === 'done' ? 'clash-done' : 'clash') : /unavailable|unreadable/i.test(error.message || '') ? 'outbox' : 'store');
       outboxFail(out, error, again.on);
       return null;
     }
@@ -7804,16 +7931,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     setTimeout(function(){ try{ $('pay-sw').click(); if(!SW_BUY)$('sw-dir').click(); $('sw-amt').focus() }catch(e){} },80);
   }
   /* the same refusal as a status line's parts, with its one action */
-  function refusalParts(t){
+  function refusalParts(t,net){
     var k=refusalKind(t), w=lcAll(actRefusal(t)+' Nothing changed.')+' ';
+    /* a Jungle4 refusal never offers a mainnet act (the swap spends real A, the bridge changes a real account) */
+    if(net==='jungle4'&&(k==='ram'||k==='key'))return [(k==='ram'?'the test account needs more RAM on the Jungle4 test network':'the test account on Jungle4 did not accept the test key')+'. nothing changed. ',{to:'composer-sec',t:'open the composer'}];
     if(k==='ram')return [w,{btn:'buy RAM with A',on:ramBuyOpen}];
     if(k==='key')return [w,{to:'bridge-sec',t:'let this wallet sign for it'}];
     if(k==='busy')return [w+'try again in a while.'];
     if(k==='late')return [w+'you can make it again.'];
     return [w];
   }
+  /* a link drawn outside the page's own anchors (the sign sheet) lands like any #section link: the
+     wallet's router opens its task, unfolds a folded target, and never leaves the reader on a hidden one */
+  function actLand(to){
+    var l=document.createElement('a'); l.href='#'+to; l.hidden=true; document.body.appendChild(l);
+    try{ l.click() }finally{ l.remove() }
+  }
   function actSheet(again){
     var a=(again&&again.contract)?again:actParse(); if(!a||$('act-sheet'))return;
+    if(!(again&&again.contract))ACT_PEND=null;   /* a fresh link drops any action that was left waiting for a name */
     /* a sheet that comes back once the name is connected never starts by itself: it waits for the press */
     var auto=(again&&again.contract)?false:actIntentOk(a);
     // read once: a reload or a later hash change never reopens or re-signs it
@@ -7884,24 +8020,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(busy)return;
       var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',['That is not a whole private key, so nothing was sent. Copy '+actor+'\u2019s whole active key again and paste it here.',{cy:(e&&e.message)||String(e)}]); return } finally{ pasteIn.value='' }
       busy=true; pasteGo.disabled=true; tell('busy',['Signing with that key…']);
+      var hold=false;
       try{
         if(actor!==vacct())throw new Error('This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.');
-        await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
-        tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
+        var r=await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
+        /* an earlier paste taken as landed from the account alone: its action is not read back here */
+        if(r&&r.earlier) tellKeyOnly(r.tx); else tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
         pasteRow.hidden=true;
       }catch(e){ k=null;
         if(e&&e.capRefused) tell('fail',e.capKind==='unsized'?['The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.',{cy:e.message}]:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'},{cy:e.message}]);
-        /* this paste went out, or may have: the one next step reads the account, it never pastes or signs again */
-        else if(e&&/^(late|unknown)$/.test(e.brKind||'')) tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]);
+        /* this paste went out, may have, or an earlier one may still go in: the one next step reads the account,
+           it never pastes or signs again, and the paste field waits until the account says it is safe */
+        else if(e&&/^(late|unknown|held)$/.test(e.brKind||'')){ hold=true; tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]) }
         else tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]);
       }
-      finally{ busy=false; pasteGo.disabled=false }
+      finally{ busy=false; pasteGo.disabled=hold; pasteIn.disabled=hold }
     };
     pasteRow.appendChild(pasteIn); pasteRow.appendChild(pasteGo);
     [h,say,go,pasteRow,st,rd,back].forEach(function(n){sg.appendChild(n)});
     d.appendChild(sg); document.body.appendChild(d);
     document.documentElement.style.overflow='hidden';
-    function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to)location.hash=to }
+    /* any way off the sheet but its "connect it" drops an action left waiting for a name */
+    function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to!=='connect-sec')ACT_PEND=null }
     // a status line: words; links that close the sheet onto a wallet section (or open the name desk);
     // a button that stays on the sheet; and the raw detail, which only cypherpunk shows
     function tell(kind,parts){
@@ -7914,19 +8054,33 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var l=document.createElement('a'); l.textContent=x.t;
         if(x.href){ l.href=x.href; st.appendChild(l); return }
         l.href='#'+x.to;
-        l.onclick=function(ev){ ev.preventDefault(); actClose(x.to); if(x.then)try{ x.then() }catch(e){} };
+        l.onclick=function(ev){ ev.preventDefault(); actClose(x.to);
+          /* x.first runs before the landing (a read that makes the target show); the wallet's router lands it */
+          Promise.resolve(x.first?x.first():null).catch(function(){}).then(function(){ actLand(x.to); if(x.then)try{ x.then() }catch(e){} }) };
         st.appendChild(l);
       });
     }
     var busy=false;
     /* a paste that went out but is not seen yet: read the account again, never paste or sign again */
+    /* the account carries this wallet's key: that is all an account read proves. Whether the paste's own
+       transaction, and the action it carried, went in shows on the name desk */
+    function tellKeyOnly(tx){
+      tell('done',['This wallet now signs for '+vacct()+', and the name desk shows whether '+a.data.domain_name+'.b changed. ',{href:back.href,t:'see '+a.data.domain_name+'.b on the name desk'},
+        {cy:'the account carries this wallet\u2019s key; '+(tx?'tx '+tx:'the paste\u2019s transaction')+' was not read back, so its '+a.action+' is not confirmed here'}]);
+    }
     async function recheck(){
-      if(busy)return; busy=true; pasteGo.disabled=true;
+      if(busy)return; busy=true; pasteGo.disabled=true; pasteIn.disabled=true;
       tell('busy',['Checking '+vacct()+'…']);
       try{ await checkBridge() }catch(x){}
-      busy=false; pasteGo.disabled=false;
-      if(BRIDGED===true){ tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']); pasteRow.hidden=true; return }
-      tell('wait',[vacct()+' does not show this wallet yet. Check again in a minute. ',{btn:'check again',on:recheck}]);
+      busy=false;
+      var acct=vacct(), p=BR_PENDING&&BR_PENDING.acct===acct?BR_PENDING:null;
+      if(BRIDGED===true){ pasteRow.hidden=true; tellKeyOnly(p&&p.tx); return }
+      if(BRIDGED===null){ tell('wait',['Could not read '+acct+' just now. ',{btn:'check again',on:recheck}]); return }
+      /* the bridge lane's own window: a paste may still go in until its time is over (a day, for one that added no key) */
+      if(p&&(Date.now()<p.exp+30000||(!p.adds&&Date.now()<p.exp+86400000))){ tell('wait',[acct+' does not show this wallet yet, and the paste may still go in. Check again in a minute. ',{btn:'check again',on:recheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]); return }
+      /* its window is over and the account, read, lacks this wallet's key: it did not go in. The bridge lane reads it again before the next paste signs */
+      pasteGo.disabled=false; pasteIn.disabled=false;
+      tell('fail',['It did not go in, so nothing changed. Paste '+acct+'\u2019s active key again to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+acct:acct+'@active does not carry this wallet\u2019s key'}]);
     }
     function outboxIds(){ return (outboxRead()||[]).map(function(e){ return e.intent_id }) }
     async function run(isAuto){
@@ -7946,13 +8100,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(res==='paste'){ go.hidden=true; pasteRow.hidden=false; pasteIn.focus() }
     }
     go.onclick=function(){ run(false) };
-    if(auto) run(true); else go.focus();
+    /* a sheet that came back after the name was connected waits for its press: Sign is not focused for it */
+    if(auto) run(true); else if(again&&again.contract){ h.tabIndex=-1; h.focus() } else go.focus();
   }
   async function actRun(a,actor,w,tell,isAuto){
     if(!window.BZDIDKEY||!BN){tell('fail',['This page did not finish loading, so nothing was signed. Press it again on the name desk. ',{href:'bnames.html',t:'go back to the name desk'}]);return 'stop'}
     if(!SOUL){
-      /* the sheet comes back by itself once the name is connected, and waits for its press */
-      try{ sessionStorage.setItem(ACT_PENDING,JSON.stringify({contract:a.contract,action:a.action,data:a.data,at:Date.now()})) }catch(e){}
+      /* the sheet comes back once the reader connects a name on this page, and waits for its press */
+      ACT_PEND={contract:a.contract,action:a.action,data:a.data,at:Date.now()};
       tell('fail',['Connect your name first, and this comes back so you can sign it. ',{to:'connect-sec',t:'connect it'}]);return 'fail'}
     // whose action is it? asked before any passkey
     tell('busy',['Checking '+SOUL+'.b…']);
@@ -7999,30 +8154,37 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         start:['The wallet\u2019s Vaulta part did not start, so nothing was signed. Press it again on the name desk. ',desk],
         build:['It could not be prepared just now, so nothing was signed. Press Sign to try again.'],
         cap:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'}],
+        clash:['This same action is already waiting to be sent, so nothing new was sent. ',{to:'outbox-sec',t:'see it in waiting to be sent'}],
+        'clash-done':['This was already done, so nothing new was sent. ',{to:'outbox-sec',t:'see it in waiting to be sent'}],
         'cap-unsized':['The price could not be read just now, so your daily cap cannot be checked. Press Sign to try again.']};
       var raw=$('tx-out')&&$('tx-out').querySelector('.wl-cyd');
       tell('fail',(says[why]||['The network did not answer, so nothing was signed. Press Sign to try again.']).concat([{cy:raw?raw.textContent.trim():''}]));
-      return /^(sign-digest|start|outbox)$/.test(why)?'stop':'fail';
+      return /^(sign-digest|start|outbox|clash|clash-done)$/.test(why)?'stop':'fail';
     }
     if(entry.phase==='confirmed'){tell('done',['Done. '+w.d+' The chain confirmed it.']);return 'done'}
     if(entry.phase==='failed'){
       var det=(entry.evidence&&entry.evidence.detail)||JSON.stringify(entry.evidence||{}), rk=refusalKind(det);
-      tell('fail',[actRefusal(det)+' Nothing changed. ',rk==='ram'?{to:'pay-sec',t:'buy RAM with A',then:ramBuyOpen}:rk==='key'?{to:'bridge-sec',t:'let this wallet sign for it'}:null,{cy:det}]);
+      tell('fail',[actRefusal(det)+' Nothing changed. ',rk==='ram'?{to:'pay-sec',t:'buy RAM with A',then:ramBuyOpen}:rk==='key'?{to:'bridge-sec',t:'let this wallet sign for it',first:function(){ return checkBridge() }}:null,{cy:det}]);
       return 'fail'}
     if(entry.phase==='expired'&&entry.evidence&&entry.evidence.maybe_in){tell('fail',['Its time ran out before this wallet could tell whether it went in, so check before you sign again. ',{to:'outbox-sec',t:'see it in waiting to be sent'}]);return 'held'}
     if(entry.phase==='expired'){tell('fail',['It did not land in time, so nothing changed. Press Sign to try again.']);return 'fail'}
+    /* a lost answer: it may already be on chain, so it is never said as not gone out */
+    if(entry.phase==='signed'&&entry.maybe_out){tell('wait',['The network did not answer, so this wallet cannot tell yet whether it went out. It keeps the signed copy, and sending it again sends that same copy. ',{to:'outbox-sec',t:'send it from waiting to be sent'}]);return 'held'}
     if(entry.phase==='signed'){tell('fail',['It was signed, but it did not go out. This wallet keeps the signed copy. ',{to:'outbox-sec',t:'send it from waiting to be sent'}]);return 'held'}
     tell('wait',['Sent. The chain has not confirmed it yet. ',{to:'outbox-sec',t:'see it in waiting to be sent'}]);
     return 'held';
   }
   window.addEventListener('load',function(){ setTimeout(actSheet,0) });
-  /* a sheet left to connect the name comes back once the name is connected, and waits for its press */
-  var ACT_PENDING='bnr_act_pending';
+  /* a sheet left to connect the name comes back once the reader connects a name on this page, and waits
+     for its press. It is kept in this page only: a reload, a fresh link, or any way off the sheet but its
+     "connect it" drops it, so it never comes back over another action or after the reader left it */
+  var ACT_PEND=null;
+  try{ sessionStorage.removeItem('bnr_act_pending') }catch(e){}   /* an older page kept it across loads: dropped, never resumed */
   document.addEventListener('bnr-soul',function(ev){
-    if(!ev.detail||!ev.detail.soul)return;
-    var p=null; try{ p=JSON.parse(sessionStorage.getItem(ACT_PENDING)||'null'); sessionStorage.removeItem(ACT_PENDING) }catch(e){}
-    if(!p||typeof p.at!=='number'||Date.now()-p.at>1800000||p.contract!==REG||!ACT_WORDS.hasOwnProperty(p.action)||!actWhole(p.action,p.data))return;
-    setTimeout(function(){ actSheet({contract:p.contract,action:p.action,data:p.data,intent:''}) },300);
+    if(!ev.detail||!ev.detail.soul||!ACT_PEND)return;
+    var p=ACT_PEND; ACT_PEND=null;
+    if($('act-sheet')||Date.now()-p.at>1800000||p.contract!==REG||!ACT_WORDS.hasOwnProperty(p.action)||!actWhole(p.action,p.data))return;
+    setTimeout(function(){ if(!$('act-sheet'))actSheet({contract:p.contract,action:p.action,data:p.data,intent:''}) },300);
   });
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=5');   // document-relative: same dir as this page
@@ -8132,6 +8294,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     };
     try { outboxPut(entry) }
     catch (oe) {
+      if (oe && oe.clash) { say(obxClashParts(oe, 'published'), 'failed'); return null }
       if (/unavailable|unreadable/i.test(oe.message)) say(['the list of things waiting to be sent cannot be read on this device, so nothing was published to keep it safe. ', { to: 'outbox-sec', t: 'open waiting to be sent' }, { cy: 'outbox read failed: ' + oe.message }], 'failed');
       else say(['this browser is out of room for the signed copy, so nothing was published. free some browser storage, then ', again, { cy: 'outbox write failed: ' + oe.message }], 'failed');
       return null;
@@ -9035,6 +9198,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* the saved outbox cannot be read, or this browser is out of room: said honestly, never a re-sign loop */
   function outboxFail(st,oe,again){
+    if(oe&&oe.clash){ wlSay(st,obxClashParts(oe)); return }
     if(/unavailable|unreadable/i.test((oe&&oe.message)||'')) wlSay(st,['the list of things waiting to be sent cannot be read on this device, so nothing was sent. ',{to:'outbox-sec',t:'open waiting to be sent'},{cy:'outbox read failed: '+oe.message}]);
     else wlSay(st,['this browser is out of room for the signed copy, so nothing was sent. free some browser storage, then ',{btn:'try again',on:again},{cy:'outbox write failed: '+((oe&&oe.message)||oe)}]);
   }

@@ -112,6 +112,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
         (state.posts = state.posts || []).push(body.packed_trx);
         if (state.slowSend) await new Promise(r => setTimeout(r, state.slowSend));
+        if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
         if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         state.submits++; state.packed = body.packed_trx;
@@ -266,6 +267,144 @@ try {
     await page.waitForTimeout(600);
     s = await sheet(page);
     ok('once the name is connected the same action comes back in words and waits for the press: no passkey, nothing sent', !!s && s.h === 'Renew king.b' && s.say === 'Renew king.b for 365 days. You sign as kingbeelovis.' && !s.goHidden && s.cred === 0 && state.submits === 0 && !s.stat, JSON.stringify(s));
+    ok('a sheet that came back is not pressed for the reader: Sign is not focused', await page.evaluate(() => !!document.getElementById('act-sheet') && (document.activeElement || {}).id !== 'act-go'), await page.evaluate(() => (document.activeElement || {}).id));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C3 · an action left waiting for a name stays in its page: never on the next load, never over another link */
+  {
+    console.log('C3 · a waiting action never comes back by itself:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(sheetUrl(RENEW), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await page.click('#act-go');
+    await settled(page);
+    ok('no name connected: nothing about the action is written into the tab\'s storage', await page.evaluate(() => sessionStorage.getItem('bnr_act_pending')) === null);
+    /* the reader walks away; another page of this site remembers the name */
+    await page.evaluate(() => localStorage.setItem('bnr_soul', 'king'));
+    await page.goto(ORIGIN + '/surfaces/wallet.html', { waitUntil: 'load' });
+    await page.waitForFunction(() => /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    await page.waitForTimeout(900);
+    ok('the next wallet load opens no sheet: the action the reader walked away from is gone', await page.evaluate(() => !document.getElementById('act-sheet')) && state.submits === 0);
+    /* a waiting action an older page kept in this tab is dropped on load, never opened */
+    await page.evaluate(d => sessionStorage.setItem('bnr_act_pending', JSON.stringify({ contract: 'kingbeelovis', action: 'renew', data: d, at: Date.now() })), RENEW);
+    await page.goto(sheetUrl({ owner: 'kingbeelovis', domain_name: 'king', days: 30 }), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await page.waitForTimeout(900);
+    const s = await sheet(page);
+    ok('a fresh link opens its own action only, never an older one over it', s && s.say === 'Renew king.b for 30 days. You sign as kingbeelovis.' && await page.evaluate(() => document.querySelectorAll('#act-sheet').length === 1 && sessionStorage.getItem('bnr_act_pending') === null), JSON.stringify(s));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* the reader opens a link with no name, presses connect it, connects the keychain and the name on the
+     same page: the action comes back and waits for its press, with this wallet's keychain in tab memory */
+  const backAfterConnect = async (page, state, keys) => {
+    await page.goto(sheetUrl(RENEW), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await page.click('#act-go');
+    await settled(page);
+    await page.click('#act-stat a[href="#connect-sec"]');
+    await page.waitForFunction(() => !document.getElementById('act-sheet'), null, { timeout: 5000 });
+    state.keys.kingbeelovis = keys || [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.fill('#wq', 'king'); await page.click('#wgo');
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await page.waitForTimeout(400);
+  };
+  const stateAfter = page => page.waitForFunction(() => /^(done|fail|wait)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 45000 });
+
+  /* C4 · a lost answer on the sheet is said as unknown, never as "did not go out" */
+  {
+    console.log('C4 · a lost answer on the sheet:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await backAfterConnect(page, state);
+    state.abortN = 2;
+    await page.click('#act-go');
+    await stateAfter(page);
+    const s = await sheet(page);
+    ok('a lost answer: this wallet cannot tell yet whether it went out, with its one link, and no second Sign',
+      /^The network did not answer, so this wallet cannot tell yet whether it went out\./.test(s.stat) && !/did not go out/.test(s.stat) && s.goHidden && await page.evaluate(() => !!document.querySelector('#act-stat a[href="#outbox-sec"]')), JSON.stringify(s));
+    await page.click('#act-stat a[href="#outbox-sec"]');
+    await page.waitForTimeout(500);
+    const row = await page.evaluate(() => ({ view: document.body.getAttribute('data-wl-view'), stat: (document.querySelector('#outbox-list .obx-stat') || {}).innerText, btn: (document.querySelector('#outbox-list .obx-retry') || {}).textContent }));
+    ok('its link lands on waiting to be sent, where the row says it may be out and its button says what it does', row.view === 'move' && /^it may already be out\. sending it again is safe\./.test(row.stat || '') && row.btn === 'send it again', JSON.stringify(row));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C5 · the sheet's links land through the wallet's router: a key refusal reads the account first, so the bridge shows */
+  {
+    console.log('C5 · a key refusal lands on the bridge:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await backAfterConnect(page, state);
+    state.refuse = 'missing authority of kingbeelovis';
+    await page.click('#act-go');
+    await stateAfter(page);
+    const s = await sheet(page);
+    ok('the chain refused the key: one sentence and its one link', /^The account did not accept this wallet\u2019s key\. Nothing changed\./.test(s.stat) && await page.evaluate(() => !!document.querySelector('#act-stat a[href="#bridge-sec"]')), JSON.stringify(s));
+    state.keys.kingbeelovis = [STRANGER_KEY];   // the account no longer carries this wallet's key
+    await page.click('#act-stat a[href="#bridge-sec"]');
+    await page.waitForFunction(() => document.getElementById('bridge-sec').style.display === 'block', null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    const land = await page.evaluate(() => { const b = document.getElementById('bridge-sec'); return { view: document.body.getAttribute('data-wl-view'), shown: b.style.display !== 'none' && b.getClientRects().length > 0, paste: !!document.getElementById('br-paste'), sheet: !!document.getElementById('act-sheet') }; });
+    ok('let this wallet sign for it lands on the bridge, shown, with its paste field (never on a hidden section)', land.view === 'key' && land.shown && land.paste && !land.sheet, JSON.stringify(land));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C6 · a paste the network lost: check again reads the account, and says when the paste is safe to make again */
+  {
+    console.log('C6 · a lost paste, read until it is safe to paste again:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await backAfterConnect(page, state, [DEV_PUB]);
+    await page.click('#act-go');
+    await page.waitForFunction(() => !document.getElementById('act-paste').hidden, null, { timeout: 40000 });
+    const k1 = await k1Of(page, 'vaulta:kingbeelovis');
+    state.abortN = 2;
+    await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go');
+    await stateAfter(page);
+    const lockedNow = () => page.evaluate(() => document.getElementById('act-key').disabled && document.getElementById('act-paste-go').disabled);
+    let s = await sheet(page);
+    ok('a paste the network lost: its one button reads the account, and the paste field waits', /cannot tell yet/.test(s.stat) && await page.textContent('#act-stat button.wl-act') === 'check again' && await lockedNow(), JSON.stringify(s));
+    await page.click('#act-stat button.wl-act'); await stateAfter(page);
+    s = await sheet(page);
+    ok('inside its window: it may still go in, check again, the field still waits', /^kingbeelovis does not show this wallet yet, and the paste may still go in\./.test(s.stat) && await lockedNow(), JSON.stringify(s));
+    await page.evaluate(() => { const real = Date.now.bind(Date); Date.now = () => real() + 200000; });   // its window and grace are over
+    await page.click('#act-stat button.wl-act'); await stateAfter(page);
+    s = await sheet(page);
+    ok('once its window is over and the account lacks the key: it did not go in, and the paste can be made again', /^It did not go in, so nothing changed\. Paste kingbeelovis\u2019s active key again to try once more\./.test(s.stat) && await page.evaluate(() => !document.getElementById('act-key').disabled && !document.getElementById('act-paste-go').disabled), JSON.stringify(s));
+    state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go');
+    await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
+    s = await sheet(page);
+    ok('the paste made again lands once: added and renewed', s.state === 'done' && /^Done\. king\.b is renewed for 365 days\./.test(s.stat) && state.submits === 1, JSON.stringify(s) + ' submits ' + state.submits);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C7 · the account shows this wallet's key from another way: the sheet says only what that proves */
+  {
+    console.log('C7 · a key that arrived another way proves only the key:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await backAfterConnect(page, state, [DEV_PUB]);
+    await page.click('#act-go');
+    await page.waitForFunction(() => !document.getElementById('act-paste').hidden, null, { timeout: 40000 });
+    const k1 = await k1Of(page, 'vaulta:kingbeelovis');
+    state.abortN = 2;
+    await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go');
+    await stateAfter(page);
+    state.keys.kingbeelovis = [DEV_PUB, k1];   // another tab let this wallet sign, with no action
+    await page.click('#act-stat button.wl-act'); await stateAfter(page);
+    const s = await sheet(page);
+    ok('check again finds the key: it says this wallet signs now and sends the reader to the name desk, never that the renew is done',
+      /^This wallet now signs for kingbeelovis, and the name desk shows whether king\.b changed\./.test(s.stat) && !/renewed/.test(s.stat) && await page.evaluate(() => /bnames\.html/.test((document.querySelector('#act-stat a') || {}).href || '')), JSON.stringify(s));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

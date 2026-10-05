@@ -67,6 +67,8 @@ function mockChain(ctx, opts = {}) {
       if (u.pathname === '/tx' && route.request().method() === 'POST') {
         const body = JSON.parse(route.request().postData());
         if (!body.signature || !body.id || !body.owner) return route.fulfill({ status: 400, headers: cors, body: 'malformed tx' });
+        state.arPosts = (state.arPosts || 0) + 1;
+        if (state.arAbort > 0) { state.arAbort--; return route.abort('connectionfailed'); }   // the gateway took it, or not: the answer is lost
         state.arAccepted = body.id;                                  // idempotent by id — the rail's own dedupe
         return route.fulfill({ status: 202, headers: cors, body: '' });
       }
@@ -110,9 +112,11 @@ function mockChain(ctx, opts = {}) {
         return json({ error: { details: [{ message: 'malformed tx body — packing or signature missing' }] } }, 400);
       if (state.abortsRemaining > 0) { state.abortsRemaining--; return route.abort('connectionfailed'); }   // the whole rail is cut — rotation cannot walk around it
       state.submits++;
+      if (state.slowMs) await new Promise(r => setTimeout(r, state.slowMs));   // an answer that takes its time: a second press lands while it runs
+      if (state.beforeAck) await state.beforeAck();                           // what happens in the page between the send and its answer
       let txid = state.byPacked.get(body.packed_trx);
       if (!txid) { txid = 'MOCKTXID' + body.packed_trx.slice(0, 16); state.byPacked.set(body.packed_trx, txid); state.head = 123499; }
-      return json({ transaction_id: txid, processed: { block_num: 123460, status: 'executed' } });
+      return json({ transaction_id: txid, processed: state.noHint ? { status: 'executed' } : { block_num: 123460, status: 'executed' } });
     }
     return json({});
   });
@@ -197,12 +201,15 @@ try {
     ok('CONFIRMED only from the block read, evidence names what was read (kept for cypherpunk)',
       /done\. the chain confirmed it/.test(out) && /CONFIRMED by a block read: get_block #123460/.test(outRaw) && /MOCKTXID/.test(outRaw), outRaw.slice(0, 160));
     ok('the intent is previewed in words before the go (the words for every register, the raw lines for cypherpunk)',
-      /^run commit on banchor22222 with the parts shown\. you sign as banchor22222\.$/.test(await cp.locator('#tx-preview-body .tx-words').textContent()) &&
+      /^run commit on banchor22222 with the parts shown, on the Jungle4 test network\. you sign as banchor22222\.$/.test(await cp.locator('#tx-preview-body .tx-words').textContent()) &&
       /in words/.test(await cp.locator('#tx-preview-body').textContent()), await cp.locator('#tx-preview-body').textContent());
     const obx = await cp.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
     ok('outbox holds the entry, phase confirmed, digest + human summary present',
       obx.length === 1 && obx[0].phase === 'confirmed' && /^[0-9a-f]{64}$/.test(obx[0].digest) &&
       /Vaulta action banchor22222::commit/.test(obx[0].human_summary), JSON.stringify(obx[0] && { phase: obx[0].phase }));
+    const rowWords = await cp.evaluate(() => { const r = document.querySelector('#outbox-list .obx-row'); const was = document.body.getAttribute('data-reg'); document.body.setAttribute('data-reg', 'bee');
+      const t = r ? r.firstElementChild.innerText : ''; document.body.setAttribute('data-reg', was); return t; });
+    ok('a Jungle4 row says its test network in words a bee reader sees', /^run commit on banchor22222 with the parts shown, on the Jungle4 test network\./.test(rowWords), rowWords);
     ok('signed bytes persisted BEFORE submit (order provable: signatures present with the packed tx)',
       !!(obx[0] && obx[0].signed_bytes) && JSON.parse(obx[0].signed_bytes).signatures.length === 1 &&
       JSON.parse(obx[0].signed_bytes).packed_hex.length > 100);
@@ -316,15 +323,17 @@ try {
       const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[l.length - 1].expires_at = new Date(Date.now() - 120000).toISOString();   // past the 30s grace — the honest terminal is due
       localStorage.setItem('bnr_outbox_v1', JSON.stringify(l));
     });
-    await p7.click('.obx-retry');
+    /* the flow that sent it still holds its row (one send at a time per entry): its button stays pressed, and that flow reads the closed window */
+    ok('while the sending flow still reads the chain, the row\'s button stays pressed', await p7.evaluate(() => { const b = document.querySelector('#outbox-list .obx-retry'); return !!b && b.disabled; }));
     await p7.waitForFunction(() => {
       const e = (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {};
       return e.phase === 'expired' || e.phase === 'confirmed';
     }, null, { timeout: 30000 });
-    const endOut = await p7.locator('#outbox-list .obx-row .obx-stat').first().innerText(), endRaw = await p7.locator('#outbox-list .obx-row .obx-stat').first().textContent();
+    const endOut = await p7.locator('#tx-out').innerText(), endRaw = await p7.locator('#tx-out').textContent();
+    const rowOut = await p7.locator('#outbox-list .obx-row .obx-stat').first().innerText();
     const endBox = await p7.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]);
-    ok('terminal came from the rail/time (expired), never from the ack, said in the outbox row that was pressed',
-      /did not show up on the chain before its time ran out/.test(endOut) && /check your coins/.test(endOut) && /expired|EXPIRED/.test(endRaw) && endBox.phase === 'expired' && !/CONFIRMED/.test(endRaw), endRaw.slice(0, 120));
+    ok('terminal came from the rail/time (expired), never from the ack, said in the line that sent it and kept in its row',
+      /did not show up on the chain before its time ran out/.test(endOut) && /check your coins/.test(endOut) && /expired|EXPIRED/.test(endRaw) && endBox.phase === 'expired' && !/CONFIRMED/.test(endRaw) && /check your coins/.test(rowOut), endRaw.slice(0, 120) + ' · row: ' + rowOut);
   }
 
   /* ── 8 · the chain-id guard still guards (worker-side now) ─────────────── */
@@ -364,6 +373,12 @@ try {
     ok('URL prefill lands: bnames link → contract+action+args loaded',
       (await p9.locator('#tx-contract').inputValue()) === 'kingbeelovis' &&
       (await p9.locator('#tx-action').inputValue()) === 'registeracc');
+    /* a link that names the action and carries no parts: the line says what it filled in, never "nothing" */
+    await p9.goto(WALLET + '?compose=' + encodeURIComponent('kingbeelovis:registeracc'), { waitUntil: 'load' });
+    await p9.waitForFunction(() => /this link/.test(document.getElementById('tx-out').innerText), null, { timeout: 9000 }).catch(() => {});
+    const desk9 = { out: await p9.locator('#tx-out').innerText(), contract: await p9.locator('#tx-contract').inputValue(), action: await p9.locator('#tx-action').inputValue() };
+    ok('a link with the action and no parts says its parts are empty, never that nothing is filled in',
+      desk9.contract === 'kingbeelovis' && desk9.action === 'registeracc' && /^this link named the action but not its parts, so its parts are empty here. fill them in, or go back to the name desk./.test(desk9.out) && !/nothing is filled in/.test(desk9.out), JSON.stringify(desk9));
     await c9.close();
   }
 
@@ -384,6 +399,7 @@ try {
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
       const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);        // runtime TEST key — vault side, never crosses the seam
       const bytes = new TextEncoder().encode('lane-b B3 anchor proof — the contract path, not a direct publish');
+      window.__jwk10 = jwk;
       const entry = await window.BNRWALLET.walletPublish(bytes, [['App-Name', 'bnr-lane-b'], ['Type', 'anchor-proof']], { jwk: jwk });
       return entry && { phase: entry.phase, ref: entry.ref, evidence: entry.evidence, id: entry.intent_id };
     });
@@ -392,6 +408,24 @@ try {
       /GET \/tx\/.*@ https:\/\/(arweave\.net|ar-io\.dev|gateway\.ardrive\.io)/.test(r.evidence.read), JSON.stringify(r && { phase: r.phase, ev: r.evidence }));
     const obx10 = await p10.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(e => e.rail === 'arweave'));
     ok('the arweave entry lives in the same outbox under the same phases', obx10.length === 1 && obx10[0].phase === 'confirmed' && obx10[0].signed_by === 'arweave-jwk');
+    const publishSame = text => p10.evaluate(async t => { const said = [];
+      const e = await window.BNRWALLET.walletPublish(new TextEncoder().encode(t), [['App-Name', 'bnr-lane-b'], ['Type', 'anchor-proof']], { jwk: window.__jwk10, say: p => said.push(p.filter(x => typeof x === 'string').join('')) });
+      return { phase: e && e.phase, said: said.join(' | ') }; }, text);
+    const posts10 = rail10.arPosts;
+    const re10 = await publishSame('lane-b B3 anchor proof — the contract path, not a direct publish');
+    const obx10b = await p10.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(e => e.rail === 'arweave'));
+    ok('the same file published again after it is done keeps the done receipt, sends nothing new, and says it was already done',
+      !re10.phase && obx10b.length === 1 && obx10b[0].phase === 'confirmed' && obx10b[0].ref === obx10[0].ref && obx10b[0].signed_bytes === obx10[0].signed_bytes && rail10.arPosts === posts10 && /already done, so nothing new was published/.test(re10.said), JSON.stringify({ re10, n: obx10b.length, posts: rail10.arPosts - posts10 }));
+    rail10.arAbort = 99;   // every gateway loses its answer: the first copy stays kept, maybe out
+    const first10 = await publishSame('a second file, its answer lost on the way back');
+    const kept10 = await p10.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(e => e.rail === 'arweave' && e.phase === 'signed'));
+    const posts10b = rail10.arPosts;
+    const second10 = await publishSame('a second file, its answer lost on the way back');
+    const kept10b = await p10.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(e => e.rail === 'arweave' && e.phase === 'signed'));
+    ok('a second copy of a publish still on its way is never written over the first: nothing new is sent, and it says where the first one waits',
+      first10.phase === 'signed' && kept10.length === 1 && !second10.phase && kept10b.length === 1 && kept10b[0].signed_bytes === kept10[0].signed_bytes && rail10.arPosts === posts10b && /already waiting to be sent, so nothing new was published/.test(second10.said),
+      JSON.stringify({ first10, second10, kept: kept10.length, keptb: kept10b.length, posts: rail10.arPosts - posts10b }));
+    rail10.arAbort = 0;
     await c10.close();
   }
 
@@ -453,7 +487,7 @@ try {
   /* ── 12 · a refusal is one calm sentence and its one action; the node's own words are cypherpunk's ── */
   console.log('12 · refusals in words:');
   for (const [refuse, words, act] of [
-    ['account banchor22222 has insufficient ram; needs 9000 bytes has 8000 bytes [ram_usage_exceeded]', /^the account needs more RAM for this\. nothing changed\.\s*$/, 'buy RAM with A'],
+    ['account banchor22222 has insufficient ram; needs 9000 bytes has 8000 bytes [ram_usage_exceeded]', /^the test account needs more RAM on the Jungle4 test network\. nothing changed\. open the composer$/, null],
     ['transaction net usage is too high: 300 > 200 [tx_net_usage_exceeded]', /^the chain is not letting the account send more right now\. nothing changed\. try again in a while\.$/, null],
     ['assertion failure with message: <img src=x onerror=window.__xss=9> is not yours [eosio_assert_message_exception]', /^the contract refused it\. nothing changed\.\s*$/, null]]) {
     const c12 = await cyContext(); const r12 = mockChain(c12); r12.refuse = refuse;
@@ -471,15 +505,122 @@ try {
       return { words: o.textContent, btn: b ? b.textContent : null, cy: [...document.querySelectorAll('#tx-out .wl-cyd')].map(x => x.textContent).join(' '), xss: window.__xss }; });
     ok('a refusal (' + refuse.slice(0, 28) + '…) is one calm sentence and its one action; the node\'s words stay in the detail',
       words.test(said.words) && said.btn === act && !/ram_usage|tx_net|assertion|CPU|NET|<img|banchor22222 has/.test(said.words) && said.cy.includes(refuse.slice(0, 30)) && said.xss === undefined, JSON.stringify(said));
-    if (act) {
-      const before = r12.submits + (r12.refused || 0);
-      await p12.click('#tx-out button.wl-act');
-      await p12.waitForTimeout(500);
-      const sw = await p12.evaluate(() => ({ hash: location.hash, panel: document.getElementById('sw-panel').style.display, dir: document.getElementById('sw-dir').textContent }));
-      ok('its one action opens the wallet\'s own RAM buy at "buy RAM with A", and signs nothing by itself',
-        sw.hash === '#pay-sec' && sw.panel === 'block' && sw.dir === 'direction: buy RAM with A' && r12.submits + (r12.refused || 0) === before, JSON.stringify(sw));
-    }
+    if (/ram_usage/.test(refuse)) ok('a Jungle4 RAM refusal offers no mainnet RAM buy: its one link opens the composer', await p12.evaluate(() => !!document.querySelector('#tx-out a[href="#composer-sec"]') && !/buy RAM/.test(document.getElementById('tx-out').innerText)), await p12.locator('#tx-out').innerText());
     await c12.close();
+  }
+
+  /* 12b · a refusal kept in the outbox: a mainnet RAM refusal opens the wallet's own RAM buy, a Jungle4 one never does */
+  {
+    const c12b = await browser.newContext(); mockChain(c12b);
+    const fx = (id, network) => ({ intent_id: id, rail: 'vaulta', network, phase: 'failed', words: 'run commit on banchor22222 with the parts shown.', signed_bytes: '{}',
+      evidence: { read: 'send_transaction refusal', detail: 'account banchor22222 has insufficient ram; needs 9000 bytes has 8000 bytes [ram_usage_exceeded]', definite: true }, created_at: new Date().toISOString() });
+    await c12b.addInitScript(l => { try { if (!sessionStorage.getItem('__obx')) { localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); sessionStorage.setItem('__obx', '1'); } } catch (e) {} },
+      [fx('vaulta:fixture-ram-j4', 'jungle4'), fx('vaulta:fixture-ram-main', 'mainnet')]);
+    const pb = await c12b.newPage();
+    await pb.goto(WALLET, { waitUntil: 'load' });
+    await pb.waitForFunction(() => document.querySelectorAll('#outbox-list .obx-row').length === 2, null, { timeout: 15000 }).catch(() => {});
+    const rows = await pb.evaluate(() => [...document.querySelectorAll('#outbox-list .obx-row')].map(r => ({ id: r.getAttribute('data-id'), btn: (r.querySelector('button.wl-act') || {}).textContent || null, text: r.innerText })));
+    const j4 = rows.find(r => r.id === 'vaulta:fixture-ram-j4') || {}, main = rows.find(r => r.id === 'vaulta:fixture-ram-main') || {};
+    ok('a kept Jungle4 RAM refusal says its test network and offers no mainnet RAM buy', !j4.btn && /Jungle4 test network/.test(j4.text || '') && !/buy RAM/.test(j4.text || ''), JSON.stringify(j4));
+    ok('a kept mainnet RAM refusal keeps its one button: buy RAM with A', main.btn === 'buy RAM with A', JSON.stringify(main));
+    await pb.evaluate(() => [...document.querySelectorAll('#outbox-list .obx-row')].find(r => r.getAttribute('data-id') === 'vaulta:fixture-ram-main').querySelector('button.wl-act').click());
+    await pb.waitForTimeout(500);
+    const sw = await pb.evaluate(() => ({ hash: location.hash, panel: document.getElementById('sw-panel').style.display, dir: document.getElementById('sw-dir').textContent }));
+    ok('and it opens the wallet\'s own swap at buy RAM with A, signing nothing by itself', sw.hash === '#pay-sec' && sw.panel === 'block' && /buy RAM with A$/.test(sw.dir), JSON.stringify(sw));
+    await c12b.close();
+  }
+
+  /* 13 · a node took it and this browser could not write that down: this tab keeps the answer */
+  console.log('13 · an answer the outbox could not save:');
+  const commitOf = epoch => ({ committer: 'banchor22222', epoch: String(epoch), new_root: '0'.repeat(64), prev_root: '0'.repeat(64), tree_size: '19', delta_id: '0'.repeat(64), forced_watermark: String(epoch) });
+  const j4Action = (pg, epoch) => pg.evaluate(([w, d]) => window.BNRWALLET.walletAction('banchor22222', 'commit', d, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: w }).then(e => e && e.phase), [J4_WIF, commitOf(epoch)]);
+  /* a browser out of room for the outbox, switched on by the test */
+  const quota = pg => pg.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && k === 'bnr_outbox_v1') throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
+  const stored = pg => pg.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
+  {
+    const c13 = await cyContext(); const r13 = mockChain(c13); r13.blockCarries = false; r13.noHint = true;
+    const p13 = await c13.newPage();
+    await p13.goto(WALLET, { waitUntil: 'load' });
+    await p13.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    await quota(p13);
+    r13.beforeAck = () => p13.evaluate(() => { window.__full = true; });
+    await j4Action(p13, 1001);
+    r13.beforeAck = null;
+    const s13 = await p13.evaluate(() => ({ out: document.getElementById('tx-out').innerText, btn: (document.querySelector('#tx-out button.wl-act') || {}).textContent,
+      known: sessionStorage.getItem('bnr_outbox_known'), row: (document.querySelector('#outbox-list .obx-stat') || {}).innerText }));
+    const e13 = (await stored(p13))[0] || {};
+    ok('a node took it and the outbox could not write that down: said as sent, with free some storage and its one honest button',
+      /^it was sent, but this browser could not save that/.test(s13.out) && s13.btn === 'send it again' && e13.phase === 'signed' && !e13.maybe_out, JSON.stringify({ s13, phase: e13.phase }).slice(0, 220));
+    ok('this tab keeps the ack, so its row reads as sent (never "not sent yet") with its one honest button', /MOCKTXID/.test(s13.known || '') && /^sent. the chain has not confirmed it yet./.test(s13.row || '') && await p13.textContent('#outbox-list .obx-retry') === 'send it again', JSON.stringify({ row: s13.row, known: s13.known }));
+    /* storage freed, its window long over: the node refuses it as expired. A node took it once, so this is never proof it did not go */
+    await p13.evaluate(() => { window.__full = false; const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].expires_at = new Date(Date.now() - 600000).toISOString(); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    r13.refuse = 'expired transaction';
+    await p13.click('#tx-out button.wl-act');
+    await p13.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'expired', null, { timeout: 15000 }).catch(() => {});
+    const x13 = { e: (await stored(p13))[0] || {}, out: await p13.locator('#tx-out').innerText() };
+    ok('a late press after that ack is filed as maybe in, never as proof it did not go (no cap is given back, no "nothing changed")',
+      x13.e.phase === 'expired' && x13.e.evidence && x13.e.evidence.maybe_in === true && !x13.e.evidence.definite && !/nothing changed/.test(x13.out), JSON.stringify(x13).slice(0, 240));
+    await c13.close();
+  }
+
+  /* 14 · one send at a time per entry, from any button; a write that fails after an answer is never "nothing was sent"; a gone row leaves */
+  console.log('14 · one send per entry, honest after a failed write, a gone row:');
+  {
+    const c14 = await cyContext(); const r14 = mockChain(c14);
+    const p14 = await c14.newPage();
+    await p14.goto(WALLET, { waitUntil: 'load' });
+    await p14.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    r14.abortsRemaining = 3;   // every Jungle4 host loses the answer: kept, maybe out
+    await j4Action(p14, 2001);
+    r14.slowMs = 1500;
+    const before14 = r14.submits;
+    await p14.click('#tx-out button.wl-act');   // the status line's own "send it again"
+    await p14.waitForTimeout(400);
+    const mid14 = await p14.evaluate(() => { const b = document.querySelector('#outbox-list .obx-retry'); const was = b ? b.disabled : 'gone'; if (b) { b.disabled = false; b.click(); } return was; });   // even a forced press of the row's button starts nothing
+    await p14.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'confirmed', null, { timeout: 30000 }).catch(() => {});
+    ok('a status line\'s send it again holds the row\'s button, and a press there starts no second send', mid14 === true && r14.submits - before14 === 1, JSON.stringify({ mid14, sends: r14.submits - before14 }));
+    r14.slowMs = 0; r14.head = 123456;   // the next build reads its reference block where the mock keeps one
+    r14.abortsRemaining = 3;
+    await j4Action(p14, 2002);
+    await quota(p14);
+    await p14.evaluate(() => { window.__full = true; });
+    r14.refuse = 'duplicate transaction 2002 (fixture)';
+    await p14.click('#outbox-list .obx-retry');
+    await p14.waitForFunction(() => /already sent once|nothing was sent/.test((document.querySelector('#outbox-list .obx-row .obx-stat') || {}).innerText || ''), null, { timeout: 15000 }).catch(() => {});
+    const d14 = await p14.evaluate(() => (document.querySelector('#outbox-list .obx-row .obx-stat') || {}).innerText || '');
+    ok('a duplicate answer this browser could not save is said as already sent, never as nothing sent', /already sent once, so nothing new was signed/.test(d14) && !/nothing was sent/.test(d14), d14);
+    await p14.evaluate(() => { window.__full = false; localStorage.setItem('bnr_outbox_v1', '[]'); });   // set aside in another tab this one has not heard from
+    r14.refuse = null;
+    const before14b = r14.submits + (r14.refused || 0);
+    await p14.click('#outbox-list .obx-retry');
+    await p14.waitForTimeout(300);
+    const g14 = await p14.evaluate(() => ({ rows: document.querySelectorAll('#outbox-list .obx-row').length, note: (document.querySelector('#outbox-list .obx-note') || {}).innerText || '', link: !!document.querySelector('#outbox-list .obx-note a[href="#bal-sec"]') }));
+    ok('a press on a row whose entry is gone: the row leaves, nothing is sent, and the line says so with its one link',
+      g14.rows === 0 && /^that one is no longer in this list, so nothing was sent from here\./.test(g14.note) && g14.link && r14.submits + (r14.refused || 0) === before14b, JSON.stringify(g14));
+    await c14.close();
+  }
+
+  /* 15 · check again reads the chain for a kept transaction before it sends anything */
+  console.log('15 · check again reads before it sends:');
+  {
+    const c15 = await cyContext(); const r15 = mockChain(c15);
+    const p15 = await c15.newPage();
+    await p15.goto(WALLET, { waitUntil: 'load' });
+    await p15.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    await j4Action(p15, 3001);
+    /* the reader left before it was read back: the row still says sent, not confirmed */
+    await p15.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].phase = 'submitted'; l[0].evidence = null; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    await p15.reload({ waitUntil: 'load' });
+    await p15.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && document.querySelector('#outbox-list .obx-retry'), null, { timeout: 25000 });
+    const label15 = await p15.textContent('#outbox-list .obx-retry');
+    const before15 = r15.submits + (r15.refused || 0);
+    await p15.click('#outbox-list .obx-retry');
+    await p15.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'confirmed', null, { timeout: 20000 }).catch(() => {});
+    const e15 = (await stored(p15))[0] || {};
+    const said15 = await p15.evaluate(() => (document.querySelector('#outbox-list .obx-row .obx-stat') || {}).innerText || '');
+    ok('a sent row\'s check again reads the chain first: a send that landed reaches done, and nothing is sent again',
+      label15 === 'check again' && e15.phase === 'confirmed' && r15.submits + (r15.refused || 0) === before15 && /^done\. the chain confirmed it\./.test(said15), JSON.stringify({ label15, phase: e15.phase, sends: r15.submits - before15, said15 }));
+    await c15.close();
   }
 
   await ctx.close();
