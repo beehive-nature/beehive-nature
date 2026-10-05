@@ -38,14 +38,25 @@ TOK=$(mktemp /run/doxx-tt.XXXXXX)
 cleanup() { stty echo 2>/dev/null || true; rm -f "$TOK"; for n in A B C; do ip netns del "bnrtt-$n" 2>/dev/null || true; done; rm -rf /run/bnr-tt; }
 trap cleanup EXIT INT TERM
 
-echo "Paste the doxx net-admin token, then Enter. Nothing will show."
-stty -echo 2>/dev/null || true
-IFS= read -r T || true
-stty echo 2>/dev/null || true
-echo
-[ -n "$T" ] || refuse "no token given"
-printf '%s\n' "$T" > "$TOK"
-T=
+# Up to three tries. Each code is checked with doxx (one read-only call)
+# before anything is created.
+tries=0
+while :; do
+  tries=$((tries + 1))
+  echo "Paste the NEW Network Admin token (not Primary), then Enter. Nothing will show."
+  stty -echo 2>/dev/null || true
+  IFS= read -r T || true
+  stty echo 2>/dev/null || true
+  echo
+  # Terminals can wrap a paste in bracketed-paste markers or add a CR or spaces.
+  T=$(printf '%s' "$T" | tr -d '\033\r\t ' | sed 's/\[20[01]~//g')
+  [ -n "$T" ] || refuse "no token given"
+  printf '%s\n' "$T" > "$TOK"
+  T=
+  if node "$DIR/tools/net-doxx/tungsten.mjs" --check --token-file "$TOK"; then break; fi
+  [ "$tries" -lt 3 ] || refuse "three codes were not accepted; nothing was changed at doxx"
+  echo "Try again: on doxx, Account > Auth Tokens, copy the token you just made."
+done
 
 echo "running: about 10 minutes, most of it waiting for a short-lived credential to expire"
 node "$DIR/tools/net-doxx/tungsten.mjs" --token-file "$TOK" --seat bFUzZ --out "$DIR/out"

@@ -94,7 +94,7 @@ export class DoxxAdapter {
       body = { transport_error: true };
     }
     const ok = status >= 200 && status < 300 && body?.status === "success";
-    this.calls.push({ seq: this.calls.length + 1, endpoint, as: token ? "device" : "net-admin", http_status: status, ok, at, response_digest: evidenceDigest(redact(body)) });
+    this.calls.push({ seq: this.calls.length + 1, endpoint, as: token ? "device" : "run", http_status: status, ok, at, response_digest: evidenceDigest(redact(body)) });
     return { status, ok, body };
   }
 }

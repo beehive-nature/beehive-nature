@@ -263,10 +263,23 @@ export async function runTungsten({ adapter, dataplane, token, seat = "bFUzZ", s
 
 async function main() {
   const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) => (a.startsWith("--") ? [...acc, [a.slice(2), all[i + 1]]] : acc), []));
-  if (!args["token-file"]) { console.error("REFUSE: --token-file required"); process.exit(2); }
-  const { NetnsDataplane } = await import("./dataplane-netns.mjs");
-  const token = readTokenFile(args["token-file"]);
+  if (!args["token-file"]) { console.error("REFUSE: --token-file required"); process.exit(2); }  const { NetnsDataplane } = await import("./dataplane-netns.mjs");
+  let token;
+  try { token = readTokenFile(args["token-file"]); } catch {
+    console.log("That does not look like a doxx token (wrong characters or too short).");
+    process.exit(3);
+  }
   const adapter = new DoxxAdapter({ token });
+  if ("check" in args) {
+    // Pre-flight, read only: is this the token the run needs? Says so in plain words.
+    const r = await adapter.call("user_list_tokens");
+    const cur = (r.body?.tokens || []).find((e) => e.is_current);
+    if (!r.ok || !cur) { console.log(`doxx did not accept that code (HTTP ${r.status}). It was ${token.length} characters long.`); process.exit(3); }
+    if (cur.role !== "net-admin") { console.log(`doxx accepted it, but it is the ${cur.role} token. Use the NEW Network Admin token instead.`); process.exit(3); }
+    if (!cur.expires_at) { console.log("That Network Admin token has no expiry. Make one that expires tomorrow."); process.exit(3); }
+    console.log(`Good: Network Admin token, expires ${cur.expires_at}.`);
+    process.exit(0);
+  }
   const dp = new NetnsDataplane({ secret: randomBytes(32).toString("hex") });
   // Ctrl-C or a closed window must still reach the cleanup: interrupt the
   // current wait, let runTungsten's finally delete what it made, then exit.
