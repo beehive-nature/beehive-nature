@@ -114,14 +114,15 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
         (state.posts = state.posts || []).push(body.packed_trx);
         if (state.slowSend) await new Promise(r => setTimeout(r, state.slowSend));
-        if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
+        if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: state.refuseName || 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
         if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         state.submits++; state.packed = body.packed_trx;
         if (state.onSend) state.onSend(body);
+        if (state.beforeAck) await state.beforeAck();   // what happens in the page between the send and its answer
         let id = state.byPacked.get(body.packed_trx);
         if (!id) { id = 'MOCKTXID' + body.packed_trx.slice(0, 16); state.byPacked.set(body.packed_trx, id); state.head = 123499; }
-        return json({ transaction_id: id, processed: { block_num: 123460, status: 'executed' } });
+        return json({ transaction_id: id, processed: state.noHint ? { status: 'executed' } : { block_num: 123460, status: 'executed' } });
       }
       return json({});
     }
@@ -741,6 +742,56 @@ try {
     state.slowSend = 0;
     await page.waitForFunction(() => /^sent 0\.0600 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     ok('and the send itself still lands in words', /^sent 0\.0600 A to someoneelse1\./.test((await svText()).trim()), await svText());
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* P · a node took a capped send and this browser could not write that down: every tab, and this one reopened,
+     holds the send and its count. A late press is never proof it did not go, gives nothing back, and signs nothing new */
+  {
+    console.log('P · an ack the outbox could not save holds the cap in every tab:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(ORIGIN + '/surfaces/wallet.html', { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    const toSend = pg => pg.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click();
+      document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.2'; document.getElementById('sv-memo').value = ''; });
+    const ledger = pg => pg.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0));
+    await page.evaluate(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (window.__full && k === 'bnr_outbox_v1') throw new DOMException('the quota is full (fixture)', 'QuotaExceededError'); return set.call(this, k, v); }; });
+    state.noHint = true;
+    state.beforeAck = () => page.evaluate(() => { window.__full = true; });
+    await toSend(page);
+    await page.evaluate(() => document.getElementById('sv-go').click());
+    await page.waitForFunction(() => /could not save that/.test(document.getElementById('sv-stat').innerText), null, { timeout: 30000 }).catch(() => {});
+    state.beforeAck = null;
+    await page.evaluate(() => { window.__full = false; });
+    const one = state.posts.length;
+    ok('the send went out, its outbox write failed, and the daily count holds it', /^it was sent, but this browser could not save that/.test(await page.innerText('#sv-stat')) && Math.abs((await ledger(page)) - 0.2) < 1e-9 &&
+      await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem('bnr_outbox_ack') || '{}')).some(a => a.acked && /^MOCKTXID/.test(a.ref || ''))), await page.innerText('#sv-stat'));
+    /* a second wallet tab, which never heard the answer */
+    const tab2 = await ctx.newPage(); tab2.on('pageerror', e => errors.push(e.message));
+    await tab2.goto(ORIGIN + '/surfaces/wallet.html', { waitUntil: 'load' });
+    await tab2.waitForFunction(() => window.BZDIDKEY && document.querySelector('#outbox-list .obx-retry') && window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    const row2 = await tab2.evaluate(() => ({ stat: (document.querySelector('#outbox-list .obx-stat') || {}).innerText, btn: (document.querySelector('#outbox-list .obx-retry') || {}).textContent }));
+    ok('the other tab reads it as sent, never as signed and not sent yet', /^sent\. the chain has not confirmed it yet\./.test(row2.stat || '') && row2.btn === 'send it again', JSON.stringify(row2));
+    /* its window long over, a press there is refused as expired */
+    await tab2.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l.forEach(e => { if (/send 0\.2000 A to someoneelse1/.test(e.human_summary)) e.expires_at = new Date(Date.now() - 600000).toISOString(); }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    state.refuse = 'expired transaction'; state.refuseName = 'expired_tx_exception';
+    await tab2.evaluate(() => document.querySelector('#outbox-list .obx-retry').click());
+    await tab2.waitForFunction(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').some(e => /send 0\.2000 A/.test(e.human_summary) && e.phase === 'expired'), null, { timeout: 20000 }).catch(() => {});
+    state.refuse = null; state.refuseName = null;
+    const x = await tab2.evaluate(() => ({ e: JSON.parse(localStorage.getItem('bnr_outbox_v1')).find(e => /send 0\.2000 A/.test(e.human_summary)), said: (document.querySelector('#outbox-list .obx-stat') || {}).innerText || '' }));
+    ok('the late press is filed as maybe in, with no "nothing changed", and the cap gives nothing back',
+      x.e && x.e.phase === 'expired' && x.e.evidence && x.e.evidence.maybe_in === true && !x.e.evidence.definite && !/nothing changed/.test(x.said) && !(x.e.cap && x.e.cap.refunded) && Math.abs((await ledger(tab2)) - 0.2) < 1e-9, JSON.stringify(x).slice(0, 260));
+    /* the same send again from the other tab: held, nothing new is signed */
+    await recoveryConnect(tab2);
+    await tab2.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await toSend(tab2);
+    await tab2.evaluate(() => document.getElementById('sv-go').click());
+    await tab2.waitForFunction(() => /nothing new was signed|^sent 0\.2000/.test(document.getElementById('sv-stat').innerText), null, { timeout: 20000 }).catch(() => {});
+    ok('the same send pressed again is held as may already be in: nothing new is signed', /may already be in, so nothing new was signed/.test(await tab2.innerText('#sv-stat')) && state.posts.length === one + 1, await tab2.innerText('#sv-stat') + ' · posts ' + (state.posts.length - one));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

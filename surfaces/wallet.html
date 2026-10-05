@@ -7294,10 +7294,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   $('tx-data').addEventListener('input', composerPreview);
   $('tx-contract').addEventListener('input', composerPreview);
   $('tx-action').addEventListener('input', composerPreview);
-  /* leaving cypherpunk leaves its test network: bee and raver sign on Vaulta or not at all. A send
-     already under way keeps the preview of what it signs, on its own network */
+  /* leaving cypherpunk leaves its test network: bee and raver sign on Vaulta or not at all. A composed
+     send already under way keeps the preview of what it signs; the preview is drawn for the network the
+     composer now signs on the moment that send ends (walletAction), before Sign can be pressed again */
+  var WA_RUN = 0, WA_STALE = false;
   document.addEventListener('bregister', function () {
-    if (document.body.getAttribute('data-reg') !== 'cypherpunk' && $('tx-net').value === 'j4') { $('tx-net').value = 'main'; $('tx-j4row').style.display = 'none'; if (!VBUSY) composerPreview() }
+    if (document.body.getAttribute('data-reg') !== 'cypherpunk' && $('tx-net').value === 'j4') { $('tx-net').value = 'main'; $('tx-j4row').style.display = 'none'; if (WA_RUN) WA_STALE = true; else composerPreview() }
   });
 
   /* pushAction is retired: its lane IS the adapter contract now — the worker
@@ -7453,29 +7455,66 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      Retry resubmits the IDENTICAL stored bytes — never re-signs, never
      rebuilds. intent_id is the idempotency key on every resubmission. */
   var OUTBOX_KEY = 'bnr_outbox_v1';
-  /* what this tab learned about a send that the outbox could not write down (a browser out of room):
-     a node took it, or a block read settled it. It folds into every read of the outbox here, so no
-     press in this tab resends it as new, calls it not sent, or gives its cap back. A small copy rides
-     in sessionStorage, so a reload of this tab keeps it */
-  var OBX_KNOWN_KEY = 'bnr_outbox_known', OBX_KNOWN = {};
-  try { var kn0 = JSON.parse(sessionStorage.getItem(OBX_KNOWN_KEY) || '{}'); if (kn0 && typeof kn0 === 'object' && !Array.isArray(kn0)) OBX_KNOWN = kn0 } catch (e) {}
+  /* what a node said about a send that the outbox could not write down (a browser out of room): it took
+     the bytes, answered "duplicate", or a block read settled it. It is kept under its own small key,
+     which every tab and a reopened tab reads (a copy for this tab alone when even that write fails), and
+     it folds into every read of the outbox, so no press anywhere resends it as new, calls it not sent,
+     files it as proven gone, or gives its cap back */
+  var OBX_ACK_KEY = 'bnr_outbox_ack', OBX_KNOWN = {};
   function obxDone(p) { return p === 'confirmed' || p === 'failed' || p === 'expired' }
-  function obxRank(p) { return obxDone(p) ? 2 : p === 'submitted' ? 1 : 0 }
+  function obxRank(p) { return p === 'confirmed' ? 3 : obxDone(p) ? 2 : p === 'submitted' ? 1 : 0 }
+  function obxBlockRead(ev) { return /^(get_block|GET \/tx)/.test(String((ev && ev.read) || '')) }
+  /* the newest record per entry wins: every writer reads the kept records before it writes */
+  function obxAckLoad() {
+    [[sessionStorage, 'bnr_outbox_known'], [sessionStorage, OBX_ACK_KEY], [localStorage, OBX_ACK_KEY]].forEach(function (src) {
+      var m = null; try { m = JSON.parse(src[0].getItem(src[1]) || 'null') } catch (e) {}
+      if (!m || typeof m !== 'object' || Array.isArray(m)) return;
+      Object.keys(m).forEach(function (id) {
+        var a = m[id], k = OBX_KNOWN[id]; if (!a || typeof a !== 'object') return;
+        if (a.acked === undefined) a.acked = !!a.phase;   /* an earlier page kept only this tab's copy: a phase there came from a node */
+        if (!k || (a.at || 0) >= (k.at || 0)) OBX_KNOWN[id] = a;
+      });
+    });
+    return OBX_KNOWN;
+  }
+  function obxAcked(id) { var k = OBX_KNOWN[id]; return !!(k && k.acked) }
   function obxKnow(e, what) {
-    var k = OBX_KNOWN[e.intent_id] || {};
+    obxAckLoad();
+    var k = Object.assign({}, OBX_KNOWN[e.intent_id] || {});
     if (e.ref) k.ref = e.ref;
     if (e.block_hint) k.block_hint = e.block_hint;
-    if (what && what.phase && obxRank(what.phase) >= obxRank(k.phase || 'signed')) { k.phase = what.phase; k.evidence = what.evidence || null }
+    k.acked = !!(k.acked || what.acked);   /* always written, so a record is never read as an older page's */
+    if (what.phase) {
+      var ev = what.evidence ? Object.assign({}, what.evidence) : null;
+      if (ev && typeof ev.detail === 'string') ev.detail = ev.detail.slice(0, 200);   /* the key stays small enough to fit when the outbox does not */
+      if (!k.phase || obxRank(what.phase) > obxRank(k.phase)) { k.phase = what.phase; k.evidence = ev }
+      else if (obxRank(what.phase) === obxRank(k.phase) && ev) k.evidence = Object.assign({}, k.evidence || {}, ev);
+    }
+    k.at = Date.now();
     OBX_KNOWN[e.intent_id] = k;
-    try { sessionStorage.setItem(OBX_KNOWN_KEY, JSON.stringify(OBX_KNOWN)) } catch (x) {}
+    var keep = {};
+    Object.keys(OBX_KNOWN).filter(function (id) { return Date.now() - (OBX_KNOWN[id].at || 0) < 3 * 86400000 })
+      .sort(function (x, y) { return (OBX_KNOWN[x].at || 0) - (OBX_KNOWN[y].at || 0) }).slice(-40).forEach(function (id) { keep[id] = OBX_KNOWN[id] });
+    var raw = JSON.stringify(keep);
+    try { localStorage.setItem(OBX_ACK_KEY, raw); if (localStorage.getItem(OBX_ACK_KEY) !== raw) throw new Error('read-back mismatch') }
+    catch (x) { try { sessionStorage.setItem(OBX_ACK_KEY, raw) } catch (y) {} }
   }
   function obxFold(list) {
+    obxAckLoad();
     list.forEach(function (e) {
       var k = OBX_KNOWN[e.intent_id]; if (!k) return;
       e.maybe_out = true;
-      if (!e.ref && k.ref) e.ref = k.ref;
-      if (!e.block_hint && k.block_hint) e.block_hint = k.block_hint;
+      /* the record written after the outbox's own copy carries the latest transaction id and block */
+      var newer = (k.at || 0) >= (Date.parse(e.updated_at || 0) || 0);
+      if (k.ref && (!e.ref || newer)) e.ref = k.ref;
+      if (k.block_hint && (!e.block_hint || newer)) e.block_hint = k.block_hint;
       if (k.phase && obxRank(k.phase) > obxRank(e.phase)) { e.phase = k.phase; if (k.evidence) e.evidence = k.evidence }
+      else if (k.phase && k.evidence && obxRank(k.phase) === obxRank(e.phase) && !obxDone(e.phase)) e.evidence = Object.assign({}, e.evidence || {}, k.evidence);   /* a "duplicate" answer is kept */
+      /* a node took these bytes: a refusal of a later resend never proves they did not go */
+      if (k.acked && (e.phase === 'expired' || e.phase === 'failed') && e.evidence && e.evidence.definite && !obxBlockRead(e.evidence)) {
+        e.evidence = Object.assign({}, e.evidence, { definite: false, maybe_in: true, acked: true, was: e.phase });
+        e.phase = 'expired';
+      }
     });
     return list;
   }
@@ -7633,7 +7672,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     });
   }
   /* another tab changed the list: this one redraws, so no stale row keeps a live button */
-  window.addEventListener('storage', function (ev) { if (ev.key === OUTBOX_KEY || ev.key === null) renderOutbox() });
+  window.addEventListener('storage', function (ev) { if (ev.key === OUTBOX_KEY || ev.key === OBX_ACK_KEY || ev.key === null) renderOutbox() });
 
   /* ── THE VAULT SIGNS (contract §4) — the only key-holding party. The
      adapter's digest is re-derived from the unsigned bytes and CHECKED
@@ -7710,20 +7749,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function capRefund(e) {
     var live = e && obxPeek(e.intent_id);
     if (!live || !live.cap || live.cap.refunded || !(live.evidence && live.evidence.definite)) return;
-    /* a node took it in this tab and the outbox could not write that down: only a block read gives it back */
-    if (OBX_KNOWN[live.intent_id] && !/^(get_block|GET \/tx)/.test(String(live.evidence.read || ''))) return;
+    /* a node took it and the outbox could not write that down: only a block read gives it back */
+    if (obxAcked(live.intent_id) && !obxBlockRead(live.evidence)) return;
     live.cap.refunded = true; try { outboxPut(live) } catch (x) { return }   /* marked first, so a second flow never gives it back twice */
     if (e.cap) e.cap.refunded = true;
     capRecord(live.cap.unit, -live.cap.amt, live.cap.day);
   }
   function isDuplicate(t) { return /duplicate transaction|tx_duplicate|already in the mempool|already on the weave|already known|already processed/i.test(String(t || '')) }
-  /* a write after a node answered: true, or the error. What the node said is kept in this tab
-     either way (OBX_KNOWN), so the words follow the answer, never the write */
+  /* a write after a node answered: true, or the error. What the node said is kept under its own
+     key either way (OBX_KNOWN), so the words follow the answer, never the write */
   function obxKeep(entry, what) {
     try { outboxPut(entry); return true }
     catch (x) { if (!x.clash && what) { obxKnow(entry, what); try { renderOutbox() } catch (y) {} } return x }   /* the list redraws from what this tab knows */
   }
-  function obxUnsaved(w) { return { cy: ' · this browser could not save that: ' + ((w && w.message) || w) + '; this tab keeps what the node said, so nothing here sends it as new or gives its cap back' } }
+  function obxUnsaved(w) { return { cy: ' · this browser could not save that: ' + ((w && w.message) || w) + '; what the node said is kept under bnr_outbox_ack, so no tab sends it as new or gives its cap back' } }
   /* every send of one entry, from whichever button pressed it: one at a time in this tab, and the
      entry's row keeps its button pressed until it ends */
   async function submitAndConfirm(entry, ui) {
@@ -7744,7 +7783,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var id = entry.intent_id;
     var againOn = function () { submitAndConfirm(obxPeek(id) || entry, say).catch(function (er) { say(sendStopParts(er, againOn), 'signed') }) };
     var resend = { btn: 'send it again', on: againOn };
-    var knownHere = !!OBX_KNOWN[id];   /* a node took it in this tab, and the outbox could not write that down */
+    var knownHere = obxAcked(id);   /* a node took it, and the outbox could not write that down */
     var maybeOut = !!entry.maybe_out || entry.phase === 'submitted' || !!entry.ref || knownHere;   /* an earlier attempt may already have reached a node */
     /* another flow may have settled it while this one waited: never move a settled entry */
     var settled = function () { var c = obxPeek(id); if (c && obxDone(c.phase)) { say(terminalWords(c), c.phase); return c } return null };
@@ -7753,7 +7792,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var settleRead = function (c) {
       entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
       if (c.phase === 'failed') entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true });
-      var w = obxKeep(entry, { phase: entry.phase, evidence: entry.evidence });
+      var w = obxKeep(entry, { phase: entry.phase, evidence: entry.evidence, acked: c.phase !== 'expired' });   /* a block that holds it, done or failed, means a node took it */
       if (w !== true && w.clash) { var dW = settled(); if (dW) return dW }
       var ev = JSON.stringify(c.evidence || {});
       say((c.phase === 'confirmed'
@@ -7764,17 +7803,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (c.phase === 'failed' && w === true) capRefund(entry);
       return entry;
     };
-    /* its window closed and the last read did not find it: most likely it did not go through, but a read
-       of its hinted block is not proof, so the reader checks before sending again. A send a node already
-       answered "duplicate" for is never filed this way */
+    /* its window closed and the last read did not find it. A read of its hinted block is not proof: a node
+       that took the bytes may have put them in a later block. So a send a node took is filed as "cannot
+       tell", and only one no node ever took leans toward "did not go through". A send a node answered
+       "duplicate" for is never filed here at all */
     var expireUnseen = function () {
       if (entry.evidence && entry.evidence.duplicate) return null;
-      entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read', maybe_in: true };
+      var tookIt = entry.phase === 'submitted' || !!entry.ref || obxAcked(id);
+      entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read', maybe_in: true, acked: tookIt };
       entry.updated_at = new Date().toISOString();
       var w = obxKeep(entry);
       if (w !== true && w.clash) { var dX = settled(); if (dX) return dX }
-      say(['it did not show up on ' + onRail(entry.rail) + ' before its time ran out, so it most likely did not go through. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' },
-        { cy: 'EXPIRED: the window closed without a confirming block read; only the hinted block was read, so this is not proof' }].concat(w === true ? [] : [obxUnsaved(w)]), 'expired');
+      say(['it did not show up on ' + onRail(entry.rail) + ' before its time ran out, so ' + (tookIt ? 'this wallet cannot tell whether it went in' : 'it most likely did not go through') + '. check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' },
+        { cy: 'EXPIRED: the window closed without a confirming block read; only the hinted block was read, so this is not proof' + (tookIt ? '; a node took the bytes, so it may sit in a later block' : '') }].concat(w === true ? [] : [obxUnsaved(w)]), 'expired');
       return entry;
     };
     /* sent before, and the chain can be read for its transaction id: read first, and only a chain that
@@ -7799,11 +7840,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var done0 = settled(); if (done0) return done0;
       entry.ref = r.ref; entry.block_hint = r.block_hint; entry.maybe_out = true;
       entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
-      var wA = obxKeep(entry, { phase: 'submitted' });
+      var wA = obxKeep(entry, { phase: 'submitted', acked: true });
       if (wA !== true) {   /* a node took the bytes, and this browser could not write that down: this tab keeps it */
         if (wA.clash) { var dA = settled(); if (dA) return dA }
         say(['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: obxCanRead(entry) ? 'check again' : 'send it again', on: againOn },
-          { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + ((wA && wA.message) || wA) + '; this tab keeps the ack, so a later press reads or resends the identical bytes as sent, never as new' }], 'submitted');
+          { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + ((wA && wA.message) || wA) + '; the ack is kept under bnr_outbox_ack, so a later press in any tab reads or resends the identical bytes as sent, never as new' }], 'submitted');
         return entry;
       }
       say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
@@ -7818,7 +7859,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           entry.phase = 'submitted'; entry.ref = entry.ref || entry.txid || null; entry.maybe_out = true;
           entry.evidence = { read: 'send_transaction: duplicate', detail: why, duplicate: true };
           entry.updated_at = new Date().toISOString();
-          var wD = obxKeep(entry, { phase: 'submitted', evidence: entry.evidence });
+          var wD = obxKeep(entry, { phase: 'submitted', evidence: entry.evidence, acked: true });
           if (wD !== true && wD.clash) { var dD = settled(); if (dD) return dD }
           say(['this was already sent once, so nothing new was signed. it is most likely in; your balance shows it in a minute. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'duplicate: ' + why }].concat(wD === true ? [] : [obxUnsaved(wD)]), 'submitted');
           if (!obxCanRead(entry)) return entry;
@@ -7918,6 +7959,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     return any?{unit:'A',amt:amt}:null;
   }
   async function walletAction(contract, action, data, auth, opts) {
+    WA_RUN++;
+    try { return await walletActionRun(contract, action, data, auth, opts) }
+    finally { if (--WA_RUN === 0 && WA_STALE) { WA_STALE = false; composerPreview() } }
+  }
+  async function walletActionRun(contract, action, data, auth, opts) {
     opts = opts || {};
     var net = opts.network === 'j4' ? 'jungle4' : 'mainnet';
     var out = $('tx-out'); out.style.display = 'block'; out.removeAttribute('data-fail'); out.style.color = '';

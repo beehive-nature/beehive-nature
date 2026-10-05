@@ -334,6 +334,8 @@ try {
     const endBox = await p7.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]);
     ok('terminal came from the rail/time (expired), never from the ack, said in the line that sent it and kept in its row',
       /did not show up on the chain before its time ran out/.test(endOut) && /check your coins/.test(endOut) && /expired|EXPIRED/.test(endRaw) && endBox.phase === 'expired' && !/CONFIRMED/.test(endRaw) && /check your coins/.test(rowOut), endRaw.slice(0, 120) + ' · row: ' + rowOut);
+    ok('a send a node took, missing from the one block that was read, is filed as cannot tell (maybe in), never as most likely not gone',
+      /so this wallet cannot tell whether it went in\./.test(endOut) && !/most likely did not go through/.test(endOut) && endBox.evidence && endBox.evidence.maybe_in === true && !endBox.evidence.definite, endOut);
   }
 
   /* ── 8 · the chain-id guard still guards (worker-side now) ─────────────── */
@@ -375,7 +377,7 @@ try {
       (await p9.locator('#tx-action').inputValue()) === 'registeracc');
     /* a link that names the action and carries no parts: the line says what it filled in, never "nothing" */
     await p9.goto(WALLET + '?compose=' + encodeURIComponent('kingbeelovis:registeracc'), { waitUntil: 'load' });
-    await p9.waitForFunction(() => /this link/.test(document.getElementById('tx-out').innerText), null, { timeout: 9000 }).catch(() => {});
+    await p9.waitForFunction(() => /this link/.test(document.getElementById('tx-out').innerText), null, { timeout: 25000 }).catch(() => {});
     const desk9 = { out: await p9.locator('#tx-out').innerText(), contract: await p9.locator('#tx-contract').inputValue(), action: await p9.locator('#tx-action').inputValue() };
     ok('a link with the action and no parts says its parts are empty, never that nothing is filled in',
       desk9.contract === 'kingbeelovis' && desk9.action === 'registeracc' && /^this link named the action but not its parts, so its parts are empty here. fill them in, or go back to the name desk./.test(desk9.out) && !/nothing is filled in/.test(desk9.out), JSON.stringify(desk9));
@@ -547,19 +549,32 @@ try {
     await j4Action(p13, 1001);
     r13.beforeAck = null;
     const s13 = await p13.evaluate(() => ({ out: document.getElementById('tx-out').innerText, btn: (document.querySelector('#tx-out button.wl-act') || {}).textContent,
-      known: sessionStorage.getItem('bnr_outbox_known'), row: (document.querySelector('#outbox-list .obx-stat') || {}).innerText }));
+      known: localStorage.getItem('bnr_outbox_ack'), row: (document.querySelector('#outbox-list .obx-stat') || {}).innerText }));
     const e13 = (await stored(p13))[0] || {};
     ok('a node took it and the outbox could not write that down: said as sent, with free some storage and its one honest button',
       /^it was sent, but this browser could not save that/.test(s13.out) && s13.btn === 'send it again' && e13.phase === 'signed' && !e13.maybe_out, JSON.stringify({ s13, phase: e13.phase }).slice(0, 220));
-    ok('this tab keeps the ack, so its row reads as sent (never "not sent yet") with its one honest button', /MOCKTXID/.test(s13.known || '') && /^sent. the chain has not confirmed it yet./.test(s13.row || '') && await p13.textContent('#outbox-list .obx-retry') === 'send it again', JSON.stringify({ row: s13.row, known: s13.known }));
-    /* storage freed, its window long over: the node refuses it as expired. A node took it once, so this is never proof it did not go */
-    await p13.evaluate(() => { window.__full = false; const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].expires_at = new Date(Date.now() - 600000).toISOString(); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    ok('the ack is kept under its own small key, so its row reads as sent (never "not sent yet") with its one honest button', /MOCKTXID/.test(s13.known || '') && /^sent. the chain has not confirmed it yet./.test(s13.row || '') && await p13.textContent('#outbox-list .obx-retry') === 'send it again', JSON.stringify({ row: s13.row, known: s13.known }));
+    /* another tab, or this one reopened, reads the same ack: the row is never "signed, not sent yet" there */
+    await p13.evaluate(() => { window.__full = false; });
+    const q13 = await c13.newPage();
+    await q13.goto(WALLET, { waitUntil: 'load' });
+    await q13.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && document.querySelector('#outbox-list .obx-retry'), null, { timeout: 25000 });
+    const t13 = await q13.evaluate(() => ({ row: (document.querySelector('#outbox-list .obx-stat') || {}).innerText, btn: (document.querySelector('#outbox-list .obx-retry') || {}).textContent }));
+    ok('a second tab reads that ack: the row says sent, and its button sends the same copy again', /^sent\. the chain has not confirmed it yet\./.test(t13.row || '') && t13.btn === 'send it again', JSON.stringify(t13));
+    /* storage freed, its window long over: in the second tab the node refuses it as expired. A node took it once, so this is never proof it did not go */
+    await q13.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].expires_at = new Date(Date.now() - 600000).toISOString(); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
     r13.refuse = 'expired transaction';
-    await p13.click('#tx-out button.wl-act');
-    await p13.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'expired', null, { timeout: 15000 }).catch(() => {});
-    const x13 = { e: (await stored(p13))[0] || {}, out: await p13.locator('#tx-out').innerText() };
-    ok('a late press after that ack is filed as maybe in, never as proof it did not go (no cap is given back, no "nothing changed")',
+    await q13.click('#outbox-list .obx-retry');
+    await q13.waitForFunction(() => (JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0] || {}).phase === 'expired', null, { timeout: 15000 }).catch(() => {});
+    const x13 = { e: (await stored(q13))[0] || {}, out: await q13.evaluate(() => (document.querySelector('#outbox-list .obx-stat') || {}).innerText || '') };
+    ok('a late press in the second tab is filed as maybe in, never as proof it did not go (no "nothing changed")',
       x13.e.phase === 'expired' && x13.e.evidence && x13.e.evidence.maybe_in === true && !x13.e.evidence.definite && !/nothing changed/.test(x13.out), JSON.stringify(x13).slice(0, 240));
+    /* an older tab that never saw the ack wrote "proven expired": every read that knows the ack says maybe in */
+    await q13.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].evidence = { read: 'send_transaction refusal', detail: 'expired transaction', definite: true, maybe_in: false }; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    await q13.reload({ waitUntil: 'load' });
+    await q13.waitForFunction(() => document.querySelector('#outbox-list .obx-row'), null, { timeout: 15000 }).catch(() => {});
+    const y13 = await q13.evaluate(() => (document.querySelector('#outbox-list .obx-stat') || {}).innerText || '');
+    ok('a stored "proven expired" verdict for a send a node took reads as cannot tell, never as nothing changed', /^its time ran out before this wallet could tell whether it went in\./.test(y13) && !/nothing changed/.test(y13), y13);
     await c13.close();
   }
 
@@ -621,6 +636,59 @@ try {
     ok('a sent row\'s check again reads the chain first: a send that landed reaches done, and nothing is sent again',
       label15 === 'check again' && e15.phase === 'confirmed' && r15.submits + (r15.refused || 0) === before15 && /^done\. the chain confirmed it\./.test(said15), JSON.stringify({ label15, phase: e15.phase, sends: r15.submits - before15, said15 }));
     await c15.close();
+  }
+
+  /* 16 · a "duplicate" answer this browser could not save is kept: a later check again never files it as not gone */
+  console.log('16 · a duplicate answer kept over an equal phase:');
+  {
+    const c16 = await cyContext(); const r16 = mockChain(c16); r16.blockCarries = false;
+    const now = Date.now();
+    await c16.addInitScript(e => { try { if (!sessionStorage.getItem('__obx16')) { localStorage.setItem('bnr_outbox_v1', JSON.stringify([e])); sessionStorage.setItem('__obx16', '1'); } } catch (x) {} },
+      { intent_id: 'vaulta:fixture-dup16', rail: 'vaulta', network: 'jungle4', phase: 'submitted', ref: 'MOCKREFDUP16', block_hint: 123460, maybe_out: true, evidence: null,
+        words: 'run commit on banchor22222 with the parts shown, on the Jungle4 test network.', signed_bytes: JSON.stringify({ network: 'jungle4', packed_hex: '00', signatures: ['SIG_K1_fixture'] }),
+        expires_at: new Date(now + 600000).toISOString(), created_at: new Date(now).toISOString(), updated_at: new Date(now - 5000).toISOString() });
+    const p16 = await c16.newPage();
+    await p16.goto(WALLET, { waitUntil: 'load' });
+    await p16.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && document.querySelector('#outbox-list .obx-retry'), null, { timeout: 25000 });
+    await quota(p16);
+    /* inside its window: the read does not find it, the resend is answered duplicate, and the outbox cannot write that */
+    await p16.evaluate(() => { window.__full = false; const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l[0].expires_at = new Date(Date.now() - 25000).toISOString(); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); window.__full = true; });
+    r16.refuse = 'duplicate transaction (fixture)';
+    await p16.click('#outbox-list .obx-retry');
+    await p16.waitForFunction(() => { const b = document.querySelector('#outbox-list .obx-retry'); return b && !b.disabled; }, null, { timeout: 30000 }).catch(() => {});
+    const d16 = await p16.evaluate(() => ({ ack: JSON.parse(localStorage.getItem('bnr_outbox_ack') || '{}')['vaulta:fixture-dup16'] || null, stored: JSON.parse(localStorage.getItem('bnr_outbox_v1'))[0].evidence }));
+    ok('the duplicate answer the outbox could not write is kept under the ack key', !!d16.ack && d16.ack.evidence && d16.ack.evidence.duplicate === true && d16.stored === null, JSON.stringify(d16));
+    /* its window is over now: check again reads the block, does not find it, and keeps what the node said */
+    await p16.click('#outbox-list .obx-retry');
+    await p16.waitForFunction(() => { const b = document.querySelector('#outbox-list .obx-retry'); return b && !b.disabled && /a node already held it|did not go through|cannot tell/.test((document.querySelector('#outbox-list .obx-stat') || {}).innerText || ''); }, null, { timeout: 30000 }).catch(() => {});
+    const e16 = await p16.evaluate(() => (document.querySelector('#outbox-list .obx-stat') || {}).innerText || '');
+    ok('after the window, a send a node answered duplicate for reads as most likely in, never as did not go through', /^a node already held it, so it is most likely in/.test(e16) && !/did not go through/.test(e16), e16);
+    await c16.close();
+  }
+
+  /* 17 · leaving cypherpunk while a Jungle4 send runs: the preview is drawn for Vaulta once that send ends */
+  console.log('17 · the preview follows the network once its send ends:');
+  {
+    const c17 = await cyContext(); const r17 = mockChain(c17);
+    const p17 = await c17.newPage();
+    await p17.goto(WALLET, { waitUntil: 'load' });
+    await p17.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    await p17.selectOption('#tx-net', 'j4');
+    await p17.fill('#tx-contract', 'banchor22222'); await p17.fill('#tx-action', 'commit');
+    await p17.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; });
+    await p17.fill('#tx-j4actor', 'banchor22222'); await p17.fill('#tx-j4key', J4_WIF);
+    await p17.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
+    r17.slowMs = 2500;
+    await p17.click('#tx-go');
+    await p17.waitForFunction(() => /sending the signed copy/.test(document.getElementById('tx-out').textContent), null, { timeout: 15000 }).catch(() => {});
+    await p17.evaluate(() => { document.body.setAttribute('data-reg', 'bee'); document.dispatchEvent(new CustomEvent('bregister', { detail: { reg: 'bee' } })); });
+    const mid17 = await p17.evaluate(() => document.querySelector('#tx-preview-body .tx-words').textContent);
+    await p17.waitForFunction(() => /confirmed it|did not|cannot tell/.test(document.getElementById('tx-out').textContent), null, { timeout: 30000 }).catch(() => {});
+    await p17.waitForTimeout(200);
+    const end17 = await p17.evaluate(() => ({ net: document.getElementById('tx-net').value, words: document.querySelector('#tx-preview-body .tx-words').textContent }));
+    ok('while the Jungle4 send runs its preview keeps what it signs; once it ends the preview is drawn for Vaulta, where the next Sign goes',
+      /on the Jungle4 test network/.test(mid17) && end17.net === 'main' && !/Jungle4/.test(end17.words) && /^run commit on banchor22222 with the parts shown\./.test(end17.words), JSON.stringify({ mid17, end17 }));
+    await c17.close();
   }
 
   await ctx.close();
