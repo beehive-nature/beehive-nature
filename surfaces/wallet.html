@@ -1173,6 +1173,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     Make new recovery words, then, still connected with your old words, paste the new bzpq1 id into
     the binding field here and bind: the old id then vouches for the new one while its keys still hold.</div>
     </details>
+    <div id="pq-law" style="margin:12px 0 16px">
+      <div class="law"><b>Sign the law.</b> One press signs every law file listed here with your post-quantum id. If your keychain is not connected yet, the same press connects it with your passkey first. You get one receipt file; nothing else to do.</div>
+      <ul id="pq-law-list" class="law" style="margin:8px 0;padding-left:18px"><li><button type="button" id="pq-law-show" style="font-size:12px;padding:4px 10px;min-height:32px">show the law files</button></li></ul>
+      <div class="row"><button type="button" id="pq-law-go" class="gold">✍ sign the law</button></div>
+      <div class="law" id="pq-law-stat" role="status" aria-live="polite"></div>
+    </div>
     <div class="law" id="pq-gate">connect your keychain to seal or open</div>
     <div id="pq-tools" hidden>
       <label for="pq-file">file to seal</label>
@@ -3196,6 +3202,72 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       st.appendChild(document.createTextNode(' — keep it beside the file; anyone can check it here or with bsigner bpq-verify'));
     }catch(e){ st.textContent='could not sign: '+(e.message||e) }
   };
+  /* ── sign the law: one press. The list is docs/PQ-LAW.json; each file is
+     fetched from this same site, shown with its status, and signed with this
+     soul's ML-DSA-65 key (SPEC-BPQ-1 §3b). One receipt file holds the card and
+     every signature; agents commit it (scripts/apply-law-signatures.mjs). ── */
+  var LAW=null;
+  async function lawRead(){
+    var ul=$('pq-law-list'); if(!ul)return null;
+    try{
+      var r=await fetch('../docs/PQ-LAW.json',{cache:'no-store'}); if(!r.ok)throw new Error('HTTP '+r.status);
+      var list=(await r.json()).files||[], out=[];
+      for(var i=0;i<list.length;i++){
+        var path=list[i], f=await fetch('../'+path,{cache:'no-store'});
+        if(!f.ok){out.push({path:path,err:'could not be read (HTTP '+f.status+')'});continue}
+        var bytes=new Uint8Array(await f.arrayBuffer()), st='not signed yet';
+        try{
+          var g=await fetch('../'+path+'.bpqsig.json',{cache:'no-store'});
+          if(g.ok&&window.BPQ){
+            var d=await g.json(), v=window.BPQ.verifyFile(d,bytes);
+            st=v.ok?'signed by '+v.id.slice(0,14)+'…':(window.BPQ.verifyDetachedClaim(d).ok?'changed since it was signed':'its signature does not check');
+          }
+        }catch(e){}
+        out.push({path:path,bytes:bytes,status:st});
+      }
+      LAW=out;
+      ul.textContent='';
+      out.forEach(function(x){
+        var li=document.createElement('li'), a=document.createElement('a');
+        a.href='../'+x.path; a.target='_blank'; a.rel='noopener'; a.textContent=x.path.replace(/^docs\//,'');
+        li.appendChild(a); li.appendChild(document.createTextNode(' · '+(x.err||x.status)));
+        ul.appendChild(li);
+      });
+      return out;
+    }catch(e){ ul.textContent=''; var li=document.createElement('li'); li.textContent='the list of law files did not load: '+(e.message||e); ul.appendChild(li); return null }
+  }
+  function lawWaitKeys(ms){
+    return new Promise(function(resolve){
+      var t0=Date.now(), iv=setInterval(function(){ if(pqReady()||Date.now()-t0>ms){clearInterval(iv);resolve(pqReady())} },300);
+    });
+  }
+  $('pq-law-go').onclick=async function(){
+    var st=$('pq-law-stat'), btn=this;
+    if(!window.BPQ){st.textContent='signing needs the post-quantum bundle (bpq-lib.js), which did not load';return}
+    btn.disabled=true;
+    try{
+      if(!pqReady()){
+        st.textContent='connecting your keychain: confirm with your passkey…';
+        if($('kc-pass'))$('kc-pass').click();
+        if(!(await lawWaitKeys(120000))){st.textContent='the keychain did not connect, so nothing was signed. Press again to retry.';return}
+      }
+      if(!SOUL){st.textContent='this keychain has no soul name yet, so there is no post-quantum id to sign with. Name your soul in the key forge, then press again.';return}
+      var law=LAW||await lawRead();
+      if(!law||!law.length){st.textContent='no law files to sign';return}
+      var k=BSIGNER.keysFor(MPRK,SOUL), at=new Date().toISOString(), sigs=[];
+      for(var i=0;i<law.length;i++){ if(law[i].bytes) sigs.push({path:law[i].path, sig:window.BPQ.signFile(k,law[i].bytes,at)}) }
+      var bundle={bpq:1, kind:'law-signatures', at:at, card:window.BPQ.card(k), signatures:sigs};
+      var name='law-signatures-'+k.id.slice(5,13)+'-'+at.slice(0,10)+'.json';
+      var a=pqSave(new TextEncoder().encode(JSON.stringify(bundle,null,1)),name,'save '+name+' again');
+      st.textContent='✓ signed '+sigs.length+' law files as '+k.id+'. The receipt '+name+' was saved to your downloads; agents take it from there. ';
+      st.appendChild(a);
+      a.click();
+    }catch(e){ st.textContent='could not sign: '+(e.message||e) }
+    finally{ btn.disabled=false }
+  };
+  if(/^#pq-law/.test(location.hash))lawRead();
+  $('pq-law-show').onclick=function(){ lawRead() };
+  addEventListener('hashchange',function(){ if(/^#pq-law/.test(location.hash)&&!LAW)lawRead() });
   $('pq-verify').onclick=async function(){
     var st=$('pq-verify-stat');
     if(!window.BPQ){st.textContent='checking needs the post-quantum bundle (bpq-lib.js), which did not load';return}

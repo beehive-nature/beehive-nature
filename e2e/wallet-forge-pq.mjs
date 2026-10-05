@@ -689,6 +689,40 @@ try {
       !/qrDigits|%10000\)/.test(src) && /cannot catch a page that is itself fake/.test(block));
     ok('qr words: the new QR words carry no em or en dash', !/[–—]/.test((D.body.match(/the phone will show[^]*?walk away\./) || [''])[0] + (P.body.match(/these six words[^]*?cancel\./) || [''])[0]));
   }
+
+  /* H · sign the law in one press: the deep link lists the law files, one press signs
+     every one with this soul's id and saves a single receipt, which Node checks file by file */
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-law`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    const law = JSON.parse(await readFile(join(ROOT, 'docs', 'PQ-LAW.json'), 'utf8')).files;
+    await page.waitForFunction(n => document.querySelectorAll('#pq-law-list li a').length === n, law.length, { timeout: 20000 });
+    const listed = await page.evaluate(() => [...document.querySelectorAll('#pq-law-list li')].map(li => li.textContent));
+    ok('law: the deep link lists every law file with its status, before anything is pressed',
+      listed.length === law.length && listed.every(t => / · not signed yet$/.test(t)), JSON.stringify(listed.slice(0, 2)));
+    ok('law: the button is visible without the keychain connected', await page.evaluate(() => { const b = document.getElementById('pq-law-go'); return !!b && b.offsetParent !== null; }));
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.evaluate(() => document.getElementById('pq-law-go').click())]);
+    const rc = JSON.parse(await readFile(await dl.path(), 'utf8'));
+    const each = await Promise.all(rc.signatures.map(async s => ({ path: s.path, r: NODE_BPQ.verifyFile(s.sig, new Uint8Array(await readFile(join(ROOT, s.path)))) })));
+    ok('law: one press saves one receipt signing every listed file, each verifying in Node against the file on disk',
+      /^law-signatures-[a-z0-9]{8}-\d{4}-\d\d-\d\d\.json$/.test(dl.suggestedFilename()) && rc.kind === 'law-signatures' &&
+      each.length === law.length && each.every((x, i) => x.path === law[i] && x.r.ok && x.r.id === EXPECT.id),
+      dl.suggestedFilename() + ' ' + JSON.stringify(each.filter(x => !x.r.ok)));
+    ok('law: the receipt carries the public card of that id and no soul name or secret',
+      NODE_BPQ.verifyCard(rc.card) && rc.card.id === EXPECT.id && !/gatesoul/.test(JSON.stringify(rc)) && Object.keys(rc).sort().join() === 'at,bpq,card,kind,signatures');
+    ok('law: the page says it signed them, in plain words',
+      /^✓ signed \d+ law files as bzpq1/.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
+    await page.close();
+  }
 } finally {
   await browser.close();
   server.close();

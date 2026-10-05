@@ -294,6 +294,20 @@
       return ok ? { ok: true, id: d.id, at: d.at } : { ok: false, id: d.id, why: 'the signature does not verify' };
     } catch (e) { return { ok: false, why: e.message }; }
   }
+  // {ok, id, at}: the signature is authentic over the file hash and size it names.
+  // It says nothing about whether a file you hold is that file; verifyFile does.
+  function verifyDetachedClaim(d) {
+    try {
+      if (!d || d.kind !== 'detached' || d.bpq !== 1) return { ok: false, why: 'not a bpq1 detached signature' };
+      if (!isAt(d.at)) return { ok: false, why: 'at does not have the shape YYYY-MM-DDTHH:MM:SS[.f]Z' };
+      if (!d.file || !Number.isSafeInteger(d.file.size) || d.file.size < 0) return { ok: false, why: 'file.size is not a whole byte count' };
+      var dsa = unb64u(d.dsa), succ = unb64u(d.succ), fh = unb64u(d.file.sha3);
+      if (fh.length !== 32) return { ok: false, why: 'file.sha3 is not 32 bytes' };
+      if (idFrom(dsa, succ) !== d.id) return { ok: false, why: 'the id does not match the key' };
+      var ok = L.ml_dsa65.verify(unb64u(d.sig), detachedMsg(d.id, d.at, d.file.size, fh), dsa);
+      return ok ? { ok: true, id: d.id, at: d.at } : { ok: false, id: d.id, why: 'the signature does not verify' };
+    } catch (e) { return { ok: false, why: e.message }; }
+  }
 
   // ── sealed objects ───────────────────────────────────────────────────────
   // a vault key may be passed bare or inside a keys() result
@@ -542,7 +556,7 @@
     idFrom: idFrom,
     card: card, verifyCard: verifyCard,
     bind: bind, verifyBind: verifyBind,
-    signFile: signFile, verifyFile: verifyFile,
+    signFile: signFile, verifyFile: verifyFile, verifyDetachedClaim: verifyDetachedClaim,
     seal: seal, open: open, opener: opener, inspect: inspect, isSealed: isSealed,
     fingerprint: fingerprint, b64u: b64u, unb64u: unb64u
   });
