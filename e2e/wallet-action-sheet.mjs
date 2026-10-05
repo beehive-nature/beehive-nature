@@ -119,6 +119,11 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       }
       return json({});
     }
+    if (/\/voucher\/v1\/voucher\//.test(url) && state.voucher) {   // the estate's voucher oracle, mocked per test
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      const v = state.voucher(url);
+      return v === 'abort' ? route.abort() : route.fulfill({ status: v.status || 200, headers: cors, contentType: 'application/json', body: JSON.stringify(v.body) });
+    }
     if (u.origin !== ORIGIN) return route.abort();
     const path = resolve(ROOT, '.' + decodeURIComponent(u.pathname));
     if (!path.startsWith(ROOT + sep)) return route.abort();
@@ -579,6 +584,73 @@ try {
     await page.evaluate(() => document.getElementById('kc-out').click());
     const out = await page.evaluate(() => ({ a: document.getElementById('a-stat').innerText, ant: document.getElementById('ant-stat').innerText, antBal: document.getElementById('ant-bal').textContent, lit: document.getElementById('ch-arb').classList.contains('connected') || document.getElementById('ch-autonomi').classList.contains('connected') }));
     ok('disconnecting the keychain stops the cards made from it claiming a read', /^connect your keychain to see your Arbitrum balance\.$/.test(out.a) && /^connect your keychain/.test(out.ant) && out.antBal === '' && !out.lit, JSON.stringify(out));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* O · the voucher tops up from this wallet: one sentence names amount, account and memo; yes signs one
+     core.vaulta transfer with the memo filled in. A failed second look up never leaves the last key's
+     account and memo on screen. The estate's own address and the sample bills are never shown as the reader's. */
+  {
+    console.log('O · voucher top up, failed look up, the estate address and the sample bills:');
+    const { ctx, state } = await context(browser, 'bee');
+    const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
+      spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
+    state.voucher = () => ({ body: VOUCHER });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    ok('the key field never shows a live meter key as its example', !/bclau|paid-1/.test(await page.getAttribute('#vc-key', 'placeholder')), await page.getAttribute('#vc-key', 'placeholder'));
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => document.querySelector('[data-wl-go="add"]').click());
+    await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go');
+    await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 10000 });
+    const shown = await page.evaluate(() => ({ copies: [...document.querySelectorAll('.vc-copy')].filter(b => b.getClientRects().length).length, dest: document.getElementById('vc-a-dest').getClientRects().length, top: document.getElementById('vc-top-go').getClientRects().length }));
+    ok('bee tops up with one press and sees no copy recipe that sends it elsewhere', shown.copies === 0 && shown.dest === 0 && shown.top === 1, JSON.stringify(shown));
+    const topText = () => page.innerText('#vc-top-stat');
+    await page.fill('#vc-top-amt', '0.5'); await page.click('#vc-top-go');
+    ok('the press asks first, in one sentence naming the amount, the account and the memo, and signs nothing yet',
+      /^send 0\.5000 A from kingbeelovis to bnrvoucher11 with the memo gatekey\? it tops up the voucher for gatekey\./.test(await topText()) && !(state.posts || []).length, await topText());
+    await page.click('#vc-top-stat button.wl-act >> text=yes, send it');
+    await page.waitForFunction(() => /^added 0\.5000 A to your voucher/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
+    const posts = state.posts || [];
+    ok('yes signs ONE core.vaulta transfer to the voucher account with the memo filled in', posts.length === 1 && posts[0].includes(actHex('core.vaulta', 'transfer')) && posts[0].includes(nameHex('bnrvoucher11')) && posts[0].includes(Buffer.from('gatekey').toString('hex')), JSON.stringify({ n: posts.length }));
+    ok('and it lands in words with its one next step', /^added 0\.5000 A to your voucher/.test((await topText()).trim()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'read my balance', await topText());
+    ok('the top up counts against the daily cap like every send', Math.abs(await page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0)) - 0.5) < 1e-9);
+    // a second look up that fails: the last key's account and memo leave the screen
+    state.voucher = () => 'abort';
+    await page.fill('#vc-key', 'otherkey'); await page.click('#vc-go');
+    await page.waitForFunction(() => /could not be read just now/.test(document.getElementById('vc-err').innerText), null, { timeout: 10000 }).catch(() => {});
+    const gone = await page.evaluate(() => ({ panel: document.getElementById('vc-panel').style.display, err: document.getElementById('vc-err').innerText, btn: (document.querySelector('#vc-err button.wl-act') || {}).textContent }));
+    ok('a failed look up hides the panel (no other key\'s account or memo beside the error) and offers try again', gone.panel === 'none' && /^your balance could not be read just now, so nothing is shown\./.test(gone.err) && gone.btn === 'try again', JSON.stringify(gone));
+    await page.evaluate(() => { document.getElementById('vc-top-amt').value = '0.5'; document.getElementById('vc-top-go').click(); });
+    ok('and nothing can be topped up for a key that is not on screen', /look up your meter key first/.test(await topText()) && (state.posts || []).length === 1, await topText());
+    // an answer missing its top up ways is a failed read, never a half panel
+    state.voucher = () => ({ body: { balance: '9.0000' } });
+    await page.click('#vc-go');
+    await page.waitForFunction(() => /could not be read just now/.test(document.getElementById('vc-err').innerText), null, { timeout: 10000 }).catch(() => {});
+    ok('a partial answer shows nothing rather than a mix of two keys', await page.evaluate(() => document.getElementById('vc-panel').style.display) === 'none');
+    state.voucher = () => ({ status: 404, body: { message: 'no such meter key' } });
+    await page.click('#vc-go');
+    await page.waitForFunction(() => /not found/.test(document.getElementById('vc-err').innerText), null, { timeout: 10000 }).catch(() => {});
+    ok('an unknown key is said calmly, the oracle\'s own words kept for cypherpunk', /^that meter key was not found; check it and press look up again\./.test(await page.innerText('#vc-err')) && /no such meter key/.test(await page.textContent('#vc-err')), await page.innerText('#vc-err'));
+    // the estate's receive address is not the reader's
+    const peer = await page.evaluate(() => ({ addr: [...document.querySelectorAll('#peer-sec code')].some(c => c.getClientRects().length && /0x8988/i.test(c.textContent)), copy: document.getElementById('peer-copy').getClientRects().length, what: document.getElementById('peer-what').innerText }));
+    ok('bee never sees the estate\'s 0x and copy button as its own; it is told to use receive', !peer.addr && !peer.copy && /not money for you/.test(peer.what), JSON.stringify(peer));
+    // the receipts: sample bills said as samples, and a cell opens its own bill
+    await page.evaluate(() => document.querySelector('[data-wl-go="proof"]').click());
+    await page.waitForFunction(() => window.__spendAuditStats, null, { timeout: 15000 });
+    ok('the receipts say they are sample bills, none of them the reader\'s, and where the reader\'s own spending is', /none of them are yours/.test(await page.innerText('#sa-sample')) && (await page.getAttribute('#sa-sample a', 'href')) === '#voucher-sec', await page.innerText('#sa-sample'));
+    await page.click('#receiptsBody details[data-reg-disclose] > summary >> nth=0');
+    const n = await page.evaluate(() => document.querySelectorAll('#receiptsBody button[data-rc]').length);
+    const opened = [];
+    for (const j of [0, n - 1]) {
+      await page.evaluate(() => document.querySelectorAll('#receiptsBody details[data-ri]').forEach(d => { d.open = false; }));
+      await page.click(`#receiptsBody button[data-rc="${j}"]`);
+      opened.push(await page.evaluate(() => [...document.querySelectorAll('#receiptsBody details[data-ri]')].filter(d => d.open).map(d => d.getAttribute('data-ri')).join()));
+    }
+    ok('tapping a receipt cell opens that receipt\'s own proof (first and last)', opened[0] === '0' && opened[1] === String(n - 1), JSON.stringify(opened));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

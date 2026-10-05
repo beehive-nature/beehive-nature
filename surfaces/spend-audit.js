@@ -268,7 +268,7 @@
 
     var rows = ledger.receipts.map(function (r, j) {
       var a = result.receipts[j];
-      return '<details style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">' +
+      return '<details data-ri="' + j + '" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">' +
         '<summary style="cursor:pointer;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11px">' +
         cellChip(a.state, 18) + '<b style="color:var(--ink)">' + esc((r.operation && r.operation.kind) || 'spend') + '</b>' +
         '<span style="color:var(--dim)">' + esc((r.seller && r.seller.name) || '') + '</span>' +
@@ -313,6 +313,8 @@
       '<span style="font-size:26px;font-weight:600;color:var(--sa-figure,var(--gold));font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
       '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total: Σ quantity × rate, never the stored number</span></div>' +
       '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser. Open a receipt to see its proof.') + '</div>' +
+      (opts.sample ? '<div id="sa-sample" style="font-size:11.5px;color:var(--ink);margin-top:6px">' + esc(opts.sample.say) +
+        (opts.sample.to ? '<a href="#' + esc(opts.sample.to) + '">' + esc(opts.sample.t) + '</a>.' : '') + '</div>' : '') +
       '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts: one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9.5px;color:var(--dim);letter-spacing:.06em">' +
@@ -354,7 +356,7 @@
     });
     el.querySelectorAll('button[data-rc]').forEach(function (b) {
       b.addEventListener('click', function () {
-        var d = el.querySelectorAll('details')[+b.getAttribute('data-rc')];
+        var d = el.querySelector('details[data-ri="' + (+b.getAttribute('data-rc')) + '"]');
         if (d) { d.open = true; d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
       });
     });

@@ -1660,7 +1660,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   that ledger via the estate oracle; the box owns the writes.</p>
 
   <div class="row" style="align-items:center;flex-wrap:wrap">
-    <input id="vc-key" aria-label="Meter key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <input id="vc-key" aria-label="Meter key" placeholder="your meter key" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
@@ -1672,7 +1672,16 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <span style="font-size:14px;color:var(--dim)">A</span>
       <span style="font-size:10.5px;color:var(--faint)" id="vc-sub">—</span>
     </div>
-    <!-- 2 · TOP UP, told exactly how -->
+    <!-- 2 · TOP UP from this wallet: one press, the memo filled in. The copy recipe
+         for paying from elsewhere (account, memo, USDC address) is cypherpunk's. -->
+    <div id="vc-top" style="margin-top:10px">
+      <div class="row" style="align-items:center;flex-wrap:wrap">
+        <input id="vc-top-amt" aria-label="How much A to add" class="small" type="number" min="0" step="0.0001" placeholder="how much A to add" style="max-width:170px;flex:0 1 170px">
+        <button id="vc-top-go" class="gold" style="min-height:40px">top up from my wallet</button>
+      </div>
+      <div class="law" id="vc-top-stat" style="margin-top:6px">top up your voucher straight from this wallet; the memo is filled in for you.</div>
+    </div>
+    <div data-reg="cypherpunk">
     <div class="row" style="margin-top:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
         <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta · gasless</div>
@@ -1689,10 +1698,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.usdc.send">send USDC (Base) to:</div>
         <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" id="vc-u-rate" style="margin-top:6px" data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</div>
+        <div class="law" id="vc-u-rate" style="margin-top:6px"><span data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</span></div>
         <div class="law" id="vc-u-ref" style="color:var(--faint)" data-wl-tech>rate: —</div>
         <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail: your bound address credits you</div>
+        <div class="law" id="vc-u-bound" style="margin-top:4px;color:var(--faint)">credited only from the address bound to this meter key on the box (meter.py bind); this wallet cannot see or make that binding, and USDC from any other address is not credited.</div>
       </div>
+    </div>
     </div>
     <!-- 3 · SEE WHAT I SPENT — aggregate first, itemized one click down -->
     <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:8px">
@@ -1710,7 +1721,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="row" style="margin-top:12px;align-items:center;flex-wrap:wrap">
       <input id="vc-afford-amt" aria-label="Job cost in A" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
       <button id="vc-afford-go" class="gold" style="min-height:36px">can I afford it?</button>
-      <span id="vc-afford-out" class="law" style="flex:2;min-width:180px">—</span>
+      <span id="vc-afford-out" class="law" style="flex:2;min-width:180px"></span>
     </div>
   </div>
   <div class="law" id="vc-err" style="display:none;margin-top:8px;color:var(--amber)"></div>
@@ -2071,10 +2082,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   tithe in a single payment: the fallback, SPEC §receive). settlement finality is one vendor
   signature until the estate's own witness set exists, priced as such, never hidden.</p>
   </details>
-  <div class="row" data-wl-tech style="align-items:center;flex-wrap:wrap;gap:8px">
-    <span class="law">receive address (bare <b>to</b>):</span>
+  <div class="law" id="peer-what">this shows payments people made to the estate, not money for you. to get money into your wallet, use <a href="#pay-sec">receive</a>.</div>
+  <div data-reg="cypherpunk">
+  <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
+    <span class="law">the estate's receive address (bare <b>to</b>), not yours:</span>
     <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
     <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
+  </div>
   </div>
   <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
     <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
@@ -2102,9 +2116,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var copyBtn = document.getElementById('peer-copy');
         if (copyBtn) copyBtn.addEventListener('click', function () {
           var t = '0x89881F83A8C9CE06E34cbDD50A612909a784d7C6';
-          if (navigator.clipboard) navigator.clipboard.writeText(t);
-          copyBtn.textContent = 'copied';
-          setTimeout(function () { copyBtn.textContent = 'copy'; }, 1400);
+          var show = function (w) { copyBtn.textContent = w; setTimeout(function () { copyBtn.textContent = 'copy'; }, 1600); };
+          var miss = function (e) { show('not copied'); wlSay(document.getElementById('peer-stat'), ['copying did not work here; select the address and copy it yourself.', { cy: (e && e.message) || 'no clipboard in this browser' }]); };
+          if (!(navigator.clipboard && navigator.clipboard.writeText)) { miss(); return; }
+          navigator.clipboard.writeText(t).then(function () { show('copied'); }, miss);
         });
         var btn = document.getElementById('peer-read');
         var stat = document.getElementById('peer-stat');
@@ -7471,32 +7486,56 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var $v = function(id){ return document.getElementById(id) };
     function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] }) }
-    function err(msg){ $v('vc-err').style.display = msg ? 'block' : 'none';
-      if (msg) $v('vc-err').textContent = msg }
+    /* the one status line under the key field: a calm sentence and its one action;
+       the raw answer is cypherpunk's ({cy}) */
+    function say(parts, warn){ var el = $v('vc-err');
+      if (!parts) { el.style.display = 'none'; el.textContent = ''; return }
+      el.style.display = 'block'; el.style.color = warn ? 'var(--amber)' : ''; wlSay(el, parts) }
+    /* what the panel is showing right now: the key whose balance is on screen and
+       where its top-up goes. null whenever the panel is hidden, so nothing is ever
+       sent or asked about for a key the reader is not looking at. */
+    var LOADED = null, SEQ = 0;
+    function clearPanel(){
+      $v('vc-panel').style.display = 'none'; LOADED = null; TOPPING = null;
+      $v('vc-afford-out').textContent = '';
+      wlSay($v('vc-top-stat'), ['top up your voucher straight from this wallet; the memo is filled in for you.']);
+    }
     async function load(key){
-      err(''); $v('vc-src').textContent = 'reading the estate oracle…';
+      var my = ++SEQ;
+      clearPanel();      /* a failed or slower read never leaves another key's account and memo on screen */
+      say(['reading your balance now.']);
+      $v('vc-src').textContent = 'reading the estate oracle…';
       try {
         var r = await fetch(API + encodeURIComponent(key) + '/view');
-        var d = await r.json();
-        if (!r.ok || d.message) { $v('vc-panel').style.display = 'none';
-          err(d.message || ('the oracle answered HTTP ' + r.status)); return }
+        var d = null; try { d = await r.json() } catch(je) { d = null }
+        if (my !== SEQ) return;      /* a newer look up took over */
+        if (!r.ok || !d || d.message) {
+          $v('vc-src').textContent = '';
+          var raw = ((d && d.message) || '') + ' (HTTP ' + r.status + ')';
+          if (r.status >= 400 && r.status < 500) say(['that meter key was not found; check it and press look up again.', {cy: raw}], true);
+          else say(['your balance could not be read just now, so nothing is shown. ', {btn: 'try again', on: function(){ load(key) }}, {cy: 'the estate oracle answered ' + raw}], true);
+          return;
+        }
+        var a = d.topup && d.topup.rail_a, u = d.topup && d.topup.rail_usdc;
+        if (!a || !u) throw new Error('the answer carries no top-up ways');
         $v('vc-balance').textContent = d.balance;
         $v('vc-sub').innerHTML = 'your voucher balance<span data-wl-tech>: live from the hash-chained ledger</span>';
-        var a = d.topup.rail_a, u = d.topup.rail_usdc;
-        $v('vc-a-dest').textContent = a.send_to || '—';
+        $v('vc-a-dest').textContent = a.send_to || '';
         $v('vc-a-memo').textContent = a.memo || key;
-        $v('vc-u-dest').textContent = u.send_to || '—';
-        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC, stated before you send';
-        $v('vc-u-ref').textContent = 'rate: ' + u.rate_ref;
+        $v('vc-u-dest').textContent = u.send_to || '';
+        $v('vc-u-rate').textContent = u.rate_a_per_usdc != null ? 'credited at ' + u.rate_a_per_usdc + ' A per USDC, stated before you send' : 'the rate was not given, so do not send USDC this way now';
+        $v('vc-u-ref').textContent = 'rate: ' + (u.rate_ref || 'not given');
+        Array.prototype.forEach.call(document.querySelectorAll('#vc-panel .vc-copy'), function(b){
+          var code = b.parentElement.querySelector('code'); b.hidden = !(code && code.textContent.trim()) });
         $v('vc-spent').textContent = d.spent_total + ' A';
         $v('vc-dep').textContent = d.deposited_total + ' A';
         $v('vc-tithe').textContent = d.tithe_total + ' A';
         $v('vc-receipts').innerHTML = (d.receipts || []).length ? (d.receipts || []).map(function(rc){
           return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px">' +
             '<div style="font-size:10.5px;color:var(--dim)">receipt ' + new Date((rc.ts||0)*1000).toISOString().slice(0,16).replace('T',' ') +
-            ' · total <b style="color:var(--ink)">' + rc.total + ' A</b> · basis ' + esc(rc.cost_basis_ref) + '</div>' +
+            ' · total <b style="color:var(--ink)">' + esc(rc.total) + ' A</b> · basis ' + esc(rc.cost_basis_ref) + '</div>' +
             '<table style="width:100%;font-size:10px;color:var(--dim);border-collapse:collapse;margin-top:4px">' +
-            rc.line_items.map(function(li){
+            (rc.line_items || []).map(function(li){
               var t = li.resource === 'tithe.founder';
               return '<tr style="border-top:1px solid var(--line)"><td style="padding:3px 6px 3px 0">' + esc(li.resource) + '</td>' +
                 '<td style="padding:3px 6px 3px 0;text-align:right">× ' + esc(li.quantity) + ' @ ' + esc(li.rate) + '</td>' +
@@ -7504,27 +7543,70 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 (t ? ' (the tithe)' : '') + '</td></tr>';
             }).join('') + '</table></div>';
         }).join('') : '<div style="color:var(--faint)">no metered charges yet: top up and the first receipt lands here</div>';
+        LOADED = { key: key, dest: a.send_to || '', memo: a.memo || key };
         $v('vc-panel').style.display = 'block';
+        say(null);
         $v('vc-src').textContent = 'source: ' + d.source;
         try { localStorage.setItem('bnr-vc-key', key) } catch(e) {}
       } catch(e) {
+        if (my !== SEQ) return;
+        clearPanel();
         $v('vc-src').textContent = '';
-        err('the estate oracle is unreachable right now: nothing is wrong with your voucher, try again in a moment');
+        say(['your balance could not be read just now, so nothing is shown. ', {btn: 'try again', on: function(){ load(key) }}, {cy: 'estate oracle unreachable, or its answer could not be read: ' + ((e && e.message) || e)}], true);
       }
     }
     $v('vc-go').onclick = function(){ var k = $v('vc-key').value.trim();
-      if (k) load(k) };
+      if (k) load(k); else say(['type your meter key first, then press look up.']) };
     $v('vc-key').addEventListener('keydown', function(e){ if (e.key === 'Enter') $v('vc-go').click() });
+    /* the copy recipe for paying from elsewhere is cypherpunk's; it says copied only once it is */
     Array.prototype.forEach.call(document.querySelectorAll('.vc-copy'), function(b){
       b.onclick = function(){
         var code = b.parentElement.querySelector('code');
-        var text = code ? code.textContent : '';
-        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){
-          var old = b.textContent; b.textContent = '✓ copied';
-          setTimeout(function(){ b.textContent = old }, 1200);
-        });
+        var text = code ? code.textContent.trim() : '';
+        var old = b.getAttribute('data-label') || b.textContent; b.setAttribute('data-label', old);
+        var show = function(w){ b.textContent = w; setTimeout(function(){ b.textContent = old }, 1600) };
+        if (!text) return;
+        if (!(navigator.clipboard && navigator.clipboard.writeText)) { show('not copied: select it yourself'); return }
+        navigator.clipboard.writeText(text).then(function(){ show('✓ copied') }, function(){ show('not copied: select it yourself') });
       };
     });
+    /* TOP UP from this wallet: a core.vaulta transfer of A to the voucher's account,
+       the memo (the meter key binding) filled in from the panel on screen. The press
+       asks first, in words, with the amount, the account and the memo; the yes signs
+       once through vaultaSend (the outbox, the daily cap, the read back). */
+    var TOPPING = null;
+    $v('vc-top-go').onclick = function(){
+      var st = $v('vc-top-stat'), raw = String($v('vc-top-amt').value || '').trim();
+      st.style.color = '';
+      if (!LOADED) { wlSay(st, ['look up your meter key first, then top up.']); return }
+      var dest = LOADED.dest, memo = LOADED.memo, key = LOADED.key;
+      if (!validAcct(dest)) { wlSay(st, ['this voucher did not say where top ups go, so nothing can be sent now. ', {btn: 'try again', on: function(){ load(key) }}, {cy: 'rail_a.send_to: ' + (dest || 'missing')}]); return }
+      if (!/^\d+(\.\d{1,4})?$/.test(raw) || !(Number(raw) > 0)) { wlSay(st, ['type how much A to add, with at most 4 digits after the point.']); $v('vc-top-amt').focus(); return }
+      if (!SOUL) { wlSay(st, [{to: 'connect-sec', t: 'connect your name'}, ' to top up from this wallet.']); return }
+      if (!K1) { wlSay(st, [{to: 'kc-sec', t: 'connect your keychain'}, ' to top up from this wallet.']); return }
+      if (!signGuard(st)) return;
+      var amt = Number(raw), q = amt.toFixed(4) + ' A';
+      var liq = (LAST_A && LAST_A.acct === vacct()) ? LAST_A.a : null;
+      if (liq !== null && amt > liq + 1e-9) { wlSay(st, ['you have ' + aAmount(liq) + ', so add that much or less.']); $v('vc-top-amt').focus(); return }
+      if (!capGate('A', amt, st)) return;
+      var ask = TOPPING = { key: key, dest: dest, memo: memo, q: q, amt: amt };
+      wlSay(st, ['send ' + q + ' from ' + vacct() + ' to ' + dest + ' with the memo ' + memo + '? it tops up the voucher for ' + key + '. ',
+        {btn: 'yes, send it', on: function(){
+          if (TOPPING !== ask || !LOADED || LOADED.key !== ask.key || LOADED.dest !== ask.dest || LOADED.memo !== ask.memo) { wlSay(st, ['the voucher on screen changed, so nothing was sent. press top up from my wallet again.']); return }
+          TOPPING = null;
+          vaultaLane($v('vc-top-go'), function(){ return topSend(st, ask) }, st);
+        }},
+        {btn: 'not now', on: function(){ TOPPING = null; wlSay(st, ['nothing was sent.']) }}]);
+    };
+    async function topSend(st, ask){
+      var actz = [{actor: vacct(), permission: 'active'}];
+      try { var act = await vaultaSerialize(A_TOKEN, 'transfer', actz, {from: vacct(), to: ask.dest, quantity: ask.q, memo: ask.memo}) }
+      catch(e) { wlSay(st, ['the network did not answer, so nothing was signed. ', {btn: 'try again', on: function(){ $v('vc-top-go').click() }}, {cy: (e && e.message) || String(e)}]); return }
+      await vaultaSend(st, [act], {unit: 'A', amt: ask.amt}, 'top up ' + ask.q + ' to ' + ask.dest + ' from ' + vacct() + ' · memo ' + ask.memo, function(fin){
+        if (fin.phase === 'confirmed') wlSay(st, ['added ' + ask.q + ' to your voucher; your balance shows it once the estate counts it. ', {btn: 'read my balance', on: function(){ load(ask.key) }}, {cy: 'tx ' + (fin.ref || fin.txid)}]);
+        $v('vc-top-amt').value = '';
+      }, $v('vc-top-go'));
+    }
     $v('vc-afford-go').onclick = async function(){
       var k = $v('vc-key').value.trim(), amt = parseFloat($v('vc-afford-amt').value);
       var out = $v('vc-afford-out');
@@ -9692,7 +9774,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 })();
 </script>
 <script src="spend-audit.js?v=3"></script>
-<script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
+<script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'), { sample: { say: 'these are sample bills that show how the checking works in your browser; none of them are yours. your own spending is in ', to: 'voucher-sec', t: 'prepay for compute' } });</script>
 <script>
 /* ══ THE THREE GRAMMARS — the presenter. It moves the reader through the one
    set of sections; it never reads a chain, holds a key, or writes a number.

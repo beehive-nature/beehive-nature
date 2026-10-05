@@ -720,7 +720,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
     spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
   const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
-  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['skaists heART WALLet', 'how this page is built'] };
+  // the top up is one press from this wallet in bee and raver; the copy recipe for paying from
+  // elsewhere (account, memo, its "no memo, no credit" warning) is cypherpunk's alone
+  const PLAIN = { voucher: ['12.5000'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['skaists heART WALLet', 'how this page is built'] };
   const seen = (page, sel) => page.evaluate(sel => {
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
     const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
@@ -790,7 +792,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
   const missing = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
-  const far = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
+  // the rate citation travels with the USDC way, which is cypherpunk's alone (bee and raver top up from the wallet)
+  const ENG_FAR = { ...ENG, voucher: ENG.voucher.filter(m => m !== 'RATE-REF-FIXTURE') };
+  const far = reg => parts.flatMap(p => ENG_FAR[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
@@ -803,6 +807,11 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
     vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
+  const TOPUP = { bee: ['top up from my wallet', 'the memo is filled in for you'], raver: ['top up from my wallet', 'the memo is filled in for you'], cypherpunk: ['top up from my wallet', 'no memo, no credit', 'bnrvoucher11', 'gatekey'] };
+  const topLost = REGS.flatMap(reg => TOPUP[reg].filter(m => [390, 1280].some(W => !resW[W][reg].voucher.includes(m))).map(m => reg + ':' + m));
+  const recipeLeak = ['bee', 'raver'].flatMap(reg => ['bnrvoucher11', '0x' + '1'.repeat(40), 'copy memo', 'no memo, no credit'].filter(m => [390, 1280].some(W => resW[W][reg].voucher.includes(m) || resW[W][reg].voucherTap.includes(m))).map(m => reg + ':' + m));
+  ok('the voucher tops up from this wallet in one press (bee and raver see the press and no copy recipe that sends them elsewhere); cypherpunk keeps the account, the memo and its warning',
+    topLost.length === 0 && recipeLeak.length === 0, [topLost.join(', '), recipeLeak.join(', ')].filter(Boolean).join(' · ') || 'press shown, recipe cypherpunk only');
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the card route\'s own "not wired to bPay", the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }
