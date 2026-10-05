@@ -5261,7 +5261,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if(BRIDGED!==null)retry(); else signGuard(el,retry,true,pin) };
       w.then(on,on); return false }
     if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
-    if(BRIDGED===false&&VACCT_NOACCT===vacct()){ wlSay(el,[vacct()+' is not a Vaulta account yet, so nothing was signed. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+vacct()+': unknown account'}]); return false }
+    if(BRIDGED===false&&VACCT_NOACCT===vacct()){ var na=vacct(); wlSay(el,[noAcctWords(na)+', so nothing was signed. ',{to:'connect-sec',t:'choose the account'}].concat(noAcctAgain(na,function(){ checkBridge().then(function(){ if(retry)signGuard(el,retry) }) }),[{cy:'get_account '+na+': '+(acctNameOk(na)?'unknown account':'not a valid account name')}])); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -10308,7 +10308,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(again)setTimeout(function(){ if(st.getAttribute('data-read-at')===stamp&&st.className==='stat ok'&&st.textContent.indexOf(t)===0)line(true) },120000);
   }
   /* a node that answers "no such account" is not a read that failed */
-  function vaultaMissing(e){ return !!e&&/account_query_exception|unknown key|unable to retrieve account|unknown account|does not exist/i.test(JSON.stringify(e)) }
+  function vaultaMissing(e){ return !!e&&/account_query_exception|unknown key|unable to retrieve account|unknown account|does not exist|not properly normalized|invalid name/i.test(JSON.stringify(e)) }
   /* A is the token of core.vaulta. The chain's older core coin, EOS (eosio.token,
      what get_account calls core_liquid_balance), is a different token that swaps
      1:1 into A at core.vaulta but is not A until it does: the founder's account
@@ -10333,7 +10333,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(LAST_A&&LAST_A.acct===acct)LAST_A=null;
       var why=d?null:((raw&&raw.error)?raw:await postAny(VH,'/v1/chain/get_account',{account_name:acct}));
       if(stale())return;
-      if(!d&&vaultaMissing(why)) wlSay($('v-stat'),['there is no Vaulta account named '+acct+' yet. ',{to:'acct-sec',t:'make one'},{cy:'get_account '+acct+': '+JSON.stringify(why).slice(0,160)}]);
+      if(!d&&!acctNameOk(acct)) wlSay($('v-stat'),[noAcctWords(acct)+'. ',{to:'connect-sec',t:'choose the account'},{cy:'a Vaulta account name is up to 12 characters of a to z, 1 to 5 and dots'}]);
+      else if(!d&&vaultaMissing(why)) wlSay($('v-stat'),['there is no Vaulta account named '+acct+' yet. ',{to:'acct-sec',t:'make one'},{cy:'get_account '+acct+': '+JSON.stringify(why).slice(0,160)}]);
       else wlSay($('v-stat'),['could not read '+acct+' just now. ',{btn:'try again',on:function(){ readVaulta(acct) }},{cy:!d?'get_account answered nothing':'get_currency_balance '+A_TOKEN+' A answered nothing'}]);
       $('v-stat').className='stat err'; wlRead($('v-stat'),false);
       if(vacct()===acct)refreshAcctPanel(!d&&vaultaMissing(why)?'missing':'failed');   /* the account forge says it too, never a figure from before */
