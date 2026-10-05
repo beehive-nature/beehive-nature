@@ -67,6 +67,7 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
       }
       if (u.pathname.endsWith('/get_account')) {
         const a = body.account_name;
+        if (state.acctDelay && state.acctDelay[a]) await new Promise(r => setTimeout(r, state.acctDelay[a]));
         // an account that does not exist: nodes answer 500 "unknown key"
         if (/^(newacct|freename)/.test(a) && !state.keys[a]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + a + ')' }] } }, 500);
         const keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
@@ -280,6 +281,34 @@ try {
     await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamea'; document.getElementById('ac-go').click(); });
     await waitIn(page, 'ac-stat', /so nothing was signed/, 20000);
     ok('the press is refused before signing, never by the chain', /^a new account needs about 0\.0823 A for its room on the chain, and you have 0\.0100 A, so nothing was signed\./.test((await page.innerText('#ac-stat')).trim()) && state.posts.length === 0, await page.innerText('#ac-stat'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* Q4 · a press made while the account is checked goes on only for the name it was made for */
+  {
+    console.log('Q4 · a press, then another name, while the account is checked (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await toKey(page);
+    await waitIn(page, 'ac-stat', /needs about/, 20000);
+    state.acctDelay = { kingbeelovis: 4000 };
+    await page.evaluate(() => {
+      window.__acSaid = []; const st = document.getElementById('ac-stat');
+      new MutationObserver(() => window.__acSaid.push(st.innerText.trim())).observe(st, { childList: true, subtree: true, characterData: true });
+      document.getElementById('wgo').click();   // the name is read again: the account check is slow this time
+    });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { document.getElementById('ac-name').value = 'newacctnamec'; document.getElementById('ac-go').click(); });
+    await page.waitForFunction(() => window.__acSaid.some(s => /^checking kingbeelovis, one moment\./.test(s)), null, { timeout: 5000 }).catch(() => {});
+    const waited = await page.evaluate(() => window.__acSaid.some(s => /^checking kingbeelovis, one moment\./.test(s)));
+    await page.evaluate(() => { document.getElementById('wq').value = 'bobaccount11'; document.getElementById('wgo').click(); });   // another name, before the check answers
+    await page.waitForFunction(() => window.__acSaid.some(s => /^you connected another name while this was being checked, so nothing was signed\./.test(s)), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+    const said = await page.evaluate(() => window.__acSaid);
+    ok('the press waits for the check it needs, and says so', waited, JSON.stringify(said.slice(0, 4)));
+    ok('once the name changed, the waiting press signs nothing and says why', said.some(s => /^you connected another name while this was being checked, so nothing was signed\. press it again to send from bobaccount11\./.test(s)) && state.posts.length === 0, JSON.stringify(said.slice(-4)) + ' · posts ' + state.posts.length);
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

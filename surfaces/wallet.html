@@ -1420,13 +1420,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="law" data-reg="cypherpunk">updateauth on the account’s active permission: your bzDiD-derived K1 key joins every key already there, nothing removed, the threshold unchanged. the one-paste lane (add this wallet) adds the K1 key only and signs once with the pasted key. scaffold · recovery can also enroll an account passkey (PUB_WA), which joins the account, though this page does not sign with it yet. either way the pasted key lives in tab memory for that one signature, and both paste fields are cleared on the press.</div>
   <div class="row" data-reg="cypherpunk">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
-      <input type="checkbox" id="br-wa" checked style="flex:0;min-width:14px;height:14px">
-      also enroll an account passkey on this origin (PUB_WA at threshold 1 on the account; this page does not sign with it yet)
+      <input type="checkbox" id="br-wa" disabled style="flex:0;min-width:14px;height:14px">
+      an account passkey cannot join yet: this page cannot write a WebAuthn key (PUB_WA) in the chain's form, so none is made
     </label>
   </div>
   <details id="br-wif-scaffold" style="margin-top:10px" data-reg="cypherpunk">
     <summary style="font-size:14px;cursor:pointer;color:var(--dim)">scaffold · recovery (cypherpunk)</summary>
-    <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">labs and migration: paste the account’s existing active private key here to bridge your derived bzDiD by hand, with an account passkey too when the box is ticked. bee and raver use the one-paste lane instead (add this wallet).</div>
+    <div class="law" style="font-size:14px;margin-top:6px;color:var(--dim)">labs and migration: paste the account’s existing active private key here to bridge your derived bzDiD by hand. bee and raver use the one-paste lane instead (add this wallet).</div>
     <div class="row" style="margin-top:8px">
       <input id="br-wif" aria-label="Existing active private key" class="small" type="password" placeholder="existing active private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
       <button id="br-go" class="gold">bridge my bzDiD</button>
@@ -5136,8 +5136,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var again=function(read){ return retry?{btn:'try again',on:function(){ Promise.resolve(read()).then(function(){ return checkBridge() }).then(retry,retry) }}:'try again in a moment.' };
     if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
     if(BRIDGED===null&&retry&&(BR_CHECK||!checked)){   /* not checked yet, or being checked: check it, say so, and go on once it answers */
-      var w=BR_CHECK||checkBridge(); wlSay(el,['checking '+vacct()+', one moment.']);
-      var on=function(){ if(BRIDGED!==null)retry(); else signGuard(el,retry,true) }; w.then(on,on); return false }
+      var w=BR_CHECK||checkBridge(), pressedFor={soul:SOUL,acct:vacct(),key:K1}; wlSay(el,['checking '+vacct()+', one moment.']);
+      var on=function(){
+        /* the press goes on only for the name, account and keychain it was made for */
+        if(SOUL!==pressedFor.soul||vacct()!==pressedFor.acct||K1!==pressedFor.key){ wlSay(el,['you connected another name while this was being checked, so nothing was signed. press it again to send from '+vacct()+'.']); return }
+        if(BRIDGED!==null)retry(); else signGuard(el,retry,true) };
+      w.then(on,on); return false }
     if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
@@ -6710,7 +6714,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(already){ $('br-wif').value=''; wlSay(stat,['this wallet already signs for '+vacct()+', so nothing was sent.']); checkBridge(); return }
     // dual-signer law: derived K1 + our-origin account passkey, both at threshold 1
     var waAdd=[], waSave=null;
-    if($('br-wa').checked){
+    if($('br-wa').checked&&!$('br-wa').disabled){   /* off until a PUB_WA encoder exists: no passkey is made only to fail */
       stat.textContent='1b/5 enrolling your account passkey (touch it)…';
       try{
         var wa=await enrollAccountPasskey();
