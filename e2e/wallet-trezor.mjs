@@ -26,6 +26,7 @@ const check = (label, condition) => { assert.ok(condition, label); console.log(`
 const mockBridge = `
       window.TrezorConnect={
         init:async p=>{bridgeCalls.push(['init',p]);if(bridgeMode==='init-fail')throw Error('fixture init failure')},
+        dispose:async()=>{bridgeCalls.push(['dispose'])},
         solanaGetAddress:async p=>reply('solanaGetAddress',p,{address:${JSON.stringify(SOL)}}),
         ethereumGetAddress:async p=>reply('ethereumGetAddress',p,{address:${JSON.stringify(EVM)}}),
         getPublicKey:async p=>reply('getPublicKey',p,{xpubSegwit:${JSON.stringify(ZPUB)}}),
@@ -39,7 +40,22 @@ const mockBridge = `
 let tamperBridge=true;
 const fixtureIntegrity='sha384-'+createHash('sha384').update(mockBridge).digest('base64');
 await ctx.route(origin+'/surfaces/wallet.html*',route=>route.fulfill({contentType:'text/html',body:fixtureHtml.replace('sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6',fixtureIntegrity)}));
-await ctx.addInitScript(() => { localStorage.setItem('bregister', 'bee'); window.bridgeCalls = []; window.bridgeMode = 'ok'; });
+await ctx.addInitScript(() => {
+  localStorage.setItem('bregister', 'bee'); window.bridgeCalls = []; window.bridgeMode = 'ok';
+  // Suite desktop's local socket, faked: window.suiteDesktop decides whether it answers; every attempt is counted.
+  window.suiteDesktop = false; window.desktopProbes = []; window.noWebUsb = false;
+  const Real = window.WebSocket;
+  window.WebSocket = function (url, p) {
+    if (String(url).startsWith('ws://127.0.0.1:21335/')) {
+      window.desktopProbes.push(String(url));
+      const ws = { readyState: 0, close() { this.readyState = 3; } };
+      setTimeout(() => { if (window.suiteDesktop) { ws.readyState = 1; ws.onopen && ws.onopen({}); } else { ws.onerror && ws.onerror({}); ws.onclose && ws.onclose({}); } }, 5);
+      return ws;
+    }
+    return new Real(url, p);
+  };
+  Object.defineProperty(navigator, 'usb', { configurable: true, get() { return window.noWebUsb ? undefined : {}; } });
+});
 await ctx.route(url => !url.href.startsWith(origin), async route => {
   const req = route.request(), url = new URL(req.url());
   const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
@@ -68,7 +84,7 @@ try {
   await page.goto(origin + '/surfaces/wallet.html#wallet-accounts');
   check('bridge absent at page load', loads === 0);
   await page.locator('#wa-trezor').click();
-  check('opening import form does not contact Trezor', loads === 0);
+  check('opening import form does not contact Trezor or the Suite desktop socket', loads === 0 && (await page.evaluate(() => window.desktopProbes.length)) === 0);
   await importAccount('solana');
   check('changed bridge bytes fail integrity without executing or saving', (await entries()).length===0 && await page.evaluate(()=>!window.tamperedBridgeRan&&!window.TrezorConnect));
   tamperBridge=false;
@@ -79,7 +95,8 @@ try {
   await importAccount('solana', '2');
   let saved = await entries();
   check('Solana account 2 preserves Suite path and public provenance', saved[0].trezor.path === "m/44'/501'/1'/0'" && saved[0].address === SOL && saved[0].kind === 'mine');
-  check('device requests use Suite web explicitly, never automatic desktop or legacy iframe transport', await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='init').every(([,p])=>p.coreMode==='suite-web'&&p.manifest.appName==='skaists heART WALLet')));
+  check('without Suite desktop, device requests use Suite web explicitly, never automatic or the legacy iframe transport', await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='init').every(([,p])=>p.coreMode==='suite-web'&&p.manifest.appName==='skaists heART WALLet')));
+  check('Suite desktop is asked for once per press, only after the press', await page.evaluate(() => window.desktopProbes.length >= 1 && window.desktopProbes.every(u => u === 'ws://127.0.0.1:21335/connect-ws')));
   check('public export explicitly requests device display', await page.evaluate(() => bridgeCalls.find(([m]) => m === 'solanaGetAddress')[1].showOnTrezor === true));
   await importAccount('solana', '2');
   check('repeat sync cannot duplicate an account', (await entries()).length === 1 && (await status()).includes('already saved'));
@@ -129,6 +146,16 @@ try {
   check('one public EVM export adds Ethereum and Arbitrum beside existing Base',expanded.length===5&&['ethereum','base','arbitrum'].every(chain=>expanded.some(r=>r.chain===chain&&r.address===EVM)));
   check('multi-network import preserves existing label and path',expanded.find(r=>r.chain==='base').label==='Hardware savings'&&expanded.filter(r=>['ethereum','base','arbitrum'].includes(r.chain)).every(r=>r.trezor.path==="m/44'/60'/2'/0/0"));
   check('multi-network sync asks the device only once',await page.evaluate(()=>bridgeCalls.filter(([m])=>m==='ethereumGetAddress').length)===exportsBefore+1);
+  await page.evaluate(() => { window.suiteDesktop = true; window.bridgeCalls.length = 0; });
+  await importAccount('solana', '4');
+  check('with Suite desktop running, the press goes through Suite desktop (Bluetooth or USB), re-initialized once, never automatic or iframe',
+    await page.evaluate(() => { const inits = bridgeCalls.filter(([m]) => m === 'init'); return inits.length === 1 && inits[0][1].coreMode === 'suite-desktop' && bridgeCalls.some(([m]) => m === 'dispose') && bridgeCalls.some(([m]) => m === 'solanaGetAddress'); }));
+  check('the status names Trezor Suite while it carries the request', /Imported|Trezor Suite is open|already saved/.test(await status()));
+  await page.evaluate(() => { window.suiteDesktop = false; window.noWebUsb = true; window.bridgeCalls.length = 0; });
+  await importAccount('solana', '5');
+  check('no Suite desktop and no WebUSB: one plain sentence, nothing initialized or saved',
+    (await status()).startsWith('No Trezor connection in this browser.') && (await page.evaluate(() => bridgeCalls.length)) === 0);
+  await page.evaluate(() => { window.noWebUsb = false; });
   check('no browser script exceptions', errors.length === 0);
   console.log(`${checks} Trezor checks passed; fake bridge, no device or signing.`);
 } finally { await browser.close();  }

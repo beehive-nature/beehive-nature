@@ -1279,7 +1279,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="wa-note" id="wa-privacy">Save up to 50 public addresses with labels in this browser. Reading shares the address with public chain services. “My accounts” is your label, not proof of ownership. bPay still uses its connected signing wallet.</div>
     <p class="wa-note">Vaulta and Hive accounts are included. The network picker shows the full wallet scope; entries awaiting a reader are marked unavailable. <a href="#matrix-sec">See every chain, read capability and signing status</a>.</p>
     <form id="wa-trezor-form" hidden aria-label="Import a Trezor public account">
-      <p class="wa-note">Import through Trezor Suite web (opens a window). Confirm the public export on your device. SAFE 7 end-to-end device verification is pending; you can add its verified public addresses manually.</p>
+      <p class="wa-note">Open Trezor Suite on this computer for Bluetooth or USB, or plug the Trezor in and use Chrome. Then press Import and confirm on your Trezor. SAFE 7 end-to-end device verification is pending; you can add its verified public addresses manually.</p>
       <div class="wa-fields">
         <label>Network<select id="wa-trezor-chain"><option value="evm">Ethereum + Base + Arbitrum</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option><option value="arbitrum">Arbitrum · ETH + ANT</option><option value="base">Base · ETH + USDC</option><option value="bitcoin-account">Bitcoin · native SegWit account</option></select></label>
         <label>Account number<input id="wa-trezor-account" type="number" min="1" max="100" value="1" required></label>
@@ -8865,17 +8865,42 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
   };
   // Official stock-device bridge. No signer or firmware-update method is
   // exposed here. A loaded public address never becomes the bPay signer.
-  var trezorInit=null;
+  // Route (2026-10-05): the Trezor Suite desktop app when it is running on this
+  // computer (it carries Bluetooth and USB, and the SAFE 7's paired channel);
+  // otherwise hosted Suite web in a window (USB through the browser). Suite
+  // desktop is asked for exactly once, on the press, never on load or when the
+  // form opens, and the legacy in-page iframe transport is never used.
+  var trezorInit=null, trezorMode=null;
+  var SUITE_DESKTOP_WS='ws://127.0.0.1:21335/connect-ws';
+  function suiteDesktopRunning(){
+    return new Promise(function(resolve){
+      var done=false,ws,timer;
+      function end(v){if(done)return;done=true;clearTimeout(timer);try{ws&&ws.close()}catch(e){}resolve(v)}
+      try{ws=new WebSocket(SUITE_DESKTOP_WS)}catch(e){return resolve(false)}
+      ws.onopen=function(){end(true)};ws.onerror=function(){end(false)};ws.onclose=function(){end(false)};
+      timer=setTimeout(function(){end(false)},1500);
+    });
+  }
   async function connectTrezor(userGesture){
     if(!userGesture&&!trezorInit)throw new Error('Press Refresh to load Trezor Connect for this public account');
+    if(userGesture){
+      var mode=(await suiteDesktopRunning())?'suite-desktop':'suite-web';
+      if(mode==='suite-web'&&!(navigator&&navigator.usb))throw new Error('No Trezor connection in this browser. Open Trezor Suite on this computer for Bluetooth or USB, or open this page in Chrome with the Trezor plugged in.');
+      if(trezorInit&&trezorMode!==mode){
+        var old=trezorInit;trezorInit=null;
+        try{var tcOld=await old;if(tcOld&&typeof tcOld.dispose==='function')await tcOld.dispose()}catch(e){}
+      }
+      trezorMode=mode;
+    }
     if(!trezorInit){
+      var useMode=trezorMode||'suite-web';
       trezorInit=(async function(){
         if(!window.TrezorConnect)await new Promise(function(resolve,reject){
           var script=document.createElement('script');script.src='https://connect.trezor.io/9.7.3/trezor-connect.js';script.integrity='sha384-yVTIY7DqrdwOMtIuVa/xEAX+S/hsrxPUW8nGQuHZIr+mtxOZ9XnEIkJzNMdGsye6';script.crossOrigin='anonymous';
           script.onload=function(){window.TrezorConnect?resolve():reject(new Error('Trezor Connect did not start'))};
           script.onerror=function(){script.remove();reject(new Error('Trezor Connect could not be loaded. Try again.'))};document.head.appendChild(script);
         });
-        await window.TrezorConnect.init({coreMode:'suite-web',lazyLoad:true,manifest:{email:'lovis@skaists.dev',appName:'skaists heART WALLet',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
+        await window.TrezorConnect.init({coreMode:useMode,lazyLoad:true,manifest:{email:'lovis@skaists.dev',appName:'skaists heART WALLet',appUrl:'https://skaists.dev/surfaces/wallet.html'}});
         return window.TrezorConnect;
       })().catch(function(error){trezorInit=null;throw error});
     }
@@ -8909,7 +8934,7 @@ window.BNRCoins={deploymentRegistry:deploymentRegistry,readHoldings:readHoldings
     event.preventDefault();var submit=el('wa-trezor-import');if(submit.disabled)return;submit.disabled=true;
     try{
       var selected=trezorSelection(),tc=await connectTrezor(true),request={path:selected.path,showOnTrezor:true},result;
-      status('Confirm the public account export on your Trezor.');
+      status(trezorMode==='suite-desktop'?'Trezor Suite is open: confirm the public account export on your Trezor.':'Confirm the public account export on your Trezor.');
       if(selected.chain==='bitcoin-account')result=await tc.getPublicKey(Object.assign(request,{coin:'btc',scriptType:'SPENDWITNESS'}));
       else if(selected.chain==='solana')result=await tc.solanaGetAddress(request);
       else result=await tc.ethereumGetAddress(request);
