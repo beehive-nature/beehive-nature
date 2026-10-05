@@ -37,7 +37,7 @@
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
   var WAVE_CHUNK = 4190208;
-  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_CHUNKS = 59;        // + 3 DataMap chunks + 1 public map record = 63; 64 records is merkle, which the bridge cannot finalize
   var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
