@@ -1475,7 +1475,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
        refuses to SIGN past it (a policy you wrote, enforced at your own key —
        never a human gate, never an approval step; unset = no limit). ══ -->
   <div class="row" id="cap-row" data-wl-tech style="margin-top:8px;align-items:center;flex-wrap:wrap">
-    <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 0 auto">a daily cap, if you want one:<span class="wl-cyd"> spend cap · optional, owner's tool; per unit, never price-converted; the ledger lives in this browser and starts fresh at local midnight</span></span>
+    <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 1 auto;min-width:0">a daily cap, if you want one:<span class="wl-cyd"> spend cap · optional, owner's tool; per unit, never price-converted; the ledger lives in this browser and starts fresh at local midnight</span></span>
     <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">no daily cap is set.</span>
     <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount a day" aria-label="Daily cap amount" title="the cap starts fresh at midnight on this device" style="max-width:110px;flex:0 1 110px">
     <select id="cap-unit" aria-label="Coin the cap is for" title="each coin has its own cap" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
@@ -5038,7 +5038,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     return false;
   }
-  async function checkBridge(){
+  /* the account check in flight, so a press made meanwhile waits for it instead of calling it failed */
+  var BR_CHECK=null;
+  function checkBridge(){
+    var p=checkBridgeRun(); BR_CHECK=p;
+    var done=function(){ if(BR_CHECK===p)BR_CHECK=null }; p.then(done,done);
+    return p;
+  }
+  async function checkBridgeRun(){
     if(!K1||!SOUL){BRIDGED=null;return}
     if(!vacctKnown()){BRIDGED=null;setBridgeState(false,'could not read where '+SOUL+'.b points','unknown');return}
     $('kc-bridge-verdict').textContent='checking '+vacct()+'…';$('kc-bridge-verdict').className='stamp';
@@ -5059,10 +5066,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* true when this wallet may sign as vacct(); otherwise one calm sentence */
   function signGuard(el,retry){
-    /* a lane that can press itself again gets the button; the read runs first, then the lane */
-    var again=function(read){ return retry?{btn:'try again',on:function(){ read().then(retry,retry) }}:'try again in a moment.' };
+    /* a lane that can press itself again gets the button; the pointer and the account are read first, then the lane */
+    var again=function(read){ return retry?{btn:'try again',on:function(){ Promise.resolve(read()).then(function(){ return checkBridge() }).then(retry,retry) }}:'try again in a moment.' };
     if(!vacctKnown()){ wlSay(el,['we could not read which account '+SOUL+'.b points at just now, so nothing was signed. ',again(resolveVacct)]); return false }
-    if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(checkBridge)]); return false }
+    if(BRIDGED===null&&BR_CHECK&&retry){   /* still being checked: say so, and go on once the check answers */
+      var w=BR_CHECK; wlSay(el,['checking '+vacct()+', one moment.']);
+      var on=function(){ if(BRIDGED!==null)retry(); else signGuard(el,retry) }; w.then(on,on); return false }
+    if(BRIDGED===null){ wlSay(el,['we could not check '+vacct()+' just now, so nothing was signed. ',again(function(){ return null })]); return false }
     if(BRIDGED!==true){ wlSay(el,['this wallet does not sign for '+vacct()+' yet · ',{to:'bridge-sec',t:'let it sign'}]); return false }
     return true;
   }
@@ -6555,6 +6565,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL){ wlSay(stat,[{to:'connect-sec',t:'connect your name'},' to make a new account.']); return }
     if(!K1){ wlSay(stat,[{to:'kc-sec',t:'connect your keychain'},' to make a new account.']); return }
     if(!/^[a-z][a-z1-5]{11}$/.test(name)){ wlSay(stat,['type a name of exactly 12 characters: letters a to z and digits 1 to 5, starting with a letter.']); $('ac-name').focus(); return }
+    stat.setAttribute('data-act','');   /* what the guard says about this press stays until the reader types or presses again */
     if(!signGuard(stat,function(){ $('ac-go').click() }))return;
     if(acBytes()===null){ wlSay(stat,['the new account needs at least 3072 bytes of room, so type a whole number from 3072 up.']); $('ac-ram').focus(); return }
     stat.setAttribute('data-act','');   /* from here the line holds what this press did, until the reader types again */
