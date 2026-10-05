@@ -498,7 +498,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
  // so reading or scrolling PLUR never starts the festival's own chain reads.
  function open(e){if(frame.getAttribute('src'))return;frame.src=frame.dataset.src;frame.hidden=false;focusOnLoad=enter.contains(e.target);landOnLoad=true;enter.hidden=true;}
  document.addEventListener('click',function(e){if(e.target.closest('a[href="#festival"]'))open(e);});
- function landNow(){var h=Math.ceil(frame.contentDocument&&frame.contentDocument.body?frame.contentDocument.body.getBoundingClientRect().height:0)+8;if(h>8&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';document.getElementById('festival').scrollIntoView({block:'start'});}
+ function landNow(){var h=Math.ceil(frame.contentDocument&&frame.contentDocument.body?frame.contentDocument.body.getBoundingClientRect().height:0)+8;if(h>8&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';document.getElementById('festival').scrollIntoView({block:'start',behavior:'instant'});}
  ['wheel','touchstart','keydown'].forEach(function(t){addEventListener(t,function(){landUntil=0;},{passive:true});});
  function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
  frame.addEventListener('load',function(){
