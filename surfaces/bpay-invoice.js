@@ -22,7 +22,12 @@
   if(!card) return;
   var BRIDGE_DEFAULT = ''; // No local service is required or selected by this wallet.
   var LS = 'bpay-policy-v1';
-  var quoteWorker=null;
+  // The file quote asks Autonomi itself through the official browser kit
+  // (vendor/ant-browser-sdk/0.1.1). Its size limits come from the kit's own
+  // limits.js; the kit and its network connection load only when a quote is asked.
+  var ANT_KIT = '/vendor/ant-browser-sdk/0.1.1/';
+  var antLimits = null, antKit = null, antClient = null, quoteRun = null;
+  var limitsLoad = import(ANT_KIT + 'limits.js').then(function(m){ antLimits = m.SDK_LIMITS; }, function(){ antLimits = null; });
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };
   try { var saved = JSON.parse(localStorage.getItem(LS)||'null'); if (saved && typeof saved==='object') st = Object.assign(st, saved); } catch(e){}
   if (/^https?:\/\/(localhost|127\.0\.0\.1):8807(?:\/|$)/i.test(st.bridge)) st.bridge = '';
@@ -40,6 +45,12 @@
   }
   function ant(atto){ try{ var n=BigInt(atto), w=n/10n**18n, f=(n%10n**18n).toString().padStart(18,'0').replace(/0+$/,''); return f? w+'.'+f : String(w); }catch(e){ return '?'; } }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+  function plainBytes(n){
+    var units = [[1e12,'TB'],[1e9,'GB'],[1e6,'MB'],[1e3,'KB']];
+    for (var i = 0; i < units.length; i++) if (n >= units[i][0]) return (n/units[i][0]).toLocaleString('en-US',{maximumFractionDigits:2}) + ' ' + units[i][1];
+    return n.toLocaleString('en-US') + (n === 1 ? ' byte' : ' bytes');
+  }
+  function sizeRange(){ return plainBytes(antLimits.minFileBytes) + ' to ' + plainBytes(antLimits.maxFileBytes); }
 
   // the artifact pin arrives mechanically from the committed reference invoice
   // (Phase A) — the page never retypes identity
@@ -80,7 +91,7 @@
     h += '</div>';
     // the gesture's record + the fresh-quote action (quote only — never a payment)
     if (st.audience === 'public') {
-      h += '<div class="wa-note"><label for="ant-quote-file">File to quote (up to 1 MiB)</label><input id="ant-quote-file" type="file" style="display:block;width:100%;max-width:100%;margin:8px 0"><div>A quote sends this file to the hosted Autonomi service for pricing. It does not pay or publish.</div><button type="button" id="ant-quote-go">Get Autonomi quote</button> <button type="button" id="ant-quote-cancel" hidden>Stop request</button><div id="ant-quote-status" role="status" aria-live="polite"></div></div>';
+      h += '<div class="wa-note"><label for="ant-quote-file">File to quote' + (antLimits ? ' (' + sizeRange() + ', the Autonomi browser kit\'s limits; your browser may allow less)' : '') + '</label><input id="ant-quote-file" type="file" style="display:block;width:100%;max-width:100%;margin:8px 0"><div>This browser splits the file into chunks itself and asks Autonomi storage nodes for a price using only addresses and sizes. The file\'s contents stay in this browser, and nothing is paid or published.</div><button type="button" id="ant-quote-go">Get Autonomi quote</button> <button type="button" id="ant-quote-cancel" hidden>Stop request</button><div id="ant-quote-status" role="status" aria-live="polite"></div></div>';
       h += '<div style="margin-top:10px;font-size:12px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b>';
       if (st.selectedAt) h += ' <span style="opacity:.65;font-size:10px">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(st.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
       h += '</div>';
@@ -154,34 +165,87 @@
       });
     });
     var quoteButton=document.getElementById('ant-quote-go');if(quoteButton)quoteButton.onclick=quoteFile;
-    var cancel=document.getElementById('ant-quote-cancel');if(cancel)cancel.onclick=function(){stopQuote();document.getElementById('ant-quote-status').textContent='Request stopped. No payment was requested.';document.getElementById('ant-quote-go').disabled=false;document.getElementById('ant-quote-file').disabled=false;cancel.hidden=true};
+    var cancel=document.getElementById('ant-quote-cancel');if(cancel)cancel.onclick=function(){stopQuote();document.getElementById('ant-quote-status').textContent='Request stopped. Nothing was paid.';quoteControls(false);};
     var bridgeInput = document.getElementById('bpay-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save({ bridge: st.bridge }); });
     var go = document.getElementById('bpay-quote-go');
     if (go) go.addEventListener('click', freshQuote);
   }
 
-  function stopQuote(){var worker=quoteWorker;quoteWorker=null;if(worker)worker.terminate('quote request finished or stopped')}
-  async function quoteFile(){
-    var input=document.getElementById('ant-quote-file'),button=document.getElementById('ant-quote-go'),cancel=document.getElementById('ant-quote-cancel'),output=document.getElementById('ant-quote-status');
-    if(quoteWorker)return;
-    var file=input.files[0];output.textContent='';
-    if(st.audience!=='public'||!file||!file.size||file.size>1048576){output.textContent='Choose Public and a non-empty file up to 1 MiB.';return;}
-    if(!window.BnrSeam){output.textContent='The storage adapter did not load. Reload and try again.';return;}
-    button.disabled=true;input.disabled=true;cancel.hidden=false;
-    output.textContent='Checking the Autonomi service and requesting a quote…';
-    var worker=null;
-    try{
-      worker=window.BnrSeam.spawn('ant','myspace-adapter-ant.js');quoteWorker=worker;
-      await worker.ready;
-      var bytes=new Uint8Array(await file.arrayBuffer());if(quoteWorker!==worker)return;
-      var result=await worker.ops['x.preparePut']({bytes:bytes},90000);if(quoteWorker!==worker)return;
-      if(!result||!result.quote||!/^\d+$/.test(result.quote.ant_atto))throw new Error('The service did not return a valid ANT amount');
-      output.textContent=ant(result.quote.ant_atto)+' ANT · '+file.size.toLocaleString()+' bytes · quoted '+new Date().toLocaleTimeString()+'. ETH network fees are separate. Quote only; no payment or publication.';
-    }catch(error){if(quoteWorker===worker)output.textContent=error.code===-32030?'Quote unavailable: the Autonomi service is not accepting requests. Your file was not sent.':'Quote unavailable: '+(error.message||'service unavailable')+'. No payment was requested.';}
-    finally{if(quoteWorker===worker){stopQuote();button.disabled=false;input.disabled=false;cancel.hidden=true;}}
+  function quoteControls(busy){
+    var button=document.getElementById('ant-quote-go'),input=document.getElementById('ant-quote-file'),cancel=document.getElementById('ant-quote-cancel');
+    if(button)button.disabled=busy;if(input)input.disabled=busy;if(cancel)cancel.hidden=!busy;
   }
-  window.addEventListener('pagehide',stopQuote);
+  function stopQuote(){var run=quoteRun;quoteRun=null;if(run)run.stop.abort(new DOMException('Quote stopped','AbortError'));}
+  // One Autonomi connection per page, opened on the first quote and reused.
+  async function antSession(signal){
+    var sdk;
+    try{ sdk=await (antKit||(antKit=import(ANT_KIT+'index.js'))); }
+    catch(error){ var kit=new Error('Autonomi browser kit did not load',{cause:error}); kit.kit=true; throw kit; }
+    if(antClient){ var open=await antClient.catch(function(){return null;}); if(open&&!open.closed)return {sdk:sdk,client:open}; antClient=null; }
+    var connecting=sdk.AutonomiClient.connect({signal:signal}); antClient=connecting;
+    try{ return {sdk:sdk,client:await connecting}; }
+    catch(error){ if(antClient===connecting)antClient=null; if(error&&typeof error==='object')error.connect=true; throw error; }
+  }
+  function quoteError(error){
+    if(error&&error.kit)return 'Quote unavailable: the Autonomi browser kit did not load. Reload and try again.';
+    if(error&&error.connect)return 'Quote unavailable: could not reach Autonomi storage nodes from this browser. Nothing was paid.';
+    if(error&&error.amount)return 'Quote unavailable: Autonomi returned an amount this page cannot read. Nothing was paid.';
+    return 'Quote unavailable: Autonomi storage nodes did not return a price for this file. Nothing was paid.';
+  }
+  async function quoteFile(){
+    var input=document.getElementById('ant-quote-file'),output=document.getElementById('ant-quote-status');
+    if(quoteRun)return;
+    var file=input.files&&input.files[0];output.textContent='';
+    if(!antLimits){output.textContent='Quote unavailable: the Autonomi browser kit did not load. Reload and try again.';return;}
+    // The kit's own limits gate the file before any Autonomi call.
+    if(st.audience!=='public'||!file||!(file.size>=antLimits.minFileBytes&&file.size<=antLimits.maxFileBytes)){output.textContent='Choose Public and a file from '+sizeRange()+'.';return;}
+    var run={stop:new AbortController()};quoteRun=run;quoteControls(true);
+    output.textContent='Connecting to Autonomi storage nodes from this browser…';
+    // The kit pauses every upload at the payment step and hands this page the
+    // request; the page reads the price and cancels. request.pay() is never called.
+    var asked=null,chunks=new Set(),total=0,windowed=false;
+    try{
+      var session=await antSession(run.stop.signal);if(quoteRun!==run)return;
+      output.textContent='Asking Autonomi storage nodes for a price…';
+      var payment=session.sdk.createManualPaymentProvider({onRequest:function(request){if(!asked)asked=request;request.cancel(new Error('Quote only: this page never pays'));}});
+      var finished=await session.client.upload(file,{
+        visibility:'public',payment:payment,retainOnFailure:false,signal:run.stop.signal,
+        onCheckpoint:function(){}, // nothing is paid, so no payment journal is kept
+        onProgress:function(event){
+          // The kit reports each chunk it priced or found already stored as "<n>/<total>".
+          var message=String(event&&event.message||''),record=/^(?:Quoted|Already present) record (\d+)\/(\d+)$/.exec(message);
+          if(record){chunks.add(record[1]);total=Math.max(total,+record[2]);}
+          else if(message.indexOf('Preparing storage for '+file.name+' records ')===0)windowed=true;
+        }
+      }).then(function(result){return result;},function(error){if(asked)return null;throw error;});
+      if(quoteRun!==run)return;
+      var when=new Date().toLocaleTimeString(),size=file.size.toLocaleString('en-US')+' bytes';
+      if(!asked){
+        // The upload finished without a payment request: every chunk is already held.
+        if(!finished||finished.storageCostAtto!=='0')throw new Error('Autonomi finished without a price');
+        output.textContent='0 ANT · '+size+' · checked '+when+' · Autonomi storage nodes already hold every chunk of this file. Nothing was stored or paid.';
+        return;
+      }
+      var amount=String(asked.totalAmountAtto);
+      if(!/^\d+$/.test(amount)){var bad=new Error('Autonomi returned an amount that is not a whole number');bad.amount=true;throw bad;}
+      // A merkle batch is priced at its maximum; the paid amount can be lower.
+      var price=(asked.merkle?'up to ':'')+ant(amount)+' ANT';
+      // Autonomi can ask for payment in parts (64-chunk payment waves, merkle
+      // batches, browser storage windows); later parts are priced only after the
+      // earlier part is paid. The price is whole only when every chunk was seen.
+      var whole=!windowed&&total>0&&chunks.size>=total;
+      output.textContent=whole
+        ? price+' · '+size+' · quoted '+when+' · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid.'
+        : price+' for '+chunks.size+(!windowed&&total>chunks.size?' of '+total:'')+' chunks of this file · '+size+' · quoted '+when+' · from Autonomi storage nodes. The rest is priced only after that part is paid, so the full price is not known here. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid.';
+    }catch(error){if(quoteRun===run){try{console.warn('Autonomi quote:',error);}catch(e){}output.textContent=quoteError(error);}}
+    finally{if(quoteRun===run){quoteRun=null;quoteControls(false);}}
+  }
+  window.addEventListener('pagehide',function(){
+    stopQuote();
+    var open=antClient;antClient=null;
+    if(open)open.then(function(client){client.close();},function(){});
+  });
 
   function freshQuote(){
     var stat = document.getElementById('bpay-quote-stat');
@@ -241,7 +305,8 @@
     applyInspection();
   }).observe(document.body, { attributes:true, attributeFilter:['data-reg'] });
 
-  fetch('bpay-invoice.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-   .then(function(inv){ refInvoice = inv; PIN = inv.domain && inv.domain.artifact && inv.domain.artifact.sha256; render(); })
-   .catch(function(){ render(); });
+  var invoiceLoad = fetch('bpay-invoice.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+   .then(function(inv){ refInvoice = inv; PIN = inv.domain && inv.domain.artifact && inv.domain.artifact.sha256; }, function(){});
+  // first paint waits for the kit's limits so the file label never shows a guessed size
+  Promise.all([invoiceLoad, limitsLoad]).then(render);
 })();

@@ -13,7 +13,8 @@ export async function installWalletFixture(browser,root){
       const url=new URL(route.request().url());
       if(url.origin!==WALLET_ORIGIN)return route.abort();
       let path=decodeURIComponent(url.pathname);
-      if(!/^\/(surfaces|docs|wasm|forge)\//.test(path))path='/surfaces'+path;
+      // /vendor/ is served from the site root, as on skaists.dev (the Autonomi browser kit).
+      if(!/^\/(surfaces|docs|wasm|forge|vendor)\//.test(path))path='/surfaces'+path;
       const file=resolve(root,'.'+path);
       if(!file.startsWith(root+sep))return route.abort();
       try{
