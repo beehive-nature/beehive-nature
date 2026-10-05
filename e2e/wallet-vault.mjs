@@ -279,6 +279,15 @@ if (hasPrf) {
   const slots = await page.locator('#vlt-devices .chip').count();
   t('a second slot appeared', slots === 2, 'slots=' + slots + ' stat=' + await page.textContent('#vlt-stat'));
   t('named from the prompt', /Test laptop/.test(await page.textContent('#vlt-devices')));
+  // the vault's passkey is marked as not a soul, so the keychain picker refuses it and nothing opens
+  const vcreds = (await cdp.send('WebAuthn.getCredentials', { authenticatorId: authId })).credentials;
+  t('the vault\'s new passkey carries the vault mark in its user handle',
+    vcreds.length === 1 && Buffer.from(vcreds[0].userHandle || '', 'base64').subarray(0, 8).toString() === 'bnrvlt01', JSON.stringify(vcreds.map(c => c.userHandle)));
+  await page.evaluate(() => document.getElementById('kc-pass').click());
+  await page.waitForFunction(() => /nothing opened|did not open|cannot/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 }).catch(() => {});
+  const kcv = await page.evaluate(() => ({ stat: document.getElementById('kc-stat').textContent, cards: document.getElementById('kc-cards').style.display }));
+  t('the keychain picker refuses the vault\'s passkey: no soul is read from it',
+    /opens your vault or your account and is not your bzDiD itself/.test(kcv.stat) && kcv.cards === 'none', kcv.stat);
 
   console.log('\n── unlock with the passkey alone ──');
   await page.click('#vlt-lock'); await page.waitForTimeout(300);

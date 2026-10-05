@@ -430,7 +430,8 @@ try {
         deliver(msg) { if (this.readyState !== 1) return; window.__wsDelivered[this.url] = (window.__wsDelivered[this.url] || 0) + 1; this.onmessage && this.onmessage({ data: JSON.stringify(msg) }); }
         send(s) {
           const m = JSON.parse(s); window.__wsSent.push([this.url, m]);
-          if (m[0] === 'EVENT') { if (!(window.__dmNoOk || {})[this.url]) setTimeout(() => this.deliver(['OK', m[1].id, true, '']), 2); return; }
+          // __dmCloseAfterSend: the relay takes the list and closes without a word (it may hold it)
+          if (m[0] === 'EVENT') { if ((window.__dmCloseAfterSend || {})[this.url]) { setTimeout(() => this.close(), 2); return; } if (!(window.__dmNoOk || {})[this.url]) setTimeout(() => this.deliver(['OK', m[1].id, true, '']), window.__dmOkDelay || 2); return; }
           if (m[0] !== 'REQ') return;
           const evs = window.__dmRelays[this.url] || [], flood = window.__dmFlood[this.url];
           setTimeout(() => {
@@ -613,24 +614,75 @@ try {
     const kept = await page.evaluate(() => [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')).join());
     ok('registry: one press on remove asks first in the row and sends nothing; keep it puts the row back',
       ask.yes && /remove this device\? it will have to be added again from that device\./.test(ask.words) && ask.sent === 0 && kept === 'devA,devB', JSON.stringify({ ask, kept }));
+    // 6a · every relay takes the list and closes without a word: one may hold it, so nothing is
+    //      called unchanged, nothing is rolled back, the mark does not rise, and try again stays
+    await page.evaluate(R => { window.__dmCloseAfterSend = {}; R.forEach(u => { window.__dmCloseAfterSend[u] = 1; }); window.__wsSent.length = 0; }, R);
+    await revoke('devB');
+    await page.waitForFunction(() => /no relay confirmed/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6u = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), cy: document.querySelector('#dm-stat .wl-cyd')?.textContent || '', ask: !!document.querySelector('.dm-ask'), hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), again: !!document.querySelector('#dm-stat button.wl-act'), sent: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    ok('registry: a list sent with no answer is never called unchanged or rolled back, and try again stays',
+      /no relay confirmed your device list yet, so that device may still be on it\./.test(s6u.stat) && !/nothing changed|did not reach/.test(s6u.stat) && /3 got it and did not answer/.test(s6u.cy) && s6u.ask && s6u.again && s6u.sent === 3 && Object.values(s6u.hwm)[0]?.at === T3, JSON.stringify(s6u));
+    await page.evaluate(() => { window.__dmCloseAfterSend = {}; document.querySelector('.dm-rv-no').click(); });
+    // 6b · every relay down before the list could leave: nothing changed, the row comes back
     await page.evaluate(R => { R.forEach(u => { window.__dmFail[u] = 1; }); window.__wsSent.length = 0; }, R);
     await revoke('devB');
-    await page.waitForFunction(() => /did not reach any relay/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.waitForFunction(() => /no relay took the change/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
     await page.evaluate(CALM);
     const s6b = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), again: !!document.querySelector('#dm-stat button.wl-act') }));
     ok('registry: with every relay down a revoke claims nothing, changes nothing, and offers try again',
-      /the change did not reach any relay, so nothing changed yet/.test(s6b.stat) && s6b.rows.join() === 'devA,devB' && Object.values(s6b.hwm)[0]?.at === T3 && s6b.again, JSON.stringify(s6b));
+      /no relay took the change, so nothing changed yet/.test(s6b.stat) && s6b.rows.join() === 'devA,devB' && Object.values(s6b.hwm)[0]?.at === T3 && s6b.again, JSON.stringify(s6b));
     await page.evaluate(() => { window.__dmFail = {}; window.__wsSent.length = 0; document.querySelector('#dm-stat button.wl-act').click(); });
     await page.waitForFunction(() => /removed on 3 of 3 relays/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
     const s6c = await page.evaluate(() => ({ rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), ids: [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].id))], at: window.__lastEvent().at, hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}') }));
     ok('registry: try again sends one signed list to every relay and removes the device only once they accepted it',
       s6c.rows.join() === 'devA' && s6c.ids.length === 1 && Object.values(s6c.hwm)[0]?.at === s6c.at, JSON.stringify(s6c));
-    await page.evaluate(() => { window.__wsSent.length = 0; });
+    await page.evaluate(R => { window.__wsSent.length = 0; window.__dmCloseAfterSend = {}; R.forEach(u => { window.__dmCloseAfterSend[u] = 1; }); }, R);
     await revoke('devA');
-    await page.waitForFunction(() => /no longer keeps your soul/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.waitForFunction(() => /no relay confirmed/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6e = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), seal: localStorage.getItem('bnr_seal'), cred: localStorage.getItem('bnr_cred'), again: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: a self-remove nobody answered drops this device\'s seal at once and says the list is not confirmed yet',
+      /this device no longer keeps your soul, and no relay confirmed your device list yet\./.test(s6e.stat) && s6e.seal === null && s6e.cred === null && s6e.again, JSON.stringify(s6e));
+    await page.evaluate(() => { window.__dmCloseAfterSend = {}; document.querySelector('#dm-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /no longer keeps your soul\. to use it here again/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s6f = await page.evaluate(() => [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].id))]);
+    ok('registry: try again after no answer resends the identical signed list', s6f.length === 1, JSON.stringify(s6f));
     const s6d = await page.evaluate(() => ({ cred: localStorage.getItem('bnr_cred'), seal: localStorage.getItem('bnr_seal'), link: document.querySelector('#dm-stat a')?.getAttribute('href'), wraps: JSON.parse(localStorage.getItem('bnr_wraps') || '[]') }));
     ok('registry: a self-revoke drops the seal AND the wrapper pointer, and names the recovery words',
       s6d.cred === null && s6d.seal === null && s6d.link === '#kc-rec-scaffold' && s6d.wraps.includes('devA'), JSON.stringify(s6d));
+    // 7 · another soul opens over this one while its device list is open and a change is still
+    //     being saved: the old soul's rows and sheet go, the late answer leaves the new soul alone,
+    //     and the new soul's list never shows (or publishes) the old soul's devices
+    const T5 = new Date(Date.now() + 60000).toISOString();
+    await setRelays([[await mk(await v2(T5, [A, B]), 11000)], [], []]);
+    const s7 = await openDm();
+    ok('registry (control): the open soul\'s list shows both devices before the switch', s7.trust === 'pq' && s7.rows.join() === 'devA,devB', JSON.stringify(s7));
+    const aPub = await page.evaluate(() => window.__mkEv({}, 1).pubkey);
+    await page.evaluate(() => {
+      window.__dmOkDelay = 1500; window.__wsSent.length = 0;
+      document.querySelector('.dm-rv[data-c="devB"]').click(); document.querySelector('.dm-rv-yes').click();
+      const b64u = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      navigator.credentials.create = async () => ({ id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) });
+      navigator.credentials.get = async () => ({ id: 'bmV3', rawId: b64u('bmV3').buffer, type: 'public-key', response: { userHandle: null }, getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(11).buffer } } }) });
+      document.getElementById('kc-create').click();
+    });
+    await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT') && document.getElementById('kc-born').style.display !== 'none', null, { timeout: 10000 });
+    const s7a = await page.evaluate(() => ({ sheet: document.getElementById('dm-sec').style.display, rows: document.querySelectorAll('.dm-rv,.dm-ask').length, fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('registry: a soul opened over another closes the old soul\'s device sheet and its rows at once',
+      s7a.sheet === 'none' && s7a.rows === 0 && s7a.fp === await page.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(11)), 'bnr.b').fingerprint.words), JSON.stringify(s7a));
+    await page.waitForFunction(() => /your keychain changed while this was saving/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(() => { window.__dmOkDelay = 0; });
+    const s7b = await page.evaluate(() => ({ rows: document.querySelectorAll('.dm-rv').length, authors: [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].pubkey))] }));
+    ok('registry: the old soul\'s late answer leaves the new soul\'s view alone, and only the old soul signed its list',
+      s7b.rows === 0 && s7b.authors.length === 1 && s7b.authors[0] === aPub, JSON.stringify(s7b));
+    const s7c = await openDm();
+    ok('registry: the new soul\'s device list never shows the old soul\'s devices', s7c.rows.length === 0 && s7c.calm === 'this is your first device list, and it starts here.', JSON.stringify(s7c));
+    await page.evaluate(T2 => { localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 })); document.getElementById('dm-add').click(); }, T2);
+    await page.evaluate(CALM);
+    const s7d = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), btn: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: a device that keeps another soul never says it already keeps this one',
+      /this device already keeps another soul, so it cannot keep this one too\./.test(s7d.stat) && s7d.btn, JSON.stringify(s7d));
     ok('registry: only the mocked relay URLs were ever opened', (await page.evaluate(() => window.__wsOpened)).every(u => R.includes(u)));
     await page.close();
   }
@@ -837,6 +889,8 @@ try {
     ok('qr words: on a 390 px phone the six words fit without a sideways scroll', P.fits);
     ok('qr words: the phone shows the very same six words for the same QR, before anything is sent', P.words === D.words, P.words + ' vs ' + D.words);
     ok('qr words: the phone says cancel if any word differs', /these six words must match the desktop's\. If any word differs, cancel\./.test(P.body) && !/digit/.test(P.body), P.body.slice(0, 200));
+    ok('qr: a request that came in a link never says where the desktop is; it asks the reader to check, and cypherpunk says the link proves nothing',
+      /allow this only if you just pressed sign in with your phone on your own desktop, and its address bar shows /.test(P.body) && !/a desktop on .* wants to sign in/.test(P.body) && /came in a #qr= link .* was never proven/.test(P.body), P.body.slice(0, 400));
     await phone.evaluate(() => document.getElementById('qr-deny').click());
     ok('qr: a cancelled request is spent: the #qr= link leaves the address, so a reload never offers it again', await phone.evaluate(() => location.hash === '' && document.getElementById('qr-sec').style.display === 'none'));
     await phone.close();
@@ -887,9 +941,12 @@ try {
     const same = BASE + '/surfaces/wallet.html#qr=' + payload.toString('base64url');
     await cam.evaluate(t => { window.__scan = t; document.getElementById('qr-x').click(); document.getElementById('kc-qr').click(); }, same);
     await cam.waitForFunction(() => document.getElementById('qr-allow'), null, { timeout: 15000 });
-    const F2 = await cam.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: document.getElementById('qr-body').innerText }));
-    ok('qr camera (control): the same code from this site offers allow with the same six words and names this site',
-      F2.words === D.words && F2.body.includes('a desktop on ' + new URL(BASE).host + ' wants to sign in as you.'), JSON.stringify(F2));
+    await cam.evaluate(CALM);
+    const F2 = await cam.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: window.__calm(document.getElementById('qr-body')), cy: [...document.querySelectorAll('#qr-body .wl-cyd')].map(x => x.textContent).join(' ') }));
+    ok('qr camera (control): the same code from this site offers allow with the same six words, and asks the reader to check this site in the desktop\'s address bar',
+      F2.words === D.words && F2.body.includes('allow this only if you just pressed sign in with your phone on your own desktop, and its address bar shows ' + new URL(BASE).host + '.') && !/a desktop on/.test(F2.body), JSON.stringify(F2));
+    ok('qr camera: the address a code names is said to be its own claim, never proof of where it was shown',
+      F2.cy.includes('the code names ' + new URL(BASE).origin + ' as its own address') && /never proves where the code was shown/.test(F2.cy), F2.cy);
     // the sheet closed while the camera prompt was still open: the camera the browser hands over goes off at once
     await cam.evaluate(() => { document.getElementById('qr-x').click(); window.__camHold = true; window.__lastStream = null; document.getElementById('kc-qr').click(); });
     await cam.waitForFunction(() => typeof window.__camRelease === 'function', null, { timeout: 5000 });
@@ -997,7 +1054,7 @@ try {
         return { id: step.id, rawId: b64u(step.id).buffer, type: 'public-key', response: { userHandle: step.handle ? Uint8Array.from(step.handle).buffer : null },
           getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(step.prf).buffer } } }) };
       };
-      navigator.credentials.create = async () => ({ id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) });
+      navigator.credentials.create = async () => { window.__creates = (window.__creates || 0) + 1; return { id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) }; };
     };
     const BASE_N = BASE.replace('127.0.0.1', 'localhost');   // a name, not an IP: an IP origin can hold no passkey at all
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
@@ -1029,6 +1086,13 @@ try {
     const j2 = await stat();
     ok('keychain: a seal that will not open never falls back to deriving a soul from the device passkey',
       j2.gets.join() === 'targeted,targeted' && !/keychain live/.test(j2.raw) && /this device's saved key did not open your soul/.test(j2.text) && j2.again, JSON.stringify(j2));
+    // 2b · this device keeps a soul sealed: a new bzDiD made here could never be opened by its passkey
+    await page.evaluate(() => { window.__creates = 0; document.getElementById('kc-create').click(); });
+    await page.waitForTimeout(200);
+    const j2b = await stat();
+    const j2bx = await page.evaluate(() => ({ creates: window.__creates, cred: localStorage.getItem('bnr_cred') }));
+    ok('keychain: a device that keeps a soul refuses to make a new bzDiD before any prompt, with the way on',
+      /this device already keeps a soul, so a new bzDiD cannot be made here\./.test(j2b.text) && j2b.again && j2bx.creates === 0 && j2bx.cred === null && j2b.gets.join() === 'targeted,targeted' && /connectSoul opens the seal and only the seal/.test(j2b.raw), JSON.stringify({ j2b, j2bx }));
     // 3 · no seal, the remembered pointer is a known wrapper: the picker runs and a wrapper answer is refused
     await page.evaluate(() => { localStorage.removeItem('bnr_seal'); localStorage.setItem('bnr_cred', 'd3JhcA'); localStorage.setItem('bnr_wraps', JSON.stringify(['d3JhcA'])); });
     await page.reload({ waitUntil: 'load' });
@@ -1049,7 +1113,92 @@ try {
     await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
     ok('keychain (control): the founding passkey opens exactly its own soul',
       await page.evaluate(() => document.getElementById('kc-soul-fp').textContent === window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'bnr.b').fingerprint.words));
+    const FP7 = await page.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'bnr.b').fingerprint.words);
+    ok('keychain: the soul a passkey opened is kept for the name (a public fingerprint, never a key)',
+      await page.evaluate(fp => { const b = JSON.parse(localStorage.getItem('bnr_bind') || '{}'); return b.name && b.name.gatesoul === fp && b.souls.includes(fp) && !/masterPrk|seed/i.test(JSON.stringify(b)); }, FP7));
+    // 6 · the vault's passkey and the account passkey carry their own mark: refused before any derive
+    const refuse = async (step, want, label) => {
+      await page.evaluate(step => { document.getElementById('kc-out').click(); window.__gets = []; window.__plan = [step]; document.getElementById('kc-pass').click(); }, step);
+      await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+      await page.waitForTimeout(200);
+      const j = await stat();
+      ok(label, j.gets.join() === 'picker' && !/keychain live/.test(j.raw) && want.test(j.text) && j.again && j.rec === '#kc-rec-scaffold' && await page.evaluate(() => document.getElementById('kc-cards').style.display === 'none'), JSON.stringify(j));
+    };
+    const TAG = s => [...Buffer.from(s)].concat([1, 2, 3, 4, 5, 6, 7, 8]);
+    await refuse({ id: 'dmF1bHQ', prf: 13, handle: TAG('bnrvlt01') }, /that passkey opens your vault or your account and is not your bzDiD itself, so nothing opened\./, 'keychain: the vault\'s "add this device" passkey answering the picker is refused (its marked handle)');
+    await refuse({ id: 'YWNjdA', prf: 13, handle: TAG('bnracct1') }, /that passkey opens your vault or your account and is not your bzDiD itself/, 'keychain: the account passkey answering the picker is refused (its marked handle)');
+    await page.evaluate(() => localStorage.setItem('bnr_notsoul', JSON.stringify(['bm90c291bA'])));
+    await refuse({ id: 'bm90c291bA', prf: 13 }, /that passkey opens your vault or your account and is not your bzDiD itself/, 'keychain: a vault or account passkey this browser made is refused by its id alone');
+    // 7 · an unmarked passkey (an older vault passkey, say) that opens another soul than this name's: refused and wiped
+    await refuse({ id: 'b2xkdmx0', prf: 13 }, /that passkey opens a different soul than the one this browser keeps for you, so nothing opened\./, 'keychain: a passkey that opens another soul than the one kept for this name is refused, and nothing opens');
+    await page.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain (control): after a refusal, try again with the name\'s own passkey opens exactly its soul', await page.evaluate(fp => document.getElementById('kc-soul-fp').textContent === fp, FP7));
     await page.close();
+
+    // 8 · a founding pointer from before its mark that opens another soul than one this browser
+    //     saw a device list for (an older add left its wrapper there): refused, the pointer goes,
+    //     and the next press runs the picker, where the real soul opens
+    const lg = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await lg.addInitScript(() => { try { if (!sessionStorage.getItem('lg')) { sessionStorage.setItem('lg', '1'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_cred', 'd3JhcA'); } } catch (e) {} });
+    await lg.addInitScript(stub);
+    await lg.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await lg.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lg.evaluate(() => {
+      const K = window.BZDIDKEY, sd = K.deriveK1Key(K.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'nostr:bnr-devices').seed;
+      const pre = Array.from(window.BnrSign.schnorr.getPublicKey(sd), b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+      localStorage.setItem('bnr_dm_hwm', JSON.stringify({ [pre]: { at: '2026-10-04T00:00:00.000Z' } }));
+      window.__plan = [{ id: 'd3JhcA', prf: 9 }]; document.getElementById('kc-pass').click();
+    });
+    await lg.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await lg.waitForTimeout(200);
+    await lg.evaluate(CALM);
+    const j8 = await lg.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, gets: window.__gets.slice(), cred: localStorage.getItem('bnr_cred'), mark: localStorage.getItem('bnr_cred_fp') }));
+    ok('keychain: an unmarked founding pointer that opens a soul this browser does not know is refused and dropped',
+      j8.gets.join() === 'targeted' && !/keychain live/.test(j8.raw) && /opens a different soul than the one this browser keeps/.test(j8.text) && j8.cred === null && j8.mark === null, JSON.stringify(j8));
+    await lg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await lg.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: after the stale pointer goes, the picker opens the soul this browser keeps a device list for',
+      await lg.evaluate(fp => window.__gets.join() === 'targeted,picker' && document.getElementById('kc-soul-fp').textContent === fp, FP7), await lg.evaluate(() => window.__gets.join()));
+    await lg.close();
+
+    // 8b · never a lockout: an unmarked pointer on a browser that knows no soul still opens, and is marked
+    const lk = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await lk.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); if (!localStorage.getItem('bnr_cred_fp')) localStorage.setItem('bnr_cred', 'bGVnYWN5'); } catch (e) {} });
+    await lk.addInitScript(stub);
+    await lk.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await lk.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lk.evaluate(() => { window.__plan = [{ id: 'bGVnYWN5', prf: 5 }]; document.getElementById('kc-pass').click(); });
+    await lk.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const FP5 = await lk.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(5)), 'bnr.b').fingerprint.words);
+    const j8b = await lk.evaluate(() => ({ gets: window.__gets.join(), mark: JSON.parse(localStorage.getItem('bnr_cred_fp') || 'null'), fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('keychain (never a lockout): an unmarked pointer on a browser that knows no soul opens its soul and is marked with it',
+      j8b.gets === 'targeted' && j8b.fp === FP5 && j8b.mark && j8b.mark.id === 'bGVnYWN5' && j8b.mark.fp === FP5, JSON.stringify(j8b));
+    await lk.reload({ waitUntil: 'load' });
+    await lk.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lk.evaluate(() => { window.__plan = [{ id: 'bGVnYWN5', prf: 5 }]; document.getElementById('kc-pass').click(); });
+    await lk.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: the marked pointer opens its soul again with one targeted touch', await lk.evaluate(fp => window.__gets.join() === 'targeted' && document.getElementById('kc-soul-fp').textContent === fp, FP5));
+    await lk.close();
+
+    // 8c · the founding pointer's passkey answers with a wrapper's mark: refused, kept as a wrapper,
+    //      and the pointer goes, so the next press runs the picker instead of the same dead end
+    const tg = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await tg.addInitScript(() => { try { if (!sessionStorage.getItem('tg')) { sessionStorage.setItem('tg', '1'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_cred', 'dGFnZ2Vk'); } } catch (e) {} });
+    await tg.addInitScript(stub);
+    await tg.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await tg.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await tg.evaluate(h => { window.__plan = [{ id: 'dGFnZ2Vk', prf: 9, handle: h }]; document.getElementById('kc-pass').click(); }, TAG('bnrwrap1'));
+    await tg.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await tg.waitForTimeout(200);
+    await tg.evaluate(CALM);
+    const j8c = await tg.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, gets: window.__gets.join(), cred: localStorage.getItem('bnr_cred'), wraps: JSON.parse(localStorage.getItem('bnr_wraps') || '[]') }));
+    ok('keychain: a founding pointer whose passkey carries a wrapper mark is refused, kept as a wrapper, and dropped',
+      j8c.gets === 'targeted' && !/keychain live/.test(j8c.raw) && /is not your bzDiD itself/.test(j8c.text) && j8c.cred === null && j8c.wraps.includes('dGFnZ2Vk'), JSON.stringify(j8c));
+    await tg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await tg.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: after the marked pointer goes, the next press runs the picker and opens the soul', await tg.evaluate(fp => window.__gets.join() === 'targeted,picker' && document.getElementById('kc-soul-fp').textContent === fp, FP7));
+    await tg.close();
 
     // 4b · a press on connect (pointerdown, then click) opens ONE prompt: the auto-connect hands off
     const one = await browser.newPage({ viewport: { width: 1100, height: 900 } });
@@ -1071,20 +1220,27 @@ try {
     await mk2.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
     await mk2.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
     await mk2.evaluate(() => { window.__plan = [{ id: 'bmV3', prf: 11 }]; document.getElementById('kc-create').click(); });
-    await mk2.waitForFunction(() => [...document.querySelectorAll('#kc-stat button')].some(b => /show my recovery words/.test(b.textContent)), null, { timeout: 10000 });
+    await mk2.waitForFunction(() => [...document.querySelectorAll('#kc-born button')].some(b => /show my recovery words/.test(b.textContent)), null, { timeout: 10000 });
     await mk2.evaluate(CALM);
-    const j5 = await mk2.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, cred: localStorage.getItem('bnr_cred') }));
+    const j5 = await mk2.evaluate(() => ({ text: window.__calm(document.getElementById('kc-born')), raw: document.getElementById('kc-born').textContent, cred: localStorage.getItem('bnr_cred'), mark: JSON.parse(localStorage.getItem('bnr_cred_fp') || 'null'), fp: document.getElementById('kc-soul-fp').textContent }));
     ok('create: the new bzDiD asks for ITS OWN recovery words, never the onboarding phrase',
       /write down its 24 recovery words now/.test(j5.text) && !/onboarding/.test(j5.text) && /bzDiD born/.test(j5.raw) && j5.cred === 'bmV3' && !/[—–]|NOW/.test(j5.text), JSON.stringify(j5));
-    await mk2.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /show my recovery words/.test(b.textContent)).click());
+    ok('create: the founding pointer is marked with the soul it opens', !!j5.mark && j5.mark.id === 'bmV3' && j5.mark.fp === j5.fp);
+    // ordinary actions rewrite the keychain's status line: closing the phone sheet, a passkey
+    // prompt that was closed. The one-time offer lives in its own line and stays
+    await mk2.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }]; document.getElementById('qr-x').click(); document.getElementById('kc-pass').click(); });
+    await mk2.waitForFunction(() => /did not open/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('create: the show my recovery words offer survives ordinary status changes',
+      await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].some(b => /show my recovery words/.test(b.textContent)) && document.getElementById('kc-born').style.display !== 'none'));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].find(b => /show my recovery words/.test(b.textContent)).click());
     const j5b = await mk2.evaluate(() => {
       const w = (document.getElementById('kc-words') || {}).textContent || '';
       let fp = null; try { fp = window.BZDIDKEY.identityFromRecovery(w, 'bnr.b').fingerprint.words; } catch (e) {}
       return { n: w.trim().split(/\s+/).length, same: fp === document.getElementById('kc-soul-fp').textContent };
     });
     ok('create: the words shown are 24 and open exactly the soul just made', j5b.n === 24 && j5b.same, JSON.stringify(j5b));
-    await mk2.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /written down/.test(b.textContent)).click());
-    ok('create: once written down, the words leave the page', await mk2.evaluate(() => !document.getElementById('kc-words') && /keychain live/.test(document.getElementById('kc-stat').textContent)));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].find(b => /written down/.test(b.textContent)).click());
+    ok('create: once written down, the words leave the page', await mk2.evaluate(() => !document.getElementById('kc-words') && document.getElementById('kc-born').style.display === 'none' && !document.getElementById('kc-born').textContent));
     await mk2.close();
   }
 } finally {
