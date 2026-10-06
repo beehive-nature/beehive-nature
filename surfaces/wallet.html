@@ -3000,6 +3000,80 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var s=b64r(bytes);
     return s.replace(/\+/g,'-').replace(/\//g,'_');
   }
+  /* ── ESR: an EOSIO Signing Request (EEP-7, https://github.com/eosio-eps/EEPs/blob/master/EEPS/eep-7.md,
+     with its ABI as wharfkit/signing-request src/abi.ts carries it). It is the link Anchor opens to sign an
+     action with its own keys: this page builds the request and signs nothing. An action request carries no
+     transaction header, so the wallet that opens it fills one in, signs, and sends it. The bytes, in order:
+       header    u8: protocol version 2, plus 0x80 when what follows is deflated (raw DEFLATE, RFC 1951),
+                 which is written only when it is shorter
+       chain_id  variant 0, chain_alias u8 1: EOS, now Vaulta (chain id aca376f2…0e906)
+       req       variant 0 action, or variant 1 action[] with a varuint32 count for several. An action is
+                 its account and its name (each a u64, little endian), authorization[] {actor, permission},
+                 and its data as bytes: the contract's ABI serialization, made by the wallet's own
+                 serializer from the contract's live ABI (vaultaSerialize)
+       flags     u8 1: broadcast, so the wallet that signs it also sends it
+       callback  string, empty: no callback
+       info      pair[], none
+     then base64url with no padding, after "esr:". The name ............1 (u64 1) is the signer
+     placeholder: it stands for the account the signing wallet picks. Proven against EEP-7's and
+     wharfkit's published requests, by their inflated payloads, in e2e/esr.test.mjs. ── */
+  var ESR_SIGNER='............1';
+  function esrName(n){
+    n=String(n);
+    if(!/^[.1-5a-z]{0,12}[.1-5a-j]?$/.test(n))throw new Error('not an Antelope name: '+JSON.stringify(n));
+    var v=0n, i, c, ch, b=new Uint8Array(8);
+    for(i=0;i<13;i++){
+      ch=i<n.length?n.charCodeAt(i):46;
+      c=ch===46?0:ch>=97?ch-91:ch-48;          // . 0, 1 to 5 as 1 to 5, a to z as 6 to 31
+      v|=i<12?BigInt(c&31)<<BigInt(59-5*i):BigInt(c&15);
+    }
+    for(i=0;i<8;i++){ b[i]=Number(v&255n); v>>=8n }
+    return b;
+  }
+  function esrVaru(out,n){ n=n>>>0; do{ var x=n&127; n>>>=7; out.push(n?x|128:x) }while(n) }
+  function esrPush(out,b){ for(var i=0;i<b.length;i++)out.push(b[i]) }
+  function esrBytes(x){   // action data: bytes, or the hex the serializer gives
+    if(x instanceof Uint8Array)return x;
+    var h=String(x); if(!/^(?:[0-9a-fA-F]{2})*$/.test(h))throw new Error('action data is not hex');
+    var o=new Uint8Array(h.length>>1); for(var i=0;i<o.length;i++)o[i]=parseInt(h.substr(i*2,2),16);
+    return o;
+  }
+  /* the payload, everything after the header byte. req: {actions:[{account, name, authorization:[{actor,
+     permission}], data}], list (true writes action[] even for one), flags (1, broadcast, unless given),
+     callback ('' unless given)} */
+  function esrPayload(req){
+    var acts=(req&&req.actions)||[], out=[], f=req.flags==null?1:req.flags, cb=new TextEncoder().encode(String(req.callback||''));
+    if(!acts.length)throw new Error('a signing request needs an action');
+    if(f!==(f&255))throw new Error('request flags are one byte');
+    var list=req.list===true||acts.length>1;
+    out.push(0,1);                                    // chain_id: chain_alias, 1
+    out.push(list?1:0); if(list)esrVaru(out,acts.length);
+    acts.forEach(function(x){
+      esrPush(out,esrName(x.account)); esrPush(out,esrName(x.name));
+      var au=x.authorization||[]; esrVaru(out,au.length);
+      au.forEach(function(p){ esrPush(out,esrName(p.actor)); esrPush(out,esrName(p.permission)) });
+      var d=esrBytes(x.data); esrVaru(out,d.length); esrPush(out,d);
+    });
+    out.push(f);
+    esrVaru(out,cb.length); esrPush(out,cb);
+    esrVaru(out,0);                                   // info: none
+    return new Uint8Array(out);
+  }
+  async function esrDeflate(b){
+    if(typeof CompressionStream!=='function')return null;
+    try{
+      var cs=new CompressionStream('deflate-raw'), wr=cs.writable.getWriter();
+      wr.write(b).catch(function(){}); wr.close().catch(function(){});
+      return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+    }catch(e){ return null }
+  }
+  /* the link: "esr:" + base64url(header ‖ payload), the payload deflated only when that is shorter */
+  async function esrEncode(req){
+    var p=esrPayload(req), z=await esrDeflate(p), small=!!z&&z.length<p.length, body=small?z:p;
+    var all=new Uint8Array(body.length+1); all[0]=small?0x82:0x02; all.set(body,1);
+    return {link:'esr:'+b64url(all),header:all[0],payload:p};
+  }
+  /* ── end ESR ── */
   // minimal CBOR walk for the attestation's authData byte-string (fmt text / attStmt map / authData bytes)
   function authDataFromAttestation(att){
     var i=0;
@@ -8384,6 +8458,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var l=document.createElement('a'); l.href='#'+to; l.hidden=true; document.body.appendChild(l);
     try{ l.click() }finally{ l.remove() }
   }
+  /* the same request as a code for Anchor on a phone (BNRQR, drawn like qrSvg, without its pulse) */
+  function esrQrSvg(text){
+    var q=BNRQR.make(text), n=q.getModuleCount(), dd='', r, c, NS='http://www.w3.org/2000/svg';
+    for(r=0;r<n;r++)for(c=0;c<n;c++)if(q.isDark(r,c))dd+='M'+c+','+r+'h1v1h-1z';
+    var sv=document.createElementNS(NS,'svg'), p=document.createElementNS(NS,'path');
+    sv.setAttribute('viewBox','-3 -3 '+(n+6)+' '+(n+6)); sv.setAttribute('role','img'); sv.setAttribute('aria-label','a code for Anchor on your phone');
+    p.setAttribute('d',dd); p.setAttribute('fill','#1a1206'); sv.appendChild(p);
+    return sv;
+  }
   function actSheet(again){
     var a=(again&&again.contract)?again:actParse(); if(!a||$('act-sheet'))return;
     if(!(again&&again.contract))ACT_PEND=null;   /* a fresh link drops any action that was left waiting for a name */
@@ -8427,7 +8510,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         'body[data-reg="cypherpunk"] #act-say,body[data-reg="cypherpunk"] #act-read{color:#a9bdb6}'+
         'body[data-reg="cypherpunk"] #act-go{border-radius:6px;background:#44c2dc;color:#061012;font:700 18px/1 "IBM Plex Mono",ui-monospace,monospace}'+
         'body[data-reg="cypherpunk"] #act-go:focus-visible{outline-color:#44c2dc}'+
-        'body[data-reg="cypherpunk"] #act-read{display:block}';
+        'body[data-reg="cypherpunk"] #act-read{display:block}'+
+        '#act-esr{margin-top:20px}'+
+        '#act-esr[hidden],#act-esr [hidden]{display:none!important}'+
+        '#act-esr-link{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:17px}'+
+        '#act-esr-say{margin:2px 0 12px;font-size:15px;line-height:1.5;color:#45574e}'+
+        '#act-esr-qr svg{width:200px;height:200px;background:#f4e9d0;border-radius:8px;shape-rendering:crispEdges}'+
+        '#act-esr-cy{display:none}'+
+        '#act-esr-stat{margin:8px 0 0;font-size:15px;line-height:1.5}'+
+        'body[data-reg="raver"] #act-esr-say{color:#cfc6e2}'+
+        'body[data-reg="cypherpunk"] #act-esr-say{color:#a9bdb6}'+
+        'body[data-reg="cypherpunk"] #act-esr-cy{display:block;margin:12px 0 0;text-align:start;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;color:#a9bdb6}';
       document.head.appendChild(css);
     }
     var d=document.createElement('div');
@@ -8455,6 +8548,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     pasteIn.addEventListener('keydown',function(e){ if(e.key==='Enter')pasteGo.click() });
     pasteGo.onclick=async function(){
       if(busy)return;
+      ew.spoke=false;   /* the paste now owns the sheet's line: the Anchor watch may still say done, never its wait */
       var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',['That is not a whole private key, so nothing was sent. Copy '+actor+'\u2019s whole active key again and paste it here.',{cy:(e&&e.message)||String(e)}]); return } finally{ pasteIn.value='' }
       busy=true; pasteGo.disabled=true; d.removeAttribute('data-need'); tell('busy',['Checking it first, one moment.']);
       var hold=false;
@@ -8464,26 +8558,42 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var r=await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data},function(ph){ if(ph==='sending')tell('busy',['Sending it, one moment.']) }); k=null;
         /* an earlier paste, or one only the account shows: the key is proven, its action is not read back here */
         if(r&&(r.earlier||r.keyOnly)) tellKeyOnly(r.tx); else tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.',{cy:(r&&r.cy)||''}]);
-        pasteRow.hidden=true;
+        pasteRow.hidden=true; esrEnd();
       }catch(e){ k=null;
         if(e&&e.capRefused) tell('fail',e.capKind==='unsized'?['The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.',{cy:e.message}]:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'},{cy:e.message}]);
         /* this paste went out, may have, or an earlier one may still go in: the one next step reads the chain,
            it never pastes or signs again, and the paste field waits until the chain says it is safe */
-        else if(e&&/^(late|unknown|held)$/.test(e.brKind||'')){ hold=true; tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]) }
+        else if(e&&/^(late|unknown|held)$/.test(e.brKind||'')){ hold=true; esrEnd(); tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]) }
         else { if(e&&e.brKind==='cpu')d.setAttribute('data-need','cpu');   /* the hook for another way to sign that brings its own CPU */
           tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]) }
       }
       finally{ busy=false; pasteGo.disabled=hold; pasteIn.disabled=hold }
     };
     pasteRow.appendChild(pasteIn); pasteRow.appendChild(pasteGo);
-    [h,say,go,pasteRow,st,rd,back].forEach(function(n){sg.appendChild(n)});
+    /* the Anchor way, asked for by name: this same action as a signing request (esrEncode), a link that opens
+       Anchor on this device and the same request as a code for Anchor on a phone. Anchor signs it with its own
+       keys and sends it; this page signs nothing and posts nothing for it. It is offered for a registry action
+       whose name the registry can hold (bdomain.cpp is_valid_name). The key the paste adds (eosio updateauth)
+       never rides it: Anchor refuses that by default. Once the link is offered, the name's registry row is
+       read every few seconds for a few minutes, and the sheet says done once the row shows the action */
+    var esrNm=String(a.data.domain_name||'').replace(/[A-Z]/g,function(c){ return c.toLowerCase() });
+    var ew={base:null,at:0,until:0,spoke:false,read:false,t:null,on:false,done:false,off:false};
+    var esrBox=document.createElement('div'); esrBox.id='act-esr'; esrBox.hidden=true;
+    var esrA=document.createElement('a'); esrA.id='act-esr-link'; esrA.textContent='or sign it in Anchor';
+    var esrSay=document.createElement('p'); esrSay.id='act-esr-say'; esrSay.textContent='open it in Anchor on this device, or scan it with Anchor on your phone.';
+    var esrQ=document.createElement('div'); esrQ.id='act-esr-qr';
+    var esrCy=document.createElement('pre'); esrCy.id='act-esr-cy';
+    var esrSt=document.createElement('p'); esrSt.id='act-esr-stat'; esrSt.setAttribute('role','status'); esrSt.hidden=true;
+    [esrA,esrSay,esrQ,esrCy,esrSt].forEach(function(n){ esrBox.appendChild(n) });
+    [h,say,go,pasteRow,esrBox,st,rd,back].forEach(function(n){sg.appendChild(n)});
     d.appendChild(sg); document.body.appendChild(d);
     document.documentElement.style.overflow='hidden';
     /* any way off the sheet but its "connect it" drops an action left waiting for a name */
-    function actClose(to){ d.remove(); document.documentElement.style.overflow=''; if(to!=='connect-sec')ACT_PEND=null }
+    function actClose(to){ esrStop(); d.remove(); document.documentElement.style.overflow=''; if(to!=='connect-sec')ACT_PEND=null }
     // a status line: words; links that close the sheet onto a wallet section (or open the name desk);
     // a button that stays on the sheet; and the raw detail, which only cypherpunk shows
-    function tell(kind,parts){
+    function tell(kind,parts,force){
+      if(ew.done&&!force)return;
       st.textContent=''; st.setAttribute('data-state',kind);
       parts.forEach(function(x){
         if(x==null||x==='')return;
@@ -8524,12 +8634,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(p&&rd.k==='wait'){ tell('wait',[(rd.via==='account'?acct+' does not show this wallet yet, and the paste may still go in.':'It is not in a block yet, and it may still go in.')+' Check again in a minute. ',{btn:'check again',on:recheck},{cy:rd.cy}]); return }
       /* it can never land (a final block past its expiration, and no block holds it), or no paste waits: the field comes back */
       if(p){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null }
-      pasteGo.disabled=false; pasteIn.disabled=false;
+      pasteGo.disabled=false; pasteIn.disabled=false; esrBack();
       tell('fail',[p?(rd.k==='failed'?'The chain did not take it, so nothing changed. Paste the key again to try once more.':'It did not reach a block before its time ran out, so nothing changed. Paste the key again to try once more.'):'It did not go in, so nothing changed. Paste '+acct+'\u2019s active key again to try once more.',{cy:p?rd.cy:acct+'@active does not carry this wallet\u2019s key'}]);
     }
     function outboxIds(){ return (outboxRead()||[]).map(function(e){ return e.intent_id }) }
     async function run(isAuto){
       if(busy)return; busy=true; go.disabled=true;
+      ew.spoke=false;   /* Sign now owns the sheet's line: the Anchor watch may still say done, never its wait */
       var res='fail', before=outboxIds();
       try{ res=await actRun(a,actor,w,tell,isAuto) }
       catch(e){
@@ -8542,9 +8653,101 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       // once bytes are signed, the sheet never offers a second signature: the outbox holds them;
       // a stop that pressing Sign again cannot change hides it too
       if(res==='done'||res==='held'||res==='stop'){ go.hidden=true } else go.disabled=false;
+      if(res==='done'||res==='held'||(res==='stop'&&/^clash/.test(($('tx-out')&&$('tx-out').getAttribute('data-fail'))||'')))esrEnd();
       if(res==='paste'){ go.hidden=true; pasteRow.hidden=false; pasteIn.focus() }
     }
     go.onclick=function(){ run(false) };
+    /* the name's registry row (and for setchain its chain address, kept in the name's own scope under the
+       chain key's hash), through the wallet's own reads; null when no node answered */
+    async function esrSnap(){
+      var id=fnv64(esrNm), r=await post(VH,'/v1/chain/get_table_rows',{json:true,code:REG,scope:REG,table:'domains',lower_bound:id,upper_bound:id,limit:1});
+      if(!r||!Array.isArray(r.rows))return null;
+      var sn={row:r.rows[0]&&r.rows[0].domain_name===esrNm?r.rows[0]:null,addr:null};
+      if(a.action==='setchain'){
+        var k=fnv64(String(a.data.chain_key)), q=await post(VH,'/v1/chain/get_table_rows',{json:true,code:REG,scope:id,table:'chainaddrs',lower_bound:k,upper_bound:k,limit:1});
+        if(!q||!Array.isArray(q.rows))return null;
+        sn.addr=q.rows[0]&&q.rows[0].chain_key===a.data.chain_key?q.rows[0]:null;
+      }
+      return sn;
+    }
+    /* what the row shows once this action went in, against the row read before the link was offered. With
+       no row read before it, only a registration made since the link was offered counts */
+    function esrLanded(b,n){
+      var x=a.data, r=n.row, o=b&&b.row, t=function(v){ return Date.parse(String(v||'')+'Z') };
+      if(a.action==='registeracc')return rowLive(r,esrNm)&&(b?!(o&&o.registered===r.registered):t(r.registered)>=ew.at-60000);
+      if(a.action==='renew')return !!(r&&o&&t(r.expires)>t(o.expires));
+      if(a.action==='transfer')return !!(r&&o&&r.owner===x.to&&o.owner!==x.to);
+      if(a.action==='setaccount')return !!(r&&o&&r.account===x.target&&o.account!==x.target);
+      if(a.action==='release')return !!(o&&!r);
+      if(a.action==='setchain'){ var y=n.addr, z=b&&b.addr; return !!(b&&y&&y.address===x.address&&y.addr_type===x.addr_type&&y.memo_tag===x.memo_tag&&!(z&&z.updated===y.updated)) }
+      return false;
+    }
+    function esrStop(){ if(ew.t)clearTimeout(ew.t); ew.t=null; ew.until=0; ew.spoke=false }
+    /* another way signed it, or may have: this way is no longer offered */
+    function esrEnd(){ ew.off=true; esrStop(); esrBox.hidden=true }
+    function esrBack(){ if(!ew.done&&esrA.getAttribute('href')){ ew.off=false; esrBox.hidden=false } }
+    function esrDone(n){
+      ew.done=true; esrStop(); esrBox.hidden=true; go.hidden=true; pasteRow.hidden=true; pasteIn.value='';
+      var r=n.row, rw=r?'the '+REG+' domains row for '+esrNm+' reads owner '+r.owner+' · account '+r.account+' · expires '+r.expires:'the '+REG+' domains row for '+esrNm+' is gone';
+      tell('done',[a.action==='registeracc'?'done. '+esrNm+'.b is registered to '+r.owner+'.':'done. '+w.d,{cy:rw+(n.addr?' · '+n.addr.chain_key+' '+n.addr.address:'')}],true);
+    }
+    function esrWatch(spoken){
+      if(ew.done||ew.off)return;
+      ew.until=Date.now()+180000; ew.read=false; ew.spoke=ew.spoke||!!spoken;
+      if(spoken&&!busy)tell('wait',['approve it in Anchor, and this page shows it here once the chain has it.',{cy:'the esr: link went to this device\u2019s handler for it. this page signs and posts nothing for it, and reads the '+REG+' domains row for '+esrNm+' every 4 s for 3 min'}]);
+      if(ew.t){ clearTimeout(ew.t); ew.t=null }
+      if(!ew.on)esrTick();
+    }
+    async function esrTick(){
+      ew.t=null;
+      if(!d.isConnected||!ew.until||ew.done||ew.off)return;
+      ew.on=true;
+      var n=null; try{ n=await esrSnap() }catch(e){ n=null }
+      ew.on=false;
+      if(!d.isConnected||!ew.until||ew.done||ew.off)return;
+      if(n){
+        ew.read=true;
+        if(esrLanded(ew.base,n)){ esrDone(n); return }
+        if(!ew.base)ew.base=n;
+      }
+      if(Date.now()>=ew.until){
+        var spoke=ew.spoke, read=ew.read; esrStop();
+        var again={btn:'check again',on:function(){ esrWatch(true) }};
+        if(spoke&&!busy)tell('wait',read?[esrNm+'.b does not show this on the chain yet, so check again once Anchor has sent it. ',again,{cy:'read the '+REG+' domains row for '+esrNm+' every 4 s for 3 min, and it does not show this '+a.action+' yet'}]
+          :['the chain could not be read just now, so check again in a minute. ',again,{cy:'no node answered the '+REG+' domains row read for '+esrNm}]);
+        return;
+      }
+      ew.t=setTimeout(esrTick,4000);
+    }
+    async function esrBuild(){
+      esrSt.hidden=true; esrSt.textContent='';
+      try{
+        if(!BN)throw new Error('vendor/bnr-sign.js did not load');
+        if(!LIVE_HOST){ await pickHost(); if(!LIVE_HOST)throw new Error('no node answered get_info') }
+        var two=await Promise.all([vaultaSerialize(a.contract,a.action,[{actor:actor,permission:'active'}],a.data),esrSnap().catch(function(){ return null })]);
+        var act=two[0], e=await esrEncode({actions:[act]});
+        if(!d.isConnected||ew.done||ew.off)return;
+        ew.base=two[1]; ew.at=Date.now();
+        esrA.href=e.link;
+        esrQ.textContent=''; esrQ.appendChild(esrQrSvg(e.link));
+        esrCy.textContent=['signing request (EEP-7) version 2, '+((e.header&0x80)?'deflated':'not deflated')+': chain alias 1 (EOS, now Vaulta) · one action · flags broadcast · no callback · no info',
+          JSON.stringify([{account:act.account,name:act.name,authorization:act.authorization,data:a.data,data_hex:String(act.data).toLowerCase()}],null,1),
+          actor===ESR_SIGNER?'the action names the signer placeholder '+ESR_SIGNER+', so the account that signs is the one Anchor picks.'
+            :'the action names '+actor+'@active, so Anchor signs as '+actor+'. an account picked there that is not '+actor+' is refused by the chain.',
+          'this page signs and posts nothing for this way: Anchor fills in the transaction header, signs and sends it. Anchor refuses eosio updateauth by default, so a key added to the account never rides this link.',
+          e.link].join('\n');
+        [esrA,esrSay,esrQ,esrCy].forEach(function(n){ n.hidden=false });
+        esrBox.hidden=false;
+        esrWatch(false);
+      }catch(x){
+        if(!d.isConnected||ew.done||ew.off)return;
+        [esrA,esrSay,esrQ,esrCy].forEach(function(n){ n.hidden=true });
+        esrSt.hidden=false; esrBox.hidden=false;
+        wlSay(esrSt,['the Anchor link could not be made just now. ',{btn:'try again',on:esrBuild},{cy:(x&&x.message)||String(x)}]);
+      }
+    }
+    esrA.addEventListener('click',function(){ esrWatch(true) });
+    if(BNAME_RE.test(esrNm))esrBuild();
     /* a sheet that came back after the name was connected waits for its press: Sign is not focused for it */
     if(auto) run(true); else if(again&&again.contract){ h.tabIndex=-1; h.focus() } else go.focus();
   }

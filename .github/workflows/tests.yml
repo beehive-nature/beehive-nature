@@ -112,6 +112,11 @@ jobs:
       - name: Wallet coins — full census, exact units, batch identity and read failures
         if: always()
         run: node --test e2e/wallet-coins.test.mjs
+      # the sign sheet's "or sign it in Anchor": the wallet's EOSIO Signing Request (EEP-7) encoder,
+      # proven against the published requests by their inflated payloads, plus a registry round trip
+      - name: Wallet Anchor link — signing requests against the published EEP-7 and wharfkit vectors
+        if: always()
+        run: node --test e2e/esr.test.mjs
       - name: Arweave status — documented confirmations, malformed evidence and rate limits
         if: always()
         run: node --test e2e/arweave-status.test.mjs

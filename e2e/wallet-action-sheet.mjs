@@ -10,6 +10,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateRawSync } from 'node:zlib';
 import { chromium } from 'playwright';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -45,6 +46,23 @@ const CORE_VAULTA_ABI = { account_name: 'core.vaulta', abi: { version: 'eosio::a
 const nameHex = n => { let v = 0n; for (let i = 0; i <= 12; i++) { const ch = n[i] || '.', c = ch === '.' ? 0 : ch >= 'a' ? ch.charCodeAt(0) - 91 : ch.charCodeAt(0) - 48;
   v |= i < 12 ? BigInt(c & 0x1f) << BigInt(64 - 5 * (i + 1)) : BigInt(c & 0x0f); } return Buffer.from(new BigUint64Array([v]).buffer).toString('hex'); };
 const actHex = (acct, act) => nameHex(acct) + nameHex(act);
+/* the test's own reading of an "esr:" signing request (EEP-7), so the sheet's link is never its own witness:
+   header (version, 0x80 deflated), chain variant, action or action[], each action, flags, callback, info */
+const ESR_ALIAS = { 1: MAIN_CHAIN };   // wharfkit/signing-request src/chain-id.ts: alias 1 is EOS, now Vaulta
+const nameOf = v => { let n = ''; for (let i = 0; i <= 12; i++) { n = '.12345abcdefghijklmnopqrstuvwxyz'[Number(v & (i === 0 ? 0x0fn : 0x1fn))] + n; v >>= i === 0 ? 4n : 5n; } return n.replace(/\.+$/, ''); };
+const decodeEsr = link => {
+  const m = /^esr:(?:\/\/)?([A-Za-z0-9_-]+)$/.exec(link || ''); if (!m) return null;
+  const all = Buffer.from(m[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64'), p = all[0] & 0x80 ? inflateRawSync(all.subarray(1)) : all.subarray(1);
+  let i = 0; const u8 = () => p[i++], varu = () => { let v = 0, sh = 0, b; do { b = p[i++]; v |= (b & 127) << sh; sh += 7; } while (b & 128); return v >>> 0; };
+  const nm = () => { const v = p.readBigUInt64LE(i); i += 8; return nameOf(v); }, bytes = () => { const n = varu(), b = p.subarray(i, i + n); i += n; return Buffer.from(b); };
+  const cv = u8(), chain = cv === 0 ? { alias: u8() } : { id: (i += 32, p.subarray(i - 32, i).toString('hex')) };
+  const rv = u8(), count = rv === 1 ? varu() : 1, actions = [];
+  for (let k = 0; k < count; k++) { const account = nm(), name = nm(), na = varu(), authorization = []; for (let j = 0; j < na; j++) authorization.push({ actor: nm(), permission: nm() }); actions.push({ account, name, authorization, data: bytes() }); }
+  const flags = u8(), callback = bytes().toString('utf8'), info = varu();
+  return { version: all[0] & 0x7f, chain, req: rv, actions, flags, callback, info, rest: p.length - i };
+};
+/* registeracc's data, read back field by field (registrant name, domain_name string, target name) */
+const registeraccOf = b => { const n = b[8]; return { registrant: nameOf(b.readBigUInt64LE(0)), domain_name: b.subarray(9, 9 + n).toString('utf8'), target: nameOf(b.readBigUInt64LE(9 + n)), len: b.length === 17 + n }; };
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -84,7 +102,8 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         if (body.code === 'kingbeelovis' && body.table === 'domains' && state.regDown) return json({ error: { what: 'registry down (fixture)' } }, 500);
         if (body.code === 'kingbeelovis' && body.table === 'domains' && state.slowRows) await new Promise(r => setTimeout(r, state.slowRows));
         if (body.code === 'kingbeelovis' && body.table === 'domains') {
-          const rows = body.lower_bound ? ROWS.filter(r => r.id === String(body.lower_bound)) : ROWS;
+          const all = ROWS.concat(state.extraRows || []);   // a row a test adds, as the chain would after a signing elsewhere
+          const rows = body.lower_bound ? all.filter(r => r.id === String(body.lower_bound)) : all;
           return json({ rows: rows.slice(0, body.limit || 500), more: false, next_key: '' });
         }
         if (body.table === 'config') return json({ rows: [{ admin: 'kingbeelovis', registration_fee: '0.0000 EOS', registration_days: 365 }], more: false });
@@ -383,6 +402,7 @@ try {
     const lockedNow = () => page.evaluate(() => document.getElementById('act-key').disabled && document.getElementById('act-paste-go').disabled);
     let s = await sheet(page);
     ok('a paste the network lost: its one button reads the account, and the paste field waits', /cannot tell yet/.test(s.stat) && await page.textContent('#act-stat button.wl-act') === 'check again' && await lockedNow(), JSON.stringify(s));
+    ok('a paste that may still go in takes the Anchor way off the sheet: never a second signature', await page.evaluate(() => document.getElementById('act-esr').hidden && document.getElementById('act-esr').getClientRects().length === 0));
     await page.click('#act-stat button.wl-act'); await stateAfter(page);
     s = await sheet(page);
     ok('inside its window: it may still go in, check again, the field still waits', /^kingbeelovis does not show this wallet yet, and the paste may still go in\./.test(s.stat) && await lockedNow(), JSON.stringify(s));
@@ -393,12 +413,14 @@ try {
     await page.click('#act-stat button.wl-act'); await stateAfter(page);
     s = await sheet(page);
     ok('once a final block is past its window and no block holds it: it did not reach a block, and the paste can be made again', /^It did not reach a block before its time ran out, so nothing changed\. Paste the key again to try once more\./.test(s.stat) && /no block holds it/.test(s.stat) && await page.evaluate(() => !document.getElementById('act-key').disabled && !document.getElementById('act-paste-go').disabled), JSON.stringify(s));
+    ok('and the Anchor way is offered again', await page.evaluate(() => !document.getElementById('act-esr').hidden && /^esr:/.test(document.getElementById('act-esr-link').getAttribute('href') || '')));
     state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
     const p0 = state.posts.length;
     await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go');
     await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
     s = await sheet(page);
     ok('the paste made again lands once: added and renewed, its identical bytes sent to both hosts', s.state === 'done' && /^Done\. king\.b is renewed for 365 days\./.test(s.stat) && /in block 123460/.test(s.stat) && state.submits === 2 && state.posts.length - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], JSON.stringify(s) + ' submits ' + state.submits);
+    ok('once the paste signed it, the Anchor way is no longer offered', await page.evaluate(() => document.getElementById('act-esr').hidden));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -521,6 +543,7 @@ try {
       await page.waitForFunction(() => { const e = document.getElementById('act-stat'); return e && /^(done|fail)$/.test(e.getAttribute('data-state') || ''); }, null, { timeout: 60000 });
       const s = await sheet(page);
       ok('one press: passkey, build, sign as kingbeelovis, persist, send, read back, done in words', s.state === 'done' && s.stat === 'Done. king.b is renewed for 365 days. The chain confirmed it.' && s.goHidden && state.submits === 1, JSON.stringify(s) + ' submits ' + state.submits);
+      ok('once Sign signed it, the Anchor way is no longer offered', await page.evaluate(() => document.getElementById('act-esr').hidden));
       const box = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
       const e = (Array.isArray(box) ? box : (box.entries || [])).find(x => x && x.phase === 'confirmed');
       ok('the outbox holds the signed bytes as confirmed (persist before submit)', !!e && /kingbeelovis::renew by kingbeelovis@active/.test(e.human_summary || ''), JSON.stringify(e || box).slice(0, 200));
@@ -544,6 +567,97 @@ try {
       ok('at a glance now reads ready, and the receive address is the account', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓' && await page.evaluate(() => window.BNRPAY.railAddresses(null, 'king')[0].v) === 'kingbeelovis', await page.textContent('#sum-bridge'));
     }
     ok('no page errors in the one-press run', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* Q · or sign it in Anchor: the same action as a signing request, as a link for Anchor on this device and as a
+     code for Anchor on a phone. The link and the code are read here with the test's own decoders; the sheet then
+     reads the registry row until it shows the action. This page signs and posts nothing for this way */
+  const REGK = { registrant: 'kingbeelovis', domain_name: 'k', target: 'kingbeelovis' };
+  const regUrl = data => `${ORIGIN}/surfaces/wallet.html?compose=${encodeURIComponent('kingbeelovis:registeracc')}&args=${encodeURIComponent(JSON.stringify(data))}#sign-action`;
+  const esrReady = page => page.waitForFunction(() => { const l = document.getElementById('act-esr-link'); return !!l && /^esr:/.test(l.getAttribute('href') || '') && !document.getElementById('act-esr').hidden; }, null, { timeout: 20000 });
+  const statText = page => page.evaluate(() => ({ t: document.getElementById('act-stat').innerText.trim(), state: document.getElementById('act-stat').getAttribute('data-state') }));
+  /* the browser hands an esr: link to Anchor; here no handler exists, so the test keeps the tab where it is (after the page's own handler ran) */
+  const keepTab = page => page.evaluate(() => window.addEventListener('click', e => { if (e.target.closest && e.target.closest('a[href^="esr:"]')) e.preventDefault(); }));
+  const noSigning = async (page, state, sends) => {
+    const box = await page.evaluate(() => ({ cred: window.__cred, box: localStorage.getItem('bnr_outbox_v1') }));
+    return sends.length === 0 && state.submits === 0 && !(state.posts || []).length && box.cred === 0 && (box.box === null || box.box === '[]');
+  };
+  for (const reg of ['bee', 'raver', 'cypherpunk']) {
+    console.log(`Q · or sign it in Anchor, ${reg}:`);
+    const { ctx, state } = await context(browser, reg);
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    const sends = []; page.on('request', r => { if (/\/(send|push)_transaction/.test(r.url())) sends.push(r.url()); });
+    await page.goto(regUrl(REGK), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await esrReady(page);
+    const v = await page.evaluate(() => { const shown = id => document.getElementById(id).getClientRects().length > 0;
+      return { href: document.getElementById('act-esr-link').getAttribute('href'), link: document.getElementById('act-esr-link').innerText.trim(), linkShown: shown('act-esr-link'),
+        say: document.getElementById('act-esr-say').innerText.trim(), sayShown: shown('act-esr-say'), cy: document.getElementById('act-esr-cy').innerText, cyShown: shown('act-esr-cy'),
+        read: JSON.parse(document.querySelector('#act-read pre').textContent), text: document.getElementById('act-sheet').innerText, wide: document.getElementById('act-sheet').scrollWidth > innerWidth + 1,
+        order: [...document.querySelector('#act-sheet .sg').children].map(n => n.id) }; });
+    const q = decodeEsr(v.href), act = q && q.actions[0], fields = act && registeraccOf(act.data);
+    ok('the link decodes to exactly the sheet\'s action: kingbeelovis::registeracc by kingbeelovis@active, the same fields and nothing else',
+      !!q && q.req === 0 && q.actions.length === 1 && act.account === v.read.contract && act.name === v.read.action && v.read.authorization === 'kingbeelovis@active' &&
+      JSON.stringify(act.authorization) === JSON.stringify([{ actor: 'kingbeelovis', permission: 'active' }]) && fields.len && JSON.stringify({ registrant: fields.registrant, domain_name: fields.domain_name, target: fields.target }) === JSON.stringify(v.read.data) &&
+      JSON.stringify(v.read.data) === JSON.stringify(REGK), JSON.stringify({ q, fields, read: v.read }));
+    ok('on Vaulta (chain alias 1 is the Vaulta chain id), version 2, broadcast set, no callback, no info, nothing after it',
+      !!q && ESR_ALIAS[q.chain.alias] === MAIN_CHAIN && q.version === 2 && (q.flags & 1) === 1 && q.flags === 1 && q.callback === '' && q.info === 0 && q.rest === 0, JSON.stringify(q && { chain: q.chain, version: q.version, flags: q.flags, callback: q.callback, info: q.info, rest: q.rest }));
+    const scanned = await page.evaluate(() => {   // the drawn code, read back by the page's QR reader (jsQR), not by the encoder that drew it
+      const svg = document.querySelector('#act-esr-qr svg'), path = svg && svg.querySelector('path'); if (!path || !path.getAttribute('d')) return null;
+      const n = Number(svg.getAttribute('viewBox').split(' ')[2]) - 6, k = Math.floor(400 / (n + 8)), size = k * (n + 8);
+      const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, size, size); g.setTransform(k, 0, 0, k, 4 * k, 4 * k); g.fillStyle = '#000'; g.fill(new Path2D(path.getAttribute('d')));
+      return window.BNRQR.scan(g.getImageData(0, 0, size, size).data, size, size);
+    });
+    ok('the code is drawn, and it reads back as the same request', scanned === v.href, JSON.stringify({ scanned, href: v.href }));
+    ok('it sits after the paste, a link (never a copy button) that says what it does', v.order.indexOf('act-esr') === v.order.indexOf('act-paste') + 1 && v.linkShown && v.link === 'or sign it in Anchor', JSON.stringify(v.order));
+    if (reg === 'cypherpunk') ok('cypherpunk reads the request: the decoded action, which account it names, and the link', v.cyShown && /"name": "registeracc"/.test(v.cy) && /"registrant": "kingbeelovis"/.test(v.cy) && /the action names kingbeelovis@active, so Anchor signs as kingbeelovis\./.test(v.cy) && v.cy.includes(v.href), v.cy.slice(0, 300));
+    else ok('one calm sentence and the link; the request detail is cypherpunk\'s', v.sayShown && v.say === 'open it in Anchor on this device, or scan it with Anchor on your phone.' && !v.cyShown && !/registeracc|esr:/.test(v.text), JSON.stringify({ say: v.say, cyShown: v.cyShown }));
+    ok('the sheet still carries no dash and fits a phone', !/[\u2013\u2014]/.test(v.text) && !v.wide, v.text.slice(0, 160));
+    await keepTab(page);
+    await page.click('#act-esr-link');
+    let st = await statText(page);
+    ok('opened: one calm sentence while the sheet reads the chain', st.state === 'wait' && /^approve it in Anchor, and this page shows it here once the chain has it\./.test(st.t), JSON.stringify(st));
+    state.extraRows = [row('k', 'kingbeelovis')];   // the chain now holds k.b, signed elsewhere
+    await page.waitForFunction(() => document.getElementById('act-stat').getAttribute('data-state') === 'done', null, { timeout: 20000 }).catch(() => {});
+    st = await statText(page);
+    const after = await page.evaluate(() => ({ go: document.getElementById('act-go').hidden, esr: document.getElementById('act-esr').hidden, paste: document.getElementById('act-paste').hidden }));
+    ok('once the registry row shows it, the sheet says done, and offers nothing more to sign', st.state === 'done' && (reg === 'cypherpunk' ? st.t.startsWith('done. k.b is registered to kingbeelovis.') : st.t === 'done. k.b is registered to kingbeelovis.') && after.go && after.esr && after.paste, JSON.stringify({ st, after }));
+    ok('nothing was signed, kept or posted by this page for the Anchor way, and no passkey was asked', await noSigning(page, state, sends), JSON.stringify({ sends, submits: state.submits }));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  {
+    console.log('Q2 · the Anchor way when the row does not come:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    const sends = []; page.on('request', r => { if (/\/(send|push)_transaction/.test(r.url())) sends.push(r.url()); });
+    await page.goto(regUrl(REGK), { waitUntil: 'load' });
+    await page.waitForSelector('#act-sheet', { timeout: 20000 });
+    await esrReady(page);
+    await keepTab(page);
+    state.regDown = true; await page.waitForTimeout(500);   // every read from here on gets no answer
+    await page.click('#act-esr-link');
+    const later = () => page.evaluate(() => { const real = Date.now.bind(Date); Date.now = () => real() + 200000; });   // its few minutes are over
+    const waitAgain = () => page.waitForFunction(() => !!document.querySelector('#act-stat button.wl-act'), null, { timeout: 20000 }).catch(() => {});
+    await later(); await waitAgain();
+    let st = await statText(page);
+    ok('no node answered: one calm sentence and check again', st.state === 'wait' && st.t === 'the chain could not be read just now, so check again in a minute. check again', JSON.stringify(st));
+    state.regDown = false;
+    await page.click('#act-stat button.wl-act');
+    st = await statText(page);
+    ok('check again reads it again, in the same calm words', st.state === 'wait' && /^approve it in Anchor, and this page shows it here once the chain has it\./.test(st.t), JSON.stringify(st));
+    await later(); await waitAgain();
+    st = await statText(page);
+    ok('read, and the row does not show it: one calm sentence and check again', st.state === 'wait' && st.t === 'k.b does not show this on the chain yet, so check again once Anchor has sent it. check again', JSON.stringify(st));
+    state.extraRows = [row('k', 'kingbeelovis')];
+    await page.click('#act-stat button.wl-act');
+    await page.waitForFunction(() => document.getElementById('act-stat').getAttribute('data-state') === 'done', null, { timeout: 20000 }).catch(() => {});
+    st = await statText(page);
+    ok('and once it shows, check again says done', st.state === 'done' && st.t === 'done. k.b is registered to kingbeelovis.', JSON.stringify(st));
+    ok('nothing was signed, kept or posted by this page', await noSigning(page, state, sends), JSON.stringify({ sends, submits: state.submits }));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
 
@@ -635,7 +749,10 @@ try {
       await page.waitForSelector('#act-sheet', { timeout: 20000 });
       await page.waitForFunction(() => !document.getElementById('act-paste').hidden, null, { timeout: 40000 });
       let s = await sheet(page);
-      ok('not signing for kingbeelovis yet: the sheet asks for one paste, right there', /Paste kingbeelovis\u2019s active key once/.test(s.stat) && s.goHidden && !/Anchor|bridge/i.test(s.text), JSON.stringify(s));
+      /* the paste comes first; Anchor (asked for by name) is named only in the quiet way after it */
+      const parts = await page.evaluate(() => { const box = document.getElementById('act-esr');
+        return { rest: [...document.querySelector('#act-sheet .sg').children].filter(n => n !== box).map(n => n.innerText).join('\n'), esr: box.hidden ? '' : box.innerText }; });
+      ok('not signing for kingbeelovis yet: the sheet asks for one paste, right there', /Paste kingbeelovis\u2019s active key once/.test(s.stat) && s.goHidden && !/bridge/i.test(s.text) && !/Anchor/.test(parts.rest) && /^or sign it in Anchor/.test(parts.esr), JSON.stringify(s) + ' ' + JSON.stringify(parts));
       await page.fill('#act-key', DEV_WIF);
       await page.click('#act-paste-go');
       await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
