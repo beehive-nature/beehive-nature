@@ -244,6 +244,7 @@ body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
 .done{margin:var(--sk-s2) 0 0;color:var(--dim);font:400 var(--fs2)/1.4 var(--font)}
 @media(min-width:760px){.nerd{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
+<script src="ant-transport.js?v=1"></script>
 </head>
 <body data-experience="bview" data-bee-theme="custom">
 <script>
@@ -1829,6 +1830,7 @@ document.addEventListener('DOMContentLoaded',function(){
         ['frames',esc(vf.quality?vf.quality.total+' total · '+vf.quality.dropped+' dropped · current media source':'not available in this browser')],
         ['source changes',esc(vf.srcChanges+' · current route attempt')]);
     }
+    var T_=window.__antTransport?window.__antTransport.snapshot():null;
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
       ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · '+(dr.only?'stop':'relay')+' after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' without a chunk':''))],
@@ -1840,9 +1842,23 @@ document.addEventListener('DOMContentLoaded',function(){
       ['chunk latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · lanes overlap')],
       ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
       ['fallback',esc(dr.only?'off · direct only'+(dr.stopped?' · stopped: '+dr.stopped+' at '+(dr.playhead||0).toFixed(2)+' s':''):dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
-      ['wire traffic',no('not measured · plaintext bytes are not network bandwidth')],
+      ['wire traffic',T_&&T_.dials?esc(mb(T_.bytes)+' received over WebRTC data channels · payload, without DTLS and SCTP framing'):no('not measured · no WebRTC dial in this page')],
       ['viewer seeding',no('not provided · this browser retrieves chunks')]
     );
+    // The dial funnel (ant-transport.js): of the endpoints the SDK dialled, how many a browser could reach.
+    if(dr&&T_&&T_.dials){
+      var pc=function(x){return x==null?'not yet':(100*x).toFixed(0)+'%';};
+      rows.push(
+        ['WebRTC dials',esc(T_.dials+' dials · '+T_.opened+' opened · '+T_.dead+' dead · '+T_.waiting+' waiting')],
+        ['dials that opened',esc(pc(T_.openRate)+' of settled dials · data channel open')],
+        ['endpoints reachable',esc(T_.endpointsReachable+' of '+(T_.endpointsReachable+T_.endpointsUnreachable)+' settled endpoints · '+pc(T_.endpointRate)+(T_.endpointsRecovered?' · '+T_.endpointsRecovered+' failed once, then opened':''))],
+        ['where dead dials stopped',esc(T_.deadAt.dial+' before ICE · '+T_.deadAt.ice+' after ICE, before DTLS · '+T_.deadAt.dtls+' after DTLS, before the channel')],
+        ['dial to open',esc(ms(T_.connectP50)+' p50 · '+ms(T_.connectP95)+' p95')],
+        ['dial to first answer',esc(ms(T_.answerP50)+' p50 · '+ms(T_.answerP95)+' p95')],
+        ['time on dead endpoints',esc(ms(T_.deadMs)+' summed across dials · dials overlap'+(T_.failedPerOpened!=null?' · '+T_.failedPerOpened.toFixed(2)+' dead per opened':''))],
+        ['lookup rounds',no('not measured · the SDK does not expose them')]
+      );
+    }
     $('etReceipt').innerHTML=rows.map(function(x){return '<tr><th>'+esc(x[0])+'</th><td>'+x[1]+'</td></tr>';}).join('');
   }
 
@@ -1879,6 +1895,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   words(); place(); wire(); paint();
   window.__eternal={data:D,raver:R,paint:paint};
+  if(window.__antTransport)window.__antTransport.subscribe(window.__eternalPaint);
 })();
 </script>
 </body>

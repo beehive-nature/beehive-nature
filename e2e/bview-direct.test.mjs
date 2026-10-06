@@ -63,7 +63,7 @@ test('direct: chunks read on their boundaries, real frames from a Blob, one conn
     assert.equal(facts.e.direct.chunks,3);assert.equal(facts.e.direct.completed,3);assert.equal(facts.e.direct.requests,3);assert.equal(facts.e.direct.failed,0);
     assert.equal(facts.e.direct.size,MEDIA.length);assert.equal(facts.e.direct.uniqueBytes,MEDIA.length);assert.ok(facts.e.bytes>0);
     assert.ok(facts.e.direct.firstReadMs>=0);assert.ok(facts.e.ttffMs>0);assert.equal(facts.e.direct.fallback,null);
-    assert.match(facts.receipt,/chunk reads/);assert.match(facts.receipt,/unique plaintext/);assert.match(facts.receipt,/not measured · plaintext bytes are not network bandwidth/);
+    assert.match(facts.receipt,/chunk reads/);assert.match(facts.receipt,/unique plaintext/);assert.match(facts.receipt,/wire traffic(?=not measured · no WebRTC dial in this page)/);
     assert.match(facts.pipe,/chunk lanes/);assert.match(facts.pipe,/3 of 3 chunks/);
     assert.ok(facts.wide<=facts.vw+1,'direct metrics must fit the mobile cypherpunk front');
     await page.evaluate(()=>{window.ranges=[];});
