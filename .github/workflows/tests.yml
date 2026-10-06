@@ -25,6 +25,15 @@ jobs:
       - name: Test workspace
         if: always()
         run: cargo test --workspace --locked
+      # the same SETTLE contract on a second rail: the binary this job just built
+      - name: bPay SETTLE — Solana native carrier through the built settle-solana binary
+        if: always()
+        working-directory: tools/bpay-settle
+        env:
+          SETTLE_SOLANA_BIN: ${{ github.workspace }}/target/debug/settle-solana
+        run: |
+          test -x "$SETTLE_SOLANA_BIN" || { echo "settle-solana binary missing: a skipped suite is not a pass"; exit 1; }
+          node --test solana-native.test.mjs
       - name: Check formatting
         if: always()
         run: cargo fmt --all --check
@@ -178,6 +187,12 @@ jobs:
         if: always()
         working-directory: tools/net-doxx
         run: npm test
+      - name: bPay SETTLE adapters — five kill conditions, sabotage battery, mutation proof
+        if: always()
+        working-directory: tools/bpay-settle
+        run: |
+          node --test bpay-settle.test.mjs
+          node prove.mjs
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh
