@@ -30,7 +30,7 @@ export const TUNGSTEN_SCHEMA = "bnr.settle-tungsten/1";
 export const VERDICTS = ["PASS", "PASS_WITH_LIMITATIONS", "FAIL", "INCONCLUSIVE"];
 export const KILLS = ["kill.1-no-owner-authority", "kill.2-cap-bounded", "kill.3-vendor-not-sole-proof", "kill.4-receipt-recreatable", "kill.5-no-vendor-leak"];
 export const REQUIRED = [...KILLS, "bound.native-fee", "reconcile.three-way", "reconcile.receipt"];
-const CONTROLS = ["control.chain", "control.oracle-quorum", "control.token"];
+const CONTROLS = ["control.reader-is-ours", "control.chain", "control.oracle-quorum", "control.token"];
 // The caller's list, never the adapter's: an adapter does not get to say what
 // counts as its own vendor's name.
 export const VENDOR_TERMS = ["coinbase", "base-org", "baseaccount", "base account", "keys.coinbase", "cdp", "smartwallet", "smart wallet", "paymentstatus", "permissionhash", "callsid"];
@@ -54,7 +54,8 @@ export function computeVerdict(observations, findings) {
   const failed = (c) => (by.get(c) || []).some((r) => !r.ok);
   const stopped = (findings || []).filter((f) => f.severity === "harness" || f.severity === "refused");
   const ctl = [];
-  for (const c of CONTROLS) { if (!by.has(c)) ctl.push(`control missing: ${c}`); else if (failed(c)) ctl.push(`control failed: ${c}`); }
+  for (const c of CONTROLS) if (!by.has(c)) ctl.push(`control missing: ${c}`);
+  for (const c of by.keys()) if (c.startsWith("control.") && failed(c)) ctl.push(`control failed: ${c}`);
   // a dead probe proves nothing either way
   if (ctl.length) return { verdict: "INCONCLUSIVE", reasons: ctl };
   const blockers = (findings || []).filter((f) => f.severity === "blocker");
@@ -63,7 +64,7 @@ export function computeVerdict(observations, findings) {
   if (stopped.length) return { verdict: "INCONCLUSIVE", reasons: stopped.map((f) => `${f.severity}: ${f.id}`) };
   const missing = REQUIRED.filter((c) => !by.has(c));
   if (missing.length) return { verdict: "INCONCLUSIVE", reasons: missing.map((c) => `check not run: ${c}`) };
-  const info = [...by.keys()].filter((c) => !REQUIRED.includes(c) && !CONTROLS.includes(c) && failed(c));
+  const info = [...by.keys()].filter((c) => !REQUIRED.includes(c) && !c.startsWith("control.") && failed(c));
   const lim = [...info.map((c) => `observation failed: ${c}`), ...(findings || []).filter((f) => f.severity === "limitation").map((f) => `limitation: ${f.id}`)];
   return lim.length ? { verdict: "PASS_WITH_LIMITATIONS", reasons: lim } : { verdict: "PASS", reasons: [] };
 }
@@ -79,23 +80,29 @@ export async function runTungsten(cfg) {
   const observations = [];
   const findings = [...(KNOWN[route] || [])];
   const ob = (check, ok, detail) => observations.push({ check, ok: !!ok, ...(detail !== undefined ? { detail } : {}) });
+  const stop = (id, text, severity = "harness") => { findings.push({ id, severity, text }); throw Object.assign(new Error(text), { tungstenStop: true }); };
+  const ownOracle = "independent:" + reader.hostIds.join("+");
   let capture = null, receipt = null, recon = null, intent = null;
 
   try {
-    // controls first: the chain, the operators, the token
+    // ── controls, all before anything can move money ──
+    // the reader that produces the evidence must be the one we control
+    ob("control.reader-is-ours", adapter.reader === reader, adapter.reader === reader ? undefined : "the adapter reads through another reader");
     const cc = await reader.controlChain();
     ob("control.chain", cc.ok, { alive: cc.alive });
     ob("control.oracle-quorum", cc.alive.length >= 2, { alive: cc.alive.length });
     const descriptor = await adapter.network();
     const asset = Object.keys(descriptor.assets)[0];
-    try { await adapter.balance({ address: recipient, asset }); ob("control.token", true); }
+    // the token, read by OUR reader, not through the adapter under test
+    try { await reader.balanceOf(descriptor.assets[asset].ref, recipient); ob("control.token", true); }
     catch (e) { ob("control.token", false, String(e.message).slice(0, 120)); }
+    if (route === "pay" && !cfg.payerAccount) stop("payer-account-missing", "the pay route needs the payer's account to read its owners before and after");
+    if (observations.some((o) => o.check.startsWith("control.") && !o.ok)) stop("controls-failed", "a control failed: nothing was settled");
 
-    // 1-2 QUOTE + INVOICE: the commitment is the invoice's carried quote set
+    // 1-3 QUOTE, PRICING COMMITMENT, INVOICE, AUTHORIZATION — bounded, single-use, never owner privilege
     const mHash = descriptorHash(descriptor);
-    // 3 AUTHORIZATION — bounded, single-use, never owner privilege
     const owed = invoice.lines.filter((l) => l.asset === asset).reduce((s, l) => s + BigInt(l.amountAtto), 0n).toString();
-    const { authority } = buildAuthority({ principal, asset, max_asset_atto: owed, max_native_fee_atto: maxNativeFeeAtto, recipient, not_after: notAfter,
+    const { authority, authority_hash: signedAuthority } = buildAuthority({ principal, asset, max_asset_atto: owed, max_native_fee_atto: maxNativeFeeAtto, recipient, not_after: notAfter,
       nonce, invoice_digest: invoice.identity.contentDigest, adapter_manifest_hash: mHash });
     intent = buildIntent({ invoice, asset, descriptor, authority, quote: { commitment: invoice.commitment.digest, expires_at: quoteExpiresAt },
       privacy: { requirements: privacy }, proof: {}, refund: { policy: "refund-to-source" }, meter: { evidence_ref: null }, now });
@@ -103,27 +110,31 @@ export async function runTungsten(cfg) {
     let ownerBefore = null;
     if (route === "spend-permission") {
       try { await adapter.grantPermission(intent, { provider, now }); ob("authority.grant-exact", true); }
-      catch (e) { ob("authority.grant-exact", false, e.code || String(e.message).slice(0, 120)); ob("kill.2-cap-bounded", false, "the granted permission is not the requested bound"); throw Object.assign(e, { tungstenStop: true }); }
+      catch (e) {
+        if (e.code === "GRANT_SUBSTITUTED" || e.code === "NO_GRANT") { ob("authority.grant-exact", false, e.code); ob("kill.2-cap-bounded", false, "the granted permission is not the requested bound"); throw Object.assign(e, { tungstenStop: true }); }
+        stop("grant-not-completed", `the owner's grant did not complete: ${String(e.message).slice(0, 120)}`);
+      }
       const own = await adapter.spenderIsOwner();
-      if (!own.deployed) findings.push({ id: "account-counterfactual", severity: "limitation", text: "the owner account is not deployed yet; the spender-is-not-owner check reads it after the first settlement" });
+      if (!own.deployed) findings.push({ id: "account-counterfactual", severity: "harness", text: "the owner account is not deployed; whether the spender is an owner cannot be read" });
       else ob("kill.1-no-owner-authority", own.owner === false, { spender_is_owner: own.owner });
-      const probe = await adapter.capProbe();
-      ob("kill.2-cap-bounded", probe.answered > 0 && probe.succeeded === 0 && probe.reverted > 0, { over_cap_simulation: { reverted: probe.reverted, succeeded: probe.succeeded } });
+      if (own.owner) stop("agent-is-owner", "the agent owns the account: nothing settles under that authority", "blocker");
+    } else {
+      ownerBefore = await adapter.ownerIndex(cfg.payerAccount);
     }
 
     // 4 EXECUTE — the kernel's run, the vendor only behind the adapter
     let run;
     try {
-      if (route === "pay") ownerBefore = cfg.payerAccount ? await adapter.ownerIndex(cfg.payerAccount) : null;
-      run = await settle({ adapter, intent, invoice, signer: executor, outbox, now, issuedAt });
+      run = await settle({ adapter, intent, invoice, signer: executor, outbox, now, issuedAt, vendorOracles: ["vendor:"], authorityHash: signedAuthority });
     } catch (e) {
-      if (/^REFUSED_/.test(e.code || "")) {
-        // the vendor flow asked for a call outside the authority: the route
-        // cannot settle without wider power than BNR grants
-        ob(e.code === "REFUSED_AUTHORITY" || e.code === "REFUSED_7702" ? "kill.1-no-owner-authority" : "kill.2-cap-bounded", false, e.code);
-        throw Object.assign(e, { tungstenStop: true });
-      }
-      throw e;
+      const code = e.code || "";
+      // the vendor flow, the wallet or the adapter produced something outside
+      // the authority: the route cannot settle without wider power
+      if (code === "REFUSED_AUTHORITY" || code === "REFUSED_7702") ob("kill.1-no-owner-authority", false, code);
+      else if (code === "SETTLE_REFUSED" && /own witness/.test(e.message)) ob("kill.3-vendor-not-sole-proof", false, e.message.slice(0, 120));
+      else if (/^REFUSED_/.test(code) || code === "SETTLE_REFUSED") ob("kill.2-cap-bounded", false, `${code}: ${String(e.message).slice(0, 120)}`);
+      else throw e;
+      throw Object.assign(e, { tungstenStop: true });
     }
     receipt = run.receipt;
 
@@ -137,39 +148,55 @@ export async function runTungsten(cfg) {
     };
     if (run.observation.intent_bound_on_chain === false)
       findings.push({ id: "intent-not-bound-on-chain", severity: "limitation", text: "the executed calldata does not carry the intent binding; the receipt alone joins this transaction to the invoice" });
+    if (run.observation.intent_bound_on_chain === null && value.length)
+      findings.push({ id: "binding-unagreed", severity: "limitation", text: "the operators did not return identical calldata, so the on-chain binding is unread" });
 
     if (route === "pay") {
-      const after = capture.account ? await adapter.ownerIndex(capture.account) : null;
-      if (ownerBefore === null && after === null) findings.push({ id: "owner-check-unread", severity: "limitation", text: "the payer account's owner index could not be read before and after" });
-      else ob("kill.1-no-owner-authority", ownerBefore === null ? true : ownerBefore === after, { owner_index_before: ownerBefore, owner_index_after: after });
+      if (capture.account && String(capture.account).toLowerCase() !== String(cfg.payerAccount).toLowerCase())
+        findings.push({ id: "paid-from-another-account", severity: "blocker", text: "the chain shows the payment from an account other than the payer's" });
+      const after = await adapter.ownerIndex(cfg.payerAccount);
+      // unreadable before or after is not a pass: a counterfactual account deployed by this very payment could carry any owner
+      if (ownerBefore === null || after === null) findings.push({ id: "owner-index-unreadable", severity: "harness", text: "the payer account's owner index could not be read both before and after" });
+      else ob("kill.1-no-owner-authority", ownerBefore === after, { owner_index_before: ownerBefore, owner_index_after: after });
       // the cap is the exact approved amount: the chain must show exactly it
       ob("kill.2-cap-bounded", capture.settled_atto === capture.requested_atto, { requested: capture.requested_atto, settled: capture.settled_atto });
+    } else {
+      // the cap is the CONTRACT's: after approval, an over-cap spend must revert with the cap error on every host
+      const probe = await adapter.capProbe();
+      ob("control.permission-live", probe.permission_valid, { permission_valid: probe.permission_valid });
+      ob("kill.2-cap-bounded", probe.succeeded === 0 && probe.cap_reverts === probe.hosts && probe.other_reverts === 0, probe);
     }
 
-    // 6 READ — value evidence from the independent oracle, at quorum
+    // 6 READ — value evidence from OUR reader, at quorum
     const top = value.every((r) => r.value_observed === "event-log+readback");
-    ob("kill.3-vendor-not-sole-proof", value.length > 0 && top && run.observation.quorum >= 2 && !descriptor.vendor_oracles.includes(run.observation.oracle),
+    // operators that answered but disagree (or only one found it) are a broken
+    // probe, not a vendor verdict: the run says so and stops short of a kill
+    if (run.observation.quorum < 2) findings.push({ id: "operators-disagree", severity: "harness", text: `only ${run.observation.quorum} operator(s) returned the same receipt` });
+    else ob("kill.3-vendor-not-sole-proof", value.length > 0 && top && run.observation.quorum >= 2 && run.observation.oracle === ownOracle,
       { records: value.length, quorum: run.observation.quorum, oracle: run.observation.oracle, conclusion: receipt.reconciliation.conclusion });
 
-    // fee within the authority
-    const fee = receipt.three_way.fee;
-    ob("bound.native-fee", !!fee && fee.within_bound, fee ? { paid: fee.chain_observed, max: fee.committed_max, basis: fee.basis } : "no fee evidence");
-
-    // 7-8 RECEIPT + RECONCILE
-    recon = reconcileReceipt(receipt, { invoice, intent });
-    // not final yet is a timing fact, not a verdict on the vendor: run again later
-    if (recon.conclusion === "FINALITY-PENDING")
-      findings.push({ id: "finality-not-reached", severity: "harness", text: "the payment is observed but its block is not finalized on both operators yet; rerun reconcile after finality" });
-    else ob("reconcile.receipt", recon.verdict === "reconciled" && recon.conclusion === "SATISFIED", { verdict: recon.verdict, conclusion: recon.conclusion, breaches: recon.breaches });
-    ob("reconcile.three-way", receipt.three_way.agrees, receipt.three_way.rows.map((r) => ({ field: r.field, chain_matches_commitment: r.chain_matches_commitment, vendor_matches_chain: r.vendor_matches_chain })));
-    if (receipt.three_way.rows.some((r) => r.vendor_matches_chain === false))
-      findings.push({ id: "vendor-misreported", severity: "blocker", text: "the vendor's payment status disagrees with the chain" });
+    // fee within the authority; an unreadable run leaves it unknown, never 0
+    if (run.observation.fee_incomplete) findings.push({ id: "fee-incomplete", severity: "harness", text: "a transaction of the run could not be read, so the native fee is unknown" });
+    else {
+      const fee = receipt.three_way.fee;
+      ob("bound.native-fee", !!fee && fee.within_bound, fee ? { paid: fee.chain_observed, max: fee.committed_max, basis: fee.basis } : "no fee evidence");
+    }
 
     // kill.4 — a fresh adapter and reader, given only the intent and the tx
     const fresh = freshAdapter ? await freshAdapter() : adapter;
     const again = await fresh.reconcile({ intent, ref: run.submitted.ref, related: run.status?.adapter_local?.txs });
     const a = digest("bnr/settle-evidence/v1", stripStamp(receipt.evidence)), b = digest("bnr/settle-evidence/v1", again.records);
     ob("kill.4-receipt-recreatable", a === b && again.records.length > 0, { first: a, rebuilt: b });
+
+    // 7-8 RECEIPT + RECONCILIATION — against our oracle and the chain rebuild
+    recon = reconcileReceipt(receipt, { invoice, intent, expectedOracle: ownOracle, rebuiltRecords: again.records });
+    // not final yet is a timing fact, not a verdict on the vendor: run again later
+    if (recon.conclusion === "FINALITY-PENDING")
+      findings.push({ id: "finality-not-reached", severity: "harness", text: "the payment is observed but its block is not finalized on every agreeing operator yet; rerun reconcile after finality" });
+    else ob("reconcile.receipt", recon.verdict === "reconciled" && recon.conclusion === "SATISFIED", { verdict: recon.verdict, conclusion: recon.conclusion, breaches: recon.breaches });
+    ob("reconcile.three-way", receipt.three_way.agrees, receipt.three_way.rows.map((r) => ({ field: r.field, chain_matches_commitment: r.chain_matches_commitment, vendor_matches_chain: r.vendor_matches_chain })));
+    if (receipt.three_way.rows.some((r) => r.vendor_matches_chain === false))
+      findings.push({ id: "vendor-misreported", severity: "blocker", text: "the vendor's payment status disagrees with the chain" });
 
     // kill.5 — the kernel's objects carry no vendor identifier
     try { assertNeutral(intent, vendorTerms); assertNeutral(receipt, vendorTerms); ob("kill.5-no-vendor-leak", true); }

@@ -18,9 +18,10 @@
 //   feeFor(msgB64)     → lamports
 //   sendRaw(txB64)     → signature
 //   signatureStatus(s) → "finalized" | "confirmed" | "processed" | null
-//   evidence(s)        → {evidence: {genesis_hash, status, transaction}, operators}
+//   evidence(s)        → [{operator, evidence: {genesis_hash, status, transaction}}] — one per RPC operator, raw
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { canonicalBytes } from "../../../scripts/lib/bpay-invoice-generic.mjs";
 import { CONTRACT, VERBS } from "../../../scripts/lib/bpay-settle.mjs";
 
 export const DEVNET = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"; // CAIP-2 for devnet: genesis hash prefix (the bench's DEVNET_GENESIS)
@@ -123,7 +124,15 @@ export function createAdapter({ run, rpc, payer, path = "m/44'/501'/0'" }) {
     async reconcile({ intent, ref }) {
       const input = memo.get(intent.intent_digest);
       if (!input || !input.signature_hex) refuse("NOT_COMBINED", "reconcile needs the verified transaction this adapter combined");
-      const { evidence, operators } = await rpc.evidence(ref);
+      // the adapter counts agreement itself: distinct operators returning the
+      // identical evidence. A count the RPC layer merely reports is not quorum.
+      const rows = await rpc.evidence(ref);
+      if (!Array.isArray(rows) || !rows.length) refuse("NO_EVIDENCE", "no operator returned evidence");
+      const groups = new Map();
+      for (const r of rows) { const k = canonicalBytes(r.evidence).toString("utf8"); const g = groups.get(k) || { evidence: r.evidence, ops: new Set() }; g.ops.add(String(r.operator)); groups.set(k, g); }
+      const best = [...groups.values()].sort((a, b) => b.ops.size - a.ops.size)[0];
+      const evidence = best.evidence;
+      const operators = groups.size > 1 ? 1 : best.ops.size; // any disagreement: a single witness at most
       let out;
       try { out = run("reconcile", { ...input, evidence: { ...evidence, requested_signature: ref } }); }
       // the bench refused the evidence (other bytes, not final, failed, over the fee bound): a human looks

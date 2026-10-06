@@ -44,7 +44,12 @@ The receipt then adds its own hash and the reconciliation state.
 | [`adapters/smart-account-usdc.mjs`](adapters/smart-account-usdc.mjs) | Base / Base Sepolia, USDC | wallet-submits | the Base Account SDK (`@base-org/account` 2.5.13), injected and never imported. Route **pay** is a person present, using `pay()` with telemetry off and the intent bound as the attribution suffix. Route **spend-permission** is an agent acting as the permission's spender, never an owner |
 | [`adapters/solana-devnet.mjs`](adapters/solana-devnet.mjs) | Solana devnet, SOL | shell-submits | `crates/settle-solana` on the native carrier (child process, JSON on stdio). The Rust bench composes the transaction, verifies the signature and reconciles. The adapter only maps the verbs |
 
-[`evm.mjs`](evm.mjs) is the shared independent reader. Two RPC operators must agree for the top evidence class; a single operator is reported one class lower and is never final. Fees come from the chain: a paymaster-sponsored user operation costs the payer 0.
+[`evm.mjs`](evm.mjs) is the shared independent reader.
+
+- Two RPC operators must return the same receipt, field for field, for the top evidence class. That covers the block, the sender, the gas and every log. The calldata must match on both, and finality counts only if every agreeing operator reports it.
+- A single operator is reported one class lower and is never final.
+- A transfer counts only if its sender acted in that transaction: through its own successful user operation, or as the transaction sender. Two such senders paying the same recipient go to a person to sort out.
+- Fees come from the chain. A paymaster-sponsored user operation costs the payer 0.
 
 ## TUNGSTEN: COINBASE SETTLEMENT ROUTE
 
@@ -52,9 +57,9 @@ The receipt then adds its own hash and the reconciliation state.
 
 | kill condition | how it is observed |
 |---|---|
-| 1. unrestricted authority | spend route: `isOwnerAddress(spender)` is read on chain and must be false. pay route: the payer's `nextOwnerIndex` is the same before and after. In both, any owner change, upgrade, cross-chain replay, ERC-20 `approve` or EIP-7702 call is refused before it reaches a signer |
-| 2. unbounded cap | spend route: the grant must equal the request field by field, and an `eth_call` of `spend(allowance + 1)` from the spender must revert, with no money moved. pay route: the chain shows exactly the approved amount |
-| 3. vendor assertion as sole proof | value evidence comes from two non-vendor operators at `event-log+readback`. The vendor's status is compared three ways and can only disagree |
+| 1. unrestricted authority | spend route: `isOwnerAddress(spender)` is read on chain before any money moves and must be false. pay route: the payer's `nextOwnerIndex` is read before and after and must not change. An index that cannot be read is INCONCLUSIVE, never a pass. In both, any owner change, upgrade, cross-chain replay, ERC-20 `approve` or EIP-7702 call is refused before it reaches a signer |
+| 2. unbounded cap | spend route: the grant must equal the request field by field, including a period covering the whole window so the cap cannot refill. The calls must be exactly `[approve,] spend, transfer`. After approval the permission must read as valid, and an `eth_call` of `spend(allowance + 1)` must revert on every operator with the contract's own `ExceededSpendPermission` error. No money moves. pay route: the chain shows exactly the approved amount |
+| 3. vendor assertion as sole proof | value evidence comes from the harness's own reader, with two operators at `event-log+readback`. The vendor list is the caller's, not the adapter's. The vendor's status is compared three ways and can only disagree |
 | 4. receipt not recreatable | a fresh adapter and reader, given only the intent and the tx hash, must rebuild identical evidence |
 | 5. vendor identifiers in the kernel | the caller's term list is scanned over the intent and the receipt. Only `adapter_local` may name the vendor |
 
@@ -64,7 +69,17 @@ The honest fake passes with limitations, and those limitations are stated from s
 - The spend-permission helpers send telemetry, and there is no switch to turn it off.
 - On the pay route the cap is the person's approval of that one payment, not a standing limit.
 
-Each kill condition has a sabotage test that makes it go red. `node prove.mjs` disables each of 16 guards in turn, and the suite fails every time.
+Controls run before anything is paid. The adapter must read through the harness's own reader, every operator must be up and on the right chain, and the token must read. If any control fails, nothing settles and the verdict is INCONCLUSIVE.
+
+At settle time the kernel does three things:
+
+- It rebuilds the intent from the invoice and the adapter, and rechecks both expiries.
+- It refuses to settle the same intent a second time.
+- It refuses an authority whose hash is not the signed one. The signing itself belongs to the signed-authorization lane.
+
+Receipt digests are unkeyed. A forger who recomputes them is caught by re-reading the chain (`rebuiltRecords`) or by an anchor (`expectedDigest`).
+
+Each kill condition has a sabotage test that makes it go red. `node prove.mjs` disables each of 31 guards in turn, and the suite fails every time.
 
 ## Differential against our rails
 
@@ -77,7 +92,7 @@ Each kill condition has a sabotage test that makes it go red. `node prove.mjs` d
 
 ## Running it
 
-- `node --test bpay-settle.test.mjs` runs 28 tests against the fake chain (CI static job).
+- `node --test bpay-settle.test.mjs` runs 47 tests against the fake chain (CI static job).
 - `node prove.mjs` runs the mutation proof (CI static job).
-- `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs against the real binary (CI test job, after the workspace build).
+- `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs 6 tests against the real binary (CI test job, after the workspace build).
 - A live run on Base Sepolia needs two founder steps: a Base Account passkey, and test USDC in it. Nothing in this directory moves money on its own.

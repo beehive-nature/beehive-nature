@@ -231,21 +231,39 @@ export function validateIntent(intent) {
   return true;
 }
 
+// The intent at settle time: it must rebuild, byte for byte, from the invoice
+// and the adapter in hand (so nobody can hand-edit it and recompute its
+// digests), and neither its quote nor its authority may have expired since.
+export function checkIntent(intent, { invoice, descriptor, now }) {
+  validateIntent(intent);
+  const rebuilt = buildIntent({ invoice, asset: intent.invoice.asset, descriptor, authority: intent.authority, quote: intent.quote,
+    privacy: intent.privacy, proof: intent.proof, refund: intent.refund, meter: intent.meter, now: intent.created_at });
+  need(rebuilt.intent_digest === intent.intent_digest, "the intent does not rebuild from this invoice and this adapter");
+  const t = Date.parse(now);
+  need(Number.isFinite(t), "now: RFC3339 (the kernel has no clock)");
+  need(t < Date.parse(intent.quote.expires_at), "quote expired since the intent was built");
+  need(t < Date.parse(intent.authority.not_after), "authority expired since the intent was built");
+  return true;
+}
+
 // ── evidence ────────────────────────────────────────────────────────────────
 // An adapter's reconcile() returns VOCAB-1 records. The kernel stamps the
 // invoice digest itself (an adapter does not choose which invoice money was
 // for) and refuses any value-class record whose oracle is the vendor.
-function checkRecords(records, descriptor, observation) {
+// vendorOracles: the CALLER's list, joined with the adapter's own declaration.
+// An adapter does not get to be the only one saying what its vendor is.
+function checkRecords(records, descriptor, observation, intent, vendorOracles = []) {
   need(Array.isArray(records), "reconcile must return records[]");
-  need(observation && typeof observation.oracle === "string", "reconcile must name the oracle it read");
-  const vendorOracles = descriptor.vendor_oracles || [];
+  need(observation && typeof observation.oracle === "string" && observation.oracle.length > 0, "reconcile must name the oracle it read");
+  const vendor = [...(descriptor.vendor_oracles || []), ...vendorOracles];
   for (const r of records) {
+    need(r.asset === intent.invoice.asset, `a record names another asset (${r.asset}) than this settlement (${intent.invoice.asset})`);
     const rank = EVIDENCE_CLASS_LADDER.indexOf(r.value_observed);
     need(rank >= 0, `record class ${r.value_observed} is not on the VOCAB-1 ladder`);
     need(rank <= EVIDENCE_CLASS_LADDER.indexOf(descriptor.evidence_ceiling),
       `record claims ${r.value_observed}, above what this adapter declared it can observe`);
     if (rank >= MIN_VALUE_RANK)
-      need(!vendorOracles.includes(observation.oracle), "value evidence read from the vendor's own endpoint: a page is never its own witness");
+      need(!vendor.some((v) => observation.oracle === v || observation.oracle.startsWith(v)), "value evidence read from the vendor's own endpoint: a page is never its own witness");
   }
 }
 
@@ -274,9 +292,9 @@ export function threeWay(intent, assertion, records, observation) {
   return { agrees: rows.every((r) => r.chain_matches_commitment && r.vendor_matches_chain !== false) && (!feeRow || feeRow.within_bound), rows, fee: feeRow };
 }
 
-export function buildReceipt({ intent, invoice, descriptor, ref, assertion, records, observation, phase, issuedAt, adapterLocal }) {
+export function buildReceipt({ intent, invoice, descriptor, ref, assertion, records, observation, phase, issuedAt, adapterLocal, vendorOracles }) {
   validateIntent(intent);
-  checkRecords(records, descriptor, observation);
+  checkRecords(records, descriptor, observation, intent, vendorOracles);
   need(PHASES.includes(phase), `phase ∈ ${PHASES.join("|")}`);
   const stamped = records.map((r) => ({ ...r, invoiceContentDigest: intent.invoice.content_digest }));
   const recon = reconcileObligation(invoice, stamped);
@@ -313,7 +331,12 @@ export function buildReceipt({ intent, invoice, descriptor, ref, assertion, reco
 // Recompute everything a receipt asserts from what it carries plus the
 // invoice and intent it names. A receipt that only re-states a vendor's word
 // does not reconcile.
-export function reconcileReceipt(receipt, { invoice, intent }) {
+// opts: expectedDigest (a durable anchor of the receipt), expectedOracle (the
+// reader the verifier trusts), rebuiltRecords (the evidence re-read from the
+// chain by the verifier itself). The digests are unkeyed: a forger who
+// recomputes them is caught only by an anchor or by re-reading the chain,
+// the same honest boundary as INVOICE-1.
+export function reconcileReceipt(receipt, { invoice, intent, expectedDigest, expectedOracle, rebuiltRecords }) {
   const checks = [];
   const add = (name, ok, detail) => checks.push({ name, ok: !!ok, ...(detail ? { detail } : {}) });
   const { receipt_digest, ...body } = receipt;
@@ -328,7 +351,14 @@ export function reconcileReceipt(receipt, { invoice, intent }) {
   const tw = threeWay(intent, null, receipt.evidence, receipt.observation);
   add("chain-matches-commitment", tw.rows.every((r) => r.chain_matches_commitment) || re.conclusion !== "SATISFIED");
   add("native-fee-within-authority", !tw.fee || tw.fee.within_bound, tw.fee ? tw.fee.chain_observed : undefined);
-  add("value-from-independent-oracle", receipt.evidence.every((r) => EVIDENCE_CLASS_LADDER.indexOf(r.value_observed) < MIN_VALUE_RANK) || !!receipt.observation?.oracle);
+  const hasValue = receipt.evidence.some((r) => EVIDENCE_CLASS_LADDER.indexOf(r.value_observed) >= MIN_VALUE_RANK && r.kind !== "attempt");
+  const oracle = receipt.observation?.oracle || "";
+  add("value-from-independent-oracle", !hasValue || (oracle.length > 0 && !/^vendor[:]/.test(oracle) && (expectedOracle === undefined || oracle === expectedOracle)), oracle || undefined);
+  if (expectedDigest !== undefined) add("receipt-anchored", receipt_digest === expectedDigest);
+  if (rebuiltRecords !== undefined) {
+    const strip = (rs) => rs.map(({ invoiceContentDigest, ...r }) => r);
+    add("evidence-rebuilds-from-chain", digest("bnr/settle-evidence/v1", strip(receipt.evidence)) === digest("bnr/settle-evidence/v1", strip(rebuiltRecords)));
+  }
   const breaches = checks.filter((c) => !c.ok).map((c) => c.name);
   return { schema: "bnr.settle-reconciliation/1", verdict: breaches.length ? "breach" : "reconciled", conclusion: re.conclusion, breaches, checks };
 }
@@ -338,13 +368,26 @@ export function reconcileReceipt(receipt, { invoice, intent }) {
 // `signer` is the vault (shell-submits: sign(items) → signatures) or the wallet
 // executor (wallet-submits: handed to adapter.submit, which knows its API).
 // `outbox.persist(intent_digest, entry)` must resolve before submit is called;
-// on resubmission the identical stored entry is replayed, never rebuilt.
-export async function settle({ adapter, intent, invoice, signer, outbox, now, issuedAt }) {
+// resubmission of a stored entry is the shell outbox's job, never this run's.
+// authorityHash: the hash the authority's SIGNATURE covers (the signing
+// machinery is the signed-authorization lane's, not this file's). Without it
+// an authority that was edited and re-hashed, but still lies inside every
+// bound, cannot be told from the real one; with it, any edit is refused.
+export async function settle({ adapter, intent, invoice, signer, outbox, now, issuedAt, vendorOracles, authorityHash }) {
   assertAdapter(adapter);
   validateIntent(intent);
+  if (authorityHash !== undefined) need(intent.authority_hash === authorityHash, "the authority is not the one that was signed");
+  need(outbox && typeof outbox.get === "function" && typeof outbox.persist === "function", "outbox {get, persist} required");
   const descriptor = await adapter.network();
   need(descriptorHash(descriptor) === intent.route.adapter_manifest_hash,
     "the adapter's live descriptor differs from the one the authority bound — refuse, never settle under a changed adapter");
+  checkIntent(intent, { invoice, descriptor, now });
+  // single-use: an intent already in the outbox is never settled again. The
+  // shell resubmits the stored entry (SPEC-ADAPTER-CONTRACT-1 §6); this run
+  // does not rebuild, re-sign or re-pay it.
+  if (await outbox.get(intent.intent_digest)) {
+    const e = new Error("this intent is already in the outbox: single-use authority, never a second payment"); e.code = "SETTLE_REPLAY"; throw e;
+  }
   const prepared = await adapter.prepare(intent, { now });
   need(prepared && prepared.intent_id === intent.intent_digest, "prepare must key on the intent digest (idempotency key)");
   const pl = await adapter.payloads(prepared);
@@ -372,7 +415,7 @@ export async function settle({ adapter, intent, invoice, signer, outbox, now, is
   const { records, observation } = await adapter.reconcile({ intent, ref: submitted.ref });
   const phase = records.some((r) => EVIDENCE_CLASS_LADDER.indexOf(r.value_observed) >= MIN_VALUE_RANK && r.kind !== "attempt") ? "observed"
     : st?.phase === "failed" ? "failed" : "submitted";
-  const receipt = buildReceipt({ intent, invoice, descriptor, ref: submitted.ref, assertion: st?.assertion || null, records, observation, phase, issuedAt: issuedAt || now, adapterLocal: st?.adapter_local || null });
+  const receipt = buildReceipt({ intent, invoice, descriptor, ref: submitted.ref, assertion: st?.assertion || null, records, observation, phase, issuedAt: issuedAt || now, adapterLocal: st?.adapter_local || null, vendorOracles });
   return { descriptor, prepared, payloads: pl, submitted, status: st, records, observation, receipt };
 }
 
@@ -387,7 +430,7 @@ export function assertNeutral(value, terms, path = "$") {
   if (Array.isArray(value)) { value.forEach((v, i) => assertNeutral(v, terms, `${path}[${i}]`)); return true; }
   if (value && typeof value === "object") {
     for (const [k, v] of Object.entries(value)) {
-      if (k === "adapter_local") continue;
+      if (k === "adapter_local" && path === "$") continue;
       for (const t of terms) if (k.toLowerCase().includes(t.toLowerCase())) throw Object.assign(new Error(`vendor identifier "${t}" as key ${path}.${k}`), { code: "SETTLE_LEAK" });
       assertNeutral(v, terms, `${path}.${k}`);
     }

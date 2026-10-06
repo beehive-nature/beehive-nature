@@ -28,7 +28,7 @@ function b58(bytes) {
 const rawPub = (k) => k.export({ format: "der", type: "spki" }).subarray(-32);
 function keypair() { const { publicKey, privateKey } = generateKeyPairSync("ed25519"); return { address: b58(rawPub(publicKey)), privateKey }; }
 
-function devnet({ swapBytes = false, operators = 2 } = {}) {
+function devnet({ swapBytes = false, operators = 2, disagree = false } = {}) {
   const sent = new Map();
   const blockhash = b58(createHash("sha256").update("bh").digest());
   return {
@@ -40,7 +40,9 @@ function devnet({ swapBytes = false, operators = 2 } = {}) {
     evidence: async (s) => {
       let b64 = sent.get(s);
       if (swapBytes) { const t = Buffer.from(b64, "base64"); t[t.length - 1] ^= 1; b64 = t.toString("base64"); }
-      return { operators, evidence: { genesis_hash: GENESIS, status: { confirmationStatus: "finalized", err: null, slot: 123 }, transaction: { slot: 123, meta: { err: null, fee: 5000 }, transaction: [b64, "base64"] } } };
+      const ev = (slot) => ({ genesis_hash: GENESIS, status: { confirmationStatus: "finalized", err: null, slot }, transaction: { slot, meta: { err: null, fee: 5000 }, transaction: [b64, "base64"] } });
+      // one row per operator; a disagreeing operator reports another slot
+      return Array.from({ length: operators }, (_, i) => ({ operator: "op-" + i, evidence: ev(disagree && i === 1 ? 124 : 123) }));
     },
   };
 }
@@ -48,6 +50,7 @@ function devnet({ swapBytes = false, operators = 2 } = {}) {
 async function run(opts = {}) {
   const payer = keypair(), recipient = keypair();
   const rpc = devnet(opts);
+  if (opts.evidence) { const real = rpc.evidence; rpc.evidence = (s) => opts.evidence(s, real); }
   const adapter = createAdapter({ run: binaryRunner(BIN), rpc, payer: payer.address });
   const d = await adapter.network();
   const invoice = buildGenericInvoice({ jobId: "solana-native-1", issuedAt: NOW, lines: [{ asset: SOL, quotes: [{ quote_hash: "q-sol-1", amount_atto: "1000" }] }],
@@ -58,7 +61,7 @@ async function run(opts = {}) {
     privacy: { requirements: ["no-sdk-telemetry", "no-vendor-account"] }, refund: { policy: "refund-to-source" }, now: NOW });
   // the vault: signs exactly the bytes the adapter built, nothing else
   const signer = { sign: async (items) => items.map((i) => ({ signature_hex: edSign(null, Buffer.from(i.bytes_b64, "base64"), payer.privateKey).toString("hex") })) };
-  const outbox = { m: new Map(), persist: async (k, v) => outbox.m.set(k, v) };
+  const outbox = { m: new Map(), get: async (k) => outbox.m.get(k) || null, persist: async (k, v) => outbox.m.set(k, v) };
   const out = await settle({ adapter, intent, invoice, signer, outbox, now: NOW });
   return { ...out, intent, invoice, outbox };
 }
@@ -89,5 +92,15 @@ test("evidence whose bytes differ from the signed transaction is refused by the 
 
 test("one RPC operator is not finality: FINALITY-PENDING", { skip }, async () => {
   const r = await run({ operators: 1 });
+  assert.equal(r.receipt.reconciliation.conclusion, "FINALITY-PENDING");
+});
+
+test("two operators that disagree are one witness at most: FINALITY-PENDING", { skip }, async () => {
+  const r = await run({ operators: 2, disagree: true });
+  assert.equal(r.receipt.reconciliation.conclusion, "FINALITY-PENDING");
+});
+
+test("the same operator twice is still one operator", { skip }, async () => {
+  const r = await run({ evidence: async (s, real) => (await real(s)).map((x) => ({ ...x, operator: "op-0" })) });
   assert.equal(r.receipt.reconciliation.conclusion, "FINALITY-PENDING");
 });

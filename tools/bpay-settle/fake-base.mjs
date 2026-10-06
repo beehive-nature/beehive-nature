@@ -4,7 +4,7 @@
 // shown to go red. No network, no keys: addresses and hashes are derived
 // from labels with sha256.
 import { createHash } from "node:crypto";
-import { SEL, TOPIC, lc, addrWord, word, encodeTransfer, encodeSpend, decodeSpend, decodeApproveWithSignature, decodeTransfer, selector, encodePermission } from "./evm.mjs";
+import { SEL, ERR, TOPIC, lc, addrWord, word, encodeTransfer, encodeSpend, decodeSpend, decodeApproveWithSignature, decodeTransfer, selector, encodePermission } from "./evm.mjs";
 import { CHAINS, SPEND_PERMISSION_MANAGER } from "./adapters/smart-account-usdc.mjs";
 
 const h = (s) => createHash("sha256").update(s).digest("hex");
@@ -52,6 +52,10 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
         // unstable: the second reading round shows a different block (a reorg the harness must catch)
         if (sabotage.unstable && reads > 2) return { ...t.receipt, blockHash: "0x" + h("reorg"), logs: t.receipt.logs.map((l) => ({ ...l, data: "0x" + word(1) })) };
         if (sabotage.lyingHost === host) return { ...t.receipt, logs: [] };
+        // one host keeps everything else honest but claims block 0, so any finalized head "covers" it
+        if (sabotage.lyingBlockHost === host) return { ...t.receipt, blockNumber: "0x0" };
+        // one host shrinks the gas so the fee looks inside the bound
+        if (sabotage.lyingGasHost === host) return { ...t.receipt, gasUsed: "0x0" };
         return t.receipt;
       }
       case "eth_call": {
@@ -60,10 +64,17 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
         if (lc(to) === usdc && s === SEL.balanceOf) return "0x" + word(bal.get("0x" + lc(data).slice(-40)) || 0n);
         if (owners.has(lc(to)) && s === SEL.isOwnerAddress) return "0x" + word(owners.get(lc(to)).list.has("0x" + lc(data).slice(-40)) ? 1 : 0);
         if (owners.has(lc(to)) && s === SEL.nextOwnerIndex) return "0x" + word(owners.get(lc(to)).next);
+        // SpendPermissionManager as the real contract orders it: sender, then
+        // isValid (approved, not revoked) → UnauthorizedSpendPermission, then
+        // the cap → ExceededSpendPermission (revert data carries the selector)
+        if (lc(to) === spm && s === SEL.isValid) return "0x" + word(approved.has(keyOfIsValid(data)) ? 1 : 0);
         if (lc(to) === spm && s === SEL.spend) {
           const d = decodeSpend(data);
-          if (lc(from) !== lc(d.permission.spender)) throw new Error("execution reverted: unauthorized spender");
-          if (!sabotage.noCap && BigInt(d.value) > BigInt(d.permission.allowance)) throw new Error("execution reverted: ExceededSpendPermission");
+          if (lc(from) !== lc(d.permission.spender)) throw revert("0x" + "deadbeef");
+          if (!approved.has(key(d.permission))) throw revert(ERR.UnauthorizedSpendPermission);
+          if (sabotage.noCap) return "0x";
+          if (sabotage.wrongRevert) throw revert("0x" + "deadbeef");
+          if (approved.get(key(d.permission)) + BigInt(d.value) > BigInt(d.permission.allowance)) throw revert(ERR.ExceededSpendPermission + word(d.value) + word(d.permission.allowance));
           return "0x";
         }
         throw new Error(`execution reverted: fake has no ${s} on ${to}`);
@@ -71,11 +82,12 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
       default: throw new Error(`fake rpc: ${method}`);
     }
   }
+  const revert = (data) => Object.assign(new Error("execution reverted"), { data });
   const fetchFor = (host) => async (_url, init) => {
     const { id, method, params } = JSON.parse(init.body);
     if ((sabotage.downHosts || []).includes(host)) return { ok: false, status: 503, json: async () => ({}) };
-    try { return { ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id, result: rpc(host, method, params) }) }; }
-    catch (e) { return { ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id, error: { code: 3, message: e.message } }) }; }
+    try { const result = rpc(host, method, params); return { ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id, result }) }; }
+    catch (e) { return { ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id, error: { code: 3, message: e.message, ...(e.data ? { data: e.data } : {}) } }) }; }
   };
   const hosts = CHAINS[chainId].hosts.map((x) => ({ id: x.id, url: x.url }));
   const fetchFn = (url, init) => fetchFor(hosts.find((x) => x.url === url).id)(url, init);
@@ -88,6 +100,26 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
       const atto = sabotage.payWrongAmount ? (BigInt(toAtto6(p.amount)) + 1n).toString() : toAtto6(p.amount);
       if (sabotage.payAddsOwner) owners.get(lc(payer)).next++;
       if (sabotage.payNoTransfer) return { id: "0x" + h("phantom"), amount: p.amount, to: p.to };
+      if (sabotage.thirdPartyTransfer || sabotage.twoPayersInBundle) {
+        // a bundle carrying our (failed or successful) op, and a transfer to the
+        // merchant from someone else: with no op of their own (third party), or
+        // with a successful op of their own (two payers)
+        const other = addr("someone-else");
+        bal.set(lc(other), BigInt(atto)); move(other, p.to, atto);
+        const op = (sender, ok) => ({ address: ENTRYPOINT, topics: [TOPIC.UserOperationEvent, "0x" + h("userop:" + sender), "0x" + addrWord(sender), "0x" + addrWord(addr("paymaster"))], data: "0x" + word(1) + word(ok ? 1 : 0) + word(1) + word(1) });
+        const logs = sabotage.twoPayersInBundle
+          ? (move(payer, p.to, atto), [transferLog(payer, p.to, atto), op(payer, true), transferLog(other, p.to, atto), op(other, true)])
+          : [op(payer, false), transferLog(other, p.to, atto)];
+        const id = mine({ from: addr("bundler"), to: ENTRYPOINT, input: "0x765e827f" + encodeTransfer(p.to, atto).slice(2) + (p.dataSuffix || "0x").slice(2), logs });
+        return { id, amount: p.amount, to: p.to };
+      }
+      if (sabotage.otherPayerInBundle) {
+        const other = addr("someone-else");
+        bal.set(lc(other), BigInt(atto)); move(other, p.to, atto);
+        const op = (sender, ok) => ({ address: ENTRYPOINT, topics: [TOPIC.UserOperationEvent, "0x" + h("userop:" + sender), "0x" + addrWord(sender), "0x" + addrWord(addr("paymaster"))], data: "0x" + word(1) + word(ok ? 1 : 0) + word(1) + word(1) });
+        const id = mine({ from: addr("bundler"), to: ENTRYPOINT, input: "0x765e827f" + encodeTransfer(p.to, atto).slice(2) + (p.dataSuffix || "0x").slice(2), logs: [op(payer, false), transferLog(other, p.to, atto), op(other, true)] });
+        return { id, amount: p.amount, to: p.to };
+      }
       move(payer, p.to, atto);
       // a bundler sends the bundle; the user op is the payer's; a paymaster sponsors it
       const inner = encodeTransfer(p.to, atto) + (sabotage.dropSuffix ? "" : (p.dataSuffix || "0x").slice(2));
@@ -108,7 +140,7 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
       sdk.calls.push({ method: "requestSpendPermission", params: { ...req, provider: undefined } });
       const allowance = sabotage.widerGrant ? (req.allowance * 10n).toString() : req.allowance.toString();
       return { signature: "0x" + h("owner-signature"), permission: { account: req.account, spender: req.spender, token: req.token, allowance,
-        period: req.periodInDays * 86400, start: Math.floor(req.start.getTime() / 1000), end: Math.floor(req.end.getTime() / 1000), salt: req.salt, extraData: req.extraData } };
+        period: sabotage.shortPeriod ? 1 : req.periodInDays * 86400, start: Math.floor(req.start.getTime() / 1000), end: Math.floor(req.end.getTime() / 1000), salt: req.salt, extraData: req.extraData } };
     },
     async prepareSpendCallData(perm, amount, recipient) {
       const p = perm.permission;
@@ -116,12 +148,15 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
       if (!approved.has(key(p))) calls.push({ to: spm, data: SEL.approveWithSignature + word(0x40) + word(0x40 + 32 * (10 + Math.ceil((p.extraData.length - 2) / 64))) + encodePermission(p) + word(65) + "11".repeat(65) + "00".repeat(31), value: 0n });
       calls.push({ to: spm, data: encodeSpend(p, amount), value: 0n });
       calls.push({ to: p.token, data: encodeTransfer(recipient, amount), value: 0n });
+      if (sabotage.extraTransfer) calls.push({ to: p.token, data: encodeTransfer(recipient, amount), value: 0n });
       if (sabotage.extraOwnerCall) calls.push({ to: p.account, data: SEL.addOwnerAddress + addrWord(addr("vendor")), value: 0n });
       if (sabotage.approveAll) calls.push({ to: p.token, data: SEL.approve + addrWord(addr("vendor")) + "f".repeat(64), value: 0n });
       return calls;
     },
   };
   const key = (p) => [p.account, p.spender, p.token, p.allowance, p.salt].map(String).join("|").toLowerCase();
+  // isValid(permission): selector, head offset 0x20, then the tuple — decode by re-wrapping as a spend
+  const keyOfIsValid = (data) => key(decodeSpend(SEL.spend + "0".repeat(62) + "40" + "0".repeat(64) + lc(data).slice(74)).permission);
 
   // ── the agent's own signer (spend route) ──
   const agent = {

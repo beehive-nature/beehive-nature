@@ -32,7 +32,7 @@
 //     self-reported assertion, compared three ways, and never closes an
 //     obligation.
 import { toAtto, fromAtto, CONTRACT, VERBS } from "../../../scripts/lib/bpay-settle.mjs";
-import { SEL, isAddr, lc, decodeTransfer, decodeSpend, decodeApproveWithSignature, recordsFromObservation, payerNativeFee, encodeSpend, addrWord, wordInt } from "../evm.mjs";
+import { SEL, ERR, isAddr, lc, decodeTransfer, decodeSpend, decodeApproveWithSignature, recordsFromObservation, payerNativeFee, encodeSpend, encodeIsValid, addrWord, wordInt } from "../evm.mjs";
 
 // Public chain facts, each read back from two RPC operators on 2026-10-05
 // (symbol=USDC decimals=6; SpendPermissionManager code 12610 bytes on both
@@ -74,33 +74,54 @@ export function permissionRequestFor(intent, { account, spender, chainId, now })
 }
 
 // The permission the wallet returned must be EXACTLY the one requested. A
-// wallet that hands back a wider allowance, another spender, a later end or
-// a different token has substituted the authority.
+// wallet that hands back a wider allowance, another spender, a later end, a
+// shorter period (the cap would reset inside the window) or a different
+// token has substituted the authority.
 export function checkGrant(granted, req) {
   const p = granted && granted.permission;
   if (!p) refuse("NO_GRANT", "the wallet returned no permission");
-  const want = { account: lc(req.account), spender: lc(req.spender), token: lc(req.token), allowance: req.allowance.toString(), end: Math.floor(req.end.getTime() / 1000), salt: req.salt, extraData: lc(req.extraData) };
-  const have = { account: lc(p.account), spender: lc(p.spender), token: lc(p.token), allowance: String(p.allowance), end: Number(p.end), salt: String(p.salt), extraData: lc(p.extraData) };
+  const start = Math.floor(req.start.getTime() / 1000), end = Math.floor(req.end.getTime() / 1000);
+  const want = { account: lc(req.account), spender: lc(req.spender), token: lc(req.token), allowance: req.allowance.toString(), period: req.periodInDays * 86400,
+    start, end, salt: req.salt, extraData: lc(req.extraData) };
+  const have = { account: lc(p.account), spender: lc(p.spender), token: lc(p.token), allowance: String(p.allowance), period: Number(p.period),
+    start: Number(p.start), end: Number(p.end), salt: String(p.salt), extraData: lc(p.extraData) };
   for (const k of Object.keys(want)) if (want[k] !== have[k]) refuse("GRANT_SUBSTITUTED", `the granted permission differs from the request at ${k}`);
+  // one period must cover the whole window, or the allowance refills inside it
+  if (have.period < have.end - have.start) refuse("GRANT_SUBSTITUTED", "the permission's period is shorter than its window: the cap would reset");
   return true;
 }
 
-// The allowlist. Every call is one of three shapes, or it does not leave.
-export function guardCalls(calls, { permission, recipient, owedAtto, usdc }) {
+const PERM_FIELDS = ["account", "spender", "token", "allowance", "period", "start", "end", "salt", "extraData"];
+const samePermission = (p, g) => PERM_FIELDS.every((k) => k === "account" || k === "spender" || k === "token" || k === "extraData" ? lc(p[k]) === lc(g[k]) : String(p[k]) === String(g[k]));
+
+// The allowlist, and the shape. A spend run is exactly: at most one
+// approveWithSignature, then one spend of the owed amount, then one transfer of
+// that amount to the recipient — in that order, nothing else. Any call that
+// does not decode exactly is refused; nothing is re-read leniently.
+export function guardCalls(calls, ctx) {
+  try { return guardCallsStrict(calls, ctx); }
+  catch (e) { if (/^REFUSED_/.test(e.code || "")) throw e; const r = new Error(`refused: ${String(e.message).slice(0, 120)}`); r.code = "REFUSED_CALL"; throw r; }
+}
+function guardCallsStrict(calls, { permission, recipient, owedAtto, usdc }) {
+  if (!Array.isArray(calls)) refuse("REFUSED_SHAPE", "calls must be a list");
+  const shape = [];
+  let spent = null, moved = null;
   for (const c of calls) {
     if (c.authorizationList || c.authorization || (c.capabilities && c.capabilities.eip7702))
       refuse("REFUSED_7702", "EIP-7702 delegation refused: no verified EIP7702Proxy is pinned, and the implementation is never a delegation target");
-    if (BigInt(c.value || 0) !== 0n) refuse("REFUSED_VALUE", "a settlement call carries native value");
-    const sel = lc(c.data || "0x").slice(0, 10);
-    if (REFUSED_SELECTORS[sel] && !(lc(c.to) === lc(usdc) && sel === SEL.transfer))
+    if (!/^(0x0*|0|)$/i.test(String(c.value ?? "0")) && BigInt(c.value) !== 0n) refuse("REFUSED_VALUE", "a settlement call carries native value");
+    if (typeof c.data !== "string" || !isAddr(c.to)) refuse("REFUSED_CALL", "a call without a target or calldata");
+    const sel = lc(c.data).slice(0, 10);
+    if (REFUSED_SELECTORS[sel])
       refuse("REFUSED_AUTHORITY", `refused ${REFUSED_SELECTORS[sel]}(): settlement never changes owners, upgrades the account, replays across chains or grants an allowance`);
     if (lc(c.to) === lc(SPEND_PERMISSION_MANAGER)) {
       const d = sel === SEL.spend ? decodeSpend(c.data) : sel === SEL.approveWithSignature ? decodeApproveWithSignature(c.data) : null;
       if (!d) refuse("REFUSED_CALL", `SpendPermissionManager call ${sel} is not approveWithSignature or spend`);
-      const p = d.permission, g = permission.permission;
-      for (const k of ["account", "spender", "token"]) if (lc(p[k]) !== lc(g[k])) refuse("REFUSED_CALL", `call names another permission (${k})`);
-      if (String(p.allowance) !== String(g.allowance) || String(p.salt) !== String(g.salt) || lc(p.extraData) !== lc(g.extraData)) refuse("REFUSED_CALL", "call names another permission");
-      if (d.value !== undefined && BigInt(d.value) !== BigInt(owedAtto)) refuse("REFUSED_AMOUNT", `spend of ${d.value} ≠ owed ${owedAtto}`);
+      if (!samePermission(d.permission, permission.permission)) refuse("REFUSED_CALL", "call names another permission than the one granted");
+      if (sel === SEL.spend) {
+        if (BigInt(d.value) !== BigInt(owedAtto)) refuse("REFUSED_AMOUNT", `spend of ${d.value} ≠ owed ${owedAtto}`);
+        spent = d.value; shape.push("spend");
+      } else shape.push("approve");
       continue;
     }
     if (lc(c.to) === lc(usdc)) {
@@ -108,11 +129,14 @@ export function guardCalls(calls, { permission, recipient, owedAtto, usdc }) {
       if (!t) refuse("REFUSED_CALL", `token call ${sel} is not transfer`);
       if (lc(t.to) !== lc(recipient)) refuse("REFUSED_RECIPIENT", "transfer to someone the authority does not name");
       if (BigInt(t.atto) !== BigInt(owedAtto)) refuse("REFUSED_AMOUNT", `transfer of ${t.atto} ≠ owed ${owedAtto}`);
+      moved = { atto: t.atto, to: t.to }; shape.push("transfer");
       continue;
     }
     refuse("REFUSED_CALL", `call to ${c.to} is outside this settlement`);
   }
-  return true;
+  const s = shape.join(",");
+  if (s !== "approve,spend,transfer" && s !== "spend,transfer") refuse("REFUSED_SHAPE", `call shape ${s} is not [approve,] spend, transfer`);
+  return { asset_atto: moved.atto, recipient: moved.to, spent };
 }
 
 // createAdapter({ chainId, route, reader, sdk, account?, spender?, maxNativeFeeAtto })
@@ -150,6 +174,9 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
   };
 
   const adapter = {
+    // the reader is exposed so a harness can prove the evidence comes from the
+    // reader it controlled, not one the adapter chose
+    reader,
     async network() { return descriptor; },
 
     async balance({ address, asset }) {
@@ -173,17 +200,19 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
       return { ...base, rail: { permission, recipient: intent.authority.recipient, owed: intent.invoice.owed_atto } };
     },
 
+    // `spend` is what the payloads actually move, decoded from them — never
+    // copied from the intent — so the kernel's check compares two things.
     async payloads(prepared) {
-      const { intent } = prepared;
-      const spend = { asset_atto: intent.invoice.owed_atto, recipient: intent.authority.recipient, max_native_fee_atto: String(maxNativeFeeAtto) };
       if (route === "pay") {
-        return { mode: "wallet-submits", spend, items: [{ kind: "wallet-request", request: "pay", params: prepared.rail,
-          summary: `pay ${prepared.rail.amount} USDC to ${prepared.rail.to}` }] };
+        const r = prepared.rail;
+        return { mode: "wallet-submits", spend: { asset_atto: toAtto(r.amount, 6), recipient: r.to, max_native_fee_atto: String(maxNativeFeeAtto) },
+          items: [{ kind: "wallet-request", request: "pay", params: r, summary: `pay ${r.amount} USDC to ${r.to}` }] };
       }
       const calls = await sdk.prepareSpendCallData(prepared.rail.permission, BigInt(prepared.rail.owed), prepared.rail.recipient);
-      guardCalls(calls, { permission: prepared.rail.permission, recipient: prepared.rail.recipient, owedAtto: prepared.rail.owed, usdc: chain.usdc });
-      return { mode: "wallet-submits", spend, items: calls.map((c) => ({ kind: "evm-call", to: c.to, data: c.data, value: "0x0",
-        summary: lc(c.to) === lc(chain.usdc) ? `forward ${fromAtto(prepared.rail.owed, 6)} USDC to ${prepared.rail.recipient}` : `spend permission call ${lc(c.data).slice(0, 10)}` })) };
+      const moved = guardCalls(calls, { permission: prepared.rail.permission, recipient: prepared.rail.recipient, owedAtto: prepared.rail.owed, usdc: chain.usdc });
+      return { mode: "wallet-submits", spend: { asset_atto: moved.asset_atto, recipient: moved.recipient, max_native_fee_atto: String(maxNativeFeeAtto) },
+        items: calls.map((c) => ({ kind: "evm-call", to: c.to, data: c.data, value: "0x0",
+          summary: lc(c.to) === lc(chain.usdc) ? `forward ${fromAtto(prepared.rail.owed, 6)} USDC to ${prepared.rail.recipient}` : `spend permission call ${lc(c.data).slice(0, 10)}` })) };
     },
 
     async combine() { refuse("UNSUPPORTED", "wallet-submits: the wallet signs and submits; there are no detached signatures to combine"); },
@@ -209,10 +238,11 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
 
     async status(ref) {
       if (route !== "pay" || !sdk.getPaymentStatus) return { phase: "submitted", assertion: null, adapter_local: sent.get(lc(ref)) || null };
-      let s;
+      let s, amount = null;
       try { s = await sdk.getPaymentStatus({ id: ref, testnet: chain.testnet }); } catch (e) { return { phase: "unknown", assertion: null, adapter_local: { status_error: String(e.message || e).slice(0, 120) } }; }
+      try { amount = s.amount ? toAtto(s.amount, 6) : null; } catch { amount = "unparseable"; } // a vendor quirk never blocks the receipt
       const phase = s.status === "completed" ? "observed" : s.status === "failed" ? "failed" : s.status === "pending" ? "submitted" : "unknown";
-      return { phase, assertion: { status: s.status, amount_atto: s.amount ? toAtto(s.amount, 6) : null, recipient: s.recipient ? lc(s.recipient) : null, sender: s.sender ? lc(s.sender) : null },
+      return { phase, assertion: { status: s.status, amount_atto: amount, recipient: s.recipient ? lc(s.recipient) : null, sender: s.sender ? lc(s.sender) : null },
         adapter_local: sent.get(lc(ref)) || null };
     },
 
@@ -221,19 +251,31 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
     // chain gets them from the receipt's adapter_local; nothing else is needed.
     async reconcile({ intent, ref, related }) {
       const obs = await reader.observeTx(ref, chain.usdc);
-      const records = recordsFromObservation(obs, { caip2: chain.caip2, asset: chain.asset, recipient: intent.authority.recipient });
-      const payer = route === "pay" ? (records[0]?.from || null) : spender;
+      // the payer is known for the agent (the spender) and, when the wallet shared
+      // it, for the person (the account); otherwise attribution rests on the binding
+      const known = route === "pay" ? (isAddr(account) ? account : null) : spender;
+      const records = recordsFromObservation(obs, { caip2: chain.caip2, asset: chain.asset, recipient: intent.authority.recipient, payer: known });
+      const payer = known || (records.find((r) => r.kind === "settlement")?.from ?? null);
       const others = route === "pay" ? [] : (related || sent.get(lc(ref))?.txs || []).filter((h) => lc(h) !== lc(ref));
       const otherObs = [];
       for (const h of others) otherObs.push(await reader.observeTx(h, chain.usdc));
+      // the fee is the whole run's; a run transaction nobody can read leaves it unknown, never 0
       let fee = obs.found && payer ? payerNativeFee(obs, payer) : null;
-      if (fee) for (const o of otherObs) if (o.found) fee = { atto: (BigInt(fee.atto) + BigInt(payerNativeFee(o, payer).atto)).toString(), basis: fee.basis + "+run" };
+      const feeIncomplete = otherObs.some((o) => !o.found);
+      if (fee && feeIncomplete) fee = null;
+      else if (fee) for (const o of otherObs) fee = { atto: (BigInt(fee.atto) + BigInt(payerNativeFee(o, payer).atto)).toString(), basis: fee.basis + "+run" };
       // pay: the attribution suffix in the executed calldata; spend: the
-      // authority hash (the permission's extraData) in the spend call
+      // authority hash (the permission's extraData) in the spend call. Only
+      // calldata the agreeing hosts returned identically counts.
       const binding = route === "pay" ? bindSuffix(intent).slice(2) : hex32(intent.authority_hash).slice(2);
-      const inputs = [obs, ...otherObs].filter((o) => o.found).map((o) => o.input || "");
+      const inputs = [obs, ...otherObs].filter((o) => o.found).map((o) => o.input);
+      const bound = !obs.found ? null : inputs.some((i) => typeof i === "string" && i.includes(binding)) ? true : inputs.some((i) => i === null) ? null : false;
+      // an unknown payer AND no observed binding: whoever paid the recipient in
+      // this transaction cannot be shown to be this invoice's payer
+      if (!known && bound !== true && records.some((r) => r.kind === "settlement"))
+        records.splice(0, records.length, { kind: "attempt", asset: chain.asset, retryability: "human-gate", txRef: `${chain.caip2}:${lc(ref)}`, value_observed: "tx-hash", unattributed: true });
       return { records, observation: { oracle: "independent:" + reader.hostIds.join("+"), quorum: obs.quorum || 0, finalized: !!obs.finalized, block: obs.blockNumber ?? null, payer, payer_native_fee: fee,
-        intent_bound_on_chain: obs.found ? inputs.some((i) => i.includes(binding)) : null, related: others } };
+        fee_incomplete: feeIncomplete, intent_bound_on_chain: bound, related: others } };
     },
 
     // ── the owner's one gesture (spend-permission route) ──
@@ -259,12 +301,19 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
       if (!code || code === "0x") return null;
       return wordInt(lc(await reader.ethCall(addr, SEL.nextOwnerIndex)).replace(/^0x/, "").padStart(64, "0").slice(-64)).toString();
     },
-    // Does the contract itself refuse a spend above the cap? Simulated from the
-    // spender with eth_call: no transaction, no money.
+    // Does the CONTRACT refuse a spend above the cap? Run after the permission
+    // is approved on chain, because SpendPermissionManager checks validity and
+    // the window before the cap: an unapproved probe reverts for the wrong
+    // reason. The permission must read as valid, and every host must revert the
+    // over-cap spend with ExceededSpendPermission itself — any other revert is
+    // not evidence of a cap. Simulated with eth_call: no transaction, no money.
     async capProbe() {
       const p = permission.permission;
-      const over = BigInt(p.allowance) + 1n;
-      return reader.simulate(spender, SPEND_PERMISSION_MANAGER, encodeSpend({ ...p }, over));
+      const valid = await reader.simulate(spender, SPEND_PERMISSION_MANAGER, encodeIsValid(p));
+      const isValid = valid.succeeded === reader.hostIds.length && valid.rows.every((r) => r.ok && wordInt(lc(r.v).replace(/^0x/, "").padStart(64, "0").slice(-64)) === 1n);
+      const over = await reader.simulate(spender, SPEND_PERMISSION_MANAGER, encodeSpend({ ...p }, BigInt(p.allowance) + 1n));
+      const capReverts = over.reverts.filter((r) => r.selector === ERR.ExceededSpendPermission).length;
+      return { permission_valid: isValid, hosts: reader.hostIds.length, succeeded: over.succeeded, cap_reverts: capReverts, other_reverts: over.reverts.length - capReverts };
     },
   };
   return adapter;
