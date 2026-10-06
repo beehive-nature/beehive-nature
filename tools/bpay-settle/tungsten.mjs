@@ -25,6 +25,35 @@
 //   kill.5-no-vendor-leak         no vendor identifier reaches the kernel's objects
 import { buildAuthority, buildIntent, settle, reconcileReceipt, assertNeutral, descriptorHash, digest } from "../../scripts/lib/bpay-settle.mjs";
 import { canonicalBytes } from "../../scripts/lib/bpay-invoice-generic.mjs";
+import { SEL, ERR, addrWord, wordInt, encodeIsValid, encodeSpend } from "./evm.mjs";
+import { SPEND_PERMISSION_MANAGER } from "./adapters/smart-account-usdc.mjs";
+
+// ── the harness's own chain probes ──────────────────────────────────────────
+// Read through the harness's reader, never asked of the adapter under test,
+// and only values every operator returned identically count.
+const asWord = (v) => wordInt(String(v).replace(/^0x/, "").padStart(64, "0").slice(-64));
+// "0x" from every operator = no code at the account (counterfactual)
+async function spenderIsOwner(reader, account, spender) {
+  const v = await reader.callAgreed(account, SEL.isOwnerAddress + addrWord(spender));
+  if (v === null) return { readable: false };
+  if (v === "0x") return { readable: true, deployed: false, owner: null };
+  return { readable: true, deployed: true, owner: asWord(v) === 1n };
+}
+async function ownerIndex(reader, account) {
+  const v = await reader.callAgreed(account, SEL.nextOwnerIndex);
+  return v === null || v === "0x" ? null : asWord(v).toString();
+}
+// Does the CONTRACT refuse a spend above the cap? Run after approval, because
+// SpendPermissionManager checks validity and the window before the cap: an
+// unapproved probe reverts for another reason. Every operator must revert the
+// over-cap spend with ExceededSpendPermission itself. eth_call only: no money.
+async function capProbe(reader, permission) {
+  const p = permission.permission;
+  const valid = await reader.callAgreed(SPEND_PERMISSION_MANAGER, encodeIsValid(p), p.spender);
+  const over = await reader.simulate(p.spender, SPEND_PERMISSION_MANAGER, encodeSpend({ ...p }, BigInt(p.allowance) + 1n));
+  const capReverts = over.reverts.filter((r) => r.selector === ERR.ExceededSpendPermission).length;
+  return { permission_valid: valid !== null && asWord(valid) === 1n, hosts: reader.hostIds.length, succeeded: over.succeeded, cap_reverts: capReverts, other_reverts: over.reverts.length - capReverts };
+}
 
 export const TUNGSTEN_SCHEMA = "bnr.settle-tungsten/1";
 export const VERDICTS = ["PASS", "PASS_WITH_LIMITATIONS", "FAIL", "INCONCLUSIVE"];
@@ -107,19 +136,20 @@ export async function runTungsten(cfg) {
     intent = buildIntent({ invoice, asset, descriptor, authority, quote: { commitment: invoice.commitment.digest, expires_at: quoteExpiresAt },
       privacy: { requirements: privacy }, proof: {}, refund: { policy: "refund-to-source" }, meter: { evidence_ref: null }, now });
 
-    let ownerBefore = null;
+    let ownerBefore = null, granted = null;
     if (route === "spend-permission") {
-      try { await adapter.grantPermission(intent, { provider, now }); ob("authority.grant-exact", true); }
+      try { granted = await adapter.grantPermission(intent, { provider, now }); ob("authority.grant-exact", true); }
       catch (e) {
         if (e.code === "GRANT_SUBSTITUTED" || e.code === "NO_GRANT") { ob("authority.grant-exact", false, e.code); ob("kill.2-cap-bounded", false, "the granted permission is not the requested bound"); throw Object.assign(e, { tungstenStop: true }); }
         stop("grant-not-completed", `the owner's grant did not complete: ${String(e.message).slice(0, 120)}`);
       }
-      const own = await adapter.spenderIsOwner();
+      const own = await spenderIsOwner(reader, granted.permission.account, granted.permission.spender);
+      if (!own.readable) stop("owner-unreadable", "the operators did not agree on whether the spender is an owner");
       if (!own.deployed) findings.push({ id: "account-counterfactual", severity: "harness", text: "the owner account is not deployed; whether the spender is an owner cannot be read" });
       else ob("kill.1-no-owner-authority", own.owner === false, { spender_is_owner: own.owner });
       if (own.owner) stop("agent-is-owner", "the agent owns the account: nothing settles under that authority", "blocker");
     } else {
-      ownerBefore = await adapter.ownerIndex(cfg.payerAccount);
+      ownerBefore = await ownerIndex(reader, cfg.payerAccount);
     }
 
     // 4 EXECUTE — the kernel's run, the vendor only behind the adapter
@@ -131,9 +161,9 @@ export async function runTungsten(cfg) {
       // the vendor flow, the wallet or the adapter produced something outside
       // the authority: the route cannot settle without wider power
       if (code === "REFUSED_AUTHORITY" || code === "REFUSED_7702") ob("kill.1-no-owner-authority", false, code);
-      else if (code === "SETTLE_REFUSED" && /own witness/.test(e.message)) ob("kill.3-vendor-not-sole-proof", false, e.message.slice(0, 120));
-      else if (/^REFUSED_/.test(code) || code === "SETTLE_REFUSED") ob("kill.2-cap-bounded", false, `${code}: ${String(e.message).slice(0, 120)}`);
-      else throw e;
+      else if (code === "SETTLE_FALSE_EVIDENCE") ob("kill.3-vendor-not-sole-proof", false, e.message.slice(0, 120));
+      else if (/^REFUSED_/.test(code) || code === "SETTLE_OVER_AUTHORITY") ob("kill.2-cap-bounded", false, `${code}: ${String(e.message).slice(0, 120)}`);
+      else throw e; // SETTLE_REFUSED / SETTLE_REPLAY are the caller's or the harness's, never a verdict on the vendor
       throw Object.assign(e, { tungstenStop: true });
     }
     receipt = run.receipt;
@@ -154,7 +184,7 @@ export async function runTungsten(cfg) {
     if (route === "pay") {
       if (capture.account && String(capture.account).toLowerCase() !== String(cfg.payerAccount).toLowerCase())
         findings.push({ id: "paid-from-another-account", severity: "blocker", text: "the chain shows the payment from an account other than the payer's" });
-      const after = await adapter.ownerIndex(cfg.payerAccount);
+      const after = await ownerIndex(reader, cfg.payerAccount);
       // unreadable before or after is not a pass: a counterfactual account deployed by this very payment could carry any owner
       if (ownerBefore === null || after === null) findings.push({ id: "owner-index-unreadable", severity: "harness", text: "the payer account's owner index could not be read both before and after" });
       else ob("kill.1-no-owner-authority", ownerBefore === after, { owner_index_before: ownerBefore, owner_index_after: after });
@@ -162,9 +192,11 @@ export async function runTungsten(cfg) {
       ob("kill.2-cap-bounded", capture.settled_atto === capture.requested_atto, { requested: capture.requested_atto, settled: capture.settled_atto });
     } else {
       // the cap is the CONTRACT's: after approval, an over-cap spend must revert with the cap error on every host
-      const probe = await adapter.capProbe();
-      ob("control.permission-live", probe.permission_valid, { permission_valid: probe.permission_valid });
-      ob("kill.2-cap-bounded", probe.succeeded === 0 && probe.cap_reverts === probe.hosts && probe.other_reverts === 0, probe);
+      // a permission that does not read as valid after settling means the probe
+      // cannot reach the cap check: that touches kill.2 only, never the verdict on the rest
+      const probe = await capProbe(reader, granted);
+      if (!probe.permission_valid) findings.push({ id: "cap-probe-unreachable", severity: "harness", text: "the permission does not read as valid on every operator after settling, so the over-cap probe cannot reach the cap check" });
+      else ob("kill.2-cap-bounded", probe.succeeded === 0 && probe.cap_reverts === probe.hosts && probe.other_reverts === 0, probe);
     }
 
     // 6 READ — value evidence from OUR reader, at quorum

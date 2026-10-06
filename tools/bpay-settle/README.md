@@ -69,17 +69,17 @@ The honest fake passes with limitations, and those limitations are stated from s
 - The spend-permission helpers send telemetry, and there is no switch to turn it off.
 - On the pay route the cap is the person's approval of that one payment, not a standing limit.
 
-Controls run before anything is paid. The adapter must read through the harness's own reader, every operator must be up and on the right chain, and the token must read. If any control fails, nothing settles and the verdict is INCONCLUSIVE.
+Controls run before anything is paid. The adapter must read through the harness's own reader, every operator must be up and on the right chain, and the token must read. If any control fails, nothing settles and the verdict is INCONCLUSIVE. The owner and cap probes are the harness's own chain reads, never questions put to the adapter, and they count only values every operator returned identically.
 
 At settle time the kernel does three things:
 
 - It rebuilds the intent from the invoice and the adapter, and rechecks both expiries.
-- It refuses to settle the same intent a second time.
+- It refuses a second settlement under the same authority, even through a freshly built intent. The outbox claim is put-if-absent, so two concurrent runs pay once.
 - It refuses an authority whose hash is not the signed one. The signing itself belongs to the signed-authorization lane.
 
 Receipt digests are unkeyed. A forger who recomputes them is caught by re-reading the chain (`rebuiltRecords`) or by an anchor (`expectedDigest`).
 
-Each kill condition has a sabotage test that makes it go red. `node prove.mjs` disables each of 31 guards in turn, and the suite fails every time.
+Each kill condition has a sabotage test that makes it go red. `node prove.mjs` disables each of 36 guards in turn, and the suite fails every time.
 
 ## Differential against our rails
 
@@ -92,7 +92,7 @@ Each kill condition has a sabotage test that makes it go red. `node prove.mjs` d
 
 ## Running it
 
-- `node --test bpay-settle.test.mjs` runs 47 tests against the fake chain (CI static job).
+- `node --test bpay-settle.test.mjs` runs 53 tests against the fake chain (CI static job).
 - `node prove.mjs` runs the mutation proof (CI static job).
 - `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs 6 tests against the real binary (CI test job, after the workspace build).
 - A live run on Base Sepolia needs two founder steps: a Base Account passkey, and test USDC in it. Nothing in this directory moves money on its own.

@@ -29,6 +29,41 @@ export const SOL = DEVNET + "/slip44:501"; // CAIP-19 native SOL
 
 function refuse(code, msg) { const e = new Error(msg); e.code = code; throw e; }
 
+// The legacy message the bench built, read back: what it moves, to whom, from
+// whom. The kernel compares THIS with the intent, so the check is not the
+// intent compared with itself. Exactly one System Program transfer, or refuse.
+const B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+function b58(bytes) {
+  let n = BigInt("0x" + (Buffer.from(bytes).toString("hex") || "0")), out = "";
+  while (n > 0n) { out = B58[Number(n % 58n)] + out; n /= 58n; }
+  for (const b of bytes) { if (b !== 0) break; out = "1" + out; }
+  return out;
+}
+export function decodeSystemTransfer(message) {
+  let i = 0;
+  const take = (n) => { if (i + n > message.length) refuse("BAD_MESSAGE", "message runs short"); const v = message.subarray(i, i + n); i += n; return v; };
+  const shortvec = () => { let len = 0, shift = 0; for (;;) { const b = take(1)[0]; len |= (b & 0x7f) << shift; if (!(b & 0x80)) return len; shift += 7; if (shift > 14) refuse("BAD_MESSAGE", "shortvec too long"); } };
+  if (message[0] & 0x80) refuse("BAD_MESSAGE", "versioned messages are not this bench's");
+  take(3); // header
+  const keys = Array.from({ length: shortvec() }, () => take(32));
+  take(32); // recent blockhash
+  const transfers = [];
+  for (let n = shortvec(); n > 0; n--) {
+    const program = keys[take(1)[0]];
+    const accounts = Array.from({ length: shortvec() }, () => take(1)[0]);
+    const data = take(shortvec());
+    if (!program) refuse("BAD_MESSAGE", "program index outside the keys");
+    // System Program = 32 zero bytes; Transfer = u32 LE 2, then u64 LE lamports
+    if (program.every((b) => b === 0) && data.length === 12 && data.readUInt32LE(0) === 2) {
+      if (accounts.length !== 2 || !keys[accounts[0]] || !keys[accounts[1]]) refuse("BAD_MESSAGE", "transfer accounts outside the keys");
+      transfers.push({ from: b58(keys[accounts[0]]), to: b58(keys[accounts[1]]), lamports: data.readBigUInt64LE(4).toString() });
+    }
+  }
+  if (i !== message.length) refuse("BAD_MESSAGE", "trailing bytes after the instructions");
+  if (transfers.length !== 1) refuse("BAD_MESSAGE", `expected exactly one SOL transfer, found ${transfers.length}`);
+  return transfers[0];
+}
+
 export function binaryRunner(bin) {
   return (command, input) => {
     const r = spawnSync(bin, [command], { input: JSON.stringify(input), encoding: "utf8", timeout: 30000 });
@@ -93,8 +128,11 @@ export function createAdapter({ run, rpc, payer, path = "m/44'/501'/0'" }) {
     async payloads(prepared) {
       const bytes = Buffer.from(prepared.rail.message_base64, "base64");
       const { intent } = prepared;
+      const moved = decodeSystemTransfer(bytes);
+      if (moved.from !== payer) refuse("BAD_MESSAGE", "the message pays from another account than this payer");
+      // the fee bound is the bench's own: verify and reconcile refuse a fee above max_fee_lamports
       return { mode: "shell-submits",
-        spend: { asset_atto: intent.invoice.owed_atto, recipient: intent.authority.recipient, max_native_fee_atto: intent.authority.max_native_fee_atto },
+        spend: { asset_atto: moved.lamports, recipient: moved.to, max_native_fee_atto: intent.authority.max_native_fee_atto },
         items: [{ kind: "sign-bytes", signer: payer, bytes_b64: prepared.rail.message_base64, digest: "sha256:" + createHash("sha256").update(bytes).digest("hex"),
           summary: `send ${intent.invoice.owed_atto} lamports to ${intent.authority.recipient}` }] };
     },

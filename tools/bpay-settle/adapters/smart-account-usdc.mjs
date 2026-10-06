@@ -32,7 +32,7 @@
 //     self-reported assertion, compared three ways, and never closes an
 //     obligation.
 import { toAtto, fromAtto, CONTRACT, VERBS } from "../../../scripts/lib/bpay-settle.mjs";
-import { SEL, ERR, isAddr, lc, decodeTransfer, decodeSpend, decodeApproveWithSignature, recordsFromObservation, payerNativeFee, encodeSpend, encodeIsValid, addrWord, wordInt } from "../evm.mjs";
+import { SEL, isAddr, lc, decodeTransfer, decodeSpend, decodeApproveWithSignature, recordsFromObservation, payerNativeFee } from "../evm.mjs";
 
 // Public chain facts, each read back from two RPC operators on 2026-10-05
 // (symbol=USDC decimals=6; SpendPermissionManager code 12610 bytes on both
@@ -261,15 +261,17 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
       for (const h of others) otherObs.push(await reader.observeTx(h, chain.usdc));
       // the fee is the whole run's; a run transaction nobody can read leaves it unknown, never 0
       let fee = obs.found && payer ? payerNativeFee(obs, payer) : null;
-      const feeIncomplete = otherObs.some((o) => !o.found);
+      const agreed = (o) => o.found && o.quorum >= 2 && !o.disagree;
+      const feeIncomplete = otherObs.some((o) => !agreed(o));
       if (fee && feeIncomplete) fee = null;
       else if (fee) for (const o of otherObs) fee = { atto: (BigInt(fee.atto) + BigInt(payerNativeFee(o, payer).atto)).toString(), basis: fee.basis + "+run" };
       // pay: the attribution suffix in the executed calldata; spend: the
       // authority hash (the permission's extraData) in the spend call. Only
       // calldata the agreeing hosts returned identically counts.
       const binding = route === "pay" ? bindSuffix(intent).slice(2) : hex32(intent.authority_hash).slice(2);
-      const inputs = [obs, ...otherObs].filter((o) => o.found).map((o) => o.input);
-      const bound = !obs.found ? null : inputs.some((i) => typeof i === "string" && i.includes(binding)) ? true : inputs.some((i) => i === null) ? null : false;
+      const inputs = [obs, ...otherObs].filter(agreed).map((o) => o.input);
+      const bound = !obs.found ? null : inputs.some((i) => typeof i === "string" && i.includes(binding)) ? true
+        : (!agreed(obs) || otherObs.some((o) => !agreed(o)) || inputs.some((i) => i === null)) ? null : false;
       // an unknown payer AND no observed binding: whoever paid the recipient in
       // this transaction cannot be shown to be this invoice's payer
       if (!known && bound !== true && records.some((r) => r.kind === "settlement"))
@@ -288,33 +290,6 @@ export function createAdapter({ chainId, route, reader, sdk, account, spender, m
       return g;
     },
 
-    // ── money-free checks the tungsten run reads from the chain ──
-    // Is the agent an owner of the account? (must be false)
-    async spenderIsOwner() {
-      const code = await reader.code(account);
-      if (!code || code === "0x") return { deployed: false, owner: null };
-      const r = await reader.ethCall(account, SEL.isOwnerAddress + addrWord(spender));
-      return { deployed: true, owner: wordInt(lc(r).replace(/^0x/, "").padStart(64, "0").slice(-64)) === 1n };
-    },
-    async ownerIndex(addr) {
-      const code = await reader.code(addr);
-      if (!code || code === "0x") return null;
-      return wordInt(lc(await reader.ethCall(addr, SEL.nextOwnerIndex)).replace(/^0x/, "").padStart(64, "0").slice(-64)).toString();
-    },
-    // Does the CONTRACT refuse a spend above the cap? Run after the permission
-    // is approved on chain, because SpendPermissionManager checks validity and
-    // the window before the cap: an unapproved probe reverts for the wrong
-    // reason. The permission must read as valid, and every host must revert the
-    // over-cap spend with ExceededSpendPermission itself — any other revert is
-    // not evidence of a cap. Simulated with eth_call: no transaction, no money.
-    async capProbe() {
-      const p = permission.permission;
-      const valid = await reader.simulate(spender, SPEND_PERMISSION_MANAGER, encodeIsValid(p));
-      const isValid = valid.succeeded === reader.hostIds.length && valid.rows.every((r) => r.ok && wordInt(lc(r.v).replace(/^0x/, "").padStart(64, "0").slice(-64)) === 1n);
-      const over = await reader.simulate(spender, SPEND_PERMISSION_MANAGER, encodeSpend({ ...p }, BigInt(p.allowance) + 1n));
-      const capReverts = over.reverts.filter((r) => r.selector === ERR.ExceededSpendPermission).length;
-      return { permission_valid: isValid, hosts: reader.hostIds.length, succeeded: over.succeeded, cap_reverts: capReverts, other_reverts: over.reverts.length - capReverts };
-    },
   };
   return adapter;
 }

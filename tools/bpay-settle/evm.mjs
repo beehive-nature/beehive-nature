@@ -208,6 +208,13 @@ export function createEvmReader({ chainId, hosts, fetchFn = globalThis.fetch, ti
         rows,
       };
     },
+    // The value every host returned identically, or null when any host failed
+    // or disagreed: a probe that rests on one witness proves nothing.
+    async callAgreed(to, data, from) {
+      const rows = await each("eth_call", [from ? { from, to, data } : { to, data }, "latest"]);
+      const vals = new Set(rows.map((r) => (r.ok ? lc(r.v) : "!")));
+      return vals.size === 1 && !vals.has("!") ? [...vals][0] : null;
+    },
     async code(addr) {
       for (const r of await each("eth_getCode", [addr, "latest"])) if (r.ok) return r.v;
       throw new Error("no host answered eth_getCode");

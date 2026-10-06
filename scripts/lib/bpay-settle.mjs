@@ -86,8 +86,11 @@ export function digest(domain, value) {
   return "sha256:" + h.digest("hex");
 }
 
-function need(cond, msg) {
-  if (!cond) { const e = new Error(msg); e.code = "SETTLE_REFUSED"; throw e; }
+// codes: SETTLE_OVER_AUTHORITY (the payloads would do more than the authority
+// allows), SETTLE_FALSE_EVIDENCE (evidence claims more than it may), and
+// SETTLE_REFUSED for everything else, including a caller's own mistakes.
+function need(cond, msg, code = "SETTLE_REFUSED") {
+  if (!cond) { const e = new Error(msg); e.code = code; throw e; }
 }
 
 // ── the adapter descriptor ──────────────────────────────────────────────────
@@ -257,13 +260,13 @@ function checkRecords(records, descriptor, observation, intent, vendorOracles = 
   need(observation && typeof observation.oracle === "string" && observation.oracle.length > 0, "reconcile must name the oracle it read");
   const vendor = [...(descriptor.vendor_oracles || []), ...vendorOracles];
   for (const r of records) {
-    need(r.asset === intent.invoice.asset, `a record names another asset (${r.asset}) than this settlement (${intent.invoice.asset})`);
+    need(r.asset === intent.invoice.asset, `a record names another asset (${r.asset}) than this settlement (${intent.invoice.asset})`, "SETTLE_FALSE_EVIDENCE");
     const rank = EVIDENCE_CLASS_LADDER.indexOf(r.value_observed);
     need(rank >= 0, `record class ${r.value_observed} is not on the VOCAB-1 ladder`);
     need(rank <= EVIDENCE_CLASS_LADDER.indexOf(descriptor.evidence_ceiling),
-      `record claims ${r.value_observed}, above what this adapter declared it can observe`);
+      `record claims ${r.value_observed}, above what this adapter declared it can observe`, "SETTLE_FALSE_EVIDENCE");
     if (rank >= MIN_VALUE_RANK)
-      need(!vendor.some((v) => observation.oracle === v || observation.oracle.startsWith(v)), "value evidence read from the vendor's own endpoint: a page is never its own witness");
+      need(!vendor.some((v) => observation.oracle === v || observation.oracle.startsWith(v)), "value evidence read from the vendor's own endpoint: a page is never its own witness", "SETTLE_FALSE_EVIDENCE");
   }
 }
 
@@ -367,7 +370,10 @@ export function reconcileReceipt(receipt, { invoice, intent, expectedDigest, exp
 // build → (sign) → PERSIST → submit → status → independent reconcile → receipt.
 // `signer` is the vault (shell-submits: sign(items) → signatures) or the wallet
 // executor (wallet-submits: handed to adapter.submit, which knows its API).
-// `outbox.persist(intent_digest, entry)` must resolve before submit is called;
+// outbox.persist(key, entry) is PUT-IF-ABSENT and must return true only when
+// it stored the entry (false when the key existed): that claim, not the
+// earlier get, is what keeps two concurrent runs from both paying. It resolves
+// before submit is called;
 // resubmission of a stored entry is the shell outbox's job, never this run's.
 // authorityHash: the hash the authority's SIGNATURE covers (the signing
 // machinery is the signed-authorization lane's, not this file's). Without it
@@ -382,32 +388,34 @@ export async function settle({ adapter, intent, invoice, signer, outbox, now, is
   need(descriptorHash(descriptor) === intent.route.adapter_manifest_hash,
     "the adapter's live descriptor differs from the one the authority bound — refuse, never settle under a changed adapter");
   checkIntent(intent, { invoice, descriptor, now });
-  // single-use: an intent already in the outbox is never settled again. The
-  // shell resubmits the stored entry (SPEC-ADAPTER-CONTRACT-1 §6); this run
-  // does not rebuild, re-sign or re-pay it.
-  if (await outbox.get(intent.intent_digest)) {
-    const e = new Error("this intent is already in the outbox: single-use authority, never a second payment"); e.code = "SETTLE_REPLAY"; throw e;
-  }
+  // single-use belongs to the AUTHORITY: any intent built from an authority
+  // already in the outbox is refused, however freshly it was built. The shell
+  // resubmits the stored entry (SPEC-ADAPTER-CONTRACT-1 §6); this run never
+  // rebuilds, re-signs or re-pays it.
+  const key = outboxKey(intent);
+  const replay = () => { const e = new Error("this authority is already in the outbox: single-use, never a second payment"); e.code = "SETTLE_REPLAY"; return e; };
+  if (await outbox.get(key)) throw replay();
   const prepared = await adapter.prepare(intent, { now });
   need(prepared && prepared.intent_id === intent.intent_digest, "prepare must key on the intent digest (idempotency key)");
   const pl = await adapter.payloads(prepared);
   need(pl && Array.isArray(pl.items) && pl.items.length > 0, "payloads.items required");
   need(pl.mode === descriptor.submit_model, "payload mode differs from the declared submit model");
   need(pl.spend && ATTO.test(pl.spend.asset_atto), "payloads.spend.asset_atto: what the payloads move, as the adapter decoded it");
-  need(BigInt(pl.spend.asset_atto) === BigInt(intent.invoice.owed_atto), "payloads move a different amount than the invoice owes");
-  need(BigInt(pl.spend.asset_atto) <= BigInt(intent.authority.max_asset_atto), "payloads exceed the authority maximum");
-  need(sameAddress(intent.route.network, pl.spend.recipient, intent.authority.recipient), "payloads pay someone the authority does not name");
+  const OVER = "SETTLE_OVER_AUTHORITY";
+  need(BigInt(pl.spend.asset_atto) === BigInt(intent.invoice.owed_atto), "payloads move a different amount than the invoice owes", OVER);
+  need(BigInt(pl.spend.asset_atto) <= BigInt(intent.authority.max_asset_atto), "payloads exceed the authority maximum", OVER);
+  need(sameAddress(intent.route.network, pl.spend.recipient, intent.authority.recipient), "payloads pay someone the authority does not name", OVER);
   need(ATTO.test(pl.spend.max_native_fee_atto) && BigInt(pl.spend.max_native_fee_atto) <= BigInt(intent.authority.max_native_fee_atto),
-    "payloads' native-fee bound exceeds the authority");
+    "payloads' native-fee bound exceeds the authority", OVER);
 
   let submitted;
   if (descriptor.submit_model === "shell-submits") {
     const sigs = await signer.sign(pl.items);
     const combined = await adapter.combine(prepared, sigs);
-    await outbox.persist(intent.intent_digest, { kind: "signed", signed: combined.signed });
+    if ((await outbox.persist(key, { kind: "signed", intent_digest: intent.intent_digest, signed: combined.signed })) !== true) throw replay();
     submitted = await adapter.submit(combined.signed, { prepared });
   } else {
-    await outbox.persist(intent.intent_digest, { kind: "payloads", payloads: pl.items });
+    if ((await outbox.persist(key, { kind: "payloads", intent_digest: intent.intent_digest, payloads: pl.items })) !== true) throw replay();
     submitted = await adapter.submit(pl, { prepared, executor: signer });
   }
   need(submitted && typeof submitted.ref === "string" && submitted.ref.length > 0, "submit must return a ref");
@@ -422,6 +430,9 @@ export async function settle({ adapter, intent, invoice, signer, outbox, now, is
 // Kill condition 5 made mechanical: no vendor identifier in the kernel's
 // objects. `terms` come from the CALLER (the tungsten harness), never from the
 // adapter under test. adapter_local is the adapter's own room and is skipped.
+// the outbox key of a settlement: its authority, which is single-use
+export const outboxKey = (intent) => "authority:" + intent.authority_hash;
+
 export function assertNeutral(value, terms, path = "$") {
   if (typeof value === "string") {
     for (const t of terms) if (value.toLowerCase().includes(t.toLowerCase())) throw Object.assign(new Error(`vendor identifier "${t}" at ${path}`), { code: "SETTLE_LEAK" });

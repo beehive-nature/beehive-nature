@@ -53,9 +53,11 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
         if (sabotage.unstable && reads > 2) return { ...t.receipt, blockHash: "0x" + h("reorg"), logs: t.receipt.logs.map((l) => ({ ...l, data: "0x" + word(1) })) };
         if (sabotage.lyingHost === host) return { ...t.receipt, logs: [] };
         // one host keeps everything else honest but claims block 0, so any finalized head "covers" it
-        if (sabotage.lyingBlockHost === host) return { ...t.receipt, blockNumber: "0x0" };
+        if (sabotage.lyingBlockHost === host) return { ...t.receipt, blockNumber: "0x1" };
         // one host shrinks the gas so the fee looks inside the bound
         if (sabotage.lyingGasHost === host) return { ...t.receipt, gasUsed: "0x0" };
+        // ... or only on the run's approve/spend, honest on the forwarding transfer
+        if (sabotage.lyingGasRelatedHost === host && !t.tx.input.startsWith(SEL.transfer)) return { ...t.receipt, gasUsed: "0x0" };
         return t.receipt;
       }
       case "eth_call": {
@@ -67,7 +69,7 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
         // SpendPermissionManager as the real contract orders it: sender, then
         // isValid (approved, not revoked) → UnauthorizedSpendPermission, then
         // the cap → ExceededSpendPermission (revert data carries the selector)
-        if (lc(to) === spm && s === SEL.isValid) return "0x" + word(approved.has(keyOfIsValid(data)) ? 1 : 0);
+        if (lc(to) === spm && s === SEL.isValid) return "0x" + word(approved.has(keyOfIsValid(data)) && sabotage.isValidFlakyHost !== host ? 1 : 0);
         if (lc(to) === spm && s === SEL.spend) {
           const d = decodeSpend(data);
           if (lc(from) !== lc(d.permission.spender)) throw revert("0x" + "deadbeef");

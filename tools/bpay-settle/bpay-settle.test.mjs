@@ -24,7 +24,8 @@ function invoiceFor(asset = ASSET, owed = OWED, ceiling = OWED) {
     lines: [{ kind: "service", asset, quotes: [{ quote_hash: "q-" + asset.slice(-8), amount_atto: owed }] }],
     authorization: { ceilings: { [asset]: ceiling }, authorizedBy: "test", stopConditions: [] } });
 }
-const memOutbox = () => { const m = new Map(); return { m, get: async (k) => m.get(k) || null, persist: async (k, v) => { m.set(k, v); } }; };
+// put-if-absent, as the kernel requires: true only when it stored the entry
+const memOutbox = () => { const m = new Map(); return { m, get: async (k) => m.get(k) || null, persist: async (k, v) => { if (m.has(k)) return false; m.set(k, v); return true; } }; };
 
 function rig({ route = "pay", sabotage = {}, maxNativeFeeAtto, adapterFee } = {}) {
   const chain = createFakeBase({ chainId: CHAIN, sabotage });
@@ -178,7 +179,7 @@ test("TUNGSTEN spend-permission route, honest: the agent is a spender, never an 
   const k2 = check(t.tungsten, "kill.2-cap-bounded")[0];
   assert.equal(k2.detail.cap_reverts, 2);
   assert.equal(k2.detail.other_reverts, 0);
-  assert.ok(okAll(t.tungsten, "control.permission-live"));
+  assert.ok(!t.tungsten.findings.some((f) => f.id === "cap-probe-unreachable"), "the permission read as valid on every operator");
 });
 
 // ── one sabotage per kill condition ─────────────────────────────────────────
@@ -341,10 +342,10 @@ test("the outbox holds the payloads before the wallet is asked to pay", async ()
   const r = rig();
   const { inv, intent } = await payIntent(r);
   const order = [];
-  const outbox = { get: async () => null, persist: async (k) => { order.push("persist:" + k.slice(0, 12)); } };
+  const outbox = { get: async () => null, persist: async (k) => { order.push("persist:" + k.slice(0, 22)); return true; } };
   const exec = { pay: async (p) => { order.push("pay"); return r.chain.sdk.pay(p); } };
   await settle({ adapter: r.adapter, intent, invoice: inv, signer: exec, outbox, now: NOW });
-  assert.deepEqual(order, ["persist:" + intent.intent_digest.slice(0, 12), "pay"]);
+  assert.deepEqual(order, ["persist:" + ("authority:" + intent.authority_hash).slice(0, 22), "pay"]);
 });
 
 // ── receipts ────────────────────────────────────────────────────────────────
@@ -366,6 +367,56 @@ test("a tampered tungsten verdict or capture does not verify", async () => {
   const t = await tungsten("pay");
   assert.equal(verifyTungsten({ ...t.tungsten, verdict: "PASS" }).verdict_ok, false);
   assert.equal(verifyTungsten({ ...t.tungsten, capture: { ...t.tungsten.capture, settled_atto: "1" } }).digest_ok, false);
+});
+
+// ── the second review's findings ────────────────────────────────────────────
+test("single-use belongs to the authority: a fresh intent from the same authority a minute later is refused", async () => {
+  const r = rig();
+  const { inv, intent } = await payIntent(r);
+  const outbox = memOutbox();
+  await settle({ adapter: r.adapter, intent, invoice: inv, signer: r.chain.sdk, outbox, now: NOW });
+  const d = await r.adapter.network();
+  const fresh = buildIntent({ invoice: inv, asset: ASSET, descriptor: d, authority: intent.authority, quote: intent.quote, refund: intent.refund, now: "2026-10-05T12:01:00.000Z" });
+  assert.notEqual(fresh.intent_digest, intent.intent_digest);
+  await assert.rejects(settle({ adapter: r.adapter, intent: fresh, invoice: inv, signer: r.chain.sdk, outbox, now: "2026-10-05T12:01:00.000Z" }), (e) => e.code === "SETTLE_REPLAY");
+  assert.equal(r.chain.sdk.calls.filter((c) => c.method === "pay").length, 1);
+});
+test("a replayed authority is refused before the adapter is asked anything", async () => {
+  const r = rig();
+  const { inv, intent } = await payIntent(r);
+  let prepares = 0;
+  const counted = { ...r.adapter, prepare: async (...x) => { prepares++; return r.adapter.prepare(...x); } };
+  const outbox = memOutbox();
+  await settle({ adapter: counted, intent, invoice: inv, signer: r.chain.sdk, outbox, now: NOW });
+  await assert.rejects(settle({ adapter: counted, intent, invoice: inv, signer: r.chain.sdk, outbox, now: NOW }), (e) => e.code === "SETTLE_REPLAY");
+  assert.equal(prepares, 1);
+});
+test("two concurrent settlements of one authority pay once: the put-if-absent claim decides", async () => {
+  const r = rig();
+  const { inv, intent } = await payIntent(r);
+  const outbox = memOutbox();
+  const runs = await Promise.allSettled([1, 2].map(() => settle({ adapter: r.adapter, intent, invoice: inv, signer: r.chain.sdk, outbox, now: NOW })));
+  assert.equal(runs.filter((x) => x.status === "fulfilled").length, 1);
+  assert.equal(runs.find((x) => x.status === "rejected").reason.code, "SETTLE_REPLAY");
+  assert.equal(r.chain.sdk.calls.filter((c) => c.method === "pay").length, 1);
+});
+test("a host that lies about gas only on the run's approve and spend cannot fit the fee inside the bound", async () => {
+  const t = await tungsten("spend-permission", { lyingGasRelatedHost: "base-foundation", expensiveGas: true });
+  assert.ok(!["PASS", "PASS_WITH_LIMITATIONS"].includes(t.tungsten.verdict), t.tungsten.verdict);
+  assert.ok(t.tungsten.findings.some((f) => f.id === "fee-incomplete"));
+});
+test("a caller's own mistake is INCONCLUSIVE, never a FAIL charged to the vendor", async () => {
+  const r = rig();
+  const t = await runTungsten({ route: "pay", adapter: r.adapter, reader: r.reader, freshAdapter: r.fresh, invoice: invoiceFor(), now: NOW, principal: "person:p", recipient: RECIPIENT,
+    notAfter: NOT_AFTER, quoteExpiresAt: QUOTE_EXPIRES, nonce: "nonce-no-get-1", executor: r.chain.sdk, outbox: { persist: async () => true }, payerAccount: r.chain.payer });
+  assert.equal(t.tungsten.verdict, "INCONCLUSIVE");
+  assert.ok(!t.tungsten.observations.some((o) => o.check === "kill.2-cap-bounded" && !o.ok));
+});
+test("a cap probe that cannot run after settling does not hide a later FAIL", async () => {
+  const wrap = (a) => ({ ...a, reconcile: async (x) => { const r = await a.reconcile(x); return { ...r, records: r.records.map((e) => ({ ...e, txRef: "coinbase:" + e.txRef })) }; } });
+  const t = await tungsten("spend-permission", { isValidFlakyHost: "publicnode" }, { wrap });
+  assert.ok(t.tungsten.findings.some((f) => f.id === "cap-probe-unreachable"));
+  failsOn(t, "kill.5-no-vendor-leak");
 });
 
 // ── guards the mutation run reached only through these ──────────────────────

@@ -61,7 +61,7 @@ async function run(opts = {}) {
     privacy: { requirements: ["no-sdk-telemetry", "no-vendor-account"] }, refund: { policy: "refund-to-source" }, now: NOW });
   // the vault: signs exactly the bytes the adapter built, nothing else
   const signer = { sign: async (items) => items.map((i) => ({ signature_hex: edSign(null, Buffer.from(i.bytes_b64, "base64"), payer.privateKey).toString("hex") })) };
-  const outbox = { m: new Map(), get: async (k) => outbox.m.get(k) || null, persist: async (k, v) => outbox.m.set(k, v) };
+  const outbox = { m: new Map(), get: async (k) => outbox.m.get(k) || null, persist: async (k, v) => (outbox.m.has(k) ? false : (outbox.m.set(k, v), true)) };
   const out = await settle({ adapter, intent, invoice, signer, outbox, now: NOW });
   return { ...out, intent, invoice, outbox };
 }
@@ -76,7 +76,7 @@ test("the Solana bench answers the same contract: descriptor validates, CAIP-2 d
 test("prepare → sign → combine → PERSIST → submit → reconcile through the real binary: SATISFIED", { skip }, async () => {
   const r = await run();
   assert.equal(r.receipt.reconciliation.conclusion, "SATISFIED", JSON.stringify(r.receipt.reconciliation));
-  assert.equal(r.outbox.m.get(r.intent.intent_digest).kind, "signed", "the signed bytes were persisted before submit");
+  assert.equal(r.outbox.m.get("authority:" + r.intent.authority_hash).kind, "signed", "the signed bytes were persisted before submit");
   assert.equal(r.observation.payer_native_fee.atto, "5000");
   assert.ok(r.receipt.three_way.agrees);
   // the bench's memo binds THIS authority: its intent hash covers authorization_ref = the authority hash
