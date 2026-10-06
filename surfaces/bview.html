@@ -1477,7 +1477,9 @@ document.addEventListener('DOMContentLoaded',function(){
     let stage = 'Connecting to Autonomi nodes', movedAt = startedAt;
     const only = routeOf() === 'direct-only';
     const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
-    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
+    // The dials themselves are the receipt: how many storage nodes answered so far, shown as it happens.
+    const answered = () => { const t = window.__antTransport && window.__antTransport.snapshot(); return t && t.dials ? ' · ' + t.opened + ' of ' + t.dials + ' nodes answered' : ''; };
+    const startupStatus = () => routeStatus(stage + answered() + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });

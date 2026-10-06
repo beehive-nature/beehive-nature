@@ -84,3 +84,10 @@ our runs line up with his table:
 - The funnel rows show whenever a dial happened, not only inside a Watch attempt.
 - A quiet stop with no node reached now says that none of the N storage nodes
   it dialled could be reached from this network.
+
+## Third commit: status that reads like a receipt
+
+From a founder-relayed Codex read of the doxx.net app: its status row works
+because every light is a live receipt. bViEw's direct-start status line now
+says how many storage nodes answered as it happens ("1 of 5 nodes answered"),
+taken from the dial funnel. No new styling.
