@@ -19,211 +19,250 @@
 <meta name="color-scheme" content="dark light">
 <title>the mission desk · LOVErnment</title>
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="skaists.css">
 <style>
-  /* ── shared spine ─────────────────────────────────────────────────────
-     --human / --ai / --biomass are the BNR color law; each view respeaks
-     them at its own contrast. --gold stays the estate's caution color. */
-  :root {
-    --human:#9C6FD6; --human-soft:#B79FE0; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
-    --bg:#070D0A; --panel:#0F1713; --well:#0B120F; --line:#1E2B25; --line-hi:#31463C;
-    --ink:#E9F2EC; --dim:#8FA79C; --dimmer:#5B7368; --void:#070D0A; --lift:#16211C;
-    --ember:#E25822;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  /* ── THE CHOSEN DRESS (the founder's chosen UI, his My Space screens 2026-10-04; surfaces/myspace.html;
+     standing order 2026-10-05 "just follow the rules for each of the three seperate ui/ux's"). Only the
+     dress moves. Each view keeps its own grammar exactly as built: new bee's numbered steps, raver's
+     poster hero with the breathing loop and its pause control, cypherpunk's boundary-first terminal (the
+     boundary card leading, the YAML open); the docket, the envelope, the levers, the calculator, the law
+     and the foot keep every part and its order. The page's own variables are mapped per register onto
+     skaists tokens (skaists.css, compiled from docs/design/skaists/tokens.json), declared on the body so
+     each resolves against that register's tokens; every size sits on that register's type scale and every
+     corner is a radius token.
+     The BNR color law still speaks in every view: purple = humans (sovereign), teal = Ai, green =
+     biomass and the law; cautions (review, escalation, the fixture note, the controls well) sit in the
+     lavender guard, never red and never gold. Red, magenta or orange belongs to the stop press alone.
+     NEW BEE: paper, ink, bold system sans, white cards with soft large corners, forest green for the one
+     filled lever (white label) and for what is open, outlined pills for every second press, a red outline
+     on stop. */
+  body {
+    --human:var(--sk-sovereign); --human-soft:var(--sk-sovereign); --ai:var(--sk-ai); --biomass:var(--sk-verified);
+    --gold:var(--sk-guard); --gold-wash:var(--sk-guard-wash);
+    --bg:var(--sk-bg); --panel:var(--sk-bg-card); --well:var(--sk-bg); --line:var(--sk-line); --line-hi:rgba(106,115,110,.4);
+    --ink:var(--sk-ink); --dim:var(--sk-ink-mut); --dimmer:var(--sk-ink-mut); --void:var(--sk-bg-well); --lift:var(--sk-bg-well);
+    --ember:var(--sk-rose);
+    --accent:var(--sk-forest); --on:var(--sk-on-primary); --edge:rgba(106,115,110,.4); --field:var(--sk-ink-dim);
+    --sel:var(--sk-forest); --link:var(--sk-forest); --link-hover:var(--sk-ink); --glow:none;
+    --mono:var(--sk-font-mono); --sans:var(--sk-font-ui); --font:var(--sk-font-ui);
+    --r-card:var(--sk-radius-xl); --r-row:var(--sk-radius-lg); --r-in:var(--sk-radius-md); --r-btn:var(--sk-radius-pill);
   }
   * { box-sizing:border-box; margin:0; }
   html { scroll-behavior:smooth; }
-  body { min-height:100vh; color:var(--ink); background:var(--bg); font:max(14px,var(--fmin,12px))/1.65 var(--mono);
+  body { min-height:100vh; color:var(--ink); background:var(--bg); font:400 16px/1.6 var(--font); color-scheme:light;
     padding-bottom:70px; }
-  a { color:var(--ai); text-decoration:none; }
-  a:hover { color:var(--human-soft); }
-  a:focus-visible, button:focus-visible { outline:3px solid var(--ai); outline-offset:3px; }
-  button { font:600 max(12px,var(--fmin,12px)) var(--mono); }
+  a { color:var(--link); text-decoration:none; font-weight:700; }
+  a:hover { color:var(--link-hover); }
+  a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline:2px solid var(--sk-focus); outline-offset:3px; }
+  button { font:700 16px/1.2 var(--font); }
   .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
 
-  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
-  .eyebrow { position:relative; color:var(--human-soft); letter-spacing:.04em; font-size:max(10px,var(--fmin,12px)); }
-  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 var(--sans);
-    letter-spacing:-.055em; }
-  h1 span { color:var(--human); }
-  .lead { position:relative; max-width:44ch; margin-top:17px; font:600 clamp(1.05rem,2.6vw,1.5rem)/1.35 var(--sans);
-    letter-spacing:-.015em; color:var(--ink); }
-  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:14px; }
+  header { position:relative; overflow:hidden; padding:44px 0 30px; border-bottom:1px solid var(--line); }
+  .eyebrow { position:relative; color:var(--dim); letter-spacing:.06em; font:700 14px/1.4 var(--font); }
+  h1 { position:relative; margin-top:8px; font:700 32px/1.12 var(--sans); letter-spacing:-.025em; color:var(--ink); }
+  h1 span { color:inherit; }
+  .lead { position:relative; max-width:44ch; margin-top:14px; font:600 17px/1.4 var(--sans);
+    letter-spacing:-.01em; color:var(--ink); }
+  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:12px; }
   .intro b { color:var(--ink); }
   .intro .lv { color:var(--human-soft); }
-  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
-  .nav a, button.pill { border:1px solid var(--line-hi); border-radius:999px; padding:11px 15px; color:var(--ink);
-    background:var(--panel); font:600 max(11px,var(--fmin,12px)) var(--mono); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
-  .nav a:hover, button.pill:hover { border-color:var(--human); background:var(--lift); }
-  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:max(11px,var(--fmin,12px)); }
+  .nav { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+  .nav a, button.pill { border:1.5px solid var(--edge); border-radius:var(--r-btn); padding:6px 18px; color:var(--ink);
+    background:transparent; font:700 16px/1.2 var(--font); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
+  .nav a:hover, button.pill:hover { border-color:var(--sel); color:var(--ink); }
+  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:22px; color:var(--dim); font:600 15px/1.4 var(--font); }
   .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
-  .dot.ok { background:var(--biomass); box-shadow:0 0 13px var(--biomass); }
-  .dot.bad { background:var(--ember); box-shadow:0 0 13px var(--ember); }
-  .fx { border:1px dashed var(--gold); border-radius:99px; padding:2px 9px; color:var(--gold); font-size:max(9px,var(--fmin,12px));
-    letter-spacing:.04em; white-space:nowrap; }
+  .dot.ok { background:var(--biomass); }
+  .dot.bad { background:var(--ember); }
+  .fx { border:1.5px dashed var(--gold); border-radius:var(--r-btn); padding:2px 12px; color:var(--gold); background:var(--gold-wash);
+    font:700 14px/1.4 var(--font); letter-spacing:.02em; white-space:nowrap; }
 
   main { padding-top:24px; }
   .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
-  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .card { grid-column:span 12; padding:18px; border:1px solid var(--line); border-radius:var(--r-card); background:var(--panel); }
   .card.half { grid-column:span 6; }
   .card.third { grid-column:span 4; }
-  .card h2 { color:var(--human-soft); font-size:max(13px,var(--fmin,12px)); letter-spacing:.04em; }
-  .sub { color:var(--dim); font-size:max(11px,var(--fmin,12px)); margin-top:6px; }
-  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
+  .card h2 { color:var(--ink); font:700 18px/1.3 var(--sans); letter-spacing:-.01em; }
+  .sub { color:var(--dim); font-size:16px; line-height:1.5; margin-top:6px; }
+  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 32px, 1100px); } }
 
   /* the loop diagram — shared bones; motion is a raver-only courtesy */
   .loopart { display:none; }
   #motion { display:none; }
-  #motion[aria-pressed="true"] { color:var(--human-soft); border-color:var(--human); }
+  #motion[aria-pressed="true"] { color:var(--ink); border-color:var(--sel); }
 
   /* ── the color-law legend — one line, three swatches, every view ────── */
-  .colorlaw { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
-    padding:11px 14px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:max(10.5px,var(--fmin,12px)); }
-  .colorlaw .sw { display:inline-flex; align-items:center; gap:5px; }
+  .colorlaw { display:flex; align-items:center; gap:8px 16px; flex-wrap:wrap; margin-top:14px;
+    padding:12px 16px; border:1px solid var(--line); border-radius:var(--r-card); background:var(--panel); color:var(--dim); font-size:15px; line-height:1.4; }
+  .colorlaw .sw { display:inline-flex; align-items:center; gap:6px; }
   .colorlaw .sw i { width:10px; height:10px; border-radius:50%; display:inline-block; }
   .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
   .colorlaw .sw.biomass i { background:var(--biomass); }
 
   /* mission cards */
   .mrow { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(210px,1fr); gap:14px; align-items:center;
-    padding:15px 16px; border:1px solid var(--line); border-radius:11px; background:var(--well); margin-top:11px; }
-  .mrow:hover { border-color:var(--line-hi); }
-  .mid { color:var(--dimmer); font-size:max(10px,var(--fmin,12px)); letter-spacing:.04em; }
-  .mtitle { color:var(--ink); font:650 max(15px,var(--fmin,12px))/1.35 var(--sans); margin-top:3px; }
-  .mobj { color:var(--dim); font-size:max(11px,var(--fmin,12px)); margin-top:4px; }
-  .chip { display:inline-flex; align-items:center; border-radius:99px; padding:2px 9px; font-size:max(9px,var(--fmin,12px));
-    letter-spacing:.04em; white-space:nowrap; border:1px solid var(--line-hi); color:var(--dim); }
-  .chip.complete { color:var(--biomass); border-color:rgba(134,204,114,.5); }
-  .chip.active, .chip.funded { color:var(--ai); border-color:rgba(69,194,220,.45); }
-  .chip.review, .chip.paused { color:var(--gold); border-color:rgba(232,181,75,.45); }
-  .chip.escalated, .chip.stopped { color:var(--ember); border-color:rgba(226,88,34,.5); }
-  .chip.approved { color:var(--human-soft); border-color:rgba(156,111,214,.45); }
-  .bar { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; margin-top:6px; }
+    padding:14px 16px; border:1px solid var(--line); border-radius:var(--r-row); background:var(--well); margin-top:12px; }
+  .mrow:hover { border-color:var(--edge); }
+  .mid { color:var(--dimmer); font-size:14px; line-height:1.4; letter-spacing:.02em; margin-top:6px; }
+  .mtitle { color:var(--ink); font:700 17px/1.35 var(--sans); margin-top:4px; }
+  .mobj { color:var(--dim); font-size:16px; line-height:1.5; margin-top:4px; }
+  .chip { display:inline-flex; align-items:center; border-radius:var(--r-btn); padding:2px 12px; font:700 14px/1.4 var(--font);
+    letter-spacing:.02em; white-space:nowrap; border:1.5px solid var(--line-hi); color:var(--dim); }
+  .chip.complete { color:var(--biomass); border-color:var(--biomass); }
+  .chip.active, .chip.funded { color:var(--ai); border-color:var(--ai); }
+  .chip.review, .chip.paused { color:var(--gold); border-color:var(--gold); }
+  .chip.escalated, .chip.stopped { color:var(--gold); border-color:var(--gold); border-style:dashed; background:var(--gold-wash); }
+  .chip.approved { color:var(--human-soft); border-color:var(--human); }
+  .bar { height:8px; border-radius:var(--sk-radius-pill); background:var(--void); border:1px solid var(--line); overflow:hidden; margin-top:6px; }
   .bar i { display:block; height:100%; background:var(--ai); }
   .bar i.hot { background:var(--gold); }
   .bar i.over { background:var(--ember); }
-  .barlabel { display:flex; justify-content:space-between; color:var(--dimmer); font-size:max(9.5px,var(--fmin,12px)); margin-top:4px; }
-  .mnext { color:var(--dim); font-size:max(10px,var(--fmin,12px)); margin-top:7px; }
-  .mnext b { color:var(--ink); font-weight:600; }
+  .barlabel { display:flex; justify-content:space-between; gap:10px; color:var(--dimmer); font-size:14px; line-height:1.4; margin-top:4px; }
+  .mnext { color:var(--dim); font-size:15px; line-height:1.45; margin-top:8px; }
+  .mnext b { color:var(--ink); font-weight:700; }
+  /* the docket's "open the envelope" press: a 44px target at the reading size (its inline 12px is
+     the script's; the dress outranks it here) */
+  .mrow a[href^="#/m/"] { align-items:center; min-height:44px; margin-top:2px !important; font-size:16px !important; }
 
   /* proposal + tables */
-  pre.proposal { margin-top:12px; padding:13px; border:1px solid var(--line); border-radius:9px; background:var(--well);
-    color:var(--dim); font-size:max(10.5px,var(--fmin,12px)); line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
-  details.yaml summary { cursor:pointer; color:var(--ai); font-size:max(11px,var(--fmin,12px)); min-height:32px; display:flex; align-items:center; }
-  table.sheet { width:100%; border-collapse:collapse; margin-top:12px; font-size:max(11px,var(--fmin,12px)); }
-  table.sheet th { text-align:start; color:var(--dimmer); font-weight:400; font-size:max(9px,var(--fmin,12px));
-    letter-spacing:.04em; padding:6px 8px; border-bottom:1px solid var(--line); }
-  table.sheet td { padding:7px 8px; border-bottom:1px solid var(--line); color:var(--dim); }
+  pre.proposal { margin-top:12px; padding:14px; border:1px solid var(--line); border-radius:var(--r-in); background:var(--well);
+    color:var(--dim); font:400 14px/1.7 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+  details.yaml summary { cursor:pointer; color:var(--link); font:700 16px/1.3 var(--font); min-height:44px; display:flex; align-items:center; }
+  details.yaml[open] > summary { color:var(--sel); }
+  table.sheet { width:100%; border-collapse:collapse; margin-top:12px; font-size:16px; }
+  table.sheet th { text-align:start; color:var(--dimmer); font-weight:600; font-size:14px;
+    letter-spacing:.02em; padding:6px 8px; border-bottom:1px solid var(--line); }
+  table.sheet td { padding:8px; border-bottom:1px solid var(--line); color:var(--dim); }
   table.sheet td.num { text-align:end; font-variant-numeric:tabular-nums; color:var(--ink); }
-  table.sheet tr.total td { color:var(--ink); font-weight:650; border-bottom:0; }
+  table.sheet tr.total td { color:var(--ink); font-weight:700; border-bottom:0; }
   table.sheet td .pos { color:var(--biomass); } table.sheet td .neg { color:var(--ember); }
+  /* a milestone's small line: its inline 10px is the script's; the dress sets it on the scale */
+  table.sheet td > div { font-size:14px !important; line-height:1.45; margin-top:2px; }
 
   /* the calculator */
-  .calc { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:13px; }
-  .calc label { display:block; color:var(--dimmer); font-size:max(9px,var(--fmin,12px)); letter-spacing:.04em; }
-  .calc input { width:100%; margin-top:4px; padding:9px 10px; border:1px solid var(--line-hi); border-radius:8px;
-    background:var(--well); color:var(--ink); font:600 max(12px,var(--fmin,12px)) var(--mono); min-height:40px; }
-  .calc input:focus-visible { outline:2px solid var(--ai); outline-offset:2px; }
+  .calc { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:14px; }
+  .calc label { display:block; color:var(--dimmer); font:600 14px/1.4 var(--font); letter-spacing:.02em; }
+  .calc input { width:100%; margin-top:4px; padding:9px 14px; border:1.5px solid var(--field); border-radius:var(--r-in);
+    background:var(--panel); color:var(--ink); font:600 16px/1.3 var(--font); min-height:44px; }
+  .calc input:focus { border-color:var(--sel); }
+  .calc input:focus-visible { outline:2px solid var(--sk-focus); outline-offset:2px; }
   .finline { display:flex; justify-content:space-between; gap:10px; padding:8px 2px; border-bottom:1px dashed var(--line);
-    color:var(--dim); font-size:max(11px,var(--fmin,12px)); }
+    color:var(--dim); font-size:15px; line-height:1.45; }
   .finline b { color:var(--ink); font-variant-numeric:tabular-nums; }
   .finline.tithe b { color:var(--gold); }
   .finline.grand { border-bottom:0; margin-top:4px; }
-  .finline.grand b { font-size:max(15px,var(--fmin,12px)); color:var(--human-soft); }
+  .finline.grand b { font-size:17px; font-weight:800; color:var(--ink); }
 
-  /* human levers */
-  .levers { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
-  .lever { border:1px solid var(--line-hi); border-radius:99px; padding:9px 14px; background:var(--panel); color:var(--ink);
-    font:600 max(11px,var(--fmin,12px)) var(--mono); cursor:pointer; min-height:40px; }
-  .lever:hover { border-color:var(--human); }
-  .lever.approve { border-color:var(--biomass); color:var(--biomass); }
-  .lever.approve:hover { background:rgba(134,204,114,.08); }
-  .lever.danger { border-color:rgba(226,88,34,.55); color:var(--ember); }
-  .lever.danger:hover { background:rgba(226,88,34,.08); }
+  /* human levers: the one filled press (approve or resume, never both), a second way on, the stop */
+  .levers { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .lever { border:1.5px solid var(--edge); border-radius:var(--r-btn); padding:6px 18px; background:transparent; color:var(--ink);
+    font:700 16px/1.2 var(--font); cursor:pointer; min-height:44px; }
+  .lever:hover { border-color:var(--sel); }
+  .lever.approve { background:var(--accent); border-color:var(--accent); color:var(--on); box-shadow:var(--glow); }
+  .lever.approve:hover { border-color:var(--accent); }
+  .lever.danger { border-color:var(--ember); color:var(--ember); }
+  .lever.danger:hover { border-color:var(--ember); }
   .lever:disabled { opacity:.45; cursor:not-allowed; }
 
   .meta { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
-  .meta div { padding:12px; border-left:2px solid var(--ai); background:var(--well); }
-  .meta label { display:block; color:var(--dimmer); font-size:max(9px,var(--fmin,12px)); letter-spacing:.04em; }
-  .meta strong { display:block; margin-top:3px; color:var(--ink); font-size:max(12px,var(--fmin,12px)); overflow-wrap:anywhere; }
+  .meta div { padding:12px; border-left:2px solid var(--ai); border-radius:var(--sk-radius-sm); background:var(--well); }
+  .meta label { display:block; color:var(--dimmer); font:600 14px/1.4 var(--font); letter-spacing:.02em; }
+  .meta strong { display:block; margin-top:3px; color:var(--ink); font-size:16px; line-height:1.4; overflow-wrap:anywhere; }
+  /* the controls well (the envelope the agents may not leave): the lavender guard, never red; its inline
+     corner and 12px are the script's, the dress sets them on the scale */
+  #mission-detail .gate { background:var(--gold-wash); border-radius:var(--r-in) !important; font-size:15px !important; line-height:1.45; }
+  #mission-detail .gate > div:first-child { font-weight:700; }
+  #mission-detail .card > a[href^="mission-room"] { display:inline-flex; align-items:center; min-height:44px; margin-top:4px; font-size:16px !important; }
 
-  .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-left:2px solid var(--biomass);
-    border-radius:10px; color:var(--dim); font-size:max(10.5px,var(--fmin,12px)); line-height:1.8; }
+  .law { margin-top:20px; padding:14px 18px; border:1px solid var(--line); border-left:3px solid var(--biomass);
+    border-radius:var(--r-card); background:var(--panel); color:var(--dim); font-size:16px; line-height:1.6; }
   .law b { color:var(--ink); }
 
   .rep { display:grid; gap:8px; margin-top:12px; }
-  .rep .r { display:grid; grid-template-columns:120px 1fr 44px; align-items:center; gap:10px; font-size:max(10.5px,var(--fmin,12px)); color:var(--dim); }
-  .rep .r .track { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; }
+  .rep .r { display:grid; grid-template-columns:120px 1fr 44px; align-items:center; gap:10px; font-size:15px; line-height:1.4; color:var(--dim); }
+  .rep .r .track { height:8px; border-radius:var(--sk-radius-pill); background:var(--void); border:1px solid var(--line); overflow:hidden; }
   .rep .r .track i { display:block; height:100%; background:var(--biomass); }
   .rep .r b { text-align:end; color:var(--ink); font-variant-numeric:tabular-nums; }
 
   footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line);
-    color:var(--dimmer); font-size:max(10px,var(--fmin,12px)); line-height:1.8; }
-  footer a { color:var(--dim); }
+    color:var(--dimmer); font-size:16px; line-height:1.6; }
+  footer a { color:var(--link); display:inline-flex; align-items:center; min-height:44px; }
 
-  .backlink { display:inline-flex; gap:6px; align-items:center; margin-bottom:12px; color:var(--ai); font-size:max(11px,var(--fmin,12px)); }
-  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:max(10.5px,var(--fmin,12px)); }
+  .backlink { display:inline-flex; gap:6px; align-items:center; min-height:44px; margin-bottom:8px; color:var(--link); font:700 16px/1.3 var(--font); }
+  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:14px; line-height:1.5; }
   .boundary-dl dt { color:var(--ai); }
   .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
   @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; }
     .mrow { grid-template-columns:1fr; } }
 
   /* ═════════════════════════════════════════════════════════════════════
-     NEW BEE — the calm first minute. Light canvas, quiet type, no ambient
+     NEW BEE — the calm first minute. Paper canvas, quiet type, no ambient
      motion, every control plain and labelled. Same facts, whispered.
      ═════════════════════════════════════════════════════════════════════ */
-  body[data-reg="bee"] {
-    --human:#65509A; --human-soft:#65509A; --ai:#176879; --biomass:#326b39; --gold:#855b0b;
-    --bg:#f6f7f2; --panel:#fff; --well:#edf2eb; --line:#ccd7cf; --line-hi:#a9bcad;
-    --ink:#18362a; --dim:#435f4e; --dimmer:#52695b; --void:#f6f7f2; --lift:#e2eadf; --ember:#9f362c;
-    font-family:var(--sans); font-size:max(15px,var(--fmin,12px)); color-scheme:light;
-  }
-  body[data-reg="bee"] header { background:linear-gradient(180deg,#eef2e9,#f6f7f2); }
-  body[data-reg="bee"] h1 span { color:var(--human); }
-  body[data-reg="bee"] .dot.bad { box-shadow:none; }
-  body[data-reg="bee"] .card h2 { color:var(--human); }
-  body[data-reg="bee"] .mtitle { font-family:var(--sans); }
-  body[data-reg="bee"] .steplist { counter-reset:step; display:grid; gap:8px; margin-top:12px; }
-  body[data-reg="bee"] .steplist li { list-style:none; display:flex; gap:10px; align-items:baseline; color:var(--dim);
-    font-size:max(12.5px,var(--fmin,12px)); line-height:1.7; }
+  body[data-reg="bee"] .steplist { counter-reset:step; display:grid; gap:10px; margin-top:16px; padding:0; }
+  body[data-reg="bee"] .steplist li { list-style:none; display:flex; gap:12px; align-items:baseline; color:var(--dim);
+    font-size:16px; line-height:1.6; }
   body[data-reg="bee"] .steplist li::before { counter-increment:step; content:counter(step);
-    flex:none; display:grid; place-items:center; width:24px; height:24px; border-radius:50%;
-    background:var(--human); color:#fff; font:650 max(11px,var(--fmin,12px)) var(--sans); align-self:center; }
+    flex:none; display:grid; place-items:center; width:28px; height:28px; border-radius:50%;
+    background:var(--sk-bg-well); color:var(--sk-forest); font:700 14px/1 var(--font); align-self:center; }
 
   /* ═════════════════════════════════════════════════════════════════════
-     RAVER — the desk at full feeling. Poster type, the loop alive, stat
-     tiles; motion pauses for anyone whose browser asks it to.
+     RAVER — the desk at full feeling. Poster hero, the loop alive; motion
+     pauses for anyone whose browser asks it to. Dressed after dark: the
+     night purple ground (the sovereign wash into the tint), plain white
+     bold titles, lavender for the quiet words, the magenta pill with its
+     soft glow and a dark label for the one lever, magenta outlined pills
+     for every second press, round everything.
      ═════════════════════════════════════════════════════════════════════ */
   body[data-reg="raver"] {
-    --human:#9C6FD6; --human-soft:#C9A7F5; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
-    --bg:#0E0817; --panel:#1A1226; --well:#140E1F; --line:#3A2C4E; --line-hi:#544070;
-    --ink:#F5EFFA; --dim:#C4B9D5; --dimmer:#9C8FB8; --void:#0E0817; --lift:#241A35;
+    --human:var(--sk-sovereign); --human-soft:var(--sk-sovereign-soft); --biomass:var(--sk-biomass);
+    --bg:var(--sk-sovereign-tint); --panel:var(--sk-sovereign-wash); --well:var(--sk-sovereign-tint);
+    --line:rgba(156,111,214,.34); --line-hi:rgba(214,85,187,.6);
+    --dim:var(--sk-sovereign-soft); --dimmer:var(--sk-sovereign-soft); --void:var(--sk-sovereign-tint); --lift:var(--sk-sovereign-wash);
+    --ember:var(--sk-you);
+    --accent:var(--sk-primary); --edge:rgba(214,85,187,.6); --field:var(--sk-sovereign-soft);
+    --sel:var(--sk-you); --link:var(--sk-link); --link-hover:var(--sk-link-hover); --glow:0 0 28px rgba(214,85,187,.38);
+    --r-row:var(--sk-radius-xl); --r-in:var(--sk-radius-xl);
+    color-scheme:dark; font-size:15px; line-height:1.55;
+    background-color:var(--sk-sovereign-tint);
+    background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+    background-attachment:fixed;
   }
   body[data-reg="raver"] header { padding:0; border-bottom:0; }
   body[data-reg="raver"] .hero-open { position:relative; min-height:min(66vh,600px); display:flex; flex-direction:column;
     justify-content:center; padding:84px 0 54px; overflow:hidden;
-    background:
-      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.28), transparent 62%),
-      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(69,194,220,.16), transparent 60%),
-      radial-gradient(ellipse 80% 40% at 50% 108%, rgba(134,204,114,.14), transparent 66%),
-      linear-gradient(180deg,#0E0817,#150C24 58%,#0E0817); }
+    background:radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.2), transparent 62%); }
   body[data-reg="raver"] .hero-open .wrap { position:relative; }
-  body[data-reg="raver"] .eyebrow { color:var(--human-soft); }
-  body[data-reg="raver"] h1 { font-size:clamp(2.6rem,10vw,6.8rem); }
-  body[data-reg="raver"] h1 span {
-    background:linear-gradient(94deg,#C9A7F5,#45C2DC 55%,#86CC72);
-    -webkit-background-clip:text; background-clip:text; color:transparent; }
-  body[data-reg="raver"] .lead { font:500 clamp(1.5rem,4.2vw,2.7rem)/1.14 var(--sans);
-    letter-spacing:-.035em; max-width:20ch; margin-top:22px; text-wrap:balance; }
-  body[data-reg="raver"] .intro { max-width:52ch; font-size:max(13px,var(--fmin,12px)); }
-  body[data-reg="raver"] .nav { margin-top:30px; }
-  body[data-reg="raver"] .statusline { margin-top:26px; }
+  body[data-reg="raver"] .eyebrow { color:var(--sk-sovereign-soft); font-size:13px; }
+  body[data-reg="raver"] h1 { font-size:30px; line-height:1.12; letter-spacing:-.03em; }
+  body[data-reg="raver"] .lead { font:600 18px/1.35 var(--sans); color:var(--sk-sovereign-strong);
+    letter-spacing:-.01em; max-width:20ch; margin-top:14px; text-wrap:balance; }
+  body[data-reg="raver"] .intro { max-width:52ch; font-size:15px; }
+  body[data-reg="raver"] .nav { margin-top:26px; }
+  body[data-reg="raver"] .statusline { margin-top:24px; }
   body[data-reg="raver"] .loopart { display:block; position:absolute; inset:auto -3% -6% auto; width:min(58%,620px);
     pointer-events:none; }
+  /* the loop's words wear the raver hand on its scale; the founder's names wear the soft lavender and
+     the stop path the guard (paint only: every station, ring and word stays) */
+  body[data-reg="raver"] .loopart text { font-family:var(--sk-font-ui); font-weight:700; }
+  body[data-reg="raver"] .loopart text[font-size="9.5"] { font-size:11px; }
+  body[data-reg="raver"] .loopart [fill="#C9A7F5"] { fill:var(--sk-sovereign-soft); }
+  body[data-reg="raver"] .loopart [fill="#E8B54B"] { fill:var(--sk-guard); }
+  body[data-reg="raver"] .loopart [stroke="#E8B54B"] { stroke:var(--sk-guard); }
   body[data-reg="raver"] #motion { display:inline-flex; }
-  body[data-reg="raver"] .card { border-radius:18px; }
-  body[data-reg="raver"] .card h2 { color:var(--human-soft); }
-  body[data-reg="raver"] .lever.approve { border-radius:999px; }
+  body[data-reg="raver"] .dot.ok { box-shadow:0 0 12px var(--sk-biomass); }
+  body[data-reg="raver"] .dot.bad { box-shadow:0 0 12px var(--sk-you); }
+  body[data-reg="raver"] .card h2 { color:var(--ink); }
+  body[data-reg="raver"] .lever.approve { border-radius:var(--sk-radius-pill); }
+  body[data-reg="raver"] :is(.nav a, button.pill, .lever, details.yaml summary, .backlink, .mrow a[href^="#/m/"]) { font-size:15px !important; }
+  body[data-reg="raver"] #mission-detail .card > a[href^="mission-room"] { font-size:15px !important; }
+  body[data-reg="raver"] :is(.statusline, .colorlaw, .sub, .mobj, .mnext, .law, footer, table.sheet td, .finline, .rep .r, .meta strong) { font-size:14px; }
+  body[data-reg="raver"] :is(.fx, .chip, .mid, .barlabel, .calc label, table.sheet th) { font-size:13px; }
+  body[data-reg="raver"] :is(.meta label, pre.proposal) { font-size:12px; }
+  body[data-reg="raver"] table.sheet td > div { font-size:12px !important; }
+  body[data-reg="raver"] #mission-detail .gate { font-size:14px !important; }
+  body[data-reg="raver"] :is(.card h2, .mtitle, .finline.grand b) { font-size:18px; }
+  body[data-reg="raver"] .calc input { font-size:15px; }
   body[data-reg="raver"] .loopspin { animation:loopspin 26s linear infinite; transform-origin:center; }
   @keyframes loopspin { to { transform:rotate(360deg); } }
   .loopart .lpulse { animation:lpulse 5.2s ease-in-out infinite; }
@@ -232,25 +271,42 @@
 
   /* ═════════════════════════════════════════════════════════════════════
      CYPHERPUNK — the registrar terminal. Mono, dense, boundary-first: the
-     envelope and its gates lead; the poster art never loads.
+     envelope and its gates lead; the poster art never loads. Dressed as
+     the instrument: near-black ground, IBM Plex Mono throughout, thin grey
+     borders, 6px corners, the cyan lever with a dark label, an orange
+     outline on stop.
      ═════════════════════════════════════════════════════════════════════ */
   body[data-reg="cypherpunk"] {
-    --human:#C9A7F5; --human-soft:#C9A7F5; --ai:#80CDDD; --biomass:#8CD98C; --gold:#E8B54B;
-    --bg:#0E141A; --panel:#151E26; --well:#101820; --line:#3F5260; --line-hi:#58707F;
-    --ink:#D8F0D9; --dim:#A4C0A8; --dimmer:#8AA690; --void:#0E141A; --lift:#1B2833; --ember:#E25822;
-    font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;
+    --human:var(--sk-sovereign); --human-soft:var(--sk-sovereign-soft); --biomass:var(--sk-biomass);
+    --well:var(--sk-bg); --void:var(--sk-bg); --lift:var(--sk-bg-well);
+    --line-hi:rgba(100,129,118,.7); --edge:rgba(100,129,118,.7); --field:rgba(100,129,118,.7);
+    --ember:var(--sk-cat-bug);
+    --accent:var(--sk-primary); --sel:var(--sk-ai); --link:var(--sk-link); --link-hover:var(--sk-link-hover);
+    --font:var(--sk-font-mono); --sans:var(--sk-font-mono);
+    --r-card:var(--sk-radius-sm); --r-row:var(--sk-radius-sm); --r-in:var(--sk-radius-sm); --r-btn:var(--sk-radius-sm);
+    color-scheme:dark; font-size:13px; line-height:1.55;
   }
-  body[data-reg="cypherpunk"] header { padding:40px 0 26px; }
-  body[data-reg="cypherpunk"] h1 { font:700 clamp(1.5rem,3.4vw,2.3rem)/1.1 inherit; letter-spacing:-.02em; }
-  body[data-reg="cypherpunk"] h1 span { color:var(--biomass); }
-  body[data-reg="cypherpunk"] .lead { font:600 1rem/1.5 inherit; max-width:78ch; }
-  body[data-reg="cypherpunk"] .nav a, body[data-reg="cypherpunk"] button.pill { border-radius:3px; }
-  body[data-reg="cypherpunk"] .card, body[data-reg="cypherpunk"] .mrow, body[data-reg="cypherpunk"] .meta div,
-  body[data-reg="cypherpunk"] .law, body[data-reg="cypherpunk"] .colorlaw, body[data-reg="cypherpunk"] .fx { border-radius:3px; }
-  body[data-reg="cypherpunk"] .card h2 { color:var(--ai); }
+  body[data-reg="cypherpunk"] header { padding:36px 0 24px; }
+  body[data-reg="cypherpunk"] .eyebrow { font:600 12px/1.45 var(--font); letter-spacing:.06em; }
+  body[data-reg="cypherpunk"] h1 { font:600 22px/1.3 var(--font); letter-spacing:0; }
+  body[data-reg="cypherpunk"] .lead { font:600 15px/1.45 var(--font); letter-spacing:0; max-width:78ch; }
+  body[data-reg="cypherpunk"] .card h2 { font:600 15px/1.45 var(--font); letter-spacing:0; }
+  body[data-reg="cypherpunk"] .mtitle { font:600 15px/1.45 var(--font); }
+  body[data-reg="cypherpunk"] :is(.nav a, button.pill, .lever, .chip, .fx, .calc input) { border-width:1px; }
+  body[data-reg="cypherpunk"] :is(.nav a, button.pill, .lever) { font-size:14px; font-weight:600; }
+  body[data-reg="cypherpunk"] :is(details.yaml summary, .backlink, .mrow a[href^="#/m/"]) { font-size:14px !important; font-weight:600; }
+  body[data-reg="cypherpunk"] #mission-detail .card > a[href^="mission-room"] { font-size:14px !important; font-weight:600; }
+  body[data-reg="cypherpunk"] :is(.intro, .sub, .mobj, .calc input, .meta strong) { font-size:13px; }
+  body[data-reg="cypherpunk"] :is(.statusline, .fx, .colorlaw, .chip, .mid, .barlabel, .mnext, .law, footer, pre.proposal,
+    table.sheet td, table.sheet th, .calc label, .finline, .meta label, .rep .r, .boundary-dl) { font-size:12px; }
+  body[data-reg="cypherpunk"] :is(.statusline, .chip, .fx, a) { font-weight:600; }
+  body[data-reg="cypherpunk"] table.sheet td > div { font-size:12px !important; }
+  body[data-reg="cypherpunk"] #mission-detail .gate { font-size:12px !important; }
+  body[data-reg="cypherpunk"] .finline.grand b { font-size:15px; font-weight:700; }
+  body[data-reg="cypherpunk"] .card { padding:14px; }
+  body[data-reg="cypherpunk"] .meta div { border-radius:var(--sk-radius-sm); }
   body[data-reg="cypherpunk"] .grid { display:flex; flex-direction:column; }
   body[data-reg="cypherpunk"] #boundary-card { order:-1; }
-  body[data-reg="cypherpunk"] .levers .lever { border-radius:3px; }
 
   /* ── motion laws ────────────────────────────────────────────────────────
      The loop stops for anyone who asks the OS for less motion, and for the

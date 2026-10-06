@@ -102,7 +102,7 @@ body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee
 body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
 body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+/* NEW BEE — a calm room: plain rows, one reassurance, one forest action, an outlined second way on, a footnote */
 #eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
 #eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
 #eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
@@ -289,9 +289,9 @@ body[data-reg] .herofig .num{color:var(--sk-sovereign)}
 body[data-reg] .pane{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl)}
 body[data-reg] .well,body[data-reg] .pstat{background:var(--vitrine);border-color:var(--sk-line);border-radius:var(--sk-radius)}
 body[data-reg] input[type=text]:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-md);min-height:44px}
-body[data-reg] button:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ai);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-pill);min-height:44px}
-body[data-reg] button:not(#eternal *):hover{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
-body[data-reg] button:not(#eternal *):disabled{color:var(--sk-ink-mut);border-color:var(--sk-line)}
+body[data-reg] .bar button{background:var(--sk-bg-card);color:var(--sk-ai);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-pill);min-height:44px}
+body[data-reg] .bar button:hover{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+body[data-reg] .bar button:disabled{color:var(--sk-ink-mut);border-color:var(--sk-line)}
 body[data-reg] .facts b,body[data-reg] .status b{color:var(--sk-verified)}
 body[data-reg] .facts i{color:var(--sk-sovereign)}
 body[data-reg] .pane h3{color:var(--sk-sovereign)}
@@ -303,20 +303,131 @@ body[data-reg="bee"] .sub b,body[data-reg="bee"] .foot b{color:var(--sk-ink)}
 body[data-reg="bee"] .herofig .cap{font:400 14px/1.4 var(--sk-font-bee-sans);letter-spacing:normal}
 body[data-reg="bee"] .facts,body[data-reg="bee"] .status,body[data-reg="bee"] .foot,body[data-reg="bee"] .pane .by{font-family:var(--sk-font-bee-sans)}
 body[data-reg="bee"] .pane h3{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:normal}
-body[data-reg="bee"] button:not(#eternal *){font:600 16px/1.2 var(--sk-font-bee-sans);color:var(--sk-sovereign);border-color:var(--sk-ink)}
+body[data-reg="bee"] .bar button{font:600 16px/1.2 var(--sk-font-bee-sans);color:var(--sk-sovereign);border-color:var(--sk-ink)}
 body[data-reg="raver"]{--vitrine:var(--sk-bg-well);font:400 14px/1.6 var(--sk-font-raver-body)}
 body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);background:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;letter-spacing:-.01em}
 body[data-reg="raver"] .sub,body[data-reg="raver"] .facts,body[data-reg="raver"] .status,body[data-reg="raver"] .foot,body[data-reg="raver"] .pane .by{font-family:var(--sk-font-raver-body);color:var(--sk-ink-soft)}
 body[data-reg="raver"] .pane h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
-body[data-reg="raver"] button:not(#eternal *){font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-on-primary);background:var(--sk-primary);border-color:var(--sk-primary)}
-body[data-reg="raver"] button:not(#eternal *):disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] .bar button{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-on-primary);background:var(--sk-primary);border-color:var(--sk-primary)}
+body[data-reg="raver"] .bar button:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
 body[data-reg="cypherpunk"]{--vitrine:var(--sk-bg-well);font:400 13px/1.6 var(--sk-font-mono)}
 body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);background:none;color:var(--sk-ink);-webkit-text-fill-color:currentColor;text-shadow:none;letter-spacing:normal}
-body[data-reg="cypherpunk"] .pane,body[data-reg="cypherpunk"] .well,body[data-reg="cypherpunk"] .pstat,body[data-reg="cypherpunk"] input[type=text]:not(#eternal *),body[data-reg="cypherpunk"] button:not(#eternal *){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .pane,body[data-reg="cypherpunk"] .well,body[data-reg="cypherpunk"] .pstat,body[data-reg="cypherpunk"] input[type=text]:not(#eternal *),body[data-reg="cypherpunk"] .bar button{border-radius:var(--sk-radius-sm)}
 body[data-reg="cypherpunk"] .sub{color:var(--sk-ink-soft)}
 body[data-reg="cypherpunk"] .herofig .num{line-height:1.25}
 body[data-reg] .sub a{color:var(--sk-link)}
 #eternal .et-r-art .et-band{cursor:pointer}
+
+/* ── THE FOUNDER'S CHOSEN UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to the
+   set 2026-10-05: "just follow the rules for each of the three seperate ui/ux's"). Only the dress
+   moves: the mark, the title, the lede, the guard, the code card, your link, the three plain rows
+   with their open answers, the one way to plant, the second way on and the footnote (new bee), the
+   score with its clock, legend, card, the still plate, the link, the hold pill, its note and the
+   second way on (raver), and the path, chips, guard, form, code, receipt, timeline, pipeline, verify
+   list and the two ways on (cypherpunk) keep every part and its order, and so does the whole garden
+   below. THE CODE IS NEVER TOUCHED: the plate images, the garden svg and the clock's data colours
+   keep their own paint in every register; only the frames around them wear the register.
+   new bee: paper, ink, bold system sans, forest green for the one filled action (white label) and
+   for the row you have open, white cards with soft large corners, outlined pills for every other
+   press; the guard well stays lavender (guard, never red). raver: night purple ground (sovereign
+   wash into tint), plain white bold sans titles, the magenta pill with its soft glow, magenta
+   outlines, round everything. cypherpunk: near-black, IBM Plex Mono, cyan action cut 6px with a dark
+   label, thin grey lines on its presses, dense. ── */
+/* NEW BEE — a calm room: your link, the code, one forest action, a second way on */
+#eternal .et-b{font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-mark{color:var(--sk-ink-mut)}
+#eternal .et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink);text-wrap:balance}
+#eternal .et-b-lede{font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-guard{border-radius:var(--sk-radius-xl);font:600 15px/1.45 var(--sk-font-ui)}
+#eternal .et-b-code p{font:400 14px/1.45 var(--sk-font-ui)}
+#eternal .et-b-code b{font:700 14px/1.45 var(--sk-font-ui)}
+#eternal .et-b-field>span{font:700 14px/1.4 var(--sk-font-ui)}
+#eternal .et-b-input{border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-input:focus{border-color:var(--sk-forest)}
+#eternal .et-b-row{font:600 16px/1.45 var(--sk-font-ui)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-bg-card);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-forest)}
+#eternal .et-b-open{background:var(--sk-bg);font:400 15px/1.5 var(--sk-font-ui)}
+#eternal .et-b-act{gap:var(--sk-s2)}
+#eternal .et-b-primary{border-radius:var(--sk-radius-pill);background:var(--sk-forest);color:var(--sk-on-primary);font:700 17px/1.2 var(--sk-font-ui)}
+#eternal .et-b-primary:hover{background:var(--sk-forest);color:var(--sk-on-primary)}
+#eternal .et-b-link{min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);font:700 16px/1.2 var(--sk-font-ui);color:var(--sk-ink)}
+#eternal .et-b-link:hover{color:var(--sk-ink);border-color:var(--sk-forest)}
+#eternal .et-b-foot{font:400 14px/1.5 var(--sk-font-ui)}
+
+/* RAVER — the score at night: plain white bold sans, the magenta pill with its glow, round everything */
+#eternal .et-r{font:400 15px/1.45 var(--sk-font-ui)}
+#eternal .et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#etSmSky>circle:is([r="1.6"],[r="3"]){fill:rgba(183,159,224,.5)}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em}
+#eternal .et-r-mid span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-card{border:1px solid rgba(156,111,214,.34);background:var(--sk-sovereign-wash)}
+#eternal .et-r-card .et-rk{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-ui)}
+#eternal .et-r-card b{font:700 15px/1.3 var(--sk-font-ui)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-code{border:1px solid rgba(156,111,214,.34);background:var(--sk-sovereign-wash);box-shadow:none}
+#eternal .et-r-code b{font:700 15px/1.3 var(--sk-font-ui);letter-spacing:normal}
+#eternal .et-r-code span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-input{border:1.5px solid rgba(156,111,214,.55);background:var(--sk-sovereign-tint);font:400 15px/1.4 var(--sk-font-ui)}
+#eternal .et-r-input:focus{border-color:var(--sk-you)}
+#eternal .et-r-pill{font:700 18px/1.2 var(--sk-font-ui);letter-spacing:normal;box-shadow:0 0 28px rgba(214,85,187,.38)}
+#eternal .et-r-pill:disabled{box-shadow:none}
+#eternal .et-r-note{font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-ghost{width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s4);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);text-decoration:none}
+#eternal .et-r-ghost:hover{color:var(--sk-ink);border-color:var(--sk-you)}
+
+/* CYPHERPUNK — the instrument already wore the chosen UI (near-black, IBM Plex Mono throughout, cyan
+   action cut 6px with a dark label, dense); the chosen UI adds only thin grey lines on its presses */
+#eternal .et-c-ghost{border:1px solid rgba(100,129,118,.7)}
+#eternal .et-c-ghost:hover{border-color:var(--sk-ai)}
+
+/* ── THE WHOLE GARDEN in the chosen UI: the title, the pilot's words, the bar, both panes with the
+   garden's well, the frozen code's figure and facts, the provenance and the fleet row keep every part
+   and their order. None of the bar's presses is filled (the one filled press is the front's): new
+   bee outlines them in a soft grey pill, raver in magenta, cypherpunk in thin grey cut 6px. The well
+   stays dark in every register, the ground the garden was drawn for. The bar's presses are reached
+   through .bar (above, was button:not(#eternal *)): the wider selector also dressed the shared look
+   switch and the tour bar's menu toggle, so raver showed three filled magenta pills and new bee
+   never showed its forest one; both now wear the dress their own scripts give them. ── */
+body[data-reg="bee"]{font-family:var(--sk-font-ui)}
+body[data-reg="bee"] h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+body[data-reg="bee"] #etArchive.et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="bee"] .sub,body[data-reg="bee"] .herofig .cap,body[data-reg="bee"] .facts,body[data-reg="bee"] .status,body[data-reg="bee"] .foot,body[data-reg="bee"] .pane .by{font-family:var(--sk-font-ui)}
+body[data-reg="bee"] .herofig .num{font-family:var(--sk-font-ui);font-weight:700;color:var(--sk-ink)}
+body[data-reg="bee"] .pane h3{font:700 17px/1.35 var(--sk-font-ui);letter-spacing:normal;color:var(--sk-ink)}
+body[data-reg="bee"] .facts i{color:var(--sk-ink);font-weight:600}
+body[data-reg="bee"] input[type=text]:not(#eternal *){border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-xl);font:400 16px/1.5 var(--sk-font-ui)}
+body[data-reg="bee"] input[type=text]:not(#eternal *):focus{border-color:var(--sk-forest)}
+body[data-reg="bee"] .bar button{background:transparent;color:var(--sk-ink);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);padding:0 var(--sk-s3);font:700 15px/1.2 var(--sk-font-ui)}
+body[data-reg="bee"] .bar button:hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-forest)}
+body[data-reg="bee"] .bar button:disabled{color:var(--sk-ink-mut);border-color:var(--sk-line)}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
+body[data-reg="raver"]{--vitrine:var(--sk-sovereign-tint);
+ background-color:var(--sk-sovereign-tint);
+ background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+ background-attachment:fixed;color-scheme:dark;font-family:var(--sk-font-ui)}
+body[data-reg="raver"] h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--sk-ink);-webkit-text-fill-color:currentColor}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] .sub{font-size:15px;line-height:1.6}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .facts,body[data-reg="raver"] .status,body[data-reg="raver"] .foot,body[data-reg="raver"] .pane .by{font-family:var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] .sub b,body[data-reg="raver"] .foot b{color:var(--sk-ink)}
+body[data-reg="raver"] .herofig .num{font-family:var(--sk-font-ui);font-weight:700}
+body[data-reg="raver"] .herofig .cap{color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] .pane{background:var(--sk-sovereign-wash);border-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] .well{border-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] .pane h3{font:700 18px/1.3 var(--sk-font-ui);letter-spacing:normal;color:var(--sk-ink)}
+body[data-reg="raver"] .foot{border-top-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] input[type=text]:not(#eternal *){background:var(--sk-sovereign-tint);border:1.5px solid rgba(156,111,214,.55);border-radius:var(--sk-radius-pill);font:400 15px/1.4 var(--sk-font-ui)}
+body[data-reg="raver"] input[type=text]:not(#eternal *):focus{border-color:var(--sk-you)}
+body[data-reg="raver"] .bar button{background:transparent;color:var(--sk-ink);border:1.5px solid rgba(214,85,187,.6);padding:0 var(--sk-s3);font:700 15px/1.2 var(--sk-font-ui);letter-spacing:normal}
+body[data-reg="raver"] .bar button:hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-you)}
+body[data-reg="raver"] .bar button:disabled{background:transparent;color:var(--sk-sovereign-soft);border-color:rgba(156,111,214,.34)}
+body[data-reg="cypherpunk"] .pane h3{font-weight:600;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] .bar button{background:transparent;color:var(--sk-ink);border:1px solid rgba(100,129,118,.7);font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .bar button:hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .bar button:disabled{color:var(--sk-ink-mut);border-color:var(--sk-line)}
 </style>
 <link rel="stylesheet" href="../skaists.css">
 </head>
