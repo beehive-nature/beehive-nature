@@ -19,10 +19,10 @@ runs.forEach((r, i) => r.endpoints.forEach(e => {
   all.get(e.endpoint)[i] = { verdict: verdict(e.attempts), stages: e.attempts.map(a => a.stage) };
 }));
 
-const classes = { 'dead everywhere': [], 'opened everywhere': [], 'differs by network': [], 'seen by one network only': [], 'unsettled somewhere': [] };
+const classes = { 'dead everywhere': [], 'opened everywhere': [], 'differs by network': [], 'not seen by every network': [], 'unsettled somewhere': [] };
 for (const [h, per] of all) {
   const seen = per.filter(Boolean);
-  if (seen.length < runs.length) classes['seen by one network only'].push(h);
+  if (seen.length < runs.length) classes['not seen by every network'].push(h);
   else if (seen.some(p => p.verdict === 'unsettled')) classes['unsettled somewhere'].push(h);
   else if (seen.every(p => p.verdict === 'dead')) classes['dead everywhere'].push(h);
   else if (seen.every(p => p.verdict === 'opened')) classes['opened everywhere'].push(h);
@@ -33,7 +33,7 @@ const deadEverywhereNoIce = classes['dead everywhere'].filter(h => all.get(h).ev
 console.log('runs: ' + runs.map(r => `${r.label} (${r.network.type}/${r.network.effectiveType}, ${r.startedAt || r.exportedAt}, ${r.endpoints.length} endpoints)`).join(' · '));
 for (const [k, v] of Object.entries(classes)) console.log(`${k}: ${v.length}`);
 console.log(`dead everywhere, never ICE-connected on any attempt: ${deadEverywhereNoIce}`);
-const both = all.size - classes['seen by one network only'].length;
+const both = all.size - classes['not seen by every network'].length;
 console.log(`endpoints seen by every network: ${both}`);
 
 if (jsonOut) writeFileSync(jsonOut, JSON.stringify({

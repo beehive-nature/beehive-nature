@@ -168,3 +168,22 @@ endpoint X keep its outcome over time and from a third vantage point".
 
 Nothing in `ant-node` is touched from BNR. The sequence stays: evidence,
 upstream review, upstream diagnosis, a patch at the source.
+
+### Cohort window 2: three vantage points, about 35 minutes later
+
+laptop-w2 20:54:51Z · gh-macos-latest 20:55:52Z · gh-ubuntu-latest 20:56:23Z,
+150 s each (Actions run 37529869576).
+
+- dead cohort: 20 of 20 observed; **43 of 43** settled observations still dead, 0 opened
+- live cohort: 20 of 20 observed; **50 of 50** settled observations still open, 0 failed
+- all three runs, all endpoints: 271 seen by every network, 259 settled on all
+  three; 127 dead from all three, 130 open from all three, **2 differ by
+  network**, 12 unsettled somewhere
+
+So far the 40 endpoints kept their phenotype across time and three vantage
+points. Across the whole three-way overlap, 257 of 259 settled endpoints were
+concordant; the 2 that differ are the first cases where the browser's network
+mattered, and they are kept in the record, not explained away. The 6-hourly
+runner windows continue to 2026-10-09; the laptop takes no part in those.
+
+Receipt: `docs/receipts/ant-reach-cohort-2026-10-06.json`.
