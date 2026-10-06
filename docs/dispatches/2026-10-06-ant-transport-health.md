@@ -114,3 +114,34 @@ the ant-client comment). It does not tell a closed port from a NAT mapping, a
 firewall, a stale candidate or a wrong advertisement. One network, one time.
 (Corrected 2026-10-06: an earlier line here said this "is where an unreachable
 UDP port fails", which claimed a diagnosis the run did not measure.)
+
+## Two independent networks, endpoint by endpoint (2026-10-06)
+
+Same live page (`ant-transport.js?v=2`), same clip, direct only, 150 s each,
+`e2e/ant-reach-probe.mjs` on both sides. The windows overlapped by about 45 s.
+
+| run | network | dials | opened | dead | settled endpoints reachable | dead attempts never ICE-connected |
+|---|---|---|---|---|---|---|
+| laptop | founder's home network, 20:20:49Z | 760 | 441 | 295 | 231 of 526 | 295 of 295 |
+| gh-runner | GitHub-hosted runner (Actions run 37525604244), 20:22:36Z | 794 | 509 | 285 | 230 of 505 | 276 of 285 |
+
+`node scripts/ant-reach-compare.mjs` over the two exports:
+
+- endpoints seen by both: 375
+- dead from both networks: **195** (every attempt, both sides, never ICE-connected)
+- opened from both networks: **170**
+- differs by network: **0**
+- unsettled on one side: 10; seen by one network only: 301
+
+Reading: in this run, whether an endpoint opened did not depend on the browser's
+network. Every endpoint both sides settled was either dead from both or open from
+both. That moves the finding from "this client's network had trouble" towards
+"these advertised WebRTC Direct endpoints are not reachable", which is the
+`ant-node` advertisement question. It still does not say why ICE never
+connected for those 195. It is two networks in one 5-minute window; a repeat
+at another hour would firm it up.
+
+Receipt: `docs/receipts/ant-reach-2026-10-06.json` (both run summaries, the
+counts, and the 195 dead-everywhere and 170 opened-everywhere endpoints as
+16-hex prefixes of SHA-256 of `ip:port`, so the advertised list can be matched
+without publishing addresses here).
