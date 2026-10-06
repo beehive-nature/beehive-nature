@@ -159,8 +159,10 @@ endpoint X keep its outcome over time and from a third vantage point".
 - `scripts/ant-reach-cohort.mjs` reads any later reach() exports for those 40
   only: observed or not, and kept or flipped when settled.
 - `.github/workflows/ant-reach.yml` now probes from a Linux and a macOS
-  GitHub-hosted runner, on demand and every 6 hours, and the schedule stops by
-  itself after 2026-10-09. The two runner pools are separate machines; that
+  GitHub-hosted runner, on demand and every 6 hours. Probing stops
+  automatically after 2026-10-09; the cron must then be removed or disabled.
+  (Corrected 2026-10-06: this line first said the schedule "stops by itself",
+  which was false: the cron stays registered and wakes as a no-op.) The two runner pools are separate machines; that
   they leave through different upstream networks is not verified.
 - Baseline (the two runs above): dead cohort 40 of 40 settled observations
   dead; live cohort 40 of 40 open. Trivially so, since the cohort was drawn
@@ -182,8 +184,9 @@ laptop-w2 20:54:51Z · gh-macos-latest 20:55:52Z · gh-ubuntu-latest 20:56:23Z,
 
 So far the 40 endpoints kept their phenotype across time and three vantage
 points. Across the whole three-way overlap, 257 of 259 settled endpoints were
-concordant; the 2 that differ are the first cases where the browser's network
-mattered, and they are kept in the record, not explained away. The 6-hourly
+concordant; the 2 that differ are both outside the fixed cohort. They are the
+first cases where the browser's network mattered, kept in the record, not
+explained away. The 6-hourly
 runner windows continue to 2026-10-09; the laptop takes no part in those.
 
 Receipt: `docs/receipts/ant-reach-cohort-2026-10-06.json`.

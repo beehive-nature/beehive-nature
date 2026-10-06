@@ -2,8 +2,9 @@
 # independent of the founder's laptop (a Linux and a macOS runner pool). Runs the live bViEw
 # page on the direct-only route and saves its reach() export (endpoints as SHA-256 of ip:port,
 # no raw address) as an artifact. Read-only: a public read; no secret, no key, no payment.
-# The schedule tracks the 40-endpoint cohort (scripts/ant-reach-cohort.mjs) across time windows
-# and stops by itself after 2026-10-09.
+# The schedule tracks the 40-endpoint cohort (scripts/ant-reach-cohort.mjs) across time windows.
+# Probing stops automatically after 2026-10-09; the cron must then be removed or disabled (until
+# then each scheduled run still wakes, finds the window closed and skips every probe step).
 name: ant-reach
 on:
   workflow_dispatch:

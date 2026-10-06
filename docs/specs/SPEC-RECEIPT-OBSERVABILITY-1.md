@@ -1,7 +1,8 @@
 # SPEC-RECEIPT-OBSERVABILITY-1 — receipt-derived observability: a BNR design law
 
-Status: BANKED 2026-10-06 by founder ruling, after two independent lanes
-converged on the same primitive unprompted. This spec promotes
+Status: RATIFIED 2026-10-06 by founder word ("Ratify it."), after two
+independent lanes converged on the same primitive unprompted. Short form:
+`docs/architecture/receipt-derived-observability.md`. This spec promotes
 `event → receipt → projection → human truth` from a bChat/bViEw
 implementation detail to a cross-stack architectural rule.
 
