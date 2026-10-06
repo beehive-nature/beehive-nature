@@ -106,8 +106,11 @@ Founder's 214 MB clip, direct only, founder's laptop network, one page session:
 - wire traffic: 74 MB of data channel payload
 - status line during the start: "Reading the video map · 19 of 37 nodes answered"
 
-Reading: about half the advertised WebRTC Direct endpoints could not be
-reached from this browser, and 98% of the dead dials died before ICE, which
-is where an unreachable UDP port fails. That is consistent with Shu's
-hypothesis and the ant-client comment; it is one network at one time, not a
-network-wide figure.
+Reading: about half the dialled WebRTC Direct endpoints could not be
+reached from this browser, and 129 of 131 failed attempts never reached
+ICE-connected. That localises the failure to connection establishment and is
+consistent with unreachable or misadvertised UDP endpoints (Shu's hypothesis,
+the ant-client comment). It does not tell a closed port from a NAT mapping, a
+firewall, a stale candidate or a wrong advertisement. One network, one time.
+(Corrected 2026-10-06: an earlier line here said this "is where an unreachable
+UDP port fails", which claimed a diagnosis the run did not measure.)

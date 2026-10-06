@@ -86,3 +86,25 @@ test('a browser without WebRTC is left alone', () => {
   assert.equal(window.__antTransport, undefined);
   assert.equal(window.RTCPeerConnection, undefined);
 });
+
+test('reach() exports hashed endpoints with every attempt, never the raw address', async () => {
+  let t = 0;
+  const window = { RTCPeerConnection: FakePC };
+  const ctx = vm.createContext({ window, performance: { now: () => t }, setTimeout: (fn) => { fn(); return 1; },
+    Object, String, Math, Event, Date, Promise, Array, Uint8Array, TextEncoder, crypto: globalThis.crypto, navigator: {} });
+  vm.runInContext(SRC, ctx);
+  const PC = window.RTCPeerConnection;
+  const dead = new PC({}); await dead.setRemoteDescription(answer('5.6.7.8', 10001)); t += 900; dead.close();
+  const open = new PC({}); await open.setRemoteDescription(answer('5.6.7.8', 10001)); const ch = open.createDataChannel('');
+  t += 200; open.conn('connected'); ch.dispatchEvent(new Event('open'));
+  const iced = new PC({}); await iced.setRemoteDescription(answer('9.9.9.9', 10001)); iced.ice('connected'); iced.conn('failed');
+  const r = JSON.parse(JSON.stringify(await window.__antTransport.reach('laptop')));
+  assert.equal(r.schema, 'bnr.ant-reach/1');
+  assert.equal(r.label, 'laptop');
+  assert.equal(r.endpoints.length, 2);
+  const want = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('5.6.7.8:10001'))).toString('hex');
+  const e = r.endpoints.find(x => x.endpoint === want);
+  assert.deepEqual(e.attempts.map(a => a.stage), ['no-ice-connected', 'opened']);
+  assert.equal(r.endpoints.find(x => x.endpoint !== want).attempts[0].stage, 'ice-no-dtls');
+  assert.doesNotMatch(JSON.stringify(r), /\d+\.\d+\.\d+\.\d+/);
+});

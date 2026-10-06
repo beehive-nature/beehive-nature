@@ -244,7 +244,7 @@ body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
 .done{margin:var(--sk-s2) 0 0;color:var(--dim);font:400 var(--fs2)/1.4 var(--font)}
 @media(min-width:760px){.nerd{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
-<script src="ant-transport.js?v=1"></script>
+<script src="ant-transport.js?v=2"></script>
 </head>
 <body data-experience="bview" data-bee-theme="custom">
 <script>
@@ -1866,7 +1866,7 @@ document.addEventListener('DOMContentLoaded',function(){
         ['connections',esc(T_.dials+' created · '+(T_.dead+T_.closed)+' destroyed · '+(T_.opened-T_.closed)+' open now')],
         ['dials that opened',esc(pc(T_.openRate)+' of settled dials · data channel open')],
         ['endpoints reachable',esc(T_.endpointsReachable+' of '+(T_.endpointsReachable+T_.endpointsUnreachable)+' settled endpoints · '+pc(T_.endpointRate)+(T_.endpointsRecovered?' · '+T_.endpointsRecovered+' failed once, then opened':''))],
-        ['where dead dials stopped',esc(T_.deadAt.dial+' before ICE · '+T_.deadAt.ice+' after ICE, before DTLS · '+T_.deadAt.dtls+' after DTLS, before the channel')],
+        ['where dead dials stopped',esc(T_.deadAt.dial+' never ICE-connected · '+T_.deadAt.ice+' ICE-connected, no DTLS · '+T_.deadAt.dtls+' DTLS, no channel')],
         ['dial to open',esc(ms(T_.connectP50)+' p50 · '+ms(T_.connectP95)+' p95')],
         ['dial to first answer',esc(ms(T_.answerP50)+' p50 · '+ms(T_.answerP95)+' p95')],
         ['time on dead endpoints',esc(ms(T_.deadMs)+' summed across dials · dials overlap'+(T_.failedPerOpened!=null?' · '+T_.failedPerOpened.toFixed(2)+' dead per opened':''))],

@@ -5,7 +5,10 @@
      dial → ICE connected → DTLS connected → data channel open → first answer → bytes
    It wraps the constructor once, before the SDK loads; the SDK resolves RTCPeerConnection at each
    dial, so every dial is seen. Nothing leaves the device and no endpoint address is exposed: the
-   address is kept in memory only to tell endpoints apart. Lookup rounds are not visible from here
+   address is kept in memory only to tell endpoints apart. reach() exports, on request, each
+   endpoint as a SHA-256 of "ip:port" (whoever holds the advertised list can match it; the raw
+   address is not written) with every attempt's furthest step, so runs from independent networks
+   can be compared endpoint by endpoint. Lookup rounds are not visible from here
    (the frames are the SDK's own), so they are not counted. */
 (function () {
   'use strict';
@@ -39,7 +42,7 @@
     emit();
   };
   var track = function (pc) {
-    var d = { t0: now(), ep: null, ice: null, dtls: null, open: null, first: null, end: null, bytes: 0, reached: 'dial', outcome: null };
+    var d = { at: Date.now(), t0: now(), ep: null, ice: null, dtls: null, open: null, first: null, end: null, bytes: 0, reached: 'dial', outcome: null };
     dials.push(d); seq++; emit();
     var setRemote = pc.setRemoteDescription;
     pc.setRemoteDescription = function (desc) {
@@ -101,8 +104,31 @@
       bytes: bytes
     };
   };
+  // How far an attempt got, in the browser's own terms. "no-ice-connected" means ICE never reached
+  // connected; it does not say why (closed port, NAT, firewall, stale or wrong advertisement).
+  var stageOf = function (d) {
+    if (d.open != null) return d.first != null ? 'answered' : 'opened';
+    if (d.outcome !== 'dead') return 'waiting';
+    return d.reached === 'dial' ? 'no-ice-connected' : d.reached === 'ice' ? 'ice-no-dtls' : 'dtls-no-channel';
+  };
+  var hex = function (buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join(''); };
+  var reach = function (label) {
+    var by = Object.create(null);
+    dials.forEach(function (d) {
+      if (!d.ep) return;
+      (by[d.ep] = by[d.ep] || []).push({ at: d.at, stage: stageOf(d), ms: Math.round(d.open != null ? d.open : d.end != null ? d.end : now() - d.t0) });
+    });
+    var c = navigator.connection || {};
+    return Promise.all(Object.keys(by).map(function (ep) {
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(ep)).then(function (h) { return { endpoint: hex(h), attempts: by[ep] }; });
+    })).then(function (list) {
+      return { schema: 'bnr.ant-reach/1', label: String(label || ''), exportedAt: new Date().toISOString(),
+        network: { type: c.type || 'unknown', effectiveType: c.effectiveType || 'unknown' },
+        summary: snapshot(), endpoints: list.sort(function (a, b) { return a.endpoint < b.endpoint ? -1 : 1; }) };
+    });
+  };
   window.__antTransport = {
-    snapshot: snapshot,
+    snapshot: snapshot, reach: reach,
     subscribe: function (fn) { subs.push(fn); return function () { subs = subs.filter(function (f) { return f !== fn; }); }; }
   };
 })();

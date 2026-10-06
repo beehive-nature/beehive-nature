@@ -1,0 +1,41 @@
+# Autonomi WebRTC Direct reachability, from a GitHub-hosted runner: a datacenter network
+# independent of the founder's laptop. Runs the live bViEw page on the direct-only route,
+# saves its reach() export (endpoints as SHA-256 of ip:port, no raw address) as an artifact.
+# Read-only: a public read; no secret, no key, no payment. Compare with
+# scripts/ant-reach-compare.mjs against a run from another network.
+name: ant-reach
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: seconds to watch
+        default: '120'
+      label:
+        description: run label
+        default: gh-runner
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: install chromium
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: probe the live page
+        working-directory: e2e
+        env:
+          SECONDS_IN: ${{ inputs.seconds }}
+          LABEL_IN: ${{ inputs.label }}
+        run: node ant-reach-probe.mjs --label "$LABEL_IN" --seconds "$SECONDS_IN" --out reach.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ant-reach
+          path: e2e/reach.json
