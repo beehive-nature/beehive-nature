@@ -32,6 +32,7 @@ row below is a data-plane call the user's operation asked for.
 |---|---|---|---|
 | `relay.damus.io`, `nos.lol`, `relay.snort.social` (wss) | QR bridge v2: ephemeral kind-20107 events carrying the desktop's X-Wing key and the phone's sealed grant (ciphertext only) | only while a QR bridge is open (desktop shows a code, or the phone presses allow) | `QR_RELAYS` in wallet.html; close the bridge |
 | `a.pool.opentimestamps.org`, `b.pool.opentimestamps.org`, `a.pool.eternitywall.com` | OpenTimestamps: POST /digest with the SHA-256 of a PQ binding (32 bytes, nothing else) | only when the person presses "timestamp it on Bitcoin" after making a binding | `PQ_OTS_CALENDARS` in wallet.html; do not press |
+| `eos.hyperion.eosrio.io`, then `eos.eosusa.io` | Hyperion history: GET `/v2/history/get_transaction?id=` with the one-paste transaction's id (a public id, nothing else), to tell whether a block holds it | only while a one-paste send is read for its outcome, and only when no Vaulta host answers `get_transaction_status` for it | `HYPERION` in wallet.html |
 
 ## atmirror (mirror pipeline)
 

@@ -108,7 +108,10 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       if (u.pathname.endsWith('/get_currency_balance')) return json(body.code === 'core.vaulta' && body.symbol === 'A' ? ['5.0000 A'] : []);
       if (u.pathname.endsWith('/get_abi') && state.abiDelay && body.account_name === 'core.vaulta') await new Promise(r => setTimeout(r, state.abiDelay));
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : body.account_name === 'core.vaulta' ? CORE_VAULTA_ABI : body.account_name === 'eosio.token' ? EOSIO_TOKEN_ABI : ABI);
-      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
+      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head, head_block_time: state.chainTime });
+      // the dry run (compute_transaction) and the transaction's own status: a node without them answers {} (the default)
+      if (u.pathname.endsWith('/compute_transaction')) { (state.dry = state.dry || []).push(u.host); return json(state.dryRun ? state.dryRun(body) : {}); }
+      if (u.pathname.endsWith('/get_transaction_status')) { (state.st = state.st || []).push(u.host); return json(state.status ? state.status(body.id, url) : {}); }
       if (u.pathname.endsWith('/get_block')) {
         const num = body.block_num_or_id;
         if (num === 123453) return json({ ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000' });
@@ -118,6 +121,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
         (state.posts = state.posts || []).push(body.packed_trx);
         if (state.slowSend) await new Promise(r => setTimeout(r, state.slowSend));
+        if (state.sendBy && state.sendBy(url) === 'abort') return route.abort();   // this host loses its answer
         if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: state.refuseName || 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
         if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
@@ -382,15 +386,19 @@ try {
     await page.click('#act-stat button.wl-act'); await stateAfter(page);
     s = await sheet(page);
     ok('inside its window: it may still go in, check again, the field still waits', /^kingbeelovis does not show this wallet yet, and the paste may still go in\./.test(s.stat) && await lockedNow(), JSON.stringify(s));
-    await page.evaluate(() => { const real = Date.now.bind(Date); Date.now = () => real() + 200000; });   // its window and grace are over
+    // the nodes now answer for the transaction itself: no block holds it, and a final block is past its window
+    const lib = new Date(Date.now() + 200000).toISOString().slice(0, 23);
+    state.status = id => [...state.byPacked.values()].includes(id) ? { state: 'IRREVERSIBLE', block_number: 123460, irreversible_number: 123598, irreversible_timestamp: lib, earliest_tracked_block_number: 100 }
+      : { state: 'UNKNOWN', irreversible_number: 123598, irreversible_timestamp: lib, earliest_tracked_block_number: 100 };
     await page.click('#act-stat button.wl-act'); await stateAfter(page);
     s = await sheet(page);
-    ok('once its window is over and the account lacks the key: it did not go in, and the paste can be made again', /^It did not go in, so nothing changed\. Paste kingbeelovis\u2019s active key again to try once more\./.test(s.stat) && await page.evaluate(() => !document.getElementById('act-key').disabled && !document.getElementById('act-paste-go').disabled), JSON.stringify(s));
+    ok('once a final block is past its window and no block holds it: it did not reach a block, and the paste can be made again', /^It did not reach a block before its time ran out, so nothing changed\. Paste the key again to try once more\./.test(s.stat) && /no block holds it/.test(s.stat) && await page.evaluate(() => !document.getElementById('act-key').disabled && !document.getElementById('act-paste-go').disabled), JSON.stringify(s));
     state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    const p0 = state.posts.length;
     await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go');
     await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
     s = await sheet(page);
-    ok('the paste made again lands once: added and renewed', s.state === 'done' && /^Done\. king\.b is renewed for 365 days\./.test(s.stat) && state.submits === 1, JSON.stringify(s) + ' submits ' + state.submits);
+    ok('the paste made again lands once: added and renewed, its identical bytes sent to both hosts', s.state === 'done' && /^Done\. king\.b is renewed for 365 days\./.test(s.stat) && /in block 123460/.test(s.stat) && state.submits === 2 && state.posts.length - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], JSON.stringify(s) + ' submits ' + state.submits);
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -412,6 +420,80 @@ try {
     const s = await sheet(page);
     ok('check again finds the key: it says this wallet signs now and sends the reader to the name desk, never that the renew is done',
       /^This wallet now signs for kingbeelovis, and the name desk shows whether king\.b changed\./.test(s.stat) && !/renewed/.test(s.stat) && await page.evaluate(() => /bnames\.html/.test((document.querySelector('#act-stat a') || {}).href || '')), JSON.stringify(s));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  /* C8 · the sheet's one paste reads the chain: a dry run before the key signs anything, the same bytes to every
+     host, then the transaction's own status until a block holds it or it can never land */
+  {
+    console.log('C8 · the sheet paste, read from the chain:');
+    const { ctx, state } = await context(browser, 'bee', { soul: null });
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await backAfterConnect(page, state, [DEV_PUB]);
+    await page.click('#act-go');
+    await page.waitForFunction(() => !document.getElementById('act-paste').hidden, null, { timeout: 40000 });
+    const k1 = await k1Of(page, 'vaulta:kingbeelovis');
+    state.chainTime = '2026-10-05T00:00:00.000';   // the head block's time: each paste's window closes at 00:02:00 on the chain's clock
+    await page.evaluate(() => { window.__said = []; const st = document.getElementById('act-stat');
+      new MutationObserver(() => window.__said.push(st.innerText.trim())).observe(st, { childList: true, subtree: true, characterData: true }); });
+    const paste = async () => { await page.evaluate(() => { window.__said = []; }); await page.fill('#act-key', DEV_WIF); await page.click('#act-paste-go'); };
+    const waitStat = re => page.waitForFunction(r => new RegExp(r).test(document.getElementById('act-stat').textContent), re.source, { timeout: 45000 }).catch(() => {});
+    const open = () => page.evaluate(() => !document.getElementById('act-paste').hidden && !document.getElementById('act-key').disabled && !document.getElementById('act-paste-go').disabled);
+    const need = () => page.evaluate(() => document.getElementById('act-sheet').getAttribute('data-need'));
+    const posts = () => (state.posts || []).length;
+    const said = () => page.evaluate(() => window.__said);
+    const neverSent = list => !list.some(x => /was sent|it was sent/i.test(x.replace(/nothing was sent/gi, '')));
+    const ST = (st, lib, more = {}) => ({ state: st, head_number: 123500, head_timestamp: lib, irreversible_number: 123498, irreversible_timestamp: lib, earliest_tracked_block_number: 100, expiration: '2026-10-05T00:02:00', ...more });
+    const BEFORE = '2026-10-05T00:01:00.000', AFTER = '2026-10-05T00:02:00.500';   // a final block before, then past, the window's end
+    // 1 · the dry run hits the registry's assertion: refused before the key signs anything
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: null, elapsed: 120, except: { code: 3050003, name: 'eosio_assert_message_exception', message: 'eosio_assert_message assertion failure', stack: [{ format: 'assertion failure with message: ${s}', data: { s: 'the test registry refuses this' } }] } } });
+    await paste(); await waitStat(/would refuse/);
+    let s = await sheet(page);
+    ok('a dry run the registry refuses is said before the key signs anything: nothing signed, nothing sent, the paste field back',
+      /^The chain would refuse this, so nothing was signed\./.test(s.stat) && s.state === 'fail' && posts() === 0 && await open() && /the test registry refuses this/.test(s.stat) && (state.dry || []).length >= 1, JSON.stringify(s) + ' · posts ' + posts());
+    // 2 · the dry run needs more CPU than the account has
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: { status: 'executed', cpu_usage_us: 1500 }, elapsed: 1400, except: null } });
+    await paste(); await waitStat(/CPU this needs/);
+    s = await sheet(page);
+    ok('too little CPU is said before signing with its one step, and the sheet carries the hook for another way to sign',
+      /^kingbeelovis does not have the CPU this needs right now, so nothing was signed\. It comes back within a day, so paste the key again then\./.test(s.stat) && posts() === 0 && await open() && await need() === 'cpu', JSON.stringify(s) + ' · posts ' + posts());
+    // 3 · one host takes it, the other loses its answer; the node that took it says FAILED once a final block is past its window
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: { status: 'executed', cpu_usage_us: 224 }, elapsed: 198, except: null } });
+    state.sendBy = url => /eosnation/.test(url) ? 'abort' : 'ack';
+    state.polls = 0;
+    state.status = (id, url) => { const g = /greymass/.test(url); if (g) state.polls++; const before = state.polls < 3;
+      return g ? ST(before ? 'LOCALLY_APPLIED' : 'FAILED', before ? BEFORE : AFTER) : ST('UNKNOWN', before ? BEFORE : AFTER); };
+    let p0 = posts();
+    await paste(); await waitStat(/did not take it/);
+    s = await sheet(page);
+    ok('a FAILED status, read once a final block is past its window, is said as the chain not taking it: nothing changed, the paste field back',
+      /^The chain did not take it, so nothing changed\. Paste the key again to try once more\./.test(s.stat) && s.state === 'fail' && await open() && /FAILED/.test(s.stat), JSON.stringify(s));
+    ok('the CPU hook clears on the next press, and one signature went to both hosts', await need() === null && posts() - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(await need()) + ' · ' + (posts() - p0));
+    // 4 · one host takes it and no block ever holds it
+    state.polls = 0;
+    state.status = (id, url) => { const g = /greymass/.test(url); if (g) state.polls++; const lib = state.polls < 3 ? BEFORE : AFTER;
+      return g ? ST('LOCALLY_APPLIED', lib) : ST('UNKNOWN', lib); };
+    p0 = posts();
+    await paste(); await waitStat(/did not reach a block/);
+    s = await sheet(page);
+    const w4 = await said();
+    ok('acked by one host and never in a block: after its window, one sentence and the field back',
+      /^It did not reach a block before its time ran out, so nothing changed\. Paste the key again to try once more\./.test(s.stat) && s.state === 'fail' && await open() && /no block holds it/.test(s.stat), JSON.stringify(s));
+    ok('while it waited the sheet said "Sending it, one moment.", never that it was sent', w4.includes('Sending it, one moment.') && neverSent(w4), JSON.stringify(w4));
+    ok('signed once: the identical bytes to both hosts', posts() - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(posts() - p0));
+    // 5 · both hosts take it and a block holds it
+    state.sendBy = null; state.polls = 0;
+    state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    state.status = (id, url) => { if (/greymass/.test(url)) state.polls++;
+      return state.polls < 2 ? ST('LOCALLY_APPLIED', BEFORE) : ST('IN_BLOCK', BEFORE, { block_number: 123461, block_id: 'MOCKBLOCK123461', block_timestamp: '2026-10-05T00:00:01.500' }); };
+    p0 = posts();
+    await paste(); await waitStat(/^Done\./);
+    s = await sheet(page);
+    const w5 = await said();
+    ok('a block holds it: done in words, and cypherpunk reads the block', s.state === 'done' && s.stat.startsWith('Done. king.b is renewed for 365 days. This wallet now signs for kingbeelovis with one press.') && /in block 123461/.test(s.stat), JSON.stringify(s));
+    ok('until the block, the sheet said "Sending it, one moment." and never that it was sent', w5.includes('Sending it, one moment.') && neverSent(w5), JSON.stringify(w5));
+    ok('signed once, the same bytes to both hosts', posts() - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(posts() - p0));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -546,6 +628,8 @@ try {
       await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
       ok('the bridge page is one sentence, one field and one button', await page.evaluate(() => { const c = document.getElementById('br-calm'); return !!c && !document.getElementById('br-copy') && !/Anchor|permissions →|copy/i.test(c.textContent) && /^this wallet does not sign for kingbeelovis yet, so paste its active key once/.test(c.textContent) && document.getElementById('br-paste-go').textContent === 'add this wallet'; }), await page.textContent('#br-calm'));
       state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };   // the chain applies the updateauth the transaction carried
+      // the transaction's own status: a block holds it once a node took it
+      state.status = id => [...state.byPacked.values()].includes(id) ? { state: 'IN_BLOCK', block_number: 123460, irreversible_timestamp: '2026-10-05T00:00:00.000', earliest_tracked_block_number: 100 } : { state: 'UNKNOWN' };
       await intentFor(page, 'live-0004', RENEW);
       await page.goto(sheetUrl(RENEW, 'live-0004'), { waitUntil: 'load' });
       await page.waitForSelector('#act-sheet', { timeout: 20000 });
@@ -556,8 +640,8 @@ try {
       await page.click('#act-paste-go');
       await page.waitForFunction(() => /^(done|fail)$/.test(document.getElementById('act-stat').getAttribute('data-state') || ''), null, { timeout: 40000 });
       s = await sheet(page);
-      ok('one press: added and renewed', s.state === 'done' && s.stat === 'Done. king.b is renewed for 365 days. This wallet now signs for kingbeelovis with one press.', JSON.stringify(s));
-      ok('in ONE transaction carrying two actions (updateauth, then renew)', state.submits === 1 && parseInt(String(state.packed).slice(28, 30), 16) === 2, String(state.packed).slice(0, 40));
+      ok('one press: added and renewed, and cypherpunk reads the block that holds it', s.state === 'done' && s.stat.startsWith('Done. king.b is renewed for 365 days. This wallet now signs for kingbeelovis with one press.') && /in block 123460/.test(s.stat), JSON.stringify(s));
+      ok('in ONE transaction carrying two actions (updateauth, then renew), its identical bytes sent to both hosts', state.submits === 2 && state.posts.length === 2 && state.posts[0] === state.posts[1] && parseInt(String(state.packed).slice(28, 30), 16) === 2, String(state.packed).slice(0, 40) + ' · submits ' + state.submits);
       ok('the pasted key is gone from the page', await page.evaluate(() => document.getElementById('act-key').value === '' && !JSON.stringify(localStorage).includes('5KQwrPbw')));
       ok('the wallet now signs for kingbeelovis itself', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓', await page.textContent('#sum-bridge'));
     }

@@ -2792,6 +2792,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 (function(){
   var $=function(i){return document.getElementById(i)};
   var VH=['https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var VAULTA_CHAIN='aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906'; // PUBLIC-CONSTANT: Vaulta mainnet chain id, checked before a paste signs
   var HH='https://api.hive.blog';
   var LIVE_HOST=null;
   var SOUL=null;
@@ -5080,19 +5081,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function brExtraKey(x){ return x?JSON.stringify([x.contract,x.action,x.data]):'' }
   /* the bridge's own line starts every sentence lower case (names keep theirs) */
   function lcAll(t){ return String(t||'').replace(/(^|[.!?]\s+)([A-Z])(?=[a-z ])/g,function(m,p,c){ return p+c.toLowerCase() }) }
-  /* the signed bytes go out once, host after host. A node's refusal ends it; a host that
-     loses its answer may still hold the bytes, so what follows is never a clean "no" */
-  async function brSend(body){
-    var lost=false;
-    for(var i=0;i<VH.length;i++){
-      try{
-        var r=await fetchT(VH[i]+'/v1/chain/send_transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        var d=null; try{ d=await r.json() }catch(je){}
-        if(d&&(d.transaction_id||!r.ok))return {res:d,lost:lost};
-      }catch(e){}
-      lost=true;
-    }
-    return {res:null,lost:lost};
+  /* the signed bytes go to every host at once. They are the same bytes, so a second answer is the
+     same transaction: the first host that takes them answers for the send, and a "duplicate" from
+     another host means it holds them too. A refusal answers only when no host took them, and a host
+     that loses its answer may still hold the bytes, so what follows is never a clean "no" */
+  function brSend(body){
+    var s={res:null,lost:false,acked:[],refused:[]}, json=JSON.stringify(body);
+    var each=VH.map(function(h){
+      return fetchT(h+'/v1/chain/send_transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:json})
+        .then(function(r){ return r.json().then(function(d){ return {r:r,d:d} },function(){ return {r:r,d:null} }) },function(){ return {} })
+        .then(function(x){
+          var d=x.d, why=d&&!d.transaction_id?JSON.stringify(d.error||d):'';
+          if(d&&(d.transaction_id||isDuplicate(why))){ s.acked.push(h); if(!(s.res&&s.res.transaction_id))s.res=d }
+          else if(d&&x.r&&!x.r.ok){ s.refused.push(why); if(!s.res)s.res=d }
+          else s.lost=true;
+        });
+    });
+    return new Promise(function(done){
+      each.forEach(function(p){ p.then(function(){ if(s.acked.length)done(s) }) });
+      Promise.all(each).then(function(){ done(s) });
+    });
   }
   /* the chain's refusal of a paste, in words: the key it refused is the pasted one */
   function brRefusal(t,a){
@@ -5103,7 +5111,85 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(/expired/i.test(t))return 'It did not land in time, so nothing changed.';
     return 'The chain said no, so nothing changed.';
   }
-  async function pasteBridge(wif,extra){
+  /* the exact transaction, run once by a node that keeps nothing (compute_transaction). It needs no
+     signature, so a refusal is said before the pasted key signs anything. A node that cannot run it is
+     passed over; when none can, the send is the chain's first word, as before */
+  function brDryKind(t){
+    t=String(t||'');
+    if(/assertion failure|eosio_assert/i.test(t))return 'no';   /* first: a contract's own message never passes for a resource */
+    if(/ram_usage_exceeded|insufficient ram/i.test(t))return 'ram';
+    if(/tx_net_usage|net usage/i.test(t))return 'net';
+    if(/cpu|billed|leeway|deadline/i.test(t))return 'cpu';
+    if(/unknown key|does not exist|unknown account|expired|tapos|invalid_ref_block|action_validate/i.test(t))return 'no';
+    return null;
+  }
+  async function brDryRun(hex){
+    var body=JSON.stringify({transaction:{signatures:[],compression:0,packed_context_free_data:'',packed_trx:hex}});
+    for(var i=0;i<VH.length;i++){
+      var h=VH[i], r=null, d=null;
+      try{ r=await fetchT(h+'/v1/chain/compute_transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:body}); try{ d=await r.json() }catch(je){} }catch(e){ continue }
+      var p=d&&d.processed;
+      if(r.ok&&p&&typeof p==='object'){
+        if(p.except){ var t=JSON.stringify(p.except); return {h:h,no:t,kind:brDryKind(t)||'no'} }
+        return {h:h,need:Number((p.receipt&&p.receipt.cpu_usage_us)||p.elapsed||0)};
+      }
+      var k=d&&d.error?brDryKind(JSON.stringify(d.error)):null;   /* a node that said no to the transaction, never one that cannot dry run */
+      if(k)return {h:h,no:JSON.stringify(d.error),kind:k};
+    }
+    return null;
+  }
+  /* the dry run's refusal, in words: nothing was signed, and the one thing to do */
+  function brDryWords(k,a){
+    if(k==='cpu')return a+' does not have the CPU this needs right now, so nothing was signed. It comes back within a day, so paste the key again then.';
+    if(k==='net')return a+' cannot send this much right now, so nothing was signed. It comes back within a day, so paste the key again then.';
+    if(k==='ram')return a+' needs more RAM for this, so nothing was signed. Add RAM to it, then paste the key again.';
+    return 'The chain would refuse this, so nothing was signed.';
+  }
+  /* serializing needs no key: the pasted one joins only for the one signature */
+  var BR_NOKEY={getAvailableKeys:function(){ return Promise.resolve([]) },sign:function(){ return Promise.reject(new Error('no key here')) }};
+  /* where a sent paste is, read from the chain itself. Every host is asked for the transaction's own
+     status (get_transaction_status follows every block for about an hour): a block that holds it is the
+     receipt. It can never land once a host that followed blocks from before it was signed has made final
+     a block whose time is past its expiration, and no host holds it in a block. A host that cannot say
+     is never silence: Hyperion is read for the transaction id, and the account for the key it added (a
+     second witness, never the only one: the account alone never says it did not land) */
+  var HYPERION=['https://eos.hyperion.eosrio.io','https://eos.eosusa.io'];
+  function chainMs(t){ t=String(t||''); var v=Date.parse(/Z$/.test(t)?t:t+'Z'); return isFinite(v)?v:NaN }
+  function hostName(h){ return String(h).replace(/^https?:\/\//,'') }
+  async function txStatusAt(h,id){
+    try{ var r=await fetchT(h+'/v1/chain/get_transaction_status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})},6000), d=await r.json();
+      return r.ok&&d&&typeof d.state==='string'?d:null }catch(e){ return null }
+  }
+  async function txHyperion(id){
+    for(var i=0;i<HYPERION.length;i++){
+      try{ var r=await fetchT(HYPERION[i]+'/v2/history/get_transaction?id='+encodeURIComponent(id),{},6000), d=await r.json();
+        if(r.ok&&d&&typeof d.executed==='boolean')return {h:HYPERION[i],d:d} }catch(e){}
+    }
+    return null;
+  }
+  async function brWitness(p){
+    var expT=chainMs(p.expStr), until=' · valid until '+p.expStr+'Z';
+    var reads=await Promise.all(VH.map(function(h){ return txStatusAt(h,p.tx).then(function(d){ return {h:h,d:d} }) }));
+    var said=reads.filter(function(x){ return x.d }), all=said.map(function(x){ return hostName(x.h)+' '+x.d.state }).join(', ');
+    var inb=said.filter(function(x){ return x.d.state==='IN_BLOCK'||x.d.state==='IRREVERSIBLE' })[0];
+    if(inb)return {k:'in',block:inb.d.block_number,cy:'tx '+p.tx+' · in block '+inb.d.block_number+' ('+inb.d.state+' at '+hostName(inb.h)+')'};
+    var past=said.filter(function(x){ var d=x.d; return chainMs(d.irreversible_timestamp)>expT&&typeof d.earliest_tracked_block_number==='number'&&d.earliest_tracked_block_number<=p.head })[0];
+    if(past)return {k:said.some(function(x){ return x.d.state==='FAILED' })?'failed':'never',
+      cy:'tx '+p.tx+' · '+all+' · final block '+past.d.irreversible_number+' at '+past.d.irreversible_timestamp+' ('+hostName(past.h)+') is past its expiration '+p.expStr+', and no block holds it'};
+    if(said.length)return {k:'wait',via:'status',cy:'tx '+p.tx+' · '+all+until};
+    /* no host could say */
+    var hy=await txHyperion(p.tx), hyN=hy&&hy.d.executed&&hy.d.actions&&hy.d.actions[0]&&hy.d.actions[0].block_num;
+    if(hy&&hy.d.executed)return {k:'in',block:hyN||null,cy:'tx '+p.tx+' · executed'+(hyN?' in block '+hyN:'')+' (Hyperion at '+hostName(hy.h)+'; get_transaction_status did not answer)'};
+    /* a block's time grows by at least half a second a block: once Hyperion's final block is that many past the head at signing, its time is past the expiration */
+    if(hy&&isFinite(p.t0)&&typeof hy.d.lib==='number'&&hy.d.lib>=p.head+Math.floor((expT-p.t0)/500)+1)
+      return {k:'never',cy:'tx '+p.tx+' · no block to '+hy.d.lib+' holds it (Hyperion at '+hostName(hy.h)+'), and that block\u2019s time is past its expiration '+p.expStr};
+    var key=null;
+    if(p.adds&&p.acct===vacct()){ try{ await checkBridge() }catch(e){} key=BRIDGED }
+    if(key===true)return {k:'key',cy:'tx '+p.tx+' · '+p.acct+' carries this wallet\u2019s key; get_transaction_status and Hyperion did not answer, so no block was read for it'};
+    if(hy||key===false)return {k:'wait',via:hy?'hyperion':'account',cy:'tx '+p.tx+' · '+(hy?'Hyperion: not in a block yet, indexed to '+hy.d.last_indexed_block:p.acct+' does not carry this wallet\u2019s key yet')+' · get_transaction_status did not answer'+until};
+    return {k:'unread',cy:'tx '+p.tx+' · no host answered get_transaction_status, Hyperion or get_account'+until};
+  }
+  async function pasteBridge(wif,extra,onPhase){
     var a=vacct();
     if(!MPRK||!K1)throw brErr('Connect your keychain first.','nokc','no keychain in this tab');
     if(!vacctKnown())throw brErr('Could not read which account '+SOUL+'.b points at, so nothing was sent.','read','the '+SOUL+'.b row was not read');
@@ -5111,18 +5197,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var pub;
     try{ pub=BN.PrivateKey.fromString(wif).getPublicKey().toString() }
     catch(ke){ throw brErr('That is not a whole private key, so nothing was sent.','parse',(ke&&ke.message)||String(ke)) }
-    /* a paste for this account that may still land is read first: never signed twice */
+    /* a paste for this account that may still land is read first, from the chain: never signed twice */
     var held=BR_PENDING&&BR_PENDING.acct===a?BR_PENDING:null;
     if(held){
-      await checkBridge();
-      if(BRIDGED===true&&held.adds&&held.extra===brExtraKey(extra)){ BR_PENDING=null; return {tx:held.tx,earlier:true} }
-      if(BRIDGED===null||VACCT_NOACCT===a)   /* an account a paste already went to cannot have stopped existing: that answer proves nothing */
-        throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held',(VACCT_NOACCT===a?'get_account '+a+' answered unknown account':'get_account '+a+' answered nothing')+' · tx '+held.tx);
-      /* proof it never landed: its window is over and the account, read, lacks the key it added */
-      var proven=held.adds&&BRIDGED===false&&Date.now()>=held.exp+30000;
-      if(!proven&&(held.adds||Date.now()<held.exp+86400000))
-        throw brErr('The last paste may still go in, so nothing new was signed. Check again in a minute.','held','tx '+held.tx+' · valid until '+new Date(held.exp).toISOString()+(held.adds?'':' · it carried no key change, so the account cannot prove it'));
-      if(proven)brGiveBack(held); BR_PENDING=null;
+      var hw=await brWitness(held), same=held.extra===brExtraKey(extra);
+      if(hw.k==='in'||(hw.k==='key'&&(same||!held.extra))){   /* it landed (a block holds it, or the account shows all it did) */
+        if(BR_PENDING===held)BR_PENDING=null;
+        if(same)return hw.k==='in'?{tx:held.tx,cy:hw.cy}:{tx:held.tx,earlier:!!held.extra,cy:hw.cy};
+      }
+      else if(hw.k==='never'||hw.k==='failed'){ brGiveBack(held); if(BR_PENDING===held)BR_PENDING=null }   /* proven never to land */
+      else if(hw.k==='unread')
+        throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held',hw.cy);
+      else throw brErr('The last paste may still go in, so nothing new was signed. Check again in a minute.','held',hw.cy);
     }
     var acc=await post(VH,'/v1/chain/get_account',{account_name:a});
     if(!acc)throw brErr('Could not read '+a+' just now, so nothing was sent.','read','get_account '+a+' answered nothing');
@@ -5135,7 +5221,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var th=ra.threshold||1, pw=((existing.filter(function(k){return canon(k.key)===pub})[0])||{}).weight||0;
     if(pw<th)
       throw brErr(a+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was sent.','multisig','threshold '+th+' · the pasted key weighs '+pw+' · '+existing.map(function(k){return k.key+' weight '+k.weight}).join(', '));
-    var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, packed, sgn, txid;
+    var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, expStr='', t0=NaN, info=null, packed, sgn, txid;
     try{
       var k1w=((existing.filter(function(k){return canon(k.key)===K1.pubK1})[0])||{}).weight||0;
       if(k1w<th){   /* absent, or present too lightly to sign alone: it is set at the weight that signs, once */
@@ -5147,32 +5233,55 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(xsp)capAssert(xsp.unit,xsp.amt);   /* the action the paste carries meets the owner's daily cap like every other */
       if(extra) acts.push({account:extra.contract,name:extra.action,authorization:actz,data:await serialized(extra.contract,extra.action,actz,extra.data)});
       if(!acts.length) return {tx:null};
-      var prov=new BN.JsSignatureProvider([wif]); wif=null;
-      var info=await rpc().get_info(), ref=await rpc().get_block(info.head_block_num-3);
-      exp=Date.now()+120000;
-      packed=await api(prov).serializeTransaction({expiration:new Date(exp).toISOString().slice(0,19),
+      info=await rpc().get_info(); var ref=await rpc().get_block(info.head_block_num-3);
+      if(info.chain_id!==VAULTA_CHAIN)throw new Error('the node answered for another chain ('+String(info.chain_id).slice(0,16)+'…), not Vaulta');
+      /* its window runs on the chain's clock (the head block's time), never this device's */
+      t0=chainMs(info.head_block_time);
+      exp=(Math.floor((isFinite(t0)?t0:Date.now())/1000)+120)*1000; expStr=new Date(exp).toISOString().slice(0,19);
+      packed=await api(BR_NOKEY).serializeTransaction({expiration:expStr,
         ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,
         context_free_actions:[],actions:acts,transaction_extensions:[]});
-      sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[pub],serializedTransaction:packed,abis:[]});
-      prov=null;
-      txid=hexS(BN.sha256(packed));   /* an Antelope transaction id is the sha256 of its packed bytes */
     }catch(pe){
       if(pe&&pe.capRefused)throw pe;
       throw brErr('Something stopped this before anything was sent, so nothing changed.','pre',(pe&&pe.message)||String(pe));
     }
+    /* the exact transaction runs first and is not kept: a refusal, or too little CPU, is said before the key signs anything */
+    var dry=await brDryRun(hexS(packed));
+    if(dry&&dry.no)throw brErr(brDryWords(dry.kind,a),dry.kind==='cpu'||dry.kind==='net'?'cpu':'dry','compute_transaction at '+hostName(dry.h)+', nothing signed: '+dry.no.slice(0,300));
+    var cl=acc.cpu_limit, have=cl&&typeof cl.available==='number'&&!(cl.max<0)?cl.available:null;
+    if(dry&&dry.need>0&&have!==null&&dry.need>have)
+      throw brErr(brDryWords('cpu',a),'cpu','compute_transaction at '+hostName(dry.h)+', nothing signed: it needs about '+dry.need+' \u00b5s of CPU, and '+a+' has '+have+' \u00b5s of '+cl.max+' \u00b5s available');
+    try{
+      var prov=new BN.JsSignatureProvider([wif]); wif=null;
+      sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[pub],serializedTransaction:packed,abis:[]});
+      prov=null;
+      txid=hexS(BN.sha256(packed));   /* an Antelope transaction id is the sha256 of its packed bytes */
+    }catch(se){
+      throw brErr('Something stopped this before anything was sent, so nothing changed.','pre',(se&&se.message)||String(se));
+    }
+    if(onPhase)try{ onPhase('sending') }catch(oe){}
     var sent=await brSend({signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hexS(packed)});
-    var res=sent.res, why=res&&!res.transaction_id?JSON.stringify(res.error||res):'';
-    var took=!!(res&&res.transaction_id)||isDuplicate(why);   /* a node took it, or already holds these exact bytes */
-    if(res&&!took&&(!sent.lost||authorityNo(why)))            /* refused, and no earlier host can hold it */
+    var res=sent.res, why=sent.refused[0]||'', took=sent.acked.length>0;   /* a host took it, or already holds these exact bytes */
+    if(!took&&sent.refused.length&&(!sent.lost||sent.refused.some(authorityNo)))   /* refused, and no host can hold it */
       throw brErr(brRefusal(why,a),'refused',why.slice(0,400));
     var tx=(res&&res.transaction_id)||txid;
     var xday=xsp?capRecord(xsp.unit,xsp.amt):null;   /* it went out, or may have: it counts, like every send that may be in */
-    BR_PENDING={acct:a,tx:tx,exp:exp,extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
-    /* the chain is the receipt: the account carries this wallet's key (the same transaction carried the action) */
-    try{ if(adds) for(var i=0;i<10;i++){ await checkBridge(); if(BRIDGED===true)break; await new Promise(function(r){setTimeout(r,1500)}) } }catch(ce){}
-    if(adds?BRIDGED===true:took){ BR_PENDING=null; return {tx:tx} }
-    if(took)throw brErr('It was sent, and '+a+' does not show this wallet yet. Check again in a minute.','late','tx '+tx+(why?' · '+why.slice(0,300):''));
-    throw brErr('The network did not answer, so this wallet cannot tell yet whether '+a+' changed. Check it before you paste again.','unknown',(why?why.slice(0,300)+' · ':'')+'no node confirmed send_transaction · tx '+tx);
+    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
+    /* the chain is the receipt: the transaction's own status, read about every 1.5 s until a block holds
+       it or it can never land. While it waits, nothing says it was sent */
+    var since=Date.now(), blind=0, w=null;
+    for(;;){
+      w=await brWitness(p);
+      if(w.k==='in'){ if(BR_PENDING===p)BR_PENDING=null; if(adds){ try{ await checkBridge() }catch(ce){} } return {tx:tx,cy:w.cy} }
+      if(w.k==='key'){ if(BR_PENDING===p)BR_PENDING=null; return {tx:tx,keyOnly:!!extra,cy:w.cy} }   /* the account shows the key; with an action, only the key is proven */
+      if(w.k==='never'||w.k==='failed'){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null;
+        throw brErr(w.k==='failed'?'The chain did not take it, so nothing changed. Paste the key again to try once more.':'It did not reach a block before its time ran out, so nothing changed. Paste the key again to try once more.',w.k,w.cy) }
+      blind=(w.k==='unread'||w.via==='account')?blind+1:0;   /* no chain clock answered: the account alone never closes it */
+      if(blind>=10||Date.now()-since>180000)break;
+      await new Promise(function(r){setTimeout(r,1500)});
+    }
+    if(took)throw brErr('It is not in a block yet, so check again in a minute.','late',w.cy+' · acked by '+sent.acked.map(hostName).join(', '));
+    throw brErr('The network did not answer, so this wallet cannot tell yet whether '+a+' changed. Check it before you paste again.','unknown',w.cy+' · no host confirmed send_transaction'+(why?' · '+why.slice(0,200):''));
   }
   function k1PubFor(ctx){
     var rec=BZDIDKEY.deriveK1Key(MPRK,ctx), seed=rec.seed.slice();
@@ -5337,7 +5446,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var a=vacct(), old=$('br-paste'), keep=old&&!BR_OK&&$('bridge-sec').style.display!=='none'&&old.getAttribute('data-acct')===a?old.value:'';
     el.textContent='';
     if(BR_DONE&&BR_DONE.acct===a){
-      wlSay(el,['done. this wallet now signs for '+a+' with one press. ',{to:'bal-sec',t:'see what you have'},{cy:BR_DONE.tx?'tx '+BR_DONE.tx:'the account carries this wallet\u2019s key'}]);
+      wlSay(el,['done. this wallet now signs for '+a+' with one press. ',{to:'bal-sec',t:'see what you have'},{cy:BR_DONE.cy||(BR_DONE.tx?'tx '+BR_DONE.tx:'the account carries this wallet\u2019s key')}]);
       return;
     }
     if(BR_KIND==='noperm'){ wlSay(el,['this wallet cannot be added to '+a+', so choose the account you want to use. ',{to:'connect-sec',t:'choose the account'},{cy:'get_account '+a+': no active permission'}]); return }
@@ -5375,9 +5484,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }
     raw=null; brScrub();   /* both paste fields are cleared on the press: the key lives on only in this call */
     BR_BUSY=true; if(inp)inp.disabled=true; if(go)go.disabled=true;
+    var bs=$('bridge-sec'); if(bs)bs.removeAttribute('data-need');
     brSay(a,['adding this wallet to '+a+', one moment.']);
-    try{ var r=await pasteBridge(w,null); w=null; BR_DONE={acct:a,tx:r&&r.tx}; BR_SAID=null }
-    catch(e){ w=null; brSay(a,brFail(e,a)) }
+    try{ var r=await pasteBridge(w,null,function(ph){ if(ph==='sending')brSay(a,['sending it, one moment.']) }); w=null; BR_DONE={acct:a,tx:r&&r.tx,cy:r&&r.cy}; BR_SAID=null }
+    catch(e){ w=null; if(e&&e.brKind==='cpu'&&bs)bs.setAttribute('data-need','cpu'); brSay(a,brFail(e,a)) }   /* data-need: the hook for another way to sign that brings its own CPU */
     finally{ BR_BUSY=false; brRender() }
   }
   /* a paste that failed, in one calm sentence and its one next step */
@@ -5387,23 +5497,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(k==='nokc')return [{to:'kc-sec',t:'connect your keychain'},' to let this wallet sign.',cy];
     if(k==='noperm')return [m+' ',{to:'connect-sec',t:'choose the account'},cy];
     if(k==='wrongkey')return [m+' paste '+a+'\u2019s active key here.',cy];
-    if(k==='refused')return [m,cy];
+    if(k==='refused'||k==='never'||k==='failed'||k==='dry'||k==='cpu')return [m,cy];
     if(k==='multisig')return [m+' ',{to:'connect-sec',t:'choose the account'},cy];
     if(k==='read'||k==='pre'||k==='parse')return [m+' paste the key again to try once more.',cy];
     return ['something stopped this before anything was sent, so nothing changed. paste the key again to try once more.',cy];
   }
-  /* check again: the account is read, never re-signed. The paste field comes back only once
-     the account proves the key is missing and the last transaction's window has closed */
+  /* check again: the chain is read, never re-signed. The paste field comes back only once the
+     transaction can never land: a final block past its expiration, and no block holds it */
   async function brRecheck(){
     var a=vacct();
     brSay(a,['reading '+a+', one moment.']);
-    await checkBridge();
-    if(a!==vacct())return;
     var p=BR_PENDING&&BR_PENDING.acct===a?BR_PENDING:null;
-    if(BRIDGED===true){ BR_PENDING=null; BR_SAID=null; BR_DONE={acct:a,tx:p?p.tx:null}; brRender(); return }
-    if(BRIDGED===null||VACCT_NOACCT===a)brSay(a,['could not read '+a+' just now, so this wallet cannot tell yet whether the last paste went in. ',{btn:'check again',on:brRecheck},{cy:VACCT_NOACCT===a?'get_account '+a+' answered unknown account; a paste is never given back on that answer':'get_account '+a+' answered nothing'}]);
-    else if(p&&(Date.now()<p.exp+30000||(!p.adds&&Date.now()<p.exp+86400000)))brSay(a,[a+' does not show this wallet yet, and the last paste may still go in. ',{btn:'check again',on:brRecheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]);
-    else { if(p&&p.adds)brGiveBack(p); BR_PENDING=null; brSay(a,['the last paste did not go in, so nothing changed. paste '+a+'\u2019s active key here to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+a:a+'@active does not carry this wallet\u2019s key'}]) }
+    if(!p){
+      await checkBridge();
+      if(a!==vacct())return;
+      if(BRIDGED===true){ BR_SAID=null; BR_DONE={acct:a,tx:null}; brRender(); return }
+      if(BRIDGED===null||VACCT_NOACCT===a)brSay(a,['could not read '+a+' just now, so this wallet cannot tell yet whether the last paste went in. ',{btn:'check again',on:brRecheck},{cy:VACCT_NOACCT===a?'get_account '+a+' answered unknown account; a paste is never given back on that answer':'get_account '+a+' answered nothing'}]);
+      else brSay(a,['the last paste did not go in, so nothing changed. paste '+a+'\u2019s active key here to try once more.',{cy:a+'@active does not carry this wallet\u2019s key'}]);
+      brRender(); return;
+    }
+    var w=await brWitness(p);
+    if(a!==vacct())return;
+    if(w.k==='in'||w.k==='key'){ if(BR_PENDING===p)BR_PENDING=null; BR_SAID=null; BR_DONE={acct:a,tx:p.tx,cy:w.cy}; if(w.k==='in'&&p.adds){ try{ await checkBridge() }catch(e){} } brRender(); return }
+    if(w.k==='never'||w.k==='failed'){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null;
+      brSay(a,[(w.k==='failed'?'the chain did not take the last paste, so nothing changed.':'the last paste did not reach a block before its time ran out, so nothing changed.')+' paste '+a+'\u2019s active key here to try once more.',{cy:w.cy}]) }
+    else if(w.k==='unread')brSay(a,['could not read '+a+' just now, so this wallet cannot tell yet whether the last paste went in. ',{btn:'check again',on:brRecheck},{cy:w.cy}]);
+    else brSay(a,[(w.via==='account'?a+' does not show this wallet yet, and the last paste may still go in. ':'the last paste is not in a block yet, and it may still go in. '),{btn:'check again',on:brRecheck},{cy:w.cy}]);
     brRender();
   }
   /* the keychain leaves: both paste fields and the lane's words go with it */
@@ -8337,20 +8456,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     pasteGo.onclick=async function(){
       if(busy)return;
       var k; try{ k=parseWifAny(pasteIn.value) }catch(e){ tell('fail',['That is not a whole private key, so nothing was sent. Copy '+actor+'\u2019s whole active key again and paste it here.',{cy:(e&&e.message)||String(e)}]); return } finally{ pasteIn.value='' }
-      busy=true; pasteGo.disabled=true; tell('busy',['Signing with that key…']);
+      busy=true; pasteGo.disabled=true; d.removeAttribute('data-need'); tell('busy',['Checking it first, one moment.']);
       var hold=false;
       try{
         if(actor!==vacct())throw new Error('This is for '+actor+', and your wallet signs for '+vacct()+'. Nothing was signed.');
-        var r=await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data}); k=null;
-        /* an earlier paste taken as landed from the account alone: its action is not read back here */
-        if(r&&r.earlier) tellKeyOnly(r.tx); else tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.']);
+        /* the chain dry runs it first; once signed, the line waits for a block and never says it was sent before one holds it */
+        var r=await pasteBridge(k,{contract:a.contract,action:a.action,data:a.data},function(ph){ if(ph==='sending')tell('busy',['Sending it, one moment.']) }); k=null;
+        /* an earlier paste, or one only the account shows: the key is proven, its action is not read back here */
+        if(r&&(r.earlier||r.keyOnly)) tellKeyOnly(r.tx); else tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.',{cy:(r&&r.cy)||''}]);
         pasteRow.hidden=true;
       }catch(e){ k=null;
         if(e&&e.capRefused) tell('fail',e.capKind==='unsized'?['The price could not be read just now, so your daily cap cannot be checked. Nothing was signed.',{cy:e.message}]:['This is past the daily cap you set, so nothing was signed. ',{to:'cap-row',t:'change the cap'},{cy:e.message}]);
-        /* this paste went out, may have, or an earlier one may still go in: the one next step reads the account,
-           it never pastes or signs again, and the paste field waits until the account says it is safe */
+        /* this paste went out, may have, or an earlier one may still go in: the one next step reads the chain,
+           it never pastes or signs again, and the paste field waits until the chain says it is safe */
         else if(e&&/^(late|unknown|held)$/.test(e.brKind||'')){ hold=true; tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]) }
-        else tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]);
+        else { if(e&&e.brKind==='cpu')d.setAttribute('data-need','cpu');   /* the hook for another way to sign that brings its own CPU */
+          tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]) }
       }
       finally{ busy=false; pasteGo.disabled=hold; pasteIn.disabled=hold }
     };
@@ -8389,16 +8510,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     async function recheck(){
       if(busy)return; busy=true; pasteGo.disabled=true; pasteIn.disabled=true;
       tell('busy',['Checking '+vacct()+'…']);
-      try{ await checkBridge() }catch(x){}
+      var acct=vacct(), p=BR_PENDING&&BR_PENDING.acct===acct?BR_PENDING:null, rd=null;
+      if(p){ try{ rd=await brWitness(p) }catch(x){ rd={k:'unread',cy:(x&&x.message)||String(x)} } }
+      else{ try{ await checkBridge() }catch(x){} }
       busy=false;
-      var acct=vacct(), p=BR_PENDING&&BR_PENDING.acct===acct?BR_PENDING:null;
-      if(BRIDGED===true){ pasteRow.hidden=true; tellKeyOnly(p&&p.tx); return }
-      if(BRIDGED===null){ tell('wait',['Could not read '+acct+' just now. ',{btn:'check again',on:recheck}]); return }
-      /* the bridge lane's own window: a paste may still go in until its time is over (a day, for one that added no key) */
-      if(p&&(Date.now()<p.exp+30000||(!p.adds&&Date.now()<p.exp+86400000))){ tell('wait',[acct+' does not show this wallet yet, and the paste may still go in. Check again in a minute. ',{btn:'check again',on:recheck},{cy:'tx '+p.tx+' · valid until '+new Date(p.exp).toISOString()}]); return }
-      /* its window is over and the account, read, lacks this wallet's key: it did not go in. The bridge lane reads it again before the next paste signs */
+      /* a block holds it: done, with its block. The account alone proves only the key */
+      if(p&&(rd.k==='in'||rd.k==='key')){
+        if(BR_PENDING===p)BR_PENDING=null; pasteRow.hidden=true;
+        if(rd.k==='in'&&p.extra===brExtraKey({contract:a.contract,action:a.action,data:a.data})){ if(p.adds){ try{ await checkBridge() }catch(x){} } tell('done',['Done. '+w.d+' This wallet now signs for '+vacct()+' with one press.',{cy:rd.cy}]); return }
+        tellKeyOnly(p.tx); return }
+      if(!p&&BRIDGED===true){ pasteRow.hidden=true; tellKeyOnly(null); return }
+      if(p?rd.k==='unread':BRIDGED===null){ tell('wait',['Could not read '+acct+' just now. ',{btn:'check again',on:recheck},{cy:p?rd.cy:''}]); return }
+      if(p&&rd.k==='wait'){ tell('wait',[(rd.via==='account'?acct+' does not show this wallet yet, and the paste may still go in.':'It is not in a block yet, and it may still go in.')+' Check again in a minute. ',{btn:'check again',on:recheck},{cy:rd.cy}]); return }
+      /* it can never land (a final block past its expiration, and no block holds it), or no paste waits: the field comes back */
+      if(p){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null }
       pasteGo.disabled=false; pasteIn.disabled=false;
-      tell('fail',['It did not go in, so nothing changed. Paste '+acct+'\u2019s active key again to try once more.',{cy:p?'tx '+p.tx+' expired without reaching '+acct:acct+'@active does not carry this wallet\u2019s key'}]);
+      tell('fail',[p?(rd.k==='failed'?'The chain did not take it, so nothing changed. Paste the key again to try once more.':'It did not reach a block before its time ran out, so nothing changed. Paste the key again to try once more.'):'It did not go in, so nothing changed. Paste '+acct+'\u2019s active key again to try once more.',{cy:p?rd.cy:acct+'@active does not carry this wallet\u2019s key'}]);
     }
     function outboxIds(){ return (outboxRead()||[]).map(function(e){ return e.intent_id }) }
     async function run(isAuto){

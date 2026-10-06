@@ -80,10 +80,14 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
         return json(body.code === 'core.vaulta' && body.symbol === 'A' ? [state.aBal || '5.0000 A'] : []);
       }
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : CORE_VAULTA_ABI);
-      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head });
+      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head, head_block_time: state.chainTime });
+      // the dry run (compute_transaction) and the transaction's own status: a node without them answers {} (the default)
+      if (u.pathname.endsWith('/compute_transaction')) { (state.dry = state.dry || []).push(u.host); return json(state.dryRun ? state.dryRun(body) : {}); }
+      if (u.pathname.endsWith('/get_transaction_status')) { (state.st = state.st || []).push(u.host); return json(state.status ? state.status(body.id, url) : {}); }
       if (u.pathname.endsWith('/get_block')) return json({ id: 'MOCKBLOCK' + body.block_num_or_id, block_num: body.block_num_or_id, ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000', transactions: [] });
       if (u.pathname.endsWith('/send_transaction')) {
         state.posts.push(body.packed_trx);
+        if (state.sendBy && state.sendBy(url) === 'abort') return route.abort();   // this host loses its answer
         if (state.abortN > 0) { state.abortN--; if (state.applyLost && state.onSend) state.onSend(body); return route.abort(); }   // the node took it; the answer is lost
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         if (state.refuseWith) return json({ code: 500, error: { name: 'unsatisfied_authorization', what: 'Transaction declares authority', details: [{ message: state.refuseWith }] } }, 500);
@@ -91,6 +95,10 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
         return json({ transaction_id: 'MOCKTXID' + body.packed_trx.slice(0, 16), processed: { block_num: 123460, status: 'executed' } });
       }
       return json({});
+    }
+    if (/^https:\/\/(eos\.hyperion\.eosrio\.io|eos\.eosusa\.io)\/v2\/history\/get_transaction\?/.test(url) && state.hyperion) {   // Hyperion, mocked per test
+      (state.hy = state.hy || []).push(u.host);
+      return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify(state.hyperion(u.searchParams.get('id'))) });
     }
     if (u.origin !== ORIGIN) return route.abort();
     const path = resolve(ROOT, '.' + decodeURIComponent(u.pathname));
@@ -160,7 +168,7 @@ try {
     state.abortN = 2;
     await page.evaluate(w => { document.getElementById('br-paste').value = w; document.getElementById('br-wif').value = w; }, DEV_WIF);
     await page.evaluate(() => document.getElementById('br-paste-go').click());
-    await waitIn(page, 'br-paste-stat', /adding this wallet to kingbeelovis/, 10000);
+    await waitIn(page, 'br-paste-stat', /adding this wallet to kingbeelovis|sending it, one moment/, 10000);
     const flight = await page.evaluate(() => ({ paste: document.getElementById('br-paste').value, wif: document.getElementById('br-wif').value, off: document.getElementById('br-paste').disabled && document.getElementById('br-paste-go').disabled }));
     ok('pressed: both paste fields are already empty, and the field and button stay off while it runs', flight.paste === '' && flight.wif === '' && flight.off, JSON.stringify(flight));
     await waitIn(page, 'br-paste-stat', /cannot tell yet/);
@@ -216,7 +224,115 @@ try {
     await page.evaluate(w => { document.getElementById('br-paste').value = w; document.getElementById('br-paste-go').click(); }, DEV_WIF);
     await waitIn(page, 'br-paste-stat', /did not accept/);
     const r = await page.evaluate(() => { const e = document.getElementById('br-paste-stat'); const c = e.cloneNode(true); c.querySelectorAll('.wl-cyd').forEach(x => x.remove()); return { t: c.textContent.trim(), all: e.textContent, off: document.getElementById('br-paste').disabled }; });
-    ok('a refusal names the pasted key, says nothing changed, and keeps the raw answer for cypherpunk', r.t === 'kingbeelovis did not accept that key, so nothing changed.' && /missing authority/.test(r.all) && !r.off && state.posts.length === 1, JSON.stringify(r));
+    ok('a refusal names the pasted key, says nothing changed, and keeps the raw answer for cypherpunk', r.t === 'kingbeelovis did not accept that key, so nothing changed.' && /missing authority/.test(r.all) && !r.off && state.posts.length === 2 && state.posts[0] === state.posts[1], JSON.stringify(r) + ' · posts ' + state.posts.length);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* T · one paste, read from the chain: a dry run before the key signs anything, the same bytes to every host,
+     then the transaction's own status until a block holds it or it can never land */
+  {
+    console.log('T · one paste, read from the chain (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [DEV_PUB];
+    state.chainTime = '2026-10-05T00:00:00.000';   // the head block's time: each paste's window closes at 00:02:00 on the chain's clock
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    const k1 = (await page.textContent('#kc-k1-pub')).trim();
+    await toKey(page);
+    await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+    await page.evaluate(() => { window.__said = [];
+      new MutationObserver(() => { const e = document.getElementById('br-paste-stat'); if (e) window.__said.push(e.innerText.trim()); }).observe(document.getElementById('br-calm'), { childList: true, subtree: true, characterData: true }); });
+    const press = async () => { await page.evaluate(() => { window.__said = []; }); await page.fill('#br-paste', DEV_WIF); await page.evaluate(() => document.getElementById('br-paste-go').click()); };
+    const line = () => page.evaluate(() => { const e = document.getElementById('br-paste-stat'); return e ? { t: e.innerText.trim(), all: e.textContent, open: !document.getElementById('br-paste').disabled && !document.getElementById('br-paste-go').disabled, need: document.getElementById('bridge-sec').getAttribute('data-need') } : null; });
+    const said = () => page.evaluate(() => window.__said);
+    const neverSent = list => !list.some(x => /was sent|it was sent/i.test(x.replace(/nothing was sent/gi, '')));
+    const ST = (st, lib, more = {}) => ({ state: st, head_number: 123500, head_timestamp: lib, irreversible_number: 123498, irreversible_timestamp: lib, earliest_tracked_block_number: 100, expiration: '2026-10-05T00:02:00', ...more });
+    const BEFORE = '2026-10-05T00:01:00.000', AFTER = '2026-10-05T00:02:00.500';   // a final block before, then past, the window's end
+    // 1 · the dry run needs more CPU than the account has: said before anything is signed
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: { status: 'executed', cpu_usage_us: 1500, net_usage_words: 30 }, elapsed: 1400, except: null } });
+    await press();
+    await waitIn(page, 'br-paste-stat', /CPU this needs/, 20000);
+    let l = await line();
+    ok('too little CPU is said before the key signs anything, with its one step; nothing is signed or sent, the field is back',
+      /^kingbeelovis does not have the CPU this needs right now, so nothing was signed\. it comes back within a day, so paste the key again then\.$/.test(l.t) && state.posts.length === 0 && l.open && /needs about 1500 µs of CPU, and kingbeelovis has 1000 µs of 1000 µs available/.test(l.all), JSON.stringify(l) + ' · posts ' + state.posts.length);
+    ok('the bridge carries the hook for another way to sign that brings its own CPU', l.need === 'cpu', String(l.need));
+    // 2 · the dry run hits the contract's assertion: refused before signing
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: null, elapsed: 120, except: { code: 3050003, name: 'eosio_assert_message_exception', message: 'eosio_assert_message assertion failure', stack: [{ format: 'assertion failure with message: ${s}', data: { s: 'the test contract refuses this' } }] } } });
+    await press();
+    await waitIn(page, 'br-paste-stat', /would refuse/, 20000);
+    l = await line();
+    ok('a dry run the chain refuses is said before the key signs anything: nothing signed, nothing sent, the field back, the raw answer for cypherpunk',
+      /^the chain would refuse this, so nothing was signed\.$/.test(l.t) && state.posts.length === 0 && l.open && /the test contract refuses this/.test(l.all) && (state.dry || []).length >= 2, JSON.stringify(l) + ' · posts ' + state.posts.length);
+    ok('the CPU hook clears on the next press', l.need === null, String(l.need));
+    // 3 · one host takes it, the other loses its answer; the node that took it says FAILED once a final block is past its window
+    state.dryRun = () => ({ transaction_id: 'DRYRUN', processed: { receipt: { status: 'executed', cpu_usage_us: 224 }, elapsed: 198, except: null } });
+    state.sendBy = url => /eosnation/.test(url) ? 'abort' : 'ack';
+    state.polls = 0; state.st = [];
+    state.status = (id, url) => { const g = /greymass/.test(url); if (g) state.polls++; const before = state.polls < 3;
+      return g ? ST(before ? 'LOCALLY_APPLIED' : 'FAILED', before ? BEFORE : AFTER) : ST('UNKNOWN', before ? BEFORE : AFTER); };
+    let p0 = state.posts.length;
+    await press();
+    await waitIn(page, 'br-paste-stat', /did not take it/, 30000);
+    l = await line();
+    ok('a FAILED status, read once a final block is past its window, is said as the chain not taking it: nothing changed, the field back',
+      /^the chain did not take it, so nothing changed\. paste the key again to try once more\.$/.test(l.t) && l.open && /FAILED/.test(l.all) && /past its expiration 2026-10-05T00:02:00/.test(l.all), JSON.stringify(l));
+    ok('one signature: the identical bytes went to both hosts', state.posts.length - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(state.posts.length - p0));
+    ok('the transaction\'s own status was read on both hosts', ['eos.greymass.com', 'eos.api.eosnation.io'].every(h => state.st.includes(h)), JSON.stringify([...new Set(state.st)]));
+    // 4 · one host takes it and no block ever holds it: once a final block is past its window it can never land
+    state.polls = 0;
+    state.status = (id, url) => { const g = /greymass/.test(url); if (g) state.polls++; const lib = state.polls < 3 ? BEFORE : AFTER;
+      return g ? ST('LOCALLY_APPLIED', lib) : ST('UNKNOWN', lib); };
+    p0 = state.posts.length;
+    await press();
+    await waitIn(page, 'br-paste-stat', /did not reach a block/, 30000);
+    l = await line();
+    const w4 = await said();
+    ok('acked by one host and never in a block: after its window it is said in one sentence, with the one step',
+      /^it did not reach a block before its time ran out, so nothing changed\. paste the key again to try once more\.$/.test(l.t) && /no block holds it/.test(l.all), JSON.stringify(l));
+    ok('while it waited the line said "sending it, one moment.", never that it was sent', w4.includes('sending it, one moment.') && neverSent(w4) && !w4.some(x => /\d\s*\/\s*\d/.test(x)), JSON.stringify(w4));
+    ok('the held paste is released: the field and its button are back, and nothing says it may still go in', l.open && !/may still go in/.test(await page.textContent('#br-calm')), JSON.stringify(l));
+    ok('and it was signed once, the same bytes to both hosts', state.posts.length - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(state.posts.length - p0));
+    // 5 · both hosts take it and a block holds it: done, and cypherpunk reads the block
+    state.sendBy = null; state.polls = 0;
+    state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    state.status = (id, url) => { if (/greymass/.test(url)) state.polls++;
+      return state.polls < 2 ? ST('LOCALLY_APPLIED', BEFORE) : ST('IN_BLOCK', BEFORE, { block_number: 123461, block_id: 'MOCKBLOCK123461', block_timestamp: '2026-10-05T00:00:01.500' }); };
+    p0 = state.posts.length;
+    await press();
+    await waitIn(page, 'br-calm', /^done\./, 30000);
+    const done = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), all: document.getElementById('br-calm').textContent }));
+    const w5 = await said();
+    ok('a block holds it: done, and the cypherpunk detail names the block', /^done\. this wallet now signs for kingbeelovis with one press\./.test(done.t) && /in block 123461/.test(done.all), JSON.stringify(done));
+    ok('until the block, the line said "sending it, one moment." and never that it was sent', w5.includes('sending it, one moment.') && neverSent(w5), JSON.stringify(w5));
+    ok('signed once, the same bytes to both hosts; at a glance agrees', state.posts.length - p0 === 2 && state.posts[p0] === state.posts[p0 + 1] && (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓', String(state.posts.length - p0) + ' · ' + await page.textContent('#sum-bridge'));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* U · no host answers the transaction's own status: Hyperion is read for its id, never silence */
+  {
+    console.log('U · one paste, read from Hyperion when the nodes cannot say (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [DEV_PUB];
+    state.chainTime = '2026-10-05T00:00:00.000';
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    const k1 = (await page.textContent('#kc-k1-pub')).trim();
+    await toKey(page);
+    await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+    const press = async () => { await page.fill('#br-paste', DEV_WIF); await page.evaluate(() => document.getElementById('br-paste-go').click()); };
+    // no block to a final block 241 past the head at signing (123456) holds it: that block's time is past the window
+    state.hyperion = id => ({ executed: false, trx_id: id, lib: 123700, last_indexed_block: 123702, last_indexed_block_time: '2026-10-05T00:02:03.000' });
+    await press();
+    await waitIn(page, 'br-paste-stat', /did not reach a block/, 30000);
+    let l = await page.evaluate(() => ({ t: document.getElementById('br-paste-stat').innerText.trim(), all: document.getElementById('br-paste-stat').textContent, open: !document.getElementById('br-paste').disabled }));
+    ok('with no status from any node, Hyperion\'s final block past the window proves it never landed: said, and the field back',
+      /^it did not reach a block before its time ran out, so nothing changed\. paste the key again to try once more\.$/.test(l.t) && /Hyperion at eos\.hyperion\.eosrio\.io/.test(l.all) && l.open && (state.hy || []).length >= 1, JSON.stringify(l));
+    state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    state.hyperion = id => ({ executed: true, trx_id: id, lib: 123460, actions: [{ block_num: 123462, act: { account: 'eosio', name: 'updateauth' } }] });
+    await press();
+    await waitIn(page, 'br-calm', /^done\./, 30000);
+    l = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), all: document.getElementById('br-calm').textContent }));
+    ok('Hyperion holds it in a block: done, with its block for cypherpunk', /^done\. this wallet now signs for kingbeelovis with one press\./.test(l.t) && /executed in block 123462 \(Hyperion/.test(l.all), JSON.stringify(l));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
