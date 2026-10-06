@@ -1185,16 +1185,6 @@
    "limit": "says it plainly itself: does not exist yet"
   },
   {
-   "id": "bmesh",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/bmesh.html",
-   "state": "LIVE",
-   "gloss": "bMESH/x0x capability lights — identity, authority, route, proof, meter",
-   "org": "beehive-biomass",
-   "limit": "a light only turns on when something real was measured (founder rule 2026-10-06, CI-enforced): four lights lit by dated receipts, route measured per-visit by opt-in probe, #622 kept dark until a capture actually runs"
-  },
-  {
    "id": "index",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1465,8 +1455,8 @@
   }
  ],
  "counts": {
-  "surfaces": 111,
-  "listed": 120,
+  "surfaces": 110,
+  "listed": 119,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1477,18 +1467,18 @@
    "plur": 7,
    "skaists": 28,
    "bnature": 18,
-   "beehivebiomass": 6,
+   "beehivebiomass": 5,
    "beehivebuds": 0,
    "midi": 5,
    "bnr": 2
   },
   "byState": {
-   "LIVE": 120
+   "LIVE": 119
   },
   "byOrg": {
    "beehive-nature": 63,
    "skaists": 42,
-   "beehive-biomass": 6
+   "beehive-biomass": 5
   }
  },
  "_note": "skaists.dev repo-home exception (plumbing fact, recorded once): the hub and estate-internal surfaces are SERVED from the beehive-nature repo at skaists.dev — the repo is plumbing, the positioning is skaists. org follows the founder-ruled domain map, never the repo that happens to host a page."
