@@ -64,10 +64,13 @@ const laws = p => p.evaluate(() => {
 // the page's own split, as drawn below the fronts
 const pageSplit = p => p.evaluate(() => ({ on: (document.querySelector('main [data-plan].on') || {}).dataset?.plan, first: document.querySelector('#split .splitrow .lbl').textContent.replace(/\s+/g, ' ').trim() }));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('the law keeps page one; one front per register, each in its own dress; the laws hold', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '.et-b [data-go="split"]', action: 'rgb(168, 35, 140)', shape: [7, 0, 0] },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '#eternal .et-r-pill', action: 'rgb(214, 85, 187)', shape: [0, 8, 0] },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '.et-b [data-go="split"]', action: 'rgb(38, 77, 54)', shape: [7, 0, 0] },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '#eternal .et-r-pill', action: 'rgb(214, 85, 187)', shape: [0, 8, 0] },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etFaCyGo', action: 'rgb(69, 194, 220)', shape: [0, 0, 4] },
   };
   for (const [reg, w] of Object.entries(want)) {

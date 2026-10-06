@@ -60,10 +60,13 @@ const LAWS = () => {
 const PAGEROWS = () => [...document.querySelectorAll('#rows tbody tr')].map(tr => ({ q: tr.cells[0].textContent, state: tr.cells[3].textContent.trim(),
   links: [...tr.querySelectorAll('.cite a')].map(a => [a.getAttribute('href'), a.textContent]), fix: ([...tr.cells[1].querySelectorAll('i')].find(i => /^a prior version/.test(i.textContent)) || {}).textContent || '' }));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, its own dress, and the same discourse the page renders', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)', t: '.et-b-h', a: '.et-b-primary' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)', t: '.et-r-h', a: '.et-r-pill' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)', t: '.et-b-h', a: '.et-b-primary' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)', t: '.et-r-h', a: '.et-r-pill' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)', t: '.et-c-path', a: '.et-c-primary' },
   };
   for (const [reg, w] of Object.entries(want)) {
