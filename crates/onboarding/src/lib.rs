@@ -13,7 +13,9 @@
 //!   is the adoption gate: without it, a person caps below Settlement grade **forever** (§4). A
 //!   Settlement gate consumes a [`GradeDisclosure`] witness that only [`disclose_grade`] can mint,
 //!   so a surface cannot gate without first showing the user their grade — it fails to compile,
-//!   not at runtime.
+//!   not at runtime. (Where the anchor sits in the hierarchy: the sovereign identity root is the
+//!   self-certifying `did:b:` — VOCABULARY Law 7, verifier in `crates/bzdid`; `did:autonomi` is
+//!   this ladder's BOUND PUBLICATION ANCHOR, never a competing root.)
 //! - **Step 3 — personas.** Plural, optional, each a [`persona::PersonaBinding`] whose disclosure
 //!   mode is its own (never global) and whose default is the reversible, private side.
 //!

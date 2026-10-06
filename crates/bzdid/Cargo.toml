@@ -1,0 +1,11 @@
+[package]
+name = "bzdid"
+version = "0.1.0"
+edition = "2021"
+description = "The self-certifying did:b: root and its local verifier — bzDiD = hash(genesis op), the sovereign identity root (moat, BUSL-1.1)"
+
+[dependencies]
+sha2 = "0.10"
+
+[dev-dependencies]
+atmirror = { path = "../atmirror" }

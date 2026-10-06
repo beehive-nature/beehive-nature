@@ -16,6 +16,7 @@ members = [
     "crates/b-token",
     "crates/bswap",
     "crates/bsigner",
+    "crates/bzdid",
     "crates/headroom-textcrusher",
     "crates/bnr-shell",
     "crates/capability",
