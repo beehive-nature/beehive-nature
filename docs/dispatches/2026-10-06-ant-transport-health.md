@@ -133,15 +133,38 @@ Same live page (`ant-transport.js?v=2`), same clip, direct only, 150 s each,
 - differs by network: **0**
 - unsettled on one side: 10; seen by one network only: 301
 
-Reading: in this run, whether an endpoint opened did not depend on the browser's
-network. Every endpoint both sides settled was either dead from both or open from
-both. That moves the finding from "this client's network had trouble" towards
-"these advertised WebRTC Direct endpoints are not reachable", which is the
-`ant-node` advertisement question. It still does not say why ICE never
-connected for those 195. It is two networks in one 5-minute window; a repeat
-at another hour would firm it up.
+Reading: 375 endpoints were observed by both networks and 365 settled on both.
+Among those 365, outcome concordance was 365/365: 195 failed from both and 170
+opened from both; none opened from one network while failing from the other.
+That makes a client-network explanation unlikely for this sample and points at
+endpoint-side state: advertised address or port validity, remote NAT or
+firewall, listener availability, a stale advertisement, or similar. The run
+does not distinguish those causes, and it does not show the defect is in
+`ant-node`'s `advertised_addr()`. Two networks, one 5-minute window.
 
 Receipt: `docs/receipts/ant-reach-2026-10-06.json` (both run summaries, the
-counts, and the 195 dead-everywhere and 170 opened-everywhere endpoints as
-16-hex prefixes of SHA-256 of `ip:port`, so the advertised list can be matched
-without publishing addresses here).
+counts, and the 195 dead-from-both and 170 opened-from-both endpoints). The
+endpoint IDs are truncated deterministic fingerprints (first 16 hex of SHA-256
+of `ip:port`), not raw addresses. They are pseudonymous, not anonymous: anyone
+holding the advertised endpoint set can recompute them, which is the point, so
+the Autonomi team can match them.
+
+## Next: does an endpoint keep its phenotype? (cohort, 2026-10-06 → 2026-10-09)
+
+The question moves from "does network A differ from network B" to "does
+endpoint X keep its outcome over time and from a third vantage point".
+
+- Cohort: the first 20 dead-from-both and first 20 opened-from-both
+  fingerprints in the receipt, sorted, so anyone re-derives the same 40.
+- `scripts/ant-reach-cohort.mjs` reads any later reach() exports for those 40
+  only: observed or not, and kept or flipped when settled.
+- `.github/workflows/ant-reach.yml` now probes from a Linux and a macOS
+  GitHub-hosted runner, on demand and every 6 hours, and the schedule stops by
+  itself after 2026-10-09. The two runner pools are separate machines; that
+  they leave through different upstream networks is not verified.
+- Baseline (the two runs above): dead cohort 40 of 40 settled observations
+  dead; live cohort 40 of 40 open. Trivially so, since the cohort was drawn
+  from them; the later windows are the test.
+
+Nothing in `ant-node` is touched from BNR. The sequence stays: evidence,
+upstream review, upstream diagnosis, a patch at the source.

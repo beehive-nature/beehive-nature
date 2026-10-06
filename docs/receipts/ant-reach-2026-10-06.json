@@ -1,6 +1,6 @@
 {
  "schema": "bnr.ant-reach-receipt/1",
- "_note": "Endpoints are the first 16 hex of SHA-256(\"ip:port\") of each dialled WebRTC Direct endpoint; no raw address is kept. Full exports: GitHub Actions run 37525604244 artifact ant-reach (runner side) and the laptop export (local). network.effectiveType is Chrome's own estimate and says nothing about the link here.",
+ "_note": "Endpoint IDs are truncated deterministic fingerprints: the first 16 hex of SHA-256(\"ip:port\") of each dialled WebRTC Direct endpoint. They are pseudonymous, not anonymous: anyone holding the advertised endpoint set can recompute and match them, by design. Raw addresses are not published. Full exports: GitHub Actions run 37525604244 artifact ant-reach (runner side) and the laptop export (local). network.effectiveType is Chrome's own estimate and says nothing about the link here.",
  "runs": [
   {
    "label": "laptop",
@@ -411,5 +411,13 @@
   "feb6c56758e7a490",
   "fef04c0379dd540c",
   "ff0e83f3d5850a8f"
- ]
+ ],
+ "concordance": {
+  "observedByBoth": 375,
+  "settledByBoth": 365,
+  "deadFromBoth": 195,
+  "openedFromBoth": 170,
+  "opposite": 0,
+  "unsettledSomewhere": 10
+ }
 }

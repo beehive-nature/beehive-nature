@@ -4,18 +4,13 @@
 // does not diagnose why ICE failed (closed port, NAT, firewall, stale or wrong advertisement).
 // Run: node scripts/ant-reach-compare.mjs reach-a.json reach-b.json [...] [--json out.json]
 import { readFileSync, writeFileSync } from 'node:fs';
+import { verdict } from './ant-reach-verdict.mjs';
 
 const args = process.argv.slice(2);
 const ji = args.indexOf('--json');
 const jsonOut = ji >= 0 ? args.splice(ji, 2)[1] : null;
 if (args.length < 2) { console.error('usage: ant-reach-compare.mjs a.json b.json [...] [--json out.json]'); process.exit(2); }
 
-// One run's verdict on one endpoint: opened if any attempt opened, dead if every attempt settled dead.
-export function verdict(attempts) {
-  if (attempts.some(a => a.stage === 'opened' || a.stage === 'answered')) return 'opened';
-  if (attempts.length && attempts.every(a => a.stage.startsWith('no-') || a.stage.includes('-no-'))) return 'dead';
-  return 'unsettled';
-}
 
 const runs = args.map(f => { const r = JSON.parse(readFileSync(f, 'utf8')); if (r.schema !== 'bnr.ant-reach/1') throw new Error(f + ': not bnr.ant-reach/1'); return r; });
 const all = new Map();
