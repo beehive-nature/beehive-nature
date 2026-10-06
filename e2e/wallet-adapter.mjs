@@ -861,10 +861,10 @@ try {
     ok('a signature refusal from one host while the other host\'s answer was lost is never a clean no: kept, maybe out, nothing given back',
       eg.phase === 'signed' && eg.maybe_out === true && !eg.evidence && /cannot tell yet whether it went out/.test(rg.words) && !/did not accept|said no/.test(rg.words) && rg.btn === 'check again' && Math.abs((await ledger()) - l4) < 1e-9, JSON.stringify({ phase: eg.phase, mo: eg.maybe_out, ev: eg.evidence, rg }));
     r18.sendBy = () => 'refuse';
-    if ((await rowOf(g.id)).btn) { await press(g.id); await until(g.id, ['failed', 'expired', 'confirmed'], 30000); }
+    if ((await rowOf(g.id)).btn) { await press(g.id); await p18.waitForTimeout(1500); await p18.waitForFunction(i => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === i); const b = r && r.querySelector('.obx-retry'); return b && !b.disabled; }, g.id, { timeout: 30000 }).catch(() => {}); }
     const eg2 = await entryOf(g.id);
-    ok('once every host answers and each refuses the signature, it is a clean no: failed, and the cap given back once',
-      eg2.phase === 'failed' && eg2.evidence && eg2.evidence.definite === true && eg2.cap && eg2.cap.refunded === true && Math.abs((await ledger()) - (l4 - 0.9)) < 1e-9, JSON.stringify({ phase: eg2.phase, ev: eg2.evidence, cap: eg2.cap }));
+    ok('after a lost answer, even every host refusing the signature is not a clean no: still signed, maybe out, nothing given back; the chain read decides',
+      eg2.phase === 'signed' && eg2.maybe_out === true && !(eg2.cap && eg2.cap.refunded) && Math.abs((await ledger()) - l4) < 1e-9, JSON.stringify({ phase: eg2.phase, mo: eg2.maybe_out, ev: eg2.evidence, cap: eg2.cap }));
     r18.sendBy = null;
 
     // H · two tabs read the same send, and both reads come back past its window with no block holding it: the cap comes back once

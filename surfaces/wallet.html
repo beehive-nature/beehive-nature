@@ -5305,7 +5305,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var th=ra.threshold||1, pw=((existing.filter(function(k){return canon(k.key)===pub})[0])||{}).weight||0;
     if(pw<th)
       throw brErr(a+' needs more than one key to sign, so this wallet cannot sign for it alone. Nothing was sent.','multisig','threshold '+th+' · the pasted key weighs '+pw+' · '+existing.map(function(k){return k.key+' weight '+k.weight}).join(', '));
-    var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, expStr='', t0=NaN, info=null, packed, sgn, txid;
+    var actz=[{actor:a,permission:'active'}], acts=[], adds=false, xsp=null, exp=0, expStr='', t0=NaN, info=null, packed, sgn, txid, addedKey=canon(K1.eosPub);   /* the key this paste adds, kept from now: the keychain may close while it is out */
     try{
       var k1w=((existing.filter(function(k){return canon(k.key)===K1.pubK1})[0])||{}).weight||0;
       if(k1w<th){   /* absent, or present too lightly to sign alone: it is set at the weight that signs, once */
@@ -5350,7 +5350,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       throw brErr(brRefusal(why,a),'refused',why.slice(0,400));
     var tx=(res&&res.transaction_id)||txid;
     var xday=xsp?capRecord(xsp.unit,xsp.amt):null;   /* it went out, or may have: it counts, like every send that may be in */
-    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,acked:sent.acked.map(hostName),extra:brExtraKey(extra),adds:adds,key:K1.pubK1,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
+    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,acked:sent.acked.map(hostName),extra:brExtraKey(extra),adds:adds,key:addedKey,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
     /* the chain is the receipt: the transaction's own status, read about every 1.5 s until a block holds
        it or it can never land. While it waits, nothing says it was sent */
     var since=Date.now(), blind=0, w=null;
@@ -8049,9 +8049,6 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if (/duplicate|already known|tx_dup/i.test(t)) return false;
     return /missing authority|unsatisfied|irrelevant|declares authority|assertion failure|eosio_assert|ram_usage_exceeded|insufficient ram|net usage is too high|already taken|does not exist|expiration is too far|overdrawn|no balance object|verification failed|gateway said 4(0[0-9]|1[0-8]|2[0-8])\b/i.test(t);
   }
-  /* once an earlier attempt may have reached a node, only a refusal of the signature itself proves nothing ran */
-  function authorityNo(t) { return /missing authority|unsatisfied|irrelevant|declares authority/i.test(String(t || ''))
-  }
   /* what a finished entry says when it is pressed again: never sent twice, never moved backward */
   function terminalWords(e) {
     var ev = e.evidence || {};
@@ -8205,7 +8202,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           say(terminalWords(entry).concat(wE === true ? [] : [obxUnsaved(wE)]), 'expired');
           return entry;
         }
-        else if (!knownHere && (maybeOut ? authorityNo(why) : definiteNo(why))) {  // the rail evaluated it and refused: nothing ran
+        else if (!knownHere && !maybeOut && definiteNo(why)) {  // the rail evaluated it and refused, and no earlier copy may be out: nothing ran
+          /* after a lost answer a refusal proves nothing (a node behind the block that changed the keys refuses
+             what another node took): the entry stays signed and the chain read decides */
           entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: why, definite: true };
           entry.updated_at = new Date().toISOString();
           var wF = obxKeep(entry);
