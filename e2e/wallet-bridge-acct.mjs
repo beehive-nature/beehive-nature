@@ -80,7 +80,7 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
         return json(body.code === 'core.vaulta' && body.symbol === 'A' ? [state.aBal || '5.0000 A'] : []);
       }
       if (u.pathname.endsWith('/get_abi')) return json(body.account_name === 'eosio' ? EOSIO_ABI : CORE_VAULTA_ABI);
-      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head, head_block_time: state.chainTime });
+      if (u.pathname.endsWith('/get_info')) return json({ chain_id: MAIN_CHAIN, head_block_num: state.head, head_block_time: state.chainTime, ...(state.libTime ? { last_irreversible_block_num: state.head - 2, last_irreversible_block_time: state.libTime } : {}) });
       // the dry run (compute_transaction) and the transaction's own status: a node without them answers {} (the default)
       if (u.pathname.endsWith('/compute_transaction')) { (state.dry = state.dry || []).push(u.host); return json(state.dryRun ? state.dryRun(body) : {}); }
       if (u.pathname.endsWith('/get_transaction_status')) { (state.st = state.st || []).push(u.host); return json(state.status ? state.status(body.id, url) : {}); }
@@ -308,9 +308,50 @@ try {
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
-  /* U · no host answers the transaction's own status: Hyperion is read for its id, never silence */
+  /* U · when no node that follows every block since the signing can say: Hyperion may only ever say "in"; "it can never
+     land" needs the chain's own final block past the window and the account, read after it, without the key the paste adds */
   {
-    console.log('U · one paste, read from Hyperion when the nodes cannot say (bee):');
+    console.log('U · one paste, when the nodes cannot say (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [DEV_PUB];
+    state.chainTime = '2026-10-05T00:00:00.000';   // the window closes at 00:02:00 on the chain's clock
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    const k1 = (await page.textContent('#kc-k1-pub')).trim();
+    await toKey(page);
+    await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+    const press = async () => { await page.fill('#br-paste', DEV_WIF); await page.evaluate(() => document.getElementById('br-paste-go').click()); };
+    const line = () => page.evaluate(() => ({ t: document.getElementById('br-paste-stat').innerText.trim(), all: document.getElementById('br-paste-stat').textContent, open: !document.getElementById('br-paste').disabled, btn: (document.querySelector('#br-paste-stat button.wl-act') || {}).textContent || null }));
+    const AFTER = '2026-10-05T00:02:00.500';
+    // 1 · no node answers the status; Hyperion has nothing indexed and its lib is far past the window (its index has gaps): never "did not land"
+    state.hyperion = id => ({ executed: false, trx_id: id, lib: 123700, last_indexed_block: 123702, last_indexed_block_time: '2026-10-05T00:02:03.000', missing_blocks: 4 });
+    const p0 = state.posts.length;
+    await press();
+    await waitIn(page, 'br-paste-stat', /not in a block yet/, 60000);
+    let l = await line();
+    ok('Hyperion\'s lib past the window never proves a paste did not land: it is not in a block yet, check again, and the paste stays held',
+      /^it is not in a block yet, so check again in a minute\./.test(l.t) && l.btn === 'check again' && !l.open && !/did not reach a block|nothing changed/.test(l.t) && (state.hy || []).length >= 1 && state.posts.length - p0 === 2, JSON.stringify(l));
+    // 2 · the chain's own final block is past the window, and the account, read after it, does not carry the key: neither landed
+    state.libTime = AFTER;
+    await page.evaluate(() => document.querySelector('#br-paste-stat button.wl-act').click());
+    await waitIn(page, 'br-paste-stat', /did not reach a block/, 30000);
+    l = await line();
+    ok('a final block past the window, and the account read after it without the key: the paste and its key never landed, said, and the field back',
+      /^the last paste did not reach a block before its time ran out, so nothing changed\./.test(l.t) && /does not carry this wallet’s key: the key and the action were one transaction, so neither landed/.test(l.all) && l.open && state.posts.length - p0 === 2, JSON.stringify(l));
+    state.libTime = null;
+    // 3 · Hyperion holds it in a block: in
+    state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
+    state.hyperion = id => ({ executed: true, trx_id: id, lib: 123460, actions: [{ block_num: 123462, act: { account: 'eosio', name: 'updateauth' } }] });
+    await press();
+    await waitIn(page, 'br-calm', /^done\./, 30000);
+    l = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), all: document.getElementById('br-calm').textContent }));
+    ok('Hyperion holds it in a block: done, with its block for cypherpunk', /^done\. this wallet now signs for kingbeelovis with one press\./.test(l.t) && /in block 123462 · Hyperion at eos\.hyperion\.eosrio\.io: executed/.test(l.all), JSON.stringify(l));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* V · the hour each node remembers no longer reaches back to the signing: the account is the witness for the key a paste adds */
+  {
+    console.log('V · one paste, after the nodes forgot it (bee):');
     const { ctx, state, page, errors } = await open(browser, 'bee');
     state.keys.kingbeelovis = [DEV_PUB];
     state.chainTime = '2026-10-05T00:00:00.000';
@@ -320,19 +361,21 @@ try {
     await toKey(page);
     await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
     const press = async () => { await page.fill('#br-paste', DEV_WIF); await page.evaluate(() => document.getElementById('br-paste-go').click()); };
-    // no block to a final block 241 past the head at signing (123456) holds it: that block's time is past the window
-    state.hyperion = id => ({ executed: false, trx_id: id, lib: 123700, last_indexed_block: 123702, last_indexed_block_time: '2026-10-05T00:02:03.000' });
+    const line = () => page.evaluate(() => ({ t: document.getElementById('br-paste-stat').innerText.trim(), all: document.getElementById('br-paste-stat').textContent, open: !document.getElementById('br-paste').disabled }));
+    // every node answers UNKNOWN, following blocks only from long after the signing, its final block past the window
+    state.status = () => ({ state: 'UNKNOWN', head_number: 999999, irreversible_number: 999997, irreversible_timestamp: '2026-10-05T01:02:00.000', earliest_tracked_block_number: 992000 });
+    // 1 · the account read after that final block does not carry the key: never in, said, and the field back
     await press();
     await waitIn(page, 'br-paste-stat', /did not reach a block/, 30000);
-    let l = await page.evaluate(() => ({ t: document.getElementById('br-paste-stat').innerText.trim(), all: document.getElementById('br-paste-stat').textContent, open: !document.getElementById('br-paste').disabled }));
-    ok('with no status from any node, Hyperion\'s final block past the window proves it never landed: said, and the field back',
-      /^it did not reach a block before its time ran out, so nothing changed\. paste the key again to try once more\.$/.test(l.t) && /Hyperion at eos\.hyperion\.eosrio\.io/.test(l.all) && l.open && (state.hy || []).length >= 1, JSON.stringify(l));
+    let l = await line();
+    ok('no node remembers back to the signing, a final block is past the window, and the account lacks the key: it never landed, the field back',
+      /^it did not reach a block before its time ran out, so nothing changed\. paste the key again to try once more\.$/.test(l.t) && /neither landed/.test(l.all) && /UNKNOWN/.test(l.all) && l.open, JSON.stringify(l));
+    // 2 · the account carries the key: it went in
     state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
-    state.hyperion = id => ({ executed: true, trx_id: id, lib: 123460, actions: [{ block_num: 123462, act: { account: 'eosio', name: 'updateauth' } }] });
     await press();
     await waitIn(page, 'br-calm', /^done\./, 30000);
-    l = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), all: document.getElementById('br-calm').textContent }));
-    ok('Hyperion holds it in a block: done, with its block for cypherpunk', /^done\. this wallet now signs for kingbeelovis with one press\./.test(l.t) && /executed in block 123462 \(Hyperion/.test(l.all), JSON.stringify(l));
+    const d = await page.evaluate(() => document.getElementById('br-calm').innerText.trim());
+    ok('and when the account carries the key, the paste went in: done', /^done\. this wallet now signs for kingbeelovis with one press\./.test(d), d);
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

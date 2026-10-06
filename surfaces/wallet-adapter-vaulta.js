@@ -21,6 +21,10 @@
 // it read. Replay safety (spec §6): a signed Antelope tx has a fixed id and an
 // expiration; the chain rejects the duplicate — resubmitting identical stored
 // bytes is safe by construction, re-signing is the only unsafe path.
+//
+// ONE READER for every Vaulta send: the wallet's own key (the outbox) and the
+// one paste (wallet.html brWitness) both read a sent transaction here, so the
+// rule for "it went in" and "it can never land" lives in one place.
 importScripts('onboarding/vendor/bnr-sign.js?v=6');   // worker-relative: /surfaces/onboarding/…
 var BN = globalThis.BnrSign;
 
@@ -31,6 +35,12 @@ var J4 = {
 };
 var MAIN_CHAIN_ID = 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906'; // PUBLIC-CONSTANT: Vaulta mainnet chain id
 var RPC_TIMEOUT = 9000;
+var READ_TIMEOUT = 6000;
+var DUP_GRACE = 1500;   // a "duplicate" acks at once; a transaction id from another host is waited for this long
+/* Hyperion history, read by transaction id only when no node that follows every block since the signing
+   can say. It may only ever show that a block holds a transaction, never that none does: its index can
+   have gaps. No Hyperion is known for Jungle4 */
+var HYPERION = { mainnet: ['https://eos.hyperion.eosrio.io', 'https://eos.eosusa.io'], jungle4: [] };
 
 /* RPC account rows still use the historical EOS symbol on Vaulta. Keep the
    numeric text exactly as returned; only the display unit belongs to this UI. */
@@ -82,6 +92,111 @@ async function railPost(net, path, body) {
   var unreachable = new Error('all ' + (net || 'mainnet') + ' hosts unreachable (' + ((lastErr && lastErr.message) || 'no answer') + ')');
   unreachable.code = E.RAIL_UNREACHABLE;
   throw unreachable;
+}
+
+/* one POST to one host: its answer (ok, status, parsed body), or the fact that the answer was lost */
+async function hostPost(h, path, json, ms) {
+  var ctl = new AbortController();
+  var to = setTimeout(function () { ctl.abort() }, ms || RPC_TIMEOUT);
+  try {
+    var res = await fetch(h + path, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: json });
+    var d = null; try { d = await res.json() } catch (e) {}
+    return { h: h, ok: res.ok, status: res.status, d: d };
+  } catch (e) { return { h: h, lost: true, why: (e && e.message) || String(e) } }
+  finally { clearTimeout(to) }
+}
+/* a node's refusal in its own words (the same words railPost has always surfaced) */
+function errText(d) {
+  if (!d || !d.error) return '';
+  var msg = (d.error.details && d.error.details[0] && d.error.details[0].message) || d.error.what || 'rail refused';
+  if (d.error.name && msg.indexOf(d.error.name) < 0) msg += ' [' + d.error.name + ']';
+  return msg;
+}
+function isDuplicate(t) { return /duplicate transaction|tx_duplicate|already in the mempool|already known|already processed/i.test(String(t || '')) }
+/* the one refusal that holds on every node whatever it has seen: the signature itself */
+function authorityNo(t) { return /missing authority|unsatisfied|irrelevant|declares authority/i.test(String(t || '')) }
+function hostName(h) { return String(h).replace(/^https?:\/\//, '') }
+function chainMs(t) { t = String(t || ''); var v = Date.parse(/Z$/.test(t) ? t : t + 'Z'); return isFinite(v) ? v : NaN }
+function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i }) }
+
+/* the signed bytes go to every host at once. They are the same bytes, so a second answer is the same
+   transaction: the first host that takes them answers for the send, and a "duplicate" from another
+   host means it holds them too. A refusal answers only when no host took them; a host whose answer was
+   lost may still hold the bytes, so then only a refusal of the signature itself is a clean "no" */
+function sendAll(net, body) {
+  var json = JSON.stringify(body), s = { res: null, acked: [], dup: null, refused: [], lost: [] };
+  var each = hostsFor(net).map(function (h) {
+    return hostPost(h, '/v1/chain/send_transaction', json, RPC_TIMEOUT).then(function (x) {
+      var d = x.d, why = errText(d);
+      if (x.ok && d && d.transaction_id) { s.acked.push(h); if (!s.res) s.res = d }
+      else if (d && !x.ok && isDuplicate(why)) { s.acked.push(h); if (!s.dup) s.dup = why }
+      else if (d && !x.ok && why) s.refused.push(why);
+      else s.lost.push(hostName(h) + (x.lost ? ' (' + x.why + ')' : ' said ' + x.status));
+    });
+  });
+  return new Promise(function (done) {
+    var t = null;
+    each.forEach(function (q) { q.then(function () {
+      if (s.res) done(s);
+      else if (s.acked.length && !t) t = setTimeout(function () { done(s) }, DUP_GRACE);
+    }) });
+    Promise.all(each).then(function () { if (t) clearTimeout(t); done(s) });
+  });
+}
+
+/* an Antelope transaction id is the sha256 of its packed bytes; the signed expiration is their first
+   four bytes (seconds, little endian), so what the reader holds a send to is what was signed */
+function txIdOf(hx) { return hexOf(BN.sha256(hexToBytes(hx))) }
+function signedTerms(sb) {
+  var w = sb;
+  if (typeof sb === 'string') { try { w = JSON.parse(sb) } catch (e) { return null } }
+  var hx = w && w.packed_hex;
+  if (typeof hx !== 'string' || !/^([0-9a-f]{2}){10,}$/i.test(hx)) return null;
+  var b = hexToBytes(hx.slice(0, 8)), sec = (b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24)) >>> 0;
+  return { id: txIdOf(hx), expStr: new Date(sec * 1000).toISOString().slice(0, 19) };
+}
+
+/* a host is read for a transaction only once its own get_info names this network's chain */
+var CHAIN_OK = {};
+async function hostOnChain(net, h) {
+  var k = net + ' ' + h;
+  if (CHAIN_OK[k]) return true;
+  var x = await hostPost(h, '/v1/chain/get_info', '{}', READ_TIMEOUT);
+  if (x.ok && x.d && x.d.chain_id === chainIdFor(net)) { CHAIN_OK[k] = true; return true }
+  return false;
+}
+/* the transaction's own status on one host (get_transaction_status follows every block for about an hour) */
+async function statusAt(net, h, id) {
+  var both = await Promise.all([hostPost(h, '/v1/chain/get_transaction_status', JSON.stringify({ id: id }), READ_TIMEOUT), hostOnChain(net, h)]);
+  var x = both[0];
+  return both[1] && x.ok && x.d && typeof x.d.state === 'string' ? x.d : null;
+}
+async function hyperionTx(net, id) {
+  var hs = HYPERION[net] || [];
+  for (var i = 0; i < hs.length; i++) {
+    var ctl = new AbortController(), to = setTimeout(ctl.abort.bind(ctl), READ_TIMEOUT);
+    try {
+      var r = await fetch(hs[i] + '/v2/history/get_transaction?id=' + encodeURIComponent(id), { signal: ctl.signal });
+      var d = await r.json();
+      if (r.ok && d && typeof d.executed === 'boolean') return { h: hs[i], d: d };
+    } catch (e) {} finally { clearTimeout(to) }
+  }
+  return null;
+}
+/* the latest final block a status reply named, else the chain's own get_info: its number and time */
+function finalOf(said) {
+  var best = null;
+  said.forEach(function (x) {
+    var t = x.d.irreversible_timestamp;
+    if (isFinite(chainMs(t)) && (!best || chainMs(t) > chainMs(best.time))) best = { time: t, block: x.d.irreversible_number };
+  });
+  return best;
+}
+async function finalInfo(net) {
+  var info = null;
+  try { info = await guardedInfo(net) } catch (e) { return null }
+  var t = info && info.last_irreversible_block_time;
+  return isFinite(chainMs(t)) ? { time: t, block: info.last_irreversible_block_num } : null;
 }
 
 /* the chain-id HARD guard: a node answering with the wrong chain is refused,
@@ -170,6 +285,7 @@ async function buildIntent(net, contract, action, data, actz, summaryWords) {
     digest: digest,
     packed_hex: hexOf(packed),                    // the wire body the shell re-pairs with signatures
     expires_at: new Date(expSec * 1000).toISOString(),
+    head: info.head_block_num,                    // the head it was built at: no block before it can hold it
     human_summary: summaryWords
   };
 }
@@ -180,32 +296,84 @@ function hexToBytes(h) {
   return o;
 }
 
-/* confirm/status (spec §5): ONE rail read, plugin-free — the block itself.
-   submit's block_hint says where the rail said it landed; we wait for the
-   head to reach it, fetch the block, and scan for the transaction id. */
-async function readBack(net, ref, blockHint) {
-  if (!ref) { var e = new Error('status needs a ref (transaction id)'); e.code = E.BAD_PARAMS; throw e }
-  var info = await guardedInfo(net);
-  if (typeof blockHint !== 'number' || !blockHint) {
-    return { phase: 'submitted', evidence: { read: 'get_info @ head ' + info.head_block_num, note: 'no block hint from submit — cannot scan without it' } };
+/* confirm/status (spec §5): where a sent transaction is, read from the chain itself. Every host is
+   asked for the transaction's own status, and a host counts only once its get_info names this chain:
+   - a block holds it on any host: confirmed, with its block;
+   - a host that has followed every block since the head at signing (earliest_tracked_block_number at or
+     below it) has made final a block whose time is past the signed expiration, and no host holds it in a
+     block: it can never land (failed when a host says FAILED, expired otherwise). That is the only "never";
+   - such a host answers without that proof yet: it may still land, so wait.
+   When no host that follows blocks from the signing can say (none answered, or the hour each host
+   remembers no longer reaches back to it), the witnesses that can only say "in" are read: Hyperion by
+   transaction id, then the block the node named at submit. Hosts that answered but no longer reach back,
+   with a final block past the expiration: this wallet can no longer tell from the chain ("lost": maybe
+   in, nothing given back). Silence is never a verdict. The final block found is returned with every
+   answer that is not settled, so the one paste can read its account after it (wallet.html brWitness) */
+async function readBack(net, p) {
+  p = p || {};
+  var terms = signedTerms(p.signed_bytes), ref = p.ref || (terms && terms.id);
+  if (!ref) { var e = new Error('status needs a ref (transaction id) or the signed bytes'); e.code = E.BAD_PARAMS; throw e }
+  var expStr = terms ? terms.expStr : (typeof p.expiration === 'string' && p.expiration ? p.expiration.replace(/Z$/, '').slice(0, 19) : null);
+  var expT = expStr ? chainMs(expStr) : NaN, until = expStr ? ' · valid until ' + expStr + 'Z' : '';
+  var head = typeof p.head === 'number' && p.head > 0 ? p.head : null;
+  var acked = Array.isArray(p.acked_by) && p.acked_by.length ? ' · acked by ' + p.acked_by.map(hostName).join(', ') : '';
+  var reads = await Promise.all(hostsFor(net).map(function (h) { return statusAt(net, h, ref).then(function (d) { return { h: h, d: d } }) }));
+  var said = reads.filter(function (x) { return x.d });
+  var all = said.map(function (x) { return hostName(x.h) + ' ' + x.d.state }).join(', ');
+  var inb = said.filter(function (x) { return x.d.state === 'IN_BLOCK' || x.d.state === 'IRREVERSIBLE' })[0];
+  if (inb) return { phase: 'confirmed', evidence: { read: 'get_transaction_status at ' + hostName(inb.h) + ': ' + inb.d.state + ' in block #' + inb.d.block_number + acked,
+    via: 'status', k: 'in', block_num: inb.d.block_number, block_id: inb.d.block_id || null, state: inb.d.state } };
+  var cover = head === null ? [] : said.filter(function (x) { return typeof x.d.earliest_tracked_block_number === 'number' && x.d.earliest_tracked_block_number <= head });
+  var past = isFinite(expT) ? cover.filter(function (x) { return chainMs(x.d.irreversible_timestamp) > expT })[0] : null;
+  if (past) {
+    var failed = said.some(function (x) { return x.d.state === 'FAILED' });
+    var why = 'final block ' + past.d.irreversible_number + ' at ' + past.d.irreversible_timestamp + ' (' + hostName(past.h) + ', following every block since ' + past.d.earliest_tracked_block_number +
+      ', signed at head ' + head + ') is past its expiration ' + expStr + ', and no block holds it';
+    return { phase: failed ? 'failed' : 'expired', evidence: { read: 'get_transaction_status: ' + all + ' · ' + why + acked, via: 'status', k: failed ? 'failed' : 'never',
+      definite: true, maybe_in: false, state: failed ? 'FAILED' : 'never in a block', detail: 'expired: ' + why, final_time: past.d.irreversible_timestamp, final_block: past.d.irreversible_number } };
   }
-  if (info.head_block_num < blockHint) {
-    return { phase: 'submitted', evidence: { read: 'get_info @ head ' + info.head_block_num, note: 'block ' + blockHint + ' not reached yet' } };
-  }
-  var block = await railPost(net, '/v1/chain/get_block', { block_num_or_id: blockHint });
-  var txs = (block && block.transactions) || [];
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
-    var id = t.id || (t.trx && t.trx.id);
-    if (id === ref) {
-      var status = t.status || (t.trx && t.trx.receipt && t.trx.receipt.status) || 'executed';
-      if (status === 'executed') {
-        return { phase: 'confirmed', evidence: { read: 'get_block #' + blockHint + ' on ' + net, block_id: block.id, block_num: blockHint, status: status, irreversible_behind: info.head_block_num - blockHint } };
+  if (cover.length) return { phase: 'submitted', evidence: { read: 'get_transaction_status: ' + all + until + acked, via: 'status', k: 'wait', covered: true } };
+  /* no host that follows every block since the signing could say: the witnesses that can only say "in" */
+  var hy = await hyperionTx(net, ref), hyN = hy && hy.d.executed && hy.d.actions && hy.d.actions[0] && hy.d.actions[0].block_num;
+  if (hy && hy.d.executed) return { phase: 'confirmed', evidence: { read: 'Hyperion at ' + hostName(hy.h) + ': executed' + (hyN ? ' in block #' + hyN : '') +
+    (said.length ? ' (get_transaction_status: ' + all + ', following no block from the signing)' : ' (get_transaction_status did not answer)') + acked, via: 'hyperion', k: 'in', block_num: hyN || null } };
+  var blk = typeof p.block_hint === 'number' && p.block_hint > 0 ? await blockRead(net, ref, p.block_hint) : null;
+  if (blk && blk.phase !== 'submitted') return blk;
+  var fin = finalOf(said) || await finalInfo(net);
+  var notes = (said.length ? 'get_transaction_status: ' + all + (head === null ? ' (the head at signing is not known)' : '; none follows every block since the head at signing ' + head) : 'get_transaction_status did not answer') +
+    (hy ? ' · Hyperion at ' + hostName(hy.h) + ': not executed, indexed to ' + hy.d.last_indexed_block + ' (an index can have gaps, so this is never a "no")' : '') +
+    (blk ? ' · ' + blk.evidence.read : '') + (fin ? ' · final block ' + fin.block + ' at ' + fin.time : '');
+  var fins = { final_time: fin ? fin.time : null, final_block: fin ? fin.block : null };
+  if (said.length && fin && isFinite(expT) && chainMs(fin.time) > expT)   /* the hosts no longer reach back to the signing, and it can no longer land: no chain read can tell now */
+    return { phase: 'expired', evidence: Object.assign({ read: 'get_transaction_status lapsed: ' + notes + ', past its expiration ' + expStr + acked, via: 'status', k: 'lost', maybe_in: true, definite: false, lapsed: true }, fins) };
+  if (said.length || hy || blk) return { phase: 'submitted', evidence: Object.assign({ read: notes + until + acked, via: said.length ? 'status' : hy ? 'hyperion' : 'block', k: 'wait', covered: false }, fins) };
+  return { phase: 'submitted', evidence: Object.assign({ read: 'no host answered get_transaction_status, Hyperion did not answer' + (p.block_hint ? ', and block #' + p.block_hint + ' could not be read' : ', and no block was named to read') + until + acked, via: 'none', k: 'none' }, fins) };
+}
+/* the block the node named at submit (processed.block_num, its speculative head): a block that holds it
+   says in (or failed, with the chain's own status); a block without it proves nothing, the transaction
+   may sit in any later one. null when no node answered */
+async function blockRead(net, ref, blockHint) {
+  try {
+    var info = await guardedInfo(net);
+    if (info.head_block_num < blockHint) return { phase: 'submitted', evidence: { read: 'get_info @ head ' + info.head_block_num + ': block #' + blockHint + ' not reached yet', via: 'block', k: 'wait' } };
+    var block = await railPost(net, '/v1/chain/get_block', { block_num_or_id: blockHint });
+    var txs = (block && block.transactions) || [];
+    for (var i = 0; i < txs.length; i++) {
+      var t = txs[i];
+      var id = t.id || (t.trx && t.trx.id);
+      if (id === ref) {
+        var status = t.status || (t.trx && t.trx.receipt && t.trx.receipt.status) || 'executed';
+        if (status === 'executed') {
+          return { phase: 'confirmed', evidence: { read: 'get_block #' + blockHint + ' on ' + net, via: 'block', k: 'in', block_id: block.id, block_num: blockHint, status: status, irreversible_behind: info.head_block_num - blockHint } };
+        }
+        return { phase: 'failed', evidence: { read: 'get_block #' + blockHint + ' on ' + net, via: 'block', k: 'failed', block_id: block.id, status: status } };
       }
-      return { phase: 'failed', evidence: { read: 'get_block #' + blockHint + ' on ' + net, block_id: block.id, status: status } };
     }
+    return { phase: 'submitted', evidence: { read: 'get_block #' + blockHint + ': ' + txs.length + ' txs scanned, id not present', via: 'block', k: 'wait', block_id: block && block.id } };
+  } catch (e) {
+    if (e && e.code === E.CHAIN_GUARD) throw e;
+    return null;
   }
-  return { phase: 'submitted', evidence: { read: 'get_block #' + blockHint + ' — ' + txs.length + ' txs scanned, id not present', block_id: block.id } };
 }
 
 /* ── the JSON-RPC 2.0 server (spec §3) ─────────────────────────────── */
@@ -213,7 +381,7 @@ var METHODS = {
   describe: function () {
     return {
       rail: 'vaulta',
-      adapter_version: '1.0.0',
+      adapter_version: '1.1.0',
       contract_version: '1',
       capabilities: ['balance', 'status', 'buildSend', 'buildAction', 'submit', 'confirm'],
       networks: ['mainnet', 'jungle4'],
@@ -256,20 +424,28 @@ var METHODS = {
     var wire = JSON.parse(p.signed_bytes);   // {network, packed_hex, signatures, block_hint-less}
     var net = netOf(wire);
     if (!wire.packed_hex || !wire.signatures || !wire.signatures.length) throw bad('signed_bytes missing packing or signatures');
-    var res = await railPost(net, '/v1/chain/send_transaction', {
-      signatures: wire.signatures, compression: 0, packed_context_free_data: '', packed_trx: wire.packed_hex
-    });
-    if (!res || !res.transaction_id) {
-      var e = new Error('rail accepted nothing: ' + JSON.stringify(res).slice(0, 200)); e.code = E.SUBMIT_REFUSED; throw e;
+    /* the identical signed bytes go to every host at once: the first that takes them answers, a
+       "duplicate" from another is the same transaction held there, and a refusal answers only when no
+       host took them (spec §6: resubmitting identical bytes is safe; nothing here re-signs) */
+    var s = await sendAll(net, { signatures: wire.signatures, compression: 0, packed_context_free_data: '', packed_trx: wire.packed_hex });
+    if (s.acked.length) {
+      var res = s.res;
+      return {
+        ref: (res && res.transaction_id) || txIdOf(wire.packed_hex),
+        accepted_at: new Date().toISOString(),
+        block_hint: (res && res.processed && res.processed.block_num) || null,
+        acked_by: s.acked.map(hostName),
+        duplicate: !res,                            // every host that answered already held these exact bytes
+        detail: res ? null : s.dup
+      };
     }
-    return {
-      ref: res.transaction_id,
-      accepted_at: new Date().toISOString(),
-      block_hint: (res.processed && res.processed.block_num) || null
-    };
+    var refusal = uniq(s.refused).join(' | ');
+    if (s.refused.length && (!s.lost.length || s.refused.some(authorityNo))) { var e = new Error(refusal); e.code = E.SUBMIT_REFUSED; throw e }
+    var u = new Error('no ' + net + ' host took it' + (s.lost.length ? ' (no answer from ' + s.lost.join(', ') + ')' : '') + (refusal ? '; refused elsewhere: ' + refusal : ''));
+    u.code = E.RAIL_UNREACHABLE; throw u;
   },
-  confirm: async function (p) { return readBack(netOf(p), p && p.ref, p && p.block_hint) },
-  status: async function (p) { return readBack(netOf(p), p && p.ref, p && p.block_hint) }
+  confirm: async function (p) { return readBack(netOf(p), p) },
+  status: async function (p) { return readBack(netOf(p), p) }
 };
 
 function netOf(p) { return (p && p.network) === 'jungle4' ? 'jungle4' : 'mainnet' }

@@ -5221,47 +5221,38 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* serializing needs no key: the pasted one joins only for the one signature */
   var BR_NOKEY={getAvailableKeys:function(){ return Promise.resolve([]) },sign:function(){ return Promise.reject(new Error('no key here')) }};
-  /* where a sent paste is, read from the chain itself. Every host is asked for the transaction's own
-     status (get_transaction_status follows every block for about an hour): a block that holds it is the
-     receipt. It can never land once a host that followed blocks from before it was signed has made final
-     a block whose time is past its expiration, and no host holds it in a block. A host that cannot say
-     is never silence: Hyperion is read for the transaction id, and the account for the key it added (a
-     second witness, never the only one: the account alone never says it did not land) */
-  var HYPERION=['https://eos.hyperion.eosrio.io','https://eos.eosusa.io'];
+  /* where a sent paste is, read by the wallet's one Vaulta reader (wallet-adapter-vaulta.js readBack, which
+     the wallet's own sends use too): a block that holds it is the receipt. It can never land only once a node
+     that followed every block since the head at signing has made final a block past its expiration, and no
+     host holds it in a block. When no such node can say (none answered, or the hour each node remembers no
+     longer reaches back to the signing), the account is the other witness for a paste that adds this wallet's
+     key: carrying the key, it is in; read after a final block past the expiration and still without the key,
+     the key and the action were one transaction, so neither landed. Hyperion may only ever say "in". For a
+     paste that adds no key, nothing on the chain can tell once the nodes forget it: that is said, and the
+     hold goes with nothing given back */
   function chainMs(t){ t=String(t||''); var v=Date.parse(/Z$/.test(t)?t:t+'Z'); return isFinite(v)?v:NaN }
   function hostName(h){ return String(h).replace(/^https?:\/\//,'') }
-  async function txStatusAt(h,id){
-    try{ var r=await fetchT(h+'/v1/chain/get_transaction_status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})},6000), d=await r.json();
-      return r.ok&&d&&typeof d.state==='string'?d:null }catch(e){ return null }
-  }
-  async function txHyperion(id){
-    for(var i=0;i<HYPERION.length;i++){
-      try{ var r=await fetchT(HYPERION[i]+'/v2/history/get_transaction?id='+encodeURIComponent(id),{},6000), d=await r.json();
-        if(r.ok&&d&&typeof d.executed==='boolean')return {h:HYPERION[i],d:d} }catch(e){}
-    }
-    return null;
+  /* the chain's last final block (get_info), when the reader named none */
+  async function finalNow(){
+    var i=null; try{ i=await post(VH,'/v1/chain/get_info',{}) }catch(e){}
+    return i&&i.chain_id===VAULTA_CHAIN&&isFinite(chainMs(i.last_irreversible_block_time))?{time:i.last_irreversible_block_time,block:i.last_irreversible_block_num}:null;
   }
   async function brWitness(p){
-    var expT=chainMs(p.expStr), until=' · valid until '+p.expStr+'Z';
-    var reads=await Promise.all(VH.map(function(h){ return txStatusAt(h,p.tx).then(function(d){ return {h:h,d:d} }) }));
-    var said=reads.filter(function(x){ return x.d }), all=said.map(function(x){ return hostName(x.h)+' '+x.d.state }).join(', ');
-    var inb=said.filter(function(x){ return x.d.state==='IN_BLOCK'||x.d.state==='IRREVERSIBLE' })[0];
-    if(inb)return {k:'in',block:inb.d.block_number,cy:'tx '+p.tx+' · in block '+inb.d.block_number+' ('+inb.d.state+' at '+hostName(inb.h)+')'};
-    var past=said.filter(function(x){ var d=x.d; return chainMs(d.irreversible_timestamp)>expT&&typeof d.earliest_tracked_block_number==='number'&&d.earliest_tracked_block_number<=p.head })[0];
-    if(past)return {k:said.some(function(x){ return x.d.state==='FAILED' })?'failed':'never',
-      cy:'tx '+p.tx+' · '+all+' · final block '+past.d.irreversible_number+' at '+past.d.irreversible_timestamp+' ('+hostName(past.h)+') is past its expiration '+p.expStr+', and no block holds it'};
-    if(said.length)return {k:'wait',via:'status',cy:'tx '+p.tx+' · '+all+until};
-    /* no host could say */
-    var hy=await txHyperion(p.tx), hyN=hy&&hy.d.executed&&hy.d.actions&&hy.d.actions[0]&&hy.d.actions[0].block_num;
-    if(hy&&hy.d.executed)return {k:'in',block:hyN||null,cy:'tx '+p.tx+' · executed'+(hyN?' in block '+hyN:'')+' (Hyperion at '+hostName(hy.h)+'; get_transaction_status did not answer)'};
-    /* a block's time grows by at least half a second a block: once Hyperion's final block is that many past the head at signing, its time is past the expiration */
-    if(hy&&isFinite(p.t0)&&typeof hy.d.lib==='number'&&hy.d.lib>=p.head+Math.floor((expT-p.t0)/500)+1)
-      return {k:'never',cy:'tx '+p.tx+' · no block to '+hy.d.lib+' holds it (Hyperion at '+hostName(hy.h)+'), and that block\u2019s time is past its expiration '+p.expStr};
-    var key=null;
+    var expT=chainMs(p.expStr), until=' · valid until '+p.expStr+'Z', r=null;
+    try{ r=await callAdapter('vaulta','status',{network:'mainnet',ref:p.tx,expiration:p.expStr,head:p.head,acked_by:p.acked||null},30000) }catch(e){ r=null }
+    var ev=(r&&r.evidence)||{}, k=r?ev.k:'none', rd=r?String(ev.read||''):'the wallet\u2019s Vaulta reader did not answer';
+    if(k==='in')return {k:'in',block:ev.block_num||null,cy:'tx '+p.tx+(ev.block_num?' · in block '+ev.block_num:'')+' · '+rd};
+    if(k==='failed'||k==='never')return {k:k,cy:'tx '+p.tx+' · '+rd};
+    if(k==='wait'&&ev.covered)return {k:'wait',via:'status',cy:'tx '+p.tx+' · '+rd};
+    /* no node that follows every block since the signing can say: a final block first, then the account read after it */
+    var fin=ev.final_time?{time:ev.final_time,block:ev.final_block}:await finalNow(), past=!!fin&&chainMs(fin.time)>expT, key=null;
     if(p.adds&&p.acct===vacct()){ try{ await checkBridge() }catch(e){} key=BRIDGED }
-    if(key===true)return {k:'key',cy:'tx '+p.tx+' · '+p.acct+' carries this wallet\u2019s key; get_transaction_status and Hyperion did not answer, so no block was read for it'};
-    if(hy||key===false)return {k:'wait',via:hy?'hyperion':'account',cy:'tx '+p.tx+' · '+(hy?'Hyperion: not in a block yet, indexed to '+hy.d.last_indexed_block:p.acct+' does not carry this wallet\u2019s key yet')+' · get_transaction_status did not answer'+until};
-    return {k:'unread',cy:'tx '+p.tx+' · no host answered get_transaction_status, Hyperion or get_account'+until};
+    if(key===true)return {k:'key',cy:'tx '+p.tx+' · '+p.acct+' carries this wallet\u2019s key · '+rd};
+    if(key===false&&past)return {k:'never',cy:'tx '+p.tx+' · final block '+fin.block+' at '+fin.time+' is past its expiration '+p.expStr+', and '+p.acct+', read after it, does not carry this wallet\u2019s key: the key and the action were one transaction, so neither landed · '+rd};
+    if(!p.adds&&k==='lost')return {k:'lost',cy:'tx '+p.tx+' · '+rd};
+    if(k==='wait'||k==='lost')return {k:'wait',via:ev.via==='hyperion'?'hyperion':'status',cy:'tx '+p.tx+' · '+rd+(key===false?' · '+p.acct+' does not carry this wallet\u2019s key yet':'')};
+    if(key===false)return {k:'wait',via:'account',cy:'tx '+p.tx+' · '+p.acct+' does not carry this wallet\u2019s key yet · '+rd+(fin?' · final block '+fin.block+' at '+fin.time:'')+until};
+    return {k:'unread',cy:'tx '+p.tx+' · '+rd+(p.adds?' · get_account '+p.acct+' did not answer':'')+until};
   }
   async function pasteBridge(wif,extra,onPhase){
     var a=vacct();
@@ -5280,6 +5271,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if(same)return hw.k==='in'?{tx:held.tx,cy:hw.cy}:{tx:held.tx,earlier:!!held.extra,cy:hw.cy};
       }
       else if(hw.k==='never'||hw.k==='failed'){ brGiveBack(held); if(BR_PENDING===held)BR_PENDING=null }   /* proven never to land */
+      else if(hw.k==='lost'){ if(BR_PENDING===held)BR_PENDING=null }   /* the chain can no longer tell: the hold goes, the cap keeps its count */
       else if(hw.k==='unread')
         throw brErr('Could not read '+a+' just now, and the last paste may still go in, so nothing new was signed. Check again in a minute.','held',hw.cy);
       else throw brErr('The last paste may still go in, so nothing new was signed. Check again in a minute.','held',hw.cy);
@@ -5340,7 +5332,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       throw brErr(brRefusal(why,a),'refused',why.slice(0,400));
     var tx=(res&&res.transaction_id)||txid;
     var xday=xsp?capRecord(xsp.unit,xsp.amt):null;   /* it went out, or may have: it counts, like every send that may be in */
-    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
+    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,acked:sent.acked.map(hostName),extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
     /* the chain is the receipt: the transaction's own status, read about every 1.5 s until a block holds
        it or it can never land. While it waits, nothing says it was sent */
     var since=Date.now(), blind=0, w=null;
@@ -5350,7 +5342,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(w.k==='key'){ if(BR_PENDING===p)BR_PENDING=null; return {tx:tx,keyOnly:!!extra,cy:w.cy} }   /* the account shows the key; with an action, only the key is proven */
       if(w.k==='never'||w.k==='failed'){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null;
         throw brErr(w.k==='failed'?'The chain did not take it, so nothing changed. Paste the key again to try once more.':'It did not reach a block before its time ran out, so nothing changed. Paste the key again to try once more.',w.k,w.cy) }
-      blind=(w.k==='unread'||w.via==='account')?blind+1:0;   /* no chain clock answered: the account alone never closes it */
+      if(w.k==='lost'){ if(BR_PENDING===p)BR_PENDING=null;   /* the chain can no longer tell: the hold goes, the cap keeps its count */
+        throw brErr('This wallet can no longer tell from the chain whether it went in.','lost',w.cy) }
+      blind=(w.k==='wait'&&w.via==='status')?0:blind+1;   /* only a node that follows every block since the signing can close it on the chain's clock; any other answer is read a few times, then left to check again */
       if(blind>=10||Date.now()-since>180000)break;
       await new Promise(function(r){setTimeout(r,1500)});
     }
@@ -5569,6 +5563,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var k=e&&e.brKind, m=lcAll((e&&e.message)||''), cy={cy:(e&&(e.cy||e.message))||String(e)};
     if(k==='held'||k==='late'||k==='unknown')return [m+' ',{btn:'check again',on:brRecheck},cy];
     if(k==='nokc')return [{to:'kc-sec',t:'connect your keychain'},' to let this wallet sign.',cy];
+    if(k==='lost')return [m+' check your coins before you paste again. ',{to:'bal-sec',t:'see your coins'},cy];
     if(k==='noperm')return [m+' ',{to:'connect-sec',t:'choose the account'},cy];
     if(k==='wrongkey')return [m+' paste '+a+'\u2019s active key here.',cy];
     if(k==='refused'||k==='never'||k==='failed'||k==='dry'||k==='cpu')return [m,cy];
@@ -5593,6 +5588,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var w=await brWitness(p);
     if(a!==vacct())return;
     if(w.k==='in'||w.k==='key'){ if(BR_PENDING===p)BR_PENDING=null; BR_SAID=null; BR_DONE={acct:a,tx:p.tx,cy:w.cy}; if(w.k==='in'&&p.adds){ try{ await checkBridge() }catch(e){} } brRender(); return }
+    if(w.k==='lost'){ if(BR_PENDING===p)BR_PENDING=null;   /* the chain can no longer tell: the hold goes, the cap keeps its count */
+      brSay(a,['this wallet can no longer tell from the chain whether the last paste went in, so check your coins before you paste again. ',{to:'bal-sec',t:'see your coins'},{cy:w.cy}]); brRender(); return }
     if(w.k==='never'||w.k==='failed'){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null;
       brSay(a,[(w.k==='failed'?'the chain did not take the last paste, so nothing changed.':'the last paste did not reach a block before its time ran out, so nothing changed.')+' paste '+a+'\u2019s active key here to try once more.',{cy:w.cy}]) }
     else if(w.k==='unread')brSay(a,['could not read '+a+' just now, so this wallet cannot tell yet whether the last paste went in. ',{btn:'check again',on:brRecheck},{cy:w.cy}]);
@@ -7736,7 +7733,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var OBX_ACK_KEY = 'bnr_outbox_ack', OBX_KNOWN = {};
   function obxDone(p) { return p === 'confirmed' || p === 'failed' || p === 'expired' }
   function obxRank(p) { return p === 'confirmed' ? 3 : obxDone(p) ? 2 : p === 'submitted' ? 1 : 0 }
-  function obxBlockRead(ev) { return /^(get_block|GET \/tx)/.test(String((ev && ev.read) || '')) }
+  function obxBlockRead(ev) { return /^(get_block|GET \/tx|get_transaction_status)/.test(String((ev && ev.read) || '')) }
   /* the newest record per entry wins: every writer reads the kept records before it writes */
   function obxAckLoad() {
     [[sessionStorage, 'bnr_outbox_known'], [sessionStorage, OBX_ACK_KEY], [localStorage, OBX_ACK_KEY]].forEach(function (src) {
@@ -7931,8 +7928,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* a row's button follows its send: pressed while that entry is being sent, whichever button started it */
   function obxPaint(id) { var r = obxRow(id), b = r && r.querySelector('.obx-retry'); if (b) b.disabled = !!OBX_BUSY[id] }
-  /* the chain can be read for it: a kept transaction id, and for Vaulta the block a node took it into */
-  function obxCanRead(e) { return !!(e && e.ref && (e.block_hint || e.rail !== 'vaulta')) }
+  /* the chain can be read for it: a kept transaction id, and for Vaulta its signed bytes alone (the id is their
+     hash, and the transaction's own status is read for it on every host), so a send only ever answered
+     "duplicate", with no block named, is read like any other */
+  function obxCanRead(e) { return !!(e && (e.ref || (e.rail === 'vaulta' && e.signed_bytes))) }
+  /* what the reader needs: the id and the block a node named, and for Vaulta the signed bytes (the chain holds a
+     send to the expiration they carry), the hosts that took them and the head they were signed at */
+  function obxReadArgs(e) {
+    var a = { ref: e.ref, block_hint: e.block_hint, network: e.network };
+    if (e.rail === 'vaulta') { a.signed_bytes = e.signed_bytes; a.acked_by = e.acked_by || null; a.head = e.head || null }
+    return a;
+  }
+  /* a read on the chain's own clock (the Vaulta reader names how it read): never judged by this device's clock */
+  function chainRead(c) { return !!(c && c.evidence && c.evidence.via) }
   /* a send that stopped part way, said by where it stopped: only a read before anything went out is "nothing was sent" */
   function sendStopParts(error, again) {
     var cy = { cy: (error && error.message) || String(error) };
@@ -8076,19 +8084,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* another flow may have settled it while this one waited: never move a settled entry */
     var settled = function () { var c = obxPeek(id); if (c && obxDone(c.phase)) { say(terminalWords(c), c.phase); return c } return null };
     var pastWindow = function () { return !!entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000 };
-    /* a read settled it: said and kept; a failure read from the block is proof, and gives the cap back */
+    /* a read settled it: said and kept. Proof that it never ran (a block holds it failed, or a node that followed
+       every block since its signing made final a block past its expiration and no block holds it) gives the cap
+       back; "can no longer tell" (the nodes forgot it, and it can no longer land) gives nothing back */
     var settleRead = function (c) {
       entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
       if (c.phase === 'failed') entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true });
+      var proven = c.phase === 'failed' || (c.phase === 'expired' && !!(entry.evidence && entry.evidence.definite));
       var w = obxKeep(entry, { phase: entry.phase, evidence: entry.evidence, acked: c.phase !== 'expired' });   /* a block that holds it, done or failed, means a node took it */
       if (w !== true && w.clash) { var dW = settled(); if (dW) return dW }
       var ev = JSON.stringify(c.evidence || {});
       say((c.phase === 'confirmed'
         ? ['done. ' + onRail(entry.rail) + ' confirmed it.', { cy: 'CONFIRMED by a block read: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref }]
         : c.phase === 'expired'
-          ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
+          ? (proven ? ['it did not land in time, so nothing changed. you can make it again.', { cy: 'expired: ' + ev }]
+            : ['this wallet can no longer tell from ' + onRail(entry.rail) + ' whether it went in, so check your coins before you send it again. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'cannot tell: ' + ev }])
           : refusalParts(ev, entry.network).concat([{ cy: 'failed: ' + ev }])).concat(w === true ? [] : [obxUnsaved(w)]), c.phase);
-      if (c.phase === 'failed' && w === true) capRefund(entry);
+      if (proven && w === true) capRefund(entry);
       return entry;
     };
     /* its window closed and the last read did not find it. A read of its hinted block is not proof: a node
@@ -8109,14 +8121,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     /* sent before, and the chain can be read for its transaction id: read first, and only a chain that
        lacks it gets the same signed copy again */
     if (maybeOut && obxCanRead(entry)) {
-      say(['reading ' + onRail(entry.rail) + ' for it…', { cy: 'confirm read of tx ' + entry.ref + (entry.block_hint ? ' in block #' + entry.block_hint : '') + ' before any resend' }], 'submitted');
+      say(['reading ' + onRail(entry.rail) + ' for it…', { cy: 'confirm read of ' + (entry.ref ? 'tx ' + entry.ref : 'the transaction its signed bytes name') + (entry.block_hint ? ' (a node named block #' + entry.block_hint + ')' : '') + ' before any resend' }], 'submitted');
       var pre = null;
-      try { pre = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000) } catch (pe) { pre = null }
+      try { pre = await callAdapter(entry.rail, 'confirm', obxReadArgs(entry), 30000) } catch (pe) { pre = null }
       var dP = settled(); if (dP) return dP;
       if (pre && obxDone(pre.phase)) return settleRead(pre);
-      if (pre && pastWindow()) {   /* read, not there, and its window is over: a resend could only be refused as expired */
-        var xP = expireUnseen(); if (xP) return xP;
-        say(['a node already held it, so it is most likely in, but the chain has not shown it yet. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'a node answered duplicate earlier; the read of its block does not show it and its window is over, so it is not sent again' }], 'submitted');
+      /* read, not there, and its window is over by this device's clock. A node already held it: it is not sent
+         again. A rail without a chain clock is filed as cannot tell. On Vaulta the identical bytes go out again,
+         and the node's own answer (expired, or duplicate) says what this device's clock cannot */
+      if (pre && pastWindow() && (!chainRead(pre) || (entry.evidence && entry.evidence.duplicate))) {
+        var xP = chainRead(pre) ? null : expireUnseen(); if (xP) return xP;
+        say(['a node already held it, so it is most likely in, but the chain has not shown it yet. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'a node answered duplicate earlier; the read (' + ((pre.evidence && pre.evidence.read) || '') + ') does not show it yet and its window is over, so it is not sent again' }], 'submitted');
         return entry;
       }
     }
@@ -8126,16 +8141,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     catch (e) { subErr = e || new Error('submit failed'); why = String((e && e.message) || e || '') }
     if (!subErr) {
       var done0 = settled(); if (done0) return done0;
-      entry.ref = r.ref; entry.block_hint = r.block_hint; entry.maybe_out = true;
-      entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
-      var wA = obxKeep(entry, { phase: 'submitted', acked: true });
+      entry.ref = r.ref || entry.ref || entry.txid || null;
+      if (r.block_hint || !entry.block_hint) entry.block_hint = r.block_hint || null;   /* a duplicate names no block: the one named before stays */
+      if (r.acked_by) entry.acked_by = r.acked_by;
+      entry.maybe_out = true; entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
+      /* every host that answered already held these exact bytes: they went out, and the reader follows them by id */
+      if (r.duplicate) entry.evidence = { read: 'send_transaction: duplicate', detail: String(r.detail || ''), duplicate: true };
+      var dupSay = ['this was already sent once, so nothing new was signed. it is most likely in; your balance shows it in a minute. ', { to: 'bal-sec', t: 'see your coins' }, { cy: 'duplicate: ' + (r.detail || '') + (r.acked_by ? ' · from ' + r.acked_by.join(', ') : '') }];
+      var wA = obxKeep(entry, { phase: 'submitted', evidence: r.duplicate ? entry.evidence : null, acked: true });
       if (wA !== true) {   /* a node took the bytes, and this browser could not write that down: this tab keeps it */
         if (wA.clash) { var dA = settled(); if (dA) return dA }
-        say(['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: obxCanRead(entry) ? 'check again' : 'send it again', on: againOn },
+        say(r.duplicate ? dupSay.concat([obxUnsaved(wA)]) : ['it was sent, but this browser could not save that, so free some browser storage, then ', { btn: obxCanRead(entry) ? 'check again' : 'send it again', on: againOn },
           { cy: 'submit acked (ref ' + (entry.ref || '') + ') but the outbox write failed: ' + ((wA && wA.message) || wA) + '; the ack is kept under bnr_outbox_ack, so a later press in any tab reads or resends the identical bytes as sent, never as new' }], 'submitted');
         return entry;
       }
-      say(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: the node accepted the bytes; not done until a block read says so · ref ' + entry.ref }], 'submitted');
+      say(r.duplicate ? dupSay : ['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'SUBMITTED: ' + (r.acked_by ? r.acked_by.join(', ') + ' took the identical bytes' : 'the node accepted the bytes') + '; not done until a chain read says so · ref ' + entry.ref }], 'submitted');
     } else {
       var done1 = settled(); if (done1) return done1;
       if (!subErr.code && /not attached|never spawned|crashed/i.test(why)) {   // the worker never got the bytes: nothing left this tab
@@ -8196,7 +8216,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if (c && obxDone(c.phase)) return;
       say(msg, ph);
     };
-    var readOk = false;
+    var readOk = false, last = null;
     for (var attempt = 0; attempt < 14; attempt++) {
       await new Promise(function (r2) { setTimeout(r2, 2200) });
       /* the outbox is the state, not this closure: if another flow (a retry,
@@ -8207,17 +8227,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if (cur.expires_at) entry.expires_at = cur.expires_at;      // adopt the kept window
       }
       try {
-        var c = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000);
-        readOk = true;
+        var c = await callAdapter(entry.rail, 'confirm', obxReadArgs(entry), 30000);
+        readOk = true; last = c;
         if (obxDone(c.phase)) return settleRead(c);
         speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'submitted; the rail read says not visible yet (' + (c.evidence && c.evidence.read) + '); reading again' }], 'submitted');
       } catch (e2) {
         readOk = false;
         speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'confirm read faulted (' + ((e2 && e2.message) || e2) + '); retrying the rail read; the bytes are safe in the outbox' }], 'submitted');
       }
-      if (readOk && pastWindow()) { var xL = expireUnseen(); if (xL) return xL; break }
+      /* a rail without a chain clock (Arweave) is closed by its window as cannot tell. Vaulta's reader answers on
+         the chain's own clock, and silence there is never a verdict */
+      if (readOk && !chainRead(c) && pastWindow()) { var xL = expireUnseen(); if (xL) return xL; break }
     }
-    speak(['sent, but ' + onRail(entry.rail) + ' has not confirmed it yet. ', { to: 'outbox-sec', t: 'see it in waiting to be sent' }, { cy: 'still submitted after the read window; the entry stays in the outbox and its evidence updates on any later read' }], 'submitted');
+    var lv = last && last.evidence, mute = !lv || lv.k === 'none';
+    speak(['sent, but ' + onRail(entry.rail) + (mute ? ' could not be read for it just now' : ' has not confirmed it yet') + ', so check again in a minute. ', { btn: 'check again', on: againOn },
+      { cy: 'still submitted after the read window' + (lv ? '; last read: ' + lv.read : '; no read answered') + '; nothing is decided from silence or from this device\u2019s clock: check again reads the chain first and only ever resends the identical bytes' }], 'submitted');
     return entry;
   }
 
@@ -8312,7 +8336,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       unsigned_bytes: intent.unsigned_bytes,
       signed_bytes: JSON.stringify({ network: net, packed_hex: intent.packed_hex, signatures: sgn.signatures }),
       phase: 'signed', ref: null, block_hint: null,
-      expires_at: intent.expires_at, signed_by: sgn.by,
+      expires_at: intent.expires_at, signed_by: sgn.by, head: intent.head || null,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
     };
     try{outboxPut(entry)}catch(error){                       // PERSIST BEFORE SUBMIT — the law
@@ -8564,6 +8588,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         /* this paste went out, may have, or an earlier one may still go in: the one next step reads the chain,
            it never pastes or signs again, and the paste field waits until the chain says it is safe */
         else if(e&&/^(late|unknown|held)$/.test(e.brKind||'')){ hold=true; esrEnd(); tell('wait',[(e.message||'')+' ',{btn:'check again',on:recheck},{cy:e.cy||''}]) }
+        else if(e&&e.brKind==='lost') tell('fail',[(e.message||'')+' ',{href:back.href,t:'see '+a.data.domain_name+'.b on the name desk'},{cy:e.cy||''}]);
         else { if(e&&e.brKind==='cpu')d.setAttribute('data-need','cpu');   /* the hook for another way to sign that brings its own CPU */
           tell('fail',[(e&&e.message)||'Something went wrong, so nothing was sent.',{cy:(e&&e.cy)||''}]) }
       }
@@ -8631,6 +8656,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         tellKeyOnly(p.tx); return }
       if(!p&&BRIDGED===true){ pasteRow.hidden=true; tellKeyOnly(null); return }
       if(p?rd.k==='unread':BRIDGED===null){ tell('wait',['Could not read '+acct+' just now. ',{btn:'check again',on:recheck},{cy:p?rd.cy:''}]); return }
+      if(p&&rd.k==='lost'){ if(BR_PENDING===p)BR_PENDING=null; pasteGo.disabled=false; pasteIn.disabled=false; esrBack();   /* the hold goes, the cap keeps its count */
+        tell('fail',['This wallet can no longer tell from the chain whether it went in. ',{href:back.href,t:'see '+a.data.domain_name+'.b on the name desk'},{cy:rd.cy}]); return }
       if(p&&rd.k==='wait'){ tell('wait',[(rd.via==='account'?acct+' does not show this wallet yet, and the paste may still go in.':'It is not in a block yet, and it may still go in.')+' Check again in a minute. ',{btn:'check again',on:recheck},{cy:rd.cy}]); return }
       /* it can never land (a final block past its expiration, and no block holds it), or no paste waits: the field comes back */
       if(p){ brGiveBack(p); if(BR_PENDING===p)BR_PENDING=null }
@@ -8841,7 +8868,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     setTimeout(function(){ if(!$('act-sheet'))actSheet({contract:p.contract,action:p.action,data:p.data,intent:''}) },300);
   });
 
-  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=5');   // document-relative: same dir as this page
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=6');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=5');
 
@@ -9921,7 +9948,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var txid=hexS(BN.sha256(hexB(built.packedHex)));   /* an Antelope transaction id is the sha256 of its packed bytes */
       entry={intent_id:'vaulta:'+txid.slice(0,32),rail:'vaulta',network:'mainnet',human_summary:summary,digest:txid,txid:txid,
         signed_bytes:JSON.stringify({network:'mainnet',packed_hex:built.packedHex,signatures:built.signatures}),
-        phase:'signed',ref:null,block_hint:null,expires_at:built.expires_at,signed_by:built.by,
+        phase:'signed',ref:null,block_hint:null,expires_at:built.expires_at,signed_by:built.by,head:info.head_block_num,
         created_at:new Date().toISOString(),updated_at:new Date().toISOString(),evidence:null};
     }catch(e){
       if(e&&e.capRefused){ capSay(st,e,again); return null }

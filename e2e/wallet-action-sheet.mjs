@@ -11,6 +11,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, extname, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 import { chromium } from 'playwright';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -134,7 +135,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
       if (u.pathname.endsWith('/get_block')) {
         const num = body.block_num_or_id;
         if (num === 123453) return json({ ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000' });
-        return json({ id: 'MOCKBLOCK' + num, block_num: num, ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000', transactions: [...state.byPacked.values()].map(id => ({ id, status: 'executed' })) });
+        return json({ id: 'MOCKBLOCK' + num, block_num: num, ref_block_prefix: 987654321, timestamp: '2026-10-05T00:00:00.000', transactions: state.blockEmpty ? [] : [...state.byPacked.values()].map(id => ({ id, status: 'executed' })) });
       }
       if (u.pathname.endsWith('/send_transaction')) {
         if (!body.packed_trx || !body.signatures || !body.signatures.length) return json({ error: { details: [{ message: 'malformed' }] } }, 400);
@@ -143,6 +144,7 @@ async function context(browser, reg, { soul = 'king', width = 390, realPasskey =
         if (state.sendBy && state.sendBy(url) === 'abort') return route.abort();   // this host loses its answer
         if (state.refuse) { state.refused = (state.refused || 0) + 1; return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: state.refuseName || 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: state.refuse }] } }, 500); }   // the chain evaluated it and said no
         if (state.abortN > 0) { state.abortN--; return route.abort(); }   // the answer is lost on the way back
+        if (state.dupAll) return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409);   // every host already holds these bytes
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         state.submits++; state.packed = body.packed_trx;
         if (state.onSend) state.onSend(body);
@@ -361,7 +363,7 @@ try {
     await page.click('#act-stat a[href="#outbox-sec"]');
     await page.waitForTimeout(500);
     const row = await page.evaluate(() => ({ view: document.body.getAttribute('data-wl-view'), stat: (document.querySelector('#outbox-list .obx-stat') || {}).innerText, btn: (document.querySelector('#outbox-list .obx-retry') || {}).textContent }));
-    ok('its link lands on waiting to be sent, where the row says it may be out and its button says what it does', row.view === 'move' && /^it may already be out\. sending it again is safe\./.test(row.stat || '') && row.btn === 'send it again', JSON.stringify(row));
+    ok('its link lands on waiting to be sent, where the row says it may be out and its button reads the chain for it first', row.view === 'move' && /^it may already be out\./.test(row.stat || '') && row.btn === 'check again', JSON.stringify(row));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -504,6 +506,16 @@ try {
       /^It did not reach a block before its time ran out, so nothing changed\. Paste the key again to try once more\./.test(s.stat) && s.state === 'fail' && await open() && /no block holds it/.test(s.stat), JSON.stringify(s));
     ok('while it waited the sheet said "Sending it, one moment.", never that it was sent', w4.includes('Sending it, one moment.') && neverSent(w4), JSON.stringify(w4));
     ok('signed once: the identical bytes to both hosts', posts() - p0 === 2 && state.posts[p0] === state.posts[p0 + 1], String(posts() - p0));
+    // 4b · the account already carries this wallet's key, so the paste carries only the renew; every node answers UNKNOWN, following
+    //      blocks only from long after the signing, and a final block is past the window: the chain can no longer tell
+    state.keys.kingbeelovis = [DEV_PUB, k1];
+    state.status = () => ST('UNKNOWN', AFTER, { earliest_tracked_block_number: 999999 });
+    p0 = posts();
+    await paste(); await waitStat(/can no longer tell/);
+    s = await sheet(page);
+    ok('a paste with no key to add, once no node remembers back to its signing and it can no longer land: one calm sentence and the name desk, the hold released',
+      /^This wallet can no longer tell from the chain whether it went in\. see king\.b on the name desk/.test(s.stat) && s.state === 'fail' && await open() && posts() - p0 === 2 && await page.evaluate(() => /bnames\.html/.test((document.querySelector('#act-stat a') || {}).href || '')), JSON.stringify(s));
+    state.keys.kingbeelovis = [DEV_PUB];
     // 5 · both hosts take it and a block holds it
     state.sendBy = null; state.polls = 0;
     state.onSend = () => { state.keys.kingbeelovis = [DEV_PUB, k1]; };
@@ -542,7 +554,7 @@ try {
       await page.waitForSelector('#act-sheet', { timeout: 20000 });
       await page.waitForFunction(() => { const e = document.getElementById('act-stat'); return e && /^(done|fail)$/.test(e.getAttribute('data-state') || ''); }, null, { timeout: 60000 });
       const s = await sheet(page);
-      ok('one press: passkey, build, sign as kingbeelovis, persist, send, read back, done in words', s.state === 'done' && s.stat === 'Done. king.b is renewed for 365 days. The chain confirmed it.' && s.goHidden && state.submits === 1, JSON.stringify(s) + ' submits ' + state.submits);
+      ok('one press: passkey, build, sign as kingbeelovis, persist, send, read back, done in words', s.state === 'done' && s.stat === 'Done. king.b is renewed for 365 days. The chain confirmed it.' && s.goHidden && state.submits === 2, JSON.stringify(s) + ' submits ' + state.submits);
       ok('once Sign signed it, the Anchor way is no longer offered', await page.evaluate(() => document.getElementById('act-esr').hidden));
       const box = await page.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'));
       const e = (Array.isArray(box) ? box : (box.entries || [])).find(x => x && x.phase === 'confirmed');
@@ -563,7 +575,7 @@ try {
       await page.evaluate(() => document.getElementById('act-go').click());
       await page.waitForFunction(() => { const e = document.getElementById('act-stat'); return e && /^(done|fail)$/.test(e.getAttribute('data-state') || ''); }, null, { timeout: 60000 });
       const s3 = await sheet(page);
-      ok('its own press then signs and sends once', s3.state === 'done' && state.submits === subs0 + 1, JSON.stringify(s3) + ' submits ' + state.submits);
+      ok('its own press then signs once and sends the same bytes to both hosts', s3.state === 'done' && state.submits === subs0 + 2, JSON.stringify(s3) + ' submits ' + state.submits);
       ok('at a glance now reads ready, and the receive address is the account', (await page.textContent('#sum-bridge')).trim() === 'kingbeelovis · ready to sign ✓' && await page.evaluate(() => window.BNRPAY.railAddresses(null, 'king')[0].v) === 'kingbeelovis', await page.textContent('#sum-bridge'));
     }
     ok('no page errors in the one-press run', errors.length === 0, errors.join(' | '));
@@ -777,7 +789,7 @@ try {
     await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
     await page.waitForFunction(() => document.getElementById('v-bal').textContent === '5.0000 A', null, { timeout: 15000 }).catch(() => {});
     ok('the A figure is the core.vaulta balance, never the EOS core balance relabelled', (await page.textContent('#v-bal')) === '5.0000 A', await page.textContent('#v-bal'));
-    const sent = []; state.onSend = body => sent.push(body.packed_trx);
+    const sent = [], hosts = []; state.onSend = body => { hosts.push(body.packed_trx); if (!sent.includes(body.packed_trx)) sent.push(body.packed_trx); };   // each signed transaction once, and each host it reached
     const press = id => page.evaluate(i => document.getElementById(i).click(), id);
     const settle = (id, re) => page.waitForFunction(([i, r]) => new RegExp(r).test(document.getElementById(i).innerText), [id, re.source], { timeout: 20000 })
       .catch(async () => console.log('  (waited for ' + re + ' in #' + id + ', it reads: ' + JSON.stringify(await page.innerText('#' + id)) + ')'));
@@ -785,7 +797,7 @@ try {
     await page.evaluate(() => { document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '1.5'; });
     await press('sv-go');
     await settle('sv-stat', /^sent 1\.5000 A to someoneelse1\.$/);
-    ok('send A is one transfer on core.vaulta, never on eosio', sent.length === 1 && sent[0].includes(actHex('core.vaulta', 'transfer')) && !sent[0].includes(actHex('eosio', 'transfer')) && sent[0].includes('983a0000000000000441000000000000'), String(sent[0]).slice(0, 120));
+    ok('send A is one transfer on core.vaulta, never on eosio, its identical bytes to both hosts', sent.length === 1 && hosts.length === 2 && hosts[0] === hosts[1] && sent[0].includes(actHex('core.vaulta', 'transfer')) && !sent[0].includes(actHex('eosio', 'transfer')) && sent[0].includes('983a0000000000000441000000000000'), String(sent[0]).slice(0, 120));
     await page.evaluate(() => localStorage.setItem('bnr-spend-cap', JSON.stringify({ A: 1 })));
     await page.evaluate(() => { document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = '0.1'; });
     await press('sv-go');
@@ -907,13 +919,15 @@ try {
       await page.evaluate(() => document.getElementById('sv-go').click());
       ok('a memo with ' + what + ' (an EVM style key) is never sent', /looks like a private key/.test(await svText()) && !(state.posts || []).length, await svText());
     }
-    // a duplicate answer: the bytes went in, nothing new is signed, the cap keeps the count
-    state.dupOnce = true;
+    // a duplicate answer from every host: the bytes went in, nothing new is signed, the cap keeps the count
+    state.dupAll = true;
     await fill('someoneelse1', '0.2');
     await page.evaluate(() => document.getElementById('sv-go').click());
     await page.waitForFunction(() => /already sent once/.test(document.getElementById('sv-stat').innerText), null, { timeout: 20000 }).catch(() => {});
     ok('a duplicate answer reads as already sent, not as refused, and offers no second signature', /already sent once, so nothing new was signed/.test(await svText()) && !/nothing was sent/.test(await svText()) && !(await page.$('#sv-stat button.wl-act')), await svText());
     ok('and the daily count keeps it (no refund for a send that went in)', Math.abs((await ledger()) - 0.2) < 1e-9, String(await ledger()));
+    state.dupAll = false;
+    await page.waitForFunction(() => !document.getElementById('sv-go').disabled, null, { timeout: 60000 }).catch(() => {});   // its read runs out: no node answers its status here
     // the same send again while that one may be in: nothing new is signed until the reader chooses
     const p0 = (state.posts || []).length;
     await fill('someoneelse1', '0.2');
@@ -926,7 +940,7 @@ try {
     ok('past its window it may still be in: the reader is told and chooses, nothing is signed silently', /may already be in, so nothing new was signed/.test(await svText()) && state.posts.length === p0 && (await page.textContent('#sv-stat button.wl-act')) === 'send a new one', await svText());
     await page.evaluate(() => document.querySelector('#sv-stat button.wl-act').click());
     await page.waitForFunction(() => /^sent 0\.2000 A to someoneelse1\.$/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
-    ok('send a new one signs exactly one new transaction', state.posts.length === p0 + 1, String(state.posts.length - p0));
+    ok('send a new one signs exactly one new transaction, the same bytes to both hosts', state.posts.length === p0 + 2 && state.posts[p0] === state.posts[p0 + 1], String(state.posts.length - p0));
     // a lost answer: kept, and "send it again" resends the identical bytes
     const before = (state.posts || []).length;
     state.abortN = 2;
@@ -946,7 +960,7 @@ try {
     await page.evaluate(() => { const b = document.getElementById('sv-go'); b.click(); b.click(); });
     await page.waitForFunction(() => /^sent 0\.0500 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     const posted = state.posts.slice(b2);
-    ok('a double press signs and sends one transaction', posted.length === 1, String(posted.length));
+    ok('a double press signs one transaction, the same bytes to both hosts', posted.length === 2 && posted[0] === posted[1], String(posted.length));
     // a send still waiting for its answer, the receive panel open, and the keychain closes: the cards follow at once
     await page.evaluate(() => document.getElementById('pay-rx').click());
     const evmShown = () => page.evaluate(() => /0x[0-9a-fA-F]{40}/.test(document.getElementById('rx-cards').textContent));
@@ -960,10 +974,69 @@ try {
     await page.evaluate(() => { document.getElementById('pay-rx').click(); document.getElementById('kc-out').click(); });
     await page.waitForTimeout(1200);
     const busy = await page.evaluate(() => document.getElementById('sv-go').disabled);
-    ok('while that send is still busy, the open receive panel drops the closed keychain\'s addresses', (state.posts || []).length === b3 + 1 && busy && !(await evmShown()), JSON.stringify({ posted: state.posts.length - b3, busy }));
+    ok('while that send is still busy, the open receive panel drops the closed keychain\'s addresses', (state.posts || []).length === b3 + 2 && busy && !(await evmShown()), JSON.stringify({ posted: state.posts.length - b3, busy }));
     state.slowSend = 0;
     await page.waitForFunction(() => /^sent 0\.0600 A/.test(document.getElementById('sv-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     ok('and the send itself still lands in words', /^sent 0\.0600 A to someoneelse1\./.test((await svText()).trim()), await svText());
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* S · the wallet's own send, read on the chain's clock: the identical bytes to both hosts; a block the node did not name still
+     confirms; "never" only on a final block past the signed expiration, and only then is the cap given back; no status at all
+     decides nothing; a send only ever answered "duplicate" is confirmed by the status read for its own id */
+  {
+    console.log('S · the wallet\'s own send, read on the chain\'s clock:');
+    const { ctx, state } = await context(browser, 'bee');
+    const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${ORIGIN}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && /kingbeelovis/.test(document.getElementById('sum-soul').textContent), null, { timeout: 20000 });
+    state.keys.kingbeelovis = [await k1Of(page, 'vaulta:kingbeelovis')];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await page.evaluate(() => { document.querySelector('[data-wl-go="move"]').click(); document.getElementById('pay-tx').click(); document.getElementById('tx-tab-v').click(); });
+    const send = amt => page.evaluate(a => { document.getElementById('sv-to').value = 'someoneelse1'; document.getElementById('sv-amt').value = a; document.getElementById('sv-memo').value = ''; document.getElementById('sv-go').click(); }, amt);
+    const idle = async () => { await page.waitForTimeout(300); await page.waitForFunction(() => !document.getElementById('sv-go').disabled, null, { timeout: 60000 }).catch(() => {}); };
+    const words = () => page.evaluate(() => { const o = document.getElementById('sv-stat').cloneNode(true); o.querySelectorAll('.wl-cyd').forEach(x => x.remove()); return o.textContent.trim(); });
+    const entryFor = q => page.evaluate(a => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').find(e => String(e.human_summary || '').startsWith('send ' + a + ' A to someoneelse1')) || null, q);
+    const ledger = () => page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0));
+    const txid = hex => createHash('sha256').update(Buffer.from(hex, 'hex')).digest('hex');
+    const expOf = hex => Buffer.from(hex.slice(0, 8), 'hex').readUInt32LE(0) * 1000;   // the signed expiration: the packed bytes' first four
+    const at = ms => new Date(ms).toISOString().slice(0, 23);
+    const ST = (st, lib, more = {}) => ({ state: st, head_number: 123500, irreversible_number: 123498, irreversible_timestamp: lib, earliest_tracked_block_number: 100, ...more });
+    // 1 · both hosts take the identical bytes; the node named block 123460, the chain put it in 123470
+    state.blockEmpty = true;
+    state.status = id => [...state.byPacked.values()].includes(id) ? ST('IN_BLOCK', '2026-10-05T00:00:00.000', { block_number: 123470, block_id: 'MOCKBLOCK123470' }) : {};
+    const p1 = (state.posts || []).length, l1 = await ledger();
+    await send('0.1'); await idle();
+    const e1 = await entryFor('0.1000'), w1 = await words(), s1 = state.posts.slice(p1);
+    ok('one press: the identical signed bytes to both hosts, one signature', s1.length === 2 && s1[0] === s1[1], String(s1.length));
+    ok('in a later block than the one the node named: confirmed from its own status and said as sent, never "cannot tell"',
+      !!e1 && e1.phase === 'confirmed' && e1.block_hint === 123460 && /IN_BLOCK in block #123470/.test(e1.evidence.read) && /^sent 0\.1000 A to someoneelse1\.$/.test(w1) && Math.abs((await ledger()) - l1 - 0.1) < 1e-9, JSON.stringify({ e: e1 && { phase: e1.phase, hint: e1.block_hint, ev: e1.evidence }, w1 }));
+    // 2 · taken, never in a block: a host that followed every block since the signing makes final a block past its expiration
+    state.polls = 0;
+    state.status = id => { state.polls++; const pk = [...state.byPacked.entries()].find(x => x[1] === id), exp = pk ? expOf(pk[0]) : Date.now(); return ST('LOCALLY_APPLIED', at(state.polls < 5 ? exp - 60000 : exp + 1000)); };
+    const l2 = await ledger();
+    await send('0.2'); await idle();
+    const e2 = await entryFor('0.2000'), w2 = await words();
+    ok('never in a block, a final block past its signed expiration: it did not land, and maybe in is false only on that proof',
+      !!e2 && e2.phase === 'expired' && e2.evidence.definite === true && e2.evidence.maybe_in === false && /^get_transaction_status: /.test(e2.evidence.read) && /^it did not land in time, so nothing changed\. you can make it again\.$/.test(w2), JSON.stringify({ ev: e2 && e2.evidence, w2 }));
+    ok('and only then is the cap given back', Math.abs((await ledger()) - l2) < 1e-9 && !!e2.cap && e2.cap.refunded === true, String((await ledger()) - l2));
+    // 3 · no status anywhere and no block named: it stays sent, the line offers check again, nothing is decided from silence
+    state.status = null; state.noHint = true;
+    const l3 = await ledger();
+    await send('0.3'); await idle();
+    const e3 = await entryFor('0.3000'), w3 = await words(), btn3 = await page.evaluate(() => (document.querySelector('#sv-stat button.wl-act') || {}).textContent || null);
+    ok('no status answer at all: it stays sent, one calm sentence and check again, and the count holds',
+      !!e3 && e3.phase === 'submitted' && !e3.evidence && btn3 === 'check again' && /^sent, but the chain could not be read for it just now, so check again in a minute\./.test(w3) && Math.abs((await ledger()) - l3 - 0.3) < 1e-9, JSON.stringify({ phase: e3 && e3.phase, w3, btn3 }));
+    state.noHint = false;
+    // 4 · every host answers "duplicate": no block is named, and the status read for the hash of its bytes confirms it
+    state.dupAll = true;
+    state.status = id => (state.posts || []).some(p => txid(p) === id) ? ST('IRREVERSIBLE', '2026-10-05T00:00:00.000', { block_number: 123475, block_id: 'MOCKBLOCK123475' }) : {};
+    await send('0.4'); await idle();
+    state.dupAll = false;
+    const e4 = await entryFor('0.4000'), w4 = await words();
+    ok('a send only ever answered "duplicate", with no block named, is confirmed by the status read for its own id',
+      !!e4 && e4.phase === 'confirmed' && e4.block_hint === null && e4.ref === txid(JSON.parse(e4.signed_bytes).packed_hex) && /IRREVERSIBLE in block #123475/.test(e4.evidence.read) && /^sent 0\.4000 A to someoneelse1\.$/.test(w4), JSON.stringify({ e: e4 && { phase: e4.phase, hint: e4.block_hint, ref: e4.ref, ev: e4.evidence }, w4 }));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -997,7 +1070,7 @@ try {
     await tab2.goto(ORIGIN + '/surfaces/wallet.html', { waitUntil: 'load' });
     await tab2.waitForFunction(() => window.BZDIDKEY && document.querySelector('#outbox-list .obx-retry') && window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
     const row2 = await tab2.evaluate(() => ({ stat: (document.querySelector('#outbox-list .obx-stat') || {}).innerText, btn: (document.querySelector('#outbox-list .obx-retry') || {}).textContent }));
-    ok('the other tab reads it as sent, never as signed and not sent yet', /^sent\. the chain has not confirmed it yet\./.test(row2.stat || '') && row2.btn === 'send it again', JSON.stringify(row2));
+    ok('the other tab reads it as sent, never as signed and not sent yet, and its button reads the chain first', /^sent\. the chain has not confirmed it yet\./.test(row2.stat || '') && row2.btn === 'check again', JSON.stringify(row2));
     /* its window long over, a press there is refused as expired */
     await tab2.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1')); l.forEach(e => { if (/send 0\.2000 A to someoneelse1/.test(e.human_summary)) e.expires_at = new Date(Date.now() - 600000).toISOString(); }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
     state.refuse = 'expired transaction'; state.refuseName = 'expired_tx_exception';
@@ -1013,7 +1086,7 @@ try {
     await toSend(tab2);
     await tab2.evaluate(() => document.getElementById('sv-go').click());
     await tab2.waitForFunction(() => /nothing new was signed|^sent 0\.2000/.test(document.getElementById('sv-stat').innerText), null, { timeout: 20000 }).catch(() => {});
-    ok('the same send pressed again is held as may already be in: nothing new is signed', /may already be in, so nothing new was signed/.test(await tab2.innerText('#sv-stat')) && state.posts.length === one + 1, await tab2.innerText('#sv-stat') + ' · posts ' + (state.posts.length - one));
+    ok('the same send pressed again is held as may already be in: nothing new is signed', /may already be in, so nothing new was signed/.test(await tab2.innerText('#sv-stat')) && state.posts.length === one + 2, await tab2.innerText('#sv-stat') + ' · posts ' + (state.posts.length - one));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -1050,7 +1123,7 @@ try {
     await page.waitForTimeout(1200); await page.waitForFunction(() => /ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
     await page.evaluate(() => document.querySelector('#v-stat button.wl-act').click());
     const landed = await page.waitForFunction(() => /is now A/.test(document.getElementById('v-stat').innerText) && document.getElementById('v-stat').innerText, null, { timeout: 30000 }).then(h => h.jsonValue()).catch(() => '');
-    ok('one press signs one eosio.token transfer of exactly 1.2345 EOS from kingbeelovis to core.vaulta', !!sent && (state.posts || []).length === 1 && sent.includes(actHex('eosio.token', 'transfer')) && sent.includes(nameHex('kingbeelovis') + nameHex('core.vaulta') + '3930000000000000' + '04454f5300000000'), String(sent).slice(0, 120));
+    ok('one press signs one eosio.token transfer, to both hosts, of exactly 1.2345 EOS from kingbeelovis to core.vaulta', !!sent && (state.posts || []).length === 2 && state.posts[0] === state.posts[1] && sent.includes(actHex('eosio.token', 'transfer')) && sent.includes(nameHex('kingbeelovis') + nameHex('core.vaulta') + '3930000000000000' + '04454f5300000000'), String(sent).slice(0, 120));
     ok('and it lands in words', /your 1\.2345 EOS is now A\./.test(landed), landed);
     // every Arbitrum host is down here: the card says so calmly, with try again, and shows no figure
     await page.waitForFunction(() => /did not load/.test(document.getElementById('a-stat').innerText), null, { timeout: 20000 }).catch(() => {});
@@ -1101,7 +1174,7 @@ try {
     state.abiDelay = 0;
     await page.waitForFunction(() => /^added 0\.5000 A to the voucher for gatekey/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
     const posts = state.posts || [];
-    ok('yes signs ONE core.vaulta transfer to the voucher account with the memo filled in', posts.length === 1 && posts[0].includes(actHex('core.vaulta', 'transfer')) && posts[0].includes(nameHex('bnrvoucher11')) && posts[0].includes(Buffer.from('gatekey').toString('hex')), JSON.stringify({ n: posts.length }));
+    ok('yes signs ONE core.vaulta transfer to the voucher account with the memo filled in, the same bytes to both hosts', posts.length === 2 && posts[0] === posts[1] && posts[0].includes(actHex('core.vaulta', 'transfer')) && posts[0].includes(nameHex('bnrvoucher11')) && posts[0].includes(Buffer.from('gatekey').toString('hex')), JSON.stringify({ n: posts.length }));
     ok('and it lands in words naming the key it credited, with its one next step', /^added 0\.5000 A to the voucher for gatekey; its balance shows it once the estate counts it\./.test((await topText()).trim()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'read my balance', await topText());
     ok('the top up counts against the daily cap like every send', Math.abs(await page.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').reduce((t, e) => t + e.a, 0)) - 0.5) < 1e-9);
     // can I afford it asks about the key on screen, never what the field holds now, and answers in words
@@ -1117,7 +1190,7 @@ try {
     const gone = await page.evaluate(() => ({ panel: document.getElementById('vc-panel').style.display, err: document.getElementById('vc-err').innerText, btn: (document.querySelector('#vc-err button.wl-act') || {}).textContent }));
     ok('a failed look up hides the panel (no other key\'s account or memo beside the error) and offers try again', gone.panel === 'none' && /^your balance could not be read just now, so nothing is shown\./.test(gone.err) && gone.btn === 'try again', JSON.stringify(gone));
     await page.evaluate(() => { document.getElementById('vc-top-amt').value = '0.5'; document.getElementById('vc-top-go').click(); });
-    ok('and nothing can be topped up for a key that is not on screen', /look up your meter key first/.test(await topText()) && (state.posts || []).length === 1, await topText());
+    ok('and nothing can be topped up for a key that is not on screen', /look up your meter key first/.test(await topText()) && (state.posts || []).length === 2, await topText());
     // an answer missing its top up ways is a failed read, never a half panel
     state.voucher = () => ({ body: { balance: '9.0000' } });
     await page.click('#vc-go');
@@ -1185,7 +1258,7 @@ try {
     await page.waitForFunction(() => /added 0\.5000 A/.test(document.getElementById('vc-top-away').innerText), null, { timeout: 40000 }).catch(() => {});
     const away = await page.evaluate(() => ({ t: document.getElementById('vc-top-away').innerText.trim(), seen: document.getElementById('vc-top-away').getClientRects().length > 0,
       btn: (document.querySelector('#vc-top-away button.wl-act') || {}).textContent, here: document.getElementById('vc-top-stat').innerText.trim(), amt: document.getElementById('vc-top-amt').value }));
-    ok('a top up on its way when another key is looked up lands in sight, naming the key it credited', nPosts() === 1 && away.seen && /^your top up of 0\.5000 A for the voucher gatekey:\s*added 0\.5000 A to the voucher for gatekey;/.test(away.t) && away.btn === 'read its balance', JSON.stringify(away));
+    ok('a top up on its way when another key is looked up lands in sight, naming the key it credited', nPosts() === 2 && away.seen && /^your top up of 0\.5000 A for the voucher gatekey:\s*added 0\.5000 A to the voucher for gatekey;/.test(away.t) && away.btn === 'read its balance', JSON.stringify(away));
     ok('and never under the other key\'s balance, nor wiping the amount typed for it', !/added|gatekey/.test(away.here) && away.amt === '0.7', JSON.stringify(away));
     await page.click('#vc-top-away button.wl-act');
     await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block' && document.getElementById('vc-a-memo').textContent === 'gatekey', null, { timeout: 10000 }).catch(() => {});
@@ -1196,16 +1269,16 @@ try {
     await page.evaluate(() => { window.__yes = [...document.querySelectorAll('#vc-top-stat button.wl-act')].find(b => b.textContent === 'yes, send it'); });
     await page.evaluate(() => { document.getElementById('wq').value = 'bobsoul'; document.getElementById('wgo').click(); });
     const swapped = await page.evaluate(() => ({ t: document.getElementById('vc-top-stat').innerText.trim(), btns: document.querySelectorAll('#vc-top-stat button').length }));
-    ok('connecting another name closes the question: nothing is sent, said calmly with what to do', swapped.t === 'you connected another name, so nothing was sent. press top up from my wallet again.' && swapped.btns === 0 && nPosts() === 1, JSON.stringify(swapped));
+    ok('connecting another name closes the question: nothing is sent, said calmly with what to do', swapped.t === 'you connected another name, so nothing was sent. press top up from my wallet again.' && swapped.btns === 0 && nPosts() === 2, JSON.stringify(swapped));
     await page.evaluate(() => window.__yes.click());
     await page.waitForTimeout(1500);
-    ok('a yes left over from the old question signs nothing', nPosts() === 1 && /^you connected another name/.test(await topText()), await topText());
+    ok('a yes left over from the old question signs nothing', nPosts() === 2 && /^you connected another name/.test(await topText()), await topText());
     await page.waitForFunction(() => /bobsoul · ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
     await page.click('#vc-top-go');
     ok('asked again, the question names the account now connected', /^send 0\.2500 A from bobsoul to bnrvoucher11 with the memo gatekey\?/.test(await topText()), await topText());
     await pressYes();
     await page.waitForFunction(() => /^added 0\.2500 A to the voucher for gatekey/.test(document.getElementById('vc-top-stat').innerText.trim()), null, { timeout: 30000 }).catch(() => {});
-    ok('and yes signs exactly that: one transfer from bobsoul to the voucher account', nPosts() === 2 && state.posts[1].includes(actHex('core.vaulta', 'transfer')) && state.posts[1].includes(nameHex('bobsoul') + nameHex('bnrvoucher11')), await topText());
+    ok('and yes signs exactly that: one transfer from bobsoul to the voucher account, the same bytes to both hosts', nPosts() === 4 && state.posts[2] === state.posts[3] && state.posts[2].includes(actHex('core.vaulta', 'transfer')) && state.posts[2].includes(nameHex('bobsoul') + nameHex('bnrvoucher11')), await topText());
     // yes runs the signing check again: a key that left the account since the question signs nothing
     await page.fill('#vc-top-amt', '0.25'); await page.click('#vc-top-go');
     state.keys.bobsoul = [STRANGER_KEY];
@@ -1213,7 +1286,7 @@ try {
     ok('the question stays open while the same name is read again', /^send 0\.2500 A from bobsoul/.test(await topText()), await topText());
     await pressYes();
     await page.waitForTimeout(300);
-    ok('yes checks again that this wallet signs for the account, and signs nothing when it does not', /^this wallet does not sign for bobsoul yet/.test(await topText()) && nPosts() === 2, await topText());
+    ok('yes checks again that this wallet signs for the account, and signs nothing when it does not', /^this wallet does not sign for bobsoul yet/.test(await topText()) && nPosts() === 4, await topText());
     // another name connected while the transfer is made ready (a slow host) signs nothing
     state.keys.bobsoul = [await k1Of(page, 'vaulta:bobsoul')];
     await connectAs('bobsoul', 'bobsoul · ready to sign');
@@ -1223,13 +1296,13 @@ try {
     await page.evaluate(() => { document.getElementById('wq').value = 'king'; document.getElementById('wgo').click(); });
     await page.waitForFunction(() => /changed since you were asked/.test(document.getElementById('vc-top-stat').innerText), null, { timeout: 10000 }).catch(() => {});
     state.abiDelay = 0;
-    ok('another name connected while the transfer is made ready signs nothing, and offers to ask again', /^the account to send from changed since you were asked, so nothing was signed\./.test(await topText()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'ask me again' && nPosts() === 2, await topText());
+    ok('another name connected while the transfer is made ready signs nothing, and offers to ask again', /^the account to send from changed since you were asked, so nothing was signed\./.test(await topText()) && (await page.textContent('#vc-top-stat button.wl-act')) === 'ask me again' && nPosts() === 4, await topText());
     // a keychain closed since the question signs nothing
     await page.waitForFunction(() => /kingbeelovis · ready to sign/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 }).catch(() => {});
     await page.click('#vc-top-go');
     await page.evaluate(() => document.getElementById('kc-out').click());
     await pressYes();
-    ok('a keychain closed since the question signs nothing, and the line names the one step', await topText() === 'connect your keychain to top up from this wallet. nothing was sent.' && nPosts() === 2, await topText());
+    ok('a keychain closed since the question signs nothing, and the line names the one step', await topText() === 'connect your keychain to top up from this wallet. nothing was sent.' && nPosts() === 4, await topText());
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
