@@ -91,3 +91,23 @@ From a founder-relayed Codex read of the doxx.net app: its status row works
 because every light is a live receipt. bViEw's direct-start status line now
 says how many storage nodes answered as it happens ("1 of 5 nodes answered"),
 taken from the dial funnel. No new styling.
+
+## Live receipt, skaists.dev, after aae4d8751 (CI green)
+
+Founder's 214 MB clip, direct only, founder's laptop network, one page session:
+
+- WebRTC dials: 329 · 176 opened · 131 dead · 22 waiting
+- connections: 329 created · 267 destroyed · 40 open now
+- dials that opened: 57% of settled dials
+- endpoints reachable: 118 of 247 settled endpoints, 48%
+- where dead dials stopped: 129 before ICE · 2 after ICE, before DTLS · 0 after DTLS
+- dial to open: 2.58 s p50 · 5.49 s p95; dial to first answer 2.88 s p50 · 5.68 s p95
+- time on dead endpoints: 1,446 s summed across overlapping dials · 0.74 dead per opened
+- wire traffic: 74 MB of data channel payload
+- status line during the start: "Reading the video map · 19 of 37 nodes answered"
+
+Reading: about half the advertised WebRTC Direct endpoints could not be
+reached from this browser, and 98% of the dead dials died before ICE, which
+is where an unreachable UDP port fails. That is consistent with Shu's
+hypothesis and the ant-client comment; it is one network at one time, not a
+network-wide figure.
