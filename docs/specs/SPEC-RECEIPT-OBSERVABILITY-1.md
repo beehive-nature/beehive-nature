@@ -52,6 +52,13 @@ receipts[] → derive(surface) → { state, tone, word, evidence[] }
   measured-lights-must-cite) is preserved on branch
    `zcode/bmesh-lights-2026-10-06` as input to step 4.
 
+5. **ant-reach two-network experiment** — docs/receipts/
+   ant-reach-2026-10-06.json (+ the cohort receipt): the §experiment
+   itself ran as the law prescribes — dials classified into receipts,
+   compared across networks, concordance stated exactly (365/365, zero
+   opposite), endpoint identity reduced to pseudonymous fingerprints.
+   Evidence ready for upstream.
+
 ## THE PRECISION LAW (evidence localizes, never over-diagnoses)
 
 An evidence light states WHAT the run establishes, not the diagnosis it
@@ -63,7 +70,7 @@ port vs NAT mapping vs firewall vs stale candidate vs bad advertisement.
 The narrower claim is the stronger upstream gift: evidence, not a
 diagnosis we have not measured.
 
-## §experiment — the narrow ant-node test (step 2; design banked, run pending)
+## §experiment — the narrow ant-node test (Step 2 — COMPLETED 2026-10-06)
 
 ```
 advertised WebRTC endpoint
@@ -73,22 +80,47 @@ advertised WebRTC endpoint
 → compare
 ```
 
-If the same advertised endpoint repeatedly fails from independent browser
-networks while another endpoint repeatedly succeeds, the hypothesis moves
-from "this client/network had trouble" toward "the advertisement itself is
-bad." Privacy shape, per founder: locally generated only — `endpoint_hash`,
-advertisement observed, attempt classifications A/B/C, timestamps, coarse
-client/network class; the raw address is discarded after hashing. NO
-global telemetry collector until a collector and a privacy ruling exist.
-BLOCKED ON: a second independent network (founder gesture).
+**Step 2 — COMPLETED 2026-10-06.** Laptop and GitHub-hosted runner
+(e2e/ant-reach-probe.mjs; runner side = GitHub Actions run 37525604244)
+independently exercised the same live bViEw direct route during
+overlapping 150 s windows. Among 365 endpoints settled by both networks,
+outcome concordance was 365/365: 195 failed from both, 170 opened from
+both, and zero differed by network (10 were unsettled somewhere). All 195
+dead-everywhere endpoints never reached ICE-connected on EITHER network.
+Receipt: docs/receipts/ant-reach-2026-10-06.json (schema
+bnr.ant-reach-receipt/1). This localizes the problem away from one
+client network and toward endpoint-specific reachability/advertisement
+state; it does not diagnose the underlying cause — the PRECISION LAW
+holds on the completed result too.
 
-## §sequence (founder ruling 2026-10-06, binding order)
+Privacy shape, as ruled: endpoint IDs are truncated deterministic
+fingerprints — first 16 hex of SHA-256("ip:port") — pseudonymous by
+design (holders of the advertised set can recompute; raw addresses are
+not published). No global collector exists.
 
-1. Bank receipt-derived observability as a cross-stack rule (THIS SPEC).
-2. Run the independent-network Autonomi reachability experiment.
-3. Take that evidence UPSTREAM (David's team) BEFORE touching `ant-node`.
-4. Only then generalize the projection primitive into bMESHasi/x0x —
-   smallest common receipt-projection contract first, dashboards after.
+FOLLOW-UP EVIDENCE, already banked (not a prerequisite): a 40-endpoint
+cohort held across time and THREE vantage points kept its phenotype —
+docs/receipts/ant-reach-cohort-2026-10-06.json + cohort window 2
+(commits e7be8a369, 31e97c333). The temporal/third-network repeat the
+founder called useful is therefore already in the record.
+
+## §sequence (founder ruling 2026-10-06, binding order — AMENDED 2026-10-06 on completed evidence)
+
+1. ✓ DONE — bank receipt-derived observability as a cross-stack rule
+   (THIS SPEC @eebe10646; the bmesh dashboard revert rode the same push).
+2. ✓ DONE 2026-10-06 — the independent-network Autonomi reachability
+   experiment COMPLETED (§experiment above; receipts on main). The
+   second network was a GitHub Actions runner — no founder gesture
+   was required.
+3. ← CURRENT — take that evidence UPSTREAM (David's team) BEFORE
+   touching ant-node. Founder ruling 2026-10-06: no additional
+   hour/day/network repeat is a prerequisite — temporal/third-network
+   repeats are follow-up evidence, and the first cohort is already
+   banked (40 endpoints, three vantage points, phenotype-stable).
+4. LATER — generalize the projection primitive into bMESHasi/x0x:
+   smallest common receipt-projection contract first, dashboards after
+   (the reverted lane's receipts format is preserved on branch
+   zcode/bmesh-lights-2026-10-06 as input).
 
 ## §future mappings (the law applied forward)
 
