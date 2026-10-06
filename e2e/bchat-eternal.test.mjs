@@ -48,6 +48,10 @@ test('bchat eternal front — three lanes, local state only', async () => {
   ok('loads with zero page/console errors', errors.length === 0, errors.join(' | '));
   ok('the rub law, watched: no socket and no external request on load', sockets.length === 0 && externals.length === 0, (sockets.concat(externals)).join(', '));
   ok('the shared shell rode in (tour bar present)', await page.locator('#tbar').count() === 1);
+  const fresh = (await page.locator('#cockpit .light').evaluateAll(els => els.map(e => e.dataset.light + ':' + e.dataset.tone)));
+  ok('the cockpit stands with five lights, none green before any receipt proves it',
+    fresh.length === 5 && fresh.every(t => !t.endsWith(':ok')), fresh.join(' '));
+  ok('the road light says what it knows: primary, not probed', (await page.locator('#cockpit [data-light="road"]').innerText()).includes('not probed'));
 
   ok('both threads stand', await page.locator('.threadrow').count() === 2);
   ok('the SMS lane says SIMULATED in place', (await page.locator('#threadcard').innerText()).includes('SIMULATED'));
@@ -65,12 +69,14 @@ test('bchat eternal front — three lanes, local state only', async () => {
   await page.waitForTimeout(400);
   const pub = await page.locator('#pubview').textContent();
   ok('a fresh key arms on device (64-hex x-only)', /^[0-9a-f]{64}$/.test(pub || ''), String(pub).slice(0, 20));
+  ok('identity turns green on the key-armed receipt', ((await page.locator('#cockpit .light').evaluateAll(els => els.map(e => e.dataset.light + ':' + e.dataset.tone)))).includes('identity:ok'));
 
   await page.click('#runvec');
   await page.waitForTimeout(900);
   const okCount = await page.locator('#vecout .ok').count();
   const badCount = await page.locator('#vecout .bad').count();
   ok(`the encryptor proves itself in-browser (NIP's own vectors ${okCount}/5, 0 red)`, okCount === 5 && badCount === 0, `${okCount} ok / ${badCount} bad`);
+  ok('crypto turns green only after the vectors ran here', ((await page.locator('#cockpit .light').evaluateAll(els => els.map(e => e.dataset.light + ':' + e.dataset.tone)))).includes('crypto:ok'));
 
   await page.click('.threadrow[data-t="bnr"]');
   await page.locator('#rcpt').fill('c41c775356fd92eadc63ff5a0dc1da211b268cbea22316767095b2871ea1412d'); // PUBLIC-CONSTANT (NIP-44's own published vector key)
@@ -80,6 +86,12 @@ test('bchat eternal front — three lanes, local state only', async () => {
   ok('offline send is HELD local, stated honestly', (await page.locator('#sendstate').textContent()).includes('held locally'));
   ok('no socket opened for a held message', sockets.length === 0);
   ok('the held message carries its state chip', (await page.locator('#msgs').innerText()).includes('local — not yet published'));
+  await page.click('#cockpit [data-light="relay"]');
+  const strip = (await page.locator('#cockpit').innerText()) + (await page.locator('#conninfo').innerText()) + (await page.locator('#receipts').innerText());
+  ok('a light opens its evidence one tap deeper', await page.locator('#conninfo').evaluate(d => d.open));
+  ok('lights, evidence and receipts never carry the message text', !strip.includes('the eternal front never pretends'), strip.slice(0, 120));
+  const held = (await page.locator('#cockpit .light').evaluateAll(els => els.map(e => e.dataset.light + ':' + e.dataset.tone)));
+  ok('a held send turns nothing green: relay not dialled, no event evidence', held.includes('relay:idle') && held.includes('receipt:idle'), held.join(' '));
 
   /* FORGET: a read until-read message prunes locally, and the page SAYS it is consent-routing */
   await page.selectOption('#retain', 'until-read');
