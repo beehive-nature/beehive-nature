@@ -529,6 +529,7 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
     metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0; metrics.route = '';
+    metrics.stalls = 0; metrics.stallMs = 0; metrics.stallAt = 0;
   };
   // Where this run's bytes came from, said once for every front and every receipt.
   const sourceOf = () => {
@@ -1413,6 +1414,11 @@ document.addEventListener('DOMContentLoaded',function(){
     pool.client.catch(() => { if (directPool === pool) directPool = null; });
     return directPool = pool;
   };
+  // A quiet stop names what the dials saw: no node answering is a network fact, not a slow file.
+  const quietWhy = () => {
+    const t = window.__antTransport && window.__antTransport.snapshot();
+    return t && t.dials && !t.opened && !t.waiting ? 'none of the ' + t.dials + ' storage nodes it dialled could be reached from this network' : 'storage nodes went quiet';
+  };
   const directCapable = () => isSecureContext && 'RTCPeerConnection' in window;
   // Three routes: relay only, direct only (never the relay), direct with relay fallback.
   const routeOf = () => $('playback-route').value;
@@ -1577,7 +1583,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if (my !== job || signal.aborted) return true;
       // Keep an open connection for the next video; drop only one that never connected.
       if (!pool || !pool.ready) closePool();
-      const why = readError ? readError.message : error.name === 'AbortError' ? 'storage nodes went quiet' : error.message;
+      const why = readError ? readError.message : error.name === 'AbortError' ? quietWhy() : error.message;
       if (receipt.startupElapsedMs == null) receipt.startupElapsedMs = performance.now() - startedAt;
       receipt.firstFrameMs = metrics.ttffMs;
       if (only) {
@@ -1677,6 +1683,7 @@ document.addEventListener('DOMContentLoaded',function(){
       planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
       direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
+      stalls: metrics.stalls || 0, stallMs: (metrics.stallMs || 0) + (metrics.stallAt ? performance.now() - metrics.stallAt : 0),
       route: metrics.route || null, source: sourceOf(),
     };
   };
@@ -1684,6 +1691,9 @@ document.addEventListener('DOMContentLoaded',function(){
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
   paintNerd(); renderInst();
   for(const event of ['timeupdate','progress','loadedmetadata','playing','pause','ended','seeked'])v.addEventListener(event,paintNerd);
+  // A stall is the playhead waiting for bytes after the first frame; a seek is not one.
+  v.addEventListener('waiting', () => { if (metrics.ttffMs != null && !v.seeking && !metrics.stallAt) { metrics.stallAt = performance.now(); metrics.stalls = (metrics.stalls || 0) + 1; } });
+  for (const event of ['playing', 'pause', 'ended']) v.addEventListener(event, () => { if (metrics.stallAt) { metrics.stallMs = (metrics.stallMs || 0) + performance.now() - metrics.stallAt; metrics.stallAt = 0; } });
   addEventListener('hashchange', fromHash); fromHash();
 })();
 </script>
@@ -1821,6 +1831,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['done',V.done?'<span class="yes">'+esc(V.done)+'</span>':no('not yet')]
     ];
     var ms=function(n){return n==null?'not yet':(n/1000).toFixed(2)+' s';};
+    rows.push(['stalls',esc(E.stalls?E.stalls+' · '+ms(E.stallMs)+' waiting for bytes after the first frame':'none yet')]);
     rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
     if(vf){
       rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
@@ -1846,10 +1857,11 @@ document.addEventListener('DOMContentLoaded',function(){
       ['viewer seeding',no('not provided · this browser retrieves chunks')]
     );
     // The dial funnel (ant-transport.js): of the endpoints the SDK dialled, how many a browser could reach.
-    if(dr&&T_&&T_.dials){
+    if(T_&&T_.dials){
       var pc=function(x){return x==null?'not yet':(100*x).toFixed(0)+'%';};
       rows.push(
         ['WebRTC dials',esc(T_.dials+' dials · '+T_.opened+' opened · '+T_.dead+' dead · '+T_.waiting+' waiting')],
+        ['connections',esc(T_.dials+' created · '+(T_.dead+T_.closed)+' destroyed · '+(T_.opened-T_.closed)+' open now')],
         ['dials that opened',esc(pc(T_.openRate)+' of settled dials · data channel open')],
         ['endpoints reachable',esc(T_.endpointsReachable+' of '+(T_.endpointsReachable+T_.endpointsUnreachable)+' settled endpoints · '+pc(T_.endpointRate)+(T_.endpointsRecovered?' · '+T_.endpointsRecovered+' failed once, then opened':''))],
         ['where dead dials stopped',esc(T_.deadAt.dial+' before ICE · '+T_.deadAt.ice+' after ICE, before DTLS · '+T_.deadAt.dtls+' after DTLS, before the channel')],

@@ -58,3 +58,29 @@ certified first.
   proven reachable (dial-back or independent observations). That change goes
   in `ant-node`; our receipt numbers are the evidence to bring to it.
 - The same recorder on W@tch and bMeter once they dial directly.
+
+## Live check, skaists.dev, commit 0c408392a
+
+Built-in browser on the founder's laptop network, founder's 214 MB clip,
+route "direct only".
+
+- `ant-transport.js` serves and wraps `RTCPeerConnection`.
+- A direct `AutonomiClient.connect()` from the page: connected in 3.4 s,
+  5 dials, 1 opened, dial to open 0.36 s, first answer 0.41 s, 4 still waiting.
+- The page's own attempt a minute later: 4 dials, all 4 dead before ICE,
+  26.2 s of dial time spent on them, nothing opened. The stop line said only
+  "storage nodes went quiet", and the funnel rows were hidden because they
+  waited for a Watch attempt that never began.
+
+## Second commit: after Shu's note
+
+Shu benchmarks ants.tube strategies on time to first frame, connections
+created and destroyed, and time spent stalled. bViEw now reports all three so
+our runs line up with his table:
+
+- `connections`: created, destroyed (dead plus opened and later closed), open now.
+- `stalls`: count and seconds the playhead waited for bytes after the first
+  frame; seeks are not counted.
+- The funnel rows show whenever a dial happened, not only inside a Watch attempt.
+- A quiet stop with no node reached now says that none of the N storage nodes
+  it dialled could be reached from this network.

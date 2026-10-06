@@ -82,9 +82,9 @@
   var pct = function (sorted, p) { return sorted.length ? sorted[Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1)] : null; };
   // Counts and timings only: no address, no peer id.
   var snapshot = function () {
-    var opened = 0, dead = 0, waiting = 0, deadMs = 0, by = { dial: 0, ice: 0, dtls: 0 }, connect = [], answer = [];
+    var opened = 0, closed = 0, dead = 0, waiting = 0, deadMs = 0, by = { dial: 0, ice: 0, dtls: 0 }, connect = [], answer = [];
     dials.forEach(function (d) {
-      if (d.open != null) { opened++; connect.push(d.open); if (d.first != null) answer.push(d.first); }
+      if (d.open != null) { opened++; if (d.end != null) closed++; connect.push(d.open); if (d.first != null) answer.push(d.first); }
       else if (d.outcome === 'dead') { dead++; deadMs += d.end; by[d.reached === 'dial' ? 'dial' : d.reached === 'ice' ? 'ice' : 'dtls']++; }
       else waiting++;
     });
@@ -92,7 +92,7 @@
     var eps = Object.keys(endpoints), reachable = 0, unreachable = 0, recovered = 0;
     eps.forEach(function (k) { var e = endpoints[k]; if (e.opened) reachable++; else if (e.dead) unreachable++; if (e.recovered) recovered++; });
     return {
-      dials: seq, opened: opened, dead: dead, waiting: waiting,
+      dials: seq, opened: opened, closed: closed, dead: dead, waiting: waiting,
       openRate: opened + dead ? opened / (opened + dead) : null,
       endpoints: eps.length, endpointsReachable: reachable, endpointsUnreachable: unreachable, endpointsRecovered: recovered,
       endpointRate: reachable + unreachable ? reachable / (reachable + unreachable) : null,

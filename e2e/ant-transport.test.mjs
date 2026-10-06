@@ -61,6 +61,7 @@ test('the dial funnel counts opened, dead and recovered endpoints, and keeps add
   const s = window.__antTransport.snapshot();
   assert.equal(s.dials, 5);
   assert.equal(s.opened, 2);
+  assert.equal(s.closed, 0, 'an opened connection is not destroyed until it closes');
   assert.equal(s.dead, 2);
   assert.equal(s.waiting, 1);
   assert.equal(s.openRate, 0.5);
@@ -74,6 +75,8 @@ test('the dial funnel counts opened, dead and recovered endpoints, and keeps add
   assert.equal(s.deadMs, 4000 + 2100);
   assert.equal(s.bytes, 300);
   assert.ok(b.closed, 'close still reaches the native connection');
+  a.close();
+  assert.equal(window.__antTransport.snapshot().closed, 1);
   assert.doesNotMatch(JSON.stringify(s), /\d+\.\d+\.\d+\.\d+/, 'no endpoint address leaves the recorder');
 });
 
