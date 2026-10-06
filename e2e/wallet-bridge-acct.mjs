@@ -71,8 +71,10 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
         if (state.acctDelay && state.acctDelay[a]) await new Promise(r => setTimeout(r, state.acctDelay[a]));
         // an account that does not exist: nodes answer 500 "unknown key"
         if (/^(newacct|freename)/.test(a) && !state.keys[a]) return json({ code: 500, message: 'Internal Service Error', error: { code: 0, name: 'exception', what: 'unspecified', details: [{ message: 'unknown key (boost::tuples::tuple<bool, eosio::chain::name>): (0 ' + a + ')' }] } }, 500);
-        const keys = (state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
-        return json({ account_name: a, core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
+        const by = state.acctBy ? state.acctBy(u.host, a) : null;   // one host's own view of the account
+        if (by === 'abort') return route.abort();
+        const keys = ((by && by.keys) || state.keys[a] || [STRANGER_KEY]).map(key => ({ key, weight: 1 }));
+        return json({ account_name: a, head_block_num: (by && by.head) || state.acctHead || state.head, head_block_time: state.chainTime || '2026-10-05T00:00:00.000', core_liquid_balance: '0.0000 EOS', ram_quota: 8192, ram_usage: 3000, cpu_limit: { used: 0, available: 1000, max: 1000 }, net_limit: { used: 0, available: 1000, max: 1000 },
           permissions: [{ perm_name: 'active', parent: 'owner', required_auth: { threshold: (state.threshold && state.threshold[a]) || 1, keys, accounts: [], waits: [] } }] });
       }
       if (u.pathname.endsWith('/get_currency_balance')) {
@@ -88,6 +90,7 @@ async function context(browser, reg, { soul = 'king', width = 390 } = {}) {
       if (u.pathname.endsWith('/send_transaction')) {
         state.posts.push(body.packed_trx);
         if (state.sendBy && state.sendBy(url) === 'abort') return route.abort();   // this host loses its answer
+        if (state.sendBy && state.sendBy(url) === 'refuse') return json({ code: 500, error: { name: 'unsatisfied_authorization', what: 'Transaction declares authority', details: [{ message: 'missing authority of kingbeelovis' }] } }, 500);   // this host refuses the key
         if (state.abortN > 0) { state.abortN--; if (state.applyLost && state.onSend) state.onSend(body); return route.abort(); }   // the node took it; the answer is lost
         if (state.dupOnce) { state.dupOnce = false; return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409); }
         if (state.refuseWith) return json({ code: 500, error: { name: 'unsatisfied_authorization', what: 'Transaction declares authority', details: [{ message: state.refuseWith }] } }, 500);
@@ -228,6 +231,24 @@ try {
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
+  /* P3b · one host loses its answer and the other refuses the key: authority is each node's own state, so it is not a clean no */
+  {
+    console.log('P3b · one paste, refused by one host while the other lost its answer (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [DEV_PUB];
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    await toKey(page);
+    await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+    state.sendBy = url => /eosnation/.test(url) ? 'abort' : 'refuse';
+    await page.evaluate(w => { document.getElementById('br-paste').value = w; document.getElementById('br-paste-go').click(); }, DEV_WIF);
+    await waitIn(page, 'br-paste-stat', /cannot tell yet|did not accept/, 60000);
+    const r = await stat(page);
+    ok('a key refusal from one host while the other lost its answer is never a clean no: cannot tell yet, check again, the field held',
+      /^the network did not answer, so this wallet cannot tell yet whether kingbeelovis changed\./.test(r.text.trim()) && !/did not accept/.test(r.text) && r.btn === 'check again' && await page.evaluate(() => document.getElementById('br-paste').disabled) && state.posts.length === 2, JSON.stringify(r));
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
   /* T · one paste, read from the chain: a dry run before the key signs anything, the same bytes to every host,
      then the transaction's own status until a block holds it or it can never land */
   {
@@ -354,6 +375,7 @@ try {
     console.log('V · one paste, after the nodes forgot it (bee):');
     const { ctx, state, page, errors } = await open(browser, 'bee');
     state.keys.kingbeelovis = [DEV_PUB];
+    state.acctHead = 1000000;   // the account is read at a head past the final block the nodes name (999997)
     state.chainTime = '2026-10-05T00:00:00.000';
     await recoveryConnect(page);
     await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
@@ -376,6 +398,45 @@ try {
     await waitIn(page, 'br-calm', /^done\./, 30000);
     const d = await page.evaluate(() => document.getElementById('br-calm').innerText.trim());
     ok('and when the account carries the key, the paste went in: done', /^done\. this wallet now signs for kingbeelovis with one press\./.test(d), d);
+    ok('no page errors', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  /* W · a host behind the final block shows the account as it was: only a host that has reached the final block past the window may
+     say the key never came, and any host that shows the key says it went in */
+  {
+    console.log('W · one paste, read on a host that lags (bee):');
+    const { ctx, state, page, errors } = await open(browser, 'bee');
+    state.keys.kingbeelovis = [DEV_PUB];
+    state.chainTime = '2026-10-05T00:00:00.000';
+    await recoveryConnect(page);
+    await page.waitForFunction(() => /let this wallet sign for it/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 20000 });
+    const k1 = (await page.textContent('#kc-k1-pub')).trim();
+    await toKey(page);
+    await page.waitForFunction(() => !!document.getElementById('br-paste'), null, { timeout: 15000 });
+    const press = async () => { await page.fill('#br-paste', DEV_WIF); await page.evaluate(() => document.getElementById('br-paste-go').click()); };
+    const line = () => page.evaluate(() => ({ t: document.getElementById('br-paste-stat').innerText.trim(), all: document.getElementById('br-paste-stat').textContent, open: !document.getElementById('br-paste').disabled, btn: (document.querySelector('#br-paste-stat button.wl-act') || {}).textContent || null }));
+    // every node has forgotten it; their final block (999997) is past the window
+    state.status = () => ({ state: 'UNKNOWN', head_number: 999999, irreversible_number: 999997, irreversible_timestamp: '2026-10-05T01:02:00.000', earliest_tracked_block_number: 992000 });
+    // 1 · eosnation is behind that final block and shows no key; greymass does not answer
+    state.acctBy = host => /eosnation/.test(host) ? { head: 999000 } : 'abort';
+    await press();
+    await waitIn(page, 'br-paste-stat', /not in a block yet|did not reach a block/, 60000);
+    let l = await line();
+    ok('a host behind the final block that shows no key never proves the paste did not land: not in a block yet, check again, the paste held',
+      /^it is not in a block yet, so check again in a minute\./.test(l.t) && l.btn === 'check again' && !l.open && !/did not reach a block/.test(l.t), JSON.stringify(l));
+    // 2 · eosnation reaches the final block and still shows no key: the key and the action never landed
+    state.acctBy = host => /eosnation/.test(host) ? { head: 1000000 } : 'abort';
+    await page.evaluate(() => document.querySelector('#br-paste-stat button.wl-act').click());
+    await waitIn(page, 'br-paste-stat', /did not reach a block/, 30000);
+    l = await line();
+    ok('a host that has reached the final block past the window and shows no key: the paste never landed, the field back',
+      /^the last paste did not reach a block before its time ran out, so nothing changed\./.test(l.t) && /neither landed/.test(l.all) && /eos\.api\.eosnation\.io lacks the key at head 1000000/.test(l.all) && l.open, JSON.stringify(l));
+    // 3 · a new paste: eosnation lags without the key, greymass has reached past it and carries it
+    state.acctBy = host => /eosnation/.test(host) ? { head: 999000 } : { head: 1000000, keys: [DEV_PUB, k1] };
+    await press();
+    await waitIn(page, 'br-calm', /^done\./, 40000);
+    const d = await page.evaluate(() => ({ t: document.getElementById('br-calm').innerText.trim(), all: document.getElementById('br-calm').textContent }));
+    ok('any host that shows the key says it went in, whatever a lagging host shows: done', /^done\. this wallet now signs for kingbeelovis with one press\./.test(d.t) && /eos\.greymass\.com carries the key/.test(d.all), JSON.stringify(d));
     ok('no page errors', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

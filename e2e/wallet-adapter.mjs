@@ -101,7 +101,9 @@ function mockChain(ctx, opts = {}) {
     }
     if (u.pathname.endsWith('/get_info')) return json({ chain_id: chain, head_block_num: state.head, ...(state.libTime ? { last_irreversible_block_num: state.head - 2, last_irreversible_block_time: state.libTime } : {}) });
     // the transaction's own status, per test; a node without it answers {} (the default)
-    if (u.pathname.endsWith('/get_transaction_status')) { (state.st = state.st || []).push(u.host); return json(state.status ? state.status(JSON.parse(route.request().postData()).id, u.host) : {}); }
+    if (u.pathname.endsWith('/get_transaction_status')) { (state.st = state.st || []).push(u.host);
+      if (state.gates) { const n = state.nHeld = (state.nHeld || 0) + 1; state.held = (state.held || 0) + 1; await state.gates[n <= 2 ? 0 : 1]; state.held--; }   // the first read held at one gate, the next at another: the test answers them in its own order
+      return json(state.status ? state.status(JSON.parse(route.request().postData()).id, u.host) : {}); }
     if (u.pathname.endsWith('/get_block')) {
       const num = JSON.parse(route.request().postData()).block_num_or_id;
       if (num === 123453) return json({ ref_block_prefix: 987654321, timestamp: '2026-08-28T00:00:00.000' });   // the build read
@@ -116,6 +118,9 @@ function mockChain(ctx, opts = {}) {
         return json({ error: { details: [{ message: 'malformed tx body — packing or signature missing' }] } }, 400);
       (state.sent = state.sent || []).push({ host: u.host, packed: body.packed_trx, sigs: JSON.stringify(body.signatures) });   // what each host was given
       if (state.abortsRemaining > 0) { state.abortsRemaining--; return route.abort('connectionfailed'); }   // the whole rail is cut — rotation cannot walk around it
+      const by = state.sendBy ? state.sendBy(u.host) : null;   // one host's own answer
+      if (by === 'abort') return route.abort('connectionfailed');
+      if (by === 'refuse') return json({ code: 500, message: 'Internal Service Error', error: { code: 3090003, name: 'unsatisfied_authorization', what: 'Provided keys, permissions, and delays do not satisfy declared authorizations', details: [{ message: 'missing authority of banchor22222' }] } }, 500);
       if (state.dupAll) return json({ code: 409, error: { name: 'tx_duplicate', what: 'Duplicate transaction', details: [{ message: 'duplicate transaction ' + body.packed_trx.slice(0, 16) }] } }, 409);   // every host already holds these bytes
       state.submits++;
       if (state.slowMs) await new Promise(r => setTimeout(r, state.slowMs));   // an answer that takes its time: a second press lands while it runs
@@ -740,7 +745,7 @@ try {
         return { id: e.intent_id, exp: it.expires_at, head: it.head, packed: it.packed_hex, sigs: JSON.stringify([sig]) };
       }, [J4_WIF, commitOf(epoch), amt, more]);
       await p18.reload({ waitUntil: 'load' });
-      await p18.waitForFunction(i => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && [...document.querySelectorAll('#outbox-list .obx-row')].some(r => r.getAttribute('data-id') === i), k.id, { timeout: 25000 });
+      await p18.waitForFunction(i => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && [...document.querySelectorAll('#outbox-list .obx-row')].some(r => r.getAttribute('data-id') === i), k.id, { timeout: 45000 });
       return k;
     };
     const rowOf = id => p18.evaluate(i => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === i); if (!r) return null;
@@ -844,6 +849,53 @@ try {
     const ef2 = await entryOf(f.id);
     ok('and Hyperion holding it in a block confirms it, with that block', ef2.phase === 'confirmed' && new RegExp('^Hyperion at eos\\.hyperion\\.eosrio\\.io: executed in block #' + (f.head + 9)).test(ef2.evidence.read), JSON.stringify(ef2.evidence));
     r18.hyperion = null; r18.libTime = null;
+
+    // G · one host loses its answer and the other refuses the signature: authority is each node's own state, so it is not a clean no
+    r18.status = null;
+    r18.sendBy = host => /eosnation/.test(host) ? 'abort' : 'refuse';
+    const g = await keep(18008, 0.9);
+    const l4 = await ledger();
+    await press(g.id);
+    await p18.waitForFunction(i => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === i); const b = r && r.querySelector('.obx-retry'); return b && !b.disabled && /cannot tell|said no|did not accept/.test(r.querySelector('.obx-stat').textContent); }, g.id, { timeout: 30000 }).catch(() => {});
+    const eg = await entryOf(g.id), rg = await rowOf(g.id);
+    ok('a signature refusal from one host while the other host\'s answer was lost is never a clean no: kept, maybe out, nothing given back',
+      eg.phase === 'signed' && eg.maybe_out === true && !eg.evidence && /cannot tell yet whether it went out/.test(rg.words) && !/did not accept|said no/.test(rg.words) && rg.btn === 'check again' && Math.abs((await ledger()) - l4) < 1e-9, JSON.stringify({ phase: eg.phase, mo: eg.maybe_out, ev: eg.evidence, rg }));
+    r18.sendBy = () => 'refuse';
+    if ((await rowOf(g.id)).btn) { await press(g.id); await until(g.id, ['failed', 'expired', 'confirmed'], 30000); }
+    const eg2 = await entryOf(g.id);
+    ok('once every host answers and each refuses the signature, it is a clean no: failed, and the cap given back once',
+      eg2.phase === 'failed' && eg2.evidence && eg2.evidence.definite === true && eg2.cap && eg2.cap.refunded === true && Math.abs((await ledger()) - (l4 - 0.9)) < 1e-9, JSON.stringify({ phase: eg2.phase, ev: eg2.evidence, cap: eg2.cap }));
+    r18.sendBy = null;
+
+    // H · two tabs read the same send, and both reads come back past its window with no block holding it: the cap comes back once
+    r18.status = null;
+    const h = await keep(18009, 1.1);
+    const q18 = await c18.newPage(); q18.on('pageerror', e => err18.push(e.message));
+    await q18.goto(WALLET, { waitUntil: 'load' });
+    await q18.waitForFunction(i => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached && [...document.querySelectorAll('#outbox-list .obx-row')].some(r => r.getAttribute('data-id') === i), h.id, { timeout: 25000 });
+    const HB = chainAt(h.exp, -60000), HA = chainAt(h.exp, 1000);
+    r18.status = () => ST('LOCALLY_APPLIED', HB);
+    const l5 = await ledger();
+    await press(h.id);   // this tab sends it, then reads
+    await until(h.id, ['submitted']);
+    await q18.waitForFunction(i => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === i); const b = r && r.querySelector('.obx-retry'); return !!b && !b.disabled && b.textContent === 'check again'; }, h.id, { timeout: 20000 }).catch(() => {});
+    await q18.evaluate(i => [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === i).querySelector('.obx-retry').click(), h.id);   // the other tab reads it too
+    await p18.waitForTimeout(3000);
+    /* the next read in each tab is held (two hosts each): the later one is answered first, so its tab settles it and gives the cap
+       back while the earlier read, sent before that, is still out; then that one is answered too */
+    const rel = []; r18.held = 0; r18.nHeld = 0; r18.gates = [new Promise(r => rel.push(r)), new Promise(r => rel.push(r))];
+    r18.status = () => ST('LOCALLY_APPLIED', HA);
+    for (let i = 0; i < 300 && r18.held < 4; i++) await p18.waitForTimeout(50);
+    const heldBoth = r18.held;
+    rel[1]();
+    await until(h.id, ['expired', 'failed', 'confirmed']);
+    await p18.waitForTimeout(1500);
+    rel[0](); r18.gates = null;
+    await p18.waitForTimeout(4000);
+    const eh = await entryOf(h.id), backs = await p18.evaluate(() => JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => Math.abs(e.a + 1.1) < 1e-9).length);
+    ok('two tabs that both read it can never land give its cap back once, and the mark that says so is kept',
+      heldBoth >= 4 && eh.phase === 'expired' && eh.evidence.definite === true && eh.cap && eh.cap.refunded === true && backs === 1 && Math.abs((await ledger()) - (l5 - 1.1)) < 1e-9, JSON.stringify({ heldBoth, phase: eh.phase, cap: eh.cap, backs, d: (await ledger()) - l5 }));
+    await q18.close();
     ok('no page errors', err18.length === 0, err18.join(' | '));
     await c18.close();
   }

@@ -113,16 +113,15 @@ function errText(d) {
   return msg;
 }
 function isDuplicate(t) { return /duplicate transaction|tx_duplicate|already in the mempool|already known|already processed/i.test(String(t || '')) }
-/* the one refusal that holds on every node whatever it has seen: the signature itself */
-function authorityNo(t) { return /missing authority|unsatisfied|irrelevant|declares authority/i.test(String(t || '')) }
 function hostName(h) { return String(h).replace(/^https?:\/\//, '') }
 function chainMs(t) { t = String(t || ''); var v = Date.parse(/Z$/.test(t) ? t : t + 'Z'); return isFinite(v) ? v : NaN }
 function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i }) }
 
 /* the signed bytes go to every host at once. They are the same bytes, so a second answer is the same
    transaction: the first host that takes them answers for the send, and a "duplicate" from another
-   host means it holds them too. A refusal answers only when no host took them; a host whose answer was
-   lost may still hold the bytes, so then only a refusal of the signature itself is a clean "no" */
+   host means it holds them too. A refusal answers only when every host answered and none took them: a
+   host whose answer was lost may hold the bytes, and even a refusal of the signature is one node's view
+   of the account (a key just changed on one node and not yet on another) */
 function sendAll(net, body) {
   var json = JSON.stringify(body), s = { res: null, acked: [], dup: null, refused: [], lost: [] };
   var each = hostsFor(net).map(function (h) {
@@ -440,7 +439,7 @@ var METHODS = {
       };
     }
     var refusal = uniq(s.refused).join(' | ');
-    if (s.refused.length && (!s.lost.length || s.refused.some(authorityNo))) { var e = new Error(refusal); e.code = E.SUBMIT_REFUSED; throw e }
+    if (s.refused.length && !s.lost.length) { var e = new Error(refusal); e.code = E.SUBMIT_REFUSED; throw e }
     var u = new Error('no ' + net + ' host took it' + (s.lost.length ? ' (no answer from ' + s.lost.join(', ') + ')' : '') + (refusal ? '; refused elsewhere: ' + refusal : ''));
     u.code = E.RAIL_UNREACHABLE; throw u;
   },

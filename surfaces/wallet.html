@@ -5237,6 +5237,20 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var i=null; try{ i=await post(VH,'/v1/chain/get_info',{}) }catch(e){}
     return i&&i.chain_id===VAULTA_CHAIN&&isFinite(chainMs(i.last_irreversible_block_time))?{time:i.last_irreversible_block_time,block:i.last_irreversible_block_num}:null;
   }
+  /* the account as every host that names the chain shows it, with the head it was read at (get_account carries
+     head_block_num): a host behind may show the account as it was before the paste landed */
+  async function brAcctReads(a,key){
+    var one=function(h,path,body){ return fetchT(h+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},6000).then(function(r){ return r.ok?r.json():null }).catch(function(){ return null }) };
+    var rs=await Promise.all(VH.map(function(h){ return Promise.all([one(h,'/v1/chain/get_info',{}),one(h,'/v1/chain/get_account',{account_name:a})]).then(function(x){
+      var info=x[0], acc=x[1];
+      if(!info||info.chain_id!==VAULTA_CHAIN||!acc||acc.account_name!==a||!Array.isArray(acc.permissions))return null;
+      var act=acc.permissions.filter(function(q){ return q.perm_name==='active' })[0], ra=act&&act.required_auth;
+      if(!ra)return null;
+      var th=ra.threshold||1;
+      return {h:h,head:typeof acc.head_block_num==='number'?acc.head_block_num:null,has:(ra.keys||[]).some(function(k){ return (k.weight||0)>=th&&canon(k.key)===key })};
+    },function(){ return null }) }));
+    return rs.filter(Boolean);
+  }
   async function brWitness(p){
     var expT=chainMs(p.expStr), until=' · valid until '+p.expStr+'Z', r=null;
     try{ r=await callAdapter('vaulta','status',{network:'mainnet',ref:p.tx,expiration:p.expStr,head:p.head,acked_by:p.acked||null},30000) }catch(e){ r=null }
@@ -5244,15 +5258,19 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(k==='in')return {k:'in',block:ev.block_num||null,cy:'tx '+p.tx+(ev.block_num?' · in block '+ev.block_num:'')+' · '+rd};
     if(k==='failed'||k==='never')return {k:k,cy:'tx '+p.tx+' · '+rd};
     if(k==='wait'&&ev.covered)return {k:'wait',via:'status',cy:'tx '+p.tx+' · '+rd};
-    /* no node that follows every block since the signing can say: a final block first, then the account read after it */
-    var fin=ev.final_time?{time:ev.final_time,block:ev.final_block}:await finalNow(), past=!!fin&&chainMs(fin.time)>expT, key=null;
-    if(p.adds&&p.acct===vacct()){ try{ await checkBridge() }catch(e){} key=BRIDGED }
-    if(key===true)return {k:'key',cy:'tx '+p.tx+' · '+p.acct+' carries this wallet\u2019s key · '+rd};
-    if(key===false&&past)return {k:'never',cy:'tx '+p.tx+' · final block '+fin.block+' at '+fin.time+' is past its expiration '+p.expStr+', and '+p.acct+', read after it, does not carry this wallet\u2019s key: the key and the action were one transaction, so neither landed · '+rd};
+    /* no node that follows every block since the signing can say: a final block first, then the account as every host shows it.
+       Any host that shows the key says it went in; it never landed only when a host that has reached that final block shows no key
+       and no host shows it */
+    var fin=ev.final_time?{time:ev.final_time,block:ev.final_block}:await finalNow(), past=!!fin&&chainMs(fin.time)>expT;
+    var ar=p.adds?await brAcctReads(p.acct,p.key||(K1&&K1.pubK1)):[], has=ar.filter(function(x){ return x.has }), lack=ar.filter(function(x){ return !x.has });
+    var seen=ar.map(function(x){ return hostName(x.h)+(x.has?' carries':' lacks')+' the key at head '+(x.head===null?'unknown':x.head) }).join(', ');
+    if(has.length){ if(p.acct===vacct()){ try{ await checkBridge() }catch(e){} } return {k:'key',cy:'tx '+p.tx+' · '+p.acct+': '+seen+' · '+rd} }
+    var caught=past&&typeof fin.block==='number'?lack.filter(function(x){ return x.head!==null&&x.head>=fin.block })[0]:null;
+    if(caught)return {k:'never',cy:'tx '+p.tx+' · final block '+fin.block+' at '+fin.time+' is past its expiration '+p.expStr+', and '+p.acct+', read after it ('+seen+'), does not carry this wallet\u2019s key: the key and the action were one transaction, so neither landed · '+rd};
     if(!p.adds&&k==='lost')return {k:'lost',cy:'tx '+p.tx+' · '+rd};
-    if(k==='wait'||k==='lost')return {k:'wait',via:ev.via==='hyperion'?'hyperion':'status',cy:'tx '+p.tx+' · '+rd+(key===false?' · '+p.acct+' does not carry this wallet\u2019s key yet':'')};
-    if(key===false)return {k:'wait',via:'account',cy:'tx '+p.tx+' · '+p.acct+' does not carry this wallet\u2019s key yet · '+rd+(fin?' · final block '+fin.block+' at '+fin.time:'')+until};
-    return {k:'unread',cy:'tx '+p.tx+' · '+rd+(p.adds?' · get_account '+p.acct+' did not answer':'')+until};
+    if(lack.length)return {k:'wait',via:'account',cy:'tx '+p.tx+' · '+p.acct+' does not carry this wallet\u2019s key yet ('+seen+(fin?'; final block '+fin.block+' at '+fin.time:'')+') · '+rd+until};
+    if(k==='wait'||k==='lost')return {k:'wait',via:ev.via==='hyperion'?'hyperion':'chain',cy:'tx '+p.tx+' · '+rd+until};
+    return {k:'unread',cy:'tx '+p.tx+' · '+rd+(p.adds?' · get_account '+p.acct+' did not answer on any host':'')+until};
   }
   async function pasteBridge(wif,extra,onPhase){
     var a=vacct();
@@ -5328,11 +5346,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(onPhase)try{ onPhase('sending') }catch(oe){}
     var sent=await brSend({signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hexS(packed)});
     var res=sent.res, why=sent.refused[0]||'', took=sent.acked.length>0;   /* a host took it, or already holds these exact bytes */
-    if(!took&&sent.refused.length&&(!sent.lost||sent.refused.some(authorityNo)))   /* refused, and no host can hold it */
+    if(!took&&sent.refused.length&&!sent.lost)   /* every host answered and each refused it. While an answer is lost, even a refusal of the key is one node's view */
       throw brErr(brRefusal(why,a),'refused',why.slice(0,400));
     var tx=(res&&res.transaction_id)||txid;
     var xday=xsp?capRecord(xsp.unit,xsp.amt):null;   /* it went out, or may have: it counts, like every send that may be in */
-    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,acked:sent.acked.map(hostName),extra:brExtraKey(extra),adds:adds,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
+    var p=BR_PENDING={acct:a,tx:tx,exp:exp,expStr:expStr,head:info.head_block_num,t0:t0,acked:sent.acked.map(hostName),extra:brExtraKey(extra),adds:adds,key:K1.pubK1,cap:xsp?{unit:xsp.unit,amt:xsp.amt,day:xday}:null};
     /* the chain is the receipt: the transaction's own status, read about every 1.5 s until a block holds
        it or it can never land. While it waits, nothing says it was sent */
     var since=Date.now(), blind=0, w=null;
@@ -7200,7 +7218,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           'threshold: '+ra.threshold+' of '+newKeys.length+' keys, nothing removed'+(waAdd.length?' · the account passkey is on the account; this page does not sign with it yet':'');
         if(waSave&&waAdd.length)saveWaCred(waSave);
         checkBridge();
-      } else if(!res||(sent.lost&&!authorityNo(why))){   /* no node confirmed it: it may have landed, so it is read, never re-signed */
+      } else if(!res||sent.lost){   /* no node confirmed it, and one may hold it: it may have landed, so it is read, never re-signed */
         wlSay(stat,['no node confirmed the broadcast, so it may have landed. read the account before you paste again. ',{btn:'read the account',on:function(){
           checkBridge().then(function(){ stat.textContent=BRIDGED===true?'the account carries this wallet\u2019s key: bridged.':BRIDGED===false?'the account does not carry this wallet\u2019s key: not landed, or not yet.':'could not read the account just now.' }) }}]);
         out.textContent=(why||'no host answered send_transaction')+String.fromCharCode(10)+'tx '+tid+' (its window closes 120 s after signing)';
@@ -7834,6 +7852,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var old = list[i];
       if ((old.phase === 'signed' || old.phase === 'submitted') && old.signed_bytes && old.signed_bytes !== entry.signed_bytes) throw obxClash(old, entry);
       if (old.phase === 'confirmed' && entry.phase !== 'confirmed') throw obxClash(old, entry);
+      /* the cap's record is never dropped, and a given back mark is never lost to a copy read before it was made (another tab) */
+      if (old.cap && (!entry.cap || (old.cap.refunded && !entry.cap.refunded))) entry.cap = Object.assign({}, entry.cap || old.cap, old.cap.refunded ? { refunded: true } : {});
       list[i] = entry; break;
     }
     var isNew = i === list.length;
@@ -8043,8 +8063,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   }
   /* the cap given back once, only for a send the rail proved never ran */
   function capRefund(e) {
-    var live = e && obxPeek(e.intent_id);
-    if (!live || !live.cap || live.cap.refunded || !(live.evidence && live.evidence.definite)) return;
+    var live = e && obxPeek(e.intent_id);   /* the stored record, read now: its cap and its mark, never this flow's copy */
+    if (!live || !live.cap || live.cap.refunded || !(live.evidence && live.evidence.definite)) { if (live && live.cap && live.cap.refunded && e.cap) e.cap.refunded = true; return }
     /* a node took it and the outbox could not write that down: only a block read gives it back */
     if (obxAcked(live.intent_id) && !obxBlockRead(live.evidence)) return;
     live.cap.refunded = true; try { outboxPut(live) } catch (x) { return }   /* marked first, so a second flow never gives it back twice */
@@ -8088,6 +8108,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
        every block since its signing made final a block past its expiration and no block holds it) gives the cap
        back; "can no longer tell" (the nodes forgot it, and it can no longer land) gives nothing back */
     var settleRead = function (c) {
+      var dS = settled(); if (dS) return dS;   /* another flow (another tab) settled it while this one read: never twice */
       entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
       if (c.phase === 'failed') entry.evidence = Object.assign({}, entry.evidence || {}, { definite: true });
       var proven = c.phase === 'failed' || (c.phase === 'expired' && !!(entry.evidence && entry.evidence.definite));
@@ -8228,6 +8249,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
       try {
         var c = await callAdapter(entry.rail, 'confirm', obxReadArgs(entry), 30000);
+        var dR = settled(); if (dR) return dR;   /* settled elsewhere while this read was out */
         readOk = true; last = c;
         if (obxDone(c.phase)) return settleRead(c);
         speak(['sent. waiting for ' + onRail(entry.rail) + ' to confirm it…', { cy: 'submitted; the rail read says not visible yet (' + (c.evidence && c.evidence.read) + '); reading again' }], 'submitted');
@@ -8868,7 +8890,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     setTimeout(function(){ if(!$('act-sheet'))actSheet({contract:p.contract,action:p.action,data:p.data,intent:''}) },300);
   });
 
-  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=6');   // document-relative: same dir as this page
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js?v=7');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js?v=4');
   spawnAdapter('arweave', 'wallet-adapter-arweave.js?v=5');
 
