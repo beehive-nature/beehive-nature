@@ -1,0 +1,9 @@
+{
+  "name": "net-doxx",
+  "private": true,
+  "type": "module",
+  "description": "doxx NETWORK adapter tungsten test: bounded capability, deny paths, revocation, bnr.net-receipt/1",
+  "scripts": {
+    "test": "node --test net-doxx.test.mjs"
+  }
+}

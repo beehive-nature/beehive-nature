@@ -53,10 +53,18 @@ await ctx.route(url => !url.href.startsWith(origin), async route => {
     if (body.method === 'eth_getBalance') return json({ result: '0x' + (preview ? 12345000000000000n : 9007199254740993123456789n).toString(16) });
     if (body.method === 'eth_call') return json({ result: '0x' + (preview ? /base|1rpc/.test(url.host) ? 21000000n : 42000000000000000000n : 1234567890123456789n).toString(16) });
   }
+  // A is core.vaulta's token; get_account's core_liquid_balance is EOS, a different token
+  if (url.pathname === '/v1/chain/get_currency_balance') {
+    calls.push('get_currency_balance');
+    if (body.code !== 'core.vaulta' || body.symbol !== 'A') return json([]);
+    return json(vaultMalformed ? { error: 'fixture' } : body.account === 'alice' ? ['12.3456 A'] : ['7.0000 A']);
+  }
+  // the .b registry answers: no row, so a soul is a plain account (an unanswered registry reads nothing)
+  if (url.pathname === '/v1/chain/get_table_rows') return json({ rows: [], more: false });
   if (url.pathname === '/v1/chain/get_account') {
     calls.push('get_account');
     if (body.account_name === 'missing') return json({ error: { message: 'unknown account' } });
-    return json({ account_name: body.account_name, core_liquid_balance: vaultMalformed ? null : body.account_name === 'alice' ? '12.3456 EOS' : '7.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
+    return json({ account_name: body.account_name, core_liquid_balance: '0.0000 EOS', permissions: [], ram_usage: 10, ram_quota: 100 });
   }
   if (url.host === 'api.hive.blog') { calls.push(body.method); return json({ result: [{ balance: hiveMalformed ? 'not a balance' : '42.123 HIVE',hbd_balance:'8.765 HBD' }] }); }
   if (/blockstream|mempool/.test(url.host)) {
@@ -86,6 +94,7 @@ async function settled(locator) {
 try {
   await open();
   check('address book accessible without identity', await page.locator('#wa-add').isVisible());
+  check('an empty list offers its one action, and refresh all waits until there is something to refresh', (await page.locator('#wa-mine .wa-note button').textContent()) === 'add account' && await page.locator('#wa-refresh').isHidden());
   await add('vaulta', 'Alice.b', 'mine', 'Everyday');
   await settled(card('alice'));
   await add('vaulta', 'bob', 'mine', 'Savings');
@@ -114,7 +123,7 @@ try {
   await page.locator('#wa-save').click();
   await settled(arb);
   check('labels render as text, never markup', await arb.locator('img').count() === 0 && (await arb.locator('h4').textContent()).startsWith('<img'));
-  const explorer = arb.getByRole('link', { name: 'Activity' });
+  const explorer = arb.getByRole('link', { name: 'history on arbiscan.io' });
   check('activity uses chain-specific new-tab links with isolation', await explorer.getAttribute('href') === 'https://arbiscan.io/address/' + EVM && await explorer.getAttribute('target') === '_blank' && await explorer.getAttribute('rel') === 'noopener noreferrer');
   outage = true;
   await arb.getByRole('button', { name: 'Refresh', exact: true }).click();
@@ -134,6 +143,7 @@ try {
   release(); deferred = null;
   await page.waitForTimeout(100);
   check('removing during a read cannot resurrect the account', await page.locator('#wa-following .wa-card').count() === 0);
+  check('the undo sits in the sentence it undoes', /^removed .+ from your list\./.test(await page.locator('#wa-status').innerText()) && await page.locator('#wa-status #wa-undo').isVisible());
   await page.locator('#wa-undo').click(); await settled(arb);
   check('undo restores the public account', await page.locator('#wa-following .wa-card').count() === 1);
   await add('bitcoin', BTC, 'following', 'Bitcoin genesis'); await settled(card(BTC));
@@ -179,7 +189,7 @@ try {
   hiveMalformed=false;
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY);
   check('persistence contains only versioned public metadata', saved.v === 1 && saved.entries.length === 9 && saved.entries.every(row => Object.keys(row).sort().join(',') === 'address,chain,kind,label'));
-  check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
+  check('all reads avoid credentials and signing RPCs', await page.evaluate(() => window.credentialCalls) === 0 && calls.every(method => ['eth_chainId','eth_getBalance','eth_call','get_account','get_currency_balance','condenser_api.get_accounts','esplora balance','getBalance','AR balance'].includes(method)));
   await open(); await settled(card(BTC));
   check('reload preserves all accounts and rereads', await cards().count() === 9);
   const second = await ctx.newPage(); await second.goto(origin + '/surfaces/wallet.html#wallet-accounts');
@@ -216,6 +226,9 @@ try {
   await page.locator('#wallet-storage a[href="#arw-sec"]').click();
   await page.locator('#wallet-identity a[href="#wallet-accounts"]').click();
   check('returning identity can navigate accounts and storage without a passkey request',await page.evaluate(()=>window.credentialCalls)===0);
+  for (const sel of ['#wl-bee .wlb-total', '#summary-sec a', 'footer .wl-foot>summary', '#wl-rave', '#wq']) await page.locator(sel).first().dispatchEvent('pointerdown');
+  await page.locator('#wq').dispatchEvent('keydown', { key: 'Enter' });
+  check('looking never asks for the passkey: the glance total, its links, the raver stage, the footer and the name field',await page.evaluate(()=>window.credentialCalls)===0);
   await page.locator('#kc-stat').dispatchEvent('pointerdown');
   await page.waitForFunction(() => window.credentialCalls > 0);
   check('negative control: the existing keychain gesture would request credentials', await page.evaluate(() => window.credentialCalls) === 1);
@@ -261,6 +274,7 @@ try {
   outage=true;await coinsCard.locator('[data-wa-action="coins"]').click();
   await page.waitForFunction(()=>document.querySelector('.wa-coins')?.textContent.includes('Contract read failed'));
   check('token failure removes prior balances instead of reporting zero', !(await coinsCard.locator('.wa-coins').textContent()).includes('1.25')&&(await coinsCard.locator('.wa-coins').textContent()).includes('unavailable'));
+  check('a failed token read is one calm sentence and try again, the raw reason kept for cypherpunk', /the coins this address holds did not load/.test(await coinsCard.locator('.wa-coins').innerText()) && await coinsCard.locator('.wa-coins button', { hasText: 'try again' }).count() === 1);
   check('coin reads request no credentials', await page.evaluate(()=>window.credentialCalls)===0);
   outage=false;
   const draftAddress='0x'+'56'.repeat(20);

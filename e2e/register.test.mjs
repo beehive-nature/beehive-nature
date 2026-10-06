@@ -78,9 +78,28 @@ test('duplicate script execution before or after DOM readiness mounts once',()=>
   assert.equal(p.ids.get('bregctl').children.length,3);
   assert.equal(p.body.children.filter(c=>c.id==='bregbar').length,1);
   /* head: the register's own style plus the kit-faces wiring (#257 follow-through)
-     — #bkitfonts link + #bkitburti style, each appended exactly once across re-runs */
+     — #bkitfonts link + #bkitskaists and #bkitburti styles, each appended exactly once across re-runs */
   assert.equal(p.document.head.children.filter(c=>c.id==='bkitfonts').length,1);
+  assert.equal(p.document.head.children.filter(c=>c.id==='bkitskaists').length,1);
   assert.equal(p.document.head.children.filter(c=>c.id==='bkitburti').length,1);
+});
+test('the house hand is skaists, same-origin beside the loader, with burti declared behind it',()=>{
+  for(const prefix of ['https://skaists.dev/surfaces/','https://beehive-nature.github.io/beehive-nature/surfaces/']){
+    const p=page({script:prefix+'register.js?v=9'});const head=p.document.head.children;
+    const ids=head.map(c=>c.id);
+    assert.ok(ids.indexOf('bkitskaists')>=0&&ids.indexOf('bkitskaists')<ids.indexOf('bkitburti'),'skaists is declared before its fallback');
+    assert.equal(p.ids.get('bkitskaists').textContent,"@font-face{font-family:'skaists';font-style:normal;font-weight:400;font-display:swap;src:url('"+prefix+"fonts/skaists.woff2') format('woff2')}");
+    assert.equal(p.ids.get('bkitburti').textContent,"@font-face{font-family:'burti';font-style:normal;font-weight:400;font-display:swap;src:url('"+prefix+"fonts/burti.woff2') format('woff2')}");
+  }
+  /* every stack that names the house hand puts skaists first and burti straight behind it */
+  const sheet=read('surfaces/skaists.css');
+  assert.match(sheet,/--sk-font-house:"skaists", "burti", /);
+  assert.match(sheet,/@font-face\{font-family:'skaists';[^}]*src:url\(fonts\/skaists\.woff2\) format\('woff2'\)\}/);
+  for(const f of ['surfaces/atlas.css','surfaces/bnamesday.html','surfaces/law-of-the-sea.html','surfaces/read.html','surfaces/vending-deck.html','surfaces/watch.html']){
+    const src=read(f);
+    assert.doesNotMatch(src,/(?<![\w-]|skaists,)burti,(?:var\(|system-ui)/,f+' never sets burti ahead of skaists');
+    assert.match(src,/skaists,burti,/,f+' sets the house hand');
+  }
 });
 test('native buttons cannot submit a surrounding form; labels use existing corpus keys',()=>{
   const p=page({host:true});const corpus=JSON.parse(read('surfaces/lang-corpus.json')).strings;

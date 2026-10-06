@@ -6,7 +6,8 @@ import {mkdir,open,readFile,rename,rm,stat} from 'node:fs/promises';
 import {resolve,join,basename,win32} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-export const MAX_BYTES=63*4190208;
+// 59 data chunks + 3 DataMap chunks + 1 public map record = 63 records; at 64 ant-core pays by merkle, which the bridge cannot finalize.
+export const MAX_BYTES=59*4190208;
 const allowedOrigin=origin=>{try{const u=new URL(origin);return origin==='https://skaists.dev'||(['localhost','127.0.0.1'].includes(u.hostname)&&u.protocol==='http:');}catch{return false;}};
 export function createIntakeServer({stateDir,upstream='http://127.0.0.1:8817',maxBytes=MAX_BYTES}){
   const root=resolve(stateDir);let queue=Promise.resolve();

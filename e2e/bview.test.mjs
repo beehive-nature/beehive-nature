@@ -760,16 +760,15 @@ test('three registers are three authored experiences at 390 px, and none repeats
     await ctx.close();
   }
   const { bee, raver, cypherpunk: cy } = seen;
-  // NEW BEE — a calm room: paper, serif title, one magenta "watch", the video framed, no instrument, no art.
-  // ETERNAL (2026-09-26): the dress is the skaists design system now (docs/design/skaists/tokens.json),
-  // not hand-picked values: the bee title is Instrument Serif (bee-display), the primary button's corner is
-  // radius-lg 16px ("the primary button in new bee"), cypherpunk's is radius-sm 6px ("cypherpunk: rows,
-  // tables, buttons"). The old 12px / 4px corners were the pre-token dress of PR #232.
-  assert.equal(bee.land.bg, 'rgb(251, 247, 240)'); assert.match(bee.land.title, /Instrument Serif/);
-  assert.equal(bee.land.btnText, 'watch'); assert.equal(bee.land.btnBg, 'rgb(168, 35, 140)'); assert.equal(bee.land.btnRadius, '16px');
+  // NEW BEE — a calm room: paper, bold sans title, one forest "watch", the video framed, no instrument, no art.
+  // The dress comes from skaists tokens (docs/design/skaists/tokens.json); cypherpunk's corner is radius-sm 6px.
+  // The founder's chosen UI (2026-10-05): the bee title is bold system sans (font-ui) and "watch" is the forest
+  // green pill (radius-pill) with a white label; raver's ground is the night purple sovereign tint.
+  assert.equal(bee.land.bg, 'rgb(251, 247, 240)'); assert.match(bee.land.title, /^ui-sans-serif, system-ui/);
+  assert.equal(bee.land.btnText, 'watch'); assert.equal(bee.land.btnBg, 'rgb(38, 77, 54)'); assert.equal(bee.land.btnRadius, '999px');
   assert.equal(bee.land.art, false); assert.equal(bee.land.inst, false); assert.equal(bee.land.sheetOpen, false);
-  // RAVER — the drop: black, pills, original art that can be paused, a full-bleed stage, the countdown on the picture.
-  assert.equal(raver.land.bg, 'rgb(6, 17, 12)'); assert.equal(raver.land.btnRadius, '999px'); assert.equal(raver.land.btnBg, 'rgb(214, 85, 187)');
+  // RAVER — the drop: night purple, pills, original art that can be paused, a full-bleed stage, the countdown on the picture.
+  assert.equal(raver.land.bg, 'rgb(18, 14, 30)'); assert.equal(raver.land.btnRadius, '999px'); assert.equal(raver.land.btnBg, 'rgb(214, 85, 187)');
   assert.equal(raver.land.art, true, 'raver arrives on its own art'); assert.equal(raver.land.inst, false);
   // CYPHERPUNK — the instrument, complete before any address: mono, teal "fetch", 6px (radius-sm), panes up, the sheet open.
   assert.match(cy.land.body, /mono|Menlo|Consolas/i); assert.equal(cy.land.btnText, 'fetch'); assert.equal(cy.land.btnBg, 'rgb(69, 194, 220)'); assert.equal(cy.land.btnRadius, '6px');

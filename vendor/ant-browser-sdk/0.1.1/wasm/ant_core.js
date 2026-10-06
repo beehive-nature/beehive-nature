@@ -252,6 +252,35 @@ export class BrowserNetworkClient {
         return ret;
     }
     /**
+     * Create the pointer `owner_seed` controls, pointing at `target`, and pay
+     * for it through the same wallet callback file uploads take.
+     *
+     * `kind` is `"chunk"` or `"pointer"`. Refused before anything is paid if
+     * the pointer already exists.
+     *
+     * `on_paid`, if given, is called with `{ record, proof }` once the state
+     * is paid for and before it is stored. Keep both: if storing fails, or the
+     * page is lost, [`Self::store_paid_pointer`] stores the same state without
+     * paying again.
+     * @param {Uint8Array} owner_seed
+     * @param {string} target
+     * @param {string} kind
+     * @param {any} payment_network
+     * @param {Function} pay_for_quotes
+     * @param {Function | null} [on_paid]
+     * @returns {Promise<any>}
+     */
+    createPointer(owner_seed, target, kind, payment_network, pay_for_quotes, on_paid) {
+        const ptr0 = passArray8ToWasm0(owner_seed, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(target, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(kind, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.browsernetworkclient_createPointer(this.__wbg_ptr, ptr0, len0, ptr1, len1, ptr2, len2, payment_network, pay_for_quotes, isLikeNone(on_paid) ? 0 : addToExternrefTable0(on_paid));
+        return ret;
+    }
+    /**
      * Download and reconstruct a private file from the DataMap its uploader kept.
      * @param {any} file
      * @param {number | null} [concurrency]
@@ -286,6 +315,20 @@ export class BrowserNetworkClient {
         return ret;
     }
     /**
+     * Read a pointer, or `null` if the network holds none at `address`.
+     *
+     * The record is verified and must be named by at least two of the close
+     * group, as for a native read.
+     * @param {string} address
+     * @returns {Promise<any>}
+     */
+    getPointer(address) {
+        const ptr0 = passStringToWasm0(address, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.browsernetworkclient_getPointer(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
      * Construct a reusable client around stable WebRTC Direct seed addresses.
      * @param {any} endpoints
      */
@@ -300,22 +343,27 @@ export class BrowserNetworkClient {
     }
     /**
      * Resolve a private file from its DataMap for random-access range reads.
+     * `options` is as for `openPublicFile`.
      * @param {any} file
      * @param {Function | null} [on_progress]
+     * @param {any | null} [options]
      * @returns {Promise<BrowserFileReader>}
      */
-    openPrivateFile(file, on_progress) {
-        const ret = wasm.browsernetworkclient_openPrivateFile(this.__wbg_ptr, file, isLikeNone(on_progress) ? 0 : addToExternrefTable0(on_progress));
+    openPrivateFile(file, on_progress, options) {
+        const ret = wasm.browsernetworkclient_openPrivateFile(this.__wbg_ptr, file, isLikeNone(on_progress) ? 0 : addToExternrefTable0(on_progress), isLikeNone(options) ? 0 : addToExternrefTable0(options));
         return ret;
     }
     /**
      * Resolve and validate a public file for random-access range reads.
+     * `options` is an object of `BrowserFileReaderOptions`, such as
+     * `{ streaming: true }`; omitted fields take their defaults.
      * @param {any} file
      * @param {Function | null} [on_progress]
+     * @param {any | null} [options]
      * @returns {Promise<BrowserFileReader>}
      */
-    openPublicFile(file, on_progress) {
-        const ret = wasm.browsernetworkclient_openPublicFile(this.__wbg_ptr, file, isLikeNone(on_progress) ? 0 : addToExternrefTable0(on_progress));
+    openPublicFile(file, on_progress, options) {
+        const ret = wasm.browsernetworkclient_openPublicFile(this.__wbg_ptr, file, isLikeNone(on_progress) ? 0 : addToExternrefTable0(on_progress), isLikeNone(options) ? 0 : addToExternrefTable0(options));
         return ret;
     }
     /**
@@ -342,6 +390,55 @@ export class BrowserNetworkClient {
         const ptr0 = passStringToWasm0(snapshot, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.browsernetworkclient_reconcileFailedUploadPayment(this.__wbg_ptr, ptr0, len0, verify_failure, on_checkpoint);
+        return ret;
+    }
+    /**
+     * Follow a chain of pointers to the target at its end.
+     * @param {string} address
+     * @returns {Promise<any>}
+     */
+    resolvePointer(address) {
+        const ptr0 = passStringToWasm0(address, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.browsernetworkclient_resolvePointer(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * Store a pointer state already paid for, from the `record` and `proof`
+     * an earlier write handed to its `on_paid` callback. Pays nothing.
+     * @param {Uint8Array} record
+     * @param {Uint8Array} proof
+     * @param {any} payment_network
+     * @returns {Promise<any>}
+     */
+    storePaidPointer(record, proof, payment_network) {
+        const ptr0 = passArray8ToWasm0(record, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(proof, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.browsernetworkclient_storePaidPointer(this.__wbg_ptr, ptr0, len0, ptr1, len1, payment_network);
+        return ret;
+    }
+    /**
+     * Point the pointer `owner_seed` controls at `target`, one past the
+     * counter the network serves (or create it), and pay for the new state.
+     * `on_paid` is as for [`Self::create_pointer`].
+     * @param {Uint8Array} owner_seed
+     * @param {string} target
+     * @param {string} kind
+     * @param {any} payment_network
+     * @param {Function} pay_for_quotes
+     * @param {Function | null} [on_paid]
+     * @returns {Promise<any>}
+     */
+    updatePointer(owner_seed, target, kind, payment_network, pay_for_quotes, on_paid) {
+        const ptr0 = passArray8ToWasm0(owner_seed, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(target, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(kind, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.browsernetworkclient_updatePointer(this.__wbg_ptr, ptr0, len0, ptr1, len1, ptr2, len2, payment_network, pay_for_quotes, isLikeNone(on_paid) ? 0 : addToExternrefTable0(on_paid));
         return ret;
     }
     /**
@@ -585,6 +682,32 @@ export function paymentQuoteHash(signed_bytes, public_key, signature) {
         return getStringFromWasm0(ret[0], ret[1]);
     } finally {
         wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
+    }
+}
+
+/**
+ * The address of the pointer an owner seed controls, computed offline.
+ * @param {Uint8Array} owner_seed
+ * @returns {string}
+ */
+export function pointerAddress(owner_seed) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(owner_seed, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.pointerAddress(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 }
 
@@ -1073,6 +1196,10 @@ function __wbg_get_imports() {
         __wbg_set_6be42768c690e380: function(arg0, arg1, arg2) {
             arg0[arg1] = arg2;
         },
+        __wbg_set_6e30c9374c26414c: function() { return handleError(function (arg0, arg1, arg2) {
+            const ret = Reflect.set(arg0, arg1, arg2);
+            return ret;
+        }, arguments); },
         __wbg_set_binaryType_42788161dca49131: function(arg0, arg1) {
             arg0.binaryType = __wbindgen_enum_RtcDataChannelType[arg1];
         },
@@ -1153,27 +1280,27 @@ function __wbg_get_imports() {
             return ret;
         },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 1003, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 1045, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h6c639ae6ac52cf17);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 421, ret: NamedExternref("Promise<any>"), inner_ret: Some(NamedExternref("Promise<any>")) }, mutable: true }) -> Externref`.
-            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h0adb10753c7fca5a);
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 462, ret: NamedExternref("Promise<any>"), inner_ret: Some(NamedExternref("Promise<any>")) }, mutable: true }) -> Externref`.
+            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h16e8fb15f4b14199);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("Event")], shim_idx: 423, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1);
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("Event")], shim_idx: 460, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c);
             return ret;
         },
         __wbindgen_cast_0000000000000004: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("MessageEvent")], shim_idx: 423, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1_3);
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("MessageEvent")], shim_idx: 460, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c_3);
             return ret;
         },
         __wbindgen_cast_0000000000000005: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 719, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [], shim_idx: 758, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen__convert__closures_____invoke__hc4b509476b4504c4);
             return ret;
         },
@@ -1222,16 +1349,16 @@ function wasm_bindgen__convert__closures_____invoke__hc4b509476b4504c4(arg0, arg
     wasm.wasm_bindgen__convert__closures_____invoke__hc4b509476b4504c4(arg0, arg1);
 }
 
-function wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1(arg0, arg1, arg2) {
-    wasm.wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1(arg0, arg1, arg2);
+function wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c(arg0, arg1, arg2) {
+    wasm.wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c(arg0, arg1, arg2);
 }
 
-function wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1_3(arg0, arg1, arg2) {
-    wasm.wasm_bindgen__convert__closures_____invoke__h5206e33babbdebc1_3(arg0, arg1, arg2);
+function wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c_3(arg0, arg1, arg2) {
+    wasm.wasm_bindgen__convert__closures_____invoke__h3f88e79f3975848c_3(arg0, arg1, arg2);
 }
 
-function wasm_bindgen__convert__closures_____invoke__h0adb10753c7fca5a(arg0, arg1, arg2) {
-    const ret = wasm.wasm_bindgen__convert__closures_____invoke__h0adb10753c7fca5a(arg0, arg1, arg2);
+function wasm_bindgen__convert__closures_____invoke__h16e8fb15f4b14199(arg0, arg1, arg2) {
+    const ret = wasm.wasm_bindgen__convert__closures_____invoke__h16e8fb15f4b14199(arg0, arg1, arg2);
     return ret;
 }
 

@@ -88,6 +88,18 @@ jobs:
         run: |
           node scripts/build-stack-inventory.mjs --check
           node scripts/build-stack-surfaces.mjs --check
+      # SPEC-BPQ-1: the browser (noble) half of the shared PQ vectors; the
+      # Rust half runs in `cargo test --workspace` (crates/bsigner/src/bpq.rs).
+      # pq-kat: NIST ACVP known-answer vectors (surfaces/pq-kat.json), noble
+      # half here, RustCrypto half in crates/bsigner/src/kat.rs.
+      - name: Post-quantum keys and sealed objects — shared vectors, two implementations
+        if: always()
+        run: |
+          node scripts/build-bpq-vectors.mjs --check
+          node --test e2e/bpq.test.mjs
+          node scripts/verify-bpq-signatures.mjs
+          node --test e2e/law-signatures.test.mjs
+          node --test e2e/pq-kat.test.mjs
       - name: Wallet coins — full census, exact units, batch identity and read failures
         if: always()
         run: node --test e2e/wallet-coins.test.mjs
@@ -113,7 +125,7 @@ jobs:
         run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/ans104.test.mjs e2e/bchat-core.test.mjs
+        run: node --test         run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/a1-log.test.mjs e2e/ans104.test.mjs e2e/bchat-core.test.mjs
       # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
       # run one of them. That is why a real regression sat on an open, mergeable
       # PR for three days with nothing red naming it: the gate was not weak, it
@@ -162,6 +174,10 @@ jobs:
           npm ci --ignore-scripts
           npm test
           npm run prove
+      - name: doxx tungsten harness — no false success, no secret in a receipt
+        if: always()
+        working-directory: tools/net-doxx
+        run: npm test
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh
@@ -846,7 +862,10 @@ jobs:
     # the pipeline open at once, new bee and raver in the reader's own
     # "everything" view. Each step runs all six and fails at the end, so one red
     # battery never hides the others.
-    timeout-minutes: 30
+    # 2026-10-05: the bug sweep doubled the batteries (about 1,100 checks), so 30 minutes ran out mid-run
+    # and a cancelled job publishes no log. Each step now has its own limit: a slow or stuck battery fails
+    # its own step, with its log, and the steps after it still run.
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -862,42 +881,72 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-registers.mjs
+      - name: Wallet action sheet — one press composes and signs a .b action as the account the name points at
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-action-sheet.mjs
+      - name: Arweave from your own keys — native secp256k1 address, keyless reads, a publish the network would attribute to you
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-arweave-keys.mjs
+      - name: Hive — one paste adds the account its active key controls; bytes and digest equal Hive's own library; one press sends
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-hive.mjs
       - name: Wallet public accounts — persistence, following, read failures and signing isolation
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-accounts.mjs
+      - name: Bridge and account forge — one paste never signs twice; the forge reads the name and says its price
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-bridge-acct.mjs
+      - name: Composer — what a link, a contract or a worker says is shown as text and never runs, in all three registers
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-compose-xss.mjs
       - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-unified.mjs
       - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-read-budget.mjs
       - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-trezor.mjs
       - name: Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-forge-pq.mjs
       - name: Soul chrome truth — live bzDiD removes connect/create from rails footer
         if: always()
+        timeout-minutes: 10
         run: node e2e/soul-chrome.mjs
   eternal:
     timeout-minutes: 25

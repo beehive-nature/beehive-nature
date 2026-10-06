@@ -111,6 +111,7 @@ try {
     ok('unconfigured state said in words with its reason', await page.locator('#fund-off').isVisible() &&
       banner.includes('funding not configured') && banner.includes('no buy button') && banner.includes('public checkout key'), banner);
     ok('the panel says it is a separate card route not wired to bPay', (await page.locator('#fund-apart').innerText()).includes('not wired to bPay yet'));
+    ok('and it names the one way to add money now: receive', await page.locator('#fund-now').isVisible() && (await page.getAttribute('#fund-now a', 'href')) === '#pay-sec');
     // bee and raver fold the engineering (key names, environment, host) one tap
     // away, behind the section's own toggle: the reader's tap, then the same text
     if (REG !== 'cypherpunk') { await page.click('#fund-sec .wl-more'); await page.waitForTimeout(150); }
@@ -148,10 +149,12 @@ try {
     await page.fill('#fund-addr', ADDR);
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_ETHEREUM');
     ok('walletAddressLocked carries the address', u.searchParams.get('walletAddressLocked') === ADDR);
+    ok('a sandbox checkout says it is a test and moves no real money', (await page.locator('#fund-stat').innerText()).includes('this checkout is a test and moves no real money'));
     await page.fill('#fund-addr', '0x123'); // garbage — must be omitted, never silently wrong
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_ETHEREUM');
     ok('invalid address left out of URL', !u.searchParams.has('walletAddressLocked'));
-    ok('invalid address gets a visible note', (await page.locator('#fund-stat').innerText()).includes('does not read as an address'));
+    ok('invalid address gets a visible calm note', (await page.locator('#fund-stat').innerText()).includes('not an address yet'));
+    ok('its raw reason is kept for cypherpunk', (await page.locator('#fund-stat').textContent()).includes('does not read as an address'));
     await ctx.close();
   }
 

@@ -52,10 +52,13 @@ async function hold(p, ms) {
   await p.mouse.down(); await p.waitForTimeout(ms); await p.mouse.up(); await p.waitForTimeout(250);
 }
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress; nothing sounds on arrival', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/ },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/ },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/ },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/ },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/ },
   };
   for (const [reg, w] of Object.entries(want)) {
@@ -69,7 +72,7 @@ test('one front per register, each in its own dress; nothing sounds on arrival',
       return { bg: getComputedStyle(document.body).backgroundColor, title: getComputedStyle(title).fontFamily, action: getComputedStyle(act).backgroundColor, wide: document.documentElement.scrollWidth, vw: innerWidth };
     }, w.front);
     assert.equal(d.bg, w.bg, reg + ' ground'); assert.match(d.title, w.title, reg + ' title face');
-    assert.equal(d.action, { bee: 'rgb(168, 35, 140)', raver: 'rgb(214, 85, 187)', cypherpunk: 'rgb(69, 194, 220)' }[reg], reg + ' action colour');
+    assert.equal(d.action, { bee: 'rgb(38, 77, 54)', raver: 'rgb(214, 85, 187)', cypherpunk: 'rgb(69, 194, 220)' }[reg], reg + ' action colour');
     assert.ok(d.wide <= 390 && d.vw <= 390, reg + ': no sideways page at 390 px');
     const s = await score(p); assert.equal(s.sounding, false, reg + ': nothing sounds before a press'); assert.equal(s.ctx, false);
     assert.equal(errs.length, 0, errs.join(' | '));

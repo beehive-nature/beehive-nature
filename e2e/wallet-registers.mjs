@@ -108,10 +108,15 @@ const arrival = page => page.evaluate(() => {
       return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
     },
   });
-  ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-  ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
-  ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
-  ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
+  // the founder's chosen UI (his My Space screens, 2026-10-04; the wallet 2026-10-05):
+  // bee's titles are BOLD SYSTEM SANS over the same sans, its controls pills, its action forest
+  const SANS = 'ui-sans-serif,system-ui,SegoeUI,Roboto,Helvetica,Arial,sans-serif';
+  const flat = s => String(s).replace(/["'\s]/g, '');
+  ok('bee reads in BOLD SYSTEM SANS titles (≥ 700) over the same system sans body (the chosen UI)',
+    flat(seen.bee.h1Font) === SANS && flat(seen.bee.bodyFont) === SANS && parseInt(seen.bee.h1Weight, 10) >= 700, seen.bee.h1Font.split(',').slice(0, 3).join(',') + ' · ' + seen.bee.h1Weight);
+  ok('bee corners are SOFT (18px radius-xl cards) and its controls are PILLS (999px) — the chosen UI', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '999px', seen.bee.cardRadius + ' · ' + seen.bee.btnRadius);
+  ok('bee action is the ONE forest green (rgb(38, 77, 54), --sk-forest)', seen.bee.btnColor === 'rgb(38, 77, 54)', seen.bee.btnColor);
+  ok('raver shouts in a heavy title, bold system sans (the chosen UI)', parseInt(seen.raver.h1Weight, 10) >= 700 && flat(seen.raver.h1Font) === SANS && flat(seen.raver.bodyFont) === SANS, 'weight ' + seen.raver.h1Weight + ' · ' + seen.raver.h1Font.split(',').slice(0, 3).join(','));
   ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
   ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
   ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
@@ -245,33 +250,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // own order, so it is true in every register. A new one fails until someone
   // reviews it: across tasks, a message names its target as a link instead.
   const REVIEWED = [
-    ['the glyphs above open each part', 'raver stage: the dock sits above it'],
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-        ['Any device in the list above', 'within the vault'],
-    ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
-    ['rge new ones below', 'within the key forge'],
-    ['(live price below)', 'within the account forge'],
-    ['addresses below are yours to hand out', 'within pay'],
-    ['Each address above falls out of the', 'within pay'],
-    ['choose a lane above', 'within pay'],
     ['(rate cited below)', 'within the voucher'],
-    ['The key in the config below is', 'within fund'],
-    ['its Base address below is a bare', 'within fiat in'],
-    ['no contexts yet — forge one below', 'within the key forge'],
-    ['NOT YET on chain — bridge below', 'keychain → bridge, same task, after it'],
-    ['use the recovery lane below', 'within the keychain'],
-    ['create one here, or use recovery below', 'within the keychain'],
-    ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
-    ['first (above)', 'account forge ← bridge, same task, before it'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
-    ['Raise or clear it above', 'within pay (the spend cap)'],
-    ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
-    ['filled into both fields below', 'within the vault'],
-    ['connect your keychain above to use it', 'vault → keychain, same task, before it'],
-    ['bridge field below', 'vault → bridge, same task, after it'],
-    ['select the text above and copy it manually', 'within the vault'],
-    ['unlock with a keypass below', 'within the vault'],
   ];
   const blank = m => m.replace(/[^\n]/g, ' ');
   let code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);
@@ -728,7 +710,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
     spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
   const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
-  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['skaists heART WALLet', 'how this page is built'] };
+  // the top up is one press from this wallet in bee and raver; the copy recipe for paying from
+  // elsewhere (account, memo, its "no memo, no credit" warning) is cypherpunk's alone
+  const PLAIN = { voucher: ['12.5000'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['skaists heART WALLet', 'how this page is built'] };
   const seen = (page, sel) => page.evaluate(sel => {
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
     const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
@@ -798,7 +782,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
   const missing = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
-  const far = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
+  // the rate citation travels with the USDC way, which is cypherpunk's alone (bee and raver top up from the wallet)
+  const ENG_FAR = { ...ENG, voucher: ENG.voucher.filter(m => m !== 'RATE-REF-FIXTURE') };
+  const far = reg => parts.flatMap(p => ENG_FAR[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
@@ -811,6 +797,11 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
     vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
+  const TOPUP = { bee: ['top up from my wallet', 'the memo is filled in for you'], raver: ['top up from my wallet', 'the memo is filled in for you'], cypherpunk: ['top up from my wallet', 'no memo, no credit', 'bnrvoucher11', 'gatekey'] };
+  const topLost = REGS.flatMap(reg => TOPUP[reg].filter(m => [390, 1280].some(W => !resW[W][reg].voucher.includes(m))).map(m => reg + ':' + m));
+  const recipeLeak = ['bee', 'raver'].flatMap(reg => ['bnrvoucher11', '0x' + '1'.repeat(40), 'copy memo', 'no memo, no credit'].filter(m => [390, 1280].some(W => resW[W][reg].voucher.includes(m) || resW[W][reg].voucherTap.includes(m))).map(m => reg + ':' + m));
+  ok('the voucher tops up from this wallet in one press (bee and raver see the press and no copy recipe that sends them elsewhere); cypherpunk keeps the account, the memo and its warning',
+    topLost.length === 0 && recipeLeak.length === 0, [topLost.join(', '), recipeLeak.join(', ')].filter(Boolean).join(' · ') || 'press shown, recipe cypherpunk only');
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the card route\'s own "not wired to bPay", the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }
@@ -970,7 +961,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     [390, 1280].map(W => W + ': ' + at[W].raver.add.cards.join(',')).join(' · ') + (rvMeld.length ? ' · ' + rvMeld.slice(0, 3).join(' · ') : ''));
   // 2 · moved, not deleted; a reason in words, never a dead button
   const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
-  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC (opens Meld)', 'transactionType'].filter(m => !src.includes(m));
+  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC with a card', '(opens Meld)', 'transactionType'].filter(m => !src.includes(m));
   ok('2 · the card route\'s code and words stay in the file (moved, not deleted)', kept.length === 0, kept.join(', ') || 'launch, asset, address, key config, note, label, checkout builder all present');
   const says = both(a => ['cypherpunk', 'bee', 'raver'].filter(r => !(r === 'cypherpunk' ? a[r].add : a[r].all).sections.includes('fund-sec') || !a[r].fundAll.includes('not wired to bPay yet') || !a[r].fundAll.includes('card checkout is not switched on here yet')));
   ok('2 · wherever the card route still shows (cypherpunk\'s pipeline, bee\'s and raver\'s "show me everything") it says it is a separate card route not wired to bPay yet, and why checkout is off, in words',
@@ -1029,7 +1020,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   // the desktop's QR (#qr=<request>) lands on the waiting sheet, painted, in every register
   {
-    const q = Buffer.alloc(49, 7); q[16] = 2;
+    const q = Buffer.alloc(81, 7); q[16] = 2;   // v2: sid(16) ‖ secp256k1 pub(33) ‖ SHA-256 of the X-Wing key(32)
     const got = {};
     for (const reg of REGS) {
       const r = await open(reg, { path: '/wallet.html#qr=' + q.toString('base64url'), fixture: false });

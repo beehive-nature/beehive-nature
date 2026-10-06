@@ -534,15 +534,23 @@ window.BNRVAULT = (function () {
   }
   function newId() { return toHex(randomBytes(8)); }
   function requireUnlocked() { if (!state.unlocked) throw new Error('vault is locked'); }
+  /* every change to the envelope is written FIRST and kept in memory only once the write
+     took: a write the browser refuses leaves the vault exactly as it was, in storage and in
+     this tab, so "nothing changed" is the truth and no later save carries the change in.
+     A vault that locked during an await is never written from the stale state. */
+  function stillOpen(s) { if (state !== s || !s.unlocked) throw new Error('vault is locked'); }
 
   async function persist() {
     requireUnlocked();
-    var body = await encryptPayload({ entries: state.entries }, state.vmk, state.env);
-    state.env = Object.assign({}, state.env, body, { updated: new Date().toISOString() });
-    if (!writeEnvelope(state.env)) {
+    var s = state;
+    var body = await encryptPayload({ entries: s.entries }, s.vmk, s.env);
+    stillOpen(s);
+    var next = Object.assign({}, s.env, body, { updated: new Date().toISOString() });
+    if (!writeEnvelope(next)) {
       throw new Error('could not write to localStorage — export to a file to avoid losing this');
     }
-    return state.env;
+    s.env = next;
+    return s.env;
   }
 
   /* ── create / unlock / lock ────────────────────────────────────────────── */
@@ -650,11 +658,14 @@ window.BNRVAULT = (function () {
             throw new Error('that keypass already opens the slot "' + s.label + '"'); }
       catch (e) { if (/already opens/.test(e.message)) throw e; }
     }
-    var slot = await makeSlot({ type: 'keypass', keypass: newKeypass }, label, state.vmk);
-    state.env = Object.assign({}, state.env, {
-      slots: state.env.slots.concat([slot]), updated: new Date().toISOString()
+    var open = state;
+    var slot = await makeSlot({ type: 'keypass', keypass: newKeypass }, label, open.vmk);
+    stillOpen(open);
+    var next = Object.assign({}, open.env, {
+      slots: open.env.slots.concat([slot]), updated: new Date().toISOString()
     });
-    if (!writeEnvelope(state.env)) throw new Error('could not write the new slot');
+    if (!writeEnvelope(next)) throw new Error('could not write the new slot');
+    open.env = next;
     return { id: slot.id, label: slot.label, strength: st };
   }
 
@@ -670,12 +681,15 @@ window.BNRVAULT = (function () {
             throw new Error('that passkey already opens the slot "' + s.label + '"'); }
       catch (e) { if (/already opens/.test(e.message)) throw e; }
     }
+    var open = state;
     var slot = await makeSlot({ type: 'passkey', prfSecret: prfSecret,
-      evidence: (opts && opts.deviceBound) ? 'E3' : 'E2' }, label, state.vmk);
-    state.env = Object.assign({}, state.env, {
-      slots: state.env.slots.concat([slot]), updated: new Date().toISOString()
+      evidence: (opts && opts.deviceBound) ? 'E3' : 'E2' }, label, open.vmk);
+    stillOpen(open);
+    var next = Object.assign({}, open.env, {
+      slots: open.env.slots.concat([slot]), updated: new Date().toISOString()
     });
-    if (!writeEnvelope(state.env)) throw new Error('could not write the new slot');
+    if (!writeEnvelope(next)) throw new Error('could not write the new slot');
+    open.env = next;
     return { id: slot.id, label: slot.label };
   }
 
@@ -686,8 +700,9 @@ window.BNRVAULT = (function () {
     if (id === state.slotId) throw new Error('that is the slot you are currently unlocked with — remove it from one of your other devices');
     var left = slots.filter(function (s) { return s.id !== id; });
     if (left.length === slots.length) throw new Error('no such slot');
-    state.env = Object.assign({}, state.env, { slots: left, updated: new Date().toISOString() });
-    if (!writeEnvelope(state.env)) throw new Error('could not write the revoked slot list');
+    var next = Object.assign({}, state.env, { slots: left, updated: new Date().toISOString() });
+    if (!writeEnvelope(next)) throw new Error('could not write the revoked slot list');
+    state.env = next;
     return true;
   }
 
@@ -705,11 +720,12 @@ window.BNRVAULT = (function () {
     }
     var dropped = slots.length - 1;
     if (dropped < 1) throw new Error('there is only one slot — nothing to revoke');
-    state.env = Object.assign({}, state.env, {
+    var next = Object.assign({}, state.env, {
       slots: slots.filter(function (s) { return s.id === keep; }),
       updated: new Date().toISOString()
     });
-    if (!writeEnvelope(state.env)) throw new Error('could not write the revoked slot list');
+    if (!writeEnvelope(next)) throw new Error('could not write the revoked slot list');
+    state.env = next;
     return { revoked: dropped, kept: keep };
   }
 
@@ -724,28 +740,45 @@ window.BNRVAULT = (function () {
     if (!found) throw new Error('no such slot');
     // The label is inside each slot's AAD, so a rename must re-wrap that slot.
     var i = slots.map(function (s) { return s.id; }).indexOf(id);
-    state.env = Object.assign({}, state.env, { slots: slots, updated: new Date().toISOString() });
-    if (!writeEnvelope(state.env)) throw new Error('could not write the renamed slot');
+    var next = Object.assign({}, state.env, { slots: slots, updated: new Date().toISOString() });
+    if (!writeEnvelope(next)) throw new Error('could not write the renamed slot');
+    state.env = next;
     return true;
   }
 
   /* Re-key the slot you are currently using. Other devices' slots are untouched —
      which is the point: changing this laptop's keypass must not lock out the phone. */
+  /* The keypass the open slot was made with, typed again. An open vault is not proof of
+     who is at the screen, so a re-key checks it before a new keypass replaces it. */
+  async function checkKeypass(pass) {
+    requireUnlocked();
+    var cur = (state.env.slots || []).filter(function (s) { return s.id === state.slotId; })[0];
+    if (!cur || cur.type !== 'keypass') return false;
+    try { zero(await unwrapSlot(cur, { type: 'keypass', keypass: String(pass || '') })); return true; }
+    catch (e) { return false; }
+  }
+
   async function changeKeypass(oldPass, newPass) {
     var env = readEnvelope();
     if (!env) throw new Error('no vault to re-key');
-    if (env.format === 1) { await unlock(oldPass); env = state.env; }
-    else if (!state.unlocked) { await unlock(oldPass); }
-    var st = keypassStrength(newPass);
-    if (st.bits < 50) throw new Error('new keypass too weak (' + st.bits + ' bits)');
+    var proven = false;                         // unlocking with oldPass right here proves it
+    if (env.format === 1) { await unlock(oldPass); env = state.env; proven = true; }
+    else if (!state.unlocked) { await unlock(oldPass); proven = true; }
     var cur = (state.env.slots || []).filter(function (s) { return s.id === state.slotId; })[0];
     if (!cur) throw new Error('cannot tell which slot you are using — unlock again');
     if (cur.type !== 'keypass') throw new Error('you are unlocked with a passkey — re-key from a keypass slot instead');
-    var fresh = await makeSlot({ type: 'keypass', keypass: newPass }, cur.label, state.vmk);
-    var slots = state.env.slots.map(function (s) { return s.id === cur.id ? fresh : s; });
-    state.env = Object.assign({}, state.env, { slots: slots, updated: new Date().toISOString() });
-    state.slotId = fresh.id;
-    if (!writeEnvelope(state.env)) throw new Error('could not write the re-keyed vault');
+    if (!proven && !(await checkKeypass(oldPass))) throw new Error('that is not the keypass this vault was opened with');
+    var st = keypassStrength(newPass);
+    if (st.bits < 50) throw new Error('new keypass too weak (' + st.bits + ' bits)');
+    var open = state; stillOpen(open);
+    var fresh = await makeSlot({ type: 'keypass', keypass: newPass }, cur.label, open.vmk);
+    stillOpen(open);
+    var slots = open.env.slots.map(function (s) { return s.id === cur.id ? fresh : s; });
+    var next = Object.assign({}, open.env, { slots: slots, updated: new Date().toISOString() });
+    // written first: a refused write leaves the old keypass in force, here and in storage
+    if (!writeEnvelope(next)) throw new Error('could not write the re-keyed vault');
+    open.env = next;
+    open.slotId = fresh.id;
     return true;
   }
 
@@ -775,7 +808,7 @@ window.BNRVAULT = (function () {
       // checksum over the same wordlist — so it is stored verbatim. The page validates
       // it through BZDIDKEY before calling this; we record what it claimed.
       secret = secret.trim();
-      meta = { words: secret.split(/s+/).length, fingerprint: String(e.fingerprint || '') };
+      meta = { words: secret.split(/\s+/).length, fingerprint: String(e.fingerprint || '') };
     } else if (type === 'note') {
       meta = {};
     } else if (type === 'arweave') {
@@ -797,17 +830,22 @@ window.BNRVAULT = (function () {
       chain: String(e.chain || '').trim(), note: String(e.note || '').trim(),
       meta: meta, added: new Date().toISOString()
     };
-    state.entries.push(entry);
-    await persist();
+    var s = state; stillOpen(s);   // it may have locked while the secret was checked
+    var before = s.entries;
+    s.entries = before.concat([entry]);
+    try { await persist(); }
+    catch (err) { if (state === s) s.entries = before; throw err; }   // not saved: not kept
     return entry;
   }
 
   async function removeEntry(id) {
     requireUnlocked();
-    var before = state.entries.length;
-    state.entries = state.entries.filter(function (x) { return x.id !== id; });
-    if (state.entries.length === before) throw new Error('no such entry');
-    await persist();
+    var s = state, before = s.entries;
+    var left = before.filter(function (x) { return x.id !== id; });
+    if (left.length === before.length) throw new Error('no such entry');
+    s.entries = left;
+    try { await persist(); }
+    catch (err) { if (state === s) s.entries = before; throw err; }   // not saved: still here
     return true;
   }
 
@@ -856,7 +894,7 @@ window.BNRVAULT = (function () {
   return {
     exists: exists, isUnlocked: isUnlocked, list: list, reveal: reveal,
     create: create, unlock: unlock, unlockWithPasskey: unlockWithPasskey,
-    lock: lock, destroy: destroy, changeKeypass: changeKeypass,
+    lock: lock, destroy: destroy, changeKeypass: changeKeypass, checkKeypass: checkKeypass,
     listSlots: listSlots, addKeypassSlot: addKeypassSlot, addPasskeySlot: addPasskeySlot,
     removeSlot: removeSlot, renameSlot: renameSlot, revokeAllExcept: revokeAllExcept,
     addEntry: addEntry, removeEntry: removeEntry,

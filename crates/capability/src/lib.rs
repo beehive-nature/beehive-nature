@@ -19,11 +19,13 @@
 //! time-bound validity. This is the logic every panel gates on, and it needs no
 //! crypto to be correct.
 //!
-//! **What gates behind the [`Verifier`] trait (the pending crypto step):**
-//! signature issuance and verification (Ed25519 over the delegation's canonical
-//! form) and the delegation-chain proof. Kept behind a trait — not a `todo!()`
-//! — so the unbuilt crypto never sits in a shipped path, matching the adapter
-//! discipline. A real verifier lands once its curve API is compile-verified.
+//! **What sits behind the [`Verifier`] trait:** signature verification over the
+//! delegation's canonical form — [`Ed25519Verifier`] (the v1 signature),
+//! [`MlDsa65Verifier`] (the post-quantum one, ML-DSA-65), and [`AgileVerifier`],
+//! which dispatches on the algorithm id a token carries and refuses an id it
+//! cannot verify. The delegation-chain proof is still unbuilt; it stays behind
+//! the trait — not a `todo!()` — so it never sits in a shipped path, matching
+//! the adapter discipline.
 
 #![forbid(unsafe_code)]
 
@@ -631,10 +633,12 @@ impl QuorumPolicy {
 
 /// A UCAN-shaped delegation from `issuer` to `audience`.
 ///
-/// The `signature` is `None` in v1 (the capability core is exercised unsigned).
-/// A real issuer fills it via [`Verifier`]; [`Delegation::is_signed`] tells a
-/// caller whether cryptographic proof is present. A production gate must call a
-/// verifier — an unsigned delegation authorizes nothing on its own.
+/// Two signature slots, both `None` until signed (the capability core is
+/// exercised unsigned): `signature`, the v1 Ed25519 one
+/// ([`Ed25519Verifier::sign`]), and `pq_signature`, an algorithm-tagged one
+/// ([`MlDsa65Verifier::sign`]). [`Delegation::is_signed`] tells a caller whether
+/// either is present. A production gate must call a verifier — an unsigned
+/// delegation authorizes nothing on its own.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Delegation {
     pub issuer: Did,
@@ -667,7 +671,52 @@ pub struct Delegation {
     /// the token.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tier_ceiling: Option<Tier>,
+    /// A second signature that **names its algorithm** — the post-quantum
+    /// signature, carried alongside the Ed25519 `signature` (or, once an issuer
+    /// has retired Ed25519, instead of it). `None` until signed.
+    ///
+    /// It signs the same canonical bytes as `signature`, behind a domain tag
+    /// that names the algorithm: `"cap1/delegation/" ‖ alg ‖ "\n" ‖`
+    /// [`Delegation::signing_payload`]. The tag puts the algorithm id inside
+    /// the signed bytes, so relabelling a signature changes what it would have
+    /// to verify over. The payload clears **both** signature slots, so the two
+    /// can be added in either order without one invalidating the other.
+    ///
+    /// `default` + `skip_serializing_if`, exactly as for `tier_ceiling` and for
+    /// the same reason: a token minted before this field existed deserializes
+    /// (absent → `None`) and re-serializes byte-identically, with no
+    /// `"pq_signature":null` key its issuer never saw.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pq_signature: Option<TaggedSignature>,
 }
+
+/// A signature that carries its algorithm id — crypto-agility as data
+/// (`docs/architecture/did-autonomi-spec.md` §7: the signature scheme is data,
+/// never a hardcoded assumption).
+///
+/// `alg` is a plain string on purpose, not an enum: an id this crate does not
+/// know must still *parse*, so verification can read it and refuse it by name
+/// ([`CapabilityError::UnsupportedAlgorithm`]) instead of the whole token
+/// failing as malformed JSON. Ids match exactly — no case folding, no
+/// trimming, no default.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TaggedSignature {
+    /// The algorithm id: [`ALG_ML_DSA_65`] is the one this crate verifies.
+    /// The same strings as the did-autonomi `keyAlg` and bsigner's algorithm
+    /// registry (`crates/bsigner/src/alg.rs`).
+    pub alg: String,
+    /// The signature bytes, base64url without padding — the estate's wire form
+    /// for post-quantum material (`docs/specs/SPEC-BPQ-1.md` §3). Decoded
+    /// strictly, so one byte string has exactly one accepted text form.
+    pub sig: String,
+}
+
+/// Algorithm id of ML-DSA-65 (FIPS 204, security category 3).
+pub const ALG_ML_DSA_65: &str = "ml-dsa-65";
+
+/// Domain tag that opens every [`TaggedSignature`]'s signed message; see
+/// [`Delegation::pq_signature`].
+const TAGGED_DOMAIN: &[u8] = b"cap1/delegation/";
 
 impl Delegation {
     /// An unsigned, unbounded grant (the shape a test or the core logic uses
@@ -681,6 +730,7 @@ impl Delegation {
             expires_at: None,
             signature: None,
             tier_ceiling: None,
+            pq_signature: None,
         }
     }
 
@@ -690,8 +740,12 @@ impl Delegation {
         self
     }
 
+    /// Does this delegation carry a signature in either slot? Presence only —
+    /// whether it is any good is a [`Verifier`]'s question. A token carrying
+    /// only `pq_signature` is signed; before that slot existed every token had
+    /// it `None`, so for them this answer is unchanged.
     pub fn is_signed(&self) -> bool {
-        self.signature.is_some()
+        self.signature.is_some() || self.pq_signature.is_some()
     }
 
     /// Is this delegation within its time bounds at `now` (unix seconds)?
@@ -701,8 +755,8 @@ impl Delegation {
         after_start && before_end
     }
 
-    /// Canonical bytes to sign / verify: a stable JSON serialization with the
-    /// signature field cleared. Deterministic, so issuer and verifier agree.
+    /// Canonical bytes to sign / verify: a stable JSON serialization with both
+    /// signature slots cleared. Deterministic, so issuer and verifier agree.
     ///
     /// **INVARIANT — signed-byte stability.** Every field of [`Delegation`] is
     /// inside these bytes, so adding one changes what a signature covers. Any
@@ -712,13 +766,29 @@ impl Delegation {
     /// `"new_field":null`, the payload for an unchanged delegation moves, and
     /// **every signature minted before the field existed stops verifying.**
     /// `tier_ceiling` is the worked example; `none_ceiling_emits_no_key_so_old_signatures_survive`
-    /// is the test that fails if this is forgotten.
+    /// is the test that fails if this is forgotten. `pq_signature` does both:
+    /// it is cleared here, and skipped when `None`, so a v1 token's payload is
+    /// the same bytes it always was (`legacy_ed25519_token_verifies_byte_for_byte_unchanged`
+    /// pins those bytes).
     pub fn signing_payload(&self) -> Vec<u8> {
         let unsigned = Delegation {
             signature: None,
+            pq_signature: None,
             ..self.clone()
         };
         serde_json::to_vec(&unsigned).unwrap_or_default()
+    }
+
+    /// The exact bytes a [`TaggedSignature`] in `alg` signs:
+    /// `"cap1/delegation/" ‖ alg ‖ "\n" ‖ signing_payload()`.
+    fn tagged_message(&self, alg: &str) -> Vec<u8> {
+        let payload = self.signing_payload();
+        let mut m = Vec::with_capacity(TAGGED_DOMAIN.len() + alg.len() + 1 + payload.len());
+        m.extend_from_slice(TAGGED_DOMAIN);
+        m.extend_from_slice(alg.as_bytes());
+        m.push(b'\n');
+        m.extend_from_slice(&payload);
+        m
     }
 
     /// Authorization CORE: does this delegation, addressed to `audience` and
@@ -765,11 +835,11 @@ impl Delegation {
     }
 }
 
-/// Signature issuance + verification over [`Delegation`]s. The pending crypto
-/// step lives here (Ed25519 over [`Delegation::signing_payload`]); v1 has no
-/// implementation shipped — a real one lands once its curve API is
-/// compile-verified. Kept as a trait so the unbuilt work is behind an interface,
-/// never a panic in a shipped path.
+/// Signature verification over [`Delegation`]s: did this issuer sign these
+/// bytes? Three implementations ship — [`Ed25519Verifier`], [`MlDsa65Verifier`],
+/// and [`AgileVerifier`], which dispatches between them on the algorithm id a
+/// token carries. Kept as a trait so work still unbuilt (the delegation-chain
+/// proof) sits behind an interface, never a panic in a shipped path.
 pub trait Verifier {
     fn verify(&self, delegation: &Delegation) -> Result<(), CapabilityError>;
 }
@@ -946,6 +1016,57 @@ fn hex_decode(s: &str) -> Option<Vec<u8>> {
         .collect()
 }
 
+const B64U_ALPHABET: &[u8; 64] =
+    b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+/// base64url, no padding — a [`TaggedSignature`]'s wire form.
+fn b64u_encode(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
+    for chunk in bytes.chunks(3) {
+        let n = (u32::from(chunk[0]) << 16)
+            | (u32::from(*chunk.get(1).unwrap_or(&0)) << 8)
+            | u32::from(*chunk.get(2).unwrap_or(&0));
+        // 1 byte → 2 characters, 2 → 3, 3 → 4.
+        for i in 0..=chunk.len() {
+            out.push(B64U_ALPHABET[(n >> (18 - 6 * i)) as usize & 63] as char);
+        }
+    }
+    out
+}
+
+/// Strict base64url decode: the alphabet only, no padding, no impossible
+/// length, and no stray low bits in the last character — so every byte string
+/// has exactly one accepted text form. Anything else is `None`, a refusal.
+fn b64u_decode(s: &str) -> Option<Vec<u8>> {
+    if s.len() % 4 == 1 {
+        return None;
+    }
+    let mut out = Vec::with_capacity(s.len() / 4 * 3 + 2);
+    let mut acc: u32 = 0;
+    let mut bits = 0u32;
+    for c in s.bytes() {
+        let v = match c {
+            b'A'..=b'Z' => c - b'A',
+            b'a'..=b'z' => c - b'a' + 26,
+            b'0'..=b'9' => c - b'0' + 52,
+            b'-' => 62,
+            b'_' => 63,
+            _ => return None,
+        };
+        acc = (acc << 6) | u32::from(v);
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            out.push((acc >> bits) as u8);
+        }
+        acc &= (1 << bits) - 1;
+    }
+    if acc != 0 {
+        return None;
+    }
+    Some(out)
+}
+
 impl Verifier for Ed25519Verifier {
     fn verify(&self, delegation: &Delegation) -> Result<(), CapabilityError> {
         let sig_hex = delegation
@@ -974,6 +1095,244 @@ impl Verifier for Ed25519Verifier {
     }
 }
 
+/// ML-DSA-65 verification of a [`Delegation`]'s [`TaggedSignature`] — the
+/// post-quantum signature, built to sit beside [`Ed25519Verifier`], not to
+/// replace it.
+///
+/// # Sources (cite or stop)
+///
+/// Every call below is checked against `ml-dsa` 0.1.1 as Cargo.lock vendors it,
+/// the crate and version `crates/bsigner/src/pq.rs` already cites:
+///
+/// - The crate implements ML-DSA "as described in the FIPS 204 (final)"
+///   (README.md); `MlDsa65` is security category 3 (src/lib.rs:217-222).
+/// - Sizes: encoded public key 1952 B, signature 3309 B — the crate's own
+///   assertions, src/lib.rs:273-274. Both are checked before anything is
+///   decoded.
+/// - Key: `VerifyingKey::decode` (src/verifying.rs:165, FIPS 204 Algorithm 23
+///   pkDecode) cannot fail on a correctly sized array, so the length check is
+///   the whole key check.
+/// - Signature: `Signature::try_from(&[u8])` (src/lib.rs:130-136) runs
+///   sigDecode (src/lib.rs:115, Algorithm 27), which refuses a malformed hint
+///   or an out-of-range `z`.
+/// - Verify: `verify_with_context(msg, &[], sig)` (src/verifying.rs:131,
+///   Algorithm 3 ML-DSA.Verify) with the empty context — the same path the
+///   `signature` crate's `Verifier::verify` takes (src/verifying.rs:195-205).
+/// - Sign: `Signer::try_sign` (src/signing.rs:184), the deterministic variant
+///   with an empty context (src/signing.rs:181-182); it errs only for a
+///   context over 255 bytes (src/signing.rs:440-443).
+///
+/// # Limits, carried forward rather than smoothed over
+///
+/// - `ml-dsa` 0.1.1 README.md: "The implementation contained in this crate has
+///   never been independently audited!" A small subset of NIST ACVP
+///   known-answer vectors runs against the same resolved crate (ml-dsa 0.1.1,
+///   one copy in Cargo.lock): `surfaces/pq-kat.json`, ML-DSA-65 keyGen tcId
+///   26-28 and sigVer tcId 31, 33, 34, 38, 39, 41, 43, checked by
+///   crates/bsigner/src/kat.rs. They do not run through this verifier, and a
+///   handful of cases is not ACVP validation; sigGen is not covered.
+/// - What the tests do pin: a signature made by @noble/post-quantum 0.7.1 (the
+///   estate's vendored browser library, `surfaces/onboarding/vendor/bpq-lib.js`)
+///   from the same public test seed verifies here, and this crate's
+///   deterministic signature is byte-identical to it. That is agreement
+///   between two implementations, not an audit.
+///
+/// Like [`Ed25519Verifier`] it answers one question and checks time bounds,
+/// and it ignores the other slot entirely. [`AgileVerifier`] is what requires
+/// both and refuses a token stripped of one.
+pub struct MlDsa65Verifier {
+    /// The issuer's ML-DSA-65 public key, by DID — keyed on the principal, as
+    /// for [`Ed25519Verifier`], so rotation updates this map and nothing else.
+    keys: std::collections::BTreeMap<Did, ml_dsa::VerifyingKey<ml_dsa::MlDsa65>>,
+    /// Unix seconds, supplied by the caller. This crate reads no clock.
+    now: i64,
+}
+
+impl MlDsa65Verifier {
+    /// Encoded ML-DSA-65 public key length (ml-dsa 0.1.1 src/lib.rs:273).
+    pub const PUBLIC_KEY_LEN: usize = 1952;
+    /// Encoded ML-DSA-65 signature length (ml-dsa 0.1.1 src/lib.rs:274).
+    pub const SIGNATURE_LEN: usize = 3309;
+
+    /// A verifier that knows `keys` and evaluates time bounds at `now`.
+    pub fn new(
+        keys: std::collections::BTreeMap<Did, ml_dsa::VerifyingKey<ml_dsa::MlDsa65>>,
+        now: i64,
+    ) -> Self {
+        MlDsa65Verifier { keys, now }
+    }
+
+    /// Parse an encoded ML-DSA-65 public key (FIPS 204 pkEncode form — the
+    /// bytes a bpq card's `dsa` field carries, decoded the same way at
+    /// `crates/bsigner/src/bpq.rs:217-221`). Any length but
+    /// [`MlDsa65Verifier::PUBLIC_KEY_LEN`] is [`CapabilityError::MalformedKey`]
+    /// — checked, never trusted.
+    pub fn public_key_from_bytes(
+        bytes: &[u8],
+    ) -> Result<ml_dsa::VerifyingKey<ml_dsa::MlDsa65>, CapabilityError> {
+        if bytes.len() != Self::PUBLIC_KEY_LEN {
+            return Err(CapabilityError::MalformedKey);
+        }
+        let enc = ml_dsa::EncodedVerifyingKey::<ml_dsa::MlDsa65>::try_from(bytes)
+            .map_err(|_| CapabilityError::MalformedKey)?;
+        Ok(ml_dsa::VerifyingKey::<ml_dsa::MlDsa65>::decode(&enc))
+    }
+
+    /// Sign `delegation` with ML-DSA-65, returning it with `pq_signature`
+    /// filled. Any Ed25519 `signature` already present is kept, and stays
+    /// valid: neither slot is inside the other's bytes.
+    ///
+    /// Test/issuer helper. The key is borrowed, never stored, and `ml-dsa`'s
+    /// `SigningKey` scrubs its seed on drop with the `zeroize` feature this
+    /// crate enables (src/signing.rs:222-231). `SigningFailed` is mapped, not
+    /// unwrapped, so no shipped path panics.
+    pub fn sign(
+        delegation: &Delegation,
+        key: &ml_dsa::SigningKey<ml_dsa::MlDsa65>,
+    ) -> Result<Delegation, CapabilityError> {
+        use ml_dsa::Signer;
+        let sig = key
+            .try_sign(&delegation.tagged_message(ALG_ML_DSA_65))
+            .map_err(|_| CapabilityError::SigningFailed)?;
+        let mut signed = delegation.clone();
+        signed.pq_signature = Some(TaggedSignature {
+            alg: ALG_ML_DSA_65.to_string(),
+            sig: b64u_encode(sig.encode().as_slice()),
+        });
+        Ok(signed)
+    }
+}
+
+impl Verifier for MlDsa65Verifier {
+    fn verify(&self, delegation: &Delegation) -> Result<(), CapabilityError> {
+        let tagged = delegation
+            .pq_signature
+            .as_ref()
+            .ok_or(CapabilityError::Unsigned)?;
+
+        // Dispatch on the id the token carries, never on a default. An id this
+        // verifier cannot check is refused by name, before any other work.
+        if tagged.alg != ALG_ML_DSA_65 {
+            return Err(CapabilityError::UnsupportedAlgorithm);
+        }
+
+        if !delegation.valid_at(self.now) {
+            return Err(CapabilityError::Expired);
+        }
+
+        let key = self
+            .keys
+            .get(&delegation.issuer)
+            .ok_or(CapabilityError::UnknownIssuer)?;
+
+        // As for Ed25519: every malformed input is BadSignature, so the error
+        // never tells "wrong length" from "wrong bytes".
+        let raw = b64u_decode(&tagged.sig).ok_or(CapabilityError::BadSignature)?;
+        if raw.len() != Self::SIGNATURE_LEN {
+            return Err(CapabilityError::BadSignature);
+        }
+        let sig = ml_dsa::Signature::<ml_dsa::MlDsa65>::try_from(raw.as_slice())
+            .map_err(|_| CapabilityError::BadSignature)?;
+
+        if key.verify_with_context(&delegation.tagged_message(ALG_ML_DSA_65), &[], &sig) {
+            Ok(())
+        } else {
+            Err(CapabilityError::BadSignature)
+        }
+    }
+}
+
+/// Algorithm-agile verification: reads which algorithms a [`Delegation`]
+/// carries, sends each signature to the verifier for its algorithm, and refuses
+/// an id it cannot verify rather than skipping it
+/// (`docs/architecture/did-autonomi-spec.md` §7: resolvers "MUST reject ops in
+/// an algorithm they cannot verify rather than skip them").
+///
+/// # The rules, in order
+///
+/// 1. **Unknown id → [`CapabilityError::UnsupportedAlgorithm`].** A
+///    [`TaggedSignature`] naming anything but [`ALG_ML_DSA_65`] is refused —
+///    even with a valid Ed25519 signature beside it. Never skipped, never
+///    defaulted.
+/// 2. **Nothing carried → [`CapabilityError::Unsigned`].**
+/// 3. **No downgrade → [`CapabilityError::MissingSignature`].** If this
+///    verifier knows the issuer under an algorithm, the token must carry a
+///    signature in that algorithm. This rule is what gives the post-quantum
+///    signature its value: without it, whoever can forge Ed25519 strips the
+///    ML-DSA-65 signature and presents the rest.
+/// 4. **Every carried signature verifies; none is skipped.** Each goes to its
+///    own verifier and returns that verifier's error (`Expired`,
+///    `UnknownIssuer`, `BadSignature`).
+///
+/// # What that means for an issuer, plainly
+///
+/// - Known by Ed25519 only (every issuer before this type existed): an
+///   Ed25519-only token verifies exactly as under [`Ed25519Verifier`].
+/// - Known by both: only a token carrying **both** signatures verifies. So
+///   enrolling an issuer's ML-DSA-65 key retires that issuer's outstanding
+///   Ed25519-only tokens *under this verifier* — by design, because such a
+///   token is exactly what a downgrade looks like. [`Ed25519Verifier`] alone
+///   still accepts them; which of the two a gate uses is the caller's policy.
+/// - Known by ML-DSA-65 only (Ed25519 retired): an ML-DSA-only token
+///   verifies; a token still carrying an Ed25519 signature is refused as
+///   `UnknownIssuer` by rule 4, because "I cannot check this" denies everywhere
+///   in this crate.
+pub struct AgileVerifier {
+    ed25519: Ed25519Verifier,
+    ml_dsa_65: MlDsa65Verifier,
+}
+
+impl AgileVerifier {
+    /// One clock for every algorithm, so the two can never disagree on `now`.
+    pub fn new(
+        ed25519_keys: std::collections::BTreeMap<Did, ed25519_dalek::VerifyingKey>,
+        ml_dsa_65_keys: std::collections::BTreeMap<Did, ml_dsa::VerifyingKey<ml_dsa::MlDsa65>>,
+        now: i64,
+    ) -> Self {
+        AgileVerifier {
+            ed25519: Ed25519Verifier::new(ed25519_keys, now),
+            ml_dsa_65: MlDsa65Verifier::new(ml_dsa_65_keys, now),
+        }
+    }
+}
+
+impl Verifier for AgileVerifier {
+    fn verify(&self, delegation: &Delegation) -> Result<(), CapabilityError> {
+        // Rule 1: route the tagged slot on the id it carries.
+        let tagged: Option<&dyn Verifier> =
+            match delegation.pq_signature.as_ref().map(|t| t.alg.as_str()) {
+                None => None,
+                Some(ALG_ML_DSA_65) => Some(&self.ml_dsa_65),
+                Some(_) => return Err(CapabilityError::UnsupportedAlgorithm),
+            };
+        // The v1 slot names no id: it has carried Ed25519 since the field
+        // existed, so its algorithm is the field's definition, not a default.
+        let legacy: Option<&dyn Verifier> = delegation
+            .signature
+            .as_ref()
+            .map(|_| &self.ed25519 as &dyn Verifier);
+
+        // Rule 2.
+        if legacy.is_none() && tagged.is_none() {
+            return Err(CapabilityError::Unsigned);
+        }
+
+        // Rule 3: an algorithm the issuer is known by may not be stripped.
+        let issuer = &delegation.issuer;
+        if (self.ed25519.keys.contains_key(issuer) && legacy.is_none())
+            || (self.ml_dsa_65.keys.contains_key(issuer) && tagged.is_none())
+        {
+            return Err(CapabilityError::MissingSignature);
+        }
+
+        // Rule 4.
+        for v in legacy.into_iter().chain(tagged) {
+            v.verify(delegation)?;
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CapabilityError {
     /// The delegation carried no signature.
@@ -993,6 +1352,19 @@ pub enum CapabilityError {
     /// would let an operator read an un-enrolled issuer as an attack. Both
     /// still deny — fail-closed either way.
     UnknownIssuer,
+    /// A [`TaggedSignature`] names an algorithm this verifier cannot verify.
+    /// Refused, never skipped and never defaulted (did-autonomi-spec §7).
+    UnsupportedAlgorithm,
+    /// The verifier knows the issuer under an algorithm the delegation carries
+    /// no signature in — a stripped signature, i.e. a downgrade. See
+    /// [`AgileVerifier`].
+    MissingSignature,
+    /// Public key bytes of the wrong length for their algorithm.
+    MalformedKey,
+    /// The signing library refused to sign. For ML-DSA-65 that happens only
+    /// for a context string over 255 bytes (ml-dsa 0.1.1 src/signing.rs:440-443),
+    /// which this crate never passes.
+    SigningFailed,
 }
 
 impl std::fmt::Display for CapabilityError {
@@ -1007,6 +1379,20 @@ impl std::fmt::Display for CapabilityError {
             CapabilityError::UnknownIssuer => {
                 write!(f, "no public key known for the delegation's issuer")
             }
+            CapabilityError::UnsupportedAlgorithm => {
+                write!(
+                    f,
+                    "delegation signature names an algorithm this verifier cannot verify"
+                )
+            }
+            CapabilityError::MissingSignature => write!(
+                f,
+                "delegation lacks a signature in an algorithm its issuer is known by"
+            ),
+            CapabilityError::MalformedKey => {
+                write!(f, "public key has the wrong length for its algorithm")
+            }
+            CapabilityError::SigningFailed => write!(f, "the signing library refused to sign"),
         }
     }
 }
@@ -1980,6 +2366,416 @@ mod tests {
                 k.is_weak(),
                 "if 2.x ever builds this key, it must at least report it weak"
             ),
+        }
+    }
+
+    // ── post-quantum: ML-DSA-65 + algorithm dispatch ─────────────────────
+
+    /// The v1 token's Ed25519 signature exactly as the code produced it before
+    /// `pq_signature` existed (`Ed25519Verifier::sign`, seed `[7; 32]`, over
+    /// `unsigned_grant()`). Node's OpenSSL Ed25519 produced the same 64 bytes
+    /// independently. base64url here because the wire form (hex) is 128 chars.
+    const LEGACY_ED25519_SIG_B64U: &str =
+        "6GuqUSZrBIOwDzKP2IMeopi5lcWqOSBgcxmM0E5NCL5XisIsX2Lz1soTcvA_auQqoVuBiwXT-akv56uZonDdBA";
+
+    /// The exact bytes that signature covers — the v1 payload of `unsigned_grant()`.
+    const LEGACY_PAYLOAD: &str = r#"{"issuer":"did:autonomi:root","audience":"did:plc:design","capabilities":[{"with":"storage.sovereign","can":"node/read"}],"not_before":null,"expires_at":null,"signature":null}"#;
+
+    /// A TEST seed: the UTF-8 bytes of a public sentence, exactly 32 of them.
+    /// Nothing signed with it guards anything.
+    const PQ_SEED: &[u8; 32] = b"capability ml-dsa-65 test seed A";
+
+    /// The foreign oracle. ML-DSA-65 over `"cap1/delegation/ml-dsa-65\n" ‖
+    /// LEGACY_PAYLOAD`, made by @noble/post-quantum 0.7.1
+    /// (surfaces/onboarding/vendor/bpq-lib.js) — `keygen(PQ_SEED)`, then
+    /// `sign(msg, secretKey, { extraEntropy: false })`: deterministic, empty
+    /// context. Not this crate's code.
+    const NOBLE_ML_DSA_65_SIG: &str = "0FvoHFdDxo8bNfyVwyVX1LvDCkRMCUNiaYhG1UJEcG96jxSSNDBZycLx-j3Gmt_XIVTvIvIfTxTDD0E2Vu7qdcwSoiLYY18z4XPIMkZ2ycNwaCyc4TRyArZVVQrfjErt_q5fg_tPFqXQimx4IpV2GRbB3qgC7vYNjSVz4bu3Kyo4wfg4uYAM_ZopgXYY8P7F-YjqFqItnVBRurWUV5jzu-lKt8sQpAZsV5ycG_eADMOtCG8D4imaIUS3pr2MXG1a-BhtJwaj0-1XwQxXNFbqZinNoQ8bTA06X0ZLMG_ZeQyVPr89NGsniAFswnUzT2yr6pDv36REIotB4wjEPS3N6nRXPozy-in-UPLLwlGtcMia3n2GUPMGXHg4tuI-o-tiQKF-ZOG2a0C6TDELMdr6RzB6B2NWljSywf1i_cNJTHn2k0ybdaG4LeEVs_oInMFLKcp3De1mUCRs3UfLG7Er8rXkjUowcf6sCOx_0FhOisrexNrhHRXhAq2esVsJxaxiE3GU-xGjZAur4k5jqG9dEtP5RXZQ4SOt5yR4jCDx5lISEsX0soNUm0ZTzy6dI_AfoHU9blEur660Q4AXPVAzKsXklhPdBI7Cocw-QYuuOorYyzsg6qBGXg1b8mTptpDcXqzn-ojQV9JN5zXUXEoPCmPmDs3WbqHamk7Cr_VZMZb8rwBe7ieJ0Ii5JWqMmI_XF9IqbTvdXnsqxrIwwD3-9cqJMF33geifG3O-exQBXE7i8GOMhk08Sb0g5QG30F0hAIp33iKTvmsU-9uUULar_C76O4mngh1mL7jnzjW-tMYeyqRBzPGNY0SbkG1Q5PYPeDZpGLR_6O5raN8qkRhOCnKz4KikmwfYcNesfNZ2bf3fHhOgtJjhq5O5T7NdKLyb3kHoDdHm-heANR7YQSGWS6nPYSBNai13n0LXK37clrrH4kHrY11awOZ1OlXtbo33Q_C_x5SlOfOmnm-hzalMt-H108ZUf-w-nIVsGY0ciptCObB8PIAT8cHPbQQL9by-Qlr4LlF_jSK5bzgUuf2uW4ZGRaZ0aOg1Zk6faRpFvfNGIaoxrO8yEV9BvoK8WmRi3_1VCGgTbJbZcDQh9YPGaK4BNX17YHVySMfU8QdjvjgoUZtDUv2TOc2cyv2ho2oLU2n1HRddWZGA0YygJDe8nozJ1S5ofl22FHjphxKLwuBBc5kZbxvAlLR-N_IhiNXUJZhEtelLk47GKkn9AkCCv3TstuIZty5Rsb_ho-90jA7ZKCvQifxYrg-x8bGlbiiUb_Aipv_p-IIHGV2koctvHYOG3_onqdNjgYM_QVzoPq823gJ5HLAHzGzmOOlNWucAIS4bW5ICCl5WH7JnLfiFn7GE7qz24u0v00hwkY8bbInzGnoSSkFemLo7e1MeqcIA_KS7kD_PMLOkZeRaPiZgN8uHrSzuLkVKAsKMiojIstMK4PB_kn8edDyK-yxtp9p18G2mcvVqUaBeRKYtKDLK_vijsbhp9yzoJwmqODPFLMRhZrAPII0rH0KzyRy04RTw3HfvkSiKSkQuN-COsOjmGRecvAeEKx2eKqMmUrf5x96WrMrr06pFR1nsXn0jgj9RddvaiNgsgIcNUgWynkRPQWbqNdj8MMhyh9-CPzQTk8z5kfr8sOyye7t82m-fUItoLp32Rfb1boAuTTy7WYlXL40hmChTT-aXU4A7xpDK1d9Dr2qDmxhuNIdMuS1zpu76NaSkh57q4r3RuqCDVgwTBUpv1i_zgGTuns0FD8X1EiAf5izkaMRueuBZYpk0lsoPLB2W-0n0nYSAZ3NYRArdu5m9ZzujwEntGvlHG5BdDkxB74qGibkSv5HPDh5ilHmBdTjZVo0CefnByqwguB_phCEEU3tfkobGMPFt1xpEBeH-z4ZF5eRuz0Z6DlvTKoddNgL3CcaiTNai3R4yKUCEmYkk4K9daBiDZ42XkQzXhVycMQgLouuk2En-uvWJi2EZeoHzHTpkmCZePu-Y45psBGkuWCvTH0w9nzCdQI8wuhVZ_BSGVO1P4JY6lCvWLQywO-PqWTSZXmiam_9ZJNUbRCYK7-cqVJNJ0VZb1IjmUdnK9f_uKcZYB4y9_U10RkH0aibpk3QRD5obWYOHRX1QoKeqGtd3tcZbnPJ9qPzVuAcffb7G79j17gBJLDhERlAD-Son0Mhov-MNP8BFQ87ZA6HmsM2Xf54wIcMq4tE3nU6CtE0cyRvag01VOu6kk7yi60cgDWwVXOZJAnSnWfz3xTgzdy38cUFRrzidJwyov51_nhpZ3dVKbv2-RpDJIoe8Q4ZAlKBqdlI4pDn92w33G5OtPBmmpnUtAeAeAPIKN9bkk0rMNREWIMkuNDOHGEWMcgcDB30yE5zrZj9QinDGC1VdVhfIQfrs6uxOUp8V9hh-HkTKZ139YsAt7qyiRRIsTExFTLzApep4iHmb5a5NB9auJOXAon39fg4-G0wo9Pr6g0zPjdkpHDWhCnTUSXNUgn6AzJU4e3L1v8neAqk9IyUtfxYYQU3OeR69sLmYRX_y9QZVgCH2k-FFdWi7QJkAryFllbqFVaf5KBOEyCDb8oohF02TnEbxV0-3CpJD3Ae3PxVYWbrpdON3874dPJJEM5vTG74bF3WvSvnLMMVwNWQvm1oO08fuEs925c7y5bq4grbAZQfIZC2ciXLbGGFrUcfVNet6XCYzgG0e9_mfLhvi15W1yoTUEhxTxRe3MAbWHyJSftSZrCA2zlbd-R4SBaIrU5MOUyw9-5sCs45ziNL-1n6oIQwkjz_EUHF2Hsbmvrs_QZYimQtNDMbMCJP5KDAQ-oyJuBGVAi4V5hGGxPRJ6aiL3Dk-PQz4jS01zqyJliw-n6v5-9FHmbKFEskxrZgLWo6TUyZcz_Yv3HOVKqOV9p7bs2rY6uSt_C8S_NPIoCzA7yuOTZRgGXVJLKnQ_qQ6MVuq3mjK00xQEUIjPZ69hKgFKNA2qKR8mc__zGG5E2Ahm-q7wlEiyw6VD9yTjJUnaQL7gCSn_GmaRTlEvz5mvDKNlKRezgTGK9-k2KRsHEi7c_7HpA0VwU_oLfPAjsbNOBdPmEclHLgN-S4MZPiHdFHSIIZsnOkzf2oJ9n0_KjG-rdSoQiGKAhm2E5BDQ6rcBubPBdHddybhZpn8ni71dM9Pw7yq83f36ClqMPIxIqFckLKly20HVJC1vYP4oNA_bMRfvbirCd2a1y9_mUmxMVX8l0dtWKaRPIL8BqJvOMbiXMY5zDU3ZsT8VOSQVgtq37fuDpOB2PEIll8TRnaB0mFPjolXGkcPVNGtayOIyXea9ZyOzxICRcYX0jD3sqm1XDd3wlGzrXN5XCPsFQ-4kYaBucWWXoxEI7H97CGZ878Tk2fbBYf7tDlhuz81P0CQvv8O7dqGH0SvgdHZjrNJznHnFNwNBgIvK7VySJ7f_Y8Pwm934-5KcXQhFjWyWczYZkQCcGtsXD3mX1IMohK7LuteGCQhLCbex-DEu3j1bThDCfrQ5Yl8ltanIckxTaijZon1WrVJhxBq91URmN5Sc1LW9ccZ27VG8n_ccdTL3piOUs3jfODQyP7xk_MXSNLOtvAfnzFY1-tjMt9sRZSRg0DNtEn49dt4dNbMjEKk7iaaxiy09-4Q8hHymQVQIIb5aCih6JFBVt4jZ1zb7AnHwuBG_UcyBGhPjpUCTZxHrjkR6eG-dbdF-Z9IYSJlG1F0fuoBml90ZxSdVs2RY3u7RJO0piAr36QYiDuMPMM-UG5DfjVxN-4j7NT6aN73odtPq3vlUj5rMqW9WlJI3keUiFW-qZKMSEHp3wiKrymdhT6T_eDJ4J70dh2oQ_nZzx14rzoNmmYMe9Te4cm0uM3aereSTvo7y0ZuwrwszgdwycQQ0QrJifKI0UAy38Scg9kBcrlaDJgwH3qIo0ybmJIP7u6OIkjsym-f3gaSfu7pBeJzvxBAjhZzu6yBFYLEj97vn5gZ6M2GRKSErcjnY5oNuJz0D-yOd8fnwVO0e55IVqrF22KG0Vod1HgusmjUja_0xqXocMCAIuhGfchj2Ycf4S-lO3Zq6JQeNSrSUZ9uY5-zxU9jAUD3OOoNqJxGPWJABbx1pVr_YL3em3-QR_OY4CQz3jcl7-LFGMTVJiGUUkHWec5QuIHM-oVthl7ndGsjkRy9OImk7EoHQv_ucLORPHXTwmJg6TvibKCr7np47d0kgw80t_Yl58gQhTQg7YUQipM46BPAIjDAkyyQ-q4mMDHVzOlJEqq_H9XgcGyjfkLVNP0CK2Tjb4yyrZuKXxpxa3v5UMSah5iDLRnimQglS5W2iLx41EFosRXA7cEHCS4zOFtogoiNjqW4whtob7K6weYRHB80UXvK2vNHnMjK3esnToU4VHOChqLBw8YAAAAAAAAADhUeJCcw";
+
+    /// The first 32 bytes of noble's public key for `PQ_SEED`.
+    const NOBLE_PK_PREFIX: &str = "O5ga_f_RESswa1uK5idJUPHdJzxioamZD51JaQ6rP2g";
+
+    fn pq_key() -> ml_dsa::SigningKey<ml_dsa::MlDsa65> {
+        ml_dsa::SigningKey::from_seed(&(*PQ_SEED).into())
+    }
+
+    fn pq_public(k: &ml_dsa::SigningKey<ml_dsa::MlDsa65>) -> ml_dsa::VerifyingKey<ml_dsa::MlDsa65> {
+        use ml_dsa::Keypair;
+        k.verifying_key()
+    }
+
+    fn root() -> Did {
+        Did::new("did:autonomi:root")
+    }
+
+    fn pq_keyring(did: Did, k: &ml_dsa::SigningKey<ml_dsa::MlDsa65>) -> MlDsa65Verifier {
+        let mut m = std::collections::BTreeMap::new();
+        m.insert(did, pq_public(k));
+        MlDsa65Verifier::new(m, 1_000)
+    }
+
+    /// An AgileVerifier that knows `root()` by the algorithms asked for.
+    fn agile(ed25519: bool, ml_dsa_65: bool) -> AgileVerifier {
+        let mut ed = std::collections::BTreeMap::new();
+        if ed25519 {
+            ed.insert(root(), test_key().verifying_key());
+        }
+        let mut pq = std::collections::BTreeMap::new();
+        if ml_dsa_65 {
+            pq.insert(root(), pq_public(&pq_key()));
+        }
+        AgileVerifier::new(ed, pq, 1_000)
+    }
+
+    /// `unsigned_grant()` carrying both signatures.
+    fn hybrid() -> Delegation {
+        let ed = Ed25519Verifier::sign(&unsigned_grant(), &test_key());
+        MlDsa65Verifier::sign(&ed, &pq_key()).unwrap()
+    }
+
+    fn with_tagged_sig(d: &Delegation, sig: String) -> Delegation {
+        let mut out = d.clone();
+        out.pq_signature.as_mut().unwrap().sig = sig;
+        out
+    }
+
+    #[test]
+    fn legacy_ed25519_token_verifies_byte_for_byte_unchanged() {
+        // THE back-compat promise. A token minted before pq_signature existed,
+        // in its exact wire bytes.
+        let sig_hex = hex_lower(&b64u_decode(LEGACY_ED25519_SIG_B64U).unwrap());
+        let wire = LEGACY_PAYLOAD.replace(
+            r#""signature":null"#,
+            &format!(r#""signature":"{sig_hex}""#),
+        );
+        let d: Delegation = serde_json::from_str(&wire).unwrap();
+        assert_eq!(d.pq_signature, None, "an absent key parses as None");
+        // The bytes its signature covers have not moved...
+        assert_eq!(d.signing_payload(), LEGACY_PAYLOAD.as_bytes());
+        // ...re-serializing adds no key its issuer never signed...
+        assert_eq!(serde_json::to_string(&d).unwrap(), wire);
+        // ...it verifies under the v1 verifier, and under the agile one for an
+        // issuer known by Ed25519 only...
+        assert_eq!(keyring(root(), &test_key()).verify(&d), Ok(()));
+        assert_eq!(agile(true, false).verify(&d), Ok(()));
+        // ...and today's signer still produces those exact bytes.
+        assert_eq!(
+            Ed25519Verifier::sign(&unsigned_grant(), &test_key()).signature,
+            Some(sig_hex)
+        );
+    }
+
+    #[test]
+    fn ml_dsa_65_signs_and_verifies() {
+        let k = pq_key();
+        let d = MlDsa65Verifier::sign(&unsigned_grant(), &k).unwrap();
+        assert!(d.signature.is_none());
+        assert!(
+            d.is_signed(),
+            "a token carrying only the PQ signature is signed"
+        );
+        let t = d.pq_signature.as_ref().unwrap();
+        assert_eq!(t.alg, ALG_ML_DSA_65);
+        assert_eq!(
+            b64u_decode(&t.sig).unwrap().len(),
+            MlDsa65Verifier::SIGNATURE_LEN
+        );
+        assert_eq!(pq_keyring(root(), &k).verify(&d), Ok(()));
+        assert_eq!(
+            agile(false, true).verify(&d),
+            Ok(()),
+            "an issuer known by ML-DSA-65 only needs nothing else"
+        );
+
+        // Hybrid: both slots, both keys. And the order of signing does not
+        // matter, because neither slot is inside the other's bytes.
+        let h = hybrid();
+        assert_eq!(agile(true, true).verify(&h), Ok(()));
+        let pq_first = Ed25519Verifier::sign(&d, &test_key());
+        assert_eq!(pq_first, h);
+
+        // It survives the wire.
+        let back: Delegation = serde_json::from_str(&serde_json::to_string(&h).unwrap()).unwrap();
+        assert_eq!(back, h);
+        assert_eq!(agile(true, true).verify(&back), Ok(()));
+    }
+
+    #[test]
+    fn a_noble_signature_verifies_here_and_ours_matches_it_byte_for_byte() {
+        // A foreign oracle, not our own code. Keygen agrees...
+        let k = pq_key();
+        let pk = pq_public(&k).encode();
+        assert_eq!(pk.len(), MlDsa65Verifier::PUBLIC_KEY_LEN);
+        assert_eq!(b64u_encode(&pk.as_slice()[..32]), NOBLE_PK_PREFIX);
+        // ...noble's signature over the v1 payload verifies here...
+        let mut d = unsigned_grant();
+        assert_eq!(d.signing_payload(), LEGACY_PAYLOAD.as_bytes());
+        d.pq_signature = Some(TaggedSignature {
+            alg: ALG_ML_DSA_65.to_string(),
+            sig: NOBLE_ML_DSA_65_SIG.to_string(),
+        });
+        assert_eq!(pq_keyring(root(), &k).verify(&d), Ok(()));
+        // ...and ours is the same 3309 bytes, because both sign deterministically
+        // with an empty context.
+        let ours = MlDsa65Verifier::sign(&unsigned_grant(), &k).unwrap();
+        assert_eq!(ours.pq_signature.unwrap().sig, NOBLE_ML_DSA_65_SIG);
+    }
+
+    #[test]
+    fn tampering_breaks_the_ml_dsa_signature() {
+        let k = pq_key();
+        let v = pq_keyring(root(), &k);
+        let signed = MlDsa65Verifier::sign(&unsigned_grant(), &k).unwrap();
+        assert_eq!(v.verify(&signed), Ok(()));
+
+        // Escalate the capability.
+        let mut escalated = signed.clone();
+        escalated.capabilities = vec![Capability::new("settlement.private", "wallet/spend")];
+        assert_eq!(v.verify(&escalated), Err(CapabilityError::BadSignature));
+
+        // Redirect the audience.
+        let mut redirected = signed.clone();
+        redirected.audience = Did::new("did:plc:attacker");
+        assert_eq!(v.verify(&redirected), Err(CapabilityError::BadSignature));
+
+        // Strip a tier ceiling.
+        let ceilinged =
+            MlDsa65Verifier::sign(&unsigned_grant().with_tier_ceiling(Tier::T5), &k).unwrap();
+        assert_eq!(v.verify(&ceilinged), Ok(()));
+        let mut stripped = ceilinged.clone();
+        stripped.tier_ceiling = None;
+        assert_eq!(v.verify(&stripped), Err(CapabilityError::BadSignature));
+
+        // Flip one bit of the signature itself.
+        let mut raw = b64u_decode(&signed.pq_signature.as_ref().unwrap().sig).unwrap();
+        raw[0] ^= 1;
+        let flipped = with_tagged_sig(&signed, b64u_encode(&raw));
+        assert_eq!(v.verify(&flipped), Err(CapabilityError::BadSignature));
+
+        // Signed by a different key.
+        let other = ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(
+            &(*b"capability ml-dsa-65 test seed B").into(),
+        );
+        let forged = MlDsa65Verifier::sign(&unsigned_grant(), &other).unwrap();
+        assert_eq!(v.verify(&forged), Err(CapabilityError::BadSignature));
+
+        // A hybrid whose Ed25519 half is good but whose PQ half is not: refused.
+        let bad_pq_half = with_tagged_sig(&hybrid(), b64u_encode(&raw));
+        assert_eq!(
+            agile(true, true).verify(&bad_pq_half),
+            Err(CapabilityError::BadSignature)
+        );
+    }
+
+    #[test]
+    fn unknown_algorithm_ids_are_refused_never_skipped() {
+        let v = pq_keyring(root(), &pq_key());
+        let good = hybrid();
+        for id in [
+            "ml-dsa-87",
+            "ml-dsa-44",
+            "ML-DSA-65",
+            "ml-dsa-65 ",
+            "mldsa65",
+            "ed25519",
+            "slh-dsa-shake-256f",
+            "",
+        ] {
+            let mut d = good.clone();
+            d.pq_signature.as_mut().unwrap().alg = id.to_string();
+            assert_eq!(
+                v.verify(&d),
+                Err(CapabilityError::UnsupportedAlgorithm),
+                "{id:?}"
+            );
+            for a in [agile(true, true), agile(false, true), agile(true, false)] {
+                // Even a verifier that knows the issuer by Ed25519 only, holding
+                // a valid Ed25519 signature for this very token, refuses the
+                // slot it cannot read rather than skipping it.
+                assert_eq!(
+                    a.verify(&d),
+                    Err(CapabilityError::UnsupportedAlgorithm),
+                    "{id:?}"
+                );
+            }
+        }
+        // An id nobody knows still parses: refused by name, not as broken JSON.
+        let json = r#"{"issuer":"did:autonomi:root","audience":"did:plc:design","capabilities":[],"not_before":null,"expires_at":null,"signature":null,"pq_signature":{"alg":"falcon-512","sig":"AA"}}"#;
+        let d: Delegation = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            agile(true, true).verify(&d),
+            Err(CapabilityError::UnsupportedAlgorithm)
+        );
+    }
+
+    #[test]
+    fn wrong_lengths_are_refused() {
+        // Public keys: checked before decoding, never trusted.
+        let pk = pq_public(&pq_key()).encode();
+        let pk = pk.as_slice();
+        assert!(MlDsa65Verifier::public_key_from_bytes(pk).is_ok());
+        let mut long_pk = pk.to_vec();
+        long_pk.push(0);
+        // 1312 and 2592 are ML-DSA-44's and ML-DSA-87's key lengths.
+        for bad in [&pk[..0], &pk[..32], &pk[..1312], &pk[..1951], &long_pk[..]] {
+            assert_eq!(
+                MlDsa65Verifier::public_key_from_bytes(bad).err(),
+                Some(CapabilityError::MalformedKey),
+                "a {}-byte key",
+                bad.len()
+            );
+        }
+        assert_eq!(
+            MlDsa65Verifier::public_key_from_bytes(&[0u8; 2592]).err(),
+            Some(CapabilityError::MalformedKey)
+        );
+
+        // Signatures: 3309 bytes or BadSignature, never a panic. 2420 and
+        // 4627 are ML-DSA-44's and ML-DSA-87's signature lengths.
+        let v = pq_keyring(root(), &pq_key());
+        let good = MlDsa65Verifier::sign(&unsigned_grant(), &pq_key()).unwrap();
+        let s = good.pq_signature.as_ref().unwrap().sig.clone();
+        let raw = b64u_decode(&s).unwrap();
+        let mut long_sig = raw.clone();
+        long_sig.push(0);
+        let mut ml_dsa_87_sized = raw.clone();
+        ml_dsa_87_sized.resize(4627, 0);
+        for bad in [
+            &raw[..0],
+            &raw[..64],
+            &raw[..2420],
+            &raw[..3308],
+            &long_sig[..],
+            &ml_dsa_87_sized[..],
+        ] {
+            assert_eq!(
+                v.verify(&with_tagged_sig(&good, b64u_encode(bad))),
+                Err(CapabilityError::BadSignature),
+                "a {}-byte signature",
+                bad.len()
+            );
+        }
+
+        // Text that is not canonical base64url never reaches the decoder.
+        for junk in [
+            format!("{s}="),
+            format!("{s}A"),
+            format!("+{}", &s[1..]),
+            format!("/{}", &s[1..]),
+            format!(" {}", &s[1..]),
+            "!!!!".to_string(),
+        ] {
+            assert_eq!(
+                v.verify(&with_tagged_sig(&good, junk)),
+                Err(CapabilityError::BadSignature)
+            );
+        }
+    }
+
+    #[test]
+    fn a_stripped_signature_is_refused_as_a_downgrade() {
+        let h = hybrid();
+        let mut no_pq = h.clone();
+        no_pq.pq_signature = None;
+        let mut no_ed = h.clone();
+        no_ed.signature = None;
+
+        // Known by both: only both will do. Stripping the ML-DSA-65 half is
+        // what a forger who can break Ed25519 would do.
+        let both = agile(true, true);
+        assert_eq!(both.verify(&h), Ok(()));
+        assert_eq!(both.verify(&no_pq), Err(CapabilityError::MissingSignature));
+        assert_eq!(both.verify(&no_ed), Err(CapabilityError::MissingSignature));
+        assert_eq!(
+            both.verify(&unsigned_grant()),
+            Err(CapabilityError::Unsigned)
+        );
+
+        // Known by Ed25519 only: v1 behaviour, but a carried PQ signature it
+        // cannot check is not skipped.
+        assert_eq!(agile(true, false).verify(&no_pq), Ok(()));
+        assert_eq!(
+            agile(true, false).verify(&h),
+            Err(CapabilityError::UnknownIssuer)
+        );
+
+        // Known by ML-DSA-65 only (Ed25519 retired): the mirror image.
+        assert_eq!(agile(false, true).verify(&no_ed), Ok(()));
+        assert_eq!(
+            agile(false, true).verify(&h),
+            Err(CapabilityError::UnknownIssuer)
+        );
+
+        // Known by neither.
+        assert_eq!(
+            agile(false, false).verify(&h),
+            Err(CapabilityError::UnknownIssuer)
+        );
+    }
+
+    #[test]
+    fn ml_dsa_verifier_reports_unsigned_expired_and_unknown_issuer() {
+        let k = pq_key();
+        let v = pq_keyring(root(), &k);
+        // An Ed25519-only token carries nothing for this verifier.
+        assert_eq!(
+            v.verify(&Ed25519Verifier::sign(&unsigned_grant(), &test_key())),
+            Err(CapabilityError::Unsigned)
+        );
+
+        // Expired is Expired, however good the signature.
+        let mut d = unsigned_grant();
+        d.expires_at = Some(500);
+        let d = MlDsa65Verifier::sign(&d, &k).unwrap();
+        assert_eq!(v.verify(&d), Err(CapabilityError::Expired));
+        let mut m = std::collections::BTreeMap::new();
+        m.insert(root(), pq_public(&k));
+        assert_eq!(MlDsa65Verifier::new(m, 400).verify(&d), Ok(()));
+
+        // "I cannot check this" is not "this is forged".
+        let stranger = pq_keyring(Did::new("did:autonomi:somebody-else"), &k);
+        assert_eq!(
+            stranger.verify(&MlDsa65Verifier::sign(&unsigned_grant(), &k).unwrap()),
+            Err(CapabilityError::UnknownIssuer)
+        );
+    }
+
+    #[test]
+    fn none_pq_signature_emits_no_key_and_neither_slot_is_in_the_payload() {
+        let d = unsigned_grant();
+        let json = serde_json::to_string(&d).unwrap();
+        assert!(
+            !json.contains("pq_signature"),
+            "None must emit no key at all, got: {json}"
+        );
+        let h = hybrid();
+        assert!(serde_json::to_string(&h).unwrap().contains("pq_signature"));
+        assert_eq!(
+            h.signing_payload(),
+            d.signing_payload(),
+            "both signature slots are cleared from the signed bytes"
+        );
+        // The tagged message puts the algorithm id ahead of the payload.
+        let m = d.tagged_message(ALG_ML_DSA_65);
+        assert!(m.starts_with(b"cap1/delegation/ml-dsa-65\n"));
+        assert!(m.ends_with(LEGACY_PAYLOAD.as_bytes()));
+    }
+
+    #[test]
+    fn base64url_is_strict_and_roundtrips() {
+        for n in 0u8..10 {
+            let b: Vec<u8> = (0..n)
+                .map(|i| i.wrapping_mul(37).wrapping_add(200))
+                .collect();
+            assert_eq!(b64u_decode(&b64u_encode(&b)), Some(b));
+        }
+        assert_eq!(b64u_encode(&[0xfb, 0xff]), "-_8");
+        assert_eq!(b64u_decode("AA"), Some(vec![0]));
+        // Impossible length, padding, the standard alphabet, stray low bits.
+        for bad in [
+            "A", "AAAAA", "AA==", "AAA=", "A+AA", "A/AA", " AAA", "AB", "AAB",
+        ] {
+            assert_eq!(b64u_decode(bad), None, "{bad:?}");
         }
     }
 

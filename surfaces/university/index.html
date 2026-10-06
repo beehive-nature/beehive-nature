@@ -162,7 +162,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 }
 .uni-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 /* A small local exercise: illustrative marks, never a medical result. */
-.lesson-example{margin:24px auto;padding:24px;border:1px solid var(--line);border-radius:24px;max-width:42rem;background:var(--well,var(--bg))}
+.lesson-example{margin:24px auto;padding:24px;border:1px solid var(--line);border-radius:var(--sk-radius-xl);max-width:42rem;background:var(--well,var(--bg))}
 .lesson-sample{display:block;width:min(100%,320px);height:auto;margin:8px auto;color:var(--ink)}
 .lesson-check{border:0;min-width:0;padding:16px 0 0}
 .lesson-check legend{font:600 1.15rem/1.5 var(--bee-font,system-ui)}
@@ -172,7 +172,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 #lesson-answer[hidden]{display:none}
 .lesson-context{max-width:42rem;margin:20px auto;text-align:start;border:1px solid var(--line);border-radius:16px;padding:16px 20px}
 .lesson-context summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
-body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36,#102c28)}
+body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint));border-color:rgba(156,111,214,.34)}
 
 /* THE LOWER HALF AT 390 (2026-09-26, footer audit): the cypherpunk
    instrument kept 9–11.5 px laws, exercises, tables and footer, with 17–30 px
@@ -202,73 +202,87 @@ body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c
 #eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
 [dir="rtl"] #eternal .chev{transform:scaleX(-1)}
 .et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
-body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
-body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="bee"] .et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
 body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm room: one page, one mark, a few words; one magenta action */
-#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start}
-#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+/* NEW BEE — a calm room: one page, one mark, a few words; one action. Dressed in the founder's chosen
+   UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to the university 2026-10-05):
+   paper, ink, bold system sans, white cards with soft large corners, forest green for the one filled
+   action (white label) and for what is chosen, an outlined pill for the second way on. The guard well
+   stays lavender (guard, never red). The title, the lede, the guard, the progress, the seven lesson
+   rows and their order, the action, the link and the foot all stay. */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start;font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-ui)}
 #eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-#eternal .et-b-q{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-q{font:600 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-lg);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.5 var(--sk-font-ui)}
 #eternal .et-b-note{min-height:96px;resize:vertical}
-#eternal .et-b-count{align-self:flex-end;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-count{align-self:flex-end;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
-#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:600 16px/1.45 var(--sk-font-ui);color:var(--sk-ink)}
 #eternal .et-b-rows>:last-child{border-bottom:0}
-#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink-mut)}
-#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
-#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-sovereign-strong);color:var(--sk-bg-card)}
-#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
-#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans)}
-#eternal .et-b-outline{min-height:48px;padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:600 16px/1.45 var(--sk-font-bee-sans)}
-#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
-#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:700 14px/1.4 var(--sk-font-ui);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-bg-card);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-forest);color:var(--sk-on-primary)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s2)}
+#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-pill);background:var(--sk-forest);color:var(--sk-on-primary);font:700 17px/1.2 var(--sk-font-ui)}
+#eternal .et-b-primary:hover{background:var(--sk-forest);color:var(--sk-on-primary)}
+#eternal .et-b-outline{min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 16px/1.2 var(--sk-font-ui)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);font:700 16px/1.2 var(--sk-font-ui);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-link:hover{border-color:var(--sk-forest)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-draft{display:flex;flex-direction:column;gap:var(--sk-s2);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
-#eternal .et-b-draft b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-draft b{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
 #eternal .et-b-draft code{display:block;padding:var(--sk-s2);border-radius:var(--sk-radius);background:var(--sk-bg);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
-#eternal .et-b-draft span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft span{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-draft span.ok{color:var(--sk-verified)}
 
-/* RAVER — every page of the estate is a star; tap one, light a mark, hold to draft your gift */
-#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);text-align:start}
+/* RAVER — the curriculum as an orbit; tap a lesson, colour = done. Dressed in the founder's chosen UI:
+   night purple ground (sovereign wash into tint), plain white bold system sans, round everything, you
+   magenta for the one filled pill with its soft glow and as the outline of the second way on. The
+   orbit, its seven discs and their centre, the lesson card and the note are the raver grammar and
+   stay as built. */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.4 var(--sk-font-ui);text-align:start}
 #eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
-#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 #eternal .et-r-sky{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));cursor:pointer;touch-action:manipulation}
 #eternal .et-r-sky circle{transition:r .26s}
-#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
-#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2) var(--sk-s3);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash)}
+#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-ui)}
 #eternal .et-r-card div{flex:1;min-width:0}
-#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
-#eternal .et-r-card span{font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
-#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card b{display:block;font:700 15px/1.3 var(--sk-font-ui);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-soft)}
 #eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
 #eternal .et-r-legend i{width:10px;height:10px;border-radius:var(--sk-radius-pill)}
 #eternal .lg-door{background:var(--sk-sovereign-strong)}#eternal .lg-blight{background:var(--sk-ai)}#eternal .lg-top{background:var(--sk-sovereign)}#eternal .lg-deep{background:var(--sk-info)}
 #eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s3) 0}
-#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;opacity:.7;transition:opacity .26s,box-shadow .26s}
-#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid rgba(156,111,214,.55);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);opacity:.7;transition:opacity .26s,box-shadow .26s}
+#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em}
 #eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
-#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid rgba(156,111,214,.55);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-tint);color:var(--sk-ink);font:400 15px/1.4 var(--sk-font-ui)}
 #eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s4) auto 0}
 #eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
 #eternal .et-r-hold circle{fill:none;stroke-width:5}
-#eternal .et-r-hold .track{stroke:var(--sk-line)}
+#eternal .et-r-hold .track{stroke:rgba(156,111,214,.34)}
 #eternal .et-r-hold .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:540;stroke-dashoffset:540}
-#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
-#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
-#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-tint)}
-#eternal .et-r-gift code{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
-#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);margin-top:var(--sk-s2);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em;box-shadow:0 0 28px rgba(214,85,187,.38)}
+#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-ui)}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-soft)}
+#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-wash)}
+#eternal .et-r-gift code{display:block;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-row);margin-top:var(--sk-s2);padding:0 var(--sk-s3);border-radius:var(--sk-radius-pill);border:1.5px solid rgba(214,85,187,.6);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui)}
+#eternal .et-r-ghost:hover{border-color:var(--sk-you)}
 @media (prefers-reduced-motion:reduce){#eternal .et-r-sky circle,#eternal .et-r-tiles button{transition:none}}
 
-/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard */
+/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard. It already
+   wore the chosen UI (near-black, IBM Plex Mono throughout, cyan action cut 6px with a dark label,
+   dense); the chosen UI adds only thin grey borders on every second way on. */
 #eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);text-align:start}
 #eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
 #eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
@@ -296,7 +310,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 #eternal .et-c-verify b{display:block;margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 #eternal .et-c-verify ol{padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
 #eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
-#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost:hover{border-color:var(--sk-ai)}
 #eternal .et-c-ghost .et-c-nt{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 
 #eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
@@ -309,9 +325,9 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 #eternal .et-c-tab tr.cur td{background:var(--sk-sovereign-tint)}
 #eternal .et-c-tab .draft{color:var(--sk-info)}#eternal .et-c-tab .att{color:var(--sk-verified)}#eternal .et-c-tab .wd{color:var(--sk-guard)}
 /* university: the curriculum as an orbit of seven lessons around the one sample */
-#eternal .et-b-prog{display:flex;align-items:center;gap:var(--sk-s2);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-prog b{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-prog{display:flex;align-items:center;gap:var(--sk-s2);font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-prog b{font:700 32px/1 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-row small.ok{color:var(--sk-verified)}
 #eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
 #eternal .et-b-row span{display:flex;align-items:center;gap:var(--sk-s2)}
@@ -320,37 +336,121 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 #eternal .et-r-orbit .node{cursor:pointer}
 #eternal .et-r-orbit .node:focus{outline:none}
 #eternal .et-r-orbit .node:focus-visible circle.disc{stroke:var(--sk-ink);stroke-width:3}
-#eternal .et-r-orbit text{font:700 30px/1 var(--sk-font-raver-display)}
-#eternal .et-r-orbit text.lbl{font:700 15px/1.2 var(--sk-font-raver-display)}
-#eternal .et-r-orbit text.sm{font:600 14px/1.25 var(--sk-font-raver-body)}
-#eternal .et-r-pill{display:block;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-orbit text{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em}
+#eternal .et-r-orbit text.lbl{font:700 18px/1.2 var(--sk-font-ui);letter-spacing:0}
+#eternal .et-r-orbit text.sm{font:600 14px/1.4 var(--sk-font-ui);letter-spacing:0}
+#eternal .et-r-pill{display:block;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 18px/1.2 var(--sk-font-ui);box-shadow:0 0 28px rgba(214,85,187,.38)}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
 #eternal .et-r-card{flex-wrap:wrap}
-#eternal .et-r-card a{display:flex;align-items:center;min-height:var(--sk-control-min);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-link)}
+#eternal .et-r-card a{display:flex;align-items:center;min-height:var(--sk-control-min);font:600 14px/1.4 var(--sk-font-ui);color:var(--sk-link)}
 #eternal .et-c-tab td:nth-child(3){white-space:nowrap}
 #eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .open{color:var(--sk-info)}
 #eternal .et-c-grad{display:block;margin-top:var(--sk-s2);padding:var(--sk-s2);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
-/* ── THE WHOLE UNIVERSITY, dressed per register: the page's own variables mapped onto skaists ── */
+/* ── THE WHOLE UNIVERSITY, dressed per register: the page's own variables mapped onto skaists, in the
+   founder's chosen UI (2026-10-05). Only the dress: the arrival, the figure, the lesson, the
+   instrument with its charter, registers, courses, quests, graduation, transcript, gates and sources
+   are the ones this page draws, in the same order, in every register. new bee: paper, white cards
+   with soft large corners, bold system sans, outlined pills, forest on what is chosen and on the
+   compose presses (outlined: the front's action is the one filled press in view); the university's
+   two status words read in the darker verified and ai inks so they hold 4.5:1 on white (glyph and
+   word still carry the meaning). raver: night purple, wash cards on magenta-outlined pills, plain
+   bold sans. cypherpunk: near-black, mono, thin grey outlines, cyan on the compose presses. The
+   transcript's copy press and the inline-styled fields are written by the page itself, so their
+   dress is laid with !important. ── */
 body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
  --c-works:var(--sk-cat-works);--c-idea:var(--sk-cat-idea);--c-bug:var(--sk-cat-bug);--c-gap:var(--sk-cat-gap);background:var(--sk-bg)}
-body[data-reg="bee"]{--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-bee-sans)}
-body[data-reg="raver"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-raver-body);font-family:var(--sk-font-raver-body)}
-body[data-reg="raver"][data-uni-beat="arrival"]{background:var(--sk-bg)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-ui);
+ --c-works:var(--sk-verified);--c-gap:var(--sk-ai);font-family:var(--sk-font-ui)}
+html body[data-reading-room][data-reg="bee"]{font-family:var(--sk-font-ui)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-ui);font-family:var(--sk-font-ui)}
 body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);font-family:var(--sk-font-mono)}
-html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);background:var(--sk-bg)!important;color:var(--sk-ink)}
+html body[data-reg="raver"],html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-sovereign-tint);--panel:var(--sk-sovereign-wash);--well:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:rgba(156,111,214,.34);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);
+ background:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%) var(--sk-sovereign-tint)!important;background-attachment:fixed!important;
+ color:var(--sk-ink);font-family:var(--sk-font-ui)}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
 body[data-reg] :is(section,.ex,.rline,.swatch){background:var(--sk-bg-card);border-color:var(--sk-line)}
 body[data-reg] .charter{background:var(--sk-sovereign-tint);border-color:var(--sk-line);color:var(--sk-sovereign-strong)}
 body[data-reg] :is(select,input){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink-mut)}
 body[data-reg] :is(.ex button,.tgl button,.swatch button){background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
 body[data-reg] .ex button.gold{background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink)}
 body[data-reg] .tgl button[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-ink);border-color:var(--sk-sovereign)}
-body[data-reg="raver"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
-body[data-reg="bee"] .door:not(.primary){color:var(--sk-ink);border-color:var(--sk-ink);background:var(--sk-bg-card)}
 body[data-reg="cypherpunk"] :is(section,.ex,.rline,.swatch,.charter){border-radius:var(--sk-radius-sm)}
-body[data-reg="bee"] #masthead h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
-body[data-reg="raver"] #masthead h1{font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="bee"] #masthead h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+body[data-reg="raver"] #masthead h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
 body[data-reg="cypherpunk"] #masthead h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal;color:var(--sk-ink)}
 body[data-reg="raver"] :where(.law,.charter,.badge,.machine,.ex h3,.ex .q,.ex label,.fb,.rline,table,.swatch,.dE,footer,.prose,section h2){font-size:14px}
 body[data-reg="cypherpunk"] :where(section h2,.prose){font-size:13px}
+/* new bee reads nothing under 14 px: running text at the room's 16, the small chrome at 14; a long
+   receipt name breaks inside its card instead of running past it */
+body[data-reg="bee"] :is(.charter,.ex .q,.fb,.prose,.dE){font-size:16px}
+body[data-reg="bee"] :is(.badge,.machine,.ex label,.rline,table,.swatch){font-size:14px}
+body:is([data-reg="bee"],[data-reg="raver"]) #instrument :is(.law,.prose,.q,.charter,.rline){overflow-wrap:anywhere}
+body:is([data-reg="bee"],[data-reg="raver"]) .gates td:first-child{white-space:nowrap}
+
+/* the titles, the takeaway and the feeling line: plain bold system sans (the reading room's own
+   rules are outranked by the html-rooted selectors, as on the other rooms) */
+html body[data-reg="bee"] #masthead h1,html body[data-reading-room][data-reg="bee"] #masthead h1,
+html body[data-reg="raver"] #masthead h1,html body[data-reading-room][data-reg="raver"] #masthead h1{font-family:var(--sk-font-ui);font-weight:700;letter-spacing:-.02em;color:var(--sk-ink)}
+html body[data-reg="bee"] .take,html body[data-reading-room][data-reg="bee"] #first-bee .take{font-family:var(--sk-font-ui);font-weight:700;letter-spacing:-.025em;color:var(--sk-ink)}
+html body[data-reg="raver"] #first-raver .feel,html body[data-reading-room][data-reg="raver"] #first-raver .feel{font-family:var(--sk-font-ui);font-weight:700;letter-spacing:-.03em;color:var(--sk-ink)}
+html body[data-reading-room]:is([data-reg="bee"],[data-reg="raver"]) #instrument :is(h2,h3){font-family:var(--sk-font-ui);font-weight:700}
+html body[data-reading-room]:is([data-reg="bee"],[data-reg="raver"]) #instrument :is(section,.card){border-radius:var(--sk-radius-xl)}
+html body:is([data-reg="bee"],[data-reg="raver"]) main summary{color:var(--sk-ink);font-weight:700}
+html body[data-reg="bee"] th{color:var(--sk-ink-mut);font-weight:700}
+
+/* NEW BEE — the archive's cards, presses and fields */
+body[data-reg="bee"] section{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] .ex{background:var(--sk-bg);border-radius:var(--sk-radius-lg)}
+body[data-reg="bee"] .rline{border-radius:var(--sk-radius)}
+body[data-reg]:not([data-reg="cypherpunk"]) .charter{border-radius:var(--sk-radius-lg)}
+body[data-reg]:not([data-reg="cypherpunk"]) .swatch{border-radius:var(--sk-radius-pill)}
+body[data-reg]:not([data-reg="cypherpunk"]) .badge{border-radius:var(--sk-radius-pill);font-weight:700}
+body[data-reg="bee"] .lesson-example{background:var(--sk-bg-card)}
+html body[data-reg="bee"] .door,html body[data-reading-room][data-reg="bee"] .door{border-radius:var(--sk-radius-pill);font-family:var(--sk-font-ui);font-weight:700}
+html body[data-reg="bee"] .door.primary,html body[data-reading-room][data-reg="bee"] .door.primary{background:var(--sk-forest);color:var(--sk-on-primary);border-color:var(--sk-forest)}
+html body[data-reg="bee"] .door:not(.primary),html body[data-reading-room][data-reg="bee"] .door:not(.primary){background:transparent;border:1.5px solid rgba(106,115,110,.4);color:var(--sk-ink)}
+/* the front's action is the one filled press in view; the archive's own first press, one short scroll
+   below it, wears the forest outline so the two never share a screen filled */
+html body[data-reg="bee"] #first-bee .door.primary,html body[data-reading-room][data-reg="bee"] #first-bee .door.primary{background:transparent;border:1.5px solid var(--sk-forest);color:var(--sk-forest)}
+html body[data-reading-room][data-reg="bee"] .lesson-check .door[aria-pressed="true"]{border-color:var(--sk-forest);color:var(--sk-forest);outline-color:var(--sk-forest)}
+body[data-reg="bee"] :is(.ex button,.tgl button,.swatch button){background:transparent;border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);padding:0 var(--sk-s3)}
+body[data-reg="bee"] .swatch button{font-size:14px;padding:0 var(--sk-s2)}
+body[data-reg="bee"] :is(.ex button,.tgl button,.swatch button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-forest)}
+body[data-reg="bee"] .ex button.gold{background:transparent;border-color:var(--sk-forest);color:var(--sk-forest)}
+body[data-reg="bee"] .tgl button[aria-pressed="true"]{background:var(--sk-forest);border-color:var(--sk-forest);color:var(--sk-on-primary)}
+body[data-reg="bee"] #tcopy{background:transparent!important;border:1.5px solid var(--sk-forest)!important;border-radius:var(--sk-radius-pill)!important;color:var(--sk-forest)!important;font:700 15px/1.2 var(--sk-font-ui)!important;padding:0 var(--sk-s3)!important;min-height:var(--sk-control-min)}
+body[data-reg="bee"] :is(#father,#mother,#students,#q-wt,.ex input[type=number]){background:var(--sk-bg-card)!important;color:var(--sk-ink)!important;border:1.5px solid var(--sk-ink-mut)!important;border-radius:var(--sk-radius-md)!important;font:400 16px/1.4 var(--sk-font-ui)!important;padding:0 var(--sk-s2)!important;min-height:var(--sk-control-min)!important}
+body[data-reg]:not([data-reg="cypherpunk"]) #instrument label[style]{font-size:14px!important}
+
+/* RAVER — the archive after dark: wash cards, magenta outlines, the arrival scene's press outlined */
+body[data-reg="raver"] section{background:var(--sk-sovereign-wash);border-color:rgba(156,111,214,.34);border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] :is(.ex,.rline,.swatch){background:var(--sk-sovereign-tint);border-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] .ex{border-radius:var(--sk-radius-lg)}
+body[data-reg="raver"] .rline{border-radius:var(--sk-radius)}
+html body[data-reg="raver"] #first-raver,html body[data-reading-room][data-reg="raver"] #first-raver{background:var(--sk-sovereign-wash);border:1px solid rgba(156,111,214,.34);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reg="raver"] .door,html body[data-reading-room][data-reg="raver"] .door{border-radius:var(--sk-radius-pill);font-family:var(--sk-font-ui);font-weight:700}
+html body[data-reg="raver"] .door.primary,html body[data-reading-room][data-reg="raver"] .door.primary{background:var(--sk-primary);border-color:var(--sk-primary);color:var(--sk-on-primary);box-shadow:0 0 28px rgba(214,85,187,.38)}
+html body[data-reg="raver"] .door:not(.primary),html body[data-reading-room][data-reg="raver"] .door:not(.primary){background:transparent;border:1.5px solid rgba(214,85,187,.6);color:var(--sk-ink)}
+/* the front's magenta pill is the one filled press in view; the arrival scene's own press below it
+   wears the you magenta outline, no fill and no glow */
+html body[data-reg="raver"] #first-raver .door.primary,html body[data-reading-room][data-reg="raver"] #first-raver .door.primary{background:transparent;border:1.5px solid var(--sk-you);color:var(--sk-ink);box-shadow:none}
+html body[data-reading-room][data-reg="raver"] .lesson-check .door[aria-pressed="true"]{border-color:var(--sk-you);outline-color:var(--sk-you)}
+body[data-reg="raver"] :is(.ex button,.tgl button,.swatch button){background:transparent;border:1.5px solid rgba(156,111,214,.55);border-radius:var(--sk-radius-pill);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);padding:0 var(--sk-s3)}
+body[data-reg="raver"] .swatch button{font-size:14px;padding:0 var(--sk-s2)}
+body[data-reg="raver"] :is(.ex button,.tgl button,.swatch button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-you)}
+body[data-reg="raver"] .ex button.gold{background:transparent;border-color:rgba(214,85,187,.6);color:var(--sk-ink)}
+body[data-reg="raver"] .tgl button[aria-pressed="true"]{background:var(--sk-sovereign-wash);border-color:var(--sk-you);color:var(--sk-ink)}
+body[data-reg="raver"] #tcopy{background:transparent!important;border:1.5px solid rgba(214,85,187,.6)!important;border-radius:var(--sk-radius-pill)!important;color:var(--sk-ink)!important;font:700 15px/1.2 var(--sk-font-ui)!important;padding:0 var(--sk-s3)!important;min-height:var(--sk-control-min)}
+body[data-reg="raver"] :is(#father,#mother,#students,#q-wt,.ex input[type=number]){background:var(--sk-sovereign-tint)!important;color:var(--sk-ink)!important;border:1.5px solid rgba(156,111,214,.55)!important;border-radius:var(--sk-radius-pill)!important;font:400 15px/1.4 var(--sk-font-ui)!important;padding:0 var(--sk-s2)!important;min-height:var(--sk-control-min)!important}
+
+/* CYPHERPUNK — the instrument keeps its density: thin grey outlines, cyan on the compose presses */
+body[data-reg="cypherpunk"] :is(.ex button,.tgl button,.swatch button){background:transparent;border:1px solid rgba(100,129,118,.7);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.ex button,.tgl button,.swatch button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .ex button.gold{background:transparent;border-color:var(--sk-ai);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .tgl button[aria-pressed="true"]{background:transparent;border-color:var(--sk-ai);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] #tcopy{background:transparent!important;border:1px solid var(--sk-ai)!important;border-radius:var(--sk-radius-sm)!important;color:var(--sk-ai)!important;font:600 12px/1.2 var(--sk-font-mono)!important;padding:0 var(--sk-s2)!important;min-height:var(--sk-control-min)}
+body[data-reg="cypherpunk"] :is(#father,#mother,#students,#q-wt,.ex input[type=number]){background:var(--sk-bg)!important;color:var(--sk-ink)!important;border:1px solid rgba(100,129,118,.7)!important;border-radius:var(--sk-radius-sm)!important;font:400 13px/1.4 var(--sk-font-mono)!important;padding:0 var(--sk-s1)!important;min-height:var(--sk-control-min)!important}
+body[data-reg="cypherpunk"] #instrument label[style]{font-size:12px!important}
 </style>
 <link rel="stylesheet" href="../skaists.css">
 </head>
@@ -1242,8 +1342,8 @@ COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else
   }
   /* ── RAVER: the orbit ── */
   function orbit(){
-    var n=D.courses.length, h='<circle r="138" fill="none" stroke-width="1.5" stroke-dasharray="2 7" style="stroke:var(--sk-line)"/>';
-    h+='<circle r="62" style="fill:var(--sk-bg-card);stroke:var(--sk-sovereign)" stroke-width="1.5"/>'+
+    var n=D.courses.length, h='<circle r="138" fill="none" stroke-width="1.5" stroke-dasharray="2 7" style="stroke:rgba(156,111,214,.34)"/>';
+    h+='<circle r="62" style="fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign)" stroke-width="1.5"/>'+
       '<text y="4" text-anchor="middle" style="fill:var(--sk-ink)">'+D.done.length+'/'+D.total+'</text>'+
       '<text class="sm" y="30" text-anchor="middle" style="fill:var(--sk-ink-soft)">'+esc(T('et.uni.r.done','done'))+'</text>';
     D.courses.forEach(function(c,i){

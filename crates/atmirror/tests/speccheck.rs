@@ -16,7 +16,7 @@
 //! the malleable signature) AND the guard ENGAGED (`verify_record` rejects it) — it does
 //! not merely assert our own rejection.
 
-use atmirror::record_sig::verify_record;
+use atmirror::record_sig::{verify_record, verify_record_alg};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 
 const VECTORS: [(&str, &str, &str); 12] = [
@@ -111,5 +111,35 @@ fn speccheck_cofactored_accepts_where_verify_record_rejects() {
     assert!(
         !strict_weaker_anywhere,
         "verify_record accepted a signature the cofactored verifier rejected — the strict path is weaker?!"
+    );
+}
+
+/// The keyAlg dispatch (2026-10-04) is `verify_record` on the ed25519 path, byte for
+/// byte: over all 12 speccheck vectors, `verify_record_alg("ed25519", …)` returns the
+/// same result, error variant included. Guarded against vacuity: the vectors must
+/// produce more than one distinct outcome, or the comparison would prove nothing.
+#[test]
+fn speccheck_ed25519_dispatch_matches_verify_record() {
+    let mut outcomes = Vec::new();
+    for (i, (m, pk, sg)) in VECTORS.iter().enumerate() {
+        let msg = unhex(m);
+        let pk_vec = unhex(pk);
+        let pk_bytes: [u8; 32] = pk_vec.clone().try_into().expect("pub_key is 32 bytes");
+        let sig_bytes = unhex(sg);
+
+        let direct = verify_record(&pk_bytes, &msg, &sig_bytes);
+        let dispatched = verify_record_alg("ed25519", &pk_vec, &msg, &sig_bytes);
+        assert_eq!(
+            dispatched, direct,
+            "vector {i}: dispatch diverged from verify_record"
+        );
+        eprintln!("  vector {i:2}: {direct:?}");
+        if !outcomes.contains(&direct) {
+            outcomes.push(direct);
+        }
+    }
+    assert!(
+        outcomes.len() > 1,
+        "control vacuous: every vector gave the same outcome {outcomes:?}"
     );
 }

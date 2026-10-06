@@ -215,7 +215,7 @@ body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c
 #eternal [hidden]{display:none!important}
 #eternal :is(h2,h3,p,ol,ul,table){margin:0;padding:0;letter-spacing:normal}
 #eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;border-radius:0;cursor:pointer;min-height:0}
-#eternal button:hover{background:none;color:inherit}
+#eternal button:where(:hover){background:none;color:inherit}
 #eternal :is(select,input,textarea){margin:0;min-height:0}
 #eternal label{display:block;margin:0}
 #eternal a{color:inherit}
@@ -223,80 +223,97 @@ body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c
 #eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
 [dir="rtl"] #eternal .chev{transform:scaleX(-1)}
 .et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
-body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
-body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="bee"] .et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
 body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm room: one page, one mark, a few words; one magenta action */
-#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start}
-#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+/* NEW BEE — a calm room: one page, one mark, a few words; one action. Dressed in the founder's chosen
+   UI (his My Space screens, 2026-10-04; surfaces/myspace.html): paper, ink, bold system sans, white
+   cards with soft large corners, forest green for the one filled action (white label) and for the mark
+   that is chosen, outlined pills for every second way on. The guard well stays lavender (guard, never
+   red). The title, the reassurance, the page, the four marks, the words, the action, the draft and their
+   order are the bee grammar and stay as built. */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start;font-family:var(--sk-font-ui)}
+#eternal .et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-ui)}
 #eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-#eternal .et-b-q{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-q{font:700 15px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:700 15px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-ui)}
+#eternal .et-b-select:focus,#eternal .et-b-note:focus{border-color:var(--sk-forest)}
 #eternal .et-b-note{min-height:96px;resize:vertical}
-#eternal .et-b-count{align-self:flex-end;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-count{align-self:flex-end;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
-#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:600 16px/1.45 var(--sk-font-ui);color:var(--sk-ink)}
 #eternal .et-b-rows>:last-child{border-bottom:0}
-#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink-mut)}
-#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
-#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-sovereign-strong);color:var(--sk-bg-card)}
-#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
-#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans)}
-#eternal .et-b-outline{min-height:48px;padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:600 16px/1.45 var(--sk-font-bee-sans)}
-#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
-#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:700 14px/1.4 var(--sk-font-ui);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-bg-card);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+[dir="rtl"] #eternal .et-b-row[aria-pressed="true"]{box-shadow:inset -3px 0 0 var(--sk-forest)}
+#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-forest);color:var(--sk-on-primary)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s2)}
+#eternal .et-b-primary,#eternal .et-b-primary:hover{height:var(--sk-control-primary);border-radius:var(--sk-radius-pill);background:var(--sk-forest);color:var(--sk-on-primary);font:700 17px/1.2 var(--sk-font-ui)}
+#eternal .et-b-outline{min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 16px/1.2 var(--sk-font-ui)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);background:transparent;font:700 16px/1.2 var(--sk-font-ui);color:var(--sk-ink);text-decoration:none}
+#eternal :is(.et-b-outline,.et-b-link):hover{border-color:var(--sk-forest)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-draft{display:flex;flex-direction:column;gap:var(--sk-s2);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
-#eternal .et-b-draft b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-draft code{display:block;padding:var(--sk-s2);border-radius:var(--sk-radius);background:var(--sk-bg);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
-#eternal .et-b-draft span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft b{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-b-draft code{display:block;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius-md);background:var(--sk-bg);font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-b-draft span{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-draft span.ok{color:var(--sk-verified)}
 
-/* RAVER — every page of the estate is a star; tap one, light a mark, hold to draft your gift */
-#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);text-align:start}
+/* RAVER — every page of the estate is a star; tap one, light a mark, hold to draft your gift. Dressed in
+   the founder's chosen UI: night purple ground (the sovereign wash into tint), plain white bold titles,
+   round everything, you magenta for the one filled press (the hold disc, dark label, soft glow) and as
+   the outline of every second way on and of the lit mark. The sky of pages, its legend, the star card,
+   the four tiles, the words, the hold ring and the gift stay as built. */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.4 var(--sk-font-ui);text-align:start}
 #eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
-#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 #eternal .et-r-sky{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));cursor:pointer;touch-action:manipulation}
 #eternal .et-r-sky circle{transition:r .26s}
-#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
-#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash)}
+#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);display:flex;align-items:center;justify-content:center;font:700 18px/1 var(--sk-font-ui)}
+#eternal .et-r-card .rk:hover{border-color:var(--sk-you)}
 #eternal .et-r-card div{flex:1;min-width:0}
-#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
-#eternal .et-r-card span{font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
-#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card b{display:block;font:700 15px/1.3 var(--sk-font-ui);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-soft)}
 #eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
 #eternal .et-r-legend i{width:10px;height:10px;border-radius:var(--sk-radius-pill)}
 #eternal .lg-door{background:var(--sk-sovereign-strong)}#eternal .lg-blight{background:var(--sk-ai)}#eternal .lg-top{background:var(--sk-sovereign)}#eternal .lg-deep{background:var(--sk-info)}
 #eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s3) 0}
-#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;opacity:.7;transition:opacity .26s,box-shadow .26s}
-#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid rgba(156,111,214,.55);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);opacity:.7;transition:opacity .26s,box-shadow .26s}
+#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-ui)}
 #eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
-#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid rgba(183,159,224,.6);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:400 15px/1.4 var(--sk-font-ui)}
+#eternal .et-r-input:focus{border-color:var(--sk-you)}
 #eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s4) auto 0}
 #eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
 #eternal .et-r-hold circle{fill:none;stroke-width:5}
-#eternal .et-r-hold .track{stroke:var(--sk-line)}
+#eternal .et-r-hold .track{stroke:rgba(156,111,214,.34)}
 #eternal .et-r-hold .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:540;stroke-dashoffset:540}
-#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
-#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
-#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-tint)}
-#eternal .et-r-gift code{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
-#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);margin-top:var(--sk-s2);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em;box-shadow:0 0 28px rgba(214,85,187,.38)}
+#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-ui);letter-spacing:0}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-soft)}
+#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-wash)}
+#eternal .et-r-gift code{display:block;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-row);margin-top:var(--sk-s2);padding:0 var(--sk-s3);border-radius:var(--sk-radius-pill);border:1.5px solid rgba(214,85,187,.6);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui)}
+#eternal .et-r-ghost:hover{border-color:var(--sk-you)}
 @media (prefers-reduced-motion:reduce){#eternal .et-r-sky circle,#eternal .et-r-tiles button{transition:none}}
 
-/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard */
+/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard. It already
+   wore the chosen UI (near-black, IBM Plex Mono throughout, cyan action cut 6px with a dark label,
+   dense); the chosen UI adds only thin grey borders on every second way on. */
 #eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);text-align:start}
 #eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
 #eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 #eternal .et-c-form{display:grid;gap:var(--sk-s1);margin-top:var(--sk-s3)}
 #eternal .et-c-form label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);display:flex;flex-direction:column;gap:2px}
 #eternal .et-c-in{width:100%;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
-#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-primary,#eternal .et-c-primary:hover{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono)}
 #eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
 #eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
 #eternal .et-c-kv th{width:84px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
@@ -317,37 +334,92 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
 #eternal .et-c-verify b{display:block;margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 #eternal .et-c-verify ol{padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
 #eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
-#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost:hover{border-color:var(--sk-ai)}
 #eternal .et-c-ghost .et-c-nt{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 
-/* ── THE WHOLE DECK, dressed per register: the page's own variables mapped onto skaists ── */
+/* ── THE WHOLE DECK, dressed per register: the page's own variables mapped onto skaists, in the
+   founder's chosen UI (2026-10-05). Only the dress: the masthead, the arrival, the figure, the four
+   marks, the composer and the instrument (tally, bind, guard, the AI window, the sources) are the ones
+   this page draws, in the same order, in every register. The verdict palette (--v-*) is the validated
+   data set and keeps painting the data. The front's action is the one filled press on the page; every
+   press of the deck below it is an outlined pill (cut 6px in cypherpunk), and the deck's own "do this"
+   press wears the register's action edge: new bee forest, raver you magenta, cypherpunk cyan. ── */
 body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);background:var(--sk-bg)}
-body[data-reg="bee"]{--dim:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-bee-sans)}
-body[data-reg="raver"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-raver-body);font-family:var(--sk-font-raver-body)}
-body[data-reg="raver"][data-review-beat="arrival"]{background:var(--sk-bg)}
-body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);font-family:var(--sk-font-mono)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-ui);--edge:rgba(106,115,110,.4);--act:var(--sk-forest);font-family:var(--sk-font-ui)}
+body[data-reg="raver"]{--dim:var(--sk-sovereign-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-ui);--edge:rgba(156,111,214,.55);--act:rgba(214,85,187,.6);font-family:var(--sk-font-ui)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--edge:rgba(100,129,118,.7);--act:var(--sk-ai);font-family:var(--sk-font-mono)}
+/* raver is night purple: the sovereign wash into tint, the same gradient the reference builds wear. The
+   shared reading room paints its own violet-black (register.js); this page names the chosen ground. */
+html body[data-reg="raver"],html body[data-reg="raver"][data-review-beat],html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-sovereign-tint);--panel:var(--sk-sovereign-wash);--well:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-sovereign-soft);--line:rgba(156,111,214,.34);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);
+ background:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%) var(--sk-sovereign-tint)!important;background-attachment:fixed!important;color:var(--sk-ink)}
 body[data-reg] :is(section,.out,.note,.tile,#tip){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="raver"] :is(section,.out,.note,.tile,#tip){background:var(--sk-sovereign-wash);border-color:rgba(156,111,214,.34)}
+html body[data-reg="raver"] :is(.out,.note,.tile,#tip){background:var(--sk-sovereign-tint)}
+/* the three fronts stand on the register's own ground, as the reference builds' heads do */
+html body[data-reg] section#eternal{background:none}
 body[data-reg] :is(select,input,textarea){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink-mut);border-radius:var(--sk-radius-sm)}
-body[data-reg] button:not(.door):not(.mark){background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
-body[data-reg] button.gold:not(.door){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink)}
-body[data-reg="bee"] #mkReview{background:var(--sk-primary);color:var(--sk-on-primary)}
-body[data-reg="raver"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+html body[data-reg="bee"][data-review-beat] #instrument :is(input,select,textarea){background:var(--sk-bg-card);border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-md)}
+html body[data-reg="raver"][data-review-beat] #instrument :is(input,select,textarea){background:var(--sk-sovereign-tint);border:1.5px solid rgba(183,159,224,.6);border-radius:var(--sk-radius-xl)}
+html body:not([data-reg="cypherpunk"])[data-review-beat] #instrument :is(input,select,textarea):focus{border-color:var(--act)}
+/* a field's hint text reads in the register's muted ink at 4.5:1 or better on every field ground, the
+   idiom surfaces/bview.html uses; the browser's own grey falls under 4.5:1 on the night grounds */
+body[data-reg] :is(input,textarea)::placeholder{color:var(--sk-ink-mut);opacity:1}
+body[data-reg] button:not(.door):not(.mark){background:transparent;color:var(--sk-ink);border-color:var(--edge);border-radius:var(--sk-radius-pill)}
+body[data-reg] button.gold:not(.door){background:transparent;color:var(--sk-ink);border-color:var(--act)}
+body[data-reg="bee"] button.gold:not(.door){color:var(--sk-forest)}
+html body[data-reg][data-review-beat] #instrument button:not(.mark){background:transparent;border-style:solid;border-width:1.5px;border-radius:var(--sk-radius-pill);font-family:var(--sk-font-ui);font-weight:700;padding:9px 18px}
+html body[data-reg][data-review-beat] #instrument button:not(.mark):not([disabled]):hover{background:transparent;border-color:var(--act)}
+html body[data-reg="bee"][data-review-beat] #instrument button:not(.mark){font-size:16px}
+html body[data-reg="raver"][data-review-beat] #instrument button:not(.mark){font-size:15px}
+html body[data-reg="cypherpunk"][data-review-beat] #instrument button:not(.mark){border-width:1px;border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono);font-weight:600;padding:9px 14px}
+body[data-reg="bee"] #mkReview{background:transparent;color:var(--sk-forest);border-color:var(--sk-forest)}
+body[data-reg="raver"] .door.primary{background:transparent;color:var(--sk-ink);border-color:var(--sk-you)}
 body[data-reg="cypherpunk"] :is(section,.out,.note,.tile,#tip){border-radius:var(--sk-radius-sm)}
-body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
-body[data-reg="raver"] h1{font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body:not([data-reg="cypherpunk"]) :is(.out,.note,.tile){border-radius:var(--sk-radius-md)}
+body[data-reg="bee"] h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em}
+body[data-reg="raver"] h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
 body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal;color:var(--sk-ink)}
 body[data-reg="raver"] :where(section .law,label,.st,.note,.note .t,footer,table,.tile .tl,.brow .bn,.brow .bc,summary),body[data-reg="raver"] #legend{font-size:14px}
 body[data-reg="cypherpunk"] :where(.tile .tl,.brow .bn,.brow .bc,summary,.out),body[data-reg="cypherpunk"] #legend,body[data-reg="cypherpunk"] #instrument button{font-size:12px}
+/* new bee reads at 14 px and up everywhere, the instrument too */
+html body[data-reg="bee"][data-review-beat] :where(.st,.tile .tl,.note .t,.brow .bn,.brow .bc,.out),html body[data-reg="bee"][data-review-beat] .tile .tv .tof,html body[data-reg="bee"][data-review-beat] :is(#legend,#tip){font-size:14px}
+html body[data-reg="bee"][data-review-beat] #tally details>summary{font-size:14px!important}
+/* the table-view fold is a 44 px press in every register */
+body[data-reg] #tally details>summary{padding-block:13px;line-height:18px}
 body[data-reg="bee"]{--faint:var(--sk-ink-mut)}
 body[data-reg="bee"] .door:not(.primary){color:var(--sk-ink);border-color:var(--sk-ink);background:var(--sk-bg-card)}
-body[data-reg="bee"] #masthead h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
-body[data-reg="raver"] #masthead h1{font:700 30px/1.1 var(--sk-font-raver-display)}
+body[data-reg="bee"] #masthead h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em}
+body[data-reg="raver"] #masthead h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em}
 body[data-reg="cypherpunk"] #masthead h1{font:600 15px/1.45 var(--sk-font-mono)}
 body[data-reg="raver"] .tile .tl{font-size:14px}
 body[data-reg="cypherpunk"] .tile .tl{font-size:12px}
 body[data-reg] #instrument button{min-height:44px}
-/* the shared reading room paints raver violet-black (register.js); this page's raver is skaists black-green */
-html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);background:var(--sk-bg)!important;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] #instrument :is(select,input){min-height:44px}
+/* the reading room's arrival, figure and instrument in the chosen dress (register.js lays them out;
+   this page keeps that layout and changes only face, weight, corners and paint) */
+html body[data-reg="bee"][data-review-beat] #masthead h1,html body[data-reg="raver"][data-review-beat] #masthead h1{font-family:var(--sk-font-ui);font-weight:700;letter-spacing:-.02em;color:var(--sk-ink)}
+html body[data-reg="bee"][data-review-beat] #first-bee .take,html body[data-reg="raver"][data-review-beat] .take{font-family:var(--sk-font-ui);font-weight:700;color:var(--sk-ink)}
+html body[data-reg="bee"][data-review-beat] .door,html body[data-reg="raver"][data-review-beat] .door{border-radius:var(--sk-radius-pill);font-family:var(--sk-font-ui);font-weight:700}
+html body[data-reg="bee"][data-review-beat] .door:not(.primary){background:transparent;border:1.5px solid var(--edge);color:var(--sk-ink)}
+html body[data-reg="raver"][data-review-beat] .door:not(.primary){background:transparent;border:1.5px solid rgba(214,85,187,.6);color:var(--sk-ink)}
+/* the front's action is the one filled press in view; the deck's own first press below it wears the
+   register's action outline, no fill */
+html body[data-reg="bee"][data-review-beat] #first-bee .door.primary{background:transparent;border:1.5px solid var(--sk-forest);color:var(--sk-forest)}
+html body[data-reg="raver"][data-review-beat] :is(#first-raver,#layer-figure) .door.primary{background:transparent;border:1.5px solid var(--sk-you);color:var(--sk-ink);box-shadow:none}
+html body[data-reg="bee"][data-review-beat] .door:hover{border-color:var(--sk-forest)}
+html body[data-reg="raver"][data-review-beat] .door:hover{background:transparent;border-color:var(--sk-you)}
+html body[data-reading-room][data-reg="raver"] #first-raver{background:var(--sk-sovereign-wash);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reading-room][data-reg="raver"] #first-raver .feel{font-family:var(--sk-font-ui);font-weight:700;color:var(--sk-ink)}
+html body[data-reading-room]:is([data-reg="bee"],[data-reg="raver"]) #layer-figure{border-radius:var(--sk-radius-xl)}
+html body[data-reading-room]:is([data-reg="bee"],[data-reg="raver"]) #instrument :is(section,.card){border-radius:var(--sk-radius-xl)}
+html body[data-reading-room]:is([data-reg="bee"],[data-reg="raver"]) #instrument :is(h2,h3){font-family:var(--sk-font-ui);font-weight:700}
+/* the four marks: white cards on paper (night wash in raver); the chosen one wears the action edge */
+html body[data-reg="bee"][data-review-beat] #mark-words .mark{background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);color:var(--sk-ink);font-family:var(--sk-font-ui)}
+html body[data-reg="bee"][data-review-beat] #mark-words .mark[aria-pressed="true"]{border-color:var(--sk-forest);box-shadow:inset 0 0 0 1px var(--sk-forest);color:var(--sk-forest)}
+html body[data-reg="raver"][data-review-beat] #mark-words .mark{background:var(--sk-sovereign-wash);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);color:var(--sk-ink);font-family:var(--sk-font-ui)}
+html body[data-reg="raver"][data-review-beat] #mark-words .mark[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:inset 0 0 0 1px var(--sk-you),var(--sk-glow-sovereign);color:var(--sk-ink)}
+body[data-reg="cypherpunk"] #sources-panel{border-radius:var(--sk-radius-sm)}
 </style>
 <link rel="stylesheet" href="skaists.css">
 </head>
@@ -445,10 +517,10 @@ html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--s
   <svg id="crown-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="keep-wash" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#2a2410"/>
-        <stop offset="32%" stop-color="#1a2a1c"/>
-        <stop offset="62%" stop-color="#142028"/>
-        <stop offset="100%" stop-color="#1a1428"/>
+        <stop offset="0%" stop-color="#171028"/>
+        <stop offset="32%" stop-color="#171028"/>
+        <stop offset="62%" stop-color="#120e1e"/>
+        <stop offset="100%" stop-color="#120e1e"/>
       </linearGradient>
       <radialGradient id="crown-glow" cx="50%" cy="32%" r="48%">
         <stop offset="0%" stop-color="#FFD700" stop-opacity=".38"/>

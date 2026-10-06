@@ -223,3 +223,15 @@ vectors file carries PUBLIC-CONSTANT on every baked line.
 - The door card copy and SPEC §open updated to quote 'restricted: not a
   relay member'; harness control leg is offline-first (public-relay
   fallback exists but this network SNI-filters those hosts).
+
+## Pass 5 (2026-10-05) — founder sees the MVP; cypherpunk register approved; lane lands on MAIN for Pages
+
+- Founder verdict on the UI/UX MVP: "looks good for the cypherpunk UX/ui."
+  Polish landed first (63280a4e6): posture card became a comprehension-law
+  disclosure; ONE filled gold primary per concept; tour-bar clearance.
+  Its single CI red was the bGENEaLOGY eternal flake — rerun ALL GREEN.
+- Local review server retired in favor of the real deploy: Pages builds
+  from main / (legacy), so the lane lands on main by NO-PR direct push
+  (estate precedent, founder order "no PRs"). Merge of main's UI batch 3
+  resolved by regeneration; all gates green pre-push.
+- Live door after deploy: https://skaists.dev/surfaces/bchat.html

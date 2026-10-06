@@ -24,7 +24,14 @@ row below is a data-plane call the user's operation asked for.
 
 | endpoint | purpose | when it fires | override / kill |
 |---|---|---|---|
-| `connect.trezor.io` | Trezor Connect (hosted `/9/trezor-connect.js`, probe-verified 200 on 2026-08-14; the `/10/` path 404s) — official device rail (consent popup; Bridge/WebUSB) | **On the user ENTERING the Trezor step** (they clicked the Trezor card — explicit rail choice; preloading there keeps the connect popup inside the click's gesture window, or browsers silently block it) | Never enter the Trezor step, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
+| `connect.trezor.io` | Trezor Connect (the pinned `/9.7.3/trezor-connect.js` with SRI, the same build the wallet loads) — official device rail. On the Connect press only: one local check for the Trezor Suite desktop app at `ws://127.0.0.1:21335/connect-ws` (Bluetooth and USB through Suite), otherwise hosted Suite web in a window (`suite.trezor.io`, browser USB); never the legacy in-page iframe | **On the user ENTERING the Trezor step** (they clicked the Trezor card — explicit rail choice; preloading there keeps the connect popup inside the click's gesture window, or browsers silently block it) | Never enter the Trezor step, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
+
+## surfaces/wallet.html (served page)
+
+| endpoint | purpose | when it fires | override / kill |
+|---|---|---|---|
+| `relay.damus.io`, `nos.lol`, `relay.snort.social` (wss) | QR bridge v2: ephemeral kind-20107 events carrying the desktop's X-Wing key and the phone's sealed grant (ciphertext only) | only while a QR bridge is open (desktop shows a code, or the phone presses allow) | `QR_RELAYS` in wallet.html; close the bridge |
+| `a.pool.opentimestamps.org`, `b.pool.opentimestamps.org`, `a.pool.eternitywall.com` | OpenTimestamps: POST /digest with the SHA-256 of a PQ binding (32 bytes, nothing else) | only when the person presses "timestamp it on Bitcoin" after making a binding | `PQ_OTS_CALENDARS` in wallet.html; do not press |
 
 ## atmirror (mirror pipeline)
 
@@ -55,6 +62,13 @@ row below is a data-plane call the user's operation asked for.
 | bsigner | `evm-tst3.exsat.network` | exSat TESTNET registry entry — testnet-only by construction |
 | price-feed | `ams.usda.gov/mnreports/fvhemp` | hemp-seed price series (documented source, not an oracle) |
 | ceremony scripts (`docs/dispatches/ceremony/`) | npm registry, Turbo (`upload.ardrive.io` family), Stripe checkout | founder-run, one-time, by design |
+
+## tools/net-doxx (tungsten test harness, founder-run only)
+
+| endpoint | purpose | when it fires | override / kill |
+|---|---|---|---|
+| `config.doxx.net/v1/` | doxx NETWORK adapter: read state, create and delete three test tunnels, add and remove firewall rules, mint one role=device credential | only when the founder runs `tools/net-doxx/live.sh`; never in CI (tests use a fake) | do not run the script; the token is typed per run and never stored |
+| doxx WireGuard servers (`wireguard.*.doxx.net:51820`) | the test tunnels, inside network namespaces bnrtt-A/B/C | same run | the namespaces are deleted on exit |
 
 ## Flagged, not yet uniform
 

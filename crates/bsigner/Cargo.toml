@@ -17,3 +17,10 @@ serde_json = "1"
 sha3 = { workspace = true }
 zeroize = { workspace = true }
 thiserror = "2"
+# bpq.rs (the Rust twin of surfaces/bpq.js): X-Wing's X25519 half, HKDF and
+# AES-256-GCM for sealed objects, bech32m for the bzpq1 id.
+aes-gcm = "0.10"
+bech32 = "0.9"
+hkdf = "0.12"
+sha2 = { workspace = true }
+x25519-dalek = { version = "2", features = ["static_secrets"] }

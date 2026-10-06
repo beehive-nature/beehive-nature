@@ -42,10 +42,13 @@ async function open(reg, { lang = 'en' } = {}) {
 const FRONT = { bee: '.et-b', raver: '.et-r', cypherpunk: '.et-c' };
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress', async () => {
   const want = {
-    bee: { bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '#etBDock', action: 'rgb(168, 35, 140)' },
-    raver: { bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '#etRDock', action: 'rgb(214, 85, 187)' },
+    bee: { bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '#etBDock', action: 'rgb(38, 77, 54)' },
+    raver: { bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '#etRDock', action: 'rgb(214, 85, 187)' },
     cypherpunk: { bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etCDock', action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
@@ -104,7 +107,7 @@ test('bee: a tongue is chosen through the estate\'s own picker; docking opens th
   assert.equal(await p.inputValue('#blangsel'), 'lv');
   assert.equal(await p.evaluate(() => window.__eternal.data.current), 'lv');
   assert.match(await p.textContent('#etBRows .et-b-row[data-code="lv"]'), /reading now/);
-  // the one magenta action opens the real workshop (it composes, it never posts)
+  // the one filled action opens the real workshop (it composes, it never posts)
   await p.click('#etBDock');
   await p.waitForFunction(() => getComputedStyle(document.getElementById('ws-editor')).display !== 'none', null, { timeout: 8000 });
   assert.match(await p.textContent('#ws-verbtitle'), /CREATE/);
