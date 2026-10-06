@@ -55,6 +55,7 @@ from typing import Optional
 from voucher_escrow import (  # noqa: F401 (re-exported for callers)
     Escrow, RateSet, InsufficientVoucher, NonceReplay, TermsMismatch,
     VoucherError, TITHE_RATE, receipt_total, receipt_tithe,
+    ConversionQuote,
 )
 
 # the four verifier states — one spelling shared with the z3.2 comb
@@ -151,7 +152,8 @@ def rate_set_minted_at_epoch(raw: dict) -> float | None:
 # ── 1 · credit-from-settlement ──────────────────────────────────────────────
 
 def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
-                           observed: dict, idempotency_key: str | None = None) -> dict:
+                           observed: dict, idempotency_key: str | None = None,
+                           now: float | None = None) -> dict:
     """
     pinout server.mjs:paymentContext / creditFromPayment, estate-shaped.
 
@@ -166,6 +168,10 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
       amount) → SettlementMismatch, NOTHING credited;
     - a replayed settlement (same tx) credits once — idempotent, the
       (voucher, tx) key lives in voucher_escrow.deposit;
+    - AV-2: a base-rail credit rides the SERVED conversion quote (declared
+      quote_id/quoted_at + rate + rate_ref); the engine's single-use + TTL
+      law does the refusing, and a base credit with no citable quote is a
+      typed SettlementMismatch — the stale-quote hole stays closed here too;
     - AV-1: an optional serve-bridge idempotency_key is recorded on the
       credit event (additive field) for bridge-level resubmission lookup.
     """
@@ -186,9 +192,27 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
     if Decimal(str(observed["amount"])) <= 0:
         raise SettlementMismatch("settled transfer carries zero — nothing to credit")
     if observed.get("rail") == "base":
+        # AV-2 (2026-10-06 convergence): a base credit rides a SERVED
+        # conversion quote — the declaration must carry the quote the desk
+        # actually served (id, rate, rate_ref, quoted_at), and the engine's
+        # own quote law (single use + inclusive TTL) does the refusing. A
+        # base credit without a citable quote is the stale-quote hole
+        # reopened at the bridge: fail closed, never price-table it.
+        try:
+            cq = ConversionQuote(
+                id=str(declared["quote_id"]),
+                rate_a_per_usdc=declared["rate_a_per_usdc"],
+                rate_ref=declared["rate_ref"],
+                quoted_at=float(declared["quoted_at"]))
+        except KeyError as miss:
+            raise SettlementMismatch(
+                f"base settlement declares no conversion quote "
+                f"(missing {miss.args[0]}) — a USDC credit cites the served "
+                "quote (id, rate, rate_ref, quoted_at) or does not credit"
+            ) from miss
         return escrow.deposit_usdc(
-            voucher, observed["amount"], base_tx=observed["tx"],
-            rate_a_per_usdc=declared["rate_a_per_usdc"], rate_ref=declared["rate_ref"])
+            voucher, observed["amount"], base_tx=observed["tx"], quote=cq,
+            now=now)
     return escrow.deposit(voucher, observed["amount"], vaulta_tx=observed["tx"],
                           sender=observed.get("from", ""),
                           memo=observed.get("memo", ""),

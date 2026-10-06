@@ -35,7 +35,7 @@ import json, os, re, sys, time, hashlib, subprocess, argparse
 # refuse-before-write. meter.py keeps the ruled duties (receipt emission, key
 # secrets, chain read-back, bindings/gate) and routes voucher BALANCES here.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from voucher_escrow import Escrow, RateSet, InsufficientVoucher, VoucherError, TITHE_RATE  # noqa: E402
+from voucher_escrow import Escrow, RateSet, InsufficientVoucher, VoucherError, ConversionQuote, TITHE_RATE  # noqa: E402
 
 LOG = "/opt/buzz-compute/logs/usage.log"
 # AV-1: the whole meter state tree derives from BUZZ_METER_DIR so the serve
@@ -760,6 +760,10 @@ def cmd_basepoll(args):
         print("basepoll: base_receive_address / usdc_a_rate / usdc_a_rate_ref unset in keys.json.meta "
               "— CONFIG fillable at flip-time (paid lane HOLD); idling")
         return
+    # AV-2: the card read is the QUOTE's serve moment — every credit this run
+    # cites it, so freshness is measured honestly (poll-time − read-time) and
+    # the quote's identity is (card version, transfer): one quote per deposit.
+    rate_read_at = time.time()
     st = {}
     try:
         with open(BASE_STATE) as f: st = json.load(f)
@@ -787,9 +791,13 @@ def cmd_basepoll(args):
                 continue
             try:
                 ev = escrow().deposit_usdc(key, str(usdc_amt), base_tx=tx,
-                                           rate_a_per_usdc=str(rate), rate_ref=rate_ref)
+                                           quote=ConversionQuote(
+                                               id=f"{rate_ref}:{tx}",
+                                               rate_a_per_usdc=str(rate),
+                                               rate_ref=rate_ref,
+                                               quoted_at=rate_read_at))
                 print(f"basepoll: credited {key} +{ev['amount']} A "
-                      f"({usdc_amt} USDC @ {rate} A/USDC, ref {rate_ref}) — event {ev['hash'][:12]}…")
+                      f"({usdc_amt} USDC @ {rate} A/USDC, quote {rate_ref}:{tx[:10]}… ref {rate_ref}) — event {ev['hash'][:12]}…")
                 credited += 1
             except VoucherError as e:
                 emit_settlement_instruction(f"USDC deposit REFUSED by engine ({e}) — tx {tx}")
