@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from voucher_escrow import (  # noqa: E402
     Escrow, RateSet, InsufficientVoucher, NonceReplay, TermsMismatch, VoucherError,
+    StaleQuote, QUOTE_TTL_SECS,
 )
 from x402_meter import (  # noqa: E402
     PENDING_ANCHOR, PASSED, FAILED, INCONCLUSIVE,
@@ -82,14 +83,45 @@ try:
 except SettlementMismatch:
     ok("rail mismatch (declared base, settled vaulta) → REJECT")
 
-# base rail: observed USDC credits through the explicit cited rate
+# base rail: observed USDC credits through the SERVED conversion quote (AV-2)
+T_USDC = 1_800_000_000.0
 ev_usdc = credit_from_settlement(
     es, "member-abc",
     {"rail": "base", "tx": "0xsettle2", "sender": "0xmember", "amount": "10.000000",
-     "rate_a_per_usdc": "2.5", "rate_ref": "estate-rate-card@demo"},
-    {"rail": "base", "tx": "0xsettle2", "from": "0xmember", "amount": "10.000000"})
+     "rate_a_per_usdc": "2.5", "rate_ref": "estate-rate-card@demo",
+     "quote_id": "xq-settle2", "quoted_at": T_USDC - 10},
+    {"rail": "base", "tx": "0xsettle2", "from": "0xmember", "amount": "10.000000"},
+    now=T_USDC)
 assert ev_usdc["currency_in"] == "USDC" and es.balance("member-abc") == Decimal("27.0000")
-ok("base-rail settlement: 10 USDC @ cited 2.5 A/USDC → 25.0000 A; balance 27.0000")
+assert ev_usdc["quote_id"] == "xq-settle2"
+ok("base-rail settlement: 10 USDC @ cited 2.5 A/USDC → 25.0000 A; balance 27.0000 (the quote is cited and its id burned)")
+
+# base rail WITHOUT the served quote → typed refusal, nothing credited (AV-2)
+try:
+    credit_from_settlement(
+        es, "member-abc",
+        {"rail": "base", "tx": "0xnoquote", "sender": "0xmember", "amount": "1.000000",
+         "rate_a_per_usdc": "2.5", "rate_ref": "estate-rate-card@demo"},
+        {"rail": "base", "tx": "0xnoquote", "from": "0xmember", "amount": "1.000000"},
+        now=T_USDC)
+    raise SystemExit("FAIL: base credit without a citable quote accepted")
+except SettlementMismatch:
+    assert es.balance("member-abc") == Decimal("27.0000")
+    ok("base credit with no served quote (missing quote_id/quoted_at) → REJECT — the stale-quote hole stays closed at the bridge")
+
+# a STALE declared quote → the engine refuses it typed, through the bridge
+try:
+    credit_from_settlement(
+        es, "member-abc",
+        {"rail": "base", "tx": "0xstaleq", "sender": "0xmember", "amount": "1.000000",
+         "rate_a_per_usdc": "2.5", "rate_ref": "estate-rate-card@demo",
+         "quote_id": "xq-stale", "quoted_at": T_USDC - (QUOTE_TTL_SECS + 1)},
+        {"rail": "base", "tx": "0xstaleq", "from": "0xmember", "amount": "1.000000"},
+        now=T_USDC)
+    raise SystemExit("FAIL: stale declared quote credited")
+except StaleQuote:
+    assert es.balance("member-abc") == Decimal("27.0000")
+    ok(f"stale declared quote (age TTL+1 = {QUOTE_TTL_SECS + 1}s) → StaleQuote through the bridge, nothing credited")
 
 # ── 2 · PAUSE-NOT-KILL — the metered session ────────────────────────────────
 sess = Session(voucher="member-abc", escrow=es, rate_set=RS).open()

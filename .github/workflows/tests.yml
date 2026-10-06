@@ -34,6 +34,15 @@ jobs:
         run: |
           test -x "$SETTLE_SOLANA_BIN" || { echo "settle-solana binary missing: a skipped suite is not a pass"; exit 1; }
           node --test solana-native.test.mjs
+      # the bSigner→SETTLE nerve: the real organ signs the authority, the organ verifies it, the kernel settles under it
+      - name: bPay SETTLE — the signed-authorization nerve through the built bsigner organ
+        if: always()
+        working-directory: tools/bpay-settle
+        env:
+          SETTLE_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$SETTLE_BSIGNER_BIN" || { echo "bsigner binary missing: a skipped suite is not a pass"; exit 1; }
+          node --test bsigner-nerve.test.mjs
       - name: Check formatting
         if: always()
         run: cargo fmt --all --check
