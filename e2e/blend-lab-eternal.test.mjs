@@ -61,10 +61,13 @@ const G = { virginia: 35, burley: 40, turkish: 10, perique: 15 }, P = { virginia
 const COST = Object.keys(G).reduce((a, k) => a + G[k] * P[k] / 454, 0), PACK = COST / 111 * 20;
 const BLACK = { total: '100g', cigs: '111', pack: '$' + PACK.toFixed(2), cost: '$' + COST.toFixed(2), save: Math.round((12 - PACK) / 12 * 100) + '%' };
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register in its own dress; the lab keeps its own ground; the laws', async () => {
   const want = {
-    bee: { bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+    bee: { bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+    raver: { bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
     cypherpunk: { bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
