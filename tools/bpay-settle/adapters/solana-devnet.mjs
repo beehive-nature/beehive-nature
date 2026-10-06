@@ -31,7 +31,12 @@ function refuse(code, msg) { const e = new Error(msg); e.code = code; throw e; }
 
 // The legacy message the bench built, read back: what it moves, to whom, from
 // whom. The kernel compares THIS with the intent, so the check is not the
-// intent compared with itself. Exactly one System Program transfer, or refuse.
+// intent compared with itself. The message may hold exactly two instructions:
+// one System Program transfer and the bench's own memo carrying its intent
+// hash. Any other instruction (a second transfer, CreateAccount, Assign, any
+// other program) is refused: it could move or reassign what the transfer
+// check never sees.
+const MEMO_PROGRAM = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"; // PUBLIC-CONSTANT: SPL Memo program (crates/settle-solana MEMO)
 const B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 function b58(bytes) {
   let n = BigInt("0x" + (Buffer.from(bytes).toString("hex") || "0")), out = "";
@@ -39,7 +44,7 @@ function b58(bytes) {
   for (const b of bytes) { if (b !== 0) break; out = "1" + out; }
   return out;
 }
-export function decodeSystemTransfer(message) {
+export function decodeSystemTransfer(message, intentHash) {
   let i = 0;
   const take = (n) => { if (i + n > message.length) refuse("BAD_MESSAGE", "message runs short"); const v = message.subarray(i, i + n); i += n; return v; };
   const shortvec = () => { let len = 0, shift = 0; for (;;) { const b = take(1)[0]; len |= (b & 0x7f) << shift; if (!(b & 0x80)) return len; shift += 7; if (shift > 14) refuse("BAD_MESSAGE", "shortvec too long"); } };
@@ -47,7 +52,7 @@ export function decodeSystemTransfer(message) {
   take(3); // header
   const keys = Array.from({ length: shortvec() }, () => take(32));
   take(32); // recent blockhash
-  const transfers = [];
+  const transfers = [], memos = [];
   for (let n = shortvec(); n > 0; n--) {
     const program = keys[take(1)[0]];
     const accounts = Array.from({ length: shortvec() }, () => take(1)[0]);
@@ -57,10 +62,13 @@ export function decodeSystemTransfer(message) {
     if (program.every((b) => b === 0) && data.length === 12 && data.readUInt32LE(0) === 2) {
       if (accounts.length !== 2 || !keys[accounts[0]] || !keys[accounts[1]]) refuse("BAD_MESSAGE", "transfer accounts outside the keys");
       transfers.push({ from: b58(keys[accounts[0]]), to: b58(keys[accounts[1]]), lamports: data.readBigUInt64LE(4).toString() });
-    }
+    } else if (b58(program) === MEMO_PROGRAM && accounts.length === 0) {
+      memos.push(data.toString("utf8"));
+    } else refuse("BAD_MESSAGE", "the message carries an instruction other than the transfer and its memo");
   }
   if (i !== message.length) refuse("BAD_MESSAGE", "trailing bytes after the instructions");
   if (transfers.length !== 1) refuse("BAD_MESSAGE", `expected exactly one SOL transfer, found ${transfers.length}`);
+  if (memos.length !== 1 || memos[0] !== "bnr:settle-eval:v1:" + intentHash) refuse("BAD_MESSAGE", "the memo is not the bench's binding of this intent");
   return transfers[0];
 }
 
@@ -128,7 +136,7 @@ export function createAdapter({ run, rpc, payer, path = "m/44'/501'/0'" }) {
     async payloads(prepared) {
       const bytes = Buffer.from(prepared.rail.message_base64, "base64");
       const { intent } = prepared;
-      const moved = decodeSystemTransfer(bytes);
+      const moved = decodeSystemTransfer(bytes, prepared.rail.intent_hash);
       if (moved.from !== payer) refuse("BAD_MESSAGE", "the message pays from another account than this payer");
       // the fee bound is the bench's own: verify and reconcile refuse a fee above max_fee_lamports
       return { mode: "shell-submits",

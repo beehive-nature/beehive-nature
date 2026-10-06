@@ -104,3 +104,28 @@ test("the same operator twice is still one operator", { skip }, async () => {
   const r = await run({ evidence: async (s, real) => (await real(s)).map((x) => ({ ...x, operator: "op-0" })) });
   assert.equal(r.receipt.reconciliation.conclusion, "FINALITY-PENDING");
 });
+
+test("a message with any instruction beyond the transfer and its memo is refused before signing", { skip }, async () => {
+  const { decodeSystemTransfer } = await import("./adapters/solana-devnet.mjs");
+  const payer = keypair(), recipient = keypair();
+  const adapter = createAdapter({ run: binaryRunner(BIN), rpc: devnet(), payer: payer.address });
+  const d = await adapter.network();
+  const invoice = buildGenericInvoice({ jobId: "solana-native-2", issuedAt: NOW, lines: [{ asset: SOL, quotes: [{ quote_hash: "q-sol-2", amount_atto: "1000" }] }], authorization: { ceilings: { [SOL]: "1000" }, authorizedBy: "test" } });
+  const { authority } = buildAuthority({ principal: "agent:bFUzZ", asset: SOL, max_asset_atto: "1000", max_native_fee_atto: "5000", recipient: recipient.address, not_after: "2026-10-05T17:30:00.000Z", nonce: "nonce-sol-0002", invoice_digest: invoice.identity.contentDigest, adapter_manifest_hash: descriptorHash(d) });
+  const intent = buildIntent({ invoice, asset: SOL, descriptor: d, authority, quote: { commitment: invoice.commitment.digest, expires_at: "2026-10-05T18:00:00.000Z" }, refund: { policy: "refund-to-source" }, now: NOW });
+  const prepared = await adapter.prepare(intent);
+  const msg = Buffer.from(prepared.rail.message_base64, "base64");
+  assert.equal(decodeSystemTransfer(msg, prepared.rail.intent_hash).lamports, "1000");
+  // a wrong memo binding
+  assert.throws(() => decodeSystemTransfer(msg, "0".repeat(64)), /memo/);
+  // a real extra instruction: System Assign of the payer account, spliced in
+  // with the instruction count raised by one (legacy layout: header 3, keys, blockhash 32, instructions)
+  const nKeys = msg[3];
+  const keysAt = 4, countAt = keysAt + 32 * nKeys + 32;
+  const sysIdx = [...Array(nKeys).keys()].find((k) => msg.subarray(keysAt + 32 * k, keysAt + 32 * k + 32).every((b) => b === 0));
+  const assign = Buffer.concat([Buffer.from([sysIdx, 1, 0, 36]), Buffer.from([1, 0, 0, 0]), Buffer.alloc(32, 7)]);
+  const extra = Buffer.concat([msg.subarray(0, countAt), Buffer.from([msg[countAt] + 1]), msg.subarray(countAt + 1), assign]);
+  assert.throws(() => decodeSystemTransfer(extra, prepared.rail.intent_hash), /an instruction other than the transfer and its memo/);
+  // and a trailing byte is refused too
+  assert.throws(() => decodeSystemTransfer(Buffer.concat([msg, Buffer.from([0])]), prepared.rail.intent_hash), /trailing|short/);
+});

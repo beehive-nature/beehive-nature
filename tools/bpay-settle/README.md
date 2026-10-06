@@ -94,5 +94,5 @@ Each kill condition has a sabotage test that makes it go red. `node prove.mjs` d
 
 - `node --test bpay-settle.test.mjs` runs 53 tests against the fake chain (CI static job).
 - `node prove.mjs` runs the mutation proof (CI static job).
-- `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs 6 tests against the real binary (CI test job, after the workspace build).
+- `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs 7 tests against the real binary (CI test job, after the workspace build).
 - A live run on Base Sepolia needs two founder steps: a Base Account passkey, and test USDC in it. Nothing in this directory moves money on its own.
