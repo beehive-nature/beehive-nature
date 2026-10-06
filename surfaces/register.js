@@ -180,7 +180,7 @@
        founder's own screen (#121021, #59496b: the reading room's raver night). Every label clears
        4.5:1 on its own ground: ink on track, white on forest 9.5:1, dark on magenta 5.4:1, dark on cyan 9.1:1. */
     #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#e6dfd2;--reg-active:#264d36;--reg-on:#ffffff;--reg-font:ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;--reg-weight:400;color-scheme:light}
-    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-bg:#121021;--reg-ink:#e9f2ec;--reg-track:#15241f;--reg-line:#59496b;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
+    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-bg:#121021;--reg-ink:#e9f2ec;--reg-track:#171028;--reg-line:#59496b;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
     body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-track:#0c1412;--reg-line:#1e2b26;--reg-active:#45c2dc;--reg-on:#06110c;--reg-radius:6px;--reg-font:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;--reg-weight:500;color-scheme:dark}
     #bregbar{position:relative;inset:auto;z-index:auto;display:flex;flex:0 0 auto;order:-1;grid-column:1/-1;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-sizing:border-box;width:100%;min-width:0;max-width:none;height:auto;min-height:68px;margin:0 0 16px;padding:12px clamp(12px,3vw,40px);border:0;border-bottom:1px solid var(--reg-line);background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font);text-align:start}
     #bregbar [data-register-host]{display:block;flex:0 1 auto;min-width:0;max-width:100%;margin:0;padding:0}
