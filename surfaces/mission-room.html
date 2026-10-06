@@ -150,6 +150,9 @@
   .event.law { border-left-color:var(--biomass); }
   .event.law b { color:var(--biomass); }
   .event .when { color:var(--dimmer); white-space:nowrap; }
+  /* on a phone the four fixed parts left the summary a one-word column that ran under the bar: the row wraps and the
+     summary takes its own full line, in DOM order (kind and actor, then the summary, then cost and time) */
+  @media (max-width:640px) { .event { flex-wrap:wrap; row-gap:4px; } .event>span:nth-child(3) { flex:1 1 100%; color:var(--ink); } }
 
   /* evaluator + treasury */
   .verdict { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; padding:13px;

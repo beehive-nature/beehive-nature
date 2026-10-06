@@ -98,7 +98,16 @@ function measure() {
     if (!r.width || !r.height || r.bottom <= 0 || r.top >= H) continue;
     if (!(n.textContent || '').trim() && !/^(IMG|VIDEO|CANVAS|SVG|INPUT|BUTTON|SELECT|TEXTAREA|IFRAME)$/i.test(n.tagName)) continue;
     if (n.closest('[aria-hidden="true"]')) continue;
-    if (!low || r.bottom > low.b) low = { b: r.bottom, el: n };
+    // what a reader can see ends at the nearest clipping box: text scrolled out of an overflow:auto feed is not under the bar
+    let bottom = r.bottom;
+    for (let a = n.parentElement; a && a !== document.body; a = a.parentElement) {
+      const as = getComputedStyle(a);
+      if (as.overflowX === 'visible' && as.overflowY === 'visible') continue;
+      const ar = a.getBoundingClientRect(); bottom = Math.min(bottom, ar.bottom);
+      if (bottom <= Math.max(r.top, ar.top)) { bottom = -1; break; }
+    }
+    if (bottom <= 0) continue;
+    if (!low || bottom > low.b) low = { b: bottom, el: n };
   }
   if (low && low.b > br.top + 1) out.push(['UNDER', `${low.el.tagName.toLowerCase()} "${(low.el.textContent || '').trim().slice(0, 30)}" ends at ${Math.round(low.b)} under the bar top ${Math.round(br.top)}`]);
   if (document.documentElement.scrollWidth > W + 1) out.push(['WIDE', `page ${document.documentElement.scrollWidth} px wide`]);
