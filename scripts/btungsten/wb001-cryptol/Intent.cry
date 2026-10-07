@@ -191,7 +191,7 @@ property wireInjective a b =
 //////////////////////////////////////////////////////////////////////////////
 
 mkB : {m, cap} (fin m, fin cap) => [m][8] -> [32] -> Field cap
-mkB b n = { len = n, bytes = take`{cap} (b # zero) }
+mkB b n = { len = n, bytes = take`{cap} (b # (zero : [cap][8])) }
 
 bee : [4]Byte
 bee = split (0xf09f909d : [32])   // 🐝 — a valid 4-byte supplementary char
@@ -199,9 +199,9 @@ bee = split (0xf09f909d : [32])   // 🐝 — a valid 4-byte supplementary char
 iBase : Intent
 iBase =
   { domain      = mkB "skaists.bpay/1" 15
-  , nonce       = mkB ("nonce-wb001" # zero) L32
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
   , epoch       = 1
-  , action      = mkB ("action-hash-01" # zero) L32
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
   , destination = mkB "vault:0xBEEF" 11
   , capability  = mkB "pay" 3
   , amount      = 1000000
