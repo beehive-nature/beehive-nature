@@ -80,7 +80,7 @@ step st b =
        if b <= 0x7f                                        then stG
   else if (b >= 0xc2) && (b <= 0xdf)                           then stC1
   else if b == 0xe0                                        then stE0
-  else if ((b >= 0xe1) && (b <= 0xec)) || b == 0xee || b == 0xef then stC2
+  else if ((b >= 0xe1) && (b <= 0xec)) || (b == 0xee) || (b == 0xef) then stC2
   else if b == 0xed                                        then stED
   else if b == 0xf0                                        then stF0
   else if (b >= 0xf1) && (b <= 0xf3)                           then stC3
@@ -103,11 +103,11 @@ step st b =
 scan : {cap} (fin cap) => [4] -> [cap]Byte -> [cap][4]
 scan st0 bs =
   [ step (if i == 0 then st0 else (scan st0 bs) @ (i - 1)) (bs @ i)
-  | i <- [ 0 .. cap - 1 ]
+  | i <- [ 0 .. `(cap) - 1 ]
   ]
 
 wellFormedUtf8 : {cap} (fin cap) => Field cap -> Bit
-wellFormedUtf8 f = (scan stG f.bytes) @ (cap - 1) == stG
+wellFormedUtf8 f = ((scan stG f.bytes) @ (`(cap) - 1)) == stG
 
 //////////////////////////////////////////////////////////////////////////////
 // Valid intents: bounds per field, fixed legal length words for the
@@ -117,16 +117,16 @@ wellFormedUtf8 f = (scan stG f.bytes) @ (cap - 1) == stG
 
 canonicalPad : {cap} (fin cap) => [32] -> [cap][8] -> [cap][8]
 canonicalPad len bs =
-  [ if i < len then bs @ i else 0 | i <- [ 0 .. cap - 1 ] ]
+  [ if i < len then bs @ i else 0 | i <- [ 0 .. `(cap) - 1 ] ]
 
 validField : {cap} (fin cap) => [32] -> [32] -> Field cap -> Bit
-validField lo hi f = (f.len >= lo) && (f.len <= hi) && canonicalPad f.len f.bytes == f.bytes
+validField lo hi f = (f.len >= lo) && (f.len <= hi) && (canonicalPad f.len f.bytes == f.bytes)
 
 validIntent : Intent -> Bit
 validIntent i =
        validField 1 64  i.domain    && wellFormedUtf8 i.domain
-    && i.nonce.len == L32           && canonicalPad i.nonce.len i.nonce.bytes == i.nonce.bytes
-    && i.action.len == L32          && canonicalPad i.action.len i.action.bytes == i.action.bytes
+    && (i.nonce.len == L32)           && (canonicalPad i.nonce.len i.nonce.bytes == i.nonce.bytes)
+    && (i.action.len == L32)          && (canonicalPad i.action.len i.action.bytes == i.action.bytes)
     && validField 1 128 i.destination && wellFormedUtf8 i.destination
     && validField 1 64  i.capability   && wellFormedUtf8 i.capability
     && validField 1 128 i.payer       && wellFormedUtf8 i.payer
