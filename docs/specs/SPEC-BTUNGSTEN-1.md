@@ -174,12 +174,21 @@ implementation/model EQUIVALENCE
 ```
 
 No step substitutes for a later one. WB001 is the reference instance;
-the CI `formal` job (cryptol pinned 3.6.0) gates on TYPECHECK and
-CHECK-SAMPLED every push; WB001 PROVE-UNIVERSAL landed 2026-10-07
-(`wireInjective` Q.E.D., z3, 23.7s — universal injectivity over the
-concrete accepted language) and every push re-proves it; a solver
-timeout is NOT-PROVEN, a recorded state, never success and never a CI
-wedge.
+the CI `formal` job (cryptol pinned 3.6.0) gates on TYPECHECK,
+CHECK-SAMPLED and the pinned-vector reproduction (`vectorsHold` — the
+model must produce every pinned envelope byte-for-byte: length word,
+every meaningful byte, zero tail) every push, and re-proves
+`wireInjective` + `wireZeroTail` on the ALIGNED compact wire. Receipt
+history, honestly scoped: the 2026-10-07 Q.E.D. (23.7s z3 in-PR, 17.6s
+post-merge) proved injectivity of the CAPACITY-PADDED representation —
+a valid receipt for that theorem only; founder review B1 found the
+model's packing was not the deployed wire (tag offsets displaced by
+per-field padding, nonzero bytes past envLen, all 10 pinned vector
+prefixes disagreeing at offset 27), the packing was repaired
+(tag-after-meaningful-bytes, zeros only past the compact envelope), the
+vectors moved from comment to executed check, and the re-proof on the
+aligned wire is the canonical receipt. A solver timeout is NOT-PROVEN,
+a recorded state, never success and never a CI wedge.
 
 
 **WB002 — the extinct-infrastructure specimen (founder order

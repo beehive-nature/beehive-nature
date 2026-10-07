@@ -30,6 +30,7 @@ set -eu
 
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
 CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
+CRYV="scripts/btungsten/wb001-cryptol/Vectors.cry"
 PROVE_BUDGET_S="${PROVE_BUDGET_S:-300}"
 
 say() { printf '%s\n' "$*"; }
@@ -52,10 +53,11 @@ say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, adversari
 # cryptol CLI (3.6.0, learned from its own usage output): -c COMMAND runs
 # one command and exits; multiple -c run in order. -b takes a SCRIPT FILE,
 # not stdin — the first CI run taught us this, receipted in the dispatch.
+# Checks load Vectors.cry, which imports Intent.cry — one load covers both.
 check() {
   _name=$1; _cmd=$2
   say "== formal: CHECK-SAMPLED $_name — $_cmd =="
-  _out=$("$CRYPTOL" -c ":load $CRY" -c "$_cmd" 2>&1) || {
+  _out=$("$CRYPTOL" -c ":load $CRYV" -c "$_cmd" 2>&1) || {
     say "FORMAL-CHECK-SAMPLED $_name: ABORTED (cryptol exited nonzero). Output:"
     say "$_out"
     exit 1
@@ -92,35 +94,44 @@ check validCombining          ':check validCombining'
 check nearValid               ':check nearValid'
 check nearDistinct            ':check nearDistinct'
 check baseVsTwinDistinct      ':check baseVsTwinDistinct'
+# THE BRIDGE, EXECUTED: the model must reproduce every pinned envelope
+# byte-for-byte (length word, every meaningful byte, zero tail) — the
+# Beat 3 B1 repair; a red here is a wire-packing divergence, by name.
+check vectorsHold             ':check vectorsHold'
+check wireZeroTail-sampled    ':check wireZeroTail'
 check wireInjective-sampled   ':check wireInjective'
 
-# ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified ---------------
-say "== formal: PROVE-UNIVERSAL :prove wireInjective (budget ${PROVE_BUDGET_S}s) =="
-PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove wireInjective" 2>&1) && _rc=0 || _rc=$?
-if [ "$_rc" -eq 0 ]; then
-  # Cryptol's universal verdict is printed as "Q.E.D." (some versions
-  # "Valid."). The first honestly-successful prove was mis-recorded as
-  # NOT-PROVEN because the classifier looked only for Valid — never
-  # again: a result class records what happened, not what we guessed
-  # the tool would print.
-  if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
-    say "$PROVE_LOG" | tail -2
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: PROVEN (universal, :prove verdict Q.E.D.)"
-  elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: REFUTED — counterexample is a REAL finding. Output:"
-    say "$PROVE_LOG"
-    exit 1
+# ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified, per obligation
+prove() {
+  _name=$1
+  say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${PROVE_BUDGET_S}s) =="
+  PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRYV" -c ":prove $_name" 2>&1) && _rc=0 || _rc=$?
+  if [ "$_rc" -eq 0 ]; then
+    # Cryptol's universal verdict prints "Q.E.D." (some versions "Valid.").
+    # The first honestly-successful prove was mis-recorded as NOT-PROVEN
+    # because the classifier looked only for Valid — never again: a result
+    # class records what happened, not what we guessed the tool would print.
+    if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
+      say "$PROVE_LOG" | tail -2
+      say "FORMAL-PROVE-UNIVERSAL $_name: PROVEN (universal, :prove verdict Q.E.D.)"
+    elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
+      say "FORMAL-PROVE-UNIVERSAL $_name: REFUTED — counterexample is a REAL finding. Output:"
+      say "$PROVE_LOG"
+      exit 1
+    else
+      say "$PROVE_LOG" | tail -3
+      say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (ran to completion, no verdict line)"
+    fi
+  elif [ "$_rc" -eq 124 ]; then
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
   else
-    say "$PROVE_LOG" | tail -3
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: NOT-PROVEN (ran to completion, no verdict line)"
+    say "FORMAL-PROVE-UNIVERSAL $_name: ABORTED rc=$_rc. Output:"
+    say "$PROVE_LOG" || true
+    exit 1
   fi
-elif [ "$_rc" -eq 124 ]; then
-  say "FORMAL-PROVE-UNIVERSAL wireInjective: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
-else
-  say "FORMAL-PROVE-UNIVERSAL wireInjective: ABORTED rc=$_rc. Output:"
-  say "$PROVE_LOG" || true
-  exit 1
-fi
+}
+prove wireZeroTail
+prove wireInjective
 
 say "== formal: ladder state =="
-say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (adversarial + constructed + random) | PROVE-UNIVERSAL: see line above | EQUIVALENCE: NOT ATTEMPTED (vectors are sampled agreement, never equivalence)"
+say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (adversarial + per-field + constructed + VECTORS-BYTE-FOR-BYTE + random) | PROVE-UNIVERSAL: see lines above | EQUIVALENCE: NOT ATTEMPTED (vectors are sampled agreement, never equivalence)"

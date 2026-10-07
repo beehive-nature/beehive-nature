@@ -133,37 +133,84 @@ validIntent i =
     && validField 0 4096 i.payload
 
 //////////////////////////////////////////////////////////////////////////////
-// The wire: exactly the deployed bytes on the meaningful prefix, zero
-// padding beyond it (canonicalPad + validIntent guarantee nothing
-// meaningful hides in the padding).
+// The wire: the DEPLOYED compact packing. Each tag follows the previous
+// field's MEANINGFUL bytes immediately — never its capacity — and zero
+// padding begins only after the complete compact envelope.
+//
+// (Repair 2026-10-07, founder review B1: the prior wireTlv concatenated
+// CAPACITY-SIZED blocks — nonce tag at offset 77 where the runtime puts
+// it at 27, the capability tag alive at 297 past envLen — so that
+// representation was NOT the deployed wire: 10/10 pinned vector prefixes
+// disagreed at offset 27, and two intents differing only in amount
+// shared their entire compact prefix in the model buffer. The Q.E.D.
+// receipted 2026-10-07 stands for THAT padded representation's
+// injectivity and nothing broader; this repair re-aligns the model to
+// the runtime bytes and re-proves.)
 //////////////////////////////////////////////////////////////////////////////
-
-wireTlv : {cap} (fin cap) => Byte -> Field cap -> [5 + cap][8]
-wireTlv t f = [t] # split f.len # f.bytes
 
 u64 : [64] -> Field 8
 u64 w = { len = L8, bytes = split w }
 
 type MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
-wire : Intent -> [MaxEnv][8]
-wire i =
-  "bT-WB01" # [0x01]
-    # wireTlv 0x01 i.domain
-    # wireTlv 0x02 i.nonce
-    # wireTlv 0x03 (u64 i.epoch)
-    # wireTlv 0x04 i.action
-    # wireTlv 0x05 i.destination
-    # wireTlv 0x06 i.capability
-    # wireTlv 0x07 (u64 i.amount)
-    # wireTlv 0x08 (u64 i.expiry)
-    # wireTlv 0x09 i.payer
-    # wireTlv 0x0a i.payload
+// Field layout offsets, each the previous offset + 5 + the previous
+// field's MEANINGFUL length (u64/bytes32 fields carry their fixed legal
+// length words — validIntent enforces those).
+oDom, oNon, oEpo, oAct, oDst, oCap, oAmt, oExp, oPay, oLoa : Intent -> [32]
+oDom i = 8
+oNon i = oDom i + 5 + i.domain.len
+oEpo i = oNon i + 5 + L32
+oAct i = oEpo i + 5 + L8
+oDst i = oAct i + 5 + L32
+oCap i = oDst i + 5 + i.destination.len
+oAmt i = oCap i + 5 + i.capability.len
+oExp i = oAmt i + 5 + L8
+oPay i = oExp i + 5 + L8
+oLoa i = oPay i + 5 + i.payer.len
 
 envLen : Intent -> [32]
-envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action.len)
-             + (5 + i.destination.len) + (5 + i.capability.len) + (5 + L8) + (5 + L8)
-             + (5 + i.payer.len) + (5 + i.payload.len)
+envLen i = oLoa i + 5 + i.payload.len
+
+headerByte : [32] -> Byte
+headerByte p = ("bT-WB01" # [0x01]) @ p
+
+// The byte at wire position p of one field's TLV, based at offset o:
+// its tag, its four length-word bytes, then its meaningful bytes.
+tlvByte : {cap} (fin cap) => Byte -> [32] -> [cap][8] -> [32] -> [32] -> Byte
+tlvByte t lw bs o p =
+     if p == o           then t
+else if (p - o) == 1     then (split lw) @ 0
+else if (p - o) == 2     then (split lw) @ 1
+else if (p - o) == 3     then (split lw) @ 2
+else if (p - o) == 4     then (split lw) @ 3
+else                         bs @ (p - o - 5)
+
+// The byte at wire position p: the compact envelope laid out by the
+// offsets above, zero past envLen. Laziness keeps every @ in range —
+// each branch is guarded by the same bound that makes its index safe.
+byteAt : Intent -> [32] -> Byte
+byteAt i p =
+     if p < 8                then headerByte p
+else if p < oNon i           then tlvByte 0x01 i.domain.len       i.domain.bytes       (oDom i) p
+else if p < oEpo i           then tlvByte 0x02 L32                i.nonce.bytes        (oNon i) p
+else if p < oAct i           then tlvByte 0x03 L8                 (split i.epoch)      (oEpo i) p
+else if p < oDst i           then tlvByte 0x04 L32                i.action.bytes       (oAct i) p
+else if p < oCap i           then tlvByte 0x05 i.destination.len  i.destination.bytes  (oDst i) p
+else if p < oAmt i           then tlvByte 0x06 i.capability.len   i.capability.bytes   (oCap i) p
+else if p < oExp i           then tlvByte 0x07 L8                 (split i.amount)     (oAmt i) p
+else if p < oPay i           then tlvByte 0x08 L8                 (split i.expiry)     (oExp i) p
+else if p < oLoa i           then tlvByte 0x09 i.payer.len        i.payer.bytes        (oPay i) p
+else if p < envLen i         then tlvByte 0x0a i.payload.len      i.payload.bytes      (oLoa i) p
+else 0
+
+wire : Intent -> [MaxEnv][8]
+wire i = [ byteAt i p | p <- take`{MaxEnv} [0 ...] ]
+
+// The zero-tail half of the bridge, now a PROVABLE obligation rather
+// than a comment: for valid intents nothing nonzero exists past envLen.
+wireZeroTail : Intent -> Bit
+property wireZeroTail a =
+  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
 
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
 // implementation) within the published adversarial model; the workbench
@@ -475,8 +522,11 @@ property adversarialRejected =
     and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
 
 //////////////////////////////////////////////////////////////////////////////
-// BRIDGE (model <-> deployed bytes), pinned byte-for-byte by the shared
-// vectors (wb001-vectors.json — both implementations reproduce them):
-//   prefix:  the JS envelope of i == take (envLen i) (wire i)
-//   zeroTail: every wire position >= envLen is zero
+// BRIDGE (model <-> deployed bytes): the prefix half is checked in CI by
+// the generated vectors module (wb001-cryptol/Vectors.cry — every pinned
+// positive reproduced byte-for-byte: length word, every meaningful byte,
+// zero tail), the zeroTail half is the provable property wireZeroTail
+// above. UNIVERSAL model==runtime agreement remains the future
+// EQUIVALENCE class — the vectors are sampled agreement and are never
+// recorded as more.
 //////////////////////////////////////////////////////////////////////////////
