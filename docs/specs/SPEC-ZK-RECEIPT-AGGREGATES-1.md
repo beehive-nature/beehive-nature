@@ -100,11 +100,14 @@ nothing (founder ruling 2026-10-06).
    tampered kind/count on a real proof fails verification. All artifacts
    re-derived together (r1cs→zkey→vk→vk_count_constants.hpp→WASM→proofs —
    never a corrected circuit on an old vk); ceremony split into tiers —
-   rehearsal pot17 (one seat) vs RELEASE from the verified public Hermez
+   rehearsal pot17 (one seat) vs RELEASE from the public Hermez
    `powersOfTau28_hez_final_17.ptau` (54 contributions + beacon; blake2b
-   pinned to the iden3/snarkjs README, dual-source byte-identical,
-   transcript re-verified locally). On-chain re-acceptance on the
-   rehearsal chain AND jungle4 with the release-class artifacts. The M3
+   pinned to the iden3/snarkjs README, dual-source byte-identical, and
+   `snarkjs powersoftau verify` COMPLETED 2026-10-07 — "Powers of Tau
+   Ok!", exit 0, snarkjs 0.7.6, ≈1 h 45 m unrestarted — all three
+   checks green, verification status PASSED). On-chain
+   re-acceptance on the rehearsal chain AND jungle4 with the
+   release-class artifacts. The M3
    "named next step" of SPEC-PRIVACY-1 ruled superseded by its §m4; the
    PLONK/BN254 engine closed.
 6. ← CURRENT REMAINDER: §tungsten 2 (leak distinguisher) + §tungsten 4

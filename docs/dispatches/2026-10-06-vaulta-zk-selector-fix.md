@@ -234,17 +234,113 @@ account had budget room for. Receipts:
   healthy evidence; a re-read 4 s later matched. (2) the reconcile
   helper's rapid get-table burst was rate-limited to null bodies —
   seven refusal legs went INCONCLUSIVE (never false-green) before
-  their verify pushes ran.
+  their verify pushes ran. **(2) is CORRECTED in §addendum-2: the
+  nulls were a LOCAL stdin race in the parser, not provider
+  throttling; the provider-level diagnosis is withdrawn as
+  unestablished.**
 - **The seven short-circuited legs were completed manually** with the
   same exact-message assertions, 3 s spacing: forged (eval_zw+1) /
   mutated count / mutated root / mutated kind / re-verify /
   **REVERSED (0,19)** / **REVERSED (1,20)** — ALL refused with the
-  contract's own messages. Ladder complete: 28/28 legs on the fresh
-  account, exhaustion included.
+  contract's own messages.
 - **Runner hardened (code-enforced — the read-race class hit twice):**
   the deploy-gate hash read now retries bounded (4 × 4 s) before it may
   FATAL; reconcile widened to 8 attempts × 6 s. Both edits sit beside
   the sibling session's epoch-based seq fix (their comment receipts the
-  crashed-run collision the time-based seqs cure).
+  crashed-run collision the time-based seqs cure). **(The widening was
+  NOT the cure — §addendum-2 repairs the parser itself.)**
 - The Hermez transcript verify was STILL RUNNING at this addendum
   (>1 h single-threaded CPU); its verdict remains the open receipt.
+
+### Closeout wording for the fresh-account record (per review order)
+
+> **Fresh-account acceptance: 28 legs reported complete across the
+> initial automated run and a separately recorded seven-leg follow-up.
+> Automated runner: reconciliation repair outstanding.**
+
+The two parts are bound to one another by: chain jungle4 · account
+`zkrtst444444` · deployed code hash `7a86ac34ddf15489…84af6f40d`
+(== built wasm sha256, the hez17-derived vk constants) · the prove
+artifact set of addendum §5 (canonical root `0x2e6bc682…`, asym
+fixture root `0x1f31dc72…`) · anchor seqs 1791354701–706 and
+1791354801–804 (the automated run's anchors; the seven-leg follow-up
+verified against those same rows). The initial INCONCLUSIVE results
+stand preserved above, not replaced by a single green summary.
+
+---
+
+## §addendum-2 — the reconciliation failures were a LOCAL parser race; the harness repair (review 2026-10-07, second order)
+
+**The reviewer's finding, confirmed against our own receipts.** Both
+reconciliation helpers parsed with `JSON.parse(process.stdin.read())` —
+`read()` returns null when nothing is buffered yet, a STREAM STATE, not
+a property of the HTTP response. The reviewer reproduced the exact
+failure on a complete valid fixture with no network involved (Node
+22.16.0; ours is 22.22.1). The smoking gun was already in our run log:
+only `reconcile()` used the synchronous `read()` form, while
+`row_field`/`count_rows` used the event-accumulation form — and in the
+same run, against the same endpoint, the event-form reads PASSED while
+every `reconcile()` call failed with `Cannot read properties of null
+(reading 'rows')`. **The addendum-1 sentence attributing the nulls to
+greymass rate-limiting is WITHDRAWN as unestablished.** Provider-level
+throttling may or may not have occurred; the null parse value alone is
+not evidence of it, and the local race fully explains the seven
+INCONCLUSIVE legs. (The deploy-gate zero-hash observation — a bash-level
+read showing a genuinely different VALUE, not a parse null — remains a
+read-your-writes race, consistent-with, cause plausible.)
+
+**The repair (fixture-tested BEFORE any chain use, per the order):**
+
+- `reconcile_row.mjs` — the ONE shared parser: `readFileSync(0, 'utf8')`
+  blocks until stdin EOF, so the race is structurally eliminated, not
+  retried away. Failure classes are NAMED and exit-coded: 2 malformed ·
+  3 transport-empty · 4 row-missing · 5 field-mismatch (diagnostics to
+  stderr).
+- `zkrself-parse-test.sh` + `fixtures/parse/` — local fixtures, no
+  network/wallet/chain/RAM: valid · truncated-JSON · zero-byte ·
+  seq-absent · count-mismatch, plus the here-string delivery path (the
+  exact incident mechanism) ×5. **RESULT: 10 passed, 0 failed.**
+- `zkrself-run.sh` + `zkrself-recheck.sh` rewired through the shared
+  parser; the reads now use the DECLARED second endpoint (`RCLEOS` —
+  the wiring gap the review flagged is closed: the claim and the code
+  agree); the in-code "write endpoint throttles read bursts" comment is
+  corrected to the unverified status.
+- The final table section is now ASSERTED, not printed
+  (`final_table_assert.mjs`): the four intended-valid claims (canonical
+  AND asym positives — the gap the review named) must carry exact
+  fields and nonzero `verified_at`; the six rejected claims must match
+  their anchored (tampered where applicable) fields and remain
+  unverified AT THE OBSERVATION; total rows must equal the cap for the
+  exhaustion fixture; any parse failure FAILS the run. Exit-coded:
+  4 missing · 5 mismatch · 6 verified_at wrong for the class ·
+  7 row-count ≠ cap.
+
+**The recorded rows reconciled read-only (no RAM, per the order):**
+the repaired `final_table_assert.mjs` over the saturated
+`zkrtst444444` table — seqs 1791354701–706 / 1791354801–804, spec
+matching every anchored claim including the tampered values —
+**ASSERT-EXIT=0**: four positives verified (canonical 20/20 + asym
+20/19), six rejected claims exact and unverified at the observation,
+10 rows == cap 10. The account is preserved as the exhaustion fixture.
+
+**The closeout line, updated post-repair:** fresh-account acceptance
+remains 28 legs reported complete across the initial automated run and
+the separately recorded seven-leg follow-up (binding above); the
+automated runner's reconciliation repair has now LANDED and is
+fixture-proven, so the outstanding clause is retired for future runs —
+the historical 21+7 split stands as recorded.
+
+**The transcript — the verify COMPLETED (2026-10-07, ~01:15 lab
+time):** `snarkjs powersoftau verify hez17.ptau` ran UNRESTARTED to
+completion — **final line "Powers of Tau Ok!", process exit 0**, wall
+time ≈ 1 h 45 m single-threaded (the process was never restarted for a
+status update, per the order). Tool: snarkjs 0.7.6 (node 22.22.1).
+Transcript digests: blake2b-512 `6247a343…b49345` (the iden3/snarkjs
+README published-table match) · sha256 `6b662a32…83ae0`. With checks
+(1) hash-pin, (2) dual-source byte-identity, and (3) the completed
+transcript verification all green, the release-tier verification
+status reads PASSED for the downloaded artifact. Lane gates unchanged:
+the leak distinguisher and the 1k/10k scale measurements remain OPEN —
+"only one receipt remains" describes the selector-repair dispatch,
+never the lane or its coupling readiness (the Autonomi coupling ban
+stands).

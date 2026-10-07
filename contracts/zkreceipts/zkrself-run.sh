@@ -13,7 +13,7 @@
 # from prove_count.sh: canonical $W/{expected,calldata_*}.json and the
 # asym selector fixture $W/asym/* (deadKept=20, liveKept=19).
 U=${U:-https://jungle4.greymass.com}
-RURL=${RURL:-https://jungle4.api.eosnation.io}   # READS on a second endpoint: the write endpoint throttles read bursts (empty reads, found live 2026-10-07)
+RURL=${RURL:-https://jungle4.api.eosnation.io}   # reads on a second endpoint so a stale write-endpoint read never gates a leg. (The 2026-10-07 null parses were a LOCAL stdin race — see reconcile; provider-level throttling UNVERIFIED.)
 REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
 W=~/plonkport
 A=${A:-zkrtst111111}
@@ -54,39 +54,49 @@ expect_refuse(){ # label contract action json EXPECTED-EXACT-MESSAGE
 
 # reconcile: the prerequisite anchor must be VISIBLE with the exact
 # claimed fields before a negative test may classify a refusal; bounded
-# retries, each recorded; failure = INCONCLUSIVE = FAIL, never pass
+# retries, each recorded; failure = INCONCLUSIVE = FAIL, never pass.
+# THE 2026-10-07 REPAIR: the inline `JSON.parse(process.stdin.read())`
+# raced its own stdin — read() returns null when nothing is buffered,
+# which failed parses against VALID responses (seven legs starved to
+# INCONCLUSIVE on zkrtst444444). The parser is now the shared
+# reconcile_row.mjs (readFileSync(0) — blocks to EOF; the race is
+# structurally gone) and every failure class is NAMED: malformed ·
+# transport · missing · mismatch. Fixture-proven in
+# zkrself-parse-test.sh before any chain use. Reads use the second
+# endpoint (RCLEOS); retries remain for genuine state-visibility lag.
 reconcile(){ # seq root kind count
-  local SEQ=$1 ROOT=$2 KIND=$3 COUNT=$4 I ROWJ
-  # 8 attempts × 6 s (was 5 × 3 s — found live 2026-10-07 on zkrtst444444:
-  # greymass rate-limits rapid get-table bursts to null bodies; the short
-  # window starved seven refusal legs into INCONCLUSIVE before their
-  # verify pushes ever ran)
+  local SEQ=$1 ROOT=$2 KIND=$3 COUNT=$4 I RC1 ERR1
   for I in 1 2 3 4 5 6 7 8; do
-    ROWJ=$($CLEOS get table $A $A anchors --lower $SEQ --upper $SEQ 2>/dev/null)
-    if node -e "
-let j;try{j=JSON.parse(process.stdin.read())}catch(e){process.exit(3)}
-const r=(j.rows||[])[0];if(!r||r.seq!==+$SEQ)process.exit(3);
-const hex=typeof r.root==='string'?r.root.replace(/^0x/,''):Buffer.from(r.root).toString('hex');
-process.exit(r.kind===+$KIND&&r.count===+$COUNT&&hex==='$ROOT'?0:3)" <<<"$ROWJ"; then
-      echo "reconcile seq $SEQ: visible and exact (attempt $I)"; return 0
-    fi
-    echo "reconcile seq $SEQ: not yet visible/exact (attempt $I of 8); retrying"
+    ERR1=$($RCLEOS get table $A $A anchors --lower $SEQ --upper $SEQ 2>/dev/null | node "$REPO/reconcile_row.mjs" "$SEQ" "$ROOT" "$KIND" "$COUNT" 2>&1 >/dev/null)
+    RC1=$?
+    case $RC1 in
+      0) echo "reconcile seq $SEQ: visible and exact (attempt $I)"; return 0 ;;
+      2) echo "reconcile seq $SEQ: MALFORMED response (attempt $I of 8): $ERR1" ;;
+      3) echo "reconcile seq $SEQ: TRANSPORT-empty (attempt $I of 8): $ERR1" ;;
+      4) echo "reconcile seq $SEQ: row not yet visible (attempt $I of 8): $ERR1" ;;
+      5) echo "reconcile seq $SEQ: FIELD mismatch — not the anchored claim (attempt $I of 8): $ERR1" ;;
+      *) echo "reconcile seq $SEQ: UNCLASSIFIED parse failure rc=$RC1 (attempt $I of 8): $ERR1" ;;
+    esac
     sleep 6
   done
-  bad "prerequisite anchor seq $SEQ INCONCLUSIVE — not visible after 8 recorded attempts" "(no stable row (root,kind,count) match)"
+  bad "prerequisite anchor seq $SEQ INCONCLUSIVE — not established after 8 recorded attempts" "($ERR1)"
   return 1
 }
 
-row_field(){ $CLEOS get table $A $A anchors --lower $1 --upper $1 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const r=JSON.parse(s).rows[0];console.log(r?r.$2:'MISSING')}catch(e){console.log('MISSING')}})"; }
+row_field(){ $RCLEOS get table $A $A anchors --lower $1 --upper $1 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const r=JSON.parse(s).rows[0];console.log(r?r.$2:'MISSING')}catch(e){console.log('MISSING')}})"; }
 # law_field — the cap lives in the LAW table, not anchors (found live
 # 2026-10-07: the cap readback used row_field, got MISSING for an
 # initialized law row, and FATALed a healthy account)
-law_field(){ $CLEOS get table $A $A law 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const r=JSON.parse(s).rows[0];console.log(r?r.$1:'MISSING')}catch(e){console.log('MISSING')}})"; }
-count_rows(){ $CLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).rows.length)}catch(e){console.log(-1)}})"; }
+law_field(){ $RCLEOS get table $A $A law 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const r=JSON.parse(s).rows[0];console.log(r?r.$1:'MISSING')}catch(e){console.log('MISSING')}})"; }
+count_rows(){ $RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).rows.length)}catch(e){console.log(-1)}})"; }
 
 ROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).root.replace(/^0x/,'')")
 ROOTFLIP=$(node -pe "const r='$ROOT'.split(''); const c=r[63]; r[63]= c==='f'?'0':(parseInt(c,16)+1).toString(16); r.join('')")
 FROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).root.replace(/^0x/,'')")
+DK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).deadKept")
+LK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).liveKept")
+ADK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).deadKept")
+ALK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).liveKept")
 P_DEAD=$(node -pe "require('$W/calldata_dead.json').proof_hex")
 P_LIVE=$(node -pe "require('$W/calldata_live.json').proof_hex")
 P_FORG=$(node -pe "require('$W/calldata_forged.json').proof_hex")
@@ -140,7 +150,7 @@ S999=$((BASE+999))
 echo "== [2] law row: bounded anchor budget =="
 ROWS=$(count_rows)
 [ "$ROWS" -ge 0 ] 2>/dev/null || { echo "FATAL: row count unreadable"; exit 1; }
-LAW=$($CLEOS get table $A $A law 2>/dev/null | grep -c '"max_anchors"')
+LAW=$($RCLEOS get table $A $A law 2>/dev/null | grep -c '"max_anchors"')
 if [ "$LAW" = 0 ]; then
   # existing rows + 6 canonical/tamper anchors + 4 asym = room for the pass,
   # then the fillers climb to the cap and the budget must refuse in the open
@@ -209,14 +219,33 @@ done
 ok "filled to cap (rows $((ROWS + F)) of $CAP; $F fillers)"
 expect_refuse "anchor beyond cap — budget exhausted" anchor "$(aargs $S999 "$ROOT" 0 20)" "anchor table FULL (bounded resource budget)"
 
-echo "== [7] final table state =="
-$CLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "
-let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{
-const rows=JSON.parse(s).rows;
-const v=q=>rows.filter(x=>x.seq===q)[0];
-for(const q of [$S101,$S102,$S201,$S202]) console.log('  seq',q,'verified_at',v(q)&&v(q).verified_at);
-for(const q of [$S103,$S104,$S105,$S106,$S203,$S204]) console.log('  seq',q,'verified_at',v(q)&&v(q).verified_at,'(unverified at this observation)');
-console.log('  total rows:',rows.length);});"
+echo "== [7] final table state (ASSERTED — review 2026-10-07: printing is not evidence) =="
+# the four INTENDED-VALID claims must exist with exact fields and nonzero
+# verified_at (both canonical AND both asym positives); the six REJECTED
+# claims must exist with their anchored (tampered where applicable)
+# fields and verified_at == 0 at the observation; total rows == cap for
+# the exhaustion fixture. A parse failure here FAILS the run.
+cat > $W/final-spec.json <<EOF
+[
+ {"seq":$S101,"root":"$ROOT","kind":0,"count":$DK,"verified":"nonzero"},
+ {"seq":$S102,"root":"$ROOT","kind":1,"count":$LK,"verified":"nonzero"},
+ {"seq":$S201,"root":"$FROOT","kind":0,"count":$ADK,"verified":"nonzero"},
+ {"seq":$S202,"root":"$FROOT","kind":1,"count":$ALK,"verified":"nonzero"},
+ {"seq":$S103,"root":"$ROOT","kind":0,"count":$DK,"verified":"zero"},
+ {"seq":$S104,"root":"$ROOT","kind":0,"count":$((DK+1)),"verified":"zero"},
+ {"seq":$S105,"root":"$ROOTFLIP","kind":0,"count":$DK,"verified":"zero"},
+ {"seq":$S106,"root":"$ROOT","kind":1,"count":$DK,"verified":"zero"},
+ {"seq":$S203,"root":"$FROOT","kind":0,"count":$ALK,"verified":"zero"},
+ {"seq":$S204,"root":"$FROOT","kind":1,"count":$ADK,"verified":"zero"}
+]
+EOF
+FTOUT=$($RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node "$REPO/final_table_assert.mjs" "$W/final-spec.json" "$CAP" 2>&1)
+if [ $? -eq 0 ]; then
+  echo "$FTOUT" | sed 's/^/  /'
+  ok "final table: 4 positives verified (canonical AND asym), 6 rejected claims unverified at the observation, rows == cap $CAP"
+else
+  bad "final table assertion failed" "$FTOUT"
+fi
 
 echo "== RESULT: $PASS passed, $FAILS failed =="
 [ $FAILS -eq 0 ] || exit 1

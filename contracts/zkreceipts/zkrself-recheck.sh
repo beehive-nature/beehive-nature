@@ -18,9 +18,12 @@
 #   (defaults: seq 5, the canonical root from expected.json, 0, 20,
 #    calldata_dead.json — the two raced legs of 2026-10-06)
 U=${U:-https://jungle4.greymass.com}
+RURL=${RURL:-https://jungle4.api.eosnation.io}   # reads on a second endpoint (stale write-endpoint reads never gate a leg)
+REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
 A=${A:-zkrtst111111}
 W=~/plonkport
 CLEOS="/usr/bin/cleos -u $U"
+RCLEOS="/usr/bin/cleos -u $RURL"
 SEQ=${1:-5}
 ROOT=${2:-$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).root.replace(/^0x/,'')")}
 KIND=${3:-0}
@@ -36,20 +39,28 @@ P=$(node -pe "require('$PROOF').proof_hex")
 PAIR="count proof REJECTED — plonk pairing false"
 
 echo "== reconcile prerequisite anchor seq $SEQ (root ${ROOT:0:12}… kind $KIND count $COUNT) =="
+# THE 2026-10-07 REPAIR (shared with zkrself-run.sh): the inline
+# `JSON.parse(process.stdin.read())` raced its own stdin — read()
+# returns null when nothing is buffered and failed parses against
+# VALID responses. The parser is now the shared reconcile_row.mjs
+# (readFileSync(0) blocks to EOF — the race is structurally gone) with
+# NAMED failure classes; fixture-proven in zkrself-parse-test.sh.
 VIS=1
-for I in 1 2 3 4 5; do
-  ROWJ=$($CLEOS get table $A $A anchors --lower $SEQ --upper $SEQ 2>/dev/null)
-  if node -e "
-let j;try{j=JSON.parse(process.stdin.read())}catch(e){process.exit(3)}
-const r=(j.rows||[])[0];if(!r||r.seq!==+$SEQ)process.exit(3);
-const hex=typeof r.root==='string'?r.root.replace(/^0x/,''):Buffer.from(r.root).toString('hex');
-process.exit(r.kind===+$KIND&&r.count===+$COUNT&&hex==='$ROOT'?0:3)" <<<"$ROWJ"; then
-    echo "  visible and exact (attempt $I)"; VIS=0; break
-  fi
-  echo "  not yet visible/exact (attempt $I of 5); retrying"; sleep 3
+for I in 1 2 3 4 5 6 7 8; do
+  ERR1=$($RCLEOS get table $A $A anchors --lower $SEQ --upper $SEQ 2>/dev/null | node "$REPO/reconcile_row.mjs" "$SEQ" "$ROOT" "$KIND" "$COUNT" 2>&1 >/dev/null)
+  RC1=$?
+  if [ $RC1 -eq 0 ]; then echo "  visible and exact (attempt $I)"; VIS=0; break; fi
+  case $RC1 in
+    2) echo "  MALFORMED response (attempt $I of 8): $ERR1" ;;
+    3) echo "  TRANSPORT-empty (attempt $I of 8): $ERR1" ;;
+    4) echo "  row not yet visible (attempt $I of 8): $ERR1" ;;
+    5) echo "  FIELD mismatch — not the anchored claim (attempt $I of 8): $ERR1" ;;
+    *) echo "  UNCLASSIFIED parse failure rc=$RC1 (attempt $I of 8): $ERR1" ;;
+  esac
+  sleep 6
 done
 if [ $VIS -ne 0 ]; then
-  echo "INCONCLUSIVE: prerequisite anchor seq $SEQ not established after 5 recorded attempts — this negative test is NOT passed"
+  echo "INCONCLUSIVE: prerequisite anchor seq $SEQ not established after 8 recorded attempts — this negative test is NOT passed"
   exit 1
 fi
 ok "prerequisite visible"

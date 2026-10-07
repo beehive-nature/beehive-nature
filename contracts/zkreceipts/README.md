@@ -89,20 +89,21 @@ one (the spec's count-first law).
 - **REHEARSAL tier:** `pot17_final.ptau`, ONE honest participant (this
   seat) — rehearsal-labeled, the standing estate law until a witnessed
   multi-party sealing is ruled for anything BNR-originated.
-- **RELEASE tier:** the verified PUBLIC multi-party transcript — Hermez
+- **RELEASE tier:** the PUBLIC multi-party transcript — Hermez
   `powersOfTau28_hez_final_17.ptau` (54 contributions + a beacon; the
   perpetual-powersoftau lineage), power 17 = 128k constraints ≥ the
-  circuit's 116,537 PLONK constraints. Verified three independent ways
-  before use: (1) blake2b-512 matches the hash published in the
-  iden3/snarkjs README's ceremony table byte-for-byte; (2) the hermez S3
-  original and the circom.info mirror are byte-identical (two independent
-  download locations); (3) `snarkjs powersoftau verify` re-verified the
-  whole contribution transcript locally. RELEASE artifacts (zkey, vk,
-  vk_count_constants.hpp, proofs) are derived with `PTAU=hez17.ptau`.
-  Multiple agents on one shared host are NOT independent trust domains
-  (ruling); a fresh BNR ceremony would need human participants on
-  separate machines — the witnessed-sealing kit stays a named future
-  lane. Nothing here authorizes mainnet deposits.
+  circuit's 116,537 PLONK constraints. Verified three independent ways:
+  (1) blake2b-512 matches the hash published in the iden3/snarkjs
+  README's ceremony table byte-for-byte; (2) the hermez S3 original
+  and the circom.info mirror are byte-identical (two independent
+  download locations); (3) `snarkjs powersoftau verify` ran to
+  completion 2026-10-07 — "Powers of Tau Ok!", exit 0, snarkjs 0.7.6,
+  ≈1 h 45 m unrestarted. RELEASE artifacts
+  (zkey, vk, vk_count_constants.hpp, proofs) are derived with
+  `PTAU=hez17.ptau`. Multiple agents on one shared host are NOT
+  independent trust domains (ruling); a fresh BNR ceremony would need
+  human participants on separate machines — the witnessed-sealing kit
+  stays a named future lane. Nothing here authorizes mainnet deposits.
 
 ## Labeled boundaries (what this does NOT prove)
 
@@ -113,8 +114,9 @@ one (the spec's count-first law).
 - Vantage independence: out of proof scope without cryptographic vantage
   identities (the ant-reach precision stands).
 - The ceremony tier per artifact is stated with it (see above): rehearsal
-  proofs ride the one-seat pot17; release artifacts ride the verified
-  public Hermez transcript. A witnessed multi-party BNR sealing remains
+  proofs ride the one-seat pot17; release artifacts ride the public
+  Hermez transcript (all three verification checks green). A witnessed
+  multi-party BNR sealing remains
   the named future lane for anything needing estate-originated setup.
 - On-chain verification is MEASURED on BOTH the local Spring v1.2.2
   rehearsal chain (9,629 / 12,427 µs billed) and VAULTA PUBLIC TESTNET
