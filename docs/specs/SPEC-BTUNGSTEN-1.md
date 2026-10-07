@@ -148,6 +148,29 @@ or a solver timeout is NOT-RUN, never success. Shared byte-for-byte
 vectors are pinned before any equivalence claim, and a green workflow
 wrapper is never a substitute for an executed proof obligation.
 
+**Right-language law (founder ruling 2026-10-07):** a universal proof
+receipt is canonical only if the theorem is about the DEPLOYED accepted
+language — the validity predicate is concrete inside the formal model,
+or connected to the runtime validator by a separately proved
+refinement. A proof can be correct about the wrong accepted language;
+that is the exact class of mistake the Beat 2 counterexample eliminated.
+
+**Formal-assurance ladder (founder ruling 2026-10-07 — the default
+sequence for every bTunGsTeN workbench):**
+
+```
+RED counterexample → accepted-language repair → shared vectors →
+formal wire alignment → TYPECHECK → CHECK-SAMPLED (adversarial +
+constructed + random arms) → PROVE-UNIVERSAL → eventually
+implementation/model EQUIVALENCE
+```
+
+No step substitutes for a later one. WB001 is the reference instance;
+the CI `formal` job (cryptol pinned 3.6.0) gates on TYPECHECK and
+CHECK-SAMPLED every push and records the PROVE-UNIVERSAL attempt
+honestly — a solver timeout is NOT-PROVEN, a recorded state, never
+success and never a CI wedge.
+
 Sequence: WB001 formal core (current) → WB002 hostile distributed
 specimen (kill/reroute/replay/partition/heal; the healed result must
 still verify) → WB003+ scale and century-transition legs.

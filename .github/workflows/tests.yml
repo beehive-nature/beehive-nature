@@ -1089,3 +1089,34 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test render-badges.test.mjs
+
+  formal:
+    # bTunGsTeN formal-assurance ladder (founder ruling 2026-10-07, SPEC-
+    # BTUNGSTEN-1 §workbench): the formal leg runs in CI as its own result
+    # classes. TYPECHECK and CHECK-SAMPLED (adversarial + constructed +
+    # random arms) gate this job. PROVE-UNIVERSAL is attempted under a
+    # bounded budget and recorded honestly — a timeout prints NOT-PROVEN
+    # and exits green BY DESIGN: gating on an open research obligation
+    # would wedge CI red forever, and the result-class law forbids
+    # recording a timeout as anything but NOT-PROVEN. EQUIVALENCE is not
+    # attempted here and can never be claimed from this job (the shared
+    # vectors are sampled agreement). Cryptol is pinned: the version and
+    # asset below are part of every receipt this job produces.
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: shared setup — install cryptol 3.6.0 (pinned, with bundled solvers)
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/v3.6.0/cryptol-3.6.0-ubuntu-22.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-22.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          ./cryptol/bin/cryptol --version
+      - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
+        if: always()
+        timeout-minutes: 10
+        run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"

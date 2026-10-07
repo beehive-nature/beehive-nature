@@ -54,13 +54,37 @@ recorded as another:
 
 | class | meaning | status |
 |---|---|---|
-| TYPECHECK | the .cry parses and typechecks | pending (CI ubuntu beat) |
-| CHECK-SAMPLED | `:check` over sampled cases — with CONSTRUCTED related pairs (boundary twins, surrogate rows), not random sampling alone | pending |
-| PROVE-UNIVERSAL | `:prove` across the stated input domain | pending |
-| EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | pending |
+| TYPECHECK | the .cry parses and typechecks | **WIRED IN CI** — `formal` job gates on it every push (cryptol 3.6.0, pinned asset) |
+| CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
+| PROVE-UNIVERSAL | `:prove wireInjective` across the stated domain | **attempted every run** under a 300s budget; timeout records NOT-PROVEN and exits green BY DESIGN (an open obligation is a recorded state, never a wedge) |
+| EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | NOT ATTEMPTED — the shared vectors are sampled agreement, never equivalence |
 
 A missing tool, a skipped obligation or a solver timeout is NOT-RUN,
-never success. `:check` is testing; `:prove` is the proof step.
+never success. `:check` is testing; `:prove` is the proof step. And per
+the Beat 3 scrutiny: a PROVE-UNIVERSAL receipt is canonical only if the
+validity predicate is CONCRETE in the model — `wellFormedUtf8` is now
+the real DFA with the runtime validator's exact transition law, not an
+abstract placeholder — or connected to the runtime validator by a
+separately proved refinement. A proof can be correct about the wrong
+accepted language; that class of mistake is what Beat 2 eliminated and
+this law keeps eliminated.
+
+### §ladder (founder ruling 2026-10-07 — the default sequence for every workbench)
+
+```
+RED counterexample
+→ accepted-language repair
+→ shared vectors
+→ formal wire alignment
+→ TYPECHECK
+→ CHECK-SAMPLED
+→ PROVE-UNIVERSAL
+→ eventually implementation/model EQUIVALENCE
+```
+
+No step substitutes for a later one; the WB001 chain is the reference
+instance (surrogate collision → utf16/utf8 gates → wb001-vectors.json →
+concrete-DFA Intent.cry → CI formal job).
 
 ### §next (named gaps, in order)
 
