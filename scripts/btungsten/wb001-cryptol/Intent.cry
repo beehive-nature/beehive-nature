@@ -190,9 +190,6 @@ property wireInjective a b =
 // payload pairs stay DISTINCT on the wire.
 //////////////////////////////////////////////////////////////////////////////
 
-mk : {cap} (fin cap) => String -> [32] -> Field cap
-mk s n = { len = n, bytes = take`{cap} (s # (0 : [cap][8])) }
-
 mkB : {m, cap} (fin m, fin cap) => [m][8] -> [32] -> Field cap
 mkB b n = { len = n, bytes = take`{cap} (b # (0 : [cap][8])) }
 
@@ -201,22 +198,22 @@ bee = split (0xf09f909d : [32])   // 🐝 — a valid 4-byte supplementary char
 
 iBase : Intent
 iBase =
-  { domain      = mk "skaists.bpay/1" 15
+  { domain      = mkB "skaists.bpay/1" 15
   , nonce       = mkB ("nonce-wb001" # (0 : [16][8])) L32
   , epoch       = 1
   , action      = mkB ("action-hash-01" # (0 : [17][8])) L32
-  , destination = mk "vault:0xBEEF" 11
-  , capability  = mk "pay" 3
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
   , amount      = 1000000
   , expiry      = 1790000000
-  , payer       = mk "seat:bFUzZ" 10
-  , payload     = mk "{}" 2
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
   }
 
 twinL : Intent
-twinL = iBase { destination = mk "ab" 2, capability = mk "c" 1 }
+twinL = iBase { destination = mkB "ab" 2, capability = mkB "c" 1 }
 twinR : Intent
-twinR = iBase { destination = mk "a" 1, capability = mk "bc" 2 }
+twinR = iBase { destination = mkB "a" 1, capability = mkB "bc" 2 }
 
 astral : Intent
 astral = iBase { domain = mkB ("skaists." # bee # "/1") 14 }
@@ -263,10 +260,10 @@ xTrunc : Intent       // a c2 — sequence truncated by the field's length
 xTrunc = iBase { domain = mkB ("a" # [0xc2]) 2 }
 
 xLenBeyondCap : Intent // length word outside the field's capacity — bounds violation
-xLenBeyondCap = iBase { domain = { len = 65, bytes = (mk "ab" 2).bytes } }
+xLenBeyondCap = iBase { domain = { len = 65, bytes = (mkB "ab" 2).bytes } }
 
 xNonCanonPad : Intent // meaningful beyond len — padding not canonical
-xNonCanonPad = iBase { domain = { len = 1, bytes = (mk "ab" 2).bytes } }
+xNonCanonPad = iBase { domain = { len = 1, bytes = (mkB "ab" 2).bytes } }
 
 adversarialRejected : Bit
 property adversarialRejected =
