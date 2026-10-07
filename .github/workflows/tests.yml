@@ -1117,6 +1117,14 @@ jobs:
           curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
           echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
           mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "-- bundle bin/ (recorded for the receipt):"; ls cryptol/bin
+          # cryptol requires z3 on PATH; the with-solvers bundle ships it in its
+          # bin dir (learned from run 3's "z3 not found" — expose it, apt as floor)
+          export PATH="$HOME/cryptol/bin:$PATH"
+          if ! command -v z3 >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq z3
+          fi
+          z3 --version | head -1
           ./cryptol/bin/cryptol --version
       - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
         if: always()
