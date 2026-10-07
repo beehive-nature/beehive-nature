@@ -73,6 +73,24 @@ check() {
   say "FORMAL-CHECK-SAMPLED $_name: PASS"
 }
 
+# ---- FORMAL-WIRE-ALIGNMENT (founder review B1, 2026-10-07): the bridge ----
+# The BRIDGE block in Intent.cry was comment-only until B1 — no Cryptol
+# wire byte had ever been compared to a runtime canonical() byte, so the
+# deployed-envelope claim under the wireInjective proof was prose. These
+# closed-term evaluations compare the .cry wire (prefix + zero tail +
+# envLen) against OPAQUE constants pinned from the runtime
+# (wb001-bridge.json, derived by wb001-bridge-gen.mjs, re-derived on the
+# node leg by wb001-bridge.test.mjs every run). A red here names its
+# term: the twin and the runtime have drifted apart.
+check bridgeIBase     ':check bridgeIBase'
+check bridgeTwinL     ':check bridgeTwinL'
+check bridgeTwinR     ':check bridgeTwinR'
+check bridgeAstral    ':check bridgeAstral'
+check bridgeFffd      ':check bridgeFffd'
+check bridgeCombining ':check bridgeCombining'
+check bridgeNearA     ':check bridgeNearA'
+check bridgeNearB     ':check bridgeNearB'
+
 # ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed (one
 # obligation per claim, so a red names the claim), then random
 check adversarialRejected     ':check adversarialRejected'
@@ -123,4 +141,5 @@ else
 fi
 
 say "== formal: ladder state =="
+say "FORMAL-WIRE-ALIGNMENT: PASS — 8 pinned terms, exact prefix + zero tail + envLen, both legs re-derive every run (sampled agreement, never equivalence)"
 say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (adversarial + constructed + random) | PROVE-UNIVERSAL: see line above | EQUIVALENCE: NOT ATTEMPTED (vectors are sampled agreement, never equivalence)"
