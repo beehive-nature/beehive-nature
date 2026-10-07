@@ -155,6 +155,33 @@ or a solver timeout is NOT-RUN, never success. Shared byte-for-byte
 vectors are pinned before any equivalence claim, and a green workflow
 wrapper is never a substitute for an executed proof obligation.
 
+
+**Right-language law (founder ruling 2026-10-07):** a universal proof
+receipt is canonical only if the theorem is about the DEPLOYED accepted
+language — the validity predicate is concrete inside the formal model,
+or connected to the runtime validator by a separately proved
+refinement. A proof can be correct about the wrong accepted language;
+that is the exact class of mistake the Beat 2 counterexample eliminated.
+
+**Formal-assurance ladder (founder ruling 2026-10-07 — the default
+sequence for every bTunGsTeN workbench):**
+
+```
+RED counterexample → accepted-language repair → shared vectors →
+formal wire alignment → TYPECHECK → CHECK-SAMPLED (adversarial +
+constructed + random arms) → PROVE-UNIVERSAL → eventually
+implementation/model EQUIVALENCE
+```
+
+No step substitutes for a later one. WB001 is the reference instance;
+the CI `formal` job (cryptol pinned 3.6.0) gates on TYPECHECK and
+CHECK-SAMPLED every push; WB001 PROVE-UNIVERSAL landed 2026-10-07
+(`wireInjective` Q.E.D., z3, 23.7s — universal injectivity over the
+concrete accepted language) and every push re-proves it; a solver
+timeout is NOT-PROVEN, a recorded state, never success and never a CI
+wedge.
+
+
 **WB002 — the extinct-infrastructure specimen (founder order
 2026-10-07):** SimpleAssets frozen at upstream commit `e6a042f` (2021,
 v1.6.1, LGPL-2.1) is preserved verbatim as the standard's first
@@ -187,9 +214,12 @@ authenticated display truth (checkpoint contents verified, suffixes
 bounded to an authenticated tip) — the landing closed, the
 model-correctness claim kept open. See scripts/btungsten/README.md.
 
-Sequence: WB001 formal core (done; input boundary repaired in its beat
-2) → WB002 SimpleAssets specimen (CURRENT) → WB003+ scale and
-century-transition legs.
+Sequence: WB001 formal core (done: input boundary repaired in beat 2;
+the formal ladder climbed in beat 3 — TYPECHECK, CHECK-SAMPLED and
+PROVE-UNIVERSAL all receipted in the CI formal job) → WB002
+SimpleAssets specimen (CURRENT) → WB003+ scale and century-transition
+legs.
+
 
 ## §toolchain — Foundation, Emissary, and replaceability
 

@@ -1,38 +1,37 @@
 // bTunGsTeN Workbench 001 — the formal twin of wb001-intent.mjs.
 //
-// STAGED ARTIFACT: written, NOT yet executed under cryptol/SAW — UNVERIFIED
-// until that run lands (SAW ships Linux x86_64; the qualified host is the
-// CI ubuntu runner). Result classes are recorded separately and none
-// implies another: TYPECHECK, CHECK-SAMPLED (:check), PROVE-UNIVERSAL
-// (:prove), EQUIVALENCE (SAW, implementation == spec). A missing tool or
-// a solver timeout is NOT-RUN, never success.
+// STAGED until the CI formal job's receipts land; result classes are
+// recorded separately and none implies another (SPEC-BTUNGSTEN-1
+// §workbench result-class law): TYPECHECK, CHECK-SAMPLED (:check, with
+// CONSTRUCTED related pairs — random sampling alone rarely challenges
+// the collision condition), PROVE-UNIVERSAL (:prove, budgeted attempt,
+// timeout = NOT-PROVEN, never success), EQUIVALENCE (SAW, not attempted
+// here — the shared vectors establish sampled agreement, not universal
+// equivalence).
 //
-// ALIGNED 2026-10-07 (founder review of the genesis): the earlier draft
-// appended full capacity-sized arrays and constrained nothing — proving
-// THAT padded encoding injective would not prove the deployed
-// variable-length encoding injective. This model now carries meaningful
-// lengths, valid-input constraints (including canonical zero padding and
-// the UTF-8 boundary law of the 2026-10-07 repair), and an explicit
-// bridge to the exact serialized bytes, pinned by shared vectors
-// (wb001-vectors.json) that every twin must reproduce byte-for-byte.
+// BEAT 3 (founder ruling 2026-10-07): the accepted language is now
+// CONCRETE in the model. wellFormedUtf8 is a real DFA with exactly the
+// transition law of the runtime validator (wb001-intent.mjs
+// assertValidUtf8) — the same class-checking, overlong/surrogate/
+// >U+10FFFF/truncation refusals — because "universal wireInjective is
+// only as meaningful as the validity predicate": a proof can be correct
+// about the WRONG accepted language, the exact class of mistake Beat 2
+// eliminated. The runtime validator's agreement with this DFA is
+// sampled by the shared vectors today and belongs to the future
+// EQUIVALENCE class; it is never claimed from the samples.
 //
 // Wire format mirrored exactly: envelope = "bT-WB01" || 0x01 || tlv*;
-// tlv = tag(1) || length(4, BE u32) || value, where `length` counts
-// MEANINGFUL bytes only; ten fields, tags strictly ascending 0x01..0x0a,
-// nothing trailing. The deployed envelope is the first envLen bytes of
-// `wire`; every byte after that is zero (zeroTail).
+// tlv = tag(1) || length(4, BE u32) || value, `length` counts MEANINGFUL
+// bytes; ten fields, tags strictly ascending 0x01..0x0a, nothing
+// trailing. The deployed envelope is the first envLen bytes of `wire`.
 
-module BTungstenWB001 where;
+module BTungstenWB001 where
 
-// A variable-length field at capacity: `len` counts meaningful bytes;
-// `bytes` is canonically ZERO-PADDED beyond them (validIntent enforces
-// the padding, so the fixed-size model is exactly the variable-length
-// wire on the meaningful prefix).
-Field : {cap} (fin cap) -> Type
-Field cap = { len : [32], bytes : [cap][8] }
+type Byte = [8]
 
-Intent : Type
-Intent =
+type Field cap = { len : [32], bytes : [cap][8] }
+
+type Intent =
   { domain       : Field 64
   , nonce        : Field 32
   , epoch        : [64]
@@ -45,38 +44,99 @@ Intent =
   , payload      : Field 4096
   }
 
-// One legal length word for the fixed-width fields.
-L8  : [32]
+L8 : [32]
+L8 = 8
 L32 : [32]
-L8  = 8
 L32 = 32
 
-// The repair's decode-side law as an abstract predicate: the meaningful
-// bytes are well-formed UTF-8. It is defined by the implementations and
-// pinned ACROSS twins by the shared vectors' surrogate/invalid-UTF-8
-// rows (both must refuse them); re-deriving UTF-8 here is out of scope.
-wellFormedUtf8 : {cap} (fin cap) => [cap][8] -> Bit
+//////////////////////////////////////////////////////////////////////////////
+// THE CONCRETE ACCEPTED LANGUAGE — the UTF-8 DFA
+//
+// States: ground (complete sequence), Ck (k plain continuations still
+// expected), and the four lead-specific first-continuation ranges that
+// forbid overlong forms, encoded surrogates and > U+10FFFF. BAD absorbs.
+// The scan runs over the whole capacity array; this is exactly prefix
+// validity because ground is a fixed point for the canonical zero
+// padding (a zero byte is a valid ASCII lead), and a TRUNCATED prefix
+// leaves the DFA mid-sequence where the padding cannot rescue it — the
+// truncation refuses, as it must.
+//////////////////////////////////////////////////////////////////////////////
 
-// Canonical zero padding: positions >= len are zero. (TYPECHECK BEAT:
-// settle the range/index widths of this comprehension — the meaning is
-// the equation below, which the typecheck run must accept.)
+stG, stC1, stC2, stC3, stE0, stED, stF0, stF4, sBAD : [4]
+stG = 0
+stC1 = 1
+stC2 = 2
+stC3 = 3
+stE0 = 4
+stED = 5
+stF0 = 6
+stF4 = 7
+sBAD = 13
+
+step : [4] -> Byte -> [4]
+step st b =
+  if st == sBAD then sBAD else
+  if st == stG then
+       if b <= 0x7f                                        then stG
+  else if (b >= 0xc2) && (b <= 0xdf)                           then stC1
+  else if b == 0xe0                                        then stE0
+  else if ((b >= 0xe1) && (b <= 0xec)) || (b == 0xee) || (b == 0xef) then stC2
+  else if b == 0xed                                        then stED
+  else if b == 0xf0                                        then stF0
+  else if (b >= 0xf1) && (b <= 0xf3)                           then stC3
+  else if b == 0xf4                                        then stF4
+  else sBAD
+  else if st == stC1 then (if (b >= 0x80) && (b <= 0xbf) then stG  else sBAD)
+  else if st == stC2 then (if (b >= 0x80) && (b <= 0xbf) then stC1 else sBAD)
+  else if st == stC3 then (if (b >= 0x80) && (b <= 0xbf) then stC2 else sBAD)
+  else if st == stE0 then (if (b >= 0xa0) && (b <= 0xbf) then stC1 else sBAD)
+  else if st == stED then (if (b >= 0x80) && (b <= 0x9f) then stC1 else sBAD)
+  else if st == stF0 then (if (b >= 0x90) && (b <= 0xbf) then stC2 else sBAD)
+  else if st == stF4 then (if (b >= 0x80) && (b <= 0x8f) then stC2 else sBAD)
+  else sBAD
+
+// Lazy positional self-reference: state(i) consumes byte i from
+// state(i-1). (TYPECHECK iterations so far: no where-semicolon, no
+// let-expression — Cryptol 3 takes neither; if the termination checker
+// still rejects the self-reference, the value-driven head/tail recursion
+// is the fallback. The SEMANTICS are fixed by this equation either way.)
+scan : {cap} (fin cap) => [4] -> [cap]Byte -> [cap][4]
+scan st0 bs =
+  [ step (if i == 0 then st0 else (scan st0 bs) @ (i - 1)) (bs @ i)
+  | i <- take`{cap} [0 ...]
+  ]
+
+wellFormedUtf8 : {cap} (fin cap) => Field cap -> Bit
+wellFormedUtf8 f = ((scan stG f.bytes) @ (`(cap) - 1)) == stG
+
+//////////////////////////////////////////////////////////////////////////////
+// Valid intents: bounds per field, fixed legal length words for the
+// fixed-width fields, canonical zero padding, and the concrete UTF-8 law
+// on every text field.
+//////////////////////////////////////////////////////////////////////////////
+
 canonicalPad : {cap} (fin cap) => [32] -> [cap][8] -> [cap][8]
-canonicalPad len bs = [ if toInteger i < toInteger len then bs @ i else 0 | i <- [ 0 .. cap - 1 ] ]
+canonicalPad len bs =
+  [ if i < len then bs @ i else 0 | i <- take`{cap} [0 ...] ]
 
 validField : {cap} (fin cap) => [32] -> [32] -> Field cap -> Bit
-validField lo hi f =
-  f.len >= lo && f.len <= hi
-  && canonicalPad f.len f.bytes == f.bytes
+validField lo hi f = (f.len >= lo) && (f.len <= hi) && (canonicalPad f.len f.bytes == f.bytes)
 
 validIntent : Intent -> Bit
 validIntent i =
-       validField 1 64 i.domain    && wellFormedUtf8 i.domain.bytes
-    && i.nonce.len == L32          && canonicalPad i.nonce.len i.nonce.bytes == i.nonce.bytes
-    && i.action.len == L32         && canonicalPad i.action.len i.action.bytes == i.action.bytes
-    && validField 1 128 i.destination && wellFormedUtf8 i.destination.bytes
-    && validField 1 64 i.capability   && wellFormedUtf8 i.capability.bytes
-    && validField 1 128 i.payer       && wellFormedUtf8 i.payer.bytes
+       validField 1 64  i.domain    && wellFormedUtf8 i.domain
+    && (i.nonce.len == L32)           && (canonicalPad i.nonce.len i.nonce.bytes == i.nonce.bytes)
+    && (i.action.len == L32)          && (canonicalPad i.action.len i.action.bytes == i.action.bytes)
+    && validField 1 128 i.destination && wellFormedUtf8 i.destination
+    && validField 1 64  i.capability   && wellFormedUtf8 i.capability
+    && validField 1 128 i.payer       && wellFormedUtf8 i.payer
     && validField 0 4096 i.payload
+
+//////////////////////////////////////////////////////////////////////////////
+// The wire: exactly the deployed bytes on the meaningful prefix, zero
+// padding beyond it (canonicalPad + validIntent guarantee nothing
+// meaningful hides in the padding).
+//////////////////////////////////////////////////////////////////////////////
 
 wireTlv : {cap} (fin cap) => Byte -> Field cap -> [5 + cap][8]
 wireTlv t f = [t] # split f.len # f.bytes
@@ -84,12 +144,8 @@ wireTlv t f = [t] # split f.len # f.bytes
 u64 : [64] -> Field 8
 u64 w = { len = L8, bytes = split w }
 
-MaxEnv : Nat
-MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
+type MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
-// The fixed-size padded wire. The deployed variable-length envelope is
-// `take (envLen i) (wire i)`; positions beyond envLen are zero by
-// canonicalPad, so nothing meaningful hides in the padding.
 wire : Intent -> [MaxEnv][8]
 wire i =
   "bT-WB01" # [0x01]
@@ -104,47 +160,323 @@ wire i =
     # wireTlv 0x09 i.payer
     # wireTlv 0x0a i.payload
 
-// Total meaningful length of the deployed envelope (sum of 5 + len per
-// field, plus the 8-byte header), as a u32.
 envLen : Intent -> [32]
 envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action.len)
              + (5 + i.destination.len) + (5 + i.capability.len) + (5 + L8) + (5 + L8)
              + (5 + i.payer.len) + (5 + i.payload.len)
 
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
-// implementation): within the published adversarial model no adversary
-// produces (pk, m, sig) accepting under an m it never queried. The
-// workbench's layer UNDER the assumption: "the message" is exactly the
-// committed intent's canonical bytes.
-SigVerify : [32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit
+// implementation) within the published adversarial model; the workbench
+// owns the layer under the assumption — that the signed message is
+// exactly the committed intent's canonical bytes. The assumption lives
+// in prose here, not as a declaration: Cryptol requires every signature
+// to carry a binding, and an abstract SigVerify had none (typecheck
+// round 4). P3's formal statement — verification is over the wire bytes
+// of the intent under test and nothing else — is exactly wireInjective's
+// premise once the primitive is assumed, so no obligation is lost.
 
-verifyWith : ([32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit) -> Intent -> [32][8] -> [64][8] -> Bit
-verifyWith sv i pk sig = sv pk (wire i) sig
+//////////////////////////////////////////////////////////////////////////////
+// P2 — THE framing property, for all VALID pairs:
+//////////////////////////////////////////////////////////////////////////////
 
-// P2 — THE framing property, for all VALID pairs (the battery samples it,
-// the vectors pin its boundary rows):
-// distinct valid intents never share wire bytes. With ascending unique
-// tags, meaningful length words, and canonical zero padding, drift in
-// any field must surface in its own tag, length word or bytes.
-property wireInjective (a : Intent) (b : Intent) : Bit
-  = (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
+wireInjective : Intent -> Intent -> Bit
+property wireInjective a b =
+  (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
 
-// BRIDGE (model <-> deployed bytes), discharged by the shared vectors
-// byte-for-byte and to be stated as checked properties once the
-// typecheck idiom settles:
+//////////////////////////////////////////////////////////////////////////////
+// CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
+// sampled): valid international text is ACCEPTED (astral, a legitimate
+// U+FFFD, combining sequences), boundary-shift twins and near-collision
+// payload pairs stay DISTINCT on the wire.
+//////////////////////////////////////////////////////////////////////////////
+
+mkB : {m, cap} (fin m, fin cap) => [m][8] -> [32] -> Field cap
+mkB b n = { len = n, bytes = take`{cap} (b # (zero : [cap][8])) }
+
+bee : [4]Byte
+bee = split (0xf09f909d : [32])   // 🐝 — a valid 4-byte supplementary char
+
+iBase : Intent
+iBase =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+twinL : Intent
+twinL =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "ab" 2
+  , capability  = mkB "c" 1
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+twinR : Intent
+twinR =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "a" 1
+  , capability  = mkB "bc" 2
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+astral : Intent
+astral =
+  { domain      = mkB ("skaists." # bee # "/1") 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+fffd : Intent
+fffd =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB (split (0xefbfbd : [24])) 3
+  , payload     = mkB "{}" 2
+  }
+
+combining : Intent
+combining =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB ("e" # split (0xcc81 : [16])) 3
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+nearA : Intent
+nearA =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB (split (0xdeadbeef : [32])) 4
+  }
+nearB : Intent
+nearB =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB (split (0xdeadbeef : [32]) # [0x00]) 5
+  }
+
+// Constructed arm, one obligation per claim (the founder ruling asks for
+// exact obligation names; a conjunction hid which claim red on the first
+// green-ladder run — this split makes CI name it). The per-field rows
+// exist because validIBase red while the adversarial arm passed — if a
+// conjunct is constant-false the adversarial arm cannot see it; these can.
+validDomain_iBase : Bit
+property validDomain_iBase =
+  (validField 1 64 iBase.domain) && (wellFormedUtf8 iBase.domain)
+
+validNonce_iBase : Bit
+property validNonce_iBase =
+  (iBase.nonce.len == L32) && (canonicalPad iBase.nonce.len iBase.nonce.bytes == iBase.nonce.bytes)
+
+validAction_iBase : Bit
+property validAction_iBase =
+  (iBase.action.len == L32) && (canonicalPad iBase.action.len iBase.action.bytes == iBase.action.bytes)
+
+validDest_iBase : Bit
+property validDest_iBase =
+  (validField 1 128 iBase.destination) && (wellFormedUtf8 iBase.destination)
+
+validCap_iBase : Bit
+property validCap_iBase =
+  (validField 1 64 iBase.capability) && (wellFormedUtf8 iBase.capability)
+
+validPayer_iBase : Bit
+property validPayer_iBase =
+  (validField 1 128 iBase.payer) && (wellFormedUtf8 iBase.payer)
+
+validPayload_iBase : Bit
+property validPayload_iBase = validField 0 4096 iBase.payload
+
+validIBase : Bit
+property validIBase = validIntent iBase
+
+twinsValid : Bit
+property twinsValid = (validIntent twinL) && (validIntent twinR)
+
+twinsDistinct : Bit
+property twinsDistinct = (wire twinL != wire twinR)
+
+validAstral : Bit
+property validAstral = validIntent astral
+
+validFffd : Bit
+property validFffd = validIntent fffd
+
+validCombining : Bit
+property validCombining = validIntent combining
+
+nearValid : Bit
+property nearValid = (validIntent nearA) && (validIntent nearB)
+
+nearDistinct : Bit
+property nearDistinct = (wire nearA != wire nearB)
+
+baseVsTwinDistinct : Bit
+property baseVsTwinDistinct = (wire iBase != wire twinL)
+
+//////////////////////////////////////////////////////////////////////////////
+// CHECK-SAMPLED, adversarial arm (closed terms): intents OUTSIDE
+// validIntent — every malformed-UTF-8 class the runtime validator
+// refuses, plus bounds and canonical-padding violations — are REJECTED
+// by the model BEFORE any injectivity claim is evaluated against them.
+//////////////////////////////////////////////////////////////////////////////
+
+xSurrogate : Intent   // ed a0 80 — a UTF-16 surrogate encoded on the wire (CESU-8)
+xSurrogate =
+  { domain      = mkB ("skaists." # split (0xeda080 : [24])) 11
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xOverlong : Intent    // c0 80 — overlong ASCII
+xOverlong =
+  { domain      = mkB ("a" # split (0xc080 : [16])) 3
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xRawFF : Intent       // ff — not a lead byte at all
+xRawFF =
+  { domain      = mkB [0xff] 1
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xBeyond : Intent      // f4 90 80 80 — beyond U+10FFFF
+xBeyond =
+  { domain      = mkB (split (0xf4908080 : [32])) 4
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xTrunc : Intent       // a c2 — sequence truncated by the field's length
+xTrunc =
+  { domain      = mkB ("a" # [0xc2]) 2
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xLenBeyondCap : Intent // length word outside the field's capacity — bounds violation
+xLenBeyondCap =
+  { domain      = { len = 65, bytes = (mkB "ab" 2 : Field 64).bytes }
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+xNonCanonPad : Intent // meaningful beyond len — padding not canonical
+xNonCanonPad =
+  { domain      = { len = 1, bytes = (mkB "ab" 2 : Field 64).bytes }
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
+
+adversarialRejected : Bit
+property adversarialRejected =
+    and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
+
+//////////////////////////////////////////////////////////////////////////////
+// BRIDGE (model <-> deployed bytes), pinned byte-for-byte by the shared
+// vectors (wb001-vectors.json — both implementations reproduce them):
 //   prefix:  the JS envelope of i == take (envLen i) (wire i)
 //   zeroTail: every wire position >= envLen is zero
-//
-// Discharge plan, result classes recorded separately:
-//   1. TYPECHECK — this file parses and typechecks (settle the
-//      canonicalPad comprehension idiom).
-//   2. CHECK-SAMPLED — :check wireInjective over symbolic a, b, with the
-//      check set INCLUDING CONSTRUCTED related pairs (boundary-shift
-//      twins, the surrogate-class rows, nested envelopes), not random
-//      sampling alone: random pairs rarely challenge the collision
-//      condition.
-//   3. PROVE-UNIVERSAL — :prove wireInjective across the stated domain.
-//      A successful :check is never recorded as this.
-//   4. EQUIVALENCE — SAW: the Rust twin == this spec on the shared
-//      vectors, then the llvm_verify equivalence proof per
-//      wb001-saw/intent.saw.
+//////////////////////////////////////////////////////////////////////////////

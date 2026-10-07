@@ -1089,3 +1089,47 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test render-badges.test.mjs
+
+  formal:
+    # bTunGsTeN formal-assurance ladder (founder ruling 2026-10-07, SPEC-
+    # BTUNGSTEN-1 §workbench): the formal leg runs in CI as its own result
+    # classes. TYPECHECK and CHECK-SAMPLED (adversarial + constructed +
+    # random arms) gate this job. PROVE-UNIVERSAL is attempted under a
+    # bounded budget and recorded honestly — a timeout prints NOT-PROVEN
+    # and exits green BY DESIGN: gating on an open research obligation
+    # would wedge CI red forever, and the result-class law forbids
+    # recording a timeout as anything but NOT-PROVEN. EQUIVALENCE is not
+    # attempted here and can never be claimed from this job (the shared
+    # vectors are sampled agreement). Cryptol is pinned: the version and
+    # asset below are part of every receipt this job produces.
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: shared setup — install cryptol 3.6.0 (pinned, with bundled solvers)
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          # tag is 3.6.0 (no v prefix) and ubuntu-24.04 matches ubuntu-latest —
+          # both facts from the releases API, learned from a 404 on the first run
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "-- bundle bin/ (recorded for the receipt):"; ls cryptol/bin
+          # cryptol requires z3 on PATH; the with-solvers bundle ships it in its
+          # bin dir (learned from run 3's "z3 not found"). $GITHUB_PATH persists
+          # for the job's later steps — a plain export dies with this step's
+          # shell, which is exactly how run 4 red while z3 --version printed.
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/cryptol/bin:$PATH"
+          if ! command -v z3 >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq z3
+          fi
+          z3 --version | head -1
+          ./cryptol/bin/cryptol --version
+      - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
+        if: always()
+        timeout-minutes: 10
+        run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
