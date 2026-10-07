@@ -73,6 +73,28 @@ one (the spec's count-first law).
   chain state with bounded recorded retries (state-visibility rule);
   exit 0 ⇔ every leg passed. (The print-only v1 forms, reviewed at
   31ec63316, are superseded.)
+- `zkrself-final.sh` + `final-find.mjs` — the FINALIZER (v3, review
+  orders 2026-10-07): reconciles STANDING anchors (no deploy, no RAM) —
+  parent-owned failure accounting (discovery NEVER records inside a
+  subshell), a required-leg ledger (a leg that never ran is a failure),
+  EXACT build identity (on-chain hash must EQUAL the pinned release
+  wasm sha256 — non-empty is not a check), and the asserted final state
+  through the shared helper.
+- `reconcile_row.mjs` / `final_table_assert.mjs` — the shared
+  read-side helpers: `readFileSync(0)` blocks to EOF (the stdin race
+  that misparsed valid responses is structurally gone, not retried
+  away), failure classes named and exit-coded (malformed · transport ·
+  missing · mismatch; the final-table helper adds verified_at-class and
+  row-count), and `verified_at` must be a VALID uint32 timestamp BEFORE
+  the positive-vs-zero assertion (missing/null/nonnumeric/negative all
+  fail — review order 3).
+- `zkrself-parse-test.sh` / `zkrself-final-offline-test.sh` + 
+  `fixtures/parse/` + `fixtures/final/` — the OFFLINE proofs (no
+  network, no chain, no RAM): 15/15 parser/timestamp cases including
+  the reviewer's four timestamp mutations, and the finalizer's
+  accounting proven by stub replay — happy 9/9 green, a MISSING row
+  fails its leg and the run, a wrong (merely non-empty) code hash
+  fails identity. Harness changes prove out here BEFORE any chain use.
 - `prove_count.sh` — pipeline: compile → ceremony → setup → vk → witnesses
   → TWO proofs (kind 0/1) → off-chain verifies → calldata → the FORGERY
   set → the ASYM regression. `PTAU=` selects the ceremony: default is the

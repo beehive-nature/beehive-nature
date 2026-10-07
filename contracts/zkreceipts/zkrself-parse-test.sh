@@ -44,6 +44,24 @@ for i in 1 2 3 4 5; do
   fi
 done
 
+# ── final_table_assert.mjs — STRICT TIMESTAMP VALIDATION (review order
+# 3, 2026-10-07): the verified_at field must be PRESENT and a VALID
+# uint32 ABI timestamp BEFORE the positive-vs-zero assertion. The four
+# mutations below are the reviewer's exact table — each once passed
+# exit 0 under truthiness/Number() coercion and must now fail exit 6.
+FF=$REPO/fixtures/final
+ftcheck(){ # fixture expectedExit label
+  local TBL=$1 WANT=$2 LBL=$3 GOT ERR
+  ERR=$(node "$REPO/final_table_assert.mjs" "$FF/spec.json" 4 < "$TBL" 2>&1 >/dev/null)
+  GOT=$?
+  if [ "$GOT" = "$WANT" ]; then ok "$LBL (exit $GOT)"; else bad "$LBL — exit $GOT ≠ $WANT ($ERR)"; fi
+}
+ftcheck "$FF/table-valid.json"             0 "valid 4-row table → asserted"
+ftcheck "$FF/table-missing-negative.json"  6 "rejected row OMITS verified_at → state not established"
+ftcheck "$FF/table-null-negative.json"     6 "rejected row verified_at:null → invalid field"
+ftcheck "$FF/table-string-positive.json"   6 "positive row verified_at:'not-a-timestamp' → invalid timestamp"
+ftcheck "$FF/table-neg-one-positive.json"  6 "positive row verified_at:-1 → invalid timestamp"
+
 echo "== RESULT: $PASS passed, $FAILS failed =="
 [ $FAILS -eq 0 ] || exit 1
 exit 0

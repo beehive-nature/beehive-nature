@@ -307,3 +307,54 @@ with the sibling session's parallel receipts on zkrtst222222
 (dispatch 2026-10-06-vaulta-zk-selector-fix.md §7) as the
 sponsored-lane corroboration. Leak (tungsten 2) and scale (tungsten 4)
 remain OPEN; the Autonomi coupling ban STANDS.
+
+## HARNESS REPAIR ADDENDUM (2026-10-07, review round 3): the finalizer can no longer pass by skipping
+
+The reviewer's offline stub proved the v2 finalizer's decisive defect:
+`find_anchor` recorded failures inside COMMAND SUBSTITUTION, so a missing
+prerequisite silently skipped its leg — a table without the seven claims
+scored "2 passed, 0 failed", exit 0, with ZERO proof-verification calls;
+a malformed final table also reported full success; and the identity
+predicate was mere non-emptiness (the zero hash passed it).
+
+zkrself-final.sh v3 closes all four:
+- PARENT-OWNED accounting — discovery emits `seq N` on stdout,
+  diagnostics on stderr, and only a return status; every failure is
+  recorded by the caller. No ok/bad in subshells.
+- REQUIRED-LEG LEDGER — identity, seven refusals, exhaustion, final
+  state: the closeout fails unless EVERY leg has a recorded result;
+  "NEVER RAN" is printed and counted as a failure.
+- EXACT build identity — on-chain hash must EQUAL the pinned release
+  wasm sha256 (7a86ac34…, same-line PUBLIC-CONSTANT); zero or foreign
+  hashes fail.
+- ASSERTED final state — the shared final_table_assert.mjs checks each
+  discovered claim's fields and verified_at class and requires
+  rows == cap; unreadable is inconclusive, never green.
+
+OFFLINE REGRESSIONS (zkrself-final.test.sh + stub/cleos.stub.sh — the
+reviewer's method, committed): control exits 0 with 10/10 legs and
+exactly 7 verify calls; missing-prerequisites exits 1 with ZERO verify
+calls; malformed final state exits 1; zero code hash exits 1. The
+regressions earned their keep on first run — they caught a doubled
+REPO path (the `${REPO:-base}/suffix` form appends even when REPO is
+pre-set) that unloaded every helper; fixed, semantics now "the helper
+directory itself".
+
+CHAIN RUN of v3 (no deployment — standing anchors, per the order):
+10/10 PASS, 0 failed, 0 never-ran, exit 0. Identity = pinned-hash
+equality; forged / mutated count / mutated root / mutated kind /
+re-verify / both asym reversed claims refused on their specified
+reasons; "anchor table FULL (bounded resource budget)"; final state
+asserted: the seven claims in their verified classes, 27 rows == cap 27.
+
+Labels preserved: the zkrtst111111 acceptance remains a TWO-PART
+COMPOSITE (positives from the zkrself-run pass; negatives + exhaustion
+from the finalizer); the fresh-account record keeps its initial
+automated run and separately completed follow-up legs. Ceremony
+status, per the banked receipt (selector-fix dispatch, commit
+112f1c011): "public transcript digest matched; downloaded bytes
+cross-matched; full local transcript-verification COMPLETED —
+'Powers of Tau Ok!', exit 0, ≈1 h 45 m, digests recorded."
+
+Leak (tungsten 2) and scale (tungsten 4) remain open; the Autonomi
+coupling ban stands.

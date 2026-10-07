@@ -344,3 +344,54 @@ the leak distinguisher and the 1k/10k scale measurements remain OPEN —
 "only one receipt remains" describes the selector-repair dispatch,
 never the lane or its coupling readiness (the Autonomi coupling ban
 stands).
+
+---
+
+## §addendum-3 — review order 3: the two remaining harness items closed, offline-proven (2026-10-07)
+
+The reviewer's dispatch closed the stdin-race, read-endpoint and
+pending-transcript findings at `112f1c011` (banked above; the completed
+transcript receipt keeps its scope: verification of the DOWNLOADED
+setup artifact, never "the ZK lane is done"). Two items stayed open;
+both are now closed, offline-first:
+
+**1 · the finalizer.** The committed blob (`834a28f4…`) was indeed the
+unrepaired v2 — the working tree meanwhile held the concurrent seat's
+uncommitted v3, which this session AUDITED line-by-line rather than
+trusting its header, then proved by STUB REPLAY
+(`zkrself-final-offline-test.sh` — a fixture-backed fake cleos drives
+the entire finalizer with no network, chain or RAM):
+
+- the v2 defect (failure counters mutated inside `$(...)`, legs
+  skippable while the run exits 0) is closed by construction —
+  discovery NEVER records; the caller owns every counter, and the
+  required-leg ledger turns a never-ran leg into a failure;
+- **case happy: 9/9 legs PASS, exit 0; case missing-row: the absent
+  claim's leg FAILS and the run exits 1 (absence is a failure — the
+  exact v2 counter-example, now red); case wrong-build: a merely
+  non-empty wrong code hash FAILS identity, exit 1.**
+
+**2 · strict timestamp validation.** The reviewer's four mutations
+(rejected row missing `verified_at`; rejected row `null`; positive row
+`"not-a-timestamp"`; positive row `-1`) all passed the helper's
+truthiness/`Number()` predicates — confirmed, reproduced, fixed:
+`final_table_assert.mjs` now requires the field to be PRESENT and a
+VALID uint32 ABI timestamp (numeric, integral, 0…2³²−1) BEFORE the
+positive-vs-zero assertion; missing/null/nonnumeric/negative all exit 6
+as state-not-established, positive claims require exactly > 0 and
+rejected claims exactly 0. All four mutations are committed fixtures
+(`fixtures/final/`) in the standing offline suite —
+**zkrself-parse-test.sh now 15/15** (five response classes, five
+here-string deliveries, valid table, four timestamp mutations).
+
+The recorded read-only reconciliation of §addendum-2 is unaffected
+(the observed rows carried proper numeric timestamps); what changed is
+that the helper no longer accepts responses that do not establish the
+state it claims to establish. The finalizer's final leg rides the same
+helper, so the tightening covers both entry points.
+
+Scope unchanged: selector and anchor-budget repairs stay closed; leak
+and scale stay open; no circuit rebuild, ceremony rerun, account
+funding or Autonomi coupling. `final-find.mjs` (selection-only, feeds
+the strict gate downstream) keeps its event-accumulation read — noted
+here so a future review knows it was looked at, not missed.

@@ -1,52 +1,80 @@
 #!/bin/bash
-# zkrself-final.sh v2 — the FINALIZER of the corrected-build enforcing
-# pass on zkrtst111111 (review 2026-10-07 order). The account's anchor
-# table reached its law-row cap mid-pass (the bound WORKS), so this
-# completes the acceptance against anchors STANDING on-chain from the
-# same build, DISCOVERED by (root,kind,count) — not by assumed seqs
-# (v1 hardcoded run-epoch bases and a missing paren broke every
-# reconcile; both found by the runner's own red). Every negative leg
-# reconciles its prerequisite row first, then must refuse on its
-# SPECIFIED reason; the exhaustion leg proves the bounded budget
-# refuses in the open; positives for these same claims were receipted
-# in the zkrself-run.sh pass (canonical verifies 10,277/11,391 µs with
-# verified_at transitions; asym verifies 9,924/10,823 µs).
+# zkrself-final.sh v3 — the FINALIZER, review order 2026-10-07 round 3.
+# v2's decisive defect (offline-proven by the reviewer's stub): find_anchor
+# called bad() INSIDE command substitution, so its FAILS never reached the
+# parent — a missing prerequisite silently SKIPPED its leg and the run
+# still exited 0 ("nothing recorded a failure" ≠ "everything passed"; a
+# table without the seven claims scored 2 passed / 0 failed). v3 rules:
+#   · PARENT-OWNED accounting — discovery emits `seq N` on stdout,
+#     diagnostics on stderr, and ONLY a return status; every failure is
+#     recorded by the caller, never in a subshell.
+#   · REQUIRED-LEG LEDGER — closeout fails unless every expected leg has
+#     a recorded result; absence is a failure, never success.
+#   · EXACT build identity — on-chain hash must EQUAL the pinned release
+#     wasm sha256 (non-empty is not a check; the zero-hash and
+#     wrong-contract cases both passed v2's predicate, reviewer-proven).
+#   · ASSERTED final state — via the shared final_table_assert.mjs:
+#     exact claims, verified_at class per claim, rows == cap; an
+#     unreadable final table is inconclusive, never green.
+# Reconciles STANDING anchors (no deployment — shell logic is not a
+# reason to buy another deploy). Positives for these claims were
+# receipted by zkrself-run.sh (composite label preserved).
 U=${U:-https://jungle4.greymass.com}
 RURL=${RURL:-https://jungle4.api.eosnation.io}
-REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
+# REPO = the directory CONTAINING the helpers (final-find.mjs,
+# final_table_assert.mjs). NOTE: the v2 form `${REPO:-base}/contracts/
+# zkreceipts` appended the suffix even when REPO was pre-set — a doubled
+# path that unloaded every helper (found by the offline regressions).
+REPO=${REPO:-/mnt/c/Users/travi/beehive-nature/contracts/zkreceipts}
 W=~/plonkport
 A=${A:-zkrtst111111}
-CLEOS="/usr/bin/cleos -u $U"
-RCLEOS="/usr/bin/cleos -u $RURL"
-PASS=0; FAILS=0
+CLEOS=${CLEOS:-"/usr/bin/cleos -u $U"}
+RCLEOS=${RCLEOS:-"/usr/bin/cleos -u $RURL"}
+# PUBLIC-CONSTANT: zkrcount v1.1 release wasm sha256 (zkrcount.cpp @ this lane, deployed on zkrtst111111 2026-10-07)
+EXPECTED_HASH=${EXPECTED_HASH:-7a86ac34ddf15489a90775a2e0e8f1baa7e5337a268af73e43e41c884af6f40d}  # PUBLIC-CONSTANT: zkrcount v1.1 release wasm sha256
+PASS=0; FAILS=0; RESULTS=""
 ok(){ echo "PASS: $1"; PASS=$((PASS+1)); }
-bad(){ echo "FAIL: $1"; FAILS=$((FAILS+1)); }
+bad(){ echo "FAIL: $1"; echo "----- output (first 4 lines) -----"; echo "$2" | head -4; echo "--------------------------------"; FAILS=$((FAILS+1)); }
+record(){ RESULTS="$RESULTS
+$1 $2"; [ "$2" = PASS ] || FAILS=$((FAILS+1)); }
+LEGS="identity forged count21 rootflip kind1 reverify asym019 asym120 exhaust final"
 
 $CLEOS wallet unlock --name bnrzk --password "$(cat /tmp/nd/bnrzk.pw)" >/dev/null 2>&1 || true
 $CLEOS wallet import --name bnrzk --private-key "$(awk 'NR==1{print $1}' /tmp/nd/zkrtst.key)" >/dev/null 2>&1 || true
 
 push_raw(){ OUT=$($CLEOS push action $A "$1" "$2" -p $A 2>&1); RC=$?; }
-expect_refuse(){ # label action json exact-message
+expect_refuse(){ # label action json exact-message → status only (parent records)
   local LBL=$1 ACT=$2 ARGS=$3 MSG=$4
   push_raw "$ACT" "$ARGS"
   if echo "$OUT" | grep -q "executed transaction:"; then bad "$LBL — UNEXPECTEDLY EXECUTED"; echo "$OUT" | head -3; return 1; fi
   if echo "$OUT" | grep -qF "$MSG"; then ok "$LBL — refused: $MSG"; return 0; fi
-  bad "$LBL — wrong/absent reason (expected: $MSG)"; echo "$OUT" | head -3
+  bad "$LBL — wrong/absent reason (expected: $MSG)"; echo "$OUT" | head -3; return 1
 }
-# find_anchor <root> <kind> <count> [unverified|verified] — bounded,
-# recorded discovery of a standing row matching the exact claim
-find_anchor(){
+# discovery, subshell-safe: stdout `seq N` only; diagnostics to stderr;
+# rc 0 found · 1 no-match · 2 inconclusive. NEVER records failures.
+find_anchor(){ # root kind count [unverified|verified]
   local I RES
   for I in 1 2 3 4 5 6; do
     RES=$($RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node $REPO/final-find.mjs "$1" "$2" "$3" "${4:-unverified}")
     case "$RES" in
-      "seq "*) echo "$RES (attempt $I)"; return 0 ;;
-      NONE)    bad "find_anchor ($1, $2, $3, ${4:-unverified}) — no standing row matches" ""; return 1 ;;
-      *)      echo "find_anchor: READ-ERROR (attempt $I of 6)" ;;
+      "seq "*) echo "seq ${RES#seq } (attempt $I)" >&2; echo "${RES#seq }"; return 0 ;;
+      NONE)    echo "find_anchor($1,$2,$3,${4:-unverified}): no standing row matches" >&2; return 1 ;;
+      *)      echo "find_anchor($1,$2,$3): READ-ERROR attempt $I of 6" >&2 ;;
     esac
     sleep 4
   done
-  bad "find_anchor ($1,$2,$3) INCONCLUSIVE after 6 attempts" ""
+  echo "find_anchor($1,$2,$3): INCONCLUSIVE after 6 attempts" >&2
+  return 2
+}
+discover(){ # leg-id root kind count [class] → sets SEQ; records on failure; logs for the final spec
+  local R
+  if R=$(find_anchor "$2" "$3" "$4" "${5:-unverified}" 2>/tmp/zkr-find.err); then
+    SEQ=${R%% *}; echo "  [$1] prerequisite: seq $SEQ"
+    node -e "console.log(JSON.stringify({seq:+process.argv[1],root:process.argv[2],kind:+process.argv[3],count:+process.argv[4],verified:process.argv[5]==='verified'?'nonzero':'zero'}))" "$SEQ" "$2" "$3" "$4" "${5:-unverified}" >> /tmp/zkr-disc.log
+    return 0
+  fi
+  record "$1" FAIL; echo "  [$1] discovery failed: $(tail -1 /tmp/zkr-find.err)"
+  return 1
 }
 
 ROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).root.replace(/^0x/,'')")
@@ -59,42 +87,66 @@ FA_LIVE=$(node -pe "require('$W/asym/calldata_live.json').proof_hex")
 vargs(){ node -e "console.log(JSON.stringify({seq:+process.argv[1],proof:process.argv[2]}))" "$@"; }
 aargs(){ node -e "console.log(JSON.stringify({seq:+process.argv[1],root:process.argv[2],kind:+process.argv[3],count:+process.argv[4]}))" "$@"; }
 PAIR="count proof REJECTED — plonk pairing false"
+SPEC=/tmp/zkr-final-spec.json; : > $SPEC; : > /tmp/zkr-disc.log
 
-echo "== [0] build identity =="
-CH=$($RCLEOS get code $A 2>&1 | head -1 | grep -oE '[a-f0-9]{64}')
-[ -n "$CH" ] && ok "on-chain code hash ${CH:0:16}… (this build)" || { bad "no code on-chain" ""; exit 1; }
+echo "== [0] build identity (EXACT equality — pinned release wasm) =="
+CH=$($RCLEOS get code $A 2>/dev/null | head -1 | grep -oE '[a-f0-9]{64}')
+if [ -n "$CH" ] && [ "$CH" = "$EXPECTED_HASH" ]; then
+  ok "on-chain code hash == pinned wasm sha256 (${CH:0:16}…, this exact build)"; record identity PASS
+else
+  bad "build identity: on-chain '$CH' ≠ pinned '$EXPECTED_HASH' — wrong build or no code" ""; record identity FAIL
+fi
 
-echo "== [1] negative legs against standing anchors (discovered, then reconciled) =="
-R=$(find_anchor "$ROOT" 0 20 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  forged-proof anchor: $R" \
-  && expect_refuse "forged proof (eval_zw+1) @seq $SEQ" verify "$(vargs $SEQ "$P_FORG")" "$PAIR"
-R=$(find_anchor "$ROOT" 0 21 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  count=21 anchor: $R" \
-  && expect_refuse "real dead proof vs count=21 @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR"
-R=$(find_anchor "$ROOTFLIP" 0 20 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  mutated-root anchor: $R" \
-  && expect_refuse "real dead proof vs mutated root @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR"
-R=$(find_anchor "$ROOT" 1 20 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  kind=1 anchor: $R" \
-  && expect_refuse "real DEAD proof vs kind=1 @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR"
-R=$(find_anchor "$ROOT" 0 20 verified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  verified anchor (re-verify): $R" \
-  && expect_refuse "re-verify @seq $SEQ (already verified)" verify "$(vargs $SEQ "$P_DEAD")" "anchor already verified (one proof per anchor)"
+echo "== [1] negative legs against standing anchors (discovered, parent-owned) =="
+if discover forged "$ROOT" 0 20; then
+  expect_refuse "forged proof (eval_zw+1) @seq $SEQ" verify "$(vargs $SEQ "$P_FORG")" "$PAIR" && record forged PASS || record forged FAIL
+fi
+if discover count21 "$ROOT" 0 21; then
+  expect_refuse "real dead proof vs count=21 @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR" && record count21 PASS || record count21 FAIL
+fi
+if discover rootflip "$ROOTFLIP" 0 20; then
+  expect_refuse "real dead proof vs mutated root @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR" && record rootflip PASS || record rootflip FAIL
+fi
+if discover kind1 "$ROOT" 1 20; then
+  expect_refuse "real DEAD proof vs kind=1 @seq $SEQ" verify "$(vargs $SEQ "$P_DEAD")" "$PAIR" && record kind1 PASS || record kind1 FAIL
+fi
+if discover reverify "$ROOT" 0 20 verified; then
+  expect_refuse "re-verify @seq $SEQ (already verified)" verify "$(vargs $SEQ "$P_DEAD")" "anchor already verified (one proof per anchor)" && record reverify PASS || record reverify FAIL
+fi
 echo "== [2] asym REVERSED claims (the selector law, on-chain) =="
-R=$(find_anchor "$FROOT" 0 19 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  asym reversed (0,19): $R" \
-  && expect_refuse "valid asym-dead proof vs REVERSED (0,19) @seq $SEQ" verify "$(vargs $SEQ "$FA_DEAD")" "$PAIR"
-R=$(find_anchor "$FROOT" 1 20 unverified) && SEQ=$(echo "$R" | awk '{print $2}') && echo "  asym reversed (1,20): $R" \
-  && expect_refuse "valid asym-live proof vs REVERSED (1,20) @seq $SEQ" verify "$(vargs $SEQ "$FA_LIVE")" "$PAIR"
+if discover asym019 "$FROOT" 0 19; then
+  expect_refuse "valid asym-dead proof vs REVERSED (0,19) @seq $SEQ" verify "$(vargs $SEQ "$FA_DEAD")" "$PAIR" && record asym019 PASS || record asym019 FAIL
+fi
+if discover asym120 "$FROOT" 1 20; then
+  expect_refuse "valid asym-live proof vs REVERSED (1,20) @seq $SEQ" verify "$(vargs $SEQ "$FA_LIVE")" "$PAIR" && record asym120 PASS || record asym120 FAIL
+fi
 echo "== [3] exhaustion — the bounded budget refuses in the open =="
-ROWS=$($RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node $REPO/final-find.mjs x 0 0 2>/dev/null | head -1)
 CAP=$($RCLEOS get table $A $A law 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).rows[0].max_anchors)}catch(e){console.log('?')}})")
-echo "  table rows / cap: $($RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{console.log(JSON.parse(s).rows.length)})") / $CAP"
-expect_refuse "anchor beyond cap (table full)" anchor "$(aargs 4294967295 "$ROOT" 0 20)" "anchor table FULL (bounded resource budget)"
-echo "== [4] final table =="
-$RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "
-let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{
-const rows=JSON.parse(s).rows;
-const byClaim={};
-for(const r of rows){const hex=typeof r.root==='string'?r.root.replace(/^0x/,''):Buffer.from(r.root).toString('hex');
-  const k=hex.slice(0,8)+'/'+r.kind+'/'+r.count; byClaim[k]=(byClaim[k]||0)+(r.verified_at>0?0:0)+1;}
-const verified=rows.filter(r=>r.verified_at>0).length;
-console.log('  rows:',rows.length,'verified:',verified,'unverified:',rows.length-verified,'— table AT CAP, the bound held');});"
+expect_refuse "anchor beyond cap (table full)" anchor "$(aargs 4294967295 "$ROOT" 0 20)" "anchor table FULL (bounded resource budget)" && record exhaust PASS || record exhaust FAIL
+echo "== [4] final state (ASSERTED — the shared final_table_assert.mjs) =="
+CAP=$($RCLEOS get table $A $A law 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).rows[0].max_anchors)}catch(e){console.log('?')}})")
+# the assertion spec is the DISCOVERY LOG itself: every leg's claim in
+# its expected verified class, table exactly at cap; unreadable = fail
+node -e "
+const fs=require('fs');
+const spec=fs.readFileSync('/tmp/zkr-disc.log','utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));
+fs.writeFileSync(process.argv[1],JSON.stringify(spec));" "$SPEC"
+if $RCLEOS get table $A $A anchors -l 1000 2>/dev/null | node $REPO/final_table_assert.mjs "$SPEC" "$CAP"; then
+  record final PASS
+else
+  record final FAIL
+fi
 
-echo "== RESULT: $PASS passed, $FAILS failed =="
+echo "== LEDGER =="
+MISSING=0
+for L in $LEGS; do
+  LINE=$(printf '%s\n' "$RESULTS" | grep "^$L " | head -1)
+  case "${LINE#* }" in
+    PASS) echo "  $L: PASS" ;;
+    FAIL) echo "  $L: FAIL" ;;
+    *)    echo "  $L: NEVER RAN — absence is a failure (the v2 defect, closed)"; MISSING=$((MISSING+1)); FAILS=$((FAILS+1)) ;;
+  esac
+done
+echo "== RESULT: $PASS passed, $FAILS failed (incl. $MISSING never-ran) =="
 [ $FAILS -eq 0 ] || exit 1
 exit 0

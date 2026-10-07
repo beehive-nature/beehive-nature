@@ -39,12 +39,23 @@ for (const s of spec) {
   if (hex !== s.root) { console.error('mismatch: seq ' + s.seq + ' root ' + hex.slice(0, 12) + '… ≠ spec'); process.exit(5); }
   if (r.kind !== s.kind) { console.error('mismatch: seq ' + s.seq + ' kind ' + r.kind + ' ≠ ' + s.kind); process.exit(5); }
   if (r.count !== s.count) { console.error('mismatch: seq ' + s.seq + ' count ' + r.count + ' ≠ ' + s.count); process.exit(5); }
-  const v = Number(r.verified_at);
-  if (s.verified === 'nonzero' && (!r.verified_at || v === 0)) {
-    console.error('verified_at: seq ' + s.seq + ' is ' + r.verified_at + ' — a POSITIVE claim must carry a nonzero verified_at'); process.exit(6);
+  const v = r.verified_at;
+  // STRICT TIMESTAMP VALIDATION (review order 3, 2026-10-07): the field
+  // must be PRESENT and a VALID uint32 ABI timestamp BEFORE any
+  // positive-vs-zero assertion — truthiness/Number() coercion once let
+  // a missing field, null, "not-a-timestamp" (NaN ≠ 0) and -1 all pass
+  // against the class predicates. Missing, null, nonnumeric, negative
+  // (and > 2^32−1) are state-NOT-established: fail.
+  const tsValid = typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 4294967295;
+  if (!tsValid) {
+    console.error('verified_at: seq ' + s.seq + ' carries ' + JSON.stringify(v) +
+      ' — not a valid uint32 timestamp; the claim\'s state is NOT established'); process.exit(6);
   }
-  if (s.verified === 'zero' && r.verified_at && v !== 0) {
-    console.error('verified_at: seq ' + s.seq + ' is ' + r.verified_at + ' — a REJECTED claim must remain unverified at the observation'); process.exit(6);
+  if (s.verified === 'nonzero' && v === 0) {
+    console.error('verified_at: seq ' + s.seq + ' is 0 — a POSITIVE claim must carry a nonzero verified_at'); process.exit(6);
+  }
+  if (s.verified === 'zero' && v !== 0) {
+    console.error('verified_at: seq ' + s.seq + ' is ' + v + ' — a REJECTED claim must be exactly 0 at the observation'); process.exit(6);
   }
 }
 if (rows.length !== Number(wantTotal)) {
