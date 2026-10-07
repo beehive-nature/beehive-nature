@@ -167,6 +167,9 @@ jobs:
           if [ "${n:-0}" -lt 1 ]; then
             echo "genealogy: matched ${n:-0} suites under tools/genealogy — that is not a count of tests, it is a glob that found nothing. Refusing to report a pass."
             exit 1
+          fi
+          echo "genealogy: running $n suite(s)"
+          node --test $(ls tools/genealogy/*.test.mjs)
       # bTunGsTeN Workbench 001 (zCode seat, 2026-10-06; SPEC-BTUNGSTEN-1):
       # the standard's first executable arm — the intent-binding invariant.
       # No valid signature authorizes any intent other than the exact
@@ -190,9 +193,6 @@ jobs:
           fi
           echo "btungsten: running $n suite(s)"
           node --test $(ls scripts/btungsten/*.test.mjs)
-          fi
-          echo "genealogy: running $n suite(s)"
-          node --test $(ls tools/genealogy/*.test.mjs)
       - name: bData local intake — real disk bytes, hash refusal and restart persistence
         if: always()
         run: node --test tools/antd-bridge/intake-server.test.mjs
