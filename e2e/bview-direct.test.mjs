@@ -38,7 +38,7 @@ async function open(reject = false, slow = false, hang = null, large = false, ro
   await ctx.addInitScript(hang => { window.hangDirect=hang; }, hang);
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
-  await ctx.route('**/vendor/ant-browser-sdk/0.1.1/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
+  await ctx.route('**/vendor/ant-browser-sdk/0.1.2/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
   let relayBody=MEDIA;
   if(large){const free=Buffer.alloc(49<<20);free.writeUInt32BE(free.length,0);free.write('free',4);relayBody=Buffer.concat([MEDIA,free]);}
   await ctx.route('https://relay.skaists.dev/ant/v1/data/public/**', r=> { relay.push(r.request().url()); return slow ? r.fulfill({status:302,headers:{'access-control-allow-origin':ORIGIN,location:ORIGIN+'/slow.mp4'}}) : r.fulfill({status:200,headers:{'access-control-allow-origin':ORIGIN,'content-length':String(relayBody.length)},body:relayBody}); });

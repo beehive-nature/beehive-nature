@@ -29,9 +29,11 @@ try {
   await page.waitForTimeout(seconds * 1000);
   const r = await page.evaluate(l => window.__antTransport.reach(l), label);
   r.startedAt = startedAt; r.seconds = seconds; r.page = url;
+  // the SDK version the page actually loaded, read from its own resource timing
+  r.sdk = await page.evaluate(() => { const m = performance.getEntriesByType('resource').map(e => /\/vendor\/ant-browser-sdk\/([^/]+)\//.exec(e.name)).find(Boolean); return m ? m[1] : 'unknown'; });
   await writeFile(out, JSON.stringify(r, null, 1) + '\n');
   const s = r.summary;
-  console.log(`${label}: ${s.dials} dials · ${s.opened} opened · ${s.dead} dead · ${s.waiting} waiting · ` +
+  console.log(`${label} (sdk ${r.sdk}): ${s.dials} dials · ${s.opened} opened · ${s.dead} dead · ${s.waiting} waiting · ` +
     `${s.endpointsReachable}/${s.endpointsReachable + s.endpointsUnreachable} settled endpoints reachable · ` +
     `dead: ${s.deadAt.dial} never ICE-connected, ${s.deadAt.ice} ICE no DTLS, ${s.deadAt.dtls} DTLS no channel → ${out}`);
 } finally {

@@ -1387,7 +1387,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (my === job && !ok && !playing) say('s-fail');
   }
   // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
-  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.1/';
+  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.2/';
   // Autonomi self-encryption cuts a file into CHUNK-sized pieces (three equal pieces under 3 × CHUNK).
   // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
   const CHUNK = 4190208, DIRECT_LANES = 6;
@@ -1488,7 +1488,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // The SDK names each step of opening a file; show the viewer which one is running.
     const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
     cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
-    const receipt = metrics.direct = {sdk:'0.1.1',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
+    const receipt = metrics.direct = {sdk:'0.1.2',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
     try {
       if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
@@ -1810,7 +1810,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(direct)steps=[
       ['parse · 64 hex','public read · no wallet required',E.has?'done':'todo'],
       ['cache · '+D.cache,'miss · ask the storage nodes',E.has?'done':'todo'],
-      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.1'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
+      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.2'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
       ['chunk lanes · '+(dr&&dr.chunks?Math.min(dr.lanes,dr.chunks):6)+' at a time',dr&&dr.chunks?(dr.completed+' of '+dr.chunks+' chunks · read on chunk boundaries, so none is fetched twice'):'chunks are read on their own boundaries, in parallel, and played in order',dr&&dr.chunks&&dr.completed>=dr.chunks?'done':'todo'],
       steps[4],steps[5],
