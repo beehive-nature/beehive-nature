@@ -144,8 +144,7 @@ wireTlv t f = [t] # split f.len # f.bytes
 u64 : [64] -> Field 8
 u64 w = { len = L8, bytes = split w }
 
-MaxEnv : Nat
-MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
+type MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
 wire : Intent -> [MaxEnv][8]
 wire i =
@@ -236,10 +235,10 @@ nearB = iBase { payload = mkB (split (0xdeadbeef : [32]) # [0x00]) 5 }
 constructedValidPairs : Bit
 property constructedValidPairs =
     validIntent iBase
-  && validIntent twinL  && validIntent twinR  && wire twinL != wire twinR
+  && validIntent twinL  && validIntent twinR  && (wire twinL != wire twinR)
   && validIntent astral && validIntent fffd   && validIntent combining
-  && validIntent nearA  && validIntent nearB  && wire nearA != wire nearB
-  && wire iBase != wire twinL
+  && validIntent nearA  && validIntent nearB  && (wire nearA != wire nearB)
+  && (wire iBase != wire twinL)
 
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, adversarial arm (closed terms): intents OUTSIDE
