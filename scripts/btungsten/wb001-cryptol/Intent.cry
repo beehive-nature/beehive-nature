@@ -27,6 +27,8 @@
 
 module BTungstenWB001 where
 
+type Byte = [8]
+
 type Field cap = { len : [32], bytes : [cap][8] }
 
 type Intent =
@@ -76,21 +78,21 @@ step st b =
   if st == sBAD then sBAD else
   if st == stG then
        if b <= 0x7f                                        then stG
-  else if b >= 0xc2 && b <= 0xdf                           then stC1
+  else if (b >= 0xc2) && (b <= 0xdf)                           then stC1
   else if b == 0xe0                                        then stE0
-  else if (b >= 0xe1 && b <= 0xec) || b == 0xee || b == 0xef then stC2
+  else if ((b >= 0xe1) && (b <= 0xec)) || b == 0xee || b == 0xef then stC2
   else if b == 0xed                                        then stED
   else if b == 0xf0                                        then stF0
-  else if b >= 0xf1 && b <= 0xf3                           then stC3
+  else if (b >= 0xf1) && (b <= 0xf3)                           then stC3
   else if b == 0xf4                                        then stF4
   else sBAD
-  else if st == stC1 then (if b >= 0x80 && b <= 0xbf then stG  else sBAD)
-  else if st == stC2 then (if b >= 0x80 && b <= 0xbf then stC1 else sBAD)
-  else if st == stC3 then (if b >= 0x80 && b <= 0xbf then stC2 else sBAD)
-  else if st == stE0 then (if b >= 0xa0 && b <= 0xbf then stC1 else sBAD)
-  else if st == stED then (if b >= 0x80 && b <= 0x9f then stC1 else sBAD)
-  else if st == stF0 then (if b >= 0x90 && b <= 0xbf then stC2 else sBAD)
-  else if st == stF4 then (if b >= 0x80 && b <= 0x8f then stC2 else sBAD)
+  else if st == stC1 then (if (b >= 0x80) && (b <= 0xbf) then stG  else sBAD)
+  else if st == stC2 then (if (b >= 0x80) && (b <= 0xbf) then stC1 else sBAD)
+  else if st == stC3 then (if (b >= 0x80) && (b <= 0xbf) then stC2 else sBAD)
+  else if st == stE0 then (if (b >= 0xa0) && (b <= 0xbf) then stC1 else sBAD)
+  else if st == stED then (if (b >= 0x80) && (b <= 0x9f) then stC1 else sBAD)
+  else if st == stF0 then (if (b >= 0x90) && (b <= 0xbf) then stC2 else sBAD)
+  else if st == stF4 then (if (b >= 0x80) && (b <= 0x8f) then stC2 else sBAD)
   else sBAD
 
 // Lazy positional self-reference: state(i) consumes byte i from
@@ -118,7 +120,7 @@ canonicalPad len bs =
   [ if i < len then bs @ i else 0 | i <- [ 0 .. cap - 1 ] ]
 
 validField : {cap} (fin cap) => [32] -> [32] -> Field cap -> Bit
-validField lo hi f = f.len >= lo && f.len <= hi && canonicalPad f.len f.bytes == f.bytes
+validField lo hi f = (f.len >= lo) && (f.len <= hi) && canonicalPad f.len f.bytes == f.bytes
 
 validIntent : Intent -> Bit
 validIntent i =
