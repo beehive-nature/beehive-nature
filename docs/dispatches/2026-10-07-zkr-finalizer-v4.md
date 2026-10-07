@@ -177,3 +177,44 @@ tree extracted clean; zkrself-final-v4-offline-test.sh → 23 passed,
 0 failed, exit 0; the v3 regression suite (zkrself-final.test.sh)
 against the same tree → all scenarios green. No chain, wallet, or
 deployment was touched by the repair or its verification.
+
+## FOLLOWER-CONFIG LAW — SCOPE CORRECTED (review handoff, 2026-10-07)
+
+The boot-gate header over-reached: "only then ZK interaction" read as
+if no cryptographic operation anywhere could proceed before
+AGREEMENT-GREEN. Corrected operative wording (jungle4-node.config.ini,
+committed this commit; the gate admits THIS FOLLOWER as a Jungle4
+verification source — not every cryptographic operation everywhere):
+
+> **Configuration intent is never runtime evidence.**
+> `EXPOSURE → IDENTITY → PEER → AGREEMENT` governs admission of this
+> follower as a verification source for Jungle4 ZK execution. No
+> downstream receipt may attribute independent Jungle4 verification to
+> this follower until those runtime checks pass.
+> Offline proving and proof verification remain independent.
+> Public-API submissions follow their own execution-evidence path and
+> must not borrow verification status from the configured or
+> unsynchronized follower.
+
+Also folded into the header: "one-shot" binds PER TESTED RUNTIME
+INSTANCE (receipts name run/binary/config/data-dir identity + times; a
+restart or config/build change inherits nothing; a peer count is a
+timestamped observation); loopback-BOUND ≠ CLOSED (the EXPOSURE
+acceptance is that observed listeners match the intended posture, not
+an absence of sockets); the AGREEMENT receipt names the exact compared
+height AND block ID; zero-handshake REDs are recorded and investigated
+without a premature cause or any silent weakening of
+allowed-connection; and ALL FOUR BOOT RECEIPTS ARE MARKED NOT RUN —
+this handoff establishes intended configuration and receipt
+requirements, not completed boot acceptance.
+
+The two evidence paths stay distinct: follower-backed (four receipts)
+and public-API (submission_source / execution block N + id /
+verification_source, plus txid, exact deployed-code identity, asserted
+effects — a successful response alone insufficient; the codeless-
+deployment incident is the standing reason). Neither path establishes
+the other. Unrelated closed findings stay closed.
+
+THE RULE: no follower-derived trust before follower agreement; no
+execution claim without execution evidence; no configuration value
+promoted into either.
