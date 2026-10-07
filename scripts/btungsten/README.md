@@ -54,7 +54,7 @@ recorded as another:
 
 | class | meaning | status |
 |---|---|---|
-| TYPECHECK | the .cry parses and typechecks | **WIRED IN CI** — `formal` job gates on it every push (cryptol 3.6.0, pinned asset) |
+| TYPECHECK | the .cry parses and typechecks | **PASS in CI** — gates every push (cryptol 3.6.0, pinned asset) |
 | CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
 | PROVE-UNIVERSAL | `:prove wireInjective` across the stated domain | **attempted every run** under a 300s budget; timeout records NOT-PROVEN and exits green BY DESIGN (an open obligation is a recorded state, never a wedge) |
 | EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | NOT ATTEMPTED — the shared vectors are sampled agreement, never equivalence |

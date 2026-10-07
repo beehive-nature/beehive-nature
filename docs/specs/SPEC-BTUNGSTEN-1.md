@@ -167,9 +167,11 @@ implementation/model EQUIVALENCE
 
 No step substitutes for a later one. WB001 is the reference instance;
 the CI `formal` job (cryptol pinned 3.6.0) gates on TYPECHECK and
-CHECK-SAMPLED every push and records the PROVE-UNIVERSAL attempt
-honestly — a solver timeout is NOT-PROVEN, a recorded state, never
-success and never a CI wedge.
+CHECK-SAMPLED every push; WB001 PROVE-UNIVERSAL landed 2026-10-07
+(`wireInjective` Q.E.D., z3, 23.7s — universal injectivity over the
+concrete accepted language) and every push re-proves it; a solver
+timeout is NOT-PROVEN, a recorded state, never success and never a CI
+wedge.
 
 Sequence: WB001 formal core (current) → WB002 hostile distributed
 specimen (kill/reroute/replay/partition/heal; the healed result must

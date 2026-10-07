@@ -90,8 +90,57 @@ HUMAN INTERACTION: NONE.
 ## NEXT OWNER
 
 - CI merge of this PR on green: this seat (no-stall law).
-- The PR's own `formal` job run is the first TYPECHECK receipt — if it
-  reds on an idiom, the fix belongs to this seat in this PR (the ladder
-  working as designed).
 - WB002 lane (PR #351) remains its owner's; the ladder applies to it
   the same way when its formal leg runs.
+
+## APPENDIX (final push): the typecheck iterations, the counterexample that was mine, and Q.E.D.
+
+The ladder ran to its top rung inside this PR. Every iteration is a
+commit on this branch; the receipts:
+
+- **Rounds 1-13 (install + language idioms):** release tag carries no
+  `v` prefix and ubuntu-latest wants the 24.04 asset; cryptol CLI is
+  `-c COMMAND` (batch `-b` takes a SCRIPT FILE, not stdin); cryptol
+  needs z3 on PATH and `$GITHUB_PATH` — not a step-local export — is how
+  it reaches the next step's shell; Cryptol 3 takes no where-semicolon,
+  no let-expressions, no return annotation on `property`, no abstract
+  signatures without bindings, no unparenthesized comparisons in boolean
+  combinations, no String value type, no literal broadcasting to byte
+  sequences, no variable range bounds (positions come from
+  `take`{cap} [0 ...]`), no Nat-kinded value signatures (MaxEnv is a
+  type synonym), and record update `{a = .., b = ..}` parses as
+  application — full literals carry explicit `Field N` annotations.
+- **Round 14 (TYPECHECK: PASS; adversarial arm: PASS; a REAL
+  counterexample):** `constructedValidPairs = False` on a closed term.
+  The split into named obligations (round 15) pointed at `validIBase`,
+  the per-field split (round 16) named `validDest_iBase`, and the model
+  was RIGHT: my literal said `"vault:0xBEEF"` had length 11 — it is 12
+  bytes — so byte 11 sat beyond the claimed length and the canonical
+  padding law refused it (`"skaists.bpay/1"` was off by one the other
+  way, passing only because the extra claimed byte happened to be
+  zero). The concrete accepted language caught a lying length word in
+  its own author's fixture — the exact class of thing it exists to
+  catch — and the adversarial arm could never have seen it (it passes
+  vacuously when a validity conjunct is too strict; only the VALID arm
+  can name that).
+- **Round 17 (the top rung):** with honest literals, CI prints:
+  `FORMAL-PROVE-UNIVERSAL wireInjective: … Q.E.D. (Total Elapsed Time:
+  23.677s, using "Z3")` — **the universal injectivity of the canonical
+  wire over the valid domain is PROVEN**, on the first honest attempt,
+  23.7 seconds. The first classifier recorded NOT-PROVEN because it
+  grepped for `Valid.` and Cryptol prints `Q.E.D.` — the classifier now
+  records what the tool printed, not what we guessed it would; the
+  lesson is the result-class law applied to the runner itself.
+
+**Final ladder state (this PR's formal job):** TYPECHECK: PASS ·
+CHECK-SAMPLED: PASS (adversarial + 8 per-field + constructed twins +
+near-collision + random `:check wireInjective`) · **PROVE-UNIVERSAL:
+PROVEN (Q.E.D., z3, 23.7s)** · EQUIVALENCE: NOT ATTEMPTED — the shared
+vectors remain sampled agreement between the JS implementation and this
+model; universal implementation/model equivalence is SAW's future class
+and nothing here claims it.
+
+Toolchain of record: Cryptol 3.6.0 (Git commit 61dd17b0c45ddf8c5c1e952
+afd5e789c4dc4ec4b), z3 4.8.14 (the bundle's own pin, build df8f9d7dcb8b
+9f9b3de1072017b7c2b7f63f0af8), tarball sha256 621860aa1dedc037e8fc8355
+bef3edf023e41e78efb7177146126f5a87309962, ubuntu-24.04 asset.

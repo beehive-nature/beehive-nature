@@ -98,9 +98,14 @@ check wireInjective-sampled   ':check wireInjective'
 say "== formal: PROVE-UNIVERSAL :prove wireInjective (budget ${PROVE_BUDGET_S}s) =="
 PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove wireInjective" 2>&1) && _rc=0 || _rc=$?
 if [ "$_rc" -eq 0 ]; then
-  if say "$PROVE_LOG" | grep -aq '^Valid'; then
+  # Cryptol's universal verdict is printed as "Q.E.D." (some versions
+  # "Valid."). The first honestly-successful prove was mis-recorded as
+  # NOT-PROVEN because the classifier looked only for Valid — never
+  # again: a result class records what happened, not what we guessed
+  # the tool would print.
+  if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
     say "$PROVE_LOG" | tail -2
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: PROVEN"
+    say "FORMAL-PROVE-UNIVERSAL wireInjective: PROVEN (universal, :prove verdict Q.E.D.)"
   elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
     say "FORMAL-PROVE-UNIVERSAL wireInjective: REFUTED — counterexample is a REAL finding. Output:"
     say "$PROVE_LOG"
