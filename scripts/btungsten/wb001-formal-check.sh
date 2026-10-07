@@ -46,7 +46,7 @@ TC_LOG=$("$CRYPTOL" -c ":load $CRY" 2>&1) || {
   exit 1
 }
 say "$TC_LOG" | tail -2
-say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, constructedValidPairs, adversarialRejected)"
+say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, adversarialRejected, validIBase, twinsValid, twinsDistinct, validAstral, validFffd, validCombining, nearValid, nearDistinct, baseVsTwinDistinct)"
 
 # ---- one :check with honest classification ---------------------------------
 # cryptol CLI (3.6.0, learned from its own usage output): -c COMMAND runs
@@ -73,9 +73,18 @@ check() {
   say "FORMAL-CHECK-SAMPLED $_name: PASS"
 }
 
-# ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed, then random
+# ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed (one
+# obligation per claim, so a red names the claim), then random
 check adversarialRejected     ':check adversarialRejected'
-check constructedValidPairs   ':check constructedValidPairs'
+check validIBase              ':check validIBase'
+check twinsValid              ':check twinsValid'
+check twinsDistinct           ':check twinsDistinct'
+check validAstral             ':check validAstral'
+check validFffd               ':check validFffd'
+check validCombining          ':check validCombining'
+check nearValid               ':check nearValid'
+check nearDistinct            ':check nearDistinct'
+check baseVsTwinDistinct      ':check baseVsTwinDistinct'
 check wireInjective-sampled   ':check wireInjective'
 
 # ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified ---------------

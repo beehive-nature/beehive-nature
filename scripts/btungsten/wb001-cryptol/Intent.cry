@@ -306,13 +306,35 @@ nearB =
   , payload     = mkB (split (0xdeadbeef : [32]) # [0x00]) 5
   }
 
-constructedValidPairs : Bit
-property constructedValidPairs =
-    validIntent iBase
-  && validIntent twinL  && validIntent twinR  && (wire twinL != wire twinR)
-  && validIntent astral && validIntent fffd   && validIntent combining
-  && validIntent nearA  && validIntent nearB  && (wire nearA != wire nearB)
-  && (wire iBase != wire twinL)
+// Constructed arm, one obligation per claim (the founder ruling asks for
+// exact obligation names; a conjunction hid which claim red on the first
+// green-ladder run — this split makes CI name it).
+validIBase : Bit
+property validIBase = validIntent iBase
+
+twinsValid : Bit
+property twinsValid = (validIntent twinL) && (validIntent twinR)
+
+twinsDistinct : Bit
+property twinsDistinct = (wire twinL != wire twinR)
+
+validAstral : Bit
+property validAstral = validIntent astral
+
+validFffd : Bit
+property validFffd = validIntent fffd
+
+validCombining : Bit
+property validCombining = validIntent combining
+
+nearValid : Bit
+property nearValid = (validIntent nearA) && (validIntent nearB)
+
+nearDistinct : Bit
+property nearDistinct = (wire nearA != wire nearB)
+
+baseVsTwinDistinct : Bit
+property baseVsTwinDistinct = (wire iBase != wire twinL)
 
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, adversarial arm (closed terms): intents OUTSIDE
