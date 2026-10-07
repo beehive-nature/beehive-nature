@@ -211,23 +211,100 @@ iBase =
   }
 
 twinL : Intent
-twinL = iBase { destination = (mkB "ab" 2 : Field 128), capability = (mkB "c" 1 : Field 64) }
+twinL =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "ab" 2
+  , capability  = mkB "c" 1
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 twinR : Intent
-twinR = iBase { destination = (mkB "a" 1 : Field 128), capability = (mkB "bc" 2 : Field 64) }
+twinR =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "a" 1
+  , capability  = mkB "bc" 2
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 astral : Intent
-astral = iBase { domain = (mkB ("skaists." # bee # "/1") 14 : Field 64) }
+astral =
+  { domain      = mkB ("skaists." # bee # "/1") 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 fffd : Intent
-fffd = iBase { payer = (mkB (split (0xefbfbd : [24])) 3 : Field 128) }   // an honest U+FFFD
+fffd =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB (split (0xefbfbd : [24])) 3
+  , payload     = mkB "{}" 2
+  }
 
 combining : Intent
-combining = iBase { destination = (mkB ("e" # split (0xcc81 : [16])) 3 : Field 128) }
+combining =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB ("e" # split (0xcc81 : [16])) 3
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 nearA : Intent
-nearA = iBase { payload = (mkB (split (0xdeadbeef : [32])) 4 : Field 4096) }
+nearA =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB (split (0xdeadbeef : [32])) 4
+  }
 nearB : Intent
-nearB = iBase { payload = (mkB (split (0xdeadbeef : [32]) # [0x00]) 5 : Field 4096) }
+nearB =
+  { domain      = mkB "skaists.bpay/1" 15
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB (split (0xdeadbeef : [32]) # [0x00]) 5
+  }
 
 constructedValidPairs : Bit
 property constructedValidPairs =
@@ -245,25 +322,102 @@ property constructedValidPairs =
 //////////////////////////////////////////////////////////////////////////////
 
 xSurrogate : Intent   // ed a0 80 — a UTF-16 surrogate encoded on the wire (CESU-8)
-xSurrogate = iBase { domain = (mkB ("skaists." # split (0xeda080 : [24])) 11 : Field 64) }
+xSurrogate =
+  { domain      = mkB ("skaists." # split (0xeda080 : [24])) 11
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xOverlong : Intent    // c0 80 — overlong ASCII
-xOverlong = iBase { domain = (mkB ("a" # split (0xc080 : [16])) 3 : Field 64) }
+xOverlong =
+  { domain      = mkB ("a" # split (0xc080 : [16])) 3
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xRawFF : Intent       // ff — not a lead byte at all
-xRawFF = iBase { domain = (mkB [0xff] 1 : Field 64) }
+xRawFF =
+  { domain      = mkB [0xff] 1
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xBeyond : Intent      // f4 90 80 80 — beyond U+10FFFF
-xBeyond = iBase { domain = (mkB (split (0xf4908080 : [32])) 4 : Field 64) }
+xBeyond =
+  { domain      = mkB (split (0xf4908080 : [32])) 4
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xTrunc : Intent       // a c2 — sequence truncated by the field's length
-xTrunc = iBase { domain = (mkB ("a" # [0xc2]) 2 : Field 64) }
+xTrunc =
+  { domain      = mkB ("a" # [0xc2]) 2
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xLenBeyondCap : Intent // length word outside the field's capacity — bounds violation
-xLenBeyondCap = iBase { domain = ({ len = 65, bytes = (mkB "ab" 2 : Field 64).bytes } : Field 64) }
+xLenBeyondCap =
+  { domain      = { len = 65, bytes = (mkB "ab" 2 : Field 64).bytes }
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 xNonCanonPad : Intent // meaningful beyond len — padding not canonical
-xNonCanonPad = iBase { domain = ({ len = 1, bytes = (mkB "ab" 2 : Field 64).bytes } : Field 64) }
+xNonCanonPad =
+  { domain      = { len = 1, bytes = (mkB "ab" 2 : Field 64).bytes }
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 11
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = mkB "{}" 2
+  }
 
 adversarialRejected : Bit
 property adversarialRejected =
