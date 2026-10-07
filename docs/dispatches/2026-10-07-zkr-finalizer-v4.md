@@ -130,3 +130,50 @@ passed where a real lab happened to live. `W` is env-honored in v4.
 
 The repaired SHA and the committed blob hashes are recorded in the
 commit message and verified post-push against the tested bytes.
+
+## BANKING NOTE — CORRECTED (review handoff, 2026-10-07)
+
+The earlier note that "10ae1437a closes the finalizer lane" over-closed:
+that SHA closed the EARLIER repairs only; the review OF that same
+commit left three finalizer findings open, and this dispatch's commit
+(b4960dbfb, pushed 10ae1437a..b4960dbfb) is their repair. The accurate
+ledger, in the reviewer's words:
+
+> **Closed findings remain closed:** selector/asymmetric regressions,
+> bounded-anchor exhaustion, stdin parsing, read-endpoint wiring,
+> strict timestamp validation, original parent-owned accounting and
+> required-leg tracking, and the completed setup-artifact verification
+> receipt.
+>
+> **Finalizer repair @b4960dbfb (verified independently before push):**
+> identity-before-actions (a failed/absent/unreadable identity ends the
+> run with ZERO action calls — the regression asserts the call count,
+> not the eventual exit), command-status propagation (a refusal must be
+> a nonzero status; a failed read command's body cannot establish
+> state), and run-local complete assertion coverage (private mktemp
+> run dir; an empty or truncated discovery record refuses instead of
+> degrading to row-count checking).
+>
+> **Two tungsten measurements remain open:** leak distinguisher and
+> 1k/10k scale. The Autonomi coupling boundary remains closed.
+
+The unexecuted leak distinguisher is recorded as **NOT RUN; test model
+and acceptance criteria specified** — "sound by construction against
+the pinned test set" is wording discipline on any future result, never
+a substitute for one.
+
+Shared-checkout interference and shared runtime-file interference
+remain distinct: BT-WORKTREE-ISOLATION owns the general class; the
+finalizer's fixed temporary paths and incomplete-assertion acceptance
+were its own implementation defect, repaired here (cx3a/cx3b).
+
+*Slēgtās lietas paliek slēgtas* — and that rule preserves scoped
+closeouts; it cannot turn subsequently identified, unrepaired findings
+into completed work. No new circuit work, funding, or ceremony rerun
+followed from this correction.
+
+Independent verification receipt (this seat, pre-push): v4's committed
+tree extracted clean; zkrself-final-v4-offline-test.sh → 23 passed,
+0 failed, exit 0; the v3 regression suite (zkrself-final.test.sh)
+against the same tree → all scenarios green. No chain, wallet, or
+deployment was touched by the repair or its verification.
