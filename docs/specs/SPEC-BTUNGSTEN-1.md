@@ -131,8 +131,14 @@ destination, capability, amount, domain, nonce, expiry, payer or
 execution payload must fail verification. This aims the Foundation
 workbench at the MiM/intent-substitution axis instead of a generic crypto
 demo. Status: executable battery LIVE in CI (scripts/btungsten/ —
-2,178+ mutants rejected, teeth row convicting the naive encoder);
-Cryptol/SAW twins staged UNVERIFIED. See scripts/btungsten/README.md.
+2,178+ mutants rejected, teeth row convicting the naive encoder); the
+Cryptol twin RUNS in the CI formal job (TYPECHECK + CHECK-SAMPLED all
+arms + a budgeted PROVE attempt), and since the B1 repair (2026-10-07)
+the formal-wire bridge is EXECUTABLE — the runtime bytes of every
+constructed term pinned on both legs, which convicted the pre-B1 wire
+as a padded lookalike (counterexample bridgeIBase = False) and drove
+the true-stream rewrite. SAW equivalence staged UNVERIFIED. See
+scripts/btungsten/README.md.
 
 **Input-boundary law (founder ruling 2026-10-07, from the genesis
 review):** the canonical form binds every ACCEPTED intent uniquely —

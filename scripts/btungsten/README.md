@@ -160,7 +160,8 @@ stay accepted, byte-exact. Red-first receipt in
 | `wb001.test.mjs` — the genesis battery (retained byte-stable): injectivity corpus (25 intents incl. nested-envelope and boundary-shift twins), 21 field-move mutants, 1,640 one-bit envelope mutants (205 bytes × 8), 512 one-bit signature mutants, 5 structural forgeries (reorder / unknown tag / duplicate / length-splice / truncation), domain/nonce/epoch participation, cross-key, and the TEETH row convicting the naive length-free encoder on both adjacent-variable-field collision pairs | RUNS in CI — green 10/10 |
 | `wb001-boundary.test.mjs` — the boundary suite (landed RED against the genesis module first): 32 lone-surrogate encodes refused (4 fields × 8 forms), 24 surrogate-class authorization crossings rejected, 8 valid-Unicode controls round-trip byte-exact, 9 malformed-UTF-8 decodes refused with the valid 4-byte and U+FFFD controls passing, malformed-wire verifyEnvelope refusal, and the pinned shared vectors | RUNS in CI — green 6/6 since the repair |
 | `wb001-vectors.json` (+ `wb001-gen-vectors.mjs`) — the pinned shared vectors: 10 positives byte-for-byte, 9 refusals by exact code, including the surrogate/invalid-UTF-8 boundary rows. Every twin (Rust, Cryptol) must reproduce these BEFORE any equivalence claim | PINNED, re-derived and compared on every CI run |
-| `wb001-cryptol/Intent.cry` — formal twin, ALIGNED 2026-10-07: meaningful lengths, valid-input constraints (canonical zero padding, wellFormedUtf8 as the pinned abstract predicate), padded wire whose meaningful prefix is exactly the deployed envelope, `wireInjective` for all VALID pairs | STAGED — written, not run; UNVERIFIED |
+| `wb001-cryptol/Intent.cry` — formal twin: meaningful lengths, valid-input constraints (canonical zero padding, wellFormedUtf8 as the concrete DFA with the runtime validator's exact transition law), `wireInjective` for all VALID pairs; the B1 repair made the BRIDGE block EXECUTABLE (every constructed term's runtime bytes pinned as opaque constants, prefix + zero-tail + envLen obligations) — and the bridge's FIRST counterexample (`bridgeIBase = False`, CI run 37692766559) convicted the pre-B1 `wire` as a PADDED LOOKALIKE: it interleaved each field's capacity padding inside the stream, so the deployed envelope was never its prefix. The wire is REWRITTEN as the true variable-length stream (byteAt dispatch over length-derived block offsets, zero tail beyond envLen) | RUNS in the CI formal job — TYPECHECK PASS, CHECK-SAMPLED all arms; the pre-B1 wireInjective Q.E.D. (z3, 23.7s) was a receipt about the lookalike and does NOT carry over: the prove re-attempts on the repaired wire every run and its verdict line is the live record — see §result-classes |
+| `wb001-bridge.json` (+ `wb001-bridge-gen.mjs`, `wb001-bridge.test.mjs`) — the formal-wire bridge (founder review B1, 2026-10-07): the 8 constructed terms' runtime canonical() envelopes pinned byte-for-byte; the .cry carries the same hex as opaque constants; the node leg re-derives every run and asserts the .cry literals, the formal leg :checks the bridge properties — any drift on either side goes red. Sampled agreement on pinned terms, never equivalence | PINNED, re-derived and compared on every CI run (both legs) |
 | `wb001-saw/intent.saw` — equivalence-proof plan against a future Rust twin, vector-first | STAGED — written, not run; UNVERIFIED |
 
 ### §result-classes (founder ruling 2026-10-07)
@@ -200,7 +201,12 @@ RED counterexample
 
 No step substitutes for a later one; the WB001 chain is the reference
 instance (surrogate collision → utf16/utf8 gates → wb001-vectors.json →
-concrete-DFA Intent.cry → CI formal job).
+concrete-DFA Intent.cry → CI formal job). The "formal wire alignment"
+step is EXECUTED since the B1 repair (2026-10-07): wb001-bridge.json
+pins the runtime bytes of every constructed term, both CI legs
+re-derive them every run — before B1 the twin's bridge block was
+comment-only and not one Cryptol wire byte had ever been compared to a
+runtime byte.
 
 ### §next (named gaps, in order)
 
