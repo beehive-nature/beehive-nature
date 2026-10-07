@@ -65,6 +65,34 @@ const name = (n) => {
   return n;
 };
 
+// Offer rows carry an expiry key ONLY on the adapter profile — no
+// undefined-valued properties anywhere in state, so snapshot/restore and
+// canonical fingerprints stay byte-exact.
+const offerRecord = (profile, now, owner, offeredto) => {
+  const rec = { owner, offeredto, cdate: now };
+  if (profile === 'bnr-adapter') rec.expiresAt = now + ADAPTER_OFFER_TTL;
+  return rec;
+};
+
+// The model's transaction boundary (model-hardening beat, founder review
+// 2026-10-07, finding R-1). Antelope specifies that a FAILED transaction
+// restores prior state — the vendored C++ relies on that rollback
+// boundary, and the port must reproduce it rather than assume it. Every
+// PUBLIC action below runs inside tx(): state tables, counters and the
+// committed event log roll back on any throw. Nested action calls
+// (delegate -> transfer, undelegate -> transfer, issuef -> transferf)
+// are internal method calls that bypass the proxy and therefore JOIN the
+// outer transaction — the inline-action semantics of one Antelope
+// transaction. tx() is also public: a caller may bundle several actions
+// into one atomic unit, mirroring a multi-action transaction.
+const TX_ACTIONS = new Set([
+  'create', 'createntt', 'claim', 'claimntt', 'transfer', 'transferf',
+  'offer', 'offerf', 'canceloffer', 'cancelofferf', 'claimf', 'update',
+  'updatentt', 'burn', 'burnntt', 'burnf', 'delegate', 'delegatemore',
+  'undelegate', 'attach', 'detach', 'attachf', 'detachf', 'changeauthor',
+  'createf', 'issuef', 'setarampayer', 'importState',
+]);
+
 export class Chain {
   constructor({ profile = 'specimen', now = 1_700_000_000n } = {}) {
     if (!PROFILES.includes(profile)) throw new Refusal('bt-wb002:profile', `unknown profile ${profile}`);
@@ -85,6 +113,66 @@ export class Chain {
     this.ramPayerOf = new Map();          // assetid -> last ram payer (sponsored-sovereignty evidence)
     this.log = [];                        // anchored event log (the external-consumer surface)
     this.genesis = sha('bT-WB02:genesis');
+    this._txDepth = 0;
+    // The public seam: every action call from OUTSIDE the chain opens a
+    // transaction; calls from inside (this.transfer inside delegate, the
+    // inline-action pattern) join the one already open.
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        const v = Reflect.get(target, prop, receiver);
+        if (typeof prop === 'string' && TX_ACTIONS.has(prop) && typeof v === 'function') {
+          return (...args) => target.tx(() => v.apply(target, args));
+        }
+        return v;
+      },
+    });
+  }
+
+  // One modeled transaction: run fn(); on ANY throw, restore the entire
+  // pre-state (tables, counters, committed log) and rethrow. This is the
+  // rollback boundary the 2021 contract gets from Antelope for free.
+  tx(fn) {
+    if (this._txDepth > 0) return fn(); // nested: the outer transaction owns rollback
+    const snap = this._snapshot();
+    this._txDepth = 1;
+    let out;
+    try { out = fn(); } catch (e) {
+      this._txDepth = 0;
+      this._restore(snap);
+      throw e;
+    }
+    this._txDepth = 0;
+    return out;
+  }
+  _snapshot() {
+    return {
+      scopes: structuredClone(this.scopes), nttScopes: structuredClone(this.nttScopes),
+      offers: structuredClone(this.offers), nttOffers: structuredClone(this.nttOffers),
+      delegates: structuredClone(this.delegates), stats: structuredClone(this.stats),
+      balances: structuredClone(this.balances), ftOffers: structuredClone(this.ftOffers),
+      arampayers: structuredClone(this.arampayers), ramPayerOf: structuredClone(this.ramPayerOf),
+      lnftid: this.lnftid, defid: this.defid, logLen: this.log.length,
+    };
+  }
+  _restore(s) {
+    this.scopes = s.scopes; this.nttScopes = s.nttScopes; this.offers = s.offers;
+    this.nttOffers = s.nttOffers; this.delegates = s.delegates; this.stats = s.stats;
+    this.balances = s.balances; this.ftOffers = s.ftOffers; this.arampayers = s.arampayers;
+    this.ramPayerOf = s.ramPayerOf; this.lnftid = s.lnftid; this.defid = s.defid;
+    this.log.length = s.logLen; // committed events of the refused transaction vanish too
+  }
+  // A fingerprint over EVERYTHING a modeled action can touch, plus the
+  // committed log. The battery demands it be preserved across every
+  // refused transaction (R-1 regression net).
+  fingerprint() {
+    const dump = (m) => [...m.entries()].map(([k, v]) => [k, v instanceof Map ? [...v.entries()] : v]);
+    return sha(canon({
+      scopes: dump(this.scopes), ntt: dump(this.nttScopes), offers: [...this.offers.entries()],
+      nttOffers: [...this.nttOffers.entries()], delegates: [...this.delegates.entries()],
+      stats: [...this.stats.entries()], balances: dump(this.balances), ftOffers: [...this.ftOffers.entries()],
+      arampayers: this.arampayers, lnftid: this.lnftid, defid: this.defid,
+      ramPayerOf: [...this.ramPayerOf.entries()], logLen: this.log.length, logRoot: this.logRoot(),
+    }));
   }
 
   acct(n) { this.accounts.add(name(n)); return this; }
@@ -181,8 +269,7 @@ export class Chain {
     let assetOwner = owner;
     if (requireclaim) {
       assetOwner = author;
-      const expiresAt = this.profile === 'bnr-adapter' ? this.now + ADAPTER_OFFER_TTL : undefined;
-      this.offers.set(newID, { owner: author, offeredto: owner, cdate: this.now, expiresAt });
+      this.offers.set(newID, offerRecord(this.profile, this.now, author, owner));
     }
     this.emplaceAsset(assetOwner, { id: newID, owner: assetOwner, author, category, idata, mdata, container: [], containerf: [] }, author);
     this.emit({ type: 'spawn', kind: 'nft', assetid: newID, author, category, owner: assetOwner, idata });
@@ -270,8 +357,7 @@ export class Chain {
       this.findAsset(owner, id);
       this.check(!this.offers.has(id), 'bt-wb002:offered', `asset ${id} is already offered`);
       this.check(!this.delegates.has(id), 'bt-wb002:delegated', `asset ${id} is delegated`);
-      const expiresAt = this.profile === 'bnr-adapter' ? this.now + ADAPTER_OFFER_TTL : undefined;
-      this.offers.set(id, { owner, offeredto: newowner, cdate: this.now, expiresAt });
+      this.offers.set(id, offerRecord(this.profile, this.now, owner, newowner));
       this.emit({ type: 'offeropen', assetid: id, owner, offeredto: newowner });
     }
   }
@@ -455,8 +541,7 @@ export class Chain {
     let assetOwner = owner;
     if (requireclaim) {
       assetOwner = author;
-      const expiresAt = this.profile === 'bnr-adapter' ? this.now + ADAPTER_OFFER_TTL : undefined;
-      this.nttOffers.set(newID, { owner: author, offeredto: owner, cdate: this.now, expiresAt });
+      this.nttOffers.set(newID, offerRecord(this.profile, this.now, author, owner));
     }
     this.scope(assetOwner, true).set(newID, { id: newID, owner: assetOwner, author, category, idata, mdata });
     this.emit({ type: 'spawn', kind: 'ntt', assetid: newID, author, category, owner: assetOwner, idata });
@@ -678,6 +763,20 @@ export class Chain {
   // consumer, a successor contract, or a 3019 archivist reconstructs from.
   logRoot() { return this.log.length ? this.log[this.log.length - 1].root : this.genesis; }
 
+  // Consensus anchors for display truth (model-hardening beat, founder
+  // review 2026-10-07, finding R-2). The checkpoint anchor carries the
+  // checkpoint's PARENT root so a verifier can recompute the checkpoint
+  // root from its CONTENTS — a matching root string alone authenticates
+  // nothing. The tip anchor brackets a stream's end; only it promotes a
+  // post-checkpoint suffix to current ownership.
+  checkpointAnchor() {
+    const cp = this.log.filter((e) => e.type === 'checkpoint').at(-1);
+    if (!cp) return null;
+    const parentRoot = cp.seq > 0 ? this.log[cp.seq - 1].root : this.genesis;
+    return { seq: cp.seq, root: cp.root, parentRoot };
+  }
+  tipAnchor() { return this.log.length ? { seq: this.log.length - 1, root: this.logRoot() } : null; }
+
   // A migration bundle is the sovereign state + its commitment. The
   // commitment is over the CANONICAL serialization only — no identity, no
   // heartbeat, no personal material rides in state (COMMIT owns that
@@ -827,17 +926,56 @@ export class SpecimenUI {
 }
 
 export class AdapterUI {
-  constructor(indexer, checkpoint) { this.indexer = indexer; this.checkpoint = checkpoint; }
-  // BNR posture: answer only from a stream that is internally consistent
-  // AND carries the consensus checkpoint root at the checkpoint's seq.
-  // Anything else is DISPUTED — never a confident wrong owner.
-  displayOwner(id) {
-    if (!this.indexer.chainConsistent()) return 'DISPUTED';
-    const atCp = this.indexer.events.find((e) => e.seq === this.checkpoint.seq);
-    const last = this.indexer.events[this.indexer.events.length - 1];
-    if (!atCp || atCp.root !== this.checkpoint.root || !last || last.seq < this.checkpoint.seq) return 'DISPUTED';
-    return this.indexer.fold().sovereign(id);
+  // checkpoint: {seq, root, parentRoot} from Chain.checkpointAnchor() —
+  //             consensus-trusted AND content-authenticating.
+  // tip (optional): {seq, root} from Chain.tipAnchor() — brackets the
+  //             authenticated end of a stream.
+  constructor(indexer, checkpoint, tip) { this.indexer = indexer; this.checkpoint = checkpoint; this.tip = tip ?? null; }
+
+  // display(id) -> { owner, asOfSeq, scope } where scope is one of:
+  //   'authenticated-tip'  — the stream is bracketed cp..tip by trusted
+  //                          roots with every link verified: current truth
+  //   'checkpoint-scoped'  — the checkpoint contents are authenticated and
+  //                          every link after it verifies, but no trusted
+  //                          tip brackets the suffix: the truth AS OF the
+  //                          checkpoint, at its explicit height; an
+  //                          arbitrary (possibly fabricated) suffix is
+  //                          never promoted to current ownership
+  //   'disputed'           — owner 'DISPUTED': authentication failed
+  display(id) {
+    const disputed = { owner: 'DISPUTED', asOfSeq: null, scope: 'disputed' };
+    const cp = this.checkpoint;
+    if (!cp || typeof cp.parentRoot !== 'string' || typeof cp.root !== 'string' || typeof cp.seq !== 'number') return disputed;
+    const ev = this.indexer.events.find((e) => e.seq === cp.seq);
+    if (!ev) return disputed;
+    // OBLIGATION A — authenticate the checkpoint CONTENTS: recompute the
+    // root from the event body over the trusted parent root. A
+    // substituted body hiding behind a genuine root string dies here.
+    const { root, ...fields } = ev;
+    if (sha(`${cp.parentRoot}|${canon(fields)}`) !== root || root !== cp.root) return disputed;
+    // every link AFTER the checkpoint must verify (contiguity + content)
+    let prevSeq = ev.seq;
+    let prevRoot = root;
+    for (const e of this.indexer.events) {
+      if (e.seq <= ev.seq) continue;
+      if (e.seq !== prevSeq + 1) return disputed;
+      const { root: r, ...f } = e;
+      if (sha(`${prevRoot}|${canon(f)}`) !== r) return disputed;
+      prevSeq = e.seq; prevRoot = r;
+    }
+    // OBLIGATION B — bound the displayed state to an authenticated
+    // history. Links prove self-consistency, not consensus acceptance:
+    // a fabricated suffix recomputes perfectly. Only a trusted tip that
+    // brackets the stream's exact end promotes the suffix; otherwise the
+    // answer is checkpoint-scoped, never the suffix's fold.
+    const atTip = this.tip && prevSeq === this.tip.seq && prevRoot === this.tip.root;
+    if (atTip) {
+      return { owner: reconstruct(this.indexer.events).sovereign(id), asOfSeq: this.tip.seq, scope: 'authenticated-tip' };
+    }
+    const uptoCp = this.indexer.events.filter((e) => e.seq <= ev.seq);
+    return { owner: reconstruct(uptoCp).sovereign(id), asOfSeq: ev.seq, scope: 'checkpoint-scoped' };
   }
+  displayOwner(id) { return this.display(id).owner; }
 }
 
 // ---------------------------------------------------------------------------
