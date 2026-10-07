@@ -1112,8 +1112,10 @@ jobs:
         run: |
           set -eu
           cd "$HOME"
-          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/v3.6.0/cryptol-3.6.0-ubuntu-22.04-X64-with-solvers.tar.gz
-          echo "cryptol-3.6.0-ubuntu-22.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          # tag is 3.6.0 (no v prefix) and ubuntu-24.04 matches ubuntu-latest —
+          # both facts from the releases API, learned from a 404 on the first run
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
           mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
           ./cryptol/bin/cryptol --version
       - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
