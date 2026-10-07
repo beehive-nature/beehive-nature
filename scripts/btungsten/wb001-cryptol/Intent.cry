@@ -25,7 +25,7 @@
 // bytes; ten fields, tags strictly ascending 0x01..0x0a, nothing
 // trailing. The deployed envelope is the first envLen bytes of `wire`.
 
-module BTungstenWB001 where;
+module BTungstenWB001 where
 
 type Field cap = { len : [32], bytes : [cap][8] }
 
@@ -259,10 +259,10 @@ xTrunc : Intent       // a c2 — sequence truncated by the field's length
 xTrunc = iBase { domain = mkB ("a" # [0xc2]) 2 }
 
 xLenBeyondCap : Intent // length word outside the field's capacity — bounds violation
-xLenBeyondCap = iBase { domain = { len = 65, bytes = mk "ab" 2 . bytes } }
+xLenBeyondCap = iBase { domain = { len = 65, bytes = (mk "ab" 2).bytes } }
 
 xNonCanonPad : Intent // meaningful beyond len — padding not canonical
-xNonCanonPad = iBase { domain = { len = 1, bytes = mk "ab" 2 . bytes } }
+xNonCanonPad = iBase { domain = { len = 1, bytes = (mk "ab" 2).bytes } }
 
 property adversarialRejected : Bit
   = and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
