@@ -31,6 +31,10 @@ set -eu
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
 CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
 CRYV="scripts/btungsten/wb001-cryptol/Vectors.cry"
+# cryptol does not search the importing file own directory for imports;
+# CRYPTOLPATH points it there (learned from run: Could not find module
+# BTungstenWB001, Searched paths: .).
+export CRYPTOLPATH="scripts/btungsten/wb001-cryptol"
 PROVE_BUDGET_S="${PROVE_BUDGET_S:-300}"
 
 say() { printf '%s\n' "$*"; }
