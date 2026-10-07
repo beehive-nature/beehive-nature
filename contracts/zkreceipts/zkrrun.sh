@@ -9,7 +9,7 @@ set -e
 U=http://127.0.0.1:8888
 REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
 W=~/plonkport
-A=${A:-zkreceipts11}
+A=${A:-zkrcount12}
 ZKB=/mnt/c/Users/travi/zkbench
 CLEOS="/usr/bin/cleos -u $U"
 
@@ -75,26 +75,48 @@ echo "[2] deploy: code $($CLEOS set code $A $W/zkrcount.wasm 2>&1 | grep -c 'exe
 sleep 1
 
 ROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).root.replace(/^0x/,'')")
+DK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).deadKept")
+LK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).liveKept")
+AROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).root.replace(/^0x/,'')")
+ADK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).deadKept")
+ALK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).liveKept")
 ROOTFLIP=$(node -pe "const r='$ROOT'.split(''); const c=r[63]; r[63]= c==='f'?'0':(parseInt(c,16)+1).toString(16); r.join('')")
 P_DEAD=$(node -pe "require('$W/calldata_dead.json').proof_hex")
 P_LIVE=$(node -pe "require('$W/calldata_live.json').proof_hex")
 P_FORG=$(node -pe "require('$W/calldata_forged.json').proof_hex")
+PA_DEAD=$(node -pe "require('$W/asym/calldata_dead.json').proof_hex")
+PA_LIVE=$(node -pe "require('$W/asym/calldata_live.json').proof_hex")
 say(){ local act=$1; shift; $CLEOS push action $A $act "$1" -p $A 2>&1 | grep -m1 -oE 'executed transaction: [a-f0-9]+|assertion failure with message: [^"]*' | head -1; }
 bill(){ case "$1" in "executed transaction:"*) if [ -f $ZKB/find2.sh ]; then bash $ZKB/find2.sh "${1:22:16}" 40 2>/dev/null | head -1; else echo "  (billing probe skipped: find2.sh absent)"; fi ;; *) echo "  (no billing: not an executed tx)" ;; esac; }
 
-echo "[3] anchor 1 (root, kind=0 dead, count=20): $(say anchor "[1,\"$ROOT\",0,20]")"
+# [2b] the bounded-budget law row (the concurrent review seat's v1.1 gate):
+# anchors refuse until init; the cap turns the permissionless table into a
+# CONTROLLED refusal at exhaustion, not unbounded contract-RAM growth
+echo "[2b] pre-init anchor must refuse: $(say anchor "[1,\"$ROOT\",0,$DK]")"
+echo "     init(max_anchors=64): $(say init "[64]")"
+sleep 1
+
+echo "[3] anchor 1 (root, kind=0 dead, count=$DK): $(say anchor "[1,\"$ROOT\",0,$DK]")"
 echo "[4] REAL PROOF — dead-baseline count:"
 R=$(say verify "[1,\"$P_DEAD\"]"); echo "  $R"; bill "$R"
-echo "[5] anchor 2 (root, kind=1 live, count=20): $(say anchor "[2,\"$ROOT\",1,20]")"
+echo "[5] anchor 2 (root, kind=1 live, count=$LK): $(say anchor "[2,\"$ROOT\",1,$LK]")"
 echo "[6] REAL PROOF #2 — live-baseline count:"
 R=$(say verify "[2,\"$P_LIVE\"]"); echo "  $R"; bill "$R"
 echo "[7] refusals (each must be an assertion failure, never executed):"
-echo "  forged proof (eval_zw+1) on fresh anchor 3: anchor $(say anchor "[3,\"$ROOT\",0,20]") → $(say verify "[3,\"$P_FORG\"]")"
-echo "  mutated COUNT  (anchor 4 says 21):          anchor $(say anchor "[4,\"$ROOT\",0,21]") → $(say verify "[4,\"$P_DEAD\"]")"
-echo "  mutated ROOT   (anchor 5, last byte):       anchor $(say anchor "[5,\"$ROOTFLIP\",0,20]") → $(say verify "[5,\"$P_DEAD\"]")"
-echo "  mutated KIND   (anchor 6 says live):        anchor $(say anchor "[6,\"$ROOT\",1,20]") → $(say verify "[6,\"$P_DEAD\"]")"
+echo "  forged proof (eval_zw+1) on fresh anchor 3: anchor $(say anchor "[3,\"$ROOT\",0,$DK]") → $(say verify "[3,\"$P_FORG\"]")"
+echo "  mutated COUNT  (anchor 4 says $((DK+1))):       anchor $(say anchor "[4,\"$ROOT\",0,$((DK+1))]") → $(say verify "[4,\"$P_DEAD\"]")"
+echo "  mutated ROOT   (anchor 5, last byte):       anchor $(say anchor "[5,\"$ROOTFLIP\",0,$DK]") → $(say verify "[5,\"$P_DEAD\"]")"
+echo "  mutated KIND   (anchor 6 says live):        anchor $(say anchor "[6,\"$ROOT\",1,$DK]") → $(say verify "[6,\"$P_DEAD\"]")"
 echo "  re-verify anchor 1 (one proof per anchor):  $(say verify "[1,\"$P_DEAD\"]")"
-echo "  bad kind at anchor time (kind=2):           $(say anchor "[7,\"$ROOT\",2,20]")"
+echo "  bad kind at anchor time (kind=2):           $(say anchor "[7,\"$ROOT\",2,$DK]")"
+echo "[7b] ASYM legs (the selector law on-chain — fixture root, dead=$ADK live=$ALK):"
+echo "  anchor 8 (asym root, kind=0, count=$ADK): $(say anchor "[8,\"$AROOT\",0,$ADK]")"
+R=$(say verify "[8,\"$PA_DEAD\"]"); echo "  REAL ASYM PROOF dead(=$ADK): $R"; bill "$R"
+echo "  anchor 9 (asym root, kind=1, count=$ALK): $(say anchor "[9,\"$AROOT\",1,$ALK]")"
+R=$(say verify "[9,\"$PA_LIVE\"]"); echo "  REAL ASYM PROOF live(=$ALK): $R"; bill "$R"
+echo "  REVERSED-COUNT refusals (each must fail):"
+echo "  anchor 10 says kind=0,count=$ALK (the inverted claim): $(say anchor "[10,\"$AROOT\",0,$ALK]") → $(say verify "[10,\"$PA_DEAD\"]")"
+echo "  anchor 11 says kind=1,count=$ADK (the inverted claim): $(say anchor "[11,\"$AROOT\",1,$ADK]") → $(say verify "[11,\"$PA_LIVE\"]")"
 echo "[8] anchors table:"
 $CLEOS get table $A $A anchors 2>/dev/null | node -e "
 let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{

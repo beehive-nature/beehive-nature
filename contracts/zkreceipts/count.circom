@@ -141,9 +141,13 @@ template CountTree() {
     f6.hOut[0] === root;                 // the committed set IS this leaf set
 
     kind * (kind - 1) === 0;             // K binary
-    component selDead = IsEqual(); selDead.in[0] <== kind; selDead.in[1] <== 0;
-    // one product (circom rule): mux the counter the claim counts
-    signal picked <== f6.dOut[0] + selDead.out * (f6.lOut[0] - f6.dOut[0]);
+    // THE SELECTOR LAW: K picks its OWN baseline's counter directly
+    // (K=0 → dead-kept, K=1 → live-kept). The first build muxed with
+    // IsEqual(kind,0), whose output is 1 at kind=0, so every claim
+    // counted the OPPOSITE baseline — hidden while the cohort was 20/20;
+    // found inverted in the 2026-10-06 founder-ruled review, fixed same
+    // day, and pinned by the asymmetric fixture (fixtures/asym-cohort).
+    signal picked <== f6.dOut[0] + kind * (f6.lOut[0] - f6.dOut[0]);
     picked === count;                    // the claim, checked
 }
 

@@ -35,26 +35,74 @@ one (the spec's count-first law).
 
 ## Files
 
-- `count.circom` — the circuit. 101,278 constraints, 3 publics, measured
+- `count.circom` — the circuit. 101,275 constraints, 3 publics, measured
   at compile (receipt in the dispatch). Full-tree fold, not per-member
   paths: the root provably derives from EXACTLY the 64-leaf witness (40
-  members + 24 constrained zero pads).
+  members + 24 constrained zero pads). **THE SELECTOR LAW (2026-10-06
+  repair):** `picked = dOut + kind·(lOut − dOut)` — K selects its OWN
+  baseline's counter. The first build muxed with `IsEqual(kind,0)` whose
+  output is 1 at kind=0, so every claim counted the OPPOSITE baseline;
+  the cohort's 20/20 symmetry hid it (found in the founder-ruled source
+  review; both labels verified while swapped). Pinned by the asymmetric
+  fixture below — reversed claims have NO satisfying witness.
+- `fixtures/asym-cohort.json` — TEST FIXTURE (synthetic, derived from the
+  real receipt by flipping one live member's settled verdict): deadKept=20,
+  liveKept=19. The regression ladder: both correct claims prove and
+  verify; kind=0/count=19 and kind=1/count=20 are REFUSED at witness
+  generation (`picked === count` unsatisfiable); tampered kind/count on a
+  real proof fails verification.
 - `zkrprep.cjs` — witness builder; every aggregate cross-checked against
   the receipt's own numbers (fails loud on any disagreement).
 - `gen_vk_count_cpp.js` — vk → `vk_count_constants.hpp` (decimal bytes;
   copy of the M4 generator, provenance lines only).
 - `plonk_verify_count.hpp` — VERBATIM copy of `../privacy/plonk_verify.hpp`
   with exactly three cited divergent lines (includes + N_PUBLIC assert).
-- `zkrcount.cpp` — the on-chain gate: `anchor` + `verify`, root as RAW
-  BYTES (the fixed_bytes T-laws never touch the transcript), one proof
-  per anchor, alg id 2 shared with note.cpp's law row.
-- `prove_count.sh` — pipeline: compile → pot17 (ONE honest participant —
-  REHEARSAL-labeled, the estate law) → setup → vk → witnesses → TWO
-  proofs (kind 0/1) → off-chain verifies → calldata → the FORGERY set.
+- `zkrcount.cpp` — the on-chain gate: `init(max_anchors)` + `anchor` +
+  `verify`, root as RAW BYTES (the fixed_bytes T-laws never touch the
+  transcript), one proof per anchor, alg id 2 shared with note.cpp's law
+  row. v1.1 (review 2026-10-07): `anchor()` stays permissionless BY
+  DESIGN but the table is BOUNDED by the law row's cap — the
+  contract-RAM budget refuses in the open ("anchor table FULL (bounded
+  resource budget)") instead of growing without bound; the exhaustion
+  regression (fill to cap, controlled refusal) is a leg of the enforcing
+  self-paid runner.
+- `zkrself-run.sh` / `zkrself-recheck.sh` — the ENFORCING self-paid
+  testnet runners (zkrtst111111): a negative test passes ONLY on its
+  specified failure reason; positive tests assert execution AND the
+  verified_at transition; prerequisite anchors are reconciled against
+  chain state with bounded recorded retries (state-visibility rule);
+  exit 0 ⇔ every leg passed. (The print-only v1 forms, reviewed at
+  31ec63316, are superseded.)
+- `prove_count.sh` — pipeline: compile → ceremony → setup → vk → witnesses
+  → TWO proofs (kind 0/1) → off-chain verifies → calldata → the FORGERY
+  set → the ASYM regression. `PTAU=` selects the ceremony: default is the
+  lab's one-seat rehearsal pot17; the RELEASE artifacts are derived with
+  `PTAU=hez17.ptau` (see the ceremony section).
 - `zkrrun.sh` — the acceptance pass (the m4run discipline): rehearsal
   chain boot + activation ladder → deploy → both real proofs verify →
   every refusal: forged / mutated count / mutated root / mutated kind /
-  re-verify / bad kind at anchor time.
+  re-verify / bad kind at anchor time → the ASYM legs (fixture-root proofs
+  verify; reversed-count anchors are refused by the pairing).
+
+## The ceremony (two tiers, 2026-10-06 ruling)
+
+- **REHEARSAL tier:** `pot17_final.ptau`, ONE honest participant (this
+  seat) — rehearsal-labeled, the standing estate law until a witnessed
+  multi-party sealing is ruled for anything BNR-originated.
+- **RELEASE tier:** the verified PUBLIC multi-party transcript — Hermez
+  `powersOfTau28_hez_final_17.ptau` (54 contributions + a beacon; the
+  perpetual-powersoftau lineage), power 17 = 128k constraints ≥ the
+  circuit's 116,537 PLONK constraints. Verified three independent ways
+  before use: (1) blake2b-512 matches the hash published in the
+  iden3/snarkjs README's ceremony table byte-for-byte; (2) the hermez S3
+  original and the circom.info mirror are byte-identical (two independent
+  download locations); (3) `snarkjs powersoftau verify` re-verified the
+  whole contribution transcript locally. RELEASE artifacts (zkey, vk,
+  vk_count_constants.hpp, proofs) are derived with `PTAU=hez17.ptau`.
+  Multiple agents on one shared host are NOT independent trust domains
+  (ruling); a fresh BNR ceremony would need human participants on
+  separate machines — the witnessed-sealing kit stays a named future
+  lane. Nothing here authorizes mainnet deposits.
 
 ## Labeled boundaries (what this does NOT prove)
 
@@ -64,8 +112,10 @@ one (the spec's count-first law).
   named boundary; second circuit lane).
 - Vantage independence: out of proof scope without cryptographic vantage
   identities (the ant-reach precision stands).
-- The ceremony is one honest participant — rehearsal-labeled until a
-  witnessed multi-party sealing is ruled (the M5 law carries).
+- The ceremony tier per artifact is stated with it (see above): rehearsal
+  proofs ride the one-seat pot17; release artifacts ride the verified
+  public Hermez transcript. A witnessed multi-party BNR sealing remains
+  the named future lane for anything needing estate-originated setup.
 - On-chain verification is MEASURED on BOTH the local Spring v1.2.2
   rehearsal chain (9,629 / 12,427 µs billed) and VAULTA PUBLIC TESTNET
   (jungle4, `zkrtst222222`, code hash identical: 12,071 / 10,647 µs

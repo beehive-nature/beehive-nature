@@ -88,9 +88,30 @@ nothing (founder ruling 2026-10-06).
 4. ✓ TESTNET VERIFY DONE 2026-10-06 (same night — the founder powered the
    accounts mid-lane): the full acceptance pass green on jungle4, code
    hash byte-identical, §tungsten 3 earned (verify bills ≈10.6–12.1 ms
-   CPU; dispatch addendum). ← CURRENT REMAINDER: §tungsten 2 (leak
-   distinguisher) + §tungsten 4 (scale 1k/10k proof-time receipts).
-5. Only after a full tungsten pass: revisit coupling with the Autonomi
+   CPU; dispatch addendum).
+5. ✓ SELECTOR REPAIR DONE 2026-10-06 (founder-ruled review + dispatch): the
+   v1 `picked` mux selected the OPPOSITE baseline's counter (`IsEqual`
+   output is 1 at kind=0 → every claim counted the other side; hidden by
+   the cohort's 20/20 symmetry). Fix: `picked = dOut + kind·(lOut−dOut)`
+   (K picks its OWN counter; the IsEqual component removed, 101,275
+   constraints). Asymmetric regression PINNED (fixtures/asym-cohort.json,
+   deadKept 20 / liveKept 19): correct claims prove+verify; reversed
+   claims REFUSED at witness generation (`picked === count`, no witness);
+   tampered kind/count on a real proof fails verification. All artifacts
+   re-derived together (r1cs→zkey→vk→vk_count_constants.hpp→WASM→proofs —
+   never a corrected circuit on an old vk); ceremony split into tiers —
+   rehearsal pot17 (one seat) vs RELEASE from the verified public Hermez
+   `powersOfTau28_hez_final_17.ptau` (54 contributions + beacon; blake2b
+   pinned to the iden3/snarkjs README, dual-source byte-identical,
+   transcript re-verified locally). On-chain re-acceptance on the
+   rehearsal chain AND jungle4 with the release-class artifacts. The M3
+   "named next step" of SPEC-PRIVACY-1 ruled superseded by its §m4; the
+   PLONK/BN254 engine closed.
+6. ← CURRENT REMAINDER: §tungsten 2 (leak distinguisher) + §tungsten 4
+   (scale 1k/10k proof-time receipts) + the witnessed multi-party BNR
+   sealing kit (human participants on separate machines — preparation
+   only; multiple agents on one host are NOT independent trust domains).
+7. Only after a full tungsten pass: revisit coupling with the Autonomi
    upstream lane and the bMESHasi/x0x step-4 contract work.
 
 ## §kin

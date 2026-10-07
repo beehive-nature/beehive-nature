@@ -25,7 +25,14 @@ echo "[2] powersoftau bn128 pot$POT (ONE honest participant — REHEARSAL labele
 [ -f pot${POT}_final.ptau ] || npx snarkjs powersoftau prepare phase2 pot${POT}_0001.ptau pot${POT}_final.ptau -v
 
 echo "[3] plonk setup + vk"
-npx snarkjs plonk setup $W/count.r1cs pot${POT}_final.ptau $W/count.zkey
+# PTAU selects the ceremony: default = the lab's one-seat rehearsal pot; the
+# RELEASE artifacts are derived from a verified PUBLIC multi-party transcript
+# (PTAU=hez17.ptau — Hermez powersOfTau28_hez_final_17, 54 contributions +
+# beacon, blake2b-512 pinned against the iden3/snarkjs README table; the
+# transcript itself re-verified with `snarkjs powersoftau verify`).
+PTAU=${PTAU:-pot${POT}_final.ptau}
+echo "    ceremony: $PTAU ($(sha256sum $PTAU | cut -c1-16)… sha256)"
+npx snarkjs plonk setup $W/count.r1cs $PTAU $W/count.zkey
 npx snarkjs zkey export verificationkey $W/count.zkey $W/count_vk.json
 npx snarkjs zkey verify $W/count.r1cs pot${POT}_final.ptau $W/count.zkey || true   # zkey verify is groth16-only ("zkey file is not groth16") — the M-lane prove.sh || true law
 
@@ -71,3 +78,44 @@ fs.writeFileSync('$W/public_mut_$m.json',JSON.stringify(pub));
 done
 echo "[9] expected set (cross-checked against the receipt in step 5)"
 cat $W/expected.json
+
+echo "[9b] ASYM REGRESSION (the selector law — fixtures/asym-cohort.json:"
+echo "     deadKept=20, liveKept=19; a label mixup can no longer hide)"
+node $REPO/zkrprep.cjs $REPO/fixtures/asym-cohort.json $W/asym
+node $W/count_js/generate_witness.js $W/count_js/count.wasm $W/asym/input_dead.json $W/asym/witness_dead.wtns
+node $W/count_js/generate_witness.js $W/count_js/count.wasm $W/asym/input_live.json $W/asym/witness_live.wtns
+npx snarkjs plonk prove $W/count.zkey $W/asym/witness_dead.wtns $W/asym/proof_dead.json $W/asym/public_dead.json
+npx snarkjs plonk prove $W/count.zkey $W/asym/witness_live.wtns $W/asym/proof_live.json $W/asym/public_live.json
+npx snarkjs plonk verify $W/count_vk.json $W/asym/public_dead.json $W/asym/proof_dead.json && echo "ASYM-DEAD-20-OK"
+npx snarkjs plonk verify $W/count_vk.json $W/asym/public_live.json $W/asym/proof_live.json && echo "ASYM-LIVE-19-OK"
+node $REPO/../privacy/flatten.js $W/asym/proof_dead.json $W/asym/public_dead.json > $W/asym/calldata_dead.json
+node $REPO/../privacy/flatten.js $W/asym/proof_live.json $W/asym/public_live.json > $W/asym/calldata_live.json
+# the INVERSION PROBES: the claim the pre-fix selector verified (each kind
+# fed the OTHER baseline's count) must now fail AT WITNESS GENERATION —
+# picked === count has no satisfying witness
+for probe in 0:19 1:20; do
+  kind=${probe%%:*}; want=${probe##*:}
+  node -e "
+const fs=require('fs');
+const j=JSON.parse(fs.readFileSync('$W/asym/input_dead.json'));   // same leaf set — only the claim differs
+j.kind='$kind'; j.count='$want';
+fs.writeFileSync('$W/asym/input_probe_${kind}_${want}.json',JSON.stringify(j));
+"
+  if node $W/count_js/generate_witness.js $W/count_js/count.wasm $W/asym/input_probe_${kind}_${want}.json $W/asym/witness_probe_${kind}_${want}.wtns 2>$W/asym/probe_err_${kind}_${want}.log; then
+    echo "INVERSION-PROBE kind=$kind count=$want PASSED WITNESS (BAD — selector still inverted)"; exit 1
+  else
+    echo "inversion-probe kind=$kind count=$want refused at witness generation (expected): $(head -c 200 $W/asym/probe_err_${kind}_${want}.log | tr '\n' ' ')"
+  fi
+done
+# tampered publics against a valid ASYM proof (kind and count both)
+for m in kind count; do
+  node -e "
+const fs=require('fs');
+const pub=JSON.parse(fs.readFileSync('$W/asym/public_live.json'));
+if ('$m'=='kind')  pub[1]=(BigInt(pub[1])+1n).toString();
+if ('$m'=='count') pub[2]=(BigInt(pub[2])+1n).toString();
+fs.writeFileSync('$W/asym/public_mut_$m.json',JSON.stringify(pub));
+"
+  npx snarkjs plonk verify $W/count_vk.json $W/asym/public_mut_$m.json $W/asym/proof_live.json && echo "ASYM-FORGERY-$m PASSED (BAD)" || echo "asym-forgeries-$m rejected (expected)"
+done
+cat $W/asym/expected.json

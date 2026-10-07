@@ -184,18 +184,85 @@ eosio_assert_message):
 | re-verify @1 | REFUSED "anchor already verified (one proof per anchor)" |
 | bad kind (2) at anchor time | REFUSED "kind must be 0 or 1" |
 
-Anchors table: seq 1/2 verified_at 1791347511/12; seq 3–6 verified_at 0.
+Anchors table: seq 1/2 verified_at 1791347511/12; seq 3–6 remained
+UNVERIFIED at the recorded observation (there is no permanent-rejection
+state in this contract: the verifier binds the public claim
+(root, kind, count), not the sequence — anchor 6 carries the same claim
+as anchor 2 and CAN be verified later by a valid live proof; that is
+expected behavior, not evidence of invalidity).
 
-Found live: greymass's load-balanced API nodes are not read-your-writes
-consistent — a verify pushed seconds after its anchor can hit a node
-that has not indexed it and refuse "anchor not found"; settled-state
-re-pushes refuse correctly (zkrself-recheck.sh receipt above). Ladder
-law: on public APIs, treat an immediate "not found" after a write as a
-RACE first, re-read before diagnosing the contract.
+State-visibility observation (WORDING CORRECTED 2026-10-07 per review:
+the original text attributed the incident to greymass's load balancer,
+which exceeds the recorded evidence): immediate verification attempts
+for anchors 5 and 6 returned `anchor not found`; later attempts returned
+the intended pairing rejection. A state-visibility or transaction-
+ordering race is CONSISTENT with these observations; the precise cause
+is UNVERIFIED. Operational rule (v2 runners enforce it): RECONCILE the
+prerequisite anchor against chain state — with bounded, recorded
+retries — before classifying any refusal; if visibility cannot be
+established, the negative test is INCONCLUSIVE, never passed.
 
-Runner: `contracts/zkreceipts/zkrself-run.sh` (+ `zkrself-recheck.sh`).
+Runner: `contracts/zkreceipts/zkrself-run.sh` (+ `zkrself-recheck.sh`)
+— both REWRITTEN 2026-10-07 as enforcing runners (see the review
+reconciliation below; the print-only v1 forms remain at 31ec63316).
 
-## Next (after the testnet receipt)
+## REVIEW RECONCILIATION (2026-10-07 — the formal review of 31ec63316)
+
+The review found the count selector INVERTED in the circuit, and this
+lane re-derived and CONFIRMED it: the pre-fix line muxed on
+`IsEqual(kind,0)`, so kind=0 returned the LIVE count and kind=1 the
+DEAD count — opposite to the documented mapping. The symmetric 20/20
+cohort masked it completely: both counts equal, so every proof,
+refusal, and kind-tamper leg of all three prior passes is consistent
+with EITHER selector. **All receipts above (rehearsal 44d484fbc,
+sponsored testnet 1fd2c8e04, self-paid testnet 31ec63316) are
+measurements of the PRE-FIX BUILD — kept as evidence, not as a green
+claim.** The pairing machinery, billing figures, code-hash identity,
+sponsor recipe, and ladder laws stand as measured; the CLAIM SEMANTICS
+of every pre-fix proof are inverted relative to its label.
+
+Repairs executed per the review order:
+1. SELECTOR — count.circom now muxes on `kind` directly
+   (`picked = deadCount + kind·(liveCount − deadCount)`): kind=0 counts
+   dead-baseline, kind=1 live-baseline, matching README/contract. Pinned
+   by the ASYMMETRIC FIXTURE (fixtures/asym-cohort.json: deadKept=20,
+   liveKept=19, flipped=1 — synthetic, labeled, root distinct from the
+   receipt's): correct claims (0,20) and (1,19) prove and verify;
+   the INVERSION PROBES (0,19) and (1,20) — exactly the claims the
+   pre-fix selector accepted — now fail AT WITNESS GENERATION, and the
+   prove script HARD-FAILS if either passes (prove_count.sh §9b). The
+   same reversed claims are refused ON-CHAIN by the rebuilt verifier
+   (zkrself-run.sh §5, anchors 203/204).
+2. ENFORCING RUNNERS — zkrself-run.sh v2 and zkrself-recheck.sh v2
+   assert outcomes: a negative test passes ONLY on its specified
+   failure reason (exact message match); wrong reason, transport
+   failure, absent anchor, or unexpected execution = FAIL with the
+   captured output; positive tests assert execution AND the
+   verified_at table transition; exit 0 ⇔ every leg passed. The
+   prereq-reconcile helper (bounded 5-attempt, recorded) implements the
+   state-visibility rule above. The print-only v1 runners remain at
+   31ec63316 as the reviewed artifacts; zkrrun.sh and zkrrun-jungle4.sh
+   carried the pre-fix passes and are being extended for the corrected
+   build by the parallel session — the ENFORCING zkrself pair is the
+   acceptance authority for this lane.
+3. RESOURCE BOUND — zkrcount v1.1: anchor() is permissionless BY
+   DESIGN but the anchor table is now BOUNDED by a law row
+   (init(max_anchors), owner-set once); a finite contract-RAM budget
+   produces the CONTROLLED refusal "anchor table FULL (bounded
+   resource budget)" instead of unbounded contract-funded growth. The
+   exhaustion regression (fill to cap, refuse in the open) is a leg of
+   the enforcing runner (§6).
+4. CEREMONY — the corrected artifacts are derived from the verified
+   PUBLIC multi-party transcript (powersOfTau28_hez_final_17, 54
+   contributions + beacon, sha256 pinned and transcript re-verified)
+   instead of the one-honest-seat rehearsal pot — the rehearsal-label
+   boundary on the ceremony retires with the rebuild.
+
+Rebuild + remeasure receipts for the corrected build land in the next
+addendum (the enforcing pass above). Leak (§tungsten 2) and scale
+(§tungsten 4) gates remain OPEN; the Autonomi coupling ban STANDS.
+
+## Next
 
 1. §tungsten 2 leak distinguisher; §tungsten 4 scale beats (1k/10k).
 2. Second circuit: sums/bounds (the 43/50 settled-observation figures).

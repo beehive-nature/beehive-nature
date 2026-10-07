@@ -41,18 +41,48 @@ struct [[eosio::table("anchors"), eosio::contract("zkrcount")]] anchor_row {
 };
 using anchor_index = eosio::multi_index<"anchors"_n, anchor_row>;
 
+// the law row: the anchor-table cap (review 2026-10-07: anchor() is
+// permissionless AND contract-RAM-funded — without a cap, anyone can grow
+// the table without bound and drain the funding account. A finite budget
+// must produce a CONTROLLED refusal, not unbounded growth. cap is set at
+// init and cannot be raised above it without a new deploy.)
+struct [[eosio::table("law"), eosio::contract("zkrcount")]] law_row {
+   uint64_t max_anchors;               // hard table-size cap
+   uint64_t alg;                       // 2 = ALG_PROOF_PLONK_V1
+   uint64_t primary_key() const { return 0; }
+};
+using law_index = eosio::multi_index<"law"_n, law_row>;
+
 class [[eosio::contract("zkrcount")]] zkrcount : public eosio::contract {
 public:
    zkrcount( eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds )
       : eosio::contract( receiver, code, ds ) {}
    static constexpr uint8_t ALG_PROOF_PLONK_V1 = 2;   // same id-space as note.cpp
 
-   // commit a claim (the M9 bounded-anchor law: the head, never the set)
+   // set the resource budget (owner-only, once); anchors refuse until init
+   [[eosio::action]] void init( uint64_t max_anchors ) {
+      require_auth( get_self() );
+      eosio::check( max_anchors > 0, "max_anchors must be positive" );
+      law_index law( get_self(), get_self().value );
+      eosio::check( law.find( 0 ) == law.end(), "law already initialized" );
+      law.emplace( get_self(), [&]( auto& r ) {
+         r.max_anchors = max_anchors;
+         r.alg = ALG_PROOF_PLONK_V1;
+      });
+   }
+
+   // commit a claim (the M9 bounded-anchor law: the head, never the set).
+   // Permissionless BY DESIGN, but BOUNDED by the law row's cap — the
+   // contract-funded RAM budget refuses in the open when exhausted.
    [[eosio::action]] void anchor( uint64_t seq, const std::vector<uint8_t>& root,
                                   uint64_t kind, uint64_t count ) {
       eosio::check( root.size() == 32, "root: expected 32 bytes" );
       eosio::check( kind <= 1, "kind must be 0 or 1" );
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
       anchor_index ai( get_self(), get_self().value );
+      eosio::check( (uint64_t)std::distance( ai.begin(), ai.end() ) < lr.max_anchors,
+                    "anchor table FULL (bounded resource budget)" );
       eosio::check( ai.find( seq ) == ai.end(), "anchor seq already exists" );
       ai.emplace( get_self(), [&]( auto& r ) {
          r.seq = seq; r.root = root; r.kind = kind; r.count = count;

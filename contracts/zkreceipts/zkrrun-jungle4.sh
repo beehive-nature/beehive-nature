@@ -12,7 +12,7 @@ set -e
 U=https://jungle4.greymass.com
 REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
 W=~/plonkport
-A=${A:-zkrtst333333}
+A=${A:-zkrtst444444}
 ZKB=/mnt/c/Users/travi/zkbench
 CLEOS="/usr/bin/cleos -u $U"
 mkdir -p /tmp/nd
@@ -85,39 +85,78 @@ skel(){ # skel <out-file> <set code|set abi args...> — retry: greymass throttl
   done
   echo "FATAL: skeleton capture failed after retries: $*"; exit 1
 }
-skel /tmp/zkr-code.json set code $A $W/zkrcount.wasm -p $A
+# private build dir — a parallel session compiles to $W/zkrcount.wasm; never
+# race the shared artifact name (cdt-cpp's abigen needs the class-name file)
+mkdir -p $W/zkr44
+(cd $REPO && /usr/bin/cdt-cpp -O3 -I. -o $W/zkr44/zkrcount.wasm -abigen zkrcount.cpp) || { echo "FATAL: compile"; exit 1; }
+skel /tmp/zkr-code.json set code $A $W/zkr44/zkrcount.wasm -p $A
 SPON_BASE=/tmp/zkr-code.json spon "  code"
 sleep 2
-skel /tmp/zkr-abi.json set abi $A $W/zkrcount.abi -p $A
+skel /tmp/zkr-abi.json set abi $A $W/zkr44/zkrcount.abi -p $A
 SPON_BASE=/tmp/zkr-abi.json spon "  abi"
 sleep 2
 CH=$($CLEOS get code $A 2>&1 | head -1 | grep -oE '[a-f0-9]{64}')
-[ -n "$CH" ] || { echo "FATAL: code hash is zero — actions would be codeless no-ops (found live: a no-op pass masquerading as green)"; exit 1; }
-echo "  code hash: $CH"
+WH=$(sha256sum $W/zkr44/zkrcount.wasm | cut -d' ' -f1)
+if [ -z "$CH" ] || [ "$CH" != "$WH" ]; then
+  echo "FATAL: on-chain code hash ($CH) ≠ built wasm sha256 ($WH) — the phantom-pass law: an all-zero or stale hash means codeless no-ops masquerading as green (found live on zkrtst444444 2026-10-07: RAM-refused setcode, every later action 'executed' at ~300 µs with zero code)"
+  exit 1
+fi
+echo "  code hash: $CH (= built wasm sha256)"
+# the bounded-budget law row (v1.1 gate): cap = existing rows + room for
+# this pass (11 anchors) + 1 spare; anchors refuse until init
+ROWS=$($CLEOS get table $A $A anchors -l 1000 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).rows.length)}catch(e){console.log(0)}})")
+if [ "$($CLEOS get table $A $A law 2>/dev/null | grep -c '"max_anchors"')" = 0 ]; then
+  CAP=$((ROWS + 12))
+  spon "  init(max_anchors=$CAP) over $ROWS existing rows" $A init "[ $CAP ]"
+else
+  echo "  law already initialized (cap $($CLEOS get table $A $A law 2>/dev/null | grep -oE '"max_anchors": [0-9]+'))"
+fi
+sleep 2
 
 ROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).root.replace(/^0x/,'')")
+DK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).deadKept")
+LK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/expected.json')).liveKept")
+AROOT=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).root.replace(/^0x/,'')")
+ADK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).deadKept")
+ALK=$(node -pe "JSON.parse(require('fs').readFileSync('$W/asym/expected.json')).liveKept")
 ROOTFLIP=$(node -pe "const r='$ROOT'.split(''); const c=r[63]; r[63]= c==='f'?'0':(parseInt(c,16)+1).toString(16); r.join('')")
 P_DEAD=$(node -pe "require('$W/calldata_dead.json').proof_hex")
 P_LIVE=$(node -pe "require('$W/calldata_live.json').proof_hex")
 P_FORG=$(node -pe "require('$W/calldata_forged.json').proof_hex")
+PA_DEAD=$(node -pe "require('$W/asym/calldata_dead.json').proof_hex")
+PA_LIVE=$(node -pe "require('$W/asym/calldata_live.json').proof_hex")
 anchor_args(){ node -e "console.log(JSON.stringify({seq:+process.argv[1],root:process.argv[2],kind:+process.argv[3],count:+process.argv[4]}))" "$1" "$2" "$3" "$4"; }
 verify_args(){ node -e "console.log(JSON.stringify({seq:+process.argv[1],proof:process.argv[2]}))" "$1" "$2"; }
+# SEQOFS: reuse a loaded account's RAM by anchoring in a fresh seq region
+# above any existing rows (zkrtst222222 carries count-v1's seqs 1–7)
+SEQOFS=${SEQOFS:-0}
+S1=$((SEQOFS+1)); S2=$((SEQOFS+2)); S3=$((SEQOFS+3)); S4=$((SEQOFS+4)); S5=$((SEQOFS+5))
+S6=$((SEQOFS+6)); S7=$((SEQOFS+7)); S8=$((SEQOFS+8)); S9=$((SEQOFS+9)); S10=$((SEQOFS+10)); S11=$((SEQOFS+11))
 
-spon "[3] anchor1 dead" $A anchor "$(anchor_args 1 "$ROOT" 0 20)"
-spon "[4] VERIFY dead-baseline REAL" $A verify "$(verify_args 1 "$P_DEAD")"
-spon "[5] anchor2 live" $A anchor "$(anchor_args 2 "$ROOT" 1 20)"
-spon "[6] VERIFY live-baseline REAL" $A verify "$(verify_args 2 "$P_LIVE")"
+spon "[3] anchor1 dead" $A anchor "$(anchor_args $S1 "$ROOT" 0 "$DK")"
+spon "[4] VERIFY dead-baseline REAL" $A verify "$(verify_args $S1 "$P_DEAD")"
+spon "[5] anchor2 live" $A anchor "$(anchor_args $S2 "$ROOT" 1 "$LK")"
+spon "[6] VERIFY live-baseline REAL" $A verify "$(verify_args $S2 "$P_LIVE")"
 echo "[7] refusals (each must say REFUSED, never OK):"
-spon "  forged (eval_zw+1) @3" $A anchor "$(anchor_args 3 "$ROOT" 0 20)"
-spon "  forged proof @3" $A verify "$(verify_args 3 "$P_FORG")"
-spon "  mutated-count anchor4" $A anchor "$(anchor_args 4 "$ROOT" 0 21)"
-spon "  real proof vs count=21 @4" $A verify "$(verify_args 4 "$P_DEAD")"
-spon "  mutated-root anchor5" $A anchor "$(anchor_args 5 "$ROOTFLIP" 0 20)"
-spon "  real proof vs mutated root @5" $A verify "$(verify_args 5 "$P_DEAD")"
-spon "  mutated-kind anchor6" $A anchor "$(anchor_args 6 "$ROOT" 1 20)"
-spon "  real dead proof vs kind=1 @6" $A verify "$(verify_args 6 "$P_DEAD")"
-spon "  re-verify @1" $A verify "$(verify_args 1 "$P_DEAD")"
-spon "  bad kind @anchor" $A anchor "$(anchor_args 7 "$ROOT" 2 20)"
+spon "  forged (eval_zw+1) @$S3" $A anchor "$(anchor_args $S3 "$ROOT" 0 "$DK")"
+spon "  forged proof @$S3" $A verify "$(verify_args $S3 "$P_FORG")"
+spon "  mutated-count anchor$S4" $A anchor "$(anchor_args $S4 "$ROOT" 0 $((DK+1)))"
+spon "  real proof vs count=$((DK+1)) @$S4" $A verify "$(verify_args $S4 "$P_DEAD")"
+spon "  mutated-root anchor$S5" $A anchor "$(anchor_args $S5 "$ROOTFLIP" 0 "$DK")"
+spon "  real proof vs mutated root @$S5" $A verify "$(verify_args $S5 "$P_DEAD")"
+spon "  mutated-kind anchor$S6" $A anchor "$(anchor_args $S6 "$ROOT" 1 "$DK")"
+spon "  real dead proof vs kind=1 @$S6" $A verify "$(verify_args $S6 "$P_DEAD")"
+spon "  re-verify @$S1" $A verify "$(verify_args $S1 "$P_DEAD")"
+spon "  bad kind @anchor" $A anchor "$(anchor_args $S7 "$ROOT" 2 "$DK")"
+echo "[7b] ASYM legs (the selector law on-chain — fixture root, dead=$ADK live=$ALK):"
+spon "  asym anchor$S8 dead" $A anchor "$(anchor_args $S8 "$AROOT" 0 "$ADK")"
+spon "  VERIFY asym dead REAL (count=$ADK)" $A verify "$(verify_args $S8 "$PA_DEAD")"
+spon "  asym anchor$S9 live" $A anchor "$(anchor_args $S9 "$AROOT" 1 "$ALK")"
+spon "  VERIFY asym live REAL (count=$ALK)" $A verify "$(verify_args $S9 "$PA_LIVE")"
+spon "  reversed-count anchor$S10 (0,$ALK)" $A anchor "$(anchor_args $S10 "$AROOT" 0 "$ALK")"
+spon "  asym dead proof vs count=$ALK @$S10" $A verify "$(verify_args $S10 "$PA_DEAD")"
+spon "  reversed-count anchor$S11 (1,$ADK)" $A anchor "$(anchor_args $S11 "$AROOT" 1 "$ADK")"
+spon "  asym live proof vs count=$ADK @$S11" $A verify "$(verify_args $S11 "$PA_LIVE")"
 echo "[8] anchors table:"
 $CLEOS get table $A $A anchors 2>/dev/null | node -e "
 let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{
