@@ -109,10 +109,59 @@ constraints verified at the same price class as the 12k payment circuit.
 - `cleos push action` takes `[args]`, not `[[args]]`; and the ACTION
   NAME is not optional — say() swallowed both failures silently.
 
-## Next (step 4)
+## ADDENDUM (same night): the pass on VAULTA PUBLIC TESTNET — §tungsten-3 COST earned
 
-1. Jungle4 faucet gesture → deploy + the same acceptance pass on Vaulta
-   public testnet (the COST receipt).
-2. §tungsten 2 leak distinguisher; §tungsten 4 scale beats.
-3. Second circuit: sums/bounds (the 43/50 settled-observation figures),
-   per the spec's count-first law.
+The founder powered up the estate's testnet accounts mid-lane (faucet +
+powerup on bnrapolltest + bzcodejungle; 2.27 s CPU each observed), so the
+§sequence-4 testnet verify ran immediately — `zkrrun-jungle4.sh`, the
+spladder sponsor recipe (every tx = [core.vaulta deposit(bnrapolltest,
+varying 4-decimal amount), real action], signed by both — self-stake on
+jungle4 buys ~28 µs: measured; only_bill_first_authorizer makes the
+sponsor's rented CPU pay). Contract account `zkrtst222222` (sponsor
+created it with stakes + 1 MB RAM — the pot17-era vk costs ≈498 KB of
+RAM: nodeos said "needs 510,526 bytes").
+
+Code hash on jungle4 = `eb4d61c98fad…caf576e5` — BYTE-IDENTICAL to the
+rehearsal chain deploy.
+
+| leg | result (jungle4, via greymass) |
+|---|---|
+| sponsored setcode | OK `c4c7f4bb…` billed 2,301 µs |
+| anchor 1 (root, kind=0, count=20) | OK `a78d85c1…` 403 µs |
+| REAL PROOF dead-baseline | OK `10198154…` **billed 12,071 µs** |
+| anchor 2 (root, kind=1, count=20) | OK `a3241fd8…` 392 µs |
+| REAL PROOF live-baseline | OK `a7e7ae05…` **billed 10,647 µs** |
+| forged proof (eval_zw+1) @ fresh anchor 3 | REFUSED (eosio_assert_message) |
+| real proof vs mutated count 21 @4 | REFUSED |
+| real proof vs mutated root @5 | REFUSED |
+| real dead proof vs mutated kind @6 | REFUSED |
+| re-verify @1 | REFUSED |
+| bad kind (2) at anchor time | REFUSED (anchor 7 never lands) |
+
+Anchors table on-chain: seq 1/2 verified_at set (1791346680/81); seq
+3–6 remain verified_at 0 — claims without proofs stay unverified, by
+construction. Batch amortization NOT measured (single verifies only) —
+named, not claimed.
+
+**COST receipt (the Vaulta figure this gate needed): one count-proof
+verify bills ≈10.6–12.1 ms CPU on jungle4** — same class as the local
+rehearsal (9.6/12.4 ms) and the M-lane payment verifier (6.9–10.4 ms).
+
+Found live and banked (testnet ladder):
+- cleos prints the UNSIGNED TRANSACTION JSON to STDERR — the `2>&1` in
+  spladder's skeleton capture is load-bearing; dropping it yields empty
+  base txs.
+- An action pushed to an account with ABI but NO CODE executes as a
+  NO-OP and reports OK — a codeless deploy can masquerade as a green
+  pass. The runner now hard-gates on a non-zero code hash before any
+  acceptance leg (found live: one such phantom pass, discarded).
+- core.vaulta deposit amounts must stay 4-decimal-valid and vary per tx
+  (0.00010 A asserts; duplicates assert).
+- jungle4 RAM: a pot17-vk verifier contract needs ≈498 KB — budget it
+  at account creation, the 128 KB drip does not cover it.
+
+## Next (after the testnet receipt)
+
+1. §tungsten 2 leak distinguisher; §tungsten 4 scale beats (1k/10k).
+2. Second circuit: sums/bounds (the 43/50 settled-observation figures).
+3. Mainnet Vaulta: not in scope until a witnessed ceremony ruling.

@@ -66,11 +66,12 @@ one (the spec's count-first law).
   identities (the ant-reach precision stands).
 - The ceremony is one honest participant — rehearsal-labeled until a
   witnessed multi-party sealing is ruled (the M5 law carries).
-- On-chain verification is measured on the LOCAL Spring v1.2.2 rehearsal
-  chain (same client family as Vaulta's public endpoints, ZK_BENCH);
-  a Vaulta-testnet (jungle4) verify needs CPU resources the estate's
-  testnet accounts no longer hold (171 µs available vs ≈9–12 ms billed) —
-  founder gesture named in the dispatch.
+- On-chain verification is MEASURED on BOTH the local Spring v1.2.2
+  rehearsal chain (9,629 / 12,427 µs billed) and VAULTA PUBLIC TESTNET
+  (jungle4, `zkrtst222222`, code hash identical: 12,071 / 10,647 µs
+  billed) — `zkrrun-jungle4.sh` is the sponsored testnet runner (the
+  spladder recipe). Vaulta mainnet: out of scope until a witnessed
+  ceremony ruling.
 
 ## Kin
 

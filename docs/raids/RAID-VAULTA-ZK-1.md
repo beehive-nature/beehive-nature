@@ -94,8 +94,12 @@ The lane may not couple with the Autonomi upstream lane until ALL of:
    repetition pending the faucet gesture.)
 2. LEAK — OPEN: the bounded distinguisher test is NOT run; wording
    remains "sound by construction against the pinned test set".
-3. COST — PARTIAL: rehearsal-chain verify billed (probe in the dispatch);
-   a Vaulta-testnet figure is still the receipt this gate needs.
+3. COST — EARNED on Vaulta PUBLIC TESTNET 2026-10-06 (the addendum in
+   dispatch 2026-10-06-vaulta-zk-count-v1.md): one count-proof verify
+   bills 12,071 µs (dead) / 10,647 µs (live) on jungle4 via the sponsor
+   recipe, code hash byte-identical to the rehearsal deploy. Batch
+   amortization NOT measured (single verifies only) — named. Mainnet
+   stays out of scope until a witnessed ceremony ruling.
 4. SCALE — OPEN: proof-time receipts at n = 1k and n = 10k not yet run
    (design note: a full-tree fold at n leaves costs (2n−1) Poseidons —
    pot choice per scale, measured when run).

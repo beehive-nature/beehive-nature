@@ -33,13 +33,14 @@ information a proof may introduce.
 - Public claim C: "≥ N receipts in M have kind = K."
 - Circuit: Merkle inclusion per receipt + kind predicate + counter fold.
 - Amounts/sums are the SECOND circuit — count-first is the genesis scope.
-- Venue CONFIRMED 2026-10-06 for the rehearsal chain: the estate's own
-  native Antelope C++ nine-phase PLONK port (contracts/privacy/
+- Venue CONFIRMED 2026-10-06 on BOTH chains: the estate's own native
+  Antelope C++ nine-phase PLONK port (contracts/privacy/
   plonk_verify.hpp → plonk_verify_count.hpp) over Spring's alt_bn128
-  host functions — two real proofs verified ON-CHAIN, four forgeries
-  refused (zkrcount, code hash eb4d61c9…). "Verifiable on VAULTA
-  (public testnet/mainnet)" itself stays UNVERIFIED until the jungle4
-  verify lands (faucet gesture named in the raid §checks).
+  host functions — two real proofs verified and four forgeries refused
+  on the Spring v1.2.2 rehearsal chain AND on Vaulta public testnet
+  (jungle4, code hash `eb4d61c9…` byte-identical across both;
+  dispatch 2026-10-06-vaulta-zk-count-v1.md). Vaulta MAINNET stays
+  UNVERIFIED and out of scope until a witnessed ceremony ruling.
 
 ## §privacy
 
@@ -84,9 +85,11 @@ nothing (founder ruling 2026-10-06).
    set ALL refused off-chain AND on-chain (zkrcount, Spring rehearsal
    chain, code hash eb4d61c9…). Receipt: dispatch
    2026-10-06-vaulta-zk-count-v1.md; contracts/zkreceipts/.
-4. ← CURRENT — testnet verify (jungle4 faucet gesture for bnrapolltest)
-   + §tungsten 2 (leak distinguisher), 3 (testnet cost figure),
-   4 (scale 1k/10k proof-time receipts).
+4. ✓ TESTNET VERIFY DONE 2026-10-06 (same night — the founder powered the
+   accounts mid-lane): the full acceptance pass green on jungle4, code
+   hash byte-identical, §tungsten 3 earned (verify bills ≈10.6–12.1 ms
+   CPU; dispatch addendum). ← CURRENT REMAINDER: §tungsten 2 (leak
+   distinguisher) + §tungsten 4 (scale 1k/10k proof-time receipts).
 5. Only after a full tungsten pass: revisit coupling with the Autonomi
    upstream lane and the bMESHasi/x0x step-4 contract work.
 
