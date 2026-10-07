@@ -67,21 +67,33 @@ accepted-language predicate itself had been made concrete.
   (Q.E.D. = PROVEN; counterexample = REFUTED red; timeout = NOT-PROVEN
   green, never success).
 
-## Receipts after the repair
+## Receipts after the repair (run 37702436659, formal job — the result-class law: the run is the receipt)
 
-Filled by this PR's own formal job run (the result-class law: the run
-is the receipt, not this prose):
-
-- TYPECHECK: see run log.
-- CHECK-SAMPLED: adversarial + per-field + constructed + **vectorsHold
-  (10/10 pinned envelopes reproduced byte-for-byte)** + wireZeroTail +
-  random wireInjective.
-- PROVE-UNIVERSAL: `wireZeroTail`, `wireInjective` — verdicts as
-  printed by the run.
-- The 2026-10-07 Q.E.D. receipts (23.7s in-PR; 17.6s post-merge) stand
-  for their ACTUAL theorem — injectivity of the capacity-padded
-  representation — and are recorded as such in README/SPEC; the
-  aligned-wire proof is the canonical claim.
+- **TYPECHECK: PASS** (BTungstenWB001.cry loads — renamed from
+  Intent.cry: Cryptol resolves module names to same-named files).
+- **CHECK-SAMPLED: PASS, every arm** — adversarial, per-field,
+  constructed twins/near-collision, **vectorsHold (10/10 pinned
+  envelopes reproduced byte-for-byte: length word, every meaningful
+  byte, zero tail — the exact check that would have caught B1)**,
+  wireZeroTail-sampled, wireInjective-sampled.
+- **PROVE-UNIVERSAL: `wireZeroTail`: NOT-PROVEN (timeout 240s).
+  `wireInjective`: NOT-PROVEN (timeout 240s).** Both are recorded open
+  obligations, never success. The aligned-wire theorem is genuinely
+  heavier than the padded structural one (offset arithmetic over
+  MaxEnv=4626 positions × two symbolic intents), and the hosted runner
+  was shut down mid-prove TWICE before a 300s wrapper could classify
+  (exit 143 at 269s, run 37698302619; at 289s, run 37701649473) — the
+  budget now sits below that kill window so the honest classification
+  lands. Named next levers, in order: (1) a lemma decomposition
+  (offset-equality then per-field equality), (2) a proof-scoped smaller
+  capacity instance with an explicit scaling argument, (3) a manual
+  long-budget run on a durable host (PROVE_BUDGET_S override).
+- The 2026-10-07 Q.E.D. receipts (23.7s in-PR; 17.6s post-merge run
+  37639664457) stand for their ACTUAL theorem — injectivity of the
+  capacity-padded representation — and are recorded as such in
+  README/SPEC. The canonical deployed-wire claim now rests on:
+  vectorsHold (sampled, byte-for-byte, CI-gated) + wireInjective
+  CHECK-SAMPLED (sampled) + the open universal proof, honestly open.
 
 ## Boundaries not crossed
 
