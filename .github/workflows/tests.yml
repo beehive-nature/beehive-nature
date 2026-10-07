@@ -167,6 +167,29 @@ jobs:
           if [ "${n:-0}" -lt 1 ]; then
             echo "genealogy: matched ${n:-0} suites under tools/genealogy — that is not a count of tests, it is a glob that found nothing. Refusing to report a pass."
             exit 1
+      # bTunGsTeN Workbench 001 (zCode seat, 2026-10-06; SPEC-BTUNGSTEN-1):
+      # the standard's first executable arm — the intent-binding invariant.
+      # No valid signature authorizes any intent other than the exact
+      # committed intent: one-bit mutation matrix over every byte of the
+      # envelope AND the signature, field-move mutants across all ten
+      # fields, structural forgeries (reorder, unknown tag, duplicate,
+      # length-splice, truncation), an injectivity corpus with
+      # nested-envelope and boundary-shift twins, domain/nonce/epoch
+      # participation, and the teeth row convicting the naive length-free
+      # encoder. Measured green on the branch before wiring (10/10, 2,178
+      # mutants rejected) — guard, not new red. Globbed, never listed, with
+      # the same non-vacuity count guard as genealogy above.
+      - name: bTunGsTeN WB001 — intent-binding mutation matrix (globbed, never listed)
+        if: always()
+        run: |
+          set -eu
+          n=$(ls scripts/btungsten/*.test.mjs 2>/dev/null | wc -l | tr -d " ")
+          if [ "${n:-0}" -lt 1 ]; then
+            echo "btungsten: matched ${n:-0} suites under scripts/btungsten — that is not a count of tests, it is a glob that found nothing. Refusing to report a pass."
+            exit 1
+          fi
+          echo "btungsten: running $n suite(s)"
+          node --test $(ls scripts/btungsten/*.test.mjs)
           fi
           echo "genealogy: running $n suite(s)"
           node --test $(ls tools/genealogy/*.test.mjs)

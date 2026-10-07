@@ -1,0 +1,36 @@
+// bTunGsTeN Workbench 001 — SAW plan. STAGED, NOT RUN (2026-10-06).
+//
+// Software Analysis Workbench (Galois, the tool NSA's Foundation repo
+// builds its assurance methodology around) proves an implementation
+// equivalent to a Cryptol specification. The spec half exists
+// (../wb001-cryptol/Intent.cry, itself staged-unrun); the implementation
+// half for SAW is a RUST twin of wb001-intent.mjs that does not exist
+// yet — the JS twin is the executable battery's target, and SAW has no
+// JS extraction. Named gaps, in order:
+//
+//   1. cryptol typecheck + :check/:prove canonicalInjective  (CI container)
+//   2. Rust twin of canonical/decode in this repo             (next beat)
+//   3. this script's equivalence proof against the twin       (last)
+//
+// Planned shape once (1)-(2) exist — kept here so the run is a matter of
+// filling in the bitcode path, not of redesign:
+//
+//   cryptol_load ../wb001-cryptol/Intent.cry;
+//   let canonicalSpec = cryptol "canonical";
+//
+//   llvm_load_bitcode "target/…/wb001_intent.bc";
+//   let canonicalImpl = llvm_extract "wb001_intent::canonical";
+//
+//   // equivalence, no symbolic exceptions: for all intents the Rust
+//   // bytes are the Cryptol bytes.
+//   theorem rust_matches_spec : llvm_verify canonicalImpl
+//     [cryptol canonicalSpec] [];
+//
+//   // the adversarial leg, mirrored from the battery: after the
+//   // equivalence proof, mutation is provably detected — any envelope
+//   // differing from canonical i in any bit fails decode or SigVerify,
+//   // which is P3 in the .cry file.
+//
+// Run environment note: SAW release binaries are Linux x86_64; the CI
+// ubuntu runner is the qualified host (tests.yml's container beat when it
+// lands). Until then: UNVERIFIED, deliberately.
