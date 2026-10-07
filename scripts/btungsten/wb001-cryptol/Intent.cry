@@ -178,30 +178,30 @@ headerByte p = ("bT-WB01" # [0x01]) @ p
 // its tag, its four length-word bytes, then its meaningful bytes.
 tlvByte : {cap} (fin cap) => Byte -> [32] -> [cap][8] -> [32] -> [32] -> Byte
 tlvByte t lw bs o p =
-     if p == o           then t
-else if (p - o) == 1     then (split lw) @ 0
-else if (p - o) == 2     then (split lw) @ 1
-else if (p - o) == 3     then (split lw) @ 2
-else if (p - o) == 4     then (split lw) @ 3
-else                         bs @ (p - o - 5)
+  if p == o           then t
+  else if (p - o) == 1 then (split lw) @ 0
+  else if (p - o) == 2 then (split lw) @ 1
+  else if (p - o) == 3 then (split lw) @ 2
+  else if (p - o) == 4 then (split lw) @ 3
+  else bs @ (p - o - 5)
 
 // The byte at wire position p: the compact envelope laid out by the
 // offsets above, zero past envLen. Laziness keeps every @ in range —
 // each branch is guarded by the same bound that makes its index safe.
 byteAt : Intent -> [32] -> Byte
 byteAt i p =
-     if p < 8                then headerByte p
-else if p < oNon i           then tlvByte 0x01 i.domain.len       i.domain.bytes       (oDom i) p
-else if p < oEpo i           then tlvByte 0x02 L32                i.nonce.bytes        (oNon i) p
-else if p < oAct i           then tlvByte 0x03 L8                 (split i.epoch)      (oEpo i) p
-else if p < oDst i           then tlvByte 0x04 L32                i.action.bytes       (oAct i) p
-else if p < oCap i           then tlvByte 0x05 i.destination.len  i.destination.bytes  (oDst i) p
-else if p < oAmt i           then tlvByte 0x06 i.capability.len   i.capability.bytes   (oCap i) p
-else if p < oExp i           then tlvByte 0x07 L8                 (split i.amount)     (oAmt i) p
-else if p < oPay i           then tlvByte 0x08 L8                 (split i.expiry)     (oExp i) p
-else if p < oLoa i           then tlvByte 0x09 i.payer.len        i.payer.bytes        (oPay i) p
-else if p < envLen i         then tlvByte 0x0a i.payload.len      i.payload.bytes      (oLoa i) p
-else 0
+  if p < 8        then headerByte p
+  else if p < oNon i   then tlvByte 0x01 i.domain.len       i.domain.bytes      (oDom i) p
+  else if p < oEpo i   then tlvByte 0x02 L32                i.nonce.bytes       (oNon i) p
+  else if p < oAct i   then tlvByte 0x03 L8                 (split i.epoch)     (oEpo i) p
+  else if p < oDst i   then tlvByte 0x04 L32                i.action.bytes      (oAct i) p
+  else if p < oCap i   then tlvByte 0x05 i.destination.len  i.destination.bytes (oDst i) p
+  else if p < oAmt i   then tlvByte 0x06 i.capability.len   i.capability.bytes  (oCap i) p
+  else if p < oExp i   then tlvByte 0x07 L8                 (split i.amount)    (oAmt i) p
+  else if p < oPay i   then tlvByte 0x08 L8                 (split i.expiry)    (oExp i) p
+  else if p < oLoa i   then tlvByte 0x09 i.payer.len        i.payer.bytes       (oPay i) p
+  else if p < envLen i then tlvByte 0x0a i.payload.len      i.payload.bytes     (oLoa i) p
+  else 0
 
 wire : Intent -> [MaxEnv][8]
 wire i = [ byteAt i p | p <- take`{MaxEnv} [0 ...] ]
