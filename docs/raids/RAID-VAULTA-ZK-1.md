@@ -60,36 +60,45 @@ identities" (the ant-reach pattern, made cryptographic).
 
 ## §checks — the exact first beats (each a receipt when done)
 
-- [ ] PRECOMPILES: grep VaultaFoundation/evm-contract for 0x06/0x07/0x08
-      (alt_bn128) wiring, or deploy a snarkjs Groth16 verifier on the
-      Vaulta EVM testnet and verify a known-good proof. Until then, every
-      "verify on Vaulta" statement above carries UNVERIFIED.
-- [ ] TESTNET ACCOUNT: a Vaulta EVM testnet account + faucet (the estate
-      holds Jungle4 EOS-side identities — bzcodejungle; the EVM-side
-      equivalent is unnamed). Founder gesture may be needed for faucet.
-- [ ] TOOLING: circom+snarkjs (JS/EVM-native, fastest to first proof)
-      vs arkworks (Rust, fits the estate's crates pattern — bmesh-meter,
-      bpay-rail precedents). Genesis recommendation: circom+snarkjs for
-      the FIRST proof (the tungsten target), arkworks if the circuit
-      graduates into the workspace.
-- [ ] THE CIRCUIT ITSELF (smallest true aggregate): a count-only claim —
-      "I hold ≥N receipts of kind K whose hashes commit to root M" —
-      Merkle inclusion + counter fold, no amounts. Amounts/sums are the
-      second circuit, not the first.
+- [x] PRECOMPILES — CLOSED 2026-10-06, by the estate's own receipts, not
+      by search: ZK_BENCH_2026-09-01 documents Spring's `crypto.cpp`
+      implementing the alt_bn128 host functions, and mainnet + jungle4 API
+      endpoints run Spring v1.2.1 — the same client family as the lab.
+      Today: CRYPTO_PRIMITIVES activated on the rehearsal chain (minibios
+      ladder), `zkrcount` deployed (code hash eb4d61c9…f576e5), and the
+      nine-phase gate ACCEPTED two real proofs and REFUSED four forgeries
+      ON-CHAIN (dispatch 2026-10-06-vaulta-zk-count-v1). The EVM-side
+      hypothesis above is RETIRED to fallback — the native Antelope path
+      is the estate's own proven engine.
+- [x] TESTNET ACCOUNT — reach PROVEN 2026-10-06: jungle4 RPC live
+      (chain_id 73e4385a…, head 290,725,568 at 01:05Z). Estate accounts
+      DRY: notelab11111 CPU 171 µs, bnrapolltest 0 µs, bzcodejungle 2 µs
+      (the 2026-09-03 powerup expired). FOUNDER GESTURE (asked for and
+      answered mid-lane): faucet `monitor.jungletestnet.io/#faucet` →
+      `bnrapolltest` (the proven sponsor payer). One drip covers the
+      whole pass (≈0.2 s CPU).
+- [x] TOOLING — circom + snarkjs 0.7.6, the estate standard, confirmed:
+      count.circom compiled (101,278 constraints, 3 publics), pot17
+      ceremony (ONE honest participant — rehearsal-labeled; contribution
+      response 2bfb5bd6…, next challenge 2bb7b357…).
+- [x] THE CIRCUIT — built and exercised end to end (the v1 lane below).
 
 ## §tungsten — this lane's own gate (design now, earn before any coupling)
 
 The lane may not couple with the Autonomi upstream lane until ALL of:
-1. FORGERY: a mutated aggregate (wrong count, wrong root, skipped
-   receipt) produces a proof the verifier REJECTS — mutation-proven the
-   bmesh-meter way, receipts in-tree.
-2. LEAK: the proof + claim reveal nothing beyond C and M — bounded
-   distinguisher test on simulated vs real witnesses; wording capped at
-   "sound by construction against the pinned test set" (crypto language
-   law) until an independent review says more.
-3. COST: on-chain verification measured on Vaulta EVM testnet — gas
-   receipt per verify, batch amortization stated.
-4. SCALE: proof-time receipts at n = 1k and n = 10k receipts.
+1. FORGERY — EARNED 2026-10-06 (rehearsal chain + off-chain): real
+   dead/live proofs verify; tampered proof word (eval_zw+1), mutated
+   count, mutated root, mutated kind ALL refused by the pairing;
+   re-verify and bad-kind refused by the contract's own bounds. Receipts
+   in docs/dispatches/2026-10-06-vaulta-zk-count-v1.md. (Vaulta-testnet
+   repetition pending the faucet gesture.)
+2. LEAK — OPEN: the bounded distinguisher test is NOT run; wording
+   remains "sound by construction against the pinned test set".
+3. COST — PARTIAL: rehearsal-chain verify billed (probe in the dispatch);
+   a Vaulta-testnet figure is still the receipt this gate needs.
+4. SCALE — OPEN: proof-time receipts at n = 1k and n = 10k not yet run
+   (design note: a full-tree fold at n leaves costs (2n−1) Poseidons —
+   pot choice per scale, measured when run).
 
 ## Sources
 

@@ -33,11 +33,13 @@ information a proof may introduce.
 - Public claim C: "≥ N receipts in M have kind = K."
 - Circuit: Merkle inclusion per receipt + kind predicate + counter fold.
 - Amounts/sums are the SECOND circuit — count-first is the genesis scope.
-- UNVERIFIED until §checks close: on-chain verification venue. No Vaulta
-  native ZK precompile was found; the working hypothesis is Vaulta EVM +
-  a standard snarkjs Groth16 verifier over the alt_bn128 precompiles
-  (0x06–0x08) — confirmed against VaultaFoundation/evm-contract source or
-  by a testnet verify before any claim of "verifiable on Vaulta."
+- Venue CONFIRMED 2026-10-06 for the rehearsal chain: the estate's own
+  native Antelope C++ nine-phase PLONK port (contracts/privacy/
+  plonk_verify.hpp → plonk_verify_count.hpp) over Spring's alt_bn128
+  host functions — two real proofs verified ON-CHAIN, four forgeries
+  refused (zkrcount, code hash eb4d61c9…). "Verifiable on VAULTA
+  (public testnet/mainnet)" itself stays UNVERIFIED until the jungle4
+  verify lands (faucet gesture named in the raid §checks).
 
 ## §privacy
 
@@ -69,12 +71,22 @@ nothing (founder ruling 2026-10-06).
 ## §sequence (this lane)
 
 1. ✓ GENESIS — raid + this spec (research receipts in the raid).
-2. ← CURRENT — close RAID §checks: precompile confirmation (evm-contract
-   source or testnet deploy), testnet account/faucet (EVM-side; the
-   Jungle4 EOS-side identities do not automatically carry), tooling pick
-   (circom+snarkjs first proof, arkworks if it graduates into crates/).
-3. Build the count-only circuit; run §tungsten 1–2 locally.
-4. Testnet verify; §tungsten 3–4 receipts.
+2. ✓ CLOSED 2026-10-06 — all four RAID §checks receipted (see the raid):
+   the verifier venue is the estate's OWN native Antelope PLONK port
+   (Spring crypto.cpp alt_bn128 host functions — ZK_BENCH receipts; the
+   EVM hypothesis retired to fallback); jungle4 RPC live but estate
+   accounts CPU-dry (faucet gesture named); circom+snarkjs confirmed;
+   the circuit built.
+3. ✓ EXECUTED 2026-10-06 — count.circom (101,278 constraints, 3 publics,
+   pot17 one-honest-seat rehearsal ceremony) proven over the ant-reach
+   40-member cohort (root 0x2e6bc682…, claims 20 dead-baseline kept /
+   20 live-baseline kept); off-chain verifies PASS; tungsten-1 forgery
+   set ALL refused off-chain AND on-chain (zkrcount, Spring rehearsal
+   chain, code hash eb4d61c9…). Receipt: dispatch
+   2026-10-06-vaulta-zk-count-v1.md; contracts/zkreceipts/.
+4. ← CURRENT — testnet verify (jungle4 faucet gesture for bnrapolltest)
+   + §tungsten 2 (leak distinguisher), 3 (testnet cost figure),
+   4 (scale 1k/10k proof-time receipts).
 5. Only after a full tungsten pass: revisit coupling with the Autonomi
    upstream lane and the bMESHasi/x0x step-4 contract work.
 

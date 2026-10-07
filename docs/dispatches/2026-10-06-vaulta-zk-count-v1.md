@@ -1,0 +1,118 @@
+# 2026-10-06 — Vaulta/ZK lane: the count-only aggregate proof, first light on-chain
+
+zCode seat, branch zcode/vaulta-zk-2026-10-06. SPEC-ZK-RECEIPT-
+AGGREGATES-1 §sequence 2–3: the v1 circuit is built, proven over the
+ant-reach cohort, and the estate's own nine-phase PLONK verifier ACCEPTED
+both real proofs and REFUSED every forgery ON-CHAIN — on the Spring
+v1.2.2 rehearsal chain, the same client family as Vaulta's public
+endpoints.
+
+SOUND BY CONSTRUCTION / ISOLATED BY DESIGN — never stronger language.
+
+## CLAIM → EVIDENCE → BOUNDARY NOT CROSSED
+
+**CLAIM.** A prover holding the private 40-member ant-reach cohort
+receipt set can publish only (root, kind, count) and a proof, and the
+chain verifies the count claim against the anchored root — the receipts,
+the fingerprints, and the verdicts never leave the prover.
+
+**EVIDENCE (all from this seat's runs, 2026-10-06, WSL lab on the
+founder's laptop).**
+
+Circuit — `contracts/zkreceipts/count.circom`:
+- 101,278 constraints (48,057 non-linear), 3 publics (root, kind,
+  count), 320 private inputs; circom compile receipt in
+  `prove_count.sh` step [1] output.
+- FULL-TREE fold, not per-member paths: the root provably derives from
+  EXACTLY the 64-leaf witness (40 members + 24 constrained zero pads);
+  per-leaf kept = (≥1 settled run) ∧ (zero flips), folded with both
+  counters up the same tree.
+- Witness builder `zkrprep.cjs` cross-checks EVERY member row and every
+  aggregate against the receipt (members 40; settled 43 dead + 50 live;
+  flipped 0; kept-members 20+20) — it fails loud on any disagreement.
+- Commitment root for the 2026-10-06 cohort:
+  `0x2e6bc682087a3c07baafea8502ba7d2ae10e6f02ff9bf0edceaf2a29df59f98d` (PUBLIC-CONSTANT: this lane's cohort commitment root, published by design).
+
+Ceremony — pot17 bn128, ONE honest participant, REHEARSAL-labeled (the
+estate law): contribution response `2bfb5bd63e2a1a65…7305ec10`, next
+challenge `2bb7b3577878d1e7…eb6cc02c`. (`zkey verify` is groth16-only —
+"zkey file is not groth16" — the M-lane `|| true` law carried forward.)
+
+Off-chain (snarkjs 0.7.6 plonk): both real proofs verify —
+`OFFCHAIN-DEAD-OK`, `OFFCHAIN-LIVE-OK` (claims: kind 0 → count 20,
+kind 1 → count 20, same root). Forgeries, all REJECTED: tampered proof
+word (eval_zw+1), mutated count, mutated root, mutated kind.
+
+On-chain — `contracts/zkreceipts/zkrcount.cpp` (anchor + verify; root
+rides the table as RAW BYTES so the fixed_bytes T-laws never touch the
+transcript; one proof per anchor; alg id 2 shared with note.cpp's law
+row). Deployed on the Spring v1.2.2 rehearsal chain after the minibios
+ladder + CRYPTO_PRIMITIVES activation; code hash
+`eb4d61c98fad1c4c3611a57d6a89e98938eaf455688150c37489df4acaf576e5` (PUBLIC-CONSTANT: zkrcount wasm code hash, on-chain readable by anyone).
+Account `zkreceipts33`; table rows read back with verified_at set.
+
+| leg | result |
+|---|---|
+| anchor 1 (root, kind=0, count=20) | executed `b380522d…49881` |
+| REAL PROOF dead-baseline | executed `824d77d3…4339e` — **billed 9,629 µs** (blk 4708) |
+| anchor 2 (root, kind=1, count=20) | executed `970702d4…ce8d6` |
+| REAL PROOF live-baseline | executed `071c23d0…1fd82` — **billed 12,427 µs** (blk 4723) |
+| forged proof (eval_zw+1), fresh anchor 3 | REFUSED — "count proof REJECTED — plonk pairing false" |
+| mutated COUNT (anchor says 21) | REFUSED — plonk pairing false |
+| mutated ROOT (last byte flipped), anchor `86b4bba9…3c45` | REFUSED — plonk pairing false |
+| mutated KIND (anchor says live, dead proof) | REFUSED — plonk pairing false |
+| re-verify anchor 1 | REFUSED — "anchor already verified (one proof per anchor)" |
+| bad kind at anchor time (kind=2) | REFUSED — "kind must be 0 or 1" |
+
+The mutated-claim legs are the load-bearing ones: the publics the
+pairing checks are assembled FROM THE ANCHOR ROW, so a real proof
+cannot ride a mutated claim — the pairing itself refuses.
+
+**BOUNDARY NOT CROSSED.**
+- Rehearsal chain: one local Spring node, dev keys, /tmp state. A
+  Vaulta PUBLIC-testnet verify is NOT yet done — the estate's jungle4
+  accounts are CPU-dry (notelab11111 171 µs, bnrapolltest 0 µs,
+  bzcodejungle 2 µs; the 2026-09-03 powerup expired). FOUNDER GESTURE,
+  asked and answered mid-lane: faucet `monitor.jungletestnet.io/#faucet`
+  → account `bnrapolltest` (the proven sponsor payer; one drip covers
+  the pass).
+- Measurement ORIGIN: the proof says the CLAIM follows from the witness
+  set; it cannot say a browser really dialed anything. Seat-signed
+  receipts feeding the commitment are the named next lane.
+- §tungsten 2 (leak distinguisher), 3 (testnet cost figure), 4 (scale
+  1k/10k) remain OPEN — the coupling ban with the Autonomi upstream
+  lane STANDS.
+- The ceremony is one honest participant — rehearsal-labeled until a
+  witnessed multi-party sealing is ruled.
+
+## The live-proof billing line
+
+Both verifies billed on the rehearsal chain, uncontended single node:
+dead-baseline 9,629 µs (blk 4708), live-baseline 12,427 µs (blk 4723) —
+the second sits a little above the M4–M10 payment lane's 6.9–10.4 ms
+band (5 publics there, 3 here) and under the 15 ms tripwire; labeled
+host variance per the M4/M5 contention law rather than claimed as a
+tighter figure. The verifier cost is O(1) in circuit size — 101k
+constraints verified at the same price class as the 12k payment circuit.
+
+## Found live and banked (the ladder's own lessons)
+
+- A cleos wallet FILE survives WSL restarts in ~/eosio-wallet but its
+  password lived in /tmp — a wallet without its password is
+  unrecoverable; wipe and recreate (only ever public dev + fresh bench
+  keys). Symptom: every later push silently unsigned.
+- zkbench's full `eosio.bios.wasm` demands `env.bls_pairing` this node
+  does not expose — use `minibios` (the handoff's ladder was right).
+- snarkjs `powersoftau contribute` BLOCKS on the entropy prompt under a
+  closed stdin — pipe it (the committed script does).
+- `zkey verify` is groth16-only; `|| true` carried.
+- `cleos push action` takes `[args]`, not `[[args]]`; and the ACTION
+  NAME is not optional — say() swallowed both failures silently.
+
+## Next (step 4)
+
+1. Jungle4 faucet gesture → deploy + the same acceptance pass on Vaulta
+   public testnet (the COST receipt).
+2. §tungsten 2 leak distinguisher; §tungsten 4 scale beats.
+3. Second circuit: sums/bounds (the 43/50 settled-observation figures),
+   per the spec's count-first law.
