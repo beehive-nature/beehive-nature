@@ -1,0 +1,89 @@
+// bTunGsTeN Workbench 001 — the formal twin of wb001-intent.mjs.
+//
+// STAGED ARTIFACT (2026-10-06, zCode seat): written, NOT yet executed
+// under cryptol/SAW — UNVERIFIED until that run lands. SAW ships Linux
+// x86_64 binaries; this Windows seat and the aarch64 box cannot run it
+// unqualified, so the run belongs to the CI-container beat named in
+// scripts/btungsten/README.md §next. The executable twin (wb001.test.mjs)
+// already attacks the same invariant over 2,178+ concrete mutants; this
+// file states it for ALL intents.
+//
+// Wire format mirrored exactly: envelope = "bT-WB01" || 0x01 || tlv*;
+// tlv = tag(1) || length(4, BE u32) || value; ten fields, tags strictly
+// ascending 0x01..0x0a, nothing trailing.
+
+module BTungstenWB001 where;
+
+// A variable-length field at capacity: the u32 length word counts only
+// meaningful bytes; `bytes` is exactly the meaningful prefix.
+Field : {cap : Nat} -> Type
+Field cap = { len : [32], bytes : [cap][8] }
+
+Intent : Type
+Intent =
+  { domain       : Field 64
+  , nonce        : Field 32
+  , epoch        : [64]
+  , action       : Field 32
+  , destination  : Field 128
+  , capability   : Field 64
+  , amount       : [64]
+  , expiry       : [64]
+  , payer        : Field 128
+  , payload      : Field 4096
+  }
+
+// u32 length words for the fixed-width fields (their one legal value).
+L8  : [32]
+L32 : [32]
+L8  = 8
+L32 = 32
+
+tlv : {cap : Nat} -> Byte -> Field cap -> [5 + cap][8]
+tlv t f = [t] # split f.len # f.bytes
+
+u64 : [64] -> Field 8
+u64 w = { len = L8, bytes = split w }
+
+EnvelopeSize : Nat
+EnvelopeSize = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
+
+canonical : Intent -> [EnvelopeSize][8]
+canonical i =
+  "bT-WB01" # [0x01]
+    # tlv 0x01 i.domain
+    # tlv 0x02 i.nonce
+    # tlv 0x03 (u64 i.epoch)
+    # tlv 0x04 i.action
+    # tlv 0x05 i.destination
+    # tlv 0x06 i.capability
+    # tlv 0x07 (u64 i.amount)
+    # tlv 0x08 (u64 i.expiry)
+    # tlv 0x09 i.payer
+    # tlv 0x0a i.payload
+
+// The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
+// implementation): within the published adversarial model, no adversary
+// produces (pk, m, sig) accepting under m it never queried. The
+// workbench's job is the layer UNDER the assumption — that "the message"
+// is exactly the committed intent.
+SigVerify : [32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit
+
+verifyWith : ([32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit) -> Intent -> [32][8] -> [64][8] -> Bit
+verifyWith sv i pk sig = sv pk (canonical i) sig
+
+// P2 — THE framing property, for all pairs (the battery samples it):
+// distinct intents never share canonical bytes. With ascending unique
+// tags and explicit length words, drift in any field must surface in its
+// own tag, length word or padded bytes.
+property canonicalInjective (a : Intent) (b : Intent) : Bit
+  = (canonical a == canonical b) ==> (a == b)
+
+// P3 — binding, stated with the assumed primitive: verification is over
+// the canonical bytes of the intent under test and nothing else, so
+// verifyWith sv b pk sig for b =/= a can only hold if sv accepts a
+// message b's canonical form that was never signed — outside the model.
+// Discharge plan: typecheck P2 first (`:check canonicalInjective` over
+// symbolic a b at bounded payload capacity), then full `:prove` per the
+// Foundation Cryptol+SAW methodology; then the SAW equivalence proof
+// against the Rust twin once it exists (README §next).
