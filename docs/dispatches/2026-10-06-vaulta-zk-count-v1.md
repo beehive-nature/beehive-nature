@@ -267,3 +267,43 @@ addendum (the enforcing pass above). Leak (§tungsten 2) and scale
 1. §tungsten 2 leak distinguisher; §tungsten 4 scale beats (1k/10k).
 2. Second circuit: sums/bounds (the 43/50 settled-observation figures).
 3. Mainnet Vaulta: not in scope until a witnessed ceremony ruling.
+
+## CLOSING ADDENDUM (2026-10-07): the corrected-build pass on zkrtst111111 — finalizer green, 9/9, exit 0
+
+The corrected build (selector-repaired circuit, v1.1 bounded contract,
+code hash 7a86ac34… identity-gated as == the built wasm's sha256) ran
+its enforcing acceptance on the founder-loaded account as a two-part
+composite, because the account's anchor table reached its law-row cap
+mid-pass — the bound working exactly as designed:
+
+- POSITIVES (zkrself-run.sh, this build): canonical (R,0,20) and
+  (R,1,20) anchors landed and verified — billed 10,277 / 11,391 µs,
+  verified_at transitions asserted (read attempt 2 — the visibility
+  retry earning its keep); asym (fRoot,0,20)/(fRoot,1,19) verified
+  earlier in the session at 9,924 / 10,823 µs.
+- NEGATIVES + EXHAUSTION (zkrself-final.sh, 9/9 PASS, exit 0): every
+  prerequisite anchor DISCOVERED by exact (root,kind,count) match
+  against standing rows — not assumed seqs — then each refusal
+  asserted on its SPECIFIED reason: forged eval_zw+1, mutated count,
+  mutated root, mutated kind, re-verify, BOTH asym REVERSED claims
+  (0,19)/(1,20) — all "count proof REJECTED — plonk pairing false";
+  "anchor already verified (one proof per anchor)"; and the resource
+  bound: table at 27/27 rows → "anchor table FULL (bounded resource
+  budget)". Final state: 27 rows, 9 verified, 18 unverified at this
+  observation.
+
+The finalizer's own ladder lessons (its red runs were load-bearing):
+hardcoded run-epoch seqs break when anchors span runs — discover by
+claim; inline `node -e` scripts are a quoting trap (one missing paren
+silently failed every reconcile — helpers now live in files:
+final-find.mjs); reads belong on a second endpoint (the write endpoint
+throttles read bursts into empty outputs that masquerade as
+"not visible"); REPO= must point at the worktree that owns the
+helpers.
+
+Both enforcing runners, the finalizer, and the v1.1 contract are
+in-tree; the review order's four items are closed on this account,
+with the sibling session's parallel receipts on zkrtst222222
+(dispatch 2026-10-06-vaulta-zk-selector-fix.md §7) as the
+sponsored-lane corroboration. Leak (tungsten 2) and scale (tungsten 4)
+remain OPEN; the Autonomi coupling ban STANDS.
