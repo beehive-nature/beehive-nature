@@ -201,3 +201,38 @@ report, not a vulnerability. No fork exists or is needed: one is made only if
 Autonomi confirms a cause and wants the patch from us. If the issue goes
 quiet, the same evidence link goes to David directly. The 6-hourly cohort
 windows will be added to the issue as they complete.
+
+## Re-checked against current code, and 24 hours of cohort (2026-10-07)
+
+Founder: "may be stale code and or changes". Checked before going further:
+
+- `ant-node`: `advertised_addr()` is identical in release v0.21.0 and on main
+  `d41a353544f11b333e6e0ab42d9de7723ef5f772`: an explicit `advertised_addr`,
+  else a bound specific IP, else the first non-relay native address of the same
+  family with the WebRTC listener's local port. `refresh_browser_endpoint()`
+  publishes that into the DHT; the listener's own diagnostics say "no external
+  probe is implied". Verified by this seat from source, no longer only relayed.
+- `ant-client` main `48c4d7d72a121844d00ce34c325c966c34f687d2`,
+  `ant-core/src/browser/wasm_transport.rs`: the "a third to a half … time out
+  when dialled" comment is there, citing ADR-0004.
+- The SDK package is `@withautonomi/ant-browser-sdk` (the issue first said
+  `@autonomi/…`; corrected). 0.1.2 shipped 2026-10-05 with two browser fixes,
+  ant-client #215 and #216, both WebKit (Safari) problems; #216 says Chromium
+  "never lost a connection". Our runs are Chromium. bViEw now ships 0.1.2
+  (commit c7a4c5c14) and the probe records the SDK the page loaded.
+
+Window 3, SDK 0.1.2, three vantage points, 2026-10-07 20:19–20:20Z (Actions run
+37681059558 + laptop): 147 settled on all three; 73 dead from all, 73 open from
+all, 1 differs.
+
+Cohort over every window after the baseline (10 runs, about 24 hours, SDK 0.1.1
+and 0.1.2; two scheduled windows fired, two were dropped by GitHub's scheduler):
+
+- dead cohort: 20 of 20 observed; **108 of 108** settled observations dead
+- live cohort: 20 of 20 observed; **126 of 128** settled observations open
+- the 2 misses are one endpoint (`09d7e457307accd9`): at 13:21Z it was dead from
+  the macOS runner and open from the Linux runner at the same time, and dead
+  from the laptop at 20:20Z. A real network- or time-dependent case inside the
+  live cohort, recorded as such.
+
+Receipt: `docs/receipts/ant-reach-cohort-2026-10-07.json`.
