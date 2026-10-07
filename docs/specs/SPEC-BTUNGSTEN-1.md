@@ -103,6 +103,13 @@ the standard those gates instantiate:
   cost, scale) before ANY upstream coupling. Axes exercised: 2, 5.
 - `docs/research/2026-10-05-autonomi-10-100gb.md` — the storage-scale
   tungsten ladder (free stages, then paid 250 MB → 100 GB). Axis: 5.
+- SPEC-SKAISTS-SEAT-SOVEREIGNTY-1 + `scripts/btungsten/sk001*` — the
+  first bounded DEPLOYMENT instance: the Skaists LOVERnment DAO's
+  7,776-seat (6⁵) seat-sovereignty law made executable (one living
+  human → one seat → one canonical energy type → one constituency at
+  every epoch; governance weight ⊥ population; evidence never crosses
+  COMMIT). Axes exercised: 2, 5, 6 — model scale; live layers stay
+  UNVERIFIED until their own beats run.
 - A failed tungsten test is never quietly turned into integration work
   (doxx FAIL precedent; the failed-test-to-integration move has no
   written precedent and stays UNVERIFIED/unlawful until ruled).

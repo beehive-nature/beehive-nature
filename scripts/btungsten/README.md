@@ -179,3 +179,45 @@ never success. `:check` is testing; `:prove` is the proof step.
   published) and SPEC-ZK-RECEIPT-AGGREGATES-1 §tungsten (the ZK lane's
   four-receipt coupling gate). bTunGsTeN-1 names the umbrella those
   gates instantiate.
+
+## SK001 — the Skaists seat-sovereignty deployment battery (SPEC-SKAISTS-SEAT-SOVEREIGNTY-1)
+
+Not a workbench of the standard's own WB sequence — the first bounded
+DEPLOYMENT instance of it: the Skaists LOVERnment DAO's 7,776-seat
+(6⁵) organism, whose identity layer must satisfy bTunGsTeN at the
+scale where every seat can be exercised exhaustively.
+
+**Invariant (founder ruling 2026-10-07, verbatim in the spec):**
+Skaists Seat Sovereignty — at every governance epoch, no natural human
+may control more than one active membership seat, every active seat
+must resolve to exactly one eligible living human and exactly one of
+the five constitutional energy types, and no verifier needs access to
+that human's underlying biometric or civil identity to establish
+eligibility.
+
+**The arithmetic law:** 7,776 = 6⁵ = 2⁵·3⁵ has no factor of five, so
+equal integer fifths do not exist. Membership population is a measured
+variable; governance weight is the exact rational 1/5 per constituency,
+CONSTANT in population (no float ever represents it — 3 × (1/5) ≠ 0.6).
+The nearest packing {1556, 1555, 1555, 1555, 1555} is recorded and NOT
+constitutional.
+
+| artifact | status |
+|---|---|
+| `sk001-seat.mjs` — the model: beginEpoch/occupy/depart/release/carrySeat (COMMIT), prove (PROVE — the five frozen predicates), compress (COMPRESS — the fixed-weight fold), constitutionalWeights vs populationShares (the sabotage governor), exportEra; typed `bt-sk01:*` refusals, fails closed | RUNS — imported by the battery |
+| `sk001.test.mjs` — the battery (10 rows, each printing its own 0→N count): 6⁵ derived + equal-fifths impossibility by exhaustion; tightest packing recorded not constitutional; weight ⊥ population over 7 adversarial vectors; double-seat/seat-taken refusals + bijection; 8 malformed types refused; the five predicates frozen-shape with stale-epoch/not-live/vacant refusals and per-epoch carry; private-evidence byte-scan of proof and era export; full-cap fill + the 7,777th refused + one release/re-admit breath; exact COMPRESS fold of all 7,776 votes on constant weights; TEETH — the population governor and float weights convicted by name | RUNS in CI (same globbed step) — green 10/10 |
+
+Model-scale honesty: this receipts the in-memory MODEL. The sha256
+commitment is a binding placeholder only — hiding is NOT claimed; the
+boundary the battery receipts is structural (evidence bytes have no
+code path into the registry, the proof, or the export). No live proof
+system, hiding commitment, or SETTLE chain exists for Skaists seats
+yet — every live-layer claim stays UNVERIFIED until its own beat runs
+(the spec's §deployment-status table is the ledger). Axes exercised:
+2, 5, 6 (model scale).
+
+Genesis receipt: the battery caught two of its own bugs before landing
+— Buffer identity-comparison defeating the uniqueness index (equal
+sha256 digests are distinct Map keys), and the BigInt wire form — both
+fixed before the 10/10; see
+`docs/dispatches/2026-10-07-skaists-seat-sovereignty.md`.
