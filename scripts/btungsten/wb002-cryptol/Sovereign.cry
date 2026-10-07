@@ -1,10 +1,12 @@
 // bTunGsTeN Workbench 002 — the formal twin of wb002-simpleassets.mjs:
 // sovereign continuity across the SimpleAssets-2021 state machine.
 //
-// STAGED ARTIFACT (2026-10-07, zCode seat): written, NOT yet executed
-// under cryptol/SAW — UNVERIFIED until that run lands. SAW ships Linux
-// x86_64 binaries; this Windows seat and the aarch64 box cannot run it
-// unqualified, so the run belongs to the CI-container beat named in
+// STAGED ARTIFACT (2026-10-07, zCode seat): written, NOT-RUN under
+// cryptol/SAW (the result-class law, SPEC-BTUNGSTEN-1 §workbench:
+// TYPECHECK, CHECK-SAMPLED, PROVE-UNIVERSAL, EQUIVALENCE are separate
+// results, and none of them has run). SAW ships Linux x86_64 binaries;
+// this Windows seat and the aarch64 box cannot run it unqualified, so
+// the run belongs to the CI-container beat named in
 // scripts/btungsten/README.md §next. The executable twin (wb002.test.mjs)
 // already attacks the same invariant over hostile histories, a wrong-
 // signer matrix and the torture suite; this file states it for ALL

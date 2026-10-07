@@ -1,22 +1,34 @@
 // bTunGsTeN Workbench 001 — the formal twin of wb001-intent.mjs.
 //
-// STAGED ARTIFACT (2026-10-06, zCode seat): written, NOT yet executed
-// under cryptol/SAW — UNVERIFIED until that run lands. SAW ships Linux
-// x86_64 binaries; this Windows seat and the aarch64 box cannot run it
-// unqualified, so the run belongs to the CI-container beat named in
-// scripts/btungsten/README.md §next. The executable twin (wb001.test.mjs)
-// already attacks the same invariant over 2,178+ concrete mutants; this
-// file states it for ALL intents.
+// STAGED ARTIFACT: written, NOT yet executed under cryptol/SAW — UNVERIFIED
+// until that run lands (SAW ships Linux x86_64; the qualified host is the
+// CI ubuntu runner). Result classes are recorded separately and none
+// implies another: TYPECHECK, CHECK-SAMPLED (:check), PROVE-UNIVERSAL
+// (:prove), EQUIVALENCE (SAW, implementation == spec). A missing tool or
+// a solver timeout is NOT-RUN, never success.
+//
+// ALIGNED 2026-10-07 (founder review of the genesis): the earlier draft
+// appended full capacity-sized arrays and constrained nothing — proving
+// THAT padded encoding injective would not prove the deployed
+// variable-length encoding injective. This model now carries meaningful
+// lengths, valid-input constraints (including canonical zero padding and
+// the UTF-8 boundary law of the 2026-10-07 repair), and an explicit
+// bridge to the exact serialized bytes, pinned by shared vectors
+// (wb001-vectors.json) that every twin must reproduce byte-for-byte.
 //
 // Wire format mirrored exactly: envelope = "bT-WB01" || 0x01 || tlv*;
-// tlv = tag(1) || length(4, BE u32) || value; ten fields, tags strictly
-// ascending 0x01..0x0a, nothing trailing.
+// tlv = tag(1) || length(4, BE u32) || value, where `length` counts
+// MEANINGFUL bytes only; ten fields, tags strictly ascending 0x01..0x0a,
+// nothing trailing. The deployed envelope is the first envLen bytes of
+// `wire`; every byte after that is zero (zeroTail).
 
 module BTungstenWB001 where;
 
-// A variable-length field at capacity: the u32 length word counts only
-// meaningful bytes; `bytes` is exactly the meaningful prefix.
-Field : {cap : Nat} -> Type
+// A variable-length field at capacity: `len` counts meaningful bytes;
+// `bytes` is canonically ZERO-PADDED beyond them (validIntent enforces
+// the padding, so the fixed-size model is exactly the variable-length
+// wire on the meaningful prefix).
+Field : {cap} (fin cap) -> Type
 Field cap = { len : [32], bytes : [cap][8] }
 
 Intent : Type
@@ -33,57 +45,106 @@ Intent =
   , payload      : Field 4096
   }
 
-// u32 length words for the fixed-width fields (their one legal value).
+// One legal length word for the fixed-width fields.
 L8  : [32]
 L32 : [32]
 L8  = 8
 L32 = 32
 
-tlv : {cap : Nat} -> Byte -> Field cap -> [5 + cap][8]
-tlv t f = [t] # split f.len # f.bytes
+// The repair's decode-side law as an abstract predicate: the meaningful
+// bytes are well-formed UTF-8. It is defined by the implementations and
+// pinned ACROSS twins by the shared vectors' surrogate/invalid-UTF-8
+// rows (both must refuse them); re-deriving UTF-8 here is out of scope.
+wellFormedUtf8 : {cap} (fin cap) => [cap][8] -> Bit
+
+// Canonical zero padding: positions >= len are zero. (TYPECHECK BEAT:
+// settle the range/index widths of this comprehension — the meaning is
+// the equation below, which the typecheck run must accept.)
+canonicalPad : {cap} (fin cap) => [32] -> [cap][8] -> [cap][8]
+canonicalPad len bs = [ if toInteger i < toInteger len then bs @ i else 0 | i <- [ 0 .. cap - 1 ] ]
+
+validField : {cap} (fin cap) => [32] -> [32] -> Field cap -> Bit
+validField lo hi f =
+  f.len >= lo && f.len <= hi
+  && canonicalPad f.len f.bytes == f.bytes
+
+validIntent : Intent -> Bit
+validIntent i =
+       validField 1 64 i.domain    && wellFormedUtf8 i.domain.bytes
+    && i.nonce.len == L32          && canonicalPad i.nonce.len i.nonce.bytes == i.nonce.bytes
+    && i.action.len == L32         && canonicalPad i.action.len i.action.bytes == i.action.bytes
+    && validField 1 128 i.destination && wellFormedUtf8 i.destination.bytes
+    && validField 1 64 i.capability   && wellFormedUtf8 i.capability.bytes
+    && validField 1 128 i.payer       && wellFormedUtf8 i.payer.bytes
+    && validField 0 4096 i.payload
+
+wireTlv : {cap} (fin cap) => Byte -> Field cap -> [5 + cap][8]
+wireTlv t f = [t] # split f.len # f.bytes
 
 u64 : [64] -> Field 8
 u64 w = { len = L8, bytes = split w }
 
-EnvelopeSize : Nat
-EnvelopeSize = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
+MaxEnv : Nat
+MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
-canonical : Intent -> [EnvelopeSize][8]
-canonical i =
+// The fixed-size padded wire. The deployed variable-length envelope is
+// `take (envLen i) (wire i)`; positions beyond envLen are zero by
+// canonicalPad, so nothing meaningful hides in the padding.
+wire : Intent -> [MaxEnv][8]
+wire i =
   "bT-WB01" # [0x01]
-    # tlv 0x01 i.domain
-    # tlv 0x02 i.nonce
-    # tlv 0x03 (u64 i.epoch)
-    # tlv 0x04 i.action
-    # tlv 0x05 i.destination
-    # tlv 0x06 i.capability
-    # tlv 0x07 (u64 i.amount)
-    # tlv 0x08 (u64 i.expiry)
-    # tlv 0x09 i.payer
-    # tlv 0x0a i.payload
+    # wireTlv 0x01 i.domain
+    # wireTlv 0x02 i.nonce
+    # wireTlv 0x03 (u64 i.epoch)
+    # wireTlv 0x04 i.action
+    # wireTlv 0x05 i.destination
+    # wireTlv 0x06 i.capability
+    # wireTlv 0x07 (u64 i.amount)
+    # wireTlv 0x08 (u64 i.expiry)
+    # wireTlv 0x09 i.payer
+    # wireTlv 0x0a i.payload
+
+// Total meaningful length of the deployed envelope (sum of 5 + len per
+// field, plus the 8-byte header), as a u32.
+envLen : Intent -> [32]
+envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action.len)
+             + (5 + i.destination.len) + (5 + i.capability.len) + (5 + L8) + (5 + L8)
+             + (5 + i.payer.len) + (5 + i.payload.len)
 
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
-// implementation): within the published adversarial model, no adversary
-// produces (pk, m, sig) accepting under m it never queried. The
-// workbench's job is the layer UNDER the assumption — that "the message"
-// is exactly the committed intent.
+// implementation): within the published adversarial model no adversary
+// produces (pk, m, sig) accepting under an m it never queried. The
+// workbench's layer UNDER the assumption: "the message" is exactly the
+// committed intent's canonical bytes.
 SigVerify : [32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit
 
 verifyWith : ([32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit) -> Intent -> [32][8] -> [64][8] -> Bit
-verifyWith sv i pk sig = sv pk (canonical i) sig
+verifyWith sv i pk sig = sv pk (wire i) sig
 
-// P2 — THE framing property, for all pairs (the battery samples it):
-// distinct intents never share canonical bytes. With ascending unique
-// tags and explicit length words, drift in any field must surface in its
-// own tag, length word or padded bytes.
-property canonicalInjective (a : Intent) (b : Intent) : Bit
-  = (canonical a == canonical b) ==> (a == b)
+// P2 — THE framing property, for all VALID pairs (the battery samples it,
+// the vectors pin its boundary rows):
+// distinct valid intents never share wire bytes. With ascending unique
+// tags, meaningful length words, and canonical zero padding, drift in
+// any field must surface in its own tag, length word or bytes.
+property wireInjective (a : Intent) (b : Intent) : Bit
+  = (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
 
-// P3 — binding, stated with the assumed primitive: verification is over
-// the canonical bytes of the intent under test and nothing else, so
-// verifyWith sv b pk sig for b =/= a can only hold if sv accepts a
-// message b's canonical form that was never signed — outside the model.
-// Discharge plan: typecheck P2 first (`:check canonicalInjective` over
-// symbolic a b at bounded payload capacity), then full `:prove` per the
-// Foundation Cryptol+SAW methodology; then the SAW equivalence proof
-// against the Rust twin once it exists (README §next).
+// BRIDGE (model <-> deployed bytes), discharged by the shared vectors
+// byte-for-byte and to be stated as checked properties once the
+// typecheck idiom settles:
+//   prefix:  the JS envelope of i == take (envLen i) (wire i)
+//   zeroTail: every wire position >= envLen is zero
+//
+// Discharge plan, result classes recorded separately:
+//   1. TYPECHECK — this file parses and typechecks (settle the
+//      canonicalPad comprehension idiom).
+//   2. CHECK-SAMPLED — :check wireInjective over symbolic a, b, with the
+//      check set INCLUDING CONSTRUCTED related pairs (boundary-shift
+//      twins, the surrogate-class rows, nested envelopes), not random
+//      sampling alone: random pairs rarely challenge the collision
+//      condition.
+//   3. PROVE-UNIVERSAL — :prove wireInjective across the stated domain.
+//      A successful :check is never recorded as this.
+//   4. EQUIVALENCE — SAW: the Rust twin == this spec on the shared
+//      vectors, then the llvm_verify equivalence proof per
+//      wb001-saw/intent.saw.

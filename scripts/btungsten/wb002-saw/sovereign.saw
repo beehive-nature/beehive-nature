@@ -1,4 +1,5 @@
-// bTunGsTeN Workbench 002 — SAW plan. STAGED, NOT RUN (2026-10-07).
+// bTunGsTeN Workbench 002 — SAW plan. STAGED, NOT-RUN (2026-10-07,
+// result-class law: EQUIVALENCE is its own result class and has not run).
 //
 // Software Analysis Workbench (Galois, the tool NSA's Foundation repo
 // builds its assurance methodology around) proves an implementation

@@ -26,6 +26,16 @@ check; this pass clears the lane-start bar. Main CI at lane start: green
   and README are amended in this commit to say exactly that.
 - "Tungsten" naming law respected: bTunGsTeN is the BNR-internal
   umbrella; this workbench instantiates SPEC-BTUNGSTEN-1 axes 1, 3 and 6.
+- MID-FLIGHT RECONCILIATION (merge commit): WB001's beat 2 (PR #350,
+  the input-boundary repair + the input-boundary and result-class laws)
+  landed on main after this branch was cut and conflicted here. Resolved
+  keeping BOTH: beat-2's law paragraphs and the boundary-suite rows are
+  intact; the WB002 entry and its README section sit alongside them; the
+  WB002 staged twins' wording is aligned to the result-class law
+  (STAGED = NOT-RUN; TYPECHECK/CHECK-SAMPLED/PROVE-UNIVERSAL/EQUIVALENCE
+  all pending). The pre-merge CI run of THIS branch had already passed
+  scan + static (the btungsten step: WB001 + boundary + WB002 suites)
+  + test before the merge invalidated it; the merge push re-runs all.
 
 ## Upstream claims re-verified first (claim → evidence)
 
