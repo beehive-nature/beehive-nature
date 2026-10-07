@@ -13,10 +13,12 @@
 # from prove_count.sh: canonical $W/{expected,calldata_*}.json and the
 # asym selector fixture $W/asym/* (deadKept=20, liveKept=19).
 U=${U:-https://jungle4.greymass.com}
+RURL=${RURL:-https://jungle4.api.eosnation.io}   # READS on a second endpoint: the write endpoint throttles read bursts (empty reads, found live 2026-10-07)
 REPO=${REPO:-/mnt/c/Users/travi/beehive-nature}/contracts/zkreceipts
 W=~/plonkport
 A=${A:-zkrtst111111}
 CLEOS="/usr/bin/cleos -u $U"
+RCLEOS="/usr/bin/cleos -u $RURL"
 PASS=0; FAILS=0
 ok(){ echo "PASS: $1"; PASS=$((PASS+1)); }
 bad(){ echo "FAIL: $1"; echo "----- output (first 4 lines) -----"; echo "$2" | head -4; echo "--------------------------------"; FAILS=$((FAILS+1)); }
@@ -55,7 +57,11 @@ expect_refuse(){ # label contract action json EXPECTED-EXACT-MESSAGE
 # retries, each recorded; failure = INCONCLUSIVE = FAIL, never pass
 reconcile(){ # seq root kind count
   local SEQ=$1 ROOT=$2 KIND=$3 COUNT=$4 I ROWJ
-  for I in 1 2 3 4 5; do
+  # 8 attempts × 6 s (was 5 × 3 s — found live 2026-10-07 on zkrtst444444:
+  # greymass rate-limits rapid get-table bursts to null bodies; the short
+  # window starved seven refusal legs into INCONCLUSIVE before their
+  # verify pushes ever ran)
+  for I in 1 2 3 4 5 6 7 8; do
     ROWJ=$($CLEOS get table $A $A anchors --lower $SEQ --upper $SEQ 2>/dev/null)
     if node -e "
 let j;try{j=JSON.parse(process.stdin.read())}catch(e){process.exit(3)}
@@ -64,10 +70,10 @@ const hex=typeof r.root==='string'?r.root.replace(/^0x/,''):Buffer.from(r.root).
 process.exit(r.kind===+$KIND&&r.count===+$COUNT&&hex==='$ROOT'?0:3)" <<<"$ROWJ"; then
       echo "reconcile seq $SEQ: visible and exact (attempt $I)"; return 0
     fi
-    echo "reconcile seq $SEQ: not yet visible/exact (attempt $I of 5); retrying"
-    sleep 3
+    echo "reconcile seq $SEQ: not yet visible/exact (attempt $I of 8); retrying"
+    sleep 6
   done
-  bad "prerequisite anchor seq $SEQ INCONCLUSIVE — not visible after 5 recorded attempts" "(no stable row (root,kind,count) match)"
+  bad "prerequisite anchor seq $SEQ INCONCLUSIVE — not visible after 8 recorded attempts" "(no stable row (root,kind,count) match)"
   return 1
 }
 
@@ -102,8 +108,18 @@ mkdir -p $W/zkr11
 (cd $REPO && /usr/bin/cdt-cpp -O3 -I. -o $W/zkr11/zkrcount.wasm -abigen zkrcount.cpp) || { echo "FATAL: compile"; exit 1; }
 echo "  setcode: $($CLEOS set code $A $W/zkr11/zkrcount.wasm -p $A 2>&1 | grep -c 'executed transaction')"
 echo "  setabi:  $($CLEOS set abi $A $W/zkr11/zkrcount.abi -p $A 2>&1 | grep -c 'executed transaction')"
-CH=$($CLEOS get code $A 2>&1 | head -1 | grep -oE '[a-f0-9]{64}')
+# deploy gate with bounded retry — greymass reads are not read-your-writes
+# (found live 2026-10-07 on zkrtst444444: setcode EXECUTED, the immediate
+# get-code hit a stale node still showing the pre-deploy ZERO hash, and the
+# gate FATALed healthy evidence; a re-read 4 s later matched)
 WH=$(sha256sum $W/zkr11/zkrcount.wasm | cut -d' ' -f1)
+CH=""
+for t in 1 2 3 4; do
+  CH=$($CLEOS get code $A 2>&1 | head -1 | grep -oE '[a-f0-9]{64}')
+  [ "$CH" = "$WH" ] && break
+  echo "  deploy-gate read $t: hash not yet this build — retrying in 4s"
+  sleep 4
+done
 if [ -z "$CH" ] || [ "$CH" != "$WH" ]; then
   echo "FATAL: on-chain code hash ($CH) ≠ built wasm sha256 ($WH) — stale or failed deploy; actions would run the WRONG build (the phantom-pass law, sharpened: non-zero is not enough, it must be THIS build)"
   exit 1

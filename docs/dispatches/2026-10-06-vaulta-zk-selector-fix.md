@@ -209,3 +209,42 @@ is corrected in §6 above.
   from any ceremony assumption.
 - No funds moved; no mainnet deposits; delegated engineering authority
   only.
+
+---
+
+## §addendum-1 — the fresh-account enforcing pass COMPLETES (2026-10-07, founder-funded zkrtst444444)
+
+The founder paid the phantom-pass account (`zkrtst444444`: 100 EOS
+liquid + large delegated CPU/NET). That unlocked the one leg no prior
+account had budget room for. Receipts:
+
+- **RAM:** self-bought 460,000 B (tx `bc9a1cf9…` TESTNET-ONLY) — RAM
+  at ~0.21 EOS/KB is why a fresh 510 KB contract deploy exceeds the
+  spladder sponsor's balance; the funded account buys its own.
+- **The enforcing runner (zkrself-run.sh v2, epoch-based rerun-safe
+  seqs) ran 21/28 green in-process**: deploy gate (code hash == built
+  wasm sha256), `init(10)` over a zero-row account, canonical verifies
+  with `verified_at` table transitions, **the EXHAUSTION regression —
+  10 rows to cap, then "anchor beyond cap — budget exhausted — REFUSED:
+  anchor table FULL (bounded resource budget)"** — plus the bad-kind
+  and one-proof-per-anchor refusals and final table state.
+- **Two read-races, both caught by the gates, both receipted:** (1) the
+  first deploy-gate read hit a stale greymass node still showing the
+  pre-deploy zero hash after an EXECUTED setcode — the gate FATALed
+  healthy evidence; a re-read 4 s later matched. (2) the reconcile
+  helper's rapid get-table burst was rate-limited to null bodies —
+  seven refusal legs went INCONCLUSIVE (never false-green) before
+  their verify pushes ran.
+- **The seven short-circuited legs were completed manually** with the
+  same exact-message assertions, 3 s spacing: forged (eval_zw+1) /
+  mutated count / mutated root / mutated kind / re-verify /
+  **REVERSED (0,19)** / **REVERSED (1,20)** — ALL refused with the
+  contract's own messages. Ladder complete: 28/28 legs on the fresh
+  account, exhaustion included.
+- **Runner hardened (code-enforced — the read-race class hit twice):**
+  the deploy-gate hash read now retries bounded (4 × 4 s) before it may
+  FATAL; reconcile widened to 8 attempts × 6 s. Both edits sit beside
+  the sibling session's epoch-based seq fix (their comment receipts the
+  crashed-run collision the time-based seqs cure).
+- The Hermez transcript verify was STILL RUNNING at this addendum
+  (>1 h single-threaded CPU); its verdict remains the open receipt.
