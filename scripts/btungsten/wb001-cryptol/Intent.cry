@@ -103,7 +103,7 @@ step st b =
 scan : {cap} (fin cap) => [4] -> [cap]Byte -> [cap][4]
 scan st0 bs =
   [ step (if i == 0 then st0 else (scan st0 bs) @ (i - 1)) (bs @ i)
-  | i <- [ 0 .. `(cap) - 1 ]
+  | i <- [ 0 .. `(cap - 1) ]
   ]
 
 wellFormedUtf8 : {cap} (fin cap) => Field cap -> Bit
@@ -117,7 +117,7 @@ wellFormedUtf8 f = ((scan stG f.bytes) @ (`(cap) - 1)) == stG
 
 canonicalPad : {cap} (fin cap) => [32] -> [cap][8] -> [cap][8]
 canonicalPad len bs =
-  [ if i < len then bs @ i else 0 | i <- [ 0 .. `(cap) - 1 ] ]
+  [ if i < len then bs @ i else 0 | i <- [ 0 .. `(cap - 1) ] ]
 
 validField : {cap} (fin cap) => [32] -> [32] -> Field cap -> Bit
 validField lo hi f = (f.len >= lo) && (f.len <= hi) && (canonicalPad f.len f.bytes == f.bytes)
