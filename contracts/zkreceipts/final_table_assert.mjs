@@ -10,13 +10,40 @@
 // no stdin race)
 // exit: 0 all asserted · 2 malformed · 3 transport · 4 row missing ·
 //       5 field mismatch · 6 verified_at wrong for the claim's class ·
-//       7 total rows ≠ expected
+//       7 total rows ≠ expected · 8 spec unusable (unreadable, not an
+//       array, empty, malformed entries, or duplicate seqs)
 // on success prints the human-readable per-row view (kept — it is the
 // receipt); every failure line names the row and the violated check
+//
+// MANDATORY COVERAGE (review order 4, 2026-10-07): an EMPTY spec once
+// sailed through to the row-count check — "total rows: 27 == cap 27"
+// graded green while NO claim was inspected: a check of nothing. The
+// spec itself is now validated: unreadable, non-array, empty, malformed
+// entries and duplicate seqs all fail BEFORE the table is looked at.
 import { readFileSync } from 'node:fs';
 
 const [specPath, wantTotal] = process.argv.slice(2);
-const spec = JSON.parse(readFileSync(specPath, 'utf8'));
+let spec;
+try { spec = JSON.parse(readFileSync(specPath, 'utf8')); }
+catch (e) { console.error('spec: unreadable/malformed — ' + e.message); process.exit(8); }
+if (!Array.isArray(spec) || spec.length === 0) {
+  console.error('spec: EMPTY assertion coverage — refusing to grade a table on row count alone (a check of nothing)');
+  process.exit(8);
+}
+const seen = new Set();
+for (const s of spec) {
+  if (!s || typeof s.seq !== 'number' || typeof s.root !== 'string' ||
+      typeof s.kind !== 'number' || typeof s.count !== 'number' ||
+      (s.verified !== 'zero' && s.verified !== 'nonzero')) {
+    console.error('spec: malformed entry ' + JSON.stringify(s) + ' — coverage construction is checked, not assumed');
+    process.exit(8);
+  }
+  if (seen.has(s.seq)) {
+    console.error('spec: duplicate seq ' + s.seq + ' — each claim is asserted once');
+    process.exit(8);
+  }
+  seen.add(s.seq);
+}
 
 let raw = '';
 try { raw = readFileSync(0, 'utf8'); } catch (e) {
