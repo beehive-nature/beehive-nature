@@ -46,7 +46,9 @@ shared part is only the rule that user-facing state must be derivable from them.
 2. Done: the independent-network Autonomi reachability experiment
    (`e2e/ant-reach-probe.mjs`, `.github/workflows/ant-reach.yml`,
    `scripts/ant-reach-compare.mjs`, `scripts/ant-reach-cohort.mjs`).
-3. Current: take that evidence upstream before anyone touches `ant-node`
+3. Done 2026-10-07: evidence filed upstream as
+   [WithAutonomi/ant-node#247](https://github.com/WithAutonomi/ant-node/issues/247)
    (`docs/upstream/2026-10-06-autonomi-webrtc-endpoint-reachability.md`).
+   Nothing in `ant-node` is touched from BNR until their diagnosis.
 4. Later: extract the smallest common projection contract first. Ratification
    does not bring back the reverted bMESH dashboard.

@@ -190,3 +190,14 @@ explained away. The 6-hourly
 runner windows continue to 2026-10-09; the laptop takes no part in those.
 
 Receipt: `docs/receipts/ant-reach-cohort-2026-10-06.json`.
+
+## Filed upstream (2026-10-07)
+
+The package went up as a public issue on the founder's account:
+[WithAutonomi/ant-node#247](https://github.com/WithAutonomi/ant-node/issues/247).
+`ant-node` has no contributing guide, issue templates or security policy and
+discussions are off, so a plain issue is the channel; this is a reachability
+report, not a vulnerability. No fork exists or is needed: one is made only if
+Autonomi confirms a cause and wants the patch from us. If the issue goes
+quiet, the same evidence link goes to David directly. The 6-hourly cohort
+windows will be added to the issue as they complete.
