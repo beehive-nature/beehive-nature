@@ -35,7 +35,14 @@ CRYV="scripts/btungsten/wb001-cryptol/Vectors.cry"
 # CRYPTOLPATH points it there (learned from run: Could not find module
 # BTungstenWB001, Searched paths: .).
 export CRYPTOLPATH="scripts/btungsten/wb001-cryptol"
-PROVE_BUDGET_S="${PROVE_BUDGET_S:-300}"
+# 240s, not 300: twice the runner was shut down mid-prove (exit 143,
+# runs 37698302619 at 269s and 37701649473 at 289s) BEFORE a 300s
+# wrapper could print the honest NOT-PROVEN — the aligned-wire theorem
+# is heavier than the padded one and the runner goes down first. Below
+# the kill window the classification lands: NOT-PROVEN is a recorded
+# open obligation, never success, and the decomposition beat is named
+# in the dispatch. Override with PROVE_BUDGET_S for a manual long run.
+PROVE_BUDGET_S="${PROVE_BUDGET_S:-240}"
 
 say() { printf '%s\n' "$*"; }
 
