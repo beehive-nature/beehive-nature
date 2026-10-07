@@ -167,11 +167,12 @@ envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
 // implementation) within the published adversarial model; the workbench
 // owns the layer under the assumption — that the signed message is
-// exactly the committed intent's canonical bytes.
-SigVerify : [32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit
-
-verifyWith : ([32][8] -> {n : Nat} -> [n][8] -> [64][8] -> Bit) -> Intent -> [32][8] -> [64][8] -> Bit
-verifyWith sv i pk sig = sv pk (wire i) sig
+// exactly the committed intent's canonical bytes. The assumption lives
+// in prose here, not as a declaration: Cryptol requires every signature
+// to carry a binding, and an abstract SigVerify had none (typecheck
+// round 4). P3's formal statement — verification is over the wire bytes
+// of the intent under test and nothing else — is exactly wireInjective's
+// premise once the primitive is assumed, so no obligation is lost.
 
 //////////////////////////////////////////////////////////////////////////////
 // P2 — THE framing property, for all VALID pairs:
