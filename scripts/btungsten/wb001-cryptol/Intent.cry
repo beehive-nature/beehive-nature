@@ -133,37 +133,94 @@ validIntent i =
     && validField 0 4096 i.payload
 
 //////////////////////////////////////////////////////////////////////////////
-// The wire: exactly the deployed bytes on the meaningful prefix, zero
-// padding beyond it (canonicalPad + validIntent guarantee nothing
-// meaningful hides in the padding).
+// The wire: the TRUE variable-length deployed stream, right-padded with
+// zeros to MaxEnv. (Until the B1 repair this section emitted each
+// field's FULL CAPACITY array inside the stream — tag # len # cap bytes
+// per field — which is injective and was proven so, but it is a PADDED
+// LOOKALIKE: the deployed envelope is not its prefix, because each
+// block trailed its zero padding before the next tag. The bridge's
+// first counterexample — bridgeIBase = False, CI run 37692766559 —
+// convicted it exactly as founder review B1 named. The Beat-2 law's
+// warning applies at the stream level too: a proof can be correct
+// about the wrong encoding.)
+//
+// byteAt dispatches a position k to the field block that owns it; every
+// block offset is DERIVED from the field lengths — the same arithmetic
+// the runtime's concatenation performs — so the first envLen bytes of
+// `wire i` are the deployed canonical envelope byte-for-byte, pinned by
+// the bridge properties below, and every position >= envLen is zero.
 //////////////////////////////////////////////////////////////////////////////
-
-wireTlv : {cap} (fin cap) => Byte -> Field cap -> [5 + cap][8]
-wireTlv t f = [t] # split f.len # f.bytes
 
 u64 : [64] -> Field 8
 u64 w = { len = L8, bytes = split w }
 
 type MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
+head8 : [8][8]
+head8 = "bT-WB01" # [0x01]
+
+inBlock : [32] -> [32] -> [32] -> Bit
+inBlock off sz k = (k >= off) && (k < off + sz)
+
+// The bytes a field contributes at a position inside its block:
+// the tag at off, the 4 BE length bytes at off+1..off+4, then the
+// MEANINGFUL value bytes — nothing else; positions beyond off+5+len
+// belong to later blocks and are answered by byteAt's dispatch order.
+blockByte : {cap} (fin cap) => Byte -> [32] -> Field cap -> [32] -> Byte
+blockByte t off f k =
+  if k == off         then t
+  else if k < off + 5 then (split f.len) @ (k - off - 1)
+  else                     f.bytes @ (k - off - 5)
+
+// Block start offsets, derived exactly as the runtime concatenates.
+bDom : Intent -> [32]
+bDom i = 8
+bNon : Intent -> [32]
+bNon i = bDom i + 5 + i.domain.len
+bEpo : Intent -> [32]
+bEpo i = bNon i + 5 + i.nonce.len
+bAct : Intent -> [32]
+bAct i = bEpo i + 5 + L8
+bDst : Intent -> [32]
+bDst i = bAct i + 5 + i.action.len
+bCap : Intent -> [32]
+bCap i = bDst i + 5 + i.destination.len
+bAmt : Intent -> [32]
+bAmt i = bCap i + 5 + i.capability.len
+bExp : Intent -> [32]
+bExp i = bAmt i + 5 + L8
+bPay : Intent -> [32]
+bPay i = bExp i + 5 + L8
+bPld : Intent -> [32]
+bPld i = bPay i + 5 + i.payer.len
+
+byteAt : Intent -> [32] -> Byte
+byteAt i k =
+  if k < 8 then head8 @ k else
+  if inBlock (bDom i) (5 + i.domain.len)       k then blockByte 0x01 (bDom i) i.domain       k else
+  if inBlock (bNon i) (5 + i.nonce.len)        k then blockByte 0x02 (bNon i) i.nonce        k else
+  if inBlock (bEpo i) (5 + L8)                 k then blockByte 0x03 (bEpo i) (u64 i.epoch)  k else
+  if inBlock (bAct i) (5 + i.action.len)       k then blockByte 0x04 (bAct i) i.action       k else
+  if inBlock (bDst i) (5 + i.destination.len)  k then blockByte 0x05 (bDst i) i.destination  k else
+  if inBlock (bCap i) (5 + i.capability.len)   k then blockByte 0x06 (bCap i) i.capability   k else
+  if inBlock (bAmt i) (5 + L8)                 k then blockByte 0x07 (bAmt i) (u64 i.amount) k else
+  if inBlock (bExp i) (5 + L8)                 k then blockByte 0x08 (bExp i) (u64 i.expiry) k else
+  if inBlock (bPay i) (5 + i.payer.len)        k then blockByte 0x09 (bPay i) i.payer        k else
+  if inBlock (bPld i) (5 + i.payload.len)      k then blockByte 0x0a (bPld i) i.payload      k else
+  0x00
+
 wire : Intent -> [MaxEnv][8]
-wire i =
-  "bT-WB01" # [0x01]
-    # wireTlv 0x01 i.domain
-    # wireTlv 0x02 i.nonce
-    # wireTlv 0x03 (u64 i.epoch)
-    # wireTlv 0x04 i.action
-    # wireTlv 0x05 i.destination
-    # wireTlv 0x06 i.capability
-    # wireTlv 0x07 (u64 i.amount)
-    # wireTlv 0x08 (u64 i.expiry)
-    # wireTlv 0x09 i.payer
-    # wireTlv 0x0a i.payload
+wire i = [ byteAt i k | k <- take`{MaxEnv} [0 ...] ]
 
 envLen : Intent -> [32]
 envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action.len)
              + (5 + i.destination.len) + (5 + i.capability.len) + (5 + L8) + (5 + L8)
              + (5 + i.payer.len) + (5 + i.payload.len)
+
+// envLen is the same arithmetic as the block-offset chain (checked
+// sampled, not assumed): the last block's end is the envelope's end.
+envLenMatchesOffsets : Intent -> Bit
+property envLenMatchesOffsets i = envLen i == (bPld i + 5 + i.payload.len)
 
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
 // implementation) within the published adversarial model; the workbench

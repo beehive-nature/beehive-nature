@@ -90,6 +90,7 @@ check bridgeFffd      ':check bridgeFffd'
 check bridgeCombining ':check bridgeCombining'
 check bridgeNearA     ':check bridgeNearA'
 check bridgeNearB     ':check bridgeNearB'
+check envLenMatchesOffsets ':check envLenMatchesOffsets'
 
 # ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed (one
 # obligation per claim, so a red names the claim), then random

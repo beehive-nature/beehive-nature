@@ -95,6 +95,42 @@ edits (runner-only); no secrets; the WB002 and SK001 lanes untouched.
 
 HUMAN INTERACTION: NONE.
 
+## Round 2 — the bridge convicted the pre-B1 wire (this is what B1 was)
+
+Round 1 (commit `214f58f7c`) failed formal TYPECHECK: a bare hex
+literal is a bit-vector of digit width, not a byte sequence — the
+constants now ride the file's own `split (0x… : [8n])` idiom (commit
+`2f018b090`, "Expected 178 / Inferred 1424" is the receipt).
+
+Round 2 (run `37692766559`) TYPECHECKED and then returned
+**Counterexample: `bridgeIBase = False`** — the bridge's first
+evaluation, convicting exactly what founder review B1 named:
+
+- the pre-B1 `wire` interleaved each field's FULL CAPACITY array
+  inside the stream (`wireTlv t f = [t] # split f.len # f.bytes` —
+  `f.bytes` is `[cap][8]`, not the meaningful prefix), so after each
+  field's meaningful bytes the stream carried `(cap − len)` zeros
+  BEFORE the next tag. The deployed envelope was NEVER the first
+  envLen bytes of that wire — the header's claim was prose, and the
+  interleaving made it structurally false.
+- `wireInjective`'s universal Q.E.D. (z3, 23.7s, PR #352) was a real
+  proof about that PADDED LOOKALIKE — correct mathematics about the
+  wrong encoding; the receipt does not carry over. The result-class
+  law applies to this too: the proof obligation is re-attempted on
+  the repaired wire every run, and the run's verdict line is the
+  live record (NOT-PROVEN on timeout is an honest state, never a
+  wedge).
+
+The repair (this round): `wire` REWRITTEN as the true variable-length
+stream — `byteAt` dispatches each position to the field block that
+owns it, every block offset DERIVED from the field lengths exactly as
+the runtime concatenates (bDom..bPld), `blockByte` emits tag + 4 BE
+length bytes + MEANINGFUL value bytes only, positions ≥ envLen are
+0x00 by the final else, and `envLenMatchesOffsets` pins envLen to the
+same chain as a sampled property. The pinned bridge constants, the
+JSON, the generator, and the node leg are UNCHANGED — the runtime
+never moved; the model was wrong, and only the model side changed.
+
 ## NEXT OWNER
 
 - CI green (incl. the formal job's eight bridge checks) → merge: this
