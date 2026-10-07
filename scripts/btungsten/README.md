@@ -25,25 +25,57 @@ exact intent that was committed to. One bit of drift in domain, nonce,
 epoch, action, destination, capability, amount, expiry, payer or payload
 must break verification.
 
+**Input-boundary law (repair 2026-10-07, founder review of the genesis):**
+text fields accept well-formed Unicode only. The genesis module accepted
+unpaired UTF-16 surrogates, which `Buffer.from(value,'utf8')` silently
+maps to the same replacement bytes (`efbfbd`) — so `'\uD800'`, `'\uD801'`
+and `'\uFFFD'` were three distinct accepted strings sharing ONE
+authorization, in every text field. Not an Ed25519 forgery: a many-to-one
+conversion BEFORE signing. The twin gap sat in decode
+(`toString('utf8')` replaces instead of refusing). Repair: refuse at
+encode (`bt-wb01:utf16`), refuse at decode (`bt-wb01:utf8`); valid
+international text, supplementary characters and a legitimate U+FFFD
+stay accepted, byte-exact. Red-first receipt in
+`docs/dispatches/2026-10-07-btungsten-wb001-boundary-repair.md`.
+
 | artifact | status |
 |---|---|
-| `wb001-intent.mjs` — canonical TLV envelope + Ed25519 binding verifier, fails closed | RUNS — `node --test scripts/btungsten/wb001.test.mjs` |
-| `wb001.test.mjs` — the battery: injectivity corpus (25 intents incl. nested-envelope and boundary-shift twins), 21 field-move mutants, 1,640 one-bit envelope mutants (205 bytes × 8), 512 one-bit signature mutants, 5 structural forgeries (reorder / unknown tag / duplicate / length-splice / truncation), domain/nonce/epoch participation, cross-key, and the TEETH row convicting the naive length-free encoder on both adjacent-variable-field collision pairs | RUNS in CI (globbed step, tests.yml static job) — green 2026-10-06: 10/10 tests, 2,178 mutants rejected |
-| `wb001-cryptol/Intent.cry` — formal twin; P2 injectivity for ALL pairs; P3 binding over an assumed signature primitive | STAGED — written, not run; UNVERIFIED |
-| `wb001-saw/intent.saw` — equivalence-proof plan against a future Rust twin | STAGED — written, not run; UNVERIFIED |
+| `wb001-intent.mjs` — canonical TLV envelope + Ed25519 binding verifier, fails closed; UTF-16/UTF-8 boundary gates since the 2026-10-07 repair | RUNS — `node --test scripts/btungsten/*.test.mjs` |
+| `wb001.test.mjs` — the genesis battery (retained byte-stable): injectivity corpus (25 intents incl. nested-envelope and boundary-shift twins), 21 field-move mutants, 1,640 one-bit envelope mutants (205 bytes × 8), 512 one-bit signature mutants, 5 structural forgeries (reorder / unknown tag / duplicate / length-splice / truncation), domain/nonce/epoch participation, cross-key, and the TEETH row convicting the naive length-free encoder on both adjacent-variable-field collision pairs | RUNS in CI — green 10/10 |
+| `wb001-boundary.test.mjs` — the boundary suite (landed RED against the genesis module first): 32 lone-surrogate encodes refused (4 fields × 8 forms), 24 surrogate-class authorization crossings rejected, 8 valid-Unicode controls round-trip byte-exact, 9 malformed-UTF-8 decodes refused with the valid 4-byte and U+FFFD controls passing, malformed-wire verifyEnvelope refusal, and the pinned shared vectors | RUNS in CI — green 6/6 since the repair |
+| `wb001-vectors.json` (+ `wb001-gen-vectors.mjs`) — the pinned shared vectors: 10 positives byte-for-byte, 9 refusals by exact code, including the surrogate/invalid-UTF-8 boundary rows. Every twin (Rust, Cryptol) must reproduce these BEFORE any equivalence claim | PINNED, re-derived and compared on every CI run |
+| `wb001-cryptol/Intent.cry` — formal twin, ALIGNED 2026-10-07: meaningful lengths, valid-input constraints (canonical zero padding, wellFormedUtf8 as the pinned abstract predicate), padded wire whose meaningful prefix is exactly the deployed envelope, `wireInjective` for all VALID pairs | STAGED — written, not run; UNVERIFIED |
+| `wb001-saw/intent.saw` — equivalence-proof plan against a future Rust twin, vector-first | STAGED — written, not run; UNVERIFIED |
+
+### §result-classes (founder ruling 2026-10-07)
+
+Four distinct results, recorded separately; NO one of them is ever
+recorded as another:
+
+| class | meaning | status |
+|---|---|---|
+| TYPECHECK | the .cry parses and typechecks | pending (CI ubuntu beat) |
+| CHECK-SAMPLED | `:check` over sampled cases — with CONSTRUCTED related pairs (boundary twins, surrogate rows), not random sampling alone | pending |
+| PROVE-UNIVERSAL | `:prove` across the stated input domain | pending |
+| EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | pending |
+
+A missing tool, a skipped obligation or a solver timeout is NOT-RUN,
+never success. `:check` is testing; `:prove` is the proof step.
 
 ### §next (named gaps, in order)
 
-1. **Cryptol typecheck + `:check canonicalInjective`** — needs a Linux
-   x86_64 host with cryptol/SAW release binaries; the CI ubuntu runner is
-   the qualified home (add a container step here when the beat lands).
-   The `.cry` file models variable fields at capacity with explicit u32
-   length words mirroring the wire format.
-2. **Rust twin of `canonical`/`decode`** in this repo, byte-identical to
-   the JS twin, proven against shared pinned vectors (the bpq
-   two-implementation precedent).
+1. **Cryptol typecheck + `:check wireInjective`** — needs a Linux x86_64
+   host with cryptol/SAW release binaries; the CI ubuntu runner is the
+   qualified home (add a container step here when the beat lands).
+   The check set must include CONSTRUCTED related pairs (boundary-shift
+   twins, the surrogate-class rows), not random sampling alone; :check is
+   recorded as CHECK-SAMPLED, never as the universal proof.
+2. **Rust twin of `canonical`/`decode`** in this repo, reproducing
+   `wb001-vectors.json` byte-for-byte (positives exact, refusals by code)
+   BEFORE any equivalence claim (the bpq two-implementation precedent).
 3. **SAW equivalence proof** (`wb001-saw/intent.saw`): implementation ==
-   spec for all intents; then the mutation leg is provable, not sampled.
+   spec for all VALID intents; then the mutation leg is provable, not
+   sampled.
 4. **Distributed leg (WB002):** the bounded BNR job through a hostile
    P2P workflow — kill services, reroute, replay, fake peer, partition,
    heal — final result must still satisfy this invariant and produce the

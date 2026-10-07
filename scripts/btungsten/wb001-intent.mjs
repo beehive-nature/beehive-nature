@@ -19,6 +19,15 @@
 // plus the magic), never by context, so a signature never travels between
 // protocols silently.
 //
+// INPUT BOUNDARY (repair 2026-10-07, founder review of the genesis):
+// text fields accept well-formed Unicode only — unpaired UTF-16
+// surrogates are refused at encode (bt-wb01:utf16) and malformed UTF-8
+// byte sequences refused at decode (bt-wb01:utf8), because silent
+// replacement made distinct accepted strings share one authorization
+// ('\uD800'/'\uD801'/'\uFFFD' all became efbfbd). Valid international
+// text, supplementary characters and a legitimate U+FFFD remain
+// accepted, byte-exact.
+//
 // naiveConcat() at the bottom is the SABOTAGE encoder — the classic
 // length-free concatenation whose {ab,c}/{a,bc} ambiguity is exactly the
 // class the framing exists to kill. It exists only so the battery can
@@ -51,6 +60,51 @@ export const FIELDS = [
 ];
 export const FIELD_NAMES = FIELDS.map((f) => f.name);
 
+// A well-formed string: every surrogate code unit is part of a pair.
+// Unpaired surrogates are REFUSED, not replaced — Buffer.from's silent
+// efbfbd mapping made '\uD800' and '\uD801' the same signed bytes in
+// every text field (founder-found collision on the genesis, repaired
+// 2026-10-07). Valid supplementary characters pass through untouched.
+function assertWellFormedString(s, fieldName) {
+  for (let i = 0; i < s.length; i++) {
+    const cu = s.charCodeAt(i);
+    if (cu >= 0xd800 && cu <= 0xdbff) {
+      const next = i + 1 < s.length ? s.charCodeAt(i + 1) : 0;
+      if (!(next >= 0xdc00 && next <= 0xdfff)) throw new Refusal('bt-wb01:utf16', `${fieldName}: unpaired high surrogate at ${i}`);
+      i++;
+    } else if (cu >= 0xdc00 && cu <= 0xdfff) {
+      throw new Refusal('bt-wb01:utf16', `${fieldName}: unpaired low surrogate at ${i}`);
+    }
+  }
+}
+
+// Strict UTF-8: refuses exactly what Node's toString('utf8') would
+// silently replace with U+FFFD — the decode-side twin of the surrogate
+// gate. Accepts the legitimate efbfbd bytes of an honest U+FFFD.
+function assertValidUtf8(bytes, fieldName) {
+  const n = bytes.length;
+  for (let i = 0; i < n; ) {
+    const b = bytes[i];
+    if (b < 0x80) { i++; continue; }
+    let need, lo = 0x80, hi = 0xbf;
+    if (b >= 0xc2 && b <= 0xdf) need = 1;
+    else if (b === 0xe0) { need = 2; lo = 0xa0; }                          // no overlong
+    else if ((b >= 0xe1 && b <= 0xec) || b === 0xee || b === 0xef) need = 2;
+    else if (b === 0xed) { need = 2; hi = 0x9f; }                          // no encoded surrogates
+    else if (b === 0xf0) { need = 3; lo = 0x90; }                          // no overlong 4-byte
+    else if (b >= 0xf1 && b <= 0xf3) need = 3;
+    else if (b === 0xf4) { need = 3; hi = 0x8f; }                          // cap U+10FFFF
+    else throw new Refusal('bt-wb01:utf8', `${fieldName}: invalid UTF-8 lead byte 0x${b.toString(16)} at ${i}`);
+    for (let k = 1; k <= need; k++) {
+      const c = bytes[i + k];
+      if (c === undefined) throw new Refusal('bt-wb01:utf8', `${fieldName}: truncated UTF-8 sequence at ${i}`);
+      const kLo = k === 1 ? lo : 0x80, kHi = k === 1 ? hi : 0xbf;
+      if (c < kLo || c > kHi) throw new Refusal('bt-wb01:utf8', `${fieldName}: invalid UTF-8 continuation 0x${c.toString(16)} at ${i + k}`);
+    }
+    i += need + 1;
+  }
+}
+
 function encodedValue(field, value) {
   if (field.kind === 'u64') {
     if (typeof value !== 'bigint') throw new Refusal('bt-wb01:type', `${field.name}: u64 fields are BigInt, got ${typeof value}`);
@@ -65,8 +119,10 @@ function encodedValue(field, value) {
   }
   if (field.kind === 'utf8') {
     if (typeof value !== 'string') throw new Refusal('bt-wb01:type', `${field.name}: text field, got ${typeof value}`);
+    assertWellFormedString(value, field.name);
     const b = Buffer.from(value, 'utf8');
     if (b.length < field.min || b.length > field.max) throw new Refusal('bt-wb01:bounds', `${field.name}: ${b.length} bytes, bounds ${field.min}..${field.max}`);
+    assertValidUtf8(b, field.name);
     return b;
   }
   // raw
@@ -116,7 +172,10 @@ export function decode(env) {
     const v = env.subarray(at + 5, at + 5 + len);
     if (field.kind === 'u64') intent[field.name] = v.readBigUInt64BE(0);
     else if (field.kind === 'bytes32') intent[field.name] = Buffer.from(v);
-    else if (field.kind === 'utf8') intent[field.name] = v.toString('utf8');
+    else if (field.kind === 'utf8') {
+      assertValidUtf8(v, field.name);
+      intent[field.name] = v.toString('utf8');
+    }
     else intent[field.name] = Buffer.from(v);
     at += 5 + len;
   }

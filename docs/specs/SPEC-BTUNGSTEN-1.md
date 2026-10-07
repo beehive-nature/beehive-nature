@@ -127,6 +127,27 @@ demo. Status: executable battery LIVE in CI (scripts/btungsten/ —
 2,178+ mutants rejected, teeth row convicting the naive encoder);
 Cryptol/SAW twins staged UNVERIFIED. See scripts/btungsten/README.md.
 
+**Input-boundary law (founder ruling 2026-10-07, from the genesis
+review):** the canonical form binds every ACCEPTED intent uniquely —
+which makes the accepted-input boundary part of the invariant. The
+genesis accepted unpaired UTF-16 surrogates, which encode silently to
+the same replacement bytes, so distinct accepted strings shared one
+authorization (a many-to-one conversion before signing, not a signature
+forgery). Law: ill-formed strings are REFUSED at encode, malformed
+UTF-8 REFUSED at decode — never silently replaced; valid international
+text, supplementary characters and a legitimate U+FFFD stay accepted.
+The same review closed the model gap: the formal twin must mirror the
+variable-length wire (meaningful lengths, valid-input constraints, exact
+serialized bytes), not a padded lookalike.
+
+**Result-class law (founder ruling 2026-10-07):** typechecking, sampled
+checking (`:check`), universal proof (`:prove`), and implementation
+equivalence are four SEPARATE results; no one is ever recorded as
+another, `:check` never as proof. A missing tool, a skipped obligation
+or a solver timeout is NOT-RUN, never success. Shared byte-for-byte
+vectors are pinned before any equivalence claim, and a green workflow
+wrapper is never a substitute for an executed proof obligation.
+
 Sequence: WB001 formal core (current) → WB002 hostile distributed
 specimen (kill/reroute/replay/partition/heal; the healed result must
 still verify) → WB003+ scale and century-transition legs.
