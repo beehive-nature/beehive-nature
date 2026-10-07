@@ -130,6 +130,31 @@ Model-green is a receipt about the model, not about the world; every
 live-layer claim stays a hypothesis until its own adversarial test and
 machine-verifiable receipt exist.
 
+## §ratification — founder acceptance, 2026-10-07 (post-merge, FOUNDER RULING)
+
+Banked at main `6c9147d74` (PR #353). The founder's ratification holds
+verbatim, and its lines are law:
+
+> SK001 MODEL = GREEN
+> hiding COMMIT = UNVERIFIED
+> live PROVE = UNVERIFIED
+> SETTLE = UNVERIFIED
+
+- **The non-inheritance law:** no live Sybil/MiM-immunity claim may
+  inherit the model result until those later layers earn their own
+  receipts. SK001's green is a receipt about the model, never a
+  live-immunity receipt.
+- **Symmetry is not constitutional evidence:** interesting symmetry
+  between the five type dimensions and the 6⁵ geometry is not
+  constitutional evidence. The two founder-reserved decisions stay
+  untouched by autonomous seats — the canonical 1..5 ↔ Human Design
+  type mapping, and any proposed interpretation connecting the five
+  type dimensions to the 6⁵ geometry.
+- **Sequence confirmed:** constituency canon → hiding commitment →
+  live PROVE → SETTLE. Only at that point does SK001 stop being merely
+  a correct constitutional model and begin becoming an independently
+  verifiable Skaists membership system.
+
 ## §bTunGsTeN-axes — what this deployment exercises
 
 - **Axis 2 (Sybil/MiM):** one-human-one-seat at every epoch — the

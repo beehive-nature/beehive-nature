@@ -121,3 +121,15 @@ HUMAN INTERACTION: NONE.
   measurement surfaces): founder declares; any seat executes.
 - The commitment beat (hiding+binding scheme) and the live PROVE beat
   (fresh worktree per the standing zkreceipts law when it opens).
+
+## Founder ratification (2026-10-07, post-merge @6c9147d74)
+
+Banked. The honesty boundary stands exactly as landed — SK001 MODEL =
+GREEN; hiding COMMIT / live PROVE / SETTLE = UNVERIFIED — and **no
+live Sybil/MiM-immunity claim inherits the model result** until those
+layers earn their own receipts. The two founder-reserved decisions
+stay untouched by autonomous seats: the 1..5 ↔ Human Design type
+mapping, and any type↔geometry interpretation — "interesting symmetry
+is not constitutional evidence." Sequence confirmed: constituency
+canon → hiding commitment → live PROVE → SETTLE. Recorded verbatim in
+the spec §ratification (this rider).
