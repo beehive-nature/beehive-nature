@@ -160,6 +160,41 @@ Found live and banked (testnet ladder):
 - jungle4 RAM: a pot17-vk verifier contract needs ≈498 KB — budget it
   at account creation, the 128 KB drip does not cover it.
 
+## SECOND ADDENDUM: the SELF-PAID pass on zkrtst111111 (founder loaded it)
+
+The founder then loaded `zkrtst111111` — the account that had stalled on
+RAM (2.27 s CPU, 2.8 GB NET, 100 A liquid; RAM still 129 KiB). Self-buy
+400,000 B ≈ 82 A (rammarket: 11.83M A / 58.08B RAM ≈ 0.0002 A/B), self
+setcode/setabi — **code hash `eb4d61c9…` identical on the THIRD deploy**
+(rehearsal → zkrtst222222 → zkrtst111111). No sponsor anywhere: plain
+self-signed pushes, whose receipts carry the contract's own assertion
+messages (the sponsored wrapper only surfaces generic
+eosio_assert_message):
+
+| leg | result (zkrtst111111, plain pushes) |
+|---|---|
+| anchor 1 (root, kind=0, count=20) | OK `3ea61238…` 175 µs |
+| REAL PROOF dead-baseline | OK `e0ef7c3f…` **billed 11,075 µs** |
+| anchor 2 (root, kind=1, count=20) | OK `b9dee49f…` 139 µs |
+| REAL PROOF live-baseline | OK `95e33a65…` **billed 10,795 µs** |
+| forged proof (eval_zw+1) @3 | REFUSED "count proof REJECTED — plonk pairing false" |
+| real proof vs count 21 @4 | REFUSED pairing false |
+| real proof vs mutated root @5 | REFUSED pairing false (settled re-check, below) |
+| real dead proof vs kind=1 @6 | REFUSED pairing false (settled re-check, below) |
+| re-verify @1 | REFUSED "anchor already verified (one proof per anchor)" |
+| bad kind (2) at anchor time | REFUSED "kind must be 0 or 1" |
+
+Anchors table: seq 1/2 verified_at 1791347511/12; seq 3–6 verified_at 0.
+
+Found live: greymass's load-balanced API nodes are not read-your-writes
+consistent — a verify pushed seconds after its anchor can hit a node
+that has not indexed it and refuse "anchor not found"; settled-state
+re-pushes refuse correctly (zkrself-recheck.sh receipt above). Ladder
+law: on public APIs, treat an immediate "not found" after a write as a
+RACE first, re-read before diagnosing the contract.
+
+Runner: `contracts/zkreceipts/zkrself-run.sh` (+ `zkrself-recheck.sh`).
+
 ## Next (after the testnet receipt)
 
 1. §tungsten 2 leak distinguisher; §tungsten 4 scale beats (1k/10k).
