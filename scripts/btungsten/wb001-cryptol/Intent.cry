@@ -94,13 +94,13 @@ step st b =
   else sBAD
 
 // Lazy positional self-reference: state(i) consumes byte i from
-// state(i-1). (TYPECHECK obligation: if the termination checker rejects
-// this idiom, the value-driven head/tail recursion is the fallback —
-// the SEMANTICS are fixed by this equation either way.)
+// state(i-1). (TYPECHECK iterations so far: no where-semicolon, no
+// let-expression — Cryptol 3 takes neither; if the termination checker
+// still rejects the self-reference, the value-driven head/tail recursion
+// is the fallback. The SEMANTICS are fixed by this equation either way.)
 scan : {cap} (fin cap) => [4] -> [cap]Byte -> [cap][4]
 scan st0 bs =
-  [ let prev = if i == 0 then st0 else (scan st0 bs) @ (i - 1)
-    in step prev (bs @ i)
+  [ step (if i == 0 then st0 else (scan st0 bs) @ (i - 1)) (bs @ i)
   | i <- [ 0 .. cap - 1 ]
   ]
 
