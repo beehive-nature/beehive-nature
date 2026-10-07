@@ -18,7 +18,83 @@ deletes Foundation or SAW disappears, the workbench migrates to whatever
 formal system replaces them — the ≥1000-year clause applies to bTunGsTeN's
 own tooling first.
 
-## WB001 — the intent-binding invariant (CURRENT)
+## WB002 — the extinct-infrastructure specimen (CURRENT, founder order 2026-10-07)
+
+**Invariant (the killer one):** no change of implementation, network,
+author, storage provider, cryptographic algorithm, or execution
+environment may transfer sovereign authority without the currently
+authorized sovereign action.
+
+**Specimen:** SimpleAssets frozen at upstream `e6a042f` (2021-03-17,
+v1.6.1, LGPL-2.1), vendored verbatim under `wb002-specimen/` with
+provenance and file hashes (`wb002-specimen/PROVENANCE.md`). Do not
+modernize it; do not build it; do not depend on it. Attack the port,
+preserve the artifact. Upstream field evidence for the failure classes
+under test: issues #26, #19, #21, #6 (all still open, re-verified
+2026-10-07 — see PROVENANCE.md).
+
+| artifact | status |
+|---|---|
+| `wb002-specimen/simpleassets-e6a042f/` + `PROVENANCE.md` | PRESERVED — 17 files incl. the 2021-era wasm/abi; nothing built or executed |
+| `wb002-simpleassets.mjs` — faithful port of the 2021 state machine (SA.cpp line refs), two profiles: `specimen` (upstream quirks intact) and `bnr-adapter` (the extracted BNR semantics); anchored event log with periodic state checkpoints; export/import migration surface; truth-lattice observers (Indexer / SpecimenUI / AdapterUI) | RUNS — imported by the battery |
+| `wb002.test.mjs` — the battery: faithful-port row, idata byte-stability, the killer invariant over 600-step hostile histories on BOTH profiles (specimen violations must be NAMED or the battery fails), 26/27-row wrong-signer matrix, F-1..F-4/F-8 A/B convictions, the truth lattice (consensus = log fold; drop/corrupt/replay/lag; adapter disputes, never lies), 7 torture rows (kill author / lose contract / fragment recovery / re-key + algorithm rotation / partition-reorg / contract replacement + chain migration + tamper refusal + naive-importer conviction / marketplace death), the 1,000-year leg, and the TEETH row | RUNS in CI (same globbed step as WB001) — green locally 2026-10-07: 14/14 |
+| `wb002-cryptol/Sovereign.cry` — formal twin; `sovereignContinuity` for ALL states/actions | STAGED — written, not run; UNVERIFIED |
+| `wb002-saw/sovereign.saw` — equivalence-plan against a future Rust twin | STAGED — written, not run; UNVERIFIED |
+
+### §findings — the specimen's convictions (each = one BNR adapter requirement)
+
+- **F-1** `authorctrl=true` FTs: the issuer's signature ALONE moves or
+  burns any holder's balance (SA.cpp:692-695, 787). REJECTED for BNR
+  sovereign funds by founder ruling (issuer authority ≠ confiscation
+  authority); kept as an adversarial vector — the battery proves the
+  confiscation succeeds on the specimen profile and refuses on the
+  adapter profile.
+- **F-2** the delegation return path in `transfer` accepts the LENDER's
+  signature without undelegate's period check (SA.cpp:261 vs :514) —
+  bounded tenure is not enforced on every exit path. Adapter enforces it
+  (the borrower may still return at any time).
+- **F-3** `attach`/`detach` (and `attachf`/`detachf`) require the
+  AUTHOR's signature, not the sovereign's (SA.cpp:537, 568, 874) — the
+  author can lock a sovereign's assets and value into containers the
+  sovereign cannot unlock. Adapter binds composition to the sovereign.
+- **F-4** offers never expire — a standing claim from 2019 is claimable
+  in 3019 (1,000-year consent hazard, convicted in the millennium leg).
+  Adapter offers carry TTL.
+- **F-8** `changeauthor` moves the mdata-authority envelope on the
+  author's signature alone (SA.cpp:14). Adapter requires the sovereign's
+  co-signature.
+- **Field evidence, not model inventions:** upstream issues #26/#19
+  (indexer/UI truth diverging from consensus — the truth-lattice rows),
+  #6 (author-side freeze — the marketplace-death torture row), #21 (CDT
+  rot — the wasm+source preservation answer).
+
+### §extractions — the semantics BNR keeps (founder mapping, 2026-10-07)
+
+`idata` → COMMIT (commitment only; no identity/personal material —
+COMMIT owns that boundary) · `mdata` → mutable status pointer ·
+NTT → credential/capability primitive · `offer→claim` → consent ·
+`delegate(period, redelegate)` → bounded authority (the Silent-Pay
+lineage: owner → bounded authority → temporary executor → receipt) ·
+`attach/attachf` → capability composition · author RAM payer →
+sponsored sovereignty (payer is never an owner — proven in the
+faithful-port row).
+
+### §next (named gaps, in order)
+
+1. **wasm-vs-model equivalence**: the vendored 2021 wasm executed on a
+   modern Antelope/Vaulta test stack vs the port's verdicts — the port
+   is evidence about a model until this lands (run on the box or CI;
+   the specimen's own issue #21 is the epoch's build-rot warning).
+2. **Cryptol typecheck + `:check sovereignContinuity`** (with WB001's
+   container beat; SAW = Linux x86_64).
+3. **Rust twin of sovereign/step**, then the SAW equivalence
+   (wb002-saw plan) — after which the battery's sampled histories
+   become provable corollaries.
+4. **Live leg**: the same torture rows against a deployed Vaulta
+   contract (bzcodejungle), not only the model.
+5. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
+
+## WB001 — the intent-binding invariant (LIVE in CI)
 
 **Invariant:** no valid signature may authorize any intent other than the
 exact intent that was committed to. One bit of drift in domain, nonce,
@@ -44,11 +120,14 @@ must break verification.
    two-implementation precedent).
 3. **SAW equivalence proof** (`wb001-saw/intent.saw`): implementation ==
    spec for all intents; then the mutation leg is provable, not sampled.
-4. **Distributed leg (WB002):** the bounded BNR job through a hostile
-   P2P workflow — kill services, reroute, replay, fake peer, partition,
+4. **Distributed leg:** the bounded BNR job through a hostile P2P
+   workflow — kill services, reroute, replay, fake peer, partition,
    heal — final result must still satisfy this invariant and produce the
    same meter-verifiable outcome (Emissary as sacrificial specimen, not
-   dependency).
+   dependency). Superseded as "WB002" by the founder's 2026-10-07
+   SimpleAssets order; kill/partition/heal/reorg/replay are now torture
+   rows of WB002's battery, and the Emissary leg remains open under its
+   own workbench number.
 5. **Scale/century legs (WB003+):** progressively larger physical runs
    and simulated century transitions per SPEC §axes 5-6.
 

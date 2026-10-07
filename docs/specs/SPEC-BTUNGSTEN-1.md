@@ -127,9 +127,35 @@ demo. Status: executable battery LIVE in CI (scripts/btungsten/ —
 2,178+ mutants rejected, teeth row convicting the naive encoder);
 Cryptol/SAW twins staged UNVERIFIED. See scripts/btungsten/README.md.
 
-Sequence: WB001 formal core (current) → WB002 hostile distributed
-specimen (kill/reroute/replay/partition/heal; the healed result must
-still verify) → WB003+ scale and century-transition legs.
+**WB002 — the extinct-infrastructure specimen (founder order
+2026-10-07):** SimpleAssets frozen at upstream commit `e6a042f` (2021,
+v1.6.1, LGPL-2.1) is preserved verbatim as the standard's first
+"extinct infrastructure" reference specimen — an older EOSIO epoch,
+attacked, not adopted. The killer invariant: no change of
+implementation, network, author, storage provider, cryptographic
+algorithm, or execution environment may transfer sovereign authority
+without the currently authorized sovereign action. The battery drives a
+faithful port of the 2021 state machine through torture (kill the
+author, lose the contract, re-key, partition/reorg, corrupt indexers,
+replace the contract, migrate chains, advance the clock a millennium)
+and requires `canonical sovereignty == reconstructed sovereignty` at
+every stage — or bTunGsTeN goes RED. The specimen FAILS parts of the
+invariant by design (issuer confiscation via authorctrl, composition
+authority held by the author, tenure not enforced on the delegation
+return path, consent that never expires); each failure is convicted by
+name and becomes a BNR adapter requirement (issuer authority ≠
+confiscation authority for sovereign funds — founder ruling 2026-10-07).
+The same order fixes the BNR semantic extractions: idata → COMMIT,
+mdata → mutable status pointer, delegate → bounded authority,
+attach → capability composition, offer→claim → consent, author RAM
+payer → sponsored sovereignty. The previously named "WB002 hostile
+distributed specimen" leg (kill/reroute/replay/partition/heal) is
+absorbed here: those are rows of this battery. Status: executable
+battery LIVE in CI; wasm-vs-model equivalence and Cryptol/SAW twins
+staged UNVERIFIED. See scripts/btungsten/README.md.
+
+Sequence: WB001 formal core (done) → WB002 SimpleAssets specimen
+(CURRENT) → WB003+ scale and century-transition legs.
 
 ## §toolchain — Foundation, Emissary, and replaceability
 
