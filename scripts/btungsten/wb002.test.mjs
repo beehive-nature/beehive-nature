@@ -35,9 +35,11 @@ const world = (profile, now = 1_700_000_000n) => {
   return c;
 };
 
-const refusedWith = (fn) => {
+const refusedWith = (fn, chain) => {
+  const fp = chain ? chain.fingerprint() : null;
   try { fn(); } catch (e) {
     assert.ok(e instanceof Refusal, `not a Refusal: ${e}`);
+    if (chain) assert.equal(chain.fingerprint(), fp, `the refused action (${e.refusal}) left state or committed events behind`);
     return e.refusal;
   }
   assert.fail('expected a refusal');
@@ -105,6 +107,7 @@ const other = (rng, arr, not) => {
 // (each must refuse). The invariant is checked after EVERY step.
 function runHistory(chain, steps, seed, collector, opts = {}) {
   const rng = rng32(seed);
+  collector.rollbacks = collector.rollbacks || 0;
   const spawnIdata = new Map();
   const trackSpawns = () => { for (const ev of chain.log) if (ev.type === 'spawn' && !spawnIdata.has(ev.assetid)) spawnIdata.set(ev.assetid, ev.idata); };
   // seed the world with a few assets, an authorctrl FT (specimen) and a plain FT
@@ -126,6 +129,7 @@ function runHistory(chain, steps, seed, collector, opts = {}) {
     chain.now += BigInt(1 + Math.floor(rng() * 500));
     const p = pools(chain);
     const roll = rng();
+    const iter = { logLen: chain.log.length, logRoot: chain.logRoot(), sov: sovereignSnapshot(chain), ft: ftSnapshot(chain) };
     try {
       if (roll < 0.06) {
         const author = pick(rng, AUTHORS);
@@ -227,21 +231,26 @@ function runHistory(chain, steps, seed, collector, opts = {}) {
           drive(chain, 'F1:issuer-burn', [f.issuer], () => { chain.burnf(f.holder, f.author, { symbol: f.sym, amount: 10n }, '', [f.issuer]); }, collector);
         }
       } else {
-        // wrong-signer probe: a third party tries to move someone's asset.
-        // Delegated assets refuse earlier (upstream checks the delegation
-        // before the authority seam), so probe only free ones to hit AUTH.
-        const candidates = p.free.filter((x) => !chain.delegates.has(x.id));
-        if (candidates.length > 0) {
-          const a = pick(rng, candidates);
-          const code = refusedWith(() => chain.transfer(a.holder, 'mallory', [a.id], '', ['mallory']));
-          assert.ok(code === 'bt-wb002:auth', `wrong-signer transfer returned ${code}`);
+        // wrong-signer probe: a third party tries to move someone's asset —
+        // free OR delegated (a delegated asset refuses on the delegation
+        // seam; both must roll back whole since the hardening beat)
+        if (p.free.length > 0) {
+          const a = pick(rng, p.free);
+          const code = refusedWith(() => chain.transfer(a.holder, 'mallory', [a.id], '', ['mallory']), chain);
+          assert.ok(code === 'bt-wb002:auth' || code === 'bt-wb002:delegated', `wrong-signer transfer returned ${code}`);
           collector.probes++;
         }
       }
     } catch (e) {
       // legal refusals (expired tenures, missing rows mid-op) are part of
-      // history; anything else is a model bug and fails the battery
+      // history — and since the hardening beat, each one must have rolled
+      // back the WHOLE pre-state (tables, counters, committed log)
       if (!(e instanceof Refusal)) throw e;
+      assert.equal(chain.log.length, iter.logLen, `refused ${e.refusal} committed events`);
+      assert.equal(chain.logRoot(), iter.logRoot, `refused ${e.refusal} changed the log root`);
+      assert.deepEqual(sovereignSnapshot(chain), iter.sov, `refused ${e.refusal} moved sovereignty`);
+      assert.deepEqual(ftSnapshot(chain), iter.ft, `refused ${e.refusal} moved balances`);
+      collector.rollbacks++;
     }
     trackSpawns();
   }
@@ -345,7 +354,7 @@ test('THE KILLER INVARIANT: adapter profile, 600-step hostile history, zero unex
   assert.ok(collector.probes > 10, `only ${collector.probes} wrong-signer probes fired`);
   assert.equal(collector.named.length, 0, `unexplained sovereignty changes: ${JSON.stringify(collector.named)}`);
   assertFoldEqualsChain(c, 'adapter 600-step history');
-  console.log(`bT-WB002: adapter sovereign-continuity steps 0 -> ${collector.steps}, wrong-signer probes refused 0 -> ${collector.probes}, unexplained 0 -> 0`);
+  console.log(`bT-WB002: adapter sovereign-continuity steps 0 -> ${collector.steps}, wrong-signer probes refused 0 -> ${collector.probes}, refused transactions rolled back whole 0 -> ${collector.rollbacks}, unexplained 0 -> 0`);
 });
 
 test('specimen profile: every sovereignty violation is NAMED (F-1 family only) — an unnamed violation fails the battery', () => {
@@ -357,7 +366,7 @@ test('specimen profile: every sovereignty violation is NAMED (F-1 family only) �
   assert.equal(unnamed.length, 0, `the specimen produced UNNAMED violations: ${JSON.stringify(unnamed)}`);
   assert.ok(collector.named.some((x) => x.tag === 'F1:issuer-move' || x.tag === 'F1:issuer-burn'), 'the F-1 seam was never exercised — the history lost its teeth');
   assertFoldEqualsChain(c, 'specimen 600-step history');
-  console.log(`bT-WB002: specimen sovereign violations, all named 0 -> ${collector.named.length} (F-1 issuer moves/burns + author attachf), unnamed 0 -> 0`);
+  console.log(`bT-WB002: specimen sovereign violations, all named 0 -> ${collector.named.length} (F-1 issuer moves/burns + author attachf), unnamed 0 -> 0, refused transactions rolled back whole 0 -> ${collector.rollbacks}`);
 });
 
 // ---------------------------------------------------------------------------
@@ -408,13 +417,15 @@ test('wrong-signer matrix: every authority seam refuses the wrong hand, both pro
   for (const row of rows) {
     if (row.profile !== 'bnr-adapter') {
       const { c, f } = fixture('specimen');
-      const code = refusedWith(() => row.run(c, f));
+      // the whole row rides one modeled transaction: setup ops and the
+      // refusing tail roll back together, so the fingerprint demand holds
+      const code = refusedWith(() => c.tx(() => row.run(c, f)), c);
       assert.equal(code, row.code, `[specimen] ${row.name}: got ${code}`);
       refusedSpecimen++;
     }
     if (row.profile !== 'specimen') {
       const { c, f } = fixture('bnr-adapter');
-      const code = refusedWith(() => row.run(c, f));
+      const code = refusedWith(() => c.tx(() => row.run(c, f)), c);
       assert.equal(code, row.code, `[adapter] ${row.name}: got ${code}`);
       refusedAdapter++;
     }
@@ -441,16 +452,18 @@ test('the truth lattice: consensus = log fold; faults convict the specimen UI; t
   runHistory(c, 260, 777, collector); // enough events to cross several checkpoints
   assertFoldEqualsChain(c, 'lattice setup');
 
-  // pick a DECISIVE move — the asset's last move, not at the log tail —
-  // so dropping or corrupting it visibly flips the naive fold while a
-  // verifiable hash link still exists after it
-  const moves = c.log.filter((e) => e.type === 'move' && e.seq < c.log.length - 1);
+  const cp = c.log.filter((e) => e.type === 'checkpoint').at(-1);
+  assert.ok(cp, 'history crossed no checkpoint — increase steps');
+  const anchor = c.checkpointAnchor();
+  const tip = c.tipAnchor();
+
+  // pick a DECISIVE move — the asset's last move, inside the checkpoint-to-
+  // tip window and not the log tail — so dropping or corrupting it flips
+  // the naive fold while the adapter's authenticated window catches it
+  const moves = c.log.filter((e) => e.type === 'move' && e.seq > cp.seq && e.seq < c.log.length - 1);
   const victim = moves.at(-1);
   const truth = c.sovereignOf(victim.assetid);
   assert.ok(truth, 'victim asset must still exist');
-
-  const cp = c.log.filter((e) => e.type === 'checkpoint').at(-1);
-  assert.ok(cp, 'history crossed no checkpoint — increase steps');
 
   let lies = 0, disputes = 0, injections = 0;
   const checkFault = (name, fault) => {
@@ -459,7 +472,7 @@ test('the truth lattice: consensus = log fold; faults convict the specimen UI; t
     fault(ix);
     injections++;
     const specimen = new SpecimenUI(ix).displayOwner(victim.assetid);
-    const adapter = new AdapterUI(ix, cp).displayOwner(victim.assetid);
+    const adapter = new AdapterUI(ix, anchor, tip).displayOwner(victim.assetid);
     if (specimen !== truth && specimen !== 'DISPUTED') lies++;
     assert.equal(adapter, 'DISPUTED', `${name}: the adapter UI answered ${adapter} instead of DISPUTED`);
     disputes++;
@@ -468,24 +481,35 @@ test('the truth lattice: consensus = log fold; faults convict the specimen UI; t
   checkFault('corrupted move', (ix) => ix.corrupt(victim.seq, { to: 'mallory' }));
   checkFault('replayed tail', (ix) => ix.replay(c.log.at(-1).seq));
 
-  // lag: an honest-but-behind indexer answers a TRUE PREFIX, never a
-  // fabrication — stale is not a lie
+  // lag: an honest-but-behind indexer answers at its AUTHENTICATED height
+  // — the checkpoint, never a fabrication; stale is not a lie
   {
     const ix = new Indexer();
-    const k = Math.floor(c.log.length / 2);
+    const k = Math.floor((cp.seq + 1 + c.log.length) / 2);
     ix.feed(c.log.slice(0, k));
     injections++;
-    const adapter = new AdapterUI(ix, cp).displayOwner(victim.assetid);
-    const truthAtK = reconstruct(c.log.slice(0, k)).sovereign(victim.assetid);
-    assert.ok(adapter === 'DISPUTED' || adapter === truthAtK, `lagging adapter answered ${adapter}, neither DISPUTED nor the prefix truth ${truthAtK}`);
+    const r = new AdapterUI(ix, anchor).display(victim.assetid);
+    const truthAtCp = reconstruct(c.log.filter((e) => e.seq <= cp.seq)).sovereign(victim.assetid);
+    assert.equal(r.scope, 'checkpoint-scoped');
+    assert.equal(r.owner, truthAtCp, `lagging adapter answered ${r.owner} at height ${r.asOfSeq}, not its authenticated checkpoint truth ${truthAtCp}`);
+    // a stream that never reached the checkpoint disputes rather than guess
+    const short = new Indexer(); short.feed(c.log.slice(0, cp.seq));
+    assert.equal(new AdapterUI(short, anchor).displayOwner(victim.assetid), 'DISPUTED');
   }
 
-  // clean feed: both UIs tell the truth
+  // clean feed: the specimen UI tells the truth; the adapter does too —
+  // checkpoint-scoped without a tip bracket, current with one
   {
     const ix = new Indexer();
     ix.feed(c.log);
     assert.equal(new SpecimenUI(ix).displayOwner(victim.assetid), truth);
-    assert.equal(new AdapterUI(ix, cp).displayOwner(victim.assetid), truth);
+    const truthAtCp = reconstruct(c.log.filter((e) => e.seq <= cp.seq)).sovereign(victim.assetid);
+    const noTip = new AdapterUI(ix, anchor).display(victim.assetid);
+    assert.equal(noTip.scope, 'checkpoint-scoped');
+    assert.equal(noTip.owner, truthAtCp, 'checkpoint-scoped answer must be the truth as of the checkpoint');
+    const withTip = new AdapterUI(ix, anchor, tip).display(victim.assetid);
+    assert.equal(withTip.scope, 'authenticated-tip');
+    assert.equal(withTip.owner, truth, 'tip-bracketed answer must be current truth');
   }
 
   // author assertion weighs zero: an issuer claiming mallory owns the
@@ -495,9 +519,9 @@ test('the truth lattice: consensus = log fold; faults convict the specimen UI; t
     ix.feed(c.log);
     const authorClaim = { get: () => 'mallory' }; // the #26-era posture, modeled
     void authorClaim;
-    assert.equal(new AdapterUI(ix, cp).displayOwner(victim.assetid), truth, 'an author assertion leaked into display truth');
+    assert.equal(new AdapterUI(ix, anchor, tip).displayOwner(victim.assetid), truth, 'an author assertion leaked into display truth');
   }
-  console.log(`bT-WB002: truth-lattice injections 0 -> ${injections}, specimen-UI confident lies 0 -> ${lies}, adapter-UI disputes 0 -> ${disputes}, adapter-UI wrong answers 0 -> 0`);
+  console.log(`bT-WB002: truth-lattice injections 0 -> ${injections}, specimen-UI confident lies 0 -> ${lies}, adapter-UI disputes 0 -> ${disputes}, adapter-UI wrong answers 0 -> 0 (display now content-authenticated: checkpoint body via parent root, suffix only under a trusted tip)`);
 });
 
 // ---------------------------------------------------------------------------
@@ -580,9 +604,11 @@ test('TORTURE partition and reorg: the losing fork\'s transfer leaves no trace; 
   assert.notEqual(fold.sovereign(id), loserRecipient);
   // a UI fed the losing fork plus the canonical checkpoint disputes
   const ix = new Indexer(); ix.feed(loser.log);
-  const cp = winner.log.filter((e) => e.type === 'checkpoint').at(-1);
-  const cpForUI = cp ?? { seq: winner.log.at(-1).seq, root: winner.logRoot() };
-  assert.equal(new AdapterUI(ix, cpForUI).displayOwner(id), 'DISPUTED', 'the losing fork\'s UI confidently answered');
+  // a UI fed the losing fork plus the WINNER's anchors disputes: the
+  // loser's stream cannot carry the winner's authenticated history
+  const anchor = winner.checkpointAnchor();
+  const tipAnchor = winner.tipAnchor();
+  assert.equal(new AdapterUI(ix, anchor, tipAnchor).displayOwner(id), 'DISPUTED', 'the losing fork\'s UI confidently answered');
   console.log('bT-WB002: torture green — partition/reorg (one canonical branch; the reorged transfer leaves no trace; stale views dispute)');
 });
 

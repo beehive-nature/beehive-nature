@@ -173,8 +173,12 @@ payer → sponsored sovereignty. The previously named "WB002 hostile
 distributed specimen" leg (kill/reroute/replay/partition/heal) is
 absorbed here: those are rows of this battery. Status: executable
 battery LIVE in CI; wasm-vs-model equivalence and Cryptol/SAW twins
-staged NOT-RUN/UNVERIFIED under the result-class law. See
-scripts/btungsten/README.md.
+staged NOT-RUN/UNVERIFIED under the result-class law. Model-hardening
+beat (founder review 2026-10-07, same day): transactional rollback
+fidelity (refused actions preserve the whole pre-state and log) and
+authenticated display truth (checkpoint contents verified, suffixes
+bounded to an authenticated tip) — the landing closed, the
+model-correctness claim kept open. See scripts/btungsten/README.md.
 
 Sequence: WB001 formal core (done; input boundary repaired in its beat
 2) → WB002 SimpleAssets specimen (CURRENT) → WB003+ scale and

@@ -40,6 +40,46 @@ under test: issues #26, #19, #21, #6 (all still open, re-verified
 | `wb002.test.mjs` — the battery: faithful-port row, idata byte-stability, the killer invariant over 600-step hostile histories on BOTH profiles (specimen violations must be NAMED or the battery fails), 26/27-row wrong-signer matrix, F-1..F-4/F-8 A/B convictions, the truth lattice (consensus = log fold; drop/corrupt/replay/lag; adapter disputes, never lies), 7 torture rows (kill author / lose contract / fragment recovery / re-key + algorithm rotation / partition-reorg / contract replacement + chain migration + tamper refusal + naive-importer conviction / marketplace death), the 1,000-year leg, and the TEETH row | RUNS in CI (same globbed step as WB001) — green locally 2026-10-07: 14/14 |
 | `wb002-cryptol/Sovereign.cry` — formal twin; `sovereignContinuity` for ALL states/actions | STAGED — NOT-RUN under cryptol (result-class law); TYPECHECK/CHECK-SAMPLED/PROVE-UNIVERSAL all pending the CI ubuntu beat |
 | `wb002-saw/sovereign.saw` — equivalence-plan against a future Rust twin | STAGED — NOT-RUN (result-class law); EQUIVALENCE pending, vectors-first when the twin exists |
+| `wb002-hardening.test.mjs` — the model-hardening beat (founder review of the merged landing, 2026-10-07): the two review findings R-1/R-2 as red-first regressions, fingerprint-stability over every refusing seam, multi-action `tx()` bundle atomicity, content-authenticated display (checkpoint body via parent root; suffix bounded by a trusted tip), lag-at-authenticated-height, fail-closed root-only anchor | RUNS in CI — green locally 2026-10-07: 10/10 (landed RED first: 6 failing cases + 3 controls, receipt in the dispatch) |
+
+### §model-hardening (founder review 2026-10-07 — R-1/R-2, both repaired)
+
+- **R-1 transactional atomicity.** The port had no rollback boundary: a
+  refused action retained mutations made before its refusal (the
+  return-to-lender path deleted the delegation + emitted `delegateclose`
+  before `requireAuth`; partial batches committed their prefix). Antelope
+  specifies failed transactions restore prior state — the vendored C++
+  relies on that boundary. REPAIR: every public action now runs inside
+  `tx()` — state tables, counters AND committed event-log effects roll
+  back on any throw; nested action calls (delegate→transfer,
+  undelegate→transfer, issuef→transferf) join the outer transaction
+  (inline-action semantics); `tx()` is public so a caller can bundle
+  several actions into one atomic unit. The battery now demands, after
+  refused attempts as well as successful ones, that the ENTIRE pre-state
+  and log are preserved (fingerprint-stable; 240 refused transactions
+  rolled back whole in the adapter history alone). The specimen's
+  authorctrl policy is untouched — rollback fidelity is not
+  modernization.
+- **R-2 authenticated display.** The AdapterUI compared a matching ROOT
+  STRING against the trusted checkpoint and folded indexer-supplied
+  contents: a substituted checkpoint BODY behind a genuine root was
+  believed, and a self-consistent but unconfirmed log extension was
+  promoted to current ownership. REPAIR, two obligations: (a)
+  authenticate the checkpoint CONTENTS — `Chain.checkpointAnchor()`
+  carries the checkpoint's parent root so the UI recomputes the root
+  from the event body; (b) bound displayed state to an authenticated
+  history — `display()` answers either at the authenticated TIP
+  (bracketed by a trusted `{seq, root}` tip anchor with every link
+  verified: current truth) or CHECKPOINT-SCOPED at its explicit height
+  (never promoting an arbitrary suffix); a root-only anchor fails
+  closed. Links prove self-consistency, not consensus acceptance — that
+  sentence is now executable.
+- Red-first receipt: the hardening suite landed against the MERGED
+  module with the founder's counterexamples failing (delegated-transfer
+  refusal and partial batch × both profiles; checkpoint-body
+  substitution; unconfirmed extension) and the honest controls passing;
+  the repair turned all rows green. Dispatch:
+  `docs/dispatches/2026-10-07-btungsten-wb002-model-hardening.md`.
 
 ### §findings — the specimen's convictions (each = one BNR adapter requirement)
 
