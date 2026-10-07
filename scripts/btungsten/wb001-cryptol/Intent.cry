@@ -177,8 +177,9 @@ verifyWith sv i pk sig = sv pk (wire i) sig
 // P2 — THE framing property, for all VALID pairs:
 //////////////////////////////////////////////////////////////////////////////
 
-property wireInjective (a : Intent) (b : Intent) : Bit
-  = (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
+wireInjective : Intent -> Intent -> Bit
+property wireInjective a b =
+  (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
 
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
@@ -229,8 +230,9 @@ nearA = iBase { payload = mkB (split (0xdeadbeef : [32])) 4 }
 nearB : Intent
 nearB = iBase { payload = mkB (split (0xdeadbeef : [32]) # [0x00]) 5 }
 
-property constructedValidPairs : Bit
-  =        validIntent iBase
+constructedValidPairs : Bit
+property constructedValidPairs =
+    validIntent iBase
   && validIntent twinL  && validIntent twinR  && wire twinL != wire twinR
   && validIntent astral && validIntent fffd   && validIntent combining
   && validIntent nearA  && validIntent nearB  && wire nearA != wire nearB
@@ -264,8 +266,9 @@ xLenBeyondCap = iBase { domain = { len = 65, bytes = (mk "ab" 2).bytes } }
 xNonCanonPad : Intent // meaningful beyond len — padding not canonical
 xNonCanonPad = iBase { domain = { len = 1, bytes = (mk "ab" 2).bytes } }
 
-property adversarialRejected : Bit
-  = and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
+adversarialRejected : Bit
+property adversarialRejected =
+    and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
 
 //////////////////////////////////////////////////////////////////////////////
 // BRIDGE (model <-> deployed bytes), pinned byte-for-byte by the shared
