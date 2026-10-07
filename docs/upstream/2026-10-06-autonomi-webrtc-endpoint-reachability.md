@@ -16,8 +16,8 @@ without yet identifying the mechanism.
 
 ## The numbers
 
-Browser: Chromium, the published `@autonomi/ant-browser-sdk` 0.1.1, reading
-one public 214 MB file (`try_autonomi.mp4`) for 150 s per run.
+Browser: Chromium, the published `@withautonomi/ant-browser-sdk` 0.1.1 (window 3:
+0.1.2), reading one public 214 MB file (`try_autonomi.mp4`) for 150 s per run.
 
 | window | vantage point | dials | opened | dead | settled endpoints reachable | dead attempts that never reached ICE-connected |
 |---|---|---|---|---|---|---|
@@ -43,13 +43,20 @@ one public 214 MB file (`try_autonomi.mp4`) for 150 s per run.
   failure to connection setup; it does not tell a closed UDP port from a NAT
   mapping, a firewall, a listener that is down, a stale advertisement or a
   wrong address/port.
-- Our reviewer's reading of current source (not verified by us) is that
-  `ant-node` builds its WebRTC Direct address from the QUIC-observed public IP
-  plus the WebRTC listener's local UDP port, without a reachability check of
-  that socket before publishing, and that `ant-client`'s browser lookup
-  already notes many mainnet WebRTC Direct endpoints time out. If that reading
-  is right, `advertised_addr()` is a good place to look; our data does not
-  prove the defect is there.
+- What the code does (read at release v0.21.0 and main
+  [`d41a353`](https://github.com/WithAutonomi/ant-node/blob/d41a353544f11b333e6e0ab42d9de7723ef5f772/src/web_rtc.rs#L874-L893);
+  the function is identical in both): `advertised_addr()` returns an explicit
+  `advertised_addr`, else a bound specific IP, else the first non-relay native
+  address of the same family with the WebRTC listener's local port.
+  `refresh_browser_endpoint()` publishes that into the DHT
+  ([L731–L764](https://github.com/WithAutonomi/ant-node/blob/d41a353544f11b333e6e0ab42d9de7723ef5f772/src/web_rtc.rs#L731-L764)).
+  We found no reachability check of that socket before publication; the
+  listener snapshot itself notes "no external probe is implied" ([L520](https://github.com/WithAutonomi/ant-node/blob/d41a353544f11b333e6e0ab42d9de7723ef5f772/src/web_rtc.rs#L520)). `ant-client`
+  already records that "a third to a half" of mainnet WebRTC Direct endpoints
+  time out when dialled
+  ([wasm_transport.rs](https://github.com/WithAutonomi/ant-client/blob/48c4d7d72a121844d00ce34c325c966c34f687d2/ant-core/src/browser/wasm_transport.rs#L85-L90)).
+  So `advertised_addr()` is a good place to look; our data does not prove the
+  defect is there.
 
 ## Matching our endpoints to yours
 
@@ -72,5 +79,19 @@ group. Raw addresses are not published.
 - Compare and cohort: [scripts/ant-reach-compare.mjs](https://github.com/beehive-nature/beehive-nature/blob/main/scripts/ant-reach-compare.mjs) ·
   [scripts/ant-reach-cohort.mjs](https://github.com/beehive-nature/beehive-nature/blob/main/scripts/ant-reach-cohort.mjs)
 
-More 6-hourly runner windows run until 2026-10-09 and will be added to the
-cohort receipt; they strengthen persistence and are not a reason to wait.
+## Update 2026-10-07: current SDK, and 24 hours
+
+- SDK 0.1.2 (2026-10-05) fixes two WebKit-only problems (ant-client #215,
+  #216; #216 notes Chromium "never lost a connection"). Our runs are Chromium,
+  so they do not explain these results. Window 3 ran on 0.1.2 from all three
+  vantage points: 147 endpoints settled on all three; 73 dead from all, 73
+  open from all, 1 differs.
+- The fixed 40-endpoint cohort over ten runs in about 24 hours (SDK 0.1.1 and
+  0.1.2): the 20 dead endpoints stayed dead in **108/108** settled
+  observations; the 20 live ones stayed open in **126/128**. Both misses are
+  one endpoint (`09d7e457307accd9`), dead from one runner and open from the
+  other at the same moment: network effects are real for some endpoints, just
+  not for the dead group.
+- Receipt: [cohort, 24 h](https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/ant-reach-cohort-2026-10-07.json).
+
+Scheduled runner windows continue until 2026-10-09.
