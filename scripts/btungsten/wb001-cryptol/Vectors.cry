@@ -3,7 +3,7 @@
 // reproduce each pinned envelope exactly (length word, every meaningful
 // byte, zero tail past envLen). A red here names a wire-packing
 // divergence between the Cryptol model and the runtime canonical().
-import BTungstenWB001;
+import BTungstenWB001
 
 v0 : Intent
 v0 =

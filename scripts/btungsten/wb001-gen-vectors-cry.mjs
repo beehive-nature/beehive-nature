@@ -22,7 +22,7 @@ lines.push('// The CI formal job :check-s these rows every push: the model must'
 lines.push('// reproduce each pinned envelope exactly (length word, every meaningful');
 lines.push('// byte, zero tail past envLen). A red here names a wire-packing');
 lines.push('// divergence between the Cryptol model and the runtime canonical().');
-lines.push('import BTungstenWB001;');
+lines.push('import BTungstenWB001');
 lines.push('');
 v.positives.forEach((p, k) => {
   const envBits = p.length * 8;
