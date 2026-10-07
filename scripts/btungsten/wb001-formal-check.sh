@@ -40,7 +40,7 @@ say "== formal: toolchain =="
 
 # ---- CLASS 1: TYPECHECK ----------------------------------------------------
 say "== formal: TYPECHECK :load $CRY =="
-TC_LOG=$(printf ':load %s\n' "$CRY" | "$CRYPTOL" -b 2>&1) || {
+TC_LOG=$("$CRYPTOL" -c ":load $CRY" 2>&1) || {
   say "FORMAL-TYPECHECK: FAIL — module did not load. Full output:"
   say "$TC_LOG"
   exit 1
@@ -49,10 +49,13 @@ say "$TC_LOG" | tail -2
 say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, constructedValidPairs, adversarialRejected)"
 
 # ---- one :check with honest classification ---------------------------------
+# cryptol CLI (3.6.0, learned from its own usage output): -c COMMAND runs
+# one command and exits; multiple -c run in order. -b takes a SCRIPT FILE,
+# not stdin — the first CI run taught us this, receipted in the dispatch.
 check() {
   _name=$1; _cmd=$2
   say "== formal: CHECK-SAMPLED $_name — $_cmd =="
-  _out=$(printf '%s\n' "$_cmd" | "$CRYPTOL" -b "$CRY" 2>&1) || {
+  _out=$("$CRYPTOL" -c ":load $CRY" -c "$_cmd" 2>&1) || {
     say "FORMAL-CHECK-SAMPLED $_name: ABORTED (cryptol exited nonzero). Output:"
     say "$_out"
     exit 1
@@ -77,7 +80,7 @@ check wireInjective-sampled   ':check wireInjective'
 
 # ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified ---------------
 say "== formal: PROVE-UNIVERSAL :prove wireInjective (budget ${PROVE_BUDGET_S}s) =="
-PROVE_LOG=$(printf ':prove wireInjective\n' | timeout "$PROVE_BUDGET_S" "$CRYPTOL" -b "$CRY" 2>&1) && _rc=0 || _rc=$?
+PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove wireInjective" 2>&1) && _rc=0 || _rc=$?
 if [ "$_rc" -eq 0 ]; then
   if say "$PROVE_LOG" | grep -aq '^Valid'; then
     say "$PROVE_LOG" | tail -2
