@@ -1,0 +1,323 @@
+{
+  "beat": "wb002-wasm-vs-model",
+  "stack": {
+    "client": "antelope-spring v1.2.2",
+    "chain": "local dev chain, single producer",
+    "wasm": "vendored 2021 e6a042f, verbatim, never rebuilt"
+  },
+  "steps": 46,
+  "matched": 46,
+  "classMismatches": 0,
+  "stateMismatches": 0,
+  "refusedStepsProvenAtomicOnChain": 14,
+  "f1IssuerConfiscationAcceptedOnChain": true,
+  "f3OwnerAttachRefusedOnChain": true,
+  "rows": [
+    {
+      "name": "create NFT direct",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "create NFT requireclaim",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "claim own offer (consent)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "create by a stranger",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 8e86366bed…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:23.921 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of authorx | {\"account\":\"authorx\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::create pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"create\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "transfer alice->bob",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "transfer by a stranger",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 8f6f87a125…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:27.213 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of bob | {\"account\":\"bob\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::transfer pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transfer\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "transfer by the receiver only",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: e88c0188a7…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:28.581 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of bob | {\"account\":\"bob\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::transfer pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transfer\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "partial batch rolls back whole (R-1 on the real stack)",
+      "model": "refuse:bt-wb002:not-found",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 8b1b06933b…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:29.922 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 999999999999999 cannot be found (check ids?) | {\"s\":\"Asset id: 999999999999999 cannot be found (check ids?)\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::transfer pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transfer\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "offer bob->carol",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "claim by the wrong offeree",
+      "model": "refuse:bt-wb002:not-offered-to",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 78b48061f4…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:32.532 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 100000000000001 has not been offerred to you. It offered to carol | {\"s\":\"Asset id: 100000000000001 has not been offerred to you. It offered to carol\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::claim pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"claim\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "transfer an offered asset",
+      "model": "refuse:bt-wb002:offered",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 0011befdda…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:33.771 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 100000000000001 offered for a claim and cannot be transferred. Cancel offer? | {\"s\":\"Asset id: 100000000000001 offered for a claim and cannot be transferred. Cancel offer?\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::transfer pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transfer\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "claim by the offeree (consent)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "mdata update by the author",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "mdata update by the owner refuses",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 61199ac4f7…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:39.650 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of authorgov | {\"account\":\"authorgov\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::update pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"update\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "delegate carol->dave (long period)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "borrower routes a delegated asset onward",
+      "model": "refuse:bt-wb002:delegated",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: a710c29994…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:44.003 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 100000000000001 cannot be transferred because it is delegated from dave | {\"s\":\"Asset id: 100000000000001 cannot be transferred because it is delegated from dave\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::transfer pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transfer\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "undelegate before expiry refuses",
+      "model": "refuse:bt-wb002:period",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 33c83d24f0…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:44:46.123 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Cannot undelegate until the PERIOD expires. Time to wait 138 hours 53 minutes 16 seconds | {\"s\":\"Cannot undelegate until the PERIOD expires. Time to wait 138 hours 53 minutes 16 seconds\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::undelegate pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"undelegate\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "borrower returns early (upstream semantics)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "delegate carol->dave (2s period, redelegate on)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "redelegation by the borrower (sovereign never moves)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "undelegate after expiry",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "create container",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "create child",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "attach by the AUTHOR (F-3 composition is author-gated upstream)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "attach by the OWNER refuses (the F-3 seam, live)",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: 2be246a51f…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:45:01.279 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of authorgov | {\"account\":\"authorgov\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::attach pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"attach\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "burn a container with children refuses",
+      "model": "refuse:bt-wb002:contains",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: c44f1a3dac…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:45:02.763 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 100000000000003 has 1 attached NFT assets. Detach them before burning. | {\"s\":\"Asset id: 100000000000003 has 1 attached NFT assets. Detach them before burning.\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::burn pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"burn\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "detach by the AUTHOR",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "createf WOOD authorctrl=true",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "issuef to bob",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "transferf bob->carol",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "F-1 LIVE: the issuer moves a holder balance on the issuer signature ALONE",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "transferf by a stranger refuses",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: f29afc46a9…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:45:10.763 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of carol | {\"account\":\"carol\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::transferf pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"transferf\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "offerf carol->ed",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "claimf by the wrong offeree refuses",
+      "model": "refuse:bt-wb002:not-offered-to",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: ad67c0932f…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:45:13.666 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure | assertion failure with message: Asset id: 1000013 has not been offerred to you. It offered to ed | {\"s\":\"Asset id: 1000013 has not been offerred to you. It offered to ed\"} | nodeos  cf_system.cpp:14 eosio_assert | simpleasset1 <= simpleasset1::claimf pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"claimf\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "claimf by the offeree (consent)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "F-1b LIVE: the issuer burns a holder balance alone",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "attachf value into the container (author-gated)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "detachf value back (author-gated)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "createntt for alice (direct)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "createntt requireclaim for bob",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "claimntt by bob (consent)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "updatentt by the author",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "burnntt by alice",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "changeauthor by the author alone (F-8 seam, upstream semantics)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    },
+    {
+      "name": "changeauthor by the owner alone refuses",
+      "model": "refuse:bt-wb002:auth",
+      "chain": "refuse",
+      "chainMsg": "failed transaction: eeed3aea1e…redacted  <unknown> bytes  <unknown> us | error 2026-10-07T22:45:28.733 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3090004 missing_auth_exception: Missing required authority | missing authority of authorx | {\"account\":\"authorx\"} | nodeos  apply_context.cpp:260 require_authorization | simpleasset1 <= simpleasset1::changeauthor pending console output: | {\"console\":\"\",\"account\":\"simpleasset1\",\"action\":\"changeauthor\",\"receiver\":\"simpleasset1\"} | nodeos  apply_context.cpp:134 exec_one",
+      "atomicOnChain": true,
+      "verdict": "match"
+    },
+    {
+      "name": "burn by the owner (final)",
+      "model": "accept",
+      "chain": "accept",
+      "verdict": "match"
+    }
+  ],
+  "hexScrubbed": true,
+  "finalChainHash40": "4c924325022756617bc150799aafb91362a122a8"
+}
