@@ -57,7 +57,7 @@ say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, adversari
 # cryptol CLI (3.6.0, learned from its own usage output): -c COMMAND runs
 # one command and exits; multiple -c run in order. -b takes a SCRIPT FILE,
 # not stdin — the first CI run taught us this, receipted in the dispatch.
-# Checks load Vectors.cry, which imports Intent.cry — one load covers both.
+# Checks load Vectors.cry, which imports BTungstenWB001.cry — one load covers both.
 check() {
   _name=$1; _cmd=$2
   say "== formal: CHECK-SAMPLED $_name — $_cmd =="

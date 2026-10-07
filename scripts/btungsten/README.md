@@ -201,7 +201,7 @@ RED counterexample
 
 No step substitutes for a later one; the WB001 chain is the reference
 instance (surrogate collision → utf16/utf8 gates → wb001-vectors.json →
-concrete-DFA Intent.cry → CI formal job).
+concrete-DFA BTungstenWB001.cry → CI formal job).
 
 ### §next (named gaps, in order)
 
