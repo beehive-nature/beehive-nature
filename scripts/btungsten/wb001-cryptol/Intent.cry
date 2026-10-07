@@ -308,7 +308,36 @@ nearB =
 
 // Constructed arm, one obligation per claim (the founder ruling asks for
 // exact obligation names; a conjunction hid which claim red on the first
-// green-ladder run — this split makes CI name it).
+// green-ladder run — this split makes CI name it). The per-field rows
+// exist because validIBase red while the adversarial arm passed — if a
+// conjunct is constant-false the adversarial arm cannot see it; these can.
+validDomain_iBase : Bit
+property validDomain_iBase =
+  (validField 1 64 iBase.domain) && (wellFormedUtf8 iBase.domain)
+
+validNonce_iBase : Bit
+property validNonce_iBase =
+  (iBase.nonce.len == L32) && (canonicalPad iBase.nonce.len iBase.nonce.bytes == iBase.nonce.bytes)
+
+validAction_iBase : Bit
+property validAction_iBase =
+  (iBase.action.len == L32) && (canonicalPad iBase.action.len iBase.action.bytes == iBase.action.bytes)
+
+validDest_iBase : Bit
+property validDest_iBase =
+  (validField 1 128 iBase.destination) && (wellFormedUtf8 iBase.destination)
+
+validCap_iBase : Bit
+property validCap_iBase =
+  (validField 1 64 iBase.capability) && (wellFormedUtf8 iBase.capability)
+
+validPayer_iBase : Bit
+property validPayer_iBase =
+  (validField 1 128 iBase.payer) && (wellFormedUtf8 iBase.payer)
+
+validPayload_iBase : Bit
+property validPayload_iBase = validField 0 4096 iBase.payload
+
 validIBase : Bit
 property validIBase = validIntent iBase
 

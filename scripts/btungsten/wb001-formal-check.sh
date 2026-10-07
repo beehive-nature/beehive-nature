@@ -76,6 +76,13 @@ check() {
 # ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed (one
 # obligation per claim, so a red names the claim), then random
 check adversarialRejected     ':check adversarialRejected'
+check validDomain_iBase       ':check validDomain_iBase'
+check validNonce_iBase        ':check validNonce_iBase'
+check validAction_iBase       ':check validAction_iBase'
+check validDest_iBase         ':check validDest_iBase'
+check validCap_iBase          ':check validCap_iBase'
+check validPayer_iBase        ':check validPayer_iBase'
+check validPayload_iBase      ':check validPayload_iBase'
 check validIBase              ':check validIBase'
 check twinsValid              ':check twinsValid'
 check twinsDistinct           ':check twinsDistinct'
