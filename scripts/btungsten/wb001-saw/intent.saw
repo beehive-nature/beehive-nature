@@ -8,23 +8,28 @@
 // yet — the JS twin is the executable battery's target, and SAW has no
 // JS extraction. Named gaps, in order:
 //
-//   1. cryptol typecheck + :check/:prove canonicalInjective  (CI container)
-//   2. Rust twin of canonical/decode in this repo             (next beat)
+//   1. cryptol typecheck + :check/:prove wireInjective (CI container;
+//      :check is SAMPLED evidence — constructed related pairs required —
+//      and is never recorded as the :prove universal result)
+//   2. Rust twin of canonical/decode in this repo, reproducing the
+//      pinned shared vectors (wb001-vectors.json) byte-for-byte —
+//      positives exact, refusals by code — BEFORE any equivalence claim
 //   3. this script's equivalence proof against the twin       (last)
 //
 // Planned shape once (1)-(2) exist — kept here so the run is a matter of
 // filling in the bitcode path, not of redesign:
 //
 //   cryptol_load ../wb001-cryptol/Intent.cry;
-//   let canonicalSpec = cryptol "canonical";
+//   let wireSpec = cryptol "wire";
 //
 //   llvm_load_bitcode "target/…/wb001_intent.bc";
 //   let canonicalImpl = llvm_extract "wb001_intent::canonical";
 //
-//   // equivalence, no symbolic exceptions: for all intents the Rust
-//   // bytes are the Cryptol bytes.
+//   // equivalence, no symbolic exceptions: for all VALID intents the
+//   // Rust meaningful bytes are the Cryptol wire's meaningful prefix
+//   // (same envLen, same bytes), pinned first by the shared vectors.
 //   theorem rust_matches_spec : llvm_verify canonicalImpl
-//     [cryptol canonicalSpec] [];
+//     [cryptol wireSpec] [];
 //
 //   // the adversarial leg, mirrored from the battery: after the
 //   // equivalence proof, mutation is provably detected — any envelope
