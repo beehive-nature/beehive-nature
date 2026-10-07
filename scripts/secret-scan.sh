@@ -98,6 +98,21 @@ MARK2='PUBLIC-CONSTANT'
 # Matches only the seed shape, so anything else in those files is still scanned.
 PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 
+# ONE BINARY RULE, BOTH MODES (bee-laborer's ruling, #215 round 5, 07:22Z 2026-10-01): a blob is
+# binary when its first 8000 bytes hold a NUL - git's own rule (FIRST_FEW_BYTES) - decided from
+# the bytes, never from an attribute. A binary is skipped BY NAME and the skip is COUNTED in the
+# verdict line; every other file is read whole. Reading binaries whole was measured and refused:
+# a phone or Facebook JPEG carries a 48+ hex metadata id, so every image commit went red.
+# THE KNOWN GAP, same as main's: a key placed BEFORE an early NUL is in a skipped file and is not
+# read, in either mode (P19m / P19p name it). A UTF-16 text has early NULs, so it is skipped too.
+# _binsel READER PREFIX: reads NUL-terminated paths on stdin and prints back, NUL-terminated and with
+# PREFIX in front, exactly those whose bytes - fetched by READER with the path in $f - hold a
+# NUL in the first 8000. A path READER cannot read counts as text, so it is READ, never skipped.
+_binsel() {
+    _BINPFX="$2" LC_ALL=C xargs -0 sh -c 'for f; do n=$('"$1"' 2>/dev/null | head -c 8000 | tr -dc "\000" | wc -c); [ $n -gt 0 ] && printf "%s%s\000" "$_BINPFX" "$f"; done; exit 0' sh
+}
+_nulcount() { LC_ALL=C tr -dc '\000' < "$1" | wc -c | tr -d ' '; }
+
 case "$mode" in
 selftest|--selftest)
     # The founder law (a checker is not landed until known-BAD and known-GOOD
@@ -191,14 +206,34 @@ diff)
     # appended a key rode past the scan (rc=0). ACMR + --no-renames: renames
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
-    names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
-        grep '^+' | grep -v '^+++')
-    hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
-    pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
-    wif=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$WIF_RE" | while IFS= read -r lh; do
+    # THE SCAN READS NO CONFIG AND NO ATTRIBUTES (bFUzZ #215 r3 C1-C3, ruled 06:27Z 2026-10-01).
+    # A porcelain diff obeys the repo and the user: color.diff/color.ui=always put escapes
+    # before every "+", diff.external hands the diff to another program, and `* -diff` in
+    # .git/info/attributes makes every file binary. Each left this mode at "0 added lines
+    # scanned" while a planted key committed. These four flags take all three away.
+    # --text puts a staged binary's bytes in the stream, and a grep that meets a NUL calls the
+    # whole input binary and prints no line (bFUzZ A1/A2, ruled 06:31Z): one PNG beside a key
+    # and the scan read 0 lines. So every grep below that reads this stream is -a, and the
+    # NULs are dropped before the stream is kept.
+    # A STAGED BINARY IS EXCLUDED FROM THE --text DIFF BY NAME (round 5): binary is judged from the
+    # INDEX blob, the bytes being committed. Round 4 read binaries too, and staging
+    # assets/bnature-logo.jpg alone was BLOCKED (P19q). Each binary becomes an
+    # ':(exclude,literal)' pathspec that xargs appends to the one diff; if there were so many
+    # that xargs split the call, each part would re-read the others' binaries - over-reading,
+    # never under-reading.
+    _sst=$(mktemp 2>/dev/null) || { echo "  secret-scan: REFUSING - no temp file for the binary list. A scan that cannot list what it skips is not a pass." >&2; exit 2; }
+    git diff --cached --no-color --no-ext-diff --no-textconv --name-only -z --diff-filter=ACMR --no-renames |
+        _binsel 'git cat-file blob ":$f"' ':(exclude,literal)' > "$_sst"
+    skipped=$(_nulcount "$_sst")
+    names=$(git diff --cached --no-color --no-ext-diff --no-textconv --text --name-only --diff-filter=ACMR --no-renames | grep -aEi "$NAME_RE")
+    added=$(xargs -0 git diff --cached --no-color --no-ext-diff --no-textconv --text --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' < "$_sst" |
+        grep -a '^+' | grep -av '^+++' | tr -d '\000')
+    rm -f "$_sst"
+    hex=$(printf '%s\n' "$added" | grep -avF -e "$MARK" -e "$MARK2" | grep -avE "$PROPTEST_RE" | grep -anE "$HEX_RE")
+    pem=$(printf '%s\n' "$added" | grep -anE "$PEM_RE")
+    wif=$(printf '%s\n' "$added" | grep -avF -e "$MARK" -e "$MARK2" | grep -anE "$WIF_RE" | while IFS= read -r lh; do
         aln=${lh%%:*}; acontent=${lh#*:}
-        for tok in $(printf '%s\n' "$acontent" | grep -oE "$WIF_RE"); do
+        for tok in $(printf '%s\n' "$acontent" | grep -aoE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")
           case "$cls" in
             VALID*) echo "added-line $aln: [REDACTED key-shaped checksum-VALID]" ;;
@@ -210,11 +245,33 @@ diff)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
-    pem=$(git grep -InE "$PEM_RE")
-    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+    # BINARY IS DECIDED BY CONTENT, NEVER BY ATTRIBUTES (bFUzZ B1/B2, ruled 06:31Z 2026-10-01).
+    # `git grep -I` skips every path an attribute marks -diff or binary: a tracked or untracked
+    # .gitattributes, or .git/info/attributes, emptied this scan, and main's own .gitattributes
+    # had kept two SVGs out of it since they were added. info/attributes cannot be overridden
+    # inside git (--attr-source, GIT_ATTR_SOURCE, core.attributesFile=/dev/null: all still 0),
+    # so git only LISTS the files, with the same pathspec excludes, and grep reads them.
+    # grep -I does NOT skip a file that holds a NUL: it reads up to the buffer holding the NUL and
+    # stops there, so at round 4 a key after a NUL past byte 8000 read clean (bFUzZ, ruled 07:10Z).
+    # So binary is the ONE RULE above, judged from the work-tree bytes: grep -IL only names the
+    # CANDIDATES (every file with a NUL in its first 8000 bytes is among them), _binsel keeps those
+    # whose first 8000 bytes really hold one, and comm takes exactly them out of every listing.
+    # Every other file is read whole with -a, whatever an attribute says.
+    # tgrep DROPS THE NULs FROM ITS OWN OUTPUT (row 7, bFUzZ, ruled 07:25Z): a hit line from a file
+    # whose first NUL is past byte 8000 carries that NUL, and one NUL blinds every plain grep that
+    # reads after it - the marker and proptest filters, and so the whole scan (P19r). Dropped at the
+    # one place the stream is made, so a filter added later cannot bring the blindness back. Its
+    # three consumers, hex, pem and wif, all read tgrep's output only. No color either, since this
+    # grep is not git's. -s: a tracked file deleted from the work tree is not a hit.
+    _sst=$(mktemp 2>/dev/null) || { echo "  secret-scan: REFUSING - no temp file for the binary list. A scan that cannot list what it skips is not a pass." >&2; exit 2; }
+    git ls-files -z | LC_ALL=C xargs -0 grep -IsLZ -e '' -- | _binsel 'cat -- "$f"' '' | LC_ALL=C sort -z > "$_sst"
+    skipped=$(_nulcount "$_sst")
+    tgrep() { _tp=$1; shift; git ls-files -z -- "$@" | LC_ALL=C sort -z | LC_ALL=C comm -z -23 - "$_sst" | LC_ALL=C xargs -0 grep -asnHE -e "$_tp" -- | tr -d '\000'; }
+    hex=$(tgrep "$HEX_RE" ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -avF -e "$MARK" -e "$MARK2" | grep -avE "$PROPTEST_RE")
+    pem=$(tgrep "$PEM_RE")
+    wif=$(tgrep "$WIF_RE" ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -avF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
         tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
-        for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
+        for tok in $(printf '%s\n' "$tcontent" | grep -aoE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")
           case "$cls" in
             VALID*) echo "$tf:$tln: [REDACTED key-shaped checksum-VALID]" ;;
@@ -223,6 +280,7 @@ tree)
           esac
         done
       done)
+    rm -f "$_sst"
     ;;
 *)
     echo "usage: $0 {diff|tree|selftest}   # --selftest accepted (estate form, cf. identity-check.sh --selftest)" >&2
@@ -272,6 +330,7 @@ if [ -n "$pem" ]; then
 fi
 
 if [ "$fail" -ne 0 ]; then
+    echo "secret-scan: $skipped binary file(s) skipped (a NUL in the first 8000 bytes)." >&2
     if [ "$mode" = "diff" ]; then
         echo "" >&2
         echo "Last resort (eyeballed exception): git commit --no-verify — but CI re-scans the tree on push." >&2
@@ -283,8 +342,8 @@ fi
 # content. A silent exit 0 is indistinguishable from a scan that never ran -
 # the WSL/worktree vacuity class this guard family closes.
 if [ "$mode" = "diff" ]; then
-    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -c .) added lines scanned"
+    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -ac .) added lines scanned, $skipped staged binary file(s) skipped"
 else
-    echo "secret-scan: clean - tree mode, $(git ls-files | wc -l) tracked files scanned"
+    echo "secret-scan: clean - tree mode, $(( $(git ls-files | wc -l) - skipped )) tracked files scanned, $skipped binary file(s) skipped"
 fi
 exit 0
