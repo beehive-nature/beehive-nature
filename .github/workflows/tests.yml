@@ -1119,7 +1119,10 @@ jobs:
           mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
           echo "-- bundle bin/ (recorded for the receipt):"; ls cryptol/bin
           # cryptol requires z3 on PATH; the with-solvers bundle ships it in its
-          # bin dir (learned from run 3's "z3 not found" — expose it, apt as floor)
+          # bin dir (learned from run 3's "z3 not found"). $GITHUB_PATH persists
+          # for the job's later steps — a plain export dies with this step's
+          # shell, which is exactly how run 4 red while z3 --version printed.
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/cryptol/bin:$PATH"
           if ! command -v z3 >/dev/null 2>&1; then
             sudo apt-get update -qq && sudo apt-get install -y -qq z3
