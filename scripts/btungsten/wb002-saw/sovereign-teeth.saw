@@ -1,0 +1,14 @@
+// bTunGsTeN Workbench 002 — SAW TEETH: the same equivalence obligation as
+// sovereign.saw, asked against the SPECIMEN machine (`stepSpecimen` = `step`
+// + the F-1 issuer head that the 2021 wasm accepted live). The Rust twin
+// does not have that head, so this verification MUST FAIL with a
+// counterexample; ../wb002-saw-check.sh runs it and goes red if it passes.
+// A pass here would mean the equivalence obligation cannot tell a machine
+// with confiscation from one without — and sovereign.saw's PROVEN lines
+// would be vacuous.
+
+include "sovereign-defs.saw";
+
+print "WB002-SAW-TEETH obligation step_matches_specimen (must FAIL)";
+mir_verify m "wb002_twin::step" [] false (step_against {{ stepSpecimen }}) z3;
+print "WB002-SAW-TEETH UNEXPECTED-PROVEN";

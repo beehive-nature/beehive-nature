@@ -7,12 +7,14 @@
 // the CI formal job by scripts/btungsten/wb002-formal-check.sh (cryptol
 // 3.6.0 pinned): TYPECHECK, CHECK-SAMPLED, PROVE-UNIVERSAL and TEETH are
 // separate results (SPEC-BTUNGSTEN-1 §workbench result-class law) and the
-// run's log is the receipt. EQUIVALENCE has NOT run: it needs the Rust
-// twin + SAW (../wb002-saw/sovereign.saw). The executable twin
-// (wb002.test.mjs) attacks the same invariant over hostile histories, a
-// wrong-signer matrix and the torture suite; this file states it for ALL
-// states and actions OF THIS ABSTRACTION — the proof is about `step` as
-// written here, not about the JS port or the wasm until equivalence runs.
+// run's log is the receipt. EQUIVALENCE is a separate class, run by
+// ../wb002-saw-check.sh (.github/workflows/wb002-saw.yml): SAW proves the
+// Rust twin (../wb002-rust/src/lib.rs) equal to `step` and `sovereign`
+// here. The executable twin (wb002.test.mjs) attacks the same invariant
+// over hostile histories, a wrong-signer matrix and the torture suite;
+// this file states it for ALL states and actions OF THIS ABSTRACTION. No
+// proof here or in SAW reaches the JS port or the 2021 wasm: those links
+// are sampled (the battery, the wasm corpus), never proven.
 //
 // Modeled scope: the sovereignty state of ONE asset through the action
 // heads that can move it, exactly as the port models them:

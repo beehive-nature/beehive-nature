@@ -1,0 +1,66 @@
+// bTunGsTeN Workbench 002 — shared SAW definitions for sovereign.saw (the
+// EQUIVALENCE obligations) and sovereign-teeth.saw (the obligation that
+// must fail). Paths are relative to this directory; the runner cds here.
+
+import "../wb002-cryptol/BTungstenWB002.cry";
+
+m <- mir_load_module "../wb002-rust/target/saw/wb002_twin.linked-mir.json";
+
+let status_adt = mir_find_adt m "wb002_twin::Status" [];
+let action_adt = mir_find_adt m "wb002_twin::Action" [];
+
+// the bridge: Rust carries bytes, the spec carries [3] tags and [4] heads
+let {{
+  toStatus : [8] -> [8] -> [8] -> [8] -> Status
+  toStatus t h l o = { tag = drop`{5} t, holder = h, lender = l, offeree = o }
+
+  toAction : [8] -> [8] -> [8] -> Action
+  toAction hd sg to = { head = drop`{4} hd, signer = sg, to = to }
+}};
+
+// Rust `step` against a given Cryptol transition function on the
+// well-formed domain
+let step_against spec_step = do {
+  tag <- mir_fresh_var "tag" mir_u8;
+  holder <- mir_fresh_var "holder" mir_u8;
+  lender <- mir_fresh_var "lender" mir_u8;
+  offeree <- mir_fresh_var "offeree" mir_u8;
+  hd <- mir_fresh_var "head" mir_u8;
+  sg <- mir_fresh_var "signer" mir_u8;
+  to <- mir_fresh_var "to" mir_u8;
+  mir_precond {{ tag < 5 }};
+  mir_precond {{ hd < 16 }};
+  mir_execute_func
+    [ mir_struct_value status_adt [mir_term tag, mir_term holder, mir_term lender, mir_term offeree]
+    , mir_struct_value action_adt [mir_term hd, mir_term sg, mir_term to] ];
+  let r = {{ spec_step (toStatus tag holder lender offeree) (toAction hd sg to) }};
+  mir_return (mir_struct_value status_adt
+    [ mir_term {{ zext r.tag : [8] }}, mir_term {{ r.holder }}
+    , mir_term {{ r.lender }}, mir_term {{ r.offeree }} ]);
+};
+
+let step_refuses_rest = do {
+  tag <- mir_fresh_var "tag" mir_u8;
+  holder <- mir_fresh_var "holder" mir_u8;
+  lender <- mir_fresh_var "lender" mir_u8;
+  offeree <- mir_fresh_var "offeree" mir_u8;
+  hd <- mir_fresh_var "head" mir_u8;
+  sg <- mir_fresh_var "signer" mir_u8;
+  to <- mir_fresh_var "to" mir_u8;
+  mir_precond {{ (tag >= 5) || (hd >= 16) }};
+  let s = mir_struct_value status_adt [mir_term tag, mir_term holder, mir_term lender, mir_term offeree];
+  mir_execute_func [ s, mir_struct_value action_adt [mir_term hd, mir_term sg, mir_term to] ];
+  mir_return s;
+};
+
+let sovereign_matches = do {
+  tag <- mir_fresh_var "tag" mir_u8;
+  holder <- mir_fresh_var "holder" mir_u8;
+  lender <- mir_fresh_var "lender" mir_u8;
+  offeree <- mir_fresh_var "offeree" mir_u8;
+  mir_precond {{ tag < 8 }};
+  mir_execute_func
+    [ mir_struct_value status_adt [mir_term tag, mir_term holder, mir_term lender, mir_term offeree] ];
+  mir_return (mir_term {{ sovereign (toStatus tag holder lender offeree) }});
+};
+
