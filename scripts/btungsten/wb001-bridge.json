@@ -1,7 +1,7 @@
 {
   "what": "WB001 formal-wire bridge — the Rust model's canonical() bytes pinned for the Cryptol spec's constructed terms (founder review B1)",
   "format": "each term carries the model intent (JSON-safe) and the exact canonical() envelope hex; BTungstenWB001.cry pins the same hex as opaque constants; the Rust test target and the Cryptol formal job re-derive every run",
-  "note": "closed-term agreement on pinned terms; the universal statement is the SAW proof that the model's encoder equals `wire` (wb001-saw/rust.saw); regenerate with `cargo test -p btungsten-wb001 --test wb001 -- --ignored pin_write`",
+  "note": "closed-term agreement on pinned terms; the universal statement is the SAW proof that the model's encoder equals `wire` (wb001-saw/rust.saw); regenerate with `WB001_PIN_WRITE=1 cargo test -p btungsten-wb001 --test wb001 pinned`",
   "terms": [
     {
       "name": "iBase",

@@ -1,9 +1,9 @@
 //! The pinned-file generator, in Rust: the shared vectors and the formal
 //! bridge are derived from the model and serialized exactly as the files are
 //! committed (JSON.stringify layout). The drift gate requires the committed
-//! bytes to equal a fresh derivation; the ignored `pin_write` test rewrites
-//! them after an intentional format change:
-//!   cargo test -p btungsten-wb001 --test wb001 -- --ignored pin_write
+//! bytes to equal a fresh derivation; with WB001_PIN_WRITE=1 the same test
+//! rewrites them instead (after an intentional format change only):
+//!   WB001_PIN_WRITE=1 cargo test -p btungsten-wb001 --test wb001 pinned
 
 use crate::common::{base, to_hex};
 use btungsten_wb001::core::HEAD8;
@@ -288,7 +288,7 @@ pub fn vectors() -> String {
     let doc = W::Obj(vec![
         ("what", s("PUBLIC-CONSTANT: deterministic bT-WB001 shared vectors — canonical encodings of public test intents and their refusal codes; generated from the Rust model by crates/btungsten-wb001/tests/wb001/pin.rs, never by hand.")),
         ("format", s("bt-wb01/1")),
-        ("note", s("Pinned shared vectors — derived from the Rust model (the code SAW proves equal to the Cryptol wire): positives byte-for-byte (full length, every meaningful byte), refusals by exact code. Includes the surrogate/invalid-UTF-8 boundary rows of the 2026-10-07 repair. Regenerate only via `cargo test -p btungsten-wb001 --test wb001 -- --ignored pin_write` after an intentional format change; the wb001 test target fails on any drift.")),
+        ("note", s("Pinned shared vectors — derived from the Rust model (the code SAW proves equal to the Cryptol wire): positives byte-for-byte (full length, every meaningful byte), refusals by exact code. Includes the surrogate/invalid-UTF-8 boundary rows of the 2026-10-07 repair. Regenerate only via `WB001_PIN_WRITE=1 cargo test -p btungsten-wb001 --test wb001 pinned` after an intentional format change; the wb001 test target fails on any drift.")),
         ("positives", W::Arr(positives)),
         ("refusals", W::Arr(refusals)),
     ]);
@@ -377,7 +377,7 @@ pub fn bridge() -> String {
     let doc = W::Obj(vec![
         ("what", s("WB001 formal-wire bridge — the Rust model's canonical() bytes pinned for the Cryptol spec's constructed terms (founder review B1)")),
         ("format", s("each term carries the model intent (JSON-safe) and the exact canonical() envelope hex; BTungstenWB001.cry pins the same hex as opaque constants; the Rust test target and the Cryptol formal job re-derive every run")),
-        ("note", s("closed-term agreement on pinned terms; the universal statement is the SAW proof that the model's encoder equals `wire` (wb001-saw/rust.saw); regenerate with `cargo test -p btungsten-wb001 --test wb001 -- --ignored pin_write`")),
+        ("note", s("closed-term agreement on pinned terms; the universal statement is the SAW proof that the model's encoder equals `wire` (wb001-saw/rust.saw); regenerate with `WB001_PIN_WRITE=1 cargo test -p btungsten-wb001 --test wb001 pinned`")),
         ("terms", W::Arr(terms)),
     ]);
     let mut out = String::new();
@@ -388,22 +388,20 @@ pub fn bridge() -> String {
 
 #[test]
 fn the_committed_pinned_files_equal_a_fresh_derivation_from_the_model() {
+    if std::env::var("WB001_PIN_WRITE").as_deref() == Ok("1") {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/btungsten/");
+        std::fs::write(format!("{root}wb001-vectors.json"), vectors()).unwrap();
+        std::fs::write(format!("{root}wb001-bridge.json"), bridge()).unwrap();
+        return;
+    }
     assert_eq!(
         vectors(),
         crate::common::VECTORS,
-        "wb001-vectors.json drifted from the model: run the ignored pin_write test"
+        "wb001-vectors.json drifted from the model: rerun with WB001_PIN_WRITE=1"
     );
     assert_eq!(
         bridge(),
         crate::common::BRIDGE,
-        "wb001-bridge.json drifted from the model: run the ignored pin_write test"
+        "wb001-bridge.json drifted from the model: rerun with WB001_PIN_WRITE=1"
     );
-}
-
-#[test]
-#[ignore = "rewrites the pinned files; run only after an intentional format change"]
-fn pin_write() {
-    let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/btungsten/");
-    std::fs::write(format!("{root}wb001-vectors.json"), vectors()).unwrap();
-    std::fs::write(format!("{root}wb001-bridge.json"), bridge()).unwrap();
 }

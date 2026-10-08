@@ -30,7 +30,7 @@ same Rust code SAW proves, no JS twin beside it.
   Rust model equal to the spec for every input in each domain.
 - `wb001-saw/injective.saw` + `WB001Injective.cry`: `wireInjective`
   PROVEN for every pair of valid intents, by a first-difference ladder
-  (20 rungs, each required by name).
+  (21 rungs, each required by name).
 - `wb001-cryptol/Ed25519.cry`: RFC 8032 Ed25519 as an executable Cryptol
   spec, the missing algorithm artifact. Its SHA-512 round constants and
   initial hash are computed from the FIPS 180-4 definitions, not
@@ -74,7 +74,7 @@ reproduce.
 
 ```
 cargo test -p btungsten-wb001-core -p btungsten-wb001
-test result: ok. 20 passed; 0 failed; 1 ignored   (the ignored test is the pin writer)
+test result: ok. 20 passed; 0 failed
 
 cargo test -p btungsten-wb002-core -p btungsten-wb002
 test result: ok. 6 passed   (ready.rs)
@@ -94,7 +94,7 @@ SAW, local, on a box at load average 10-13 (another lane's snarkjs held
 six cores):
 
 ```
-saw injective.saw     (22 rungs, wall 1749 s, peak RSS 6.1 GB, exit 0)
+saw injective.saw     (21 rungs, wall 1749 s, peak RSS 6.1 GB, exit 0)
 WB001-SAW PROVEN validImpliesBounded / validImpliesPadded
 WB001-SAW PROVEN fd01 .. fd09, fd10len, fdIdx, fdInLen, fd10at, fd10 (payload)
 WB001-SAW PROVEN casesCover / recordExt / firstDifference / wireIndexDef

@@ -117,4 +117,4 @@ for prop in sha512Abc rfcTest1 rfcTest2 rfcTest3 rfcTestAbc oracleEnvBase oracle
 done
 
 say "== SAW WB001: ladder state =="
-say "BUILD: PASS | EQUIVALENCE: PROVEN (11 obligations, Rust model == Cryptol spec) | PROVE-UNIVERSAL: wireInjective PROVEN (22 rungs) | TEETH: PASS (2) | SPEC-CHECK: Ed25519 RFC 8032 PASS (8)"
+say "BUILD: PASS | EQUIVALENCE: PROVEN (11 obligations, Rust model == Cryptol spec) | PROVE-UNIVERSAL: wireInjective PROVEN (21 rungs) | TEETH: PASS (2) | SPEC-CHECK: Ed25519 RFC 8032 PASS (8)"
