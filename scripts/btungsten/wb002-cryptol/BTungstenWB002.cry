@@ -1,16 +1,18 @@
 // bTunGsTeN Workbench 002 — the formal twin of wb002-simpleassets.mjs:
 // sovereign continuity across the SimpleAssets-2021 state machine.
 //
-// STAGED ARTIFACT (2026-10-07, zCode seat): written, NOT-RUN under
-// cryptol/SAW (the result-class law, SPEC-BTUNGSTEN-1 §workbench:
-// TYPECHECK, CHECK-SAMPLED, PROVE-UNIVERSAL, EQUIVALENCE are separate
-// results, and none of them has run). SAW ships Linux x86_64 binaries;
-// this Windows seat and the aarch64 box cannot run it unqualified, so
-// the run belongs to the CI-container beat named in
-// scripts/btungsten/README.md §next. The executable twin (wb002.test.mjs)
-// already attacks the same invariant over hostile histories, a wrong-
-// signer matrix and the torture suite; this file states it for ALL
-// states and actions.
+// Written 2026-10-07 (zCode seat) and staged unrun; the staged file never
+// parsed (`where;`, `X : Type` synonyms, unparenthesized `==`/`&&` chains —
+// Cryptol binds `&&` tighter than `==`). Repaired syntax-only and RUN in
+// the CI formal job by scripts/btungsten/wb002-formal-check.sh (cryptol
+// 3.6.0 pinned): TYPECHECK, CHECK-SAMPLED, PROVE-UNIVERSAL and TEETH are
+// separate results (SPEC-BTUNGSTEN-1 §workbench result-class law) and the
+// run's log is the receipt. EQUIVALENCE has NOT run: it needs the Rust
+// twin + SAW (../wb002-saw/sovereign.saw). The executable twin
+// (wb002.test.mjs) attacks the same invariant over hostile histories, a
+// wrong-signer matrix and the torture suite; this file states it for ALL
+// states and actions OF THIS ABSTRACTION — the proof is about `step` as
+// written here, not about the JS port or the wasm until equivalence runs.
 //
 // Modeled scope: the sovereignty state of ONE asset through the action
 // heads that can move it, exactly as the port models them:
@@ -30,10 +32,9 @@
 // the state machine itself; the battery's torture rows cover the
 // environment-change half.
 
-module BTungstenWB002 where;
+module BTungstenWB002 where
 
-Actor : Type
-Actor = [8]
+type Actor = [8]
 
 T_FREE, T_DELEG, T_OFFER, T_CONT, T_GONE : [3]
 T_FREE  = 0
@@ -44,8 +45,7 @@ T_GONE  = 4
 
 // Sovereignty state of one asset (explicit tags, no sum types — keeps the
 // spec loadable under any Cryptol 3.x).
-Status : Type
-Status = { tag : [3], holder : Actor, lender : Actor, offeree : Actor }
+type Status = { tag : [3], holder : Actor, lender : Actor, offeree : Actor }
 
 free : Actor -> Status
 free a = { tag = T_FREE, holder = a, lender = a, offeree = a }
@@ -83,8 +83,7 @@ A_ATTACH    = 8
 A_DETACH    = 9
 A_BURN      = 10
 
-Action : Type
-Action = { head : [4], signer : Actor, to : Actor }
+type Action = { head : [4], signer : Actor, to : Actor }
 
 // The port's seam table, one clause per action head. `step` is total: an
 // unauthorized or inapplicable action leaves the state unchanged (the
@@ -93,49 +92,49 @@ Action = { head : [4], signer : Actor, to : Actor }
 step : Status -> Action -> Status
 step s a =
   if a.head == A_TRANSFER then
-    if sovereign s == a.signer && s.tag != T_GONE && s.tag != T_OFFER
+    if (sovereign s == a.signer) && (s.tag != T_GONE) && (s.tag != T_OFFER)
       then free a.to                      // the sovereign moves a free/contained-held asset
-      else if s.tag == T_DELEG && s.holder == a.signer && s.lender == a.to
+      else if (s.tag == T_DELEG) && (s.holder == a.signer) && (s.lender == a.to)
         then free a.to                    // the documented borrower handback
         else s
   else if a.head == A_OFFER then
-    if sovereign s == a.signer && s.tag == T_FREE
+    if (sovereign s == a.signer) && (s.tag == T_FREE)
       then offered a.signer a.to
       else s
   else if a.head == A_CLAIM then
-    if s.tag == T_OFFER && s.offeree == a.signer
+    if (s.tag == T_OFFER) && (s.offeree == a.signer)
       then free a.signer                  // standing consent, cashed by the offeree
       else s
   else if a.head == A_CANCEL then
-    if s.tag == T_OFFER && sovereign s == a.signer
+    if (s.tag == T_OFFER) && (sovereign s == a.signer)
       then free a.signer
       else s
   else if a.head == A_DELEGATE then
-    if sovereign s == a.signer && s.tag == T_FREE
+    if (sovereign s == a.signer) && (s.tag == T_FREE)
       then delegated a.signer a.to
       else s
   else if a.head == A_RETURN then
-    if s.tag == T_DELEG && s.holder == a.signer
+    if (s.tag == T_DELEG) && (s.holder == a.signer)
       then free s.lender                  // borrower returns at any time
       else s
   else if a.head == A_UNDELEGATE then     // lender reclaims after the period; the
-    if s.tag == T_DELEG && s.lender == a.signer  // period itself is outside this
+    if (s.tag == T_DELEG) && (s.lender == a.signer)  // period itself is outside this
       then free s.lender                  // abstraction (time is not sovereignty)
       else s
   else if a.head == A_REDELEGATE then     // borrower passes possession onward;
-    if s.tag == T_DELEG && s.holder == a.signer // sovereignty NEVER moves
+    if (s.tag == T_DELEG) && (s.holder == a.signer) // sovereignty NEVER moves
       then delegated s.lender a.to
       else s
   else if a.head == A_ATTACH then
-    if sovereign s == a.signer && s.tag == T_FREE   // bnr-adapter profile:
+    if (sovereign s == a.signer) && (s.tag == T_FREE)   // bnr-adapter profile:
       then contained a.to                           // composition is the sovereign's
       else s
   else if a.head == A_DETACH then
-    if s.tag == T_CONT && sovereign s == a.signer
+    if (s.tag == T_CONT) && (sovereign s == a.signer)
       then free a.signer
       else s
   else if a.head == A_BURN then
-    if sovereign s == a.signer && s.tag != T_GONE
+    if (sovereign s == a.signer) && (s.tag != T_GONE)
       then gone
       else s
   else s
@@ -145,12 +144,42 @@ step s a =
 // consent that sovereign signed into existence (an offer). Note the
 // A_REDELEGATE clause: possession moves, sovereignty does not — the
 // invariant is about sovereign AUTHORITY, not possession.
-property sovereignContinuity (s : Status) (a : Action) : Bit
-  = (sovereign (step s a) != sovereign s)
-      ==> (sovereign s == a.signer || (s.tag == T_OFFER && s.offeree == a.signer))
+// The continuity predicate, over any transition function, so the same
+// words can be asked of a machine that SHOULD fail them (the teeth row
+// below).
+continuityOf : (Status -> Action -> Status) -> Status -> Action -> Bit
+continuityOf f s a
+  = (sovereign (f s a) != sovereign s)
+      ==> ((sovereign s == a.signer) || ((s.tag == T_OFFER) && (s.offeree == a.signer)))
+
+sovereignContinuity : Status -> Action -> Bit
+property sovereignContinuity s a = continuityOf step s a
 
 // Corollary the battery exercises concretely (the specimen's F-1 seam):
 // with an issuer-confiscation head absent from this machine (the adapter
 // profile refuses it at creation), the property above is the WHOLE story;
 // adding such a head makes sovereignContinuity falsifiable — which is
 // exactly how the specimen profile convicts by name in wb002.test.mjs.
+//
+// TEETH (constructed, closed): the specimen machine is `step` plus the F-1
+// head — with authorctrl=true the issuer's signature ALONE moves a holder's
+// asset (`transferf`, ACCEPTED live by the 2021 wasm on Spring 1.2.2, see
+// the wasm-equivalence dispatch). The same continuity words must CONVICT
+// that machine on the concrete F-1 row; if they did not, a PROVEN verdict
+// on `step` would be vacuous.
+A_ISSUERMOVE : [4]
+A_ISSUERMOVE = 11
+
+ISSUER, HOLDER, STRANGER : Actor
+ISSUER   = 0xA1
+HOLDER   = 0x02
+STRANGER = 0x03
+
+stepSpecimen : Status -> Action -> Status
+stepSpecimen s a =
+  if (a.head == A_ISSUERMOVE) && (a.signer == ISSUER) && (s.tag != T_GONE)
+    then free a.to
+    else step s a
+
+property f1Convicted =
+  ~ (continuityOf stepSpecimen (free HOLDER) { head = A_ISSUERMOVE, signer = ISSUER, to = STRANGER })

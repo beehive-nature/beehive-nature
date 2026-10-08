@@ -116,9 +116,17 @@ async function bootChain() {
     await sleep(500);
     if (nodeosProc.exitCode !== null || nodeosProc.signalCode !== null) throw new Error(`nodeos exited during startup; see ${RUN}/nodeos.log`);
     const r = tryCleos(['get', 'info']);
-    if (r.ok) return JSON.parse(r.out);
+    if (!r.ok) continue;
+    // Answering is not ready: at head 1 the head is the 2018 genesis block,
+    // and cleos derives expiration from head time, so a transaction sent
+    // then is born expired the moment a block is produced at the real
+    // time (hosted run 37715019246, chain 2: "Expired Transaction,
+    // expiration 2018-06-01T12:00:30"). Ready = a head produced NOW.
+    const info = JSON.parse(r.out);
+    const t = Date.parse(`${info.head_block_time}${info.head_block_time.endsWith('Z') ? '' : 'Z'}`);
+    if (info.head_block_num >= 2 && Math.abs(Date.now() - t) < 60_000) return info;
   }
-  throw new Error(`nodeos did not come up at ${HTTP} (see ${RUN}/nodeos.log)`);
+  throw new Error(`nodeos did not reach a current head block at ${HTTP} within 30s (see ${RUN}/nodeos.log)`);
 }
 
 async function headTime() {
