@@ -1,0 +1,169 @@
+// bTunGsTeN WB001 — EQUIVALENCE: the Rust model (crates/btungsten-wb001-core)
+// against the Cryptol spec (../wb001-cryptol/BTungstenWB001.cry), by SAW over MIR.
+//
+// Compositional, bottom-up; each proven spec is used as an override above it:
+//   utf8_step            == step                         (all st < 16, all bytes)
+//   well_formed_utf8_N   == wellFormedUtf8               (N = 64, 128; all arrays)
+//   pad_ok_N             == canonicalPad len bs == bs    (N = 32, 64, 128, 4096)
+//   valid_intent         == validIntent                  (ALL intents)
+//   offsets              == bDom .. bPld, envLen         (ALL intents)
+//   byte_at              == byteAt                       (lensBounded intents, all k)
+//   encode               == wire, returns envLen         (lensBounded intents)
+// Every line "WB001-SAW PROVEN <name>" is printed only after its mir_verify
+// returned; wb001-saw-check.sh requires each one.
+//
+// Each Intent field is its own fresh variable, so an override binds the
+// caller's values by pattern; the Cryptol side reassembles the record.
+//
+// usage (from this directory): saw rust.saw   with MIR at ../../../target/saw-wb001/
+
+enable_experimental;
+import "../wb001-cryptol/BTungstenWB001.cry";
+
+m <- mir_load_module "../../../target/saw-wb001/btungsten_wb001_core.linked-mir.json";
+
+let fn n = str_concat "btungsten_wb001_core::" n;
+intent_adt <- return (mir_find_adt m "btungsten_wb001_core::Intent" []);
+offs_adt <- return (mir_find_adt m "btungsten_wb001_core::Offsets" []);
+
+let proven name = print (str_concat "WB001-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+// fresh Rust Intent, field by field; returns (MIR value, Cryptol Intent)
+let fresh_intent = do {
+  dl <- mir_fresh_var "dl" mir_u32;  db <- mir_fresh_var "db" (mir_array 64 mir_u8);
+  nl <- mir_fresh_var "nl" mir_u32;  nb <- mir_fresh_var "nb" (mir_array 32 mir_u8);
+  ep <- mir_fresh_var "ep" mir_u64;
+  al <- mir_fresh_var "al" mir_u32;  ab <- mir_fresh_var "ab" (mir_array 32 mir_u8);
+  tl <- mir_fresh_var "tl" mir_u32;  tb <- mir_fresh_var "tb" (mir_array 128 mir_u8);
+  cl <- mir_fresh_var "cl" mir_u32;  cb <- mir_fresh_var "cb" (mir_array 64 mir_u8);
+  am <- mir_fresh_var "am" mir_u64;
+  ex <- mir_fresh_var "ex" mir_u64;
+  pl <- mir_fresh_var "pl" mir_u32;  pb <- mir_fresh_var "pb" (mir_array 128 mir_u8);
+  yl <- mir_fresh_var "yl" mir_u32;  yb <- mir_fresh_var "yb" (mir_array 4096 mir_u8);
+  let v = mir_struct_value intent_adt
+    [ mir_term dl, mir_term db, mir_term nl, mir_term nb, mir_term ep
+    , mir_term al, mir_term ab, mir_term tl, mir_term tb, mir_term cl, mir_term cb
+    , mir_term am, mir_term ex, mir_term pl, mir_term pb, mir_term yl, mir_term yb ];
+  let I = {{ { domain = { len = dl, bytes = db }, nonce = { len = nl, bytes = nb }, epoch = ep
+             , action = { len = al, bytes = ab }, destination = { len = tl, bytes = tb }
+             , capability = { len = cl, bytes = cb }, amount = am, expiry = ex
+             , payer = { len = pl, bytes = pb }, payload = { len = yl, bytes = yb } } : Intent }};
+  return (v, I);
+};
+
+let offsets_value I = mir_struct_value offs_adt
+  [ mir_term {{ bDom I }}, mir_term {{ bNon I }}, mir_term {{ bEpo I }}, mir_term {{ bAct I }}
+  , mir_term {{ bDst I }}, mir_term {{ bCap I }}, mir_term {{ bAmt I }}, mir_term {{ bExp I }}
+  , mir_term {{ bPay I }}, mir_term {{ bPld I }}, mir_term {{ envLen I }} ];
+
+// ---- utf8_step == step ------------------------------------------------------
+let step_spec = do {
+  st <- mir_fresh_var "st" mir_u8;
+  b <- mir_fresh_var "b" mir_u8;
+  mir_precond {{ st < 16 }};
+  mir_execute_func [mir_term st, mir_term b];
+  mir_return (mir_term {{ zext (step (drop`{4} st) b) : [8] }});
+};
+step_ov <- mir_verify m (fn "utf8_step") [] false step_spec bw;
+proven "utf8_step";
+
+// ---- well_formed_utf8_N == wellFormedUtf8 -----------------------------------
+let wf_spec n = do {
+  bs <- mir_fresh_var "bs" (mir_array n mir_u8);
+  r <- mir_alloc (mir_array n mir_u8);
+  mir_points_to r (mir_term bs);
+  mir_execute_func [r];
+  mir_return (mir_term {{ wellFormedUtf8 { len = 0 : [32], bytes = bs } }});
+};
+wf64_ov <- mir_verify m (fn "well_formed_utf8_64") [step_ov] false (wf_spec 64) bw;
+proven "well_formed_utf8_64";
+wf128_ov <- mir_verify m (fn "well_formed_utf8_128") [step_ov] false (wf_spec 128) bw;
+proven "well_formed_utf8_128";
+
+// ---- pad_ok_N == (canonicalPad len bs == bs) --------------------------------
+let pad_spec n = do {
+  len <- mir_fresh_var "len" mir_u32;
+  bs <- mir_fresh_var "bs" (mir_array n mir_u8);
+  r <- mir_alloc (mir_array n mir_u8);
+  mir_points_to r (mir_term bs);
+  mir_execute_func [mir_term len, r];
+  mir_return (mir_term {{ canonicalPad len bs == bs }});
+};
+pad32_ov <- mir_verify m (fn "pad_ok_32") [] false (pad_spec 32) bw;
+proven "pad_ok_32";
+pad64_ov <- mir_verify m (fn "pad_ok_64") [] false (pad_spec 64) bw;
+proven "pad_ok_64";
+pad128_ov <- mir_verify m (fn "pad_ok_128") [] false (pad_spec 128) bw;
+proven "pad_ok_128";
+pad4096_ov <- mir_verify m (fn "pad_ok_4096") [] false (pad_spec 4096) bw;
+proven "pad_ok_4096";
+
+// ---- valid_intent == validIntent (ALL intents) ------------------------------
+let valid_spec = do {
+  (v, I) <- fresh_intent;
+  r <- mir_alloc (mir_adt intent_adt);
+  mir_points_to r v;
+  mir_execute_func [r];
+  mir_return (mir_term {{ validIntent I }});
+};
+valid_ov <- mir_verify m (fn "valid_intent")
+  [wf64_ov, wf128_ov, pad32_ov, pad64_ov, pad128_ov, pad4096_ov] false valid_spec
+  (w4_unint_bitwuzla ["canonicalPad"]);
+proven "valid_intent";
+
+// ---- offsets == bDom .. bPld, envLen (ALL intents) --------------------------
+let offsets_spec = do {
+  (v, I) <- fresh_intent;
+  r <- mir_alloc (mir_adt intent_adt);
+  mir_points_to r v;
+  mir_execute_func [r];
+  mir_return (offsets_value I);
+};
+offsets_ov <- mir_verify m (fn "offsets") [] false offsets_spec bw;
+proven "offsets";
+
+// ---- byte_at == byteAt (bounded intents, every position) --------------------
+// The offsets are fresh variables bound by pattern at each call site, and
+// every requirement is ONE precondition: encode applies this override 4,626
+// times, so one side goal per call instead of twelve.
+let byte_at_spec = do {
+  (v, I) <- fresh_intent;
+  k <- mir_fresh_var "k" mir_u32;
+  od <- mir_fresh_var "od" mir_u32;  on <- mir_fresh_var "on" mir_u32;
+  oe <- mir_fresh_var "oe" mir_u32;  oa <- mir_fresh_var "oa" mir_u32;
+  ot <- mir_fresh_var "ot" mir_u32;  oc <- mir_fresh_var "oc" mir_u32;
+  om <- mir_fresh_var "om" mir_u32;  ox <- mir_fresh_var "ox" mir_u32;
+  op <- mir_fresh_var "op" mir_u32;  ol <- mir_fresh_var "ol" mir_u32;
+  ov <- mir_fresh_var "ov" mir_u32;
+  mir_precond {{ lensBounded I
+              && ([od, on, oe, oa, ot, oc, om, ox, op, ol, ov]
+                  == [bDom I, bNon I, bEpo I, bAct I, bDst I, bCap I, bAmt I, bExp I, bPay I, bPld I, envLen I]) }};
+  ri <- mir_alloc (mir_adt intent_adt);
+  mir_points_to ri v;
+  ro <- mir_alloc (mir_adt offs_adt);
+  mir_points_to ro (mir_struct_value offs_adt (map mir_term [od, on, oe, oa, ot, oc, om, ox, op, ol, ov]));
+  mir_execute_func [ri, ro, mir_term k];
+  mir_return (mir_term {{ byteAt I k }});
+};
+byte_at_ov <- mir_verify m (fn "byte_at") [] false byte_at_spec bw;
+proven "byte_at";
+
+// ---- encode == wire, returns envLen (bounded intents) -----------------------
+let encode_spec = do {
+  (v, I) <- fresh_intent;
+  mir_precond {{ lensBounded I }};
+  ri <- mir_alloc (mir_adt intent_adt);
+  mir_points_to ri v;
+  out0 <- mir_fresh_var "out0" (mir_array 4626 mir_u8);
+  ro <- mir_alloc_mut (mir_array 4626 mir_u8);
+  mir_points_to ro (mir_term out0);
+  mir_execute_func [ri, ro];
+  mir_points_to ro (mir_term {{ wire I }});
+  mir_return (mir_term {{ envLen I }});
+};
+encode_ov <- mir_verify m (fn "encode") [offsets_ov, byte_at_ov] false encode_spec
+  (w4_unint_bitwuzla ["byteAt", "bDom", "bNon", "bEpo", "bAct", "bDst", "bCap", "bAmt", "bExp", "bPay", "bPld", "envLen"]);
+proven "encode";
+
+print "WB001-SAW ALL-PROVEN";

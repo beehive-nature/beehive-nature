@@ -35,8 +35,8 @@ Upstream facts, re-verified 2026-10-07 (claim → evidence):
   (and not just owner) to burn and transfer"); enforced at
   `src/SimpleAssets.cpp:692-695` (`transferf`) and `:787` (`burnf`).
 
-Load-bearing file hashes (sha256, over the vendored bytes) — the port in
-`../wb002-simpleassets.mjs` cites these files by line: PUBLIC-CONSTANT
+Load-bearing file hashes (sha256, over the vendored bytes) — the Rust model in
+`crates/btungsten-wb002/src/chain.rs` cites these files by line: PUBLIC-CONSTANT
 
 - src/SimpleAssets.cpp — 820af348481dc423cc577add0492cfe80c6e918c405265b66c5d6443258b2f8c (PUBLIC-CONSTANT)
 - include/SimpleAssets.hpp — 9c60dcee88b9164b15a8cfae1bbc2a9dac8a0857910fcdbf84ac19637d6e50c9 (PUBLIC-CONSTANT)

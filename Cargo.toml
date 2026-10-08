@@ -63,6 +63,10 @@ members = [
     "crates/watchpay",
     "crates/settle-solana",
     "crates/bnr-seal",
+    "crates/btungsten-wb001-core",
+    "crates/btungsten-wb001",
+    "crates/btungsten-wb002-core",
+    "crates/btungsten-wb002",
 ]
 
 [workspace.metadata]

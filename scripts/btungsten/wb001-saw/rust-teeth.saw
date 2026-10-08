@@ -1,0 +1,41 @@
+// TEETH for rust.saw: the Rust byte_at asked to equal the spec one position
+// off (byteAt I (k + 1)). It MUST fail with a solver counterexample; if it
+// proves, the byte_at obligation in rust.saw says nothing.
+
+enable_experimental;
+import "../wb001-cryptol/BTungstenWB001.cry";
+
+m <- mir_load_module "../../../target/saw-wb001/btungsten_wb001_core.linked-mir.json";
+intent_adt <- return (mir_find_adt m "btungsten_wb001_core::Intent" []);
+offs_adt <- return (mir_find_adt m "btungsten_wb001_core::Offsets" []);
+
+let rust_intent I = mir_struct_value intent_adt
+  [ mir_term {{ I.domain.len }},      mir_term {{ I.domain.bytes }}
+  , mir_term {{ I.nonce.len }},       mir_term {{ I.nonce.bytes }}
+  , mir_term {{ I.epoch }}
+  , mir_term {{ I.action.len }},      mir_term {{ I.action.bytes }}
+  , mir_term {{ I.destination.len }}, mir_term {{ I.destination.bytes }}
+  , mir_term {{ I.capability.len }},  mir_term {{ I.capability.bytes }}
+  , mir_term {{ I.amount }}
+  , mir_term {{ I.expiry }}
+  , mir_term {{ I.payer.len }},       mir_term {{ I.payer.bytes }}
+  , mir_term {{ I.payload.len }},     mir_term {{ I.payload.bytes }}
+  ];
+let rust_offsets I = mir_struct_value offs_adt
+  [ mir_term {{ bDom I }}, mir_term {{ bNon I }}, mir_term {{ bEpo I }}, mir_term {{ bAct I }}
+  , mir_term {{ bDst I }}, mir_term {{ bCap I }}, mir_term {{ bAmt I }}, mir_term {{ bExp I }}
+  , mir_term {{ bPay I }}, mir_term {{ bPld I }}, mir_term {{ envLen I }} ];
+
+print "WB001-SAW-TEETH obligation: byte_at == byteAt one position off";
+mir_verify m "btungsten_wb001_core::byte_at" [] false (do {
+  I <- mir_fresh_cryptol_var "I" {| Intent |};
+  k <- mir_fresh_var "k" mir_u32;
+  mir_precond {{ lensBounded I }};
+  ri <- mir_alloc (mir_adt intent_adt);
+  mir_points_to ri (rust_intent I);
+  ro <- mir_alloc (mir_adt offs_adt);
+  mir_points_to ro (rust_offsets I);
+  mir_execute_func [ri, ro, mir_term k];
+  mir_return (mir_term {{ byteAt I (k + 1) }});
+}) w4;
+print "WB001-SAW-TEETH UNEXPECTED-PROVEN";

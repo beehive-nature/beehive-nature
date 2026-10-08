@@ -16,8 +16,9 @@
 #   TEETH            the solver must REFUTE the same continuity words on the
 #                    specimen machine (step + the F-1 issuer head). Q.E.D.
 #                    there means the property lost its teeth: red.
-#   EQUIVALENCE      not attempted here. The Rust twin + SAW plan
-#                    (wb002-saw/sovereign.saw) is a later class and cannot
+#   EQUIVALENCE      not attempted here: SAW proves the model core equal to
+#                    this spec in wb002-saw-check.sh. The SAW plan
+#                    (wb002-saw/sovereign.saw) is that class and cannot
 #                    be claimed from this run.
 #
 # cryptol 3.6.0 exits nonzero when a :prove finds a counterexample, so the
@@ -107,4 +108,4 @@ case $PROVE_VERDICT in
 esac
 
 say "== formal WB002: ladder state =="
-say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (random + constructed F-1 row) | PROVE-UNIVERSAL: see line above | TEETH: PASS | EQUIVALENCE: NOT ATTEMPTED (Rust twin + SAW are later classes)"
+say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (random + constructed F-1 row) | PROVE-UNIVERSAL: see line above | TEETH: PASS | EQUIVALENCE: separate class, wb002-saw-check.sh (SAW, wb002-saw.yml)"

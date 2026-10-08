@@ -1,0 +1,19 @@
+[package]
+name = "btungsten-wb001"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "bTunGsTeN WB001 Rust twin: canonical intent envelope (SAW-verified core), strict decoder, Ed25519 binding via HACL*-verified libcrux."
+publish = false
+
+[dependencies]
+btungsten-wb001-core = { path = "../btungsten-wb001-core" }
+# Ed25519 compiled to safe Rust from HACL* C, which is F*-verified for memory
+# safety, functional correctness against the RFC 8032 spec, and secret
+# independence. Pinned exactly; 0.0.9 (2026-07-15), not the day-old 0.0.10.
+libcrux-ed25519 = "=0.0.9"
+
+[dev-dependencies]
+# Independent second and third implementations for differential checks:
+# dalek here, OpenSSL (node:crypto) through the pinned vectors file.
+ed25519-dalek = "2.2.0"

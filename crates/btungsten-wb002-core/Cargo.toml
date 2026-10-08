@@ -1,0 +1,14 @@
+# bTunGsTeN WB002 — the sovereignty machine of the Cryptol spec
+# (scripts/btungsten/wb002-cryptol/BTungstenWB002.cry): `sovereign` and
+# `step`, proven equal to the spec by SAW (scripts/btungsten/wb002-saw/).
+# The WB002 model (crates/btungsten-wb002) links THIS code: its sovereignty
+# definition is `sovereign`, and its adapter transitions replay `step`.
+# No dependencies, so saw-rustc compiles it as one file.
+[package]
+name = "btungsten-wb002-core"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+publish = false
+
+[dependencies]

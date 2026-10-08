@@ -4,10 +4,10 @@
 
 import "../wb002-cryptol/BTungstenWB002.cry";
 
-m <- mir_load_module "../wb002-rust/target/saw/wb002_twin.linked-mir.json";
+m <- mir_load_module "../../../target/saw-wb002/btungsten_wb002_core.linked-mir.json";
 
-let status_adt = mir_find_adt m "wb002_twin::Status" [];
-let action_adt = mir_find_adt m "wb002_twin::Action" [];
+let status_adt = mir_find_adt m "btungsten_wb002_core::Status" [];
+let action_adt = mir_find_adt m "btungsten_wb002_core::Action" [];
 
 // the bridge: Rust carries bytes, the spec carries [3] tags and [4] heads
 let {{

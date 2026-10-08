@@ -1,0 +1,12 @@
+[package]
+name = "btungsten-wb002"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "bTunGsTeN WB002: the SimpleAssets-2021 specimen model in Rust; sovereignty through the SAW-proven core."
+publish = false
+
+[dependencies]
+btungsten-wb002-core = { path = "../btungsten-wb002-core" }
+sha2 = { workspace = true }
+serde_json = "1"

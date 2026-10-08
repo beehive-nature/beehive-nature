@@ -1,10 +1,10 @@
 #!/bin/sh
-# wb002-saw-check.sh — the EQUIVALENCE class for Workbench 002: the Rust twin
-# (wb002-rust/src/lib.rs) against the Cryptol spec
+# wb002-saw-check.sh — the EQUIVALENCE class for Workbench 002: the model core
+# (crates/btungsten-wb002-core/src/lib.rs) against the Cryptol spec
 # (wb002-cryptol/BTungstenWB002.cry), proven by SAW over MIR. Classes, none
 # standing in for another:
 #
-#   BUILD        the twin compiles to MIR JSON (mir-json, schema 13 — the
+#   BUILD        the core compiles to MIR JSON (mir-json, schema 13 — the
 #                schema SAW 1.6 reads). A failed build is red.
 #   EQUIVALENCE  wb002-saw/sovereign.saw: three mir_verify obligations
 #                (step on the well-formed domain, step's refusal of the
@@ -25,10 +25,10 @@ set -eu
 SAW="${1:?usage: wb002-saw-check.sh <saw> <saw-rustc>}"
 SAW_RUSTC="${2:?usage: wb002-saw-check.sh <saw> <saw-rustc>}"
 ROOT=$(pwd)
-TWIN="$ROOT/scripts/btungsten/wb002-rust"
+CORE="$ROOT/crates/btungsten-wb002-core"
 SAWDIR="$ROOT/scripts/btungsten/wb002-saw"
-OUT="$TWIN/target/saw"
-MIR="$OUT/wb002_twin.linked-mir.json"
+OUT="$ROOT/target/saw-wb002"
+MIR="$OUT/btungsten_wb002_core.linked-mir.json"
 
 say() { printf '%s\n' "$*"; }
 
@@ -36,10 +36,10 @@ say "== SAW WB002: toolchain =="
 "$SAW" --version | head -1
 
 # ---- BUILD -------------------------------------------------------------------
-say "== SAW WB002: BUILD the twin to MIR JSON =="
+say "== SAW WB002: BUILD the model core to MIR JSON =="
 rm -rf "$OUT" && mkdir -p "$OUT"
-( cd "$TWIN" && "$SAW_RUSTC" src/lib.rs --edition 2021 --crate-type lib --crate-name wb002_twin --out-dir "$OUT" ) || {
-  say "SAW-BUILD WB002: FAIL — the twin did not compile to MIR"
+( cd "$CORE" && "$SAW_RUSTC" src/lib.rs --edition 2021 --crate-type lib --crate-name btungsten_wb002_core --out-dir "$OUT" ) || {
+  say "SAW-BUILD WB002: FAIL — the model core did not compile to MIR"
   exit 1
 }
 if [ ! -s "$MIR" ]; then
@@ -76,7 +76,7 @@ if ! say "$TE_LOG" | grep -aq 'WB002-SAW-TEETH obligation' || ! say "$TE_LOG" | 
   say "$TE_LOG"
   exit 1
 fi
-say "SAW-TEETH WB002: PASS (the solver separates the Rust twin from the F-1 specimen machine)"
+say "SAW-TEETH WB002: PASS (the solver separates the model core from the F-1 specimen machine)"
 
 say "== SAW WB002: ladder state =="
-say "BUILD: PASS | EQUIVALENCE: PROVEN (step on well-formed, step refuses the rest, sovereign on all of [3]) | TEETH: PASS | scope: Rust twin == Cryptol spec; NOT the JS port, NOT the 2021 wasm"
+say "BUILD: PASS | EQUIVALENCE: PROVEN (step on well-formed, step refuses the rest, sovereign on all of [3]) | TEETH: PASS | scope: model core == Cryptol spec (the model links this core); NOT the 2021 wasm"

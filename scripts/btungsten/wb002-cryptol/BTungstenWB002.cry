@@ -1,4 +1,4 @@
-// bTunGsTeN Workbench 002 — the formal twin of wb002-simpleassets.mjs:
+// bTunGsTeN Workbench 002 — the formal spec of the WB002 model's sovereignty:
 // sovereign continuity across the SimpleAssets-2021 state machine.
 //
 // Written 2026-10-07 (zCode seat) and staged unrun; the staged file never
@@ -9,12 +9,14 @@
 // separate results (SPEC-BTUNGSTEN-1 §workbench result-class law) and the
 // run's log is the receipt. EQUIVALENCE is a separate class, run by
 // ../wb002-saw-check.sh (.github/workflows/wb002-saw.yml): SAW proves the
-// Rust twin (../wb002-rust/src/lib.rs) equal to `step` and `sovereign`
-// here. The executable twin (wb002.test.mjs) attacks the same invariant
-// over hostile histories, a wrong-signer matrix and the torture suite;
-// this file states it for ALL states and actions OF THIS ABSTRACTION. No
-// proof here or in SAW reaches the JS port or the 2021 wasm: those links
-// are sampled (the battery, the wasm corpus), never proven.
+// model core (crates/btungsten-wb002-core) equal to `step` and
+// `sovereign` here, and the Rust model (crates/btungsten-wb002) links that
+// core: every asset's sovereign is `sovereign` of its table status, and
+// the adapter profile replays every sovereignty-moving action through
+// `step`. The battery (crates/btungsten-wb002/tests/wb002) attacks the same
+// invariant over hostile histories, a wrong-signer matrix and the torture
+// suite; this file states it for ALL states and actions OF THIS
+// ABSTRACTION. The 2021 wasm link is the executed corpus, never a proof.
 //
 // Modeled scope: the sovereignty state of ONE asset through the action
 // heads that can move it, exactly as the port models them:
@@ -161,7 +163,7 @@ property sovereignContinuity s a = continuityOf step s a
 // with an issuer-confiscation head absent from this machine (the adapter
 // profile refuses it at creation), the property above is the WHOLE story;
 // adding such a head makes sovereignContinuity falsifiable — which is
-// exactly how the specimen profile convicts by name in wb002.test.mjs.
+// exactly how the specimen profile convicts by name in the battery.
 //
 // TEETH (constructed, closed): the specimen machine is `step` plus the F-1
 // head — with authorctrl=true the issuer's signature ALONE moves a holder's

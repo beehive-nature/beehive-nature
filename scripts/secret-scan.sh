@@ -61,10 +61,10 @@
 #     docs/handoffs/silentpay-v2 basis, 2026-10-07 (WB002 lane dispatch).
 #   - scripts/btungsten/wb001-bridge.json: the bTunGsTeN WB001 formal-wire
 #     bridge corpus (founder review B1, 2026-10-07) — the 8 constructed
-#     terms' canonical() envelopes, derived FROM THE PUBLIC RUNTIME by
-#     wb001-bridge-gen.mjs and re-derived byte-for-byte by the node leg on
-#     every CI run. Pretty-printed JSON cannot carry a same-line marker;
-#     the identical bytes are pinned in wb001-cryptol/Intent.cry constants
+#     terms' canonical() envelopes, derived FROM THE PUBLIC RUST MODEL by
+#     crates/btungsten-wb001/tests/wb001/pin.rs and re-derived byte-for-byte
+#     by its cargo test drift gate on every CI run. Pretty-printed JSON cannot carry a same-line marker;
+#     the identical bytes are pinned in wb001-cryptol/BTungstenWB001.cry constants
 #     that DO carry same-line PUBLIC-CONSTANT markers. The hex is envelope
 #     data (magic 'bT-WB01' TLV), never key material. Path-scoped (this
 #     one generator-owned file; the hex pattern stays armed everywhere

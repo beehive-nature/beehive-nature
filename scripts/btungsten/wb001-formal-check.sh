@@ -29,7 +29,7 @@
 set -eu
 
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
-CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
+CRY="scripts/btungsten/wb001-cryptol/BTungstenWB001.cry"
 # 240s, not 300: twice the prove process died by SIGTERM (exit 143, at
 # 269s in run 37698302619 and 289s in run 37701649473) BEFORE a 300s
 # wrapper could print the honest classification. Termination by signal
@@ -85,14 +85,14 @@ check() {
 }
 
 # ---- FORMAL-WIRE-ALIGNMENT (founder review B1, 2026-10-07): the bridge ----
-# The BRIDGE block in Intent.cry was comment-only until B1 — no Cryptol
+# The BRIDGE block in BTungstenWB001.cry was comment-only until B1 — no Cryptol
 # wire byte had ever been compared to a runtime canonical() byte, so the
 # deployed-envelope claim under the wireInjective proof was prose. These
 # closed-term evaluations compare the .cry wire (prefix + zero tail +
-# envLen) against OPAQUE constants pinned from the runtime
-# (wb001-bridge.json, derived by wb001-bridge-gen.mjs, re-derived on the
-# node leg by wb001-bridge.test.mjs every run). A red here names its
-# term: the twin and the runtime have drifted apart.
+# envLen) against OPAQUE constants pinned from the Rust model
+# (wb001-bridge.json, derived by crates/btungsten-wb001/tests/wb001/pin.rs,
+# re-derived by its cargo test drift gate every run). A red here names its
+# term: the spec and the model have drifted apart.
 check bridgeIBase     ':check bridgeIBase'
 check bridgeTwinL     ':check bridgeTwinL'
 check bridgeTwinR     ':check bridgeTwinR'

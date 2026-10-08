@@ -1,5 +1,5 @@
-// bTunGsTeN Workbench 002 — SAW EQUIVALENCE: the Rust twin
-// (../wb002-rust/src/lib.rs) against the Cryptol spec
+// bTunGsTeN Workbench 002 — SAW EQUIVALENCE: the model core
+// (crates/btungsten-wb002-core/src/lib.rs) against the Cryptol spec
 // (../wb002-cryptol/BTungstenWB002.cry), through MIR (mir-json schema 13,
 // SAW 1.6). Run by ../wb002-saw-check.sh from this directory; the runner
 // classifies the result (result-class law: this is the EQUIVALENCE class,
@@ -16,19 +16,19 @@
 //                        equals the Cryptol `sovereign`
 //
 // With these discharged, sovereignContinuity (PROVEN in Cryptol) holds of
-// the Rust function for all inputs. It still says NOTHING about the JS port
-// or the 2021 wasm. The teeth twin of this script is sovereign-teeth.saw.
+// the Rust function for all inputs, and the model links that function. It
+// says nothing about the 2021 wasm. The teeth of this script: sovereign-teeth.saw.
 
 include "sovereign-defs.saw";
 
 print "WB002-SAW obligation step_matches_spec";
-mir_verify m "wb002_twin::step" [] false (step_against {{ step }}) z3;
+mir_verify m "btungsten_wb002_core::step" [] false (step_against {{ step }}) z3;
 print "WB002-SAW PROVEN step_matches_spec";
 
 print "WB002-SAW obligation step_refuses_rest";
-mir_verify m "wb002_twin::step" [] false step_refuses_rest z3;
+mir_verify m "btungsten_wb002_core::step" [] false step_refuses_rest z3;
 print "WB002-SAW PROVEN step_refuses_rest";
 
 print "WB002-SAW obligation sovereign_matches";
-mir_verify m "wb002_twin::sovereign" [] false sovereign_matches z3;
+mir_verify m "btungsten_wb002_core::sovereign" [] false sovereign_matches z3;
 print "WB002-SAW PROVEN sovereign_matches";

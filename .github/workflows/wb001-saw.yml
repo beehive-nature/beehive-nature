@@ -1,11 +1,11 @@
-name: WB002 SAW equivalence
+name: WB001 SAW proofs
 
-# bTunGsTeN WB002 EQUIVALENCE class: the model core (crates/
-# btungsten-wb002-core) proven equal to the Cryptol spec by SAW over MIR, plus the
-# TEETH run that must fail. Separate from tests.yml's formal job so its
-# toolchain build cannot eat WB001's prove budget. Every tool is pinned:
-# SAW 1.6 by release-asset digest, mir-json by the exact commit SAW 1.6
-# itself vendors (deps/mir-json @ v1.6), on the nightly that commit names.
+# bTunGsTeN WB001 on the Rust model itself (crates/btungsten-wb001-core): SAW
+# over MIR proves the model equal to the Cryptol spec (EQUIVALENCE), proves
+# wireInjective for all valid intents (PROVE-UNIVERSAL), runs two TEETH
+# obligations that must fail, and checks the RFC 8032 Ed25519 Cryptol spec on
+# its closed terms. Toolchain pins and the mir-json cache are shared with the
+# WB002 SAW workflow (same key, same commit, same nightly).
 
 on:
   push:
@@ -22,7 +22,7 @@ env:
 jobs:
   saw:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Install pinned SAW 1.6 (with bundled solvers)
@@ -72,9 +72,6 @@ jobs:
           echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
           echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
           "$HOME/mir-json-inst/bin/mir-json" --version
-      - name: WB002 model core — unit tests
+      - name: WB001 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH + Ed25519 SPEC-CHECK
         shell: bash
-        run: cargo test --locked -p btungsten-wb002-core
-      - name: WB002 SAW — BUILD + EQUIVALENCE + TEETH
-        shell: bash
-        run: sh scripts/btungsten/wb002-saw-check.sh saw saw-rustc
+        run: sh scripts/btungsten/wb001-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
