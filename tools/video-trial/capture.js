@@ -18,7 +18,10 @@
       paused: v?.paused ?? null, ended: v?.ended ?? null, aheadSeconds: number(v?.ahead),
       direct: d ? { reused: d.reused, requests: d.requests, completed: d.completed,
         failed: d.failed, uniqueBytes: d.uniqueBytes, readBytes: d.readBytes,
-        connectMs: d.connectMs, openMs: d.openMs } : null });
+        connectMs: d.connectMs, openMs: d.openMs,
+        emittedBytes: number(d.emittedBytes), bufferedBytes: number(d.bufferedBytes),
+        peakBufferedBytes: number(d.peakBufferedBytes), emittedChunks: number(d.emittedChunks),
+        waitingForChunk: number(d.waitingForChunk), headWaitMs: number(d.headWaitMs) } : null });
     if (rows.length >= 7200) stop(); // bounded to 30 minutes at 250 ms
   };
   const stop = () => { stopped = true; clearInterval(timer); };

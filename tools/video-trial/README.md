@@ -1,7 +1,8 @@
 # Video trial: browse, playback, and return visits
 
-This is a measurement kit, not a streaming optimization or a bTunGsTeN
-conformance result. It follows SPEC-BTUNGSTEN-1's observation/evidence boundary.
+This is a measurement kit, not a bTunGsTeN conformance result. Its companion
+bView repair bounds recovery when a needed chunk is missing; it does not claim
+higher network throughput. It follows SPEC-BTUNGSTEN-1's observation/evidence boundary.
 The founder supplied Shu's October 7 observations and an interpretation with
 numbers. Screenshots, raw logs, Trial #1 source/build, exact content IDs, and
 repetition counts were not supplied. The numbers here are a transcription of
@@ -100,6 +101,10 @@ sample `atMs` is relative to recorder installation, not play.
 ## The engineering experiment worth doing next
 
 Hypothesis: background poster reads compete with the next playable video bytes.
+Follow-up inspection of the public October 7 ants.tube bundle found existing
+visible-poster prioritization, a shared client, and playback context switching.
+That bundle has not been identified as Trial #1. Establish what its existing
+scheduler does under load before proposing another one.
 This is not yet established. Trial #1's code is needed before attributing its win
 to scheduling. Test one change at a time against the pinned baseline:
 
@@ -119,6 +124,16 @@ the document (`openPool`). `pagehide` closes it. Instrument chunk completion ver
 ordered emission before changing lanes: a delayed early chunk can block usable
 progress even when later bytes have arrived. More concurrency may amplify that
 problem. None of this source inspection proves ants.tube has the same behavior.
+
+The companion bView repair starts the existing 45-second watchdog only while the
+player is waiting for its next ordered chunk. Later arrivals cannot reset that
+deadline; consumer processing time does not consume it. A successful needed chunk
+ends the wait. `emittedBytes`, `bufferedBytes`, `peakBufferedBytes`, `emittedChunks`,
+`waitingForChunk` (zero-based or null), and cumulative completed `headWaitMs` expose
+the distinction. These are application counters, not decoded frames or wire bytes.
+On stop, queued bytes describe the queue at termination, not retained memory.
+Late reads cannot change a terminated run's counters. Direct-only still stops;
+the fallback route still uses the relay. No retry fanout or concurrency increase.
 
 Recommended provisional acceptance, agreed before runs: retain the browse gain
 on equal workloads; no additional failures; paired median first-frame regression

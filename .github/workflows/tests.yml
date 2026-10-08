@@ -845,7 +845,7 @@ jobs:
         timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs bview-direct.test.mjs
+        run: node --test bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
