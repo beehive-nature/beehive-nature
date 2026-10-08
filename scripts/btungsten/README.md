@@ -41,6 +41,7 @@ under test: issues #26, #19, #21, #6 (all still open, re-verified
 | `wb002-cryptol/Sovereign.cry` — formal twin; `sovereignContinuity` for ALL states/actions | STAGED — NOT-RUN under cryptol (result-class law); TYPECHECK/CHECK-SAMPLED/PROVE-UNIVERSAL all pending the CI ubuntu beat |
 | `wb002-saw/sovereign.saw` — equivalence-plan against a future Rust twin | STAGED — NOT-RUN (result-class law); EQUIVALENCE pending, vectors-first when the twin exists |
 | `wb002-hardening.test.mjs` — the model-hardening beat (founder review of the merged landing, 2026-10-07): the two review findings R-1/R-2 as red-first regressions, fingerprint-stability over every refusing seam, multi-action `tx()` bundle atomicity, content-authenticated display (checkpoint body via parent root; suffix bounded by a trusted tip), lag-at-authenticated-height, fail-closed root-only anchor | RUNS in CI — green locally 2026-10-07: 10/10 (landed RED first: 6 failing cases + 3 controls, receipt in the dispatch) |
+| `wb002-wasm-equiv.mjs` + `wb002-wasm-receipt.json` — the WASM-vs-model beat: the VENDORED 2021 wasm+abi deployed VERBATIM (never rebuilt) onto a fresh local dev chain under **Antelope Spring 1.2.2** (this box's WSL; isolated :8889/:9899 + own dirs — a sibling lane's chain owns :8888), a 46-step deterministic corpus executed on BOTH the chain and the HARDENED specimen-profile model with one shared clock (chain head time), compared on accept/refuse class + full state projection after EVERY step | EXECUTED 2026-10-07 — three consecutive fresh-chain runs: **46/46 matched, 0 class mismatches, 0 state mismatches, final projections agree; 14 refused steps proven atomic ON CHAIN (the R-1 class against the real rollback boundary); F-1 issuer confiscation ACCEPTED live; F-3 owner-attach refused live.** Corpus-sampled evidence, NOT a proof (result-class law); local dev chain only — no testnet claim |
 
 ### §model-hardening (founder review 2026-10-07 — R-1/R-2, both repaired)
 
@@ -119,20 +120,46 @@ lineage: owner → bounded authority → temporary executor → receipt) ·
 sponsored sovereignty (payer is never an owner — proven in the
 faithful-port row).
 
+### §wasm-beat — what running the 2021 artifact on the 2026 client taught (2026-10-07)
+
+- The wasm runs UNMODIFIED on Antelope Spring 1.2.2 (Savanna-era) once
+  its OWN documented deployment link is applied (`set account permission
+  … --add-code`): the contract's `sendEvent` deferred transactions act
+  as the contract account and every Antelope since eosio.code requires
+  the link. That link is deployment configuration, not artifact
+  modification.
+- Bring-up receipts, honestly: Spring's keosd serves the wallet API on
+  its unix socket (HTTP wallet endpoints 404); a fresh wallet is born
+  unlocked; WSL's poor timer accuracy needs `--max-transaction-time`
+  raised or the subjective deadline kills heavier calls
+  nondeterministically; and a failed `get table` must NEVER read as an
+  empty table (the harness fails loudly instead).
+- The corpus validated the model's most consequential claims LIVE: the
+  F-1 issuer confiscation is ACCEPTED by the real contract on the
+  issuer's signature alone; the F-3 owner-attach is refused (composition
+  is author-gated upstream); the partial batch refuses with the WHOLE
+  state untouched (Antelope's rollback boundary — the same class the
+  hardening beat added to the model); delegation expiry follows real
+  chain time; ids match naturally (both sides run the same genesis
+  counters — only `offerfs.id` diverges, because upstream allocates
+  deferred-event ids from the same counter the model deliberately does
+  not port; the harness reconciles it and names that in its header).
+
 ### §next (named gaps, in order)
 
-1. **wasm-vs-model equivalence**: the vendored 2021 wasm executed on a
-   modern Antelope/Vaulta test stack vs the port's verdicts — the port
-   is evidence about a model until this lands (run on the box or CI;
-   the specimen's own issue #21 is the epoch's build-rot warning).
+1. ~~wasm-vs-model equivalence~~ **DONE 2026-10-07** (see §wasm-beat +
+   the receipt; corpus-sampled, local dev chain).
 2. **Cryptol typecheck + `:check sovereignContinuity`** (with WB001's
    container beat; SAW = Linux x86_64).
 3. **Rust twin of sovereign/step**, then the SAW equivalence
    (wb002-saw plan) — after which the battery's sampled histories
    become provable corollaries.
 4. **Live leg**: the same torture rows against a deployed Vaulta
-   contract (bzcodejungle), not only the model.
-5. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
+   contract (bzcodejungle testnet), not only the local dev chain.
+5. **CI leg**: run wb002-wasm-equiv.mjs on the CI ubuntu runner (it
+   needs a Spring install; the sibling-isolation ports/dirs are
+   already parameterized).
+6. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
 
 ## WB001 — the intent-binding invariant (LIVE in CI)
 
@@ -160,8 +187,8 @@ stay accepted, byte-exact. Red-first receipt in
 | `wb001.test.mjs` — the genesis battery (retained byte-stable): injectivity corpus (25 intents incl. nested-envelope and boundary-shift twins), 21 field-move mutants, 1,640 one-bit envelope mutants (205 bytes × 8), 512 one-bit signature mutants, 5 structural forgeries (reorder / unknown tag / duplicate / length-splice / truncation), domain/nonce/epoch participation, cross-key, and the TEETH row convicting the naive length-free encoder on both adjacent-variable-field collision pairs | RUNS in CI — green 10/10 |
 | `wb001-boundary.test.mjs` — the boundary suite (landed RED against the genesis module first): 32 lone-surrogate encodes refused (4 fields × 8 forms), 24 surrogate-class authorization crossings rejected, 8 valid-Unicode controls round-trip byte-exact, 9 malformed-UTF-8 decodes refused with the valid 4-byte and U+FFFD controls passing, malformed-wire verifyEnvelope refusal, and the pinned shared vectors | RUNS in CI — green 6/6 since the repair |
 | `wb001-vectors.json` (+ `wb001-gen-vectors.mjs`) — the pinned shared vectors: 10 positives byte-for-byte, 9 refusals by exact code, including the surrogate/invalid-UTF-8 boundary rows. Every twin (Rust, Cryptol) must reproduce these BEFORE any equivalence claim | PINNED, re-derived and compared on every CI run |
-| `wb001-cryptol/BTungstenWB001.cry (renamed from Intent.cry: Cryptol resolves module names to same-named files)` — formal twin: concrete UTF-8 DFA (the runtime validator's exact transition law), valid-input constraints, and since the B1 repair the COMPACT packing — offsets + `byteAt`, each tag immediately after the previous field's meaningful bytes, zeros only past `envLen` — with `wireInjective` and `wireZeroTail` over the valid domain | RUNS IN CI (formal job) |
-| `wb001-cryptol/Vectors.cry` (generated by `wb001-gen-vectors-cry.mjs` from the pinned JSON) — the bridge EXECUTED: the model must reproduce every pinned envelope byte-for-byte (length word, every meaningful byte, zero tail) | RUNS IN CI — `:check vectorsHold` gates the formal job |
+| `wb001-cryptol/Intent.cry` — formal twin: meaningful lengths, valid-input constraints (canonical zero padding, wellFormedUtf8 as the concrete DFA with the runtime validator's exact transition law), `wireInjective` for all VALID pairs; the B1 repair made the BRIDGE block EXECUTABLE (every constructed term's runtime bytes pinned as opaque constants, prefix + zero-tail + envLen obligations) — and the bridge's FIRST counterexample (`bridgeIBase = False`, CI run 37692766559) convicted the pre-B1 `wire` as a PADDED LOOKALIKE: it interleaved each field's capacity padding inside the stream, so the deployed envelope was never its prefix. The wire is REWRITTEN as the true variable-length stream (byteAt dispatch over length-derived block offsets, zero tail beyond envLen) | RUNS in the CI formal job — TYPECHECK PASS, CHECK-SAMPLED all arms; the pre-B1 wireInjective Q.E.D. (z3, 23.7s) was a receipt about the lookalike and does NOT carry over: the prove re-attempts on the repaired wire every run and its verdict line is the live record — see §result-classes |
+| `wb001-bridge.json` (+ `wb001-bridge-gen.mjs`, `wb001-bridge.test.mjs`) — the formal-wire bridge (founder review B1, 2026-10-07): the 8 constructed terms' runtime canonical() envelopes pinned byte-for-byte; the .cry carries the same hex as opaque constants; the node leg re-derives every run and asserts the .cry literals, the formal leg :checks the bridge properties — any drift on either side goes red. Sampled agreement on pinned terms, never equivalence | PINNED, re-derived and compared on every CI run (both legs) |
 | `wb001-saw/intent.saw` — equivalence-proof plan against a future Rust twin, vector-first | STAGED — written, not run; UNVERIFIED |
 
 ### §result-classes (founder ruling 2026-10-07)
@@ -172,8 +199,8 @@ recorded as another:
 | class | meaning | status |
 |---|---|---|
 | TYPECHECK | the .cry parses and typechecks | **PASS in CI** — gates every push (cryptol 3.6.0, pinned asset) |
-| CHECK-SAMPLED | `:check` — adversarial arm + per-field validity rows + constructed arm + THE PINNED VECTORS (`vectorsHold`: the model reproduces every envelope byte-for-byte) + zero-tail + random arm | **WIRED IN CI** — every arm gates the job |
-| PROVE-UNIVERSAL | `:prove` across the stated domain | **CORRECTED 2026-10-07 (founder review B1):** the first Q.E.D. (23.7s z3 in-PR; 17.6s post-merge run 37639664457) proved injectivity of the CAPACITY-PADDED representation — a valid receipt for THAT theorem, never for the deployed wire (nonce tag at model offset 77 vs the runtime 27; capability tag nonzero at 297 past envLen; 10/10 pinned vector prefixes disagreed at offset 27). The B1 repair re-packed the model and re-proves `wireInjective` + `wireZeroTail` on the ALIGNED wire every run; a timeout records NOT-PROVEN (never success, never a wedge) |
+| CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
+| PROVE-UNIVERSAL | `:prove` per obligation across the stated domain | **honestly open on the aligned wire**: `wireZeroTail` and `wireInjective` both re-attempt every run under a 240s budget — 240, not 300, because the hosted runner was shut down mid-prove TWICE before a 300s wrapper could classify (exit 143 at 269s and 289s; the offset-arithmetic theorem is heavier than the padded structural one). Live verdicts are the run's own lines — currently NOT-PROVEN (timeout), recorded open obligations, never success, never a wedge; named levers: lemma decomposition (offset-equality then per-field), a proof-scoped smaller-capacity instance with an explicit scaling argument, or a manual long-budget run (PROVE_BUDGET_S) on a durable host |
 | EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | NOT ATTEMPTED — the shared vectors are sampled agreement, never equivalence |
 
 A missing tool, a skipped obligation or a solver timeout is NOT-RUN,
@@ -201,7 +228,12 @@ RED counterexample
 
 No step substitutes for a later one; the WB001 chain is the reference
 instance (surrogate collision → utf16/utf8 gates → wb001-vectors.json →
-concrete-DFA BTungstenWB001.cry → CI formal job).
+concrete-DFA Intent.cry → CI formal job). The "formal wire alignment"
+step is EXECUTED since the B1 repair (2026-10-07): wb001-bridge.json
+pins the runtime bytes of every constructed term, both CI legs
+re-derive them every run — before B1 the twin's bridge block was
+comment-only and not one Cryptol wire byte had ever been compared to a
+runtime byte.
 
 ### §next (named gaps, in order)
 

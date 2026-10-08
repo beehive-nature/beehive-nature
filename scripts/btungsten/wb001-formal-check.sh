@@ -29,19 +29,13 @@
 set -eu
 
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
-CRY="scripts/btungsten/wb001-cryptol/BTungstenWB001.cry"
-CRYV="scripts/btungsten/wb001-cryptol/Vectors.cry"
-# cryptol does not search the importing file own directory for imports;
-# CRYPTOLPATH points it there (learned from run: Could not find module
-# BTungstenWB001, Searched paths: .).
-export CRYPTOLPATH="scripts/btungsten/wb001-cryptol"
+CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
 # 240s, not 300: twice the runner was shut down mid-prove (exit 143,
 # runs 37698302619 at 269s and 37701649473 at 289s) BEFORE a 300s
 # wrapper could print the honest NOT-PROVEN — the aligned-wire theorem
-# is heavier than the padded one and the runner goes down first. Below
-# the kill window the classification lands: NOT-PROVEN is a recorded
-# open obligation, never success, and the decomposition beat is named
-# in the dispatch. Override with PROVE_BUDGET_S for a manual long run.
+# is heavier than the padded one and the hosted runner dies first.
+# Below the kill window the classification lands; override
+# PROVE_BUDGET_S for a manual long run on a durable host.
 PROVE_BUDGET_S="${PROVE_BUDGET_S:-240}"
 
 say() { printf '%s\n' "$*"; }
@@ -64,11 +58,10 @@ say "FORMAL-TYPECHECK: PASS (module loads; obligations: wireInjective, adversari
 # cryptol CLI (3.6.0, learned from its own usage output): -c COMMAND runs
 # one command and exits; multiple -c run in order. -b takes a SCRIPT FILE,
 # not stdin — the first CI run taught us this, receipted in the dispatch.
-# Checks load Vectors.cry, which imports BTungstenWB001.cry — one load covers both.
 check() {
   _name=$1; _cmd=$2
   say "== formal: CHECK-SAMPLED $_name — $_cmd =="
-  _out=$("$CRYPTOL" -c ":load $CRYV" -c "$_cmd" 2>&1) || {
+  _out=$("$CRYPTOL" -c ":load $CRY" -c "$_cmd" 2>&1) || {
     say "FORMAL-CHECK-SAMPLED $_name: ABORTED (cryptol exited nonzero). Output:"
     say "$_out"
     exit 1
@@ -85,6 +78,25 @@ check() {
   fi
   say "FORMAL-CHECK-SAMPLED $_name: PASS"
 }
+
+# ---- FORMAL-WIRE-ALIGNMENT (founder review B1, 2026-10-07): the bridge ----
+# The BRIDGE block in Intent.cry was comment-only until B1 — no Cryptol
+# wire byte had ever been compared to a runtime canonical() byte, so the
+# deployed-envelope claim under the wireInjective proof was prose. These
+# closed-term evaluations compare the .cry wire (prefix + zero tail +
+# envLen) against OPAQUE constants pinned from the runtime
+# (wb001-bridge.json, derived by wb001-bridge-gen.mjs, re-derived on the
+# node leg by wb001-bridge.test.mjs every run). A red here names its
+# term: the twin and the runtime have drifted apart.
+check bridgeIBase     ':check bridgeIBase'
+check bridgeTwinL     ':check bridgeTwinL'
+check bridgeTwinR     ':check bridgeTwinR'
+check bridgeAstral    ':check bridgeAstral'
+check bridgeFffd      ':check bridgeFffd'
+check bridgeCombining ':check bridgeCombining'
+check bridgeNearA     ':check bridgeNearA'
+check bridgeNearB     ':check bridgeNearB'
+check envLenMatchesOffsets ':check envLenMatchesOffsets'
 
 # ---- CLASS 2: CHECK-SAMPLED — adversarial arm, then constructed (one
 # obligation per claim, so a red names the claim), then random
@@ -105,44 +117,42 @@ check validCombining          ':check validCombining'
 check nearValid               ':check nearValid'
 check nearDistinct            ':check nearDistinct'
 check baseVsTwinDistinct      ':check baseVsTwinDistinct'
-# THE BRIDGE, EXECUTED: the model must reproduce every pinned envelope
-# byte-for-byte (length word, every meaningful byte, zero tail) — the
-# Beat 3 B1 repair; a red here is a wire-packing divergence, by name.
-check vectorsHold             ':check vectorsHold'
-check wireZeroTail-sampled    ':check wireZeroTail'
 check wireInjective-sampled   ':check wireInjective'
 
 # ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified, per obligation
 prove() {
   _name=$1
-  say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${PROVE_BUDGET_S}s) =="
-  PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRYV" -c ":prove $_name" 2>&1) && _rc=0 || _rc=$?
-  if [ "$_rc" -eq 0 ]; then
-    # Cryptol's universal verdict prints "Q.E.D." (some versions "Valid.").
-    # The first honestly-successful prove was mis-recorded as NOT-PROVEN
-    # because the classifier looked only for Valid — never again: a result
-    # class records what happened, not what we guessed the tool would print.
-    if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
-      say "$PROVE_LOG" | tail -2
-      say "FORMAL-PROVE-UNIVERSAL $_name: PROVEN (universal, :prove verdict Q.E.D.)"
+    say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${PROVE_BUDGET_S}s) =="
+  PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove $_name" 2>&1) && rc=0 || rc=$?
+  if [ "$rc" -eq 0 ]; then
+  # Cryptol's universal verdict is printed as "Q.E.D." (some versions
+  # "Valid."). The first honestly-successful prove was mis-recorded as
+  # NOT-PROVEN because the classifier looked only for Valid — never
+  # again: a result class records what happened, not what we guessed
+  # the tool would print.
+  if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
+    say "$PROVE_LOG" | tail -2
+    say "FORMAL-PROVE-UNIVERSAL $_name: PROVEN (universal, :prove verdict Q.E.D.)"
     elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
-      say "FORMAL-PROVE-UNIVERSAL $_name: REFUTED — counterexample is a REAL finding. Output:"
-      say "$PROVE_LOG"
-      exit 1
-    else
-      say "$PROVE_LOG" | tail -3
-      say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (ran to completion, no verdict line)"
-    fi
-  elif [ "$_rc" -eq 124 ]; then
-    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
-  else
-    say "FORMAL-PROVE-UNIVERSAL $_name: ABORTED rc=$_rc. Output:"
-    say "$PROVE_LOG" || true
+    say "FORMAL-PROVE-UNIVERSAL $_name: REFUTED — counterexample is a REAL finding. Output:"
+    say "$PROVE_LOG"
     exit 1
+    else
+    say "$PROVE_LOG" | tail -3
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (ran to completion, no verdict line)"
   fi
+elif [ "$rc" -eq 124 ]; then
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
+else
+    say "FORMAL-PROVE-UNIVERSAL $_name: ABORTED rc=$rc. Output:"
+    say "$PROVE_LOG" || true
+  exit 1
+fi
+
 }
 prove wireZeroTail
 prove wireInjective
 
 say "== formal: ladder state =="
-say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (adversarial + per-field + constructed + VECTORS-BYTE-FOR-BYTE + random) | PROVE-UNIVERSAL: see lines above | EQUIVALENCE: NOT ATTEMPTED (vectors are sampled agreement, never equivalence)"
+say "FORMAL-WIRE-ALIGNMENT: PASS — 8 pinned terms, exact prefix + zero tail + envLen, both legs re-derive every run (sampled agreement, never equivalence)"
+say "TYPECHECK: PASS | CHECK-SAMPLED: PASS (adversarial + constructed + random) | PROVE-UNIVERSAL: see line above | EQUIVALENCE: NOT ATTEMPTED (vectors are sampled agreement, never equivalence)"

@@ -133,19 +133,22 @@ validIntent i =
     && validField 0 4096 i.payload
 
 //////////////////////////////////////////////////////////////////////////////
-// The wire: the DEPLOYED compact packing. Each tag follows the previous
-// field's MEANINGFUL bytes immediately — never its capacity — and zero
-// padding begins only after the complete compact envelope.
+// The wire: the TRUE variable-length deployed stream, right-padded with
+// zeros to MaxEnv. (Until the B1 repair this section emitted each
+// field's FULL CAPACITY array inside the stream — tag # len # cap bytes
+// per field — which is injective and was proven so, but it is a PADDED
+// LOOKALIKE: the deployed envelope is not its prefix, because each
+// block trailed its zero padding before the next tag. The bridge's
+// first counterexample — bridgeIBase = False, CI run 37692766559 —
+// convicted it exactly as founder review B1 named. The Beat-2 law's
+// warning applies at the stream level too: a proof can be correct
+// about the wrong encoding.)
 //
-// (Repair 2026-10-07, founder review B1: the prior wireTlv concatenated
-// CAPACITY-SIZED blocks — nonce tag at offset 77 where the runtime puts
-// it at 27, the capability tag alive at 297 past envLen — so that
-// representation was NOT the deployed wire: 10/10 pinned vector prefixes
-// disagreed at offset 27, and two intents differing only in amount
-// shared their entire compact prefix in the model buffer. The Q.E.D.
-// receipted 2026-10-07 stands for THAT padded representation's
-// injectivity and nothing broader; this repair re-aligns the model to
-// the runtime bytes and re-proves.)
+// byteAt dispatches a position k to the field block that owns it; every
+// block offset is DERIVED from the field lengths — the same arithmetic
+// the runtime's concatenation performs — so the first envLen bytes of
+// `wire i` are the deployed canonical envelope byte-for-byte, pinned by
+// the bridge properties below, and every position >= envLen is zero.
 //////////////////////////////////////////////////////////////////////////////
 
 u64 : [64] -> Field 8
@@ -153,64 +156,71 @@ u64 w = { len = L8, bytes = split w }
 
 type MaxEnv = 7 + 1 + (5+64) + (5+32) + (5+8) + (5+32) + (5+128) + (5+64) + (5+8) + (5+8) + (5+128) + (5+4096)
 
-// Field layout offsets, each the previous offset + 5 + the previous
-// field's MEANINGFUL length (u64/bytes32 fields carry their fixed legal
-// length words — validIntent enforces those).
-oDom, oNon, oEpo, oAct, oDst, oCap, oAmt, oExp, oPay, oLoa : Intent -> [32]
-oDom i = 8
-oNon i = oDom i + 5 + i.domain.len
-oEpo i = oNon i + 5 + L32
-oAct i = oEpo i + 5 + L8
-oDst i = oAct i + 5 + L32
-oCap i = oDst i + 5 + i.destination.len
-oAmt i = oCap i + 5 + i.capability.len
-oExp i = oAmt i + 5 + L8
-oPay i = oExp i + 5 + L8
-oLoa i = oPay i + 5 + i.payer.len
+head8 : [8][8]
+head8 = "bT-WB01" # [0x01]
 
-envLen : Intent -> [32]
-envLen i = oLoa i + 5 + i.payload.len
+inBlock : [32] -> [32] -> [32] -> Bit
+inBlock off sz k = (k >= off) && (k < off + sz)
 
-headerByte : [32] -> Byte
-headerByte p = ("bT-WB01" # [0x01]) @ p
+// The bytes a field contributes at a position inside its block:
+// the tag at off, the 4 BE length bytes at off+1..off+4, then the
+// MEANINGFUL value bytes — nothing else; positions beyond off+5+len
+// belong to later blocks and are answered by byteAt's dispatch order.
+blockByte : {cap} (fin cap) => Byte -> [32] -> Field cap -> [32] -> Byte
+blockByte t off f k =
+  if k == off         then t
+  else if k < off + 5 then (split f.len) @ (k - off - 1)
+  else                     f.bytes @ (k - off - 5)
 
-// The byte at wire position p of one field's TLV, based at offset o:
-// its tag, its four length-word bytes, then its meaningful bytes.
-tlvByte : {cap} (fin cap) => Byte -> [32] -> [cap][8] -> [32] -> [32] -> Byte
-tlvByte t lw bs o p =
-  if p == o           then t
-  else if (p - o) == 1 then (split lw) @ 0
-  else if (p - o) == 2 then (split lw) @ 1
-  else if (p - o) == 3 then (split lw) @ 2
-  else if (p - o) == 4 then (split lw) @ 3
-  else bs @ (p - o - 5)
+// Block start offsets, derived exactly as the runtime concatenates.
+bDom : Intent -> [32]
+bDom i = 8
+bNon : Intent -> [32]
+bNon i = bDom i + 5 + i.domain.len
+bEpo : Intent -> [32]
+bEpo i = bNon i + 5 + i.nonce.len
+bAct : Intent -> [32]
+bAct i = bEpo i + 5 + L8
+bDst : Intent -> [32]
+bDst i = bAct i + 5 + i.action.len
+bCap : Intent -> [32]
+bCap i = bDst i + 5 + i.destination.len
+bAmt : Intent -> [32]
+bAmt i = bCap i + 5 + i.capability.len
+bExp : Intent -> [32]
+bExp i = bAmt i + 5 + L8
+bPay : Intent -> [32]
+bPay i = bExp i + 5 + L8
+bPld : Intent -> [32]
+bPld i = bPay i + 5 + i.payer.len
 
-// The byte at wire position p: the compact envelope laid out by the
-// offsets above, zero past envLen. Laziness keeps every @ in range —
-// each branch is guarded by the same bound that makes its index safe.
 byteAt : Intent -> [32] -> Byte
-byteAt i p =
-  if p < 8        then headerByte p
-  else if p < oNon i   then tlvByte 0x01 i.domain.len       i.domain.bytes      (oDom i) p
-  else if p < oEpo i   then tlvByte 0x02 L32                i.nonce.bytes       (oNon i) p
-  else if p < oAct i   then tlvByte 0x03 L8                 (split i.epoch)     (oEpo i) p
-  else if p < oDst i   then tlvByte 0x04 L32                i.action.bytes      (oAct i) p
-  else if p < oCap i   then tlvByte 0x05 i.destination.len  i.destination.bytes (oDst i) p
-  else if p < oAmt i   then tlvByte 0x06 i.capability.len   i.capability.bytes  (oCap i) p
-  else if p < oExp i   then tlvByte 0x07 L8                 (split i.amount)    (oAmt i) p
-  else if p < oPay i   then tlvByte 0x08 L8                 (split i.expiry)    (oExp i) p
-  else if p < oLoa i   then tlvByte 0x09 i.payer.len        i.payer.bytes       (oPay i) p
-  else if p < envLen i then tlvByte 0x0a i.payload.len      i.payload.bytes     (oLoa i) p
-  else 0
+byteAt i k =
+  if k < 8 then head8 @ k else
+  if inBlock (bDom i) (5 + i.domain.len)       k then blockByte 0x01 (bDom i) i.domain       k else
+  if inBlock (bNon i) (5 + i.nonce.len)        k then blockByte 0x02 (bNon i) i.nonce        k else
+  if inBlock (bEpo i) (5 + L8)                 k then blockByte 0x03 (bEpo i) (u64 i.epoch)  k else
+  if inBlock (bAct i) (5 + i.action.len)       k then blockByte 0x04 (bAct i) i.action       k else
+  if inBlock (bDst i) (5 + i.destination.len)  k then blockByte 0x05 (bDst i) i.destination  k else
+  if inBlock (bCap i) (5 + i.capability.len)   k then blockByte 0x06 (bCap i) i.capability   k else
+  if inBlock (bAmt i) (5 + L8)                 k then blockByte 0x07 (bAmt i) (u64 i.amount) k else
+  if inBlock (bExp i) (5 + L8)                 k then blockByte 0x08 (bExp i) (u64 i.expiry) k else
+  if inBlock (bPay i) (5 + i.payer.len)        k then blockByte 0x09 (bPay i) i.payer        k else
+  if inBlock (bPld i) (5 + i.payload.len)      k then blockByte 0x0a (bPld i) i.payload      k else
+  0x00
 
 wire : Intent -> [MaxEnv][8]
-wire i = [ byteAt i p | p <- take`{MaxEnv} [0 ...] ]
+wire i = [ byteAt i k | k <- take`{MaxEnv} [0 ...] ]
 
-// The zero-tail half of the bridge, now a PROVABLE obligation rather
-// than a comment: for valid intents nothing nonzero exists past envLen.
-wireZeroTail : Intent -> Bit
-property wireZeroTail a =
-  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
+envLen : Intent -> [32]
+envLen i = 8 + (5 + i.domain.len) + (5 + i.nonce.len) + (5 + L8) + (5 + i.action.len)
+             + (5 + i.destination.len) + (5 + i.capability.len) + (5 + L8) + (5 + L8)
+             + (5 + i.payer.len) + (5 + i.payload.len)
+
+// envLen is the same arithmetic as the block-offset chain (checked
+// sampled, not assumed): the last block's end is the envelope's end.
+envLenMatchesOffsets : Intent -> Bit
+property envLenMatchesOffsets i = envLen i == (bPld i + 5 + i.payload.len)
 
 // The signature scheme is an ASSUMED-CORRECT primitive (Ed25519 in the
 // implementation) within the published adversarial model; the workbench
@@ -229,6 +239,13 @@ property wireZeroTail a =
 wireInjective : Intent -> Intent -> Bit
 property wireInjective a b =
   (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
+
+// The zero-tail half of the model-wire bridge as a UNIVERSAL obligation
+// (the per-term half is the bridge* properties pinned by the shared
+// bytes below): for valid intents nothing nonzero exists past envLen.
+wireZeroTail : Intent -> Bit
+property wireZeroTail a =
+  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
 
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
@@ -522,11 +539,74 @@ property adversarialRejected =
     and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
 
 //////////////////////////////////////////////////////////////////////////////
-// BRIDGE (model <-> deployed bytes): the prefix half is checked in CI by
-// the generated vectors module (wb001-cryptol/Vectors.cry — every pinned
-// positive reproduced byte-for-byte: length word, every meaningful byte,
-// zero tail), the zeroTail half is the provable property wireZeroTail
-// above. UNIVERSAL model==runtime agreement remains the future
-// EQUIVALENCE class — the vectors are sampled agreement and are never
-// recorded as more.
+// BRIDGE (model <-> deployed bytes) — EXECUTABLE (founder review B1,
+// 2026-10-07): the block below was comment-only until B1; no Cryptol
+// wire byte had ever been compared to a runtime canonical() byte, so
+// the universal wireInjective proof was about the model's wire with
+// the deployed-envelope claim resting on prose. Repair: the runtime
+// bytes of every constructed term are pinned here as OPAQUE constants
+// (derived by scripts/btungsten/wb001-bridge-gen.mjs from
+// wb001-intent.mjs canonical(); pinned in wb001-bridge.json; never
+// hand-written), and two independent CI legs re-derive them every run:
+//   node leg   (wb001-bridge.test.mjs): canonical() == JSON bytes, and
+//              this file carries each envelope hex literal verbatim;
+//   formal leg (wb001-formal-check.sh): :check evaluates each bridge
+//              property below — exact prefix, exact zero tail, and the
+//              envLen arithmetic — as closed terms, exactly.
+// Any drift on either side goes red. This is sampled agreement on
+// pinned terms, never universal equivalence (result-class law); the
+// deployed-wire proof claim closes on these receipts, not on prose.
 //////////////////////////////////////////////////////////////////////////////
+
+// ---- pinned runtime bytes (generated by wb001-bridge-gen.mjs; re-derived every CI run on BOTH legs) ----
+biBase : [187][8]
+biBase = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000027b7d : [1496])  // PUBLIC-CONSTANT: runtime canonical() envelope of iBase
+btwinL : [175][8]
+btwinL = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d303100000000000000000000000000000000000005000000026162060000000163070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000027b7d : [1400])  // PUBLIC-CONSTANT: runtime canonical() envelope of twinL
+btwinR : [175][8]
+btwinR = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d303100000000000000000000000000000000000005000000016106000000026263070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000027b7d : [1400])  // PUBLIC-CONSTANT: runtime canonical() envelope of twinR
+bastral : [187][8]
+bastral = split (0x62542d5742303101010000000e736b61697374732ef09f909d2f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000027b7d : [1496])  // PUBLIC-CONSTANT: runtime canonical() envelope of astral
+bfffd : [180][8]
+bfffd = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b800900000003efbfbd0a000000027b7d : [1440])  // PUBLIC-CONSTANT: runtime canonical() envelope of fffd
+bcombining : [178][8]
+bcombining = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000365cc810600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000027b7d : [1424])  // PUBLIC-CONSTANT: runtime canonical() envelope of combining
+bnearA : [189][8]
+bnearA = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a00000004deadbeef : [1512])  // PUBLIC-CONSTANT: runtime canonical() envelope of nearA
+bnearB : [190][8]
+bnearB = split (0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a00000005deadbeef00 : [1520])  // PUBLIC-CONSTANT: runtime canonical() envelope of nearB
+
+// prefix + zero tail + envLen arithmetic, one obligation per term (a
+// red names its term). tail widths are MaxEnv - envLen, spelled out so
+// the concatenation forces the full padded-wire width.
+bridgeIBase : Bit
+property bridgeIBase =
+  (wire iBase == biBase # (zero : [4439][8])) && (envLen iBase == 187)
+
+bridgeTwinL : Bit
+property bridgeTwinL =
+  (wire twinL == btwinL # (zero : [4451][8])) && (envLen twinL == 175)
+
+bridgeTwinR : Bit
+property bridgeTwinR =
+  (wire twinR == btwinR # (zero : [4451][8])) && (envLen twinR == 175)
+
+bridgeAstral : Bit
+property bridgeAstral =
+  (wire astral == bastral # (zero : [4439][8])) && (envLen astral == 187)
+
+bridgeFffd : Bit
+property bridgeFffd =
+  (wire fffd == bfffd # (zero : [4446][8])) && (envLen fffd == 180)
+
+bridgeCombining : Bit
+property bridgeCombining =
+  (wire combining == bcombining # (zero : [4448][8])) && (envLen combining == 178)
+
+bridgeNearA : Bit
+property bridgeNearA =
+  (wire nearA == bnearA # (zero : [4437][8])) && (envLen nearA == 189)
+
+bridgeNearB : Bit
+property bridgeNearB =
+  (wire nearB == bnearB # (zero : [4436][8])) && (envLen nearB == 190)

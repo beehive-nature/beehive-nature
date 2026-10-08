@@ -131,8 +131,14 @@ destination, capability, amount, domain, nonce, expiry, payer or
 execution payload must fail verification. This aims the Foundation
 workbench at the MiM/intent-substitution axis instead of a generic crypto
 demo. Status: executable battery LIVE in CI (scripts/btungsten/ —
-2,178+ mutants rejected, teeth row convicting the naive encoder);
-Cryptol/SAW twins staged UNVERIFIED. See scripts/btungsten/README.md.
+2,178+ mutants rejected, teeth row convicting the naive encoder); the
+Cryptol twin RUNS in the CI formal job (TYPECHECK + CHECK-SAMPLED all
+arms + a budgeted PROVE attempt), and since the B1 repair (2026-10-07)
+the formal-wire bridge is EXECUTABLE — the runtime bytes of every
+constructed term pinned on both legs, which convicted the pre-B1 wire
+as a padded lookalike (counterexample bridgeIBase = False) and drove
+the true-stream rewrite. SAW equivalence staged UNVERIFIED. See
+scripts/btungsten/README.md.
 
 **Input-boundary law (founder ruling 2026-10-07, from the genesis
 review):** the canonical form binds every ACCEPTED intent uniquely —
@@ -215,13 +221,17 @@ attach → capability composition, offer→claim → consent, author RAM
 payer → sponsored sovereignty. The previously named "WB002 hostile
 distributed specimen" leg (kill/reroute/replay/partition/heal) is
 absorbed here: those are rows of this battery. Status: executable
-battery LIVE in CI; wasm-vs-model equivalence and Cryptol/SAW twins
-staged NOT-RUN/UNVERIFIED under the result-class law. Model-hardening
-beat (founder review 2026-10-07, same day): transactional rollback
-fidelity (refused actions preserve the whole pre-state and log) and
-authenticated display truth (checkpoint contents verified, suffixes
-bounded to an authenticated tip) — the landing closed, the
-model-correctness claim kept open. See scripts/btungsten/README.md.
+battery LIVE in CI; the wasm-vs-model beat EXECUTED 2026-10-07 (the
+vendored 2021 wasm, verbatim, on Antelope Spring 1.2.2: a 46-step
+corpus at 46/46 verdicts, 0 class/state mismatches, 14 refused steps
+atomic on chain — corpus-sampled, local dev chain, NOT a proof);
+Cryptol/SAW twins staged NOT-RUN/UNVERIFIED under the result-class law.
+Model-hardening beat (founder review 2026-10-07, same day):
+transactional rollback fidelity (refused actions preserve the whole
+pre-state and log) and authenticated display truth (checkpoint
+contents verified, suffixes bounded to an authenticated tip) — the
+landing closed, the model-correctness claim kept open. See
+scripts/btungsten/README.md.
 
 Sequence: WB001 formal core (done: input boundary repaired in beat 2;
 the formal ladder climbed in beat 3 — TYPECHECK, CHECK-SAMPLED and

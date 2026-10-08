@@ -111,3 +111,28 @@ HUMAN INTERACTION: NONE.
 - If the aligned-wire `:prove` exceeds its 300s budget, the honest
   state is NOT-PROVEN with CHECK-SAMPLED + vectors green — a later beat
   may raise the budget or decompose the theorem; never paper over it.
+
+## RECONCILIATION (same-day, parallel seats)
+
+While this lane iterated its repair in-PR, the sibling zCode seat
+landed its own B1 repair on main (PR #358 — byteAt dispatch over
+length-derived offsets, the SAME converged design, with a bridge
+mechanism: runtime-derived bytes pinned in wb001-bridge.json + hex
+constants in Intent.cry + two CI legs re-deriving them; their bridge's
+own first counterexample `bridgeIBase = False`, run 37692766559,
+independently convicted the pre-B1 wire) plus a WB002 wasm-equivalence
+beat (PR #359). The merge onto 08d11832b keeps THEIR landed model and
+bridge as canonical (receipted on main), drops this lane's superseded
+generated-import variant (Vectors.cry + its generator — same class of
+check as their bridge, theirs is landed), and layers only the
+non-overlapping remainder of this lane:
+
+- `wireZeroTail` — the zero-tail half of the bridge as a UNIVERSAL
+  obligation (their bridge pins it per-term; this is the ∀ form).
+- The prove leg as a per-obligation loop with honest classification,
+  and the 240s budget with the two runner-kill receipts (269s/289s,
+  exit 143) that motivated sitting below the kill window.
+
+The B1 finding itself (founder review of #352), the red transcription
+receipt, and the honest open state of the aligned-wire universal proof
+stand as this dispatch records them — now on the converged model.
