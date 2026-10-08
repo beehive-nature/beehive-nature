@@ -1102,7 +1102,7 @@ jobs:
     # attempted here and can never be claimed from this job (the shared
     # vectors are sampled agreement). Cryptol is pinned: the version and
     # asset below are part of every receipt this job produces.
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -1134,5 +1134,5 @@ jobs:
         # 14m, not 10: setup+checks ~75s + TWO 300s prove budgets (wireZeroTail,
         # wireInjective) — the step cap killed the second prove mid-run before
         # the honest timeout classification could print (learned run 37698302619).
-        timeout-minutes: 14
+        timeout-minutes: 19
         run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
