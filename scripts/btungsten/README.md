@@ -200,7 +200,7 @@ recorded as another:
 |---|---|---|
 | TYPECHECK | the .cry parses and typechecks | **PASS in CI** — gates every push (cryptol 3.6.0, pinned asset) |
 | CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
-| PROVE-UNIVERSAL | `:prove wireInjective` across the stated domain | **attempted every run** under a 300s budget; timeout records NOT-PROVEN and exits green BY DESIGN (an open obligation is a recorded state, never a wedge) |
+| PROVE-UNIVERSAL | `:prove` per obligation across the stated domain | **honestly open on the aligned wire**: `wireZeroTail` and `wireInjective` both re-attempt every run under a 240s budget — 240, not 300, because the hosted runner was shut down mid-prove TWICE before a 300s wrapper could classify (exit 143 at 269s and 289s; the offset-arithmetic theorem is heavier than the padded structural one). Live verdicts are the run's own lines — currently NOT-PROVEN (timeout), recorded open obligations, never success, never a wedge; named levers: lemma decomposition (offset-equality then per-field), a proof-scoped smaller-capacity instance with an explicit scaling argument, or a manual long-budget run (PROVE_BUDGET_S) on a durable host |
 | EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | NOT ATTEMPTED — the shared vectors are sampled agreement, never equivalence |
 
 A missing tool, a skipped obligation or a solver timeout is NOT-RUN,

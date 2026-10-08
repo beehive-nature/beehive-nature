@@ -240,6 +240,13 @@ wireInjective : Intent -> Intent -> Bit
 property wireInjective a b =
   (validIntent a && validIntent b && (wire a == wire b)) ==> (a == b)
 
+// The zero-tail half of the model-wire bridge as a UNIVERSAL obligation
+// (the per-term half is the bridge* properties pinned by the shared
+// bytes below): for valid intents nothing nonzero exists past envLen.
+wireZeroTail : Intent -> Bit
+property wireZeroTail a =
+  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
+
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
 // sampled): valid international text is ACCEPTED (astral, a legitimate

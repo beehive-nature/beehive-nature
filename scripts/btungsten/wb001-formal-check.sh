@@ -30,7 +30,13 @@ set -eu
 
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
 CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
-PROVE_BUDGET_S="${PROVE_BUDGET_S:-300}"
+# 240s, not 300: twice the runner was shut down mid-prove (exit 143,
+# runs 37698302619 at 269s and 37701649473 at 289s) BEFORE a 300s
+# wrapper could print the honest NOT-PROVEN — the aligned-wire theorem
+# is heavier than the padded one and the hosted runner dies first.
+# Below the kill window the classification lands; override
+# PROVE_BUDGET_S for a manual long run on a durable host.
+PROVE_BUDGET_S="${PROVE_BUDGET_S:-240}"
 
 say() { printf '%s\n' "$*"; }
 
@@ -113,10 +119,12 @@ check nearDistinct            ':check nearDistinct'
 check baseVsTwinDistinct      ':check baseVsTwinDistinct'
 check wireInjective-sampled   ':check wireInjective'
 
-# ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified ---------------
-say "== formal: PROVE-UNIVERSAL :prove wireInjective (budget ${PROVE_BUDGET_S}s) =="
-PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove wireInjective" 2>&1) && _rc=0 || _rc=$?
-if [ "$_rc" -eq 0 ]; then
+# ---- CLASS 3: PROVE-UNIVERSAL — bounded, honestly classified, per obligation
+prove() {
+  _name=$1
+    say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${PROVE_BUDGET_S}s) =="
+  PROVE_LOG=$(timeout "$PROVE_BUDGET_S" "$CRYPTOL" -c ":load $CRY" -c ":prove $_name" 2>&1) && rc=0 || rc=$?
+  if [ "$rc" -eq 0 ]; then
   # Cryptol's universal verdict is printed as "Q.E.D." (some versions
   # "Valid."). The first honestly-successful prove was mis-recorded as
   # NOT-PROVEN because the classifier looked only for Valid — never
@@ -124,22 +132,26 @@ if [ "$_rc" -eq 0 ]; then
   # the tool would print.
   if say "$PROVE_LOG" | grep -aq 'Q\.E\.D\.' || say "$PROVE_LOG" | grep -aq '^Valid'; then
     say "$PROVE_LOG" | tail -2
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: PROVEN (universal, :prove verdict Q.E.D.)"
-  elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: REFUTED — counterexample is a REAL finding. Output:"
+    say "FORMAL-PROVE-UNIVERSAL $_name: PROVEN (universal, :prove verdict Q.E.D.)"
+    elif say "$PROVE_LOG" | grep -aq 'ounterexample'; then
+    say "FORMAL-PROVE-UNIVERSAL $_name: REFUTED — counterexample is a REAL finding. Output:"
     say "$PROVE_LOG"
     exit 1
-  else
+    else
     say "$PROVE_LOG" | tail -3
-    say "FORMAL-PROVE-UNIVERSAL wireInjective: NOT-PROVEN (ran to completion, no verdict line)"
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (ran to completion, no verdict line)"
   fi
-elif [ "$_rc" -eq 124 ]; then
-  say "FORMAL-PROVE-UNIVERSAL wireInjective: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
+elif [ "$rc" -eq 124 ]; then
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (timeout ${PROVE_BUDGET_S}s — recorded, never success)"
 else
-  say "FORMAL-PROVE-UNIVERSAL wireInjective: ABORTED rc=$_rc. Output:"
-  say "$PROVE_LOG" || true
+    say "FORMAL-PROVE-UNIVERSAL $_name: ABORTED rc=$rc. Output:"
+    say "$PROVE_LOG" || true
   exit 1
 fi
+
+}
+prove wireZeroTail
+prove wireInjective
 
 say "== formal: ladder state =="
 say "FORMAL-WIRE-ALIGNMENT: PASS — 8 pinned terms, exact prefix + zero tail + envLen, both legs re-derive every run (sampled agreement, never equivalence)"
