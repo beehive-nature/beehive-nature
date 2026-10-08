@@ -174,6 +174,16 @@ equation — hours of careful work, honestly beyond this pass) — then the toy
 constants in `spend_gate` become the real verifying key WITHOUT touching
 the flow, and the receipt upgrades from op-count-real to circuit-backed.
 
+> **SUPERSEDED by §m4 (executed 2026-09-04; ruled closed 2026-10-06):** the
+> step above LANDED one day later — circuit-backed PLONK verification,
+> forged-proof and replay rejections all in §m4-receipt. The PLONK/BN254
+> engine and the proving-system choice are CLOSED; do not rebuild or reopen
+> without a specific defect or measured reason. The only ceremony-class item
+> open anywhere in the estate is the witnessed multi-party sealing (every
+> one-honest-participant setup stays rehearsal-labeled until then) — and
+> that is preparation work on the AGGREGATE lane
+> (SPEC-ZK-RECEIPT-AGGREGATES-1), not a verifier port.
+
 ## §m4-receipt — the port LANDED: circuit-backed PLONK verifies on-chain (2026-09-04)
 
 The ruled fork's last step, executed. `contracts/privacy/` now holds the
