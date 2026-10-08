@@ -158,9 +158,13 @@ faithful-port row).
    become provable corollaries.
 4. **Live leg**: the same torture rows against a deployed Vaulta
    contract (bzcodejungle testnet), not only the local dev chain.
-5. **CI leg**: run wb002-wasm-equiv.mjs on the CI ubuntu runner (it
-   needs a Spring install; the sibling-isolation ports/dirs are
-   already parameterized).
+5. **CI leg**: `.github/workflows/wb002-wasm.yml` runs the corpus three
+   times on fresh local chains, on Ubuntu 22.04 with checksum-pinned
+   Spring 1.2.2. Each run uploads fresh JSON receipts (14-day retention).
+   This is corpus-sampled evidence, not a proof or testnet acceptance.
+   Local runs may set `WB002_HTTP_PORT` and `WB002_P2P_PORT`; state and
+   wallet directories are unique per invocation. Cleanup signals only
+   owned child processes; occupied ports fail rather than evict siblings.
 6. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
 
 ## WB001 — the intent-binding invariant (LIVE in CI)
@@ -202,7 +206,7 @@ recorded as another:
 |---|---|---|
 | TYPECHECK | the .cry parses and typechecks | **PASS in CI** — gates every push (cryptol 3.6.0, pinned asset) |
 | CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
-| PROVE-UNIVERSAL | `:prove wireInjective` across the stated domain | **attempted every run** under a 300s budget; timeout records NOT-PROVEN and exits green BY DESIGN (an open obligation is a recorded state, never a wedge) |
+| PROVE-UNIVERSAL | `:prove` per obligation across the stated domain | **honestly open on the aligned wire**: `wireZeroTail` and `wireInjective` both re-attempt every run under a 240s budget — 240, not 300, because the hosted runner was shut down mid-prove TWICE before a 300s wrapper could classify (exit 143 at 269s and 289s; the offset-arithmetic theorem is heavier than the padded structural one). Live verdicts are the run's own lines — currently NOT-PROVEN (timeout), recorded open obligations, never success, never a wedge; named levers: lemma decomposition (offset-equality then per-field), a proof-scoped smaller-capacity instance with an explicit scaling argument, or a manual long-budget run (PROVE_BUDGET_S) on a durable host |
 | EQUIVALENCE | SAW: implementation == spec (vectors first, then the proof) | NOT ATTEMPTED — the shared vectors are sampled agreement, never equivalence |
 
 A missing tool, a skipped obligation or a solver timeout is NOT-RUN,

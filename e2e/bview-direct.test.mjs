@@ -17,7 +17,7 @@ const server = createServer(async (req, res) => {
       for(let at=0;at<MEDIA.length&&!res.destroyed;at+=65536){res.write(MEDIA.subarray(at,at+65536));await new Promise(r=>setTimeout(r,85));}
       res.end();return;
     }
-    const body = path === '/media.mp4' ? MEDIA : await readFile(ROOT + path);
+    const body = path === '/media.mp4' ? MEDIA : await readFile(path === '/surfaces/bview.html' && process.env.BVIEW_HTML ? process.env.BVIEW_HTML : ROOT + path);
     res.writeHead(200, { 'content-type': path.endsWith('.js') ? 'text/javascript' : path.endsWith('.html') ? 'text/html' : path.endsWith('.css') ? 'text/css' : 'application/octet-stream' }); res.end(body);
   } catch { res.writeHead(404); res.end(); }
 });
@@ -29,13 +29,13 @@ const mockSDK = `let client; export class AutonomiClient {
   static async connect() { window.connections=(window.connections||0)+1; if(window.hangDirect==='connect')return new Promise(()=>{}); return client={closed:false, close(){this.closed=true}, async openFile(address,{signal}) {
     if(window.rejectDirect) throw Error('network offline');
     const bytes=new Uint8Array(await (await fetch('/media.mp4',{signal})).arrayBuffer());
-    let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length,{signal}={}){if(window.hangDirect==='read')return new Promise((resolve,reject)=>{const abort=()=>{window.cancelledRead=true;reject(new DOMException('Cancelled','AbortError'));};if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});});if(closed)throw Error('closed reader');window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
+    let closed=false; return {address,name:'fixture.mp4',size:bytes.length,contentType:'video/mp4',close(){closed=true;window.closedReaders=(window.closedReaders||0)+1},async read(start,length,{signal}={}){if(window.hangDirect==='read')return new Promise((resolve,reject)=>{const abort=()=>{window.cancelledRead=true;reject(new DOMException('Cancelled','AbortError'));};if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});});if(closed)throw Error('closed reader');if(window.hangDirect==='ordered-stall'||window.hangDirect==='ordered-ok'){const order=start===0?1:start<bytes.length/2?2:3;const delay=window.hangDirect==='ordered-ok'?order*500:(order===1?1400:order===2?350:650);await new Promise(resolve=>setTimeout(resolve,delay));}window.ranges=(window.ranges||[]);window.ranges.push([start,length]);return bytes.slice(start,start+length)}};
   }} }
 }`;
 async function open(reject = false, slow = false, hang = null, large = false, route = 'direct') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(reject => { window.rejectDirect=reject; localStorage.setItem('blang','en'); localStorage.setItem('bregister','bee'); }, reject);
-  await ctx.addInitScript(hang => { window.hangDirect=hang; }, hang);
+  await ctx.addInitScript(hang => { window.hangDirect=hang; if(hang?.startsWith('ordered-')){const original=window.setTimeout;window.setTimeout=(fn,ms,...args)=>original(fn,ms===45000?800:ms,...args);} }, hang);
   const page=await ctx.newPage(), errors=[], relay=[];
   page.on('pageerror', e=>errors.push(String(e)));
   await ctx.route('**/vendor/ant-browser-sdk/0.1.2/index.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:mockSDK}));
@@ -149,4 +149,51 @@ test('relay only: every byte is labelled relay and no direct connection opens',a
     assert.equal(await page.evaluate(()=>window.connections||0),0);
     assert.deepEqual(errors,[]);
   }finally{await ctx.close();}
+});
+
+// Only the 45-second network watchdog is accelerated to 800 ms. Other timers,
+// decoded video frames, lane ordering, and the actual production page stay real.
+test('later chunks cannot postpone recovery from a missing playable head',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,'ordered-stall',false,'direct-only');
+  try {
+    await page.waitForFunction(()=>!!window.__bviewEngine().direct?.stopped,null,{timeout:5000});
+    const d=await page.evaluate(()=>window.__bviewEngine().direct);
+    assert.match(d.stopped,/waiting for chunk 0/);
+    assert.equal(d.completed,2,'both later chunks arrived while the head was missing');
+    assert.equal(d.emittedBytes,0);
+    assert.ok(d.bufferedBytes>0);
+    assert.equal(d.peakBufferedBytes,d.bufferedBytes);
+    assert.ok(d.headWaitMs>=700 && d.headWaitMs<1300,'later arrivals did not restart the head deadline');
+    assert.equal(d.waitingForChunk,null);
+    assert.equal(relay.length,0,'direct-only still never uses the relay');
+    await page.waitForTimeout(800);
+    assert.equal(await page.evaluate(()=>window.__bviewEngine().direct.completed),2,'late completion cannot mutate a stopped receipt');
+    assert.deepEqual(errors,[]);
+  } finally {await ctx.close();}
+});
+
+test('head progress renews the next demand deadline and completes ordered delivery',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,'ordered-ok',false,'direct-only');
+  try {
+    await page.waitForFunction(()=>!!window.__bviewEngine().sha,null,{timeout:10000});
+    const e=await page.evaluate(()=>window.__bviewEngine());
+    assert.equal(e.direct.stopped,null);
+    assert.equal(e.direct.emittedBytes,MEDIA.length);
+    assert.equal(e.direct.emittedChunks,3);
+    assert.equal(e.direct.bufferedBytes,0);
+    assert.ok(e.direct.headWaitMs>0);
+    assert.ok(e.ttffMs>0);
+    assert.equal(relay.length,0);
+    assert.deepEqual(errors,[]);
+  } finally {await ctx.close();}
+});
+
+test('ordered starvation on the fallback route asks the relay exactly once',async()=>{
+  const {ctx,page,errors,relay}=await open(false,false,'ordered-stall');
+  try {
+    await page.waitForFunction(()=>window.__bviewEngine().path==='stream'&&document.querySelector('#v').videoWidth>0,null,{timeout:10000});
+    assert.match(await page.evaluate(()=>window.__bviewEngine().direct.fallback),/waiting for chunk 0/);
+    assert.equal(relay.length,1);
+    assert.deepEqual(errors,[]);
+  } finally {await ctx.close();}
 });

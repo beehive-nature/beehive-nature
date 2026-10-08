@@ -1,0 +1,22 @@
+{
+  "evidence": "reported-transcription",
+  "source": "Founder-provided chat, 2026-10-07; numbers from the accompanying interpretation, not independently read from Shu's screenshots",
+  "baseline": "ants.tube live 2026-10-07; build unknown",
+  "trial": "Trial #1; build and implementation unknown",
+  "rows": [
+    {"scenario":"cold home","metric":"first poster","baselineSeconds":10.4,"trialSeconds":5.9},
+    {"scenario":"cold home","metric":"fourth poster","baselineSeconds":23.4,"trialSeconds":12.3},
+    {"scenario":"cold home","metric":"eighth poster","baselineSeconds":35.3,"trialSeconds":21.7},
+    {"scenario":"cold home","metric":"twelfth poster","baselineSeconds":48.7,"trialSeconds":31.7},
+    {"scenario":"cold home","metric":"21 of 21 posters","baselineSeconds":72.6,"trialSeconds":57.9},
+    {"scenario":"cold short","metric":"first frame","baselineSeconds":6.3,"trialSeconds":7.7},
+    {"scenario":"cold short","metric":"whole file","baselineSeconds":5.2,"trialSeconds":6.0},
+    {"scenario":"cold short","metric":"played to end","baselineSeconds":18.1,"trialSeconds":19.4},
+    {"scenario":"cold short","metric":"stall","baselineSeconds":0,"trialSeconds":0},
+    {"scenario":"cold long","metric":"first frame","baselineSeconds":12.9,"trialSeconds":12.8},
+    {"scenario":"cold long","metric":"whole file","baselineSeconds":83.9,"trialSeconds":91.7},
+    {"scenario":"cold long","metric":"played to end","baselineSeconds":92.5,"trialSeconds":98.0},
+    {"scenario":"cold long","metric":"stall","baselineSeconds":22.7,"trialSeconds":29.6},
+    {"scenario":"warm Home-Watch-Home-Watch","metric":"transition","baselineSeconds":null,"trialSeconds":null}
+  ]
+}

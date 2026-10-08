@@ -845,7 +845,7 @@ jobs:
         timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs bview-direct.test.mjs
+        run: node --test bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
@@ -1138,5 +1138,8 @@ jobs:
         run: sh scripts/btungsten/wb002-formal-check.sh "$HOME/cryptol/bin/cryptol"
       - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
         if: always()
-        timeout-minutes: 10
+        # 14m, not 10: setup+checks ~75s + TWO 300s prove budgets (wireZeroTail,
+        # wireInjective) — the step cap killed the second prove mid-run before
+        # the honest timeout classification could print (learned run 37698302619).
+        timeout-minutes: 14
         run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
