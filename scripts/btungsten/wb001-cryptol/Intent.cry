@@ -242,10 +242,67 @@ property wireInjective a b =
 
 // The zero-tail half of the model-wire bridge as a UNIVERSAL obligation
 // (the per-term half is the bridge* properties pinned by the shared
-// bytes below): for valid intents nothing nonzero exists past envLen.
+// bytes below): for VALID intents nothing nonzero exists past envLen.
+//
+// THEOREM CORRECTION (founder review 2026-10-08, SHA 8b2ac34ae): the
+// original definition below quantified over ALL intents while its
+// documentation claimed valid ones — and it is REFUTED, executed: a
+// malformed payload length (0xfffffff0) wraps the [32] offset
+// arithmetic so envLen lands INSIDE the later field blocks, whose tags
+// and bytes are then nonzero past the claimed end. The original lives
+// on as wireZeroTailRaw — the record of what was actually claimed —
+// with the executed witness as a permanent regression; the corrected
+// theorem states its domain as an explicit premise. A solver timeout
+// on the raw form was NOT "a difficult true theorem."
+wireZeroTailRaw : Intent -> Bit
+wireZeroTailRaw a =
+  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
+
 wireZeroTail : Intent -> Bit
 property wireZeroTail a =
-  and [ if p < envLen a then True else ((wire a) @ p == 0) | p <- take`{MaxEnv} [0 ...] ]
+  (validIntent a) ==> (wireZeroTailRaw a)
+
+//////////////////////////////////////////////////////////////////////////////
+// PROOF DECOMPOSITION (founder ruling 2026-10-08): the corrected claim
+// is established through explicit lemmas — bounded lengths, no offset
+// overflow, ordered non-overlapping blocks, envelope-end agreement,
+// zero tail — before any field-recovery/decoder argument for injectivity.
+//////////////////////////////////////////////////////////////////////////////
+
+// The bounds premise, isolated from the (heavy) DFA so arithmetic
+// lemmas do not carry it.
+lensBounded : Intent -> Bit
+lensBounded a =
+       (a.domain.len >= 1)       && (a.domain.len <= 64)
+    && (a.nonce.len == L32)
+    && (a.action.len == L32)
+    && (a.destination.len >= 1)  && (a.destination.len <= 128)
+    && (a.capability.len >= 1)   && (a.capability.len <= 64)
+    && (a.payer.len >= 1)        && (a.payer.len <= 128)
+    && (a.payload.len <= 4096)
+
+validImpliesBounded : Intent -> Bit
+property validImpliesBounded a = (validIntent a) ==> (lensBounded a)
+
+// L1 — with bounded lengths the block offsets are ordered and never
+// wrap [32]: every block starts at or after the previous block's end.
+offsetsOrdered : Intent -> Bit
+property offsetsOrdered a =
+  (lensBounded a) ==>
+    (   (bDom a <= bNon a)
+     && (bNon a <= bEpo a) && (bEpo a <= bAct a) && (bAct a <= bDst a)
+     && (bDst a <= bCap a) && (bCap a <= bAmt a) && (bAmt a <= bExp a)
+     && (bExp a <= bPay a) && (bPay a <= bPld a)
+     && (bPld a <= envLen a) && (envLen a <= 4626) )
+
+// L2 — envelope-end agreement is envLenMatchesOffsets (above, existing).
+
+// L3 — the corrected zero tail, re-founded on the bounds premise: for
+// bounded lengths, every position at or past envLen answers 0 in the
+// dispatch (no block can claim it without violating order).
+zeroTailFromBounds : Intent -> Bit
+property zeroTailFromBounds a =
+  (lensBounded a) ==> (wireZeroTailRaw a)
 
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
@@ -536,7 +593,32 @@ xNonCanonPad =
 
 adversarialRejected : Bit
 property adversarialRejected =
-    and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad ] ]
+    and [ validIntent x == False | x <- [ xSurrogate, xOverlong, xRawFF, xBeyond, xTrunc, xLenBeyondCap, xNonCanonPad, xWrapPayload ] ]
+
+// THE EXECUTED REFUTATION of the original unconditioned zero-tail
+// theorem (founder review 2026-10-08): a payload length of 0xfffffff0
+// wraps envLen inside the later blocks, so nonzero field bytes live
+// past the claimed envelope end. This row evaluates the ORIGINAL
+// theorem's actual result on that witness — False — and keeps it as a
+// permanent regression: if a future refactor makes wireZeroTailRaw
+// TRUE here, the premise structure changed and this row goes red.
+xWrapPayload : Intent // 0xfffffff0 — the [32] offset arithmetic wraps
+xWrapPayload =
+  { domain      = mkB "skaists.bpay/1" 14
+  , nonce       = mkB ("nonce-wb001" # (zero : [32][8])) L32
+  , epoch       = 1
+  , action      = mkB ("action-hash-01" # (zero : [32][8])) L32
+  , destination = mkB "vault:0xBEEF" 12
+  , capability  = mkB "pay" 3
+  , amount      = 1000000
+  , expiry      = 1790000000
+  , payer       = mkB "seat:bFUzZ" 10
+  , payload     = { len = 0xfffffff0, bytes = (mkB "{}" 2 : Field 4096).bytes }
+  }
+
+zeroTailWrapRefuted : Bit
+property zeroTailWrapRefuted =
+  (validIntent xWrapPayload == False) && (wireZeroTailRaw xWrapPayload == False)
 
 //////////////////////////////////////////////////////////////////////////////
 // BRIDGE (model <-> deployed bytes) — EXECUTABLE (founder review B1,
