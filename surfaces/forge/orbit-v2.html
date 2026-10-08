@@ -37,6 +37,102 @@ a{color:var(--cyan)}
 .hint code{color:#cfe8d6}
 .foot{font-size:max(12px,calc(var(--fz-lab) - 1px));color:#8b97aa;line-height:1.75;margin-top:22px;padding-top:14px;border-top:1px solid #1a1a2a}
 </style>
+<link rel="stylesheet" href="../skaists.css">
+<style>
+/* ── THE FOUNDER'S CHOSEN UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to
+   orbit-v2 2026-10-06: "just follow the rules for each of the three seperate ui/ux's"), worn the way
+   forge/hexfield.html wears its own copy of this instrument. One DOM in every register: the title, the
+   blurb, the seed row with its two presses, the four sliders, the stage, the status line, the tinker
+   note and the footnote keep every part and its order. Only the dress moves: the page's own variables
+   are mapped onto skaists tokens (../skaists.css, compiled from docs/design/skaists/tokens.json), every
+   size sits on its register's type scale and every corner is a radius token. The stage keeps its black
+   in every register and the rose keeps the colours its seed derives: that is the art, kept as drawn
+   (register.js marks this page data-bee-theme="preserve"). Both presses in the seed row are marked
+   ghost, so neither is filled: new bee outlines them in a soft grey pill, raver in magenta, cypherpunk
+   in thin grey cut 6px. ── */
+body[data-reg]{--bg:var(--sk-bg);--crt:var(--sk-ai);--cyan:var(--sk-ai);--pink:var(--sk-you);--dim:var(--sk-ink-mut);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] h1{color:var(--sk-ink);text-shadow:none;letter-spacing:normal}
+body[data-reg] h1 .gear{color:var(--sk-you)}
+body[data-reg] .sub{color:var(--sk-ink-mut)}
+body[data-reg] .sub b,body[data-reg] .hint b{color:var(--sk-ink)}
+body[data-reg] .row input,body[data-reg] .row button{min-height:var(--sk-control-min,44px);background:var(--sk-bg-card);color:var(--sk-ink);border:1.5px solid var(--sk-ink-mut);border-radius:var(--sk-radius,12px)}
+body[data-reg] .row button{background:transparent}
+body[data-reg] .row button:hover{background:transparent;color:var(--sk-ink)}
+body[data-reg] .row input[type=range]{accent-color:var(--sk-primary);border:0;background:transparent;border-radius:0}
+body[data-reg] .row :is(input,button):focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+body[data-reg] label.ctl{color:var(--sk-ink-mut)}
+body[data-reg] label.ctl span{color:var(--sk-ink-soft)}
+body[data-reg] svg#stage{border-color:var(--sk-line)}
+body[data-reg] #meta{color:var(--sk-ink-soft)}
+body[data-reg] .hint{color:var(--sk-ink-mut)}
+body[data-reg] .hint code{color:var(--sk-ai);font-family:var(--sk-font-mono)}
+body[data-reg] .foot{color:var(--sk-ink-mut);border-top-color:var(--sk-line)}
+body[data-reg] a{color:var(--sk-link)}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important;background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+/* NEW BEE — the instrument on paper: ink, a bold system sans title, a white field, outlined pills,
+   forest for the sliders' fill and the field you are in */
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-ui);color-scheme:light}
+body[data-reg="bee"] h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em}
+body[data-reg="bee"] h1 .gear{font-size:28px;color:var(--sk-ink-mut)}
+body[data-reg="bee"] h1 span:not(.gear){font:400 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em}
+body[data-reg="bee"] .sub,body[data-reg="bee"] .hint{font:400 16px/1.6 var(--sk-font-ui)}
+body[data-reg="bee"] .sub b,body[data-reg="bee"] .hint b{font-weight:700}
+body[data-reg="bee"] .row input,body[data-reg="bee"] .row button{min-height:var(--sk-control-row,52px);font:400 16px/1.45 var(--sk-font-ui)}
+body[data-reg="bee"] .row input[type=text]{padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-md,14px)}
+body[data-reg="bee"] .row input[type=text]:focus{border-color:var(--sk-forest)}
+body[data-reg="bee"] .row button{padding:0 var(--sk-s3,18px);border-color:rgba(106,115,110,.4);border-radius:var(--sk-radius-pill,999px);font-weight:700}
+@media (hover:hover){body[data-reg="bee"] .row button:hover{border-color:var(--sk-forest)}}
+body[data-reg="bee"] .row input[type=range]{accent-color:var(--sk-forest);min-height:var(--sk-control-min,44px)}
+body[data-reg="bee"] label.ctl,body[data-reg="bee"] #meta,body[data-reg="bee"] .foot{font:400 14px/1.6 var(--sk-font-ui)}
+body[data-reg="bee"] label.ctl span{font-weight:700}
+body[data-reg="bee"] svg#stage{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="bee"] .hint code{font-size:15px}
+body[data-reg="bee"] #bnr-beta-badge{font:700 14px/1.4 var(--sk-font-ui)!important}
+body[data-reg="bee"] #bnr-beta-badge a{color:var(--sk-ink)!important;border:1.5px solid rgba(106,115,110,.4)!important;border-radius:var(--sk-radius-pill)!important}
+/* RAVER — the instrument after dark: the night purple ground (the sovereign wash into the tint), plain
+   white bold sans title, lavender for the quiet words, magenta-outlined pills, round everything */
+body[data-reg="raver"]{--dim:var(--sk-sovereign-soft);font:400 15px/1.6 var(--sk-font-ui);color-scheme:dark;background-color:var(--sk-sovereign-tint);
+  background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+  background-attachment:fixed}
+body[data-reg="raver"] h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em}
+body[data-reg="raver"] h1 .gear{font-size:30px}
+body[data-reg="raver"] h1 span:not(.gear){font:400 18px/1.3 var(--sk-font-ui);letter-spacing:0}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .hint{font:400 15px/1.6 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] .sub b,body[data-reg="raver"] .hint b{font-weight:700}
+body[data-reg="raver"] .row input,body[data-reg="raver"] .row button{min-height:var(--sk-control-row,52px);font:400 15px/1.4 var(--sk-font-ui);border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .row input[type=text]{padding:0 var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-color:rgba(156,111,214,.55)}
+body[data-reg="raver"] .row input[type=text]:focus{border-color:var(--sk-you)}
+body[data-reg="raver"] .row button{padding:0 var(--sk-s3,18px);border-color:rgba(214,85,187,.6);font-weight:700}
+@media (hover:hover){body[data-reg="raver"] .row button:hover{border-color:var(--sk-you)}}
+body[data-reg="raver"] .row input[type=range]{border-radius:0;min-height:var(--sk-control-min,44px)}
+body[data-reg="raver"] label.ctl,body[data-reg="raver"] #meta,body[data-reg="raver"] .foot{font:400 14px/1.6 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] label.ctl span{font-weight:700;color:var(--sk-sovereign-strong)}
+body[data-reg="raver"] #meta{color:var(--sk-sovereign-strong)}
+body[data-reg="raver"] .hint code{font-size:14px}
+body[data-reg="raver"] svg#stage{border-color:rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] .foot{border-top-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] #bnr-beta-badge{font:700 14px/1.25 var(--sk-font-ui)!important}
+body[data-reg="raver"] #bnr-beta-badge a{background:var(--sk-sovereign-wash)!important;color:var(--sk-ink)!important;border:1.5px solid rgba(214,85,187,.6)!important;border-radius:var(--sk-radius-pill)!important}
+/* CYPHERPUNK — the bench: near-black, IBM Plex Mono throughout, dense, never under 12 px, thin grey
+   lines, corners cut 6px, the cyan fill on the sliders */
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono);color-scheme:dark}
+body[data-reg="cypherpunk"] h1{font:600 22px/1.3 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1 .gear{font-size:15px}
+body[data-reg="cypherpunk"] h1 span:not(.gear){font:400 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .sub,body[data-reg="cypherpunk"] .hint,body[data-reg="cypherpunk"] .hint code{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .sub b,body[data-reg="cypherpunk"] .hint b{font-weight:600}
+body[data-reg="cypherpunk"] .row input,body[data-reg="cypherpunk"] .row button{font:400 13px/1.45 var(--sk-font-mono);border-width:1px;border-color:rgba(100,129,118,.7);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .row input[type=text]{background:var(--sk-bg)}
+body[data-reg="cypherpunk"] .row button{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .row input[type=text]:focus{border-color:var(--sk-ai)}
+@media (hover:hover){body[data-reg="cypherpunk"] .row button:hover{border-color:var(--sk-ai)}}
+body[data-reg="cypherpunk"] .row input[type=range]{border-radius:0}
+body[data-reg="cypherpunk"] label.ctl,body[data-reg="cypherpunk"] #meta,body[data-reg="cypherpunk"] .foot{font:500 12px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] svg#stage{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{color:var(--sk-ink)!important;border:1px solid rgba(100,129,118,.7)!important;border-radius:var(--sk-radius-sm)!important}
+</style>
 </head>
 <body><div class="wrap">
 <h1>orbit <span class="gear">⚙</span> <span style="color:var(--dim)">// the seed becomes sight</span></h1>

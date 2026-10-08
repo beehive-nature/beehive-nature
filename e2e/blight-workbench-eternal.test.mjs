@@ -69,9 +69,12 @@ async function open(reg, rpc = 'blocked') {
   return { ctx, p, errs, calls, gate };
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 const WANT = {
-  bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-  raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+  bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+  raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
   cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
 };
 // every front's facts, read from each front's own DOM (all three are rendered; one is shown)
@@ -172,5 +175,56 @@ test('cypherpunk and bee: a refused read is said in all three; the bee action is
   const end = await p.evaluate(() => ({ phase: window.__eternal.data.phase, found: window.__eternal.data.found }));
   assert.deepEqual(end, { phase: 'swept', found: 0 }, 'a Scan settles as the bench\'s own sweep (reverts are answers, not silence)');
   assert.match(await p.textContent('#etWbBState'), /no pieces found for this wallet/);
+  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
+// every visible text run under 14 px, named (new bee's floor)
+const SMALL = () => {
+  const out = [];
+  for (const el of document.querySelectorAll('body *')) {
+    const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+    if (!r.width || cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
+    if (own && parseFloat(cs.fontSize) < 14) out.push(el.tagName + (el.id ? '#' + el.id : '') + ' ' + cs.fontSize + ' ' + own.slice(0, 24));
+  }
+  return out;
+};
+
+test('bee: after a drawn read, with every disclosure open, no visible text is under 14 px (the raw SVG too)', async () => {
+  const { ctx, p, errs } = await open('bee', 'draws');
+  await p.fill('#addr', HOLDER); await p.click('#go');
+  await p.waitForFunction(() => window.__eternal.data.phase === 'rendered', null, { timeout: 12000 });
+  await p.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+  const small = await p.evaluate(SMALL);
+  assert.ok((await p.textContent('#raw')).startsWith('<svg'), 'the raw SVG is shown');
+  assert.deepEqual(small, [], 'new bee: nothing under 14 px');
+  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
+test('bee: the front\'s own "look for art" finds pieces, and the captions under them are not under 14 px', async () => {
+  const { ctx, p, errs } = await open('bee', 'draws');
+  await p.fill('#etWbBAddr', HOLDER); await p.click('#etWbBGo');
+  await p.waitForFunction(() => window.__eternal.data.phase === 'swept' && window.__eternal.data.found > 0, null, { timeout: 30000 });
+  assert.ok(await p.evaluate(() => document.querySelectorAll('#art svg').length > 0), 'the sweep drew the pieces it found');
+  assert.deepEqual(await p.evaluate(SMALL), [], 'new bee: nothing under 14 px after the sweep');
+  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
+// a labelled stand-in for a public Esplora indexer: one unconfirmed reveal whose witness script carries three
+// envelopes (text/plain, image/svg+xml, text/html). The bench shows the first as text and the other two as source.
+const hx = t => Buffer.from(t).toString('hex');
+const push = t => Buffer.from(t).length.toString(16).padStart(2, '0') + hx(t);
+const ENVELOPE = '0063' + [['text/plain', 'hello'], ['image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg"/>'], ['text/html', '<p>hi</p>']]
+  .map(([ct, body]) => push('ord') + '0101' + push(ct) + '00' + push(body)).join('') + '68';
+const TXID = 'ab'.repeat(32);
+const REVEAL = { txid: TXID, status: { confirmed: false }, size: 400, weight: 1000, fee: 500, vin: [{ witness: ['0101', ENVELOPE, 'c1'] }], vout: [] };
+
+test("bee: a Bitcoin inscription read (text, and svg and html shown as source) is not under 14 px either", async () => {
+  const { ctx, p, errs } = await open('bee');
+  await ctx.route(/\/api\/tx\/[0-9a-f]{64}$/, r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(REVEAL) }));
+  await p.selectOption('#chain', String(await p.evaluate(() => CHAINS.findIndex(c => c.btc))));
+  await p.fill('#addr', TXID); await p.click('#go');
+  await p.waitForFunction(() => document.querySelectorAll('#art pre').length >= 3, null, { timeout: 12000 });
+  assert.deepEqual(await p.evaluate(SMALL), [], 'new bee: nothing under 14 px in the inscription view');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });

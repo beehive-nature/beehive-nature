@@ -1,6 +1,6 @@
 // Isolated channel prototype. Gateways are trusted with the channel key;
 // backing storage and notification transports are not trusted with plaintext.
-import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { createHash, createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { finalizeEvent, getPublicKey, verifyEvent } from 'nostr-tools/pure';
 
@@ -62,17 +62,21 @@ function checkRef(ref) {
   requireThat(hex(ref.address) && hex(ref.sha256) && Number.isSafeInteger(ref.size)
     && ref.size > 0 && ref.size <= LIMITS.snapshot + 64, 'invalid-reference');
 }
-function seal(bytes, key, policyId) {
+// v1 snapshots (single out-of-band key) keep their exact AAD. v2 snapshots are
+// sealed under a numbered epoch key and bind that number into the AAD.
+const snapshotAad = (policyId, epoch) => epoch === 0
+  ? `bnr-channel-snapshot-v1:${policyId}` : `bnr-channel-snapshot-v2:${policyId}:${epoch}`;
+function seal(bytes, key, aad) {
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(Buffer.from(`bnr-channel-snapshot-v1:${policyId}`));
+  cipher.setAAD(Buffer.from(aad));
   return Buffer.concat([iv, cipher.update(bytes), cipher.final(), cipher.getAuthTag()]);
 }
-function unseal(bytes, key, policyId) {
+function unseal(bytes, key, aad) {
   requireThat(bytes.length >= 28, 'invalid-ciphertext');
   try {
     const cipher = createDecipheriv('aes-256-gcm', key, bytes.subarray(0, 12));
-    cipher.setAAD(Buffer.from(`bnr-channel-snapshot-v1:${policyId}`));
+    cipher.setAAD(Buffer.from(aad));
     cipher.setAuthTag(bytes.subarray(-16));
     return Buffer.concat([cipher.update(bytes.subarray(12, -16)), cipher.final()]);
   } catch { requireThat(false, 'ciphertext-authentication', 409); }
@@ -91,20 +95,42 @@ async function putVerified(store, bytes) {
   return ref;
 }
 
+// Numbered channel epoch keys held by one gateway or member. Keys arrive here
+// from opened PQ key grants (keygrant.mjs); this class has no PQ dependency.
+// It only grows: an epoch, once held, keeps its exact key.
+export class EpochKeyring {
+  #keys = new Map();
+  add(epoch, key) {
+    requireThat(Number.isSafeInteger(epoch) && epoch >= 1, 'invalid-epoch');
+    requireThat(key instanceof Uint8Array && key.length === 32, 'invalid-channel-key');
+    const held = this.#keys.get(epoch);
+    if (held) { requireThat(timingSafeEqual(held, key), 'epoch-key-conflict', 409); return this; }
+    this.#keys.set(epoch, Buffer.from(key));
+    return this;
+  }
+  get(epoch) { const key = this.#keys.get(epoch); return key && Buffer.from(key); }
+  get latest() { return Math.max(0, ...this.#keys.keys()); }
+}
+
 export class Channel extends EventEmitter {
-  #key; #writer; #state = { sequence: 0, events: [], files: [] }; #pin = null; #busy = false;
+  #key; #keyring; #epoch = 0; #writer; #state = { sequence: 0, events: [], files: [] }; #pin = null; #busy = false;
   #writeRemaining = LIMITS.writeBytesPerProcess;
-  constructor({ policy, owner, policyId, key, writer, store, live }) {
+  constructor({ policy, owner, policyId, key, keyring, writer, store, live }) {
     super();
     this.policy = checkPolicy(policy, owner, policyId);
     // The parsed policy is private to this instance's admission decisions.
     Object.freeze(this.policy.members); Object.freeze(this.policy.event); Object.freeze(this.policy);
-    requireThat(key instanceof Uint8Array && key.length === 32, 'invalid-channel-key');
+    // `key` alone: v1 behaviour, unchanged. `keyring`: writes v2 epoch snapshots;
+    // `key` may accompany it to read v1 history written before the first grant.
+    requireThat(keyring === undefined || keyring instanceof EpochKeyring, 'invalid-keyring');
+    requireThat((keyring && key === undefined) || (key instanceof Uint8Array && key.length === 32), 'invalid-channel-key');
     if (writer) requireThat(getPublicKey(writer) === this.policy.writer, 'writer-not-authorized', 403);
-    this.#key = Buffer.from(key); this.#writer = writer && Uint8Array.from(writer);
+    this.#key = key && Buffer.from(key); this.#keyring = keyring; this.#writer = writer && Uint8Array.from(writer);
     this.store = store; this.live = live;
   }
   get pin() { return this.#pin && structuredClone(this.#pin); }
+  // Epoch of the visible snapshot: 0 = v1 single key (or nothing yet).
+  get epoch() { return this.#epoch; }
   authorize(pubkey) {
     requireThat(now() < this.policy.expires_at, 'policy-expired', 403);
     requireThat(this.policy.members.includes(pubkey), 'membership-required', 403);
@@ -125,14 +151,18 @@ export class Channel extends EventEmitter {
     next.sequence = this.#state.sequence + 1;
     const bytes = encode(next);
     requireThat(bytes.length <= LIMITS.snapshot, 'snapshot-limit', 413);
-    const data = await this.#put(seal(bytes, this.#key, this.policy.event.id));
-    const checkpoint = signed(this.#writer, 30078, [['d', 'bnr-channel-checkpoint-v1']], JSON.stringify({
-      version: 1, policy_id: this.policy.event.id, sequence: next.sequence,
-      parent: this.#pin?.id ?? null, event_count: next.events.length, data,
-    }));
+    // With a keyring, every snapshot (whole history included) is sealed under the
+    // newest epoch held, and its checkpoint records that epoch number.
+    const epoch = this.#keyring ? this.#keyring.latest : 0;
+    requireThat(!this.#keyring || epoch >= 1, 'epoch-key-unavailable', 409);
+    const key = epoch ? this.#keyring.get(epoch) : this.#key;
+    const data = await this.#put(seal(bytes, key, snapshotAad(this.policy.event.id, epoch)));
+    const record = { version: epoch ? 2 : 1, policy_id: this.policy.event.id, sequence: next.sequence,
+      parent: this.#pin?.id ?? null, event_count: next.events.length, ...(epoch ? { epoch } : {}), data };
+    const checkpoint = signed(this.#writer, 30078, [['d', 'bnr-channel-checkpoint-v1']], JSON.stringify(record));
     const ref = await this.#put(encode(checkpoint));
     const pin = { id: checkpoint.id, sequence: next.sequence, policy_id: this.policy.event.id, ref };
-    this.#state = next; this.#pin = pin;
+    this.#state = next; this.#pin = pin; this.#epoch = epoch;
     this.emit('committed');
     let notificationAccepted = false;
     if (this.live) {
@@ -214,14 +244,22 @@ export class Channel extends EventEmitter {
       requireThat(cp.id === expected.id && cp.pubkey === this.policy.writer && cp.kind === 30078
         && tag(cp, 'd') === 'bnr-channel-checkpoint-v1', 'checkpoint-signature', 409);
       const m = parse(Buffer.from(cp.content), LIMITS.checkpoint);
-      exact(m, ['version', 'policy_id', 'sequence', 'parent', 'event_count', 'data']);
-      requireThat(m.version === 1 && m.policy_id === expected.policy_id && m.sequence === expected.sequence
+      const v2 = m?.version === 2;
+      exact(m, ['version', 'policy_id', 'sequence', 'parent', 'event_count', 'data', ...(v2 ? ['epoch'] : [])]);
+      requireThat((m.version === 1 || (v2 && Number.isSafeInteger(m.epoch) && m.epoch >= 1))
+        && m.policy_id === expected.policy_id && m.sequence === expected.sequence
         && (m.sequence === 1 ? m.parent === null : hex(m.parent)), 'checkpoint-shape', 409);
       // Streaming follow only advances one known predecessor. Cold recovery requires
       // an externally retained exact pin; the storage provider cannot choose a tip.
       if (this.#pin) requireThat(m.sequence === this.#pin.sequence + 1 && m.parent === this.#pin.id, 'checkpoint-gap-or-fork', 409);
+      const epoch = v2 ? m.epoch : 0;
+      // A follower never accepts new content sealed under an older epoch than it
+      // already saw: retired keys are not reused for later snapshots.
+      if (this.#pin) requireThat(epoch >= this.#epoch, 'epoch-rollback', 409);
+      const key = epoch ? this.#keyring?.get(epoch) : this.#key;
+      requireThat(key, epoch ? 'epoch-key-unavailable' : 'channel-key-unavailable', 403);
       const snapshot = parse(unseal(await fetchRef(this.store, m.data, LIMITS.snapshot + 28),
-        this.#key, this.policy.event.id), LIMITS.snapshot);
+        key, snapshotAad(this.policy.event.id, epoch)), LIMITS.snapshot);
       exact(snapshot, ['sequence', 'events', 'files']);
       requireThat(snapshot.sequence === m.sequence && Array.isArray(snapshot.events) && snapshot.events.length <= LIMITS.events
         && snapshot.events.length === m.event_count && Array.isArray(snapshot.files) && snapshot.files.length <= LIMITS.files, 'snapshot-shape', 409);
@@ -238,7 +276,7 @@ export class Channel extends EventEmitter {
         requireThat(this.#state.events.every((e, i) => snapshot.events[i]?.id === e.id)
           && this.#state.files.every((f, i) => snapshot.files[i]?.sha256 === f.sha256), 'history-removal', 409);
       }
-      this.#state = snapshot; this.#pin = structuredClone(expected);
+      this.#state = snapshot; this.#pin = structuredClone(expected); this.#epoch = epoch;
       this.emit('committed');
       return this.pin;
     });

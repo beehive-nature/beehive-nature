@@ -177,13 +177,16 @@ in the root's spelling.
 
 1. **Byte-level v1 constants are FROZEN at the old spelling.** The KDF domain-separation labels
    (`BDID-v1/prf-input/identity`, `BDID-v1/master-prk`, `BDID-v1/ed25519-record-key`,
-   `BDID-v1/persona-nullifier`, `BDID-v1/fingerprint`), the bech32 recovery HRP `bdidrec`, and
+   `BDID-v1/secp256k1-record-key`, `BDID-v1/persona-nullifier`, `BDID-v1/fingerprint`, and the
+   post-quantum labels of SPEC-BPQ-1 §2: `BDID-v1/ml-dsa-65-record-key`, `BDID-v1/x-wing-kem-key`,
+   `BDID-v1/vault-key`, `BDID-v1/slh-dsa-shake-256f-succession`), the bech32 recovery HRP `bdidrec`, and
    the SpendReceipt schema-v1 wire field `spender_bdid`. Changing one byte of a KDF label
    re-derives every existing key; changing the HRP orphans every printed recovery sheet; changing
    a wire field breaks every emitted receipt. The labels carry their own version tag — a future
    **v2 ceremony** may spell them `BZDID-v2`. Guard comments sit at all three sites
    (`surfaces/onboarding/bzdid-key.js`, `surfaces/recover.html`,
-   `crates/shared-types/src/spend.rs`).
+   `crates/shared-types/src/spend.rs`); the PQ labels are frozen in `surfaces/bpq.js` and
+   `crates/bsigner/src/bpq.rs`, and the shared vectors fail if either side moves a byte.
 2. **Dated dispatches, rulings, and receipts keep `bDiD`.** `docs/dispatches/**`,
    `docs/receipts/**`, and `docs/RECEIPT_*` are the historical record — renaming inside them
    rewrites quoted founder words and dated evidence. Pre-2026-08-19 documents reading `bDiD`
@@ -209,6 +212,35 @@ exactly the lint's exemption table), with the usual positive control.
 
 **Source.** Founder directive 2026-08-19 (mobile). Sweep landed the same day: 40 files,
 302 insertions / 301 deletions plus the file renames; residual scan clean.
+
+---
+
+## Law 7 — `did:b:` is the sovereign root; every other DID method is a bound anchor (2026-10-06)
+
+**Rule.** `bzDiD` in its wire form `did:b:` (the self-certifying root of
+`docs/bzdid-architecture-decision.md` — `did:b:` ‖ base32(sha256(genesis op)), the full 256
+bits) is THE identity root of the estate. `did:autonomi`, `did:webvh`, `did:plc`, `did:web`,
+and every other method the estate touches are **bound publication/transport personas or
+anchors — never competing roots.** A document may carry any of them; the hierarchy is explicit
+in the binding: the anchor names the `did:b:` it serves, and nothing upgrades an anchor to a
+root.
+
+**Why.** The 2026-10-06 completion review found the estate talking about three "roots" at
+once: Law 6 above says the identity root is bzDiD; the Vaulta spec calls its records "bzDiD
+Mint"; `crates/onboarding` anchors a `did:autonomi`; the browser onboarding surface describes
+a planned `did:webvh` anchor. Those coexist legitimately ONLY as a hierarchy — bzDiD
+sovereign, everything else bound — never as rivals. The root heads the hierarchy by its own
+property: it verifies locally in anyone's hands (`crates/bzdid::verify_genesis` — hash the
+handed bytes, compare, fail closed), while every anchor carries its issuer's trust.
+
+**Enforcement.** The root and its verifier are code (`crates/bzdid`; frozen vector in
+`crates/bzdid/tests/genesis_vector.rs` pins the byte-level v1 canon `BDID-GENESIS-V1` — a
+canon change is a v2 ceremony, never an edit). No lint yet for "an anchor posing as a root";
+new identity-bearing code states its place in the hierarchy in its own docs, and review holds
+that line.
+
+**Source.** Founder engineering order 2026-10-06 (completion review, "Identity-coherence
+issue — fix before adding more code"), executed in the same lane that built the root.
 
 ---
 

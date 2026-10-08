@@ -1,0 +1,11 @@
+{
+ "wire": "/service/tree/tree-data/v8/record-matches/{pid}/all",
+ "method": "in-page fetch loop (persistent page-side worker; 32s-eval-cap workaround), single worker, pacing 170ms",
+ "pidsSwept": 823,
+ "startedAt": "2026-10-07T00:00:00-06:00 (approx, loop start)",
+ "finishedAt": "2026-10-07T02:10:00-06:00 (approx)",
+ "durationApproxMin": 40,
+ "resumability": "ndjson append + cursor file in private tier C:/Users/travi/family-lineage/hint-sweep-2026-10-07/",
+ "honestNotes": "two abandoned in-page loops from 32s evaluate timeouts ran to completion before the persistent loop started (read-only fetches, same 170ms pacing); no writes during census",
+ "postPass": "after the attach session, the four Olsen-family pids (LZDH-WYF, MHRT-169, MLCS-MN5, L1N9-S2L) were re-polled and their rows rewritten in place: 22→18, 20→18, 4→4, 25→22 (the cluster drop with no attach work on it is a provider-side shared-record recount, reported as observed)"
+}

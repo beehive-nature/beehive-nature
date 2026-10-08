@@ -14,6 +14,11 @@ The local chain tier spends faucet lamports and transfers nonredeemable fixture
 units. It does not authorize or spend real funds. It is a measured reference
 suite, not a universal standard certification or production bPay adapter.
 
+Current integration: [October 7 status and component boundaries](CURRENT.md).
+The October 3 receipt is historical. A fresh v0.46.0 run found a duplicate
+receiver-history row after restart. The current lab pins x0x v0.46.5 and uses a
+durable BNR inbox; transport-history deduplication is measured, not assumed.
+
 ## Rust statement and authority boundary
 
 `src/lib.rs:Worker::prove` computes `7 * 7 = 49`. The real BN254 Groth16 circuit
@@ -75,7 +80,7 @@ enforce BNR authority. x0x transports public proof material and has no payment
 keys or authority decision in this harness.
 
 See the [measured dispatch](../../docs/dispatches/2026-10-03-tungsten-chain-acceptance.md)
-and [public evidence](evidence/2026-10-03-local.json). Upstream's
+and [historical public evidence](evidence/2026-10-03-local.json). Upstream's
 [trust assumptions](https://github.com/solana-program/groth16-verifier-program/tree/8bd06b4fb07f636c1872993a99f1a296b23b69fa#trust-assumptions)
 explain why key pinning needs setup provenance and why proof hashes cannot
 serve as replay protection.

@@ -38,6 +38,7 @@ jobs:
       - name: Lab source syntax and dependency audit (not a chain run)
         run: |
           python3 -m py_compile tools/solana-tungsten/lab/*.py
+          python3 -m unittest discover -s tools/solana-tungsten/lab -p 'test_*.py' -v
           for file in tools/solana-tungsten/lab/*.mjs; do node --check "$file"; done
           npm ci --ignore-scripts --prefix tools/solana-tungsten/lab
           npm audit --prefix tools/solana-tungsten/lab --audit-level=moderate

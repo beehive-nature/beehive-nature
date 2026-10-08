@@ -1,0 +1,12 @@
+{
+ "about": "The law files the wallet's one-press \"sign the law\" signs (surfaces/wallet.html#pq-law). Agents keep this list current; scripts/apply-law-signatures.mjs writes only signatures for files named here.",
+ "files": [
+  "docs/CONSTITUTION.md",
+  "ORDERS-1.md",
+  "docs/RULINGS-2026-07-26.md",
+  "docs/RULINGS-2026-08-26.md",
+  "docs/RULINGS-2026-09-16.md",
+  "docs/RULINGS-2026-09-30.md",
+  "docs/RULINGS-2026-10-04.md"
+ ]
+}

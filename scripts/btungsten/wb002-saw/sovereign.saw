@@ -1,0 +1,36 @@
+// bTunGsTeN Workbench 002 — SAW plan. STAGED, NOT-RUN (2026-10-07,
+// result-class law: EQUIVALENCE is its own result class and has not run).
+//
+// Software Analysis Workbench (Galois, the tool NSA's Foundation repo
+// builds its assurance methodology around) proves an implementation
+// equivalent to a Cryptol specification. The spec half exists
+// (../wb002-cryptol/Sovereign.cry, itself staged-unrun); the
+// implementation half for SAW is a RUST twin of wb002-simpleassets.mjs's
+// transition oracle that does not exist yet — the JS twin is the
+// executable battery's target, and SAW has no JS extraction. Named
+// gaps, in order (mirrors WB001's ladder; WB002 slots after it):
+//
+//   1. cryptol typecheck + :check sovereignContinuity   (CI container)
+//   2. Rust twin of sovereign/step in this repo         (later beat)
+//   3. this script's equivalence + coverage proof       (last)
+//
+// Planned shape once (1)-(2) exist:
+//
+//   cryptol_load ../wb002-cryptol/Sovereign.cry;
+//   let stepSpec = cryptol "step";
+//
+//   llvm_load_bitcode "target/…/wb002_sovereign.bc";
+//   let stepImpl = llvm_extract "wb002_sovereign::step";
+//
+//   // equivalence, all states and actions: the Rust oracle refuses
+//   // exactly where the spec holds the state unchanged.
+//   theorem rust_matches_spec : llvm_verify stepImpl
+//     [cryptol stepSpec] [];
+//
+//   // with equivalence discharged, the battery's sampled histories and
+//   // wrong-signer matrix become provable corollaries of
+//   // sovereignContinuity rather than samples — the WB002 endgame.
+//
+// Run environment note: SAW release binaries are Linux x86_64; the CI
+// ubuntu runner is the qualified host (tests.yml's container beat when
+// it lands). Until then: UNVERIFIED, deliberately.

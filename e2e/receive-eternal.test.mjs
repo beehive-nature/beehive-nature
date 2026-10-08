@@ -39,8 +39,8 @@ const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getC
 
 test('one front per register, each in its own dress and structure', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /system-ui|Segoe UI|ui-sans-serif/, action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /system-ui|Segoe UI|ui-sans-serif/, action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {

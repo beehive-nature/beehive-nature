@@ -34,18 +34,22 @@ var METHODS = {
   describe: function () {
     return {
       rail: 'hive',
-      adapter_version: '1.0.0',
+      adapter_version: '1.1.0',
       contract_version: '1',
       capabilities: ['balance'],
       networks: ['mainnet'],
-      units: ['HIVE']
+      units: ['HIVE', 'HBD']
     };
   },
   balance: async function (p) {
     if (!p || !p.address) { var b = new Error('balance needs {address}'); b.code = E.BAD_PARAMS; throw b }
     var accounts = await hiveCall('condenser_api.get_accounts', [[p.address]]);
     if (!accounts || !accounts[0]) { var e = new Error('account ' + p.address + ' not found on Hive'); e.code = -32006; throw e }
-    return { unit: 'HIVE', quantity: (parseFloat(accounts[0].balance) || 0).toFixed(3) + ' HIVE' };
+    var account=accounts[0];
+    if(typeof account.balance!=='string'||!/^\d+\.\d{3} HIVE$/.test(account.balance))throw new Error('Hive returned no valid liquid balance');
+    var balances=[account.balance];
+    if(typeof account.hbd_balance==='string'&&/^\d+\.\d{3} HBD$/.test(account.hbd_balance))balances.push(account.hbd_balance);
+    return { unit:'HIVE',quantity:account.balance,balances:balances,hbdAvailable:balances.length===2 };
   }
 };
 

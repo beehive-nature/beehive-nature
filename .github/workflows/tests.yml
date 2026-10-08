@@ -25,6 +25,24 @@ jobs:
       - name: Test workspace
         if: always()
         run: cargo test --workspace --locked
+      # the same SETTLE contract on a second rail: the binary this job just built
+      - name: bPay SETTLE — Solana native carrier through the built settle-solana binary
+        if: always()
+        working-directory: tools/bpay-settle
+        env:
+          SETTLE_SOLANA_BIN: ${{ github.workspace }}/target/debug/settle-solana
+        run: |
+          test -x "$SETTLE_SOLANA_BIN" || { echo "settle-solana binary missing: a skipped suite is not a pass"; exit 1; }
+          node --test solana-native.test.mjs
+      # the bSigner→SETTLE nerve: the real organ signs the authority, the organ verifies it, the kernel settles under it
+      - name: bPay SETTLE — the signed-authorization nerve through the built bsigner organ
+        if: always()
+        working-directory: tools/bpay-settle
+        env:
+          SETTLE_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$SETTLE_BSIGNER_BIN" || { echo "bsigner binary missing: a skipped suite is not a pass"; exit 1; }
+          node --test bsigner-nerve.test.mjs
       - name: Check formatting
         if: always()
         run: cargo fmt --all --check
@@ -88,6 +106,29 @@ jobs:
         run: |
           node scripts/build-stack-inventory.mjs --check
           node scripts/build-stack-surfaces.mjs --check
+      # SPEC-BPQ-1: the browser (noble) half of the shared PQ vectors; the
+      # Rust half runs in `cargo test --workspace` (crates/bsigner/src/bpq.rs).
+      # pq-kat: NIST ACVP known-answer vectors (surfaces/pq-kat.json), noble
+      # half here, RustCrypto half in crates/bsigner/src/kat.rs.
+      - name: Post-quantum keys and sealed objects — shared vectors, two implementations
+        if: always()
+        run: |
+          node scripts/build-bpq-vectors.mjs --check
+          node --test e2e/bpq.test.mjs
+          node scripts/verify-bpq-signatures.mjs
+          node --test e2e/law-signatures.test.mjs
+          node --test e2e/pq-kat.test.mjs
+      - name: Wallet coins — full census, exact units, batch identity and read failures
+        if: always()
+        run: node --test e2e/wallet-coins.test.mjs
+      # the sign sheet's "or sign it in Anchor": the wallet's EOSIO Signing Request (EEP-7) encoder,
+      # proven against the published requests by their inflated payloads, plus a registry round trip
+      - name: Wallet Anchor link — signing requests against the published EEP-7 and wharfkit vectors
+        if: always()
+        run: node --test e2e/esr.test.mjs
+      - name: Arweave status — documented confirmations, malformed evidence and rate limits
+        if: always()
+        run: node --test e2e/arweave-status.test.mjs
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
@@ -107,7 +148,7 @@ jobs:
         run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/ans104.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/a1-log.test.mjs e2e/ans104.test.mjs e2e/bchat-core.test.mjs e2e/ant-transport.test.mjs e2e/bchat-cockpit.test.mjs
       # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
       # run one of them. That is why a real regression sat on an open, mergeable
       # PR for three days with nothing red naming it: the gate was not weak, it
@@ -129,6 +170,29 @@ jobs:
           fi
           echo "genealogy: running $n suite(s)"
           node --test $(ls tools/genealogy/*.test.mjs)
+      # bTunGsTeN Workbench 001 (zCode seat, 2026-10-06; SPEC-BTUNGSTEN-1):
+      # the standard's first executable arm — the intent-binding invariant.
+      # No valid signature authorizes any intent other than the exact
+      # committed intent: one-bit mutation matrix over every byte of the
+      # envelope AND the signature, field-move mutants across all ten
+      # fields, structural forgeries (reorder, unknown tag, duplicate,
+      # length-splice, truncation), an injectivity corpus with
+      # nested-envelope and boundary-shift twins, domain/nonce/epoch
+      # participation, and the teeth row convicting the naive length-free
+      # encoder. Measured green on the branch before wiring (10/10, 2,178
+      # mutants rejected) — guard, not new red. Globbed, never listed, with
+      # the same non-vacuity count guard as genealogy above.
+      - name: bTunGsTeN WB001 — intent-binding mutation matrix (globbed, never listed)
+        if: always()
+        run: |
+          set -eu
+          n=$(ls scripts/btungsten/*.test.mjs 2>/dev/null | wc -l | tr -d " ")
+          if [ "${n:-0}" -lt 1 ]; then
+            echo "btungsten: matched ${n:-0} suites under scripts/btungsten — that is not a count of tests, it is a glob that found nothing. Refusing to report a pass."
+            exit 1
+          fi
+          echo "btungsten: running $n suite(s)"
+          node --test $(ls scripts/btungsten/*.test.mjs)
       - name: bData local intake — real disk bytes, hash refusal and restart persistence
         if: always()
         run: node --test tools/antd-bridge/intake-server.test.mjs
@@ -156,6 +220,16 @@ jobs:
           npm ci --ignore-scripts
           npm test
           npm run prove
+      - name: doxx tungsten harness — no false success, no secret in a receipt
+        if: always()
+        working-directory: tools/net-doxx
+        run: npm test
+      - name: bPay SETTLE adapters — five kill conditions, sabotage battery, mutation proof
+        if: always()
+        working-directory: tools/bpay-settle
+        run: |
+          node --test bpay-settle.test.mjs
+          node prove.mjs
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh
@@ -455,6 +529,13 @@ jobs:
       - name: CI shape — every suite step carries if:always()
         if: always()
         run: node scripts/lint-ci-shape.mjs
+      # NO ENABLE-THEN-CLICK ACROSS TWO STEPS (2026-10-03): the wallet check
+      # went red on unrelated commits because a test enabled a control and
+      # clicked it in separate Playwright steps while the page re-disabled it
+      # between them. This fails the run if that shape returns in any e2e file.
+      - name: e2e shape — a control is enabled and clicked in one browser task
+        if: always()
+        run: node scripts/lint-e2e-enable-click.mjs
       # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
       # frozen art — CI fails on ANY edit to its committed blob. The hash is
       # taken from the committed blob, never the worktree copy. Tinkering
@@ -764,7 +845,7 @@ jobs:
         timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs bview-direct.test.mjs
+        run: node --test bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
@@ -833,7 +914,10 @@ jobs:
     # the pipeline open at once, new bee and raver in the reader's own
     # "everything" view. Each step runs all six and fails at the end, so one red
     # battery never hides the others.
-    timeout-minutes: 30
+    # 2026-10-05: the bug sweep doubled the batteries (about 1,100 checks), so 30 minutes ran out mid-run
+    # and a cancelled job publishes no log. Each step now has its own limit: a slow or stuck battery fails
+    # its own step, with its log, and the steps after it still run.
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -849,30 +933,72 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
         if: always()
+        timeout-minutes: 22
         run: |
           rc=0
           for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
           exit $rc
       - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-registers.mjs
+      - name: Wallet action sheet — one press composes and signs a .b action as the account the name points at
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-action-sheet.mjs
+      - name: Arweave from your own keys — native secp256k1 address, keyless reads, a publish the network would attribute to you
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-arweave-keys.mjs
+      - name: Hive — one paste adds the account its active key controls; bytes and digest equal Hive's own library; one press sends
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-hive.mjs
+      - name: Wallet public accounts — persistence, following, read failures and signing isolation
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-accounts.mjs
+      - name: Bridge and account forge — one paste never signs twice; the forge reads the name and says its price
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-bridge-acct.mjs
+      - name: Composer — what a link, a contract or a worker says is shown as text and never runs, in all three registers
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-compose-xss.mjs
+      - name: Unified wallet — phone and desktop, public backup and storage navigation, no server
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-unified.mjs
+      - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-read-budget.mjs
+      - name: Trezor public accounts — gesture, paths, cancellation and account balance binding
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-trezor.mjs
       - name: Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub
         if: always()
+        timeout-minutes: 10
         run: node e2e/wallet-forge-pq.mjs
       - name: Soul chrome truth — live bzDiD removes connect/create from rails footer
         if: always()
+        timeout-minutes: 10
         run: node e2e/soul-chrome.mjs
   eternal:
     timeout-minutes: 25
@@ -899,7 +1025,7 @@ jobs:
         timeout-minutes: 12 # measured: max 491s in run 36755721413 (+47% headroom)
         if: always()
         working-directory: e2e
-        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs plur-festival-entry.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
+        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs plur-festival-entry.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs bchat-eternal.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
       # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
       # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
       # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
@@ -963,3 +1089,50 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test render-badges.test.mjs
+
+  formal:
+    # bTunGsTeN formal-assurance ladder (founder ruling 2026-10-07, SPEC-
+    # BTUNGSTEN-1 §workbench): the formal leg runs in CI as its own result
+    # classes. TYPECHECK and CHECK-SAMPLED (adversarial + constructed +
+    # random arms) gate this job. PROVE-UNIVERSAL is attempted under a
+    # bounded budget and recorded honestly — a timeout prints NOT-PROVEN
+    # and exits green BY DESIGN: gating on an open research obligation
+    # would wedge CI red forever, and the result-class law forbids
+    # recording a timeout as anything but NOT-PROVEN. EQUIVALENCE is not
+    # attempted here and can never be claimed from this job (the shared
+    # vectors are sampled agreement). Cryptol is pinned: the version and
+    # asset below are part of every receipt this job produces.
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: shared setup — install cryptol 3.6.0 (pinned, with bundled solvers)
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          # tag is 3.6.0 (no v prefix) and ubuntu-24.04 matches ubuntu-latest —
+          # both facts from the releases API, learned from a 404 on the first run
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "-- bundle bin/ (recorded for the receipt):"; ls cryptol/bin
+          # cryptol requires z3 on PATH; the with-solvers bundle ships it in its
+          # bin dir (learned from run 3's "z3 not found"). $GITHUB_PATH persists
+          # for the job's later steps — a plain export dies with this step's
+          # shell, which is exactly how run 4 red while z3 --version printed.
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/cryptol/bin:$PATH"
+          if ! command -v z3 >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq z3
+          fi
+          z3 --version | head -1
+          ./cryptol/bin/cryptol --version
+      - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
+        if: always()
+        # 14m, not 10: setup+checks ~75s + TWO 300s prove budgets (wireZeroTail,
+        # wireInjective) — the step cap killed the second prove mid-run before
+        # the honest timeout classification could print (learned run 37698302619).
+        timeout-minutes: 14
+        run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"

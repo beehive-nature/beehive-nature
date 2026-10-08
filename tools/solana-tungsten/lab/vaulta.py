@@ -40,6 +40,16 @@ def main(a):
             except OSError:
                 time.sleep(.2)
         raise RuntimeError('daemon readiness timeout')
+    def wait_feature(digest):
+        deadline = time.monotonic() + 60
+        while time.monotonic() < deadline:
+            activated = rpc(18888,'chain/get_activated_protocol_features',{'limit':100})
+            if any(f['feature_digest'] == digest for f in activated['activated_protocol_features']):
+                return
+            if any(p.poll() is not None for p in processes):
+                raise RuntimeError('owned daemon exited during protocol activation')
+            time.sleep(.25)
+        raise RuntimeError('protocol feature activation timeout')
     def cleos(*args, expected=None):
         result = subprocess.run(['/usr/bin/cleos','--no-auto-keosd','-u','http://127.0.0.1:18888',
                                  '--wallet-url','http://127.0.0.1:18902',*map(str,args)],capture_output=True,text=True)
@@ -48,7 +58,7 @@ def main(a):
             assert result.returncode != 0 and expected in combined, f'expected refusal: {expected}; exit={result.returncode}; {combined[-1800:]}'
             return
         if result.returncode:
-            raise RuntimeError(result.stderr[-2000:])
+            raise RuntimeError(f'cleos exit={result.returncode}: {result.stderr[-2000:]}')
         return json.loads(result.stdout) if result.stdout.strip().startswith('{') else result.stdout
     def action(account, name, data, auth, expected=None):
         return cleos('push','action',account,name,json.dumps(data),'-p',auth,'-j',expected=expected)
@@ -74,6 +84,10 @@ p2p-listen-endpoint = 127.0.0.1:18987
 producer-name = eosio
 enable-stale-production = true
 signature-provider = {public}=KEOSD:http://127.0.0.1:18902/v1/wallet/sign_digest
+# A contended local host can exceed Spring's default 5 ms wallet RPC budget.
+keosd-provider-timeout = 100
+# ABI table readback also needs headroom on the shared development machine.
+abi-serializer-max-time-ms = 150
 max-transaction-time = 200
 chain-state-db-size-mb = 256
 chain-state-db-guard-size-mb = 16
@@ -84,10 +98,10 @@ chain-state-db-guard-size-mb = 16
         features = rpc(18888,'producer/get_supported_protocol_features',{'exclude_disabled':False,'exclude_unactivatable':False})
         feature = {next(x['value'] for x in f['specification'] if x['name']=='builtin_feature_codename'):f['feature_digest'] for f in features}
         rpc(18888,'producer/schedule_protocol_feature_activations',{'protocol_features_to_activate':[feature['PREACTIVATE_FEATURE']]})
-        time.sleep(1.5)
+        wait_feature(feature['PREACTIVATE_FEATURE'])
         cleos('set','contract','eosio',build,'boot.wasm','boot.abi','-j')
         action('eosio','activate',[feature['CRYPTO_PRIMITIVES']],'eosio')
-        time.sleep(1.5)
+        wait_feature(feature['CRYPTO_PRIMITIVES'])
         cleos('create','account','eosio','tungsten',public,'-j')
         cleos('create','account','eosio','worker',public,'-j')
         cleos('set','contract','tungsten',build,'tungsten.wasm','tungsten.abi','-j')

@@ -12,6 +12,11 @@ assert.deepEqual(received,owner);
 const job = owner.packet.job;
 const commitment = [...crypto.createHash('sha256').update('bnr-solana-tungsten/job/v1\0').update(JSON.stringify(job)).digest()];
 const solana = read('solana/solana-receipt.json'), vaulta = read('vaulta/vaulta-receipt.json');
+const transport = read('delivery/receipt.json');
+assert.equal(transport.completed,true);
+assert.equal(transport.bnr_inbox_restart_replay_refused,true);
+assert.equal(transport.bnr_inbox_payload_conflict_refused,true);
+assert.equal(transport.bnr_inbox_queued_jobs,111);
 assert.equal(solana.finality,'finalized'); assert.equal(vaulta.finality,'irreversible');
 assert.equal(solana.amount,job.amount); assert.equal(vaulta.amount,job.amount);
 const invoice = buildGenericInvoice({jobId:job.job_id,issuedAt:'2026-10-03T00:00:00Z',
@@ -42,7 +47,7 @@ for (const observation of observations) {
 const report = {schema:'bnr.tungsten-acceptance/2',scope:'private local chains and loopback delivery',
   semantic_core_equal:true,rail_evidence_intentionally_distinct:true,
   production_ready:false,universal_standard_certified:false,real_funds_moved:false,
-  transport:read('delivery/receipt.json'),observations};
+  transport,observations};
 fs.writeFileSync(path.join(root,'acceptance.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({acceptance:path.join(root,'acceptance.json'),semantic_core_equal:true,
   reconciliation:observations.map(x=>x.reconciliation.conclusion)}));

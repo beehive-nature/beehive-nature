@@ -33,18 +33,18 @@ console.log("member ed25519 pub (hex):", pubHex, "PUBLIC-CONSTANT");
 
 // 2. the store binding: a REAL signed A1 genesis revision under the member key
 //    (format proven; the funded Autonomi write is custody-gated — stated in-record)
-import { genesisRevision, hashRevision, importMemberSeed } from "./a1.mjs";
-const memberPrivObj = await importMemberSeed(Buffer.from(seedB64url, "base64url"));
-const a1Genesis = await genesisRevision({
+//    a1 v2: the genesis also pins the agent's post-quantum key, derived from
+//    the same member seed (a1PqKeys), and carries its ML-DSA-65 signature
+import { genesisRevisionV2, hashRevision, importMemberSeed, a1PqKeys, storeBinding as a1StoreBinding } from "./a1.mjs";
+const memberSeed = Buffer.from(seedB64url, "base64url");
+const memberPrivObj = await importMemberSeed(memberSeed);
+const a1Pq = a1PqKeys(memberSeed, NAME);
+const a1Genesis = await genesisRevisionV2({
   agent: NAME, body: { note: "a1 genesis — memory begins empty; the store funds later under this binding" },
-  memberPrivateKey: memberPrivObj });
+  memberPrivateKey: memberPrivObj, pqKeys: a1Pq });
+a1Pq.wipe();
 const a1GenesisHash = hashRevision(a1Genesis);
-const storeBinding = {
-  store: "autonomi",
-  binding: "a1-log v1 — append-only hash-linked revisions, owner-signed ed25519 (this member key); resolver takes the highest valid revision; deletable by the member",
-  a1_genesis: { rev: a1Genesis.rev, sha256: a1GenesisHash, ts: a1Genesis.ts },
-  funded_write_status: "GATED on the ANT custody review (storage-substrate-split item 8); the binding is derivable from this certificate the day it is funded",
-};
+const storeBinding = a1StoreBinding(a1Genesis, a1GenesisHash);
 
 // 3. compose + hash
 const mintedIso = new Date().toISOString();

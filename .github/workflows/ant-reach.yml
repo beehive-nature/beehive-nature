@@ -1,0 +1,57 @@
+# Autonomi WebRTC Direct reachability, from GitHub-hosted runners: datacenter vantage points
+# independent of the founder's laptop (a Linux and a macOS runner pool). Runs the live bViEw
+# page on the direct-only route and saves its reach() export (endpoints as SHA-256 of ip:port,
+# no raw address) as an artifact. Read-only: a public read; no secret, no key, no payment.
+# The schedule tracks the 40-endpoint cohort (scripts/ant-reach-cohort.mjs) across time windows.
+# Probing stops automatically after 2026-10-09; the cron must then be removed or disabled (until
+# then each scheduled run still wakes, finds the window closed and skips every probe step).
+name: ant-reach
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: seconds to watch
+        default: '120'
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: read
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: cohort window still open
+        id: window
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = schedule ] && [ "$(date -u +%Y%m%d)" -gt 20261009 ]; then echo open=false >> "$GITHUB_OUTPUT"; else echo open=true >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        if: steps.window.outputs.open == 'true'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.window.outputs.open == 'true'
+        with:
+          node-version: 22
+      - name: install chromium
+        if: steps.window.outputs.open == 'true'
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: probe the live page
+        if: steps.window.outputs.open == 'true'
+        working-directory: e2e
+        shell: bash
+        env:
+          SECONDS_IN: ${{ inputs.seconds || '120' }}
+          LABEL_IN: gh-${{ matrix.os }}
+        run: node ant-reach-probe.mjs --label "$LABEL_IN" --seconds "$SECONDS_IN" --out reach.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.window.outputs.open == 'true'
+        with:
+          name: ant-reach-${{ matrix.os }}
+          path: e2e/reach.json

@@ -48,6 +48,27 @@
 #     only; the 64-hex pattern stays armed everywhere else), on the
 #     docs/audits basis, founder-approved 2026-09-16 (Astra disposition:
 #     "DC-1 merge after normal CI"; banking commit a1bb4f8e).
+#   - scripts/btungsten/wb002-specimen/simpleassets-e6a042f/: the bTunGsTeN
+#     Workbench 002 extinct-infrastructure specimen — a byte-verbatim copy of
+#     CryptoLions/SimpleAssets at e6a042f (2021, LGPL-2.1), preserved
+#     untouched by founder order 2026-10-07 ("preserve SimpleAssets upstream
+#     untouched"), pinned by the sha256 file hashes in its sibling
+#     PROVENANCE.md (which stays SCANNED and marker-governed). A same-line
+#     marker is impossible without breaking verbatim preservation. Its 64-hex
+#     runs are upstream's own public CMake icon-URI hashes and doc pins,
+#     never key material. Path-scoped (this verbatim subtree only; the
+#     64-hex pattern stays armed everywhere else), on the
+#     docs/handoffs/silentpay-v2 basis, 2026-10-07 (WB002 lane dispatch).
+#   - scripts/btungsten/wb001-bridge.json: the bTunGsTeN WB001 formal-wire
+#     bridge corpus (founder review B1, 2026-10-07) — the 8 constructed
+#     terms' canonical() envelopes, derived FROM THE PUBLIC RUNTIME by
+#     wb001-bridge-gen.mjs and re-derived byte-for-byte by the node leg on
+#     every CI run. Pretty-printed JSON cannot carry a same-line marker;
+#     the identical bytes are pinned in wb001-cryptol/Intent.cry constants
+#     that DO carry same-line PUBLIC-CONSTANT markers. The hex is envelope
+#     data (magic 'bT-WB01' TLV), never key material. Path-scoped (this
+#     one generator-owned file; the hex pattern stays armed everywhere
+#     else), on the wb002-specimen basis, 2026-10-07 (WB001 B1 dispatch).
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -192,7 +213,7 @@ diff)
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
     names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
+    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
@@ -210,9 +231,9 @@ diff)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
-    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
         tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
         for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")

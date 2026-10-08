@@ -12,6 +12,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from inbox import Inbox
 
 
 def require_isolation():
@@ -103,9 +104,10 @@ def run(args):
     root = Path(args.output).resolve()
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     bundle = json.loads(Path(args.bundle).read_text())
+    inbox = Inbox(root / 'inbox.db')
     peers = [Peer(root, 'alice', 23700, Path(args.binary), []),
              Peer(root, 'bob', 23701, Path(args.binary), ['127.0.0.1:23800'])]
-    report = {'schema': 'bnr.tungsten-x0x-delivery/1', 'scope': 'two peers, same-host isolated loopback',
+    report = {'schema': 'bnr.tungsten-x0x-delivery/2', 'scope': 'two peers, same-host isolated loopback',
               'version': subprocess.check_output([args.binary, '--version'], text=True).strip(),
               'binary_sha256': hashlib.sha256(Path(args.binary).read_bytes()).hexdigest(),
               'cases': [], 'completed': False,
@@ -148,12 +150,13 @@ def run(args):
                 records = bob.history(alice.agent, limit=1)
                 observed = [r for r in records if base64.b64decode(r['payload']) == payload]
                 assert len(observed) == 1, 'sender success must match exactly one receiver payload'
+                assert inbox.receive(alice.agent, logical_id, payload), 'fresh logical job already queued'
                 ids.append(observed[0]['msg_id'])
                 latencies.append((time.monotonic() - t0) * 1000)
                 payload_total += len(payload)
                 if first_request is None:
                     first_request = request
-                    (root / 'received-bundle.json').write_text(json.dumps(json.loads(base64.b64decode(observed[0]['payload']))['bundle']))
+                    (root / 'received-bundle.json').write_text(json.dumps(json.loads(inbox.payload(alice.agent, logical_id))['bundle']))
             seconds = time.monotonic() - started
             after = [p.metrics() for p in peers]
             report['cases'].append({'messages': count, 'receiver_verified': len(ids), 'unique_receiver_ids': len(set(ids)),
@@ -165,12 +168,41 @@ def run(args):
                 'rss_bytes': [p['rss_bytes'] for p in after]})
             print(json.dumps({'x0x_batch': report['cases'][-1]}), flush=True)
         count_before = len(bob.history(alice.agent))
+        assert inbox.count() == 111
+        inbox.close()
         bob.stop()
         bob.start()
+        inbox = Inbox(root / 'inbox.db')
         time.sleep(3)
-        alice.request('/direct/send', first_request)
-        assert len(bob.history(alice.agent)) == count_before, 'restart retry duplicated receiver history'
-        report['restart_retry_deduplicated'] = True
+        retry = alice.request('/direct/send', first_request)
+        assert retry.get('ok'), 'restart retry lacked durable acknowledgment'
+        history = bob.history(alice.agent)
+        report['restart_history_delta'] = len(history) - count_before
+        # The old experiment assumed exactly-once history. A v0.46.0 rerun
+        # disproved it. Preserve raw transport behavior separately from the
+        # durable BNR queue invariant; never call an extra history row a pass.
+        report['restart_retry_deduplicated'] = len(history) == count_before
+        recovered_ids = set()
+        fixture_rows = 0
+        for record in history:
+            payload = base64.b64decode(record['payload'])
+            decoded = json.loads(payload)
+            logical_id = decoded.get('logical_id')
+            if not logical_id or not logical_id.startswith('tungsten-'):
+                continue  # authenticated peer-control metadata is not a job
+            fixture_rows += 1
+            assert not inbox.receive(alice.agent, logical_id, payload), 'restart created a second queued job'
+            recovered_ids.add(logical_id)
+        assert len(recovered_ids) == 111, 'restart lost receiver proof history'
+        assert inbox.count() == 111
+        report['duplicate_fixture_history_rows'] = fixture_rows - len(recovered_ids)
+        report['bnr_inbox_restart_replay_refused'] = True
+        report['bnr_inbox_queued_jobs'] = inbox.count()
+        try:
+            inbox.receive(alice.agent, first_request['logical_id'], b'altered-payload')
+            raise AssertionError('BNR inbox accepted changed payload under existing logical ID')
+        except ValueError:
+            report['bnr_inbox_payload_conflict_refused'] = True
         changed = dict(first_request, payload=base64.b64encode(b'altered-payload').decode())
         try:
             alice.request('/direct/send', changed)
@@ -179,10 +211,14 @@ def run(args):
             assert error.code == 409, f'expected conflict, got {error.code}'
         report['logical_id_payload_conflict_refused'] = True
         report['completed'] = True
+    except BaseException as error:
+        report['failure'] = {'type': type(error).__name__, 'message': str(error)}
+        raise
     finally:
         for peer in peers:
             peer.stop()
             peer.log.close()
+        inbox.close()
         (root / 'receipt.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({'x0x_receipt': str(root / 'receipt.json'), 'completed': report['completed']}), flush=True)
 

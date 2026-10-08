@@ -9,14 +9,14 @@ import subprocess
 import tarfile
 import urllib.request
 
-X0X = 'cea64f20eddc3d8c71cfe4fba7464d3f137eb5c4'
+X0X = '427c411c035474ab4fb06102f19815ba4490e6ac'
 GROTH16 = '8bd06b4fb07f636c1872993a99f1a296b23b69fa'
 ASSETS = [
-    ('x0x-v0.46.0.tar.gz','https://github.com/saorsa-labs/x0x/releases/download/v0.46.0/x0x-linux-x64-gnu.tar.gz',
-     '0b52e91307a2a34cba82458ec2bec3a537352293d4a1506e5038c1a6606f54a4','bin'), # PUBLIC-CONSTANT release checksum
+    ('x0x-v0.46.5.tar.gz','https://github.com/saorsa-labs/x0x/releases/download/v0.46.5/x0x-linux-x64-gnu.tar.gz',
+     '929ce41ef0c2cf13d6f1ac38bf42821cac3c707ea749c9eb2d27783a9520a176','bin'), # PUBLIC-CONSTANT release checksum
     ('solana-v4.2.2.tar.bz2','https://github.com/anza-xyz/agave/releases/download/v4.2.2/solana-release-x86_64-unknown-linux-gnu.tar.bz2',
      '5fc8684f7430038105fde953d4308ed56addf627f658daa61709f345448247ee','bin'), # PUBLIC-CONSTANT release checksum
-    ('x0x-source.tar.gz',f'https://codeload.github.com/saorsa-labs/x0x/tar.gz/{X0X}',None,'source'),
+    (f'x0x-source-{X0X}.tar.gz',f'https://codeload.github.com/saorsa-labs/x0x/tar.gz/{X0X}',None,'source'),
     ('groth16-source.tar.gz',f'https://codeload.github.com/solana-program/groth16-verifier-program/tar.gz/{GROTH16}',None,'source'),
 ]
 

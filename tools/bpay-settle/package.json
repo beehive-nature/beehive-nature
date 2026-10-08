@@ -1,0 +1,10 @@
+{
+  "name": "bpay-settle",
+  "private": true,
+  "type": "module",
+  "description": "bPay SETTLE boundary: chain-neutral settlement adapter contract, Base/Coinbase and Solana adapters, Coinbase tungsten route",
+  "scripts": {
+    "test": "node --test bpay-settle.test.mjs solana-native.test.mjs",
+    "prove": "node prove.mjs"
+  }
+}

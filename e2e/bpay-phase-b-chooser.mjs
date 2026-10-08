@@ -2,7 +2,7 @@
 // resolved policy rides the quote request, and the fresh quote renders as
 // CAUSED BY THE CHOICE. Nothing spendable; no authorization route.
 //
-// Serves surfaces/ from the tree plus a MOCK quote service (labelled MOCK in
+// Fulfills surfaces/ in memory plus a MOCK quote service (labelled MOCK in
 // every response — the REAL bridge and the REAL acceptance belong to the
 // founder's own session; an agent never simulates the acceptance).
 //
@@ -25,7 +25,6 @@
 //   8. no page errors; A9c law holds (no authorization route strings).
 //
 //   node e2e/bpay-phase-b-chooser.mjs
-import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -53,39 +52,21 @@ const MOCK_QUOTES = [
 const MOCK_TOTAL = '4200000000000000000';
 const seenRequests = [];
 
-const server = createServer(async (req, res) => {
-  const url = (req.url || '/').split('?')[0];
-  if (url === '/mock-bridge/v1/upload/prepare') {
-    let body = '';
-    for await (const chunk of req) body += chunk;
-    const parsed = JSON.parse(body);
-    seenRequests.push(parsed);
-    if (parsed.audience !== 'public') { res.writeHead(422); res.end('MOCK: audience unqualified'); return; }
-    if (parsed.artifact_sha256 !== PIN) { res.writeHead(404); res.end('MOCK: pin not registered'); return; }
-    if (parsed.force_fresh !== true) { res.writeHead(400); res.end('MOCK: force_fresh required for a founder-fresh quote'); return; }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      upload_id: 'up-MOCK', artifact_sha256: PIN, artifact_bytes: refInvoice.domain.artifact.bytes,
-      total_chunks: 3, already_stored: 0, payment_type: 'wave_batch',
-      total_amount_atto: MOCK_TOTAL, payments: MOCK_QUOTES,
-      data_map_address: '0xMOCK-datamap-address-not-real',
-      policy: { audience: 'public', binding: 'founder-selected:public' },
-      note: 'MOCK-SYNTHETIC plan for the Phase B gate — never a network quote',
-    }));
-    return;
-  }
-  const path = url === '/' ? '/wallet.html' : url;
-  try {
-    const body = await readFile(join(SURFACES, path.replaceAll('/', '\\').replace(/^\\/, '')));
-    res.writeHead(200, { 'content-type': MIME[extname(path)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('not found'); }
-});
-await new Promise(r => server.listen(0, '127.0.0.1', r));
-const origin = `http://127.0.0.1:${server.address().port}`;
+const origin = 'https://skaists.dev';
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+// In-memory production-origin fixture: no HTTP listener and no live request.
+await page.route('**/*',async route=>{
+  const url=new URL(route.request().url());
+  if(url.origin!==origin)return route.abort();
+  if(url.pathname==='/mock-bridge/v1/upload/prepare'){
+    const parsed=route.request().postDataJSON();seenRequests.push(parsed);
+    if(parsed.audience!=='public'||parsed.artifact_sha256!==PIN||parsed.force_fresh!==true)return route.fulfill({status:422,body:'MOCK: invalid policy'});
+    return route.fulfill({contentType:'application/json',body:JSON.stringify({upload_id:'up-MOCK',artifact_sha256:PIN,artifact_bytes:refInvoice.domain.artifact.bytes,total_chunks:3,already_stored:0,payment_type:'wave_batch',total_amount_atto:MOCK_TOTAL,payments:MOCK_QUOTES,data_map_address:'0xMOCK-datamap-address-not-real',policy:{audience:'public',binding:'founder-selected:public'},note:'MOCK-SYNTHETIC plan, never a network quote'})});
+  }
+  try{return route.fulfill({body:await readFile(join(SURFACES,url.pathname)),contentType:MIME[extname(url.pathname)]||'application/octet-stream'});}catch{return route.fulfill({status:404,body:'fixture not found'});}
+});
 // seed the mock quote-service BEFORE any page script runs — the panel reads
 // localStorage once at boot; a post-hoc poke would send the founder-gesture
 // request to the REAL bridge (the near-miss this gate must never recreate)
@@ -107,9 +88,12 @@ const unavail = await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => el
 check('unavailable audience modes are PLAIN ROWS — never buttons, never struck (dead affordances are banned)',
   unavail.length === 2 && unavail.every(u => u.tag !== 'BUTTON' && u.cursor !== 'pointer' && !u.struck && u.aria === 'true' && ['only-me', 'selected-people'].includes(u.id)),
   unavail.map(u => `${u.id}:${u.tag}/${u.cursor}`).join(','));
-check('each row carries its reasons in plain sight (plain + technical)',
-  unavail.every(u => /not available yet/i.test(u.text) && /not ready/i.test(u.text) && /not yet qualified/i.test(u.text)),
+check('each row carries its plain reason in sight; the technical one is kept for cypherpunk',
+  unavail.every(u => /not available yet/i.test(u.text) && /not ready/i.test(u.text) && !/not yet qualified/i.test(u.text)) &&
+  (await page.$$eval('#bpay-sec [data-bpay-unavailable] [data-min-insp="cypherpunk"]', els => els.length === 2 && els.every(e => /not yet qualified/i.test(e.textContent)))),
   unavail.map(u => u.text).join(' | ').slice(0, 200));
+check('new bee is offered no reference quote service, no reference invoice and no timestamp',
+  !(await page.isVisible('#bpay-quote-go')) && !(await page.isVisible('#bpay-reference')));
 check('no disabled buttons remain in the bPay panel', (await page.$$('#bpay-sec button[disabled]')).length === 0);
 
 // clicking an unavailable row must change nothing — a dispatched click
@@ -121,17 +105,19 @@ check('clicking an unavailable mode changes nothing', !/You chose|ви обра�
 // the real gesture: select Public
 await page.click('[data-audience="public"]');
 choseText = (await (await sec()).innerText());
-check('You chose Public rendered with chosen-at', /You chose/i.test(choseText) && /chosen at/i.test(choseText));
+check('You chose Public rendered; chosen-at kept for cypherpunk', /You chose/i.test(choseText) && !/chosen at/i.test(choseText) && /chosen at/i.test(await page.$eval('#bpay-card', e => e.textContent)));
 const lsPolicy = await page.evaluate(() => localStorage.getItem('bpay-policy-v1'));
 check('resolved policy recorded in localStorage', !!lsPolicy && JSON.parse(lsPolicy).audience === 'public' && !!JSON.parse(lsPolicy).selectedAt, lsPolicy || 'absent');
 
 // the quote-service now points at the mock (seeded pre-boot); expose it in cypherpunk view
-await page.click('[data-inspection="cypherpunk"]');
+await page.click('#breg-cypherpunk');
 const bridgeVisible = await page.$eval('#bpay-bridge', e => e.value);
+check('cypherpunk sees the chosen-at time', /chosen at/i.test(await (await sec()).innerText()));
 check('quote-service field visible in cypherpunk view', bridgeVisible.includes('/mock-bridge'), bridgeVisible);
 await page.click('#bpay-quote-go');
 await page.waitForTimeout(1500);
 
+await page.locator('#bpay-reference > summary').click();
 const bodyText = await (await sec()).innerText();
 check('fresh quote rendered as CURRENT (caused by your choice)', /Current storage quote/i.test(bodyText) && /caused by your choice/i.test(bodyText));
 check('reference quote still labeled as reference (not chosen by you)', /Reference quote/i.test(bodyText) && /not chosen by you/i.test(bodyText));
@@ -157,7 +143,6 @@ if (foreignErrors.length) console.log(`  ⚠ wallet-side finding (reported, NOT 
 
 await page.screenshot({ path: join(here, 'shots-bpay-phase-b', 'wallet-chooser-390.png'), fullPage: false });
 await browser.close();
-server.close();
 
 const failed = results.filter(r => !r.ok);
 console.log(failed.length

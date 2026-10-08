@@ -1,6 +1,9 @@
-# SPEC-VAULTA-IDENTITY-1 v0.2 — Vaulta Identity Record / bzDiD Mint
+# SPEC-VAULTA-IDENTITY-1 v0.3 — Vaulta Identity Record / bzDiD Mint
 
 Status: **SPEC-FIRST (founder-gated)**. No account creation or key operations in a seat.
+v0.3 (2026-10-04, founder ruling R1 in `docs/RULINGS-2026-10-04.md`): §2 and §6 give `pq.ready`
+the narrow meaning the relay checks (`crates/wallet-relay/src/envelope.rs`); v1 records are
+kept as written and their `pq.ready` is read as unchecked.
 Companion to: SPEC_KEYRING-1 §2.6/§3, SPEC-PAY-ONCE-NOW-1 #1/#2,
 SPEC-ONBOARDING-IDENTITY-1, FABLE 8i/8j/8h.
 
@@ -163,13 +166,30 @@ Every key, address, and identity claim is wrapped in this envelope from record o
 
 - **v** = schema version (additive-only; old records never rewritten)
 - **self_desc** = algorithm-agnostic tags naming the exact algorithm (multicodec-style, never a hardcoded curve/hash assumption)
-- **pq.ready** = this record CAN be superseded by a PQ key without re-minting the identity
+- **pq.ready** (v1 text, superseded by v0.3 below) = this record CAN be superseded by a PQ key without re-minting the identity
 - **pq.successor_algo/key_ref** = filled when a PQ successor is added (additive, not replacing)
 - **payload.source** = provenance (device-read, manual, oauth, etc.)
 
 When a PQ successor is added: a NEW envelope record is created (additive).
 The old record's `pq.successor_key_ref` points to the new one. Both remain valid.
 The identity is NOT re-minted — the Vaulta account stays, the key set grows.
+
+### 2.1 v0.3: what `pq.ready` says (ruling R1, 2026-10-04)
+
+Every classical key can be superseded later, so "can be superseded" told a reader nothing and no
+code could check it. From v0.3 the envelope is `"v": 2` and:
+
+- `self_desc.sig_algo`, `hash` and `encoding` are derived from `key_algo` through an explicit
+  table, never written as constants; an unknown `key_algo` is refused, never defaulted.
+- **`pq.ready` is true only when** the wrapped key is itself ML-DSA-65, or the envelope names a
+  well-formed PQ successor: `pq.successor_algo` and `pq.successor_key_ref` = a `bzpq1` id
+  (SPEC-BPQ-1 §2). Otherwise `pq.ready` is false and both successor fields are null.
+- `pq.ready` means "a PQ successor is named". It does not mean the envelope is covered by a PQ
+  signature, and the envelope alone does not bind the successor to the classical key's holder:
+  that binding is the holder's own SPEC-BPQ-1 §3 binding statement.
+- v1 envelopes are never rewritten. Their `pq.ready:true` was written for every key and was never
+  checked, so readers treat it as absent, and the relay echoes a v1 enrollment without its `pq`
+  block rather than repeat it.
 
 ---
 
@@ -245,7 +265,9 @@ The seat CANNOT: sign, send, create accounts, set permissions.
 
 1. Vaulta account has owner/active/bni.id/bni.deploy permissions per §1.
 2. Every key and address wrapped in versioned envelope per §2.
-3. Envelope includes pq.ready=true and successor fields from record one.
+3. Envelope is v2 (§2.1) from record one and carries the `pq` block; `pq.ready` is true only
+   when a well-formed PQ successor is named or the key is ML-DSA-65, else false with null
+   successor fields. (v0.2 read "pq.ready=true from record one"; superseded by ruling R1.)
 4. Device-read addresses (EVM/BTC/ZEC) write into the record as envelopes.
 5. Old records never rewritten — additions only (verification-method succession).
 6. Dashboard reads registry from Vaulta (via adapter ring) and displays balances.

@@ -398,16 +398,29 @@
      signal is deleted, not repaired — the shell no longer names a rail, so its
      copy does not either. */
 
+  /* THE FOUNDER'S CHOSEN UI (order 2026-10-04, nine screens at 390 px). Its words
+     are used where the code does exactly what they say; where it does not, the
+     look and the nearest wording stay and the words are made true. Each of those
+     is named where it lives, so the reason travels with the sentence:
+       · Private never leaves this phone — the keep-it-here rail declares no
+         network and holds ciphertext — so nothing is "sealed before it leaves".
+       · Moving a public file home cannot drop the open copy: the hive rail
+         declares deletable:false. The row says so (`leftBehind`), so no button is
+         called "Make private" as if the open copy went with it.
+       · There are four purposes, not two, when four rails answer; each is a card.
+       · The device key is a browser-local schnorr key, not a bzdid key; the index
+         is IndexedDB `myspace` v2, not localStorage. */
   var COPY = {
     bee: {
-      kicker: 'My Space', title: 'My Space',
-      lede: 'Your files live on this phone.',
-      empty: 'Nothing here yet. Add a file from this phone. You choose what it is for.',
-      attach: 'Add a file',
-      'now-title': 'Just for now', 'now-body': 'For this visit only.',
-      'keep-title': 'Keep it here', 'keep-body': 'Yours, on this phone.',
-      'share-title': 'Show the world', 'share-body': 'Give someone the link.',
-      'forever-title': 'Keep it forever', 'forever-body': 'Put it out in the open, for good.',
+      kicker: 'MY SPACE', title: 'Your files live on this phone.',
+      lede: 'Add a file from this phone. Public: anyone with the link. Private: only this phone, sealed and kept here.',
+      empty: 'Nothing here yet.',
+      attach: 'Add a file from this phone', 'attach-more': 'Add another file',
+      'now-title': 'Just for now', 'now-body': 'Sealed here, for this visit only.', 'now-chip': 'JUST FOR NOW',
+      'keep-title': 'Private', 'keep-body': 'Sealed on this phone. It never leaves.', 'keep-chip': 'PRIVATE',
+      'share-title': 'Public', 'share-body': 'Not sealed. Give someone the link.', 'share-chip': 'PUBLIC',
+      'forever-title': 'Forever', 'forever-body': 'Out in the open, for good. This page cannot take the payment yet.', 'forever-chip': 'FOREVER',
+      'meta-here': 'this phone', 'meta-out': 'shared from this phone',
       pricing: 'Asking what it costs. The estate\'s door reads the file to price it.',
       joining: 'Putting this phone in the hive — that is what lets it hold a file, and what lets a link open.',
       copy: 'Copy link', move: 'Move it', open: 'Open',
@@ -415,64 +428,73 @@
       opening: 'Opening it…',
       flipping: 'Moving it…',
       'move-to': function (n) { return 'Move it: ' + n; },
-      remove: 'Remove', keep: 'Keep it', confirm: 'Remove from this phone',
+      remove: 'Delete', keep: 'Keep it', confirm: 'Delete',
+      'del-title': function (row) { return 'Delete ' + row.name + '?'; },
+      'flip-title': function (row) { return 'Where should ' + row.name + ' live?'; },
       'flip-keep': 'Leave it as it is',
       swept: function (n) { return n === 1 ? 'One file was only for that visit, and it is gone.' : n + ' files were only for that visit, and they are gone.'; },
-      law: 'This phone remembers. There is no account. Come back later on this phone and it is still here.',
-      'tech-summary': 'index · rails · identity',
-      count: function (n) { return n === 1 ? '1 file on this phone' : n + ' files on this phone'; }
+      law: 'Your list stays on this phone. A new phone starts empty.',
+      'count-label': 'On this phone:',
+      count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     },
     raver: {
-      kicker: 'my space', title: 'my space',
-      lede: 'yours. this phone. one tap.',
-      empty: 'drop a file in.',
-      attach: 'add a file',
-      'now-title': 'just now', 'now-body': 'this visit. that is all.',
-      'keep-title': 'keep it', 'keep-body': 'yours. this phone.',
+      kicker: 'MY SPACE', title: 'Drop it. Keep it. Or let it fly.',
+      lede: 'Your space. Open to the link, or locked to this device. Same files. Same store. One tap to change the look.',
+      empty: 'The floor is empty. Make it yours.',
+      attach: 'Add a file', 'attach-more': 'Add another',
+      'now-title': 'Just now', 'now-body': 'This visit. That is all.', 'now-chip': 'JUST NOW',
+      'keep-title': 'Private', 'keep-body': 'Sealed on this device. The store never sees the clear file.', 'keep-chip': 'PRIVATE',
       /* `share-body` is the ACT, never the terms: the rail's own readers line in
-         this register is already 'the link opens it.', and a card that prints
+         this register is already 'The link opens it.', and a card that prints
          the same sentence twice reads as a stutter rather than as two facts.
          Caught on the live page by the eye seat 2026-09-20 22:51Z. The row that
          keeps it dead is in `e2e/myspace-seam.mjs` §14 and it judges every
          register, not this one line. */
-      'share-title': 'show it', 'share-body': 'put it out there.',
-      'forever-title': 'forever', 'forever-body': 'out in the open. for good.',
-      pricing: 'pricing it. the estate door reads it to quote.',
-      joining: 'this phone is joining the hive. that is what makes a link open.',
-      copy: 'copy link', move: 'move it', open: 'open',
-      working: 'stashing…', done: 'done.',
-      opening: 'opening…',
-      flipping: 'moving…',
-      'move-to': function (n) { return 'move: ' + n; },
-      remove: 'remove', keep: 'keep', confirm: 'remove',
-      'flip-keep': 'leave it',
-      swept: function (n) { return n === 1 ? 'one file was just for that visit. gone.' : n + ' files were just for that visit. gone.'; },
-      law: 'same phone, still here. no account.',
-      'tech-summary': 'index · rails · identity',
+      'share-title': 'Public', 'share-body': 'The link is the door. Anyone who has it, walks in.', 'share-chip': 'PUBLIC',
+      'forever-title': 'Forever', 'forever-body': 'Out in the open. For good. This page cannot take the payment yet.', 'forever-chip': 'FOREVER',
+      'meta-here': 'this phone', 'meta-out': 'out from this phone',
+      pricing: 'Pricing it. The estate door reads it to quote.',
+      joining: 'This phone is joining the hive. That is what makes a link open.',
+      copy: 'Copy link', move: 'Move it', open: 'Open',
+      working: 'Stashing…', done: 'Done.',
+      opening: 'Opening…',
+      flipping: 'Moving…',
+      'move-to': function (n) { return 'Move: ' + n; },
+      remove: 'Delete', keep: 'Keep it', confirm: 'Delete',
+      'del-title': function () { return 'Let this one go?'; },
+      'flip-title': function () { return 'Where does it go?'; },
+      'flip-keep': 'Leave it',
+      swept: function (n) { return n === 1 ? 'One file was just for that visit. Gone.' : n + ' files were just for that visit. Gone.'; },
+      law: 'This device is the index. Another phone is another room.',
+      'count-label': 'On this phone:',
       count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     },
     cypherpunk: {
-      kicker: 'surfaces/myspace.html', title: 'MY SPACE',
-      lede: 'Device index is authority. Storage is an adapter.',
-      empty: '0 objects. Choose a purpose; the shell resolves a rail.',
-      attach: 'ATTACH',
-      'now-title': 'EPHEMERAL', 'now-body': 'purpose: this session.',
-      'keep-title': 'DEVICE', 'keep-body': 'purpose: retained here.',
-      'share-title': 'PUBLISHED', 'share-body': 'purpose: readable by link.',
-      'forever-title': 'PERMANENT', 'forever-body': 'purpose: public record.',
+      kicker: 'MYSPACE · BLOSSOM · DEVICE INDEX', title: 'local rows · sha256 · AES-GCM',
+      lede: 'Identity = browser-local schnorr key, no login. PUBLIC = plaintext blob, PNG-wrapped, by sha256. PRIVATE = AES-GCM-256 in this origin; key never leaves. Local store holds ciphertext only. Device index is the truth for “come back later.”',
+      empty: 'index [] · indexeddb myspace v2',
+      attach: function (scheme) { return 'PUT ' + (scheme || 'nothing') + ' · choose blob'; },
+      'attach-more': 'PUT another blob',
+      'now-title': 'Ephemeral', 'now-body': 'AES-GCM-256 · held in a worker · swept on reload.', 'now-chip': 'EPHEMERAL',
+      'keep-title': 'Private', 'keep-body': 'AES-GCM-256 in-browser · key in this origin · store = ciphertext only.', 'keep-chip': 'PRIVATE',
+      'share-title': 'Public', 'share-body': 'plaintext blob · link + hive membership = read.', 'share-chip': 'PUBLIC',
+      'forever-title': 'Permanent', 'forever-body': 'plaintext · public record · pay arm not wired, so no PUT completes.', 'forever-chip': 'PERMANENT',
+      'meta-here': 'this phone', 'meta-out': 'index row here, blob out there',
       pricing: 'requesting a quote from the door…',
       joining: 'claiming the standing invite for this device key.',
-      copy: 'copy URL', move: 'REWRITE', open: 'READ',
+      copy: 'Copy link', move: 're-PUT', open: 'READ',
       working: 'writing to rail…', done: 'written.',
       opening: 'reading from rail…',
       flipping: 're-addressing…',
-      'move-to': function (n) { return 'REWRITE -> ' + n; },
-      remove: 'DROP', keep: 'abort', confirm: 'DROP ROW',
+      'move-to': function (n) { return 're-PUT -> ' + n; },
+      remove: 'Delete', keep: 'abort', confirm: 'DELETE',
+      'del-title': function (row) { return row.addr ? 'DELETE ' + row.addr.scheme + ':' + row.addr.address.slice(0, 9) + '…' : 'DELETE row ' + row.id; },
+      'flip-title': function (row) { return 're-PUT ' + row.name + ' -> ?'; },
       'flip-keep': 'abort',
       swept: function (n) { return n + ' row(s) named a rail that does not survive a reload — swept.'; },
-      law: 'Come-back is the device index. No login, no session.',
-      'tech-summary': 'index · rails · identity',
-      count: function (n) { return n + ' object' + (n === 1 ? '' : 's'); }
+      law: 'rail per purpose, chosen by declared terms · a refused PUT falls back to this device · no login',
+      'count-label': 'On this phone:',
+      count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     }
   };
 
@@ -490,10 +512,10 @@
       payer: { nobody: 'Nobody is paying for it.', 'the-hive': 'The hive is paying for it.', you: 'You pay for it, from your own wallet.' }
     },
     raver: {
-      readers: { 'this-device': 'this phone only.', 'link-holders': 'the link opens it.', everyone: 'anyone reads it.' },
-      lifetime: { 'until-this-tab-closes': 'gone when this tab closes.', 'until-you-delete-it': 'stays till you drop it.', 'while-the-store-keeps-it': 'stays while the hive holds it.', permanent: 'lasts forever.' },
-      deletable: { yes: 'you can pull it back.', no: 'nobody can delete it. not even you.' },
-      payer: { nobody: 'nobody paid.', 'the-hive': 'the hive paid.', you: 'you pay. your wallet.' }
+      readers: { 'this-device': 'This phone only.', 'link-holders': 'The link opens it.', everyone: 'Anyone reads it.' },
+      lifetime: { 'until-this-tab-closes': 'Gone when this tab closes.', 'until-you-delete-it': 'Stays till you drop it.', 'while-the-store-keeps-it': 'Stays while the hive holds it.', permanent: 'Lasts forever.' },
+      deletable: { yes: 'You can pull it back.', no: 'Nobody can delete it. Not even you.' },
+      payer: { nobody: 'Nobody paid.', 'the-hive': 'The hive paid.', you: 'You pay. Your wallet.' }
     },
     cypherpunk: {
       readers: { 'this-device': 'readers: this device', 'link-holders': 'readers: link holders', everyone: 'readers: everyone' },
@@ -769,7 +791,17 @@
       b.onclick = function () { pendingPurpose = p.id; renderPurposes(); };
       box.appendChild(b);
     });
-    box.style.setProperty('--modes', String(open.length || 1));
+    attachWords();
+  }
+
+  /* The one primary names what it will do in the registers whose voice is the
+     verb (cypherpunk: `PUT <rail>`), so it follows the selection. The rail named
+     is `railFor`'s answer for the pressed purpose, never a literal. */
+  function attachWords() {
+    var v = COPY[reg()].attach;
+    if (typeof v !== 'function') return;
+    var s = v(pendingPurpose ? railFor(pendingPurpose) : null);
+    document.querySelectorAll('[data-reg-copy="attach"]').forEach(function (el) { el.textContent = s; });
   }
 
   function applyCopy() {
@@ -785,7 +817,11 @@
     var rows = await loadRows();
     rows.sort(function (a, b) { return b.ts - a.ts; });
     document.body.setAttribute('data-state', rows.length ? 'file' : 'empty');
-    $('count').textContent = COPY[reg()].count(rows.length);
+    /* "On this phone: N files" — the device index is on this phone, and that is
+       what it counts, in every state including zero. */
+    var countEl = $('count');
+    countEl.querySelector('.lbl').textContent = t('count-label');
+    countEl.querySelector('.n').textContent = COPY[reg()].count(rows.length);
 
     var list = $('list');
     list.textContent = '';
@@ -793,35 +829,51 @@
       var art = document.createElement('article');
       art.className = 'file';
 
+      /* The head: a plain tile (decoration, no preview is made), the name, the
+         size and where the bytes are, and the purpose as a chip. */
+      var head = document.createElement('div');
+      head.className = 'head';
+      var thumb = document.createElement('i');
+      thumb.className = 'thumb';
+      thumb.setAttribute('aria-hidden', 'true');
+      head.appendChild(thumb);
+      var who = document.createElement('div');
+
       var name = document.createElement('div');
       name.className = 'name';
       name.textContent = row.name;
-      art.appendChild(name);
+      who.appendChild(name);
 
+      /* Where the bytes are is the rail's declaration, not the purpose's name: a
+         rail that speaks to the world holds them out there, and only the index
+         row is on this phone. */
       var meta = document.createElement('div');
       meta.className = 'meta';
-      meta.textContent = kb(row.size) + ' · ';
+      meta.textContent = kb(row.size) + ' · ' + t(speaksToTheWorld(schemeOf(row)) ? 'meta-out' : 'meta-here');
+      who.appendChild(meta);
+
       var badge = document.createElement('span');
-      badge.className = 'badge' + (speaksToTheWorld(schemeOf(row)) ? ' pub' : '');
-      badge.textContent = purposeTitle(row.purpose) || row.purpose;
-      meta.appendChild(badge);
-      art.appendChild(meta);
+      badge.className = 'chip' + (speaksToTheWorld(schemeOf(row)) ? ' pub' : '');
+      badge.textContent = t(row.purpose + '-chip') || purposeTitle(row.purpose) || row.purpose;
+      who.appendChild(badge);
+      head.appendChild(who);
+      art.appendChild(head);
 
       /* The why line. NOT a register's opinion about a store — the rail's own
-         declared answer, rendered in this register's voice. */
+         declared answer, rendered in this register's voice. It sits under the
+         row's buttons, where the chosen UI puts the one-line note. */
       var why = document.createElement('p');
       why.className = 'why';
       why.textContent = termsLine(schemeOf(row)) ||
         'The rail that holds this is not answering, so this page will not tell you who can read it.';
-      art.appendChild(why);
 
       var h = document.createElement('p');
       h.className = 'hash';
       var prov = document.createElement('span');
       prov.className = 'prov';
       var tm = terms(schemeOf(row));
-      prov.textContent = (row.addr ? (row.addr.scheme + ':' + row.addr.address) : 'no rail record — these bytes are only here') +
-        (row.keyref ? ('\nkeyref ' + row.keyref) : '') +
+      prov.textContent = (row.addr ? (row.addr.scheme + ' address\n' + row.addr.address) : 'no rail record — these bytes are only here') +
+        '\n' + (row.keyref ? 'AES-GCM on · key on this device (' + row.keyref + ')' : 'AES-GCM off (plaintext)') +
         (tm ? ('\n' + word('deletable', tm.deletable ? 'yes' : 'no') + ' · ' + word('payer', tm.payer)) : '') +
         '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
       h.appendChild(prov);
@@ -889,13 +941,8 @@
       del.onclick = function () { openSheet('delete', row); };
       actions.appendChild(del);
 
-      /* Three fit one row at 390px; four wrap to two-by-two on the two-column
-         default. Counted, not guessed from the purpose — the row's buttons are
-         built conditionally above and a second SHARE rail would change the
-         count without touching this line. */
-      if (actions.children.length === 3) actions.className = 'actions three';
-
       art.appendChild(actions);
+      art.appendChild(why);
       list.appendChild(art);
     });
     applyCopy();
@@ -904,14 +951,14 @@
   function openSheet(kind, row) {
     sheetRow = row;
     if (kind === 'delete') {
-      $('del-title').textContent = 'Remove ' + row.name + '?';
+      $('del-title').textContent = t('del-title')(row);
       $('del-body').textContent = deleteSentence(row);
     } else {
       /* One button per OTHER purpose that a rail can answer, each carrying the
          sentence for that move. With three rails "flip" is no longer a toggle,
          and a toggle-shaped control would have to pick one of two destinations
          on the visitor's behalf. */
-      $('flip-title').textContent = 'Where should ' + row.name + ' live?';
+      $('flip-title').textContent = t('flip-title')(row);
       $('flip-body').textContent = '';
       var box = $('flip-actions');
       box.textContent = '';
@@ -929,21 +976,31 @@
       keepBtn.textContent = t('flip-keep');
       keepBtn.onclick = closeSheet;
       box.appendChild(keepBtn);
-      availablePurposes().forEach(function (p) {
-        if (p.id === row.purpose) return;
-        var b = document.createElement('button');
-        b.className = 'primary';
-        b.type = 'button';
-        b.textContent = t('move-to')(purposeTitle(p.id));
-        b.setAttribute('data-move-to', p.id);
+      /* Every destination starts as an outline; the one tapped becomes the
+         sheet's single filled button, and only that one moves the file on the
+         next tap. Tapping another destination hands the fill (and the confirm)
+         to it, so the sheet never has two filled answers at once. */
+      var dests = [];
+      function arm(b, id) {
+        b.className = 'ghost';
         b.onclick = function () {
-          $('flip-body').textContent = moveSentence(row, p.id);
+          dests.forEach(function (d) { if (d.b !== b) arm(d.b, d.id); });
+          $('flip-body').textContent = moveSentence(row, id);
           /* Second tap confirms, with the sentence for THIS destination on
              screen — the same "said at the moment it happens" rule the delete
              sheet keeps. */
-          b.onclick = function () { doMove(row, p.id); };
-          b.className = 'danger';
+          b.onclick = function () { doMove(row, id); };
+          b.className = 'primary';
         };
+      }
+      availablePurposes().forEach(function (p) {
+        if (p.id === row.purpose) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = t('move-to')(purposeTitle(p.id));
+        b.setAttribute('data-move-to', p.id);
+        arm(b, p.id);
+        dests.push({ b: b, id: p.id });
         box.appendChild(b);
       });
     }
@@ -1187,8 +1244,9 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  /* Opened for `e2e/myspace-seam.mjs` and for nothing else; not a public API.
-     Each of these is read by a named assertion in that gate. */
+  /* Opened for the My Space gates (`e2e/myspace-seam.mjs`, `myspace-eternal.test.mjs`,
+     `myspace-stranger.mjs`) and for nothing else; not a public API. Each of these is
+     read by a named assertion in the seam gate. */
   window.__myspace = {
     adapter: function (scheme) { return adapters[scheme || 'blossom'] || null; },
     adapters: function () { return adapters; },

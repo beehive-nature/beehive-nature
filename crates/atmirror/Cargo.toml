@@ -32,6 +32,10 @@ base64 = "0.22"
 # curve25519-dalek is used in tests to cross-validate the L constant + malleability.
 ed25519-dalek = "2"
 curve25519-dalek = "4"
+# ML-DSA-65 bzDiD RECORD-signature verification (did-autonomi-spec §7: a rotate op may
+# move keyAlg ed25519 -> ml-dsa-65). The same crate crates/bsigner signs with (lock: 0.1.1).
+# Verify-only here: default features off (no getrandom, no pkcs8), `alloc` kept.
+ml-dsa = { version = "0.1", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 # none — fixtures are built in-test; no network in any test

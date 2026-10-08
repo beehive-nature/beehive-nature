@@ -22,8 +22,9 @@
 //!   are the preferred serialization"); `signing.rs:55` (`from_seed`),
 //!   `signing.rs:102` (`as_seed`).
 //! - Signing: `Signer::try_sign` — `ml-dsa` 0.1.1 src/signing.rs:184
-//!   (`fn try_sign(&self, msg: &[u8])`). Randomized per FIPS 204 §5; the
-//!   randomness is consumed inside the crate.
+//!   (`fn try_sign(&self, msg: &[u8])`). Deterministic, empty context:
+//!   signing.rs:181-182 "uses the optional deterministic variant of ML-DSA,
+//!   and only supports signing with an empty context string".
 //! - Verifying: `Verifier::verify` — `ml-dsa` 0.1.1 src/verifying.rs:195
 //!   (`fn verify(&self, msg, signature)`).
 //!
@@ -50,8 +51,22 @@
 //!   never been independently audited! USE AT YOUR OWN RISK!"
 //! - `ml-kem` 0.3.2 README: "The implementation contained in this crate has
 //!   never been independently audited!" (same warning family)
-//! - Neither claim above says anything about NIST ACVP known-answer
-//!   vectors; those have NOT been run in this repo. UNVERIFIED.
+//! - Neither README claim above says anything about NIST ACVP known-answer
+//!   vectors. A small subset of them now runs: `surfaces/pq-kat.json`
+//!   (github.com/usnistgov/ACVP-Server at the commit that file records),
+//!   checked here by kat.rs (`cargo test -p bsigner kat`) and against
+//!   @noble/post-quantum by e2e/pq-kat.test.mjs. Exactly these cases:
+//!   ML-DSA-65 keyGen tgId 2 tcId 26-28 (seed -> pk);
+//!   ML-DSA-65 sigVer tgId 3 tcId 31, 33, 34, 38, 39, 41, 43 (external
+//!   interface, pure, given context; 2 expected-true, 5 expected-false;
+//!   only tcId 39 has the empty context this module verifies with);
+//!   ML-KEM-768 keyGen tgId 2 tcId 26-28 (d || z -> ek and expanded dk);
+//!   ML-KEM-768 decapsulation tgId 5 tcId 86, 87, 88, 91 (expanded dk;
+//!   88 and 91 are modified ciphertexts, implicit rejection).
+//!   Seventeen passing cases are not ACVP validation and not a CAVP
+//!   certificate. Not run: ML-DSA sigGen, ML-KEM encapsulation, the key
+//!   checks, and every ML-DSA-44/87 and ML-KEM-512/1024 vector — those
+//!   remain UNVERIFIED here.
 //! - Key storage here is a seed file under the user profile with OS file
 //!   permissions; at-rest encryption is a follow-up, NOT done. The laws that
 //!   Custody is on the host computer, NOT inside a Trezor or bSAFE secure

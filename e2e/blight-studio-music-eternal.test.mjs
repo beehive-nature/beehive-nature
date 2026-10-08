@@ -43,10 +43,13 @@ async function open(reg, opts = {}) {
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 const engine = p => p.evaluate(() => ({ playing, ctx: !!ac, notes: pattern.flat().filter(Boolean).length, steps: score().steps, bpm: tempo(), scale: document.getElementById('scale').value }));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its magenta
+// lit pitch; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress; nothing sounds or leaves on arrival', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '#etBeeGo', action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '#etWheel', action: null },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '#etBeeGo', action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '#etWheel', action: null },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etCyRun', action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {

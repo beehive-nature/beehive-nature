@@ -38,6 +38,14 @@ x402-RAID-Z33 laws (2026-09-04, pinout/tally rows read at source):
   ledger — append-only and restart-surviving, so the qisma RAM-nonce trap
   cannot exist here.
 
+AV-2 laws (SPEC AV-2, 2026-09-16; the live engine converged onto the Rust
+conformance core's law 2026-10-06):
+- USDC deposits credit ONLY through a cited ConversionQuote: the quote id is
+  single-use (the ledger is the burned-id registry, restart-surviving) and
+  the quote has an INCLUSIVE TTL (age == TTL refuses; future-dated refuses
+  with the same typed error). Fail closed. The TTL constant is a founder
+  ruling; the tests derive their boundaries from the constant.
+
 MERGE NOTE (z1, 2026-08-29): Seat-1's engine merged into the till. The closed
 resource enum is RECONCILED to the estate's ONE enum — SPEC-SPEND-RECEIPT-1's
 class set plus the Lane M dispatch additions (prefill_token / decode_token),
@@ -109,6 +117,49 @@ class TermsMismatch(VoucherError):
     the 'quote $0.10, sign $100' shape). Nothing was written."""
 
 
+class StaleQuote(VoucherError):
+    """AV-2: the cited conversion quote is older than the TTL (inclusive
+    boundary — age == TTL refuses too; future-dated quotes as well). The
+    message names the measured age and the TTL so refusals are
+    self-describing. Nothing was written."""
+
+
+class QuoteReplay(VoucherError):
+    """AV-2: a conversion quote id that already credited a deposit — quotes
+    are single-use independent of staleness. Nothing was written."""
+
+
+QUOTE_TTL_SECS = 300
+# AV-2: how long a served conversion quote stays creditable. Fail-closed
+# default per SPEC AV-2's suggestion — THE NUMBER IS A FOUNDER RULING (the law
+# decision gates the constant, never the test shape). Mirrors the Rust
+# conformance core's QUOTE_TTL_SECS (crates/voucher-escrow/src/lib.rs).
+
+
+@dataclass(frozen=True)
+class ConversionQuote:
+    """AV-2: a USDC→A conversion quote — the rate actually served, WHEN it
+    was served, and the id that makes it single-use. Mirrors the Rust core's
+    ConversionQuote field for field (rate as Decimal here where the Rust core
+    carries rate_fp8 u128)."""
+
+    id: str
+    rate_a_per_usdc: Decimal
+    rate_ref: str                 # where the rate was read, versioned
+    quoted_at: float              # unix seconds, the serve moment
+
+    def __post_init__(self):
+        if not self.id:
+            raise VoucherError("a conversion quote requires an id")
+        if not self.rate_ref:
+            raise VoucherError(
+                "a conversion quote requires a rate_ref (where the rate was read)")
+        rate = Decimal(str(self.rate_a_per_usdc))
+        if rate <= 0:
+            raise VoucherError("conversion rate must be positive")
+        object.__setattr__(self, "rate_a_per_usdc", rate)
+
+
 @dataclass(frozen=True)
 class RateSet:
     """Versioned pricing law. Rates are A per unit of the CLOSED resource enum."""
@@ -169,6 +220,16 @@ class Escrow:
         RAM-nonce trap cannot exist in this engine)."""
         for ev in self._events():
             if ev.get("upto", {}).get("quote_id") == quote_id:
+                return ev
+        return None
+
+    def conversion_quote_credited(self, quote_id: str) -> dict | None:
+        """AV-2: the ledger IS the consumed-quote registry — any DEPOSIT
+        carrying quote_id has consumed it. Rebuilt by scan on every call, so
+        single-use survives restarts (same law as the settle nonces and
+        upto_quote_used; the Rust core's consumed_quotes set, same proof)."""
+        for ev in self._events():
+            if ev.get("type") == "DEPOSIT" and ev.get("quote_id") == quote_id:
                 return ev
         return None
 
@@ -241,31 +302,58 @@ class Escrow:
         return self._append(ev)
 
     def deposit_usdc(self, voucher: str, usdc_amount, base_tx: str,
-                     rate_a_per_usdc, rate_ref: str) -> dict:
+                     quote: ConversionQuote, now: float | None = None) -> dict:
         """
         USDC-on-Base funding rail (founder ruling 2026-08-29: the second
         funding door; A stays the unit of account). The voucher is credited
-        in A — the meter's unit of account never changes. The conversion is
-        EXPLICIT on the event: usdc_amount, the rate used (A per USDC), and
-        a versioned rate_ref naming where the rate was read. Balance math
-        sees only the credited A. This rail carries gas and no memo, so the
-        key↔Base-address BINDING TABLE (meter.py basebind) resolves which
+        in A at an EXPLICIT cited conversion quote — AV-2 (SPEC AV-2), the
+        same law the Rust conformance core enforces
+        (crates/voucher-escrow/src/lib.rs::deposit_usdc); this is the live
+        engine converged onto it. Order of the laws, and each refusal runs
+        BEFORE the append (a refused deposit writes nothing):
+
+        1. (voucher, base_tx) settlement replay (x402-RAID-Z33) returns the
+           ORIGINAL event — idempotent credit outranks refusal: presenting
+           the same settlement twice is the same credit, not a double one.
+        2. SINGLE USE, independent of staleness (SPEC AV-2 2.4): a quote id
+           that already credited a deposit raises QuoteReplay and writes
+           nothing, even fresh-looking. The id and quoted_at burn into the
+           event (quote_id/quote_ts), so the law survives restarts.
+        3. INCLUSIVE TTL (2.2/2.3): age = now - quoted_at; age >=
+           QUOTE_TTL_SECS raises StaleQuote naming the age and the TTL. A
+           future-dated quote is malformed, not fresh — same typed refusal
+           (2.2b).
+
+        The conversion stays EXPLICIT on the event: usdc_amount, the rate
+        used (A per USDC), a versioned rate_ref, quote_id, quote_ts. Balance
+        math sees only the credited A. This rail carries gas and no memo, so
+        the key↔Base-address BINDING TABLE (meter.py basebind) resolves which
         voucher to credit — per the rails-are-not-symmetric rider.
         """
+        now = time.time() if now is None else now
         usdc = Decimal(str(usdc_amount)).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
         if usdc <= 0:
             raise VoucherError("usdc deposit must be positive")
         if not base_tx:
             raise VoucherError("usdc deposit requires a base_tx reference")
-        if not rate_ref:
-            raise VoucherError("usdc deposit requires a rate_ref (where the rate was read)")
-        rate = Decimal(str(rate_a_per_usdc))
-        if rate <= 0:
-            raise VoucherError("conversion rate must be positive")
         replay = self._settlement_seen(voucher, base_tx)
         if replay is not None:
             return replay
-        credited = _a(usdc * rate)
+        if self.conversion_quote_credited(quote.id) is not None:
+            raise QuoteReplay(
+                f"conversion quote {quote.id} already credited — "
+                "single use, nothing written")
+        if quote.quoted_at > now:
+            raise StaleQuote(
+                f"conversion quote is future-dated by "
+                f"{quote.quoted_at - now:.0f}s (quoted_at > now) — malformed, "
+                f"not fresh; TTL {QUOTE_TTL_SECS}s, fail closed")
+        age = now - quote.quoted_at
+        if age >= QUOTE_TTL_SECS:
+            raise StaleQuote(
+                f"conversion quote age {age:.0f}s >= TTL {QUOTE_TTL_SECS}s — "
+                "take a fresh quote (inclusive boundary, fail closed)")
+        credited = _a(usdc * quote.rate_a_per_usdc)
         if credited <= 0:
             raise VoucherError("credited A rounds to zero — deposit too small")
         return self._append({
@@ -273,7 +361,9 @@ class Escrow:
             "amount": str(credited),            # A — what balance math sees
             "currency_in": "USDC", "chain_in": "base",
             "usdc_amount": str(usdc), "base_tx": base_tx,
-            "rate_a_per_usdc": str(rate), "rate_ref": rate_ref,
+            "rate_a_per_usdc": str(quote.rate_a_per_usdc),
+            "rate_ref": quote.rate_ref,
+            "quote_id": quote.id, "quote_ts": quote.quoted_at,
         })
 
     def balance(self, voucher: str) -> Decimal:

@@ -138,9 +138,33 @@ test('the keep rows include a working registered genealogy destination', () => {
 });
 test('the house hand is same-origin, names only, and never forces case', () => {
   const css=read('surfaces/atlas.css');
+  /* the house hand is skaists (founder ruling 2026-10-04); burti stays declared behind it */
+  assert.match(css,/@font-face\{font-family:skaists;src:url\(fonts\/skaists\.woff2\) format\('woff2'\);font-display:swap\}/);
   assert.match(css,/@font-face\{font-family:burti;src:url\(fonts\/burti\.woff2\) format\('woff2'\);font-display:swap\}/);
-  assert.ok(existsSync(fileURLToPath(new URL('../surfaces/fonts/burti.woff2',import.meta.url))));
+  for(const face of ['skaists','burti']) assert.ok(existsSync(fileURLToPath(new URL('../surfaces/fonts/'+face+'.woff2',import.meta.url))),face);
+  for(const sel of ['.wordmark.house','.footer .wordmark','.bgene']){
+    const rule=css.match(new RegExp('(?:^|\\})'+sel.replace(/\./g,'\\.')+'\\{[^}]*\\bfont:[^}]*\\}','m'))?.[0]||'';
+    assert.match(rule,/\bskaists,burti,var\(--(?:mono|sans)\)/,sel+' sets skaists first, burti behind it');
+  }
+  assert.match(html,/<link rel="preload" href="fonts\/skaists\.woff2" as="font" type="font\/woff2" crossorigin>/);
   assert.doesNotMatch(css,/text-transform\s*:\s*(?:uppercase|capitalize)/);
   assert.doesNotMatch(css,/url\(\s*["']?(?:https?:|\/\/)/);
   assert.match(html,/<a class="wordmark house" href="index\.html" translate="no" dir="ltr">skaists<span>\.dev<\/span><\/a>/);
+});
+test('the skaists face is served byte-true: the founder\'s own cut, unaltered', async () => {
+  /* a plain static server over surfaces/, the path the hub's preload and atlas.css ask for */
+  const {createServer}=await import('node:http');
+  const srv=createServer((q,r)=>{
+    if(q.url!=='/fonts/skaists.woff2'){r.writeHead(404);return r.end();}
+    r.writeHead(200,{'content-type':'font/woff2'});r.end(readFileSync(new URL('../surfaces/fonts/skaists.woff2',import.meta.url)));
+  }).listen(0,'127.0.0.1');
+  await new Promise(ok=>srv.once('listening',ok));
+  try{
+    const res=await fetch('http://127.0.0.1:'+srv.address().port+'/fonts/skaists.woff2');
+    assert.equal(res.status,200);
+    const bytes=Buffer.from(await res.arrayBuffer());
+    assert.equal(bytes.length,6968);
+    assert.equal(bytes.subarray(0,4).toString('latin1'),'wOF2');
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),'09d3e65e90cbaa7626a4ac3758d1e229643fd8782fc9b3dffcb2287892dcbc4f');   // PUBLIC-CONSTANT: sha256 of the founder's skaists.woff2
+  }finally{srv.close();}
 });

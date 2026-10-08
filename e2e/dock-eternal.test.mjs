@@ -49,10 +49,13 @@ const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getC
 // dock-claims' own parse of the page source: the hero numbers it re-derives from source
 const heroesInSource = async () => [...(await readFile(SRC, 'utf8')).matchAll(/<div class="n [a-z]+">(\d+)<\/div><div class="l">([^<]*)</g)].map(m => +m[1]);
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '#etDkGo', action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '#etDkPill', action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '#etDkGo', action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '#etDkPill', action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etDkCopy', action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {

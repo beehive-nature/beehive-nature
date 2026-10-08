@@ -11,19 +11,22 @@
    First-party, no bundler (Turbo/ArDrive ruled out by founder order): a
    format-2 data transaction built and signed in the browser with WebCrypto
    only. Serialization mirrors arweave-js exactly (deepHash SHA-384, 32-byte
-   big-endian merkle notes, RSASSA-PKCS1-v1_5-SHA256 over the v2 signature
+   big-endian merkle notes, RSA-PSS-SHA256 over the v2 signature
    data, id = sha256(signature)); the live node is the oracle that proved it.
    Gateway rotation reuses the Base-adapter pattern: the first choice per
-   call is UNIFORMLY RANDOM across public gateways — no single operator learns
-   which IPs are about to anchor what. Keys NEVER live here: the JWK is held
+   call is uniformly randomized across public gateways. Each gateway still
+   observes the IP and requests it receives; rotation is not anonymity. Keys NEVER live here: the JWK is held
    by the vault (BNRVAULT) and only handed to sign(). */
 (function () {
   'use strict';
 
+  /* gateways that answer GET /info and GET /tx/{id}/status (200 for a mined tx, 404 for an unknown
+     id), read-only, 2026-10-05: arweave.net from this box and from check-host.net nodes; ar-io.dev
+     from check-host.net nodes (br, de, nl, fr, ru, sg, uk). gateway.ardrive.io is gone: NXDOMAIN at
+     dns.google and cloudflare-dns.com, "no such device or address" from every check-host.net node */
   var GATEWAYS = [ // PUBLIC-CONSTANT: public Arweave gateways, CORS-open, fee-bearing
     'https://arweave.net',
-    'https://ar-io.dev',
-    'https://gateway.ardrive.io'
+    'https://ar-io.dev'
   ];
 
   /* ── encodings ────────────────────────────────────────────────────────── */
@@ -103,8 +106,14 @@
 
   /* ── keys ─────────────────────────────────────────────────────────────── */
   function jwkOwner(jwk) { return unb64u(jwk.n); }
+  /* a secp256k1 owner (Arweave 2.9+, block 1,602,350): {kty:'EC', crv:'secp256k1',
+     pub:<base64url of the 33-byte compressed key>}. Its address is the SHA-256 of
+     that key; its transactions carry an empty owner, and the deep hash leaves the
+     owner out. Checked against mainnet tx G59jD7x4Ykz0sC4lf-gtsHzYovzjuc0MORyD-O4aWA0. */
+  function isEc(j) { return !!j && j.kty === 'EC' && j.crv === 'secp256k1' && typeof j.pub === 'string' && unb64u(j.pub).length === 33; }
   async function addressOf(jwkOrAddress) {
     if (typeof jwkOrAddress === 'string' && jwkOrAddress.length === 43) return jwkOrAddress;
+    if (isEc(jwkOrAddress)) return b64u(await sha256(unb64u(jwkOrAddress.pub)));
     return b64u(await sha256(jwkOwner(jwkOrAddress)));
   }
   function importSigner(jwk) {
@@ -152,7 +161,7 @@
     return r.text.replace(/"/g, ''); // winston, string
   }
   async function fee(bytes, target) {
-    var r = await rpc('GET', '/price/' + bytes + (target ? ',' + target : ''));
+    var r = await rpc('GET', '/price/' + bytes + (target ? '/' + encodeURIComponent(target) : ''));
     if (!r.ok) throw new Error('fee quote failed: ' + r.text.slice(0, 80));
     return r.text.replace(/"/g, '');
   }
@@ -241,23 +250,21 @@
      adapter never holds the private key; the vault never knows the rail. */
   async function buildUnsigned(publicJwk, data, tags, opts) {
     opts = opts || {};
-    var owner = jwkOwner(publicJwk);
+    var ec = isEc(publicJwk);
+    var owner = ec ? null : jwkOwner(publicJwk);
     var anchor = opts.anchor || await txAnchor();
     var reward = opts.reward || await fee(data ? data.length : 0, opts.target || '');
     var root = await chunkRoot(data);
     var tagList = [];
     for (var i = 0; i < tags.length; i++) tagList.push([str(tags[i].name), str(tags[i].value)]);
-    var sigData = await deepHash([
-      str('2'), owner, str(opts.target || ''), str(opts.quantity || '0'),
-      str(reward), unb64u(anchor), tagList,
-      str(String(data.length)), root
-    ]);
+    var fields = [str(opts.target || ''), str(opts.quantity || '0'), str(reward), unb64u(anchor), tagList, str(String(data.length)), root];
+    var sigData = await deepHash(ec ? [str('2')].concat(fields) : [str('2'), owner].concat(fields));
     return {
       sigData: sigData,
       wire: {
         format: 2,
         last_tx: anchor,
-        owner: publicJwk.n,
+        owner: ec ? '' : publicJwk.n,
         tags: tags.map(function (t) { return { name: b64u(str(t.name)), value: b64u(str(t.value)) }; }),
         target: opts.target || '',
         quantity: opts.quantity || '0',
@@ -274,21 +281,40 @@
     var id = await sha256(sig);
     return { signature: b64u(sig), id: b64u(id) };
   }
-  async function txStatus(txid) {          // the rail read for confirm(): GET /tx/{id}
-    var order = shuffled();
-    for (var i = 0; i < order.length; i++) {
-      try {
-        var r = await fetch(order[i] + '/tx/' + encodeURIComponent(txid), { method: 'GET' });
-        var text = await r.text();
-        if (r.status === 200) {
-          var body = null; try { body = JSON.parse(text) } catch (e) {}
-          return { gateway: order[i], status: r.status, tx: body && body.status, confirmations: (body && body.confirmations) || 0 };
+  /* the vault's half for a secp256k1 owner: SHA-256 of the deep hash, signed
+     recoverable with low S, then r‖s‖recid. The seed never leaves this call. */
+  async function signEcdsa(seed, sigData) {
+    var secp = globalThis.BnrSign && globalThis.BnrSign.secp;
+    if (!secp) throw new Error('the secp256k1 signer did not load');
+    var msg = await sha256(sigData);
+    var S = await secp.signAsync(msg, seed, { lowS: true });
+    var sig = new Uint8Array(65); sig.set(S.toCompactRawBytes(), 0); sig[64] = S.recovery;
+    return { signature: b64u(sig), id: b64u(await sha256(sig)) };
+  }
+  async function txStatus(txid) {
+    // The transaction body is NOT confirmation. Read the documented status API:
+    // https://docs.arweave.org/developers/arweave-node-server/http-api#get-transaction-status
+    if(!/^[A-Za-z0-9_-]{43}$/.test(txid))throw new Error('Invalid Arweave transaction ID');
+    var order=shuffled();
+    for(var i=0;i<order.length;i++){
+      var controller=new AbortController(),timer=setTimeout(function(){controller.abort()},3000);
+      try{
+        var response=await fetch(order[i]+'/tx/'+encodeURIComponent(txid)+'/status',{method:'GET',signal:controller.signal});
+        var text=await response.text();
+        if(response.status===200){
+          var body=null;try{body=JSON.parse(text)}catch(error){}
+          if(body&&Number.isSafeInteger(body.block_height)&&body.block_height>=0&&Number.isSafeInteger(body.number_of_confirmations)&&body.number_of_confirmations>0&&/^[A-Za-z0-9_-]{64}$/.test(body.block_indep_hash)){
+            return {gateway:order[i],status:200,tx:'confirmed',confirmations:body.number_of_confirmations,block_height:body.block_height,block_indep_hash:body.block_indep_hash};
+          }
+          continue; // An HTTP success with malformed evidence is never a confirmation.
         }
-        if (r.status === 404 || r.status === 410) return { gateway: order[i], status: r.status, tx: 'unknown' };
-        if (r.status >= 400 && r.status < 500) return { gateway: order[i], status: r.status, tx: 'refused' };
-      } catch (e) { /* walk */ }
+        if(response.status===202)return {gateway:order[i],status:202,tx:'pending',confirmations:0};
+        if(response.status===404||response.status===410)return {gateway:order[i],status:response.status,tx:'unknown',confirmations:0};
+        if(response.status>=400&&response.status<500&&response.status!==429)return {gateway:order[i],status:response.status,tx:'refused',confirmations:0};
+      }catch(error){/* Try another gateway after timeout or transport failure. */}
+      finally{clearTimeout(timer)}
     }
-    return { gateway: null, status: 0, tx: 'unreachable' };
+    return {gateway:null,status:0,tx:'unreachable',confirmations:0};
   }
 
   globalThis.BNRAR = {
@@ -297,6 +323,6 @@
     b64u: b64u, unb64u: unb64u, deepHash: deepHash, chunkRoot: chunkRoot,
     addressOf: addressOf, balance: balance, fee: fee, spotPrice: spotPrice,
     txAnchor: txAnchor, buildTx: buildTx, publish: publish, send: send,
-    buildUnsigned: buildUnsigned, signRaw: signRaw, postTx: postTx, txStatus: txStatus
+    buildUnsigned: buildUnsigned, signRaw: signRaw, signEcdsa: signEcdsa, isEc: isEc, postTx: postTx, txStatus: txStatus
   };
 })();

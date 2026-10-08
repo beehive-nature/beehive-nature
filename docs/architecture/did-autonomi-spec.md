@@ -134,6 +134,8 @@ invariant. Resolvers MUST implement algorithm agility (dispatch verification on
 `keyAlg`) and MUST reject ops in an algorithm they cannot verify rather than
 skip them.
 
+Implementation note (2026-10-04, additive, no id changed): the reference record verifier `crates/atmirror/src/record_sig.rs` (`verify_record_alg`) verifies `keyAlg` `ed25519` and `ml-dsa-65` (FIPS 204, empty context) and refuses every other id.
+
 ## 8. Bidirectional persona link (`did:plc`) — the format this spec closes
 The brief's open item. A link between `did:autonomi:<a>` and `did:plc:<p>` is
 verified **only when both directions exist and reference each other** — a single

@@ -11,7 +11,7 @@ function Invoke-Linux([string[]]$Command) {
 }
 $source = (& wsl -d $Distro -- wslpath -a $PSScriptRoot.Replace('\','/')).Trim()
 if ($LASTEXITCODE -ne 0) { throw 'Cannot resolve source directory' }
-$runtime = "$Lab/source/x0x-cea64f20eddc3d8c71cfe4fba7464d3f137eb5c4/scripts/ci/isolated-runtime.py"
+$runtime = "$Lab/source/x0x-427c411c035474ab4fb06102f19815ba4490e6ac/scripts/ci/isolated-runtime.py"
 $run = "$Lab/run-" + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N').Substring(0,8)
 Invoke-Linux @('/usr/bin/mkdir','-m','700',$run)
 $bundleHost = Join-Path $PSScriptRoot '../bundle.local.json'

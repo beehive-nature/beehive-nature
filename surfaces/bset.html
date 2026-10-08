@@ -244,6 +244,114 @@ body[data-reg="cypherpunk"] .design{border-color:var(--sk-guard);background:var(
 body[data-reg="cypherpunk"] main button:not(#eternal button){background:var(--sk-bg-card);color:var(--sk-ai);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono)}
 body[data-reg="cypherpunk"] main button:not(#eternal button):hover{background:var(--sk-primary);color:var(--sk-on-primary)}
 body[data-reg="cypherpunk"] .badge{border-radius:4px}
+
+/* ── THE FOUNDER'S CHOSEN UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to the
+   set 2026-10-05: "just follow the rules for each of the three seperate ui/ux's"). Only the dress
+   moves: the songs counted in plain rows with their open lists, the one way to listen, the second
+   way on and the footnotes (new bee), the record with its groove, legend, card, pill, note and spin
+   switch (raver), and the dataset with its path, chips, guard, counts, filters, records, pipeline,
+   verify list and the two second ways on (cypherpunk) keep every part and its order, and so does the
+   whole set below. The sigils and the record's cells keep their own data colours in every register.
+   new bee: paper, ink, bold system sans, forest green for the one filled action (white label) and
+   for the row you have open, white cards with soft large corners, outlined pills for every other
+   press; the guard well stays lavender (guard, never red); an artist's initials keep sovereign purple
+   (a person's). raver: night purple ground (sovereign wash into tint), plain white bold sans titles,
+   the magenta pill with its soft glow, magenta outlines, round everything. cypherpunk: near-black,
+   IBM Plex Mono, cyan action cut 6px with a dark label, thin grey lines on its presses, dense. ── */
+/* NEW BEE — a calm room: the songs counted in plain words, one forest action, a second way on */
+#eternal .et-b{font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-mark{color:var(--sk-ink-mut)}
+#eternal .et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink);text-wrap:balance}
+#eternal .et-b-lede{font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-guard{border-radius:var(--sk-radius-xl);font:600 15px/1.45 var(--sk-font-ui)}
+#eternal .et-b-row{font:600 16px/1.45 var(--sk-font-ui)}
+#eternal .et-b-row small{font:400 15px/1.4 var(--sk-font-ui)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-bg-card);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-forest)}
+#eternal .et-b-open{background:var(--sk-bg)}
+#eternal .et-b-person>i{font:700 14px/1.4 var(--sk-font-ui)}
+#eternal .et-b-person b{font:700 16px/1.45 var(--sk-font-ui)}
+#eternal .et-b-person span{font:400 15px/1.4 var(--sk-font-ui)}
+#eternal .et-b-person a{padding:0 var(--sk-s2);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui)}
+#eternal .et-b-person a:hover{color:var(--sk-ink);border-color:var(--sk-forest)}
+#eternal .et-b-more{font:400 14px/1.5 var(--sk-font-ui)}
+#eternal .et-b-act{gap:var(--sk-s2)}
+#eternal .et-b-primary{border-radius:var(--sk-radius-pill);background:var(--sk-forest);color:var(--sk-on-primary);font:700 17px/1.2 var(--sk-font-ui)}
+#eternal .et-b-primary:hover{background:var(--sk-forest);color:var(--sk-on-primary)}
+#eternal .et-b-link{min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);font:700 16px/1.2 var(--sk-font-ui);color:var(--sk-ink)}
+#eternal .et-b-link:hover{color:var(--sk-ink);border-color:var(--sk-forest)}
+#eternal .et-b-now,#eternal .et-b-foot{font:400 14px/1.5 var(--sk-font-ui)}
+
+/* RAVER — the record at night: plain white bold sans, the magenta pill with its glow, round everything */
+#eternal .et-r{font:400 15px/1.45 var(--sk-font-ui)}
+#eternal .et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend i{border-radius:var(--sk-radius-pill)}
+#eternal .et-r-card{border:1px solid rgba(156,111,214,.34);background:var(--sk-sovereign-wash)}
+#eternal .et-r-card .rk{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-ui);letter-spacing:normal}
+#eternal .et-r-card b{font:700 15px/1.3 var(--sk-font-ui)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-ui)}
+#eternal .et-r-pill{font:700 18px/1.2 var(--sk-font-ui);letter-spacing:normal;box-shadow:0 0 28px rgba(214,85,187,.38)}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-r-note{font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-ghost{min-height:var(--sk-control-row);padding:0 var(--sk-s4);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);text-decoration:none}
+#eternal .et-r-ghost:hover{color:var(--sk-ink);border-color:var(--sk-you)}
+#eternal .et-r-disc .groove{stroke:rgba(156,111,214,.34)}
+#eternal .et-r-disc .dot{stroke:var(--sk-sovereign-tint)}
+#eternal .et-r-disc .label{fill:var(--sk-sovereign-wash);stroke:rgba(156,111,214,.55)}
+#eternal .et-r-disc text.n{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em}
+#eternal .et-r-disc text.nm{font:400 18px/1.2 var(--sk-font-ui)}
+
+/* CYPHERPUNK — the dataset already wore the chosen UI (near-black, IBM Plex Mono throughout, cyan
+   action cut 6px with a dark label, dense); the chosen UI adds only thin grey lines on its presses */
+#eternal .et-c-ghost{border:1px solid rgba(100,129,118,.7)}
+#eternal .et-c-ghost:hover{border-color:var(--sk-ai)}
+#eternal .et-c-seg button,#eternal .et-c-more{border-color:rgba(100,129,118,.7)}
+
+/* ── THE WHOLE SET in the chosen UI: the header with its quote and the three words for it, the set
+   with every song card, the composer and the details keep every part and its order. None of the
+   set's presses is filled (the one filled press is the front's): new bee outlines them in a soft grey
+   pill, raver in magenta, cypherpunk in thin grey cut 6px. A song's tag is a chip: forest in new
+   bee, magenta in raver. ── */
+body[data-reg="bee"]{--cyan:var(--sk-ink);font-family:var(--sk-font-ui)}
+body[data-reg="bee"] h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+body[data-reg="bee"] #etArchive.et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="bee"] header>div:not(.sub){letter-spacing:normal!important}
+body[data-reg="bee"] main section:not(#eternal) h2{font:700 17px/1.35 var(--sk-font-ui);letter-spacing:.04em;color:var(--sk-ink)}
+body[data-reg="bee"] :is(.sub,.law){font-size:16px;line-height:1.6}
+body[data-reg="bee"] .track{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] .track .tt{font:700 16px/1.45 var(--sk-font-ui)}
+body[data-reg="bee"] .track .ta{font-size:15px}
+body[data-reg="bee"] .track .tl a{padding:0 var(--sk-s3);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);text-decoration:none}
+body[data-reg="bee"] .track .tl a:hover{border-color:var(--sk-forest)}
+body[data-reg="bee"] .badge{border:1.5px solid var(--sk-forest);border-radius:var(--sk-radius-pill);padding:0 var(--sk-s1);color:var(--sk-forest);font-weight:700;letter-spacing:normal}
+body[data-reg="bee"] main button:not(#eternal button){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);padding:0 var(--sk-s3);font:700 15px/1.2 var(--sk-font-ui)}
+body[data-reg="bee"] main button:not(#eternal button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-forest)}
+body[data-reg="bee"] textarea{background:var(--sk-bg-card);border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-md);font:400 16px/1.5 var(--sk-font-ui)}
+body[data-reg="bee"] textarea:focus{border-color:var(--sk-forest)}
+body[data-reg="bee"] pre{border-radius:var(--sk-radius-md)}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
+body[data-reg="raver"]{--bg:var(--sk-sovereign-tint);--panel:var(--sk-sovereign-wash);--well:var(--sk-sovereign-tint);--line:rgba(156,111,214,.34);--dim:var(--sk-sovereign-soft);--faint:var(--sk-sovereign-soft);
+ background-color:var(--sk-sovereign-tint);
+ background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+ background-attachment:fixed;color-scheme:dark;font-family:var(--sk-font-ui)}
+body[data-reg="raver"] h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
+body[data-reg="raver"] header>div:not(.sub){letter-spacing:normal!important}
+body[data-reg="raver"] main section:not(#eternal) h2{font:700 15px/1.3 var(--sk-font-ui);letter-spacing:.04em;color:var(--sk-ink)}
+body[data-reg="raver"] :is(.sub,.law){font-size:15px;line-height:1.6}
+body[data-reg="raver"] .track .tt{font:700 15px/1.4 var(--sk-font-ui)}
+body[data-reg="raver"] .track .tl a{padding:0 var(--sk-s3);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);text-decoration:none}
+body[data-reg="raver"] .track .tl a:hover{border-color:var(--sk-you)}
+body[data-reg="raver"] .badge{border:1.5px solid var(--sk-you);padding:0 var(--sk-s1);color:var(--sk-you);font-weight:700;letter-spacing:normal}
+body[data-reg="raver"] main button:not(#eternal button){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(214,85,187,.6);padding:0 var(--sk-s3);font:700 15px/1.2 var(--sk-font-ui)}
+body[data-reg="raver"] main button:not(#eternal button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-you)}
+body[data-reg="raver"] textarea{background:var(--sk-sovereign-tint);border:1.5px solid rgba(156,111,214,.55);border-radius:var(--sk-radius-xl);font:400 15px/1.5 var(--sk-font-ui)}
+body[data-reg="raver"] textarea:focus{border-color:var(--sk-you)}
+body[data-reg="cypherpunk"] h1{font-weight:600;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] main button:not(#eternal button){background:transparent;color:var(--sk-ink);border:1px solid rgba(100,129,118,.7)}
+body[data-reg="cypherpunk"] main button:not(#eternal button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-ai)}
 </style>
 <link rel="stylesheet" href="skaists.css">
 </head>

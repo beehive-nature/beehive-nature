@@ -29,7 +29,7 @@ python3 /mnt/c/Users/travi/wt-codex-solana-tungsten/tools/solana-tungsten/lab/pr
   --lab /home/travi/bnr-tungsten-lab
 ```
 
-Provisioning downloads x0x v0.46.0 and Agave 4.2.2 release archives with pinned
+Provisioning downloads x0x v0.46.5 and Agave 4.2.2 release archives with pinned
 SHA-256 checksums, exact-commit source archives, then runs `npm ci
 --ignore-scripts` with the checked-in lockfile and builds the pinned verifier
 with `cargo-build-sbf --arch v3`. It starts no daemon. Release checksum matching
@@ -60,7 +60,12 @@ networking and processes, not all host filesystem access.
   coded bootstrap, discovery or port mapping; mutual card import; 1/10/100
   sequential durable sends. Every received payload is checked. Unauthenticated
   local API access, changed-payload logical-ID reuse and restart retry are
-  exercised. Netlink measures namespace loopback bytes, including HTTP control
+  exercised. A durable SQLite BNR inbox binds sender and logical ID to exact
+  bytes across reopen and concurrent connections. Transport history can contain
+  duplicates: the raw restart delta remains in the receipt, while the inbox
+  must retain exactly 111 queued messages. This is queue idempotency, not
+  exactly-once settlement or a distributed authority ledger. Netlink measures
+  namespace loopback bytes, including HTTP control
   and readback; these are not public-network egress measurements.
 - `bundle.py`: exact fixture job, recomputed digest/public fields and an
   out-of-band owner key pin. A received key never becomes trusted merely by
@@ -82,6 +87,9 @@ networking and processes, not all host filesystem access.
   wrong recipient, overpayment and replay are refused. Balances conserve seven
   fixture units and replay remains refused after node restart. This is a
   fixture ledger, not `eosio.token` or a transfer of mainnet A.
+  Feature activation is polled. The local node uses a 100 ms wallet RPC budget
+  and 150 ms ABI serialization budget to tolerate development-host contention;
+  these are not public-node performance claims.
 - `reconcile.mjs`: existing INVOICE-1/RECON-1, terminal readback evidence,
   duplicate-evidence refusal and equality of the common semantic receipt core.
   The unpaid fixture-fee line keeps each result PARTIALLY-SATISFIED.

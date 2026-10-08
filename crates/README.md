@@ -113,8 +113,12 @@ Hashes: RustCrypto `sha3` 0.10 (workspace pin), SHA3-256, always
 CARRIED FORWARD VERBATIM FROM SOURCE — the audit posture:
 "The implementation contained in this crate has never been independently
 audited! USE AT YOUR OWN RISK!" (ml-dsa 0.1.1 README; ml-kem 0.3.2 README
-carries the same warning). NIST ACVP known-answer vectors have NOT been
-run in this repo — UNVERIFIED. Key storage at rest is OS file permissions
+carries the same warning). A small subset of NIST ACVP known-answer
+vectors now runs (`surfaces/pq-kat.json`, checked by `crates/bsigner/src/kat.rs`
+and `e2e/pq-kat.test.mjs`): ML-DSA-65 keyGen and sigVer, ML-KEM-768 keyGen and
+decapsulation, 17 cases in all. That is not ACVP validation; ML-DSA sigGen,
+ML-KEM encapsulation and the key checks are not run (see `notIncluded` in
+that file). Key storage at rest is OS file permissions
 only — at-rest encryption is an OPEN follow-up, not done, not claimed. What
 DOES hold and is tested: keys never leave the device (no network code in
 the crate), never printed (mechanically asserted), zeroized in memory.

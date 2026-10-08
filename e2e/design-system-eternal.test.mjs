@@ -71,10 +71,14 @@ test('the ruling: the specimens are untouched, and the fronts keep them out of t
   }
 });
 
+// the founder's chosen UI (2026-10-05): new bee is a paper room with bold system sans titles and a
+// forest green action; raver is a night purple room (the sovereign tint) set into the sheet the same
+// way, with plain bold sans titles and its magenta pill; cypherpunk is unchanged. Each value is
+// asserted exactly, and the sheet around the rooms still keeps its one dark dress.
 test('one front per register, each in its own dress (the sheet keeps its one dark dress)', async () => {
   const want = {
-    bee: { front: '.et-b', ground: '#eternal', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '.et-b-primary', action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', ground: 'body', bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '.et-r-pill', action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', ground: '#eternal', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '.et-b-primary', action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', ground: '#eternal', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '.et-r-pill', action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', ground: 'body', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etDsCopy', action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {

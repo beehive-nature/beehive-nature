@@ -1,0 +1,863 @@
+{
+ "schema": "bnr.ant-reach-cohort/1",
+ "receipt": "docs/receipts/ant-reach-2026-10-06.json",
+ "runs": [
+  {
+   "label": "laptop-w2",
+   "at": "2026-10-06T20:54:51.297Z"
+  },
+  {
+   "label": "gh-ubuntu-latest",
+   "at": "2026-10-06T20:56:23.679Z"
+  },
+  {
+   "label": "gh-macos-latest",
+   "at": "2026-10-06T20:55:52.824Z"
+  },
+  {
+   "label": "gh-macos-latest",
+   "at": "2026-10-07T05:57:37.392Z"
+  },
+  {
+   "label": "gh-ubuntu-latest",
+   "at": "2026-10-07T05:57:36.113Z"
+  },
+  {
+   "label": "gh-macos-latest",
+   "at": "2026-10-07T13:21:12.146Z"
+  },
+  {
+   "label": "gh-ubuntu-latest",
+   "at": "2026-10-07T13:21:32.965Z"
+  },
+  {
+   "label": "laptop-w3",
+   "at": "2026-10-07T20:20:12.789Z"
+  },
+  {
+   "label": "gh-ubuntu-latest",
+   "at": "2026-10-07T20:20:55.584Z"
+  },
+  {
+   "label": "gh-macos-latest",
+   "at": "2026-10-07T20:19:34.830Z"
+  }
+ ],
+ "dead": {
+  "members": 20,
+  "observed": 20,
+  "settledObservations": 108,
+  "kept": 108,
+  "flipped": 0
+ },
+ "live": {
+  "members": 20,
+  "observed": 20,
+  "settledObservations": 128,
+  "kept": 126,
+  "flipped": 2
+ },
+ "members": [
+  {
+   "id": "00d64acd2953d654",
+   "was": "dead",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "01049c81cfd2cfed",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "03575ef6c5319939",
+   "was": "dead",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "04ab50475c49ba35",
+   "was": "dead",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    null
+   ]
+  },
+  {
+   "id": "0677c859bca53f27",
+   "was": "dead",
+   "observations": 3,
+   "settled": 3,
+   "kept": 3,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "0c262881a35e62b1",
+   "was": "dead",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "0c89153e685353c4",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    null,
+    null,
+    "dead",
+    null,
+    null,
+    "dead",
+    null
+   ]
+  },
+  {
+   "id": "1041d8e268715231",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "dead"
+   ]
+  },
+  {
+   "id": "116a90f452b12751",
+   "was": "dead",
+   "observations": 3,
+   "settled": 3,
+   "kept": 3,
+   "flipped": 0,
+   "perRun": [
+    null,
+    null,
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "11ad5c50bd0d7180",
+   "was": "dead",
+   "observations": 7,
+   "settled": 6,
+   "kept": 6,
+   "flipped": 0,
+   "perRun": [
+    "unsettled",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "126d8489e484ba0d",
+   "was": "dead",
+   "observations": 4,
+   "settled": 3,
+   "kept": 3,
+   "flipped": 0,
+   "perRun": [
+    null,
+    "dead",
+    null,
+    "unsettled",
+    null,
+    null,
+    null,
+    null,
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "12795dacf76484eb",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "13d24f19e43ccde5",
+   "was": "dead",
+   "observations": 5,
+   "settled": 5,
+   "kept": 5,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null
+   ]
+  },
+  {
+   "id": "15d0054459e26898",
+   "was": "dead",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    "dead",
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "17fee72b582eaebb",
+   "was": "dead",
+   "observations": 10,
+   "settled": 10,
+   "kept": 10,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "1bffa38ed3acd3f8",
+   "was": "dead",
+   "observations": 5,
+   "settled": 5,
+   "kept": 5,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "1c9ccf111bdeaced",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    null,
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "1fe3b05085a93c2b",
+   "was": "dead",
+   "observations": 9,
+   "settled": 9,
+   "kept": 9,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead",
+    "dead"
+   ]
+  },
+  {
+   "id": "20e975238ca9f0e8",
+   "was": "dead",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "dead"
+   ]
+  },
+  {
+   "id": "2256cedfe2935e58",
+   "was": "dead",
+   "observations": 3,
+   "settled": 3,
+   "kept": 3,
+   "flipped": 0,
+   "perRun": [
+    "dead",
+    null,
+    "dead",
+    null,
+    null,
+    null,
+    null,
+    "dead",
+    null,
+    null
+   ]
+  },
+  {
+   "id": "00f6d41208c88402",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "0319cdc201fd3234",
+   "was": "opened",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "0370189e5cb6c573",
+   "was": "opened",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "0614fff3a1fcdaad",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "0704874d47b6e532",
+   "was": "opened",
+   "observations": 5,
+   "settled": 5,
+   "kept": 5,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    null,
+    "opened",
+    null,
+    "opened"
+   ]
+  },
+  {
+   "id": "07220aba1e58cdab",
+   "was": "opened",
+   "observations": 6,
+   "settled": 6,
+   "kept": 6,
+   "flipped": 0,
+   "perRun": [
+    null,
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "07c3f24e0b5e688f",
+   "was": "opened",
+   "observations": 3,
+   "settled": 3,
+   "kept": 3,
+   "flipped": 0,
+   "perRun": [
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "0879a7ba2c88504e",
+   "was": "opened",
+   "observations": 6,
+   "settled": 6,
+   "kept": 6,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    null,
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "09d7e457307accd9",
+   "was": "opened",
+   "observations": 5,
+   "settled": 5,
+   "kept": 3,
+   "flipped": 2,
+   "perRun": [
+    "opened",
+    null,
+    "opened",
+    null,
+    null,
+    "dead",
+    "opened",
+    "dead",
+    null,
+    null
+   ]
+  },
+  {
+   "id": "0e60e56b79be2a83",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    null,
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "0f2a4d1009cc7aa3",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    null,
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "12e8771a2d9572dc",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "1534c25dc64a9dae",
+   "was": "opened",
+   "observations": 6,
+   "settled": 6,
+   "kept": 6,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    null,
+    "opened"
+   ]
+  },
+  {
+   "id": "16a56fbe655616e6",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    null,
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "17bb6c74ba61f629",
+   "was": "opened",
+   "observations": 7,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "17e32db9af73e279",
+   "was": "opened",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "19b9a7d65f7b5371",
+   "was": "opened",
+   "observations": 5,
+   "settled": 5,
+   "kept": 5,
+   "flipped": 0,
+   "perRun": [
+    null,
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "1a9c37138f79cce2",
+   "was": "opened",
+   "observations": 8,
+   "settled": 8,
+   "kept": 8,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "opened",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "1f71b9200294ce1e",
+   "was": "opened",
+   "observations": 8,
+   "settled": 7,
+   "kept": 7,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    "opened",
+    null,
+    null,
+    "unsettled",
+    "opened",
+    "opened"
+   ]
+  },
+  {
+   "id": "1fb8e4fcd463b41a",
+   "was": "opened",
+   "observations": 4,
+   "settled": 4,
+   "kept": 4,
+   "flipped": 0,
+   "perRun": [
+    "opened",
+    null,
+    "opened",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "opened",
+    "opened"
+   ]
+  }
+ ],
+ "_note": "Cohort across every window after the baseline: 2026-10-06 20:54Z (laptop, Linux runner, macOS runner; SDK 0.1.1), two scheduled runner windows 2026-10-07 05:57Z and 13:21Z (SDK 0.1.1; the 13:21Z runs dialled far fewer endpoints, 55-60), and 2026-10-07 20:19Z (all three; SDK 0.1.2). Member IDs are truncated deterministic fingerprints (first 16 hex of SHA-256 of ip:port): pseudonymous, matchable by anyone holding the advertised endpoint set. Raw exports: GitHub Actions runs 37529869576, 37578872530, 37627717280, 37681059558. null in perRun = not dialled in that run."
+}

@@ -6,9 +6,10 @@
 <meta name="theme-color" content="#fbf7f0">
 <meta name="description" content="Watch a public Autonomi video in the browser. No app, no account.">
 <title>bViEw — skaists.dev</title>
-<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/skaists.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="skaists.css">
 <style>
+@font-face{font-family:skaists;src:url(fonts/skaists.woff2) format("woff2");font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
 /* ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): three separate products around ONE
    engine. new bee is a calm room, raver is the drop (the file as a ring of light), cypherpunk is the
@@ -17,14 +18,27 @@
    (the address is written once, in that field). Every value below is a skaists token
    (surfaces/skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
    corner. Measured by e2e/skaists-conformance.mjs; proven by e2e/bview-eternal.test.mjs.
-   No text-transform anywhere (casing law); no dash for an unknown value (brand law). */
-body{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--well:var(--sk-bg-card);--line:var(--sk-line);--edge:var(--sk-ink);
- --act:var(--sk-primary);--on:var(--sk-on-primary);--link:var(--sk-link);--card:var(--sk-radius-xl);--ctl:var(--sk-radius-lg);
- --font:var(--sk-font-bee-sans);--title:var(--sk-font-bee-serif);--screen:var(--sk-ink);--screen-ink:var(--sk-bg);--fs:16px;--fs2:14px}
-body[data-reg="raver"]{--edge:var(--sk-line);--ctl:var(--sk-radius-pill);--card:var(--sk-radius-xl);--font:var(--sk-font-raver-body);--title:var(--sk-font-raver-display);
- --screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--dim:var(--sk-ink-soft);--fs:14px;--fs2:14px}
-body[data-reg="cypherpunk"]{--edge:var(--sk-ink-mut);--ctl:var(--sk-radius-sm);--card:var(--sk-radius-sm);--font:var(--sk-font-mono);--title:var(--sk-font-mono);
- --screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--fs:13px;--fs2:12px}
+   No text-transform anywhere (casing law); no dash for an unknown value (brand law).
+   THE FOUNDER'S CHOSEN UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to bViEw
+   2026-10-05). Only the dress moves; the three fronts below keep every row, ring, tile, pane and step.
+   new bee: paper, ink, bold system sans, forest green for the one filled action (white label) and for
+   what is open, white soft cards, pills, an outlined pill for every second way on. raver: night purple
+   ground (sovereign wash into tint), plain white bold sans, the magenta pill with its glow, magenta
+   outlines, round everything. cypherpunk: near-black, IBM Plex Mono, cyan action cut 6px, thin grey
+   lines. --edge is the outline a second way on wears; --field the edge of the one address field;
+   --danger the outline a press that removes something wears (red / magenta / orange by register). */
+body{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--well:var(--sk-bg-card);--line:var(--sk-line);--edge:rgba(106,115,110,.4);--field:var(--sk-ink-mut);
+ --act:var(--sk-forest);--on:var(--sk-on-primary);--link:var(--sk-ink);--card:var(--sk-radius-xl);--ctl:var(--sk-radius-pill);--danger:var(--sk-rose);--glow:none;
+ --font:var(--sk-font-ui);--title:var(--sk-font-ui);--screen:var(--sk-ink);--screen-ink:var(--sk-bg);--fs:16px;--fs2:14px}
+body[data-reg="raver"]{--line:rgba(156,111,214,.34);--edge:rgba(214,85,187,.6);--field:rgba(156,111,214,.55);--well:var(--sk-sovereign-wash);--act:var(--sk-primary);--link:var(--sk-sovereign-soft);
+ --ctl:var(--sk-radius-pill);--card:var(--sk-radius-xl);--font:var(--sk-font-ui);--title:var(--sk-font-ui);--danger:var(--sk-you);--glow:0 0 28px rgba(214,85,187,.38);
+ --screen:var(--sk-sovereign-wash);--screen-ink:var(--sk-ink);--dim:var(--sk-sovereign-soft);--fs:15px;--fs2:14px;
+ background-color:var(--sk-sovereign-tint);
+ background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+ background-attachment:fixed}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
+body[data-reg="cypherpunk"]{--edge:rgba(100,129,118,.7);--field:rgba(100,129,118,.7);--act:var(--sk-primary);--link:var(--sk-link);--ctl:var(--sk-radius-sm);--card:var(--sk-radius-sm);--font:var(--sk-font-mono);--title:var(--sk-font-mono);
+ --danger:var(--sk-cat-bug);--screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--fs:13px;--fs2:12px}
 *{box-sizing:border-box;margin:0}
 [hidden]{display:none!important}
 [data-reg]:not(body){display:none}
@@ -34,7 +48,8 @@ body{background:var(--bg);color:var(--ink);font:400 var(--fs)/1.45 var(--font);m
 main{max-width:640px;margin:0 auto;display:flex;flex-direction:column}
 :is(input,button,a,summary,[tabindex]):focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
 button{cursor:pointer;font-family:inherit}
-h1.bv-mark{margin:var(--sk-s2) 0 var(--sk-s2);font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign);letter-spacing:0}
+h1.bv-mark{margin:var(--sk-s2) 0 var(--sk-s2);font:400 18px/1.2 var(--sk-font-house);color:var(--sk-ink-mut);letter-spacing:0}
+body[data-reg="raver"] h1.bv-mark{color:var(--sk-sovereign-soft)}
 
 /* ── the front: one visible at a time; new bee is the default ── */
 #eternal{display:block}
@@ -46,23 +61,25 @@ body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c
 /* the one real action: the address field and its button (#f), dressed by the front it sits in */
 form{display:flex;flex-wrap:wrap;gap:var(--sk-s2)}
 label{flex:1 0 100%;display:flex;align-items:center;min-height:var(--sk-control-min)}
-input{flex:1 1 200px;min-width:0;min-height:var(--sk-control-row);padding:0 var(--sk-s2);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);background:var(--sk-bg);border:1.5px solid var(--edge);border-radius:var(--sk-radius)}
+input{flex:1 1 200px;min-width:0;min-height:var(--sk-control-row);padding:0 var(--sk-s2);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);background:var(--sk-bg);border:1.5px solid var(--field);border-radius:var(--sk-radius-md)}
 input::placeholder{color:var(--sk-ink-mut)}
-button[type=submit]{min-height:var(--sk-control-primary);padding:0 var(--sk-s4);border:0;border-radius:var(--ctl);background:var(--act);color:var(--on);transition:transform .14s ease}
+button[type=submit]{min-height:var(--sk-control-primary);padding:0 var(--sk-s4);border:0;border-radius:var(--ctl);background:var(--act);color:var(--on);box-shadow:var(--glow);font-weight:700;transition:transform .14s ease}
 button[type=submit]:active{transform:scale(.97)}
 .say{padding:var(--sk-s2) var(--sk-s3);border:1.5px dashed var(--sk-guard);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-ink);font:400 var(--fs)/1.45 var(--font)}
 #etDock{display:flex;flex-direction:column;gap:var(--sk-s2)}
-.my-videos{border:1px solid var(--line);border-radius:var(--ctl);padding:var(--sk-s2)}
-.my-videos summary{cursor:pointer;min-height:var(--sk-control-min);display:list-item}
+.my-videos{border:1px solid var(--line);border-radius:var(--card);background:var(--well);padding:var(--sk-s2) var(--sk-s3)}
+.my-videos summary{cursor:pointer;min-height:var(--sk-control-min);display:list-item;font-weight:700}
 .my-videos p{color:var(--dim);margin:var(--sk-s2) 0}
-.my-videos button{min-height:var(--sk-control-row);padding:var(--sk-s2);border:1px solid var(--edge);border-radius:var(--ctl);background:var(--well);color:var(--ink)}
+.my-videos button{min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--edge);border-radius:var(--ctl);background:transparent;color:var(--ink);font-weight:700}
+.my-videos button:hover{border-color:var(--act)}
+.saved-video button:last-child{color:var(--danger);border-color:var(--danger)}
 #saved-videos{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--sk-s2);margin-top:var(--sk-s2)}
 .saved-video{display:flex;flex-wrap:wrap;gap:var(--sk-s2);border-top:1px solid var(--line);padding-top:var(--sk-s2)}
 .saved-video input{flex:1 1 100%;font-family:var(--font)}
 .saved-video code{flex:1 1 100%;overflow-wrap:anywhere;font:400 var(--fs2)/1.45 var(--sk-font-mono)}
 #out{display:flex;flex-direction:column;gap:var(--sk-s2)}
 .stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
-.playback-route{margin:12px 0}.playback-route label{display:block}.playback-route select{width:100%;min-height:44px;font:inherit;background:var(--screen);color:var(--fg);border:1px solid currentColor;border-radius:var(--ctl);padding:8px}.playback-route p{font-size:14px;line-height:1.5}
+.playback-route{margin:12px 0}.playback-route label{display:block}.playback-route select{width:100%;min-height:44px;font:inherit;background:var(--well);color:var(--ink);border:1.5px solid var(--field);border-radius:var(--ctl);padding:8px var(--sk-s3)}.playback-route p{font-size:14px;line-height:1.5}
 #frame-hold{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;background:var(--screen)}
 video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
 progress{display:block;width:100%;height:6px;appearance:none;border:0;background:var(--sk-line);accent-color:var(--act)}
@@ -72,39 +89,47 @@ progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progr
 .ring{width:118px;height:118px;transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:8}.ring .track{stroke:var(--screen-ink);stroke-opacity:.28}.ring .fill{stroke:var(--act);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset .26s ease}
 .count{position:absolute;inset:0;display:grid;place-items:center;align-content:center}
-.count b{font:400 32px/1 var(--sk-font-bee-serif)}
-.till{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
-.tap{width:100%;min-height:var(--sk-control-row);border:1.5px solid var(--sk-ink);border-radius:var(--ctl);background:transparent;color:var(--sk-ink);font:600 var(--fs)/1.2 var(--font)}
+.count b{font:700 32px/1 var(--sk-font-ui);letter-spacing:-.025em}
+.till{font:700 15px/1.2 var(--sk-font-ui)}
+.tap{width:100%;min-height:var(--sk-control-row);border:1.5px solid var(--edge);border-radius:var(--ctl);background:transparent;color:var(--sk-ink);font:700 var(--fs)/1.2 var(--font)}
+.tap:hover{border-color:var(--act)}
 @media (prefers-reduced-motion:reduce){button[type=submit],.ring .fill{transition:none}}
 
-/* NEW BEE — a calm room: one question, one card, one magenta action, plain rows */
-.et-b{display:flex;flex-direction:column;gap:var(--sk-s3)}
-.et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);text-wrap:balance}
-.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
-.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+/* NEW BEE — a calm room: one question, one card, one forest action, plain rows. Dressed in the founder's
+   chosen UI: paper, ink, bold system sans, white cards with soft large corners, the one filled pill forest
+   with a white label, forest for the row that is open, an outlined pill for "see the details". The guard
+   well stays lavender (guard, never red). The question, the card, the four rows and their order stay. */
+.et-b{display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-ui)}
+.et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink);text-wrap:balance}
+.et-b-lede{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-ui)}
 .et-b-guard svg,.et-b-row svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .et-b #f{padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
-.et-b label{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
-.et-b button[type=submit]{flex:1 0 100%;font:600 17px/1.2 var(--sk-font-bee-sans)}
+.et-b label{font:700 17px/1.35 var(--sk-font-ui);color:var(--sk-ink)}
+.et-b button[type=submit]{flex:1 0 100%;font:700 17px/1.2 var(--sk-font-ui)}
 .et-b #s-wait{border:0;background:transparent;padding:0 var(--sk-s1);color:var(--sk-ink-mut)}
+.et-b .playback-route p{color:var(--sk-ink-mut)}
 .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
-.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
-.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
-.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
-.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:600 16px/1.45 var(--sk-font-ui);color:var(--sk-ink)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut);text-align:right}
+.et-b-row[aria-expanded="true"]{background:var(--sk-bg-card);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-forest)}
 .et-b-row .chev{transition:transform .26s}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
-.et-b-say{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-say{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-bg);font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink)}
 .et-b-rows>:last-child{border-bottom:0}
-.et-b-link{align-self:center;min-height:var(--sk-control-min);display:flex;align-items:center;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
-.et-b-link:hover{color:var(--sk-link-hover)}
-.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-link{align-self:stretch;justify-content:center;min-height:var(--sk-control-row);display:flex;align-items:center;padding:0 var(--sk-s3);border:1.5px solid var(--edge);border-radius:var(--sk-radius-pill);font:700 17px/1.2 var(--sk-font-ui);color:var(--sk-ink);text-decoration:none}
+.et-b-link:hover{border-color:var(--sk-forest)}
+.et-b-foot{text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 
-/* RAVER — the drop: the file is a ring of light; you tap it to read it */
-.et-r{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+/* RAVER — the drop: the file is a ring of light; you tap it to read it. Dressed in the founder's chosen UI:
+   night purple ground, plain white bold titles, round everything, magenta for the one filled pill with its
+   soft glow and as the outline of every second way on. The ring, its 48 spokes, the tiles, the flow meter
+   and the full-bleed stage stay as built. */
+.et-r{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font-family:var(--sk-font-ui)}
 .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
-.et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-.et-r-lede{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+.et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+.et-r-lede{font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-strong)}
 .art{margin:0 auto;width:100%;max-width:340px;filter:drop-shadow(var(--sk-glow-sovereign))}
 .art svg{width:100%;height:auto}
 .art .dial{cursor:pointer}
@@ -112,32 +137,34 @@ progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progr
 .art .beat{fill:var(--sk-sovereign-wash);transition:fill .26s}
 .art .beat.rest{fill:var(--sk-sovereign-soft);opacity:.5}.art .beat.lit{fill:var(--sk-sovereign)}.art .beat.hot{fill:var(--sk-you)}.art .beat.head{fill:var(--sk-sovereign-strong)}
 .art .halo{fill:none;stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5;opacity:.7}
-.art .core{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
-.art .mid{font:700 30px/1 var(--sk-font-raver-display);fill:var(--sk-ink)}
-.art .sub{font:400 14px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft)}
-.motion{align-self:center;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink-soft);font:400 14px/1.4 var(--sk-font-raver-body)}
+.art .core{fill:var(--sk-sovereign-wash);stroke:rgba(156,111,214,.34);stroke-width:1.5}
+.art .mid{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em;fill:var(--sk-ink)}
+.art .sub{font:400 15px/1.4 var(--sk-font-ui);fill:var(--sk-sovereign-soft)}
+.motion{align-self:center;min-height:var(--sk-control-min);padding:0 var(--sk-s4);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui)}
+.motion:hover{border-color:var(--sk-you)}
 .et-r #f{flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s2)}
-.et-r label{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r label{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 .et-r label .sr{position:static!important;width:auto;height:auto;overflow:visible;clip-path:none}
-.et-r input{min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign);font:400 14px/1.4 var(--sk-font-mono)}
-.et-r button[type=submit]{width:var(--sk-control-primary);padding:0;flex:none;font:700 15px/1.2 var(--sk-font-raver-display);box-shadow:var(--sk-glow-sovereign)}
+.et-r input{min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid rgba(156,111,214,.55);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);box-shadow:var(--sk-glow-sovereign);font:400 14px/1.4 var(--sk-font-mono)}
+.et-r button[type=submit]{width:var(--sk-control-primary);padding:0;flex:none;font:700 18px/1.2 var(--sk-font-ui)}
 .et-r .stage{margin:0 calc(-1 * var(--sk-s3));border-radius:0}
 .et-r .ring{width:150px;height:150px;filter:drop-shadow(var(--sk-glow-sovereign))}
-.et-r .count b{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em}
+.et-r .count b{font:700 60px/.95 var(--sk-font-ui);letter-spacing:-.03em}
 .et-r #s-wait{display:none}
 .et-r progress{height:3px}
+.et-r .playback-route p{color:var(--sk-sovereign-soft);font-size:15px}
 .flow{display:flex;align-items:flex-end;gap:var(--sk-s2)}
 .flow .bars{display:flex;align-items:flex-end;gap:var(--sk-s1);height:36px;flex:none}
 .flow .bars i{display:block;width:6px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash)}
 .flow .bars i:nth-child(1){height:12px}.flow .bars i:nth-child(2){height:18px}.flow .bars i:nth-child(3){height:24px}.flow .bars i:nth-child(4){height:30px}.flow .bars i:nth-child(5){height:36px}
 .flow .bars i.on{background:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
-.flow p{color:var(--sk-ink-soft);font:400 14px/1.4 var(--sk-font-raver-body)}
+.flow p{color:var(--sk-sovereign-soft);font:400 15px/1.4 var(--sk-font-ui)}
 .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
-.et-r-tiles button{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sk-s1);min-height:88px;padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);text-align:left;transition:border-color .26s,box-shadow .26s}
-.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
-.et-r-tiles b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
-.et-r-tiles span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
-.et-r-foot{text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-tiles button{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sk-s1);min-height:88px;padding:var(--sk-s2) var(--sk-s3);border:1.5px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);text-align:left;transition:border-color .26s,box-shadow .26s}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:0 0 28px rgba(214,85,187,.38)}
+.et-r-tiles b{font:700 15px/1.3 var(--sk-font-ui)}
+.et-r-tiles span{font:400 15px/1.35 var(--sk-font-ui);color:var(--sk-ink)}
+.et-r-foot{text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 @media(prefers-reduced-motion:no-preference){
   body[data-reg="raver"]:not([data-motion-paused]) .beat{animation:beat 1.6s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
   body[data-reg="raver"]:not([data-motion-paused]) .spoke:nth-child(2n) .beat{animation-delay:.4s}
@@ -149,7 +176,9 @@ progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progr
 body[data-tab-hidden] *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){#motion{display:none!important}.et-r-tiles button,.art .beat{transition:none}}
 
-/* CYPHERPUNK — the instrument, complete at first paint: pipeline, byte map, rule, receipts */
+/* CYPHERPUNK — the instrument, complete at first paint: pipeline, byte map, rule, receipts. It already wore
+   the chosen UI (near-black, IBM Plex Mono throughout, cyan action cut 6px, dense); the chosen UI adds only
+   thin grey borders on the field, the route, every second way on, and an orange outline on a removal. */
 .et-c{display:flex;flex-direction:column;gap:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
 .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
 .et-c-path span{color:var(--sk-ai)}
@@ -158,7 +187,8 @@ body[data-tab-hidden] *{animation-play-state:paused!important}
 .et-c-chips span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
 .et-c-chips span.on{border-color:var(--sk-ai);color:var(--sk-ai)}.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}.et-c-chips span.guard{border-color:var(--sk-guard);color:var(--sk-guard)}
 .et-c label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
-.et-c input{background:var(--sk-bg-card);border-radius:var(--sk-radius-sm);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c input{background:var(--sk-bg-card);border-width:1px;border-radius:var(--sk-radius-sm);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c :is(.playback-route select,.my-videos button,.tap){border-width:1px}
 .et-c button[type=submit]{min-height:52px;font:600 14px/1.2 var(--sk-font-mono)}
 .et-c .say{border-radius:var(--sk-radius-sm);font:400 13px/1.45 var(--sk-font-mono)}
 .et-c progress,.et-c .veil,.et-c #s-wait{display:none!important}
@@ -191,14 +221,15 @@ body[data-tab-hidden] *{animation-play-state:paused!important}
 .et-c-verify p{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
 .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
 .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
-.et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+.et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+.et-c-ghost:hover{border-color:var(--sk-ai)}
 .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 
 /* ── THE WHOLE FILE, below the fronts, dressed per register (the page's variables on skaists) ── */
-.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:400 28px/1.1 var(--sk-font-bee-serif)}
-body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
 body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
-details.facts>summary{cursor:pointer;color:var(--link);min-height:var(--sk-control-min);display:flex;align-items:center;font:600 var(--fs)/1.45 var(--font)}
+details.facts>summary{cursor:pointer;color:var(--link);min-height:var(--sk-control-min);display:flex;align-items:center;font:700 var(--fs)/1.45 var(--font)}
 body[data-reg="cypherpunk"] details.facts>summary{display:none}
 .sheet{padding:var(--sk-s2) 0 0}
 body[data-reg="cypherpunk"] .sheet{padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
@@ -213,6 +244,7 @@ body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
 .done{margin:var(--sk-s2) 0 0;color:var(--dim);font:400 var(--fs2)/1.4 var(--font)}
 @media(min-width:760px){.nerd{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
+<script src="ant-transport.js?v=2"></script>
 </head>
 <body data-experience="bview" data-bee-theme="custom">
 <script>
@@ -243,8 +275,8 @@ document.addEventListener('DOMContentLoaded',function(){
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
           <div class="playback-route"><label for="playback-route">Playback route</label>
-            <select id="playback-route"><option value="relay">Relay</option><option value="direct">Direct Autonomi + relay fallback</option></select>
-            <p>Direct connects to storage nodes without a wallet. Applies when you press Watch. The relay remains the default while we compare playback.</p>
+            <select id="playback-route"><option value="relay">Relay only</option><option value="direct-only">Direct Autonomi only</option><option value="direct">Direct Autonomi + relay fallback</option></select>
+            <p>Direct connects to storage nodes without a wallet. Direct only never asks the relay, so a slow or failed run stays slow or failed. Applies when you press Watch. Every run names where its bytes came from.</p>
             <p id="playback-status" role="status" aria-live="polite"></p>
           </div>
           <details class="my-videos" id="my-videos">
@@ -496,7 +528,21 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.addr = ''; metrics.path = ''; metrics.cl = null; metrics.acceptRanges = null;
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
-    metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0;
+    metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0; metrics.route = '';
+    metrics.stalls = 0; metrics.stallMs = 0; metrics.stallAt = 0;
+  };
+  // Where this run's bytes came from, said once for every front and every receipt.
+  const sourceOf = () => {
+    const dr = metrics.direct, p = metrics.path;
+    if (p === 'cache') return { kind: 'cache', text: 'cache · this device · neither the relay nor Autonomi was asked' };
+    if (dr && dr.stopped) return { kind: 'direct', text: 'direct only · stopped: ' + dr.stopped + ' · ' + dr.uniqueBytes + ' B arrived · relay not used' };
+    if (p === 'webrtc' || p === 'webrtc-connecting') return { kind: 'direct', text: 'direct · Autonomi storage nodes over WebRTC · no relay bytes' };
+    if (p === 'stream' || p === 'envelope') {
+      if (dr && dr.fallback && dr.playhead != null) return { kind: 'mixed', text: 'mixed · ' + dr.uniqueBytes + ' B direct, played to ' + dr.playhead.toFixed(2) + ' s · then ' + metrics.bytes + ' B relay' };
+      if (dr && dr.fallback) return { kind: 'relay', text: 'relay · direct gave up before the first frame (' + dr.fallback + ') · every played byte from the relay' };
+      return { kind: 'relay', text: 'relay · every byte from relay.skaists.dev' };
+    }
+    return null;
   };
   const fmtMs = ms => ms == null ? notYet() : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
   const fmtMb = n => n == null ? notYet() : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
@@ -510,16 +556,16 @@ document.addEventListener('DOMContentLoaded',function(){
     const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
     const ny = notYet(), pl = feed && feed.plan, d = metrics.dec, vf=videoFacts(), direct=metrics.path==='webrtc';
     set('n-size', metrics.bytes ? fmtMb(metrics.bytes) : ny);
-    set('n-rate', direct?'wire rate not measured':metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
+    set('n-rate', metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
     set('n-dur', pl ? pl.dur.toFixed(2) + ' s' : direct&&vf.duration!=null ? vf.duration.toFixed(2)+' s' : ny);
     set('n-bps', pl ? (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s' : direct&&vf.duration&&metrics.direct?.size ? (8*metrics.direct.size/vf.duration/1e6).toFixed(1)+' Mb/s · file average' : ny);
     set('n-codec', pl && pl.codec || ny);
     set('n-frame', pl && pl.w ? pl.w + '×' + pl.h + (pl.fps ? ' · ' + (+pl.fps.toFixed(2)) + ' fps' : '') : direct&&vf.width ? vf.width+'×'+vf.height : ny);
     set('n-dec', d ? 'supported ' + d.supported + ' · smooth ' + d.smooth : ny);
     if (!d) set('dec', ny);
-    set('n-blob', direct?'session ranges · no Blob':feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
-    set('n-cl', direct?'not applicable · direct reader':metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
-    set('n-chunk', direct?'not exposed by SDK':metrics.firstChunk || ny);
+    set('n-blob', feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
+    set('n-cl', metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
+    set('n-chunk', direct?'not applicable · direct reader':metrics.firstChunk || ny);
     set('n-ranges', metrics.acceptRanges || ny);
     set('n-ttfb', fmtMs(metrics.ttfbMs));
     set('n-ttff', fmtMs(metrics.ttffMs));
@@ -530,7 +576,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (done) {
       if (metrics.doneMs != null) {
         done.hidden = false;
-        done.textContent = direct ? 'All plaintext ranges read in '+(metrics.doneMs/1000).toFixed(2)+' s · session only' : lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
+        done.textContent = direct ? 'done in '+(metrics.doneMs/1000).toFixed(2)+' s from Autonomi storage nodes' : lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
       } else { done.hidden = true; done.textContent = ''; }
     }
   };
@@ -1103,7 +1149,8 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     // Phase A -- at most ONE early paint. Skip on huge CL (8K): first frame needs MiBs of mdat.
-    if (!state.preview && metrics.cl && metrics.cl > (48 << 20)) {
+    // Direct playback delivers a whole 4 MB chunk first, enough for that frame, so it keeps the preview.
+    if (!state.preview && metrics.path !== 'webrtc' && metrics.cl && metrics.cl > (48 << 20)) {
       state.previewTried = true;
       state.preview = true;
       state.early = false;
@@ -1340,18 +1387,76 @@ document.addEventListener('DOMContentLoaded',function(){
     if (my === job && !ok && !playing) say('s-fail');
   }
   // The SDK assets are pinned and self-hosted. No wallet adapter is loaded.
-  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.0/';
-  const DIRECT_START_MS = 8000, DIRECT_STALL_MS = 5000;
-  let directPool = null, directSession = null, restorePause = false;
+  const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.2/';
+  // Autonomi self-encryption cuts a file into CHUNK-sized pieces (three equal pieces under 3 × CHUNK).
+  // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
+  const CHUNK = 4190208, DIRECT_LANES = 6;
+  // The relay takes over after DIRECT_QUIET_MS without progress or DIRECT_CAP_MS before the file opens,
+  // or after DIRECT_STARVE_MS waiting for the next chunk the player needs.
+  const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STARVE_MS = 45000, ROUTE_KEY = 'bnr.bview.route';
+  let directPool = null, directOpen = null, directRun = null, restorePause = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
-  const stopDirect = () => {
-    const session = directSession; directSession = null;
-    if (session) { session.dispose(); session.source?.close(); }
+  const stopDirect = () => { const run = directRun; directRun = null; if (run) run.stop(); };
+  const dropOpen = () => {
+    const open = directOpen; directOpen = null;
+    if (open) { open.stop.abort(); open.reader.then(reader => reader.close()).catch(() => {}); }
   };
   const closePool = () => {
+    dropOpen();
     const pool = directPool; directPool = null;
-    if (pool) pool.then(client => client.close()).catch(() => {});
+    if (pool) { pool.stop.abort(); pool.client.then(client => client.close()).catch(() => {}); }
   };
+  // One connection outlives every attempt, so a slow start never costs the next one a reconnect.
+  const openPool = () => {
+    if (directPool) return directPool;
+    const stop = new AbortController(), pool = { stop, ready: false, client: null };
+    pool.client = import(SDK_ROOT + 'index.js').then(sdk => sdk.AutonomiClient.connect({ signal: stop.signal })).then(client => { pool.ready = true; return client; });
+    pool.client.catch(() => { if (directPool === pool) directPool = null; });
+    return directPool = pool;
+  };
+  // A quiet stop names what the dials saw: no node answering is a network fact, not a slow file.
+  const quietWhy = () => {
+    const t = window.__antTransport && window.__antTransport.snapshot();
+    return t && t.dials && !t.opened && !t.waiting ? 'none of the ' + t.dials + ' storage nodes it dialled could be reached from this network' : 'storage nodes went quiet';
+  };
+  const directCapable = () => isSecureContext && 'RTCPeerConnection' in window;
+  // Three routes: relay only, direct only (never the relay), direct with relay fallback.
+  const routeOf = () => $('playback-route').value;
+  const wantsDirect = () => routeOf() === 'direct' || routeOf() === 'direct-only';
+  // A valid address on the direct route starts finding the video before Watch is pressed.
+  const preOpen = raw => {
+    const address = parse(raw);
+    if (!address || !wantsDirect() || !directCapable()) return;
+    if (directOpen && directOpen.address === address) return;
+    dropOpen();
+    const stop = new AbortController();
+    const open = { address, stop, reader: null, heard: null };
+    const reader = open.reader = openPool().client.then(client => client.openFile(address, { signal: stop.signal, onProgress: event => { if (open.heard) open.heard(event); } }));
+    reader.catch(() => { if (directOpen === open) directOpen = null; });
+    directOpen = open;
+  };
+  const takeOpen = address => {
+    const open = directOpen;
+    if (!open || open.address !== address) return null;
+    directOpen = null; return open;
+  };
+  const directPieces = size => {
+    const pieces = [];
+    if (size < 3 * CHUNK) {
+      const third = Math.floor(size / 3);
+      if (third > 0) pieces.push([0, third], [third, third], [2 * third, size - 2 * third]); else pieces.push([0, size]);
+    } else for (let at = 0; at < size; at += CHUNK) pieces.push([at, Math.min(CHUNK, size - at)]);
+    return pieces;
+  };
+  // Choosing the direct route connects at once. The choice is remembered on this device.
+  try { const saved = localStorage.getItem(ROUTE_KEY); if (saved === 'direct' || saved === 'direct-only') $('playback-route').value = saved; } catch {}
+  if (wantsDirect() && directCapable()) openPool();
+  $('playback-route').addEventListener('change', () => {
+    const route = $('playback-route').value;
+    try { localStorage.setItem(ROUTE_KEY, route); } catch {}
+    if (wantsDirect() && directCapable()) { openPool(); preOpen($('addr').value); }
+  });
+  $('addr').addEventListener('input', () => preOpen($('addr').value));
   addEventListener('pagehide', () => { stopDirect(); closePool(); });
   async function bounded(work, signal, milliseconds) {
     let timer, aborted;
@@ -1364,108 +1469,169 @@ document.addEventListener('DOMContentLoaded',function(){
       })]);
     } finally { clearTimeout(timer); signal.removeEventListener('abort', aborted); }
   }
+  // Direct playback: chunks come straight from storage nodes, several at once, and are handed in
+  // order to the same progressive player the relay feeds. No service worker is involved.
   async function tryDirect(address, signal, my) {
-    let reader, source, session, deadline, ticker;
+    let reader = null, opening = null, pool, quiet, cap, ticker, starve, settled = false, readError = null;
     const startedAt = performance.now();
-    let stage = 'Loading the direct reader';
-    const remaining = () => Math.max(1, DIRECT_START_MS - (performance.now() - startedAt));
-    const startupStatus = () => routeStatus(stage + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s / 8 s. Then relay if no frame.');
+    let stage = 'Connecting to Autonomi nodes', movedAt = startedAt;
+    const only = routeOf() === 'direct-only';
+    const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
+    // The dials themselves are the receipt: how many storage nodes answered so far, shown as it happens.
+    const answered = () => { const t = window.__antTransport && window.__antTransport.snapshot(); return t && t.dials ? ' · ' + t.opened + ' of ' + t.dials + ' nodes answered' : ''; };
+    const startupStatus = () => routeStatus(stage + answered() + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
-    deadline = setTimeout(() => failed.abort(), DIRECT_START_MS);
+    // Every sign of direct progress restarts the quiet clock; the cap bounds the wait for the file to open.
+    const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => failed.abort(), DIRECT_QUIET_MS); };
+    // The SDK names each step of opening a file; show the viewer which one is running.
+    const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
+    cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
+    const receipt = metrics.direct = {sdk:'0.1.2',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
+    Object.assign(receipt, { emittedBytes:0, bufferedBytes:0, peakBufferedBytes:0, emittedChunks:0, waitingForChunk:null, headWaitMs:0 });
     try {
-      metrics.direct={sdk:'0.1.0',reused:!!directPool,startupBudgetMs:DIRECT_START_MS,startupElapsedMs:null,connectMs:null,openMs:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null};
-      if (!isSecureContext || !('serviceWorker' in navigator) || !('RTCPeerConnection' in window)) throw new Error('Direct playback is unavailable in this browser');
+      if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
       metrics.path = 'webrtc-connecting'; paintNerd();
-      const sdk = await bounded(import(SDK_ROOT + 'index.js'), failed.signal, remaining());
-      const { MediaBridge } = await bounded(import(SDK_ROOT + 'internal/media.js'), failed.signal, remaining());
+      pool = openPool();
+      const connectAt = performance.now();
+      const client = await bounded(pool.client, failed.signal, capLeft());
       if (my !== job || signal.aborted) return true;
-      const connectAt=performance.now();
-      stage = 'Connecting to Autonomi nodes'; startupStatus();
-      if (!directPool) {
-        const pending = sdk.AutonomiClient.connect({ signal: failed.signal });
-        directPool = pending;
-        pending.catch(() => { if (directPool === pending) directPool = null; });
-      }
-      const client = await bounded(directPool, failed.signal, remaining());
-      if (my !== job || signal.aborted) return true;
-      metrics.direct.connectMs=performance.now()-connectAt;
-      const openAt=performance.now();
+      receipt.connectMs = performance.now() - connectAt; moved();
+      const openAt = performance.now();
       stage = 'Finding the video'; startupStatus();
-      reader = await bounded(client.openFile(address, { signal: failed.signal }), failed.signal, remaining());
-      if(my!==job||signal.aborted){reader.close();return true;}
-      metrics.direct.openMs=performance.now()-openAt;metrics.direct.size=reader.size;
-      const bridge = new MediaBridge();
-      session = { my, receipt:metrics.direct, source: null, size: reader.size, sounded: false, stalled: false, ranges: [], bytes: 0, dispose: () => { failed.abort(); bridge.close(); } };
-      // Count completed plaintext ranges, never infer wire bytes from lookup counters.
-      const trackedReader = {
-        address: reader.address, name: reader.name, size: reader.size, contentType: reader.contentType,
-        close: () => reader.close(),
-        read: async (start, length) => {
-          const receipt=session.receipt, readAt=performance.now();receipt.requests++;
-          let bytes;
-          try{bytes=await reader.read(start,length,{signal:failed.signal});}catch(error){if(my===job&&!signal.aborted){receipt.failed++;paintNerd();}throw error;}
-          if (my === job && !signal.aborted) {
-            receipt.completed++;receipt.readBytes+=bytes.length;receipt.readMs+=performance.now()-readAt;
-            const sorted = [...session.ranges, [start, start + bytes.length]].sort((a,b) => a[0]-b[0]);
-            const merged = [];
-            for (const range of sorted) { const tail=merged[merged.length-1]; if(tail && range[0]<=tail[1]) tail[1]=Math.max(tail[1],range[1]); else merged.push([...range]); }
-            session.ranges = merged; session.bytes = merged.reduce((n,r) => n+r[1]-r[0],0);
-            metrics.bytes = session.bytes;
-            receipt.uniqueBytes=session.bytes;
-            if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now()-metrics.t0;
-            if(receipt.firstReadMs==null)receipt.firstReadMs=metrics.ttfbMs;
-            if (session.bytes === session.size && metrics.doneMs == null) metrics.doneMs = performance.now()-metrics.t0;
-            paintNerd();
+      const early = takeOpen(address);
+      if (early) early.heard = heard;
+      opening = early ? early.reader : client.openFile(address, { signal: failed.signal, onProgress: heard });
+      reader = await bounded(opening, failed.signal, capLeft());
+      if (my !== job || signal.aborted) { reader.close(); return true; }
+      settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker);
+      const plan = directPieces(reader.size);
+      receipt.openMs = performance.now() - openAt; receipt.size = reader.size; receipt.chunks = plan.length;
+      receipt.startupElapsedMs = performance.now() - startedAt;
+      metrics.path = 'webrtc'; metrics.cl = reader.size; metrics.acceptRanges = 'chunk lanes';
+      const lanes = Math.min(DIRECT_LANES, plan.length);
+      routeStatus('Direct Autonomi · WebRTC · ' + lanes + ' chunks at a time.');
+      note('direct open · ' + reader.size + ' B · ' + plan.length + ' chunks · ' + lanes + ' at a time');
+      paintNerd();
+      // Lanes fetch chunks out of order; the player receives them in order.
+      let next = 0, emit = 0;
+      const arrived = new Map(), waiters = [];
+      const wake = () => { while (waiters.length) waiters.shift()(); };
+      const wait = () => new Promise(resolve => waiters.push(resolve));
+      let headWaitAt = null;
+      const endHeadWait = () => {
+        clearTimeout(starve); starve = null;
+        if (headWaitAt != null) receipt.headWaitMs += performance.now() - headWaitAt;
+        headWaitAt = null; receipt.waitingForChunk = null;
+      };
+      const waitForHead = () => {
+        if (headWaitAt != null) return;
+        headWaitAt = performance.now(); receipt.waitingForChunk = emit;
+        starve = setTimeout(() => {
+          const missing = emit; endHeadWait();
+          if (!readError) readError = new Error('Direct chunks stopped arriving in order: waiting for chunk ' + missing);
+          failed.abort(); wake();
+        }, DIRECT_STARVE_MS);
+      };
+      const lane = async () => {
+        while (!failed.signal.aborted && next < plan.length) {
+          // Never hold more than two rounds of finished chunks ahead of the player.
+          if (next - emit >= DIRECT_LANES * 2) { await wait(); continue; }
+          const index = next++, start = plan[index][0], length = plan[index][1], readAt = performance.now();
+          receipt.requests++;
+          try {
+            const bytes = await reader.read(start, length, { signal: failed.signal });
+            if (failed.signal.aborted || my !== job) return;
+            if (bytes.length !== length) throw new Error('Direct chunk came back short');
+            receipt.completed++; receipt.readBytes += bytes.length; receipt.uniqueBytes += bytes.length; receipt.readMs += performance.now() - readAt;
+            if (receipt.firstReadMs == null) receipt.firstReadMs = performance.now() - metrics.t0;
+            arrived.set(index, bytes);
+            receipt.bufferedBytes += bytes.length;
+            receipt.peakBufferedBytes = Math.max(receipt.peakBufferedBytes, receipt.bufferedBytes);
+            wake();
+            if (my === job) paintNerd();
+          } catch (error) {
+            if (!failed.signal.aborted) { receipt.failed++; if (!readError) readError = error; failed.abort(); }
+            wake(); return;
           }
-          return bytes;
         }
       };
-      stage = 'Loading the first video frame'; startupStatus();
-      source = await bounded(bridge.attach(trackedReader, { serviceWorkerUrl:'/autonomi-stream-sw.js', scope:'/', signal:failed.signal }), failed.signal, remaining());
-      if (my !== job || signal.aborted) { source.close(); bridge.close(); return true; }
-      session.source = source; directSession = session;
-      metrics.path = 'webrtc'; metrics.acceptRanges = 'local range bridge';
-      const ok = await paintSrc(() => { window.__bviewSrcAssigns++; v.src=source.url; v.load(); }, remaining());
-      if (my !== job || signal.aborted) return true;
-      if (!ok) throw new Error('Direct media did not produce a frame');
-      clearTimeout(deadline); clearInterval(ticker);
-      metrics.direct.startupElapsedMs=performance.now()-startedAt;
-      routeStatus('Direct Autonomi · WebRTC. Read bytes below are plaintext, not network traffic.');
-      playing=my; markFirstFrame(); metrics.direct.firstFrameMs=metrics.ttffMs; say(null);
-      // A stopped decoder or a network stall falls back once, preserving the playhead.
-      let stallTimer = null, progressedAt = v.currentTime || 0;
-      const fallback = reason => {
-        if (my !== job || directSession !== session) return;
-        const at=v.currentTime||0, paused=v.paused;
-        const result=reason + ' at ' + at.toFixed(1) + ' s' + (metrics.ttffMs == null ? '' : ' (first frame ' + (metrics.ttffMs/1000).toFixed(1) + ' s)');
-        const directReceipt={...metrics.direct,fallback:reason,playhead:at};
-        view(address, { relay:true, resumeAt:at, paused, reason:result, directReceipt });
+      const rd = {
+        read: async () => {
+          for (;;) {
+            if (readError) throw readError;
+            if (emit >= plan.length) return { done: true, value: undefined };
+            const bytes = arrived.get(emit);
+            if (bytes) {
+              endHeadWait();
+              arrived.delete(emit); emit++; wake();
+              receipt.bufferedBytes -= bytes.length; receipt.emittedBytes += bytes.length; receipt.emittedChunks = emit;
+              if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now() - metrics.t0;
+              return { done: false, value: bytes };
+            }
+            if (failed.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+            waitForHead();
+            await wait();
+          }
+        },
+        cancel: () => { failed.abort(); wake(); }
       };
-      const ready = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; session.sounded=true; progressedAt=v.currentTime||0; pub(); };
-      const waiting = () => { if(v.paused || v.ended) return; session.stalled=true; pub(); if (stallTimer === null) stallTimer=setTimeout(() => fallback('Direct playback stalled'),DIRECT_STALL_MS); };
-      const error = () => fallback('Direct media error');
-      const paused = () => { clearTimeout(stallTimer); stallTimer=null; session.stalled=false; pub(); };
-      const progressed = () => { if(!v.paused && !v.seeking && v.currentTime > progressedAt + 0.01) ready(); };
-      v.addEventListener('playing',ready); v.addEventListener('waiting',waiting); v.addEventListener('stalled',waiting); v.addEventListener('error',error); v.addEventListener('pause',paused); v.addEventListener('timeupdate',progressed);
-      session.sounded=!v.paused;
-      session.dispose=() => { failed.abort(); clearTimeout(stallTimer); v.removeEventListener('playing',ready); v.removeEventListener('waiting',waiting); v.removeEventListener('stalled',waiting); v.removeEventListener('error',error); v.removeEventListener('pause',paused); v.removeEventListener('timeupdate',progressed); bridge.close(); };
-      pub(); goSound(my); return true;
-    } catch (error) {
-      failed.abort();
-      if (directSession === session) stopDirect();
-      source?.close(); reader?.close(); session?.dispose();
+      directRun = { my, stop: () => { failed.abort(); wake(); } };
+      for (let i = 0; i < lanes; i++) lane();
+      frameGen++;
+      v.removeAttribute('src'); v.load();
+      pg.hidden = $('got').hidden = false; pg.value = 0;
+      try { await readBinaryStream(rd, new Uint8Array(0), reader.size, signal, my, address); }
+      catch (error) { if (!readError) readError = error; }
+      const whole = emit >= plan.length && !readError;
+      endHeadWait(); failed.abort(); wake();
+      if (directRun && directRun.my === my) directRun = null;
+      try { reader.close(); } catch {}
+      reader = null;
       if (my !== job || signal.aborted) return true;
-      closePool();
-      metrics.direct.startupElapsedMs=performance.now()-startedAt;
-      metrics.direct.fallback=error.name==='AbortError'?'startup timeout':error.message;
-      metrics.path=''; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
-      routeStatus('Direct playback could not start. Using the relay.');
-      note('direct fallback · ' + (error.name === 'AbortError' ? 'startup timeout' : error.message));
+      pg.hidden = $('got').hidden = true;
+      if (!whole) throw readError || new Error('Direct playback stopped early');
+      receipt.firstFrameMs = metrics.ttffMs;
+      routeStatus('Direct Autonomi · WebRTC. Every byte came from storage nodes.');
+      note('source · direct · every byte from Autonomi storage nodes · no relay bytes');
+      paintNerd();
+      return true;
+    } catch (error) {
+      failed.abort(); clearTimeout(starve);
+      if (directRun && directRun.my === my) directRun = null;
+      if (reader) { try { reader.close(); } catch {} }
+      else if (opening) opening.then(late => late.close()).catch(() => {});
+      if (my !== job || signal.aborted) return true;
+      // Keep an open connection for the next video; drop only one that never connected.
+      if (!pool || !pool.ready) closePool();
+      const why = readError ? readError.message : error.name === 'AbortError' ? quietWhy() : error.message;
+      if (receipt.startupElapsedMs == null) receipt.startupElapsedMs = performance.now() - startedAt;
+      receipt.firstFrameMs = metrics.ttffMs;
+      if (only) {
+        // Direct only: the failure is the measurement. The relay is never asked.
+        receipt.stopped = why; receipt.playhead = v.currentTime || 0;
+        note('source · direct only · stopped · ' + why + ' · relay not used');
+        pg.hidden = $('got').hidden = true;
+        routeStatus('Direct only stopped: ' + why + '. The relay was not used.');
+        if (playing !== my) say('s-fail');
+        paintNerd();
+        return true;
+      }
+      receipt.fallback = why;
+      note('direct fallback · ' + why);
+      pg.hidden = $('got').hidden = true;
+      const at = v.currentTime || 0;
+      if (playing === my && at > 0) {
+        // Frames were already playing: continue through the relay from the same moment.
+        view(address, { relay:true, resumeAt:at, paused:v.paused, reason:why + ' at ' + at.toFixed(1) + ' s', directReceipt:{...receipt, playhead:at} });
+        return true;
+      }
+      metrics.path=''; metrics.cl=null; metrics.acceptRanges=null; metrics.bytes=0; metrics.ttfbMs=null; metrics.doneMs=null;
+      routeStatus('Direct playback could not start: ' + why + '. Using the relay.');
       return false;
-    } finally { clearTimeout(deadline); clearInterval(ticker); signal.removeEventListener('abort',cancelled); }
+    } finally { settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker); signal.removeEventListener('abort',cancelled); }
   }
   async function view(raw, options = {}) {
     if (options.relay && options.reason) holdDecodedFrame();
@@ -1486,10 +1652,11 @@ document.addEventListener('DOMContentLoaded',function(){
     delete $('s-wait').dataset.s; $('log').textContent = ''; $('dec').textContent = notYet(); metrics.dec = null;
     resetMetrics(); paintNerd();
     if(options.directReceipt)metrics.direct=options.directReceipt;
+    metrics.route = routeOf();
     if (!a) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
     routeStatus(options.reason ? options.reason + '. Continuing through the relay.' : '');
-    note('open · ' + (options.relay ? 'relay fallback' : $('playback-route').value));
+    note('open · route ' + metrics.route + (options.relay ? ' · relay fallback' : ''));
     $('out').dataset.addr = 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     const hit = await cacheGet(a);
@@ -1504,9 +1671,10 @@ document.addEventListener('DOMContentLoaded',function(){
         return;
       }
     }
-    if (!options.relay && $('playback-route').value === 'direct' && await tryDirect(a, signal, my)) return;
+    if (!options.relay && wantsDirect() && await tryDirect(a, signal, my)) return;
     if (my !== job || signal.aborted) return;
-    if (options.relay || $('playback-route').value === 'relay') closePool();
+    if (routeOf() === 'direct-only') { routeStatus('Direct only: this browser cannot reach storage nodes. The relay was not used.'); say('s-fail'); return; }
+    if (routeOf() === 'relay') closePool();
     if (options.resumeAt > 0 || options.paused) {
       const restore = () => { if (my !== job) return; if (options.resumeAt > 0 && Number.isFinite(v.duration)) v.currentTime=Math.min(options.resumeAt,Math.max(0,v.duration-0.05)); if (options.paused) v.pause(); revealDecodedFrame(options.resumeAt || 0); };
       signal.addEventListener('abort', () => v.removeEventListener('loadeddata', restore), {once:true});
@@ -1527,24 +1695,28 @@ document.addEventListener('DOMContentLoaded',function(){
   // ETERNAL FRONT: a read-only snapshot of the engine for the three renderers (docs/design/eternal).
   // The facts on every front come from here and from nowhere else; it never writes to the engine.
   window.__bviewEngine = () => {
-    const ds = directSession && directSession.my === job ? directSession : null;
-    const st = feed, pl = st && st.plan || (ds && Number.isFinite(v.duration) && v.duration > 0 ? {dur:v.duration,m0:0,m1:ds.size,w:v.videoWidth,h:v.videoHeight,codec:'browser decoder',fps:0} : null);
+    const st = feed, pl = st && st.plan || null;
     return {
       door: DOOR, cache: CACHE, rule: { safety: SAFETY, margin: MARGIN, ahead: AHEAD, probeMs: STREAM_PROBE, stubBytes: STUB_CL },
       has: !!metrics.addr, bad: !$('s-bad').hidden, fail: !$('s-fail').hidden, slow: !$('s-slow').hidden,
-      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: ds ? ds.size : metrics.cl || (pl && pl.m1) || 0,
+      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: metrics.cl || (pl && pl.m1) || 0,
       rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
       dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
-      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: ds ? ds.sounded : !!(st && st.sounded), stalled: ds ? ds.stalled : !!(st && st.stalled), done: !!(st && st.done),
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
       direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
+      stalls: metrics.stalls || 0, stallMs: (metrics.stallMs || 0) + (metrics.stallAt ? performance.now() - metrics.stallAt : 0),
+      route: metrics.route || null, source: sourceOf(),
     };
   };
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
   paintNerd(); renderInst();
   for(const event of ['timeupdate','progress','loadedmetadata','playing','pause','ended','seeked'])v.addEventListener(event,paintNerd);
+  // A stall is the playhead waiting for bytes after the first frame; a seek is not one.
+  v.addEventListener('waiting', () => { if (metrics.ttffMs != null && !v.seeking && !metrics.stallAt) { metrics.stallAt = performance.now(); metrics.stalls = (metrics.stalls || 0) + 1; } });
+  for (const event of ['playing', 'pause', 'ended']) v.addEventListener(event, () => { if (metrics.stallAt) { metrics.stallMs = (metrics.stallMs || 0) + performance.now() - metrics.stallAt; metrics.stallAt = 0; } });
   addEventListener('hashchange', fromHash); fromHash();
 })();
 </script>
@@ -1576,7 +1748,7 @@ document.addEventListener('DOMContentLoaded',function(){
       arrived:E.bytes?mb(E.bytes)+(E.size?' '+T('et.bview.of','of')+' '+mb(E.size):''):T('et.bview.nothingYet','nothing yet'),
       frac:E.size?Math.min(1,E.bytes/E.size):(E.doneMs!=null?1:0),
       copy:E.size&&E.paintedAt?Math.min(1,E.paintedAt/E.size):0,
-      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s'+(E.path==='webrtc'?' file average':''):T('et.bview.notRead','not read yet'),
+      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s':T('et.bview.notRead','not read yet'),
       time:pl&&E.sounded?Math.min(1,E.playhead/pl.dur):0,
       flowX:flowX,
       flow:flowX!=null?flowX.toFixed(flowX<1?2:1)+'× '+T('et.bview.asFast','as fast as it plays'):T('et.bview.notMeasured','not measured yet'),
@@ -1596,12 +1768,12 @@ document.addEventListener('DOMContentLoaded',function(){
   function bee(){
     var box=$('etBeeRows'); if(!box) return;
     var direct=D.view.path==='webrtc' || D.view.path==='webrtc-connecting';
-    document.querySelector('.et-b-foot').textContent=direct?'Public video: anyone with the address can watch. Direct playback keeps session ranges; My videos remembers the address.':T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
+    document.querySelector('.et-b-foot').textContent=T('bview.bee.note','Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.');
     var rows=[
       ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',(D.view.path==='webrtc'?'This video comes directly from Autonomi storage nodes over WebRTC. This browser is not seeding it to other viewers.':T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.'))],
-      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'The browser requests verified ranges as needed. A sustained stall switches to the relay.':T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',(direct?'Several pieces of the video arrive at once, straight from storage nodes. '+(D.live&&D.live.route==='direct-only'?'If they stop arriving, playback stops. The relay is never asked.':'If they stop arriving, the relay takes over.'):T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.'))],
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
-      ['next',T('et.bview.b.next','next time'),esc(direct?'address remembered':T('et.bview.b.nextV','opens at once')),(D.view.path==='webrtc'?'Direct playback keeps bounded ranges during this session; it does not save a complete offline copy. Your saved address remains in My videos.':T('et.bview.b.nextSay','this device keeps a copy of what you watched.'))]
+      ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
     ];
     box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
       return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
@@ -1626,7 +1798,7 @@ document.addEventListener('DOMContentLoaded',function(){
       '<circle class="core" r="68"/><text class="mid" y="6" text-anchor="middle">'+esc(pct)+'</text><text class="sub" y="32" text-anchor="middle">'+esc(cap)+'</text></g>';
   }
   function raver(){
-    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi. Session ranges stay warm; your saved address remains in My videos.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
+    document.querySelector('.et-r-foot').textContent=D.view.path==='webrtc'||D.view.path==='webrtc-connecting'?'Direct from Autonomi storage nodes. Your device keeps a copy, so refresh stays warm.':T('bview.raverNote','A public picture, shared by address. Your device keeps a copy — refresh stays warm.');
     var hint=$('etRaverHint'); if(hint) hint.textContent=w('raver');
     ring();
     var t=$('etTiles'); if(!t) return;
@@ -1643,9 +1815,9 @@ document.addEventListener('DOMContentLoaded',function(){
     var E=D.live, V=D.view; if(!E) return;
     var direct=E.path==='webrtc'||E.path==='webrtc-connecting', dr=E.direct, vf=E.video;
     $('etMethod').textContent=direct?'WebRTC · ':'GET ';
-    $('etTail').textContent=direct?' · plaintext ranges':'{address}/stream';
+    $('etTail').textContent=direct?' · chunk lanes':'{address}/stream';
     var door=$('etDoor'); if(door) door.textContent=D.door.host+D.door.base;
-    $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>';
+    $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>'+(E.source?'<span class="ok" data-source="'+E.source.kind+'">source '+esc(E.source.kind)+'</span>':'');
     var r=D.rule, pl=E.plan;
     var steps=[
       ['parse · 64 hex','refuse anything else · no request is made for a bad address',E.bad?'guard':E.has?'done':'todo'],
@@ -1658,13 +1830,13 @@ document.addEventListener('DOMContentLoaded',function(){
     ];
     if(direct)steps=[
       ['parse · 64 hex','public read · no wallet required',E.has?'done':'todo'],
-      ['cache · '+D.cache,'whole-file cache miss · session range reader selected',E.has?'done':'todo'],
-      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.0'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
+      ['cache · '+D.cache,'miss · ask the storage nodes',E.has?'done':'todo'],
+      ['Autonomi browser SDK '+(dr?dr.sdk:'0.1.2'),dr&&dr.connectMs!=null?('connection '+(dr.reused?'reused':'opened')+' · '+(dr.connectMs/1000).toFixed(2)+' s'):'connecting to storage nodes',dr&&dr.connectMs!=null?'done':'todo'],
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
-      ['service worker · native ranges','one media URL · seekable session ranges · no progressive Blob swaps',E.path==='webrtc'?'done':'todo'],
-      ['browser playback',E.sounded?'decoded frames · '+E.playhead.toFixed(2)+' s':'waiting for a decoded frame',E.sounded?'done':'todo'],
-      ['relay recovery','8 s total to first frame, decoder error or 5 s without playback progress · retain playhead and pause intent','todo'],
-      ['whole-file SHA-256','not computed for direct range playback · range reads are not a whole-file hash','skip']
+      ['chunk lanes · '+(dr&&dr.chunks?Math.min(dr.lanes,dr.chunks):6)+' at a time',dr&&dr.chunks?(dr.completed+' of '+dr.chunks+' chunks · read on chunk boundaries, so none is fetched twice'):'chunks are read on their own boundaries, in parallel, and played in order',dr&&dr.chunks&&dr.completed>=dr.chunks?'done':'todo'],
+      steps[4],steps[5],
+      dr&&dr.only?['relay recovery','off · direct only · a stall or failure stops here and is recorded',dr.stopped?'guard':'skip']:['relay recovery','12 s without progress before the file opens, or 45 s waiting for the next chunk in order · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
+      steps[6]
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
     var now=steps.findIndex(function(s){return s[2]==='todo';});
@@ -1672,15 +1844,18 @@ document.addEventListener('DOMContentLoaded',function(){
     var no=function(t){return '<span class="no">'+esc(t)+'</span>';};
     var rows=[
       ['door','<span data-et="network">'+esc(D.door.host+' · '+D.door.network)+'</span>'],
+      ['route',E.route?esc({relay:'relay only','direct-only':'direct Autonomi only',direct:'direct Autonomi + relay fallback'}[E.route]||E.route):no('not yet')],
+      ['source',E.source?'<span class="yes" data-et="source">'+esc(E.source.text)+'</span>':no('not yet')],
       ['path',V.path?esc(V.path):no('not yet')],
       ['arrived','<span data-et="arrived">'+esc(V.arrived)+'</span>'],
       ['length',esc(V.length)],
       ['flow',esc(V.flow)],
-      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no(direct?'not computed · range playback':'not yet · hashed when the last byte is in')],
+      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no('not yet · hashed when the last byte is in')],
       ['done',V.done?'<span class="yes">'+esc(V.done)+'</span>':no('not yet')]
     ];
     var ms=function(n){return n==null?'not yet':(n/1000).toFixed(2)+' s';};
-    rows.push(['first response',esc((direct?'first plaintext range · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    rows.push(['stalls',esc(E.stalls?E.stalls+' · '+ms(E.stallMs)+' waiting for bytes after the first frame':'none yet')]);
+    rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
     if(vf){
       rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
         ['picture',esc(vf.width?vf.width+'×'+vf.height:'not yet')],
@@ -1689,20 +1864,38 @@ document.addEventListener('DOMContentLoaded',function(){
         ['frames',esc(vf.quality?vf.quality.total+' total · '+vf.quality.dropped+' dropped · current media source':'not available in this browser')],
         ['source changes',esc(vf.srcChanges+' · current route attempt')]);
     }
+    var T_=window.__antTransport?window.__antTransport.snapshot():null;
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
-      ['direct startup',esc(ms(dr.startupElapsedMs)+' · '+ms(dr.startupBudgetMs)+' total budget to first frame')],
+      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · '+(dr.only?'stop':'relay')+' after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' waiting for the next chunk in order':''))],
+      ['direct lanes',esc(dr.chunks?Math.min(dr.lanes||1,dr.chunks)+' chunks at a time · '+dr.chunks+' chunks':'not yet')],
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
-      ['range calls',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
-      ['range payload',esc(dr.readBytes+' B · includes repeated ranges')],
+      ['chunk reads',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
       ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
-      ['read latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · calls may overlap')],
+      ['ordered delivery',esc(dr.emittedBytes+' B handed to the player · '+dr.bufferedBytes+' B queued · '+dr.peakBufferedBytes+' B peak queued')],
+      ['ordered wait',esc(ms(dr.headWaitMs)+' completed waits'+(dr.waitingForChunk!=null?' · waiting for chunk '+dr.waitingForChunk:''))],
+      ['chunk latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · lanes overlap')],
       ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
-      ['fallback',esc(dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
-      ['wire traffic',no('not measured · plaintext bytes are not network bandwidth')],
-      ['viewer seeding',no('not provided · this browser retrieves ranges')]
+      ['fallback',esc(dr.only?'off · direct only'+(dr.stopped?' · stopped: '+dr.stopped+' at '+(dr.playhead||0).toFixed(2)+' s':''):dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
+      ['wire traffic',T_&&T_.dials?esc(mb(T_.bytes)+' received over WebRTC data channels · payload, without DTLS and SCTP framing'):no('not measured · no WebRTC dial in this page')],
+      ['viewer seeding',no('not provided · this browser retrieves chunks')]
     );
+    // The dial funnel (ant-transport.js): of the endpoints the SDK dialled, how many a browser could reach.
+    if(T_&&T_.dials){
+      var pc=function(x){return x==null?'not yet':(100*x).toFixed(0)+'%';};
+      rows.push(
+        ['WebRTC dials',esc(T_.dials+' dials · '+T_.opened+' opened · '+T_.dead+' dead · '+T_.waiting+' waiting')],
+        ['connections',esc(T_.dials+' created · '+(T_.dead+T_.closed)+' destroyed · '+(T_.opened-T_.closed)+' open now')],
+        ['dials that opened',esc(pc(T_.openRate)+' of settled dials · data channel open')],
+        ['endpoints reachable',esc(T_.endpointsReachable+' of '+(T_.endpointsReachable+T_.endpointsUnreachable)+' settled endpoints · '+pc(T_.endpointRate)+(T_.endpointsRecovered?' · '+T_.endpointsRecovered+' failed once, then opened':''))],
+        ['where dead dials stopped',esc(T_.deadAt.dial+' never ICE-connected · '+T_.deadAt.ice+' ICE-connected, no DTLS · '+T_.deadAt.dtls+' DTLS, no channel')],
+        ['dial to open',esc(ms(T_.connectP50)+' p50 · '+ms(T_.connectP95)+' p95')],
+        ['dial to first answer',esc(ms(T_.answerP50)+' p50 · '+ms(T_.answerP95)+' p95')],
+        ['time on dead endpoints',esc(ms(T_.deadMs)+' summed across dials · dials overlap'+(T_.failedPerOpened!=null?' · '+T_.failedPerOpened.toFixed(2)+' dead per opened':''))],
+        ['lookup rounds',no('not measured · the SDK does not expose them')]
+      );
+    }
     $('etReceipt').innerHTML=rows.map(function(x){return '<tr><th>'+esc(x[0])+'</th><td>'+x[1]+'</td></tr>';}).join('');
   }
 
@@ -1739,6 +1932,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   words(); place(); wire(); paint();
   window.__eternal={data:D,raver:R,paint:paint};
+  if(window.__antTransport)window.__antTransport.subscribe(window.__eternalPaint);
 })();
 </script>
 </body>
