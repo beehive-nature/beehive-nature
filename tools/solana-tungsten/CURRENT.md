@@ -63,6 +63,13 @@ same-workload delivered/published capture. This local two-peer test does not
 complete that public-mesh acceptance work. #505 remains closed with prior field
 acceptance. No upstream messages were sent.
 
+The older #622 handoff has also been refreshed: David's
+[September 30 closure](https://github.com/saorsa-labs/x0x/issues/622#issuecomment-5906763450)
+moves the outstanding slices and per-pair measurement back to #504. Its ordering
+requires unicast caps/DM hedges, consume-only Leaves, then protected-class-aware
+shedding, each through the delivered/published matrix. The closed badge does not
+mean those slices were completed.
+
 ## Current acceptance
 
 See [the October 7 integration dispatch](../../docs/dispatches/2026-10-07-tungsten-current-unified.md)

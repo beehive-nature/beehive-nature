@@ -138,6 +138,13 @@ envelope changes tied to ADR0101, and per-kind counters tracked in open
 delivered/published capture remains distinct from this isolated loopback test.
 #505 is closed with its prior field acceptance; no upstream messages were sent.
 
+The standing #622 handoff was checked against its current discussion:
+[David's September 30 closure](https://github.com/saorsa-labs/x0x/issues/622#issuecomment-5906763450)
+moves the remaining slices and per-pair measurement back to #504. The sequence
+is unicast caps/DM hedges, consume-only Leaves, then protected-class-aware
+shedding, with every step gated by the delivered/published matrix. Closing #622
+does not establish completion of those slices.
+
 The lab measures two same-host peers and sequential HTTP-controlled sends.
 It does not establish mesh scale, partition/churn behavior, adversarial load,
 independent cryptographic audit, production bPay authority or cost-free operation.
