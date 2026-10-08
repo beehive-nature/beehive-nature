@@ -1,0 +1,17 @@
+# bTunGsTeN WB002 — the Rust twin of the Cryptol sovereignty machine
+# (../wb002-cryptol/BTungstenWB002.cry). The implementation half that SAW
+# proves equivalent to the spec (../wb002-saw/sovereign.saw). Standalone on
+# purpose: no dependencies, not a kernel workspace member — it is a formal
+# specimen, not a library anything links.
+[package]
+name = "wb002_twin"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+# Its own workspace root, so cargo does not claim it for the kernel workspace
+# above.
+[workspace]

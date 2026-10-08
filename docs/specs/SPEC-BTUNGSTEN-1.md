@@ -227,8 +227,11 @@ corpus at 46/46 verdicts, 0 class/state mismatches, 14 refused steps
 atomic on chain — corpus-sampled, local dev chain, NOT a proof);
 Cryptol twin RUN in the CI formal job: TYPECHECK + CHECK-SAMPLED pass,
 `sovereignContinuity` PROVEN for the abstraction with a TEETH control;
-the SAW equivalence twin stays staged NOT-RUN/UNVERIFIED (result-class
-law — the proof is about the Cryptol `step`, not the port or the wasm).
+SAW EQUIVALENCE RUN in its own workflow (wb002-saw.yml, SAW 1.6 over
+mir-json schema 13): a Rust twin of `step`/`sovereign` proven equal to the
+Cryptol spec for all inputs, with a TEETH run that must fail — so
+continuity holds of the Rust function. Neither proof reaches the JS port
+or the 2021 wasm; those links stay sampled (result-class law).
 Model-hardening beat (founder review 2026-10-07, same day):
 transactional rollback fidelity (refused actions preserve the whole
 pre-state and log) and authenticated display truth (checkpoint

@@ -1,36 +1,34 @@
-// bTunGsTeN Workbench 002 — SAW plan. STAGED, NOT-RUN (2026-10-07,
-// result-class law: EQUIVALENCE is its own result class and has not run).
+// bTunGsTeN Workbench 002 — SAW EQUIVALENCE: the Rust twin
+// (../wb002-rust/src/lib.rs) against the Cryptol spec
+// (../wb002-cryptol/BTungstenWB002.cry), through MIR (mir-json schema 13,
+// SAW 1.6). Run by ../wb002-saw-check.sh from this directory; the runner
+// classifies the result (result-class law: this is the EQUIVALENCE class,
+// separate from the Cryptol PROVE-UNIVERSAL of sovereignContinuity).
 //
-// Software Analysis Workbench (Galois, the tool NSA's Foundation repo
-// builds its assurance methodology around) proves an implementation
-// equivalent to a Cryptol specification. The spec half exists
-// (../wb002-cryptol/BTungstenWB002.cry, run in CI by wb002-formal-check.sh); the
-// implementation half for SAW is a RUST twin of wb002-simpleassets.mjs's
-// transition oracle that does not exist yet — the JS twin is the
-// executable battery's target, and SAW has no JS extraction. Named
-// gaps, in order (mirrors WB001's ladder; WB002 slots after it):
+// Three obligations, together covering EVERY raw input of the Rust `step`
+// (7 bytes, 2^^56 inputs) and the whole Cryptol domain of `sovereign`:
 //
-//   1. cryptol typecheck + :check/:prove sovereignContinuity  (DONE, CI formal job)
-//   2. Rust twin of sovereign/step in this repo         (later beat)
-//   3. this script's equivalence + coverage proof       (last)
+//   step_matches_spec    well-formed tag (< 5) and head < 16: the Rust
+//                        result equals the Cryptol `step`, field for field
+//   step_refuses_rest    tag >= 5 or head >= 16: the Rust result is the
+//                        input unchanged (no sovereignty can move)
+//   sovereign_matches    tag < 8 (all of Cryptol's [3]): Rust `sovereign`
+//                        equals the Cryptol `sovereign`
 //
-// Planned shape once (1)-(2) exist:
-//
-//   cryptol_load ../wb002-cryptol/BTungstenWB002.cry;
-//   let stepSpec = cryptol "step";
-//
-//   llvm_load_bitcode "target/…/wb002_sovereign.bc";
-//   let stepImpl = llvm_extract "wb002_sovereign::step";
-//
-//   // equivalence, all states and actions: the Rust oracle refuses
-//   // exactly where the spec holds the state unchanged.
-//   theorem rust_matches_spec : llvm_verify stepImpl
-//     [cryptol stepSpec] [];
-//
-//   // with equivalence discharged, the battery's sampled histories and
-//   // wrong-signer matrix become provable corollaries of
-//   // sovereignContinuity rather than samples — the WB002 endgame.
-//
-// Run environment note: SAW release binaries are Linux x86_64; the CI
-// ubuntu runner is the qualified host (tests.yml's container beat when
-// it lands). Until then: UNVERIFIED, deliberately.
+// With these discharged, sovereignContinuity (PROVEN in Cryptol) holds of
+// the Rust function for all inputs. It still says NOTHING about the JS port
+// or the 2021 wasm. The teeth twin of this script is sovereign-teeth.saw.
+
+include "sovereign-defs.saw";
+
+print "WB002-SAW obligation step_matches_spec";
+mir_verify m "wb002_twin::step" [] false (step_against {{ step }}) z3;
+print "WB002-SAW PROVEN step_matches_spec";
+
+print "WB002-SAW obligation step_refuses_rest";
+mir_verify m "wb002_twin::step" [] false step_refuses_rest z3;
+print "WB002-SAW PROVEN step_refuses_rest";
+
+print "WB002-SAW obligation sovereign_matches";
+mir_verify m "wb002_twin::sovereign" [] false sovereign_matches z3;
+print "WB002-SAW PROVEN sovereign_matches";
