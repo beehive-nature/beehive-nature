@@ -42,6 +42,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Chain, Refusal, canon, sha } from './wb002-simpleassets.mjs';
+import { headTimeMs, notReadyReason } from './wb002-chain-ready.mjs';
 
 const HTTP_PORT = Number(process.env.WB002_HTTP_PORT || 8889);
 const P2P_PORT = Number(process.env.WB002_P2P_PORT || 9877);
@@ -112,26 +113,26 @@ async function bootChain() {
     `--signature-provider=${DEV_PUB}=KEY:${DEV_KEY}`,
     `--data-dir=${RUN}/data`, `--config-dir=${RUN}/config`,
   ], { detached: true, stdio: ['ignore', 'ignore', logFd] });
+  // Answering is not ready: see wb002-chain-ready.mjs for the three
+  // conditions and the runs (37713028801, 37715019246) that named them.
+  let prev = null;
+  let why = 'get info never answered';
   for (let i = 0; i < 60; i++) {
     await sleep(500);
     if (nodeosProc.exitCode !== null || nodeosProc.signalCode !== null) throw new Error(`nodeos exited during startup; see ${RUN}/nodeos.log`);
     const r = tryCleos(['get', 'info']);
     if (!r.ok) continue;
-    // Answering is not ready: at head 1 the head is the 2018 genesis block,
-    // and cleos derives expiration from head time, so a transaction sent
-    // then is born expired the moment a block is produced at the real
-    // time (hosted run 37715019246, chain 2: "Expired Transaction,
-    // expiration 2018-06-01T12:00:30"). Ready = a head produced NOW.
     const info = JSON.parse(r.out);
-    const t = Date.parse(`${info.head_block_time}${info.head_block_time.endsWith('Z') ? '' : 'Z'}`);
-    if (info.head_block_num >= 2 && Math.abs(Date.now() - t) < 60_000) return info;
+    why = notReadyReason(prev, info, Date.now());
+    if (why === null) return info;
+    prev = info;
   }
-  throw new Error(`nodeos did not reach a current head block at ${HTTP} within 30s (see ${RUN}/nodeos.log)`);
+  throw new Error(`nodeos not ready at ${HTTP} within 30s: ${why} (see ${RUN}/nodeos.log)`);
 }
 
 async function headTime() {
   const info = JSON.parse(cleosRaw(['get', 'info']));
-  return BigInt(Math.floor(new Date(`${info.head_block_time}${info.head_block_time.endsWith('Z') ? '' : 'Z'}`).getTime() / 1000));
+  return BigInt(Math.floor(headTimeMs(info) / 1000));
 }
 
 // quantity string "10000.0000 WOOD" -> raw integer units + symbol
