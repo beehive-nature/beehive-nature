@@ -100,3 +100,25 @@ HUMAN INTERACTION: NONE.
 - CI merge of this PR on green: this seat (no-stall law).
 - The decoder round-trip / field-recovery lemma ladder toward
   `wireInjective` — the next named beat, riding the same decomposition.
+
+## EXECUTED VERDICTS (PR #365 formal job, run 37713300078, job 113103957284-era log lines)
+
+```
+FORMAL-CHECK-SAMPLED zeroTailWrapRefuted: PASS        <- the original theorem, refuted on the witness, every run
+FORMAL-PROVE-UNIVERSAL validImpliesBounded: PROVEN (universal, Q.E.D., 7.419s, Z3)
+FORMAL-PROVE-UNIVERSAL offsetsOrdered:      PROVEN (universal, Q.E.D.,  0.470s, Z3)
+FORMAL-PROVE-UNIVERSAL zeroTailFromBounds:  NOT-PROVEN (timeout 180s)
+FORMAL-PROVE-UNIVERSAL wireZeroTail:        NOT-PROVEN (timeout 240s)
+FORMAL-PROVE-UNIVERSAL wireInjective:       NOT-PROVEN (timeout 240s)
+```
+
+Reading: the two STRUCTURAL lemmas (validity implies bounds; bounded
+lenses give ordered, non-overlapping, non-wrapping blocks with
+envLen <= 4626) are now PROVEN universally — the ordering half of the
+decomposition is closed, in under a second for the ordering lemma
+itself once the DFA was isolated from the arithmetic. The DISPATCH half
+(zeroTailFromBounds: every position past envLen answers zero) is the
+open hard case — 4,626 positions × the byteAt case tree — and the
+corrected wireZeroTail and wireInjective remain NOT-PROVEN behind it.
+The next lever is making zeroTailFromBounds tractable (per-block
+lemmas or a position-partitioned argument), then field recovery.
