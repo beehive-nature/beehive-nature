@@ -1,0 +1,44 @@
+name: WB002 WASM corpus
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-corpus:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Install pinned Spring 1.2.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/spring.deb https://github.com/AntelopeIO/spring/releases/download/v1.2.2/antelope-spring_1.2.2_amd64.deb
+          echo '531ed1c965f94dd7732f5e900401f132170769c45b7589819a0ba1336627687a  /tmp/spring.deb' | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          sudo apt-get update
+          sudo apt-get install -y /tmp/spring.deb
+          nodeos --version
+      - name: Compare the vendored WASM with the model on three fresh chains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p receipts
+          for run in 1 2 3; do
+            WB002_RECEIPT="$PWD/receipts/wb002-$run.json" node scripts/btungsten/wb002-wasm-equiv.mjs
+          done
+      - name: Preserve fresh corpus receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wb002-wasm-${{ github.run_id }}-${{ github.run_attempt }}
+          path: receipts/*.json
+          if-no-files-found: error
+          retention-days: 14

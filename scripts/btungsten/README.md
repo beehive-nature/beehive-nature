@@ -156,9 +156,13 @@ faithful-port row).
    become provable corollaries.
 4. **Live leg**: the same torture rows against a deployed Vaulta
    contract (bzcodejungle testnet), not only the local dev chain.
-5. **CI leg**: run wb002-wasm-equiv.mjs on the CI ubuntu runner (it
-   needs a Spring install; the sibling-isolation ports/dirs are
-   already parameterized).
+5. **CI leg**: `.github/workflows/wb002-wasm.yml` runs the corpus three
+   times on fresh local chains, on Ubuntu 22.04 with checksum-pinned
+   Spring 1.2.2. Each run uploads fresh JSON receipts (14-day retention).
+   This is corpus-sampled evidence, not a proof or testnet acceptance.
+   Local runs may set `WB002_HTTP_PORT` and `WB002_P2P_PORT`; state and
+   wallet directories are unique per invocation. Cleanup signals only
+   owned child processes; occupied ports fail rather than evict siblings.
 6. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
 
 ## WB001 — the intent-binding invariant (LIVE in CI)

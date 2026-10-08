@@ -33,17 +33,23 @@
 // NOT claimed: testnet/mainnet behavior, behavior outside this corpus,
 // Spring-version generality.
 //
-// Runs inside WSL Ubuntu against antelope-spring's cleos/nodeos. A
-// sibling lane's chain owns :8888 — this harness uses :8889/:9899 with
-// its own state and wallet dirs, and kills only processes it started.
+// Runs on Linux (including WSL) against Spring cleos/nodeos. HTTP and
+// P2P ports are configurable; each run has a fresh state/wallet directory.
+// Cleanup only signals child processes owned by this invocation.
 
+import { createServer } from 'node:net';
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Chain, Refusal, canon, sha } from './wb002-simpleassets.mjs';
 
-const HTTP = 'http://127.0.0.1:8889';
-const RUN = '/tmp/wb002nd';
+const HTTP_PORT = Number(process.env.WB002_HTTP_PORT || 8889);
+const P2P_PORT = Number(process.env.WB002_P2P_PORT || 9877);
+for (const port of [HTTP_PORT, P2P_PORT]) {
+  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid WB002 port');
+}
+const HTTP = `http://127.0.0.1:${HTTP_PORT}`;
+const RUN = mkdtempSync('/tmp/wb002-');
 const WALLET = `unix://${RUN}/wallet/keosd.sock`; // Spring keosd serves the wallet API on its socket
 const SPECIMEN = new URL('./wb002-specimen/simpleassets-e6a042f/', import.meta.url).pathname;
 const DEV_KEY = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'; // PUBLIC-CONSTANT: the universal eosio/Antelope dev-chain genesis key (every tutorial ships it; it unlocks only throwaway local chains)
@@ -67,20 +73,18 @@ const cleanup = () => {
   for (const p of [nodeosProc, keosdProc]) { if (p && p.exitCode === null) { try { p.kill('SIGKILL'); } catch {} } }
 };
 
-// preflight: kill ONLY processes this harness's earlier runs may have
-// left on OUR ports (exact program names keosd/nodeos + our port in the
-// cmdline). Never touches the sibling lane's :8888 chain or its keosd.
-function killStrays() {
-  const script = `
-for pid in $(pgrep -x keosd); do tr '\\0' ' ' </proc/$pid/cmdline | grep -q 9899 && kill -9 $pid; done
-for pid in $(pgrep -x nodeos); do tr '\\0' ' ' </proc/$pid/cmdline | grep -q 8889 && kill -9 $pid; done
-true`;
-  try { execFileSync('bash', ['-c', script], { stdio: 'ignore' }); } catch {}
-}
+process.once('SIGTERM', () => { cleanup(); process.exit(143); });
+process.once('SIGINT', () => { cleanup(); process.exit(130); });
 
 async function bootChain() {
-  killStrays();
-  rmSync(RUN, { recursive: true, force: true });
+  // Refuse occupied ports before creating a wallet or touching a chain.
+  for (const port of [HTTP_PORT, P2P_PORT]) {
+    await new Promise((resolve, reject) => {
+      const probe = createServer();
+      probe.once('error', reject);
+      probe.listen(port, '127.0.0.1', () => probe.close(resolve));
+    });
+  }
   for (const d of ['data', 'config', 'wallet']) mkdirSync(`${RUN}/${d}`, { recursive: true });
   keosdProc = spawn('keosd', [
     '--unlock-timeout', '86400',
@@ -100,8 +104,8 @@ async function bootChain() {
     '--plugin', 'eosio::producer_api_plugin',
     '--plugin', 'eosio::http_plugin',
     '--access-control-allow-origin=*', '--http-validate-host=false',
-    '--http-server-address=127.0.0.1:8889',
-    '--p2p-listen-endpoint=127.0.0.1:9877',
+    `--http-server-address=127.0.0.1:${HTTP_PORT}`,
+    `--p2p-listen-endpoint=127.0.0.1:${P2P_PORT}`,
     // WSL's timer accuracy is poor (nodeos warns); the 499ms subjective
     // deadline kills the 2021 contract's heavier calls nondeterministically
     '--max-transaction-time=10000', '--abi-serializer-max-time-ms=10000',
@@ -110,10 +114,11 @@ async function bootChain() {
   ], { detached: true, stdio: ['ignore', 'ignore', logFd] });
   for (let i = 0; i < 60; i++) {
     await sleep(500);
+    if (nodeosProc.exitCode !== null || nodeosProc.signalCode !== null) throw new Error(`nodeos exited during startup; see ${RUN}/nodeos.log`);
     const r = tryCleos(['get', 'info']);
     if (r.ok) return JSON.parse(r.out);
   }
-  throw new Error('nodeos did not come up on :8889 (see /tmp/wb002nd/config stderr)');
+  throw new Error(`nodeos did not come up at ${HTTP} (see ${RUN}/nodeos.log)`);
 }
 
 async function headTime() {
