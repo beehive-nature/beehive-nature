@@ -52,3 +52,27 @@ HUMAN INTERACTION: NONE.
 - If `zeroTailAtPosition` PROVENs and `wireIndexDef` does not, the
   compositional gap is exactly the comprehension-index step — a
   per-block lemma or an :eval-based witness row is the lever.
+
+## EXECUTED VERDICTS (PR #368 formal job)
+
+```
+FORMAL-PROVE-UNIVERSAL validImpliesBounded: PROVEN (Q.E.D., 7.486s, Z3)
+FORMAL-PROVE-UNIVERSAL offsetsOrdered:      PROVEN (Q.E.D., 0.468s, Z3)
+FORMAL-PROVE-UNIVERSAL zeroTailAtPosition:  PROVEN (Q.E.D., 1.303s, Z3)
+FORMAL-PROVE-UNIVERSAL wireIndexDef:        NOT-PROVEN (timeout 120s)
+FORMAL-PROVE-UNIVERSAL wireZeroTail:        NOT-PROVEN (timeout 240s)
+FORMAL-PROVE-UNIVERSAL wireInjective:       NOT-PROVEN (timeout 240s)
+FORMAL-CHECK-SAMPLED zeroTailFromBounds-sampled: PASS
+```
+
+The hypothesis held: the position-quantified form of the dispatch half
+proved in 1.3 seconds where the 4,626-way enumeration ground past every
+budget. The corrected zero-tail's mathematical content is now
+universally closed position-wise (lensBounded + ordering + dispatch ⇒
+zero past envLen). The remaining compositional gap is EXACTLY
+`wireIndexDef` — the symbolic `@` into the comprehension-built wire —
+named before the run, confirmed by it. Next levers, in order:
+per-block index lemmas (wire a @ p == byteAt a p proven block-by-block
+over position RANGES rather than the whole construction), then the
+field-recovery argument toward wireInjective (equal wires ⇒ equal
+length words ⇒ equal offsets ⇒ equal meaningful bytes ⇒ equal records).
