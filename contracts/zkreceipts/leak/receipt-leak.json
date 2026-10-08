@@ -1,0 +1,42 @@
+{
+ "families": {
+  "F1": {
+   "tests": 24,
+   "minBonfP": 0.33019839984854293,
+   "threshold": 0.0125,
+   "ok": true
+  },
+  "F2": {
+   "tests": 24,
+   "minBonfP": 0.6657500198029815,
+   "threshold": 0.0125,
+   "ok": true
+  },
+  "F3": {
+   "tests": 1,
+   "minBonfP": 0.5284746587870712,
+   "threshold": 0.0125,
+   "ok": true
+  },
+  "F4": {
+   "tests": 1,
+   "minBonfP": 0.7514334599952541,
+   "threshold": 0.0125,
+   "ok": true
+  },
+  "F5": {
+   "accuracy": 0.7,
+   "ci": [
+    0.48102718159593116,
+    0.8545227551575658
+   ],
+   "includes50": true
+  }
+ },
+ "pass": true,
+ "samples": {
+  "REAL": 10,
+  "SIM": 10
+ },
+ "claim_scoping": "given (π, C) only — root M withheld (M separates classes BY DESIGN as the public commitment); PASS means: to the pinned families, π distinguishes REAL from SIM no better than chance; it is NOT a zero-knowledge proof (crypto-language law)"
+}

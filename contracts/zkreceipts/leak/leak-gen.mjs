@@ -5,7 +5,7 @@
 //         encoding as zkrprep; claims engineered to 20/20)
 // Output: leak-samples.jsonl — {class, setId, claim, words[24 hex]}
 // Words are the flatten.js wire order (points x‖y then 6 scalars).
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
@@ -13,7 +13,7 @@ import { join } from 'node:path';
 
 const W = join(homedir(), 'plonkport');
 const OUT = process.argv[2] || join(W, 'leak-samples.jsonl');
-const NREAL = 5, NSIM_SETS = 4, NSIM_PER = [3, 3, 2, 2];   // 10 total
+const NREAL = 10, NSIM_SETS = 4, NSIM_PER = [3, 3, 2, 2];   // 10 REAL (5 dead-claim + 5 live-claim per PREREGISTERED) + 10 SIM
 
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
@@ -82,13 +82,19 @@ function proveWords(inputJson, tag) {
 }
 
 const lines = [];
+// REGEN-REAL mode: keep existing SIM samples, regenerate the REAL half only
+if (process.env.REGEN_REAL && existsSync(OUT)) {
+  for (const l of readFileSync(OUT, 'utf8').trim().split('\n').filter(Boolean)) {
+    const j = JSON.parse(l); if (j.class === 'SIM') lines.push(j);
+  }
+}
 // REAL: canonical cohort witness
-const realBase = JSON.parse(readFileSync(join(W, 'input_dead.json'), 'utf8'));
+const realDead = JSON.parse(readFileSync(join(W, 'input_dead.json'), 'utf8'));
+const realLive = JSON.parse(readFileSync(join(W, 'input_live.json'), 'utf8'));
 for (let i = 0; i < NREAL; i++) {
-  const claim = i % 2 === 0 ? { kind: '0', count: '20' } : { kind: '1', count: '20' };
-  const inp = { ...realBase, ...claim };
+    const inp = { ...(i % 2 === 0 ? realDead : realLive), kind: String(i % 2), count: '20' };
   const words = proveWords(inp, `real-${i}`);
-  lines.push({ class: 'REAL', setId: 'cohort', claim: [claim.kind, claim.count], words });
+  lines.push({ class: 'REAL', setId: 'cohort', claim: [inp.kind, inp.count], words });
   console.log(`REAL ${i} done`);
 }
 // SIM: engineered sets, kinds alternate
