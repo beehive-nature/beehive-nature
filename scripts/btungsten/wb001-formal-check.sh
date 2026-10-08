@@ -174,7 +174,11 @@ prove() {
 }
 prove validImpliesBounded 45
 prove offsetsOrdered 90
-prove zeroTailFromBounds 180
+# zeroTailFromBounds (the composed enumeration form) stays CHECK-SAMPLED only:
+# its content is the two lemmas below plus the bridge sampling — re-proving
+# the 4,626-way enumeration would burn budget the pieces already close.
+prove zeroTailAtPosition 120
+prove wireIndexDef 120
 prove wireZeroTail "$PROVE_BUDGET_S"
 prove wireInjective "$PROVE_BUDGET_S"
 

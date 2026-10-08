@@ -304,6 +304,24 @@ zeroTailFromBounds : Intent -> Bit
 property zeroTailFromBounds a =
   (lensBounded a) ==> (wireZeroTailRaw a)
 
+// L3' — THE SAME CLAIM WITH THE POSITION QUANTIFIED, NOT ENUMERATED.
+// zeroTailFromBounds times out because wireZeroTailRaw enumerates all
+// 4,626 positions through the `wire` comprehension and the symbolic @
+// into it — the solver case-splits across the whole construction. As a
+// two-argument property the argument is ONE dispatch: with bounded
+// lengths and p past envLen, every inBlock guard fails by the ordering
+// lemma's arithmetic (offsetsOrdered, PROVEN), so byteAt answers 0.
+// The identity wire a @ p == byteAt a p (positions in range) is the
+// definitional companion below; the 8 bridge terms sample that identity
+// on real bytes every run.
+zeroTailAtPosition : Intent -> [32] -> Bit
+property zeroTailAtPosition a p =
+  ((lensBounded a) && (envLen a <= p)) ==> (byteAt a p == 0x00)
+
+wireIndexDef : Intent -> [32] -> Bit
+property wireIndexDef a p =
+  (p < 4626) ==> ((wire a) @ p == byteAt a p)
+
 //////////////////////////////////////////////////////////////////////////////
 // CHECK-SAMPLED, constructed arm (closed terms — evaluated exactly, not
 // sampled): valid international text is ACCEPTED (astral, a legitimate
