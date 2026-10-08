@@ -1392,7 +1392,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
   const CHUNK = 4190208, DIRECT_LANES = 6;
   // The relay takes over after DIRECT_QUIET_MS without progress or DIRECT_CAP_MS before the file opens,
-  // or after DIRECT_STARVE_MS without one arriving chunk once it is open.
+  // or after DIRECT_STARVE_MS waiting for the next chunk the player needs.
   const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STARVE_MS = 45000, ROUTE_KEY = 'bnr.bview.route';
   let directPool = null, directOpen = null, directRun = null, restorePause = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
@@ -1489,6 +1489,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
     cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
     const receipt = metrics.direct = {sdk:'0.1.2',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
+    Object.assign(receipt, { emittedBytes:0, bufferedBytes:0, peakBufferedBytes:0, emittedChunks:0, waitingForChunk:null, headWaitMs:0 });
     try {
       if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
@@ -1519,7 +1520,21 @@ document.addEventListener('DOMContentLoaded',function(){
       const arrived = new Map(), waiters = [];
       const wake = () => { while (waiters.length) waiters.shift()(); };
       const wait = () => new Promise(resolve => waiters.push(resolve));
-      const fed = () => { clearTimeout(starve); starve = setTimeout(() => { if (!readError) readError = new Error('Direct chunks stopped arriving'); failed.abort(); wake(); }, DIRECT_STARVE_MS); };
+      let headWaitAt = null;
+      const endHeadWait = () => {
+        clearTimeout(starve); starve = null;
+        if (headWaitAt != null) receipt.headWaitMs += performance.now() - headWaitAt;
+        headWaitAt = null; receipt.waitingForChunk = null;
+      };
+      const waitForHead = () => {
+        if (headWaitAt != null) return;
+        headWaitAt = performance.now(); receipt.waitingForChunk = emit;
+        starve = setTimeout(() => {
+          const missing = emit; endHeadWait();
+          if (!readError) readError = new Error('Direct chunks stopped arriving in order: waiting for chunk ' + missing);
+          failed.abort(); wake();
+        }, DIRECT_STARVE_MS);
+      };
       const lane = async () => {
         while (!failed.signal.aborted && next < plan.length) {
           // Never hold more than two rounds of finished chunks ahead of the player.
@@ -1528,10 +1543,14 @@ document.addEventListener('DOMContentLoaded',function(){
           receipt.requests++;
           try {
             const bytes = await reader.read(start, length, { signal: failed.signal });
+            if (failed.signal.aborted || my !== job) return;
             if (bytes.length !== length) throw new Error('Direct chunk came back short');
             receipt.completed++; receipt.readBytes += bytes.length; receipt.uniqueBytes += bytes.length; receipt.readMs += performance.now() - readAt;
             if (receipt.firstReadMs == null) receipt.firstReadMs = performance.now() - metrics.t0;
-            arrived.set(index, bytes); fed(); wake();
+            arrived.set(index, bytes);
+            receipt.bufferedBytes += bytes.length;
+            receipt.peakBufferedBytes = Math.max(receipt.peakBufferedBytes, receipt.bufferedBytes);
+            wake();
             if (my === job) paintNerd();
           } catch (error) {
             if (!failed.signal.aborted) { receipt.failed++; if (!readError) readError = error; failed.abort(); }
@@ -1546,18 +1565,20 @@ document.addEventListener('DOMContentLoaded',function(){
             if (emit >= plan.length) return { done: true, value: undefined };
             const bytes = arrived.get(emit);
             if (bytes) {
+              endHeadWait();
               arrived.delete(emit); emit++; wake();
+              receipt.bufferedBytes -= bytes.length; receipt.emittedBytes += bytes.length; receipt.emittedChunks = emit;
               if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now() - metrics.t0;
               return { done: false, value: bytes };
             }
             if (failed.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+            waitForHead();
             await wait();
           }
         },
         cancel: () => { failed.abort(); wake(); }
       };
       directRun = { my, stop: () => { failed.abort(); wake(); } };
-      fed();
       for (let i = 0; i < lanes; i++) lane();
       frameGen++;
       v.removeAttribute('src'); v.load();
@@ -1565,7 +1586,7 @@ document.addEventListener('DOMContentLoaded',function(){
       try { await readBinaryStream(rd, new Uint8Array(0), reader.size, signal, my, address); }
       catch (error) { if (!readError) readError = error; }
       const whole = emit >= plan.length && !readError;
-      clearTimeout(starve); failed.abort(); wake();
+      endHeadWait(); failed.abort(); wake();
       if (directRun && directRun.my === my) directRun = null;
       try { reader.close(); } catch {}
       reader = null;
@@ -1814,7 +1835,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['open public file',dr&&dr.size!=null?dr.size+' B · '+(dr.openMs/1000).toFixed(2)+' s':'resolving the address',dr&&dr.size!=null?'done':'todo'],
       ['chunk lanes · '+(dr&&dr.chunks?Math.min(dr.lanes,dr.chunks):6)+' at a time',dr&&dr.chunks?(dr.completed+' of '+dr.chunks+' chunks · read on chunk boundaries, so none is fetched twice'):'chunks are read on their own boundaries, in parallel, and played in order',dr&&dr.chunks&&dr.completed>=dr.chunks?'done':'todo'],
       steps[4],steps[5],
-      dr&&dr.only?['relay recovery','off · direct only · a stall or failure stops here and is recorded',dr.stopped?'guard':'skip']:['relay recovery','12 s without progress before the file opens, or 45 s without one arriving chunk · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
+      dr&&dr.only?['relay recovery','off · direct only · a stall or failure stops here and is recorded',dr.stopped?'guard':'skip']:['relay recovery','12 s without progress before the file opens, or 45 s waiting for the next chunk in order · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
       steps[6]
     ];
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
@@ -1846,12 +1867,14 @@ document.addEventListener('DOMContentLoaded',function(){
     var T_=window.__antTransport?window.__antTransport.snapshot():null;
     if(dr)rows.push(
       ['direct SDK',esc(dr.sdk+' · '+(dr.reused?'connection reused':'new connection'))],
-      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · '+(dr.only?'stop':'relay')+' after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' without a chunk':''))],
+      ['direct startup',esc(ms(dr.startupElapsedMs)+' to an open file · '+(dr.only?'stop':'relay')+' after '+ms(dr.startupBudgetMs)+' quiet'+(dr.starveMs?' or '+ms(dr.starveMs)+' waiting for the next chunk in order':''))],
       ['direct lanes',esc(dr.chunks?Math.min(dr.lanes||1,dr.chunks)+' chunks at a time · '+dr.chunks+' chunks':'not yet')],
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
       ['chunk reads',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
       ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
+      ['ordered delivery',esc(dr.emittedBytes+' B handed to the player · '+dr.bufferedBytes+' B queued · '+dr.peakBufferedBytes+' B peak queued')],
+      ['ordered wait',esc(ms(dr.headWaitMs)+' completed waits'+(dr.waitingForChunk!=null?' · waiting for chunk '+dr.waitingForChunk:''))],
       ['chunk latency',esc(ms(dr.completed?dr.readMs/dr.completed:null)+' average · '+ms(dr.readMs)+' summed · lanes overlap')],
       ['direct first read',esc(ms(dr.firstReadMs))],['direct first frame',esc(ms(dr.firstFrameMs))],
       ['fallback',esc(dr.only?'off · direct only'+(dr.stopped?' · stopped: '+dr.stopped+' at '+(dr.playhead||0).toFixed(2)+' s':''):dr.fallback?dr.fallback+(dr.playhead!=null?' at '+dr.playhead.toFixed(2)+' s':''):'none')],
