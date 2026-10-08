@@ -12,8 +12,11 @@ HTTP/P2P port overrides, refuses occupied ports, and only signals its own
 child processes. The previous port-substring process killer is removed.
 SIGINT/SIGTERM clean up owned children. No sibling chain is stopped.
 
-Validation: JavaScript syntax check passed. A local Spring run and hosted
-workflow are being measured; their final results will be recorded below.
+Validation: JavaScript syntax check passed. Both local Spring runs matched
+46/46, zero class/state mismatches, 14 atomic refusals, identical final
+projections. The final harness exited 0. A concurrent invocation exited 2
+with `listen EADDRINUSE: address already in use 127.0.0.1:18889`; the
+original invocation continued and passed.
 The hook installer refused to replace the pre-existing custom shared hook:
 `install-hooks: REFUSING ... pre-commit exists and was not written by this installer`.
 Inspection confirms it delegates to secret-scan and identity-check; the
@@ -33,3 +36,14 @@ Boundary: corpus-sampled agreement on this pinned local stack, not a formal
 proof, testnet result, or version-general equivalence. Testnet remains a
 separate resource-dependent leg. The Cryptol follow-up is already owned
 by PR #361 and is not duplicated here.
+
+## Hosted receipt
+
+PR #362 workflow run [37707916625](https://github.com/beehive-nature/beehive-nature/actions/runs/37707916625)
+completed SUCCESS on the proposed merge with main. Its three uploaded
+JSON receipts were downloaded and inspected: each has steps=46, matched=46,
+classMismatches=0, stateMismatches=0, refusedStepsProvenAtomicOnChain=14.
+All three final projection prefixes are `4c924325022756617bc150799aafb91362a122a8`.
+The workflow ran code commit `4a590f9d6`; this follow-up changes this dispatch
+only. Repository-wide checks and merge remain separate from the green
+WASM job; no main post-merge result is claimed for this lane.
