@@ -1129,6 +1129,13 @@ jobs:
           fi
           z3 --version | head -1
           ./cryptol/bin/cryptol --version
+      # WB002 runs FIRST: its whole ladder takes seconds, and WB001's prove
+      # budgets can consume the job's remaining minutes — order keeps the
+      # cheap receipt from being starved by the expensive one.
+      - name: WB002 formal — TYPECHECK + CHECK-SAMPLED + PROVE sovereignContinuity + TEETH
+        if: always()
+        timeout-minutes: 5
+        run: sh scripts/btungsten/wb002-formal-check.sh "$HOME/cryptol/bin/cryptol"
       - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
         if: always()
         timeout-minutes: 10
