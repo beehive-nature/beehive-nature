@@ -62,6 +62,28 @@ ftcheck "$FF/table-null-negative.json"     6 "rejected row verified_at:null → 
 ftcheck "$FF/table-string-positive.json"   6 "positive row verified_at:'not-a-timestamp' → invalid timestamp"
 ftcheck "$FF/table-neg-one-positive.json"  6 "positive row verified_at:-1 → invalid timestamp"
 
+# ── final-find.mjs — STRICT-CLASS + STRICT-ABI discovery (live finding
+# 2026-10-08: the first live v4 run's forged leg got a VERIFIED row via
+# a transient string-typed verified_at shape — '!\"0\"' is false, the
+# unverified pool emptied, and the old cross-class fallback silently
+# picked matches[0]). The helper now validates numeric fields (any
+# non-numeric seq/kind/count/verified_at = READ-ERROR — retried by the
+# caller, never trusted) and NEVER substitutes across classes (an empty
+# requested pool is NONE, a loud discovery failure).
+FFD=$REPO/fixtures/find
+R=a1b2c3d4e5f60718
+ffcheck(){ # fixture query-class expected label
+  local TBL=$1 CLS=$2 WANT=$3 LBL=$4 GOT
+  GOT=$(node "$REPO/final-find.mjs" "$R" 0 20 "$CLS" < "$TBL")
+  if [ "$GOT" = "$WANT" ]; then ok "$LBL ($GOT)"; else bad "$LBL — got '$GOT' want '$WANT'"; fi
+}
+ffcheck "$FFD/table-normal.json"          unverified "seq 3"       "normal table → the UNVERIFIED row (class-exact)"
+ffcheck "$FFD/table-normal.json"          verified   "seq 1"       "normal table → the VERIFIED row (class-exact)"
+ffcheck "$FFD/table-only-verified.json"   unverified "NONE"        "no unverified row → NONE (never a cross-class pick — the live-run defect)"
+ffcheck "$FFD/table-only-verified.json"   verified   "seq 1"       "verified row still found when asked"
+ffcheck "$FFD/table-string-verified.json" unverified "READ-ERROR"  "string-typed verified_at → READ-ERROR (ABI anomaly retried, never trusted — the live run #1 shape)"
+ffcheck "$FFD/table-string-verified.json" verified   "READ-ERROR"  "string-typed verified_at → READ-ERROR (verified query too)"
+
 echo "== RESULT: $PASS passed, $FAILS failed =="
 [ $FAILS -eq 0 ] || exit 1
 exit 0

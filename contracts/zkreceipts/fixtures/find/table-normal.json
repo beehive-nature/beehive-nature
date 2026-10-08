@@ -1,0 +1,32 @@
+{
+ "rows": [
+  {
+   "seq": 1,
+   "root": "a1b2c3d4e5f60718",
+   "kind": 0,
+   "count": 20,
+   "alg": 2,
+   "anchored_at": 1791347000,
+   "verified_at": 1791347511
+  },
+  {
+   "seq": 3,
+   "root": "a1b2c3d4e5f60718",
+   "kind": 0,
+   "count": 20,
+   "alg": 2,
+   "anchored_at": 1791347000,
+   "verified_at": 0
+  },
+  {
+   "seq": 4,
+   "root": "a1b2c3d4e5f60718",
+   "kind": 0,
+   "count": 21,
+   "alg": 2,
+   "anchored_at": 1791347000,
+   "verified_at": 0
+  }
+ ],
+ "more": false
+}
