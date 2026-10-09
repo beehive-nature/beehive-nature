@@ -66,3 +66,22 @@ not):
   Swanky's maintainers name a confidential route on #51; delivering it
   then needs its own go.
 - Item 6's security impact remains UNVERIFIED.
+
+## Update: private report sent by the founder (2026-10-09T20:46Z)
+
+The founder reported in chat that he emailed the private report himself,
+with the observation-6 instrument (`repro_shared_seed.rs`) attached. He
+sent it from his own mail account; the address was given in chat and is not
+recorded here. This seat did not send it.
+
+This seat could not verify the message. The connected Gmail account holds
+no message to Swanky, and the sending account is not reachable from this
+session. So the recipient, the send time, and whether the attached bytes
+match the held file are **unverified here**. The held file's digest is in
+`DIGESTS.md` (`repro_shared_seed.rs`, `35e28536…`), so a reply that quotes
+or returns the file can be checked against it.
+
+- The "No email was sent" line above was true when written; this update
+  supersedes it.
+- #51 is unchanged.
+- Item 6's security impact remains UNVERIFIED.

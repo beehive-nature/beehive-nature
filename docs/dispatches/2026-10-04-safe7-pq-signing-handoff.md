@@ -133,9 +133,12 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
 
 > Read `beehive-nature/docs/dispatches/2026-10-04-safe7-pq-signing-handoff.md` and every file in
 > its §0, in order, plus `docs/RULINGS-2026-10-04.md` R4 (identity root ruled: option A). Steps 1
-> to 4 are done, rebased onto `beehive` `7a8709bdff`, and hardware fit is measured (§8). Execute
-> §8 "Next": the ARM compile fix for `bpq_slh.c`, then step 5, the gate-6 ceremony plan. No
-> flashing, no unlock, no real phrase, no mainnet. Report done and pending only, with receipts.
+> to 4 are done, rebased onto `beehive` `7a8709bdff`, hardware fit is measured, and the ARM
+> compile fix landed on `bpq-safe7-7a8709b` at `5e12b132f` (§8, 2026-10-09). What remains in
+> §8 "Next": the reviewed hardware build with bpq lifted out of the emulator-only gate (the
+> founder's, with his agent), then the gate-6 ceremony per
+> `docs/dispatches/2026-10-09-safe7-gate6-ceremony-plan.md`. No flashing, no unlock, no real
+> phrase, no mainnet. Report done and pending only, with receipts.
 
 ## 8 · Status, 2026-10-04 (Seat 3, emulator only)
 
@@ -185,3 +188,26 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
 - **Not claimed:** hardware fit as a whole (it does not compile for ARM as committed; VM stack
   headroom, fragmentation, timing and the device flow are unmeasured), channel confidentiality,
   device attestation. Step 5 not started.
+- **ARM compile fix landed, 2026-10-09 (Seat 3, no device).** Fork branch `bpq-safe7-7a8709b`
+  fast-forwarded `da2583079` → `cce1fe1e2` (the fix) → `5e12b132f` (its receipt and
+  reproducer); `bpq-safe7` and `beehive` unchanged. The choice: a push/ignored/pop
+  `#pragma GCC diagnostic` block around the one textual include of `merkle.c` in
+  `crypto/bpq/bpq_slh.c`, the shape this tree already uses for vendored code (`build.rs`
+  compiles its own sphincsplus units with `-Wno-incompatible-pointer-types`; upstream Trezor
+  scopes the same pragmas around vendored `printf.c`). No vendored file and no build flag
+  changed; generated code identical on ARM and x86-64 (review receipts). The control (unfixed
+  unit, the hardware build's own compile line) fails at `merkle.c:29`; the fixed unit compiles
+  with 35 bpq-prefixed symbols; the other three bpq units compile unchanged; host test 25/25;
+  the emulator rebuilt from the tree passes its five unit tests. The one-line fix at the source
+  (`wotsx1.h:15` to `unsigned int *`) is filed upstream as sphincs/sphincsplus#70; the block is
+  deleted once the pinned `merkle.c` builds for arm-none-eabi without it. Receipts: fork
+  `crypto/bpq/ARM_COMPILE_RECEIPT.md`; here `docs/receipts/bpq-safe7-arm-compile-2026-10-09.json`.
+  The emulator-only gate is untouched (three sites plus the "emulator only" doc sentences);
+  lifting it is step 2, the founder's reviewed change. Not re-run: `emu_xcheck` (no generated
+  code changed; the beehive-nature oracles have moved since `42aac5cfa`, so the re-run belongs
+  with step 2 at a pinned oracle revision).
+- **Next, 2026-10-09:** step 2, the clean T3W1 hardware build with bpq lifted out of the
+  emulator-only gate as a reviewed change (founder, with his agent): the three gate sites, the
+  doc sentences, two fresh pinned builds byte-equal (`tools/firmware/build-pinned.sh`,
+  `compare-builds.py`), the image digest recorded. Then gate 6 per
+  `docs/dispatches/2026-10-09-safe7-gate6-ceremony-plan.md` (step 5, this session).

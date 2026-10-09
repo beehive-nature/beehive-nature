@@ -376,6 +376,49 @@ The WB002 battery (24 tests) stayed green through all four repairs; the
 3. Century-depth variations: a schedule with a migration EVERY century;
    adversarial fragment sets (corrupted checkpoints presented as truth).
 
+## WB004 — the time-extinction specimen (CURRENT, founder order 2026-10-09)
+
+The 10B/1,000-year upgrade, made concrete: SPEC §laws L1-L4 (Millennium
+Authority Continuity; epochal governance, never a millennium proposal;
+the execution layer is bounded; time-representation extinction is a
+boundary, not an assumption). Specimen: **msig.app/jungle + eosio.msig**
+frozen at `c526479a` (2025, MIT), vendored verbatim under
+`wb004-specimen/` with blob-SHA-verified provenance. The attacked
+boundary, verified first-hand: an Antelope transaction's `expiration` is
+a `time_point_sec` whose sole storage is `uint32_t` seconds (Spring
+v1.2.2 `libfc/include/fc/time.hpp:87-99`) — maximum representable
+**2106-02-07 06:28:15 UTC**, seventy years short of the horizon. The
+question is not whether MSIG.app survives until 3026; it is whether
+authority created through today's stack can outlive MSIG.app, today's
+Antelope encoding, keys, timestamps, producers and eventually
+cryptography itself while retaining an independently verifiable chain
+of legitimacy.
+
+| artifact | status |
+|---|---|
+| `crates/btungsten-wb004` — the model: fail-closed expiration encoders for both time representations (the naive truncating encoder kept beside them as the TEETH artifact — it wraps a 2200-era intent into a VALID-LOOKING 2060s expiration, semantic time travel, convicted by name); the msig execution layer specimen-shaped (per-proposal approval vectors, `eosio.msig.cpp:56,191,218` semantics) with law L3's `MSIG_APPROVALS_CAP` enforced at propose; the epochal engine (COMMIT+PROVE at model scale → 256-member shards → order-independent aggregate (no indispensable aggregator) → bounded 7-day-TTL proposal → exec → SETTLE receipt → next epoch); quorum-gated rotations and the anchored chain+contract migration that replaces the u32 wire with u64 AT the boundary; the hash-chained receipt log whose fold re-derives the live authority and refuses evidence-free authority changes | RUNS — `cargo test -p btungsten-wb004` (13 tests) |
+| `tests/wb004.rs` — the battery: the 2106 arithmetic first-hand (civil date asserted, no time crate); TTL compression toward the horizon (at 29 days out a 30-day TTL refuses to exist); the founder's ladder at 65,536 sovereigns, 2026→3026, crossing 2106 only through the quorum-authorized representation migration (the u32 wire proven dead at 2180 first); continuity teeth (sub-quorum and STALE signer sets refuse whole, nothing receipted); tampered-migration anchor teeth; execution-layer boundedness at populations 256/4,096/65,536 (constant; the 10B-rows anti-pattern refused at the door); shard-kill rows (1 down: quorum holds; a third down: governance REFUSES); aggregate determinism; uniqueness (duplicate seat refused); TTL teeth (expiry, proposer-only early cancel, specimen-faithful post-expiry cleanup); provenance-chain tamper detection | RUNS in CI (workspace job) |
+
+Scale honesty: 2^16 sovereigns is SAMPLED; the 10B claim here is
+structural (per-layer counts as functions of population; the execution
+layer constant) plus the named physical-scale legs. Unique-human proof
+cryptography is SK001/PQ-lane territory — this crate models its
+interface (registration refuses duplicates), never its algorithms. The
+participation "signature" is a deterministic hash: the scheme is an
+interface; PQ algorithms are separate lanes.
+
+### §next
+
+1. **Cryptol twin** of the continuity predicate and the wraparound
+   refusal (the formal ladder: TYPECHECK → CHECK-SAMPLED → PROVE).
+2. **Live leg**: the boundary arithmetic against a live chain (a real
+   `time_point_sec` refusing a post-2106 expiration is checkable on
+   Jungle today at the propose level, no millennium proposal needed).
+3. **Aggregation cryptography**: replace the hash-fold interface with a
+   real verifiable aggregate (the PQ lanes' territory; the interface is
+   fixed here).
+4. Scale leg: population beyond 2^16 toward the axis-5 ladder.
+
 ## WB001 — the intent-binding invariant (LIVE in CI)
 
 **Invariant:** no valid signature may authorize any intent other than the
