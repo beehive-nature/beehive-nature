@@ -20,6 +20,11 @@ on:
         default: quick
         type: choice
         options: [quick, full]
+      lanes:
+        description: "the lanes to run, space-separated"
+        required: false
+        default: "rb01 rb02 rb03 rb04"
+        type: string
 
 permissions:
   contents: read
@@ -61,10 +66,14 @@ jobs:
       - id: f
         name: Which lanes did this push touch
         shell: bash
+        env:
+          LANES: ${{ inputs.lanes }}
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            for l in rb01 rb02 rb03 rb04; do echo "$l=true" >> "$GITHUB_OUTPUT"; done; exit 0
+            for l in rb01 rb02 rb03 rb04; do
+              case " $LANES " in *" $l "*) echo "$l=true" ;; *) echo "$l=false" ;; esac >> "$GITHUB_OUTPUT"
+            done; exit 0
           fi
           files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo ALL)
           # RB04's own lane file does not re-run the other lanes
