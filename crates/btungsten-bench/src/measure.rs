@@ -127,7 +127,9 @@ pub fn spawn(spec: &Spec) -> std::io::Result<Running> {
         .current_dir(&spec.cwd)
         .stdin(Stdio::null())
         .stdout(File::create(&spec.stdout)?)
-        .stderr(File::create(&spec.stderr)?);
+        .stderr(File::create(&spec.stderr)?)
+        // logs are evidence: no colour escapes in them (a Spec may override)
+        .env("CARGO_TERM_COLOR", "never");
     for (k, v) in &spec.env {
         cmd.env(k, v);
     }

@@ -677,7 +677,8 @@ pub fn run(
 
 /// `Executable unittests src/lib.rs (<path>)` from `cargo crux-test --no-run`.
 fn executable_path(stderr: &str) -> Option<PathBuf> {
-    stderr
+    // CI runners colour cargo output; the line is read without its escapes
+    crate::recognize::strip_ansi(stderr)
         .lines()
         .find_map(|l| {
             l.trim()
@@ -694,5 +695,27 @@ fn property_outcome(o: &Obs, rep: &CruxReport, name: &str) -> O {
         // anything else (a budget kill, a tool error, a missing status line) is
         // not a recognized verdict: never a pass, and not a failure of the property
         _ => O::Inconclusive,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_executable_line_is_found_with_and_without_colour() {
+        // the coloured form is verbatim from CI run 37887662009 (rb03-budget)
+        let coloured =
+            "[1m[92m  Executable[0m unittests src/lib.rs (/w/rb03_budget-49caa57252f8e228)
+";
+        let plain = "  Executable unittests src/lib.rs (/w/rb03_budget-49caa57252f8e228)
+";
+        for s in [coloured, plain] {
+            assert_eq!(
+                executable_path(s),
+                Some(PathBuf::from("/w/rb03_budget-49caa57252f8e228"))
+            );
+        }
+        assert_eq!(executable_path("Finished"), None);
     }
 }
