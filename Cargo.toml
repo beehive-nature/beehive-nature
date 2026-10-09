@@ -87,3 +87,14 @@ sha2 = "0.10"
 hmac = "0.12"
 zeroize = "1"
 hex-literal = "0.4"
+
+# SLH-DSA-SHAKE-256f signs in seconds unoptimised; the handover tests and the
+# PQ01 runner sign with it. Optimise it and its hashing in dev and test builds.
+[profile.dev.package.fips205]
+opt-level = 3
+[profile.dev.package.slh-dsa]
+opt-level = 3
+[profile.dev.package.sha3]
+opt-level = 3
+[profile.dev.package.keccak]
+opt-level = 3

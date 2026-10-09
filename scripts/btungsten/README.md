@@ -89,11 +89,12 @@ running beside it):
   on this box; gate 1 holds by construction: the crate is its own workspace,
   outside the default build).
 
-### PQ08 and PQ09 (2026-10-08)
+### PQ07, PQ08 and PQ09 (2026-10-08)
 
 | lane | artifact | status |
 |---|---|---|
 | PQ08 law signatures | `scripts/verify-bpq-signatures.mjs` (noble) + `scripts/verify-law-signatures-rust.sh` (bsigner, RustCrypto ML-DSA-65) | Every file `docs/PQ-LAW.json` names must carry a signature over its CURRENT bytes from a pinned signer. STALE now fails (it used to pass), as do a missing signature, a law-shaped file left out of the list, an empty list, and listed law files with no pin file. Both implementations: 7 of 7 law files current; the Rust leg's TEETH (a changed copy of a law file) is refused. e2e/law-signatures.test.mjs 4 of 4 |
+| PQ07 succession | `crates/bsigner/src/bpq.rs`: `succession_keys`, `card`, `handover`, `verify_handover`; CLI `bpq-handover`, `bpq-verify` | The Rust side now derives the SLH-DSA-SHAKE-256f succession key (fips205 0.4.1, SK.seed ‖ SK.prf ‖ PK.seed) and reproduces the browser's succession commitment and id on every `surfaces/bpq-vectors.json` row: the cross-check SPEC-BPQ-1 §6 listed as missing. Handover v1 (SPEC-BPQ-1 §5): the honest handover verifies after a JSON round trip; refused: an attacker's SLH key under the victim's id (the ML-DSA-only forger), a swapped new card, a handover replayed onto another id, a moved `at`, a newline in `at`, empty card / slh / sig / to (T-VACUOUS), a handover to itself, the reserved context. CLI end to end: an honest handover verifies (rc 0), a moved timestamp is refused (rc 1). bsigner 63 of 63 in 6.4 s (fips205 and its hashing optimised in dev builds). Not yet: the browser side, and carrying a handover inside a did-autonomi log |
 | PQ09 keys at rest | `crates/bsigner/src/keys.rs` + `bpq::seal_self` | A seed reaches disk only inside a SPEC-BPQ-1 sealed object, one `self` slot under the root vault of the owner's recovery words (`bheart.keyset/2`); commands that touch a seed take `--rec-env VAR`; `verify` reads the public half with no unlock; a plaintext `bheart.keyset/1` file is refused until `bsigner keys-seal` reseals it. Tests: `no_seed_byte_reaches_disk` scans every written file for the seed in raw, base64url and hex form; the wrong words and a tampered body open nothing; bsigner 60 of 60; the nerve test 7 of 7 through sealed keys; selftest PASS. The Rust sealer is checked by the other implementation: `surfaces/bpq-rust-sealed.json` opens in bpq.js (e2e/bpq.test.mjs 19 of 19). Boundary: rewriting a file does not erase the disk blocks the old plaintext sat in |
 
 Audit two gates for PQ01's new crates, read from rustsec/advisory-db

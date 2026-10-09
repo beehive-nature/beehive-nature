@@ -6,11 +6,10 @@
 //! the browser) must agree on `surfaces/bpq-vectors.json`; the tests below
 //! read that file at compile time, so CI fails if either side drifts.
 //!
-//! Not cross-checked: the SLH-DSA-SHAKE-256f succession key. This twin never
-//! derives it; the vectors' `slhPublicKey` and the commitment over it come
-//! from the browser library alone and are re-checked only by the JS side, and
-//! no SLH-DSA known-answer vectors are carried (surfaces/pq-kat.json lists it
-//! under `notIncluded`). Here the commitment is an input to `id_from`.
+//! The SLH-DSA-SHAKE-256f succession key is derived here too
+//! ([`succession_keys`], fips205 0.4.1) and must reproduce the browser's
+//! commitment and id on every vector row; its ACVP cases run in
+//! crates/btungsten-pq (SPEC-BTUNGSTEN-PQ-1 §PQ01, §PQ07).
 //!
 //! # Primitives, cited at source
 //!
@@ -323,6 +322,40 @@ pub fn root_vault(master_prk: &[u8; 32]) -> Zeroizing<[u8; 32]> {
     vault
 }
 
+/// The frozen succession label (SPEC-BPQ-1 §2; VOCABULARY carve-out 1).
+pub const LABEL_SUCC: &str = "BDID-v1/slh-dsa-shake-256f-succession";
+const DOM_SUCC: &[u8] = b"bpq1/succession";
+
+pub type SuccessionPublic = fips205::slh_dsa_shake_256f::PublicKey;
+pub type SuccessionSecret = fips205::slh_dsa_shake_256f::PrivateKey;
+
+/// The SLH-DSA-SHAKE-256f succession key of one context (SPEC-BPQ-1 §2,
+/// §5): `expand(LABEL_SUCC, 96)` split as (SK.seed, SK.prf, PK.seed), FIPS
+/// 205 `slh_keygen_internal`, through fips205 0.4.1 `keygen_with_seeds`.
+/// Derived on demand and never stored; the reserved context `root` is
+/// refused, as in [`keys`].
+pub fn succession_keys(
+    master_prk: &[u8; 32],
+    context: &str,
+) -> Result<(SuccessionPublic, SuccessionSecret), BpqError> {
+    use fips205::traits::KeyGen;
+    if context == ROOT_CONTEXT {
+        return Err(BpqError::ReservedContext);
+    }
+    let mut seed = Zeroizing::new([0u8; 96]);
+    expand_label(master_prk, LABEL_SUCC, context, seed.as_mut());
+    let part = |i: usize| -> [u8; 32] { seed[32 * i..32 * (i + 1)].try_into().expect("32 of 96") };
+    let (sk_seed, sk_prf, pk_seed) = (Zeroizing::new(part(0)), Zeroizing::new(part(1)), part(2));
+    Ok(fips205::slh_dsa_shake_256f::KG::keygen_with_seeds(
+        &sk_seed, &sk_prf, &pk_seed,
+    ))
+}
+
+/// `successionCommit = SHA3-256("bpq1/succession" || SLH-DSA public key)`.
+pub fn succession_commit(slh_public: &[u8]) -> [u8; 32] {
+    sha3(&[DOM_SUCC, slh_public])
+}
+
 /// The self-certifying id: bech32m("bzpq", SHA3-256("bpq1/id" || ML-DSA-65
 /// public key || succession commitment)).
 pub fn id_from(dsa_public: &[u8], succession_commit: &[u8]) -> Option<String> {
@@ -362,6 +395,111 @@ pub fn verify_card(card: &Value) -> bool {
         return false;
     }
     dsa_verify(&dsa, &[DOM_CARD, &dsa, &kem, &succ].concat(), &sig)
+}
+
+/// The public card of one context (SPEC-BPQ-1 §3): `{bpq:1, id, dsa, kem,
+/// succ, sig}`, `sig` = ML-DSA-65 over "bpq1/card" || dsa || kem || succ.
+/// The twin of `BPQ.card` in surfaces/bpq.js.
+pub fn card(master_prk: &[u8; 32], context: &str) -> Result<Value, BpqError> {
+    use fips205::traits::SerDes;
+    use ml_dsa::signature::Signer;
+    let k = keys(master_prk, context)?;
+    let (slh, _) = succession_keys(master_prk, context)?;
+    let succ = succession_commit(&slh.into_bytes());
+    let mut dsa_seed = Zeroizing::new([0u8; 32]);
+    expand_label(master_prk, LABEL_DSA, context, dsa_seed.as_mut());
+    let sk = SigningKey::<MlDsa65>::from_seed(&(*dsa_seed).into());
+    let sig: Signature<MlDsa65> =
+        sk.sign(&[DOM_CARD, &k.dsa_public, &k.kem_public, &succ].concat());
+    Ok(serde_json::json!({
+        "bpq": 1,
+        "id": id_from(&k.dsa_public, &succ).expect("lengths are fixed"),
+        "dsa": b64::b64u(&k.dsa_public),
+        "kem": b64::b64u(&k.kem_public),
+        "succ": b64::b64u(&succ),
+        "sig": b64::b64u(&sig.encode()),
+    }))
+}
+
+const DOM_HANDOVER: &[u8] = b"bpq1/handover";
+const SLH_PK_LEN: usize = 64;
+
+fn handover_message(from: &str, to: &str, at: &str) -> Vec<u8> {
+    [
+        DOM_HANDOVER,
+        &sha3(&[format!("{from}\n{to}\n{at}").as_bytes()]),
+    ]
+    .concat()
+}
+
+/// The succession handover v1 (SPEC-BPQ-1 §5): the owner of `from_context`
+/// reveals its SLH-DSA-SHAKE-256f public key and signs with it, hedged, pure,
+/// empty context, the statement retiring the `from` id for the `to` id of
+/// `to_context`'s card (which carries its own next succession commitment).
+pub fn handover(
+    master_prk: &[u8; 32],
+    from_context: &str,
+    to_context: &str,
+    at: &str,
+) -> Result<Value, BpqError> {
+    use fips205::traits::{SerDes, Signer};
+    if !is_utc_timestamp(at) {
+        return Err(BpqError::Format("at is not YYYY-MM-DDTHH:MM:SS[.f]Z"));
+    }
+    let old = keys(master_prk, from_context)?;
+    let (slh_pk, slh_sk) = succession_keys(master_prk, from_context)?;
+    let slh = slh_pk.into_bytes();
+    let from = id_from(&old.dsa_public, &succession_commit(&slh)).expect("lengths are fixed");
+    let new_card = card(master_prk, to_context)?;
+    let to = new_card["id"]
+        .as_str()
+        .expect("a card has an id")
+        .to_string();
+    let sig = slh_sk
+        .try_sign(&handover_message(&from, &to, at), &[], true)
+        .map_err(|_| BpqError::Format("SLH-DSA signing failed"))?;
+    Ok(serde_json::json!({
+        "bpq": 1,
+        "kind": "handover",
+        "from": from,
+        "to": to,
+        "at": at,
+        "dsa": b64::b64u(&old.dsa_public),
+        "slh": b64::b64u(&slh),
+        "card": new_card,
+        "sig": b64::b64u(&sig),
+    }))
+}
+
+/// Verify a handover: `from` recomputes from `dsa` and the revealed `slh`
+/// key's commitment, the new card verifies and is `to`, `at` has the shape,
+/// and the SLH-DSA signature holds over "bpq1/handover" || SHA3-256(from \n
+/// to \n at). Returns the new id. A holder of only the old ML-DSA key cannot
+/// make one: the succession key was never published before this reveal.
+pub fn verify_handover(h: &Value) -> Option<String> {
+    use fips205::traits::{SerDes, Verifier};
+    if whole(&h["bpq"]) != Some(1) || h["kind"] != "handover" {
+        return None;
+    }
+    let (from, to, at) = (h["from"].as_str()?, h["to"].as_str()?, h["at"].as_str()?);
+    let (dsa, slh, sig) = (
+        unb64(&h["dsa"]).ok()?,
+        unb64(&h["slh"]).ok()?,
+        unb64(&h["sig"]).ok()?,
+    );
+    if !is_utc_timestamp(at) || slh.len() != SLH_PK_LEN {
+        return None;
+    }
+    if id_from(&dsa, &succession_commit(&slh)).as_deref() != Some(from) {
+        return None;
+    }
+    if !verify_card(&h["card"]) || h["card"]["id"].as_str() != Some(to) || to == from {
+        return None;
+    }
+    let pk = SuccessionPublic::try_from_bytes(&slh.try_into().ok()?).ok()?;
+    let sig: [u8; fips205::slh_dsa_shake_256f::SIG_LEN] = sig.try_into().ok()?;
+    pk.verify(&handover_message(from, to, at), &sig, &[])
+        .then(|| to.to_string())
 }
 
 /// A binding statement: the PQ id vouching for classical accounts, signed
@@ -717,6 +855,124 @@ mod tests {
 
     fn vectors() -> Value {
         serde_json::from_str(VECTORS).expect("bpq-vectors.json parses")
+    }
+
+    // The succession key, derived here and in the browser, must give the
+    // commitment and the id bpq.js wrote into every vector row: the cross-check
+    // SPEC-BPQ-1 §6 listed as missing.
+    #[test]
+    fn succession_keys_match_the_browser_on_every_vector_row() {
+        use fips205::traits::SerDes;
+        let v = vectors();
+        let rows = v["keys"].as_array().unwrap();
+        assert!(!rows.is_empty());
+        for row in rows {
+            let prk = root(row["rootFrom"].as_str().unwrap());
+            let (pk, _sk) = succession_keys(&prk, row["context"].as_str().unwrap()).unwrap();
+            let pk = pk.into_bytes();
+            let commit = succession_commit(&pk);
+            assert_eq!(
+                b64::b64u(&commit),
+                row["successionCommit"].as_str().unwrap(),
+                "row {}",
+                row["name"]
+            );
+            if let Some(slh) = row.get("slhPublicKey").and_then(Value::as_str) {
+                assert_eq!(b64::b64u(&pk), slh, "row {} public key", row["name"]);
+            }
+            let dsa = unb64(&row["dsaPublicKey"]).unwrap();
+            assert_eq!(
+                id_from(&dsa, &commit).as_deref(),
+                row["id"].as_str(),
+                "row {} id",
+                row["name"]
+            );
+        }
+        assert!(matches!(
+            succession_keys(&root("x"), ROOT_CONTEXT),
+            Err(BpqError::ReservedContext)
+        ));
+    }
+
+    #[test]
+    fn a_card_made_here_verifies_and_matches_the_vector_row() {
+        let v = vectors();
+        let row = &v["keys"][0];
+        let c = card(
+            &root(row["rootFrom"].as_str().unwrap()),
+            row["context"].as_str().unwrap(),
+        )
+        .unwrap();
+        assert!(verify_card(&c));
+        assert_eq!(c["id"], row["id"]);
+        assert_eq!(c["dsa"], row["dsaPublicKey"]);
+    }
+
+    // SPEC-BPQ-1 §5 handover v1, and the forgeries it must refuse
+    // (SPEC-BTUNGSTEN-PQ-1 §PQ07).
+    #[test]
+    fn a_handover_verifies_and_its_forgeries_do_not() {
+        let v = vectors();
+        let row = &v["keys"][0];
+        let prk = root(row["rootFrom"].as_str().unwrap());
+        let ctx = row["context"].as_str().unwrap();
+        let next = format!("{ctx}/2");
+        let at = "2026-10-08T12:00:00Z";
+        let h = handover(&prk, ctx, &next, at).unwrap();
+        assert_eq!(
+            h["from"], row["id"],
+            "the retired id is the vector row's id"
+        );
+        let reparsed: Value = serde_json::from_str(&h.to_string()).unwrap();
+        let to = verify_handover(&reparsed)
+            .expect("the honest handover verifies after a JSON round trip");
+        assert_eq!(Some(to.as_str()), card(&prk, &next).unwrap()["id"].as_str());
+
+        let refused =
+            |f: Value, why: &str| assert!(verify_handover(&f).is_none(), "{why} was accepted");
+        // a forger holding only the old ML-DSA key signs with its own SLH key
+        let atk = handover(&root("an attacker"), "pq:x", "pq:x/2", at).unwrap();
+        let mut f = atk.clone();
+        f["from"] = h["from"].clone();
+        f["dsa"] = h["dsa"].clone();
+        refused(f, "an attacker's SLH key under the victim's id");
+        // the signature is kept, the new key set swapped
+        let mut f = h.clone();
+        f["card"] = atk["card"].clone();
+        f["to"] = atk["to"].clone();
+        refused(f, "a swapped new card");
+        // the signature replayed onto another id of the same owner
+        let other = handover(&prk, "pq:other", &next, at).unwrap();
+        let mut f = h.clone();
+        for k in ["from", "dsa", "slh"] {
+            f[k] = other[k].clone();
+        }
+        refused(f, "a handover replayed onto another id");
+        // the timestamp: a moved instant, and a smuggled line
+        let mut f = h.clone();
+        f["at"] = json!("2026-10-08T12:00:01Z");
+        refused(f, "a moved at");
+        let mut f = h.clone();
+        f["at"] = json!("2026-10-08T12:00:00Z\nx=y");
+        refused(f, "a newline in at");
+        // T-VACUOUS: the empty shapes
+        for (k, val) in [
+            ("card", Value::Null),
+            ("slh", json!("")),
+            ("sig", json!("")),
+            ("to", json!("")),
+        ] {
+            let mut f = h.clone();
+            f[k] = val;
+            refused(f, &format!("an empty {k}"));
+        }
+        // a handover to itself, and the reserved context
+        assert!(
+            verify_handover(&handover(&prk, ctx, ctx, at).unwrap()).is_none(),
+            "a handover to itself"
+        );
+        assert!(handover(&prk, ROOT_CONTEXT, &next, at).is_err());
+        assert!(handover(&prk, ctx, &next, "yesterday").is_err());
     }
 
     const RUST_SEALED_VAULT: &str = "bpq rust sealer, TEST-ONLY vault";

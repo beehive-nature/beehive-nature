@@ -48,6 +48,9 @@
 //!      "opened_with" = root | context | x-wing; without --context the
 //!      you.context, you.ml_dsa_65_public_sha3 and you.x_wing_public_sha3
 //!      fields are null)
+//!   bsigner bpq-handover --rec-env VAR --context FROM --to-context TO [--at TIME] [--out PATH]
+//!     (SPEC-BPQ-1 §5 succession handover v1: reveals FROM's SLH-DSA-SHAKE-256f
+//!      key and signs with it the statement retiring FROM's id for TO's card)
 //!   bsigner bpq-verify --file PATH [--target FILE]
 //!     (a bpq1 public key card or binding; or a detached signature, checked
 //!      against the file named by --target)
@@ -78,6 +81,7 @@ fn main() {
         Some("x402pay") => cmd_x402pay(&args[1..]),
         Some("bpq-open") => cmd_bpq_open(&args[1..]),
         Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
+        Some("bpq-handover") => cmd_bpq_handover(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -107,6 +111,8 @@ struct Opts {
     rec_env: Option<String>,
     context: Option<String>,
     target: Option<String>,
+    to_context: Option<String>,
+    at: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -123,6 +129,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         rec_env: None,
         context: None,
         target: None,
+        to_context: None,
+        at: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -143,6 +151,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--rec-env" => o.rec_env = Some(val),
             "--context" => o.context = Some(val),
             "--target" => o.target = Some(val),
+            "--to-context" => o.to_context = Some(val),
+            "--at" => o.at = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -499,6 +509,47 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
     0
 }
 
+fn cmd_bpq_handover(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(var), Some(from), Some(to)) = (
+        o.rec_env.as_deref(),
+        o.context.as_deref(),
+        o.to_context.as_deref(),
+    ) else {
+        return fail("bpq-handover needs --rec-env VAR --context FROM --to-context TO".into());
+    };
+    let code = match std::env::var(var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bpq::master_prk_from_recovery_code(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e.to_string()),
+    };
+    let at = o.at.clone().unwrap_or_else(|| keys::now_iso().0);
+    let h = match bpq::handover(&prk, from, to, &at) {
+        Ok(h) => h,
+        Err(e) => return fail(e.to_string()),
+    };
+    let text = serde_json::to_string_pretty(&h).unwrap();
+    match o.out {
+        Some(path) => {
+            if let Err(e) = std::fs::write(&path, &text) {
+                return fail(format!("write {path}: {e}"));
+            }
+            println!(
+                "{}",
+                json!({ "written": path, "kind": "handover", "from": h["from"], "to": h["to"], "at": h["at"] })
+            );
+        }
+        None => println!("{text}"),
+    }
+    0
+}
+
 fn cmd_bpq_verify(args: &[String]) -> i32 {
     let o = match parse_opts(args) {
         Ok(o) => o,
@@ -523,6 +574,8 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
             Err(e) => return fail(format!("read {target}: {e}")),
         };
         ("detached", bpq::verify_detached(&doc, &bytes).is_some())
+    } else if doc["kind"] == "handover" {
+        ("handover", bpq::verify_handover(&doc).is_some())
     } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
@@ -530,7 +583,7 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
     };
     println!(
         "{}",
-        json!({ "kind": kind, "id": doc["id"], "verified": ok })
+        json!({ "kind": kind, "id": doc["id"], "from": doc["from"], "to": doc["to"], "verified": ok })
     );
     if ok {
         0

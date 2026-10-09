@@ -177,6 +177,19 @@ statement naming the new key set and its own next commitment. The forger of the 
 cannot do this: the succession public key was never published. SLH-DSA rests on hash security
 only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 
+Handover v1 (2026-10-08): `{bpq:1, kind:"handover", from, to, at, dsa, slh, card, sig}`.
+`from` is the retired id and `dsa` its ML-DSA-65 public key; `slh` is the revealed
+SLH-DSA-SHAKE-256f public key (64 B, the succession key derived under `from`'s context); `card`
+is the new key set's §3 card, which carries its own next succession commitment, and `to` is
+its id. `sig` = SLH-DSA-SHAKE-256f (pure, empty context, hedged) over
+`"bpq1/handover" ‖ SHA3-256(UTF-8(from ‖ "\n" ‖ to ‖ "\n" ‖ at))`. A verifier refuses unless
+`from` recomputes from `dsa` and `SHA3-256("bpq1/succession" ‖ slh)`, the card verifies and its
+id is `to`, `to` is not `from`, `at` has the §3 shape, and the signature verifies under `slh`.
+Rust only so far: `bpq::handover`, `bpq::verify_handover`, `bsigner bpq-handover`, and
+`bsigner bpq-verify` for a file of kind `handover`; the browser neither makes nor checks one
+yet. A handover is a statement, not a state: refusing a second handover from the same `from`
+(its succession key is spent once revealed) is the job of whoever keeps the log.
+
 ## 6 · Agility rules
 
 - Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot
@@ -187,10 +200,10 @@ only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 - Assurance, stated plainly: @noble/post-quantum 0.7.1 (self-audited) and RustCrypto ml-dsa 0.1.1 /
   ml-kem 0.3.2 (unaudited) agree byte for byte on the vectors; that is a cross-check between two
   implementations, not an audit. JS signing is not claimed to be constant-time.
-- Not cross-checked: the SLH-DSA-SHAKE-256f succession key (§2, §5). Only the JS side derives
-  it; the Rust twin takes the succession commitment as an input and never derives the key, so
-  the vectors' `slhPublicKey` has one implementation behind it, and `surfaces/pq-kat.json`
-  carries no SLH-DSA known-answer vectors.
+- Cross-checked since 2026-10-08: the SLH-DSA-SHAKE-256f succession key (§2, §5). The Rust twin
+  derives it (`bpq::succession_keys`, fips205 0.4.1, SK.seed ‖ SK.prf ‖ PK.seed in that order)
+  and reproduces the browser's commitment and id on every `surfaces/bpq-vectors.json` row; every
+  ACVP SLH-DSA-SHAKE-256f case runs in `crates/btungsten-pq` on two Rust implementations.
 
 ## 7 · Hardware signer (Safe 7, T3W1)
 

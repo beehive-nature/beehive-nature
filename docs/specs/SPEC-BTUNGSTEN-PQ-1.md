@@ -322,25 +322,34 @@ Closes SPEC-BPQ-1 §6 "not cross-checked".
   not FIPS 205. Its deltas from FIPS 205 for the SHAKE sets are listed and
   closed before it is used as an oracle; until then it is UNVERIFIED as a
   FIPS 205 spec and the lane relies on KAT + DIFFERENTIAL.
-- The handover is not a new wire format. It is a did-autonomi `rotate` op
-  verified by `atmirror::record_sig::verify_record_alg`, which refuses
-  unknown ids and dispatches on the `keyAlg` it is passed; passing the
-  PREVIOUS state's `keyAlg` is a caller obligation documented at
-  `record_sig.rs:175-180`, so the lane proves the caller keeps it. The lane adds `keyAlg = "slh-dsa-shake-256f"` and one
-  rule: the op reveals the SLH public key and the verifier requires
-  `SHA3-256("bpq1/succession" ‖ pk) == succ` of the bzpq1 id being rotated.
+- The handover is a bzpq1 statement, SPEC-BPQ-1 §5 "Handover v1" (built
+  2026-10-08): `{bpq:1, kind:"handover", from, to, at, dsa, slh, card, sig}`,
+  SLH-DSA over `"bpq1/handover" ‖ SHA3-256(from \n to \n at)`, refused unless
+  `from` recomputes from `dsa` and `SHA3-256("bpq1/succession" ‖ slh)`. (The
+  first draft of this design put it in a did-autonomi `rotate` op through
+  `atmirror::record_sig::verify_record_alg`; a bzpq1 id lives outside those
+  logs, so the statement had to exist on its own. Carrying a handover inside
+  a did-autonomi log, with `keyAlg = "slh-dsa-shake-256f"` and the caller
+  obligation at `record_sig.rs:175-180`, is the later integration.)
 - Obligations (L5 where formal, battery rows otherwise):
-  - `handoverAuthorized`: an op is accepted only if its SLH-DSA signature
-    verifies under a revealed key whose commitment equals the id's `succ`;
-  - `handoverBinds`: the signed bytes bind the old id, the new key set, the
-    new next-commitment and the log position, so a handover cannot be
-    replayed onto another id or another position;
+  - `handoverAuthorized`: a handover is accepted only if its SLH-DSA
+    signature verifies under a revealed key whose commitment equals the id's
+    `succ`;
+  - `handoverBinds`: the signed bytes bind the old id, the new id (and
+    through it the new key set and its next commitment) and the time, so a
+    handover cannot be replayed onto another id or swapped to another key
+    set; a position in a log is the log's to bind;
   - `handoverOnce`: after a handover the old `succ` is spent; a second
-    handover under it is refused (the log is the state);
-  - T-VACUOUS: an op with no new key set, or no next-commitment, is refused.
-- Teeth: a forger holding only the ML-DSA key (the break scenario) produces a
-  rotate op signed with ML-DSA and must be refused; a reveal whose key hashes
-  to a different commitment must be refused.
+    handover under it is refused (the log is the state, so this obligation
+    belongs to whoever keeps the log, not to the stateless verifier);
+  - T-VACUOUS: a handover with an empty card, key, signature or new id is
+    refused.
+- Teeth (built, `crates/bsigner/src/bpq.rs`
+  `a_handover_verifies_and_its_forgeries_do_not`): a forger holding only the
+  ML-DSA key (the break scenario) signs with their own SLH-DSA key under the
+  victim's id and is refused, because that key hashes to a different
+  commitment; a swapped card, a handover replayed onto another id, a moved
+  `at`, a handover to itself and the reserved context are refused.
 
 ### PQ08 · The law-signature checker refuses stale signatures
 
