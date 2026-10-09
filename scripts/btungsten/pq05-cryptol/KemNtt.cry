@@ -101,3 +101,48 @@ inverseUndoesForward : Bit
 property inverseUndoesForward = nttInverse (ntt f) == f
   where
     f = [ zext i | i <- [0 .. 255 : [8]] ] : [256][16]
+
+// ---- Algorithms 11 and 12 ----------------------------------------------------
+
+// 17^e mod 3329 for e < 256
+zetaPow8 : [8] -> [16]
+zetaPow8 e = drop (foldl step (1 : [32]) [1 .. 255 : [8]])
+  where
+    step acc i = if i <= e then (acc * 17) % 3329 else acc
+
+// γ_i = ζ^(2 BitRev7(i) + 1) mod q (§4.3.1)
+gammas : [128][16]
+gammas = [ zetaPow8 (2 * zext (bitRev7 i) + 1) | i <- [0 .. 127 : [7]] ]
+
+// Algorithm 12: c0 = a0 b0 + a1 b1 γ, c1 = a0 b1 + a1 b0 (mod q), with
+// b1 γ reduced first, as the shipped code does (the same value mod q)
+baseCase : [16] -> [16] -> [16] -> [16] -> [16] -> ([16], [16])
+baseCase a0 a1 b0 b1 g = (c0, c1)
+  where
+    w x = zext x : [32]
+    b1g = kemMod (w b1 * w g)
+    c0 = kemMod (w a0 * w b0 + w a1 * w b1g)
+    c1 = kemMod (w a0 * w b1 + w a1 * w b0)
+
+// Algorithm 11: the pairwise base-case products of two NTT-domain polynomials
+multiplyNtts : [256][16] -> [256][16] -> [256][16]
+multiplyNtts f g = join [ [c.0, c.1] | c <- [ baseCase (f @ (2 * i)) (f @ (2 * i + 1)) (g @ (2 * i)) (g @ (2 * i + 1)) (gammas @ i)
+                                            | i <- [0 .. 127 : [8]] ] ]
+
+gammasMatchAppendixA : Bit
+property gammasMatchAppendixA = take`{4} gammas == [17, 3312, 2761, 568]
+
+// the schoolbook product in Z_q[X] / (X^256 + 1), for the check below
+negacyclic : [256][16] -> [256][16] -> [256][16]
+negacyclic f g = [ coeff k | k <- [0 .. 255 : [9]] ]
+  where
+    coeff k = drop (foldl (\acc i -> (acc + term k i) % 3329) (0 : [32]) [0 .. 255 : [9]])
+    term k i = if i <= k then prod i (k - i) else (3329 - prod i (k + 256 - i)) % 3329
+    prod i j = (zext (f @ i) * zext (g @ j)) % 3329 : [32]
+
+// NTT^-1(NTT f ∘ NTT g) is the negacyclic product, on fixed polynomials
+nttMultipliesPolynomials : Bit
+property nttMultipliesPolynomials = nttInverse (multiplyNtts (ntt f) (ntt g)) == negacyclic f g
+  where
+    f = [ zext i | i <- [0 .. 255 : [8]] ] : [256][16]
+    g = [ zext (i * 7 + 3) | i <- [0 .. 255 : [8]] ] : [256][16]

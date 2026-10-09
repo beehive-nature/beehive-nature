@@ -73,3 +73,46 @@ mir_verify m ntt_inverse_name [ov_add, ov_sub, ov_mul] false (do {
   mir_return rv;
 }) (w4_unint_bitwuzla ["kemAdd", "kemSub", "kemMul"]);
 proven "ml-kem ntt_inverse (FIPS 203 Algorithm 10)";
+
+// Algorithms 12 and 11. ml-kem's own Barrett instance (for every sum of two
+// products), then its base-case multiply for every i < 128 with that proof
+// standing in (kemMod uninterpreted, its results below q), then
+// multiply_ntt with the base case standing in.
+ov_barrett <- mir_verify m barrett_name [] false (do {
+  x <- mir_fresh_var "x" mir_u32;
+  mir_precond {{ x <= 2 * 3328 * 3328 }};
+  mir_execute_func [mir_term x];
+  let r = {{ kemMod x }};
+  mir_return (mir_term r);
+  mir_postcond {{ r < 3329 }};
+}) bw;
+proven "ml-kem barrett_reduce (sums of two products)";
+
+ov_bcm <- mir_verify m base_case_name [ov_barrett] false (do {
+  a0 <- mir_fresh_var "a0" mir_u16;
+  a1 <- mir_fresh_var "a1" mir_u16;
+  b0 <- mir_fresh_var "b0" mir_u16;
+  b1 <- mir_fresh_var "b1" mir_u16;
+  i <- mir_fresh_var "i" mir_usize;
+  mir_precond {{ a0 < 3329 /\ a1 < 3329 /\ b0 < 3329 /\ b1 < 3329 /\ i < 128 }};
+  mir_execute_func [elem a0, elem a1, elem b0, elem b1, mir_term i];
+  let c = {{ baseCase a0 a1 b0 b1 (gammas @ i) }};
+  mir_return (mir_tuple_value [elem {{ c.0 }}, elem {{ c.1 }}]);
+}) (w4_unint_bitwuzla ["kemMod"]);
+proven "ml-kem base_case_multiply (FIPS 203 Algorithm 12)";
+
+mir_verify m multiply_ntt_name [ov_bcm] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u16);
+  g <- mir_fresh_var "g" (mir_array 256 mir_u16);
+  mir_precond {{ all (\x -> x < 3329) f /\ all (\x -> x < 3329) g }};
+  fv <- poly_of npoly_adt f;
+  gv <- poly_of npoly_adt g;
+  fp <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to fp fv;
+  gp <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to gp gv;
+  mir_execute_func [fp, gp];
+  rv <- poly_of npoly_adt {{ multiplyNtts f g }};
+  mir_return rv;
+}) (w4_unint_bitwuzla ["baseCase"]);
+proven "ml-kem multiply_ntt (FIPS 203 Algorithm 11)";
