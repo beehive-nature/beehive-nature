@@ -70,12 +70,16 @@ function rig({ recipient = RECIPIENT } = {}) {
   return { inv, authority, intent };
 }
 
-// the organ's own keygen, in a private keydir — no pre-baked key material
+// the organ's own keygen, in a private keydir — no pre-baked key material.
+// Keys are sealed at rest under recovery words; these are TEST-ONLY and public:
+// the bdidrec1 code of SHA-256("bsigner nerve, TEST-ONLY recovery words").
+const REC_ENV = "BSIGNER_NERVE_REC";
+process.env[REC_ENV] = "bdidrec1q9r0n4djklfz8l57r3mtajrstnze98jxsa37w2l980tn6xkljllvkh5lf9u";
 let keydir, keyId, key2Id;
 test("the organ generates the principal's keyset", { skip }, async () => {
   keydir = await mkdtemp(join(tmpdir(), "bsigner-nerve-"));
   for (const [out, alg] of [[(k) => (keyId = k), "ml-dsa-65"], [(k) => (key2Id = k), "ml-dsa-44"]]) {
-    const r = spawnSync(BIN, ["keygen", "--alg", alg, "--keydir", keydir], { encoding: "utf8" });
+    const r = spawnSync(BIN, ["keygen", "--alg", alg, "--keydir", keydir, "--rec-env", REC_ENV], { encoding: "utf8" });
     assert.equal(r.status, 0, r.stderr);
     const j = JSON.parse(r.stdout);
     assert.ok(!r.stdout.includes("seed"), "keygen output must never carry secret material");
@@ -87,7 +91,7 @@ test("the organ signs and verifies the domain-separated authority bytes", { skip
   const { authority } = rig();
   const bytes = authoritySigningBytes(authority);
   assert.ok(bytes.subarray(0, AUTHORITY_DOMAIN.length).equals(Buffer.from(AUTHORITY_DOMAIN)), "the domain rides in the signed bytes");
-  const { envelope, authority_hash } = await signAuthority({ authority, bin: BIN, keyId, keydir });
+  const { envelope, authority_hash } = await signAuthority({ authority, bin: BIN, keyId, keydir, recEnv: REC_ENV });
   assert.equal(envelope.type, "bheart.signature/1");
   assert.equal(envelope.alg, "ml-dsa-65");
   assert.equal(envelope.content.bytes, bytes.length);
@@ -97,7 +101,7 @@ test("the organ signs and verifies the domain-separated authority bytes", { skip
 
 test("settleSigned runs the kernel end to end under the signed authority", { skip }, async () => {
   const { inv, intent } = rig();
-  const { envelope } = await signAuthority({ authority: intent.authority, bin: BIN, keyId, keydir });
+  const { envelope } = await signAuthority({ authority: intent.authority, bin: BIN, keyId, keydir, recEnv: REC_ENV });
   const { adapter, calls } = fakeAdapter();
   const run = await settleSigned({ adapter, intent, invoice: inv, envelope, bin: BIN, keyId, keydir, signer, outbox: memOutbox(), now: NOW, issuedAt: NOW });
   assert.deepEqual(calls, ["prepare", "combine", "submit", "reconcile"], "the full kernel path ran");
@@ -108,7 +112,7 @@ test("settleSigned runs the kernel end to end under the signed authority", { ski
 
 test("an authority edited after signing never reaches an adapter verb", { skip }, async () => {
   const good = rig();
-  const { envelope } = await signAuthority({ authority: good.authority, bin: BIN, keyId, keydir });
+  const { envelope } = await signAuthority({ authority: good.authority, bin: BIN, keyId, keydir, recEnv: REC_ENV });
   // the attacker's move: change where the money goes, keep the signature
   const edited = rig({ recipient: "fake:attacker-address" });
   assert.notEqual(edited.intent.authority_hash, good.intent.authority_hash);
@@ -122,7 +126,7 @@ test("an authority edited after signing never reaches an adapter verb", { skip }
 
 test("another key's signature is not the principal's", { skip }, async () => {
   const { authority } = rig();
-  const { envelope } = await signAuthority({ authority, bin: BIN, keyId: key2Id, keydir });
+  const { envelope } = await signAuthority({ authority, bin: BIN, keyId: key2Id, keydir, recEnv: REC_ENV });
   await assert.rejects(
     verifyAuthoritySignature({ authority, envelope, bin: BIN, keyId, keydir }),
     (e) => e.code === "SETTLE_AUTHORITY_SIG",

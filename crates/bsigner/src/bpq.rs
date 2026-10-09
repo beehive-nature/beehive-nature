@@ -24,9 +24,11 @@
 //!   `src/hybrid.ts:842-852`.
 //! - AES-256-GCM (`aes-gcm` 0.10), HKDF-SHA-256 (`hkdf` 0.12), SHA3-256.
 //!
-//! What this file does not do: seal. Sealing happens where the plaintext is,
-//! in the browser; this twin exists so a sealed object stays openable and
-//! verifiable without any browser at all.
+//! It seals in one case only: "only me" (one `self` slot, no META, no SEAL),
+//! which is how bsigner keeps its own keys at rest ([`seal_self`],
+//! SPEC-BTUNGSTEN-PQ-1 §PQ09). Objects shared with readers are sealed where
+//! the plaintext is, in the browser; this twin keeps every sealed object
+//! openable and verifiable without any browser at all.
 
 use aes_gcm::aead::{Aead, KeyInit, Payload};
 use aes_gcm::{Aes256Gcm, Nonce};
@@ -100,6 +102,13 @@ fn nonce(flag: u32, index: u64) -> [u8; 12] {
     n[..4].copy_from_slice(&flag.to_be_bytes());
     n[4..].copy_from_slice(&index.to_be_bytes());
     n
+}
+
+fn gcm_seal(key: &[u8; 32], nonce_bytes: &[u8; 12], plain: &[u8], aad: &[u8]) -> Vec<u8> {
+    Aes256Gcm::new_from_slice(key)
+        .expect("a 32-byte key")
+        .encrypt(Nonce::from_slice(nonce_bytes), Payload { msg: plain, aad })
+        .expect("AES-256-GCM seals every length used here")
 }
 
 fn gcm_open(key: &[u8; 32], nonce_bytes: &[u8; 12], sealed: &[u8], aad: &[u8]) -> Option<Vec<u8>> {
@@ -443,6 +452,63 @@ pub fn master_prk_from_recovery_code(code: &str) -> Result<Zeroizing<[u8; 32]>, 
     Ok(prk)
 }
 
+/// The `bdidrec1…` recovery code of a master PRK: the inverse of
+/// [`master_prk_from_recovery_code`] (bech32m, payload version 0x01 || PRK).
+pub fn recovery_code(master_prk: &[u8; 32]) -> String {
+    let mut payload = Zeroizing::new(Vec::with_capacity(33));
+    payload.push(1);
+    payload.extend_from_slice(master_prk);
+    bech32::encode("bdidrec", payload.to_base32(), Variant::Bech32m)
+        .expect("bdidrec is a valid hrp")
+}
+
+/// The CORE `rosetta` text, identical to surfaces/bpq.js `ROSETTA`.
+const ROSETTA: &str = "bpq1 sealed object: CORE json, KEYS json (file key wrapped per reader: self = AES-256-GCM under HKDF-SHA256(vault key), x-wing = ML-KEM-768+X25519), META, BODY = AES-256-GCM segments (nonce = u32 flag || u64 index, AAD = SHA3-256(CORE)), SEAL = ML-DSA-65 record, itself AES-256-GCM under the file key. Spec: SPEC-BPQ-1.";
+const SEG_DEFAULT: usize = 65536;
+
+/// Seal `plain` for "only me" (SPEC-BPQ-1 §4): a fresh file key and oid
+/// from OS entropy, one `self` slot wrapping the file key under
+/// HKDF-SHA256(IKM = `vault`, salt = oid, info = "bpq1/wrap/self"), no META,
+/// no SEAL. [`open`] with `Reader::SelfVault(vault)` reads it back, and so
+/// does surfaces/bpq.js.
+pub fn seal_self(plain: &[u8], vault: &[u8; 32]) -> Vec<u8> {
+    let mut file_key = Zeroizing::new([0u8; 32]);
+    let mut oid = [0u8; 16];
+    getrandom::getrandom(file_key.as_mut()).expect("OS entropy");
+    getrandom::getrandom(&mut oid).expect("OS entropy");
+    let kc = sha3(&[DOM_KC, &oid, file_key.as_ref()]);
+    let core = format!(
+        r#"{{"bpq":1,"aead":"aes-256-gcm","seg":{SEG_DEFAULT},"len":{},"oid":"{}","kc":"{}","rosetta":"{ROSETTA}"}}"#,
+        plain.len(),
+        b64::b64u(&oid),
+        b64::b64u(&kc)
+    );
+    let aad = sha3(&[core.as_bytes()]);
+    let kw = hkdf32(vault, &oid, DOM_WRAP_SELF);
+    let w = gcm_seal(&kw, &[0u8; 12], file_key.as_ref(), &aad);
+    let keys = format!(r#"[{{"to":"self","w":"{}"}}]"#, b64::b64u(&w));
+    let n = if plain.is_empty() {
+        1
+    } else {
+        plain.len().div_ceil(SEG_DEFAULT)
+    };
+    let mut out = Vec::with_capacity(8 + 12 + core.len() + keys.len() + plain.len() + 16 * n);
+    out.extend_from_slice(&MAGIC);
+    out.extend_from_slice(&(core.len() as u32).to_be_bytes());
+    out.extend_from_slice(core.as_bytes());
+    out.extend_from_slice(&(keys.len() as u32).to_be_bytes());
+    out.extend_from_slice(keys.as_bytes());
+    out.extend_from_slice(&0u32.to_be_bytes()); // META: none
+    for i in 0..n {
+        let chunk =
+            &plain[(i * SEG_DEFAULT).min(plain.len())..((i + 1) * SEG_DEFAULT).min(plain.len())];
+        let flag = if i == n - 1 { FLAG_FINAL } else { FLAG_MORE };
+        out.extend_from_slice(&gcm_seal(&file_key, &nonce(flag, i as u64), chunk, &aad));
+    }
+    out.extend_from_slice(&0u32.to_be_bytes()); // SEAL: none
+    out
+}
+
 /// Who can read: the holder of a vault key ("only me"), or the holder of an
 /// X-Wing secret ("selected people").
 pub enum Reader<'a> {
@@ -651,6 +717,64 @@ mod tests {
 
     fn vectors() -> Value {
         serde_json::from_str(VECTORS).expect("bpq-vectors.json parses")
+    }
+
+    const RUST_SEALED_VAULT: &str = "bpq rust sealer, TEST-ONLY vault";
+
+    #[test]
+    fn seal_self_round_trips_at_every_segment_edge_and_refuses_the_wrong_vault() {
+        let vault = root(RUST_SEALED_VAULT);
+        for len in [0usize, 1, 65_535, 65_536, 65_537, 200_000] {
+            let plain: Vec<u8> = (0..len).map(|i| (i * 7 + 3) as u8).collect();
+            let obj = seal_self(&plain, &vault);
+            let o = open(&obj, &Reader::SelfVault(&vault)).expect("opens");
+            assert_eq!(o.bytes, plain, "len {len}");
+            assert!(o.meta.is_none() && o.sealed_by.is_none());
+            assert!(
+                open(&obj, &Reader::SelfVault(&root("another vault"))).is_err(),
+                "len {len}"
+            );
+        }
+        assert_ne!(
+            seal_self(b"same", &vault),
+            seal_self(b"same", &vault),
+            "a fresh file key and oid every time"
+        );
+    }
+
+    #[test]
+    fn recovery_code_round_trips() {
+        let prk = root("recovery code round trip");
+        let code = recovery_code(&prk);
+        assert!(code.starts_with("bdidrec1"), "{code}");
+        assert_eq!(*master_prk_from_recovery_code(&code).unwrap(), prk);
+    }
+
+    // The pinned object sealed by `seal_self` (surfaces/bpq-rust-sealed.json)
+    // opens here and in surfaces/bpq.js (e2e/bpq.test.mjs): the browser checks
+    // the Rust sealer. BPQ_WRITE_RUST_SEALED=1 rewrites the file (a mode).
+    #[test]
+    fn the_pinned_rust_sealed_object_opens() {
+        let vault = root(RUST_SEALED_VAULT);
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../surfaces/bpq-rust-sealed.json"
+        );
+        if std::env::var("BPQ_WRITE_RUST_SEALED").is_ok() {
+            let plain = b"sealed by crates/bsigner bpq::seal_self, opened by surfaces/bpq.js";
+            let doc = json!({
+                "about": "A bpq1 object sealed by crates/bsigner bpq::seal_self (SPEC-BTUNGSTEN-PQ-1 PQ09) under a TEST-ONLY vault key = SHA-256(vaultFrom). Both implementations must open it: cargo test -p bsigner bpq, node --test e2e/bpq.test.mjs. Public test data.",
+                "vaultFrom": RUST_SEALED_VAULT,
+                "plain_b64u": b64::b64u(plain),
+                "object_b64u": b64::b64u(&seal_self(plain, &vault)),
+            });
+            std::fs::write(path, serde_json::to_string_pretty(&doc).unwrap() + "\n").unwrap();
+        }
+        let v: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        assert_eq!(v["vaultFrom"], RUST_SEALED_VAULT);
+        let obj = b64::b64u_decode(v["object_b64u"].as_str().unwrap()).unwrap();
+        let o = open(&obj, &Reader::SelfVault(&vault)).unwrap();
+        assert_eq!(b64::b64u(&o.bytes), v["plain_b64u"].as_str().unwrap());
     }
 
     fn keys_named(v: &Value, name: &str) -> PqKeys {

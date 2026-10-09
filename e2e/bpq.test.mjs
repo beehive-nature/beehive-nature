@@ -372,3 +372,12 @@ test('the context "root" is reserved: keys() and successionKeys() refuse it, roo
   assert.throws(() => B.successionKeys(prk, 'root'), e => e.code === 'context_reserved');
   assert.equal(B.keys(prk, 'pq:root').context, 'pq:root');   // a persona named root is still a pq: context
 });
+
+test('an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens in bpq.js and only for its vault', async () => {
+  const R = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-rust-sealed.json'), 'utf8'));
+  const obj = new Uint8Array(Buffer.from(R.object_b64u, 'base64url'));
+  const o = await B.open(obj, { self: rootOf(R.vaultFrom) });
+  assert.equal(B.b64u(o.bytes), R.plain_b64u);
+  assert.equal(o.meta, null);
+  await assert.rejects(B.open(obj, { self: rootOf('another vault') }));
+});

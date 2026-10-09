@@ -89,6 +89,13 @@ running beside it):
   on this box; gate 1 holds by construction: the crate is its own workspace,
   outside the default build).
 
+### PQ08 and PQ09 (2026-10-08)
+
+| lane | artifact | status |
+|---|---|---|
+| PQ08 law signatures | `scripts/verify-bpq-signatures.mjs` (noble) + `scripts/verify-law-signatures-rust.sh` (bsigner, RustCrypto ML-DSA-65) | Every file `docs/PQ-LAW.json` names must carry a signature over its CURRENT bytes from a pinned signer. STALE now fails (it used to pass), as do a missing signature, a law-shaped file left out of the list, an empty list, and listed law files with no pin file. Both implementations: 7 of 7 law files current; the Rust leg's TEETH (a changed copy of a law file) is refused. e2e/law-signatures.test.mjs 4 of 4 |
+| PQ09 keys at rest | `crates/bsigner/src/keys.rs` + `bpq::seal_self` | A seed reaches disk only inside a SPEC-BPQ-1 sealed object, one `self` slot under the root vault of the owner's recovery words (`bheart.keyset/2`); commands that touch a seed take `--rec-env VAR`; `verify` reads the public half with no unlock; a plaintext `bheart.keyset/1` file is refused until `bsigner keys-seal` reseals it. Tests: `no_seed_byte_reaches_disk` scans every written file for the seed in raw, base64url and hex form; the wrong words and a tampered body open nothing; bsigner 60 of 60; the nerve test 7 of 7 through sealed keys; selftest PASS. The Rust sealer is checked by the other implementation: `surfaces/bpq-rust-sealed.json` opens in bpq.js (e2e/bpq.test.mjs 19 of 19). Boundary: rewriting a file does not erase the disk blocks the old plaintext sat in |
+
 Audit two gates for PQ01's new crates, read from rustsec/advisory-db
 2026-10-08 (cargo-audit is not installed on this box): RUSTSEC-2026-0076,
 -0077 (libcrux-ml-dsa verify, patched >= 0.0.8), -0125, -0126

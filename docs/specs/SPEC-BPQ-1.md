@@ -1,7 +1,9 @@
 # SPEC-BPQ-1 — post-quantum keys and sealed objects
 
 Status: IMPLEMENTED. JS: `surfaces/bpq.js` over `surfaces/onboarding/vendor/bpq-lib.js`.
-Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`).
+Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`;
+seals only "only me", one `self` slot, which is how bsigner keeps its own keys at rest — the pinned
+`surfaces/bpq-rust-sealed.json` must open in both implementations).
 Vectors both must pass: `surfaces/bpq-vectors.json` (`node scripts/build-bpq-vectors.mjs --check`,
 `cargo test -p bsigner bpq`).
 
