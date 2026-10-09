@@ -1,0 +1,14 @@
+date_utc: 2026-10-09T10:47:56Z
+authority: the 2026-10-09 RB01 re-check order to this lane (re-check RB01 items 1-6 against upstream; minimal standalone reproductions; synthetic data only; build in WSL); scope: this host, synthetic inputs, two parties in one process, nothing sent off the host
+executor: Seat 3 (Claude Code)
+host: Linux 6.18.33.2-microsoft-standard-WSL2 x86_64
+rustc: rustc 1.99.0 (b940084d7 2026-09-28)
+cargo: cargo 1.99.0 (5f94df478 2026-08-27)
+swanky build worktree HEAD: 409d1ceb0831e2de11eb8da1b8f961f59a8b5276
+swanky origin/dev at run time: 409d1ceb0831e2de11eb8da1b8f961f59a8b5276 (2026-10-09T10:47:57Z)
+swanky origin branches:  origin/HEAD -> origin/dev origin/dev origin/fix-cuckoo 
+rust-toolchain file: 1.99.0
+cargo config rustflags:
+rustflags = [
+    "-C", "target-cpu=native", "--cfg", "vectoreyes_target_cpu_native", "-C", "link-args=-flto"
+]

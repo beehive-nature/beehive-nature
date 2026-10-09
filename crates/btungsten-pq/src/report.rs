@@ -42,14 +42,19 @@ impl Report {
     }
 
     pub fn print(&self) {
+        self.print_as("PQ01");
+    }
+
+    /// The tally, each line tagged with the lane that ran it.
+    pub fn print_as(&self, lane: &str) {
         for ((key, imp), (e, p)) in &self.rows {
-            println!("PQ01 {key} [{imp}]: executed {e} of {e}, passed {p}");
+            println!("{lane} {key} [{imp}]: executed {e} of {e}, passed {p}");
         }
         for (key, why) in &self.not_run {
-            println!("PQ01 NOT RUN {key}: {why}");
+            println!("{lane} NOT RUN {key}: {why}");
         }
         for f in &self.failures {
-            println!("PQ01 FAIL {f}");
+            println!("{lane} FAIL {f}");
         }
     }
 }

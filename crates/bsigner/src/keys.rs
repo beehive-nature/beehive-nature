@@ -44,9 +44,9 @@ const AT_REST: &str = "bpq1 sealed object (SPEC-BPQ-1 §4), one self slot under 
 pub struct Vault(Zeroizing<[u8; 32]>);
 
 impl Vault {
-    /// From a `bdidrec1…` recovery code.
+    /// From a `bdidrec1…` recovery code or the 24 recovery words.
     pub fn from_recovery_code(code: &str) -> Result<Self, String> {
-        let prk = bpq::master_prk_from_recovery_code(code).map_err(|e| e.to_string())?;
+        let prk = crate::bip39::master_prk_from_recovery(code)?;
         Ok(Self(bpq::root_vault(&prk)))
     }
 
@@ -301,6 +301,30 @@ pub fn seal_plaintext(key_id: &str, dir: Option<PathBuf>, vault: &Vault) -> Resu
         other => return Err(format!("unknown kind {other:?}")),
     };
     let public = public_bytes(&v, public_field)?;
+    // the seed must derive the recorded public key: a file whose two halves
+    // disagree is corrupt, and sealing it would hide that (review N-1,
+    // docs/dispatches/2026-10-09-zcode-pq07-pq09-review.md)
+    let derived = match kind {
+        "signature" => {
+            let a = SigAlg::parse(alg).map_err(|e| format!("keyset alg: {e}"))?;
+            let s = Zeroizing::new(
+                <[u8; 32]>::try_from(seed.as_slice()).map_err(|_| "ml-dsa seed is not 32 bytes")?,
+            );
+            pq::dsa_public_from_seed(a, &s)
+        }
+        _ => {
+            let a = KemAlg::parse(alg).map_err(|e| format!("keyset alg: {e}"))?;
+            let s = Zeroizing::new(
+                <[u8; 64]>::try_from(seed.as_slice()).map_err(|_| "ml-kem seed is not 64 bytes")?,
+            );
+            pq::kem_public_from_seed(a, &s)
+        }
+    };
+    if derived != public {
+        return Err(format!(
+            "{key_id}: the seed does not derive the recorded public key; the file is corrupt, not sealed"
+        ));
+    }
     let mut sealed = sealed_keyset(kind, alg, key_id, public_field, &public, &seed, vault);
     if let Some(c) = v.get("created_ms") {
         sealed["created_ms"] = c.clone();
@@ -562,6 +586,42 @@ mod tests {
             seal_plaintext(&kid, Some(dir.clone()), &vault).is_err(),
             "nothing left to seal"
         );
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    // review N-1: a legacy file whose seed and public key disagree is corrupt;
+    // resealing must refuse it rather than hide the mismatch under sealing
+    #[test]
+    fn a_legacy_file_with_a_swapped_seed_refuses_to_seal() {
+        let dir = temp_dir("swapped");
+        fs::create_dir_all(&dir).unwrap();
+        let vault = Vault::for_tests(0x67);
+        let g = pq::dsa_generate(SigAlg::MlDsa65);
+        let other = pq::dsa_generate(SigAlg::MlDsa65);
+        let kid = derive_key_id("ml-dsa-65", &g.verifying_key);
+        let v1 = json!({
+            "type": KEYSET_PLAINTEXT, "kind": "signature", "alg": "ml-dsa-65", "key_id": kid,
+            "created_ms": 1u64, "seed_b64u": b64u(&other.seed), "verifying_key_b64u": b64u(&g.verifying_key),
+        });
+        let path = dir.join(format!("{kid}.json"));
+        fs::write(&path, v1.to_string()).unwrap();
+        let err = seal_plaintext(&kid, Some(dir.clone()), &vault).unwrap_err();
+        assert!(err.contains("does not derive"), "{err}");
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            v1.to_string(),
+            "the file is left as it was"
+        );
+        // and a KEM file with a swapped seed, the same
+        let k = pq::kem_generate(KemAlg::MlKem768).unwrap();
+        let k2 = pq::kem_generate(KemAlg::MlKem768).unwrap();
+        let kkid = derive_key_id("ml-kem-768", &k.encapsulation_key);
+        let kv1 = json!({
+            "type": KEYSET_PLAINTEXT, "kind": "kem", "alg": "ml-kem-768", "key_id": kkid,
+            "created_ms": 1u64, "seed_b64u": b64u(&k2.seed), "encapsulation_key_b64u": b64u(&k.encapsulation_key),
+        });
+        fs::write(dir.join(format!("{kkid}.json")), kv1.to_string()).unwrap();
+        assert!(seal_plaintext(&kkid, Some(dir.clone()), &vault).is_err());
         let _ = fs::remove_dir_all(&dir);
     }
 

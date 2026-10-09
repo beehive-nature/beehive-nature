@@ -25,3 +25,7 @@ libcrux-ml-kem = "=0.0.11"
 libcrux-ml-dsa = { version = "=0.0.11", features = ["acvp"] }
 slh-dsa = "=0.2.0-rc.5"
 fips205 = "=0.4.1"
+# PQ11 classical vectors: the secp256k1 crate bnr-keys and atmirror verify with
+# (and the BIP-340 verifier PQ12 will run), and bsigner's X25519.
+k256 = { version = "=0.13.4", features = ["schnorr", "ecdsa", "arithmetic"] }
+x25519-dalek = { version = "=2.0.1", features = ["static_secrets"] }

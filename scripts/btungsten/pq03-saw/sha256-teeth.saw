@@ -1,0 +1,24 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TEETH for the SHA-256 proofs: each obligation
+// below is the shipped code against a spec with one constant wrong, and each
+// MUST fail with a counterexample. A spec that accepted them would not be
+// checking that constant.
+//
+//   sigma1Rotation   Σ1 rotating by 7 instead of 6
+//   (roundConstant, K_5 with its low bit flipped, is sha256-teeth-k.saw)
+
+enable_experimental;
+import "../pq03-cryptol/Sha256.cry";
+
+m <- mir_load_module "../../../target/saw-pq03-sha256/pq03_sha256.linked-mir.json";
+let fn n = str_concat "pq03_sha256::" n;
+let w4 = mir_array 4 mir_u32;
+
+print "PQ03-SAW-TEETH obligation sigma1Rotation";
+mir_verify m (fn "soft::sha256_digest_round_x2") [] false (do {
+  cdgh <- mir_fresh_var "cdgh" w4;
+  abef <- mir_fresh_var "abef" w4;
+  wk <- mir_fresh_var "wk" w4;
+  mir_execute_func [mir_term cdgh, mir_term abef, mir_term wk];
+  mir_return (mir_term {{ roundX2With (\x -> (x >>> 7) ^ (x >>> 11) ^ (x >>> 25)) cdgh abef wk }});
+}) (w4_unint_bitwuzla []);
+print "PQ03-SAW-TEETH UNEXPECTED-PROVEN sigma1Rotation";

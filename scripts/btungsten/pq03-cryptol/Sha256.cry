@@ -1,0 +1,174 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — the SHA-256 compression function as FIPS 180-4
+// §6.2.2 defines it: under HKDF-SHA256 (every bzDiD and bpq key derivation),
+// HMAC, BIP-340's tagged hashes and BIP-341's sighash.
+//
+// Written from the standard, not from any implementation:
+//   - K (§4.2.2) and the initial hash value H0 (§5.3.3) are COMPUTED: the
+//     first 32 bits of the fractional parts of the cube roots of the first
+//     64 primes, and of the square roots of the first 8, as integer roots of
+//     p * 2^96 and p * 2^64 taken mod 2^32. The primes are written out and
+//     checked prime and consecutive by closed terms below.
+//   - the functions Ch, Maj, Σ0, Σ1, σ0, σ1 are §4.1.2's.
+// Additions are mod 2^32, so FIPS 180-4's sums may be grouped in any order.
+// This spec groups them the way the shipped soft code does (stated at each
+// sum), so a composed proof can match terms; each grouping is still the
+// standard's sum. The closed checks at the bottom hold everything against
+// FIPS 180-4's published examples; those values are checks, never
+// definitions.
+module Sha256 where
+
+type Word = [32]
+
+// ---- constants ----------------------------------------------------------
+
+primes : [64]Integer
+primes = [   2,   3,   5,   7,  11,  13,  17,  19,  23,  29,  31,  37,  41,  43,  47,  53
+         ,  59,  61,  67,  71,  73,  79,  83,  89,  97, 101, 103, 107, 109, 113, 127, 131
+         , 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223
+         , 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311 ]
+
+isPrime : Integer -> Bit
+isPrime n = (n >= 2) /\ and [ (d * d > n) \/ (n % d != 0) | d <- [2 .. 18 : Integer] ]
+
+// the largest r with r^k <= n, bit by bit from 2^40 down (every root here
+// is below 2^36)
+iroot : Integer -> Integer -> Integer
+iroot k n = foldl step 0 [40, 39 .. 0 : Integer]
+  where
+    step r b = if (r + 2 ^^ b) ^^ k <= n then r + 2 ^^ b else r
+
+K : [64]Word
+K = [ fromInteger (iroot 3 (p * 2 ^^ 96) % 2 ^^ 32) | p <- primes ]
+
+H0 : [8]Word
+H0 = [ fromInteger (iroot 2 (p * 2 ^^ 64) % 2 ^^ 32) | p <- take`{8} primes ]
+
+// ---- §4.1.2 ---------------------------------------------------------------
+
+ch : Word -> Word -> Word -> Word
+ch x y z = (x && y) ^ (~x && z)
+
+maj : Word -> Word -> Word -> Word
+maj x y z = (x && y) ^ (x && z) ^ (y && z)
+
+bsig0 : Word -> Word
+bsig0 x = (x >>> 2) ^ (x >>> 13) ^ (x >>> 22)
+
+bsig1 : Word -> Word
+bsig1 x = (x >>> 6) ^ (x >>> 11) ^ (x >>> 25)
+
+ssig0 : Word -> Word
+ssig0 x = (x >>> 7) ^ (x >>> 18) ^ (x >> 3)
+
+ssig1 : Word -> Word
+ssig1 x = (x >>> 17) ^ (x >>> 19) ^ (x >> 10)
+
+// ---- §6.2.2 ---------------------------------------------------------------
+
+// one schedule word: W_t = σ1(W_{t-2}) + W_{t-7} + σ0(W_{t-15}) + W_{t-16},
+// grouped ((W_{t-16} + σ0(W_{t-15})) + W_{t-7}) + σ1(W_{t-2})
+wNext : Word -> Word -> Word -> Word -> Word
+wNext w16 w15 w7 w2 = ((w16 + ssig0 w15) + w7) + ssig1 w2
+
+schedule : [16]Word -> [64]Word
+schedule m = ws
+  where
+    ws = m # [ wNext (ws @ (t - 16)) (ws @ (t - 15)) (ws @ (t - 7)) (ws @ (t - 2))
+             | t <- [16 .. 63 : [8]] ]
+
+// T1 = h + Σ1(e) + Ch(e, f, g) + K_t + W_t, with kw = W_t + K_t, grouped
+// ((Σ1(e) + Ch(e, f, g)) + kw) + h
+roundT1 : Word -> Word -> Word -> Word -> Word -> Word
+roundT1 e f g h kw = ((bsig1 e + ch e f g) + kw) + h
+
+// T2 = Σ0(a) + Maj(a, b, c)
+roundT2 : Word -> Word -> Word -> Word
+roundT2 a b c = bsig0 a + maj a b c
+
+// one round: a := T1 + T2, e := T1 + d, and the rest shift
+roundKW : [8]Word -> Word -> [8]Word
+roundKW s kw = [t1 + t2, a, b, c, t1 + d, e, f, g]
+  where
+    [a, b, c, d, e, f, g, h] = s
+    t1 = roundT1 e f g h kw
+    t2 = roundT2 a b c
+
+// H := H + the state after 64 rounds over block M
+compress : [8]Word -> [16]Word -> [8]Word
+compress hs m = [ x + y | x <- hs | y <- final ]
+  where
+    ws = schedule m
+    final = foldl roundKW hs [ w + k | w <- ws | k <- K ]
+
+// ---- the shipped soft code's lane layout -----------------------------------
+// sha2 0.10.9 src/sha256/soft.rs keeps the state as two lanes [a, b, e, f]
+// and [c, d, g, h], runs two rounds per call, and holds four schedule words
+// per lane in reverse order [W_{t+3}, W_{t+2}, W_{t+1}, W_t].
+
+// two rounds, kw taken from lanes 3 then 2, returning [a, b, e, f]
+roundX2 : [4]Word -> [4]Word -> [4]Word -> [4]Word
+roundX2 cdgh abef wk = [s2 @ 0, s2 @ 1, s2 @ 4, s2 @ 5]
+  where
+    s0 = [abef @ 0, abef @ 1, cdgh @ 0, cdgh @ 1, abef @ 2, abef @ 3, cdgh @ 2, cdgh @ 3]
+    s1 = roundKW s0 (wk @ 3)
+    s2 = roundKW s1 (wk @ 2)
+
+// the next four schedule words from the previous sixteen, in lanes
+scheduleLanes : [4]Word -> [4]Word -> [4]Word -> [4]Word -> [4]Word
+scheduleLanes v0 v1 v2 v3 = [w19, w18, w17, w16]
+  where
+    w : Integer -> Word
+    w j = ([v0, v1, v2, v3] @ (j / 4)) @ (3 - j % 4)
+    w16 = wNext (w 0) (w 1) (w 9) (w 14)
+    w17 = wNext (w 1) (w 2) (w 10) (w 15)
+    w18 = wNext (w 2) (w 3) (w 11) w16
+    w19 = wNext (w 3) (w 4) (w 12) w17
+
+// ---- closed checks ---------------------------------------------------------
+
+primesArePrimesInOrder : Bit
+property primesArePrimesInOrder =
+  and [ isPrime p | p <- primes ] /\
+  and [ isPrime n == any (\p -> p == n) primes | n <- [2 .. 311 : Integer] ]
+
+// FIPS 180-4's first and last round constants and the initial hash value
+// (published in §4.2.2 and §5.3.3; checks on the derivation)
+constantsMatchThePublishedOnes : Bit
+property constantsMatchThePublishedOnes =
+  (K @ (0 : [6]) == 0x428a2f98) /\ (K @ (63 : [6]) == 0xc67178f2) /\
+  (H0 == [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a
+         , 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ])
+
+// one-block messages (length < 56 bytes): pad per §5.1.1, compress from H0
+digestShort : {n} (fin n, 55 >= n) => [n][8] -> [8]Word
+digestShort msg = compress H0 (split (join (msg # [0x80] # zero : [56][8]) # (`(8 * n) : [64])))
+
+sha256EmptyDigest : Bit
+property sha256EmptyDigest = digestShort [] ==
+  [0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924, 0x27ae41e4, 0x649b934c, 0xa495991b, 0x7852b855]
+
+sha256AbcDigest : Bit
+property sha256AbcDigest = digestShort "abc" ==
+  [0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223, 0xb00361a3, 0x96177a9c, 0xb410ff61, 0xf20015ad]
+
+// FIPS 180-4's two-block example "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
+sha256TwoBlockDigest : Bit
+property sha256TwoBlockDigest =
+  compress (compress H0 (split (join (m # [0x80] # zero : [64][8])))) (split (zero # (448 : [64]))) ==
+    [0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039, 0xa33ce459, 0x64ff2167, 0xf6ecedd4, 0x19db06c1]
+  where
+    m = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq" : [56][8]
+
+// ---- teeth only ------------------------------------------------------------
+// roundX2 with Σ1 replaced by s1: pq03-saw/sha256-teeth.saw asks the shipped
+// two-round function to equal it with one rotation wrong, which must fail.
+roundX2With : (Word -> Word) -> [4]Word -> [4]Word -> [4]Word -> [4]Word
+roundX2With s1 cdgh abef wk = [r2 @ 0, r2 @ 1, r2 @ 4, r2 @ 5]
+  where
+    rnd : [8]Word -> Word -> [8]Word
+    rnd s kw = [t1 + roundT2 a b c, a, b, c, t1 + d, e, f, g]
+      where
+        [a, b, c, d, e, f, g, h] = s
+        t1 = ((s1 e + ch e f g) + kw) + h
+    r0 = [abef @ 0, abef @ 1, cdgh @ 0, cdgh @ 1, abef @ 2, abef @ 3, cdgh @ 2, cdgh @ 3]
+    r2 = rnd (rnd r0 (wk @ 3)) (wk @ 2)

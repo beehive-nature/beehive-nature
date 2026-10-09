@@ -1,0 +1,23 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TEETH for shipped.saw: the crate's round body
+// (constant RC[0]) asked to equal a FIPS round with ONE ρ offset off by one
+// (lane 1). It MUST fail with a counterexample, or the shipped_round PROVEN
+// lines could not tell permutations apart.
+//
+// usage (from this directory): saw shipped-teeth.saw
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness.linked-mir.json";
+
+let wrong_spec = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakRoundRhoOffByOne 0 st }});
+};
+
+print "PQ02-SAW-TEETH obligation shipped_round_0 against one rho offset off by one";
+mir_verify m "pq02_harness::shipped_round_0" [] false wrong_spec (w4_unint_bitwuzla []);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN shipped_round_0 against one rho offset off by one";

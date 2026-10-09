@@ -1,0 +1,79 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — SHA-256 in sha2 0.10.9 (its soft path) against
+// FIPS 180-4 (pq03-cryptol/Sha256.cry). pq03_sha256 compiles the crate's own
+// soft.rs and consts.rs verbatim (see pq03-harness/sha256.rs).
+//
+//   K32, H256_256         the crate's tables = the constants the spec derives
+//   sha256_digest_round_x2  two rounds = two FIPS rounds, every input
+//   schedule              four schedule words = FIPS's, every input
+//   sha256_digest_block_u32 the 64-round block function = FIPS compress,
+//                         composed from the two above (their proofs as
+//                         overrides) with T1, T2 and the schedule word kept
+//                         uninterpreted, so the solver matches structure
+//   compress1             bytes to big-endian words, then the block: one
+//                         block through the crate's compress = FIPS compress
+//
+// usage (from this directory): saw sha256.saw   with MIR at ../../../target/saw-pq03-sha256/
+
+enable_experimental;
+import "../pq03-cryptol/Sha256.cry";
+
+m <- mir_load_module "../../../target/saw-pq03-sha256/pq03_sha256.linked-mir.json";
+
+let fn n = str_concat "pq03_sha256::" n;
+let proven name = print (str_concat "PQ03-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+mir_verify m (fn "k32") [] false (do { mir_execute_func []; mir_return (mir_term {{ K }}); }) bw;
+proven "sha256 K32 = K";
+mir_verify m (fn "h256") [] false (do { mir_execute_func []; mir_return (mir_term {{ H0 }}); }) bw;
+proven "sha256 H256_256 = H0";
+
+let w4 = mir_array 4 mir_u32;
+
+let round_x2_spec = do {
+  cdgh <- mir_fresh_var "cdgh" w4;
+  abef <- mir_fresh_var "abef" w4;
+  wk <- mir_fresh_var "wk" w4;
+  mir_execute_func [mir_term cdgh, mir_term abef, mir_term wk];
+  mir_return (mir_term {{ roundX2 cdgh abef wk }});
+};
+rx2 <- mir_verify m (fn "soft::sha256_digest_round_x2") [] false round_x2_spec bw;
+proven "sha256_digest_round_x2";
+
+let schedule_spec = do {
+  v0 <- mir_fresh_var "v0" w4;
+  v1 <- mir_fresh_var "v1" w4;
+  v2 <- mir_fresh_var "v2" w4;
+  v3 <- mir_fresh_var "v3" w4;
+  mir_execute_func [mir_term v0, mir_term v1, mir_term v2, mir_term v3];
+  mir_return (mir_term {{ scheduleLanes v0 v1 v2 v3 }});
+};
+sched <- mir_verify m (fn "soft::schedule") [] false schedule_spec bw;
+proven "schedule";
+
+let block_spec = do {
+  st <- mir_fresh_var "state" (mir_array 8 mir_u32);
+  blk <- mir_fresh_var "block" (mir_array 16 mir_u32);
+  sr <- mir_alloc_mut (mir_array 8 mir_u32);
+  mir_points_to sr (mir_term st);
+  br <- mir_alloc (mir_array 16 mir_u32);
+  mir_points_to br (mir_term blk);
+  mir_execute_func [sr, br];
+  mir_points_to sr (mir_term {{ compress st blk }});
+};
+blk <- mir_verify m (fn "soft::sha256_digest_block_u32") [rx2, sched] false block_spec
+  (w4_unint_bitwuzla ["roundT1", "roundT2", "wNext"]);
+proven "sha256_digest_block_u32";
+
+let compress1_spec = do {
+  st <- mir_fresh_var "state" (mir_array 8 mir_u32);
+  bytes <- mir_fresh_var "block" (mir_array 64 mir_u8);
+  sr <- mir_alloc_mut (mir_array 8 mir_u32);
+  mir_points_to sr (mir_term st);
+  br <- mir_alloc (mir_array 64 mir_u8);
+  mir_points_to br (mir_term bytes);
+  mir_execute_func [sr, br];
+  mir_points_to sr (mir_term {{ compress st (split (join bytes)) }});
+};
+mir_verify m (fn "compress1") [blk] false compress1_spec (w4_unint_bitwuzla ["compress"]);
+proven "compress1";

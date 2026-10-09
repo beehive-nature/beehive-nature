@@ -33,3 +33,19 @@ bpq-core = { path = "../bpq-core" }
 hkdf = "0.12"
 sha2 = { workspace = true }
 x25519-dalek = { version = "2", features = ["static_secrets"] }
+# taproot.rs (SPEC-BTUNGSTEN-PQ-1 PQ12): the BIP-341 tweak and the BIP-340
+# check of a key-path witness. The same pin btungsten-pq's classical KAT runs
+# (1,485 of 1,485 BIP-340 and Wycheproof cases, PQ11).
+k256 = { version = "=0.13.4", features = ["schnorr", "arithmetic"] }
+# intent.rs and bpq::attest_intent (SPEC-BPQ-1 §5c): the WB001 intent envelope,
+# its SAW-proven encoder and strict decoder.
+btungsten-wb001 = { path = "../btungsten-wb001" }
+# frost.rs (SPEC-BTUNGSTEN-PQ-1 PQ12 step 5): FROST signing over a ChillDKG key.
+# Unaudited, and its README says so; crates.io 0.5.0 is byte-identical to
+# olegfomenko/chilldkg afeafbc7f9df (the pin) but for a stray .DS_Store.
+# Behind the off-by-default frost feature until its key ceremony and sealed
+# shares land; CI runs its upstream vectors and bsigner's FROST tests.
+chilldkg-rs = { version = "=0.5.0", optional = true }
+
+[features]
+frost = ["dep:chilldkg-rs"]

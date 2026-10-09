@@ -1,0 +1,40 @@
+{
+  "about": "SPEC-BTUNGSTEN-PQ-1 PQ11: the official vector files the classical KAT runner (src/bin/classic-kat.rs) and scripts/btungsten/pq11-classic-kat.mjs fetch. Refused unless byte length and SHA-256 (base64url, no padding) match. Never committed.",
+  "sources": {
+    "bips": {
+      "repo": "https://github.com/bitcoin/bips",
+      "commit": "200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb"
+    },
+    "wycheproof": {
+      "repo": "https://github.com/C2SP/wycheproof",
+      "commit": "12fd3aaf33eb5fa1f52e026912ee00c054f9d984",
+      "committed": "2026-10-06"
+    }
+  },
+  "files": [
+    {
+      "name": "bip340",
+      "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0340/test-vectors.csv",
+      "bytes": 6892,
+      "sha256": "sha256:NMnR2cOojVJLyAd4VA3EP4MG7CSadIUpMGPDdtuFHC0"
+    },
+    {
+      "name": "ecdsa_secp256k1_sha256",
+      "url": "https://raw.githubusercontent.com/C2SP/wycheproof/12fd3aaf33eb5fa1f52e026912ee00c054f9d984/testvectors_v1/ecdsa_secp256k1_sha256_test.json",
+      "bytes": 318933,
+      "sha256": "sha256:Q9t2HAournH7B1XTVdUTDijOZKWweEbPJ-cHIIJZeoE"
+    },
+    {
+      "name": "ecdsa_secp256k1_sha256_bitcoin",
+      "url": "https://raw.githubusercontent.com/C2SP/wycheproof/12fd3aaf33eb5fa1f52e026912ee00c054f9d984/testvectors_v1/ecdsa_secp256k1_sha256_bitcoin_test.json",
+      "bytes": 305419,
+      "sha256": "sha256:03Kc6D_5dAxF50khAJpAYe_2wJGFuN0SJczQasVwSKQ"
+    },
+    {
+      "name": "x25519",
+      "url": "https://raw.githubusercontent.com/C2SP/wycheproof/12fd3aaf33eb5fa1f52e026912ee00c054f9d984/testvectors_v1/x25519_test.json",
+      "bytes": 253890,
+      "sha256": "sha256:NcP1IxzyXMZAtSTUA0Yd7unklEHV2RWjolssj_Wtvn0"
+    }
+  ]
+}

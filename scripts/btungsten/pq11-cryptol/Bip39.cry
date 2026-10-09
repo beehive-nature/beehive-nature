@@ -1,0 +1,44 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ11 — BIP-39 for 256-bit entropy, written from BIP-39
+// ("Generating the mnemonic"), not from crates/bpq-core: entropy ‖ checksum,
+// 264 bits, split into 24 groups of 11 bits, most significant first; each
+// group is a word index. The checksum is the first ENT/32 = 8 bits of
+// SHA-256(entropy); here it is a free input, so every theorem holds for any
+// hash in its place.
+module Bip39 where
+
+type Words = 24
+
+indicesSpec : [32][8] -> [8] -> [Words][16]
+indicesSpec e c = [ zext w | w <- split (join e # c) : [Words][11] ]
+
+indicesOk : [Words][16] -> Bit
+indicesOk idx = all (\i -> i < 2048) idx
+
+unpackSpec : [Words][16] -> ([32][8], [8])
+unpackSpec idx = (split (take`{256} bits), drop`{256} bits)
+  where bits = join [ drop`{5} i | i <- idx ] : [264]
+
+// the indices name words and carry the checksum byte the hash gives
+decodeOkW : ([8] -> [8] -> Bit) -> [Words][16] -> [8] -> Bit
+decodeOkW sameChecksum idx hashed = indicesOk idx /\ sameChecksum (unpackSpec idx).1 hashed
+
+decodeOk : [Words][16] -> [8] -> Bit
+decodeOk = decodeOkW (==)
+
+// every entropy and checksum byte becomes 24 valid indices and back
+mnemonicRoundTrip : [32][8] -> [8] -> Bit
+property mnemonicRoundTrip e c =
+  indicesOk (indicesSpec e c) /\ unpackSpec (indicesSpec e c) == (e, c)
+
+// every 24 valid indices come from exactly one (entropy, checksum)
+mnemonicRoundTripBack : [Words][16] -> Bit
+property mnemonicRoundTripBack idx =
+  indicesOk idx ==> indicesSpec (unpackSpec idx).0 (unpackSpec idx).1 == idx
+
+// a phrase carrying any checksum byte other than the hash's is refused
+badChecksumRefusedW : ([8] -> [8] -> Bit) -> [32][8] -> [8] -> [8] -> Bit
+badChecksumRefusedW sameChecksum e c hashed =
+  c != hashed ==> ~ decodeOkW sameChecksum (indicesSpec e c) hashed
+
+badChecksumRefused : [32][8] -> [8] -> [8] -> Bit
+property badChecksumRefused = badChecksumRefusedW (==)

@@ -46,6 +46,103 @@ jobs:
           cargo build --locked --release -p btungsten-pq --bin pq-kat
           target/release/pq-kat --cache "$HOME/pq-vectors"
 
+  # The classical algorithms kept by design, on their official vectors
+  # (crates/btungsten-pq/classic-manifest.json): BIP-340 on k256 and on the
+  # wallet's noble schnorr, Wycheproof secp256k1 ECDSA on k256, Wycheproof
+  # X25519 on x25519-dalek.
+  pq11-classic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Restore classical vector files (keyed on the manifest; every file is re-verified on use)
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/pq-vectors/classic
+          key: pq-classic-${{ hashFiles('crates/btungsten-pq/classic-manifest.json') }}
+      - name: PQ11 BIP-340, ECDSA secp256k1 and X25519 on the Rust implementations
+        run: |
+          cargo build --locked --release -p btungsten-pq --bin classic-kat
+          target/release/classic-kat --cache "$HOME/pq-vectors"
+      - name: PQ11 BIP-340 on the wallet's noble schnorr (the same pinned file)
+        run: node scripts/btungsten/pq11-classic-kat.mjs "$HOME/pq-vectors/classic/bip340"
+
+  # X-Wing on the test vectors of draft-connolly-cfrg-xwing-kem at the pinned
+  # revision (scripts/btungsten/pq05-xwing-draft.json): the browser's
+  # keygen, encapsulation and decapsulation, and bsigner's keygen and
+  # decapsulation. The draft is fetched, pin-checked, never committed.
+  pq05-xwing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Fetch the pinned X-Wing draft
+        run: |
+          url=$(node -e "console.log(require('./scripts/btungsten/pq05-xwing-draft.json').url)")
+          curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/xwing-draft.txt" "$url"
+      - name: PQ05 browser X-Wing (bpq-lib, what bpq.js calls) on the draft vectors
+        run: node scripts/btungsten/pq05-xwing-draft.mjs "$RUNNER_TEMP/xwing-draft.txt"
+      - name: PQ05 bsigner X-Wing on the same vectors
+        run: BPQ_XWING_DRAFT="$RUNNER_TEMP/xwing-draft.txt" cargo test --locked -p bsigner --release xwing_matches_the_draft_vectors -- --ignored --nocapture
+
+  # SPEC-BTUNGSTEN-PQ-1 PQ12: bsigner computes the Taproot key-path sighash
+  # itself (crates/bsigner/src/taproot.rs) from a PSBT it reads itself
+  # (crates/bsigner/src/psbt.rs). BIP-341's wallet vectors and the BIP-174
+  # and BIP-371 texts at the pinned bitcoin/bips commit
+  # (scripts/btungsten/pq12-bip341.json) are fetched, checked by size and
+  # SHA-256 inside the tests, never committed.
+  pq12-taproot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Fetch the pinned BIP-341 vectors and BIP-174 / BIP-371 texts
+        run: |
+          pin=./scripts/btungsten/pq12-bip341.json
+          for f in "url bip341.json" "psbt.bip174.url bip174.mediawiki" "psbt.bip371.url bip371.mediawiki"; do
+            set -- $f
+            url=$(node -e "console.log('$1'.split('.').reduce((o, k) => o[k], require('$pin')))")
+            curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/$2" "$url"
+          done
+      - name: PQ12 bsigner BIP-341 key path, and BIP-174 / BIP-371 PSBTs, on the official vectors
+        env:
+          BPQ_BIP341_VECTORS: ${{ runner.temp }}/bip341.json
+          BPQ_BIP174_TEXT: ${{ runner.temp }}/bip174.mediawiki
+          BPQ_BIP371_TEXT: ${{ runner.temp }}/bip371.mediawiki
+        run: cargo test --locked -p bsigner --release -- --ignored --nocapture bip341_wallet_vectors bip174_and_bip371_vectors
+      # step 5: FROST behind the gate (crates/bsigner/src/frost.rs, feature
+      # frost), over chilldkg-rs 0.5.0, unaudited
+      - name: PQ12 bsigner FROST (2-of-3 ChillDKG signs an ML-DSA-authorized PSBT; every signature a valid key-path witness)
+        if: always()
+        run: cargo test --locked -p bsigner --release --features frost frost -- --nocapture
+      - name: PQ12 chilldkg-rs 0.5.0 upstream vectors (the .crate checked against Cargo.lock's checksum)
+        if: always()
+        run: |
+          want=$(awk '/^\[\[package\]\]/{n=""} /^name = /{n=$3} /^checksum = /{if (n=="\"chilldkg-rs\"") {gsub(/"/,"",$3); print $3}}' Cargo.lock)
+          curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/chilldkg.crate" https://static.crates.io/crates/chilldkg-rs/chilldkg-rs-0.5.0.crate
+          got=$(sha256sum "$RUNNER_TEMP/chilldkg.crate" | cut -d' ' -f1)
+          [ -n "$want" ] && [ "$got" = "$want" ] || { echo "chilldkg-rs-0.5.0.crate does not match Cargo.lock"; exit 1; }
+          tar -xzf "$RUNNER_TEMP/chilldkg.crate" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/chilldkg-rs-0.5.0"
+          cargo test --locked --all-targets --all-features > "$RUNNER_TEMP/chilldkg-test.log" 2>&1 && rc=0 || rc=$?
+          grep -E "^test result|Running" "$RUNNER_TEMP/chilldkg-test.log"
+          [ "$rc" -eq 0 ] || { cat "$RUNNER_TEMP/chilldkg-test.log"; exit 1; }
+          echo "chilldkg-rs upstream: $(grep -o '[0-9]* passed' "$RUNNER_TEMP/chilldkg-test.log" | awk '{s+=$1} END {print s}') tests passed"
+      - name: PQ12 audit gate 1 (blocking) — chilldkg-rs is not in bsigner's default build
+        if: always()
+        run: |
+          if cargo tree --locked -p bsigner -e normal -i chilldkg-rs; then echo "chilldkg-rs reached the default build"; exit 1; fi
+          echo "default build: chilldkg-rs absent"; cargo tree --locked -p bsigner -e normal --features frost -i chilldkg-rs
+      - name: PQ12 audit gate 2 (recorded) — cargo audit of Cargo.lock, verbatim
+        if: always()
+        run: |
+          cargo install cargo-audit --locked --version 0.22.2
+          cargo audit --file Cargo.lock && rc=0 || rc=$?
+          echo "cargo audit exited $rc (gate 2 records, it does not block)"
+
   # Plonky3 at eab7f0e, its own workspace (crates/btungsten-p3count). The
   # LEAK experiment is a registered single run (contracts/zkreceipts/leak/
   # PREREGISTERED-STARK-v2.md) and is not re-run per push.
