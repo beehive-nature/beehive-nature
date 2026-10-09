@@ -71,6 +71,7 @@ members = [
     "crates/btungsten-pq",
     "crates/btungsten-bench",
     "crates/bpq-core",
+    "crates/bheraldry",
 ]
 
 [workspace.metadata]
