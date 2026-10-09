@@ -333,7 +333,8 @@ same cases (DIFFERENTIAL rides on KAT).
     the schedule word uninterpreted; one block through its `compress`
     (bytes to big-endian words) equals FIPS compress. Six obligations in
     5 s locally. TEETH: Σ1 rotating by 7, and one round constant off by a
-    bit, each refuted with a counterexample. Scope: the soft path. On
+    bit, each refuted with a counterexample. CI run 37932930215 (3 s).
+    Scope: the soft path. On
     x86_64 with the SHA extensions sha2 runs SHA-NI intrinsics instead,
     which this does not cover; the spec groups each FIPS sum the way the
     soft code does (addition mod 2^32 makes every grouping the standard's
@@ -461,7 +462,8 @@ The estate's own PQ glue, where its review findings lived.
   reduction for every product of two elements (x <= (q-1)^2) and for
   every sum of two products (x <= 2(q-1)^2, what its base-case multiply
   hands it), and `Elem` add, sub, neg, mul; ML-DSA's conditional
-  subtraction, add, sub and neg. Eleven obligations, 224 s locally.
+  subtraction, add, sub and neg. Eleven obligations (CI run 37935979095,
+  79 s).
   TEETH: the conditional subtraction claimed for every word, and Barrett
   claimed for every 32-bit word, each refuted with a counterexample.
   ML-DSA's Barrett (a 128-bit product) and multiply are open: bitwuzla,
