@@ -570,6 +570,16 @@ yet — every live-layer claim stays UNVERIFIED until its own beat runs
 (the spec's §deployment-status table is the ledger). Axes exercised:
 2, 5, 6 (model scale).
 
+**SETTLE bridge (2026-10-09, model scale):** the named-open SETTLE beat
+now has a receipt — `crates/btungsten-wb004/tests/skaists_bridge.rs`
+drives the COMPRESS verdict (exact integer 1/5 weights, population never
+entering) through the WB004 epochal engine: 6⁵ sovereigns aggregate
+through shards into ONE constant-size msig proposal whose execution
+writes the immutable receipt; the population governor is convicted by
+disagreement (3 small constituencies = 2,576 humans pass what 5,200
+humans' population-weight would block). A LIVE Antelope/Vaulta
+settlement stays named, not claimed (non-inheritance law).
+
 Genesis receipt: the battery caught two of its own bugs before landing
 — Buffer identity-comparison defeating the uniqueness index (equal
 sha256 digests are distinct Map keys), and the BigInt wire form — both
