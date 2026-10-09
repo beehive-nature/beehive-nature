@@ -96,6 +96,10 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq03-sha256-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
+      - name: PQ05/PQ06 SAW — the ML-KEM and ML-DSA base fields (module-lattice 0.2.3), PIN + BUILD + EQUIVALENCE + TEETH
+        if: always()
+        shell: bash
+        run: sh scripts/btungsten/pq05-field-check.sh saw
       - name: PQ05 SAW — X-Wing glue, BUILD + EQUIVALENCE + combinerBinds + TEETH
         if: always()
         shell: bash

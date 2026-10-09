@@ -1,0 +1,45 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — the ML-KEM and ML-DSA base fields:
+// integers mod q (FIPS 203 §2.3: q = 3329; FIPS 204 §2.3: q = 8380417).
+//
+// Stated on words wide enough that nothing wraps (a sum of two elements in
+// one more bit, a product in twice the width), with Cryptol's unsigned
+// remainder: on those widths these ARE integer arithmetic mod q. (A proof
+// of that bridge through Integer terms was attempted with z3 and did not
+// finish in 400 s; it rests on the widths, read.) SAW's bitvector solvers
+// take these goals directly. No reduction trick appears here; the shipped
+// Barrett reduction and conditional subtraction are what SAW holds to them.
+module Field where
+
+// ---- ML-KEM, q = 3329, elements in 16 bits -----------------------------------
+
+kemMod : [32] -> [16]
+kemMod x = drop (x % 3329)
+
+kemAdd : [16] -> [16] -> [16]
+kemAdd a b = drop (((zext a : [17]) + zext b) % 3329)
+
+kemSub : [16] -> [16] -> [16]
+kemSub a b = if a >= b then a - b else (a + 3329) - b
+
+kemNeg : [16] -> [16]
+kemNeg a = if a == 0 then 0 else 3329 - a
+
+kemMul : [16] -> [16] -> [16]
+kemMul a b = kemMod ((zext a) * (zext b))
+
+// ---- ML-DSA, q = 8380417, elements in 32 bits --------------------------------
+
+dsaMod : [64] -> [32]
+dsaMod x = drop (x % 8380417)
+
+dsaAdd : [32] -> [32] -> [32]
+dsaAdd a b = drop (((zext a : [33]) + zext b) % 8380417)
+
+dsaSub : [32] -> [32] -> [32]
+dsaSub a b = if a >= b then a - b else (a + 8380417) - b
+
+dsaNeg : [32] -> [32]
+dsaNeg a = if a == 0 then 0 else 8380417 - a
+
+dsaMul : [32] -> [32] -> [32]
+dsaMul a b = dsaMod ((zext a) * (zext b))

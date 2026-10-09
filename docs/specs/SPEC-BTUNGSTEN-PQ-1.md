@@ -448,6 +448,24 @@ The estate's own PQ glue, where its review findings lived.
   `pq05-xwing`). Not yet: the libcrux adoption decision (RustCrypto stays;
   three implementations agree on every ACVP vector, PQ01), the NTT and
   reductions at L4, and the implicit-rejection tooth as its own KAT group.
+- **Base field, 2026-10-09** (shared with PQ06; `scripts/btungsten/pq05-field-check.sh`).
+  ml-kem 0.3.2 and ml-dsa 0.1.1 define their fields with module-lattice
+  0.2.3's `define_field!`; `pq05-field/` links the checksum-pinned
+  module-lattice through cargo-saw-build and invokes the macro with the
+  crates' own arguments (the check refuses to run unless the pinned
+  crates still carry exactly those lines). PROVEN against
+  `pq05-cryptol/Field.cry` (arithmetic mod q on words wide enough not to
+  wrap; that this is integer arithmetic mod q rests on the widths, read:
+  a z3 proof of the bridge did not finish in 400 s), for every input in
+  the field: ML-KEM's branchless conditional subtraction (x < 2q), Barrett
+  reduction for every product of two elements (x <= (q-1)^2) and for
+  every sum of two products (x <= 2(q-1)^2, what its base-case multiply
+  hands it), and `Elem` add, sub, neg, mul; ML-DSA's conditional
+  subtraction, add, sub and neg. Eleven obligations, 224 s locally.
+  TEETH: the conditional subtraction claimed for every word, and Barrett
+  claimed for every 32-bit word, each refuted with a counterexample.
+  ML-DSA's Barrett (a 128-bit product) and multiply are open: bitwuzla,
+  ABC and yices are each past 15 minutes on it.
 
 ### PQ06 · ML-DSA (44/65/87)
 
@@ -466,6 +484,9 @@ The estate's own PQ glue, where its review findings lived.
   spec; shipped NTT butterfly and reductions as in PQ05.
 - Teeth: sigVer must refuse every negative ACVP case; a verifier that accepts
   a hint with too many ones (the classic `h` weight bug) must fail sigVer.
+- **Base field, 2026-10-09:** see PQ05's base-field entry (one lane, both
+  fields): ML-DSA's conditional subtraction, add, sub and neg PROVEN;
+  its Barrett reduction and multiply open.
 
 ### PQ07 · SLH-DSA-SHAKE-256f + the succession handover
 

@@ -1,0 +1,15 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — TOOTH unboundedBarrett: Barrett reduction
+// claimed for EVERY 32-bit x MUST fail with a counterexample (it is exact
+// only on the range the field hands it).
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+m <- mir_load_module "../../../target/saw-pq05-field/pq05_field.linked-mir.json";
+
+print "PQ05-SAW-TEETH obligation unboundedBarrett";
+mir_verify m "pq05_field::kem_barrett" [] false (do {
+  x <- mir_fresh_var "x" mir_u32;
+  mir_execute_func [mir_term x];
+  mir_return (mir_term {{ kemMod x }});
+}) (w4_unint_bitwuzla []);
+print "PQ05-SAW-TEETH UNEXPECTED-PROVEN unboundedBarrett";
