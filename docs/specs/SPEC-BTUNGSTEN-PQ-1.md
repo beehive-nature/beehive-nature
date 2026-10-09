@@ -755,10 +755,30 @@ Obligations:
   expected witness verifies, and signing with the vector's tweaked key and
   zero aux reproduces it byte for byte); 20 teeth refused (the witness on
   another input, one flipped bit, another hash type). `bsigner
-  taproot-sighash` and `taproot-address` expose it. Not yet: the PSBT
-  reader (step 2), the authorization and `VerifiedIntent` (steps 1 and 4),
-  the sighash DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, and
-  chilldkg behind it.
+  taproot-sighash` and `taproot-address` expose it.
+- **Built 2026-10-09, step (2): the signer reads the PSBT itself.**
+  `crates/bsigner/src/psbt.rs` reads BIP-174 version 0 with BIP-371's
+  Taproot fields: every known key type checked for key-data and value
+  length, public keys on the curve, keys unique per map, version 2 fields
+  and versions above 0 refused, a non-witness UTXO refused unless it hashes
+  to its outpoint (and agrees with any witness UTXO), no trailing byte;
+  unknown and proprietary keys allowed, as BIP-174 requires. The signer's
+  reading (`signing_view`) refuses a PSBT missing any spent output, a hash
+  type outside BIP-341's seven, zero inputs or outputs, and outputs that
+  pay more than the inputs spend. Every test PSBT in the pinned BIP-174 and
+  BIP-371 texts (CI job `pq12-taproot`): BIP-174 19 of 19 invalid refused,
+  each for its own stated defect; 10 of 10 valid, 10 of 10 role-walkthrough
+  and 4 of 4 "fails signer checks" PSBTs parsed (those 4 fail P2SH/P2WSH
+  script checks, which are not claimed: a Taproot key-path signer has no
+  such input to sign); BIP-371 11 of 11 invalid refused, 6 of 6 valid
+  parsed. The key-path signature BIP-371's signed PSBT carries (made by the
+  reference implementation) verifies over the sighash bsigner computes, and
+  one flipped bit does not. `bsigner psbt-inspect` prints what the signer
+  reads: each input's outpoint, amount, address, hash type, sighash and
+  whether the PSBT's internal key tweaks to the spent key; each output's
+  amount and address; the fee. Not yet: the authorization and
+  `VerifiedIntent` (steps 1 and 4), the sighash DIFFERENTIAL against
+  rust-bitcoin and @scure/btc-signer, and chilldkg behind it.
 
 ### PQ13 · Buzz events
 

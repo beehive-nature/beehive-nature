@@ -65,6 +65,11 @@
 //!      given a "signature", the check a node makes of that witness. Never
 //!      signs: the threshold signer behind this organ will sign only what
 //!      this computes)
+//!   bsigner psbt-inspect --file REQUEST.json
+//!     ({psbt: base64, network}: what the signer reads from a BIP-174 PSBT —
+//!      each input and output with its address, the hash types, each Taproot
+//!      key-path sighash and whether the internal key tweaks to the spent key,
+//!      the fee; refused unless every spent output is in the PSBT)
 //!   bsigner taproot-address --file REQUEST.json
 //!     ({internalKey, merkleRoot}: the BIP-341 tweak, output key and bc1p/tb1p address)
 //!   bsigner selftest
@@ -79,6 +84,7 @@ mod envelope;
 mod kat;
 mod keys;
 mod pq;
+mod psbt;
 mod taproot;
 mod x402;
 
@@ -100,6 +106,7 @@ fn main() {
         Some("bpq-attest-nostr") => cmd_bpq_attest_nostr(&args[1..]),
         Some("taproot-sighash") => cmd_taproot_sighash(&args[1..]),
         Some("taproot-address") => cmd_taproot_address(&args[1..]),
+        Some("psbt-inspect") => cmd_psbt_inspect(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -749,6 +756,108 @@ fn taproot_sighash(req: &Value) -> Result<Value, String> {
     }))
 }
 
+fn cmd_psbt_inspect(args: &[String]) -> i32 {
+    let req = match parse_opts(args).and_then(|o| {
+        read_json(
+            &o,
+            "psbt-inspect",
+            "psbt (base64), network mainnet or testnet",
+        )
+    }) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    match psbt_inspect(&req) {
+        Ok(v) => {
+            println!("{}", serde_json::to_string_pretty(&v).unwrap());
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+/// What the signer reads from a PSBT, in the terms a person checks: each
+/// input's outpoint (txid as explorers print it), amount and address, its
+/// hash type and, for a Taproot key-path input, the sighash and whether the
+/// PSBT's internal key really tweaks to the spent key; each output's
+/// amount and address; the fee.
+fn psbt_inspect(req: &Value) -> Result<Value, String> {
+    let hrp = match req["network"].as_str().unwrap_or("mainnet") {
+        "mainnet" => "bc",
+        "testnet" => "tb",
+        other => return Err(format!("network {other:?} is not mainnet or testnet")),
+    };
+    let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+    let p = psbt::parse(&psbt::from_base64(b64).map_err(|e| e.to_string())?)
+        .map_err(|e| e.to_string())?;
+    let keys: Vec<_> = p
+        .inputs
+        .iter()
+        .map(|i| {
+            (
+                i.tap_internal_key,
+                i.tap_merkle_root,
+                i.tap_key_sig.is_some(),
+            )
+        })
+        .collect();
+    let out_keys: Vec<_> = p.outputs.iter().map(|o| o.tap_internal_key).collect();
+    let v = psbt::signing_view(p).map_err(|e| e.to_string())?;
+    let pre = taproot::precompute(&v.tx, &v.prevouts).map_err(|e| e.to_string())?;
+    let inputs: Vec<Value> =
+        v.tx.inputs
+            .iter()
+            .zip(&v.prevouts)
+            .zip(&keys)
+            .enumerate()
+            .map(|(i, ((txin, prev), &(internal, root, signed)))| {
+                let spk = &prev.script_pubkey;
+                let taproot_key: Option<[u8; 32]> =
+                    (spk.len() == 34 && spk[0] == 0x51 && spk[1] == 0x20)
+                        .then(|| spk[2..].try_into().unwrap());
+                let mut txid = txin.prev_txid;
+                txid.reverse();
+                let mut j = json!({
+                    "txid": taproot::hex(&txid),
+                    "vout": txin.prev_vout,
+                    "amountSats": prev.amount,
+                    "scriptPubKey": taproot::hex(spk),
+                    "address": taproot::address_of(hrp, spk),
+                    "hashType": v.hash_types[i],
+                    "signed": signed,
+                });
+                if let Some(q) = taproot_key {
+                    j["sighash"] =
+                        match taproot::sig_msg(&v.tx, &v.prevouts, &pre, i, v.hash_types[i]) {
+                            Ok(m) => json!(taproot::hex(&taproot::sighash_of(&m))),
+                            Err(e) => json!({ "refused": e.to_string() }),
+                        };
+                    j["internalKeyMatches"] = match internal {
+                        Some(p) => {
+                            json!(taproot::output_key(&p, root.as_ref()).is_ok_and(|k| k.key == q))
+                        }
+                        None => Value::Null,
+                    };
+                }
+                j
+            })
+            .collect();
+    let outputs: Vec<Value> =
+        v.tx.outputs
+            .iter()
+            .zip(&out_keys)
+            .map(|(o, k)| {
+                json!({
+                    "amountSats": o.amount,
+                    "scriptPubKey": taproot::hex(&o.script_pubkey),
+                    "address": taproot::address_of(hrp, &o.script_pubkey),
+                    "internalKey": k.map(|k| taproot::hex(&k)),
+                })
+            })
+            .collect();
+    Ok(json!({ "inputs": inputs, "outputs": outputs, "feeSats": v.fee }))
+}
+
 fn cmd_taproot_address(args: &[String]) -> i32 {
     let req = match parse_opts(args)
         .and_then(|o| read_json(&o, "taproot-address", "internalKey, merkleRoot or null"))
@@ -777,8 +886,8 @@ fn cmd_taproot_address(args: &[String]) -> i32 {
                     "outputKey": taproot::hex(&q.key),
                     "parity": q.parity,
                     "scriptPubKey": taproot::hex(&taproot::script_pubkey(&q.key)),
-                    "mainnet": taproot::address("bc", &q.key),
-                    "testnet": taproot::address("tb", &q.key),
+                    "mainnet": taproot::address_of("bc", &taproot::script_pubkey(&q.key)),
+                    "testnet": taproot::address_of("tb", &taproot::script_pubkey(&q.key)),
                 })
             );
             0

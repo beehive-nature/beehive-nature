@@ -75,13 +75,16 @@ pub struct Prevout {
     pub script_pubkey: Vec<u8>,
 }
 
-struct Reader<'a> {
+pub(crate) struct Reader<'a> {
     b: &'a [u8],
     at: usize,
 }
 
 impl<'a> Reader<'a> {
-    fn take(&mut self, n: usize) -> Result<&'a [u8], TaprootError> {
+    pub(crate) fn new(b: &'a [u8]) -> Self {
+        Reader { b, at: 0 }
+    }
+    pub(crate) fn take(&mut self, n: usize) -> Result<&'a [u8], TaprootError> {
         let end = self
             .at
             .checked_add(n)
@@ -91,14 +94,17 @@ impl<'a> Reader<'a> {
         self.at = end;
         Ok(s)
     }
-    fn u32(&mut self) -> Result<u32, TaprootError> {
+    pub(crate) fn u8(&mut self) -> Result<u8, TaprootError> {
+        Ok(self.take(1)?[0])
+    }
+    pub(crate) fn u32(&mut self) -> Result<u32, TaprootError> {
         Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
     }
-    fn u64(&mut self) -> Result<u64, TaprootError> {
+    pub(crate) fn u64(&mut self) -> Result<u64, TaprootError> {
         Ok(u64::from_le_bytes(self.take(8)?.try_into().unwrap()))
     }
     /// CompactSize, refused unless minimally encoded.
-    fn compact(&mut self) -> Result<u64, TaprootError> {
+    pub(crate) fn compact(&mut self) -> Result<u64, TaprootError> {
         let first = self.take(1)?[0];
         let (v, min) = match first {
             0xfd => (
@@ -114,8 +120,16 @@ impl<'a> Reader<'a> {
         }
         Ok(v)
     }
-    fn remaining(&self) -> usize {
+    /// A CompactSize length followed by that many bytes.
+    pub(crate) fn bytes(&mut self) -> Result<&'a [u8], TaprootError> {
+        let n = self.compact()?;
+        self.take(usize::try_from(n).map_err(|_| TaprootError::Tx("it ends early"))?)
+    }
+    pub(crate) fn remaining(&self) -> usize {
         self.b.len() - self.at
+    }
+    fn at(&self) -> usize {
+        self.at
     }
 }
 
@@ -142,19 +156,39 @@ fn put_script(out: &mut Vec<u8>, script: &[u8]) {
     out.extend_from_slice(script);
 }
 
-/// Parse an unsigned transaction. Refused: zero inputs or zero outputs
-/// (T-VACUOUS; zero inputs is also where the segwit marker would sit), a
-/// scriptSig, an amount or a total above [`MAX_MONEY`], a non-minimal length,
-/// and any byte after the lock time.
-pub fn parse_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
-    let mut r = Reader { b: bytes, at: 0 };
-    let version = r.u32()?;
-    let n_in = r.compact()?;
-    if n_in == 0 {
-        return Err(TaprootError::Tx(
-            "zero inputs (or a witness marker, which an unsigned transaction never has)",
-        ));
+/// One output: amount and scriptPubKey, the amount at most [`MAX_MONEY`].
+pub(crate) fn read_txout(r: &mut Reader<'_>) -> Result<TxOut, TaprootError> {
+    let amount = r.u64()?;
+    if amount > MAX_MONEY {
+        return Err(TaprootError::Tx("an amount is above 21 million BTC"));
     }
+    Ok(TxOut {
+        amount,
+        script_pubkey: r.bytes()?.to_vec(),
+    })
+}
+
+/// One pass over a serialized transaction, returning it and its txid.
+///
+/// `unsigned`: BIP-174's form, where the transaction is never in witness
+/// serialization (so a 0x00 after the version is a count of zero inputs)
+/// and every scriptSig is empty. Otherwise (a previous transaction) the
+/// witness serialization is read when its marker is there, scriptSigs and
+/// witnesses are read and skipped, and the txid covers the non-witness
+/// bytes only. Refused either way: a non-minimal length, an amount or a
+/// total above [`MAX_MONEY`], a count larger than the bytes could hold, and
+/// any byte after the lock time.
+fn read_tx(bytes: &[u8], unsigned: bool) -> Result<(Tx, [u8; 32]), TaprootError> {
+    let mut r = Reader::new(bytes);
+    let mut stripped = Sha256::new();
+    let version = r.u32()?;
+    stripped.update(&bytes[..4]);
+    let witness = !unsigned && r.remaining() >= 2 && bytes[4] == 0x00 && bytes[5] == 0x01;
+    if witness {
+        r.take(2)?;
+    }
+    let body = r.at();
+    let n_in = r.compact()?;
     // an input is at least 41 bytes: bounds the allocation by the input itself
     if n_in > (r.remaining() / 41) as u64 {
         return Err(TaprootError::Tx("more inputs than bytes to hold them"));
@@ -163,7 +197,7 @@ pub fn parse_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
     for _ in 0..n_in {
         let prev_txid: [u8; 32] = r.take(32)?.try_into().unwrap();
         let prev_vout = r.u32()?;
-        if r.compact()? != 0 {
+        if !r.bytes()?.is_empty() && unsigned {
             return Err(TaprootError::Tx("an input carries a scriptSig"));
         }
         let sequence = r.u32()?;
@@ -174,41 +208,74 @@ pub fn parse_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
         });
     }
     let n_out = r.compact()?;
-    if n_out == 0 {
-        return Err(TaprootError::Tx("zero outputs"));
-    }
     if n_out > (r.remaining() / 9) as u64 {
         return Err(TaprootError::Tx("more outputs than bytes to hold them"));
     }
     let mut outputs = Vec::with_capacity(n_out as usize);
     let mut total: u64 = 0;
     for _ in 0..n_out {
-        let amount = r.u64()?;
+        let o = read_txout(&mut r)?;
         total = total
-            .checked_add(amount)
-            .filter(|&t| amount <= MAX_MONEY && t <= MAX_MONEY)
-            .ok_or(TaprootError::Tx(
-                "an amount or the total is above 21 million BTC",
-            ))?;
-        let len = r.compact()?;
-        let script_pubkey = r
-            .take(usize::try_from(len).map_err(|_| TaprootError::Tx("it ends early"))?)?
-            .to_vec();
-        outputs.push(TxOut {
-            amount,
-            script_pubkey,
-        });
+            .checked_add(o.amount)
+            .filter(|&t| t <= MAX_MONEY)
+            .ok_or(TaprootError::Tx("the outputs total above 21 million BTC"))?;
+        outputs.push(o);
+    }
+    stripped.update(&bytes[body..r.at()]);
+    if witness {
+        for _ in 0..n_in {
+            for _ in 0..r.compact()? {
+                r.bytes()?;
+            }
+        }
     }
     let lock_time = r.u32()?;
+    stripped.update(lock_time.to_le_bytes());
     if r.remaining() != 0 {
         return Err(TaprootError::Tx("bytes follow the lock time"));
     }
-    Ok(Tx {
-        version,
-        inputs,
-        outputs,
-        lock_time,
+    let txid = Sha256::digest(stripped.finalize()).into();
+    Ok((
+        Tx {
+            version,
+            inputs,
+            outputs,
+            lock_time,
+        },
+        txid,
+    ))
+}
+
+/// An unsigned transaction in BIP-174's form. Zero inputs or outputs are
+/// allowed here (BIP-174 calls such a PSBT valid); [`parse_tx`] refuses them.
+pub fn read_unsigned_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
+    read_tx(bytes, true).map(|(t, _)| t).map_err(|e| {
+        // 0x00 0x01 after the version reads as zero inputs and one output;
+        // when that reading fails, the bytes were the witness marker
+        if bytes.get(4..6) == Some(&[0x00, 0x01][..]) {
+            TaprootError::Tx("it is in witness serialization, which BIP-174 forbids here")
+        } else {
+            e
+        }
     })
+}
+
+/// A previous transaction (a PSBT's non-witness UTXO), with its txid.
+pub fn read_prev_tx(bytes: &[u8]) -> Result<(Tx, [u8; 32]), TaprootError> {
+    read_tx(bytes, false)
+}
+
+/// The unsigned transaction a signer will sign. Refused besides
+/// [`read_unsigned_tx`]'s refusals: zero inputs or zero outputs (T-VACUOUS).
+pub fn parse_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
+    let tx = read_unsigned_tx(bytes)?;
+    if tx.inputs.is_empty() {
+        return Err(TaprootError::Tx("zero inputs"));
+    }
+    if tx.outputs.is_empty() {
+        return Err(TaprootError::Tx("zero outputs"));
+    }
+    Ok(tx)
 }
 
 /// BIP-340's tagged hash: SHA-256(SHA-256(tag) ‖ SHA-256(tag) ‖ parts...).
@@ -396,11 +463,31 @@ pub fn script_pubkey(key: &[u8; 32]) -> Vec<u8> {
     s
 }
 
-/// BIP-350 bech32m address of a segwit v1 key (`hrp` "bc" or "tb").
-pub fn address(hrp: &str, key: &[u8; 32]) -> String {
-    let mut data = vec![bech32::u5::try_from_u8(1).unwrap()];
-    data.extend(key.to_base32());
-    bech32::encode(hrp, data, Variant::Bech32m).unwrap()
+/// The BIP-173/350 address of a witness-program output (`OP_n <2..40
+/// bytes>`, version 0 only with 20 or 32 bytes); `None` for any other
+/// script. Version 0 is bech32, later versions bech32m.
+pub fn address_of(hrp: &str, script_pubkey: &[u8]) -> Option<String> {
+    let (&op, rest) = script_pubkey.split_first()?;
+    let (&len, program) = rest.split_first()?;
+    let version = match op {
+        0x00 => 0,
+        0x51..=0x60 => op - 0x50,
+        _ => return None,
+    };
+    if usize::from(len) != program.len()
+        || !(2..=40).contains(&program.len())
+        || (version == 0 && program.len() != 20 && program.len() != 32)
+    {
+        return None;
+    }
+    let mut data = vec![bech32::u5::try_from_u8(version).ok()?];
+    data.extend(program.to_base32());
+    let variant = if version == 0 {
+        Variant::Bech32
+    } else {
+        Variant::Bech32m
+    };
+    bech32::encode(hrp, data, variant).ok()
 }
 
 /// Check a key-path witness signature the way a node does: the key is the
@@ -566,7 +653,7 @@ mod tests {
                 "case {n} scriptPubKey"
             );
             assert_eq!(
-                address("bc", &q.key),
+                address_of("bc", &script_pubkey(&q.key)).unwrap(),
                 c["expected"]["bip350Address"].as_str().unwrap(),
                 "case {n} address"
             );
@@ -751,6 +838,28 @@ mod tests {
             parse_tx(&fat).err(),
             Some(TaprootError::Tx("a length is not minimally encoded"))
         );
+    }
+
+    #[test]
+    fn addresses_follow_bip173_and_bip350() {
+        // BIP-173's first mainnet example (P2WPKH)
+        let p2wpkh = unhex("0014751e76e8199196d454941c45d1b3a323f1433bd6").unwrap();
+        assert_eq!(
+            address_of("bc", &p2wpkh).as_deref(),
+            Some("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4")
+        );
+        // not witness programs: P2PKH, a 21-byte version 0 program, a
+        // length byte that disagrees with the program
+        let mut p2pkh = vec![0x76, 0xa9, 0x14];
+        p2pkh.extend_from_slice(&[0u8; 20]);
+        p2pkh.extend_from_slice(&[0x88, 0xac]);
+        let mut v0_21 = vec![0x00, 21];
+        v0_21.extend_from_slice(&[1u8; 21]);
+        let mut short = vec![0x51, 0x20];
+        short.extend_from_slice(&[1u8; 31]);
+        for s in [p2pkh, v0_21, short] {
+            assert_eq!(address_of("bc", &s), None);
+        }
     }
 
     #[test]
