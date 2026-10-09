@@ -51,8 +51,12 @@
 //!   bsigner bpq-handover --rec-env VAR --context FROM --to-context TO [--at TIME] [--out PATH]
 //!     (SPEC-BPQ-1 §5 succession handover v1: reveals FROM's SLH-DSA-SHAKE-256f
 //!      key and signs with it the statement retiring FROM's id for TO's card)
+//!   bsigner bpq-attest-nostr --rec-env VAR --context CTX --event ID [--out PATH]
+//!     (SPEC-BPQ-1 §5b: CTX's bzpq1 key vouches for one Nostr event id, which
+//!      Buzz and every relay still check by its secp256k1 Schnorr signature)
 //!   bsigner bpq-verify --file PATH [--target FILE]
-//!     (a bpq1 public key card or binding; or a detached signature, checked
+//!     (a bpq1 public key card, binding, handover or Nostr event attestation;
+//!      or a detached signature, checked
 //!      against the file named by --target)
 //!   bsigner selftest
 //!   bsigner version
@@ -83,6 +87,7 @@ fn main() {
         Some("bpq-open") => cmd_bpq_open(&args[1..]),
         Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
         Some("bpq-handover") => cmd_bpq_handover(&args[1..]),
+        Some("bpq-attest-nostr") => cmd_bpq_attest_nostr(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -114,6 +119,7 @@ struct Opts {
     target: Option<String>,
     to_context: Option<String>,
     at: Option<String>,
+    event: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -132,6 +138,7 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         target: None,
         to_context: None,
         at: None,
+        event: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -154,6 +161,7 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--target" => o.target = Some(val),
             "--to-context" => o.to_context = Some(val),
             "--at" => o.at = Some(val),
+            "--event" => o.event = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -551,6 +559,46 @@ fn cmd_bpq_handover(args: &[String]) -> i32 {
     0
 }
 
+fn cmd_bpq_attest_nostr(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(var), Some(ctx), Some(event)) = (
+        o.rec_env.as_deref(),
+        o.context.as_deref(),
+        o.event.as_deref(),
+    ) else {
+        return fail("bpq-attest-nostr needs --rec-env VAR --context CTX --event ID".into());
+    };
+    let code = match std::env::var(var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bip39::master_prk_from_recovery(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e),
+    };
+    let a = match bpq::attest_nostr(&prk, ctx, event) {
+        Ok(a) => a,
+        Err(e) => return fail(e.to_string()),
+    };
+    let text = serde_json::to_string_pretty(&a).unwrap();
+    match o.out {
+        Some(path) => {
+            if let Err(e) = std::fs::write(&path, &text) {
+                return fail(format!("write {path}: {e}"));
+            }
+            println!(
+                "{}",
+                json!({ "written": path, "kind": "nostr-event", "id": a["id"], "event": a["event"] })
+            );
+        }
+        None => println!("{text}"),
+    }
+    0
+}
+
 fn cmd_bpq_verify(args: &[String]) -> i32 {
     let o = match parse_opts(args) {
         Ok(o) => o,
@@ -577,6 +625,8 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         ("detached", bpq::verify_detached(&doc, &bytes).is_some())
     } else if doc["kind"] == "handover" {
         ("handover", bpq::verify_handover(&doc).is_some())
+    } else if doc["kind"] == "nostr-event" {
+        ("nostr-event", bpq::verify_nostr(&doc).is_some())
     } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
@@ -584,7 +634,7 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
     };
     println!(
         "{}",
-        json!({ "kind": kind, "id": doc["id"], "from": doc["from"], "to": doc["to"], "verified": ok })
+        json!({ "kind": kind, "id": doc["id"], "from": doc["from"], "to": doc["to"], "event": doc["event"], "verified": ok })
     );
     if ok {
         0

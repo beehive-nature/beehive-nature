@@ -208,6 +208,23 @@ Rust only so far: `bpq::handover`, `bpq::verify_handover`, `bsigner bpq-handover
 yet. A handover is a statement, not a state: refusing a second handover from the same `from`
 (its succession key is spent once revealed) is the job of whoever keeps the log.
 
+## 5b · Nostr event attestation (2026-10-09)
+
+Buzz and every Nostr relay check an event by its secp256k1 Schnorr signature (NIP-01), which a
+quantum adversary forges; that stays upstream's protocol. This statement lets the author's
+bzpq1 key vouch for one event beside it:
+`{bpq:1, kind:"nostr-event", id, event, dsa, succ, sig}`, `event` = the Nostr event id as 64
+lowercase hex characters, `sig` = ML-DSA-65 (pure, empty context) over
+`"bpq1/nostr-event" ‖ the 32 event-id bytes`. The event id is SHA-256 of the event's author key,
+time, kind, tags and content (NIP-01), so the statement names all of them. A verifier refuses
+unless `id` recomputes from `dsa` and `succ`, `event` has that shape, and the signature
+verifies. JS `BPQ.attestNostr` / `BPQ.verifyNostr`, Rust `bpq::attest_nostr` /
+`bpq::verify_nostr`, `bsigner bpq-attest-nostr`, `bsigner bpq-verify`; bsigner verifies the
+browser's (`surfaces/bpq-nostr-vector.json`, made by bpq.js). How a relay carries the statement
+(an event kind and tags beside the attested event, so it is never inside the id it signs) is
+the upstream ask to block/buzz; the label joins the disjoint `bpq1/` set (SPEC-BTUNGSTEN-PQ-1
+PQ04, PQ13).
+
 ## 6 · Agility rules
 
 - Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot

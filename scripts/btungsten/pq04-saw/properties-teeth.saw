@@ -29,7 +29,7 @@ let tooth_with name script t = do {
 let tooth name t = tooth_with name (w4_unint_bitwuzla []) t;
 
 tooth "prefixDomain" {{
-  domainsDisjointW (update domains 12 (padD "bpq1/wrap")) (update domainLens 12 9) 13 }};
+  domainsDisjointW (update domains 13 (padD "bpq1/wrap")) (update domainLens 13 9) 14 }};
 
 tooth "wrappingBody" {{ \len seg avail -> bodyExactW bodyOkWrapping len seg avail }};
 

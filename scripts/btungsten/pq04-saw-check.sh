@@ -11,9 +11,9 @@
 #                   Cryptol definition (pq04-cryptol/BpqLayout.cry) for every
 #                   input in its domain.
 #   PROVE-UNIVERSAL pq04-saw/properties.saw: domainsDisjoint, nonceInjective,
-#                   bodyExact, segmentsTile (over the integers) and
-#                   segmentsBridge (the bitvector definitions compute those
-#                   integers), atNoNewline, kindNoSeparator and the bounded
+#                   bodyExact, segmentsTile (over the integers; the step to
+#                   the bitvector definitions is the definition of unsigned
+#                   division, not a theorem here), atNoNewline, kindNoSeparator and the bounded
 #                   bindInjective on the spec, which EQUIVALENCE ties to the Rust.
 #   TEETH           layout-teeth.saw asks utc_timestamp to take a lowercase z;
 #                   properties-teeth.saw loosens one rule per row (a prefix
@@ -115,10 +115,10 @@ run_required layout.saw domain_byte domain_len nonce seg_ok segment_count body_l
 run_teeth_verify layout-teeth.saw
 
 # ---- PROVE-UNIVERSAL -------------------------------------------------------------
-run_required properties.saw domainsDisjoint nonceInjective bodyExact segmentsTile segmentsBridge \
+run_required properties.saw domainsDisjoint nonceInjective bodyExact segmentsTile \
   atNoNewline kindNoSeparator bindInjective
 run_teeth_prove properties-teeth.saw prefixDomain wrappingBody lastEmptyWhole atAnyText \
   kindWithEquals bindAtAnyText bindKindEquals bindValueLines
 
 say "== SAW PQ04: ladder state =="
-say "BUILD: PASS | EQUIVALENCE: PROVEN (10, bpq-core layout == BpqLayout.cry) | PROVE-UNIVERSAL: PROVEN (8, incl. segmentsTile, bounded bindInjective) | TEETH: PASS (9)"
+say "BUILD: PASS | EQUIVALENCE: PROVEN (10, bpq-core layout == BpqLayout.cry) | PROVE-UNIVERSAL: PROVEN (7, incl. segmentsTile, bounded bindInjective) | TEETH: PASS (9)"

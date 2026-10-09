@@ -61,7 +61,8 @@
   };
   var DOM = {
     ID: 'bpq1/id', SUCC: 'bpq1/succession', CARD: 'bpq1/card', BIND: 'bpq1/bind', DETACHED: 'bpq1/detached',
-    KC: 'bpq1/key-commit', SEAL: 'bpq1/seal', WRAP_SELF: 'bpq1/wrap/self', WRAP_XWING: 'bpq1/wrap/x-wing'
+    KC: 'bpq1/key-commit', SEAL: 'bpq1/seal', WRAP_SELF: 'bpq1/wrap/self', WRAP_XWING: 'bpq1/wrap/x-wing',
+    NOSTR: 'bpq1/nostr-event'
   };
   var MAGIC = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];   // "\x89BPQ1\r\n\x1a"
   var ID_HRP = 'bzpq';
@@ -317,6 +318,35 @@
     } catch (e) { return { ok: false, why: e.message }; }
   }
 
+  // ── Nostr event attestations (SPEC-BPQ-1 §5b) ─────────────────────────────
+  // Buzz and every Nostr relay check an event's secp256k1 Schnorr signature,
+  // which a quantum adversary forges. This statement lets the author's bzpq1
+  // key vouch for one event id beside it: ML-DSA-65 over "bpq1/nostr-event"
+  // then the 32 id bytes. The id hashes the author's Nostr key, time, kind,
+  // tags and content (NIP-01), so the statement names all of them.
+  var EVENT_RE = /^[0-9a-f]{64}$/;
+  function nostrMsg(eventHex) {
+    var ev = new Uint8Array(32);
+    for (var i = 0; i < 32; i++) ev[i] = parseInt(eventHex.slice(2 * i, 2 * i + 2), 16);
+    return concat(utf8(DOM.NOSTR), ev);
+  }
+  function attestNostr(k, eventHex) {
+    if (typeof eventHex !== 'string' || !EVENT_RE.test(eventHex)) throw BpqError('a Nostr event id is 64 lowercase hex characters', 'event');
+    return { bpq: 1, kind: 'nostr-event', id: k.id, event: eventHex, dsa: b64u(k.dsa.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(nostrMsg(eventHex))) };
+  }
+  // {ok, id, event}: ok only when the id matches the key and the signature
+  // holds over that event id
+  function verifyNostr(a) {
+    try {
+      if (!a || a.bpq !== 1 || a.kind !== 'nostr-event') return { ok: false, why: 'not a bpq1 Nostr event attestation' };
+      if (typeof a.event !== 'string' || !EVENT_RE.test(a.event)) return { ok: false, why: 'event is not 64 lowercase hex characters' };
+      var dsa = unb64u(a.dsa), succ = unb64u(a.succ);
+      if (dsa.length !== 1952 || succ.length !== 32 || idFrom(dsa, succ) !== a.id) return { ok: false, why: 'the id does not match the key' };
+      var ok = L.ml_dsa65.verify(unb64u(a.sig), nostrMsg(a.event), dsa);
+      return ok ? { ok: true, id: a.id, event: a.event } : { ok: false, id: a.id, why: 'the signature does not verify' };
+    } catch (e) { return { ok: false, why: e.message }; }
+  }
+
   // ── sealed objects ───────────────────────────────────────────────────────
   // a vault key may be passed bare or inside a keys() result
   function vaultOf(x) { return x instanceof Uint8Array ? x : (x && x.vault ? x.vault.key : (x && x.key)); }
@@ -565,6 +595,7 @@
     card: card, verifyCard: verifyCard,
     bind: bind, verifyBind: verifyBind,
     signFile: signFile, verifyFile: verifyFile, verifyDetachedClaim: verifyDetachedClaim,
+    attestNostr: attestNostr, verifyNostr: verifyNostr,
     seal: seal, open: open, opener: opener, inspect: inspect, isSealed: isSealed,
     fingerprint: fingerprint, b64u: b64u, unb64u: unb64u
   });

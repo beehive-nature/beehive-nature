@@ -67,9 +67,17 @@ RC ir = foldl (||) zero [ if rc (j + 7 * ir) then (1 : Lane) << ((2 ^^ j) - 1) e
 iota : Integer -> State -> State
 iota ir A = update A (0 : [5]) (A @ (0 : [5]) ^ RC ir)
 
+// §3.3 Rnd with its round constant as the argument. Two round pairs share a
+// constant (RC 5 = RC 22, RC 6 = RC 20), so a round is a function of the
+// constant, not of the index; round.saw keeps this one uninterpreted when
+// it composes the 24 rounds.
+keccakRoundRC : Lane -> State -> State
+keccakRoundRC c A = update B (0 : [5]) (B @ (0 : [5]) ^ c)
+  where B = chi (pi (rho (theta A)))
+
 // §3.3 Rnd and Keccak-p[1600, 24] = Keccak-f[1600]
 keccakRound : Integer -> State -> State
-keccakRound ir A = iota ir (chi (pi (rho (theta A))))
+keccakRound ir A = keccakRoundRC (RC ir) A
 
 keccakF : State -> State
 keccakF A = foldl (\s ir -> keccakRound ir s) A [0 .. 23 : Integer]

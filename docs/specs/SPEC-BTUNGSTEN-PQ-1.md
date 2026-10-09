@@ -325,13 +325,15 @@ The estate's own PQ glue, where its review findings lived.
     `len - i·seg` path carried 64-bit multiply and subtract overflow
     obligations no solver here closed.
   - PROVE-UNIVERSAL `domainsDisjoint`, `nonceInjective`, `bodyExact`,
-    `segmentsTile`, `segmentsBridge`, `atNoNewline`, `kindNoSeparator`,
+    `segmentsTile`, `atNoNewline`, `kindNoSeparator`,
     `bindInjective`. 64-bit division defeats every bit-level solver on this
     box (bitwuzla does not close `len % seg < seg` in 5 minutes), so the
     segment facts split: `bodyExact` holds for ANY segment count
     (segCount uninterpreted); `segmentsTile` is over the integers (z3,
-    division native); `segmentsBridge` says the bitvector definitions
-    compute those integers. `headTotal` became structural instead: bsigner
+    division native); the step from the bitvector definitions to those
+    integers is the definition of unsigned division (SMT-LIB bvudiv and
+    bvurem), stated, not proven: posed as a goal (`segmentsBridge`), z3
+    returned Unknown after 78 minutes in CI. `headTotal` became structural instead: bsigner
     takes every part with a checked range and refuses parts that do not tile
     the BODY, so no length can make it panic, and `segmentsTile` is why an
     accepted object never meets that refusal.
@@ -685,6 +687,17 @@ referencing the target event. A separate event avoids the circularity of a
 tag inside the id it signs. Obligations: the label joins PQ04's
 `domainsDisjoint`; verifiers that do not know the kind ignore it; the
 upstream ask is filed with block/buzz by the upstream-handling seat.
+
+- **Built 2026-10-09** (the statement; carrying it on a relay is the
+  upstream ask): SPEC-BPQ-1 §5b, `{bpq:1, kind:"nostr-event", id, event,
+  dsa, succ, sig}`. Browser `BPQ.attestNostr` / `verifyNostr`, Rust
+  `bpq::attest_nostr` / `verify_nostr`, `bsigner bpq-attest-nostr`, and
+  `bpq-verify` reads the kind. `bpq1/nostr-event` is the thirteenth label
+  of bpq-core's domain table, so `domainsDisjoint` covers it. Refused in
+  both test suites: another event, uppercase hex, a short id, another kind
+  or version, another id, an empty signature, another key's signature, the
+  reserved context. bsigner verifies the browser-made
+  `surfaces/bpq-nostr-vector.json`.
 
 ### PQ14 · EcGFp5 Schnorr inside Plonky3 (after PQ10 has its own evidence)
 

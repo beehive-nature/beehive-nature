@@ -39,5 +39,5 @@ let reference_spec = do {
   mir_execute_func [r];
   mir_points_to r (mir_term {{ keccakF st }});
 };
-mir_verify m "pq02_harness::reference" round_ovs false reference_spec (w4_unint_bitwuzla ["keccakRound"]);
+mir_verify m "pq02_harness::reference" round_ovs false reference_spec (w4_unint_bitwuzla ["keccakRoundRC"]);
 proven "reference";

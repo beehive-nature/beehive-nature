@@ -23,7 +23,11 @@ pub fn indices(entropy: &[u8; 32], checksum: u8) -> [u16; WORDS] {
         let mut b = 0;
         while b < 11 {
             let bit = w * 11 + b;
-            let byte = if bit < 256 { entropy[bit / 8] } else { checksum };
+            let byte = if bit < 256 {
+                entropy[bit / 8]
+            } else {
+                checksum
+            };
             v = (v << 1) | (((byte >> (7 - bit % 8)) & 1) as u16);
             b += 1;
         }

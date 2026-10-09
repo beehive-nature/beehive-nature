@@ -31,13 +31,15 @@ pub const HANDOVER: u8 = 9;
 pub const COSIGN: u8 = 10;
 /// `bpq1/words`: the six-word id fingerprint preimage (bpq.js `words`)
 pub const WORDS: u8 = 11;
+/// `bpq1/nostr-event`: the Nostr event attestation message (PQ13)
+pub const NOSTR_EVENT: u8 = 12;
 /// Domain ids are `0 .. DOMAIN_COUNT`.
-pub const DOMAIN_COUNT: u8 = 12;
+pub const DOMAIN_COUNT: u8 = 13;
 pub const DOMAIN_CAP: usize = 20;
 
 /// Every `bpq1/` domain label: the prefix of a signing message, of a hash
 /// preimage or of an HKDF wrap info. Index = domain id.
-pub const DOMAIN_STR: [&str; 12] = [
+pub const DOMAIN_STR: [&str; 13] = [
     "bpq1/id",
     "bpq1/succession",
     "bpq1/card",
@@ -50,6 +52,7 @@ pub const DOMAIN_STR: [&str; 12] = [
     "bpq1/handover",
     "bpq1/cosign:",
     "bpq1/words",
+    "bpq1/nostr-event",
 ];
 
 const fn pad(s: &str) -> [u8; DOMAIN_CAP] {
@@ -64,20 +67,20 @@ const fn pad(s: &str) -> [u8; DOMAIN_CAP] {
     out
 }
 
-const fn pads() -> [[u8; DOMAIN_CAP]; 12] {
-    let mut out = [[0u8; DOMAIN_CAP]; 12];
+const fn pads() -> [[u8; DOMAIN_CAP]; 13] {
+    let mut out = [[0u8; DOMAIN_CAP]; 13];
     let mut d = 0;
-    while d < 12 {
+    while d < 13 {
         out[d] = pad(DOMAIN_STR[d]);
         d += 1;
     }
     out
 }
 
-const fn lens() -> [u32; 12] {
-    let mut out = [0u32; 12];
+const fn lens() -> [u32; 13] {
+    let mut out = [0u32; 13];
     let mut d = 0;
-    while d < 12 {
+    while d < 13 {
         out[d] = DOMAIN_STR[d].len() as u32;
         d += 1;
     }
@@ -85,9 +88,9 @@ const fn lens() -> [u32; 12] {
 }
 
 /// The domain labels, zero-padded to `DOMAIN_CAP`.
-pub const DOMAIN_BYTES: [[u8; DOMAIN_CAP]; 12] = pads();
+pub const DOMAIN_BYTES: [[u8; DOMAIN_CAP]; 13] = pads();
 /// The domain label lengths.
-pub const DOMAIN_LEN: [u32; 12] = lens();
+pub const DOMAIN_LEN: [u32; 13] = lens();
 
 /// Byte `k` of domain `d`'s label, zero past its end: the table SAW proves
 /// equal to the spec's. `d` must be a domain id.
@@ -168,7 +171,7 @@ pub fn segment_plain_len(i: u64, n: u64, len: u64, seg: u64) -> u64 {
         seg
     } else if len == 0 {
         0
-    } else if len % seg == 0 {
+    } else if len.is_multiple_of(seg) {
         seg
     } else {
         len % seg

@@ -86,12 +86,17 @@ mod tests {
         let js = include_str!("../../../surfaces/onboarding/vendor/bip39-wordlist.js");
         let words = list();
         assert_eq!(words.len(), 2048);
-        assert!(words.windows(2).all(|w| w[0] < w[1]), "sorted, so binary search holds");
+        assert!(
+            words.windows(2).all(|w| w[0] < w[1]),
+            "sorted, so binary search holds"
+        );
         // the vendored JS carries the same words in the same order
         let mut at = 0;
         for w in &words {
             let quoted = format!("\"{w}\"");
-            let pos = js[at..].find(&quoted).unwrap_or_else(|| panic!("{w} missing from the JS list"));
+            let pos = js[at..]
+                .find(&quoted)
+                .unwrap_or_else(|| panic!("{w} missing from the JS list"));
             at += pos + quoted.len();
         }
     }
@@ -104,7 +109,10 @@ mod tests {
             assert_eq!(p.split(' ').count(), 24);
             assert_eq!(*master_prk_from_phrase(&p).unwrap(), prk);
             assert_eq!(*master_prk_from_phrase(&p.to_uppercase()).unwrap(), prk);
-            assert_eq!(*master_prk_from_recovery(&format!("  {}\n", *p)).unwrap(), prk);
+            assert_eq!(
+                *master_prk_from_recovery(&format!("  {}\n", *p)).unwrap(),
+                prk
+            );
         }
         // BIP-39's all-zero 256-bit vector: 23 x abandon + art
         let zero = phrase(&[0u8; 32]);

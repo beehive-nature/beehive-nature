@@ -397,3 +397,22 @@ test('an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens 
   assert.equal(o.meta, null);
   await assert.rejects(B.open(obj, { self: rootOf('another vault') }));
 });
+
+test('Nostr event attestations (SPEC-BPQ-1 section 5b): one verifies, every forgery is refused, the committed vector verifies', () => {
+  const k = keysOf('A');
+  const event = 'ab'.repeat(32);
+  const a = JSON.parse(JSON.stringify(B.attestNostr(k, event)));
+  assert.deepEqual(B.verifyNostr(a), { ok: true, id: k.id, event });
+  const bent = edit => { const x = JSON.parse(JSON.stringify(a)); edit(x); return B.verifyNostr(x).ok; };
+  assert.equal(bent(x => { x.event = 'ac'.repeat(32); }), false, 'another event');
+  assert.equal(bent(x => { x.event = 'AB'.repeat(32); }), false, 'uppercase hex');
+  assert.equal(bent(x => { x.kind = 'binding'; }), false, 'another kind');
+  assert.equal(bent(x => { x.id = keysOf('B').id; }), false, 'another id');
+  const other = B.attestNostr(keysOf('B'), event);
+  assert.equal(bent(x => { x.sig = other.sig; }), false, "another key's signature");
+  assert.throws(() => B.attestNostr(k, 'zz'), e => e.code === 'event');
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-vector.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
+});

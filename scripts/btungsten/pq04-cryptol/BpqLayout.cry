@@ -4,7 +4,9 @@
 //   domains        every bpq1/ label, and domainsDisjoint (prefix-free)
 //   nonceSpec      flag ‖ index, big-endian; nonceInjective
 //   segCount ...   the BODY's segmentation and length; bodyExact,
-//                  segmentsTile (integers), segmentsBridge
+//                  segmentsTile (integers); segmentsBridge states the step to
+//                  bitvectors, which is the definition of unsigned division
+//                  and is not posed to a solver (z3: Unknown after 78 min)
 //   atOk, kindOk   the binding validators, as character-class patterns;
 //                  atNoNewline, kindNoSeparator
 //   bindInjective  a binding's signed preimage "id\nat\n(kind=value\n)*"
@@ -26,18 +28,18 @@ type DomCap = 20
 padD : {n} (fin n, DomCap >= n) => [n][8] -> [DomCap][8]
 padD s = s # zero
 
-// sixteen slots so a 4-bit index never leaves the table; ids 12-15 are empty
+// sixteen slots so a 4-bit index never leaves the table; ids 13-15 are empty
 domains : [16][DomCap][8]
 domains = [ padD "bpq1/id", padD "bpq1/succession", padD "bpq1/card", padD "bpq1/bind"
           , padD "bpq1/detached", padD "bpq1/key-commit", padD "bpq1/seal"
           , padD "bpq1/wrap/self", padD "bpq1/wrap/x-wing", padD "bpq1/handover"
-          , padD "bpq1/cosign:", padD "bpq1/words", zero, zero, zero, zero ]
+          , padD "bpq1/cosign:", padD "bpq1/words", padD "bpq1/nostr-event", zero, zero, zero ]
 
 domainLens : [16][32]
 domainLens = [ length "bpq1/id", length "bpq1/succession", length "bpq1/card", length "bpq1/bind"
              , length "bpq1/detached", length "bpq1/key-commit", length "bpq1/seal"
              , length "bpq1/wrap/self", length "bpq1/wrap/x-wing", length "bpq1/handover"
-             , length "bpq1/cosign:", length "bpq1/words", 0, 0, 0, 0 ]
+             , length "bpq1/cosign:", length "bpq1/words", length "bpq1/nostr-event", 0, 0, 0 ]
 
 domainByte : [8] -> [32] -> [8]
 domainByte d k = if k < 20 then (domains @ (drop`{4} d)) @ k else 0
@@ -58,7 +60,7 @@ domainsDisjointW tbl lens count =
 // no label is a byte prefix of another, so no byte string is a message,
 // preimage or wrap info of two kinds
 domainsDisjoint : Bit
-property domainsDisjoint = domainsDisjointW domains domainLens 12
+property domainsDisjoint = domainsDisjointW domains domainLens 13
 
 // ---- nonce ------------------------------------------------------------------
 

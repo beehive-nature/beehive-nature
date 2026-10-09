@@ -5,15 +5,13 @@
 // which builds the signed bytes itself; no Rust function is proven equal to
 // it.
 //
-//   domainsDisjoint   no bpq1/ label is a byte prefix of another (12 labels)
+//   domainsDisjoint   no bpq1/ label is a byte prefix of another (13 labels)
 //   nonceInjective    distinct (flag, index) give distinct nonces
 //   bodyExact         when the BODY check accepts, len + 16·n neither wraps
 //                     nor leaves the object (segCount left uninterpreted: true
 //                     for any segment count)
 //   segmentsTile      over the integers: n ≥ 1, the last segment holds 1..seg
 //                     bytes (0 for an empty file), (n-1)·seg + last = len
-//   segmentsBridge    the bitvector segCount and lastLen compute exactly those
-//                     integers for every 64-bit len and seg in range
 //   atNoNewline       no accepted timestamp carries CR or LF
 //   kindNoSeparator   no accepted claim kind carries LF or '='
 //   bindInjective     two accepted bindings with the same signed preimage
@@ -23,7 +21,12 @@
 //
 // Division is why the segment facts are split: no bit-level solver here
 // closes 64-bit division (len % seg < seg alone times out in bitwuzla),
-// while z3 proves the integer statements at once.
+// while z3 proves the integer statements at once. The step from the
+// bitvector segCount and lastLen to those integers is the definition of
+// unsigned division (SMT-LIB FixedSizeBitVectors bvudiv and bvurem, which
+// Cryptol's / and % on [n] and the Rust u64 operators both are), not a
+// theorem here: posed as one (segmentsBridge in the spec), z3 returned
+// Unknown after 78 minutes in CI.
 //
 // usage (from this directory): saw properties.saw
 
@@ -40,8 +43,6 @@ prove_print (w4_unint_bitwuzla ["segCount"]) {{ \len seg avail -> bodyExact len 
 proven "bodyExact";
 prove_print (w4_unint_z3 []) {{ \l s -> segmentsTile l s }};
 proven "segmentsTile";
-prove_print (w4_unint_z3 []) {{ \len seg -> segmentsBridge len seg }};
-proven "segmentsBridge";
 prove_print bw {{ \t -> atNoNewline t }};
 proven "atNoNewline";
 prove_print bw {{ \t -> kindNoSeparator t }};

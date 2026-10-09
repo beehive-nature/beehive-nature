@@ -345,6 +345,19 @@ pub fn id_from(dsa_public: &[u8], succession_commit: &[u8]) -> Option<String> {
     bech32::encode(ID_HRP, d.to_base32(), Variant::Bech32m).ok()
 }
 
+/// The ML-DSA-65 signing key of one context (deterministic signing, empty
+/// context string, as every bsigner statement signs).
+fn dsa_signing_key(master_prk: &[u8; 32], context: &str) -> Result<SigningKey<MlDsa65>, BpqError> {
+    let mut dsa_seed = Zeroizing::new([0u8; 32]);
+    expand_label(
+        master_prk,
+        bpq_core::ML_DSA_65_RECORD,
+        context,
+        dsa_seed.as_mut(),
+    )?;
+    Ok(SigningKey::<MlDsa65>::from_seed(&(*dsa_seed).into()))
+}
+
 fn dsa_verify(public: &[u8], msg: &[u8], sig: &[u8]) -> bool {
     let Ok(enc) = EncodedVerifyingKey::<MlDsa65>::try_from(public) else {
         return false;
@@ -385,14 +398,7 @@ pub fn card(master_prk: &[u8; 32], context: &str) -> Result<Value, BpqError> {
     let k = keys(master_prk, context)?;
     let (slh, _) = succession_keys(master_prk, context)?;
     let succ = succession_commit(&slh.into_bytes());
-    let mut dsa_seed = Zeroizing::new([0u8; 32]);
-    expand_label(
-        master_prk,
-        bpq_core::ML_DSA_65_RECORD,
-        context,
-        dsa_seed.as_mut(),
-    )?;
-    let sk = SigningKey::<MlDsa65>::from_seed(&(*dsa_seed).into());
+    let sk = dsa_signing_key(master_prk, context)?;
     let sig: Signature<MlDsa65> =
         sk.sign(&[dom(layout::CARD), &k.dsa_public, &k.kem_public, &succ].concat());
     Ok(serde_json::json!({
@@ -483,6 +489,72 @@ pub fn verify_handover(h: &Value) -> Option<String> {
     let sig: [u8; fips205::slh_dsa_shake_256f::SIG_LEN] = sig.try_into().ok()?;
     pk.verify(&handover_message(from, to, at), &sig, &[])
         .then(|| to.to_string())
+}
+
+/// A Nostr event id: 64 lowercase hex characters (NIP-01).
+fn nostr_event_id(hex: &str) -> Option<[u8; 32]> {
+    let ok = hex.len() == 64
+        && hex
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b));
+    if !ok {
+        return None;
+    }
+    let mut out = [0u8; 32];
+    for (i, byte) in out.iter_mut().enumerate() {
+        *byte = u8::from_str_radix(&hex[2 * i..2 * i + 2], 16).ok()?;
+    }
+    Some(out)
+}
+
+fn nostr_message(event: &[u8; 32]) -> Vec<u8> {
+    [dom(layout::NOSTR_EVENT), &event[..]].concat()
+}
+
+/// The Nostr event attestation v1 (SPEC-BPQ-1 §5b): the bzpq1 key of
+/// `context` vouches for one Nostr event id with ML-DSA-65 over
+/// "bpq1/nostr-event" || the 32 id bytes. Buzz and every relay keep checking
+/// the event's secp256k1 Schnorr signature; this statement stands beside it.
+/// The twin of `BPQ.attestNostr` in surfaces/bpq.js.
+pub fn attest_nostr(master_prk: &[u8; 32], context: &str, event: &str) -> Result<Value, BpqError> {
+    use fips205::traits::SerDes;
+    use ml_dsa::signature::Signer;
+    let ev = nostr_event_id(event).ok_or(BpqError::Format(
+        "a Nostr event id is 64 lowercase hex characters",
+    ))?;
+    let k = keys(master_prk, context)?;
+    let (slh, _) = succession_keys(master_prk, context)?;
+    let succ = succession_commit(&slh.into_bytes());
+    let sig: Signature<MlDsa65> = dsa_signing_key(master_prk, context)?.sign(&nostr_message(&ev));
+    Ok(serde_json::json!({
+        "bpq": 1,
+        "kind": "nostr-event",
+        "id": id_from(&k.dsa_public, &succ).expect("lengths are fixed"),
+        "event": event,
+        "dsa": b64::b64u(&k.dsa_public),
+        "succ": b64::b64u(&succ),
+        "sig": b64::b64u(&sig.encode()),
+    }))
+}
+
+/// Verify a Nostr event attestation: the id recomputes from `dsa` and
+/// `succ`, `event` is a Nostr event id, and the signature holds over it.
+/// Returns (id, event).
+pub fn verify_nostr(a: &Value) -> Option<(String, String)> {
+    if whole(&a["bpq"]) != Some(1) || a["kind"] != "nostr-event" {
+        return None;
+    }
+    let (id, event) = (a["id"].as_str()?, a["event"].as_str()?);
+    let ev = nostr_event_id(event)?;
+    let (dsa, succ, sig) = (
+        unb64(&a["dsa"]).ok()?,
+        unb64(&a["succ"]).ok()?,
+        unb64(&a["sig"]).ok()?,
+    );
+    if id_from(&dsa, &succ).as_deref() != Some(id) {
+        return None;
+    }
+    dsa_verify(&dsa, &nostr_message(&ev), &sig).then(|| (id.to_string(), event.to_string()))
 }
 
 /// A binding statement: the PQ id vouching for classical accounts, signed
@@ -611,7 +683,8 @@ pub fn seal_self(plain: &[u8], vault: &[u8; 32]) -> Vec<u8> {
     // the same segment arithmetic open() reads with (bpq-core, PQ04)
     let (len, seg) = (plain.len() as u64, SEG_DEFAULT as u64);
     let n = layout::segment_count(len, seg);
-    let mut out = Vec::with_capacity(8 + 12 + core.len() + keys.len() + plain.len() + 16 * n as usize);
+    let mut out =
+        Vec::with_capacity(8 + 12 + core.len() + keys.len() + plain.len() + 16 * n as usize);
     out.extend_from_slice(&MAGIC);
     out.extend_from_slice(&(core.len() as u32).to_be_bytes());
     out.extend_from_slice(core.as_bytes());
@@ -789,9 +862,9 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     let fk = file_key.ok_or(BpqError::NoKey)?;
 
     // Every part is taken with a checked range, so no length can make the
-    // parser panic; segmentsTile and segmentsBridge (PQ04) are why an
-    // accepted object's parts tile its BODY exactly, so neither refusal below
-    // fires for one.
+    // parser panic; segmentsTile (PQ04, over the integers that u64 / and %
+    // compute) is why an accepted object's parts tile its BODY exactly, so
+    // neither refusal below fires for one.
     let mut bytes = Vec::with_capacity(len as usize);
     let mut off = 0usize;
     for i in 0..n {
@@ -892,6 +965,69 @@ mod tests {
             );
         }
         assert!(keys(&prk, &"x".repeat(64)).is_ok());
+    }
+
+    // The Nostr event attestation (SPEC-BPQ-1 §5b, PQ13): made here it
+    // verifies; made by bpq.js it verifies here; every forgery is refused.
+    #[test]
+    fn nostr_attestations_verify_and_their_forgeries_do_not() {
+        let v = vectors();
+        let rows = v["keys"].as_array().unwrap();
+        let row = rows.iter().find(|r| r["name"] == "A").unwrap();
+        let prk = root(row["rootFrom"].as_str().unwrap());
+        let ctx = row["context"].as_str().unwrap();
+        let event = "ab".repeat(32);
+        let a = attest_nostr(&prk, ctx, &event).unwrap();
+        let round: Value = serde_json::from_str(&a.to_string()).unwrap();
+        assert_eq!(
+            verify_nostr(&round),
+            Some((row["id"].as_str().unwrap().to_string(), event.clone()))
+        );
+        let refused = |edit: &dyn Fn(&mut Value)| {
+            let mut x = round.clone();
+            edit(&mut x);
+            verify_nostr(&x).is_none()
+        };
+        assert!(
+            refused(&|x| x["event"] = Value::from("ac".repeat(32))),
+            "another event"
+        );
+        assert!(
+            refused(&|x| x["event"] = Value::from("AB".repeat(32))),
+            "uppercase hex"
+        );
+        assert!(
+            refused(&|x| x["event"] = Value::from("ab".repeat(31))),
+            "short id"
+        );
+        assert!(
+            refused(&|x| x["kind"] = Value::from("binding")),
+            "another kind"
+        );
+        assert!(refused(&|x| x["bpq"] = Value::from(2)), "another version");
+        let b_id = rows.iter().find(|r| r["name"] == "B").unwrap()["id"].clone();
+        assert!(refused(&|x| x["id"] = b_id.clone()), "another id");
+        assert!(refused(&|x| x["sig"] = Value::from("")), "empty signature");
+        // another key signing for the same event cannot claim this id
+        let other = attest_nostr(&prk, "pq:other", &event).unwrap();
+        assert!(
+            refused(&|x| x["sig"] = other["sig"].clone()),
+            "another key's signature"
+        );
+        assert!(attest_nostr(&prk, ctx, "zz").is_err(), "not an event id");
+        assert!(matches!(
+            attest_nostr(&prk, ROOT_CONTEXT, &event),
+            Err(BpqError::ReservedContext)
+        ));
+        // made by the browser
+        let js: Value =
+            serde_json::from_str(include_str!("../../../surfaces/bpq-nostr-vector.json")).unwrap();
+        let (id, ev) = verify_nostr(&js["attestation"]).expect("the bpq.js attestation verifies");
+        assert_eq!(id, row["id"].as_str().unwrap());
+        assert_eq!(
+            unhex(&ev),
+            Sha256::digest(js["eventFrom"].as_str().unwrap().as_bytes()).to_vec()
+        );
     }
 
     // HKDF-SHA256 as expand_label and hkdf32 call it, on RFC 5869's three
