@@ -44,6 +44,8 @@ jobs:
         run: cargo test --locked -p btungsten-bench
       - name: RB03 harness, native — budget.rs (compiled by path) with its own unit tests and the boundary vectors
         run: cargo test --locked --manifest-path scripts/btungsten/rb03-budget/Cargo.toml
+      - name: RB04 harness — the committed Daedalus-generated parsers against BNR's decode (vectors, a fixed-seed sample, TEETH)
+        run: cargo test --locked --manifest-path scripts/btungsten/rb04-daedalus/Cargo.toml
 
   changes:
     runs-on: ubuntu-24.04

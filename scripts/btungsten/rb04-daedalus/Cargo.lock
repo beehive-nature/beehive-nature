@@ -512,6 +512,7 @@ version = "0.1.0"
 dependencies = [
  "btungsten-wb001",
  "daedalus-rts-rust",
+ "serde",
  "serde_json",
  "sha2",
 ]

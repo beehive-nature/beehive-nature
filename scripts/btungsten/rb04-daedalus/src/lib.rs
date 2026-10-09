@@ -23,10 +23,10 @@
 //!
 //! A panic in either parser is caught and counted as a disagreement.
 
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 
-use btungsten_wb001::core::Intent;
 use btungsten_wb001::Refusal;
+use btungsten_wb001::core::Intent;
 use daedalus_rts_rust as ddl;
 
 pub mod corpus;
@@ -131,7 +131,10 @@ pub fn bnr(input: &[u8]) -> Bnr {
 /// A generated parser's answer for one input.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Ddl {
-    Accept { value: Decoded, consumed: usize },
+    Accept {
+        value: Decoded,
+        consumed: usize,
+    },
     /// The parser failed; the runtime's error report, first line.
     Fail(String),
     /// The parser raised a Daedalus exception.
@@ -157,7 +160,8 @@ macro_rules! adapter {
     ($m:ident) => {
         pub mod $m {
             use super::*;
-            use crate::generated::$m as g;
+            // the generated module holds one Rust module per Daedalus module
+            use crate::generated::$m::WB001 as g;
 
             fn decoded(e: g::Envelope) -> Decoded {
                 Decoded {
@@ -180,22 +184,40 @@ macro_rules! adapter {
             ) -> Ddl {
                 let r = catch_unwind(AssertUnwindSafe(|| {
                     let mut st = ddl::new_parser_state();
-                    let inp = ddl::new_input(ddl::new_byte_array(b"rb04"), ddl::new_byte_array(input));
+                    let inp =
+                        ddl::new_input(ddl::new_byte_array(b"rb04"), ddl::new_byte_array(input));
                     match entry(&mut st, inp) {
-                        ddl::ParserResult::Ok(e, rest) => Ddl::Accept { value: decoded(e), consumed: rest.offset() },
-                        ddl::ParserResult::Failure => Ddl::Fail(st.error.to_string().lines().next().unwrap_or("").to_string()),
-                        ddl::ParserResult::Exception => Ddl::Exception(st.error.to_string().lines().next().unwrap_or("").to_string()),
+                        ddl::ParserResult::Ok(e, rest) => Ddl::Accept {
+                            value: decoded(e),
+                            consumed: rest.offset(),
+                        },
+                        ddl::ParserResult::Failure => Ddl::Fail(
+                            st.error
+                                .to_string()
+                                .lines()
+                                .next()
+                                .unwrap_or("")
+                                .to_string(),
+                        ),
+                        ddl::ParserResult::Exception => Ddl::Exception(
+                            st.error
+                                .to_string()
+                                .lines()
+                                .next()
+                                .unwrap_or("")
+                                .to_string(),
+                        ),
                     }
                 }));
                 r.unwrap_or(Ddl::Panic)
             }
 
             pub fn exact(input: &[u8]) -> Ddl {
-                run(input, g::exact)
+                run(input, g::Exact)
             }
 
             pub fn prefix(input: &[u8]) -> Ddl {
-                run(input, g::envelope)
+                run(input, g::Envelope)
             }
         }
     };
@@ -219,11 +241,31 @@ pub struct Variant {
 }
 
 pub const VARIANTS: &[Variant] = &[
-    Variant { name: "honest", exact: adapters::honest::exact, prefix: adapters::honest::prefix },
-    Variant { name: "t1_domain_bound", exact: adapters::t1_domain_bound::exact, prefix: adapters::t1_domain_bound::prefix },
-    Variant { name: "t2_word_endian", exact: adapters::t2_word_endian::exact, prefix: adapters::t2_word_endian::prefix },
-    Variant { name: "t3_cesu8_surrogate", exact: adapters::t3_cesu8_surrogate::exact, prefix: adapters::t3_cesu8_surrogate::prefix },
-    Variant { name: "t4_trailing_bytes", exact: adapters::t4_trailing_bytes::exact, prefix: adapters::t4_trailing_bytes::prefix },
+    Variant {
+        name: "honest",
+        exact: adapters::honest::exact,
+        prefix: adapters::honest::prefix,
+    },
+    Variant {
+        name: "t1_domain_bound",
+        exact: adapters::t1_domain_bound::exact,
+        prefix: adapters::t1_domain_bound::prefix,
+    },
+    Variant {
+        name: "t2_word_endian",
+        exact: adapters::t2_word_endian::exact,
+        prefix: adapters::t2_word_endian::prefix,
+    },
+    Variant {
+        name: "t3_cesu8_surrogate",
+        exact: adapters::t3_cesu8_surrogate::exact,
+        prefix: adapters::t3_cesu8_surrogate::prefix,
+    },
+    Variant {
+        name: "t4_trailing_bytes",
+        exact: adapters::t4_trailing_bytes::exact,
+        prefix: adapters::t4_trailing_bytes::prefix,
+    },
 ];
 
 pub fn variant(name: &str) -> Option<Variant> {

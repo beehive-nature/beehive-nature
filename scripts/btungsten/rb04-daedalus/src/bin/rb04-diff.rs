@@ -20,8 +20,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
 use rb04_daedalus::corpus::{self, Case, Expect};
-use rb04_daedalus::{bnr, compare, variant, Bnr, Comparison, Ddl, DIMENSIONS};
-use serde_json::{json, Value};
+use rb04_daedalus::{Bnr, Comparison, DIMENSIONS, Ddl, bnr, compare, variant};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 const B64: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -56,7 +56,9 @@ fn arg(args: &[String], name: &str) -> Option<String> {
 }
 
 fn usage() -> ! {
-    eprintln!("usage: rb04-diff check --variant NAME --corpus vectors|sampled [--seed N --count N]\n       rb04-diff bench --seed N --count N --reps N");
+    eprintln!(
+        "usage: rb04-diff check --variant NAME --corpus vectors|sampled [--seed N --count N]\n       rb04-diff bench --seed N --count N --reps N"
+    );
     std::process::exit(2)
 }
 
@@ -86,7 +88,10 @@ fn ddl_text(d: &Ddl) -> String {
 fn dims_json(c: &Comparison) -> Value {
     let mut m = serde_json::Map::new();
     for (k, d) in DIMENSIONS.iter().zip(c.dims.iter()) {
-        m.insert(k.to_string(), json!(d.map_or("n/a", |a| if a { "agree" } else { "disagree" })));
+        m.insert(
+            k.to_string(),
+            json!(d.map_or("n/a", |a| if a { "agree" } else { "disagree" })),
+        );
     }
     Value::Object(m)
 }
@@ -104,7 +109,11 @@ fn check(args: &[String]) -> Value {
         "sampled" => {
             let seed = num(args, "--seed");
             let count = num(args, "--count");
-            (corpus::sampled(seed, count).collect(), json!(seed.to_string()), json!(count))
+            (
+                corpus::sampled(seed, count).collect(),
+                json!(seed.to_string()),
+                json!(count),
+            )
         }
         _ => usage(),
     };
@@ -216,8 +225,12 @@ fn bench(args: &[String]) -> Value {
             for c in &cases {
                 let ok = match k {
                     0 => matches!(std::hint::black_box(bnr(&c.input)), Bnr::Accept(_)),
-                    1 => std::hint::black_box((honest.exact)(&c.input)).accepted().is_some(),
-                    _ => std::hint::black_box((honest.prefix)(&c.input)).accepted().is_some(),
+                    1 => std::hint::black_box((honest.exact)(&c.input))
+                        .accepted()
+                        .is_some(),
+                    _ => std::hint::black_box((honest.prefix)(&c.input))
+                        .accepted()
+                        .is_some(),
                 };
                 acc += ok as u64;
             }

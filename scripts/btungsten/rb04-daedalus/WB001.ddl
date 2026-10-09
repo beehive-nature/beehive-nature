@@ -10,9 +10,10 @@
    U+10FFFF). Numbers are big-endian 64-bit words with a length of exactly 8.
 
    rbench rb04 generates the Rust parser with
-     daedalus --path=<pin>/lib compile-rust WB001.ddl --determinize
+     daedalus compile-rust WB001.ddl --determinize
        --output-file=... --entry=Envelope --entry=Exact
-   and derives each TEETH variant from this file by one declared textual
+   beside the pinned lib/Daedalus.ddl, and derives each TEETH variant from
+   this file by one declared textual
    substitution (lanes/rb04.rs, TEETH). ASCII only: the toolchain rejects
    other source bytes. -}
 import Daedalus

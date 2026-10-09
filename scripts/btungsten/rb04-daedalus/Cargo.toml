@@ -20,6 +20,9 @@ publish = false
 [dependencies]
 btungsten-wb001 = { path = "../../../crates/btungsten-wb001" }
 daedalus-rts-rust = { git = "https://github.com/GaloisInc/daedalus", rev = "a4ad7592ef2449fa1da07d2827fc6684293d21ca" }
+# the generated code names `serde` itself (`use serde;`), as upstream's
+# example crates provide it
+serde = "1"
 serde_json = "1"
 sha2 = "0.10"
 
