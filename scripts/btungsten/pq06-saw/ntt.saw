@@ -17,7 +17,8 @@
 // The inverse is proven in parts, each proof standing in for the next: the
 // eight inverse layers ntt_inverse calls (one per length, each with its
 // running twiddle index going in and coming out), then the Elem-times-
-// Polynomial product by 256^-1 that ends it, then ntt_inverse itself.
+// Polynomial product by 256^-1 that ends it, then ntt_inverse itself with
+// the eight layers held opaque (DsaNtt.cry names them invLen1 .. invLen128).
 // Then multiply_ntt (Algorithm 45) with mul standing in.
 // dsaNeg stays interpreted: it only ever meets table constants, and SAW
 // folds the override's result on a constant to the constant.
@@ -87,14 +88,21 @@ mir_verify m ntt_name [ov_add, ov_sub, ov_mul] false (do {
 }) unint;
 proven "ml-dsa ntt (FIPS 204 Algorithm 41)";
 
+// a specification that stands in for a call must bind each fresh variable
+// from what it points to, so these take the polynomial as 256 coefficients,
+// each its own variable, and f as the sequence of them
+let coeffs name = for (eval_list {{ [0 .. 255] : [256][8] }}) (\i -> mir_fresh_var (str_concat name (show (eval_int i))) mir_u32);
+let elems xs = for xs (\x -> return (elem x));
+
 // one inverse layer: w in place, the running index m from m0 down by the
 // group count; the result's coefficients stay below q
 let layer name m0 m1 spec = mir_verify m name [ov_add, ov_sub, ov_mul, ov_neg] false (do {
-  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  xs <- coeffs "f";
+  let f = list_term xs;
   mir_precond {{ all (\x -> x < 8380417) f }};
-  fv <- arr_of f;
+  es <- elems xs;
   wp <- mir_alloc_mut (mir_array 256 elem_ty);
-  mir_points_to wp fv;
+  mir_points_to wp (mir_array_value elem_ty es);
   mp <- mir_alloc_mut mir_usize;
   mir_points_to mp (mir_term m0);
   mir_execute_func [wp, mp];
@@ -104,36 +112,39 @@ let layer name m0 m1 spec = mir_verify m name [ov_add, ov_sub, ov_mul, ov_neg] f
   mir_points_to mp (mir_term m1);
   mir_postcond {{ all (\x -> x < 8380417) r }};
 }) unint;
-ov_l1 <- layer inv_layer_1_name {{ 256 : [64] }} {{ 128 : [64] }} (\f -> {{ invLayer`{1, 128} 256 f }});
+ov_l1 <- layer inv_layer_1_name {{ 256 : [64] }} {{ 128 : [64] }} (\f -> {{ invLen1 f }});
 proven "ml-dsa inverse layer len 1";
-ov_l2 <- layer inv_layer_2_name {{ 128 : [64] }} {{ 64 : [64] }} (\f -> {{ invLayer`{2, 64} 128 f }});
+ov_l2 <- layer inv_layer_2_name {{ 128 : [64] }} {{ 64 : [64] }} (\f -> {{ invLen2 f }});
 proven "ml-dsa inverse layer len 2";
-ov_l4 <- layer inv_layer_4_name {{ 64 : [64] }} {{ 32 : [64] }} (\f -> {{ invLayer`{4, 32} 64 f }});
+ov_l4 <- layer inv_layer_4_name {{ 64 : [64] }} {{ 32 : [64] }} (\f -> {{ invLen4 f }});
 proven "ml-dsa inverse layer len 4";
-ov_l8 <- layer inv_layer_8_name {{ 32 : [64] }} {{ 16 : [64] }} (\f -> {{ invLayer`{8, 16} 32 f }});
+ov_l8 <- layer inv_layer_8_name {{ 32 : [64] }} {{ 16 : [64] }} (\f -> {{ invLen8 f }});
 proven "ml-dsa inverse layer len 8";
-ov_l16 <- layer inv_layer_16_name {{ 16 : [64] }} {{ 8 : [64] }} (\f -> {{ invLayer`{16, 8} 16 f }});
+ov_l16 <- layer inv_layer_16_name {{ 16 : [64] }} {{ 8 : [64] }} (\f -> {{ invLen16 f }});
 proven "ml-dsa inverse layer len 16";
-ov_l32 <- layer inv_layer_32_name {{ 8 : [64] }} {{ 4 : [64] }} (\f -> {{ invLayer`{32, 4} 8 f }});
+ov_l32 <- layer inv_layer_32_name {{ 8 : [64] }} {{ 4 : [64] }} (\f -> {{ invLen32 f }});
 proven "ml-dsa inverse layer len 32";
-ov_l64 <- layer inv_layer_64_name {{ 4 : [64] }} {{ 2 : [64] }} (\f -> {{ invLayer`{64, 2} 4 f }});
+ov_l64 <- layer inv_layer_64_name {{ 4 : [64] }} {{ 2 : [64] }} (\f -> {{ invLen64 f }});
 proven "ml-dsa inverse layer len 64";
-ov_l128 <- layer inv_layer_128_name {{ 2 : [64] }} {{ 1 : [64] }} (\f -> {{ invLayer`{128, 1} 2 f }});
+ov_l128 <- layer inv_layer_128_name {{ 2 : [64] }} {{ 1 : [64] }} (\f -> {{ invLen128 f }});
 proven "ml-dsa inverse layer len 128";
 
 ov_scale <- mir_verify m scale_name [ov_mul] false (do {
   c <- mir_fresh_var "c" mir_u32;
-  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  xs <- coeffs "f";
+  let f = list_term xs;
   mir_precond {{ c < 8380417 /\ all (\x -> x < 8380417) f }};
-  pv <- poly_of poly_adt f;
+  es <- elems xs;
   p <- mir_alloc (mir_adt poly_adt);
-  mir_points_to p pv;
+  mir_points_to p (mir_struct_value poly_adt [mir_struct_value arr_adt [mir_array_value elem_ty es]]);
   mir_execute_func [elem c, p];
   rv <- poly_of poly_adt {{ [ dsaMul c x | x <- f ] }};
   mir_return rv;
 }) unint;
 proven "ml-dsa Elem * Polynomial";
 
+// the layers stay opaque here (each is proven above against its own
+// definition); unfolding them again makes the goal grow with every layer
 mir_verify m ntt_inverse_name [ov_l1, ov_l2, ov_l4, ov_l8, ov_l16, ov_l32, ov_l64, ov_l128, ov_scale] false (do {
   f <- mir_fresh_var "f" (mir_array 256 mir_u32);
   mir_precond {{ all (\x -> x < 8380417) f }};
@@ -143,7 +154,7 @@ mir_verify m ntt_inverse_name [ov_l1, ov_l2, ov_l4, ov_l8, ov_l16, ov_l32, ov_l6
   mir_execute_func [p];
   rv <- poly_of poly_adt {{ nttInverse f }};
   mir_return rv;
-}) unint;
+}) (w4_unint_bitwuzla ["dsaMul", "invLen1", "invLen2", "invLen4", "invLen8", "invLen16", "invLen32", "invLen64", "invLen128"]);
 proven "ml-dsa ntt_inverse (FIPS 204 Algorithm 42)";
 
 // Algorithm 45: the coefficient-wise product in the NTT domain

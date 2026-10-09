@@ -82,17 +82,22 @@ invLayer : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 9 >= width
          => [9] -> [256][32] -> [256][32]
 invLayer = invLayerWith`{len, groups} dsaNeg
 
+// the eight layers as Algorithm 42 runs them (m going in: 256, 128, ... 2),
+// each named, so a composed proof can hold each one opaque
+invLen1, invLen2, invLen4, invLen8, invLen16, invLen32, invLen64, invLen128 : [256][32] -> [256][32]
+invLen1 = invLayer`{1, 128} 256
+invLen2 = invLayer`{2, 64} 128
+invLen4 = invLayer`{4, 32} 64
+invLen8 = invLayer`{8, 16} 32
+invLen16 = invLayer`{16, 8} 16
+invLen32 = invLayer`{32, 4} 8
+invLen64 = invLayer`{64, 2} 4
+invLen128 = invLayer`{128, 1} 2
+
 nttInverse : [256][32] -> [256][32]
 nttInverse f = [ dsaMul 8347681 x | x <- l8 ]
   where
-    l1 = invLayer`{1, 128} 256 f
-    l2 = invLayer`{2, 64} 128 l1
-    l3 = invLayer`{4, 32} 64 l2
-    l4 = invLayer`{8, 16} 32 l3
-    l5 = invLayer`{16, 8} 16 l4
-    l6 = invLayer`{32, 4} 8 l5
-    l7 = invLayer`{64, 2} 4 l6
-    l8 = invLayer`{128, 1} 2 l7
+    l8 = invLen128 (invLen64 (invLen32 (invLen16 (invLen8 (invLen4 (invLen2 (invLen1 f)))))))
 
 // ---- Algorithm 45 ------------------------------------------------------------
 
