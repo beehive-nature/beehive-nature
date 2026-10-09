@@ -122,7 +122,9 @@ run_required() {
 run_teeth_verify() {
   _script=$1
   say "== SAW PQ02: TEETH $_script — must FAIL with a counterexample =="
-  _log=$(cd "$SAWDIR" && "$SAW" "$_script" 2>&1) && _rc=0 || _rc=$?
+  # capped like the proofs: a tooth that outgrows the runner fails here, loudly,
+  # instead of taking the runner down (run 37976780346)
+  _log=$(cd "$SAWDIR" && "$SAW" +RTS -M13g -RTS "$_script" 2>&1) && _rc=0 || _rc=$?
   say "$_log" | grep -a -E 'PQ02-SAW-TEETH|Subgoal failed|ounterexample' | head -12 || true
   if say "$_log" | grep -aq 'UNEXPECTED-PROVEN' || [ "$_rc" -eq 0 ]; then
     say "SAW-TEETH $_script: FAIL — the wrong obligation was accepted"
