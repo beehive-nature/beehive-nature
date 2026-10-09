@@ -1,0 +1,33 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — the X-Wing glue, written from
+// draft-connolly-cfrg-xwing-kem-11 §5 (expandDecapsulationKey, Combiner),
+// not from crates/bpq-core.
+module XWing where
+
+// XWingLabel: the ASCII of \.//^\  (hex 5c2e2f2f5e5c)
+label : [6][8]
+label = [0x5c, 0x2e, 0x2f, 0x2f, 0x5e, 0x5c]
+
+// Combiner(ss_M, ss_X, ct_X, pk_X) hashes concat(ss_M, ss_X, ct_X, pk_X, XWingLabel)
+combinerInput : [32][8] -> [32][8] -> [32][8] -> [32][8] -> [134][8]
+combinerInput ssM ssX ctX pkX = ssM # ssX # ctX # pkX # label
+
+// expandDecapsulationKey: expanded[0:64] is the ML-KEM seed, expanded[64:96]
+// the X25519 secret
+splitSeed : [96][8] -> ([64][8], [32][8])
+splitSeed wide = (take`{64} wide, drop`{64} wide)
+
+// the combiner input determines its four parts (fixed widths), so no two
+// different (ss_M, ss_X, ct_X, pk_X) are ever hashed as one
+combinerBindsW : ([32][8] -> [32][8] -> [32][8] -> [32][8] -> [134][8])
+              -> [32][8] -> [32][8] -> [32][8] -> [32][8]
+              -> [32][8] -> [32][8] -> [32][8] -> [32][8] -> Bit
+combinerBindsW f a1 b1 c1 d1 a2 b2 c2 d2 =
+  f a1 b1 c1 d1 == f a2 b2 c2 d2 ==> (a1 == a2) /\ (b1 == b2) /\ (c1 == c2) /\ (d1 == d2)
+
+combinerBinds : [32][8] -> [32][8] -> [32][8] -> [32][8]
+             -> [32][8] -> [32][8] -> [32][8] -> [32][8] -> Bit
+property combinerBinds = combinerBindsW combinerInput
+
+// TEETH: a combiner that drops pk_X (the draft's binding to the recipient)
+combinerWithoutPk : [32][8] -> [32][8] -> [32][8] -> [32][8] -> [134][8]
+combinerWithoutPk ssM ssX ctX _ = ssM # ssX # ctX # zero # label

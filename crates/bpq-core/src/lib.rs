@@ -29,6 +29,7 @@
 
 pub mod bip39;
 pub mod layout;
+pub mod xwing;
 
 /// `BDID-v1/ed25519-record-key`
 pub const ED25519_RECORD: u8 = 0;

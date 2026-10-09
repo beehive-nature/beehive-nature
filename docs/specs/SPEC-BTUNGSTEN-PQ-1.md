@@ -404,6 +404,16 @@ The estate's own PQ glue, where its review findings lived.
   (ss_M, ss_X, ct_X, pk_X) (fixed widths, proven, not assumed).
 - Teeth: a combiner that drops `pk_X` must refute; a decapsulation that skips
   the implicit-rejection compare must fail the decapsulation KAT group.
+- **Built 2026-10-09.** `crates/bpq-core/src/xwing.rs` holds the seed split
+  and the combiner input; bsigner's `xwing_expand` and `xwing_decapsulate`
+  call them. SAW (`pq05-saw/xwing.saw`): EQUIVALENCE of `combiner_input`
+  and `split_seed` to `pq05-cryptol/XWing.cry` (written from draft -11, not
+  on cryptol-specs: the primitives stay KAT), `combinerBinds` PROVEN, and the
+  tooth (a combiner without `pk_X`) refuted. The whole construction
+  reproduces draft -11's Appendix C in both implementations (CI job
+  `pq05-xwing`). Not yet: the libcrux adoption decision (RustCrypto stays;
+  three implementations agree on every ACVP vector, PQ01), the NTT and
+  reductions at L4, and the implicit-rejection tooth as its own KAT group.
 
 ### PQ06 · ML-DSA (44/65/87)
 

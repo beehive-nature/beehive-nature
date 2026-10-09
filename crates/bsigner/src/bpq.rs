@@ -58,7 +58,6 @@ fn dom(d: u8) -> &'static [u8] {
 // lengths and binding validators (`bpq_core::layout`) live in bpq-core, where
 // SAW proves them (SPEC-BTUNGSTEN-PQ-1 PQ03, PQ04).
 const MAGIC: [u8; 8] = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];
-const XWING_LABEL: &[u8] = b"\\.//^\\";
 const ID_HRP: &str = "bzpq";
 const DSA_PK_LEN: usize = 1952;
 const XWING_PK_LEN: usize = 1216;
@@ -224,13 +223,18 @@ impl PqKeys {
         let mut ct_x = [0u8; 32];
         ct_x.copy_from_slice(&ct[1088..]);
         let ss_x = x_sk.diffie_hellman(&XPublic::from(ct_x));
-        Some(Zeroizing::new(sha3(&[
-            ss_m.as_slice(),
+        let ss_m: [u8; 32] = ss_m
+            .as_slice()
+            .try_into()
+            .expect("ML-KEM-768 shared secrets are 32 bytes");
+        // the combiner input from bpq-core (SAW: equal to the draft, combinerBinds)
+        let input = Zeroizing::new(bpq_core::xwing::combiner_input(
+            &ss_m,
             ss_x.as_bytes(),
             &ct_x,
             x_pk.as_bytes(),
-            XWING_LABEL,
-        ])))
+        ));
+        Some(Zeroizing::new(sha3(&[&input[..]])))
     }
 }
 
@@ -239,12 +243,10 @@ fn xwing_expand(seed: &[u8; 32]) -> (ml_kem::DecapsulationKey<MlKem768>, StaticS
     x.update(seed);
     let mut wide = Zeroizing::new([0u8; 96]);
     x.finalize_xof().read(wide.as_mut());
-    let mut d_z = [0u8; 64];
-    d_z.copy_from_slice(&wide[..64]);
+    // the draft's split (bpq-core, SAW-proven): d ‖ z, then the X25519 secret
+    let (mut d_z, mut xs) = bpq_core::xwing::split_seed(&wide);
     let dk = ml_kem::DecapsulationKey::<MlKem768>::from_seed(d_z.into());
     d_z.zeroize();
-    let mut xs = [0u8; 32];
-    xs.copy_from_slice(&wide[64..]);
     let x_sk = StaticSecret::from(xs);
     xs.zeroize();
     let x_pk = XPublic::from(&x_sk);

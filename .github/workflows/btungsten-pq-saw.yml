@@ -90,3 +90,7 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq02-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
+      - name: PQ05 SAW — X-Wing glue, BUILD + EQUIVALENCE + combinerBinds + TEETH
+        if: always()
+        shell: bash
+        run: sh scripts/btungsten/pq05-saw-check.sh saw saw-rustc

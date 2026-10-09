@@ -1,0 +1,51 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — the X-Wing glue in crates/bpq-core/src/xwing.rs
+// (what bsigner's xwing_expand and xwing_decapsulate call) against
+// ../pq05-cryptol/XWing.cry, then combinerBinds on the spec.
+//
+//   combiner_input == combinerInput   (every ss_M, ss_X, ct_X, pk_X)
+//   split_seed     == splitSeed       (every expanded seed)
+//   combinerBinds  the 134 hashed bytes determine the four 32-byte parts
+//
+// usage (from this directory): saw xwing.saw   with MIR at ../../../target/saw-pq05/
+
+enable_experimental;
+import "../pq05-cryptol/XWing.cry";
+
+m <- mir_load_module "../../../target/saw-pq05/bpq_core.linked-mir.json";
+let proven name = print (str_concat "PQ05-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+let arr name n = do {
+  v <- mir_fresh_var name (mir_array n mir_u8);
+  r <- mir_alloc (mir_array n mir_u8);
+  mir_points_to r (mir_term v);
+  return (r, v);
+};
+
+let combiner_spec = do {
+  (ra, a) <- arr "ss_m" 32;
+  (rb, b) <- arr "ss_x" 32;
+  (rc, c) <- arr "ct_x" 32;
+  (rd, d) <- arr "pk_x" 32;
+  mir_execute_func [ra, rb, rc, rd];
+  mir_return (mir_term {{ combinerInput a b c d }});
+};
+mir_verify m "bpq_core::xwing::combiner_input" [] false combiner_spec bw;
+proven "combiner_input";
+
+let split_spec = do {
+  (r, w) <- arr "wide" 96;
+  mir_execute_func [r];
+  mir_return (mir_tuple_value [mir_term {{ (splitSeed w).0 }}, mir_term {{ (splitSeed w).1 }}]);
+};
+mir_verify m "bpq_core::xwing::split_seed" [] false split_spec bw;
+proven "split_seed";
+
+prove_print bw {{ \a1 b1 c1 d1 a2 b2 c2 d2 -> combinerBinds a1 b1 c1 d1 a2 b2 c2 d2 }};
+proven "combinerBinds";
+
+// TEETH: a combiner that drops pk_X must lose the binding
+r <- prove bw {{ \a1 b1 c1 d1 a2 b2 c2 d2 -> combinerBindsW combinerWithoutPk a1 b1 c1 d1 a2 b2 c2 d2 }};
+caseProofResult r
+  (\_ -> print "PQ05-SAW-TEETH UNEXPECTED-PROVEN combinerWithoutPk")
+  (\cex -> do { print "PQ05-SAW-TEETH REFUTED combinerWithoutPk"; print cex; });
