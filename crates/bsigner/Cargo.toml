@@ -33,3 +33,7 @@ bpq-core = { path = "../bpq-core" }
 hkdf = "0.12"
 sha2 = { workspace = true }
 x25519-dalek = { version = "2", features = ["static_secrets"] }
+# taproot.rs (SPEC-BTUNGSTEN-PQ-1 PQ12): the BIP-341 tweak and the BIP-340
+# check of a key-path witness. The same pin btungsten-pq's classical KAT runs
+# (1,485 of 1,485 BIP-340 and Wycheproof cases, PQ11).
+k256 = { version = "=0.13.4", features = ["schnorr", "arithmetic"] }

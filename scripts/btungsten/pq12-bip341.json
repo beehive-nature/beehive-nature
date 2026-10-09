@@ -1,0 +1,8 @@
+{
+  "about": "SPEC-BTUNGSTEN-PQ-1 PQ12: BIP-341's wallet test vectors, which bsigner's Taproot key-path code (crates/bsigner/src/taproot.rs) must reproduce: every intermediary hash, signature message, sighash, tweak, output key, address, control block and witness. Fetched by CI at this commit, checked by size and SHA-256 (base64url, no padding) inside the test, never committed.",
+  "repo": "https://github.com/bitcoin/bips",
+  "commit": "200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb",
+  "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0341/wallet-test-vectors.json",
+  "size": 29296,
+  "sha256": "QD4Z-4HdHzHnRWmSFjCPYftAN3SyqvqHtjG498BC038"
+}

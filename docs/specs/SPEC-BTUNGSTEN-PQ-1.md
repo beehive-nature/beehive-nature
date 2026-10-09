@@ -738,6 +738,27 @@ Obligations:
   under the new key), not a rerun.
 - chilldkg-rs is unaudited and says so; it enters only behind this design,
   through the audit two gates, with its upstream vectors in our CI.
+- **Built 2026-10-09, step (3): the signer computes what it signs.**
+  `crates/bsigner/src/taproot.rs` parses the unsigned transaction itself
+  (refused: zero inputs, zero outputs, a scriptSig, an amount or total over
+  21 million BTC, a non-minimal length, a trailing byte, every truncation),
+  builds BIP-341's signature message for a key-path spend field by field
+  for the seven hash types (others refused, as is SINGLE without its
+  output), and computes the tweak, output key and bech32m address and the
+  check a node makes of a key-path witness. Out of scope and refused, not
+  half-done: tapscript spends and the annex. On BIP-341's
+  `wallet-test-vectors.json` (bitcoin/bips `200f9b26`, pinned by size and
+  SHA-256 in `scripts/btungsten/pq12-bip341.json`, fetched by CI job
+  `pq12-taproot`, never committed): 7 of 7 script-tree cases (leaf hashes,
+  root, tweak, output key, scriptPubKey, address, control blocks) and 7 of
+  7 key-path inputs (the five shared hashes, SigMsg, sighash, tweak; the
+  expected witness verifies, and signing with the vector's tweaked key and
+  zero aux reproduces it byte for byte); 20 teeth refused (the witness on
+  another input, one flipped bit, another hash type). `bsigner
+  taproot-sighash` and `taproot-address` expose it. Not yet: the PSBT
+  reader (step 2), the authorization and `VerifiedIntent` (steps 1 and 4),
+  the sighash DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, and
+  chilldkg behind it.
 
 ### PQ13 · Buzz events
 

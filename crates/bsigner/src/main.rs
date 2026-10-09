@@ -58,6 +58,15 @@
 //!     (a bpq1 public key card, binding, handover or Nostr event attestation;
 //!      or a detached signature, checked
 //!      against the file named by --target)
+//!   bsigner taproot-sighash --file REQUEST.json
+//!     (SPEC-BTUNGSTEN-PQ-1 PQ12: the BIP-341 key-path sighash bsigner computes
+//!      itself from the unsigned transaction and the outputs it spends —
+//!      {tx, prevouts: [{scriptPubKey, amountSats}], input, hashType} — or,
+//!      given a "signature", the check a node makes of that witness. Never
+//!      signs: the threshold signer behind this organ will sign only what
+//!      this computes)
+//!   bsigner taproot-address --file REQUEST.json
+//!     ({internalKey, merkleRoot}: the BIP-341 tweak, output key and bc1p/tb1p address)
 //!   bsigner selftest
 //!   bsigner version
 
@@ -70,6 +79,7 @@ mod envelope;
 mod kat;
 mod keys;
 mod pq;
+mod taproot;
 mod x402;
 
 use serde_json::{json, Value};
@@ -88,6 +98,8 @@ fn main() {
         Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
         Some("bpq-handover") => cmd_bpq_handover(&args[1..]),
         Some("bpq-attest-nostr") => cmd_bpq_attest_nostr(&args[1..]),
+        Some("taproot-sighash") => cmd_taproot_sighash(&args[1..]),
+        Some("taproot-address") => cmd_taproot_address(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -640,6 +652,138 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         0
     } else {
         1
+    }
+}
+
+fn read_json(o: &Opts, cmd: &str, shape: &str) -> Result<Value, String> {
+    let path = o
+        .file
+        .as_deref()
+        .ok_or(format!("{cmd} needs --file REQUEST.json ({shape})"))?;
+    std::fs::read(path)
+        .map_err(|e| e.to_string())
+        .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
+        .map_err(|e| format!("{path}: {e}"))
+}
+
+fn hex_field(name: &str, v: &Value) -> Result<Vec<u8>, String> {
+    v.as_str()
+        .and_then(taproot::unhex)
+        .ok_or(format!("{name} must be a hex string"))
+}
+
+fn cmd_taproot_sighash(args: &[String]) -> i32 {
+    let req = match parse_opts(args).and_then(|o| {
+        read_json(
+            &o,
+            "taproot-sighash",
+            "tx, prevouts [{scriptPubKey, amountSats}], input, hashType or signature",
+        )
+    }) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    match taproot_sighash(&req) {
+        Ok(v) => {
+            println!("{v}");
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+fn taproot_sighash(req: &Value) -> Result<Value, String> {
+    let tx = taproot::parse_tx(&hex_field("tx", &req["tx"])?).map_err(|e| e.to_string())?;
+    let prevouts = req["prevouts"]
+        .as_array()
+        .ok_or("prevouts must be an array")?
+        .iter()
+        .map(|u| {
+            Ok(taproot::Prevout {
+                amount: u["amountSats"]
+                    .as_u64()
+                    .ok_or("amountSats must be a whole number")?,
+                script_pubkey: hex_field("scriptPubKey", &u["scriptPubKey"])?,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    let input = req["input"]
+        .as_u64()
+        .and_then(|i| usize::try_from(i).ok())
+        .ok_or("input must be a whole number")?;
+    let asked = match &req["hashType"] {
+        Value::Null => None,
+        v => Some(
+            v.as_u64()
+                .and_then(|t| u8::try_from(t).ok())
+                .ok_or("hashType must be a byte")?,
+        ),
+    };
+    // with a signature, the hash type is the one it commits to, and it must verify
+    let (hash_type, verified) = match &req["signature"] {
+        Value::Null => (
+            asked.ok_or("name the hashType (0 is SIGHASH_DEFAULT), or pass the signature")?,
+            None,
+        ),
+        v => {
+            let t = taproot::verify_key_path(&tx, &prevouts, input, &hex_field("signature", v)?)
+                .map_err(|e| e.to_string())?;
+            if asked.is_some_and(|a| a != t) {
+                return Err(format!(
+                    "the signature commits to hash type 0x{t:02x}, not the one asked for"
+                ));
+            }
+            (t, Some(true))
+        }
+    };
+    let pre = taproot::precompute(&tx, &prevouts).map_err(|e| e.to_string())?;
+    let msg =
+        taproot::sig_msg(&tx, &prevouts, &pre, input, hash_type).map_err(|e| e.to_string())?;
+    // sigMsg as BIP-341's vectors print it: epoch 0x00 ‖ SigMsg
+    Ok(json!({
+        "input": input,
+        "hashType": hash_type,
+        "sigMsg": taproot::hex(&[&[0x00][..], &msg].concat()),
+        "sighash": taproot::hex(&taproot::sighash_of(&msg)),
+        "verified": verified,
+    }))
+}
+
+fn cmd_taproot_address(args: &[String]) -> i32 {
+    let req = match parse_opts(args)
+        .and_then(|o| read_json(&o, "taproot-address", "internalKey, merkleRoot or null"))
+    {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    let key32 = |name: &str, v: &Value| -> Result<[u8; 32], String> {
+        hex_field(name, v)?
+            .try_into()
+            .map_err(|_| format!("{name} must be 32 bytes"))
+    };
+    let made = key32("internalKey", &req["internalKey"]).and_then(|p| {
+        let root = match &req["merkleRoot"] {
+            Value::Null => None,
+            v => Some(key32("merkleRoot", v)?),
+        };
+        taproot::output_key(&p, root.as_ref()).map_err(|e| e.to_string())
+    });
+    match made {
+        Ok(q) => {
+            println!(
+                "{}",
+                json!({
+                    "tweak": taproot::hex(&q.tweak),
+                    "outputKey": taproot::hex(&q.key),
+                    "parity": q.parity,
+                    "scriptPubKey": taproot::hex(&taproot::script_pubkey(&q.key)),
+                    "mainnet": taproot::address("bc", &q.key),
+                    "testnet": taproot::address("tb", &q.key),
+                })
+            );
+            0
+        }
+        Err(e) => fail(e),
     }
 }
 

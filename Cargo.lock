@@ -515,6 +515,7 @@ dependencies = [
  "fips205",
  "getrandom 0.2.17",
  "hkdf",
+ "k256",
  "ml-dsa",
  "ml-kem",
  "serde",

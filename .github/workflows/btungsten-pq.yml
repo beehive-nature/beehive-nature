@@ -87,6 +87,23 @@ jobs:
       - name: PQ05 bsigner X-Wing on the same vectors
         run: BPQ_XWING_DRAFT="$RUNNER_TEMP/xwing-draft.txt" cargo test --locked -p bsigner --release xwing_matches_the_draft_vectors -- --ignored --nocapture
 
+  # SPEC-BTUNGSTEN-PQ-1 PQ12: bsigner computes the Taproot key-path sighash
+  # itself (crates/bsigner/src/taproot.rs). BIP-341's wallet vectors at the
+  # pinned bitcoin/bips commit (scripts/btungsten/pq12-bip341.json) are
+  # fetched, checked by size and SHA-256 inside the test, never committed.
+  pq12-taproot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Fetch the pinned BIP-341 wallet vectors
+        run: |
+          url=$(node -e "console.log(require('./scripts/btungsten/pq12-bip341.json').url)")
+          curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/bip341.json" "$url"
+      - name: PQ12 bsigner BIP-341 key path on the official vectors
+        run: BPQ_BIP341_VECTORS="$RUNNER_TEMP/bip341.json" cargo test --locked -p bsigner --release bip341_wallet_vectors -- --ignored --nocapture
+
   # Plonky3 at eab7f0e, its own workspace (crates/btungsten-p3count). The
   # LEAK experiment is a registered single run (contracts/zkreceipts/leak/
   # PREREGISTERED-STARK-v2.md) and is not re-run per push.

@@ -1042,10 +1042,13 @@ mod tests {
             .collect()
     }
 
+    /// An RFC 5869 case: IKM, salt, info, PRK hex, OKM hex.
+    type HkdfCase = (Vec<u8>, Vec<u8>, Vec<u8>, &'static str, &'static str);
+
     #[test]
     fn hkdf_sha256_passes_rfc5869_a1_to_a3() {
         let run = |from: u8, to: u8| (from..=to).collect::<Vec<u8>>();
-        let cases: [(Vec<u8>, Vec<u8>, Vec<u8>, &str, &str); 3] = [
+        let cases: [HkdfCase; 3] = [
             (
                 vec![0x0b; 22],
                 run(0x00, 0x0c),
