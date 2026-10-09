@@ -27,12 +27,24 @@ fn main() -> ExitCode {
         eprintln!("rb-cvc5-intblast: RB_CVC5 must name the cvc5 binary");
         return ExitCode::from(2);
     };
-    let mut child = match Command::new(&real)
-        .arg("--solve-bv-as-int=sum")
+    let mut cmd = Command::new(&real);
+    cmd.arg("--solve-bv-as-int=sum")
         .args(std::env::args_os().skip(1))
-        .stdin(Stdio::piped())
-        .spawn()
+        .stdin(Stdio::piped());
+    // when what4 kills this shim at a goal timeout, cvc5 must die with it
+    // rather than run on inside the measured process group
+    #[cfg(target_os = "linux")]
     {
+        use std::os::unix::process::CommandExt;
+        // SAFETY: prctl is async-signal-safe and the closure allocates nothing.
+        unsafe {
+            cmd.pre_exec(|| {
+                libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL);
+                Ok(())
+            });
+        }
+    }
+    let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => {
             eprintln!(

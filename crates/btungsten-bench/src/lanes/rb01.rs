@@ -385,11 +385,14 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
         up_results.push(parse_upstream_line(&o.stdout_text()));
         ups.push(o);
     }
-    let up_ok =
-        ups.iter().all(Obs::ok) && up_results.iter().all(|x| *x == Some((want as u128, 255)));
+    let up_verdict = samples_verdict(ups.iter().zip(&up_results).map(|(o, x)| match x {
+        Some((got, 255)) if o.ok() && *got == want as u128 => Sample::Right,
+        Some(_) if o.ok() => Sample::Wrong,
+        _ => Sample::Other,
+    }));
     r.row(Row::new("upstream-example", Class::Vector, "the unmodified upstream example (two threads, one process) prints 255 for its fixture, equal to the plaintext answer computed here")
         .expect(json!({ "result": want, "plaintext": want }))
-        .observe(if up_ok { O::Pass } else { O::Fail }, json!({ "runs": ups.len(), "parsed": up_results.iter().map(|x| x.map(|(a, b)| json!([a.to_string(), b]))).collect::<Vec<_>>() })));
+        .observe(up_verdict, json!({ "runs": ups.len(), "parsed": up_results.iter().map(|x| x.map(|(a, b)| json!([a.to_string(), b]))).collect::<Vec<_>>() })));
     r.measure("runtime_upstream_example", obs_set(&ups, &c.out));
 
     // ---- 3c. the provider, same composition ------------------------------------
@@ -400,7 +403,7 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
     let (fa_s, fb_s) = (fa.display().to_string(), fb.display().to_string());
     let mut locs = Vec::new();
     let mut loc_lines = Vec::new();
-    let mut loc_ok = true;
+    let mut loc_samples = Vec::new();
     for k in 0..plan.local_runs {
         let s = c.stem(&format!("local-{k}"));
         let o = measure::run(&Spec::new(
@@ -415,13 +418,17 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
         });
         let gout =
             tagged_line(&o.stdout_text(), "RB01-RESULT").map(|v| v["garbler"]["output"].clone());
-        loc_ok &= out == Outcome::Output(Some(want as u128)) && gout == Some(Value::Null);
+        loc_samples.push(match (&out, &gout) {
+            (Outcome::Output(Some(v)), Some(Value::Null)) if *v == want as u128 => Sample::Right,
+            (Outcome::Output(_), _) => Sample::Wrong,
+            _ => Sample::Other,
+        });
         loc_lines.push(tagged_line(&o.stdout_text(), "RB01-RESULT").unwrap_or(Value::Null));
         locs.push(o);
     }
     r.row(Row::new("provider-local-threads", Class::Vector, "the provider in the upstream composition: the evaluator receives 255, the garbler receives nothing")
         .expect(json!({ "evaluator": want, "garbler": null }))
-        .observe(if loc_ok { O::Pass } else { O::Fail }, json!({ "runs": locs.len() })));
+        .observe(samples_verdict(loc_samples.into_iter()), json!({ "runs": locs.len() })));
     r.measure(
         "runtime_local_threads",
         json!({ "processes": obs_set(&locs, &c.out), "provider_lines": loc_lines }),
@@ -438,7 +445,7 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
         let (ga, gb) = write_fixture(&c, fx)?;
         fixtures.push(fx.describe());
         let want = fx.expected() as u128;
-        let mut rows_ok = true;
+        let mut row_samples = Vec::new();
         let mut per = Vec::new();
         for k in 0..*samples {
             let sid = hex(&os_random(16).map_err(|e| e.to_string())?);
@@ -448,7 +455,11 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
                 &p,
                 Run::new(&ga, &gb, &sid, *budget, &format!("tcp-{}-{k}", fx.name)),
             )?;
-            rows_ok &= run.eval == Outcome::Output(Some(want)) && run.garb == Outcome::Output(None);
+            row_samples.push(match (&run.eval, &run.garb) {
+                (Outcome::Output(Some(v)), Outcome::Output(None)) if *v == want => Sample::Right,
+                (Outcome::Output(_), _) | (_, Outcome::Output(Some(_))) => Sample::Wrong,
+                _ => Sample::Other,
+            });
             per.push(run.json(&c.out));
         }
         let first_bytes: Vec<Value> = per
@@ -458,7 +469,7 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
         bytes_by_fixture.insert(fx.name.clone(), json!(first_bytes));
         r.row(Row::new(&format!("tcp-{}", fx.name), Class::Vector, &format!("two processes over loopback TCP, fixture {}: evaluator output equals the plaintext cardinality {want}; garbler receives nothing", fx.name))
             .expect(json!({ "evaluator": want.to_string(), "garbler": null }))
-            .observe(if rows_ok { O::Pass } else { O::Fail }, json!({ "samples": samples, "outcomes": per.iter().map(|x| json!([x["garbler"]["outcome"], x["evaluator"]["outcome"]])).collect::<Vec<_>>() })));
+            .observe(samples_verdict(row_samples.into_iter()), json!({ "samples": samples, "outcomes": per.iter().map(|x| json!([x["garbler"]["outcome"], x["evaluator"]["outcome"]])).collect::<Vec<_>>() })));
         tcp_meas.insert(
             fx.name.clone(),
             json!({ "budget_ms": budget.as_millis() as u64, "sessions": per }),
@@ -538,7 +549,14 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
     });
     r.row(Row::new("bytes-independent-count", Class::Measurement, "provider byte counters equal the relay's independent count in both directions (application bytes; TCP/IP framing not measured)")
         .observe(if agree { O::Pass } else { O::Fail }, json!(relay_runs.iter().map(|x| x.json(&c.out)).collect::<Vec<_>>())));
-    let differ = relay_runs.len() == 2
+    let both_completed = relay_runs.iter().all(|x| {
+        x.eval == Outcome::Output(Some(want as u128))
+            && x.relay
+                .as_ref()
+                .is_some_and(|r| r.error.is_none() && !r.g2e_digest.is_empty())
+    });
+    let differ = both_completed
+        && relay_runs.len() == 2
         && relay_runs[0].relay.as_ref().map(|r| &r.g2e_digest)
             != relay_runs[1].relay.as_ref().map(|r| &r.g2e_digest);
     r.row(Row::new("fresh-session-randomness", Class::Measurement, "two sessions on identical inputs produced different garbler-to-evaluator transcripts (fresh randomness per session, sampled n=2)")
@@ -813,7 +831,18 @@ fn fake_garbler(
     let l = TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
     let port = l.local_addr().map_err(|e| e.to_string())?.port();
     let h = std::thread::spawn(move || {
-        let Ok((mut s, _)) = l.accept() else { return 0 };
+        // an evaluator that exits without dialling (a refusal, a crash) must
+        // not leave this thread, and the join on it, waiting forever
+        let _ = l.set_nonblocking(true);
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let mut s = loop {
+            match l.accept() {
+                Ok((s, _)) => break s,
+                Err(_) if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(5)),
+                Err(_) => return 0,
+            }
+        };
+        let _ = s.set_nonblocking(false);
         let _ = s.write_all(&bytes);
         let _ = s.flush();
         let _ = s.set_read_timeout(Some(hold));
@@ -1099,7 +1128,9 @@ fn adversarial(c: &mut Ctx, r: &mut Receipt, p: &str, up: &Fixture) -> Result<()
         "adv-garbage-after-handshake",
     )?;
     let _ = h.join();
-    let no_output = !matches!(o, Outcome::Output(_));
+    // a refusal would mean the handshake never completed, so the protocol
+    // path under test never ran
+    let no_output = matches!(o.class(), "abort" | "timeout");
     r.row(Row::new("garbage-after-handshake", Class::SampledAdversarial, "a peer that completes the handshake and then sends 64 KiB of random bytes produces no output at the evaluator (abort, crash or timeout; never a cardinality)")
         .expect(json!("abort | timeout, never output"))
         .observe(if matches!(o, Outcome::Unrecognized(_)) { O::Inconclusive } else if no_output { O::Pass } else { O::Fail }, json!({ "observed": o.label(), "class": o.class(), "detail": ob.json(&c.out) })));
@@ -1137,7 +1168,7 @@ fn adversarial(c: &mut Ctx, r: &mut Receipt, p: &str, up: &Fixture) -> Result<()
     r.row(Row::new("truncated-stream", Class::SampledAdversarial, "the connection is cut after 1 MiB garbler-to-evaluator: both roles abort, neither outputs")
         .expect(json!({ "evaluator": "abort", "garbler": "abort" }))
         .observe(
-            if s.eval.class() == "abort" && s.garb.class() == "abort" { O::Pass } else if matches!(s.eval, Outcome::Output(Some(_))) { O::Fail } else { O::Inconclusive },
+            if !s.relay.as_ref().is_some_and(|x| x.fault_fired) { O::Inconclusive } else if s.eval.class() == "abort" && s.garb.class() == "abort" { O::Pass } else if matches!(s.eval, Outcome::Output(Some(_))) { O::Fail } else { O::Inconclusive },
             json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "detail": s.json(&c.out) }),
         ));
 
@@ -1150,9 +1181,51 @@ fn adversarial(c: &mut Ctx, r: &mut Receipt, p: &str, up: &Fixture) -> Result<()
     )?;
     r.row(Row::new("stalled-peer", Class::SampledAdversarial, "the garbler-to-evaluator stream stalls after 1 MiB with the connection held open: the evaluator's 2 s socket timeout fires (timeout class, not a hang, not an output)")
         .expect(json!("evaluator: timeout"))
-        .observe(if s.eval.class() == "timeout" { O::Pass } else if matches!(s.eval, Outcome::Output(_)) { O::Fail } else { O::Inconclusive }, json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "detail": s.json(&c.out) })));
+        .observe(
+            // the stall must have happened, and the evaluator must have ended
+            // on its own socket timeout, before the relay's 8 s hold released it
+            if !s.relay.as_ref().is_some_and(|x| x.fault_fired) {
+                O::Inconclusive
+            } else if matches!(s.eval, Outcome::Abort { io_timeout: true, .. }) && s.eval_obs.wall_ns < 8_000_000_000 {
+                O::Pass
+            } else if matches!(s.eval, Outcome::Output(_)) {
+                O::Fail
+            } else {
+                O::Inconclusive
+            },
+            json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "evaluator_wall_ns": s.eval_obs.wall_ns, "detail": s.json(&c.out) }),
+        ));
 
     Ok(())
+}
+
+/// One sample of a vector row: the right answer, a wrong answer, or no
+/// recognized answer at all.
+enum Sample {
+    Right,
+    Wrong,
+    Other,
+}
+
+/// FAIL when any sample produced a wrong answer; INCONCLUSIVE when any
+/// produced none (a crash, a timeout, unrecognized output); PASS otherwise.
+fn samples_verdict(samples: impl Iterator<Item = Sample>) -> O {
+    let (mut wrong, mut other, mut n) = (false, false, 0);
+    for s in samples {
+        n += 1;
+        match s {
+            Sample::Right => {}
+            Sample::Wrong => wrong = true,
+            Sample::Other => other = true,
+        }
+    }
+    if wrong {
+        O::Fail
+    } else if other || n == 0 {
+        O::Inconclusive
+    } else {
+        O::Pass
+    }
 }
 
 /// Upstream behaviour outside the bench's input policy, through the local

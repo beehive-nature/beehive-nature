@@ -155,7 +155,8 @@ pub fn run(
     r.section("host", host());
     let load_before = loadavg();
     let tool_id = tools.identity();
-    let mir_ok = tool_id["mir_json"]["source_head"] == MIR_JSON_REV;
+    let mir_ok = tool_id["mir_json"]["source_head"] == MIR_JSON_REV
+        && tool_id["saw_release_tarball"]["matches"] == true;
     r.row(
         Row::new(
             "toolchain-identity",
@@ -408,6 +409,9 @@ pub fn run(
     let (o3, _) = saw_run(&s3, "rb02-teeth-sbox.saw", 1800)?;
     r.evidence_file(&rel(&s3.with_extension("stdout")), "committed");
     let text3 = format!("{}\n{}", o3.stdout_text(), o3.stderr_text());
+    // a script stops at the first false claim it accepts: that obligation is
+    // the FAIL, and the ones after it in the same script never ran
+    let mut blamed: Vec<String> = Vec::new();
     for (name, trigger, o, text, stem_used) in [
         (
             "teeth_encrypt_block_256",
@@ -424,6 +428,14 @@ pub fn run(
         let printed = segment.is_some();
         let cex = segment.as_deref().and_then(saw_refutation);
         let ok = printed && cex.is_some();
+        let script = stem_used.display().to_string();
+        let accepted = !ok
+            && !printed
+            && text.contains("Expected failure, but succeeded instead!")
+            && !blamed.contains(&script);
+        if accepted {
+            blamed.push(script);
+        }
         r.row(
             Row::new(
                 &format!("teeth-{name}"),
@@ -434,10 +446,10 @@ pub fn run(
             .observe(
                 if ok {
                     O::Pass
-                } else if matches!(o.exit, measure::Exit::Budget | measure::Exit::Memory(_)) {
-                    O::Inconclusive
-                } else {
+                } else if accepted {
                     O::Fail
+                } else {
+                    O::Inconclusive
                 },
                 json!({ "refuted_line": printed, "counterexample": cex, "process_exit": o.exit.json() }),
             )
@@ -524,15 +536,20 @@ pub fn run(
     r.write().map_err(|e| e.to_string())
 }
 
+/// PASS when the obligation's success line was printed; FAIL only when SAW
+/// reported a failed proof (`Subgoal failed`) and nothing else stopped it;
+/// INCONCLUSIVE for a budget or memory kill, a signal, an error shape this
+/// harness does not know, or a run that ended before the obligation.
 fn verdict_of(o: &Obs, rep: &SawReport, ok: bool) -> O {
     if ok {
         O::Pass
-    } else if matches!(o.exit, measure::Exit::Budget | measure::Exit::Memory(_))
-        || !rep.unrecognized.is_empty()
+    } else if matches!(o.exit, measure::Exit::Code(_))
+        && !rep.failed.is_empty()
+        && rep.unrecognized.is_empty()
     {
-        O::Inconclusive
-    } else {
         O::Fail
+    } else {
+        O::Inconclusive
     }
 }
 

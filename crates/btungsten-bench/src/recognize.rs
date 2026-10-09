@@ -201,7 +201,7 @@ impl CruxReport {
     pub fn status(&self, test: &str) -> Option<&str> {
         self.tests
             .iter()
-            .find(|(n, _)| n.ends_with(test))
+            .find(|(n, _)| n == test || n.ends_with(&format!("::{test}")))
             .map(|(_, s)| s.as_str())
     }
 }
@@ -289,6 +289,20 @@ pub fn crux_report(text: &str) -> CruxReport {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_test_status_matches_whole_path_segments_only() {
+        let r = CruxReport {
+            tests: vec![
+                ("h::props::xp1_zero".into(), "FAILED".into()),
+                ("h::props::p1_zero".into(), "ok".into()),
+            ],
+            ..CruxReport::default()
+        };
+        assert_eq!(r.status("p1_zero"), Some("ok"));
+        assert_eq!(r.status("xp1_zero"), Some("FAILED"));
+        assert_eq!(r.status("zero"), None);
+    }
 
     #[test]
     fn function_names_are_normalized() {

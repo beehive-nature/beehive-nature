@@ -128,7 +128,12 @@ impl Opts {
                 "--session" => o.session = Some(val()),
                 "--element-bytes" => o.element_bytes = val().parse().unwrap_or_else(|_| exit_usage("--element-bytes")),
                 "--io-timeout-ms" => {
-                    o.io_timeout = Duration::from_millis(val().parse().unwrap_or_else(|_| exit_usage("--io-timeout-ms")))
+                    let ms: u64 = val().parse().unwrap_or_else(|_| exit_usage("--io-timeout-ms"));
+                    // zero would disable the socket timeout altogether
+                    if ms == 0 {
+                        exit_usage("--io-timeout-ms must be positive");
+                    }
+                    o.io_timeout = Duration::from_millis(ms)
                 }
                 "--allow-empty" => {
                     o.allow_empty = true;
@@ -400,7 +405,9 @@ fn hex(b: &[u8]) -> String {
 }
 
 fn parse_session(s: &str) -> Option<[u8; 16]> {
-    if s.len() != 32 {
+    // ASCII hex only: byte slicing below must stay on character boundaries,
+    // and from_str_radix alone would accept a leading "+"
+    if s.len() != 32 || !s.bytes().all(|b| b.is_ascii_hexdigit()) {
         return None;
     }
     let mut out = [0u8; 16];

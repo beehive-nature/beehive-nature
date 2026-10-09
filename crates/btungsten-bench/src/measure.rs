@@ -229,6 +229,8 @@ impl Running {
             // SAFETY: a negative pid names the process group this child leads.
             unsafe {
                 libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
+                // and the child itself, in case it left its group
+                libc::kill(self.pid as libc::pid_t, libc::SIGKILL);
             }
         }
         #[cfg(not(unix))]
@@ -267,6 +269,8 @@ impl Running {
                         // SAFETY: as in `kill`.
                         unsafe {
                             libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
+                            // and the child itself, in case it left its group
+                            libc::kill(self.pid as libc::pid_t, libc::SIGKILL);
                         }
                         break self.rx.recv().expect("the reaper always reports");
                     }
@@ -375,15 +379,42 @@ pub fn output_env(argv: &[&str], cwd: &Path, env: &[(&str, &str)]) -> Option<Str
     for (k, v) in env {
         cmd.env(k, v);
     }
-    let out = cmd.output().ok()?;
+    // no query may hang the harness: ten minutes, then the child is killed
+    // and the query answers None
+    let mut child = cmd
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .ok()?;
+    let (mut so, mut se) = (child.stdout.take()?, child.stderr.take()?);
+    let reader_o = std::thread::spawn(move || {
+        let mut b = Vec::new();
+        let _ = std::io::Read::read_to_end(&mut so, &mut b);
+        b
+    });
+    let reader_e = std::thread::spawn(move || {
+        let mut b = Vec::new();
+        let _ = std::io::Read::read_to_end(&mut se, &mut b);
+        b
+    });
+    let deadline = Instant::now() + Duration::from_secs(600);
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(s)) => break s,
+            Ok(None) if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(10)),
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return None;
+            }
+        }
+    };
+    let out = reader_o.join().unwrap_or_default();
+    let err = reader_e.join().unwrap_or_default();
     // `saw --version` writes to stderr; an identity query reads whichever
     // stream carries the text
-    let text = if out.stdout.is_empty() {
-        &out.stderr
-    } else {
-        &out.stdout
-    };
-    out.status
+    let text = if out.is_empty() { &err } else { &out };
+    status
         .success()
         .then(|| String::from_utf8_lossy(text).into_owned())
 }
@@ -435,13 +466,14 @@ mod tests {
     #[test]
     fn a_group_past_its_memory_budget_is_killed_and_says_so() {
         let d = tmp("memory");
-        // a child process (in the group) that holds ~300 MiB resident: tail
-        // keeps the last N bytes in memory
+        // a shell that keeps ~200 MB in a variable through the whole sleep, so
+        // the 250 ms sampler cannot miss it (a head|tail pipeline that held its
+        // bytes only for a moment passed unseen on a fast CI runner)
         let mut spec = Spec::new(
             &[
                 "sh",
                 "-c",
-                "head -c 314572800 /dev/zero | tail -c 314572800 >/dev/null; sleep 30",
+                "x=$(head -c 200000000 /dev/zero | tr '\\0' a); sleep 30; echo ${#x}",
             ],
             &d,
             Duration::from_secs(60),

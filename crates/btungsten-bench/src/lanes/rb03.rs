@@ -253,6 +253,9 @@ pub fn run(
             .any(|x| x.as_str().is_some_and(|s| s.contains(CRUCIBLE_REV)))
     });
     let mj_ok = tool_id["mir_json"]["source_head"] == MIR_JSON_REV;
+    // the bundle's archives must be the digest-pinned upstream ones
+    let zips_ok = tool_id["crux_artifact_zip"]["matches"] == true
+        && tool_id["solvers_zip"]["matches"] == true;
     r.row(
         Row::new(
             "toolchain-identity",
@@ -261,7 +264,11 @@ pub fn run(
         )
         .expect(json!({ "crucible": CRUCIBLE_REV, "mir_json": MIR_JSON_REV }))
         .observe(
-            if crux_ok && mj_ok { O::Pass } else { O::Fail },
+            if crux_ok && mj_ok && zips_ok {
+                O::Pass
+            } else {
+                O::Fail
+            },
             tool_id.clone(),
         ),
     );
@@ -533,7 +540,9 @@ pub fn run(
         "payment_floor_vectors",
     ];
     let all_ok = names.iter().all(|t| rep.status(t) == Some("ok"))
-        && rep.overall.as_deref() == Some("Valid.");
+        && rep.overall.as_deref() == Some("Valid.")
+        && o.ok()
+        && rep.errors.is_empty();
     r.row(
         Row::new(
             "vectors-crux",
@@ -608,9 +617,14 @@ pub fn run(
             let s = stem(&format!("crux-{name}-{}", strategy.label()));
             let (o, rep) = crux(&s, &teeth, name, strategy, budget, goal)?;
             r.evidence_file(&rel(&s.with_extension("stdout")), "committed");
+            // convicted by the property's own assertion (props.rs), not by a
+            // translation failure or an overflow check inside the variant
             let convicted = rep.status(name).is_some_and(|st| st != "ok")
                 && rep.overall.as_deref() == Some("Invalid.")
-                && !rep.counterexamples.is_empty();
+                && rep
+                    .counterexamples
+                    .iter()
+                    .any(|c| c.contains("MIR assertion at src/props.rs:"));
             let outcome = if convicted {
                 O::Pass
             } else if rep.status(name) == Some("ok") && rep.overall.as_deref() == Some("Valid.") {
