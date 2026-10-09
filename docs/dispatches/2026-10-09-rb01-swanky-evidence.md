@@ -243,3 +243,13 @@ Still open:
   on #51 (delivering it needs its own go);
 - Item 6's security impact, which remains UNVERIFIED;
 - bDroP 0001, which stays prepared and unsigned.
+
+## Addendum: private report sent by the founder (2026-10-09T20:46Z)
+
+The founder reported in chat that he emailed the private report himself,
+from his own mail account, with `repro_shared_seed.rs` attached. This seat
+did not send it and could not verify it: the connected Gmail account holds
+no such message, and the sending account is not reachable from this
+session. The recipient, the time and the attachment bytes are unverified
+here. The held file's digest is in the package `DIGESTS.md`. #51 is
+unchanged. Item 6's security impact remains UNVERIFIED.
