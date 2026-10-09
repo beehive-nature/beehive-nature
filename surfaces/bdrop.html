@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bDroP — the drop desk</title>
+<link rel="stylesheet" href="tokens.css">
+<!-- the shared shell is tour.js?v=42, loaded once at the end of body; it
+     bootstraps register.js itself (register.test.mjs enforces the one-shell law) -->
+<style>
+/* register pre-hide guard — nothing flashes if register.js is late */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"]{display:block}
+body[data-reg="raver"] [data-reg="raver"]{display:block}
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:block}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0;background:var(--bg1);color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:var(--t-body);line-height:var(--lh-body);
+}
+main{max-width:1060px;margin:0 auto;padding:var(--s4)}
+h1{font-family:'burti',ui-monospace,monospace;font-size:var(--t-display);margin:var(--s2) 0 var(--s1);letter-spacing:.5px}
+.sub{color:var(--dim);font-size:var(--t-small);margin:0 0 var(--s4)}
+h2{font-size:var(--t-h2);letter-spacing:2px;color:var(--dim);margin:var(--s5) 0 var(--s2)} /* casing law: no forced capitals */
+.card{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s4)}
+.law{font-size:12px;color:var(--dim);line-height:var(--lh-law)}
+.canon{border-left:2px solid var(--gold);padding:var(--s2) var(--s3);margin:var(--s3) 0;color:var(--ink)}
+button{
+  background:var(--bg3);color:var(--ink);border:1px solid var(--line-hi);
+  border-radius:var(--r-sm);padding:var(--s2) var(--s3);font:inherit;font-size:12px;
+  cursor:pointer;transition:border-color var(--dur-fast) var(--ease);min-height:34px
+} /* footer-audit TINY floor: taps >= 32px */
+button:hover{border-color:var(--gold)}
+button.primary{background:var(--gold);color:var(--bg0);border-color:var(--gold);box-shadow:var(--glow-gold)} /* ONE primary affordance per concept */
+button:disabled{opacity:.45;cursor:not-allowed}
+button.danger{border-color:#c96}
+input,textarea,select{
+  background:var(--bg0);color:var(--ink);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:var(--s2);font:inherit;font-size:12px;width:100%
+}
+textarea{min-height:180px;resize:vertical;white-space:pre-wrap}
+label{display:block;font-size:12px;color:var(--dim);margin:var(--s3) 0 var(--s1)}
+label:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.log{
+  background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:var(--s2);font-size:12px;line-height:var(--lh-law);
+  max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word
+}
+.log .ok{color:#7c6}
+.log .bad{color:#e86}
+.log .dim{color:var(--dim)}
+.verdict{font-size:12px;margin:var(--s2) 0;padding:var(--s2);border-radius:var(--r-sm);border:1px solid var(--line)}
+.verdict.match{border-color:#7c6;color:#7c6}
+.verdict.differs{border-color:#e86;color:#e86}
+.mono{word-break:break-all}
+.row{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
+details[data-reg-disclose]{margin-top:var(--s3)}
+details summary{cursor:pointer;color:var(--dim);font-size:12px}
+pre.op{
+  background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:var(--s2);font-size:11px;line-height:var(--lh-law);overflow:auto;
+  max-height:300px;white-space:pre-wrap;word-break:break-word;margin:var(--s2) 0 0
+}
+footer{
+  max-width:1060px;margin:0 auto;padding:var(--s4);color:var(--dim);
+  font-size:12px;line-height:var(--lh-law);border-top:1px solid var(--line)
+}
+footer a{color:var(--dim)}
+a{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+  <h1>bDroP</h1>
+  <p class="sub">the drop desk — publish a drop under informed consent. public code · public evidence · explicit uncertainty · execution within informed consent.</p>
+
+  <div data-reg="bee">
+    <div class="card law">
+      this desk publishes one post on the Hive blockchain, signed with a posting key,
+      from this tab and nowhere else. every step shows you what it is doing before it
+      does it: the post's bytes are hashed in front of you, the disclosure is on the
+      page before the button, and the key never leaves this tab's memory. one click is
+      the whole gesture — nothing here asks twice, and nothing here is a promise of
+      safety: what was observed is what gets published.
+    </div>
+  </div>
+  <div data-reg="raver">
+    <div class="card law">
+      one desk, one gesture: hash the bytes, read the disclosure, sign in-memory,
+      broadcast, take the receipt. no gates, no double-asks — the click is the consent.
+    </div>
+  </div>
+  <div data-reg="cypherpunk">
+    <div class="card law">
+      a static page that builds a Hive <code>comment</code> operation, signs it
+      client-side (hive-tx, secp256k1, posting authority) and hands the signed
+      transaction — never the key — to the RPC endpoint you name. the sha-256 of the
+      body is computed locally and compared against the expected digest before you
+      sign; the receipt re-fetches the landed body and byte-compares it. the wire is
+      inspectable below at every step.
+    </div>
+  </div>
+
+  <h2>the drop</h2>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label for="author">author (hive handle)</label>
+        <input id="author" value="loviswater" spellcheck="false">
+      </div>
+      <div>
+        <label for="permlink">permlink (the permanent address of this drop)</label>
+        <input id="permlink" value="bdrop-0001-genesis-public-evidence-informed-consent" spellcheck="false">
+      </div>
+    </div>
+    <label for="title">title</label>
+    <input id="title" value="bDroP 0001 — Genesis: Public Evidence, Informed Consent" spellcheck="false">
+    <div class="grid2">
+      <div>
+        <label for="tags">tags (comma-separated; first tag names the community the post lands in)</label>
+        <input id="tags" value="hive" spellcheck="false">
+      </div>
+      <div>
+        <label for="bodyfile">…or load the body from the edition's .md file (bytes hashed verbatim)</label>
+        <input id="bodyfile" type="file" accept=".md,.markdown,.txt">
+      </div>
+    </div>
+    <label for="body">the body — paste the edition here (hashed as UTF-8 bytes)</label>
+    <textarea id="body" placeholder="paste the drop's markdown body, or load the file above" spellcheck="false"></textarea>
+    <div class="verdict" id="hashverdict">body empty — the desk is idle.</div>
+    <div class="grid2">
+      <div>
+        <label for="expected">expected sha-256 (reported by the preparing session; empty = no comparison)</label>
+        <input id="expected" class="mono" value="9fa6998d548e8f4afd0a7e17fa2a11ea50a0db18b1808d74f985931ff6d825e9" spellcheck="false"><!-- PUBLIC-CONSTANT: reported sha-256 of the bDroP 0001 genesis body, as relayed by the preparing session -->
+      </div>
+      <div>
+        <label for="livehash">computed sha-256 of the body above</label>
+        <input id="livehash" class="mono" readonly>
+      </div>
+    </div>
+    <p class="law">a mismatch does not lock the desk: it is shown, you decide. the bytes are the truth —
+    if the verdict says DIFFERS, publishing is still your call, and the receipt will carry both hashes.</p>
+  </div>
+
+  <h2>the disclosure, at the point of use</h2>
+  <div class="card">
+    <div class="law" style="color:var(--ink)">
+      <b>what this operation does:</b> publishes the post above, irreversibly, on the Hive
+      mainnet blockchain under the author named above, at the permlink named above.<br>
+      <b>what data it uses and reveals, to whom:</b> the title, body and tags — to the public
+      chain and every reader and front-end that ever mirrors it. the posting key — to no one:
+      it signs in this tab and is wiped after the gesture; only the signed transaction is
+      sent, to the RPC endpoint named below.<br>
+      <b>what the evidence establishes:</b> the hash verdict above, and nothing more. acceptance
+      of this disclosure never converts an UNVERIFIED finding into a proven one.<br>
+      <b>what remains uncertain:</b> every scientific claim inside the body stays at its own
+      evidence level; this desk certifies bytes, not conclusions.<br>
+      <b>cost and limits:</b> resource credits from the author's Hive account; a post on Hive
+      is free at point of use and capped near 64&nbsp;KB — this desk warns past 60,000 bytes.<br>
+      <b>reversibility:</b> none. a published drop can be edited only as a forked edition —
+      the eternal law: preserve the edition, then preserve corrections against it.
+    </div>
+    <div class="canon law">
+      <b>RB01 is an experimental benchmark adapter. Its functional and performance results do not establish suitability for sensitive data or production use.</b><br><br>
+      The constructors initialize separate RNG consumers from the same seed. The reporting seat
+      observed overlapping streams within each party and matches between some generated bytes
+      and protocol traffic. The security consequences remain unverified.
+    </div>
+    <p class="law">both statements ride the drop wherever the finding is shown. the security consequences of the RNG observation remain <b>UNVERIFIED</b> — here, in the post, and after publication.</p>
+  </div>
+
+  <h2>sign &amp; broadcast</h2>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label for="wif">hive posting key (WIF, 5… — the posts tier, not owner, not active)</label>
+        <input id="wif" type="password" autocomplete="off" spellcheck="false" placeholder="stays in this tab's memory, wiped after the gesture">
+      </div>
+      <div>
+        <label for="rpc">rpc endpoint (the only place anything is sent to)</label>
+        <input id="rpc" value="https://api.hive.blog" spellcheck="false">
+      </div>
+    </div>
+    <p class="law">the key lives in this tab's memory for one gesture: it signs here, in your
+    browser, and is never stored, never logged, never sent. wipe it yourself any time:</p>
+    <div class="row">
+      <button class="primary" id="publish">sign + broadcast the drop</button>
+      <button id="wipe">wipe the key now</button>
+    </div>
+    <div class="log" id="status" style="margin-top:var(--s3)"><span class="dim">idle — the desk has not acted.</span></div>
+    <details data-reg-disclose class="law">
+      <summary>the wire, verbatim (cypherpunk register stands this open)</summary>
+      <pre class="op" id="opjson">the comment operation appears here before signing.</pre>
+      <pre class="op" id="txjson">the signed transaction appears here after signing — signatures only, never the key.</pre>
+    </details>
+  </div>
+
+  <h2>the receipt</h2>
+  <div class="card">
+    <div class="log" id="receipt">no drop published from this tab yet.</div>
+    <div class="row" style="margin-top:var(--s3)">
+      <button id="download" hidden>download receipt json</button>
+      <span class="law" id="permwrap" hidden><a id="permlinkurl" target="_blank" rel="noopener noreferrer">the drop on hive.blog (opens a new tab)</a></span>
+    </div>
+    <p class="law" style="margin-top:var(--s2)">the receipt records what the gesture did: the
+    transaction id, the block that landed it, and the byte-compare of the published body
+    against what you signed. land it in the estate's tree — the publication is proven by the
+    chain, never by prose.</p>
+  </div>
+</main>
+<footer>
+  bDroP · the drop desk · surfaces/bdrop.html · signing: vendored hive-tx 6.1.0 (see
+  onboarding/vendor/BUILD-NOTES.md) · disclosure version bdrop-0001-disclosure-v1 ·
+  lane record: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/2026-10-09-bdrop.md" target="_blank" rel="noopener noreferrer">the bDroP dispatch (opens a new tab)</a>.
+  the desk informs, never gates: one gesture, executed within the disclosure above.
+  external links open a new tab so this page and its session remain yours.
+</footer>
+<script>
+/* hive-tx 6.1.0 dist bug: at init it starts a healthcheck interval and calls
+   .unref() on the timer handle — a node-ism browsers do not carry on numeric
+   ids, and the factory dies before window.hiveTx attaches. Guarded no-ops,
+   installed only when absent, nothing else touches Number. */
+if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function(){};Number.prototype.ref=function(){}}
+</script>
+<script src="onboarding/vendor/hive-tx.min.js?v=1"></script>
+<script src="bdrop.js?v=1"></script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

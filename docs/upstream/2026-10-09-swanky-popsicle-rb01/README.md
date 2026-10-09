@@ -12,10 +12,20 @@ The constructors initialize separate RNG consumers from the same seed. The repor
   at `ecd5e6c6f7ce6f1c9cc6e3f3c2cb436404ae3375`,
   `docs/receipts/btungsten-rb/REPORT.md` §RB01 (lines 149 and 160–179). It
   entered through the one-door findings handoff (`CONTRIBUTING.md`).
-- Upstream issues: **not filed.** Private report for observation 6: **not
-  sent.** This lane's order (2026-10-09) holds every upstream post until the
-  founder gives the go in chat. That go has not been given. The four issue
-  bodies and the private report are prepared.
+- Upstream issues: **filed 2026-10-09T19:41Z**, on the founder's explicit go
+  in chat, from his GitHub account `loviswaternakamoto`. ISSUE-1 →
+  [GaloisInc/swanky#47](https://github.com/GaloisInc/swanky/issues/47),
+  ISSUE-2 → [#48](https://github.com/GaloisInc/swanky/issues/48), ISSUE-3 →
+  [#49](https://github.com/GaloisInc/swanky/issues/49), ISSUE-4 →
+  [#50](https://github.com/GaloisInc/swanky/issues/50). The four link to each
+  other and to this package at `0d88ec248`. A separate, minimal
+  private-channel request is
+  [#51](https://github.com/GaloisInc/swanky/issues/51). `FILED.md` records
+  the read-back bodies and their digests. Edition note: at `0d88ec248` this
+  bullet read "not filed".
+- Private report for observation 6: **not sent.** No email was authorized.
+  The held material stays held until Swanky's maintainers name a
+  confidential route.
 - Who ran what: every execution recorded here was performed by Seat 3
   (Claude Code), the session that owns this lane, inside WSL2 on the
   founder's build box, under that order. Runs 2 and 3 repeat run 1's
@@ -121,7 +131,11 @@ other defects.
   `ISSUE-3-empty-evaluator-set.md`, `ISSUE-4-input-encoding.md`: upstream
   issue bodies, each with the pin, the reproduction, expected and observed
   results, the suspected lines as permalinks at the pin, a suggested fix and
-  an attribution note. Not filed.
+  an attribution note. These are the reviewed drafts, kept unchanged with
+  their "DRAFT, not filed" headers.
+- `FILED.md` and `filed/`: the issues as filed (#47–#50 and the
+  private-channel request #51), with their URLs and timestamps, and the
+  bodies read back from GitHub, with digests.
 - `repro/`: the five reproduction programs the issues attach. Place them at
   `edge/popsicle/examples/` in a Swanky checkout at the pin.
 - `RECEIPTS.md`: commands, toolchain, timeouts, trial counts, exit codes,
