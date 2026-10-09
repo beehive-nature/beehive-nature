@@ -7,7 +7,9 @@ name: bTunGsTeN PQ SAW
 # validators) equal to its Cryptol spec, its obligations and teeth. PQ03:
 # crates/bpq-core (the HKDF info string of every bzDiD derivation) equal to
 # its Cryptol spec, deriveInjective and its neighbours on that spec, and four
-# teeth that must be refuted. Toolchain pins and the mir-json cache are the
+# teeth that must be refuted; and SHA-256 in sha2 0.10.9 (the soft path)
+# equal to FIPS 180-4, its tables, two-round function, schedule and 64-round
+# block, with two teeth. Toolchain pins and the mir-json cache are the
 # WB001/WB002 SAW workflows' (same key, same commit, same nightly).
 
 on:
@@ -90,6 +92,10 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq02-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
+      - name: PQ03 SAW — SHA-256 in sha2 0.10.9 (soft path), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
+        if: always()
+        shell: bash
+        run: sh scripts/btungsten/pq03-sha256-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
       - name: PQ05 SAW — X-Wing glue, BUILD + EQUIVALENCE + combinerBinds + TEETH
         if: always()
         shell: bash

@@ -318,8 +318,29 @@ same cases (DIFFERENTIAL rides on KAT).
     label, built by `scripts/build-derive-vectors.mjs` from the browser's own
     functions) reproduced by bsigner through bpq-core and the hkdf crate.
   - KAT: HKDF-SHA256 on RFC 5869 A.1 to A.3 (extract PRK, expand OKM).
-  - Not yet: the SHA-256 compression function and the HMAC/HKDF composition
-    at L4 (both are KAT + DIFFERENTIAL today). `deriveRecordKey` and
+  - **SHA-256, 2026-10-09** (sha2 0.10.9, the `.crate` checked against
+    Cargo.lock; `scripts/btungsten/pq03-sha256-check.sh`):
+    `pq03-cryptol/Sha256.cry` is FIPS 180-4 with K and H0 COMPUTED (integer
+    cube and square roots of the primes, mod 2^32; the primes checked prime
+    and consecutive) and is held to FIPS 180-4's digests of "", "abc" and
+    the two-block example. `pq03-harness/sha256.rs` compiles the crate's
+    soft.rs and consts.rs verbatim. PROVEN: the crate's K32 and H256_256
+    tables equal the derived constants; its two-round function
+    (`sha256_digest_round_x2`) and message schedule (`schedule`) equal
+    FIPS 180-4 for every input; its 64-round block function
+    (`sha256_digest_block_u32`) equals FIPS compress for every state and
+    block, composed from the two proofs above as overrides with T1, T2 and
+    the schedule word uninterpreted; one block through its `compress`
+    (bytes to big-endian words) equals FIPS compress. Six obligations in
+    5 s locally. TEETH: Σ1 rotating by 7, and one round constant off by a
+    bit, each refuted with a counterexample. Scope: the soft path. On
+    x86_64 with the SHA extensions sha2 runs SHA-NI intrinsics instead,
+    which this does not cover; the spec groups each FIPS sum the way the
+    soft code does (addition mod 2^32 makes every grouping the standard's
+    sum, and the closed checks hold the spec to the published digests).
+  - Not yet: the HMAC/HKDF composition at L4 (KAT + DIFFERENTIAL today),
+    the multi-block `compress` loop (one block is proven), and the digest
+    core's padding and length encoding. `deriveRecordKey` and
     `personaNullifier` keep accepting any string: their labels take no
     counter, so label prefix-freeness alone keeps them apart, but JavaScript's
     UTF-8 encoder maps a lone surrogate to U+FFFD, so two different JS
