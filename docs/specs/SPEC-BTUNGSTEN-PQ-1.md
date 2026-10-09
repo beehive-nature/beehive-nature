@@ -243,9 +243,20 @@ same cases (DIFFERENTIAL rides on KAT).
     minutes). A harness copy of the round, composed by 24 overrides, did
     prove equal to `keccakF` (574 s locally), which shows the composition
     is sound for a separate function; it is not the shipped loop.
-  - Not yet: the sponge absorb and squeeze for the stack's lengths, and
-    keccak 0.2.2 (under sha3 0.11, which ml-kem and the SLH-DSA crates use;
-    PQ01's ACVP vectors exercise it as KAT).
+  - **keccak 0.2.2, 2026-10-09** (the Keccak under shake 0.1 for ml-dsa
+    0.1.1 and under sha3 0.11 for ml-kem 0.3.2 and slh-dsa, per Cargo.lock):
+    its round body (`backends::soft::keccak_p`, the backend
+    `Keccak::with_backend` takes on x86_64 with no `keccak_backend` cfg) is
+    crate-private, so `pq02-harness/harness022.rs` compiles the pinned
+    crate's `consts.rs`, `types.rs` and `backends/soft.rs` verbatim, adding
+    only the `Backend` trait with the one method soft.rs implements, and
+    runs the body once per constant through a lane type whose `RC` is
+    `[RC[k]]`. `pq02-saw/shipped022.saw`: equal to `keccakRound k` for every
+    state, all 24 constants (CI run 37925287105, 17 s). Read, not proven:
+    `keccak_p::<u64, 24>` runs those bodies in order (`for rc in
+    round_consts`, src/backends/soft.rs:68). The aarch64 SHA-3 backend is
+    not covered; it is compiled only on aarch64.
+  - Not yet: the sponge absorb and squeeze for the stack's lengths.
 
 ### PQ03 · SHA-2 / HMAC / HKDF + the bzDiD derivation
 
