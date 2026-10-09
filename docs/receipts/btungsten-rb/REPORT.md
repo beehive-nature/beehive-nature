@@ -21,7 +21,14 @@ target/release/rbench rb03 --tools T/crux --work W --out O/rb03
 `--quick` runs the same rows with fewer samples (the CI plan). `T` holds the
 verifier bundles in the layout `scripts/btungsten/README.md` §RB names; the
 `rb02-aes` and `rb03-budget` jobs of `.github/workflows/btungsten-rb.yml`
-build exactly that layout from pinned, digest-checked assets.
+build exactly that layout from pinned, digest-checked assets. The Crux-MIR
+bundle that job downloads is upstream's CI artifact and expires 2027-01-06;
+reproduction must not depend on that download alone. The rebuild recipe and
+its required inputs are the Crux-MIR pin row below — crucible `25d0f369`
+built the way upstream's `crux-mir-build.yml` pins it at that commit
+(GHC 9.10.3, ubuntu-24.04), mir-json `ece1622c`, nightly-2026-03-21,
+what4-solvers `snapshot-20260622` — so after the artifact expires the
+bundle is rebuilt from those inputs, not re-downloaded.
 
 ## Where these receipts ran, and what went wrong on the way
 
@@ -30,11 +37,24 @@ The committed receipts, under `ci-37923430005/`, are one full-plan run of
 `plan=full`) at BNR `073697abb`, on GitHub-hosted `ubuntu-24.04` runners, one
 runner per lane, so no two lanes shared a host. Each receipt's `host` section
 names the CPU, ISA flags, kernel and memory it measured on, and its `bnr`
-section the exact BNR commit. The branch's later commits add these documents and
-none touches a lane file
-(`git diff 073697abb HEAD -- crates/btungsten-bench scripts/btungsten/rb01-psi
-scripts/btungsten/rb02-aes scripts/btungsten/rb03-budget
-.github/workflows/btungsten-rb.yml ops/ant-extsig` is empty). Logs and
+section the exact BNR commit. The lane lineage in full: the first full-plan
+execution after the memory-accounting repair was run `37906620036` at BNR
+`f43ffdcd3f756b983289a692fdf1576240510d78` (all three lanes PASS, receipts not
+committed); RB01 then gained its operator notice — disclosure text only — and
+the lanes ran again in full as run `37923430005`, the receipts committed here.
+Pull-request runs of this workflow execute only the `changes` and `fast`
+jobs; the three lanes run only on `workflow_dispatch` with `plan=full`. A
+green PR check is therefore never a lane execution, and none is cited as one
+here.
+
+The tested-to-head comparison at this report's final commit covers every
+input a lane reads, not only files bearing an RB name:
+`git diff 073697abb HEAD -- crates/ ops/ant-extsig Cargo.toml Cargo.lock
+rust-toolchain rust-toolchain.toml .cargo .github scripts/btungsten` is
+empty except documentation lines in `scripts/btungsten/README.md`. No
+production source, dependency version, toolchain, workflow, verifier
+binary or pinned digest changed after the receipts' commit, so nothing was
+rerun: the committed receipts stand for the final head. Logs and
 input files are committed beside each receipt, except 24 RB01 fixture
 files (up to 512 KiB each): the receipt records each one's SHA-256, and
 `rbench` regenerates them byte for byte. The development host (Windows, WSL2 x86_64) ran
@@ -163,12 +183,17 @@ cardinality, to the evaluator only. Permitted leakage: the cardinality to
 the evaluator; both set sizes through traffic volume and the evaluator's
 cleartext cuckoo bin count.
 
-**Upstream behaviour the bench's input policy now guards** (characterization
+**Upstream observations and adapter coverage** (characterization
 rows, recorded at the pin; none is a claim about our code). A
 CHARACTERIZATION PASS means the behaviour was recorded, not that upstream or
 the provider behaved correctly. A separate lane re-checked each item at the
 pin, three runs on the development host, none an independent reproduction:
-`docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`), dispatch `docs/dispatches/2026-10-09-rb01-swanky-evidence.md`.
+`docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`), dispatch
+`docs/dispatches/2026-10-09-rb01-swanky-evidence.md` (Seat 3, the RB01
+reporting lane). The re-check is later evidence attributed to that seat,
+carrying its own runs and sample counts; it is not a measurement of the
+benchmark runs above, and the two histories are reported side by side, not
+merged.
 
 - A garbler set larger than the evaluator's set panics the garbler at
   `swanky-oprf-kmprt` `lib.rs:211` (`assert!(points.len() <= npoints)`); the
@@ -206,8 +231,18 @@ pin, three runs on the development host, none an independent reproduction:
   `PsiEvaluator::new`); the stream observations are the re-check lane's,
   `docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`).
 
-The provider refuses empty inputs, repeated elements, and inputs that are
-not a whole number of 8-byte elements, before any connection.
+Which input rules cover which observations, observation by observation. The
+provider refuses an empty set on either side, a repeated element in either
+set, and inputs that are not a whole number of 8-byte elements, before any
+connection; those rules address the empty-set panics and the
+repeated-element behaviours above. No input rule addresses the remaining
+observations: a garbler set larger than the evaluator's is a legitimate
+input, sampled rather than guarded — the sweep and the re-check tallies
+record how often it panics, per run, as samples, and no size is claimed as
+a threshold in either direction; the ≤16-byte zero-padding aliasing is
+recorded, not guarded; and the RNG finding is untouched by any input rule —
+rejecting empty, duplicate or wrongly sized inputs does not resolve RNG
+reuse, whose security consequences remain **UNVERIFIED**.
 
 **Execution modes.** local-threads (one process, the upstream
 composition); tcp-process (two OS processes, one host, loopback TCP, each
@@ -278,10 +313,15 @@ SHA-256, and no SHA-2 claim is made here.
 
 Receipt `ci-37923430005/rb03/receipt-rb03.json`: **PASS** (4 PROVE-UNIVERSAL INCONCLUSIVE, 16 PROVE-UNIVERSAL PASS, 6 TEETH PASS, 6 VECTOR PASS). BNR `073697abb`; runner AMD EPYC 9V74 80-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
 
-All ten properties are proven over their full input domains under the
-required strategy (cvc5 integer blasting through `rb-cvc5-intblast`), three
-times each, and both faulty variants are convicted, on all three TEETH
-properties, with concrete models. The correspondence rows hold: the harness compiles production's
+All ten properties are proved over their stated domains and preconditions
+under the required strategy (cvc5 integer blasting through
+`rb-cvc5-intblast`), three times each, and both faulty variants are
+convicted, on all three TEETH properties, with concrete models. The
+domains are the ones the `PROPERTIES` table in
+`crates/btungsten-bench/src/lanes/rb03.rs` states, and they are not all
+unconditional: p2's affordability biconditional assumes `gas_limit != 0` —
+the case p1 refuses separately. p1 establishes zero-gas refusal; it does
+not make p2's affordability statement unconditional. The correspondence rows hold: the harness compiles production's
 `budget.rs` itself (`correspondence-source`), resolves the same versions of
 every shared dependency (`correspondence-dependencies`), and
 `correspondence-split` holds today's `plan_fee_cap` to the verbatim pre-split
