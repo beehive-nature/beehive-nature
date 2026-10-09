@@ -95,7 +95,7 @@ jobs:
   # SHA-256 inside the tests, never committed.
   pq12-taproot:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
@@ -113,6 +113,35 @@ jobs:
           BPQ_BIP174_TEXT: ${{ runner.temp }}/bip174.mediawiki
           BPQ_BIP371_TEXT: ${{ runner.temp }}/bip371.mediawiki
         run: cargo test --locked -p bsigner --release -- --ignored --nocapture bip341_wallet_vectors bip174_and_bip371_vectors
+      # step 5: FROST behind the gate (crates/bsigner/src/frost.rs, feature
+      # frost), over chilldkg-rs 0.5.0, unaudited
+      - name: PQ12 bsigner FROST (2-of-3 ChillDKG signs an ML-DSA-authorized PSBT; every signature a valid key-path witness)
+        if: always()
+        run: cargo test --locked -p bsigner --release --features frost frost -- --nocapture
+      - name: PQ12 chilldkg-rs 0.5.0 upstream vectors (the .crate checked against Cargo.lock's checksum)
+        if: always()
+        run: |
+          want=$(awk '/^\[\[package\]\]/{n=""} /^name = /{n=$3} /^checksum = /{if (n=="\"chilldkg-rs\"") {gsub(/"/,"",$3); print $3}}' Cargo.lock)
+          curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/chilldkg.crate" https://static.crates.io/crates/chilldkg-rs/chilldkg-rs-0.5.0.crate
+          got=$(sha256sum "$RUNNER_TEMP/chilldkg.crate" | cut -d' ' -f1)
+          [ -n "$want" ] && [ "$got" = "$want" ] || { echo "chilldkg-rs-0.5.0.crate does not match Cargo.lock"; exit 1; }
+          tar -xzf "$RUNNER_TEMP/chilldkg.crate" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/chilldkg-rs-0.5.0"
+          cargo test --locked --all-targets --all-features > "$RUNNER_TEMP/chilldkg-test.log" 2>&1 && rc=0 || rc=$?
+          grep -E "^test result|Running" "$RUNNER_TEMP/chilldkg-test.log"
+          [ "$rc" -eq 0 ] || { cat "$RUNNER_TEMP/chilldkg-test.log"; exit 1; }
+          echo "chilldkg-rs upstream: $(grep -o '[0-9]* passed' "$RUNNER_TEMP/chilldkg-test.log" | awk '{s+=$1} END {print s}') tests passed"
+      - name: PQ12 audit gate 1 (blocking) — chilldkg-rs is not in bsigner's default build
+        if: always()
+        run: |
+          if cargo tree --locked -p bsigner -e normal -i chilldkg-rs; then echo "chilldkg-rs reached the default build"; exit 1; fi
+          echo "default build: chilldkg-rs absent"; cargo tree --locked -p bsigner -e normal --features frost -i chilldkg-rs
+      - name: PQ12 audit gate 2 (recorded) — cargo audit of Cargo.lock, verbatim
+        if: always()
+        run: |
+          cargo install cargo-audit --locked --version 0.22.2
+          cargo audit --file Cargo.lock && rc=0 || rc=$?
+          echo "cargo audit exited $rc (gate 2 records, it does not block)"
 
   # Plonky3 at eab7f0e, its own workspace (crates/btungsten-p3count). The
   # LEAK experiment is a registered single run (contracts/zkreceipts/leak/

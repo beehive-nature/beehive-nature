@@ -169,6 +169,17 @@ pub struct VerifiedIntent {
 }
 
 impl VerifiedIntent {
+    /// One BIP-341 sighash per input, in input order (the threshold
+    /// backend's only messages).
+    #[cfg(feature = "frost")]
+    pub fn sighashes(&self) -> &[[u8; 32]] {
+        &self.sighashes
+    }
+    /// The Taproot output key every input spends.
+    #[cfg(feature = "frost")]
+    pub fn output_key(&self) -> &[u8; 32] {
+        &self.output_key
+    }
     /// What was verified and what may be signed: one BIP-341 sighash per
     /// input, in input order, under the output key every input spends.
     pub fn summary(&self) -> Value {

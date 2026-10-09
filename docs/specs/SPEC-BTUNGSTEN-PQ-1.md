@@ -804,9 +804,36 @@ Obligations:
   byte for byte both ways, 9 refusal codes); each implementation verifies
   the other's authorization (`surfaces/bpq-intent-vector.json`,
   `surfaces/bpq-intent-rust.json`), and both refuse another envelope, a
-  trailing byte, another kind, id or key. Not yet: the sighash
-  DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, the wallet's
-  press that makes an authorization, and chilldkg behind the gate (step 5).
+  trailing byte, another kind, id or key.
+- **Built 2026-10-09, step (5): FROST behind the gate, feature-gated.**
+  `crates/bsigner/src/frost.rs` over chilldkg-rs `=0.5.0` (crates.io;
+  its `.crate` is byte-identical to the pinned `afeafbc7f9df` but for a
+  stray `.DS_Store`, which is why it reads "dirty"; README line 9: "has not
+  been audited"). Compiled only with the off-by-default `frost` feature,
+  so it is absent from the shipped binary until its key ceremony and its
+  shares at rest (PQ09's sealed format) land; with the feature on and no
+  CLI yet, the toolchain reports its functions unused, as the stub law
+  wants. `open` takes a `VerifiedIntent` and refuses unless its output
+  key is the group's Taproot key (BIP-341 TapTweak of the threshold key,
+  computed by bsigner's own code and equal to chilldkg's tweaked key) and
+  the input exists; the nonce is bound at round 1 to that sighash and
+  tweak (chilldkg's `msg` is always `Some`); a session id opens once;
+  `sign` consumes the session (chilldkg's secret nonce is neither Clone
+  nor Copy); `relay` and `finish` refuse fewer signers or partial
+  signatures than the threshold, and `finish` releases the signature only
+  after bsigner's own BIP-340 check under the output key. Test (local,
+  WSL): a 2-of-3 ChillDKG key signs both inputs of an ML-DSA-authorized
+  PSBT with two different pairs, and each signature passes the node check
+  of a key-path witness (`taproot::verify_key_path`); refused: one
+  signer, a replayed session id, a missing input, another group's share
+  and coordinator, a partial signature over another input's sighash, fewer
+  partials than the threshold. CI job `pq12-taproot` also runs chilldkg's
+  own vector tests from the `.crate` checked against Cargo.lock, audit
+  gate 1 (blocking: `cargo tree -e normal -i chilldkg-rs` finds nothing in
+  bsigner's default build) and gate 2 (`cargo audit` 0.22.2 over the lock,
+  recorded). Not yet: the key ceremony and sealed shares, the CLI rounds,
+  the sighash DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, and
+  the wallet's press that makes an authorization.
 
 ### PQ13 · Buzz events
 

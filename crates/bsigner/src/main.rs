@@ -91,6 +91,8 @@ mod b64;
 mod bip39;
 mod bpq;
 mod envelope;
+#[cfg(feature = "frost")]
+mod frost;
 mod intent;
 #[cfg(test)]
 mod kat;
