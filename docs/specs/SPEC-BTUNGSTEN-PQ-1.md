@@ -246,6 +246,40 @@ same cases (DIFFERENTIAL rides on KAT).
 - Teeth: a label that is a prefix of an existing one must refute
   `deriveInjective`; the counter-suffix pair above must refute it when the
   context rule is removed.
+- **Built 2026-10-08.** The callers were read: every context the wallet
+  builds is printable ASCII of at most 51 bytes, but `deriveK1Key`,
+  `BPQ.keys` and bsigner's `bpq::keys` accepted any non-empty string, so the
+  collision was a FINDING (unreachable in practice: counter 1 needs an
+  out-of-range scalar, probability below 2^-127 per derivation). The repair
+  is a context rule, not a length prefix (a prefix would change every key):
+  1 to 64 printable ASCII bytes, and the K1 counter capped at 31 so a
+  counter byte is never a context byte. It holds in `crates/bpq-core`
+  (which now builds every info string bsigner derives from), in
+  `surfaces/bpq.js` (`keys`, `successionKeys`) and in
+  `surfaces/onboarding/bzdid-key.js` (`deriveK1Key`). SPEC-BPQ-1 §2 states it.
+  - EQUIVALENCE (`scripts/btungsten/pq03-saw/derive.saw`): `context_ok`,
+    `args_ok`, `info_len`, `info_byte`, `info` equal to
+    `pq03-cryptol/BpqDerive.cry` for every input. The spec builds the info
+    string by OR-ing three shifted strings; the Rust places bytes one
+    position at a time.
+  - PROVE-UNIVERSAL (`injective.saw`): `labelsPrefixFree`, `infoFits`,
+    `infoPadded`, `rootIsolated`, `deriveInjective`, over all seven labels,
+    every admitted context (capacity 64, which is the whole rule) and every
+    counter.
+  - TEETH: `context_ok` asked to admit DEL; `deriveInjective` with
+    `BDID-v1/vault` as a label (refuted: `(4, "-key…")` vs `(5, "…")`), with
+    control bytes admitted (refuted: the counter-suffix pair), with the
+    counter cap at 0x7e (refuted: `(k1, "H@", 0)` vs `(k1, "H", 0x40)`).
+  - DIFFERENTIAL: `surfaces/bzdid-derive-vectors.json` (9 rows, every
+    label, built by `scripts/build-derive-vectors.mjs` from the browser's own
+    functions) reproduced by bsigner through bpq-core and the hkdf crate.
+  - KAT: HKDF-SHA256 on RFC 5869 A.1 to A.3 (extract PRK, expand OKM).
+  - Not yet: the SHA-256 compression function and the HMAC/HKDF composition
+    at L4 (both are KAT + DIFFERENTIAL today). `deriveRecordKey` and
+    `personaNullifier` keep accepting any string: their labels take no
+    counter, so label prefix-freeness alone keeps them apart, but JavaScript's
+    UTF-8 encoder maps a lone surrogate to U+FFFD, so two different JS
+    strings can share a context's bytes there. No caller passes one.
 
 ### PQ04 · bpq-core: every SPEC-BPQ-1 byte layout
 

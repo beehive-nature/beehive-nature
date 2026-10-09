@@ -213,12 +213,15 @@ fn open_seed<const N: usize>(v: &Value, vault: &Vault) -> Result<Zeroizing<[u8; 
     Ok(seed)
 }
 
+/// A loaded key: its algorithm, its secret seed, its public bytes.
+pub type Loaded<A, const N: usize> = (A, Zeroizing<[u8; N]>, Vec<u8>);
+
 /// Load a signature key: (alg, Zeroizing seed, verifying key bytes).
 pub fn load_dsa(
     key_id: &str,
     dir: Option<PathBuf>,
     vault: &Vault,
-) -> Result<(SigAlg, Zeroizing<[u8; 32]>, Vec<u8>), String> {
+) -> Result<Loaded<SigAlg, 32>, String> {
     let v = read_keyset(key_id, &dir.unwrap_or_else(keys_dir), "signature")?;
     let alg = SigAlg::parse(
         v.get("alg")
@@ -248,7 +251,7 @@ pub fn load_kem(
     key_id: &str,
     dir: Option<PathBuf>,
     vault: &Vault,
-) -> Result<(KemAlg, Zeroizing<[u8; 64]>, Vec<u8>), String> {
+) -> Result<Loaded<KemAlg, 64>, String> {
     let v = read_keyset(key_id, &dir.unwrap_or_else(keys_dir), "kem")?;
     let alg = KemAlg::parse(
         v.get("alg")

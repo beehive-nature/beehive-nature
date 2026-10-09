@@ -27,6 +27,9 @@ getrandom = "0.2"
 # (crates/btungsten-pq, PQ01); only this set is compiled in.
 fips205 = { version = "=0.4.1", default-features = false, features = ["default-rng", "slh_dsa_shake_256f"] }
 bech32 = "0.9"
+# the SAW-proven derivation byte layer (SPEC-BTUNGSTEN-PQ-1 PQ03): every HKDF
+# info string bpq.rs derives a key from is built by bpq-core
+bpq-core = { path = "../bpq-core" }
 hkdf = "0.12"
 sha2 = { workspace = true }
 x25519-dalek = { version = "2", features = ["static_secrets"] }

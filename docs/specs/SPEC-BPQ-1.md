@@ -44,6 +44,22 @@ via `onboarding/bzdid-key.js`) and a context string. In the wallet a persona con
 
 No label is a byte-prefix of another bzDiD label, so label ‖ context never collides.
 
+Context rule (2026-10-08, SPEC-BTUNGSTEN-PQ-1 PQ03). A context is 1 to 64 printable ASCII
+characters (0x20 to 0x7e); `keys`, `successionKeys` (JS) and `bpq::keys`, `bpq::succession_keys`
+(Rust) refuse any other with code `context_rule`. The rule exists for the classical secp256k1
+record key (`BDID-v1/secp256k1-record-key`, `onboarding/bzdid-key.js` `deriveK1Key`), the one
+derivation that appends a retry counter byte when a derived scalar is out of range: without it,
+context `"a"` at counter 1 and context `"a\x01"` at counter 0 have the same HKDF info, so two
+derivations would share a key. `deriveK1Key` holds the same rule and caps the counter at 31, so
+a counter byte is never a printable byte. Every context the wallet builds (`pq:<name>` with a
+printable name of at most 48, `<rail>:<soul>`, `nostr:bnr-devices`, `root`) is inside the rule,
+so no existing key changes; `a1:<agent>` (contracts/vending/tool/a1.mjs) is inside it for any
+printable agent name of at most 61 characters. `crates/bpq-core` builds every info string bsigner derives from;
+SAW proves it equal to `scripts/btungsten/pq03-cryptol/BpqDerive.cry` and proves there that two
+different admitted (label, context, counter) triples never share an info string, over all seven
+labels HKDF-Expand takes from the masterPrk: the four above plus `BDID-v1/ed25519-record-key`,
+`BDID-v1/secp256k1-record-key` and `BDID-v1/persona-nullifier`.
+
 Phrase-only vault (founder ruling 2026-10-04). The reserved context string `root` (no `pq:`
 prefix, so it never equals a wallet persona context, which always starts `pq:`) gives the
 **root vault key** = `expand("BDID-v1/vault-key", 32)` with context `root`: the same HKDF, the

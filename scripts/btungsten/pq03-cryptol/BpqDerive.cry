@@ -1,0 +1,135 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — the HKDF info string of every bzDiD derivation.
+//
+// Written from SPEC-BPQ-1 §2 and surfaces/onboarding/bzdid-key.js, not from
+// crates/bpq-core: info = label ‖ context, plus one counter byte for the
+// secp256k1 record key when its retry counter is above 0. The Rust model
+// places bytes one position at a time; this spec ORs three shifted strings,
+// so the EQUIVALENCE proof compares two different constructions.
+//
+// The tables are parameters (the W functions) so the teeth can swap in a
+// prefix label, a looser context rule or a higher counter cap and watch the
+// injectivity proof fail. The real tables carry an eighth, empty slot so
+// indexing never leaves the table; argsOk refuses label 7 and above.
+module BpqDerive where
+
+type LabelCap = 40
+type CtxCap = 64
+type InfoCap = 105
+
+type Context = { len : [32], bytes : [CtxCap][8] }
+type Labels = [8][LabelCap][8]
+type Lens = [8][32]
+
+padL : {n} (fin n, LabelCap >= n) => [n][8] -> [LabelCap][8]
+padL s = s # zero
+
+labels : Labels
+labels = [ padL "BDID-v1/ed25519-record-key"
+         , padL "BDID-v1/secp256k1-record-key"
+         , padL "BDID-v1/persona-nullifier"
+         , padL "BDID-v1/ml-dsa-65-record-key"
+         , padL "BDID-v1/x-wing-kem-key"
+         , padL "BDID-v1/vault-key"
+         , padL "BDID-v1/slh-dsa-shake-256f-succession"
+         , zero ]
+
+labelLens : Lens
+labelLens = [ length "BDID-v1/ed25519-record-key"
+            , length "BDID-v1/secp256k1-record-key"
+            , length "BDID-v1/persona-nullifier"
+            , length "BDID-v1/ml-dsa-65-record-key"
+            , length "BDID-v1/x-wing-kem-key"
+            , length "BDID-v1/vault-key"
+            , length "BDID-v1/slh-dsa-shake-256f-succession"
+            , 0 ]
+
+// the one label with a retry counter
+k1 : [8]
+k1 = 1
+
+slot : [8] -> [3]
+slot l = drop`{5} l
+
+printable : [8] -> Bit
+printable b = (b >= 0x20) /\ (b <= 0x7e)
+
+// a context rule, given which bytes it admits
+contextRule : ([8] -> Bit) -> Context -> Bit
+contextRule admit c =
+  (c.len >= 1) /\ (c.len <= 64) /\
+  and [ if i < c.len then admit b else b == 0 | b <- c.bytes | i <- [0 .. 63] ]
+
+contextOk : Context -> Bit
+contextOk = contextRule printable
+
+argsOkW : (Context -> Bit) -> [8] -> [8] -> Context -> [8] -> Bit
+argsOkW rule cap l c k = (l < 7) /\ rule c /\ ((k == 0) \/ ((l == k1) /\ (k <= cap)))
+
+argsOk : [8] -> Context -> [8] -> Bit
+argsOk = argsOkW contextOk 31
+
+infoLenW : Lens -> [8] -> Context -> [8] -> [32]
+infoLenW lens l c k = lens @ slot l + c.len + (if k == 0 then 0 else 1)
+
+infoLen : [8] -> Context -> [8] -> [32]
+infoLen = infoLenW labelLens
+
+widen : {n} (fin n, InfoCap >= n) => [n][8] -> [InfoCap][8]
+widen xs = xs # zero
+
+// label, then the context shifted past the label, then the counter byte
+// shifted past both (a zero counter adds nothing)
+infoBytesW : Labels -> Lens -> [8] -> Context -> [8] -> [InfoCap][8]
+infoBytesW tbl lens l c k =
+  widen (tbl @ slot l) || (widen c.bytes >> ll) || (widen [k] >> (ll + c.len))
+  where ll = lens @ slot l
+
+infoBytes : [8] -> Context -> [8] -> [InfoCap][8]
+infoBytes = infoBytesW labels labelLens
+
+// what bpq_core::info writes and returns
+infoOut : [8] -> Context -> [8] -> ([InfoCap][8], [32])
+infoOut l c k = if argsOk l c k then (infoBytes l c k, infoLen l c k) else (zero, 0)
+
+// ---- obligations ----------------------------------------------------------
+
+// no label is a byte prefix of another (closed term)
+prefixOfW : Labels -> Lens -> [3] -> [3] -> Bit
+prefixOfW tbl lens i j =
+  (lens @ i <= lens @ j) /\
+  and [ (k >= lens @ i) \/ ((tbl @ i) @ k == (tbl @ j) @ k) | k <- [0 .. 39 : [32]] ]
+
+labelsPrefixFree : Bit
+property labelsPrefixFree =
+  and [ (i == j) \/ ~ prefixOfW labels labelLens i j | i <- [0 .. 6 : [3]], j <- [0 .. 6 : [3]] ]
+
+// every admitted info string fits the capacity and is nonempty
+infoFits : [8] -> Context -> [8] -> Bit
+property infoFits l c k = argsOk l c k ==> (infoLen l c k >= 1) /\ (infoLen l c k <= 105)
+
+// past its length the padded string is zero, so equal lengths and equal
+// padded strings are exactly equal byte strings
+infoPadded : [8] -> Context -> [8] -> Bit
+property infoPadded l c k =
+  argsOk l c k ==> and [ (i < infoLen l c k) \/ (b == 0) | b <- infoBytes l c k | i <- [0 .. 104] ]
+
+injectiveW : Labels -> Lens -> (Context -> Bit) -> [8]
+          -> [8] -> Context -> [8] -> [8] -> Context -> [8] -> Bit
+injectiveW tbl lens rule cap l1 c1 k1' l2 c2 k2' =
+  (argsOkW rule cap l1 c1 k1' /\ argsOkW rule cap l2 c2 k2'
+   /\ infoLenW lens l1 c1 k1' == infoLenW lens l2 c2 k2'
+   /\ infoBytesW tbl lens l1 c1 k1' == infoBytesW tbl lens l2 c2 k2')
+  ==> ((l1 == l2) /\ (c1 == c2) /\ (k1' == k2'))
+
+// two different admitted (label, context, counter) triples never give the
+// same info string, so never the same HKDF output
+deriveInjective : [8] -> Context -> [8] -> [8] -> Context -> [8] -> Bit
+property deriveInjective = injectiveW labels labelLens contextOk 31
+
+rootContext : Context
+rootContext = { len = 4, bytes = "root" # zero }
+
+// the phrase-only vault's context is never a wallet persona context
+rootIsolated : Context -> Bit
+property rootIsolated c =
+  (contextOk c /\ (c.len >= 3) /\ (take`{3} c.bytes == "pq:")) ==> (c != rootContext)

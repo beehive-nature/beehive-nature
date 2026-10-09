@@ -1,0 +1,25 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TEETH for derive.saw: the Rust context_ok
+// asked to equal a rule that also admits DEL (0x7f). It MUST fail with a
+// counterexample (a context holding 0x7f), or the context_ok PROVEN line
+// could be passing a spec it never compared.
+//
+// usage (from this directory): saw derive-teeth.saw
+
+enable_experimental;
+import "../pq03-cryptol/BpqDerive.cry";
+
+m <- mir_load_module "../../../target/saw-pq03/bpq_core.linked-mir.json";
+ctx_adt <- return (mir_find_adt m "bpq_core::Context" []);
+
+let wrong_spec = do {
+  len <- mir_fresh_var "c_len" mir_u32;
+  bs <- mir_fresh_var "c_bytes" (mir_array 64 mir_u8);
+  r <- mir_alloc (mir_adt ctx_adt);
+  mir_points_to r (mir_struct_value ctx_adt [mir_term len, mir_term bs]);
+  mir_execute_func [r];
+  mir_return (mir_term {{ contextRule (\b -> (b >= 0x20) /\ (b <= 0x7f)) { len = len, bytes = bs } }});
+};
+
+print "PQ03-SAW-TEETH obligation context_ok admits DEL";
+mir_verify m "bpq_core::context_ok" [] false wrong_spec (w4_unint_bitwuzla []);
+print "PQ03-SAW-TEETH UNEXPECTED-PROVEN context_ok admits DEL";

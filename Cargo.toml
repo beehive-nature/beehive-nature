@@ -69,6 +69,7 @@ members = [
     "crates/btungsten-wb002",
     "crates/btungsten-teeth",
     "crates/btungsten-pq",
+    "crates/bpq-core",
 ]
 
 [workspace.metadata]

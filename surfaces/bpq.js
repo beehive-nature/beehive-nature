@@ -168,9 +168,16 @@
     return out.join(' ');
   }
 
+  // The context rule of crates/bpq-core (SPEC-BTUNGSTEN-PQ-1 PQ03): 1 to 64
+  // printable ASCII characters, so Rust and the browser refuse the same contexts.
+  function checkContext(context) {
+    if (typeof context !== 'string' || !context) throw BpqError('context must be a non-empty string', 'context_empty');
+    if (!/^[\x20-\x7e]{1,64}$/.test(context)) throw BpqError('context must be 1 to 64 printable ASCII characters', 'context_rule');
+  }
+
   function keys(masterPrk, context) {
     bytes(masterPrk, 'masterPrk', 32);
-    if (typeof context !== 'string' || !context) throw BpqError('context must be a non-empty string', 'context_empty');
+    checkContext(context);
     // 'root' belongs to the phrase-only vault (rootVault) and never names a signing or X-Wing key
     if (context === ROOT_CONTEXT) throw BpqError('context "root" is reserved for the phrase-only vault (use rootVault)', 'context_reserved');
     var dsaSeed = expandLabel(masterPrk, LABEL.DSA, context, 32);
@@ -210,6 +217,7 @@
   // A rotation to the succession key reveals it and signs with it. Re-derives
   // the SLH-DSA secret from the root on demand; never stored.
   function successionKeys(masterPrk, context) {
+    checkContext(context);
     if (context === ROOT_CONTEXT) throw BpqError('context "root" is reserved for the phrase-only vault (use rootVault)', 'context_reserved');
     var seed = expandLabel(bytes(masterPrk, 'masterPrk', 32), LABEL.SUCC, context, 96);
     var k = L.slh_dsa_shake_256f.keygen(seed);

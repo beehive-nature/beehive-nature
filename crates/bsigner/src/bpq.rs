@@ -47,10 +47,9 @@ use zeroize::{Zeroize, Zeroizing};
 
 use crate::b64;
 
-// FROZEN v1 BYTE CONSTANTS — identical to surfaces/bpq.js.
-pub const LABEL_DSA: &str = "BDID-v1/ml-dsa-65-record-key";
-pub const LABEL_KEM: &str = "BDID-v1/x-wing-kem-key";
-pub const LABEL_VAULT: &str = "BDID-v1/vault-key";
+// FROZEN v1 BYTE CONSTANTS — identical to surfaces/bpq.js. The derivation
+// labels live in bpq-core (`LABEL_STR`), where SAW proves every info string
+// they make injective (SPEC-BTUNGSTEN-PQ-1 PQ03).
 const DOM_ID: &[u8] = b"bpq1/id";
 const DOM_CARD: &[u8] = b"bpq1/card";
 const DOM_BIND: &[u8] = b"bpq1/bind";
@@ -80,12 +79,21 @@ fn sha3(parts: &[&[u8]]) -> [u8; 32] {
     h.finalize().into()
 }
 
-fn expand_label(master_prk: &[u8; 32], label: &str, context: &str, out: &mut [u8]) {
+/// `HKDF-Expand(SHA-256, masterPrk, label ‖ context, out.len())`. The info
+/// string comes from bpq-core, so a context outside its rule (1 to 64
+/// printable ASCII bytes) is refused before any key exists.
+fn expand_label(
+    master_prk: &[u8; 32],
+    label: u8,
+    context: &str,
+    out: &mut [u8],
+) -> Result<(), BpqError> {
+    let info = bpq_core::info_for(label, context, 0).ok_or(BpqError::Context)?;
     let hk =
         Hkdf::<Sha256>::from_prk(master_prk).expect("a 32-byte PRK is a valid HKDF-SHA256 PRK");
-    let info = [label.as_bytes(), context.as_bytes()].concat();
-    hk.expand(&info, out)
+    hk.expand(info.as_bytes(), out)
         .expect("output lengths used here are far below the HKDF limit");
+    Ok(())
 }
 
 fn hkdf32(ikm: &[u8], salt: &[u8], info: &[u8]) -> Zeroizing<[u8; 32]> {
@@ -209,6 +217,7 @@ pub enum BpqError {
     NoKey,
     Auth(&'static str),
     ReservedContext,
+    Context,
 }
 
 impl std::fmt::Display for BpqError {
@@ -220,6 +229,10 @@ impl std::fmt::Display for BpqError {
             BpqError::ReservedContext => write!(
                 f,
                 "context \"root\" is reserved for the phrase-only vault; omit --context to use it"
+            ),
+            BpqError::Context => write!(
+                f,
+                "a context is 1 to 64 printable ASCII characters (SPEC-BPQ-1 §2)"
             ),
         }
     }
@@ -290,11 +303,16 @@ pub fn keys(master_prk: &[u8; 32], context: &str) -> Result<PqKeys, BpqError> {
         return Err(BpqError::ReservedContext);
     }
     let mut dsa_seed = Zeroizing::new([0u8; 32]);
-    expand_label(master_prk, LABEL_DSA, context, dsa_seed.as_mut());
+    expand_label(
+        master_prk,
+        bpq_core::ML_DSA_65_RECORD,
+        context,
+        dsa_seed.as_mut(),
+    )?;
     let mut kem_seed = Zeroizing::new([0u8; 32]);
-    expand_label(master_prk, LABEL_KEM, context, kem_seed.as_mut());
+    expand_label(master_prk, bpq_core::X_WING_KEM, context, kem_seed.as_mut())?;
     let mut vault = Zeroizing::new([0u8; 32]);
-    expand_label(master_prk, LABEL_VAULT, context, vault.as_mut());
+    expand_label(master_prk, bpq_core::VAULT, context, vault.as_mut())?;
     let seed: ml_dsa::Seed = (*dsa_seed).into();
     let sk = SigningKey::<MlDsa65>::from_seed(&seed);
     let dsa_public = sk.verifying_key().encode().to_vec();
@@ -318,19 +336,19 @@ pub const ROOT_CONTEXT: &str = "root";
 /// twin of `BPQ.rootVault` in surfaces/bpq.js.
 pub fn root_vault(master_prk: &[u8; 32]) -> Zeroizing<[u8; 32]> {
     let mut vault = Zeroizing::new([0u8; 32]);
-    expand_label(master_prk, LABEL_VAULT, ROOT_CONTEXT, vault.as_mut());
+    expand_label(master_prk, bpq_core::VAULT, ROOT_CONTEXT, vault.as_mut())
+        .expect("\"root\" is an admitted context");
     vault
 }
 
-/// The frozen succession label (SPEC-BPQ-1 §2; VOCABULARY carve-out 1).
-pub const LABEL_SUCC: &str = "BDID-v1/slh-dsa-shake-256f-succession";
 const DOM_SUCC: &[u8] = b"bpq1/succession";
 
 pub type SuccessionPublic = fips205::slh_dsa_shake_256f::PublicKey;
 pub type SuccessionSecret = fips205::slh_dsa_shake_256f::PrivateKey;
 
 /// The SLH-DSA-SHAKE-256f succession key of one context (SPEC-BPQ-1 §2,
-/// §5): `expand(LABEL_SUCC, 96)` split as (SK.seed, SK.prf, PK.seed), FIPS
+/// §5): `expand` of the frozen succession label (`bpq_core::SLH_DSA_SUCCESSION`,
+/// VOCABULARY carve-out 1) to 96 bytes, split as (SK.seed, SK.prf, PK.seed), FIPS
 /// 205 `slh_keygen_internal`, through fips205 0.4.1 `keygen_with_seeds`.
 /// Derived on demand and never stored; the reserved context `root` is
 /// refused, as in [`keys`].
@@ -343,7 +361,12 @@ pub fn succession_keys(
         return Err(BpqError::ReservedContext);
     }
     let mut seed = Zeroizing::new([0u8; 96]);
-    expand_label(master_prk, LABEL_SUCC, context, seed.as_mut());
+    expand_label(
+        master_prk,
+        bpq_core::SLH_DSA_SUCCESSION,
+        context,
+        seed.as_mut(),
+    )?;
     let part = |i: usize| -> [u8; 32] { seed[32 * i..32 * (i + 1)].try_into().expect("32 of 96") };
     let (sk_seed, sk_prf, pk_seed) = (Zeroizing::new(part(0)), Zeroizing::new(part(1)), part(2));
     Ok(fips205::slh_dsa_shake_256f::KG::keygen_with_seeds(
@@ -407,7 +430,12 @@ pub fn card(master_prk: &[u8; 32], context: &str) -> Result<Value, BpqError> {
     let (slh, _) = succession_keys(master_prk, context)?;
     let succ = succession_commit(&slh.into_bytes());
     let mut dsa_seed = Zeroizing::new([0u8; 32]);
-    expand_label(master_prk, LABEL_DSA, context, dsa_seed.as_mut());
+    expand_label(
+        master_prk,
+        bpq_core::ML_DSA_65_RECORD,
+        context,
+        dsa_seed.as_mut(),
+    )?;
     let sk = SigningKey::<MlDsa65>::from_seed(&(*dsa_seed).into());
     let sig: Signature<MlDsa65> =
         sk.sign(&[DOM_CARD, &k.dsa_public, &k.kem_public, &succ].concat());
@@ -857,6 +885,97 @@ mod tests {
         serde_json::from_str(VECTORS).expect("bpq-vectors.json parses")
     }
 
+    // Every bzDiD derivation label, through bpq-core's info string and HKDF
+    // here, gives the bytes the browser's own functions give
+    // (surfaces/bzdid-derive-vectors.json, SPEC-BTUNGSTEN-PQ-1 PQ03).
+    #[test]
+    fn every_derivation_label_matches_the_browser() {
+        let v: Value =
+            serde_json::from_str(include_str!("../../../surfaces/bzdid-derive-vectors.json"))
+                .expect("bzdid-derive-vectors.json parses");
+        let prk = root(v["rootFrom"].as_str().unwrap());
+        let rows = v["rows"].as_array().unwrap();
+        let mut seen = [false; bpq_core::LABEL_COUNT as usize];
+        for row in rows {
+            let label = row["label"].as_str().unwrap();
+            let id = bpq_core::LABEL_STR
+                .iter()
+                .position(|l| *l == label)
+                .unwrap_or_else(|| panic!("{label} is not a bpq-core label"));
+            seen[id] = true;
+            let mut okm = vec![0u8; row["length"].as_u64().unwrap() as usize];
+            expand_label(&prk, id as u8, row["context"].as_str().unwrap(), &mut okm).unwrap();
+            assert_eq!(
+                b64::b64u(&okm),
+                row["okm"].as_str().unwrap(),
+                "{label} {}",
+                row["context"]
+            );
+        }
+        assert!(seen.iter().all(|&s| s), "a label has no vector row");
+    }
+
+    #[test]
+    fn contexts_outside_the_rule_derive_nothing() {
+        let prk = root("x");
+        for bad in ["", "pq:\u{1}", "pq:\u{7f}", "pq:p\u{e9}", &"x".repeat(65)] {
+            assert!(matches!(keys(&prk, bad), Err(BpqError::Context)), "{bad:?}");
+            assert!(
+                matches!(succession_keys(&prk, bad), Err(BpqError::Context)),
+                "{bad:?}"
+            );
+        }
+        assert!(keys(&prk, &"x".repeat(64)).is_ok());
+    }
+
+    // HKDF-SHA256 as expand_label and hkdf32 call it, on RFC 5869's three
+    // SHA-256 cases (A.1-A.3): extract gives the RFC's PRK, and expand from
+    // that PRK (the expand_label path) gives its OKM.
+    #[test]
+    fn hkdf_sha256_passes_rfc5869_a1_to_a3() {
+        fn unhex(s: &str) -> Vec<u8> {
+            (0..s.len())
+                .step_by(2)
+                .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+                .collect()
+        }
+        let run = |from: u8, to: u8| (from..=to).collect::<Vec<u8>>();
+        let cases: [(Vec<u8>, Vec<u8>, Vec<u8>, &str, &str); 3] = [
+            (
+                vec![0x0b; 22],
+                run(0x00, 0x0c),
+                run(0xf0, 0xf9),
+                "077709362c2e32df0ddc3f0dc47bba6390b6c73bb50f9c3122ec844ad7c2b3e5", // PUBLIC-CONSTANT: RFC 5869 A.1 PRK
+                "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865", // PUBLIC-CONSTANT: RFC 5869 A.1 OKM
+            ),
+            (
+                run(0x00, 0x4f),
+                run(0x60, 0xaf),
+                run(0xb0, 0xff),
+                "06a6b88c5853361a06104c9ceb35b45cef760014904671014a193f40c15fc244", // PUBLIC-CONSTANT: RFC 5869 A.2 PRK
+                "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87", // PUBLIC-CONSTANT: RFC 5869 A.2 OKM
+            ),
+            (
+                vec![0x0b; 22],
+                vec![],
+                vec![],
+                "19ef24a32c717b167f33a91d6f648bdf96596776afdb6377ac434c1c293ccb04", // PUBLIC-CONSTANT: RFC 5869 A.3 PRK
+                "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8", // PUBLIC-CONSTANT: RFC 5869 A.3 OKM
+            ),
+        ];
+        for (n, (ikm, salt, info, prk, okm)) in cases.iter().enumerate() {
+            let (got_prk, _) = Hkdf::<Sha256>::extract(Some(salt), ikm);
+            assert_eq!(got_prk.to_vec(), unhex(prk), "A.{} PRK", n + 1);
+            let want = unhex(okm);
+            let mut got = vec![0u8; want.len()];
+            Hkdf::<Sha256>::from_prk(&got_prk)
+                .unwrap()
+                .expand(info, &mut got)
+                .unwrap();
+            assert_eq!(got, want, "A.{} OKM", n + 1);
+        }
+    }
+
     // The succession key, derived here and in the browser, must give the
     // commitment and the id bpq.js wrote into every vector row: the cross-check
     // SPEC-BPQ-1 §6 listed as missing.
@@ -1143,7 +1262,7 @@ mod tests {
         let v = vectors();
         let rv = &v["rootVault"];
         assert_eq!(rv["context"], ROOT_CONTEXT);
-        assert_eq!(rv["label"], LABEL_VAULT);
+        assert_eq!(rv["label"], bpq_core::LABEL_STR[bpq_core::VAULT as usize]);
         for row in rv["keys"].as_array().unwrap() {
             let prk = root(row["rootFrom"].as_str().unwrap());
             let k = root_vault(&prk);
@@ -1279,10 +1398,11 @@ mod tests {
         let mut seed = [0u8; 32];
         expand_label(
             &root(row["rootFrom"].as_str().unwrap()),
-            LABEL_DSA,
+            bpq_core::ML_DSA_65_RECORD,
             row["context"].as_str().unwrap(),
             &mut seed,
-        );
+        )
+        .unwrap();
         let sig = crate::pq::dsa_sign(crate::alg::SigAlg::MlDsa65, &seed, msg).unwrap();
         b64::b64u(&sig)
     }

@@ -1,0 +1,76 @@
+name: bTunGsTeN PQ SAW
+
+# SPEC-BTUNGSTEN-PQ-1 lanes proven by SAW over MIR of the shipped Rust. PQ03:
+# crates/bpq-core (the HKDF info string of every bzDiD derivation) equal to
+# its Cryptol spec, deriveInjective and its neighbours on that spec, and four
+# teeth that must be refuted. Toolchain pins and the mir-json cache are the
+# WB001/WB002 SAW workflows' (same key, same commit, same nightly).
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d # PUBLIC-CONSTANT: GaloisInc/saw-script v1.6 deps/mir-json submodule commit
+  MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+
+jobs:
+  saw:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install pinned SAW 1.6 (with bundled solvers)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/saw.tar.gz https://github.com/GaloisInc/saw-script/releases/download/v1.6/saw-1.6-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo '0b25c8b32db8b4a7ec32d6700024af60bb2a0398ee350b630dd84ff377c938f7  /tmp/saw.tar.gz' | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          mkdir -p "$HOME/saw" && tar -xzf /tmp/saw.tar.gz -C "$HOME/saw" --strip-components=1
+          echo "$HOME/saw/bin" >> "$GITHUB_PATH"
+          "$HOME/saw/bin/saw" --version
+      - name: Install the mir-json toolchain (${{ env.MIR_JSON_TOOLCHAIN }})
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install "$MIR_JSON_TOOLCHAIN" --profile minimal --component rustc-dev,rust-src,llvm-tools-preview
+      - name: Restore mir-json build (keyed on its commit and toolchain)
+        id: mirjson-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          # rlibs is ONE symlink into rlibs_real/lib/rustlib/<triple>/lib: caching
+          # the link alone restored a dangling pointer (run 37729758258: "can't
+          # find crate for `std`"), so the target tree is cached with it and the
+          # key is versioned past the broken entry
+          path: |
+            ~/mir-json-inst
+            ~/mir-json/rlibs
+            ~/mir-json/rlibs_real
+          key: mir-json-v2-${{ env.MIR_JSON_REV }}-${{ env.MIR_JSON_TOOLCHAIN }}-ubuntu-24.04
+      - name: Build mir-json at SAW 1.6's pin
+        if: steps.mirjson-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/GaloisInc/mir-json.git "$HOME/mir-json"
+          cd "$HOME/mir-json"
+          git checkout --quiet "$MIR_JSON_REV"
+          cargo "+$MIR_JSON_TOOLCHAIN" install --path . --locked --root "$HOME/mir-json-inst"
+          PATH="$HOME/mir-json-inst/bin:$PATH" mir-json-translate-libs
+      - name: Expose mir-json
+        shell: bash
+        run: |
+          set -euo pipefail
+          # a restored cache must carry the translated std, not just a link to it
+          [ -f "$HOME/mir-json/rlibs/libstd.rlib" ] || {
+            echo "mir-json rlibs missing the translated std after build/restore:"; ls -la "$HOME/mir-json/rlibs" || true; exit 1; }
+          echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
+          echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
+          "$HOME/mir-json-inst/bin/mir-json" --version
+      - name: PQ03 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH
+        shell: bash
+        run: sh scripts/btungsten/pq03-saw-check.sh saw saw-rustc

@@ -1,0 +1,36 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TEETH for deriveInjective. Each row weakens one
+// piece the proof rests on and asks the same theorem; each MUST be refuted
+// with a counterexample, or the PROVEN line in injective.saw says nothing
+// about that piece.
+//
+//   prefixLabel  the X-Wing label replaced by "BDID-v1/vault", a prefix of
+//                the vault label: (4, "-key…") collides with (5, "…")
+//   looseRule    contexts may carry bytes 0x01-0x1f: (k1, "a", 1) collides
+//                with (k1, "a\x01", 0), the counter-suffix pair
+//   counterCap   the counter may reach 0x7e: (k1, "a", 0x61) collides with
+//                (k1, "aa", 0) even under the printable rule
+//
+// usage (from this directory): saw injective-teeth.saw
+
+import "../pq03-cryptol/BpqDerive.cry";
+
+let bw = w4_unint_bitwuzla [];
+
+let tooth name t = do {
+  print (str_concat "PQ03-SAW-TEETH obligation " name);
+  r <- prove bw t;
+  caseProofResult r
+    (\_ -> print (str_concat "PQ03-SAW-TEETH UNEXPECTED-PROVEN " name))
+    (\cex -> do { print (str_concat "PQ03-SAW-TEETH REFUTED " name); print cex; });
+};
+
+tooth "prefixLabel" {{ \l1 c1 ka l2 c2 kb ->
+  injectiveW (update labels 4 (padL "BDID-v1/vault")) (update labelLens 4 13)
+             contextOk 31 l1 c1 ka l2 c2 kb }};
+
+tooth "looseRule" {{ \l1 c1 ka l2 c2 kb ->
+  injectiveW labels labelLens (contextRule (\b -> (b >= 0x01) /\ (b <= 0x7e)))
+             31 l1 c1 ka l2 c2 kb }};
+
+tooth "counterCap" {{ \l1 c1 ka l2 c2 kb ->
+  injectiveW labels labelLens contextOk 0x7e l1 c1 ka l2 c2 kb }};
