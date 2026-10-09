@@ -8,8 +8,12 @@
 //! around spawn and reap with a monotonic clock.
 //!
 //! A run that outlives its budget is killed with its whole process group and
-//! reported as `Exit::Budget`, never as a result. Off Unix there is no
-//! `wait4`; CPU time and peak memory are then recorded as unavailable.
+//! reported as `Exit::Budget`, never as a result. A run given a memory
+//! budget has its process group's resident memory sampled every 250 ms (the
+//! sampled peak is recorded) and is killed as `Exit::Memory` when the group
+//! exceeds it: a runaway verifier is stopped with its reason recorded,
+//! instead of exhausting the host. Off Unix there is no `wait4`; CPU time
+//! and peak memory are then recorded as unavailable.
 
 use std::fs::File;
 use std::path::{Path, PathBuf};
@@ -26,6 +30,8 @@ pub struct Spec {
     pub budget: Duration,
     pub stdout: PathBuf,
     pub stderr: PathBuf,
+    /// Resident-memory budget for the whole process group, in KiB.
+    pub mem_limit_kib: Option<u64>,
 }
 
 impl Spec {
@@ -37,7 +43,13 @@ impl Spec {
             budget,
             stdout: log_stem.with_extension("stdout"),
             stderr: log_stem.with_extension("stderr"),
+            mem_limit_kib: None,
         }
+    }
+
+    pub fn mem_limit_gib(mut self, gib: u64) -> Spec {
+        self.mem_limit_kib = Some(gib * 1024 * 1024);
+        self
     }
 
     pub fn env(mut self, k: &str, v: &str) -> Spec {
@@ -52,6 +64,9 @@ pub enum Exit {
     Signal(i32),
     /// Killed by this harness after the budget ran out.
     Budget,
+    /// Killed by this harness when its process group's resident memory
+    /// passed the memory budget (the sampled group total, KiB).
+    Memory(u64),
 }
 
 impl Exit {
@@ -60,6 +75,9 @@ impl Exit {
             Exit::Code(c) => json!({ "code": c }),
             Exit::Signal(s) => json!({ "signal": s }),
             Exit::Budget => json!({ "killed": "budget exhausted" }),
+            Exit::Memory(kib) => {
+                json!({ "killed": "memory budget exceeded", "group_rss_kib": kib })
+            }
         }
     }
 }
@@ -71,6 +89,9 @@ pub struct Obs {
     pub user_us: Option<u64>,
     pub sys_us: Option<u64>,
     pub max_rss_kib: Option<u64>,
+    /// Peak resident memory of the process group, sampled every 250 ms;
+    /// only for runs with a memory budget.
+    pub group_rss_peak_kib: Option<u64>,
     pub budget_ms: u64,
     pub exit: Exit,
     pub stdout: PathBuf,
@@ -100,6 +121,7 @@ impl Obs {
             "user_cpu_us": na(self.user_us),
             "sys_cpu_us": na(self.sys_us),
             "max_rss_kib": na(self.max_rss_kib),
+            "group_rss_peak_kib_sampled": self.group_rss_peak_kib,
             "budget_ms": self.budget_ms,
             "exit": self.exit.json(),
             "stdout": rel(&self.stdout),
@@ -218,16 +240,37 @@ impl Running {
     #[cfg(unix)]
     pub fn wait(self) -> Obs {
         let deadline = self.started + self.budget;
-        let left = deadline.saturating_duration_since(Instant::now());
-        let (status, ru, ended, killed) = match self.rx.recv_timeout(left) {
-            Ok((s, ru, t)) => (s, ru, t, false),
-            Err(_) => {
-                // SAFETY: as in `kill`.
-                unsafe {
-                    libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
+        let limit = self.spec.mem_limit_kib;
+        let mut peak: Option<u64> = None;
+        let mut killed: Option<Exit> = None;
+        let (status, ru, ended) = loop {
+            let left = deadline.saturating_duration_since(Instant::now());
+            let tick = if limit.is_some() {
+                left.min(Duration::from_millis(250))
+            } else {
+                left
+            };
+            match self.rx.recv_timeout(tick) {
+                Ok(r) => break r,
+                Err(_) => {
+                    if let Some(lim) = limit {
+                        let now = group_rss_kib(self.pid);
+                        peak = Some(peak.unwrap_or(0).max(now));
+                        if now > lim {
+                            killed = Some(Exit::Memory(now));
+                        }
+                    }
+                    if killed.is_none() && Instant::now() >= deadline {
+                        killed = Some(Exit::Budget);
+                    }
+                    if killed.is_some() {
+                        // SAFETY: as in `kill`.
+                        unsafe {
+                            libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
+                        }
+                        break self.rx.recv().expect("the reaper always reports");
+                    }
                 }
-                let (s, ru, t) = self.rx.recv().expect("the reaper always reports");
-                (s, ru, t, true)
             }
         };
         // Anything the child left running in its group goes with it.
@@ -236,8 +279,8 @@ impl Running {
             libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
         }
         let tv = |t: libc::timeval| (t.tv_sec as u64) * 1_000_000 + t.tv_usec as u64;
-        let exit = if killed {
-            Exit::Budget
+        let exit = if let Some(k) = killed {
+            k
         } else if libc::WIFEXITED(status) {
             Exit::Code(libc::WEXITSTATUS(status))
         } else if libc::WIFSIGNALED(status) {
@@ -251,6 +294,7 @@ impl Running {
             user_us: Some(tv(ru.ru_utime)),
             sys_us: Some(tv(ru.ru_stime)),
             max_rss_kib: Some(ru.ru_maxrss as u64),
+            group_rss_peak_kib: peak,
             budget_ms: self.budget.as_millis() as u64,
             exit,
             stdout: self.spec.stdout.clone(),
@@ -279,12 +323,36 @@ impl Running {
             user_us: None,
             sys_us: None,
             max_rss_kib: None,
+            group_rss_peak_kib: None,
             budget_ms: self.budget.as_millis() as u64,
             exit,
             stdout: self.spec.stdout.clone(),
             stderr: self.spec.stderr.clone(),
         }
     }
+}
+
+/// Resident memory of every process in process group `pgid`, in KiB, from
+/// /proc/<pid>/stat (field 5 is the group, field 24 the resident pages).
+#[cfg(unix)]
+fn group_rss_kib(pgid: u32) -> u64 {
+    // SAFETY: sysconf has no preconditions.
+    let page = unsafe { libc::sysconf(libc::_SC_PAGESIZE) }.max(4096) as u64;
+    let mut total = 0;
+    for e in std::fs::read_dir("/proc").into_iter().flatten().flatten() {
+        let Ok(stat) = std::fs::read_to_string(e.path().join("stat")) else {
+            continue;
+        };
+        // the fields after the parenthesized command name, which may hold spaces
+        let Some((_, rest)) = stat.rsplit_once(')') else {
+            continue;
+        };
+        let f: Vec<&str> = rest.split_whitespace().collect();
+        if f.get(2).and_then(|g| g.parse::<u32>().ok()) == Some(pgid) {
+            total += f.get(21).and_then(|r| r.parse::<u64>().ok()).unwrap_or(0) * page / 1024;
+        }
+    }
+    total
 }
 
 pub fn run(spec: &Spec) -> std::io::Result<Obs> {
@@ -361,6 +429,32 @@ mod tests {
         .unwrap();
         assert_eq!(o.exit, Exit::Budget);
         assert!(t.elapsed() < Duration::from_secs(10));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_group_past_its_memory_budget_is_killed_and_says_so() {
+        let d = tmp("memory");
+        // a child process (in the group) that holds ~300 MiB resident: tail
+        // keeps the last N bytes in memory
+        let mut spec = Spec::new(
+            &[
+                "sh",
+                "-c",
+                "head -c 314572800 /dev/zero | tail -c 314572800 >/dev/null; sleep 30",
+            ],
+            &d,
+            Duration::from_secs(60),
+            &d.join("m"),
+        );
+        spec.mem_limit_kib = Some(100 * 1024);
+        let o = run(&spec).unwrap();
+        assert!(
+            matches!(o.exit, Exit::Memory(k) if k > 100 * 1024),
+            "{:?}",
+            o.exit
+        );
+        assert!(o.group_rss_peak_kib.unwrap() > 100 * 1024);
         let _ = std::fs::remove_dir_all(&d);
     }
 

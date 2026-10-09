@@ -1,0 +1,34 @@
+// RB02 (beehive-nature bTunGsTeN), TEETH 3 on its own: a false claim with no
+// overrides and no uninterpreted functions. The bitsliced sub_bytes step of
+// the specimen is claimed to compute shift_rows_2; SAW must refute it with a
+// concrete fixsliced state. `rbench rb02` copies this file into the
+// rustcrypto-verification build copy as aes-verif/rb02-teeth-sbox.saw and
+// runs it from aes-verif/ with CRYPTOLPATH=../cryptol-specs, in its own
+// process with its own time and memory budget.
+//
+// Decided by z3, not the rme solver aes-lib.saw proves sub_bytes with: rme
+// normalizes a goal to algebraic normal form, which is small for a true goal
+// and can grow without bound for a false one about the degree-7 S-box. With
+// this check inside rb02-aes256.saw on rme, two CI runners were shut down
+// (2026-10-09, runs 37887662009 and 37889906328) and this host's WSL VM ran
+// out of memory.
+
+enable_experimental;
+
+AesBitslice <- cryptol_load "AesVerif/Bitslice.cry";
+Aes256 <- cryptol_load "AesVerif/Aes256.cry";
+
+m <- mir_load_module "../target/aes_verif_rb02.linked-mir.json";
+
+let mutate_state_slice_spec (cry_fun : Term /* FSState -> FSState */) = do {
+  state_init <- mir_fresh_cryptol_var "state_init" {| AesBitslice::FSState |};
+  state_ref <- mir_ref_of_mut (mir_term state_init);
+  mir_execute_func [mir_slice_value state_ref];
+  mir_points_to state_ref (mir_term {{ cry_fun state_init }});
+};
+
+// (the honest claim, sub_bytes == Aes256::sub_bytes, is proven by aes-lib.saw
+// inside rb02-aes256.saw and aes-run.saw; it is not repeated here)
+fails (mir_verify m "aes::soft::fixslice::sub_bytes" [] false
+  (mutate_state_slice_spec {{ Aes256::shift_rows_2 }}) z3);
+print "RB02-SAW-TEETH REFUTED sub_bytes-as-shift_rows_2";

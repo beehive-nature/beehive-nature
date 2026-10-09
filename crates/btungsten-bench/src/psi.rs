@@ -199,6 +199,10 @@ pub fn classify(
     use crate::measure::Exit;
     match exit {
         Exit::Budget => Outcome::Timeout,
+        // a harness kill for memory is no protocol outcome: never a pass
+        Exit::Memory(kib) => {
+            Outcome::Unrecognized(format!("killed at the memory budget ({kib} KiB)"))
+        }
         Exit::Signal(s) => Outcome::Crash(format!("signal {s}")),
         Exit::Code(101) => Outcome::Crash("panic, exit 101".into()),
         Exit::Code(3) => match tagged_line(stdout, "RB01-REFUSAL") {

@@ -2,21 +2,31 @@ name: bTunGsTeN RB
 
 # The RB lanes (scripts/btungsten/README.md §RB): measured Rust execution and
 # assurance with pinned Galois tools. Fast checks run on every push; each lane
-# is a bounded job that runs when its own sources change, or by hand. Every
-# lane job runs `rbench <lane> --quick` (the same rows with fewer samples),
-# uploads its receipt and evidence, and is green only on a PASS verdict.
-# Timings measured on a shared CI runner are runner timings: the committed
-# receipts under docs/receipts/btungsten-rb/ carry the measured runs.
+# is a bounded job that runs when its own sources change, or by hand. On a
+# push a lane job runs `rbench <lane> --quick` (the same rows with fewer
+# samples); dispatched with plan=full it runs the full sample plan. Every job
+# uploads its receipt and evidence and is green only on a PASS verdict. The
+# receipts committed under docs/receipts/btungsten-rb/ are such runs, each on
+# its own runner VM (no other job shares it).
 
 on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      plan:
+        description: "quick (fewer samples) or full (the receipt plan)"
+        required: false
+        default: quick
+        type: choice
+        options: [quick, full]
 
 permissions:
   contents: read
 
 env:
+  # --quick unless dispatched with plan=full
+  RB_PLAN_FLAG: ${{ (github.event_name != 'workflow_dispatch' || inputs.plan != 'full') && '--quick' || '' }}
   # SAW 1.6's own deps/mir-json pin, as wb001-saw.yml / wb002-saw.yml
   MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d # PUBLIC-CONSTANT: GaloisInc/saw-script v1.6 deps/mir-json submodule commit
   MIR_JSON_TOOLCHAIN: nightly-2026-03-21
@@ -63,7 +73,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.rb01 == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
@@ -71,7 +81,7 @@ jobs:
         run: |
           rustup toolchain install 1.99.0 --profile minimal
           cargo build --locked --release -p btungsten-bench --bins
-          target/release/rbench rb01 --quick --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb01"
+          target/release/rbench rb01 $RB_PLAN_FLAG --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb01"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
@@ -117,7 +127,7 @@ jobs:
       - name: RB02 — AES-256 proof reproduction, TEETH, compatibility
         run: |
           cargo build --locked --release -p btungsten-bench --bins
-          target/release/rbench rb02 --quick --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb02"
+          target/release/rbench rb02 $RB_PLAN_FLAG --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb02"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
@@ -171,7 +181,7 @@ jobs:
       - name: RB03 — Crux-MIR properties of ops/ant-extsig/src/budget.rs, TEETH, correspondence
         run: |
           cargo build --locked --release -p btungsten-bench --bins
-          target/release/rbench rb03 --quick --tools "$HOME/rbtools/crux" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb03"
+          target/release/rbench rb03 $RB_PLAN_FLAG --tools "$HOME/rbtools/crux" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb03"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

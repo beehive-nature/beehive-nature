@@ -229,6 +229,8 @@ pub fn run(
     let root = repo_root();
     std::fs::create_dir_all(work).map_err(|e| format!("work directory {}: {e}", work.display()))?;
     let logs = out.join("logs");
+    // a receipt describes one run: earlier evidence in this directory goes
+    let _ = std::fs::remove_dir_all(&logs);
     std::fs::create_dir_all(&logs).map_err(|e| e.to_string())?;
     let tools = Tools::at(tools_dir)?;
     let harness = root.join(HARNESS);
@@ -503,7 +505,8 @@ pub fn run(
                 },
             )
             .env("RB_CVC5", &real_cvc5)
-            .env("CRUX_RUST_LIBRARY_PATH", &rlibs),
+            .env("CRUX_RUST_LIBRARY_PATH", &rlibs)
+            .mem_limit_gib(12),
         )
         .map_err(|e| e.to_string())?;
         let rep = crux_report(&format!("{}\n{}", o.stdout_text(), o.stderr_text()));

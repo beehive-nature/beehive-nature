@@ -10,7 +10,9 @@
 //!    unchanged: the reproduction.
 //! 3. Add the TEETH specimen (one appended module line) and run
 //!    `rb02-aes256.saw`: AES-256 encrypt and decrypt proven on that build,
-//!    then three false claims that must be refuted with counterexamples.
+//!    then two false claims that must be refuted with counterexamples; a
+//!    third, with no overrides, runs alone in `rb02-teeth-sbox.saw`. Every
+//!    SAW process runs under a time budget and a memory budget.
 //! 4. Compare the verified `aes` source with the crates.io `aes 0.8.4` BNR's
 //!    Cargo.lock pins, file by file, and read its backend selection.
 
@@ -45,7 +47,15 @@ pub const SAW_TARBALL_SHA256_HEX: &str =
 /// (run 37079254539, job 111076052587), as its log prints it.
 pub const SAW_SUITE_IMAGE_SHA256_HEX: &str =
     "75fcd090c433cafcb7d424c320564f73479c89b026b02511bd886e5f7f7d5325"; // PUBLIC-CONSTANT: upstream container image digest
-pub const OVERLAYS: &[&str] = &["aes-verif/src/rb02_teeth.rs", "aes-verif/rb02-aes256.saw"];
+pub const OVERLAYS: &[&str] = &[
+    "aes-verif/src/rb02_teeth.rs",
+    "aes-verif/rb02-aes256.saw",
+    "aes-verif/rb02-teeth-sbox.saw",
+];
+/// Resident-memory budget for every SAW process (its whole process group):
+/// below the 16 GB of a GitHub ubuntu-24.04 runner, so a runaway proof is
+/// killed and recorded instead of taking the runner down.
+pub const SAW_MEM_GIB: u64 = 12;
 pub const PATCHED: &str = "aes-verif/src/lib.rs";
 pub const PATCH_TEXT: &str = "\n// RB02 overlay (beehive-nature scripts/btungsten/rb02-aes): TEETH specimen.\n#[path = \"rb02_teeth.rs\"]\npub mod rb02_teeth;\n";
 const SRC_DIR: &str = "scripts/btungsten/rb02-aes";
@@ -127,6 +137,8 @@ pub fn run(
     let root = repo_root();
     std::fs::create_dir_all(work).map_err(|e| format!("work directory {}: {e}", work.display()))?;
     let logs = out.join("logs");
+    // a receipt describes one run: earlier evidence in this directory goes
+    let _ = std::fs::remove_dir_all(&logs);
     std::fs::create_dir_all(&logs).map_err(|e| e.to_string())?;
     let tools = Tools::at(tools_dir)?;
     let copy = work.join("rustcrypto-verification");
@@ -331,7 +343,8 @@ pub fn run(
                 stem,
             )
             .env("CRYPTOLPATH", "../cryptol-specs")
-            .env("PATH", &path_env),
+            .env("PATH", &path_env)
+            .mem_limit_gib(SAW_MEM_GIB),
         )
         .map_err(|e| e.to_string())?;
         let text = format!("{}\n{}", o.stdout_text(), o.stderr_text());
@@ -390,16 +403,24 @@ pub fn run(
             .observe(if ok { O::Pass } else { verdict_of(&o256, &rep256, false) }, json!({ "printed": ok }))
             .evidence(&[&rel(&s.with_extension("stdout"))]));
     }
-    for (name, trigger) in [
+    // TEETH 3 runs in its own SAW process (rb02-teeth-sbox.saw)
+    let s3 = stem("saw-rb02-teeth-sbox");
+    let (o3, _) = saw_run(&s3, "rb02-teeth-sbox.saw", 1800)?;
+    r.evidence_file(&rel(&s3.with_extension("stdout")), "committed");
+    let text3 = format!("{}\n{}", o3.stdout_text(), o3.stderr_text());
+    for (name, trigger, o, text, stem_used) in [
         (
             "teeth_encrypt_block_256",
-            Some("planted fault: key[0] = 0xA5 and block[15] = 0x5A flip one ciphertext bit"),
+            "planted fault in the specimen: key[0] = 0xA5 and block[15] = 0x5A flip one ciphertext bit; honest spec, same overrides and solver as the passing proof",
+            &o256,
+            &text256,
+            &s,
         ),
-        ("false-spec-flipped-bit", None),
-        ("sub_bytes-as-shift_rows_2", None),
+        ("false-spec-flipped-bit", "the honest toplevel_encrypt_block_256 claimed to return its output with bit 0 of byte 0 flipped", &o256, &text256, &s),
+        ("sub_bytes-as-shift_rows_2", "the bitsliced sub_bytes claimed to compute shift_rows_2: no overrides, no uninterpreted functions, decided by z3", &o3, &text3, &s3),
     ] {
         let line = format!("RB02-SAW-TEETH REFUTED {name}");
-        let segment = saw_segment(&text256, "RB02-SAW", &line);
+        let segment = saw_segment(text, "RB02-SAW", &line);
         let printed = segment.is_some();
         let cex = segment.as_deref().and_then(saw_refutation);
         let ok = printed && cex.is_some();
@@ -407,23 +428,20 @@ pub fn run(
             Row::new(
                 &format!("teeth-{name}"),
                 Class::Teeth,
-                &format!(
-                    "SAW refutes a false claim with a counterexample: {}",
-                    trigger.unwrap_or(name)
-                ),
+                &format!("SAW refutes a false claim with a counterexample: {trigger}"),
             )
             .expect(json!("refuted with a solver counterexample"))
             .observe(
                 if ok {
                     O::Pass
-                } else if o256.exit == measure::Exit::Budget {
+                } else if matches!(o.exit, measure::Exit::Budget | measure::Exit::Memory(_)) {
                     O::Inconclusive
                 } else {
                     O::Fail
                 },
-                json!({ "refuted_line": printed, "counterexample": cex }),
+                json!({ "refuted_line": printed, "counterexample": cex, "process_exit": o.exit.json() }),
             )
-            .evidence(&[&rel(&s.with_extension("stdout"))]),
+            .evidence(&[&rel(&stem_used.with_extension("stdout"))]),
         );
     }
     // bind the receipt to what was proven: the MIR, the scripts, the specs
@@ -453,6 +471,7 @@ pub fn run(
         "aes_lib_saw": tag(&copy.join("aes-verif/aes-lib.saw")),
         "aes_run_saw": tag(&copy.join("aes-verif/aes-run.saw")),
         "rb02_aes256_saw": tag(&copy.join("aes-verif/rb02-aes256.saw")),
+        "rb02_teeth_sbox_saw": tag(&copy.join("aes-verif/rb02-teeth-sbox.saw")),
         "rb02_teeth_rs": tag(&copy.join("aes-verif/src/rb02_teeth.rs")),
         "cryptol_specs_block_cipher_tree": crate::digest::tree_tag(&spec_files(&aes_spec)),
         "cryptol_specs_block_cipher_files": spec_files(&aes_spec).len(),
@@ -476,7 +495,7 @@ pub fn run(
         "warm_noop": obs_set(&noop, out),
         "command": format!("cargo {toolchain_arg} saw-build with CARGO_NET_OFFLINE=true, the pinned Cargo.lock byte-identical before and after, and RUSTFLAGS=\"--cfg aes_force_soft\" (cold[0] pristine specimen, cold[1] TEETH specimen)"),
     }));
-    r.measure("verification", json!({ "aes_run_upstream_all_sizes": o_rep.json(out), "rb02_aes256_plus_teeth": o256.json(out) }));
+    r.measure("verification", json!({ "aes_run_upstream_all_sizes": o_rep.json(out), "rb02_aes256_plus_teeth_1_2": o256.json(out), "rb02_teeth_sbox": o3.json(out), "memory_budget_gib_per_saw_process": SAW_MEM_GIB }));
     r.measure("network_bytes", json!("not measured: after preparation (clone, submodule, cargo fetch) every step runs offline (CARGO_NET_OFFLINE=true for cargo; SAW uses no network); the crates.io aes-0.8.4.crate download for the compatibility comparison is the one later fetch"));
 
     // ---- 4. compatibility ------------------------------------------------------
@@ -508,7 +527,9 @@ pub fn run(
 fn verdict_of(o: &Obs, rep: &SawReport, ok: bool) -> O {
     if ok {
         O::Pass
-    } else if o.exit == measure::Exit::Budget || !rep.unrecognized.is_empty() {
+    } else if matches!(o.exit, measure::Exit::Budget | measure::Exit::Memory(_))
+        || !rep.unrecognized.is_empty()
+    {
         O::Inconclusive
     } else {
         O::Fail

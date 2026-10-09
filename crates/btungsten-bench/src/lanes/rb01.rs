@@ -134,6 +134,8 @@ impl Ctx {
 pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static str), String> {
     let root = repo_root();
     std::fs::create_dir_all(work).map_err(|e| format!("work directory {}: {e}", work.display()))?;
+    // a receipt describes one run: earlier evidence in this directory goes
+    let _ = std::fs::remove_dir_all(out.join("logs"));
     std::fs::create_dir_all(out.join("logs")).map_err(|e| e.to_string())?;
     let mut c = Ctx {
         out: out.to_path_buf(),
