@@ -1,0 +1,65 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — the SHA-3 sponge as sha3 0.10.9 runs it (the
+// version bsigner hashes with), against FIPS 202 (pq02-cryptol/KeccakF1600.cry
+// sha3_256 and shake256: rate 136, pad10*1 after the domain bits), for every
+// input of each shape bsigner uses: SHA3-256 of one block, of two blocks,
+// and of two parts fed in two updates (bpq::sha3), and SHAKE256 of a 32-byte
+// seed read to 96 bytes (bpq::xwing_expand).
+//
+// keccak::p1600(s, 24) is ASSUMED equal to keccakF here and held opaque, so
+// the solver matches the sponge's plumbing (block buffer, little-endian
+// lanes, padding, output bytes) with the permutation as one symbol. The loop
+// lane ties p1600 to keccakF (shipped.saw composed, agree.saw agree).
+//
+// usage (from this directory): saw sponge.saw   with MIR at ../../../target/saw-pq02-sponge/
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+
+m <- mir_load_module "../../../target/saw-pq02-sponge/pq02_sponge.linked-mir.json";
+let proven name = print (str_concat "PQ02-SAW PROVEN " name);
+
+ov_p <- mir_unsafe_assume_spec m "keccak::p1600" (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r, mir_term {{ 24 : [64] }}];
+  mir_points_to r (mir_term {{ keccakF st }});
+});
+print "PQ02-SAW ASSUMED keccak::p1600(s, 24) = keccakF (tied by shipped.saw and agree.saw)";
+let unint = w4_unint_bitwuzla ["keccakF"];
+
+let bytes_in n = do {
+  x <- mir_fresh_var "m" (mir_array n mir_u8);
+  p <- mir_alloc (mir_array n mir_u8);
+  mir_points_to p (mir_term x);
+  return (x, p);
+};
+
+mir_verify m "pq02_sponge::sha3_256_32" [ov_p] false (do {
+  (x, p) <- bytes_in 32;
+  mir_execute_func [p];
+  mir_return (mir_term {{ sha3_256 x }});
+}) unint;
+proven "sha3 0.10.9 SHA3-256, 32 bytes (one block)";
+
+mir_verify m "pq02_sponge::sha3_256_200" [ov_p] false (do {
+  (x, p) <- bytes_in 200;
+  mir_execute_func [p];
+  mir_return (mir_term {{ sha3_256 x }});
+}) unint;
+proven "sha3 0.10.9 SHA3-256, 200 bytes (two blocks)";
+
+mir_verify m "pq02_sponge::sha3_256_parts" [ov_p] false (do {
+  (a, pa) <- bytes_in 8;
+  (b, pb) <- bytes_in 192;
+  mir_execute_func [pa, pb];
+  mir_return (mir_term {{ sha3_256 (a # b) }});
+}) unint;
+proven "sha3 0.10.9 SHA3-256, 8 then 192 bytes in two updates";
+
+mir_verify m "pq02_sponge::shake256_32_96" [ov_p] false (do {
+  (x, p) <- bytes_in 32;
+  mir_execute_func [p];
+  mir_return (mir_term {{ shake256`{d = 96} x }});
+}) unint;
+proven "sha3 0.10.9 SHAKE256, 32 bytes in, 96 out";
