@@ -16,10 +16,21 @@ bits) and its public claim C = (kind, count). The root M is WITHHELD, as in
 the PLONK registration: M commits to the private set and differs between
 classes by design. The question is what π adds beyond C.
 
-π is read as the ordered sequence of every number in its JSON serialization
-(serde_json of `p3_uni_stark::Proof`): field elements, Merkle digest words,
-proof-of-work witnesses and lengths. Two proofs of one AIR and one parameter
-set have the same shape, so positions align.
+π is read as the numbers in its JSON serialization (serde_json of
+`p3_uni_stark::Proof`): field elements, Merkle digest words, proof-of-work
+witnesses and lengths. Its FIXED-SHAPE part is everything except the FRI
+multi-opening proofs: the commitments, the opened values, degree_bits, the
+out-of-domain PoW witness, and inside the FRI proof the commit-phase
+commitments, the final polynomial and the PoW witnesses. Two proofs of one
+AIR and one parameter set give that part the same shape, so its positions
+align. The multi-opening proofs (`input_openings`, `commit_phase_openings`)
+share authentication paths between queries, so their length varies with
+query overlap and their positions do not align; they are covered by F0
+(equality) and F3b (distribution).
+
+(Amended 2026-10-08 before any proof for this experiment was generated: the
+first version said every position aligns, which the multi-opening layout
+contradicts. No data existed when this was corrected.)
 
 Scope, plainly: this tests the proof transcript against the pinned families
 below. It does not test the commitment (M is public by design), the
@@ -42,15 +53,16 @@ separated the classes".
 F0 linkability (the decisive family): over all 20 proofs, the number of
    proof PAIRS that share an identical main-trace commitment, an identical
    quotient commitment, or an identical vector of opened trace values.
-F1 per-position mean: for every aligned position, Welch's two-sample t
+F1 per-position mean: for every position of the fixed-shape part, Welch's two-sample t
    statistic (REAL vs SIM) of the number's value modulo 2^31, its p-value
    from the t distribution with Welch-Satterthwaite degrees of freedom. A
    position constant within both classes is excluded when the two constants
    agree and counts as a separation (p = 0) when they differ.
 F2 per-position Hamming weight: the same, on the popcount of the number's
    low 32 bits.
-F3 low-byte chi-square: the distribution of the low byte of every opened
-   trace value (trace_local), REAL pooled vs SIM pooled, 256 bins.
+F3 low-byte chi-square, two tests: (a) the low byte of every opened trace
+   value (trace_local), (b) the low byte of every number in the
+   multi-opening proofs; each REAL pooled vs SIM pooled, 256 bins.
 F4 nearest centroid: leave-one-out nearest-centroid classification of the
    20 proofs on their opened trace values (trace_local, value mod 2^31),
    reported as accuracy with its exact binomial 95% interval.
@@ -61,7 +73,7 @@ ALL of:
   (a) F0 counts zero shared commitments and zero shared opened-value
       vectors across the 20 proofs;
   (b) every F1 and F2 p-value exceeds 0.05 / (number of positions) (Bonferroni,
-      family-wise 0.05), and F3's p-value exceeds 0.05;
+      family-wise 0.05), and each of F3's two p-values exceeds 0.025;
   (c) F4's 95% interval includes 0.50.
 
 ## Teeth (fixed with the criterion)
