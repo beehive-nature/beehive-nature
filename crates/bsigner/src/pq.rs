@@ -222,6 +222,41 @@ pub fn kem_encapsulate(
     }
 }
 
+/// The encoded verifying key an ML-DSA seed derives.
+pub fn dsa_public_from_seed(alg: SigAlg, seed: &[u8; 32]) -> Vec<u8> {
+    let seed_arr: DsaSeed = (*seed).into();
+    macro_rules! public {
+        ($params:ty) => {{
+            SigningKey::<$params>::from_seed(&seed_arr)
+                .verifying_key()
+                .encode()
+                .to_vec()
+        }};
+    }
+    match alg {
+        SigAlg::MlDsa44 => public!(MlDsa44),
+        SigAlg::MlDsa65 => public!(MlDsa65),
+        SigAlg::MlDsa87 => public!(MlDsa87),
+    }
+}
+
+/// The encapsulation key an ML-KEM decapsulation seed derives.
+pub fn kem_public_from_seed(alg: KemAlg, seed: &[u8; 64]) -> Vec<u8> {
+    macro_rules! public {
+        ($params:ty) => {{
+            ml_kem::DecapsulationKey::<$params>::from_seed((*seed).into())
+                .encapsulation_key()
+                .to_bytes()
+                .to_vec()
+        }};
+    }
+    match alg {
+        KemAlg::MlKem512 => public!(MlKem512),
+        KemAlg::MlKem768 => public!(MlKem768),
+        KemAlg::MlKem1024 => public!(ml_kem::MlKem1024),
+    }
+}
+
 pub fn kem_decapsulate(alg: KemAlg, seed: &[u8; 64], ct: &[u8]) -> Result<[u8; 32], String> {
     macro_rules! dec {
         ($params:ty, $ct_len:expr) => {{
