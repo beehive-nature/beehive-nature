@@ -1,0 +1,15 @@
+    Updating git repository `https://github.com/RyanGlScott/utils.git`
+    Updating git repository `https://github.com/RyanGlScott/generic-array.git`
+    Updating git repository `https://github.com/RyanGlScott/block-ciphers.git`
+    Updating git repository `https://github.com/RyanGlScott/hashes.git`
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded digest v0.10.7
+  Downloaded cfg-if v1.0.4
+  Downloaded inout v0.1.4
+  Downloaded cipher v0.4.4
+  Downloaded version_check v0.9.5
+  Downloaded crypto-common v0.1.7
+  Downloaded cpufeatures v0.2.17
+  Downloaded typenum v1.20.1
+  Downloaded libc v0.2.186

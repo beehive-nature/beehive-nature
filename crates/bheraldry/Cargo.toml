@@ -1,0 +1,25 @@
+[package]
+name = "bheraldry"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bHERALDRY — a symbol is evidence, not artwork: heraldic semantics, documentary provenance, translation provenance (bLANGUAGEdock attestation tiers), retained disputes, revision chains, asset digests. Reference specimen: the coat of arms of the Republic of Bulgaria (Закон за герба, ДВ бр.62/1997)."
+
+# Dependencies are deliberately all already in the estate's tree — nothing new
+# enters Cargo.lock through this crate except its own entry. Replaceable by
+# design (order bHERALDRY-001 §10).
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = { workspace = true }
+# The bLANGUAGEdock seam: attestation tiers are THE law that a rendering of
+# unknown provenance cannot exist. Reused, not reinvented.
+language-authority = { path = "../language-authority" }
+# The bzDiD seam: attestor identity continuity is a did:b: string, validated
+# by the root crate's own parser, never by a local regex.
+bzdid = { path = "../bzdid" }
+
+[dev-dependencies]
+# constructing a deterministic TEST bdidrec1 recovery code for the bsigner
+# seam test (bech32m) — same version the organ itself uses
+bech32 = "0.9"

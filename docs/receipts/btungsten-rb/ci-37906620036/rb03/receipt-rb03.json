@@ -1,0 +1,3685 @@
+{
+  "assumptions": [
+    "Semantics are Crux-MIR's: MIR from rustc nightly-2026-03-21 through mir-json at ece1622c, unoptimized (test profile) with overflow checks, std from mir-json's translated libraries; u128/u64 arithmetic is modelled exactly as bit-vectors.",
+    "Each property is a separate Crux-MIR process over its own fresh symbolic inputs; a property's PASS needs its test line `ok` and `Overall status: Valid.` from that process.",
+    "--assert-false-on-error: a function crux-mir cannot translate becomes `assert false`, so an untranslatable path fails a property rather than passing it silently.",
+    "The required rows' goals are decided by cvc5 from what4-solvers snapshot-20260622 with --solve-bv-as-int=sum (integer blasting: each bit-vector term becomes an integer with range constraints), through the rb-cvc5-intblast shim (solver_shim). The soundness of that translation is cvc5's; only an unsat (Proved) answer counts. The cross-check rows use bitwuzla from the same snapshot.",
+    "fee_cap, not plan_fee_cap, is the function the symbolic properties call: plan_fee_cap is fee_cap with a refusal message (correspondence-split; vectors-native and vectors-crux run both)."
+  ],
+  "bnr": {
+    "checkout": {
+      "commit": "f43ffdcd3f756b983289a692fdf1576240510d78",
+      "tracked_changes": false
+    },
+    "provenance_review_commit": "a3419732c0c06d1d24c8bca2d4cb70e5022971cf"
+  },
+  "budgets": {
+    "cross_check": {
+      "goal_timeout_s": 300,
+      "process_budget_s": 420,
+      "run": true
+    },
+    "derivation": "Plan (rb03.rs): the required budget is 30x the slowest closure observed in the trials; a property that does not close within it is INCONCLUSIVE, never PASS.",
+    "mode": "--force-offline-goal-solving: each goal in a fresh solver process (the online mode crashed crux-mir when a goal timed out, trial_history)",
+    "required_strategy": {
+      "goal_timeout_s": 540,
+      "process_budget_s": 600,
+      "repeats": 3
+    }
+  },
+  "evidence": [
+    {
+      "bytes": 1089,
+      "path": "logs/002-native-test-cold.stdout",
+      "retention": "committed",
+      "sha256": "sha256:bz0auBdC5efQHnnH8c_hCocb5WSh-Cf31_VljfOK-s8"
+    },
+    {
+      "bytes": 339,
+      "path": "logs/017-crux-vectors.stdout",
+      "retention": "committed",
+      "sha256": "sha256:ncnSwKZu0dZrjhcwTflgh3m_-1dDy6GCZAoVABViaX8"
+    },
+    {
+      "bytes": 201,
+      "path": "logs/018-crux-p1_zero_gas_limit_refuses-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:72p4QwDaBz9KEWTZ7GKVDMzjhEKlQp0_ndfwDVS5Ofc"
+    },
+    {
+      "bytes": 201,
+      "path": "logs/019-crux-p1_zero_gas_limit_refuses-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:72p4QwDaBz9KEWTZ7GKVDMzjhEKlQp0_ndfwDVS5Ofc"
+    },
+    {
+      "bytes": 201,
+      "path": "logs/020-crux-p1_zero_gas_limit_refuses-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:72p4QwDaBz9KEWTZ7GKVDMzjhEKlQp0_ndfwDVS5Ofc"
+    },
+    {
+      "bytes": 330,
+      "path": "logs/021-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:pZGfeRdDUf9JNMjjZP0WllUfKgtj3ePorC4gCuOqZlU"
+    },
+    {
+      "bytes": 330,
+      "path": "logs/022-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:pZGfeRdDUf9JNMjjZP0WllUfKgtj3ePorC4gCuOqZlU"
+    },
+    {
+      "bytes": 330,
+      "path": "logs/023-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:pZGfeRdDUf9JNMjjZP0WllUfKgtj3ePorC4gCuOqZlU"
+    },
+    {
+      "bytes": 316,
+      "path": "logs/024-crux-p3_cap_at_least_network_fee-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:9w2d8uVS8HU6b_iL1cJr0rjI9DrqdXezMiB9UG6SPMo"
+    },
+    {
+      "bytes": 316,
+      "path": "logs/025-crux-p3_cap_at_least_network_fee-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:9w2d8uVS8HU6b_iL1cJr0rjI9DrqdXezMiB9UG6SPMo"
+    },
+    {
+      "bytes": 316,
+      "path": "logs/026-crux-p3_cap_at_least_network_fee-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:9w2d8uVS8HU6b_iL1cJr0rjI9DrqdXezMiB9UG6SPMo"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/027-crux-p4_cap_fits_remaining_budget-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:DnNEv3rawAgt4jJ5aKgYA7gLQvglJNJeeR4pF0dGcpo"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/028-crux-p4_cap_fits_remaining_budget-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:DnNEv3rawAgt4jJ5aKgYA7gLQvglJNJeeR4pF0dGcpo"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/029-crux-p4_cap_fits_remaining_budget-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:DnNEv3rawAgt4jJ5aKgYA7gLQvglJNJeeR4pF0dGcpo"
+    },
+    {
+      "bytes": 317,
+      "path": "logs/030-crux-p5_headroom_never_exceeded-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:w2n4rDKGrg4qHs-qbV62jn1wWtypkQSjgZ4WjQhOCM4"
+    },
+    {
+      "bytes": 317,
+      "path": "logs/031-crux-p5_headroom_never_exceeded-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:w2n4rDKGrg4qHs-qbV62jn1wWtypkQSjgZ4WjQhOCM4"
+    },
+    {
+      "bytes": 317,
+      "path": "logs/032-crux-p5_headroom_never_exceeded-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:w2n4rDKGrg4qHs-qbV62jn1wWtypkQSjgZ4WjQhOCM4"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/033-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:ZTBlDWVJ8vk98Gjlo6rieVS8NkbzmP1F0KzWwDQ8N3Y"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/034-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:ZTBlDWVJ8vk98Gjlo6rieVS8NkbzmP1F0KzWwDQ8N3Y"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/035-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:ZTBlDWVJ8vk98Gjlo6rieVS8NkbzmP1F0KzWwDQ8N3Y"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/036-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:c2cvSiNRxjT2EYF7bfjzCtzDaQeoqXEHFrKeNXXsO8k"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/037-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:c2cvSiNRxjT2EYF7bfjzCtzDaQeoqXEHFrKeNXXsO8k"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/038-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:c2cvSiNRxjT2EYF7bfjzCtzDaQeoqXEHFrKeNXXsO8k"
+    },
+    {
+      "bytes": 324,
+      "path": "logs/039-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:fAUi9hrNQ6DcQfytunAj1x9hf4J7dTO-W62MjTjw6T8"
+    },
+    {
+      "bytes": 324,
+      "path": "logs/040-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:fAUi9hrNQ6DcQfytunAj1x9hf4J7dTO-W62MjTjw6T8"
+    },
+    {
+      "bytes": 324,
+      "path": "logs/041-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:fAUi9hrNQ6DcQfytunAj1x9hf4J7dTO-W62MjTjw6T8"
+    },
+    {
+      "bytes": 321,
+      "path": "logs/042-crux-p9_payment_floor_is_half_product-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:qstP6VVImJslhPpVHNYqPp9ZW0qwA4bgJZ_h8_yPsjI"
+    },
+    {
+      "bytes": 321,
+      "path": "logs/043-crux-p9_payment_floor_is_half_product-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:qstP6VVImJslhPpVHNYqPp9ZW0qwA4bgJZ_h8_yPsjI"
+    },
+    {
+      "bytes": 321,
+      "path": "logs/044-crux-p9_payment_floor_is_half_product-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:qstP6VVImJslhPpVHNYqPp9ZW0qwA4bgJZ_h8_yPsjI"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/045-crux-p10_refusal_reports_the_need-cvc5-intblast-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:hczzSYhgrnQ2EjYh4js4tPmCPs4vhEq9r4xgyBoTYjk"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/046-crux-p10_refusal_reports_the_need-cvc5-intblast-1.stdout",
+      "retention": "committed",
+      "sha256": "sha256:hczzSYhgrnQ2EjYh4js4tPmCPs4vhEq9r4xgyBoTYjk"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/047-crux-p10_refusal_reports_the_need-cvc5-intblast-2.stdout",
+      "retention": "committed",
+      "sha256": "sha256:hczzSYhgrnQ2EjYh4js4tPmCPs4vhEq9r4xgyBoTYjk"
+    },
+    {
+      "bytes": 838,
+      "path": "logs/048-crux-t1_wrapping_affordability_cap_fits-cvc5-intblast.stdout",
+      "retention": "committed",
+      "sha256": "sha256:EmIHXEJI7ndjsBREzwQhzbzJk7xUeoJzOULn2XO9GJk"
+    },
+    {
+      "bytes": 920,
+      "path": "logs/049-crux-t2_ceiling_budget_cap_fits-cvc5-intblast.stdout",
+      "retention": "committed",
+      "sha256": "sha256:i_eebXqOotYKkz6F0SJQutr9jQYkANHB-StWy2mcuzc"
+    },
+    {
+      "bytes": 952,
+      "path": "logs/050-crux-t3_ceiling_budget_refuses_iff_unaffordable-cvc5-intblast.stdout",
+      "retention": "committed",
+      "sha256": "sha256:wUDbCqd7nOjLYGlB8Ds9m-Pcfcj_vOytLXws8TIY2Og"
+    },
+    {
+      "bytes": 201,
+      "path": "logs/051-crux-p1_zero_gas_limit_refuses-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:72p4QwDaBz9KEWTZ7GKVDMzjhEKlQp0_ndfwDVS5Ofc"
+    },
+    {
+      "bytes": 417,
+      "path": "logs/052-crux-p2_refuses_iff_network_fee_unaffordable-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:ugDOItr2B8t4SdAFG7hf1gc4dAvuZnRrvItuDuwdSUQ"
+    },
+    {
+      "bytes": 316,
+      "path": "logs/053-crux-p3_cap_at_least_network_fee-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:9w2d8uVS8HU6b_iL1cJr0rjI9DrqdXezMiB9UG6SPMo"
+    },
+    {
+      "bytes": 396,
+      "path": "logs/054-crux-p4_cap_fits_remaining_budget-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:K0X7fYUyHH79KJNVl2adJ1TD_qH8XW2MiC0r6qGuemw"
+    },
+    {
+      "bytes": 392,
+      "path": "logs/055-crux-p5_headroom_never_exceeded-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:YJC9dlLJFiRbXFwTZGiS51neWJuFBgAitLsO9H9_xP0"
+    },
+    {
+      "bytes": 404,
+      "path": "logs/056-crux-p6_headroom_granted_when_it_fits-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:vJ2E6kdcCgju-dUuf1OAqfbD2jBKSawoQJf7mGgxizU"
+    },
+    {
+      "bytes": 323,
+      "path": "logs/057-crux-p7_zero_denominator_reads_as_one-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:c2cvSiNRxjT2EYF7bfjzCtzDaQeoqXEHFrKeNXXsO8k"
+    },
+    {
+      "bytes": 324,
+      "path": "logs/058-crux-p8_gas_buffer_is_floor_six_fifths-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:fAUi9hrNQ6DcQfytunAj1x9hf4J7dTO-W62MjTjw6T8"
+    },
+    {
+      "bytes": 321,
+      "path": "logs/059-crux-p9_payment_floor_is_half_product-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:qstP6VVImJslhPpVHNYqPp9ZW0qwA4bgJZ_h8_yPsjI"
+    },
+    {
+      "bytes": 319,
+      "path": "logs/060-crux-p10_refusal_reports_the_need-bitwuzla-0.stdout",
+      "retention": "committed",
+      "sha256": "sha256:hczzSYhgrnQ2EjYh4js4tPmCPs4vhEq9r4xgyBoTYjk"
+    },
+    {
+      "bytes": 901,
+      "path": "logs/061-crux-t1_wrapping_affordability_cap_fits-bitwuzla.stdout",
+      "retention": "committed",
+      "sha256": "sha256:nV-rbluEwNvTT4OLE5KnjgCJZsngKWkLuUVek9ASlyQ"
+    },
+    {
+      "bytes": 943,
+      "path": "logs/062-crux-t2_ceiling_budget_cap_fits-bitwuzla.stdout",
+      "retention": "committed",
+      "sha256": "sha256:laNWmVeVtg-fJ00-BJXv6KMJA7YSIRpAzvqwJibYyGg"
+    },
+    {
+      "bytes": 854,
+      "path": "logs/063-crux-t3_ceiling_budget_refuses_iff_unaffordable-bitwuzla.stdout",
+      "retention": "committed",
+      "sha256": "sha256:hlc3DL6NyZZIjaQkA3vYsPgDybiMUfJxLwo3O5tfsOA"
+    }
+  ],
+  "executables": {
+    "budget_rs": "sha256:ZpNQTlE_Kzdi8hJ8BhN0-_H2inQHt9LENoH6BUhwYfA",
+    "harness_cargo_lock": "sha256:qtoVHnPFcd__wS1PmMKQhOQT-saZGVrU3uWVjYM5ZwM",
+    "harness_sources": {
+      "files": [
+        {
+          "path": "src/lib.rs",
+          "sha256": "sha256:YSzVUevKWstOm50YL0ZIgApTu-c2EuuyyKAc7AY5-lM"
+        },
+        {
+          "path": "src/spec.rs",
+          "sha256": "sha256:d-paKsr4JhiHfEv6dn_C_yuiiEmjYcIavcV3dzIX1Aw"
+        },
+        {
+          "path": "src/props.rs",
+          "sha256": "sha256:ad1gBnw_PgwwnDAI_qboCakkEUcVlC7iBFDlVz18CNs"
+        },
+        {
+          "path": "src/vectors.rs",
+          "sha256": "sha256:DspzofIwkzv7hd-ZgCC8dtbBH3dFsvrs_D57aXXBup0"
+        },
+        {
+          "path": "src/prior.rs",
+          "sha256": "sha256:cGaOo5saOUchw1-kL9SQ_hXPLNyykVEFG00H4YuKObg"
+        },
+        {
+          "path": "src/faulty.rs",
+          "sha256": "sha256:Vhy3dBaG2TLljEc7LMPqqTGoSYR_pfBqeYKEqMo9Bvg"
+        }
+      ],
+      "tree": "sha256:-zmNpeFbLEgOXEW1cOwKKZHTUSOTrYR88ycPK2dtz2Y"
+    },
+    "honest": {
+      "linked_mir_sha256": "sha256:C2dkoxARWaO0JTd0jwy6FuauLNsvVnPjggFKptoHsnk"
+    },
+    "teeth": {
+      "linked_mir_sha256": "sha256:sYY35-dWBgy-78WsU3fCcCz7oHxha9UTOR5TEyBgA3M"
+    }
+  },
+  "host": {
+    "arch": "x86_64",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "isa": {
+      "aes": true,
+      "avx": true,
+      "avx2": true,
+      "avx512f": true,
+      "bmi2": true,
+      "pclmulqdq": true,
+      "sha_ni": true,
+      "sse4_1": true,
+      "vaes": true,
+      "vpclmulqdq": true
+    },
+    "kernel": "6.17.0-1022-azure",
+    "logical_cpus": 4,
+    "mem_total_kib": 16373452,
+    "os": "Ubuntu 24.04.5 LTS",
+    "virtualized": true
+  },
+  "job": {
+    "finished_utc": "2026-10-09T09:09:39Z",
+    "lane": "RB03",
+    "name": "crux-mir-ant-extsig-budget",
+    "started_utc": "2026-10-09T08:47:52Z"
+  },
+  "measurements": {
+    "compile": {
+      "crux_builds": [
+        {
+          "argv": [
+            "cargo",
+            "+nightly-2026-03-21",
+            "crux-test",
+            "--lib",
+            "--no-run"
+          ],
+          "budget_ms": 3600000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4596,
+          "max_rss_kib": 400708,
+          "ru_maxrss_kib": 400708,
+          "stderr": "logs/003-crux-build-cold-honest.stderr",
+          "stdout": "logs/003-crux-build-cold-honest.stdout",
+          "sys_cpu_us": 1187748,
+          "user_cpu_us": 6710181,
+          "wall_ns": 3537312700
+        },
+        {
+          "argv": [
+            "cargo",
+            "+nightly-2026-03-21",
+            "crux-test",
+            "--lib",
+            "--no-run"
+          ],
+          "budget_ms": 600000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 106956,
+          "ru_maxrss_kib": 106956,
+          "stderr": "logs/004-crux-build-warm-noop-honest.stderr",
+          "stdout": "logs/004-crux-build-warm-noop-honest.stdout",
+          "sys_cpu_us": 69511,
+          "user_cpu_us": 40033,
+          "wall_ns": 106735912
+        },
+        {
+          "argv": [
+            "cargo",
+            "+nightly-2026-03-21",
+            "crux-test",
+            "--lib",
+            "--no-run",
+            "--features",
+            "teeth"
+          ],
+          "budget_ms": 3600000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 398584,
+          "ru_maxrss_kib": 398584,
+          "stderr": "logs/005-crux-build-cold-teeth.stderr",
+          "stdout": "logs/005-crux-build-cold-teeth.stdout",
+          "sys_cpu_us": 177366,
+          "user_cpu_us": 366138,
+          "wall_ns": 485517179
+        },
+        {
+          "argv": [
+            "cargo",
+            "+nightly-2026-03-21",
+            "crux-test",
+            "--lib",
+            "--no-run",
+            "--features",
+            "teeth"
+          ],
+          "budget_ms": 600000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 106948,
+          "ru_maxrss_kib": 106948,
+          "stderr": "logs/006-crux-build-warm-noop-teeth.stderr",
+          "stdout": "logs/006-crux-build-warm-noop-teeth.stdout",
+          "sys_cpu_us": 62784,
+          "user_cpu_us": 46337,
+          "wall_ns": 106305533
+        }
+      ],
+      "native_test_cold_including_test_run": {
+        "argv": [
+          "cargo",
+          "+nightly-2026-03-21",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib"
+        ],
+        "budget_ms": 1800000,
+        "exit": {
+          "code": 0
+        },
+        "group_rss_peak_kib_sampled": null,
+        "harness_rss_hwm_kib_after_spawn": 4596,
+        "max_rss_kib": 373144,
+        "ru_maxrss_kib": 373144,
+        "stderr": "logs/002-native-test-cold.stderr",
+        "stdout": "logs/002-native-test-cold.stdout",
+        "sys_cpu_us": 596698,
+        "user_cpu_us": 4716630,
+        "wall_ns": 2237534547
+      },
+      "note": "crux builds alternate cold (empty target for the first, honest; the teeth build shares the dependency artifacts) and warm no-op; the native build ran first into the same target directory"
+    },
+    "load_average": {
+      "after": [
+        1.0,
+        1.0,
+        0.87
+      ],
+      "before": [
+        2.23,
+        0.73,
+        0.26
+      ]
+    },
+    "network_bytes": "not measured: after preparation (cargo fetch) every step runs offline (CARGO_NET_OFFLINE=true for cargo; crux-mir and the solvers use no network)",
+    "startup_crux_mir_version": {
+      "max_rss_kib": {
+        "max": 7464,
+        "mean": 6937.6,
+        "median": 6880,
+        "min": 6844,
+        "n": 10,
+        "percentiles": "not reported: n = 10 < 20",
+        "samples": [
+          6852,
+          6880,
+          6952,
+          7464,
+          6844,
+          6880,
+          6880,
+          6872,
+          6872,
+          6880
+        ]
+      },
+      "runs": [
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6852,
+          "ru_maxrss_kib": 6852,
+          "stderr": "logs/007-startup-crux-mir-0.stderr",
+          "stdout": "logs/007-startup-crux-mir-0.stdout",
+          "sys_cpu_us": 955,
+          "user_cpu_us": 955,
+          "wall_ns": 1949387
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6880,
+          "ru_maxrss_kib": 6880,
+          "stderr": "logs/008-startup-crux-mir-1.stderr",
+          "stdout": "logs/008-startup-crux-mir-1.stdout",
+          "sys_cpu_us": 950,
+          "user_cpu_us": 950,
+          "wall_ns": 1978732
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6952,
+          "ru_maxrss_kib": 6952,
+          "stderr": "logs/009-startup-crux-mir-2.stderr",
+          "stdout": "logs/009-startup-crux-mir-2.stdout",
+          "sys_cpu_us": 1965,
+          "user_cpu_us": 0,
+          "wall_ns": 2043840
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 7464,
+          "ru_maxrss_kib": 7464,
+          "stderr": "logs/010-startup-crux-mir-3.stderr",
+          "stdout": "logs/010-startup-crux-mir-3.stdout",
+          "sys_cpu_us": 762,
+          "user_cpu_us": 762,
+          "wall_ns": 1534763
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6844,
+          "ru_maxrss_kib": 6844,
+          "stderr": "logs/011-startup-crux-mir-4.stderr",
+          "stdout": "logs/011-startup-crux-mir-4.stdout",
+          "sys_cpu_us": 1469,
+          "user_cpu_us": 0,
+          "wall_ns": 1497392
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6880,
+          "ru_maxrss_kib": 6880,
+          "stderr": "logs/012-startup-crux-mir-5.stderr",
+          "stdout": "logs/012-startup-crux-mir-5.stdout",
+          "sys_cpu_us": 799,
+          "user_cpu_us": 799,
+          "wall_ns": 1615239
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6880,
+          "ru_maxrss_kib": 6880,
+          "stderr": "logs/013-startup-crux-mir-6.stderr",
+          "stdout": "logs/013-startup-crux-mir-6.stdout",
+          "sys_cpu_us": 1581,
+          "user_cpu_us": 0,
+          "wall_ns": 1607588
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6872,
+          "ru_maxrss_kib": 6872,
+          "stderr": "logs/014-startup-crux-mir-7.stderr",
+          "stdout": "logs/014-startup-crux-mir-7.stdout",
+          "sys_cpu_us": 1560,
+          "user_cpu_us": 0,
+          "wall_ns": 1544733
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6872,
+          "ru_maxrss_kib": 6872,
+          "stderr": "logs/015-startup-crux-mir-8.stderr",
+          "stdout": "logs/015-startup-crux-mir-8.stdout",
+          "sys_cpu_us": 736,
+          "user_cpu_us": 736,
+          "wall_ns": 1490581
+        },
+        {
+          "argv": [
+            "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+            "--version"
+          ],
+          "budget_ms": 60000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4916,
+          "max_rss_kib": 6880,
+          "ru_maxrss_kib": 6880,
+          "stderr": "logs/016-startup-crux-mir-9.stderr",
+          "stdout": "logs/016-startup-crux-mir-9.stdout",
+          "sys_cpu_us": 1498,
+          "user_cpu_us": 0,
+          "wall_ns": 1521918
+        }
+      ],
+      "user_cpu_us": {
+        "max": 955,
+        "mean": 420.2,
+        "median": 368,
+        "min": 0,
+        "n": 10,
+        "percentiles": "not reported: n = 10 < 20",
+        "samples": [
+          955,
+          950,
+          0,
+          762,
+          0,
+          799,
+          0,
+          0,
+          736,
+          0
+        ]
+      },
+      "wall_ns": {
+        "max": 2043840,
+        "mean": 1678417.3,
+        "median": 1576160.5,
+        "min": 1490581,
+        "n": 10,
+        "percentiles": "not reported: n = 10 < 20",
+        "samples": [
+          1949387,
+          1978732,
+          2043840,
+          1534763,
+          1497392,
+          1615239,
+          1607588,
+          1544733,
+          1490581,
+          1521918
+        ]
+      }
+    },
+    "verification": {
+      "p10_refusal_reports_the_need": {
+        "max_rss_kib": {
+          "max": 304524,
+          "median": 304396,
+          "min": 304244,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            304396,
+            304524,
+            304244
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p10_refusal_reports_the_need"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303624,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304396,
+            "ru_maxrss_kib": 304396,
+            "stderr": "logs/045-crux-p10_refusal_reports_the_need-cvc5-intblast-0.stderr",
+            "stdout": "logs/045-crux-p10_refusal_reports_the_need-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 147372,
+            "user_cpu_us": 1301096,
+            "wall_ns": 1441793644
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p10_refusal_reports_the_need"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303624,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304524,
+            "ru_maxrss_kib": 304524,
+            "stderr": "logs/046-crux-p10_refusal_reports_the_need-cvc5-intblast-1.stderr",
+            "stdout": "logs/046-crux-p10_refusal_reports_the_need-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 144067,
+            "user_cpu_us": 1305202,
+            "wall_ns": 1442806379
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p10_refusal_reports_the_need"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303348,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304244,
+            "ru_maxrss_kib": 304244,
+            "stderr": "logs/047-crux-p10_refusal_reports_the_need-cvc5-intblast-2.stderr",
+            "stdout": "logs/047-crux-p10_refusal_reports_the_need-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 146987,
+            "user_cpu_us": 1296439,
+            "wall_ns": 1436606098
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1305202,
+          "median": 1301096,
+          "min": 1296439,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1301096,
+            1305202,
+            1296439
+          ]
+        },
+        "wall_ns": {
+          "max": 1442806379,
+          "median": 1441793644,
+          "min": 1436606098,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1441793644,
+            1442806379,
+            1436606098
+          ]
+        }
+      },
+      "p10_refusal_reports_the_need@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            304828
+          ],
+          "value": 304828
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p10_refusal_reports_the_need"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 503500,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304828,
+            "ru_maxrss_kib": 304828,
+            "stderr": "logs/060-crux-p10_refusal_reports_the_need-bitwuzla-0.stderr",
+            "stdout": "logs/060-crux-p10_refusal_reports_the_need-bitwuzla-0.stdout",
+            "sys_cpu_us": 369247,
+            "user_cpu_us": 2186999,
+            "wall_ns": 2548326869
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            2186999
+          ],
+          "value": 2186999
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            2548326869
+          ],
+          "value": 2548326869
+        }
+      },
+      "p1_zero_gas_limit_refuses": {
+        "max_rss_kib": {
+          "max": 171424,
+          "median": 171400,
+          "min": 171376,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            171424,
+            171376,
+            171400
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p1_zero_gas_limit_refuses"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 170892,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 171424,
+            "ru_maxrss_kib": 171424,
+            "stderr": "logs/018-crux-p1_zero_gas_limit_refuses-cvc5-intblast-0.stderr",
+            "stdout": "logs/018-crux-p1_zero_gas_limit_refuses-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 80118,
+            "user_cpu_us": 824223,
+            "wall_ns": 902701182
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p1_zero_gas_limit_refuses"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 170844,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 171376,
+            "ru_maxrss_kib": 171376,
+            "stderr": "logs/019-crux-p1_zero_gas_limit_refuses-cvc5-intblast-1.stderr",
+            "stdout": "logs/019-crux-p1_zero_gas_limit_refuses-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 83103,
+            "user_cpu_us": 809006,
+            "wall_ns": 890701285
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p1_zero_gas_limit_refuses"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 170116,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 171400,
+            "ru_maxrss_kib": 171400,
+            "stderr": "logs/020-crux-p1_zero_gas_limit_refuses-cvc5-intblast-2.stderr",
+            "stdout": "logs/020-crux-p1_zero_gas_limit_refuses-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 65119,
+            "user_cpu_us": 842549,
+            "wall_ns": 906290885
+          }
+        ],
+        "user_cpu_us": {
+          "max": 842549,
+          "median": 824223,
+          "min": 809006,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            824223,
+            809006,
+            842549
+          ]
+        },
+        "wall_ns": {
+          "max": 906290885,
+          "median": 902701182,
+          "min": 890701285,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            902701182,
+            890701285,
+            906290885
+          ]
+        }
+      },
+      "p1_zero_gas_limit_refuses@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            171388
+          ],
+          "value": 171388
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p1_zero_gas_limit_refuses"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 170984,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 171388,
+            "ru_maxrss_kib": 171388,
+            "stderr": "logs/051-crux-p1_zero_gas_limit_refuses-bitwuzla-0.stderr",
+            "stdout": "logs/051-crux-p1_zero_gas_limit_refuses-bitwuzla-0.stdout",
+            "sys_cpu_us": 79091,
+            "user_cpu_us": 811937,
+            "wall_ns": 889765385
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            811937
+          ],
+          "value": 811937
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            889765385
+          ],
+          "value": 889765385
+        }
+      },
+      "p2_refuses_iff_network_fee_unaffordable": {
+        "max_rss_kib": {
+          "max": 305216,
+          "median": 305116,
+          "min": 305060,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            305060,
+            305116,
+            305216
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p2_refuses_iff_network_fee_unaffordable"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 304420,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 305060,
+            "ru_maxrss_kib": 305060,
+            "stderr": "logs/021-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-0.stderr",
+            "stdout": "logs/021-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 160717,
+            "user_cpu_us": 1284725,
+            "wall_ns": 1440300920
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p2_refuses_iff_network_fee_unaffordable"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 304604,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 305116,
+            "ru_maxrss_kib": 305116,
+            "stderr": "logs/022-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-1.stderr",
+            "stdout": "logs/022-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 152721,
+            "user_cpu_us": 1299325,
+            "wall_ns": 1446986188
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p2_refuses_iff_network_fee_unaffordable"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 301248,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 305216,
+            "ru_maxrss_kib": 305216,
+            "stderr": "logs/023-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-2.stderr",
+            "stdout": "logs/023-crux-p2_refuses_iff_network_fee_unaffordable-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 148660,
+            "user_cpu_us": 1312857,
+            "wall_ns": 1455929623
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1312857,
+          "median": 1299325,
+          "min": 1284725,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1284725,
+            1299325,
+            1312857
+          ]
+        },
+        "wall_ns": {
+          "max": 1455929623,
+          "median": 1446986188,
+          "min": 1440300920,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1440300920,
+            1446986188,
+            1455929623
+          ]
+        }
+      },
+      "p2_refuses_iff_network_fee_unaffordable@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            307916
+          ],
+          "value": 307916
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p2_refuses_iff_network_fee_unaffordable"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 1
+            },
+            "group_rss_peak_kib_sampled": 750696,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 307916,
+            "ru_maxrss_kib": 307916,
+            "stderr": "logs/052-crux-p2_refuses_iff_network_fee_unaffordable-bitwuzla-0.stderr",
+            "stdout": "logs/052-crux-p2_refuses_iff_network_fee_unaffordable-bitwuzla-0.stdout",
+            "sys_cpu_us": 250396,
+            "user_cpu_us": 1974172,
+            "wall_ns": 302292148390
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            1974172
+          ],
+          "value": 1974172
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            302292148390
+          ],
+          "value": 302292148390
+        }
+      },
+      "p3_cap_at_least_network_fee": {
+        "max_rss_kib": {
+          "max": 304268,
+          "median": 304128,
+          "min": 304128,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            304268,
+            304128,
+            304128
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p3_cap_at_least_network_fee"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303628,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304268,
+            "ru_maxrss_kib": 304268,
+            "stderr": "logs/024-crux-p3_cap_at_least_network_fee-cvc5-intblast-0.stderr",
+            "stdout": "logs/024-crux-p3_cap_at_least_network_fee-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 156900,
+            "user_cpu_us": 1224594,
+            "wall_ns": 1376486955
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p3_cap_at_least_network_fee"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303616,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304128,
+            "ru_maxrss_kib": 304128,
+            "stderr": "logs/025-crux-p3_cap_at_least_network_fee-cvc5-intblast-1.stderr",
+            "stdout": "logs/025-crux-p3_cap_at_least_network_fee-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 147394,
+            "user_cpu_us": 1244603,
+            "wall_ns": 1387034458
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p3_cap_at_least_network_fee"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303616,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304128,
+            "ru_maxrss_kib": 304128,
+            "stderr": "logs/026-crux-p3_cap_at_least_network_fee-cvc5-intblast-2.stderr",
+            "stdout": "logs/026-crux-p3_cap_at_least_network_fee-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 154383,
+            "user_cpu_us": 1238909,
+            "wall_ns": 1388329660
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1244603,
+          "median": 1238909,
+          "min": 1224594,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1224594,
+            1244603,
+            1238909
+          ]
+        },
+        "wall_ns": {
+          "max": 1388329660,
+          "median": 1387034458,
+          "min": 1376486955,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1376486955,
+            1387034458,
+            1388329660
+          ]
+        }
+      },
+      "p3_cap_at_least_network_fee@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            304264
+          ],
+          "value": 304264
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p3_cap_at_least_network_fee"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 577112,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304264,
+            "ru_maxrss_kib": 304264,
+            "stderr": "logs/053-crux-p3_cap_at_least_network_fee-bitwuzla-0.stderr",
+            "stdout": "logs/053-crux-p3_cap_at_least_network_fee-bitwuzla-0.stdout",
+            "sys_cpu_us": 343588,
+            "user_cpu_us": 2610676,
+            "wall_ns": 2948573532
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            2610676
+          ],
+          "value": 2610676
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            2948573532
+          ],
+          "value": 2948573532
+        }
+      },
+      "p4_cap_fits_remaining_budget": {
+        "max_rss_kib": {
+          "max": 304380,
+          "median": 304376,
+          "min": 304308,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            304380,
+            304376,
+            304308
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p4_cap_fits_remaining_budget"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303612,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304380,
+            "ru_maxrss_kib": 304380,
+            "stderr": "logs/027-crux-p4_cap_fits_remaining_budget-cvc5-intblast-0.stderr",
+            "stdout": "logs/027-crux-p4_cap_fits_remaining_budget-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 161621,
+            "user_cpu_us": 1271272,
+            "wall_ns": 1427148323
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p4_cap_fits_remaining_budget"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 302676,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304376,
+            "ru_maxrss_kib": 304376,
+            "stderr": "logs/028-crux-p4_cap_fits_remaining_budget-cvc5-intblast-1.stderr",
+            "stdout": "logs/028-crux-p4_cap_fits_remaining_budget-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 158203,
+            "user_cpu_us": 1298766,
+            "wall_ns": 1450785902
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p4_cap_fits_remaining_budget"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 303628,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304308,
+            "ru_maxrss_kib": 304308,
+            "stderr": "logs/029-crux-p4_cap_fits_remaining_budget-cvc5-intblast-2.stderr",
+            "stdout": "logs/029-crux-p4_cap_fits_remaining_budget-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 151070,
+            "user_cpu_us": 1286053,
+            "wall_ns": 1431205125
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1298766,
+          "median": 1286053,
+          "min": 1271272,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1271272,
+            1298766,
+            1286053
+          ]
+        },
+        "wall_ns": {
+          "max": 1450785902,
+          "median": 1431205125,
+          "min": 1427148323,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1427148323,
+            1450785902,
+            1431205125
+          ]
+        }
+      },
+      "p4_cap_fits_remaining_budget@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            398624
+          ],
+          "value": 398624
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p4_cap_fits_remaining_budget"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 1
+            },
+            "group_rss_peak_kib_sampled": 1078388,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 398624,
+            "ru_maxrss_kib": 398624,
+            "stderr": "logs/054-crux-p4_cap_fits_remaining_budget-bitwuzla-0.stderr",
+            "stdout": "logs/054-crux-p4_cap_fits_remaining_budget-bitwuzla-0.stdout",
+            "sys_cpu_us": 362077,
+            "user_cpu_us": 2502596,
+            "wall_ns": 302873503283
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            2502596
+          ],
+          "value": 2502596
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            302873503283
+          ],
+          "value": 302873503283
+        }
+      },
+      "p5_headroom_never_exceeded": {
+        "max_rss_kib": {
+          "max": 304360,
+          "median": 304256,
+          "min": 304248,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            304360,
+            304248,
+            304256
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p5_headroom_never_exceeded"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 344680,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304360,
+            "ru_maxrss_kib": 304360,
+            "stderr": "logs/030-crux-p5_headroom_never_exceeded-cvc5-intblast-0.stderr",
+            "stdout": "logs/030-crux-p5_headroom_never_exceeded-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 179200,
+            "user_cpu_us": 1933358,
+            "wall_ns": 2104597867
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p5_headroom_never_exceeded"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 344788,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304248,
+            "ru_maxrss_kib": 304248,
+            "stderr": "logs/031-crux-p5_headroom_never_exceeded-cvc5-intblast-1.stderr",
+            "stdout": "logs/031-crux-p5_headroom_never_exceeded-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 160228,
+            "user_cpu_us": 1918425,
+            "wall_ns": 2070862432
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p5_headroom_never_exceeded"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 344472,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304256,
+            "ru_maxrss_kib": 304256,
+            "stderr": "logs/032-crux-p5_headroom_never_exceeded-cvc5-intblast-2.stderr",
+            "stdout": "logs/032-crux-p5_headroom_never_exceeded-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 153841,
+            "user_cpu_us": 1932859,
+            "wall_ns": 2079071681
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1933358,
+          "median": 1932859,
+          "min": 1918425,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1933358,
+            1918425,
+            1932859
+          ]
+        },
+        "wall_ns": {
+          "max": 2104597867,
+          "median": 2079071681,
+          "min": 2070862432,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            2104597867,
+            2070862432,
+            2079071681
+          ]
+        }
+      },
+      "p5_headroom_never_exceeded@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            306620
+          ],
+          "value": 306620
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p5_headroom_never_exceeded"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 1
+            },
+            "group_rss_peak_kib_sampled": 1040020,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 306620,
+            "ru_maxrss_kib": 306620,
+            "stderr": "logs/055-crux-p5_headroom_never_exceeded-bitwuzla-0.stderr",
+            "stdout": "logs/055-crux-p5_headroom_never_exceeded-bitwuzla-0.stdout",
+            "sys_cpu_us": 398001,
+            "user_cpu_us": 2407756,
+            "wall_ns": 302842225824
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            2407756
+          ],
+          "value": 2407756
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            302842225824
+          ],
+          "value": 302842225824
+        }
+      },
+      "p6_headroom_granted_when_it_fits": {
+        "max_rss_kib": {
+          "max": 304452,
+          "median": 304320,
+          "min": 304316,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            304452,
+            304320,
+            304316
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p6_headroom_granted_when_it_fits"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 332244,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304452,
+            "ru_maxrss_kib": 304452,
+            "stderr": "logs/033-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-0.stderr",
+            "stdout": "logs/033-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 168387,
+            "user_cpu_us": 1430248,
+            "wall_ns": 1591315857
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p6_headroom_granted_when_it_fits"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 330332,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304320,
+            "ru_maxrss_kib": 304320,
+            "stderr": "logs/034-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-1.stderr",
+            "stdout": "logs/034-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 182098,
+            "user_cpu_us": 1439787,
+            "wall_ns": 1614192164
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p6_headroom_granted_when_it_fits"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 331496,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 304316,
+            "ru_maxrss_kib": 304316,
+            "stderr": "logs/035-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-2.stderr",
+            "stdout": "logs/035-crux-p6_headroom_granted_when_it_fits-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 175752,
+            "user_cpu_us": 1436256,
+            "wall_ns": 1604408371
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1439787,
+          "median": 1436256,
+          "min": 1430248,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1430248,
+            1439787,
+            1436256
+          ]
+        },
+        "wall_ns": {
+          "max": 1614192164,
+          "median": 1604408371,
+          "min": 1591315857,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1591315857,
+            1614192164,
+            1604408371
+          ]
+        }
+      },
+      "p6_headroom_granted_when_it_fits@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            396416
+          ],
+          "value": 396416
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p6_headroom_granted_when_it_fits"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 1
+            },
+            "group_rss_peak_kib_sampled": 1234168,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 396416,
+            "ru_maxrss_kib": 396416,
+            "stderr": "logs/056-crux-p6_headroom_granted_when_it_fits-bitwuzla-0.stderr",
+            "stdout": "logs/056-crux-p6_headroom_granted_when_it_fits-bitwuzla-0.stdout",
+            "sys_cpu_us": 498696,
+            "user_cpu_us": 3128417,
+            "wall_ns": 303718417052
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            3128417
+          ],
+          "value": 3128417
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            303718417052
+          ],
+          "value": 303718417052
+        }
+      },
+      "p7_zero_denominator_reads_as_one": {
+        "max_rss_kib": {
+          "max": 438856,
+          "median": 438852,
+          "min": 438788,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            438788,
+            438852,
+            438856
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p7_zero_denominator_reads_as_one"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 438660,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 438788,
+            "ru_maxrss_kib": 438788,
+            "stderr": "logs/036-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-0.stderr",
+            "stdout": "logs/036-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 245549,
+            "user_cpu_us": 1593034,
+            "wall_ns": 1826790141
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p7_zero_denominator_reads_as_one"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 438724,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 438852,
+            "ru_maxrss_kib": 438852,
+            "stderr": "logs/037-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-1.stderr",
+            "stdout": "logs/037-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 252928,
+            "user_cpu_us": 1582136,
+            "wall_ns": 1823021953
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p7_zero_denominator_reads_as_one"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 438720,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 438856,
+            "ru_maxrss_kib": 438856,
+            "stderr": "logs/038-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-2.stderr",
+            "stdout": "logs/038-crux-p7_zero_denominator_reads_as_one-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 251781,
+            "user_cpu_us": 1595253,
+            "wall_ns": 1834936622
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1595253,
+          "median": 1593034,
+          "min": 1582136,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1593034,
+            1582136,
+            1595253
+          ]
+        },
+        "wall_ns": {
+          "max": 1834936622,
+          "median": 1826790141,
+          "min": 1823021953,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1826790141,
+            1823021953,
+            1834936622
+          ]
+        }
+      },
+      "p7_zero_denominator_reads_as_one@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            438856
+          ],
+          "value": 438856
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p7_zero_denominator_reads_as_one"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 638292,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 438856,
+            "ru_maxrss_kib": 438856,
+            "stderr": "logs/057-crux-p7_zero_denominator_reads_as_one-bitwuzla-0.stderr",
+            "stdout": "logs/057-crux-p7_zero_denominator_reads_as_one-bitwuzla-0.stdout",
+            "sys_cpu_us": 480550,
+            "user_cpu_us": 2705302,
+            "wall_ns": 3176298759
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            2705302
+          ],
+          "value": 2705302
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            3176298759
+          ],
+          "value": 3176298759
+        }
+      },
+      "p8_gas_buffer_is_floor_six_fifths": {
+        "max_rss_kib": {
+          "max": 243804,
+          "median": 243744,
+          "min": 243644,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            243644,
+            243744,
+            243804
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p8_gas_buffer_is_floor_six_fifths"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 243004,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243644,
+            "ru_maxrss_kib": 243644,
+            "stderr": "logs/039-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-0.stderr",
+            "stdout": "logs/039-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 127551,
+            "user_cpu_us": 990957,
+            "wall_ns": 1113525718
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p8_gas_buffer_is_floor_six_fifths"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 242592,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243744,
+            "ru_maxrss_kib": 243744,
+            "stderr": "logs/040-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-1.stderr",
+            "stdout": "logs/040-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 115943,
+            "user_cpu_us": 1010333,
+            "wall_ns": 1121051625
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p8_gas_buffer_is_floor_six_fifths"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 242852,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243804,
+            "ru_maxrss_kib": 243804,
+            "stderr": "logs/041-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-2.stderr",
+            "stdout": "logs/041-crux-p8_gas_buffer_is_floor_six_fifths-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 134014,
+            "user_cpu_us": 980603,
+            "wall_ns": 1109415309
+          }
+        ],
+        "user_cpu_us": {
+          "max": 1010333,
+          "median": 990957,
+          "min": 980603,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            990957,
+            1010333,
+            980603
+          ]
+        },
+        "wall_ns": {
+          "max": 1121051625,
+          "median": 1113525718,
+          "min": 1109415309,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1113525718,
+            1121051625,
+            1109415309
+          ]
+        }
+      },
+      "p8_gas_buffer_is_floor_six_fifths@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            244156
+          ],
+          "value": 244156
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p8_gas_buffer_is_floor_six_fifths"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 265280,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 244156,
+            "ru_maxrss_kib": 244156,
+            "stderr": "logs/058-crux-p8_gas_buffer_is_floor_six_fifths-bitwuzla-0.stderr",
+            "stdout": "logs/058-crux-p8_gas_buffer_is_floor_six_fifths-bitwuzla-0.stdout",
+            "sys_cpu_us": 186252,
+            "user_cpu_us": 12189793,
+            "wall_ns": 12372590220
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            12189793
+          ],
+          "value": 12189793
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            12372590220
+          ],
+          "value": 12372590220
+        }
+      },
+      "p9_payment_floor_is_half_product": {
+        "max_rss_kib": {
+          "max": 243808,
+          "median": 243740,
+          "min": 243712,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            243740,
+            243712,
+            243808
+          ]
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p9_payment_floor_is_half_product"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 243204,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243740,
+            "ru_maxrss_kib": 243740,
+            "stderr": "logs/042-crux-p9_payment_floor_is_half_product-cvc5-intblast-0.stderr",
+            "stdout": "logs/042-crux-p9_payment_floor_is_half_product-cvc5-intblast-0.stdout",
+            "sys_cpu_us": 120466,
+            "user_cpu_us": 960764,
+            "wall_ns": 1077680080
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p9_payment_floor_is_half_product"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 243056,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243712,
+            "ru_maxrss_kib": 243712,
+            "stderr": "logs/043-crux-p9_payment_floor_is_half_product-cvc5-intblast-1.stderr",
+            "stdout": "logs/043-crux-p9_payment_floor_is_half_product-cvc5-intblast-1.stdout",
+            "sys_cpu_us": 116768,
+            "user_cpu_us": 963748,
+            "wall_ns": 1076898453
+          },
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=cvc5",
+              "--force-offline-goal-solving",
+              "--goal-timeout=540",
+              "--timeout=570",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p9_payment_floor_is_half_product"
+            ],
+            "budget_ms": 600000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 243112,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243808,
+            "ru_maxrss_kib": 243808,
+            "stderr": "logs/044-crux-p9_payment_floor_is_half_product-cvc5-intblast-2.stderr",
+            "stdout": "logs/044-crux-p9_payment_floor_is_half_product-cvc5-intblast-2.stdout",
+            "sys_cpu_us": 118760,
+            "user_cpu_us": 954217,
+            "wall_ns": 1069480303
+          }
+        ],
+        "user_cpu_us": {
+          "max": 963748,
+          "median": 960764,
+          "min": 954217,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            960764,
+            963748,
+            954217
+          ]
+        },
+        "wall_ns": {
+          "max": 1077680080,
+          "median": 1076898453,
+          "min": 1069480303,
+          "n": 3,
+          "percentiles": "not reported: n = 3 < 20",
+          "samples": [
+            1077680080,
+            1076898453,
+            1069480303
+          ]
+        }
+      },
+      "p9_payment_floor_is_half_product@bitwuzla": {
+        "max_rss_kib": {
+          "n": 1,
+          "samples": [
+            243808
+          ],
+          "value": 243808
+        },
+        "runs": [
+          {
+            "argv": [
+              "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+              "--assert-false-on-error",
+              "--cargo-test-file",
+              "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+              "--solver=bitwuzla",
+              "--force-offline-goal-solving",
+              "--goal-timeout=300",
+              "--timeout=390",
+              "--no-colors",
+              "--show-model",
+              "--test-filter=p9_payment_floor_is_half_product"
+            ],
+            "budget_ms": 420000,
+            "exit": {
+              "code": 0
+            },
+            "group_rss_peak_kib_sampled": 293432,
+            "harness_rss_hwm_kib_after_spawn": 4920,
+            "max_rss_kib": 243808,
+            "ru_maxrss_kib": 243808,
+            "stderr": "logs/059-crux-p9_payment_floor_is_half_product-bitwuzla-0.stderr",
+            "stdout": "logs/059-crux-p9_payment_floor_is_half_product-bitwuzla-0.stdout",
+            "sys_cpu_us": 183376,
+            "user_cpu_us": 1246900,
+            "wall_ns": 1426967312
+          }
+        ],
+        "user_cpu_us": {
+          "n": 1,
+          "samples": [
+            1246900
+          ],
+          "value": 1246900
+        },
+        "wall_ns": {
+          "n": 1,
+          "samples": [
+            1426967312
+          ],
+          "value": 1426967312
+        }
+      },
+      "t1_wrapping_affordability_cap_fits": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=cvc5",
+          "--force-offline-goal-solving",
+          "--goal-timeout=540",
+          "--timeout=570",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t1_wrapping_affordability_cap_fits"
+        ],
+        "budget_ms": 600000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 282132,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 282644,
+        "ru_maxrss_kib": 282644,
+        "stderr": "logs/048-crux-t1_wrapping_affordability_cap_fits-cvc5-intblast.stderr",
+        "stdout": "logs/048-crux-t1_wrapping_affordability_cap_fits-cvc5-intblast.stdout",
+        "sys_cpu_us": 159947,
+        "user_cpu_us": 1259440,
+        "wall_ns": 1413459732
+      },
+      "t1_wrapping_affordability_cap_fits@bitwuzla": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=bitwuzla",
+          "--force-offline-goal-solving",
+          "--goal-timeout=300",
+          "--timeout=390",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t1_wrapping_affordability_cap_fits"
+        ],
+        "budget_ms": 420000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 728888,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 446280,
+        "ru_maxrss_kib": 446280,
+        "stderr": "logs/061-crux-t1_wrapping_affordability_cap_fits-bitwuzla.stderr",
+        "stdout": "logs/061-crux-t1_wrapping_affordability_cap_fits-bitwuzla.stdout",
+        "sys_cpu_us": 492123,
+        "user_cpu_us": 3263109,
+        "wall_ns": 3747972888
+      },
+      "t2_ceiling_budget_cap_fits": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=cvc5",
+          "--force-offline-goal-solving",
+          "--goal-timeout=540",
+          "--timeout=570",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t2_ceiling_budget_cap_fits"
+        ],
+        "budget_ms": 600000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 283212,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 283852,
+        "ru_maxrss_kib": 283852,
+        "stderr": "logs/049-crux-t2_ceiling_budget_cap_fits-cvc5-intblast.stderr",
+        "stdout": "logs/049-crux-t2_ceiling_budget_cap_fits-cvc5-intblast.stdout",
+        "sys_cpu_us": 145043,
+        "user_cpu_us": 1293323,
+        "wall_ns": 1431780517
+      },
+      "t2_ceiling_budget_cap_fits@bitwuzla": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=bitwuzla",
+          "--force-offline-goal-solving",
+          "--goal-timeout=300",
+          "--timeout=390",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t2_ceiling_budget_cap_fits"
+        ],
+        "budget_ms": 420000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 783088,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 499688,
+        "ru_maxrss_kib": 499688,
+        "stderr": "logs/062-crux-t2_ceiling_budget_cap_fits-bitwuzla.stderr",
+        "stdout": "logs/062-crux-t2_ceiling_budget_cap_fits-bitwuzla.stdout",
+        "sys_cpu_us": 517959,
+        "user_cpu_us": 6157585,
+        "wall_ns": 6667508186
+      },
+      "t3_ceiling_budget_refuses_iff_unaffordable": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=cvc5",
+          "--force-offline-goal-solving",
+          "--goal-timeout=540",
+          "--timeout=570",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t3_ceiling_budget_refuses_iff_unaffordable"
+        ],
+        "budget_ms": 600000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 283224,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 283864,
+        "ru_maxrss_kib": 283864,
+        "stderr": "logs/050-crux-t3_ceiling_budget_refuses_iff_unaffordable-cvc5-intblast.stderr",
+        "stdout": "logs/050-crux-t3_ceiling_budget_refuses_iff_unaffordable-cvc5-intblast.stdout",
+        "sys_cpu_us": 145802,
+        "user_cpu_us": 1300801,
+        "wall_ns": 1440011827
+      },
+      "t3_ceiling_budget_refuses_iff_unaffordable@bitwuzla": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-5bf25bc969a1b31b.linked-mir.json",
+          "--solver=bitwuzla",
+          "--force-offline-goal-solving",
+          "--goal-timeout=300",
+          "--timeout=390",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=t3_ceiling_budget_refuses_iff_unaffordable"
+        ],
+        "budget_ms": 420000,
+        "exit": {
+          "code": 1
+        },
+        "group_rss_peak_kib_sampled": 497608,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 283808,
+        "ru_maxrss_kib": 283808,
+        "stderr": "logs/063-crux-t3_ceiling_budget_refuses_iff_unaffordable-bitwuzla.stderr",
+        "stdout": "logs/063-crux-t3_ceiling_budget_refuses_iff_unaffordable-bitwuzla.stdout",
+        "sys_cpu_us": 399001,
+        "user_cpu_us": 3977879,
+        "wall_ns": 4369790113
+      },
+      "vectors": {
+        "argv": [
+          "/home/runner/rbtools/crux/crux-mir/crux-mir-0.13.0.0.99-ubuntu-24.04-X64/bin/crux-mir",
+          "--assert-false-on-error",
+          "--cargo-test-file",
+          "/home/runner/work/_temp/rb-work/rb03-target/x86_64-unknown-linux-gnu/debug/deps/rb03_budget-49caa57252f8e228.linked-mir.json",
+          "--solver=cvc5",
+          "--force-offline-goal-solving",
+          "--goal-timeout=300",
+          "--timeout=570",
+          "--no-colors",
+          "--show-model",
+          "--test-filter=vectors"
+        ],
+        "budget_ms": 600000,
+        "exit": {
+          "code": 0
+        },
+        "group_rss_peak_kib_sampled": 312864,
+        "harness_rss_hwm_kib_after_spawn": 4920,
+        "max_rss_kib": 313632,
+        "ru_maxrss_kib": 313632,
+        "stderr": "logs/017-crux-vectors.stderr",
+        "stdout": "logs/017-crux-vectors.stdout",
+        "sys_cpu_us": 136157,
+        "user_cpu_us": 1647905,
+        "wall_ns": 1781730620
+      }
+    }
+  },
+  "receipt_serialization": {
+    "bytes_first_pass": 132193,
+    "note": "measured on a first pass of this receipt without this field; the final file differs only by this object and the finish timestamp",
+    "render_ns": 2153284,
+    "render_write_fsync_ns": 2717919
+  },
+  "remaining_obligations": [
+    "Ledger persistence: GasLedger::persist writes a temp file, fsyncs it and renames it; durability of the rename and the directory entry is not checked here.",
+    "Concurrent writers: budget.rs documents that two runs of one plan at the same time lose each other's entries (no lock); not checked, and not safe.",
+    "Receipt authenticity and chain observations: settle() takes the payer's balance change and receipt cost as given; nothing here checks they came from the chain.",
+    "Call-site arithmetic: main.rs computes reserve_limit = limit.saturating_mul(SEND_ATTEMPTS) before calling plan_fee_cap; at saturation the reserved limit is below the true four-attempt worst case. plan_fee_cap's guarantees hold for the gas limit it is given.",
+    "SEND_ATTEMPTS = 4 is a claim about evmlib v0.10.0's retry loop (retry.rs), not checked here.",
+    "GasLedger::reserve/settle/remaining_wei/exposure_wei and default_ledger_path are not covered by these properties."
+  ],
+  "results": [
+    {
+      "claim": "crux-mir reports crucible 25d0f369; mir-json is that commit's submodule pin",
+      "class": "VECTOR",
+      "evidence": [],
+      "expected": {
+        "crucible": "25d0f3698a96cb8f014911146c02fabdb26f66ff",
+        "mir_json": "ece1622caf39c9530873f376caa84a5fa6a3ded3"
+      },
+      "id": "toolchain-identity",
+      "observed": {
+        "bundle": "crux-mir at crucible 25d0f369 (upstream CI build, GHC 9.10.3, ubuntu-24.04) + mir-json at that commit's submodule pin + Rust nightly-2026-03-21 + what4-solvers snapshot-20260622: the versions crucible's crux-mir-build.yml pins at 25d0f369",
+        "crux_artifact_zip": {
+          "expected": "sha256:AFu_J0z9pJN5VLpj2R-KFwMGuq6jgd2gNOs3bWvOPaY",
+          "matches": true,
+          "observed": "sha256:AFu_J0z9pJN5VLpj2R-KFwMGuq6jgd2gNOs3bWvOPaY",
+          "source": "GaloisInc/crucible Actions run 37835376050, artifact 11575803445 (expires 2027-01-06)"
+        },
+        "crux_mir_binary": "sha256:r6MjKll7vSe3t_mkfS7PzMAPoqMuOpDf3N0KqVk_CvQ",
+        "crux_mir_version": [
+          "[Crux] version: 0.10.0.0.99, crux-mir version: 0.13.0.0.99",
+          "[Crux] Git commit 25d0f3698a96cb8f014911146c02fabdb26f66ff",
+          "[Crux]     branch master (non-committed files present during build)"
+        ],
+        "mir_json": {
+          "expected_rev": "ece1622caf39c9530873f376caa84a5fa6a3ded3",
+          "source_head": "ece1622caf39c9530873f376caa84a5fa6a3ded3",
+          "version": "rustc 1.96.0-nightly (ac7f9ec7d 2026-03-20)\nmir-json 0.1.0 (JSON schema version 13)\nRust toolchain nightly-2026-03-21"
+        },
+        "solver_versions": {
+          "bitwuzla": "0.7.0",
+          "cvc5": "This is cvc5 version 1.3.1 [git ea1b484fa on branch HEAD]",
+          "yices": "Yices 2.6.5",
+          "z3": "Z3 version 4.8.14 - 64 bit - build hashcode df8f9d7dcb8b9f9b3de1072017b7c2b7f63f0af8"
+        },
+        "solvers_zip": {
+          "expected": "sha256:9JM85bxH0aMNSJJmuG36YDgRCraFDJbELDTuEyfQtwU",
+          "matches": true,
+          "observed": "sha256:9JM85bxH0aMNSJJmuG36YDgRCraFDJbELDTuEyfQtwU",
+          "release": "GaloisInc/what4-solvers snapshot-20260622 ubuntu-24.04-X64-bin.zip"
+        },
+        "strategies": {
+          "cross_check": "bitwuzla, offline goal solving",
+          "required": "cvc5-intblast: cvc5 --solve-bv-as-int=sum through rb-cvc5-intblast (src/bin/rb-cvc5-intblast.rs), offline goal solving"
+        },
+        "toolchain": "nightly-2026-03-21"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "the harness compiles ops/ant-extsig/src/budget.rs itself through #[path] (no copy); the one extraction, fee_cap out of plan_fee_cap, keeps every production call site and is checked by correspondence-split",
+      "class": "VECTOR",
+      "evidence": [],
+      "expected": {
+        "path_attribute": "#[path = \"../../../../ops/ant-extsig/src/budget.rs\"]",
+        "resolves_to": "ops/ant-extsig/src/budget.rs"
+      },
+      "id": "correspondence-source",
+      "observed": {
+        "budget_rs_sha256": "sha256:ZpNQTlE_Kzdi8hJ8BhN0-_H2inQHt9LENoH6BUhwYfA",
+        "bytes": 21935,
+        "resolved_same_file": true
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "every package the harness lockfile shares with ops/ant-extsig/Cargo.lock has the same version and checksum",
+      "class": "VECTOR",
+      "evidence": [],
+      "expected": "no mismatched shared package",
+      "id": "correspondence-dependencies",
+      "observed": {
+        "harness_only": [],
+        "mismatched": [],
+        "same_version_and_checksum": [
+          "block-buffer 0.10.4",
+          "cfg-if 1.0.5",
+          "cpufeatures 0.2.17",
+          "crypto-common 0.1.7",
+          "digest 0.10.7",
+          "generic-array 0.14.7",
+          "hex 0.4.3",
+          "itoa 1.0.18",
+          "libc 0.2.190",
+          "memchr 2.8.3",
+          "proc-macro2 1.0.107",
+          "quote 1.0.47",
+          "serde 1.0.229",
+          "serde_core 1.0.229",
+          "serde_derive 1.0.229",
+          "serde_json 1.0.151",
+          "sha2 0.10.9",
+          "syn 3.0.6",
+          "typenum 1.20.1",
+          "unicode-ident 1.0.26",
+          "version_check 0.9.5",
+          "zmij 1.0.23"
+        ]
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "the boundary vectors (max values, zero and maximal denominators, exact fit and one wei short, zero gas limit) and ant-extsig's own budget.rs unit tests pass on the native build of the same file",
+      "class": "VECTOR",
+      "evidence": [
+        "logs/002-native-test-cold.stdout"
+      ],
+      "expected": null,
+      "id": "vectors-native",
+      "observed": {
+        "process": {
+          "argv": [
+            "cargo",
+            "+nightly-2026-03-21",
+            "test",
+            "--locked",
+            "--offline",
+            "--lib"
+          ],
+          "budget_ms": 1800000,
+          "exit": {
+            "code": 0
+          },
+          "group_rss_peak_kib_sampled": null,
+          "harness_rss_hwm_kib_after_spawn": 4596,
+          "max_rss_kib": 373144,
+          "ru_maxrss_kib": 373144,
+          "stderr": "logs/002-native-test-cold.stderr",
+          "stdout": "logs/002-native-test-cold.stdout",
+          "sys_cpu_us": 596698,
+          "user_cpu_us": 4716630,
+          "wall_ns": 2237534547
+        },
+        "summary": [
+          "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+        ]
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "plan_fee_cap after the split returns the same cap or the same refusal text as the verbatim pre-split function (2e8d20970) on 74,536 boundary-grid inputs, and is fee_cap plus a message on 20,480 more",
+      "class": "VECTOR",
+      "evidence": [
+        "logs/002-native-test-cold.stdout"
+      ],
+      "expected": null,
+      "id": "correspondence-split",
+      "observed": {
+        "tests": [
+          "prior::plan_fee_cap_is_unchanged_by_the_split",
+          "budget::tests::plan_fee_cap_is_fee_cap_with_a_message"
+        ]
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "the same boundary vectors pass under Crux-MIR's translation of the code",
+      "class": "VECTOR",
+      "evidence": [
+        "logs/017-crux-vectors.stdout"
+      ],
+      "expected": null,
+      "id": "vectors-crux",
+      "observed": {
+        "overall": "Valid.",
+        "tests": [
+          [
+            "rb03_budget::vectors::gas_buffer_vectors",
+            "ok"
+          ],
+          [
+            "rb03_budget::vectors::payment_floor_vectors",
+            "ok"
+          ],
+          [
+            "rb03_budget::vectors::plan_fee_cap_vectors",
+            "ok"
+          ]
+        ]
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "fee_cap refuses a zero gas limit as ZeroGasLimit",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "remaining, fee, headroom_num, headroom_den: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p1_zero_gas_limit_refuses",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": null,
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "with gas_limit != 0, fee_cap refuses exactly when network_fee × gas_limit > remaining (overflow counted as unaffordable)",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128, gas_limit != 0",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p2_refuses_iff_network_fee_unaffordable",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 10,
+          "total": 10,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "every returned cap ≥ the network fee",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p3_cap_at_least_network_fee",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 9,
+          "total": 9,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "every returned cap × gas_limit ≤ remaining, overflow-safe",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p4_cap_fits_remaining_budget",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 11,
+          "total": 11,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "a returned cap never exceeds max(fee, ⌊fee × num / den⌋) when fee × num is representable",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p5_headroom_never_exceeded",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 14,
+          "total": 14,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "when ⌊fee × num / den⌋ fits the budget, the returned cap is at least it",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p6_headroom_granted_when_it_fits",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 16,
+          "total": 16,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "headroom_den = 0 gives exactly the result of headroom_den = 1",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "remaining, gas_limit, fee, headroom_num: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p7_zero_denominator_reads_as_one",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 26,
+          "total": 26,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "gas_limit_with_buffer(e) = ⌊e × 6/5⌋ ≥ e and the saturating multiply never saturates",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "e: all u64",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p8_gas_buffer_is_floor_six_fifths",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 11,
+          "total": 11,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "payment_floor_limit(a, t) = ⌊a × t / 2⌋, or u128::MAX / 2 when a × t overflows",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "a, t: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p9_payment_floor_is_half_product",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 6,
+          "total": 6,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "an Unaffordable refusal carries gas_limit × fee (saturating), the need plan_fee_cap prints",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "id": "p10_refusal_reports_the_need",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 14,
+          "total": 14,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "cvc5-intblast"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "F1 (wrapping affordability check) must violate p4: a cap that does not fit",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "cvc5-intblast",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t1_wrapping_affordability_cap_fits",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = 0x4 (signed), 0x4 (unsigned), 4 (decimal)\ngas_limit = 0x2 (signed), 0x2 (unsigned), 2 (decimal)\nnetwork_fee_per_gas = -0x80000000000000000000000000000000 (signed), 0x80000000000000000000000000000000 (unsigned), -170141183460469231731687303715884105728 (decimal)\nheadroom_num = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\nheadroom_den = 0x2 (signed), 0x2 (unsigned), 2 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:64:9: 64:62: error: in rb03_budget/b5c6597c::props[0]::check_cap_fits[0]\n[Crux]   MIR assertion at src/props.rs:64:9:\n[Crux]   \tfits(cap, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "F2 (ceiling per-gas budget) must violate p4",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "cvc5-intblast",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t2_ceiling_budget_cap_fits",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = -0x3ffffffffffffffffffffffffffffffe (signed), 0xc0000000000000000000000000000002 (unsigned), -85070591730234615865843651857942052862 (decimal)\ngas_limit = 0x40000000000000000000000000000000 (signed), 0x40000000000000000000000000000000 (unsigned), 85070591730234615865843651857942052864 (decimal)\nnetwork_fee_per_gas = 0x4 (signed), 0x4 (unsigned), 4 (decimal)\nheadroom_num = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\nheadroom_den = 0x2 (signed), 0x2 (unsigned), 2 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:64:9: 64:62: error: in rb03_budget/b5c6597c::props[0]::check_cap_fits[0]\n[Crux]   MIR assertion at src/props.rs:64:9:\n[Crux]   \tfits(cap, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "F2 must violate p2: an unaffordable fee accepted",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "cvc5-intblast",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t3_ceiling_budget_refuses_iff_unaffordable",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = -0x3ffffffffffffffffffffffffffffffe (signed), 0xc0000000000000000000000000000002 (unsigned), -85070591730234615865843651857942052862 (decimal)\ngas_limit = 0x40000000000000000000000000000000 (signed), 0x40000000000000000000000000000000 (unsigned), 85070591730234615865843651857942052864 (decimal)\nnetwork_fee_per_gas = 0x4 (signed), 0x4 (unsigned), 4 (decimal)\nheadroom_num = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\nheadroom_den = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:49:5: 49:72: error: in rb03_budget/b5c6597c::props[0]::check_refuses_iff_unaffordable[0]\n[Crux]   MIR assertion at src/props.rs:49:5:\n[Crux]   \trefused == !fits(i.fee, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": true
+    },
+    {
+      "claim": "fee_cap refuses a zero gas limit as ZeroGasLimit",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "remaining, fee, headroom_num, headroom_den: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p1_zero_gas_limit_refuses@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": null,
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "with gas_limit != 0, fee_cap refuses exactly when network_fee × gas_limit > remaining (overflow counted as unaffordable)",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128, gas_limit != 0",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p2_refuses_iff_network_fee_unaffordable@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 9,
+          "total": 10,
+          "unknown": 1
+        },
+        "overall": "Unknown.",
+        "status": null,
+        "strategy": "bitwuzla"
+      },
+      "outcome": "INCONCLUSIVE",
+      "required": false
+    },
+    {
+      "claim": "every returned cap ≥ the network fee",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p3_cap_at_least_network_fee@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 9,
+          "total": 9,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "every returned cap × gas_limit ≤ remaining, overflow-safe",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p4_cap_fits_remaining_budget@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 10,
+          "total": 11,
+          "unknown": 1
+        },
+        "overall": "Unknown.",
+        "status": null,
+        "strategy": "bitwuzla"
+      },
+      "outcome": "INCONCLUSIVE",
+      "required": false
+    },
+    {
+      "claim": "a returned cap never exceeds max(fee, ⌊fee × num / den⌋) when fee × num is representable",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p5_headroom_never_exceeded@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 13,
+          "total": 14,
+          "unknown": 1
+        },
+        "overall": "Unknown.",
+        "status": null,
+        "strategy": "bitwuzla"
+      },
+      "outcome": "INCONCLUSIVE",
+      "required": false
+    },
+    {
+      "claim": "when ⌊fee × num / den⌋ fits the budget, the returned cap is at least it",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p6_headroom_granted_when_it_fits@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 15,
+          "total": 16,
+          "unknown": 1
+        },
+        "overall": "Unknown.",
+        "status": null,
+        "strategy": "bitwuzla"
+      },
+      "outcome": "INCONCLUSIVE",
+      "required": false
+    },
+    {
+      "claim": "headroom_den = 0 gives exactly the result of headroom_den = 1",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "remaining, gas_limit, fee, headroom_num: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p7_zero_denominator_reads_as_one@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 26,
+          "total": 26,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "gas_limit_with_buffer(e) = ⌊e × 6/5⌋ ≥ e and the saturating multiply never saturates",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "e: all u64",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p8_gas_buffer_is_floor_six_fifths@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 11,
+          "total": 11,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "payment_floor_limit(a, t) = ⌊a × t / 2⌋, or u128::MAX / 2 when a × t overflows",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "a, t: all u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p9_payment_floor_is_half_product@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 6,
+          "total": 6,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "an Unaffordable refusal carries gas_limit × fee (saturating), the need plan_fee_cap prints",
+      "class": "PROVE-UNIVERSAL",
+      "evidence": [],
+      "expected": {
+        "domain": "all five arguments u128",
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "id": "p10_refusal_reports_the_need@bitwuzla",
+      "observed": {
+        "counterexamples": [],
+        "errors": [],
+        "goals": {
+          "disproved": 0,
+          "incomplete": 0,
+          "proved": 14,
+          "total": 14,
+          "unknown": 0
+        },
+        "overall": "Valid.",
+        "status": "ok",
+        "strategy": "bitwuzla"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "F1 (wrapping affordability check) must violate p4: a cap that does not fit",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "bitwuzla",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t1_wrapping_affordability_cap_fits@bitwuzla",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\ngas_limit = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\nnetwork_fee_per_gas = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\nheadroom_num = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\nheadroom_den = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:64:9: 64:62: error: in rb03_budget/b5c6597c::props[0]::check_cap_fits[0]\n[Crux]   MIR assertion at src/props.rs:64:9:\n[Crux]   \tfits(cap, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "F2 (ceiling per-gas budget) must violate p4",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "bitwuzla",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t2_ceiling_budget_cap_fits@bitwuzla",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = 0x7fffffffffffffffffffffffffffffff (signed), 0x7fffffffffffffffffffffffffffffff (unsigned), 170141183460469231731687303715884105727 (decimal)\ngas_limit = -0x1 (signed), 0xffffffffffffffffffffffffffffffff (unsigned), -1 (decimal)\nnetwork_fee_per_gas = 0x1 (signed), 0x1 (unsigned), 1 (decimal)\nheadroom_num = 0x80000000000000000000000000000 (signed), 0x80000000000000000000000000000 (unsigned), 41538374868278621028243970633760768 (decimal)\nheadroom_den = 0x1 (signed), 0x1 (unsigned), 1 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:64:9: 64:62: error: in rb03_budget/b5c6597c::props[0]::check_cap_fits[0]\n[Crux]   MIR assertion at src/props.rs:64:9:\n[Crux]   \tfits(cap, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": false
+    },
+    {
+      "claim": "F2 must violate p2: an unaffordable fee accepted",
+      "class": "TEETH",
+      "evidence": [],
+      "expected": {
+        "strategy": "bitwuzla",
+        "verdict": "Invalid. with a counterexample"
+      },
+      "id": "t3_ceiling_budget_refuses_iff_unaffordable@bitwuzla",
+      "observed": {
+        "counterexamples": [
+          "Model:\nremaining_wei = 0x1 (signed), 0x1 (unsigned), 1 (decimal)\ngas_limit = -0x80000000000000000000000000000000 (signed), 0x80000000000000000000000000000000 (unsigned), -170141183460469231731687303715884105728 (decimal)\nnetwork_fee_per_gas = 0x1 (signed), 0x1 (unsigned), 1 (decimal)\nheadroom_num = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\nheadroom_den = 0x0 (signed), 0x0 (unsigned), 0 (decimal)\n\n",
+          "[Crux] Found counterexample for verification goal\n[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:49:5: 49:72: error: in rb03_budget/b5c6597c::props[0]::check_refuses_iff_unaffordable[0]\n[Crux]   MIR assertion at src/props.rs:49:5:\n[Crux]   \trefused == !fits(i.fee, i.gas_limit, i.remaining)\n[Crux] Overall status: Invalid.\n"
+        ],
+        "errors": [],
+        "overall": "Invalid.",
+        "status": "FAILED"
+      },
+      "outcome": "PASS",
+      "required": false
+    }
+  ],
+  "schema": "btungsten.rb-receipt/1",
+  "solver_shim": {
+    "adds": "--solve-bv-as-int=sum",
+    "binary": "sha256:xb23TLoQP6AC79y7eM6uyIGx7xAxtvWkBxSm5iF_-Q8",
+    "drops": "the script line (set-option :produce-abducts true): it puts cvc5 in SyGuS mode, which refuses integer blasting; abducts are only used with crux-mir --get-abducts, which is not passed",
+    "source": "crates/btungsten-bench/src/bin/rb-cvc5-intblast.rs",
+    "source_sha256": "sha256:WGrIAO0hKvXCSZ5mViUaMujrW4r8ZkQJP0XHzY5DBD4",
+    "wraps": "/home/runner/rbtools/crux/solvers/cvc5"
+  },
+  "trial_history": [
+    "2026-10-08 21:33 UTC: cargo crux-test --lib -- --solver=yices --goal-timeout=300 --timeout=850 --test-filter=props (plan_fee_cap before the split): p1 ok; p2 goal timed out; crux-mir then exited 1 with `user error (Unexpected response from solver while awaiting acknowledgement *** result:\"interrupted\" in response to command ***: (pop))`. A tool error, recorded as INCONCLUSIVE, not as a verdict.",
+    "2026-10-08 21:39 UTC: the same with --solver=bitwuzla: p1 ok; p2 goal timed out; crux-mir exited 1 with `user error (Could not pop from empty entry stack.)`. INCONCLUSIVE (tool error).",
+    "2026-10-08 21:45 UTC: each property alone, bitwuzla, --force-offline-goal-solving, goal timeout 900 s: even p3 (cap >= fee, immediate from .max(fee)) had not closed after 14 min, while the three TEETH variants (whose refusal messages format no integer) were refuted in 28-77 s. A probe formatting one symbolic u128 with format!(\"{x}\") alone did not close in 1,200 s. Diagnosis: plan_fee_cap formatted its symbolic u128 arguments into the refusal message, and u128 Display yields 128-bit division goals. Repair: the arithmetic moved into budget::fee_cap and plan_fee_cap wraps it with the same messages (correspondence-split); the properties are stated on fee_cap.",
+    "2026-10-08 22:00 UTC, on fee_cap, bitwuzla offline: p1, p3, p7, p8, p9, p10 Valid in 4-53 s; p5 Unknown (1 of 14 goals) at a 1,200 s goal timeout. A probe of the bare 128-bit lemma (g != 0 => (r / g < f <=> f * g > r, overflow-safe)) was Unknown at 1,100 s.",
+    "2026-10-08 22:23 UTC: p2, p4, p6 restated over a bounded domain (gas_limit < 2^32, fee < 2^64, remaining < 2^96, headroom < 2^16), bitwuzla offline, goal timeout 1,800 s: each Unknown (1 goal). The bounded restatements were then removed: the full-domain results below subsume them.",
+    "2026-10-08 22:40 UTC: the bare lemma as a 128-bit SMT-LIB problem: cvc5 1.3.1 --solve-bv-as-int=sum unsat in 0.53 s; z3 and cvc5 (default bit-blasting) timed out at 900 s.",
+    "2026-10-08 23:00 UTC: crux-mir --solver=cvc5 through a shim adding --solve-bv-as-int=sum: cvc5 refused (`solveBVAsInt not supported in sygus`) because what4 sends (set-option :produce-abducts true); the shim was changed to drop that line. Then p2, p3, p4, p5, p6 Valid in 9-17 s each over the full domain."
+  ],
+  "verdict": {
+    "counts": {
+      "PROVE-UNIVERSAL INCONCLUSIVE": 4,
+      "PROVE-UNIVERSAL PASS": 16,
+      "TEETH PASS": 6,
+      "VECTOR PASS": 6
+    },
+    "overall": "PASS",
+    "rule": "FAIL if any required row FAIL; INCONCLUSIVE if any required row is INCONCLUSIVE, UNSUPPORTED or NOT-RUN; PASS otherwise. Computed from the rows; no row is a process exit code alone."
+  },
+  "verifier": {
+    "bundle": "crux-mir at crucible 25d0f369 (upstream CI build, GHC 9.10.3, ubuntu-24.04) + mir-json at that commit's submodule pin + Rust nightly-2026-03-21 + what4-solvers snapshot-20260622: the versions crucible's crux-mir-build.yml pins at 25d0f369",
+    "crux_artifact_zip": {
+      "expected": "sha256:AFu_J0z9pJN5VLpj2R-KFwMGuq6jgd2gNOs3bWvOPaY",
+      "matches": true,
+      "observed": "sha256:AFu_J0z9pJN5VLpj2R-KFwMGuq6jgd2gNOs3bWvOPaY",
+      "source": "GaloisInc/crucible Actions run 37835376050, artifact 11575803445 (expires 2027-01-06)"
+    },
+    "crux_mir_binary": "sha256:r6MjKll7vSe3t_mkfS7PzMAPoqMuOpDf3N0KqVk_CvQ",
+    "crux_mir_version": [
+      "[Crux] version: 0.10.0.0.99, crux-mir version: 0.13.0.0.99",
+      "[Crux] Git commit 25d0f3698a96cb8f014911146c02fabdb26f66ff",
+      "[Crux]     branch master (non-committed files present during build)"
+    ],
+    "mir_json": {
+      "expected_rev": "ece1622caf39c9530873f376caa84a5fa6a3ded3",
+      "source_head": "ece1622caf39c9530873f376caa84a5fa6a3ded3",
+      "version": "rustc 1.96.0-nightly (ac7f9ec7d 2026-03-20)\nmir-json 0.1.0 (JSON schema version 13)\nRust toolchain nightly-2026-03-21"
+    },
+    "solver_versions": {
+      "bitwuzla": "0.7.0",
+      "cvc5": "This is cvc5 version 1.3.1 [git ea1b484fa on branch HEAD]",
+      "yices": "Yices 2.6.5",
+      "z3": "Z3 version 4.8.14 - 64 bit - build hashcode df8f9d7dcb8b9f9b3de1072017b7c2b7f63f0af8"
+    },
+    "solvers_zip": {
+      "expected": "sha256:9JM85bxH0aMNSJJmuG36YDgRCraFDJbELDTuEyfQtwU",
+      "matches": true,
+      "observed": "sha256:9JM85bxH0aMNSJJmuG36YDgRCraFDJbELDTuEyfQtwU",
+      "release": "GaloisInc/what4-solvers snapshot-20260622 ubuntu-24.04-X64-bin.zip"
+    },
+    "strategies": {
+      "cross_check": "bitwuzla, offline goal solving",
+      "required": "cvc5-intblast: cvc5 --solve-bv-as-int=sum through rb-cvc5-intblast (src/bin/rb-cvc5-intblast.rs), offline goal solving"
+    },
+    "toolchain": "nightly-2026-03-21"
+  }
+}

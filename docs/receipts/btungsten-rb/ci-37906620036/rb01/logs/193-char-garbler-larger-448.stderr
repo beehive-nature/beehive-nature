@@ -1,0 +1,4 @@
+
+thread '<unnamed>' (7166) panicked at edge/oprf-kmprt/src/lib.rs:211:9:
+assertion failed: points.len() <= npoints
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
