@@ -466,15 +466,19 @@ The estate's own PQ glue, where its review findings lived.
   79 s).
   TEETH: the conditional subtraction claimed for every word, and Barrett
   claimed for every 32-bit word, each refuted with a counterexample.
-  ML-DSA's Barrett reduction (128-bit words) and multiply: the algorithm
-  is PROVEN over the integers (z3, under 0.1 s each): its multiplier
-  8396807 and shift 46 are the macro's constant expressions, and for every
+  ML-DSA's Barrett reduction (128-bit words) and multiply, in three
+  links: (1) SAW: the shipped code, built as release builds run it (no
+  overflow checks; the workspace sets no release override, so this is how
+  bsigner ships), IS the Barrett algorithm with multiplier 8396807 and
+  shift 46, and multiply is that algorithm applied to the product
+  (`pq05-saw/field-release.saw`, about a second each); (2) z3, over the
+  integers: those constants are the macro's own expressions, and for every
   product of two elements x = c q + d the remainder before the one
-  conditional subtraction is in [0, 2q), so the result is d. Tying the
-  shipped code to it is open: its debug build asserts no underflow at
-  x - t q, which is that very bound in 128-bit words, and bitwuzla (on the
-  remainder form and on a division-free form), ABC and yices each ran 30
-  minutes without closing it.
+  conditional subtraction is in [0, 2q), so the result is d; (3) read: at
+  these magnitudes the 128-bit words are the integers (x m < 2^70, and
+  x - t q >= 0 by link 2). The debug build asserts that bound itself at
+  x - t q; tying it in 128-bit words was tried with bitwuzla (two forms),
+  ABC and yices, 30 minutes each, without closing.
 - **ML-KEM NTT, 2026-10-09** (`scripts/btungsten/pq05-ntt-check.sh`, its
   own CI job `saw-ntt`). `pq05-cryptol/KemNtt.cry` is FIPS 203 Algorithms
   9 and 10 with the twiddle table COMPUTED (ζ = 17, ζ^BitRev7(i) mod q,
@@ -513,7 +517,8 @@ The estate's own PQ glue, where its review findings lived.
   a hint with too many ones (the classic `h` weight bug) must fail sigVer.
 - **Base field, 2026-10-09:** see PQ05's base-field entry (one lane, both
   fields): ML-DSA's conditional subtraction, add, sub and neg PROVEN;
-  its Barrett reduction and multiply open.
+  its Barrett reduction and multiply in three links (release-semantics
+  SAW, z3 over the integers, one read no-wrap step), as stated there.
 
 ### PQ07 · SLH-DSA-SHAKE-256f + the succession handover
 
