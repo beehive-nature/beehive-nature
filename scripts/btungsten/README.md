@@ -18,6 +18,47 @@ deletes Foundation or SAW disappears, the workbench migrates to whatever
 formal system replaces them — the ≥1000-year clause applies to bTunGsTeN's
 own tooling first.
 
+## RB — measured Rust execution and assurance with pinned Galois tools (order 2026-10-08)
+
+Three lanes, each run by `rbench <lane>` (`crates/btungsten-bench`, Rust:
+build-copy preparation, subprocess control, wait4 measurement with time and
+memory budgets, verdict recognition, receipts), each writing one receipt
+(`btungsten.rb-receipt/1`) whose verdict is computed from typed result rows.
+Measured receipts and the compatibility and PQ-scope report:
+`docs/receipts/btungsten-rb/`. CI: `.github/workflows/btungsten-rb.yml`
+(fast checks every push; each lane `--quick` when its sources change; the
+full plan by dispatch with `plan=full`).
+
+| lane | what runs | pins |
+|---|---|---|
+| RB01 | GaloisInc/swanky popsicle circuit-PSI cardinality: the upstream example, the provider `rb01-psi/rb01_psi.rs` in the same composition, then one role per process over loopback TCP with role-local inputs and a session handshake, on bounded fixtures; refusal, abort and timeout rows through fake peers and a fault-injecting relay; characterization of upstream behaviour outside the input policy | swanky `409d1ceb`, Rust 1.99.0 (Swanky's toolchain file), Swanky's lockfile and native CPU flags; the provider is one added example file in a build copy outside this workspace |
+| RB02 | GaloisInc/rustcrypto-verification's AES proof: upstream `aes-run.saw` unchanged on the pristine specimen (reproduction), then `rb02-aes/rb02-aes256.saw` and `rb02-teeth-sbox.saw` on the specimen plus `rb02_teeth.rs` (AES-256 proven, three false claims refuted); crates.io `aes 0.8.4` (BNR's lockfile checksum) compared file by file with the verified fork | rustcrypto-verification `52d36ff4`, cryptol-specs `8638495a`; SAW 1.6 + mir-json `8cbf9af1` + nightly-2026-03-21 (the WB001/WB002 bundle) |
+| RB03 | Crux-MIR on `ops/ant-extsig/src/budget.rs` itself (`rb03-budget`, by `#[path]`): `fee_cap` / `plan_fee_cap`, `gas_limit_with_buffer`, `payment_floor_limit`; boundary vectors natively and under Crux; ten properties over the full input domain; two faulty variants that must be convicted | crux-mir at crucible `25d0f369` (upstream CI artifact, digest checked), mir-json `ece1622c`, nightly-2026-03-21, what4-solvers snapshot-20260622 (cvc5 integer blasting through `rb-cvc5-intblast`; bitwuzla as cross-check) |
+
+Receipts: full-plan run 37906620036 at `f43ffdcd3`, one GitHub-hosted
+runner per lane (`docs/receipts/btungsten-rb/ci-37906620036/`; the report
+there carries every table).
+
+| lane | verdict | what the receipt shows |
+|---|---|---|
+| RB01 | PASS: 14 VECTOR, 14 SAMPLED-ADVERSARIAL, 3 MEASUREMENT, 8 CHARACTERIZATION; independent hosts NOT-RUN | the evaluator's output equals the plaintext cardinality in every session, up to 65,536 elements a side (two processes, loopback TCP: 3.3 s median and 1.19 GB to the evaluator on a 4-CPU runner); refusal, abort and timeout rows classified, and not offered as malicious security; six upstream behaviours outside the input policy recorded (five as CHARACTERIZATION rows, one from the source); classical, not post-quantum, base OT |
+| RB02 | PASS: 8 EQUIVALENCE, 3 TEETH, 3 VECTOR | upstream's six AES proofs reproduced unchanged (583 s); AES-256 proven again and three false claims refuted with counterexamples; the verified fork's `src` is byte-identical to the crates.io `aes 0.8.4` BNR locks; BNR on x86_64 with AES-NI runs AES-NI, which no proof here covers |
+| RB03 | PASS: 10 properties proven, 3 TEETH, 6 VECTOR; optional bitwuzla cross-check 6 proven, 4 INCONCLUSIVE, 3 TEETH | `fee_cap`, `plan_fee_cap`, `gas_limit_with_buffer` and `payment_floor_limit` hold their ten properties for every `u128`/`u64` input (p2 assumes a non-zero gas limit, the case p1 covers; cvc5 integer blasting, about 1 to 2 s each); both faulty variants convicted |
+
+Tools layout `rbench` expects with `--tools`. RB02: `<tools>/saw/bin/saw`,
+`<tools>/mirjson-root/bin/cargo-saw-build`, `<tools>/mir-json` (checkout
+with `rlibs`). RB03: `<tools>/crux-mir/<dist>/bin/crux-mir`,
+`<tools>/mir-json-inst/bin`, `<tools>/mir-json` (checkout with `rlibs`),
+`<tools>/solvers`, `<tools>/dl/*.zip`. The CI jobs build exactly these from
+pinned, digest-checked assets.
+
+The one production change: `ops/ant-extsig/src/budget.rs` `plan_fee_cap`
+now delegates its arithmetic to `fee_cap` and only formats the refusal
+message. Formatting a symbolic `u128` produced solver goals that did not
+close. Every call site and message is unchanged, and RB03's
+`correspondence-split` row holds the new function to the old one on 74,536
+inputs.
+
 ## PQ — proofs for the post-quantum stack (founder order 2026-10-08)
 
 Design: `docs/specs/SPEC-BTUNGSTEN-PQ-1.md` (every algorithm: what is proven,

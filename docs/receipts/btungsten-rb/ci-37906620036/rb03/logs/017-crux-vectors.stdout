@@ -1,0 +1,7 @@
+test rb03_budget/3d70d8f6::vectors[0]::gas_buffer_vectors[0]: [0Kok
+test rb03_budget/3d70d8f6::vectors[0]::payment_floor_vectors[0]: [0Kok
+test rb03_budget/3d70d8f6::vectors[0]::plan_fee_cap_vectors[0]: [0Kok
+
+[Crux-MIR] ---- FINAL RESULTS ----
+[Crux] All goals discharged through internal simplification.
+[Crux] Overall status: Valid.
