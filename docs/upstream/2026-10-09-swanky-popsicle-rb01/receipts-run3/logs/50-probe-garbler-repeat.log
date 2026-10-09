@@ -1,0 +1,14 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: one case per run; the process ends after 10 s and keeps one CPU core busy until then.
+It deliberately drives upstream into sessions that do not complete.
+Unresolved: results are samples from one host and one target (x86_64); behaviour elsewhere is untested, and no result here establishes a security property of Swanky.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+garbler-repeat: no result after 10 s
+  evaluator: 1424 RNG draws
+  garbler: 18460672 RNG draws
+  garbler: 4506 samples at
+        <swanky_oprf_kmprt::Sender>::process_oprf_output (oprf-kmprt/src/lib.rs:243:25)
+        <- <swanky_oprf_kmprt::Sender>::send (oprf-kmprt/src/lib.rs:184:18)

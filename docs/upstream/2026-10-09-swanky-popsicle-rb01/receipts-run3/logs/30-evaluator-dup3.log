@@ -1,0 +1,9 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: one case per run; a watchdog ends the process after 60 s, and until then a case that does not complete keeps one CPU core busy.
+It deliberately drives upstream into panics or sessions that do not complete.
+Unresolved: results are samples from one host and one target (x86_64); behaviour elsewhere is untested, and no result here establishes a security property of Swanky.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+dup3: |A| = 1, |B| = 4 (as given), set answer 1: cardinality 3 after 21.171632ms

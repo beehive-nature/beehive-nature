@@ -1,0 +1,23 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: nine set sizes, 20 sessions each, about 15 s on the recorded host; a watchdog ends the process after 600 s.
+It deliberately drives upstream into panics, which it catches and counts.
+Unresolved: results are samples from one host and one target (x86_64); behaviour elsewhere is untested, and no result here establishes a security property of Swanky.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+|B| = 256; 20 sessions per |A|; expected cardinality 128 in every row
+|A| =  128: correct 20, wrong  0, error  0, panic  0
+|A| =  256: correct 20, wrong  0, error  0, panic  0
+|A| =  288: correct 20, wrong  0, error  0, panic  0
+|A| =  320: correct 20, wrong  0, error  0, panic  0
+|A| =  352: correct 18, wrong  0, error  0, panic  2
+         2 session(s) panicked: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  384: correct 14, wrong  0, error  0, panic  6
+         6 session(s) panicked: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  448: correct  0, wrong  0, error  0, panic 20
+        20 session(s) panicked: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  512: correct  0, wrong  0, error  0, panic 20
+        20 session(s) panicked: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| = 1024: correct  0, wrong  0, error  0, panic 20
+        20 session(s) panicked: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints

@@ -1,0 +1,17 @@
+step	command	exit	seconds	log
+00-build-release	cargo build --locked --release -p popsicle --example repro_set_sizes --example repro_repeated_points --example repro_evaluator_inputs --example repro_input_encoding --example probe_spin	0	49.099	logs/00-build-release.log
+01-build-debug	cargo build --locked -p popsicle --example repro_repeated_points	0	1.821	logs/01-build-debug.log
+10-set-sizes	~/rb01-upstream/target/release/examples/repro_set_sizes	0	13.169	logs/10-set-sizes.log
+20-repeated-psi-release	~/rb01-upstream/target/release/examples/repro_repeated_points psi	124	60.085	logs/20-repeated-psi-release.log
+21-repeated-kmprt-release	~/rb01-upstream/target/release/examples/repro_repeated_points kmprt	124	60.043	logs/21-repeated-kmprt-release.log
+22-repeated-kmprt-debug	~/rb01-upstream/target/debug/examples/repro_repeated_points kmprt	101	1.023	logs/22-repeated-kmprt-debug.log
+23-repeated-psi-debug	~/rb01-upstream/target/debug/examples/repro_repeated_points psi	101	1.414	logs/23-repeated-psi-debug.log
+30-evaluator-dup2	~/rb01-upstream/target/release/examples/repro_evaluator_inputs dup2	0	0.113	logs/30-evaluator-dup2.log
+30-evaluator-dup3	~/rb01-upstream/target/release/examples/repro_evaluator_inputs dup3	0	0.111	logs/30-evaluator-dup3.log
+30-evaluator-dup4	~/rb01-upstream/target/release/examples/repro_evaluator_inputs dup4	124	60.037	logs/30-evaluator-dup4.log
+30-evaluator-empty-a	~/rb01-upstream/target/release/examples/repro_evaluator_inputs empty-a	0	0.111	logs/30-evaluator-empty-a.log
+31-evaluator-empty-b	env RUST_BACKTRACE=1 ~/rb01-upstream/target/release/examples/repro_evaluator_inputs empty-b	101	0.110	logs/31-evaluator-empty-b.log
+32-evaluator-empty-both	env RUST_BACKTRACE=1 ~/rb01-upstream/target/release/examples/repro_evaluator_inputs empty-both	101	0.110	logs/32-evaluator-empty-both.log
+40-input-encoding	~/rb01-upstream/target/release/examples/repro_input_encoding	0	0.110	logs/40-input-encoding.log
+50-probe-garbler-repeat	~/rb01-upstream/target/release/examples/probe_spin garbler-repeat	124	10.045	logs/50-probe-garbler-repeat.log
+51-probe-evaluator-repeat4	~/rb01-upstream/target/release/examples/probe_spin evaluator-repeat4	124	10.030	logs/51-probe-evaluator-repeat4.log
