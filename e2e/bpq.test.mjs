@@ -416,3 +416,11 @@ test('Nostr event attestations (SPEC-BPQ-1 section 5b): one verifies, every forg
   assert.equal(r.ok, true);
   assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
 });
+
+test('a Nostr event attestation made by crates/bsigner verifies in bpq.js', () => {
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-rust.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.id, keysOf('A').id);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
+});

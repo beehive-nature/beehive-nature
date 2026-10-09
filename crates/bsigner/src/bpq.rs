@@ -1342,6 +1342,49 @@ mod tests {
         assert_eq!(b64::b64u(&o.bytes), v["plain_b64u"].as_str().unwrap());
     }
 
+    // A Nostr event attestation made here (surfaces/bpq-nostr-rust.json) for
+    // the browser to verify (e2e/bpq.test.mjs). bsigner signs ML-DSA
+    // deterministically, so the pinned file must equal a fresh one byte for
+    // byte. BPQ_WRITE_RUST_NOSTR=1 rewrites the file (a mode).
+    #[test]
+    fn the_pinned_rust_nostr_attestation_is_reproduced() {
+        let v = vectors();
+        let row = v["keys"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["name"] == "A")
+            .unwrap();
+        let prk = root(row["rootFrom"].as_str().unwrap());
+        let event_from = "bpq1 nostr vector event (signed by bsigner)";
+        let event: String = Sha256::digest(event_from.as_bytes())
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect();
+        let fresh = attest_nostr(&prk, row["context"].as_str().unwrap(), &event).unwrap();
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../surfaces/bpq-nostr-rust.json"
+        );
+        if std::env::var("BPQ_WRITE_RUST_NOSTR").is_ok() {
+            // one line: the event id is 64 hex characters, a public constant
+            let doc = json!({
+                "classification": "PUBLIC-CONSTANT",
+                "about": "A Nostr event attestation (SPEC-BPQ-1 section 5b) made by crates/bsigner with vector key A of bpq-vectors.json over the event id sha256 of the eventFrom sentence; surfaces/bpq.js verifies it (SPEC-BTUNGSTEN-PQ-1 PQ13).",
+                "key": "A",
+                "eventFrom": event_from,
+                "attestation": fresh,
+            });
+            std::fs::write(path, doc.to_string() + "\n").unwrap();
+        }
+        let pinned: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        assert_eq!(
+            pinned["attestation"], fresh,
+            "deterministic: the pinned file is a fresh one"
+        );
+        assert!(verify_nostr(&pinned["attestation"]).is_some());
+    }
+
     fn keys_named(v: &Value, name: &str) -> PqKeys {
         let row = v["keys"]
             .as_array()

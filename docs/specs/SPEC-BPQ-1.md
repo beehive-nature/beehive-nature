@@ -219,8 +219,9 @@ lowercase hex characters, `sig` = ML-DSA-65 (pure, empty context) over
 time, kind, tags and content (NIP-01), so the statement names all of them. A verifier refuses
 unless `id` recomputes from `dsa` and `succ`, `event` has that shape, and the signature
 verifies. JS `BPQ.attestNostr` / `BPQ.verifyNostr`, Rust `bpq::attest_nostr` /
-`bpq::verify_nostr`, `bsigner bpq-attest-nostr`, `bsigner bpq-verify`; bsigner verifies the
-browser's (`surfaces/bpq-nostr-vector.json`, made by bpq.js). How a relay carries the statement
+`bpq::verify_nostr`, `bsigner bpq-attest-nostr`, `bsigner bpq-verify`; each verifies the
+other's (`surfaces/bpq-nostr-vector.json` made by bpq.js, `surfaces/bpq-nostr-rust.json` made by
+bsigner, which signs deterministically and reproduces it byte for byte). How a relay carries the statement
 (an event kind and tags beside the attested event, so it is never inside the id it signs) is
 the upstream ask to block/buzz; the label joins the disjoint `bpq1/` set (SPEC-BTUNGSTEN-PQ-1
 PQ04, PQ13).

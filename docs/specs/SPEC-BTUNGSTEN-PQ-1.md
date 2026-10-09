@@ -748,7 +748,9 @@ upstream ask is filed with block/buzz by the upstream-handling seat.
   both test suites: another event, uppercase hex, a short id, another kind
   or version, another id, an empty signature, another key's signature, the
   reserved context. bsigner verifies the browser-made
-  `surfaces/bpq-nostr-vector.json`.
+  `surfaces/bpq-nostr-vector.json`, and the browser verifies the
+  bsigner-made `surfaces/bpq-nostr-rust.json` (which bsigner reproduces
+  byte for byte: deterministic ML-DSA).
 
 ### PQ14 · EcGFp5 Schnorr inside Plonky3 (after PQ10 has its own evidence)
 
