@@ -1,7 +1,7 @@
 name: bTunGsTeN PQ SAW
 
 # SPEC-BTUNGSTEN-PQ-1 lanes proven by SAW over MIR of the shipped Rust. PQ02:
-# the keccak 0.1.6 crate's own round body equal to FIPS 202 for every state,
+# the keccak 0.1.6 and 0.2.2 crates' own round bodies equal to FIPS 202 for every state,
 # at each of the 24 round constants. PQ11: the BIP-39 packing of the recovery words. PQ04:
 # crates/bpq-core/src/layout.rs (labels, nonce, segment lengths, binding
 # validators) equal to its Cryptol spec, its obligations and teeth. PQ03:
@@ -86,7 +86,7 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq11-saw-check.sh saw saw-rustc
-      - name: PQ02 SAW — the shipped Keccak-f[1600] (keccak 0.1.6), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
+      - name: PQ02 SAW — the shipped Keccak-f[1600] (keccak 0.1.6 and 0.2.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq02-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"

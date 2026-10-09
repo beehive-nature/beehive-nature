@@ -1,0 +1,32 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — keccak 0.2.2 (the Keccak under sha3 0.11, which
+// ml-kem 0.3.2 and slh-dsa link), its OWN round body against FIPS 202, one
+// round at a time. pq02_harness022::shipped_round_<k> runs the crate's
+// backends::soft::keccak_p (compiled verbatim from the checksum-verified
+// .crate, see harness022.rs) once with constant RC[k], and is proven equal to
+// keccakRound k for every state, for k = 0..23.
+//
+// What this does not check by machine: that the u64 instantiation
+// `keccak_p::<u64, 24>` runs those 24 bodies in order. That is the crate's
+// loop (`for rc in round_consts`, src/backends/soft.rs:68), read, not proven.
+//
+// usage (from this directory): saw shipped022.saw   with MIR at ../../../target/saw-pq02/
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness022.linked-mir.json";
+
+let shipped_spec ir = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakRound (`ir : Integer) st }});
+};
+
+for (eval_list {{ [0 .. 23] : [24][8] }}) (\t -> do {
+  let ir = eval_int t;
+  let name = str_concat "shipped_round_" (show ir);
+  mir_verify m (str_concat "pq02_harness022::" name) [] false (shipped_spec ir) (w4_unint_bitwuzla []);
+  print (str_concat "PQ02-SAW PROVEN keccak022." name);
+});
