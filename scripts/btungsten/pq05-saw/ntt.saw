@@ -1,0 +1,75 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — ML-KEM's NTT and inverse NTT as ml-kem 0.3.2 implements them,
+// against FIPS 203 Algorithms 9 and 10 (pq05-cryptol/KemNtt.cry), for every
+// polynomial with coefficients in the field.
+//
+// First the Elem<BaseField> add, sub and mul instances ml-kem calls are
+// proven equal to Field.cry (with their results below q); then those
+// proofs stand in for the calls, and the NTT is proven equal to the spec
+// with kemAdd, kemSub and kemMul uninterpreted, so the solver matches the
+// 896 butterflies' structure: the same operations on the same operands in
+// the same order, with the same twiddle constants (the crate's table, a
+// const, against the spec's computed one).
+//
+// usage (from this directory): saw ntt.saw   with MIR and names.saw at ../../../target/saw-pq05-ntt/
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+import "../pq05-cryptol/KemNtt.cry";
+include "../../../target/saw-pq05-ntt/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq05-ntt/pq05_ntt.linked-mir.json";
+let proven name = print (str_concat "PQ05-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+let elem_adt = mir_find_mangled_adt m elem_adt_name;
+let poly_adt = mir_find_mangled_adt m poly_adt_name;
+let npoly_adt = mir_find_mangled_adt m npoly_adt_name;
+let arr_adt = mir_find_mangled_adt m arr_adt_name;
+let elem_ty = mir_adt elem_adt;
+let elem v = mir_struct_value elem_adt [mir_term v];
+
+let binop name label post = do {
+  ov <- mir_verify m name [] false (do {
+    a <- mir_fresh_var "a" mir_u16;
+    b <- mir_fresh_var "b" mir_u16;
+    mir_precond {{ a < 3329 /\ b < 3329 }};
+    mir_execute_func [elem a, elem b];
+    let r = post a b;
+    mir_return (elem r);
+    mir_postcond {{ r < 3329 }};
+  }) bw;
+  proven label;
+  return ov;
+};
+ov_add <- binop add_name "ml-kem Elem add" (\a b -> {{ kemAdd a b }});
+ov_sub <- binop sub_name "ml-kem Elem sub" (\a b -> {{ kemSub a b }});
+ov_mul <- binop mul_name "ml-kem Elem mul" (\a b -> {{ kemMul a b }});
+
+let poly_of adt f = do {
+  xs <- for (eval_list {{ [0 .. 255] : [256][8] }}) (\i -> return (elem {{ f @ i }}));
+  return (mir_struct_value adt [mir_struct_value arr_adt [mir_array_value elem_ty xs]]);
+};
+
+mir_verify m ntt_name [ov_add, ov_sub, ov_mul] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u16);
+  mir_precond {{ all (\x -> x < 3329) f }};
+  pv <- poly_of poly_adt f;
+  p <- mir_alloc (mir_adt poly_adt);
+  mir_points_to p pv;
+  mir_execute_func [p];
+  rv <- poly_of npoly_adt {{ ntt f }};
+  mir_return rv;
+}) (w4_unint_bitwuzla ["kemAdd", "kemSub", "kemMul"]);
+proven "ml-kem ntt (FIPS 203 Algorithm 9)";
+
+mir_verify m ntt_inverse_name [ov_add, ov_sub, ov_mul] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u16);
+  mir_precond {{ all (\x -> x < 3329) f }};
+  pv <- poly_of npoly_adt f;
+  p <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to p pv;
+  mir_execute_func [p];
+  rv <- poly_of poly_adt {{ nttInverse f }};
+  mir_return rv;
+}) (w4_unint_bitwuzla ["kemAdd", "kemSub", "kemMul"]);
+proven "ml-kem ntt_inverse (FIPS 203 Algorithm 10)";

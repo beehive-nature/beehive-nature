@@ -43,3 +43,28 @@ dsaNeg a = if a == 0 then 0 else 8380417 - a
 
 dsaMul : [32] -> [32] -> [32]
 dsaMul a b = dsaMod ((zext a) * (zext b))
+
+// ---- ML-DSA's Barrett reduction, over the integers ---------------------------
+// module-lattice's barrett_reduce for q = 8380417: shift s = 2 (ilog2 q + 1)
+// = 46, multiplier m = floor(2^46 / q) = 8396807, then one conditional
+// subtraction. The shipped code in 128-bit words is not yet proven equal to
+// this: its debug build asserts no underflow at x - t q, which is this very
+// bound, and no bitvector solver closed it in 30 minutes. These two
+// properties prove the algorithm and its constants.
+
+// for every x = c q + d with d < q and x <= (q-1)^2, t = floor(x m / 2^46)
+// leaves x - t q in [0, 2q): one conditional subtraction then gives d,
+// the remainder (z3, linear integer arithmetic with constants)
+dsaBarrettRange : Integer -> Integer -> Bit
+property dsaBarrettRange c d =
+  (0 <= c /\ c <= 8380415 /\ 0 <= d /\ d < 8380417 /\ c * 8380417 + d <= 8380416 * 8380416) ==>
+    (0 <= r /\ r < 2 * 8380417)
+  where
+    x = c * 8380417 + d
+    t = (x * 8396807) / 2 ^^ 46
+    r = x - t * 8380417
+
+// the multiplier and shift are the macro's own constant expressions
+dsaBarrettConstants : Bit
+property dsaBarrettConstants = (8396807 == (2 ^^ 46) / (8380417 : Integer)) /\ (46 == 2 * (22 + 1 : Integer)) /\
+  (2 ^^ 22 <= (8380417 : Integer)) /\ ((8380417 : Integer) < 2 ^^ 23)

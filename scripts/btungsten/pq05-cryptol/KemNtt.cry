@@ -1,0 +1,103 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — ML-KEM's number-theoretic transform as FIPS 203
+// defines it: Algorithm 9 (NTT), Algorithm 10 (NTT^-1), over the field of
+// Field.cry (q = 3329).
+//
+// The constants are COMPUTED, not transcribed: ζ = 17 (§4.3), the table is
+// ζ^BitRev7(i) mod q (the powers by repeated multiplication on words wide
+// enough not to wrap), and 3303 = 128^-1 mod q is checked by a closed term.
+// The closed terms at the bottom hold the table to FIPS 203 Appendix A's
+// first and last entries. The loops follow the algorithms' order exactly
+// (layer by layer, group by group, butterfly by butterfly), with the field
+// operations as Field.cry's functions, so a proof can keep those
+// uninterpreted and match the shipped code's structure.
+module KemNtt where
+
+import Field
+
+// ---- constants -------------------------------------------------------------
+
+bitRev7 : [7] -> [7]
+bitRev7 x = reverse x
+
+// 17^e mod 3329
+zetaPow : [7] -> [16]
+zetaPow e = drop (foldl step (1 : [32]) [1 .. 127 : [7]])
+  where
+    step acc i = if i <= e then (acc * 17) % 3329 else acc
+
+zetas : [128][16]
+zetas = [ zetaPow (bitRev7 i) | i <- [0 .. 127 : [7]] ]
+
+// ---- Algorithm 9 -------------------------------------------------------------
+
+// one butterfly of a forward layer at j, half-length len, twiddle z
+fwd : [16] -> [8] -> [8] -> [256][16] -> [256][16]
+fwd z len j f = update (update f (j + len) (kemSub (f @ j) t)) j (kemAdd (f @ j) t)
+  where
+    t = kemMul z (f @ (j + len))
+
+// one forward layer: groups of 2 len, the k-th twiddle of table z onwards
+fwdLayer : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 8 >= width len, 8 >= width groups)
+         => [128][16] -> [8] -> [256][16] -> [256][16]
+fwdLayer z k f = foldl grp f [0 .. groups - 1 : [8]]
+  where
+    grp g i = foldl (\h j -> fwd (z @ (k + i)) `len (start + j) h) g [0 .. len - 1 : [8]]
+      where
+        start = 2 * `len * i
+
+// Algorithm 9 with twiddle table z (the teeth bend one entry)
+nttWith : [128][16] -> [256][16] -> [256][16]
+nttWith z f = l7
+  where
+    l1 = fwdLayer`{128, 1} z 1 f
+    l2 = fwdLayer`{64, 2} z 2 l1
+    l3 = fwdLayer`{32, 4} z 4 l2
+    l4 = fwdLayer`{16, 8} z 8 l3
+    l5 = fwdLayer`{8, 16} z 16 l4
+    l6 = fwdLayer`{4, 32} z 32 l5
+    l7 = fwdLayer`{2, 64} z 64 l6
+
+ntt : [256][16] -> [256][16]
+ntt = nttWith zetas
+
+// ---- Algorithm 10 ------------------------------------------------------------
+
+inv : [16] -> [8] -> [8] -> [256][16] -> [256][16]
+inv z len j f = update (update f j (kemAdd t (f @ (j + len)))) (j + len) (kemMul z (kemSub (f @ (j + len)) t))
+  where
+    t = f @ j
+
+// one inverse layer: the k-th twiddle downwards
+invLayer : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 8 >= width len, 8 >= width groups)
+         => [8] -> [256][16] -> [256][16]
+invLayer k f = foldl grp f [0 .. groups - 1 : [8]]
+  where
+    grp g i = foldl (\h j -> inv (zetas @ (k - i)) `len (start + j) h) g [0 .. len - 1 : [8]]
+      where
+        start = 2 * `len * i
+
+nttInverse : [256][16] -> [256][16]
+nttInverse f = [ kemMul 3303 x | x <- l7 ]
+  where
+    l1 = invLayer`{2, 64} 127 f
+    l2 = invLayer`{4, 32} 63 l1
+    l3 = invLayer`{8, 16} 31 l2
+    l4 = invLayer`{16, 8} 15 l3
+    l5 = invLayer`{32, 4} 7 l4
+    l6 = invLayer`{64, 2} 3 l5
+    l7 = invLayer`{128, 1} 1 l6
+
+// ---- closed checks -----------------------------------------------------------
+
+zetasMatchAppendixA : Bit
+property zetasMatchAppendixA =
+  (take`{8} zetas == [1, 1729, 2580, 3289, 2642, 630, 1897, 848]) /\ (zetas @ (127 : [7]) == 2154)
+
+inverseOf128 : Bit
+property inverseOf128 = kemMul 128 3303 == 1
+
+// NTT^-1 undoes NTT on a fixed polynomial (the coefficients 0, 1, ..., 255)
+inverseUndoesForward : Bit
+property inverseUndoesForward = nttInverse (ntt f) == f
+  where
+    f = [ zext i | i <- [0 .. 255 : [8]] ] : [256][16]

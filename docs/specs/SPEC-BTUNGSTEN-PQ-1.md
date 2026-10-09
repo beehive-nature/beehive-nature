@@ -466,8 +466,33 @@ The estate's own PQ glue, where its review findings lived.
   79 s).
   TEETH: the conditional subtraction claimed for every word, and Barrett
   claimed for every 32-bit word, each refuted with a counterexample.
-  ML-DSA's Barrett (a 128-bit product) and multiply are open: bitwuzla,
-  ABC and yices are each past 15 minutes on it.
+  ML-DSA's Barrett reduction (128-bit words) and multiply: the algorithm
+  is PROVEN over the integers (z3, under 0.1 s each): its multiplier
+  8396807 and shift 46 are the macro's constant expressions, and for every
+  product of two elements x = c q + d the remainder before the one
+  conditional subtraction is in [0, 2q), so the result is d. Tying the
+  shipped code to it is open: its debug build asserts no underflow at
+  x - t q, which is that very bound in 128-bit words, and bitwuzla (on the
+  remainder form and on a division-free form), ABC and yices each ran 30
+  minutes without closing it.
+- **ML-KEM NTT, 2026-10-09** (`scripts/btungsten/pq05-ntt-check.sh`, its
+  own CI job `saw-ntt`). `pq05-cryptol/KemNtt.cry` is FIPS 203 Algorithms
+  9 and 10 with the twiddle table COMPUTED (ζ = 17, ζ^BitRev7(i) mod q,
+  held to Appendix A's entries) and 128^-1 = 3303 checked; NTT^-1 undoes
+  NTT on a fixed polynomial. `pq05-ntt/` builds ml-kem 0.3.2 itself under a
+  lockfile whose every package is the workspace's version and checksum;
+  SAW addresses ml-kem's crate-private `<Polynomial as Ntt>::ntt` and
+  `<NttPolynomial as NttInverse>::ntt_inverse` by MIR name
+  (`pq05-ntt-names.py`). PROVEN: ml-kem's `Elem` add, sub and mul equal
+  Field.cry with results below q; then, those proofs standing in for the
+  calls and the field operations uninterpreted, the NTT equals Algorithm 9
+  and the inverse equals Algorithm 10 (its final scaling by 3303
+  included) for every polynomial with coefficients in the field: every
+  one of the 896 butterflies the same operations on the same operands in
+  the same order, with the crate's twiddle table (a const) equal to the
+  computed one. Locally 26 and 46 minutes. TEETH: one twiddle factor bent
+  must be refuted. Not yet: ML-DSA's NTT (the same method, waiting on its
+  multiply above) and ML-KEM's base-case multiply.
 
 ### PQ06 · ML-DSA (44/65/87)
 

@@ -14,12 +14,19 @@
 #                pq05-cryptol/Field.cry for every input in the field.
 #   TEETH        field-teeth-small.saw and field-teeth-range.saw drop a
 #                precondition and MUST fail with a counterexample.
+#   SPEC-CHECK   Field.cry's ML-DSA Barrett theorems (z3, over the
+#                integers): its multiplier and shift are the macro's constant
+#                expressions, and for every product of two elements the
+#                algorithm's remainder before its one subtraction is in
+#                [0, 2q). (The shipped 128-bit code is not yet tied to it.)
 #
-# usage: pq05-field-check.sh <saw>
+# usage: pq05-field-check.sh <saw> <cryptol>
 set -eu
 
-SAW="${1:?usage: pq05-field-check.sh <saw>}"
+SAW="${1:?usage: pq05-field-check.sh <saw> <cryptol>}"
+CRYPTOL="${2:?usage: pq05-field-check.sh <saw> <cryptol>}"
 ROOT=$(pwd)
+CRYDIR="$ROOT/scripts/btungsten/pq05-cryptol"
 SAWDIR="$ROOT/scripts/btungsten/pq05-saw"
 HARNESS="$ROOT/scripts/btungsten/pq05-field"
 OUT="$ROOT/target/saw-pq05-field"
@@ -106,6 +113,17 @@ run_teeth_verify() {
   say "SAW-TEETH $_script: PASS (counterexample found, as required)"
 }
 
+# ---- SPEC-CHECK --------------------------------------------------------------------
+say "== SPEC-CHECK PQ05: Field.cry, ML-DSA Barrett over the integers =="
+for prop in dsaBarrettConstants dsaBarrettRange; do
+  _out=$(cd "$CRYDIR" && "$CRYPTOL" -c ":load Field.cry" -c ":prove $prop" 2>&1) || {
+    say "SPEC-CHECK $prop: ABORTED. Output:"; say "$_out"; exit 1; }
+  if ! say "$_out" | grep -aq 'Q.E.D.'; then
+    say "SPEC-CHECK $prop: FAIL. Output:"; say "$_out"; exit 1
+  fi
+  say "SPEC-CHECK $prop: PASS"
+done
+
 # ---- EQUIVALENCE + TEETH -------------------------------------------------------------
 run_required field.saw kem_small kem_barrett "kem_barrett (sums of two products)" kem_add kem_sub kem_neg kem_mul \
   dsa_small dsa_add dsa_sub dsa_neg
@@ -113,4 +131,4 @@ run_teeth_verify field-teeth-small.saw
 run_teeth_verify field-teeth-range.saw
 
 say "== SAW PQ05 field: ladder state =="
-say "PIN: PASS (3 crates + both define_field! invocations) | BUILD: PASS | EQUIVALENCE: PROVEN (11) | TEETH: PASS (2)"
+say "PIN: PASS (3 crates + both define_field! invocations) | BUILD: PASS | SPEC-CHECK: PASS (2) | EQUIVALENCE: PROVEN (11) | TEETH: PASS (2)"
