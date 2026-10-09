@@ -481,6 +481,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "bpq-core"
+version = "0.1.0"
+
+[[package]]
 name = "bs58"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -495,6 +499,9 @@ version = "0.1.0"
 dependencies = [
  "aes-gcm",
  "bech32",
+ "bpq-core",
+ "fips205",
+ "getrandom 0.2.17",
  "hkdf",
  "ml-dsa",
  "ml-kem",

@@ -1,7 +1,9 @@
 // The one-press "sign the law" path, end to end without a browser: a receipt shaped like the
 // wallet's (surfaces/wallet.html#pq-law) goes through scripts/apply-law-signatures.mjs into a
 // throwaway copy of the repo, and scripts/verify-bpq-signatures.mjs then reads it: ok while the
-// files are unchanged, STALE (not failed) after a signed file changes, FAIL for a forged signature.
+// files are unchanged; FAIL as STALE after a signed file changes (SPEC-BTUNGSTEN-PQ-1 §PQ08, a
+// current signature per law file); FAIL for a forged signature, a missing one, a law file left
+// out of docs/PQ-LAW.json, or a list that names nothing.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -35,7 +37,7 @@ function receipt(keys, at) {
 }
 const run = (dir, script, ...a) => spawnSync(process.execPath, [join(dir, 'scripts', script), ...a], { cwd: dir, encoding: 'utf8' });
 
-test('a wallet receipt becomes committed signatures that CI accepts, then reports a later edit as STALE', () => {
+test('a wallet receipt becomes committed signatures that CI accepts, then fails a later edit as STALE', () => {
   const k = B.keys(new Uint8Array(32).fill(0x5a), 'pq:lawtest');   // TEST-ONLY root, public
   const { dir, git } = sandbox();
   try {
@@ -49,13 +51,45 @@ test('a wallet receipt becomes committed signatures that CI accepts, then report
     git('add', '-A');
     const v = run(dir, 'verify-bpq-signatures.mjs');
     assert.equal(v.status, 0, v.stderr);
-    assert.match(v.stdout, new RegExp(`bpq signatures: ${LAW.length} of ${LAW.length} verify, signers pinned \\(1\\)`));
+    assert.match(v.stdout, new RegExp(`bpq signatures: ${LAW.length} of ${LAW.length} verify, signers pinned \\(1\\); law files: ${LAW.length} of ${LAW.length} current`));
     appendFileSync(join(dir, LAW[0]), '\nan agent edit after signing\n');
     const s = run(dir, 'verify-bpq-signatures.mjs');
-    assert.equal(s.status, 0, 'a changed file is reported, never a failed build: ' + s.stderr);
-    assert.match(s.stdout, new RegExp(`STALE ${LAW[0].replace(/[.]/g, '\\.')}: signed by ${k.id}`));
-    assert.match(s.stdout, new RegExp(`${LAW.length - 1} of ${LAW.length} verify, 1 stale`));
+    assert.equal(s.status, 1, 'a changed law file fails until it is signed again');
+    assert.match(s.stderr, new RegExp(`FAIL STALE ${LAW[0].replace(/[.]/g, '\\.')}: signed by ${k.id}`));
+    assert.match(s.stdout, new RegExp(`${LAW.length - 1} of ${LAW.length} verify, signers pinned \\(1\\); law files: ${LAW.length - 1} of ${LAW.length} current`));
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('a law file that is unsigned, unlisted, or a list that names nothing fails the build', () => {
+  const k = B.keys(new Uint8Array(32).fill(0x5a), 'pq:lawtest');   // TEST-ONLY root, public
+  const signed = () => {
+    const s = sandbox();
+    writeFileSync(join(s.dir, 'receipt.json'), JSON.stringify(receipt(k, '2026-10-04T12:00:00.000Z')));
+    assert.equal(run(s.dir, 'apply-law-signatures.mjs', 'receipt.json').status, 0);
+    s.git('add', '-A');
+    assert.equal(run(s.dir, 'verify-bpq-signatures.mjs').status, 0, 'the signed sandbox starts green');
+    return s;
+  };
+  const cases = {
+    unsigned: ({ dir, git }) => { git('rm', '-q', '-f', LAW[1] + '.bpqsig.json'); return new RegExp(`${LAW[1].replace(/[.]/g, '\\.')} is a law file with no signature`); },
+    unlisted: ({ dir, git }) => {
+      writeFileSync(join(dir, 'docs', 'RULINGS-2099-01-01.md'), '# a ruling nobody signed\n'); git('add', '-A');
+      return /docs\/RULINGS-2099-01-01\.md is a law file missing from docs\/PQ-LAW\.json/;
+    },
+    empty: ({ dir, git }) => {
+      writeFileSync(join(dir, 'docs', 'PQ-LAW.json'), JSON.stringify({ files: [] })); git('add', '-A');
+      return /names no law file/;
+    },
+  };
+  for (const [name, spoil] of Object.entries(cases)) {
+    const s = signed();
+    try {
+      const want = spoil(s);
+      const r = run(s.dir, 'verify-bpq-signatures.mjs');
+      assert.equal(r.status, 1, name + ' must fail the build');
+      assert.match(r.stderr, want, name);
+    } finally { rmSync(s.dir, { recursive: true, force: true }); }
+  }
 });
 
 test('nothing is written for a receipt with a forged, foreign or out-of-list signature', () => {

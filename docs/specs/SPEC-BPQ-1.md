@@ -1,7 +1,9 @@
 # SPEC-BPQ-1 — post-quantum keys and sealed objects
 
 Status: IMPLEMENTED. JS: `surfaces/bpq.js` over `surfaces/onboarding/vendor/bpq-lib.js`.
-Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`).
+Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`;
+seals only "only me", one `self` slot, which is how bsigner keeps its own keys at rest — the pinned
+`surfaces/bpq-rust-sealed.json` must open in both implementations).
 Vectors both must pass: `surfaces/bpq-vectors.json` (`node scripts/build-bpq-vectors.mjs --check`,
 `cargo test -p bsigner bpq`).
 
@@ -41,6 +43,22 @@ via `onboarding/bzdid-key.js`) and a context string. In the wallet a persona con
 | succession | `BDID-v1/slh-dsa-shake-256f-succession` | 96 | SLH-DSA-SHAKE-256f seed (FIPS 205) |
 
 No label is a byte-prefix of another bzDiD label, so label ‖ context never collides.
+
+Context rule (2026-10-08, SPEC-BTUNGSTEN-PQ-1 PQ03). A context is 1 to 64 printable ASCII
+characters (0x20 to 0x7e); `keys`, `successionKeys` (JS) and `bpq::keys`, `bpq::succession_keys`
+(Rust) refuse any other with code `context_rule`. The rule exists for the classical secp256k1
+record key (`BDID-v1/secp256k1-record-key`, `onboarding/bzdid-key.js` `deriveK1Key`), the one
+derivation that appends a retry counter byte when a derived scalar is out of range: without it,
+context `"a"` at counter 1 and context `"a\x01"` at counter 0 have the same HKDF info, so two
+derivations would share a key. `deriveK1Key` holds the same rule and caps the counter at 31, so
+a counter byte is never a printable byte. Every context the wallet builds (`pq:<name>` with a
+printable name of at most 48, `<rail>:<soul>`, `nostr:bnr-devices`, `root`) is inside the rule,
+so no existing key changes; `a1:<agent>` (contracts/vending/tool/a1.mjs) is inside it for any
+printable agent name of at most 61 characters. `crates/bpq-core` builds every info string bsigner derives from;
+SAW proves it equal to `scripts/btungsten/pq03-cryptol/BpqDerive.cry` and proves there that two
+different admitted (label, context, counter) triples never share an info string, over all seven
+labels HKDF-Expand takes from the masterPrk: the four above plus `BDID-v1/ed25519-record-key`,
+`BDID-v1/secp256k1-record-key` and `BDID-v1/persona-nullifier`.
 
 Phrase-only vault (founder ruling 2026-10-04). The reserved context string `root` (no `pq:`
 prefix, so it never equals a wallet persona context, which always starts `pq:`) gives the
@@ -112,10 +130,14 @@ is not signed: files get renamed, their bytes do not. In a repository the signat
 file as `<file>.bpqsig.json`; `node scripts/verify-bpq-signatures.mjs` checks every one in CI and
 `bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is the mechanism by
 which rulings, releases and archive manifests can carry an authorship proof that outlives Ed25519
-and the hosting account. It is not in force yet: no tracked file carries a `.bpqsig.json` (the
-script reports 0 of 0), and while `docs/PQ-SIGNERS.json` does not exist a signature that verifies
-proves only that some `bzpq1` key signed, not whose. Enforcement begins once
-`docs/PQ-SIGNERS.json` lists a signer.
+and the hosting account. In force for the law files (signed since 2026-10-05; enforced as below
+since 2026-10-08): `docs/PQ-LAW.json` names
+them, `docs/PQ-SIGNERS.json` pins the signer, and CI fails any law file whose signature is missing,
+from an unpinned key, or over an earlier version of the file (STALE), and any law-shaped file
+(`docs/CONSTITUTION.md`, `ORDERS-1.md`, `docs/RULINGS-*.md`) left out of the list. Both
+implementations run it: the script above (noble) and `scripts/verify-law-signatures-rust.sh`
+(bsigner). A changed law file turns green again only through the one-press "sign the law"
+(`surfaces/wallet.html#pq-law`).
 
 ## 4 · Sealed object (`bpq1`)
 
@@ -171,6 +193,19 @@ statement naming the new key set and its own next commitment. The forger of the 
 cannot do this: the succession public key was never published. SLH-DSA rests on hash security
 only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 
+Handover v1 (2026-10-08): `{bpq:1, kind:"handover", from, to, at, dsa, slh, card, sig}`.
+`from` is the retired id and `dsa` its ML-DSA-65 public key; `slh` is the revealed
+SLH-DSA-SHAKE-256f public key (64 B, the succession key derived under `from`'s context); `card`
+is the new key set's §3 card, which carries its own next succession commitment, and `to` is
+its id. `sig` = SLH-DSA-SHAKE-256f (pure, empty context, hedged) over
+`"bpq1/handover" ‖ SHA3-256(UTF-8(from ‖ "\n" ‖ to ‖ "\n" ‖ at))`. A verifier refuses unless
+`from` recomputes from `dsa` and `SHA3-256("bpq1/succession" ‖ slh)`, the card verifies and its
+id is `to`, `to` is not `from`, `at` has the §3 shape, and the signature verifies under `slh`.
+Rust only so far: `bpq::handover`, `bpq::verify_handover`, `bsigner bpq-handover`, and
+`bsigner bpq-verify` for a file of kind `handover`; the browser neither makes nor checks one
+yet. A handover is a statement, not a state: refusing a second handover from the same `from`
+(its succession key is spent once revealed) is the job of whoever keeps the log.
+
 ## 6 · Agility rules
 
 - Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot
@@ -181,10 +216,10 @@ only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 - Assurance, stated plainly: @noble/post-quantum 0.7.1 (self-audited) and RustCrypto ml-dsa 0.1.1 /
   ml-kem 0.3.2 (unaudited) agree byte for byte on the vectors; that is a cross-check between two
   implementations, not an audit. JS signing is not claimed to be constant-time.
-- Not cross-checked: the SLH-DSA-SHAKE-256f succession key (§2, §5). Only the JS side derives
-  it; the Rust twin takes the succession commitment as an input and never derives the key, so
-  the vectors' `slhPublicKey` has one implementation behind it, and `surfaces/pq-kat.json`
-  carries no SLH-DSA known-answer vectors.
+- Cross-checked since 2026-10-08: the SLH-DSA-SHAKE-256f succession key (§2, §5). The Rust twin
+  derives it (`bpq::succession_keys`, fips205 0.4.1, SK.seed ‖ SK.prf ‖ PK.seed in that order)
+  and reproduces the browser's commitment and id on every `surfaces/bpq-vectors.json` row; every
+  ACVP SLH-DSA-SHAKE-256f case runs in `crates/btungsten-pq` on two Rust implementations.
 
 ## 7 · Hardware signer (Safe 7, T3W1)
 

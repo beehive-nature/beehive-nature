@@ -28,6 +28,75 @@ inherited, tested; the teeth each gate must catch; lanes PQ00-PQ15). CI:
 |---|---|---|
 | PQ00 teeth | `crates/btungsten-teeth` — T-VACUOUS and T-TRUNCATE, no dependencies; `pq00-teeth-vortex.sh` + `teeth-vortex/pq00_teeth.rs` run them against distributed-lab/vortex-rs at `3c0affd9320a` in a build copy outside the workspace | RUNS — 9 tests (positive controls on SHA3-256 and SHAKE256-96, planted prefix hash convicted at len 257 pos 256, planted count-free verifier convicted). Against vortex: T-VACUOUS CONVICTS `verify()` twice (zero openings; zero openings with a FALSE evaluation claim), T-TRUNCATE CONVICTS `RSis::hash()` (collision at len 257, pos 256). `cargo tree -i vortex` on the workspace: no such package |
 | PQ01 vectors | `crates/btungsten-pq` — `pq-kat` runs every NIST ACVP case at ACVP-Server `975de31eb83d` (`kat-manifest.json`: 20 files pinned by size and SHA-256, fetched, never committed) for ML-KEM-512/768/1024 (keyGen, encapsulation, decapsulation expanded and seed, both key checks), ML-DSA-44/65/87 (keyGen; sigGen external-pure and internal, deterministic and hedged, expanded and seed keys; sigVer; external μ where exposed) and SLH-DSA-SHAKE-256f (keyGen, sigGen external-pure and internal, deterministic and hedged, sigVer), each on two implementations: RustCrypto ml-kem 0.3.2 / ml-dsa 0.1.1 (what bsigner links) and libcrux 0.0.11; RustCrypto slh-dsa 0.2.0-rc.5 and fips205 0.4.1 | Local receipt 2026-10-08 (WSL x86_64, 57 s, 75 MB): **2,729 executed, 2,729 passed, 0 failed; 86 required (set, function, implementation) rows, 0 missing**; 137 TEETH controls (one input byte flipped per group must change the answer or be refused) all held. NOT RUN, printed with reasons: HashML-DSA / HashSLH-DSA pre-hash groups (unused by the estate), external-μ on libcrux (no μ interface) and hedged μ on RustCrypto (randomness only through an RNG), the eleven SLH-DSA parameter sets the estate does not use. Was 17 cases (ML-DSA-65 + ML-KEM-768 only, `surfaces/pq-kat.json`); the two pins agree on the eight files they share (unit test) |
+| PQ03 derivation | `crates/bpq-core` (no_std, no dependencies; bsigner builds every HKDF info string through it) + `pq03-cryptol/BpqDerive.cry` + `pq03-saw/` + `pq03-saw-check.sh`; CI `.github/workflows/btungsten-pq-saw.yml` | Local receipt 2026-10-08 (WSL, SAW 1.6, bitwuzla, 93 s): BUILD PASS; EQUIVALENCE **PROVEN** `context_ok`, `args_ok`, `info_len`, `info_byte`, `info` (bpq-core == spec, every input); PROVE-UNIVERSAL **PROVEN** `labelsPrefixFree`, `infoFits`, `infoPadded`, `rootIsolated`, `deriveInjective` (two different admitted (label, context, counter) triples never share an info string, all seven masterPrk labels); TEETH 4 of 4 refuted with counterexamples (DEL admitted; a prefix label; control bytes admitted; counter cap 0x7e). FINDING repaired: contexts were unrestricted, so the K1 retry counter could collide with a context's last byte; the context rule (1 to 64 printable ASCII) and a K1 counter cap of 31 now hold in bpq-core, bpq.js and bzdid-key.js (SPEC-BPQ-1 §2), refusing no context the wallet builds. DIFFERENTIAL: `surfaces/bzdid-derive-vectors.json`, 9 rows over every label from the browser's own functions, reproduced by bsigner; KAT: HKDF-SHA256 RFC 5869 A.1-A.3. bsigner 66 of 66, bpq-core 5 of 5, e2e/bpq 20 of 20. Not yet: SHA-256 compression and HMAC/HKDF at L4 |
+
+### PQ10 — one Plonky3 proof of the receipt count statement (2026-10-08)
+
+`crates/btungsten-p3count` (its own workspace; Plonky3 git pin
+`eab7f0e3662500cde47cb0b6dad61afc99e3deac`, 0.8.0). The claim is
+count.circom's; the commitment is Poseidon2 over KoalaBear in the same full
+tree; `fp` is three range-checked limbs (exactly 64 bits; the circuit took any
+BN254 scalar). The AIR is a post-order stack machine, one permutation per
+row, upstream's Poseidon2 constraints run through upstream's `SubAirBuilder`,
+the tree schedule fixed in preprocessed columns. Config: `HidingFriPcs` with
+`MerkleTreeHidingMmcs` on both sides (Keccak-256), OS-entropy blinding, a
+compile-time `ZK == true` assertion, the instance label (statement, n,
+members) seeding the Keccak transcript. Parameters chosen by p3-security
+(`p3count-scan`): log_blowup 3, 104 queries, 16 query-PoW bits.
+
+Local receipts 2026-10-08 (WSL x86_64, 8 cores, another lane's SAW job
+running beside it):
+
+| | PLONK/BN254 (count.circom) | Plonky3 hiding STARK |
+|---|---|---|
+| security figure | pairing-based, classical (Shor forges) | proven 102 bits (p3-security, unique-decoding) at n = 64, 1,024 and 16,384; conjectured 111 / 108 / 104, a conjecture |
+| ceremony | Hermez pot17 (54 contributions + beacon) | none (transparent) |
+| proof, n = 64 | 768 B (24 words) | ~340 KB |
+| proof, n = 1,024 / 16,384 | not run in this lane | ~484 KB / ~720 KB |
+| prove, n = 64 / 1,024 / 16,384 | not measured in this lane (1k/10k NOT RUN) | 0.55-0.64 s / 2.2-2.4 s / 39-64 s, peak 13 MB / 80 MB / 1.3 GB |
+| verify | 10.6-12.1 ms CPU billed on jungle4 (on chain) | 11-49 ms / 17-19 ms / 25-29 ms native; on chain NOT RUN |
+
+- **FORGERY**: `p3count forgery` (n = 64, asymmetric cohort): the honest
+  control verifies; refused: wrong count, reversed claim, non-binary kind,
+  wrong root, skipped receipt, nonzero pad, two public-value swaps, the
+  39-member key, 256 one-bit flips across the 341,369-byte proof (256 of 256
+  refused), truncation, T-VACUOUS (no commit-phase openings; zero queries
+  opened, 13 arrays emptied), and the proof checked under another instance
+  label.
+- **LEAK, v1** (`leak/PREREGISTERED-STARK.md`, one run): **FAIL** on the
+  hiding config: F0 passed (no shared commitments or opened values), F2
+  smallest p 1.228e-5 against 1.677e-5, F3b p 0.0002, F4 4 of 20 correct
+  (interval 0.057 to 0.437). The non-hiding control failed every family. The
+  result stands; v1's families treated correlated numbers inside a proof as
+  independent and its leave-one-out centroid is biased below chance.
+- **LEAK, v2** (`leak/PREREGISTERED-STARK-v2.md`, registered before new
+  data, one run on new proofs, permutation over proof labels): **PASS** on
+  the hiding config: G0 0 shared, G1 permutation p 0.957, G2 0.767, G3 0.252,
+  G4 0.194 (threshold 0.0125 each). TEETH: the non-hiding control fails every
+  family, G0 with 45 pairs sharing the trace commitment. Wording cap: no
+  registered family separated the classes; upstream calls the construction
+  "only statistically zk".
+- **COST**: native numbers above. On chain NOT RUN. One finding already
+  stands: the n = 16,384 proof (~720 KB) is larger than the
+  `max_transaction_net_usage` of 524,287 bytes in jungle4's genesis
+  (`contracts/zkreceipts/jungle4-genesis.json:7`; the live chain's value not
+  re-read), so it cannot be verified in one
+  transaction as it is; the n = 64 proof fits by size. A pairing wrapper is
+  ruled out (SPEC §PQ10).
+- CI: `btungsten-pq.yml` job `pq10-plonky3` runs the tests, the FORGERY
+  battery and the three scale points on every push. Not yet done: the SAW
+  row-soundness proof of the AIR (SPEC §PQ10 `rowSound`), the on-chain
+  verifier, and audit gate 2 for this workspace (cargo-audit is not installed
+  on this box; gate 1 holds by construction: the crate is its own workspace,
+  outside the default build).
+
+### PQ07, PQ08 and PQ09 (2026-10-08)
+
+| lane | artifact | status |
+|---|---|---|
+| PQ08 law signatures | `scripts/verify-bpq-signatures.mjs` (noble) + `scripts/verify-law-signatures-rust.sh` (bsigner, RustCrypto ML-DSA-65) | Every file `docs/PQ-LAW.json` names must carry a signature over its CURRENT bytes from a pinned signer. STALE now fails (it used to pass), as do a missing signature, a law-shaped file left out of the list, an empty list, and listed law files with no pin file. Both implementations: 7 of 7 law files current; the Rust leg's TEETH (a changed copy of a law file) is refused. e2e/law-signatures.test.mjs 4 of 4 |
+| PQ07 succession | `crates/bsigner/src/bpq.rs`: `succession_keys`, `card`, `handover`, `verify_handover`; CLI `bpq-handover`, `bpq-verify` | The Rust side now derives the SLH-DSA-SHAKE-256f succession key (fips205 0.4.1, SK.seed ‖ SK.prf ‖ PK.seed) and reproduces the browser's succession commitment and id on every `surfaces/bpq-vectors.json` row: the cross-check SPEC-BPQ-1 §6 listed as missing. Handover v1 (SPEC-BPQ-1 §5): the honest handover verifies after a JSON round trip; refused: an attacker's SLH key under the victim's id (the ML-DSA-only forger), a swapped new card, a handover replayed onto another id, a moved `at`, a newline in `at`, empty card / slh / sig / to (T-VACUOUS), a handover to itself, the reserved context. CLI end to end: an honest handover verifies (rc 0), a moved timestamp is refused (rc 1). bsigner 63 of 63 in 6.4 s (fips205 and its hashing optimised in dev builds). Not yet: the browser side, and carrying a handover inside a did-autonomi log |
+| PQ09 keys at rest | `crates/bsigner/src/keys.rs` + `bpq::seal_self` | A seed reaches disk only inside a SPEC-BPQ-1 sealed object, one `self` slot under the root vault of the owner's recovery words (`bheart.keyset/2`); commands that touch a seed take `--rec-env VAR`; `verify` reads the public half with no unlock; a plaintext `bheart.keyset/1` file is refused until `bsigner keys-seal` reseals it. Tests: `no_seed_byte_reaches_disk` scans every written file for the seed in raw, base64url and hex form; the wrong words and a tampered body open nothing; bsigner 60 of 60; the nerve test 7 of 7 through sealed keys; selftest PASS. The Rust sealer is checked by the other implementation: `surfaces/bpq-rust-sealed.json` opens in bpq.js (e2e/bpq.test.mjs 19 of 19). Boundary: rewriting a file does not erase the disk blocks the old plaintext sat in |
 
 Audit two gates for PQ01's new crates, read from rustsec/advisory-db
 2026-10-08 (cargo-audit is not installed on this box): RUSTSEC-2026-0076,

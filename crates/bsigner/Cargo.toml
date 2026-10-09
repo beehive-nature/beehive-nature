@@ -20,7 +20,16 @@ thiserror = "2"
 # bpq.rs (the Rust twin of surfaces/bpq.js): X-Wing's X25519 half, HKDF and
 # AES-256-GCM for sealed objects, bech32m for the bzpq1 id.
 aes-gcm = "0.10"
+# OS entropy for the file key and oid of a sealed key file (keys.rs, bpq::seal_self)
+getrandom = "0.2"
+# SLH-DSA-SHAKE-256f (FIPS 205), the succession key of SPEC-BPQ-1 §2 and §5.
+# integritychain fips205 0.4.1 passed every ACVP case for this parameter set
+# (crates/btungsten-pq, PQ01); only this set is compiled in.
+fips205 = { version = "=0.4.1", default-features = false, features = ["default-rng", "slh_dsa_shake_256f"] }
 bech32 = "0.9"
+# the SAW-proven derivation byte layer (SPEC-BTUNGSTEN-PQ-1 PQ03): every HKDF
+# info string bpq.rs derives a key from is built by bpq-core
+bpq-core = { path = "../bpq-core" }
 hkdf = "0.12"
 sha2 = { workspace = true }
 x25519-dalek = { version = "2", features = ["static_secrets"] }

@@ -372,3 +372,28 @@ test('the context "root" is reserved: keys() and successionKeys() refuse it, roo
   assert.throws(() => B.successionKeys(prk, 'root'), e => e.code === 'context_reserved');
   assert.equal(B.keys(prk, 'pq:root').context, 'pq:root');   // a persona named root is still a pq: context
 });
+
+test('contexts outside the bpq-core rule (1 to 64 printable ASCII) derive nothing, here and in the K1 derivation', () => {
+  const prk = rootOf(V.keys[0].rootFrom);
+  const vm = require('node:vm');
+  vm.runInThisContext(readFileSync(join(ROOT, 'surfaces', 'onboarding', 'bzdid-key.js'), 'utf8') + '\n;globalThis.BZDIDKEY = BZDIDKEY;');
+  const K = globalThis.BZDIDKEY;
+  for (const bad of ['pq:\x01', 'pq:\x7f', 'pq:pé', 'x'.repeat(65)]) {
+    assert.throws(() => B.keys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => B.successionKeys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => K.deriveK1Key(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+  }
+  // the pair the rule closes: context "a" at counter 1 would be context "a\x01" at counter 0
+  assert.throws(() => K.deriveK1Key(prk, 'a\x01'), e => e.code === 'context_rule');
+  assert.equal(B.keys(prk, 'x'.repeat(64)).context.length, 64);
+  assert.equal(K.deriveK1Key(prk, 'nostr:bnr-devices').seed.length, 32);
+});
+
+test('an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens in bpq.js and only for its vault', async () => {
+  const R = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-rust-sealed.json'), 'utf8'));
+  const obj = new Uint8Array(Buffer.from(R.object_b64u, 'base64url'));
+  const o = await B.open(obj, { self: rootOf(R.vaultFrom) });
+  assert.equal(B.b64u(o.bytes), R.plain_b64u);
+  assert.equal(o.meta, null);
+  await assert.rejects(B.open(obj, { self: rootOf('another vault') }));
+});

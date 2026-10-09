@@ -1,0 +1,62 @@
+{
+  "schema": "bzdid.derive.vectors.v1",
+  "about": "HKDF-Expand(SHA-256, PRK = root, info = UTF-8(label) || UTF-8(context), length) for every bzDiD derivation label, as surfaces/onboarding/bzdid-key.js and surfaces/bpq.js compute it. crates/bsigner reproduces each row through crates/bpq-core (SPEC-BTUNGSTEN-PQ-1 PQ03). The K1 rows are the counter-0 path.",
+  "root": "sha256(utf8(\"bzdid derive vector root\"))",
+  "rootFrom": "bzdid derive vector root",
+  "rows": [
+    {
+      "label": "BDID-v1/ed25519-record-key",
+      "context": "sol:vector",
+      "length": 32,
+      "okm": "qc4wt1KAkaJodg6ypLCr2Vs6P0qwIpeDQXLyC93ExX0"
+    },
+    {
+      "label": "BDID-v1/secp256k1-record-key",
+      "context": "nostr:bnr-devices",
+      "length": 32,
+      "okm": "4YId52nFvnCT1rF0d-kyoMwjJAM8TUtLJ9RJA3B4UBE"
+    },
+    {
+      "label": "BDID-v1/secp256k1-record-key",
+      "context": "btc-spend:kingbee",
+      "length": 32,
+      "okm": "UZ6qrnFdL8pelyt5TXqiTmgqDcBN8AHYgSRbWvEQqKI"
+    },
+    {
+      "label": "BDID-v1/persona-nullifier",
+      "context": "ctx-1",
+      "length": 32,
+      "okm": "LVPNlbaEITqsvW-LiJcU0e6IhnSdenOr8M-XFzB7VUA"
+    },
+    {
+      "label": "BDID-v1/ml-dsa-65-record-key",
+      "context": "pq:vector",
+      "length": 32,
+      "okm": "ce-DD2AvUNyMEgV7gQ2PhBtX-AHgG_0fx9czCmjgkVs"
+    },
+    {
+      "label": "BDID-v1/x-wing-kem-key",
+      "context": "pq:vector",
+      "length": 32,
+      "okm": "Fs6uwQtfVOthqUHWtZNxaAhWIyxK2s7t-Y6J6WLawBk"
+    },
+    {
+      "label": "BDID-v1/vault-key",
+      "context": "root",
+      "length": 32,
+      "okm": "twX3E9Y50aWirfpL_zy_2CnnF05qvYJfsDtjoDtcRF0"
+    },
+    {
+      "label": "BDID-v1/vault-key",
+      "context": "pq:vector",
+      "length": 32,
+      "okm": "waDYR9gS4I1zu-KZsxVZVxAvMY20vr2xauodqoh5ic8"
+    },
+    {
+      "label": "BDID-v1/slh-dsa-shake-256f-succession",
+      "context": "pq:vector",
+      "length": 96,
+      "okm": "aG6NBHPYJCXJDWdaefh8QBZPsrxRrBPsOYHQ-eZZlu6PSmuc4AIB8He1XFkB1_TCZ9bri0nQt9S0SEOkq_4GQDvg33KiscbuAwaM18vM0S2-Qw7h2uZ1lmIDkJe7H8L7"
+    }
+  ]
+}

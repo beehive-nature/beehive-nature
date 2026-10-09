@@ -62,16 +62,18 @@ async function withTempDir(fn) {
   }
 }
 
-// Sign the authority with the organ. Returns { envelope, authority_hash,
+// Sign the authority with the organ. `recEnv` names the environment variable
+// holding the owner's recovery code: bsigner keeps its keys sealed at rest
+// (crates/bsigner/src/keys.rs) and unlocks one only to sign. Returns { envelope, authority_hash,
 // key_id } — the envelope is bheart.signature/1 (ML-DSA), the hash is the
 // kernel's own authority_hash for the same bytes.
-export async function signAuthority({ authority, bin, keyId, keydir }) {
+export async function signAuthority({ authority, bin, keyId, keydir, recEnv }) {
   const bytes = authoritySigningBytes(authority);
   const envelope = await withTempDir(async (dir) => {
     const file = join(dir, "authority.bytes");
     const out = join(dir, "envelope.json");
     await writeFile(file, bytes);
-    const r = runOrgan(bin, ["sign", "--key-id", keyId, "--file", file, "--keydir", keydir, "--out", out]);
+    const r = runOrgan(bin, ["sign", "--key-id", keyId, "--file", file, "--keydir", keydir, "--out", out, "--rec-env", recEnv]);
     if (r.status !== 0) {
       const e = new Error(`bsigner sign refused: ${r.stderr.trim()}`);
       e.code = "SETTLE_ORGAN_REFUSED";

@@ -18,13 +18,19 @@
 //! — the absence is the fence.)
 //!
 //! COMMANDS:
-//!   bsigner keygen --alg ml-dsa-65 [--keydir DIR]
-//!   bsigner keygen --alg ml-kem-768 [--keydir DIR]
-//!   bsigner sign --key-id ID --file PATH [--keydir DIR] [--out PATH]
-//!   bsigner verify --key-id ID --file PATH --envelope PATH [--keydir DIR]
+//!   Key files are sealed at rest under the owner's recovery words (keys.rs):
+//!   every command that touches a seed takes --rec-env VAR, the name of an
+//!   environment variable holding the bdidrec1 recovery code (never argv,
+//!   never printed).
+//!   bsigner keygen --alg ml-dsa-65 --rec-env VAR [--keydir DIR]
+//!   bsigner keygen --alg ml-kem-768 --rec-env VAR [--keydir DIR]
+//!   bsigner sign --key-id ID --file PATH --rec-env VAR [--keydir DIR] [--out PATH]
+//!   bsigner verify --key-id ID --file PATH --envelope PATH [--keydir DIR]   (public half only)
 //!   bsigner list [--keydir DIR]
-//!   bsigner kemtest --key-id ID [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
-//!   bsigner x402pay --key-id ID --offer PATH --policy PATH [--keydir DIR] [--out PATH]
+//!   bsigner keys-seal --key-id ID --rec-env VAR [--keydir DIR]
+//!     (reseals a plaintext bheart.keyset/1 file written before 2026-10-08)
+//!   bsigner kemtest --key-id ID --rec-env VAR [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
+//!   bsigner x402pay --key-id ID --offer PATH --policy PATH --rec-env VAR [--keydir DIR] [--out PATH]
 //!     (the PRE-SIGNATURE OFFER GATE: verifies the pinned seller's signature
 //!      on the offer, checks the allowlist + expiry + per-signature cap +
 //!      remaining budget BEFORE any signing, validates the exact-multi split
@@ -42,6 +48,9 @@
 //!      "opened_with" = root | context | x-wing; without --context the
 //!      you.context, you.ml_dsa_65_public_sha3 and you.x_wing_public_sha3
 //!      fields are null)
+//!   bsigner bpq-handover --rec-env VAR --context FROM --to-context TO [--at TIME] [--out PATH]
+//!     (SPEC-BPQ-1 §5 succession handover v1: reveals FROM's SLH-DSA-SHAKE-256f
+//!      key and signs with it the statement retiring FROM's id for TO's card)
 //!   bsigner bpq-verify --file PATH [--target FILE]
 //!     (a bpq1 public key card or binding; or a detached signature, checked
 //!      against the file named by --target)
@@ -67,10 +76,12 @@ fn main() {
         Some("sign") => cmd_sign(&args[1..]),
         Some("verify") => cmd_verify(&args[1..]),
         Some("list") => cmd_list(&args[1..]),
+        Some("keys-seal") => cmd_keys_seal(&args[1..]),
         Some("kemtest") => cmd_kemtest(&args[1..]),
         Some("x402pay") => cmd_x402pay(&args[1..]),
         Some("bpq-open") => cmd_bpq_open(&args[1..]),
         Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
+        Some("bpq-handover") => cmd_bpq_handover(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -100,6 +111,8 @@ struct Opts {
     rec_env: Option<String>,
     context: Option<String>,
     target: Option<String>,
+    to_context: Option<String>,
+    at: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -116,6 +129,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         rec_env: None,
         context: None,
         target: None,
+        to_context: None,
+        at: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -136,11 +151,22 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--rec-env" => o.rec_env = Some(val),
             "--context" => o.context = Some(val),
             "--target" => o.target = Some(val),
+            "--to-context" => o.to_context = Some(val),
+            "--at" => o.at = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
     }
     Ok(o)
+}
+
+/// The root vault of the owner's recovery words, from `--rec-env VAR`.
+fn unlock(o: &Opts) -> Result<keys::Vault, String> {
+    let var = o.rec_env.as_deref().ok_or(
+        "key files are sealed at rest: pass the owner's recovery code with --rec-env VAR \
+         (read from the environment variable VAR, never from argv)",
+    )?;
+    keys::Vault::from_env(var)
 }
 
 fn cmd_keygen(args: &[String]) -> i32 {
@@ -155,10 +181,14 @@ fn cmd_keygen(args: &[String]) -> i32 {
                 .into(),
         ),
     };
+    let vault = match unlock(&o) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
     let result = if let Ok(sig) = alg::SigAlg::parse(alg) {
-        keys::keygen_dsa(sig, o.keydir)
+        keys::keygen_dsa(sig, o.keydir, &vault)
     } else if let Ok(kem) = alg::KemAlg::parse(alg) {
-        keys::keygen_kem(kem, o.keydir)
+        keys::keygen_kem(kem, o.keydir, &vault)
     } else {
         return fail(format!("unknown --alg {alg:?}"));
     };
@@ -183,7 +213,8 @@ fn cmd_sign(args: &[String]) -> i32 {
         Ok(m) => m,
         Err(e) => return fail(format!("read {file}: {e}")),
     };
-    let (alg, seed, _vk) = match keys::load_dsa(kid, o.keydir.clone()) {
+    let (alg, seed, _vk) = match unlock(&o).and_then(|v| keys::load_dsa(kid, o.keydir.clone(), &v))
+    {
         Ok(x) => x,
         Err(e) => return fail(e),
     };
@@ -232,7 +263,7 @@ fn cmd_verify(args: &[String]) -> i32 {
         Ok(v) => v,
         Err(e) => return fail(format!("envelope parse: {e}")),
     };
-    let (_alg, _seed, vk) = match keys::load_dsa(kid, o.keydir) {
+    let (_alg, vk) = match keys::load_dsa_public(kid, o.keydir) {
         Ok(x) => x,
         Err(e) => return fail(e),
     };
@@ -263,6 +294,23 @@ fn cmd_list(args: &[String]) -> i32 {
     0
 }
 
+fn cmd_keys_seal(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let Some(kid) = o.key_id.as_deref() else {
+        return fail("keys-seal needs --key-id and --rec-env VAR".into());
+    };
+    match unlock(&o).and_then(|v| keys::seal_plaintext(kid, o.keydir.clone(), &v)) {
+        Ok(v) => {
+            println!("{}", serde_json::to_string_pretty(&v).unwrap());
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
 fn cmd_kemtest(args: &[String]) -> i32 {
     let o = match parse_opts(args) {
         Ok(o) => o,
@@ -271,7 +319,7 @@ fn cmd_kemtest(args: &[String]) -> i32 {
     let Some(kid) = o.key_id.as_deref() else {
         return fail("kemtest needs --key-id (a ml-kem keyset)".into());
     };
-    let (alg, seed, ek) = match keys::load_kem(kid, o.keydir) {
+    let (alg, seed, ek) = match unlock(&o).and_then(|v| keys::load_kem(kid, o.keydir.clone(), &v)) {
         Ok(x) => x,
         Err(e) => return fail(e),
     };
@@ -346,7 +394,9 @@ fn cmd_x402pay(args: &[String]) -> i32 {
             return 1;
         }
     };
-    let (alg, seed, _vk) = match keys::load_dsa(kid, o.keydir.clone()) {
+    // the key is unlocked only after the gate has said yes
+    let (alg, seed, _vk) = match unlock(&o).and_then(|v| keys::load_dsa(kid, o.keydir.clone(), &v))
+    {
         Ok(x) => x,
         Err(e) => return fail(e),
     };
@@ -459,6 +509,47 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
     0
 }
 
+fn cmd_bpq_handover(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(var), Some(from), Some(to)) = (
+        o.rec_env.as_deref(),
+        o.context.as_deref(),
+        o.to_context.as_deref(),
+    ) else {
+        return fail("bpq-handover needs --rec-env VAR --context FROM --to-context TO".into());
+    };
+    let code = match std::env::var(var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bpq::master_prk_from_recovery_code(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e.to_string()),
+    };
+    let at = o.at.clone().unwrap_or_else(|| keys::now_iso().0);
+    let h = match bpq::handover(&prk, from, to, &at) {
+        Ok(h) => h,
+        Err(e) => return fail(e.to_string()),
+    };
+    let text = serde_json::to_string_pretty(&h).unwrap();
+    match o.out {
+        Some(path) => {
+            if let Err(e) = std::fs::write(&path, &text) {
+                return fail(format!("write {path}: {e}"));
+            }
+            println!(
+                "{}",
+                json!({ "written": path, "kind": "handover", "from": h["from"], "to": h["to"], "at": h["at"] })
+            );
+        }
+        None => println!("{text}"),
+    }
+    0
+}
+
 fn cmd_bpq_verify(args: &[String]) -> i32 {
     let o = match parse_opts(args) {
         Ok(o) => o,
@@ -483,6 +574,8 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
             Err(e) => return fail(format!("read {target}: {e}")),
         };
         ("detached", bpq::verify_detached(&doc, &bytes).is_some())
+    } else if doc["kind"] == "handover" {
+        ("handover", bpq::verify_handover(&doc).is_some())
     } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
@@ -490,7 +583,7 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
     };
     println!(
         "{}",
-        json!({ "kind": kind, "id": doc["id"], "verified": ok })
+        json!({ "kind": kind, "id": doc["id"], "from": doc["from"], "to": doc["to"], "verified": ok })
     );
     if ok {
         0
@@ -504,13 +597,18 @@ fn cmd_selftest() -> i32 {
     let dir = std::env::temp_dir().join("bheart-selftest");
     let _ = std::fs::remove_dir_all(&dir);
     let mut ok = true;
+    // a throwaway root for the selftest's own throwaway keys
+    let mut prk = zeroize::Zeroizing::new([0u8; 32]);
+    getrandom::getrandom(prk.as_mut()).expect("OS entropy");
+    let vault = keys::Vault::from_recovery_code(&bpq::recovery_code(&prk))
+        .expect("a fresh recovery code decodes");
     for alg in ["ml-dsa-44", "ml-dsa-65", "ml-dsa-87"] {
         let sig = alg::SigAlg::parse(alg).unwrap();
-        let out = keys::keygen_dsa(sig, Some(dir.clone()));
+        let out = keys::keygen_dsa(sig, Some(dir.clone()), &vault);
         ok &= out.is_ok();
         if let Ok(out) = out {
             let kid = out["key_id"].as_str().unwrap().to_string();
-            let (a, seed, vk) = keys::load_dsa(&kid, Some(dir.clone())).unwrap();
+            let (a, seed, vk) = keys::load_dsa(&kid, Some(dir.clone()), &vault).unwrap();
             let env = envelope::sign_envelope(a, &kid, &seed, b"selftest").unwrap();
             ok &= envelope::verify_envelope(&env, &vk, b"selftest").is_ok();
             ok &= envelope::verify_envelope(&env, &vk, b"tamper").is_err();
@@ -518,11 +616,11 @@ fn cmd_selftest() -> i32 {
     }
     for alg in ["ml-kem-512", "ml-kem-768", "ml-kem-1024"] {
         let kem = alg::KemAlg::parse(alg).unwrap();
-        let out = keys::keygen_kem(kem, Some(dir.clone()));
+        let out = keys::keygen_kem(kem, Some(dir.clone()), &vault);
         ok &= out.is_ok();
         if let Ok(out) = out {
             let kid = out["key_id"].as_str().unwrap().to_string();
-            let (a, seed, ek) = keys::load_kem(&kid, Some(dir.clone())).unwrap();
+            let (a, seed, ek) = keys::load_kem(&kid, Some(dir.clone()), &vault).unwrap();
             if let Ok((ct, ss1)) = pq::kem_encapsulate(a, &ek) {
                 ok &= pq::kem_decapsulate(a, &seed, &ct)
                     .map(|ss2| ss1 == ss2)
