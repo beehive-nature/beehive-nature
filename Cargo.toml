@@ -67,6 +67,8 @@ members = [
     "crates/btungsten-wb001",
     "crates/btungsten-wb002-core",
     "crates/btungsten-wb002",
+    "crates/btungsten-wb003",
+    "crates/btungsten-wb004",
     "crates/btungsten-teeth",
     "crates/btungsten-pq",
     "crates/btungsten-bench",

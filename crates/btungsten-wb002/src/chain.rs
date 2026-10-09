@@ -176,6 +176,7 @@ struct Tables {
     defid: u64,
 }
 
+#[derive(Clone)]
 pub struct Chain {
     pub profile: Profile,
     pub now: u64,
@@ -2284,12 +2285,22 @@ impl Chain {
     /// Import into THIS chain (the successor network), against the
     /// commitment the predecessor published while alive: a tampered bundle
     /// fails it. FT stats are not migrated: the successor's token contracts
-    /// must exist first.
+    /// must exist first — and a bundle balance naming a token the successor
+    /// does not carry REFUSES the migration (value continuity or refusal,
+    /// never a silent drop; WB003 repair R-C).
     pub fn import_state(&mut self, bundle: &Bundle, anchor: &str) -> R<()> {
         self.tx(|c| {
             if Self::state_commitment(bundle) != anchor {
                 return refuse("bt-wb02:migration-anchor", "bundle commitment does not match the predecessor anchor — refusing the migration");
             }
+            for f in &bundle.fts {
+                if !c.t.stats.values().any(|s| s.id == f.ftid) {
+                    return refuse("bt-wb02:migration-unknown-ft", format!("bundle carries a {} balance of token {} (id {}) that the successor has no contract for — refusing the migration rather than dropping the funds", f.owner, f.sym, f.ftid));
+                }
+            }
+            // the successor must never re-mint an id its predecessor spent
+            // (WB003 repair R-A: the post-migration collision)
+            let mut max_id = c.t.lnftid;
             for a in &bundle.assets {
                 if a.kind == "ntt" {
                     let r = &a.row;
@@ -2302,17 +2313,60 @@ impl Chain {
                     c.scope_mut(&a.holder).insert(a.row.id, row);
                 }
                 c.emit(fields![("type", "spawn"), ("kind", a.kind), ("assetid", a.row.id), ("author", &a.row.author), ("category", &a.row.category), ("owner", &a.holder), ("idata", &a.row.idata), ("migrated", true)]);
+                // contained structure is LOG truth too: the fold must see
+                // the composed object without waiting for a checkpoint
+                // (WB003 repair R-D)
+                Self::emit_contained(c, &a.row, &a.holder);
+                Self::ser_max_id(&a.row, &mut max_id);
             }
             for (id, d) in &bundle.delegates {
                 c.t.delegates.insert(*id, d.clone());
+                // a live tenure is log truth on the successor, not only
+                // table truth (WB003 repair R-B)
+                c.emit(fields![("type", "delegateopen"), ("assetid", *id), ("owner", &d.owner), ("delegatedto", &d.delegatedto), ("period", d.period)]);
+                max_id = max_id.max(*id);
             }
             for f in &bundle.fts {
                 if let Some(st) = c.t.stats.values().find(|s| s.id == f.ftid).cloned() {
                     c.add_bal(&f.owner, &st, f.amount);
                 }
+                max_id = max_id.max(f.ftid);
             }
+            c.t.lnftid = max_id;
             Ok(())
         })
+    }
+
+    /// The migration's account of a composed object: one spawn per
+    /// contained child plus the attach that composed it, so the successor
+    /// log fold reconstructs containment without a checkpoint.
+    fn emit_contained(c: &mut Chain, row: &SerRow, holder: &str) {
+        for child in &row.contains {
+            c.emit(fields![
+                ("type", "spawn"),
+                ("kind", "nft"),
+                ("assetid", child.id),
+                ("author", &child.author),
+                ("category", &child.category),
+                ("owner", holder),
+                ("idata", &child.idata),
+                ("migrated", true)
+            ]);
+            c.emit(fields![
+                ("type", "attach"),
+                ("parent", row.id),
+                ("assetid", child.id),
+                ("holder", holder)
+            ]);
+            Self::emit_contained(c, child, holder);
+        }
+    }
+
+    fn ser_max_id(row: &SerRow, max: &mut u64) {
+        *max = (*max).max(row.id);
+        for child in &row.contains {
+            Self::ser_max_id(child, max);
+        }
     }
 }
 
