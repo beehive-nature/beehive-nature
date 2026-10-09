@@ -1,0 +1,11 @@
+test rb03_budget/3d70d8f6::props[0]::p3_cap_at_least_network_fee[0]: [Crux] Attempting to prove verification conditions.
+[0Kok
+
+[Crux-MIR] ---- FINAL RESULTS ----
+[Crux] Goal status:
+[Crux]   Total: 9
+[Crux]   Proved: 9
+[Crux]   Disproved: 0
+[Crux]   Incomplete: 0
+[Crux]   Unknown: 0
+[Crux] Overall status: Valid.

@@ -1,0 +1,19 @@
+# bTunGsTeN RB lanes (workerB bench, Rust execution and assurance): the
+# orchestrator that prepares pinned upstream build copies, runs and measures
+# the RB providers and verifiers, recognizes their verdicts and writes the
+# receipts. Test code: nothing ships from this crate. The lanes run from the
+# `rbench` binary, so `cargo test --workspace` stays hermetic;
+# .github/workflows/btungsten-rb.yml runs them.
+[package]
+name = "btungsten-bench"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+serde_json = "1"
+sha2 = "0.10"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

@@ -1,0 +1,11 @@
+test rb03_budget/3d70d8f6::props[0]::p9_payment_floor_is_half_product[0]: [Crux] Attempting to prove verification conditions.
+[0Kok
+
+[Crux-MIR] ---- FINAL RESULTS ----
+[Crux] Goal status:
+[Crux]   Total: 6
+[Crux]   Proved: 6
+[Crux]   Disproved: 0
+[Crux]   Incomplete: 0
+[Crux]   Unknown: 0
+[Crux] Overall status: Valid.
