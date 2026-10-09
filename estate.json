@@ -305,6 +305,16 @@
    "limit": "SMS lane is a SIMULATED display demo until the Android surface; Autonomi retrieval adapter is Building — descriptor-only travels; the relay's DM-kind allowlist is UNVERIFIED (box ssh reset 2026-10-02), verdicts render verbatim"
   },
   {
+   "id": "bdrop",
+   "family": "bnr",
+   "home": "skaists.dev",
+   "path": "surfaces/bdrop.html",
+   "state": "LIVE",
+   "gloss": "the drop desk — publish a bDroP to Hive from one tab: bytes hashed before your eyes, the disclosure at the point of use, the posting key signing in-memory and wiped after, the receipt byte-comparing the landed body. informs, never gates",
+   "org": "beehive-nature",
+   "limit": "broadcast is the reader’s own single gesture; the desk sends only the signed transaction to the RPC endpoint named on the page; item 6 security impact stays UNVERIFIED; live publication pending — proven so far by a 17/17 offline fixture proof and a live assert-rejection probe, not by a real drop"
+  },
+  {
    "id": "biq",
    "family": "bnr",
    "home": "bnr.quest",
@@ -1455,8 +1465,8 @@
   }
  ],
  "counts": {
-  "surfaces": 110,
-  "listed": 119,
+  "surfaces": 111,
+  "listed": 120,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1470,13 +1480,13 @@
    "beehivebiomass": 5,
    "beehivebuds": 0,
    "midi": 5,
-   "bnr": 2
+   "bnr": 3
   },
   "byState": {
-   "LIVE": 119
+   "LIVE": 120
   },
   "byOrg": {
-   "beehive-nature": 63,
+   "beehive-nature": 64,
    "skaists": 42,
    "beehive-biomass": 5
   }
