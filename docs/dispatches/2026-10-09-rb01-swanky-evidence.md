@@ -209,3 +209,37 @@ Cited at `ecd5e6c6`, `docs/receipts/btungsten-rb/REPORT.md`:
   lane's).
 - Any signing or broadcast. This seat holds no signing key; signing and
   broadcast are the zCode lane's.
+
+## Addendum: filed (2026-10-09T19:41Z)
+
+The original text above is kept as written. In it, "not filed" was true at
+`0d88ec248`. On the founder's explicit go in chat (four reports plus one
+minimal private-channel request; no email, no held details, no Hive, no
+permission change), Seat 3 filed from `loviswaternakamoto`:
+
+- O1 → https://github.com/GaloisInc/swanky/issues/47
+- O2 and O3 → https://github.com/GaloisInc/swanky/issues/48
+- O4 → https://github.com/GaloisInc/swanky/issues/49
+- O5 → https://github.com/GaloisInc/swanky/issues/50
+- private-channel request → https://github.com/GaloisInc/swanky/issues/51.
+  Its body is the authorized sentence and nothing else; nothing links it from
+  #47–#50.
+
+Checks before filing: the account, Swanky's `dev` head (still the pin), a
+duplicate search, a hash check of every BNR evidence link against the
+commit, and a line check of every Swanky permalink. After filing: every body
+was read back, and each of #47–#50 was cross-linked to the other three
+(GitHub timelines confirm). The record is
+`docs/upstream/2026-10-09-swanky-popsicle-rb01/FILED.md`, with the bodies
+in `filed/`.
+
+Lanes notified: the RB lane (PR #372's owner session), by cross-session
+message; the bDroP lane, by this mailbox dispatch. Delivery receipts are in
+the closing report of the session that committed this.
+
+Still open:
+
+- the held observation-6 material, until Swanky names a confidential route
+  on #51 (delivering it needs its own go);
+- Item 6's security impact, which remains UNVERIFIED;
+- bDroP 0001, which stays prepared and unsigned.
