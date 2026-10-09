@@ -1,0 +1,334 @@
+$ CARGO_TARGET_DIR=/home/travi/rustls-0285-target cargo test --locked -p composition -p wallet-relay -p royalreview -p zano-watcher -p atmirror -p banchor -p bindexer -p adapter-pixellab -p bzdid -p bheraldry
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/bnr-keys/Cargo.toml
+workspace: /mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/Cargo.toml
+   Compiling rustls v0.23.45
+   Compiling rustls-webpki v0.103.15
+   Compiling ureq v2.12.1
+   Compiling tokio-rustls v0.26.4
+   Compiling hyper-rustls v0.27.9
+   Compiling reqwest v0.12.28
+   Compiling atmirror v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/atmirror)
+   Compiling zano-watcher v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/zano-watcher)
+   Compiling bindexer v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/bindexer)
+   Compiling composition v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/composition)
+   Compiling adapter-pixellab v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/adapter-pixellab)
+warning: variable does not need to be mutable
+   --> crates/bindexer/tests/acceptance.rs:124:10
+    |
+124 |     let (mut conn, _p) = db();
+    |          ----^^^^
+    |          |
+    |          help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/bindexer/tests/acceptance.rs:218:10
+    |
+218 |     let (mut conn, _p) = db();
+    |          ----^^^^
+    |          |
+    |          help: remove this `mut`
+
+   Compiling royalreview v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/royalreview)
+   Compiling wallet-relay v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/wallet-relay)
+warning: `bindexer` (test "acceptance") generated 2 warnings (run `cargo fix --test "acceptance" -p bindexer` to apply 2 suggestions)
+   Compiling bzdid v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/bzdid)
+   Compiling banchor v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/banchor)
+warning: unused variable: `r`
+   --> crates/banchor/src/axtree.rs:803:19
+    |
+803 |             .all(|r| s.stats.indexed + s.stats.emitted >= s.refs.len()));
+    |                   ^ help: if this is intentional, prefix it with an underscore: `_r`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `take_events` and `conn_tag` are never used
+   --> crates/banchor/src/cdp.rs:194:12
+    |
+129 | impl CdpConn {
+    | ------------ associated items in this implementation
+...
+194 |     pub fn take_events(&mut self) -> Vec<(String, Value)> {
+    |            ^^^^^^^^^^^
+...
+204 |     pub fn conn_tag(url: &str) -> String {
+    |            ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `ClickOutcome` is never constructed
+  --> crates/banchor/src/page.rs:25:12
+   |
+25 | pub struct ClickOutcome {
+   |            ^^^^^^^^^^^^
+
+warning: `banchor` (bin "banchor" test) generated 3 warnings (run `cargo fix --bin "banchor" -p banchor --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 06s
+     Running unittests src/lib.rs (/home/travi/rustls-0285-target/debug/deps/adapter_pixellab-20c439316a9bb536)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/home/travi/rustls-0285-target/debug/deps/adapter_pixellab-3e308cd2a20bbc66)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/protocol.rs (/home/travi/rustls-0285-target/debug/deps/protocol-c4514ead8045a782)
+
+running 9 tests
+test tool_schemas_under_4096_bytes ... ok
+test load_key_strips_bom_cr_and_whitespace ... ok
+test initialize_tools_list_and_notification_silence ... ok
+test non_png_style_anchor_is_rejected ... ok
+test get_balance_reports_usd_and_session ... ok
+test generate_with_style_anchor_writes_png_and_measures_spend ... ok
+test budget_cap_refuses_second_generation ... ok
+test unknown_tool_is_a_protocol_error ... ok
+test invalid_enum_rejects_before_any_request ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (/home/travi/rustls-0285-target/debug/deps/atmirror-bbb5c8ac6758d48f)
+
+running 67 tests
+test arweave::tests::backoff_matches_the_sdk_schedule ... ok
+test arweave::tests::avro_tags_golden_bytes ... ok
+test arweave::tests::only_402_is_a_payment_signal ... ok
+test arweave::tests::payment_required_says_retrying_will_not_help ... ok
+test arweave::tests::server_errors_retry_and_client_errors_never_do ... ok
+test arweave::tests::deep_hash_distinguishes_structure ... ok
+test arweave::tests::status_202_is_success_not_a_parse_failure ... ok
+test arweave::tests::zigzag_matches_avro_spec_vectors ... ok
+test autonomi::tests::address_extraction_is_fail_closed ... ok
+test car::tests::parses_and_verifies_a_wellformed_car ... ok
+test car::tests::refuses_a_missing_root ... ok
+test car::tests::refuses_a_tampered_block ... ok
+test arweave::tests::ed25519_data_item_is_well_formed_and_verifies ... ok
+test cbor::tests::decodes_the_repo_subset ... ok
+test cbor::tests::rejects_duplicate_keys ... ok
+test cbor::tests::rejects_indefinite_and_foreign_tags ... ok
+test cbor::tests::strip_sig_refuses_when_no_sig ... ok
+test cbor::tests::strip_sig_removes_exactly_the_sig_entry ... ok
+test cid::tests::base58_decodes_known_vector ... ok
+test cid::tests::binary_and_string_round_trip ... ok
+test cid::tests::known_vector_matches_ipld ... ok
+test cid::tests::rejects_cidv0_and_foreign_codecs ... ok
+test commit::tests::multibase_key_parsing_round_trips_through_sec1 ... ok
+test commit::tests::high_s_is_refused_even_when_mathematically_valid ... ok
+test commit::tests::tampered_signature_fails ... ok
+test commit::tests::valid_signature_verifies ... ok
+test did::tests::extracts_pds_key_and_handles ... ok
+test arweave::tests::parse_ed25519_round_trips_and_refuses_tampering ... ok
+test did::tests::refuses_mismatched_document_id ... ok
+test did::tests::refuses_non_https_pds ... ok
+test epoch_funding::tests::no_delegate_is_a_breach ... ok
+test commit::tests::wrong_key_fails ... ok
+test epoch_funding::tests::one_leader_rail_across_items_is_the_breach ... ok
+test epoch_funding::tests::per_claimant_funding_holds ... ok
+test mst::tests::finds_blob_refs_in_all_three_forms ... ok
+test mst::tests::missing_record_is_refused ... ok
+test mst::tests::walks_and_reconstructs_prefixed_keys ... ok
+test receipt::tests::mismatched_binding_is_detected ... ok
+test receipt::tests::serializes_in_lexicon_field_names ... ok
+test record_sig::tests::key_alg_parses_exactly_the_two_ids ... ok
+test record_sig::tests::l_constant_matches_dalek_boundary ... ok
+test record_sig::tests::canonical_signature_verifies ... ok
+test record_sig::tests::ed25519_dispatch_is_verify_record ... ok
+test record_sig::tests::s_plus_l_is_rejected_even_though_arithmetically_valid ... ok
+test record_sig::tests::small_order_and_noncanonical_pubkeys_are_rejected ... ok
+test route::tests::browser_resolvable_always_routes_to_arweave ... ok
+test route::tests::bulk_routes_by_the_measured_crossover ... ok
+test route::tests::crossover_is_256_kib ... ok
+test record_sig::tests::ml_dsa_65_lengths_match_the_crate_encoder ... ok
+test route::tests::identity_records_always_get_permanence_plus_mirror ... ok
+test record_sig::tests::ml_dsa_65_verifies_the_noble_bpq_card ... ok
+test record_sig::tests::cross_alg_confusion_is_refused ... ok
+test turbo_approval::tests::empty_receipt_rejected ... ok
+test turbo_approval::tests::grant_without_approval_id_is_rejected_at_spend_time ... ok
+test record_sig::tests::ml_dsa_65_hint_padding_malleation_is_rejected ... ok
+test turbo_approval::tests::leader_delegate_in_a_grant_is_the_breach ... ok
+test turbo_approval::tests::malformed_json_is_a_parse_error ... ok
+test turbo_approval::tests::one_shared_delegate_is_delegated_but_not_per_claimant ... ok
+test turbo_approval::tests::parses_ceremony_superset_receipt_single_payer ... ok
+test turbo_approval::tests::parses_founder_paste_shape ... ok
+test turbo_approval::tests::two_distinct_delegates_prove_per_claimant ... ok
+test turbo_approval::tests::uploader_as_its_own_delegate_is_signer_pays ... ok
+test varint::tests::overflow_is_error ... ok
+test varint::tests::round_trips ... ok
+test varint::tests::truncated_is_error ... ok
+test record_sig::tests::unknown_key_alg_is_refused ... ok
+test record_sig::tests::ml_dsa_65_roundtrip_from_public_seed ... ok
+
+test result: ok. 67 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running unittests src/main.rs (/home/travi/rustls-0285-target/debug/deps/atmirror-e457b4242748046d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pipeline.rs (/home/travi/rustls-0285-target/debug/deps/pipeline-41c643ea0ef2e29a)
+
+running 13 tests
+test mirror_verifies_uploads_and_receipts ... ok
+test payment_required_is_reported_not_fatal ... ok
+test lying_blob_bytes_are_refused_per_blob ... ok
+test rail_rejection_is_reported_not_fatal ... ok
+test denied_blob_is_reported_not_fatal ... ok
+test rerun_is_idempotent_no_reupload ... ok
+test restore_rejects_wrong_key_and_bad_binding ... ok
+test restore_flags_tampered_rail_copy ... ok
+test restore_without_key_runs_steps_1_to_5_and_reports_step_6_not_performed ... ok
+test tampered_car_is_refused ... ok
+test restore_round_trips_from_rail_alone ... ok
+test v01_receipt_without_v02_fields_validates_unchanged ... ok
+test wrong_signing_key_is_refused ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/speccheck.rs (/home/travi/rustls-0285-target/debug/deps/speccheck-8f0dbb8f61c25c7f)
+
+running 2 tests
+test speccheck_ed25519_dispatch_matches_verify_record ... ok
+test speccheck_cofactored_accepts_where_verify_record_rejects ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running unittests src/main.rs (/home/travi/rustls-0285-target/debug/deps/banchor-b7b3c9d53a1d0347)
+
+running 78 tests
+test approval::tests::checkout_urls_gate ... ok
+test approval::tests::risky_click_names_gate ... ok
+test approval::tests::gate_requires_two_steps ... ok
+test approval::tests::plan_ids_unique_per_proposal ... ok
+test axtree::tests::formats_a_small_tree_with_refs ... ok
+test axtree::tests::integrity_digest_rides_the_json ... ok
+test axtree::tests::hidden_tree_text_never_reaches_output ... ok
+test axtree::tests::lean_mode_prunes_text_but_keeps_targets ... ok
+test axtree::tests::low_opacity_node_text_stripped_but_children_kept ... ok
+test axtree::tests::names_are_escaped_and_capped ... ok
+test axtree::tests::targets_past_the_cap_land_in_the_index_and_stay_clickable ... ok
+test axtree::tests::undetermined_text_fails_closed ... ok
+test b64::tests::known_vectors ... ok
+test axtree::tests::index_cap_counts_what_it_cannot_show ... ok
+test b64::tests::sha3_digest_is_stable_and_not_hex ... ok
+test cache::tests::roundtrip_under_temp_home ... ok
+test cdp::tests::target_id_extraction ... ok
+test crush::tests::deterministic_bytes ... ok
+test crush::tests::empty_and_blank_only_inputs_are_safe ... ok
+test crush::tests::goal_relevant_line_survives_irrelevant_prose_dies ... ok
+test crush::tests::protected_lines_keep_their_relative_order ... ok
+test crush::tests::crush_actually_shrinks_a_prose_run ... ok
+test crush::tests::refs_and_headers_survive_any_ratio ... ok
+test crush::tests::short_snapshots_pass_through ... ok
+test mcp::tests::agentloop_tool_requires_url_and_goal ... ok
+test mcp::tests::initialize_echoes_protocol_version ... ok
+test mcp::tests::notifications_get_no_response ... ok
+test mcp::tests::status_works_through_the_tool_boundary ... ok
+test mcp::tests::tools_list_has_bseat_and_agentloop_with_schemas ... ok
+test mcp::tests::unknown_tool_is_an_error_not_a_panic ... ok
+test page::tests::no_screenshot_on_the_durable_path ... ok
+test page::tests::url_encoding_leaves_paths_alone ... ok
+test qwen::tests::budget_leaves_room_and_says_so ... ok
+test qwen::tests::clean_json_is_parsed ... ok
+test qwen::tests::fenced_or_prose_wrapped_json_is_still_found ... ok
+test qwen::tests::fit_attempts_start_full_then_lean_prefers_target_visibility ... ok
+test qwen::tests::garbage_is_unparseable_but_bounded ... ok
+test qwen::tests::tokenize_alg_is_named ... ok
+test replay::tests::civil_known_dates ... ok
+test replay::tests::closed_writer_refuses_instead_of_dropping ... ok
+test replay::tests::flush_failure_is_typed_and_poisons ... ok
+test replay::tests::fresh_open_never_extends_an_existing_stream ... ok
+test replay::tests::injected_sink_success_positive_control ... ok
+test replay::tests::iso_epoch_is_correct ... ok
+test replay::tests::open_on_unix_syncs_the_parent_directory ... ok
+test replay::tests::partial_write_stores_a_torn_prefix_then_poisons ... ok
+test replay::tests::read_only_handle_refusal_is_typed_with_zero_bytes_stored ... ok
+test replay::tests::refused_write_is_typed_failure_and_poisons ... ok
+test replay::tests::replay_writes_events ... ok
+test replay::tests::storage_exhaustion_is_a_distinct_stop_reason ... ok
+test replay::tests::sync_failure_is_typed_and_poisons ... ok
+test resolve::tests::bnr_parse_failures_surface ... ok
+test resolve::tests::buzz_maps_to_host_home ... ok
+test resolve::tests::buzz_rejects_broken_hosts ... ok
+test seat::g2a_review_regressions::repeated_end_never_upgrades_an_incomplete_receipt ... ok
+test seat::g2a_round2_regressions::agentloop_finalize_healthy_control ... ok
+test seat::g2a_round2_regressions::agentloop_returns_original_post_action_write_error ... ok
+test seat::g2a_tests::approve_receipt_failure_does_not_execute_the_action ... ok
+test seat::g2a_tests::gate_flow_positive_control_records_the_gate_note ... ok
+test seat::g2a_tests::receipt_failure_halts_session_and_cleanup_still_runs ... ok
+test seat::g2a_round2_regressions::agentloop_returns_original_post_action_admission_error ... ok
+test seat::g2a_round2_regressions::repeated_end_after_admission_gap_stays_incomplete ... ok
+test untrusted::tests::never_obey_directive_is_standing ... ok
+test untrusted::tests::wraps_with_origin_and_tagged_digest ... ok
+test visibility::tests::aria_hidden_strips_node_only ... ok
+test visibility::tests::display_none_kills_subtree ... ok
+test visibility::tests::low_opacity_strips_node_only ... ok
+test visibility::tests::visibility_hidden_kills_subtree ... ok
+test replay::tests::oversized_record_refused_before_storage_and_stream_stays_usable ... ok
+test visibility::tests::visible_and_boundary_opacity_kept ... ok
+test voice::tests::mic_hygiene_defaults_to_delete_named_files_stay ... ok
+test voice::tests::provenance_names_engine_and_locality ... ok
+test voice::tests::transcript_cleaning_strips_noise_and_squashes_lines ... ok
+test seat::g2a_review_regressions::end_reports_gaps_after_an_unrecordable_action_receipt ... ok
+test tokens::tests::empty_text_is_zero_everywhere ... ok
+test tokens::tests::json_carries_alg_ids ... ok
+test tokens::tests::counts_are_deterministic ... ok
+test tokens::tests::english_text_brackets_sane ... ok
+
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.12s
+
+     Running unittests src/lib.rs (/home/travi/rustls-0285-target/debug/deps/bheraldry-c8ee80801ccf7f8e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/specimen.rs (/home/travi/rustls-0285-target/debug/deps/specimen-0099cb1e41c3a066)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/adversarial.rs (/home/travi/rustls-0285-target/debug/deps/adversarial-03151489c65fcf55)
+
+running 10 tests
+test a06_creative_asset_relabelled_official_is_detected ... ok
+test a07_living_person_named_is_detected ... ok
+test a09_dropped_heraldic_distinction_is_detected ... ok
+test a05_signature_reuse_across_records_or_domains_is_detected ... ok
+test a02_visually_similar_counterfeit_image_is_detected ... ok
+test a08_stale_revision_as_current_is_detected ... ok
+test a03_wrong_family_attribution_is_detected ... ok
+test a01_altered_motto_after_translation_is_detected ... ok
+test a04_source_metadata_swap_is_detected ... ok
+test a10_lossy_migration_is_detected ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/bsigner_seam.rs (/home/travi/rustls-0285-target/debug/deps/bsigner_seam-164b1961bd820f9c)
+
+running 1 test
+test the_organ_signs_the_specimen_and_refuses_tampering ... FAILED
+
+failures:
+
+---- the_organ_signs_the_specimen_and_refuses_tampering stdout ----
+
+thread 'the_organ_signs_the_specimen_and_refuses_tampering' (200175) panicked at crates/bheraldry/tests/bsigner_seam.rs:39:5:
+bsigner binary not found — run `cargo build --workspace` (CI does this before tests) or `cargo build -p bsigner` locally
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    the_organ_signs_the_specimen_and_refuses_tampering
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p bheraldry --test bsigner_seam`
+exit 101

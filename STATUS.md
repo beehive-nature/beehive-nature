@@ -36,6 +36,11 @@ in later entries (for example the proof-lights probes, 21/21) measure one suite 
 do not replace it. The earlier `cargo test --workspace` → 179 passed; 1 ignored
 predates it and is superseded.
 
+- `2026-10-09` — **RUSTSEC-2026-0285 cleared from the root lock: rustls 0.23.42 → 0.23.45, rustls-webpki 0.103.13 → 0.103.15. The audit is not clean: RUSTSEC-2023-0071 (rsa 0.9.10) has no patched version and remains.**
+  Found by the PQ12 audit gate 2 step (cargo-audit 0.22.2, CI run 37931727642). The change is four lines of `Cargo.lock`. A fresh `cargo update -p rustls --precise 0.23.45` on main `64dd73226`'s lock is byte-identical to the merged lock. `cargo audit --file Cargo.lock` against advisory-db `7eebec69`: 2 vulnerabilities on main's lock, 1 on the merged lock, both exit 1, warnings unchanged.
+  `cargo build --locked -p bsigner`, then `cargo test --locked --no-fail-fast` over the ten crates whose graph reaches rustls (composition, wallet-relay, royalreview, zano-watcher, atmirror, banchor, bindexer, adapter-pixellab; bzdid and bheraldry through a dev-dependency): **336 passed, 0 failed** on the merged tree (WSL2, Seat 3). The first local attempt stopped on a missing bsigner binary, an environment precondition, and is kept in the receipts.
+  Not changed here: `ops/x402-door/Cargo.lock` (rustls 0.23.44) and `scripts/ant-extsig-repro/lock/Cargo.lock` (0.23.43). `btungsten-ci-scratch` still carries 0.23.42 until it merges main.
+  Receipts: `docs/receipts/rustsec-2026-0285/`. Dispatch: `docs/dispatches/2026-10-09-rustsec-2026-0285-rustls.md`.
 - `2026-10-09` — **Swanky popsicle: RB01's six upstream observations re-checked at the pin and banked as an evidence package; nothing filed upstream.**
   RB01 (PR #372 at `ecd5e6c6`, `docs/receipts/btungsten-rb/REPORT.md` §RB01) recorded six behaviours of Swanky's popsicle circuit PSI outside its input policy. This entry adds the re-check of each one at the pin, `409d1ceb`, which was the head of Swanky's `dev` at 2026-10-09T10:17:48Z.
   The package is `docs/upstream/2026-10-09-swanky-popsicle-rb01/`: five reproduction programs that print their operating notice first, receipts of three runs, four Swanky issue bodies, and SHA-256 for every file in `DIGESTS.md`.
