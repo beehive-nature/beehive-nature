@@ -490,8 +490,8 @@ The estate's own PQ glue, where its review findings lived.
   included) for every polynomial with coefficients in the field: every
   one of the 896 butterflies the same operations on the same operands in
   the same order, with the crate's twiddle table (a const) equal to the
-  computed one. Locally 26 and 46 minutes. TEETH: one twiddle factor bent
-  must be refuted. Not yet: ML-DSA's NTT (the same method, waiting on its
+  computed one. CI run 37945935140 (job `saw-ntt`): five obligations in
+  1,791 s. TEETH: one twiddle factor bent, refuted with a counterexample. Not yet: ML-DSA's NTT (the same method, waiting on its
   multiply above) and ML-KEM's base-case multiply.
 
 ### PQ06 · ML-DSA (44/65/87)
