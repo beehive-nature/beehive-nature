@@ -1,0 +1,164 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ06 — ML-DSA's NTT and inverse NTT as ml-dsa 0.1.1 implements them,
+// against FIPS 204 Algorithms 41, 42 and 45 (pq06-cryptol/DsaNtt.cry), for every
+// polynomial with coefficients in the field.
+//
+// The Elem<BaseField> add, sub and neg instances ml-dsa calls are proven
+// equal to Field.cry (with their results below q). Elem mul is ASSUMED
+// equal to dsaMul here: this build is a debug build, whose overflow check
+// inside Barrett keeps the bitvector proof from closing; the field lane
+// (pq05-field-check.sh) ties mul to dsaMul in three links instead (the
+// release-semantics build equal to the Barrett algorithm, the Barrett
+// algorithm equal to x mod q by an integer proof). Then those stand in for
+// the calls, and the NTT is proven equal to Algorithm 41 with dsaAdd,
+// dsaSub and dsaMul uninterpreted, so the solver matches the 1,024
+// butterflies' structure with the crate's twiddle table (a const) against
+// the spec's computed one.
+//
+// The inverse is proven in parts, each proof standing in for the next: the
+// eight inverse layers ntt_inverse calls (one per length, each with its
+// running twiddle index going in and coming out), then the Elem-times-
+// Polynomial product by 256^-1 that ends it, then ntt_inverse itself.
+// Then multiply_ntt (Algorithm 45) with mul standing in.
+// dsaNeg stays interpreted: it only ever meets table constants, and SAW
+// folds the override's result on a constant to the constant.
+//
+// usage (from this directory): saw ntt.saw   with MIR and names.saw at ../../../target/saw-pq06-ntt/
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+import "../pq06-cryptol/DsaNtt.cry";
+include "../../../target/saw-pq06-ntt/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq06-ntt/pq06_ntt.linked-mir.json";
+let proven name = print (str_concat "PQ06-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+let unint = w4_unint_bitwuzla ["dsaAdd", "dsaSub", "dsaMul"];
+
+let elem_adt = mir_find_mangled_adt m elem_adt_name;
+let poly_adt = mir_find_mangled_adt m poly_adt_name;
+let npoly_adt = mir_find_mangled_adt m npoly_adt_name;
+let arr_adt = mir_find_mangled_adt m arr_adt_name;
+let elem_ty = mir_adt elem_adt;
+let elem v = mir_struct_value elem_adt [mir_term v];
+
+let binop_spec post = do {
+  a <- mir_fresh_var "a" mir_u32;
+  b <- mir_fresh_var "b" mir_u32;
+  mir_precond {{ a < 8380417 /\ b < 8380417 }};
+  mir_execute_func [elem a, elem b];
+  let r = post a b;
+  mir_return (elem r);
+  mir_postcond {{ r < 8380417 }};
+};
+ov_add <- mir_verify m add_name [] false (binop_spec (\a b -> {{ dsaAdd a b }})) bw;
+proven "ml-dsa Elem add";
+ov_sub <- mir_verify m sub_name [] false (binop_spec (\a b -> {{ dsaSub a b }})) bw;
+proven "ml-dsa Elem sub";
+ov_neg <- mir_verify m neg_name [] false (do {
+  a <- mir_fresh_var "a" mir_u32;
+  mir_precond {{ a < 8380417 }};
+  mir_execute_func [elem a];
+  let r = {{ dsaNeg a }};
+  mir_return (elem r);
+  mir_postcond {{ r < 8380417 }};
+}) bw;
+proven "ml-dsa Elem neg";
+ov_mul <- mir_unsafe_assume_spec m mul_name (binop_spec (\a b -> {{ dsaMul a b }}));
+print "PQ06-SAW ASSUMED ml-dsa Elem mul (tied by the field lane's three links)";
+
+let arr_of f = do {
+  xs <- for (eval_list {{ [0 .. 255] : [256][8] }}) (\i -> return (elem {{ f @ i }}));
+  return (mir_array_value elem_ty xs);
+};
+let poly_of adt f = do {
+  av <- arr_of f;
+  return (mir_struct_value adt [mir_struct_value arr_adt [av]]);
+};
+
+mir_verify m ntt_name [ov_add, ov_sub, ov_mul] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f }};
+  pv <- poly_of poly_adt f;
+  p <- mir_alloc (mir_adt poly_adt);
+  mir_points_to p pv;
+  mir_execute_func [p];
+  rv <- poly_of npoly_adt {{ ntt f }};
+  mir_return rv;
+}) unint;
+proven "ml-dsa ntt (FIPS 204 Algorithm 41)";
+
+// one inverse layer: w in place, the running index m from m0 down by the
+// group count; the result's coefficients stay below q
+let layer name m0 m1 spec = mir_verify m name [ov_add, ov_sub, ov_mul, ov_neg] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f }};
+  fv <- arr_of f;
+  wp <- mir_alloc_mut (mir_array 256 elem_ty);
+  mir_points_to wp fv;
+  mp <- mir_alloc_mut mir_usize;
+  mir_points_to mp (mir_term m0);
+  mir_execute_func [wp, mp];
+  let r = spec f;
+  rv <- arr_of r;
+  mir_points_to wp rv;
+  mir_points_to mp (mir_term m1);
+  mir_postcond {{ all (\x -> x < 8380417) r }};
+}) unint;
+ov_l1 <- layer inv_layer_1_name {{ 256 : [64] }} {{ 128 : [64] }} (\f -> {{ invLayer`{1, 128} 256 f }});
+proven "ml-dsa inverse layer len 1";
+ov_l2 <- layer inv_layer_2_name {{ 128 : [64] }} {{ 64 : [64] }} (\f -> {{ invLayer`{2, 64} 128 f }});
+proven "ml-dsa inverse layer len 2";
+ov_l4 <- layer inv_layer_4_name {{ 64 : [64] }} {{ 32 : [64] }} (\f -> {{ invLayer`{4, 32} 64 f }});
+proven "ml-dsa inverse layer len 4";
+ov_l8 <- layer inv_layer_8_name {{ 32 : [64] }} {{ 16 : [64] }} (\f -> {{ invLayer`{8, 16} 32 f }});
+proven "ml-dsa inverse layer len 8";
+ov_l16 <- layer inv_layer_16_name {{ 16 : [64] }} {{ 8 : [64] }} (\f -> {{ invLayer`{16, 8} 16 f }});
+proven "ml-dsa inverse layer len 16";
+ov_l32 <- layer inv_layer_32_name {{ 8 : [64] }} {{ 4 : [64] }} (\f -> {{ invLayer`{32, 4} 8 f }});
+proven "ml-dsa inverse layer len 32";
+ov_l64 <- layer inv_layer_64_name {{ 4 : [64] }} {{ 2 : [64] }} (\f -> {{ invLayer`{64, 2} 4 f }});
+proven "ml-dsa inverse layer len 64";
+ov_l128 <- layer inv_layer_128_name {{ 2 : [64] }} {{ 1 : [64] }} (\f -> {{ invLayer`{128, 1} 2 f }});
+proven "ml-dsa inverse layer len 128";
+
+ov_scale <- mir_verify m scale_name [ov_mul] false (do {
+  c <- mir_fresh_var "c" mir_u32;
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ c < 8380417 /\ all (\x -> x < 8380417) f }};
+  pv <- poly_of poly_adt f;
+  p <- mir_alloc (mir_adt poly_adt);
+  mir_points_to p pv;
+  mir_execute_func [elem c, p];
+  rv <- poly_of poly_adt {{ [ dsaMul c x | x <- f ] }};
+  mir_return rv;
+}) unint;
+proven "ml-dsa Elem * Polynomial";
+
+mir_verify m ntt_inverse_name [ov_l1, ov_l2, ov_l4, ov_l8, ov_l16, ov_l32, ov_l64, ov_l128, ov_scale] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f }};
+  pv <- poly_of npoly_adt f;
+  p <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to p pv;
+  mir_execute_func [p];
+  rv <- poly_of poly_adt {{ nttInverse f }};
+  mir_return rv;
+}) unint;
+proven "ml-dsa ntt_inverse (FIPS 204 Algorithm 42)";
+
+// Algorithm 45: the coefficient-wise product in the NTT domain
+mir_verify m multiply_ntt_name [ov_mul] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  g <- mir_fresh_var "g" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f /\ all (\x -> x < 8380417) g }};
+  fv <- poly_of npoly_adt f;
+  gv <- poly_of npoly_adt g;
+  fp <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to fp fv;
+  gp <- mir_alloc (mir_adt npoly_adt);
+  mir_points_to gp gv;
+  mir_execute_func [fp, gp];
+  rv <- poly_of npoly_adt {{ multiplyNtt f g }};
+  mir_return rv;
+}) unint;
+proven "ml-dsa multiply_ntt (FIPS 204 Algorithm 45)";

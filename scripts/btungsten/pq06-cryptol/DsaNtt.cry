@@ -1,0 +1,130 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ06 — ML-DSA's number-theoretic transform as FIPS 204
+// defines it: Algorithm 41 (NTT), Algorithm 42 (NTT^-1) and Algorithm 45
+// (MultiplyNTT), over the field
+// of ../pq05-cryptol/Field.cry (q = 8380417), the transform under every
+// ML-DSA-65 signature bsigner makes and checks.
+//
+// The constants are COMPUTED, not transcribed: ζ = 1753 (§7.5), the table is
+// zetas[m] = ζ^BitRev8(m) mod q with zetas[0] = 0 (the entry FIPS 204 never
+// reads), and 8347681 = 256^-1 mod q is checked by a closed term. The loops
+// follow the algorithms' order exactly (m is incremented before each use
+// going forward, decremented before each use going back, and the inverse
+// uses -zetas[m]), with the field operations as Field.cry's functions, so a
+// proof can keep those uninterpreted and match the shipped code.
+module DsaNtt where
+
+import Field
+
+bitRev8 : [8] -> [8]
+bitRev8 x = reverse x
+
+// 1753^e mod q
+zetaPow : [8] -> [32]
+zetaPow e = drop (foldl step (1 : [64]) [1 .. 255 : [8]])
+  where
+    step acc i = if i <= e then (acc * 1753) % 8380417 else acc
+
+zetas : [256][32]
+zetas = [ if m == 0 then 0 else zetaPow (bitRev8 m) | m <- [0 .. 255 : [8]] ]
+
+// ---- Algorithm 41 ------------------------------------------------------------
+
+fwd : [32] -> [9] -> [9] -> [256][32] -> [256][32]
+fwd z len j w = update (update w (j + len) (dsaSub (w @ j) t)) j (dsaAdd (w @ j) t)
+  where
+    t = dsaMul z (w @ (j + len))
+
+// one forward layer of twiddle table z; the m-th twiddle is used after m is
+// incremented
+fwdLayer : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 9 >= width len, 9 >= width groups)
+         => [256][32] -> [9] -> [256][32] -> [256][32]
+fwdLayer z m f = foldl grp f [0 .. groups - 1 : [9]]
+  where
+    grp g i = foldl (\h j -> fwd (z @ (m + i + 1)) `len (start + j) h) g [0 .. len - 1 : [9]]
+      where
+        start = 2 * `len * i
+
+// Algorithm 41 with twiddle table z (the teeth bend one entry)
+nttWith : [256][32] -> [256][32] -> [256][32]
+nttWith z f = l8
+  where
+    l1 = fwdLayer`{128, 1} z 0 f
+    l2 = fwdLayer`{64, 2} z 1 l1
+    l3 = fwdLayer`{32, 4} z 3 l2
+    l4 = fwdLayer`{16, 8} z 7 l3
+    l5 = fwdLayer`{8, 16} z 15 l4
+    l6 = fwdLayer`{4, 32} z 31 l5
+    l7 = fwdLayer`{2, 64} z 63 l6
+    l8 = fwdLayer`{1, 128} z 127 l7
+
+ntt : [256][32] -> [256][32]
+ntt = nttWith zetas
+
+// ---- Algorithm 42 ------------------------------------------------------------
+
+inv : [32] -> [9] -> [9] -> [256][32] -> [256][32]
+inv z len j w = update (update w j (dsaAdd t (w @ (j + len)))) (j + len) (dsaMul z (dsaSub t (w @ (j + len))))
+  where
+    t = w @ j
+
+// one inverse layer; m is decremented before each use, and the twiddle is
+// sign (zetas[m]) (a tooth passes a sign other than negation)
+invLayerWith : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 9 >= width len, 9 >= width groups)
+             => ([32] -> [32]) -> [9] -> [256][32] -> [256][32]
+invLayerWith sign m f = foldl grp f [0 .. groups - 1 : [9]]
+  where
+    grp g i = foldl (\h j -> inv (sign (zetas @ (m - i - 1))) `len (start + j) h) g [0 .. len - 1 : [9]]
+      where
+        start = 2 * `len * i
+
+// z = -zetas[m], as Algorithm 42 has it
+invLayer : {len, groups} (fin len, fin groups, len >= 1, groups >= 1, 9 >= width len, 9 >= width groups)
+         => [9] -> [256][32] -> [256][32]
+invLayer = invLayerWith`{len, groups} dsaNeg
+
+nttInverse : [256][32] -> [256][32]
+nttInverse f = [ dsaMul 8347681 x | x <- l8 ]
+  where
+    l1 = invLayer`{1, 128} 256 f
+    l2 = invLayer`{2, 64} 128 l1
+    l3 = invLayer`{4, 32} 64 l2
+    l4 = invLayer`{8, 16} 32 l3
+    l5 = invLayer`{16, 8} 16 l4
+    l6 = invLayer`{32, 4} 8 l5
+    l7 = invLayer`{64, 2} 4 l6
+    l8 = invLayer`{128, 1} 2 l7
+
+// ---- Algorithm 45 ------------------------------------------------------------
+
+// MultiplyNTT: the coefficient-wise product in the NTT domain
+multiplyNtt : [256][32] -> [256][32] -> [256][32]
+multiplyNtt f g = [ dsaMul a b | a <- f | b <- g ]
+
+// ---- closed checks -----------------------------------------------------------
+
+zetasMatchAppendixB : Bit
+property zetasMatchAppendixB = take`{5} zetas == [0, 4808194, 3765607, 3761513, 5178923]
+
+inverseOf256 : Bit
+property inverseOf256 = dsaMul 256 8347681 == 1
+
+// NTT^-1 undoes NTT on a fixed polynomial
+inverseUndoesForward : Bit
+property inverseUndoesForward = nttInverse (ntt f) == f
+  where
+    f = [ zext i * 32771 | i <- [0 .. 255 : [8]] ] : [256][32]
+
+// pointwise products in the NTT domain are the negacyclic product
+negacyclic : [256][32] -> [256][32] -> [256][32]
+negacyclic f g = [ coeff k | k <- [0 .. 255 : [9]] ]
+  where
+    coeff k = drop (foldl (\acc i -> (acc + term k i) % 8380417) (0 : [64]) [0 .. 255 : [9]])
+    term k i = if i <= k then prod i (k - i) else (8380417 - prod i (k + 256 - i)) % 8380417
+    prod i j = (zext (f @ i) * zext (g @ j)) % 8380417 : [64]
+
+nttMultipliesPolynomials : Bit
+property nttMultipliesPolynomials =
+  nttInverse (multiplyNtt (ntt f) (ntt g)) == negacyclic f g
+  where
+    f = [ zext i | i <- [0 .. 255 : [8]] ] : [256][32]
+    g = [ zext (i * 7 + 3) * 1001 | i <- [0 .. 255 : [8]] ] : [256][32]
