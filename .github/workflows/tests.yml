@@ -43,6 +43,12 @@ jobs:
         run: |
           test -x "$SETTLE_BSIGNER_BIN" || { echo "bsigner binary missing: a skipped suite is not a pass"; exit 1; }
           node --test bsigner-nerve.test.mjs
+      # SPEC-BTUNGSTEN-PQ-1 §PQ08: the law gate's second implementation. bsigner
+      # (RustCrypto ML-DSA-65) checks every docs/PQ-LAW.json file against its
+      # current bytes and a pinned signer; the noble half runs in the static job.
+      - name: Law signatures — the built bsigner verifies every law file, current and pinned
+        if: always()
+        run: sh scripts/verify-law-signatures-rust.sh target/debug/bsigner
       - name: Check formatting
         if: always()
         run: cargo fmt --all --check

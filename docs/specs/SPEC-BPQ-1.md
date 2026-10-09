@@ -112,10 +112,14 @@ is not signed: files get renamed, their bytes do not. In a repository the signat
 file as `<file>.bpqsig.json`; `node scripts/verify-bpq-signatures.mjs` checks every one in CI and
 `bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is the mechanism by
 which rulings, releases and archive manifests can carry an authorship proof that outlives Ed25519
-and the hosting account. It is not in force yet: no tracked file carries a `.bpqsig.json` (the
-script reports 0 of 0), and while `docs/PQ-SIGNERS.json` does not exist a signature that verifies
-proves only that some `bzpq1` key signed, not whose. Enforcement begins once
-`docs/PQ-SIGNERS.json` lists a signer.
+and the hosting account. In force for the law files (signed since 2026-10-05; enforced as below
+since 2026-10-08): `docs/PQ-LAW.json` names
+them, `docs/PQ-SIGNERS.json` pins the signer, and CI fails any law file whose signature is missing,
+from an unpinned key, or over an earlier version of the file (STALE), and any law-shaped file
+(`docs/CONSTITUTION.md`, `ORDERS-1.md`, `docs/RULINGS-*.md`) left out of the list. Both
+implementations run it: the script above (noble) and `scripts/verify-law-signatures-rust.sh`
+(bsigner). A changed law file turns green again only through the one-press "sign the law"
+(`surfaces/wallet.html#pq-law`).
 
 ## 4 · Sealed object (`bpq1`)
 
