@@ -470,9 +470,22 @@ pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static st
         r.row(Row::new(&format!("tcp-{}", fx.name), Class::Vector, &format!("two processes over loopback TCP, fixture {}: evaluator output equals the plaintext cardinality {want}; garbler receives nothing", fx.name))
             .expect(json!({ "evaluator": want.to_string(), "garbler": null }))
             .observe(samples_verdict(row_samples.into_iter()), json!({ "samples": samples, "outcomes": per.iter().map(|x| json!([x["garbler"]["outcome"], x["evaluator"]["outcome"]])).collect::<Vec<_>>() })));
+        // each role's own VmHWM from its RESULT line: wait4 cannot resolve a
+        // peak this small under the harness's own (measure.rs)
+        let hwm = |line: &str| {
+            summary(
+                &per.iter()
+                    .filter_map(|x| x[line]["vm_hwm_kib"].as_u64())
+                    .collect::<Vec<_>>(),
+            )
+        };
         tcp_meas.insert(
             fx.name.clone(),
-            json!({ "budget_ms": budget.as_millis() as u64, "sessions": per }),
+            json!({
+                "budget_ms": budget.as_millis() as u64,
+                "peak_rss_kib_self_reported": { "garbler": hwm("garbler_line"), "evaluator": hwm("evaluator_line") },
+                "sessions": per,
+            }),
         );
     }
     r.measure("runtime_tcp_processes", Value::Object(tcp_meas));
@@ -617,7 +630,7 @@ fn obs_set(v: &[Obs], base: &Path) -> Value {
         "wall_ns": summary(&pick(&|o| Some(o.wall_ns))),
         "user_cpu_us": summary(&pick(&|o| o.user_us)),
         "sys_cpu_us": summary(&pick(&|o| o.sys_us)),
-        "max_rss_kib": summary(&pick(&|o| o.max_rss_kib)),
+        "max_rss_kib": measure::rss_summary(v),
         "runs": v.iter().map(|o| o.json(base)).collect::<Vec<_>>(),
     })
 }

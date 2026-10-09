@@ -447,7 +447,7 @@ pub fn run(
         );
     }
     let pick = |f: &dyn Fn(&Obs) -> Option<u64>| st.iter().filter_map(f).collect::<Vec<u64>>();
-    r.measure("startup_crux_mir_version", json!({ "wall_ns": summary(&pick(&|o| Some(o.wall_ns))), "user_cpu_us": summary(&pick(&|o| o.user_us)), "max_rss_kib": summary(&pick(&|o| o.max_rss_kib)), "runs": st.iter().map(|o| o.json(out)).collect::<Vec<_>>() }));
+    r.measure("startup_crux_mir_version", json!({ "wall_ns": summary(&pick(&|o| Some(o.wall_ns))), "user_cpu_us": summary(&pick(&|o| o.user_us)), "max_rss_kib": measure::rss_summary(&st), "runs": st.iter().map(|o| o.json(out)).collect::<Vec<_>>() }));
     r.measure("compile", json!({
         "native_test_cold_including_test_run": native.json(out),
         "crux_builds": builds.iter().map(|o| o.json(out)).collect::<Vec<_>>(),
@@ -609,7 +609,7 @@ pub fn run(
             ver.insert(format!("{name}{suffix}"), json!({
                 "wall_ns": summary(&runs.iter().map(|o| o.wall_ns).collect::<Vec<_>>()),
                 "user_cpu_us": summary(&runs.iter().filter_map(|o| o.user_us).collect::<Vec<_>>()),
-                "max_rss_kib": summary(&runs.iter().filter_map(|o| o.max_rss_kib).collect::<Vec<_>>()),
+                "max_rss_kib": measure::rss_summary(&runs),
                 "runs": runs.iter().map(|o| o.json(out)).collect::<Vec<_>>(),
             }));
         }

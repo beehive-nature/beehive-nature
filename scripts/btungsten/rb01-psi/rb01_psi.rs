@@ -37,6 +37,9 @@
 //! before any byte reaches the network: the length must be a whole number of
 //! elements, the set must be non-empty, and no element may repeat.
 //!
+//! Each RESULT and ABORT line carries `vm_hwm_kib`, the process's own peak
+//! resident memory as the kernel counts it (`VmHWM`).
+//!
 //! Output, one line on stdout, then the exit code:
 //!   RB01-RESULT {json}    exit 0
 //!   RB01-REFUSAL {json}   exit 3   (input or handshake refused, no protocol run)
@@ -369,6 +372,7 @@ fn run_local(a: &[Vec<u8>], b: &[Vec<u8>], mode: &str) -> i32 {
                     "garbler": { "output": out_g.map(|v| v.to_string()), "phases": tg.json(), "bytes": ca.json() },
                     "evaluator": { "output": out_e.map(|v| v.to_string()), "phases": te.json(), "bytes": cb.json() },
                     "total_ns": total,
+                    "vm_hwm_kib": vm_hwm_kib(),
                 })
             );
             0
@@ -387,9 +391,20 @@ fn run_local(a: &[Vec<u8>], b: &[Vec<u8>], mode: &str) -> i32 {
 fn abort(stage: &str, error: &str, c: &Counters, io_timeout: bool) -> i32 {
     println!(
         "RB01-ABORT {}",
-        json!({ "stage": stage, "error": error, "io_timeout": io_timeout, "bytes": c.json() })
+        json!({ "stage": stage, "error": error, "io_timeout": io_timeout, "bytes": c.json(), "vm_hwm_kib": vm_hwm_kib() })
     );
     4
+}
+
+/// This process's peak resident memory (`VmHWM`, KiB), read from the kernel
+/// at the end of the run; null off Linux. The harness's `wait4` figure
+/// cannot resolve a peak below the harness's own (Linux carries a spawner's
+/// high-water mark into each child at exec), so each process reports its
+/// own, which starts afresh with the address space exec built.
+fn vm_hwm_kib() -> Option<u64> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let line = status.lines().find(|l| l.starts_with("VmHWM:"))?;
+    line.split_whitespace().nth(1)?.parse().ok()
 }
 
 fn param_digest(element_bytes: usize) -> [u8; 32] {
@@ -533,6 +548,7 @@ fn tcp_role(o: &Opts, role: u8) -> i32 {
                     "phases": t.json(),
                     "bytes": c.json(),
                     "total_ns": total,
+                    "vm_hwm_kib": vm_hwm_kib(),
                 })
             );
             0

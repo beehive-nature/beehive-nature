@@ -7,6 +7,16 @@
 //! `cargo` build includes its `rustc` processes). Wall time is measured
 //! around spawn and reap with a monotonic clock.
 //!
+//! Peak memory has a floor. Linux carries the spawning process's own peak
+//! resident set into each child at exec (`exec_mmap` folds the old address
+//! space's high-water mark into the child's `maxrss`), so `ru_maxrss` is at
+//! least this harness's own peak at the moment of the spawn: a 300 MB
+//! parent's `/bin/true` reports about 300 MB (fork+exec and `posix_spawn`
+//! alike, measured 2026-10-09). The harness reads its own high-water mark
+//! right after each spawn returns; a child's peak is reported only when
+//! `ru_maxrss` exceeds it, and is otherwise recorded as unresolved, with
+//! both numbers, rather than as the harness's peak under the child's name.
+//!
 //! A run that outlives its budget is killed with its whole process group and
 //! reported as `Exit::Budget`, never as a result. A run given a memory
 //! budget has its process group's resident memory sampled every 250 ms (the
@@ -88,7 +98,14 @@ pub struct Obs {
     pub wall_ns: u64,
     pub user_us: Option<u64>,
     pub sys_us: Option<u64>,
+    /// The child tree's peak resident memory, only when `ru_maxrss` exceeds
+    /// the harness's own peak at the spawn (see the module notes).
     pub max_rss_kib: Option<u64>,
+    /// `ru_maxrss` from `wait4` as the kernel reported it (Linux only).
+    pub ru_maxrss_kib: Option<u64>,
+    /// This harness's own peak resident memory, read right after the spawn
+    /// returned: a floor under `ru_maxrss_kib` (Linux only).
+    pub rss_floor_kib: Option<u64>,
     /// Peak resident memory of the process group, sampled every 250 ms;
     /// only for runs with a memory budget.
     pub group_rss_peak_kib: Option<u64>,
@@ -115,12 +132,21 @@ impl Obs {
     pub fn json(&self, base: &Path) -> Value {
         let rel = |p: &Path| p.strip_prefix(base).unwrap_or(p).display().to_string();
         let na = |v: Option<u64>| v.map_or(json!("unavailable"), |x| json!(x));
+        let peak = match (self.max_rss_kib, self.ru_maxrss_kib, self.rss_floor_kib) {
+            (Some(v), _, _) => json!(v),
+            (None, Some(raw), Some(floor)) => json!(format!(
+                "unresolved: at most {raw} KiB (ru_maxrss {raw} KiB does not exceed this harness's own peak, {floor} KiB, which Linux carries into each child at exec)"
+            )),
+            _ => json!("unavailable"),
+        };
         json!({
             "argv": self.argv,
             "wall_ns": self.wall_ns,
             "user_cpu_us": na(self.user_us),
             "sys_cpu_us": na(self.sys_us),
-            "max_rss_kib": na(self.max_rss_kib),
+            "max_rss_kib": peak,
+            "ru_maxrss_kib": na(self.ru_maxrss_kib),
+            "harness_rss_hwm_kib_after_spawn": na(self.rss_floor_kib),
             "group_rss_peak_kib_sampled": self.group_rss_peak_kib,
             "budget_ms": self.budget_ms,
             "exit": self.exit.json(),
@@ -136,6 +162,7 @@ pub struct Running {
     started: Instant,
     budget: Duration,
     spec: Spec,
+    rss_floor_kib: Option<u64>,
     #[cfg(unix)]
     rx: std::sync::mpsc::Receiver<(i32, libc::rusage, Instant)>,
     #[cfg(not(unix))]
@@ -172,6 +199,9 @@ pub fn spawn(spec: &Spec) -> std::io::Result<Running> {
         )
     })?;
     let pid = child.id();
+    // `spawn` returns once the child has exec'd, and a high-water mark only
+    // rises, so this bounds the peak the kernel carried into the child
+    let rss_floor_kib = own_peak_rss_kib();
     #[cfg(unix)]
     {
         // `child` is never waited on through std: the reaper thread owns it.
@@ -202,6 +232,7 @@ pub fn spawn(spec: &Spec) -> std::io::Result<Running> {
             started,
             budget: spec.budget,
             spec: spec.clone(),
+            rss_floor_kib,
             rx,
         })
     }
@@ -212,6 +243,7 @@ pub fn spawn(spec: &Spec) -> std::io::Result<Running> {
             started,
             budget: spec.budget,
             spec: spec.clone(),
+            rss_floor_kib,
             child,
         })
     }
@@ -283,6 +315,8 @@ impl Running {
             libc::kill(-(self.pid as libc::pid_t), libc::SIGKILL);
         }
         let tv = |t: libc::timeval| (t.tv_sec as u64) * 1_000_000 + t.tv_usec as u64;
+        // ru_maxrss is KiB on Linux only (macOS reports bytes)
+        let ru_maxrss_kib = cfg!(target_os = "linux").then_some(ru.ru_maxrss as u64);
         let exit = if let Some(k) = killed {
             k
         } else if libc::WIFEXITED(status) {
@@ -297,7 +331,9 @@ impl Running {
             wall_ns: ended.duration_since(self.started).as_nanos() as u64,
             user_us: Some(tv(ru.ru_utime)),
             sys_us: Some(tv(ru.ru_stime)),
-            max_rss_kib: Some(ru.ru_maxrss as u64),
+            max_rss_kib: resolved_peak(ru_maxrss_kib, self.rss_floor_kib),
+            ru_maxrss_kib,
+            rss_floor_kib: self.rss_floor_kib,
             group_rss_peak_kib: peak,
             budget_ms: self.budget.as_millis() as u64,
             exit,
@@ -327,6 +363,8 @@ impl Running {
             user_us: None,
             sys_us: None,
             max_rss_kib: None,
+            ru_maxrss_kib: None,
+            rss_floor_kib: self.rss_floor_kib,
             group_rss_peak_kib: None,
             budget_ms: self.budget.as_millis() as u64,
             exit,
@@ -357,6 +395,46 @@ fn group_rss_kib(pgid: u32) -> u64 {
         }
     }
     total
+}
+
+/// This process's own peak resident memory (`VmHWM`), KiB; Linux only.
+fn own_peak_rss_kib() -> Option<u64> {
+    if !cfg!(target_os = "linux") {
+        return None;
+    }
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let line = status.lines().find(|l| l.starts_with("VmHWM:"))?;
+    line.split_whitespace().nth(1)?.parse().ok()
+}
+
+/// A child's `ru_maxrss` names the child's own peak only above the floor the
+/// kernel carried in from this harness.
+fn resolved_peak(ru_maxrss_kib: Option<u64>, floor_kib: Option<u64>) -> Option<u64> {
+    match (ru_maxrss_kib, floor_kib) {
+        (Some(raw), Some(floor)) if raw > floor => Some(raw),
+        _ => None,
+    }
+}
+
+/// Peak-memory summary over a set of runs: the resolved peaks, and how many
+/// runs left theirs unresolved under the harness's own peak.
+pub fn rss_summary<'a>(runs: impl IntoIterator<Item = &'a Obs>) -> Value {
+    let runs: Vec<&Obs> = runs.into_iter().collect();
+    let mut v = crate::stats::summary(
+        &runs
+            .iter()
+            .filter_map(|o| o.max_rss_kib)
+            .collect::<Vec<_>>(),
+    );
+    let unresolved = runs
+        .iter()
+        .filter(|o| o.max_rss_kib.is_none() && o.ru_maxrss_kib.is_some())
+        .count();
+    if unresolved > 0 {
+        v["unresolved_runs"] = json!(unresolved);
+        v["unresolved_note"] = json!("ru_maxrss did not exceed this harness's own peak; each run's record keeps both numbers");
+    }
+    v
 }
 
 pub fn run(spec: &Spec) -> std::io::Result<Obs> {
@@ -442,7 +520,62 @@ mod tests {
         assert_eq!(o.exit, Exit::Code(3));
         assert_eq!(o.stdout_text(), "out\n");
         assert_eq!(o.stderr_text(), "err\n");
-        assert!(o.user_us.is_some() && o.max_rss_kib.unwrap() > 0);
+        assert!(o.user_us.is_some() && o.ru_maxrss_kib.unwrap() > 0);
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_child_smaller_than_the_harness_has_no_peak_reported_under_its_name() {
+        let d = tmp("floor");
+        // this process now peaks above 64 MiB; a shell that exits at once
+        // peaks at a few MiB, but the kernel reports at least our peak
+        let ballast = vec![1u8; 64 << 20];
+        let o = run(&Spec::new(
+            &["sh", "-c", "exit 0"],
+            &d,
+            Duration::from_secs(10),
+            &d.join("f"),
+        ))
+        .unwrap();
+        std::hint::black_box(&ballast);
+        let floor = o.rss_floor_kib.unwrap();
+        assert!(floor >= 64 * 1024, "{floor}");
+        assert!(
+            o.ru_maxrss_kib.unwrap() >= 60 * 1024,
+            "{:?}",
+            o.ru_maxrss_kib
+        );
+        assert_eq!(o.max_rss_kib, None);
+        assert!(o.json(&d)["max_rss_kib"]
+            .as_str()
+            .unwrap()
+            .starts_with("unresolved: at most"));
+        assert_eq!(rss_summary([&o])["unresolved_runs"], 1);
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_child_larger_than_the_harness_has_its_own_peak_reported() {
+        let d = tmp("peak");
+        // ~300 MB held in a shell variable: above anything this test binary holds
+        let o = run(&Spec::new(
+            &[
+                "sh",
+                "-c",
+                "x=$(head -c 300000000 /dev/zero | tr '\\0' a); echo ${#x}",
+            ],
+            &d,
+            Duration::from_secs(60),
+            &d.join("p"),
+        ))
+        .unwrap();
+        assert!(o.ok());
+        let peak = o.max_rss_kib.unwrap();
+        assert!(
+            peak > 250 * 1024 && peak > o.rss_floor_kib.unwrap(),
+            "{peak}"
+        );
+        assert_eq!(o.json(&d)["max_rss_kib"], peak);
         let _ = std::fs::remove_dir_all(&d);
     }
 

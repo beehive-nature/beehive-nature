@@ -583,7 +583,7 @@ fn obs_set(v: &[Obs], base: &Path) -> Value {
     json!({
         "wall_ns": summary(&pick(&|o| Some(o.wall_ns))),
         "user_cpu_us": summary(&pick(&|o| o.user_us)),
-        "max_rss_kib": summary(&pick(&|o| o.max_rss_kib)),
+        "max_rss_kib": measure::rss_summary(v),
         "runs": v.iter().map(|o| o.json(base)).collect::<Vec<_>>(),
     })
 }
