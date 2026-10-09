@@ -311,7 +311,70 @@ faithful-port row).
    Local runs may set `WB002_HTTP_PORT` and `WB002_P2P_PORT`; state and
    wallet directories are unique per invocation. Cleanup signals only
    owned child processes; occupied ports fail rather than evict siblings.
-6. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
+6. ~~WB003+ century leg~~ **DONE 2026-10-09** — the century ladder is its
+   own workbench (§ WB003 below). The SCALE half of axis 5 remains open.
+
+## WB003 — the century ladder (axis 6: repeated century transitions, 2026-10-09)
+
+The millennium question made executable: can a sovereign asset created
+under the 2019 software still be understood, authenticated, reconstructed,
+migrated and EXERCISED in 3019 — through repeated century transitions —
+with the killer invariant holding at every step and every boundary?
+SPEC §axis-6 honesty clause applies: this receipts the MECHANISMS on the
+model, never a thousand-year empirical claim.
+
+The schedule is FIXED and readable (no RNG): one spine born 2019 on the
+Specimen (an NFT credential whose idata is the COMMIT commitment, an NTT
+capability, a composed parent∋child object, a seven-century tenure, and
+sovereign funds), then ten centuries — C1 is THE EXTRACTION (Specimen →
+Adapter; the F-1 authorctrl confiscation seam is exercised once, named,
+and dies at the boundary), then per century: anchored migration with
+tamper refusal, author extinction (F-8 co-signed changeauthor), key and
+algorithm rotation (ed25519 → dilithium2 → sphincs-imp → ml-dsa-3019),
+partition+reorg with post-fork healing checkpoints, marketplace death,
+post-migration births, fragment poverty at every boundary.
+
+| artifact | status |
+|---|---|
+| `crates/btungsten-wb003` — the engine: `Engine::run()` walks the ten-century schedule; every action passes through `drive` (the killer invariant, consent captured before); every boundary re-derives the whole world from the last checkpoint + suffix ONLY and demands it equal canonical truth; receipts per century (steps/refusals/probes/migration/fingerprint/spine) | RUNS — `cargo test -p btungsten-wb003` (7 tests; the ladder prints its 11 receipts, 2019 → 3019) |
+| `crates/btungsten-wb003/tests/wb003.rs` — the ladder + the naive-importer teeth, the dead century (zero actions, fingerprint-stable), and one regression row per repaired seam (below) | RUNS in CI (workspace job, same glob as WB002) |
+
+### §findings — four migration seams, convicted red-first and repaired (2026-10-09)
+
+The ladder's first boundary went RED; the standalone rows convict each
+seam by name (red receipts quoted in
+`docs/dispatches/2026-10-09-btungsten-wb003-century.md`):
+
+- **R-A post-migration mint collision.** `import_state` did not advance
+  the successor's asset counter: the first post-migration mint reused a
+  MIGRATED id, putting one id in two scopes — the newborn resolved to the
+  OLD holder (the upstream #26 mis-assignment class, reproduced at a
+  migration boundary). REPAIR: the counter advances past every migrated
+  id (rows recursively, token ids, delegation asset ids).
+- **R-B live tenure lost from log truth.** A mid-delegation migration
+  re-planted the delegates table but emitted no event: table truth said
+  the lender, the successor's log fold said the borrower. REPAIR: import
+  emits `delegateopen` for each live tenure.
+- **R-C silent value drop.** A bundle FT naming a token the successor
+  has no contract for was silently skipped — funds lost without a
+  refusal. REPAIR: `bt-wb02:migration-unknown-ft` — value continuity or
+  refusal, never a silent drop.
+- **R-D contained structure invisible to the fold.** A composed
+  parent∋child object migrated as table state only; until the first
+  checkpoint the successor's fold could not see the child. REPAIR:
+  import emits the child's spawn + attach events.
+
+The WB002 battery (24 tests) stayed green through all four repairs; the
+46-step wasm corpus is untouched (it never imports).
+
+### §next
+
+1. **Scale half of axis 5** (the 10/100 GB storage ladder) — separate
+   lane, box-gated.
+2. **Live leg** (shared with WB002 §next 4): the century schedule against
+   a deployed contract.
+3. Century-depth variations: a schedule with a migration EVERY century;
+   adversarial fragment sets (corrupted checkpoints presented as truth).
 
 ## WB001 — the intent-binding invariant (LIVE in CI)
 
