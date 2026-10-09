@@ -10,7 +10,8 @@ name: bTunGsTeN PQ SAW
 # its Cryptol spec, deriveInjective and its neighbours on that spec, and four
 # teeth that must be refuted; and SHA-256 in sha2 0.10.9 (the soft path)
 # equal to FIPS 180-4, its tables, two-round function, schedule and 64-round
-# block, with two teeth. PQ05 and PQ06: the ML-KEM and ML-DSA NTTs and their
+# block, with two teeth, and HKDF-Expand(SHA-256) as bsigner runs it equal to
+# RFC 5869. PQ05 and PQ06: the ML-KEM and ML-DSA NTTs and their
 # inverses equal to FIPS 203 Algorithms 9 to 12 and FIPS 204 Algorithms 41,
 # 42 and 45. Toolchain pins and the mir-json cache are the
 # WB001/WB002 SAW workflows' (same key, same commit, same nightly).
@@ -103,6 +104,10 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq03-sha256-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
+      - name: PQ03 SAW — HKDF-Expand(SHA-256) in hkdf 0.12.4 / hmac 0.12.1 / sha2 0.10.9, PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
+        if: always()
+        shell: bash
+        run: sh scripts/btungsten/pq03-hkdf-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ05/PQ06 SAW — the ML-KEM and ML-DSA base fields (module-lattice 0.2.3), PIN + BUILD + EQUIVALENCE + TEETH
         if: always()
         shell: bash

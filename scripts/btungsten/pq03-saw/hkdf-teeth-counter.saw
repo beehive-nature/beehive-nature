@@ -1,0 +1,34 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TOOTH for hkdf.saw: reference_21 against the
+// first block computed with counter byte 0x02 (RFC 5869 starts T(1) at 0x01).
+// It MUST fail with a counterexample.
+//
+// usage (from this directory): saw hkdf-teeth-counter.saw
+
+enable_experimental;
+import "../pq03-cryptol/Sha256.cry";
+import "../pq03-cryptol/Hkdf.cry";
+
+m <- mir_load_module "../../../target/saw-pq03-hkdf/pq03_hkdf.linked-mir.json";
+ov_compress <- mir_unsafe_assume_spec m "sha2::sha256::x86::compress" (do {
+  st <- mir_fresh_var "st" (mir_array 8 mir_u32);
+  sp <- mir_alloc_mut (mir_array 8 mir_u32);
+  mir_points_to sp (mir_term st);
+  bs <- mir_fresh_var "bs" (mir_array 1 (mir_array 64 mir_u8));
+  bp <- mir_alloc (mir_array 1 (mir_array 64 mir_u8));
+  mir_points_to bp (mir_term bs);
+  mir_execute_func [sp, mir_slice_value bp];
+  mir_points_to sp (mir_term {{ compress st (split (join (bs @ 0))) }});
+});
+
+print "PQ03-SAW-TEETH obligation reference_21 against counter 0x02";
+mir_verify m "pq03_hkdf::reference_21" [ov_compress] false (do {
+  prk <- mir_fresh_var "prk" (mir_array 32 mir_u8);
+  pp <- mir_alloc (mir_array 32 mir_u8);
+  mir_points_to pp (mir_term prk);
+  info <- mir_fresh_var "info" (mir_array 21 mir_u8);
+  ip <- mir_alloc (mir_array 21 mir_u8);
+  mir_points_to ip (mir_term info);
+  mir_execute_func [pp, ip];
+  mir_return (mir_term {{ hmacSha256 prk (info # [0x02]) }});
+}) (w4_unint_bitwuzla ["compress"]);
+print "PQ03-SAW-TEETH UNEXPECTED-PROVEN reference_21 against counter 0x02";
