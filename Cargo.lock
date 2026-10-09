@@ -498,6 +498,27 @@ name = "bpq-core"
 version = "0.1.0"
 
 [[package]]
+name = "bpq-device-xcheck"
+version = "0.1.0"
+dependencies = [
+ "aes-gcm",
+ "bech32",
+ "bpq-core",
+ "btungsten-wb001",
+ "fips205",
+ "getrandom 0.2.17",
+ "hkdf",
+ "ml-dsa",
+ "ml-kem",
+ "serde_json",
+ "sha2 0.10.9",
+ "sha3 0.10.9",
+ "thiserror 2.0.18",
+ "x25519-dalek",
+ "zeroize",
+]
+
+[[package]]
 name = "bs58"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
