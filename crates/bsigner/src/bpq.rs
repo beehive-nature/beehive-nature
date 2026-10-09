@@ -46,27 +46,20 @@ use x25519_dalek::{PublicKey as XPublic, StaticSecret};
 use zeroize::{Zeroize, Zeroizing};
 
 use crate::b64;
+use bpq_core::layout::{self, nonce, FLAG_FINAL, FLAG_META, FLAG_MORE, FLAG_SEAL};
+
+/// A bpq1/ domain label, from bpq-core's proven table.
+fn dom(d: u8) -> &'static [u8] {
+    layout::domain(d)
+}
 
 // FROZEN v1 BYTE CONSTANTS — identical to surfaces/bpq.js. The derivation
-// labels live in bpq-core (`LABEL_STR`), where SAW proves every info string
-// they make injective (SPEC-BTUNGSTEN-PQ-1 PQ03).
-const DOM_ID: &[u8] = b"bpq1/id";
-const DOM_CARD: &[u8] = b"bpq1/card";
-const DOM_BIND: &[u8] = b"bpq1/bind";
-const DOM_DETACHED: &[u8] = b"bpq1/detached";
-const DOM_KC: &[u8] = b"bpq1/key-commit";
-const DOM_SEAL: &[u8] = b"bpq1/seal";
-const DOM_WRAP_SELF: &[u8] = b"bpq1/wrap/self";
-const DOM_WRAP_XWING: &[u8] = b"bpq1/wrap/x-wing";
+// labels (`bpq_core::LABEL_STR`) and the bpq1/ domain labels, nonces, segment
+// lengths and binding validators (`bpq_core::layout`) live in bpq-core, where
+// SAW proves them (SPEC-BTUNGSTEN-PQ-1 PQ03, PQ04).
 const MAGIC: [u8; 8] = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];
 const XWING_LABEL: &[u8] = b"\\.//^\\";
 const ID_HRP: &str = "bzpq";
-const SEG_MIN: u64 = 1024;
-const SEG_MAX: u64 = 16_777_216;
-const FLAG_MORE: u32 = 0;
-const FLAG_FINAL: u32 = 1;
-const FLAG_META: u32 = 2;
-const FLAG_SEAL: u32 = 3;
 const DSA_PK_LEN: usize = 1952;
 const XWING_PK_LEN: usize = 1216;
 const XWING_CT_LEN: usize = 1120;
@@ -104,13 +97,6 @@ fn hkdf32(ikm: &[u8], salt: &[u8], info: &[u8]) -> Zeroizing<[u8; 32]> {
     out
 }
 
-fn nonce(flag: u32, index: u64) -> [u8; 12] {
-    let mut n = [0u8; 12];
-    n[..4].copy_from_slice(&flag.to_be_bytes());
-    n[4..].copy_from_slice(&index.to_be_bytes());
-    n
-}
-
 fn gcm_seal(key: &[u8; 32], nonce_bytes: &[u8; 12], plain: &[u8], aad: &[u8]) -> Vec<u8> {
     Aes256Gcm::new_from_slice(key)
         .expect("a 32-byte key")
@@ -128,44 +114,16 @@ fn gcm_open(key: &[u8; 32], nonce_bytes: &[u8; 12], sealed: &[u8], aad: &[u8]) -
 /// `at` has the shape `YYYY-MM-DDTHH:MM:SS[.f{1,9}]Z` (the shape only: field
 /// ranges are not checked), the same pattern as bpq.js `AT_RE`. The signed
 /// bytes are "id\nat\nlines", so an
-/// `at` carrying a newline could move a claim line out of `claims`.
+/// `at` carrying a newline could move a claim line out of `claims`. The check
+/// is bpq-core's `utc_timestamp`, SAW-proven equal to that pattern (PQ04).
 fn is_utc_timestamp(s: &str) -> bool {
-    let b = s.as_bytes();
-    if b.len() < 20 {
-        return false;
-    }
-    let digits = |r: std::ops::Range<usize>| b[r].iter().all(u8::is_ascii_digit);
-    let head = digits(0..4)
-        && b[4] == b'-'
-        && digits(5..7)
-        && b[7] == b'-'
-        && digits(8..10)
-        && b[10] == b'T'
-        && digits(11..13)
-        && b[13] == b':'
-        && digits(14..16)
-        && b[16] == b':'
-        && digits(17..19);
-    let tail = &b[19..];
-    head && match tail {
-        [b'Z'] => true,
-        [b'.', frac @ .., b'Z'] => {
-            (1..=9).contains(&frac.len()) && frac.iter().all(u8::is_ascii_digit)
-        }
-        _ => false,
-    }
+    layout::Text::new(s.as_bytes()).is_some_and(|t| layout::utc_timestamp(&t))
 }
 
 /// A claim kind: `[a-z0-9][a-z0-9._-]{0,31}`, the same pattern as bpq.js
 /// `KIND_RE`. No '=' and no newline, so "kind=value" splits one way.
 fn is_claim_kind(k: &str) -> bool {
-    let b = k.as_bytes();
-    !b.is_empty()
-        && b.len() <= 32
-        && (b[0].is_ascii_lowercase() || b[0].is_ascii_digit())
-        && b[1..].iter().all(|c| {
-            c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, b'.' | b'_' | b'-')
-        })
+    layout::Text::new(k.as_bytes()).is_some_and(|t| layout::claim_kind(&t))
 }
 
 /// A whole number read by value, as JavaScript reads it: `1`, `1.0` and `1e0`
@@ -294,9 +252,9 @@ fn xwing_expand(seed: &[u8; 32]) -> (ml_kem::DecapsulationKey<MlKem768>, StaticS
 }
 
 /// Derive the ML-DSA-65 and X-Wing public keys and the vault key for one
-/// context. (The SLH-DSA succession key is derived in the browser; here its
-/// commitment is an input wherever the id is checked.) The reserved context
-/// `root` is refused: it belongs to the phrase-only vault, reached only through
+/// context. (The SLH-DSA succession key is [`succession_keys`], derived only
+/// when a card or a handover needs it.) The reserved context `root` is
+/// refused: it belongs to the phrase-only vault, reached only through
 /// `root_vault`, and never names a signing or X-Wing key.
 pub fn keys(master_prk: &[u8; 32], context: &str) -> Result<PqKeys, BpqError> {
     if context == ROOT_CONTEXT {
@@ -341,8 +299,6 @@ pub fn root_vault(master_prk: &[u8; 32]) -> Zeroizing<[u8; 32]> {
     vault
 }
 
-const DOM_SUCC: &[u8] = b"bpq1/succession";
-
 pub type SuccessionPublic = fips205::slh_dsa_shake_256f::PublicKey;
 pub type SuccessionSecret = fips205::slh_dsa_shake_256f::PrivateKey;
 
@@ -376,7 +332,7 @@ pub fn succession_keys(
 
 /// `successionCommit = SHA3-256("bpq1/succession" || SLH-DSA public key)`.
 pub fn succession_commit(slh_public: &[u8]) -> [u8; 32] {
-    sha3(&[DOM_SUCC, slh_public])
+    sha3(&[dom(layout::SUCCESSION), slh_public])
 }
 
 /// The self-certifying id: bech32m("bzpq", SHA3-256("bpq1/id" || ML-DSA-65
@@ -385,7 +341,7 @@ pub fn id_from(dsa_public: &[u8], succession_commit: &[u8]) -> Option<String> {
     if dsa_public.len() != DSA_PK_LEN || succession_commit.len() != 32 {
         return None;
     }
-    let d = sha3(&[DOM_ID, dsa_public, succession_commit]);
+    let d = sha3(&[dom(layout::ID), dsa_public, succession_commit]);
     bech32::encode(ID_HRP, d.to_base32(), Variant::Bech32m).ok()
 }
 
@@ -417,7 +373,7 @@ pub fn verify_card(card: &Value) -> bool {
     if kem.len() != XWING_PK_LEN || id_from(&dsa, &succ).as_deref() != card["id"].as_str() {
         return false;
     }
-    dsa_verify(&dsa, &[DOM_CARD, &dsa, &kem, &succ].concat(), &sig)
+    dsa_verify(&dsa, &[dom(layout::CARD), &dsa, &kem, &succ].concat(), &sig)
 }
 
 /// The public card of one context (SPEC-BPQ-1 §3): `{bpq:1, id, dsa, kem,
@@ -438,7 +394,7 @@ pub fn card(master_prk: &[u8; 32], context: &str) -> Result<Value, BpqError> {
     )?;
     let sk = SigningKey::<MlDsa65>::from_seed(&(*dsa_seed).into());
     let sig: Signature<MlDsa65> =
-        sk.sign(&[DOM_CARD, &k.dsa_public, &k.kem_public, &succ].concat());
+        sk.sign(&[dom(layout::CARD), &k.dsa_public, &k.kem_public, &succ].concat());
     Ok(serde_json::json!({
         "bpq": 1,
         "id": id_from(&k.dsa_public, &succ).expect("lengths are fixed"),
@@ -449,12 +405,11 @@ pub fn card(master_prk: &[u8; 32], context: &str) -> Result<Value, BpqError> {
     }))
 }
 
-const DOM_HANDOVER: &[u8] = b"bpq1/handover";
 const SLH_PK_LEN: usize = 64;
 
 fn handover_message(from: &str, to: &str, at: &str) -> Vec<u8> {
     [
-        DOM_HANDOVER,
+        dom(layout::HANDOVER),
         &sha3(&[format!("{from}\n{to}\n{at}").as_bytes()]),
     ]
     .concat()
@@ -561,7 +516,7 @@ pub fn verify_bind(b: &Value) -> bool {
         lines.push_str(&format!("{k}={v}\n"));
     }
     let digest = sha3(&[format!("{id}\n{at}\n{lines}").as_bytes()]);
-    dsa_verify(&dsa, &[DOM_BIND, &digest].concat(), &sig)
+    dsa_verify(&dsa, &[dom(layout::BIND), &digest].concat(), &sig)
 }
 
 /// A detached file signature: ML-DSA-65 over "bpq1/detached" || SHA3-256(file)
@@ -595,7 +550,7 @@ pub fn verify_detached(d: &Value, file: &[u8]) -> Option<String> {
         return None;
     }
     let meta = sha3(&[format!("{id}\n{at}\n{size}").as_bytes()]);
-    dsa_verify(&dsa, &[DOM_DETACHED, &fh, &meta].concat(), &sig).then(|| id.to_string())
+    dsa_verify(&dsa, &[dom(layout::DETACHED), &fh, &meta].concat(), &sig).then(|| id.to_string())
 }
 
 /// The 32-byte master PRK from a `bdidrec1…` recovery code (bech32m; payload
@@ -642,7 +597,7 @@ pub fn seal_self(plain: &[u8], vault: &[u8; 32]) -> Vec<u8> {
     let mut oid = [0u8; 16];
     getrandom::getrandom(file_key.as_mut()).expect("OS entropy");
     getrandom::getrandom(&mut oid).expect("OS entropy");
-    let kc = sha3(&[DOM_KC, &oid, file_key.as_ref()]);
+    let kc = sha3(&[dom(layout::KEY_COMMIT), &oid, file_key.as_ref()]);
     let core = format!(
         r#"{{"bpq":1,"aead":"aes-256-gcm","seg":{SEG_DEFAULT},"len":{},"oid":"{}","kc":"{}","rosetta":"{ROSETTA}"}}"#,
         plain.len(),
@@ -650,26 +605,26 @@ pub fn seal_self(plain: &[u8], vault: &[u8; 32]) -> Vec<u8> {
         b64::b64u(&kc)
     );
     let aad = sha3(&[core.as_bytes()]);
-    let kw = hkdf32(vault, &oid, DOM_WRAP_SELF);
+    let kw = hkdf32(vault, &oid, dom(layout::WRAP_SELF));
     let w = gcm_seal(&kw, &[0u8; 12], file_key.as_ref(), &aad);
     let keys = format!(r#"[{{"to":"self","w":"{}"}}]"#, b64::b64u(&w));
-    let n = if plain.is_empty() {
-        1
-    } else {
-        plain.len().div_ceil(SEG_DEFAULT)
-    };
-    let mut out = Vec::with_capacity(8 + 12 + core.len() + keys.len() + plain.len() + 16 * n);
+    // the same segment arithmetic open() reads with (bpq-core, PQ04)
+    let (len, seg) = (plain.len() as u64, SEG_DEFAULT as u64);
+    let n = layout::segment_count(len, seg);
+    let mut out = Vec::with_capacity(8 + 12 + core.len() + keys.len() + plain.len() + 16 * n as usize);
     out.extend_from_slice(&MAGIC);
     out.extend_from_slice(&(core.len() as u32).to_be_bytes());
     out.extend_from_slice(core.as_bytes());
     out.extend_from_slice(&(keys.len() as u32).to_be_bytes());
     out.extend_from_slice(keys.as_bytes());
     out.extend_from_slice(&0u32.to_be_bytes()); // META: none
+    let mut off = 0usize;
     for i in 0..n {
-        let chunk =
-            &plain[(i * SEG_DEFAULT).min(plain.len())..((i + 1) * SEG_DEFAULT).min(plain.len())];
+        let plain_len = layout::segment_plain_len(i, n, len, seg) as usize;
+        let chunk = &plain[off..off + plain_len];
+        off += plain_len;
         let flag = if i == n - 1 { FLAG_FINAL } else { FLAG_MORE };
-        out.extend_from_slice(&gcm_seal(&file_key, &nonce(flag, i as u64), chunk, &aad));
+        out.extend_from_slice(&gcm_seal(&file_key, &nonce(flag, i), chunk, &aad));
     }
     out.extend_from_slice(&0u32.to_be_bytes()); // SEAL: none
     out
@@ -779,7 +734,7 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     }
     let seg = core["seg"].as_u64().ok_or(BpqError::Format("seg"))?;
     let len = core["len"].as_u64().ok_or(BpqError::Format("len"))?;
-    if !(SEG_MIN..=SEG_MAX).contains(&seg) {
+    if !layout::seg_ok(seg) {
         return Err(BpqError::Format("seg range"));
     }
     // SPEC-BPQ-1 §6: an unknown slot `to` is refused, not skipped.
@@ -792,14 +747,12 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     let oid = unb64(&core["oid"])?;
     let kc = unb64(&core["kc"])?;
     let aad = sha3(&[core_b]);
-    let n = if len == 0 { 1 } else { len.div_ceil(seg) };
+    let n = layout::segment_count(len, seg);
     // A crafted len must not wrap: the body length is checked arithmetic and
-    // must fit inside the object before anything is allocated for it.
-    let body_len = n
-        .checked_mul(16)
-        .and_then(|t| t.checked_add(len))
+    // must fit inside the object before anything is allocated for it
+    // (bpq-core body_len; SAW proves bodyExact over it, PQ04).
+    let body_len = layout::body_len(len, seg, obj.len().saturating_sub(o) as u64)
         .and_then(|b| usize::try_from(b).ok())
-        .filter(|&b| b <= obj.len().saturating_sub(o))
         .ok_or(BpqError::Format("len does not fit the object"))?;
     let body = take(obj, &mut o, body_len)?;
     let s = read_u32(obj, o)?;
@@ -812,10 +765,10 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     let mut file_key: Option<Zeroizing<[u8; 32]>> = None;
     for slot in slots {
         let kw = match (slot["to"].as_str(), reader) {
-            (Some("self"), Reader::SelfVault(v)) => hkdf32(&v[..], &oid, DOM_WRAP_SELF),
+            (Some("self"), Reader::SelfVault(v)) => hkdf32(&v[..], &oid, dom(layout::WRAP_SELF)),
             (Some("x-wing"), Reader::XWing(keys)) => {
                 match keys.xwing_decapsulate(&unb64(&slot["ct"])?) {
-                    Some(ss) => hkdf32(&ss[..], &oid, DOM_WRAP_XWING),
+                    Some(ss) => hkdf32(&ss[..], &oid, dom(layout::WRAP_XWING)),
                     None => continue,
                 }
             }
@@ -824,7 +777,9 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
         let Some(got) = gcm_open(&kw, &[0u8; 12], &unb64(&slot["w"])?, &aad) else {
             continue;
         };
-        if got.len() == 32 && sha3(&[DOM_KC, &oid, &got]).as_slice() == kc.as_slice() {
+        if got.len() == 32
+            && sha3(&[dom(layout::KEY_COMMIT), &oid, &got]).as_slice() == kc.as_slice()
+        {
             let mut fk = Zeroizing::new([0u8; 32]);
             fk.copy_from_slice(&got);
             file_key = Some(fk);
@@ -833,15 +788,21 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     }
     let fk = file_key.ok_or(BpqError::NoKey)?;
 
+    // Every part is taken with a checked range, so no length can make the
+    // parser panic; segmentsTile and segmentsBridge (PQ04) are why an
+    // accepted object's parts tile its BODY exactly, so neither refusal below
+    // fires for one.
     let mut bytes = Vec::with_capacity(len as usize);
     let mut off = 0usize;
     for i in 0..n {
-        let plain_len = (if i == n - 1 { len - i * seg } else { seg }) as usize;
-        let part = &body[off..off + plain_len + 16];
-        off += plain_len + 16;
+        let plain_len = layout::segment_plain_len(i, n, len, seg) as usize;
+        let part = take(body, &mut off, plain_len + 16)?;
         let flag = if i == n - 1 { FLAG_FINAL } else { FLAG_MORE };
         let p = gcm_open(&fk, &nonce(flag, i), part, &aad).ok_or(BpqError::Auth("segment"))?;
         bytes.extend_from_slice(&p);
+    }
+    if off != body.len() {
+        return Err(BpqError::Format("segments do not tile the body"));
     }
     let meta = if meta_b.is_empty() {
         None
@@ -854,7 +815,7 @@ pub fn open(obj: &[u8], reader: &Reader) -> Result<Opened, BpqError> {
     } else {
         let p = gcm_open(&fk, &nonce(FLAG_SEAL, 0), seal_b, &aad);
         let msg = [
-            DOM_SEAL,
+            dom(layout::SEAL),
             &aad,
             &sha3(&[keys_b]),
             &sha3(&[meta_b]),
@@ -913,6 +874,11 @@ mod tests {
             );
         }
         assert!(seen.iter().all(|&s| s), "a label has no vector row");
+        // the browser's 24 words for this root read back to it here (PQ11)
+        assert_eq!(
+            *crate::bip39::master_prk_from_phrase(v["phrase"].as_str().unwrap()).unwrap(),
+            prk
+        );
     }
 
     #[test]
@@ -931,14 +897,15 @@ mod tests {
     // HKDF-SHA256 as expand_label and hkdf32 call it, on RFC 5869's three
     // SHA-256 cases (A.1-A.3): extract gives the RFC's PRK, and expand from
     // that PRK (the expand_label path) gives its OKM.
+    fn unhex(s: &str) -> Vec<u8> {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+            .collect()
+    }
+
     #[test]
     fn hkdf_sha256_passes_rfc5869_a1_to_a3() {
-        fn unhex(s: &str) -> Vec<u8> {
-            (0..s.len())
-                .step_by(2)
-                .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
-                .collect()
-        }
         let run = |from: u8, to: u8| (from..=to).collect::<Vec<u8>>();
         let cases: [(Vec<u8>, Vec<u8>, Vec<u8>, &str, &str); 3] = [
             (
@@ -974,6 +941,91 @@ mod tests {
                 .unwrap();
             assert_eq!(got, want, "A.{} OKM", n + 1);
         }
+    }
+
+    /// Appendix C of draft-connolly-cfrg-xwing-kem: one map of field name to
+    /// hex per vector. Page headers and footers split the hex blocks; a field
+    /// runs until the next field name. The same reading as
+    /// scripts/btungsten/pq05-xwing-draft.mjs.
+    fn xwing_draft_vectors(text: &str) -> Vec<std::collections::BTreeMap<String, String>> {
+        let start = text
+            .find("\nAppendix C.  Test vectors")
+            .expect("Appendix C");
+        let end = start + 1 + text[start + 1..].find("\nAppendix D.").expect("Appendix D");
+        let mut out: Vec<std::collections::BTreeMap<String, String>> = Vec::new();
+        let mut field: Option<String> = None;
+        for line in text[start..end].lines().skip(1).map(str::trim) {
+            let (head, rest) = line.split_once(char::is_whitespace).unwrap_or((line, ""));
+            let rest = rest.trim();
+            let is_hex = |s: &str| {
+                s.bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            };
+            if ["seed", "sk", "pk", "eseed", "ct", "ss"].contains(&head) && is_hex(rest) {
+                if head == "seed" {
+                    out.push(Default::default());
+                }
+                let v = out.last_mut().expect("a field before any seed");
+                v.insert(head.to_string(), rest.to_string());
+                field = Some(head.to_string());
+            } else if let (Some(f), false) = (&field, line.is_empty()) {
+                if is_hex(line) {
+                    out.last_mut().unwrap().get_mut(f).unwrap().push_str(line);
+                }
+            }
+        }
+        out
+    }
+
+    // X-Wing as bsigner runs it (the key from the seed, decapsulation) on the
+    // test vectors of draft-connolly-cfrg-xwing-kem Appendix C, at the
+    // revision scripts/btungsten/pq05-xwing-draft.json pins (SPEC-BTUNGSTEN-PQ-1
+    // PQ05). Ignored by default because the draft is fetched, never committed:
+    // CI runs it with BPQ_XWING_DRAFT naming the fetched, pin-checked file.
+    #[test]
+    #[ignore = "needs BPQ_XWING_DRAFT, the draft text CI fetches"]
+    fn xwing_matches_the_draft_vectors() {
+        let path = std::env::var("BPQ_XWING_DRAFT").expect("BPQ_XWING_DRAFT names the draft text");
+        let vectors = xwing_draft_vectors(&std::fs::read_to_string(path).unwrap());
+        assert!(
+            !vectors.is_empty(),
+            "the draft yielded no vectors (T-VACUOUS)"
+        );
+        for (i, v) in vectors.iter().enumerate() {
+            let seed: [u8; 32] = unhex(&v["seed"]).try_into().expect("a 32-byte seed");
+            let (dk, _, x_pk) = xwing_expand(&seed);
+            let mut pk = dk.encapsulation_key().to_bytes().to_vec();
+            pk.extend_from_slice(x_pk.as_bytes());
+            assert_eq!(pk, unhex(&v["pk"]), "vector {} public key", i + 1);
+            let keys = PqKeys {
+                dsa_public: Vec::new(),
+                kem_public: pk,
+                kem_seed: Zeroizing::new(seed),
+                vault: Zeroizing::new([0u8; 32]),
+            };
+            let ct = unhex(&v["ct"]);
+            let ss = keys.xwing_decapsulate(&ct).expect("a 1120-byte ciphertext");
+            assert_eq!(
+                ss.to_vec(),
+                unhex(&v["ss"]),
+                "vector {} shared secret",
+                i + 1
+            );
+            // TEETH: one ciphertext byte changed gives another secret
+            let mut bent = ct.clone();
+            bent[0] ^= 1;
+            assert_ne!(
+                keys.xwing_decapsulate(&bent).unwrap().to_vec(),
+                unhex(&v["ss"]),
+                "vector {}: a changed ciphertext kept the secret",
+                i + 1
+            );
+        }
+        println!(
+            "PQ05-XWING bsigner: {} of {} vectors pass (keygen, decapsulate, one changed ciphertext refused)",
+            vectors.len(),
+            vectors.len()
+        );
     }
 
     // The succession key, derived here and in the browser, must give the
@@ -1409,7 +1461,7 @@ mod tests {
 
     fn bind_msg(id: &str, at: &str, lines: &str) -> Vec<u8> {
         [
-            DOM_BIND,
+            dom(layout::BIND),
             &sha3(&[format!("{id}\n{at}\n{lines}").as_bytes()]),
         ]
         .concat()
@@ -1548,7 +1600,7 @@ mod tests {
             let meta = sha3(&[format!("{id}\n{at}\n4096").as_bytes()]);
             let mut x = d.clone();
             x["at"] = Value::from(at);
-            x["sig"] = Value::from(sign_as_a(&v, &[DOM_DETACHED, &fh, &meta].concat()));
+            x["sig"] = Value::from(sign_as_a(&v, &[dom(layout::DETACHED), &fh, &meta].concat()));
             x
         };
         assert!(
@@ -1706,16 +1758,19 @@ mod tests {
         let core = core
             .replace("{len}", &plain.len().to_string())
             .replace("{oid}", &b64::b64u(&oid))
-            .replace("{kc}", &b64::b64u(&sha3(&[DOM_KC, &oid, &fk])));
+            .replace(
+                "{kc}",
+                &b64::b64u(&sha3(&[dom(layout::KEY_COMMIT), &oid, &fk])),
+            );
         let aad = sha3(&[core.as_bytes()]);
-        let kw = hkdf32(vault, &oid, DOM_WRAP_SELF);
+        let kw = hkdf32(vault, &oid, dom(layout::WRAP_SELF));
         let mut slots =
             vec![json!({ "to": "self", "w": b64::b64u(&gcm_seal(&kw, &[0; 12], &fk, &aad)) })];
         slots.extend_from_slice(extra);
         let keys_b = serde_json::to_vec(&slots).unwrap();
         let body = gcm_seal(&fk, &nonce(FLAG_FINAL, 0), plain, &aad);
         let msg = [
-            DOM_SEAL,
+            dom(layout::SEAL),
             &aad,
             &sha3(&[keys_b.as_slice()]),
             &sha3(&[&[][..]]),

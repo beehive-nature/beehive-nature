@@ -132,7 +132,7 @@ Lane-specific teeth are named per lane below.
 | A4 | ML-KEM | FIPS 203 | X-Wing (768); bsigner exposes 512/768/1024 (`alg.rs:52-61`) | keyGen, encaps, decaps, both key checks | RustCrypto `ml-kem 0.3` (unaudited); noble | 768 keyGen + decap only |
 | A5 | X-Wing | draft-connolly-cfrg-xwing-kem (revision UNVERIFIED) | seal-to-me, QR bridge v2 | one set | bpq.rs over A1, A4, A8 | none |
 | A6 | ML-DSA | FIPS 204 | card, bind, detached, seal, cosign target, atmirror `keyAlg`, device; bsigner exposes 44/65/87 (`alg.rs:34-43`) | keyGen; sigGen (Rust: deterministic, empty context; browser: hedged, `bpq.js:194` passes no options and noble then adds 32 random bytes); sigVer | RustCrypto `ml-dsa 0.1` (unaudited); noble | 65 keyGen + sigVer only |
-| A7 | SLH-DSA-SHAKE-256f | FIPS 205 | succession key (SPEC-BPQ-1 §2, §5) | keyGen, sigGen, sigVer | noble only; Rust never derives it (`bpq.rs:9`, `:276`) | none |
+| A7 | SLH-DSA-SHAKE-256f | FIPS 205 | succession key (SPEC-BPQ-1 §2, §5) | keyGen, sigGen, sigVer | noble; since PQ07 also fips205 0.4.1 in bsigner (`bpq::succession_keys`, handover v1) | none at design time; PQ01 ACVP, PQ07 browser cross-check |
 | A8 | X25519 | RFC 7748 | X-Wing classical half, QR bridge | one | `x25519-dalek 2` | none |
 | A9 | Ed25519 | RFC 8032 | bzDiD record key, cosign, atmirror | sign, verify (strict) | libcrux-ed25519 (HACL*), dalek | DONE in WB001 (24/24 three-way + RFC) |
 | A10 | ECDSA secp256k1 | SEC 1, Antelope canonical form | Vaulta K1 (`bnr-keys`), Arweave 2.9 keys, EVM rails, atproto ES256K (low-S, `crates/atmirror/src/commit.rs:5-7`) | sign (RFC 6979), verify, recover | `k256 0.13`; noble/eosjs | none |
@@ -259,13 +259,21 @@ same cases (DIFFERENTIAL rides on KAT).
   `surfaces/onboarding/bzdid-key.js` (`deriveK1Key`). SPEC-BPQ-1 §2 states it.
   - EQUIVALENCE (`scripts/btungsten/pq03-saw/derive.saw`): `context_ok`,
     `args_ok`, `info_len`, `info_byte`, `info` equal to
-    `pq03-cryptol/BpqDerive.cry` for every input. The spec builds the info
-    string by OR-ing three shifted strings; the Rust places bytes one
-    position at a time.
+    `pq03-cryptol/BpqDerive.cry` for every input in their domains (`info`,
+    `context_ok` and `args_ok` for every input at all). The spec builds the
+    info string by OR-ing three shifted strings; the Rust places bytes one
+    position at a time. The HKDF call itself stays in bsigner
+    (`expand_label`, `hkdf32`); only the info string moved to bpq-core.
   - PROVE-UNIVERSAL (`injective.saw`): `labelsPrefixFree`, `infoFits`,
     `infoPadded`, `rootIsolated`, `deriveInjective`, over all seven labels,
     every admitted context (capacity 64, which is the whole rule) and every
-    counter.
+    counter. Two boundaries: the counter > 0 path is run only by the
+    browser's `deriveK1Key` (bsigner derives no K1 key and always passes
+    counter 0), so for it the proof covers the info construction the
+    browser mirrors, checked by DIFFERENTIAL on counter-0 rows only; and
+    `rootIsolated` is only the byte-0 fact, the separation of the root
+    vault being `keys()` refusing the exact string `root` plus
+    `deriveInjective`.
   - TEETH: `context_ok` asked to admit DEL; `deriveInjective` with
     `BDID-v1/vault` as a label (refuted: `(4, "-key…")` vs `(5, "…")`), with
     control bytes admitted (refuted: the counter-suffix pair), with the
@@ -304,6 +312,49 @@ The estate's own PQ glue, where its review findings lived.
     past the object and never allocates from an unchecked length).
 - **Accept:** each obligation PROVEN by name; bpq-vectors.json still passes
   byte for byte in Rust and JS after the refactor.
+- **Built 2026-10-09** (`crates/bpq-core/src/layout.rs`, which bsigner now
+  calls for every `bpq1/` label, nonce, segment length and binding
+  validator; `scripts/btungsten/pq04-cryptol/BpqLayout.cry`, `pq04-saw/`):
+  - The label table holds twelve, not ten: the nine of bpq.js, `cosign:`,
+    `bpq1/handover` (PQ07) and `bpq1/words` (bpq.js `words`).
+  - EQUIVALENCE `domain_byte`, `domain_len`, `nonce`, `seg_ok`,
+    `segment_count`, `body_len` (Some and None), `segment_plain_len`,
+    `utc_timestamp`, `claim_kind`; bsigner's `seal_self` and `open` both
+    cut segments with `segment_plain_len`. The last-segment length is now `len % seg` (or a whole
+    `seg`, or 0), with no multiplication or subtraction to wrap; the old
+    `len - i·seg` path carried 64-bit multiply and subtract overflow
+    obligations no solver here closed.
+  - PROVE-UNIVERSAL `domainsDisjoint`, `nonceInjective`, `bodyExact`,
+    `segmentsTile`, `segmentsBridge`, `atNoNewline`, `kindNoSeparator`,
+    `bindInjective`. 64-bit division defeats every bit-level solver on this
+    box (bitwuzla does not close `len % seg < seg` in 5 minutes), so the
+    segment facts split: `bodyExact` holds for ANY segment count
+    (segCount uninterpreted); `segmentsTile` is over the integers (z3,
+    division native); `segmentsBridge` says the bitvector definitions
+    compute those integers. `headTotal` became structural instead: bsigner
+    takes every part with a checked range and refuses parts that do not tile
+    the BODY, so no length can make it panic, and `segmentsTile` is why an
+    accepted object never meets that refusal.
+  - `bindInjective` is a bounded MODEL of bsigner `verify_bind` (the
+    63-byte id, up to two claims in any order, kinds and values up to 8
+    bytes); bsigner builds the signed bytes with `format!` and checks values
+    for CR/LF itself, and no Rust function is proven equal to the model's
+    preimage or value rule. What carries to every size: `atNoNewline` and
+    `kindNoSeparator` hold for every accepted `at` and kind (the proven
+    validators), the id is bech32 (no line break), and values are refused
+    if they hold CR or LF; with those, the decoding (split on line breaks,
+    then each line at its first '=') is the argument on paper, and the
+    bounded proof checks it where a solver can. The model leaves claim order
+    free (bsigner sorts; injectivity does not need it).
+  - TEETH: `utc_timestamp` asked to take a lowercase z; a prefix domain
+    (`bpq1/wrap`); the BODY check in wrapping arithmetic (refuted: len
+    2^64-1, seg 2^24); an empty last segment for an exact multiple; the at
+    validator dropped (the claim-stripping attack); '=' in a kind; and the
+    at, kind and value rules each loosened inside `bindInjective`.
+  - Not yet: the id, succession, card, detached, seal, bind and cosign
+    message layouts beyond their labels (Rust builds them by concatenation;
+    the bind preimage is modeled, not tied), and the CORE plain-integer
+    scan.
 
 ### PQ05 · ML-KEM + X-Wing
 
@@ -694,7 +745,13 @@ PQ00 teeth ──┬─> PQ01 vectors ──> PQ02 SHA-3 ──> PQ03 SHA-2/HKDF
 ## §8 · Open, named (not resolved here)
 
 - **X-Wing draft revision.** SPEC-BPQ-1 names the draft without a revision;
-  PQ05 records which revision's vectors ours reproduce.
+  PQ05 records which revision's vectors ours reproduce. Settled for the
+  browser 2026-10-09: bpq-lib's X-Wing (what bpq.js calls) passes all three
+  Appendix C vectors of draft-connolly-cfrg-xwing-kem-11 (the latest,
+  2026-09-23: keygen, encapsulation, decapsulation) and of -06; the
+  combiner in -11 still puts the label last, as SPEC-BPQ-1 §2 does. CI job
+  `pq05-xwing` pins -11 by size and SHA-256 and runs bsigner's keygen and
+  decapsulation on the same file.
 - **SPHINCS+ 3.1 vs FIPS 205** as a Cryptol oracle (PQ07).
 - **On-chain STARK verify fit.** Whether config K fits Vaulta's per-transaction
   CPU and NET limits is a measurement PQ10 makes on the rehearsal chain, not a

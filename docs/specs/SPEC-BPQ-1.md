@@ -81,6 +81,8 @@ that context's vault and X-Wing key.
 X-Wing: `SHAKE-256(seed, 96)`; bytes 0–63 are the ML-KEM-768 seed d‖z, bytes 64–95 the X25519
 secret. Public key = ML-KEM-768 encapsulation key (1184 B) ‖ X25519 public key (32 B). Shared
 secret = `SHA3-256(ss_M ‖ ss_X ‖ ct_X ‖ pk_X ‖ "\.//^\")`; ciphertext = ct_M (1088 B) ‖ ct_X (32 B).
+This is draft-connolly-cfrg-xwing-kem-11 (2026-09-23): CI job `pq05-xwing` runs both
+implementations on its Appendix C vectors (SPEC-BTUNGSTEN-PQ-1 PQ05).
 
 - `successionCommit = SHA3-256("bpq1/succession" ‖ slhPublicKey)` (SLH-DSA-SHAKE-256f pk, 64 B)
 - `id = bech32m("bzpq", SHA3-256("bpq1/id" ‖ mlDsaPublicKey ‖ successionCommit))`

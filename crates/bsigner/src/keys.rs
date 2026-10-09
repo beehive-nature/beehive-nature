@@ -44,9 +44,9 @@ const AT_REST: &str = "bpq1 sealed object (SPEC-BPQ-1 §4), one self slot under 
 pub struct Vault(Zeroizing<[u8; 32]>);
 
 impl Vault {
-    /// From a `bdidrec1…` recovery code.
+    /// From a `bdidrec1…` recovery code or the 24 recovery words.
     pub fn from_recovery_code(code: &str) -> Result<Self, String> {
-        let prk = bpq::master_prk_from_recovery_code(code).map_err(|e| e.to_string())?;
+        let prk = crate::bip39::master_prk_from_recovery(code)?;
         Ok(Self(bpq::root_vault(&prk)))
     }
 

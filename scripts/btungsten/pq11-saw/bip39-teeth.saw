@@ -1,0 +1,36 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ11 — TEETH for bip39.saw. Each MUST be refuted with
+// a counterexample.
+//
+//   lowBitsFirst     the Rust indices asked to equal a packing that reads each
+//                    11-bit group least significant bit first
+//   checksumIgnored  badChecksumRefused with a decoder that never compares the
+//                    checksum byte
+//
+// usage (from this directory): saw bip39-teeth.saw
+
+enable_experimental;
+import "../pq11-cryptol/Bip39.cry";
+
+m <- mir_load_module "../../../target/saw-pq11/bpq_core.linked-mir.json";
+
+let tooth name t = do {
+  print (str_concat "PQ11-SAW-TEETH obligation " name);
+  r <- prove (w4_unint_bitwuzla []) t;
+  caseProofResult r
+    (\_ -> print (str_concat "PQ11-SAW-TEETH UNEXPECTED-PROVEN " name))
+    (\cex -> do { print (str_concat "PQ11-SAW-TEETH REFUTED " name); print cex; });
+};
+
+tooth "checksumIgnored" {{ \e c h -> badChecksumRefusedW (\_ _ -> True) e c h }};
+
+let wrong_spec = do {
+  e <- mir_fresh_var "e" (mir_array 32 mir_u8);
+  r <- mir_alloc (mir_array 32 mir_u8);
+  mir_points_to r (mir_term e);
+  c <- mir_fresh_var "c" mir_u8;
+  mir_execute_func [r, mir_term c];
+  mir_return (mir_term {{ [ zext (reverse w) | w <- split (join e # c) : [24][11] ] : [24][16] }});
+};
+print "PQ11-SAW-TEETH obligation lowBitsFirst";
+mir_verify m "bpq_core::bip39::indices" [] false wrong_spec (w4_unint_bitwuzla []);
+print "PQ11-SAW-TEETH UNEXPECTED-PROVEN lowBitsFirst";

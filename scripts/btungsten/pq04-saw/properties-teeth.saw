@@ -1,0 +1,46 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ04 — TEETH for properties.saw. Each row loosens one
+// rule an obligation rests on and asks the obligation again; each MUST be
+// refuted with a counterexample.
+//
+//   prefixDomain    "bpq1/wrap" added as a label: a prefix of both wrap infos
+//   wrappingBody    the BODY length checked in 64-bit arithmetic: len 2^64-1
+//                   with seg 2^24 wraps len + 16·n below avail
+//   lastEmptyWhole  the last segment of an exact multiple read as 0 bytes, not
+//                   a whole seg: the segments no longer add up to len
+//   atAnyText       the at validator dropped (any 1-32 bytes): the claim-
+//                   stripping attack, an at carrying "\n" ends the line early
+//   kindWithEquals  '=' admitted in a kind: "a=b"="c" reads as "a"="b=c"
+//   bindAtAnyText   bindInjective with the at validator dropped
+//   bindKindEquals  bindInjective with '=' admitted in a kind: (a=b, c) and
+//                   (a, b=c) sign the same bytes
+//   bindValueLines  bindInjective with line breaks admitted in a value
+//
+// usage (from this directory): saw properties-teeth.saw
+
+import "../pq04-cryptol/BpqLayout.cry";
+
+let tooth_with name script t = do {
+  print (str_concat "PQ04-SAW-TEETH obligation " name);
+  r <- prove script t;
+  caseProofResult r
+    (\_ -> print (str_concat "PQ04-SAW-TEETH UNEXPECTED-PROVEN " name))
+    (\cex -> do { print (str_concat "PQ04-SAW-TEETH REFUTED " name); print cex; });
+};
+let tooth name t = tooth_with name (w4_unint_bitwuzla []) t;
+
+tooth "prefixDomain" {{
+  domainsDisjointW (update domains 12 (padD "bpq1/wrap")) (update domainLens 12 9) 13 }};
+
+tooth "wrappingBody" {{ \len seg avail -> bodyExactW bodyOkWrapping len seg avail }};
+
+tooth_with "lastEmptyWhole" (w4_unint_z3 []) {{ \l s -> segmentsTileW (lastLenW (\_ _ -> 0)) l s }};
+
+tooth "atAnyText" {{ \t -> noNewlineW (\u -> (u.len >= 1) /\ (u.len <= 32)) t }};
+
+tooth "kindWithEquals" {{ \t -> noSeparatorW (kindOkW (\b -> kindRest b \/ b == '=')) t }};
+
+tooth "bindAtAnyText" {{ \x y -> bindInjectiveW (\u -> (u.len >= 1) /\ (u.len <= 32)) kindRest valueByte x y }};
+
+tooth "bindKindEquals" {{ \x y -> bindInjectiveW atOk (\b -> kindRest b \/ b == '=') valueByte x y }};
+
+tooth "bindValueLines" {{ \x y -> bindInjectiveW atOk kindRest (\_ -> True) x y }};

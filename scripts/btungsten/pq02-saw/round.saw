@@ -1,0 +1,43 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — the harness reference against FIPS 202.
+//
+//   round_<ir>   pq02_harness::round(state, RC[ir]) leaves keccakRound ir state,
+//                for every state, at each round index 0..23
+//                (../pq02-cryptol/KeccakF1600.cry, written from FIPS 202)
+//   reference    pq02_harness::reference(state) leaves keccakF state, by the
+//                24 round specs as overrides: reference passes the harness's
+//                own RC table, so each call is also matched against the
+//                LFSR-derived constant of its round
+//
+// usage (from this directory): saw round.saw   with MIR at ../../../target/saw-pq02/
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness.linked-mir.json";
+
+let proven name = print (str_concat "PQ02-SAW PROVEN " name);
+
+let round_spec ir = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r, mir_term {{ RC (`ir : Integer) }}];
+  mir_points_to r (mir_term {{ keccakRound (`ir : Integer) st }});
+};
+
+round_ovs <- for (eval_list {{ [0 .. 23] : [24][8] }}) (\t -> do {
+  let ir = eval_int t;
+  ov <- mir_verify m "pq02_harness::round" [] false (round_spec ir) (w4_unint_bitwuzla []);
+  proven (str_concat "round_" (show ir));
+  return ov;
+});
+
+let reference_spec = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakF st }});
+};
+mir_verify m "pq02_harness::reference" round_ovs false reference_spec (w4_unint_bitwuzla ["keccakRound"]);
+proven "reference";

@@ -1,0 +1,129 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — Keccak-f[1600] as FIPS 202 §3 defines it, the
+// permutation under SHA3-256/512, SHAKE128/256, ML-KEM, ML-DSA, SLH-DSA-SHAKE,
+// X-Wing and every bpq1 id.
+//
+// Written from the standard, not from any implementation:
+//   - the state is 25 lanes of 64 bits, lane (x, y) at index 5y + x
+//     (the §3.1.2 string-to-state order), bit z of a lane = numeric bit z
+//   - the ρ offsets are COMPUTED by §3.2.2 Algorithm 2's (x, y) walk
+//   - the ι round constants are COMPUTED by §3.2.5 Algorithm 5's LFSR rc(t)
+//     and Algorithm 6's bit positions 2^j - 1
+// Nothing is transcribed. The closed-term checks at the bottom hold the
+// derivations against published values (Keccak team zero-state permutation,
+// FIPS 202 SHA3-256 examples); those values are checks, never definitions.
+module KeccakF1600 where
+
+type Lane = [64]
+type State = [25]Lane
+
+lane : State -> Integer -> Integer -> Lane
+lane A x y = A @ (5 * y + x)
+
+// §3.2.1 θ
+theta : State -> State
+theta A = [ lane A x y ^ D @ x | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+  where
+    C = [ foldl (^) zero [ lane A x y | y <- [0 .. 4 : Integer] ] | x <- [0 .. 4 : Integer] ] : [5]Lane
+    D = [ C @ ((x + 4) % 5) ^ (C @ ((x + 1) % 5) <<< 1) | x <- [0 .. 4 : Integer] ] : [5]Lane
+
+// §3.2.2 Algorithm 2: (x, y) starts at (1, 0); step t rotates by
+// (t + 1)(t + 2) / 2 mod 64, then (x, y) := (y, (2x + 3y) mod 5)
+rhoWalk : [24](Integer, Integer)
+rhoWalk = take`{24} ps
+  where
+    ps = [(1, 0)] # [ (y, (2 * x + 3 * y) % 5) | (x, y) <- ps ]
+
+rhoOffset : Integer -> Integer
+rhoOffset i =
+  foldl (\acc (t, (x, y)) -> if 5 * y + x == i then ((t + 1) * (t + 2) / 2) % 64 else acc)
+        0 (zip [0 .. 23 : Integer] rhoWalk)
+
+rho : State -> State
+rho A = [ (A @ i) <<< rhoOffset i | i <- [0 .. 24 : Integer] ]
+
+// §3.2.3 π: A'[x, y] = A[(x + 3y) mod 5, x]
+pi : State -> State
+pi A = [ lane A ((x + 3 * y) % 5) x | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+
+// §3.2.4 χ
+chi : State -> State
+chi A = [ lane A x y ^ (~ (lane A ((x + 1) % 5) y) && lane A ((x + 2) % 5) y)
+        | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+
+// §3.2.5 Algorithm 5: rc(t), an LFSR over R[0..7] with R[0] first
+lfsrStep : [8] -> [8]
+lfsrStep r = take`{8} [ if (i == 0) || (i == 4) || (i == 5) || (i == 6) then (r9 @ i) ^ (r9 @ 8) else r9 @ i
+                      | i <- [0 .. 8 : Integer] ]
+  where
+    r9 = [False] # r : [9]
+
+rc : Integer -> Bit
+rc t = if t % 255 == 0 then True else (iterate lfsrStep 0b10000000 @ (t % 255)) @ 0
+
+// §3.2.5 Algorithm 6: RC[2^j - 1] = rc(j + 7 i_r), every other bit 0
+RC : Integer -> Lane
+RC ir = foldl (||) zero [ if rc (j + 7 * ir) then (1 : Lane) << ((2 ^^ j) - 1) else zero | j <- [0 .. 6 : Integer] ]
+
+iota : Integer -> State -> State
+iota ir A = update A (0 : [5]) (A @ (0 : [5]) ^ RC ir)
+
+// §3.3 Rnd and Keccak-p[1600, 24] = Keccak-f[1600]
+keccakRound : Integer -> State -> State
+keccakRound ir A = iota ir (chi (pi (rho (theta A))))
+
+keccakF : State -> State
+keccakF A = foldl (\s ir -> keccakRound ir s) A [0 .. 23 : Integer]
+
+// ---- SHA3-256 on one block (messages shorter than the 136-byte rate) ----
+// §5.1 pad10*1 after the SHA-3 domain bits 01: byte 0x06 ... final byte | 0x80;
+// lanes are little-endian 8-byte groups (B.1).
+toLanes : [200][8] -> State
+toLanes bs = [ join (reverse (bs @@ [8 * i + k | k <- [0 .. 7 : Integer]])) | i <- [0 .. 24 : Integer] ]
+
+fromLanes : State -> [200][8]
+fromLanes A = join [ reverse (split`{8} l) | l <- A ]
+
+sha3_256_short : {n} (fin n, n < 136) => [n][8] -> [32][8]
+sha3_256_short m = take`{32} (fromLanes (keccakF (toLanes block)))
+  where
+    padded = m # [0x06] # zero : [136][8]
+    rateBlock = update padded (135 : [8]) (padded @ (135 : [8]) || 0x80)
+    block = rateBlock # zero : [200][8]
+
+// ---- closed-term checks (published values; checks, not definitions) ----
+
+// The Keccak team's KeccakF-1600 intermediate values: the permutation of
+// the all-zero state, first and last lanes.
+zeroStateFirstLane : Bit
+property zeroStateFirstLane = (keccakF zero) @ (0 : [5]) == 0xF1258F7940E1DDE7
+
+zeroStateLastLane : Bit
+property zeroStateLastLane = (keccakF zero) @ (24 : [5]) == 0xEAF1FF7B5CECA249
+
+// FIPS 202 example values (NIST CSRC SHA3-256 "" and "abc"), as four
+// 64-bit big-endian words of the digest.
+digestWords : [32][8] -> [4][64]
+digestWords d = [ join (d @@ [8 * i + k | k <- [0 .. 7 : Integer]]) | i <- [0 .. 3 : Integer] ]
+
+sha3EmptyDigest : Bit
+property sha3EmptyDigest = digestWords (sha3_256_short []) ==
+  [0xa7ffc6f8bf1ed766, 0x51c14756a061d662, 0xf580ff4de43b49fa, 0x82d80a4b80f8434a]
+
+sha3AbcDigest : Bit
+property sha3AbcDigest = digestWords (sha3_256_short "abc") ==
+  [0x3a985da74fe225b2, 0x045c172d6bd390bd, 0x855f086e3e9d525b, 0x46bfe24511431532]
+
+// The derived offsets are a permutation of the 24 non-zero lanes' needs:
+// lane 0 never rotates, and every other lane gets exactly one walk step.
+rhoWalkCoversEveryLaneOnce : Bit
+property rhoWalkCoversEveryLaneOnce =
+  rhoOffset 0 == 0 /\ and [ hits i == 1 | i <- [1 .. 24 : Integer] ]
+  where
+    hits i = foldl (+) 0 [ if 5 * y + x == i then 1 else 0 | (x, y) <- rhoWalk ] : Integer
+
+// TEETH spec: the same round with ONE ρ offset off by one (lane 1). The SAW
+// teeth obligation asks the harness round to equal THIS and must fail.
+keccakRoundRhoOffByOne : Integer -> State -> State
+keccakRoundRhoOffByOne ir A = iota ir (chi (pi (rhoBad (theta A))))
+  where
+    rhoBad S = [ (S @ i) <<< (if i == 1 then rhoOffset i + 1 else rhoOffset i) | i <- [0 .. 24 : Integer] ]

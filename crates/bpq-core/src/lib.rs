@@ -20,9 +20,15 @@
 //!
 //! Capacities, not lengths: a context is `{len, bytes}` with zero padding
 //! past `len` (`context_ok` requires it), the layout the WB001 model uses.
+//!
+//! PQ04, in [`layout`]: the `bpq1/` domain labels, the sealed-object nonce
+//! and segment arithmetic, and the binding validators.
 
 #![no_std]
 #![forbid(unsafe_code)]
+
+pub mod bip39;
+pub mod layout;
 
 /// `BDID-v1/ed25519-record-key`
 pub const ED25519_RECORD: u8 = 0;

@@ -8,7 +8,8 @@
 // The three classical labels come from surfaces/onboarding/bzdid-key.js's own
 // functions (deriveRecordKey, deriveK1Key, personaNullifier); the four PQ
 // labels from surfaces/bpq.js's HKDF, the same call its keys() makes. The
-// root is SHA-256 of a public sentence, so nothing here is a secret.
+// root is SHA-256 of a public sentence, so nothing here is a secret. The
+// root's 24 recovery words ride along for bsigner's BIP-39 reader (PQ11).
 //
 //   node scripts/build-derive-vectors.mjs          # write
 //   node scripts/build-derive-vectors.mjs --check  # rebuild in memory and compare
@@ -61,6 +62,9 @@ function build() {
     root: `sha256(utf8(${JSON.stringify(SENTENCE)}))`,
     rootFrom: SENTENCE,
     rows,
+    // the root as the 24 recovery words, from bzdid-key.js encodeRecoveryPhrase:
+    // bsigner (crates/bsigner/src/bip39.rs) must read the same root back
+    phrase: K.encodeRecoveryPhrase(root),
   };
 }
 

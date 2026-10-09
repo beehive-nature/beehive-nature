@@ -20,8 +20,8 @@
 //! COMMANDS:
 //!   Key files are sealed at rest under the owner's recovery words (keys.rs):
 //!   every command that touches a seed takes --rec-env VAR, the name of an
-//!   environment variable holding the bdidrec1 recovery code (never argv,
-//!   never printed).
+//!   environment variable holding the bdidrec1 recovery code or the 24
+//!   recovery words (never argv, never printed).
 //!   bsigner keygen --alg ml-dsa-65 --rec-env VAR [--keydir DIR]
 //!   bsigner keygen --alg ml-kem-768 --rec-env VAR [--keydir DIR]
 //!   bsigner sign --key-id ID --file PATH --rec-env VAR [--keydir DIR] [--out PATH]
@@ -59,6 +59,7 @@
 
 mod alg;
 mod b64;
+mod bip39;
 mod bpq;
 mod envelope;
 #[cfg(test)]
@@ -450,9 +451,9 @@ fn cmd_bpq_open(args: &[String]) -> i32 {
         Ok(c) => zeroize::Zeroizing::new(c),
         Err(_) => return fail(format!("environment variable {var} is not set")),
     };
-    let prk = match bpq::master_prk_from_recovery_code(&code) {
+    let prk = match bip39::master_prk_from_recovery(&code) {
         Ok(p) => p,
-        Err(e) => return fail(e.to_string()),
+        Err(e) => return fail(e),
     };
     // The phrase-only vault (context "root") first: every "only me" file the
     // wallet seals since 2026-10-04 opens with it. Then, when a context is
@@ -525,9 +526,9 @@ fn cmd_bpq_handover(args: &[String]) -> i32 {
         Ok(c) => zeroize::Zeroizing::new(c),
         Err(_) => return fail(format!("environment variable {var} is not set")),
     };
-    let prk = match bpq::master_prk_from_recovery_code(&code) {
+    let prk = match bip39::master_prk_from_recovery(&code) {
         Ok(p) => p,
-        Err(e) => return fail(e.to_string()),
+        Err(e) => return fail(e),
     };
     let at = o.at.clone().unwrap_or_else(|| keys::now_iso().0);
     let h = match bpq::handover(&prk, from, to, &at) {

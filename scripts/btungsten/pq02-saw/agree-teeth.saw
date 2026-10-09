@@ -1,0 +1,21 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TEETH for agree.saw: pq02_harness::agree_teeth
+// flips one output bit of the reference before comparing. Asking SAW to
+// prove it always true MUST fail with a counterexample.
+//
+// usage (from this directory): saw agree-teeth.saw
+
+enable_experimental;
+
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness.linked-mir.json";
+
+let wrong_spec = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_return (mir_term {{ True }});
+};
+
+print "PQ02-SAW-TEETH obligation agree with one reference bit flipped";
+mir_verify m "pq02_harness::agree_teeth" [] false wrong_spec (w4_unint_bitwuzla []);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN agree with one reference bit flipped";

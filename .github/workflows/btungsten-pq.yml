@@ -46,6 +46,25 @@ jobs:
           cargo build --locked --release -p btungsten-pq --bin pq-kat
           target/release/pq-kat --cache "$HOME/pq-vectors"
 
+  # X-Wing on the test vectors of draft-connolly-cfrg-xwing-kem at the pinned
+  # revision (scripts/btungsten/pq05-xwing-draft.json): the browser's
+  # keygen, encapsulation and decapsulation, and bsigner's keygen and
+  # decapsulation. The draft is fetched, pin-checked, never committed.
+  pq05-xwing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Fetch the pinned X-Wing draft
+        run: |
+          url=$(node -e "console.log(require('./scripts/btungsten/pq05-xwing-draft.json').url)")
+          curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/xwing-draft.txt" "$url"
+      - name: PQ05 browser X-Wing (bpq-lib, what bpq.js calls) on the draft vectors
+        run: node scripts/btungsten/pq05-xwing-draft.mjs "$RUNNER_TEMP/xwing-draft.txt"
+      - name: PQ05 bsigner X-Wing on the same vectors
+        run: BPQ_XWING_DRAFT="$RUNNER_TEMP/xwing-draft.txt" cargo test --locked -p bsigner --release xwing_matches_the_draft_vectors -- --ignored --nocapture
+
   # Plonky3 at eab7f0e, its own workspace (crates/btungsten-p3count). The
   # LEAK experiment is a registered single run (contracts/zkreceipts/leak/
   # PREREGISTERED-STARK-v2.md) and is not re-run per push.

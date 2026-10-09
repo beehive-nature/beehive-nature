@@ -1,0 +1,50 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ04 — PROVE-UNIVERSAL on ../pq04-cryptol/BpqLayout.cry.
+// layout.saw ties the Rust in crates/bpq-core/src/layout.rs to the domain
+// table, the nonce, the segment functions, atOk and kindOk. The binding
+// model (preimage, the value rule, the id shape) MODELS bsigner verify_bind,
+// which builds the signed bytes itself; no Rust function is proven equal to
+// it.
+//
+//   domainsDisjoint   no bpq1/ label is a byte prefix of another (12 labels)
+//   nonceInjective    distinct (flag, index) give distinct nonces
+//   bodyExact         when the BODY check accepts, len + 16·n neither wraps
+//                     nor leaves the object (segCount left uninterpreted: true
+//                     for any segment count)
+//   segmentsTile      over the integers: n ≥ 1, the last segment holds 1..seg
+//                     bytes (0 for an empty file), (n-1)·seg + last = len
+//   segmentsBridge    the bitvector segCount and lastLen compute exactly those
+//                     integers for every 64-bit len and seg in range
+//   atNoNewline       no accepted timestamp carries CR or LF
+//   kindNoSeparator   no accepted claim kind carries LF or '='
+//   bindInjective     two accepted bindings with the same signed preimage
+//                     are the same binding (bounded model: up to two claims
+//                     in any order, kinds and values up to 8 bytes, the
+//                     63-byte id)
+//
+// Division is why the segment facts are split: no bit-level solver here
+// closes 64-bit division (len % seg < seg alone times out in bitwuzla),
+// while z3 proves the integer statements at once.
+//
+// usage (from this directory): saw properties.saw
+
+import "../pq04-cryptol/BpqLayout.cry";
+
+let proven name = print (str_concat "PQ04-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+prove_print bw {{ domainsDisjoint }};
+proven "domainsDisjoint";
+prove_print bw {{ \f1 i1 f2 i2 -> nonceInjective f1 i1 f2 i2 }};
+proven "nonceInjective";
+prove_print (w4_unint_bitwuzla ["segCount"]) {{ \len seg avail -> bodyExact len seg avail }};
+proven "bodyExact";
+prove_print (w4_unint_z3 []) {{ \l s -> segmentsTile l s }};
+proven "segmentsTile";
+prove_print (w4_unint_z3 []) {{ \len seg -> segmentsBridge len seg }};
+proven "segmentsBridge";
+prove_print bw {{ \t -> atNoNewline t }};
+proven "atNoNewline";
+prove_print bw {{ \t -> kindNoSeparator t }};
+proven "kindNoSeparator";
+prove_print bw {{ \x y -> bindInjective x y }};
+proven "bindInjective";

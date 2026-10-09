@@ -1,0 +1,285 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ04 — SPEC-BPQ-1 byte layouts, written from the
+// spec text (§3 bindings, §4 sealed objects), not from crates/bpq-core.
+//
+//   domains        every bpq1/ label, and domainsDisjoint (prefix-free)
+//   nonceSpec      flag ‖ index, big-endian; nonceInjective
+//   segCount ...   the BODY's segmentation and length; bodyExact,
+//                  segmentsTile (integers), segmentsBridge
+//   atOk, kindOk   the binding validators, as character-class patterns;
+//                  atNoNewline, kindNoSeparator
+//   bindInjective  a binding's signed preimage "id\nat\n(kind=value\n)*"
+//                  decodes one way, in a bounded model (up to two claims,
+//                  kinds and values up to 8 bytes). The preimage, the value
+//                  rule and the id shape here MODEL bsigner verify_bind;
+//                  no Rust function is proven equal to them (bsigner builds
+//                  the bytes with format!). The validators it rests on for
+//                  `at` and the kinds are the proven ones.
+//
+// Rule tables are parameters (the W functions) so the teeth can loosen one
+// rule and watch the obligation fail.
+module BpqLayout where
+
+// ---- domains --------------------------------------------------------------
+
+type DomCap = 20
+
+padD : {n} (fin n, DomCap >= n) => [n][8] -> [DomCap][8]
+padD s = s # zero
+
+// sixteen slots so a 4-bit index never leaves the table; ids 12-15 are empty
+domains : [16][DomCap][8]
+domains = [ padD "bpq1/id", padD "bpq1/succession", padD "bpq1/card", padD "bpq1/bind"
+          , padD "bpq1/detached", padD "bpq1/key-commit", padD "bpq1/seal"
+          , padD "bpq1/wrap/self", padD "bpq1/wrap/x-wing", padD "bpq1/handover"
+          , padD "bpq1/cosign:", padD "bpq1/words", zero, zero, zero, zero ]
+
+domainLens : [16][32]
+domainLens = [ length "bpq1/id", length "bpq1/succession", length "bpq1/card", length "bpq1/bind"
+             , length "bpq1/detached", length "bpq1/key-commit", length "bpq1/seal"
+             , length "bpq1/wrap/self", length "bpq1/wrap/x-wing", length "bpq1/handover"
+             , length "bpq1/cosign:", length "bpq1/words", 0, 0, 0, 0 ]
+
+domainByte : [8] -> [32] -> [8]
+domainByte d k = if k < 20 then (domains @ (drop`{4} d)) @ k else 0
+
+domainLen : [8] -> [32]
+domainLen d = domainLens @ (drop`{4} d)
+
+prefixOfW : [16][DomCap][8] -> [16][32] -> [4] -> [4] -> Bit
+prefixOfW tbl lens i j =
+  (lens @ i <= lens @ j) /\
+  and [ (k >= lens @ i) \/ ((tbl @ i) @ k == (tbl @ j) @ k) | k <- [0 .. 19 : [32]] ]
+
+domainsDisjointW : [16][DomCap][8] -> [16][32] -> [4] -> Bit
+domainsDisjointW tbl lens count =
+  and [ (i == j) \/ (i >= count) \/ (j >= count) \/ ~ prefixOfW tbl lens i j
+      | i <- [0 .. 15 : [4]], j <- [0 .. 15 : [4]] ]
+
+// no label is a byte prefix of another, so no byte string is a message,
+// preimage or wrap info of two kinds
+domainsDisjoint : Bit
+property domainsDisjoint = domainsDisjointW domains domainLens 12
+
+// ---- nonce ------------------------------------------------------------------
+
+nonceSpec : [32] -> [64] -> [12][8]
+nonceSpec flag index = split (flag # index)
+
+nonceInjective : [32] -> [64] -> [32] -> [64] -> Bit
+property nonceInjective f1 i1 f2 i2 =
+  nonceSpec f1 i1 == nonceSpec f2 i2 ==> (f1 == f2) /\ (i1 == i2)
+
+// ---- segments ---------------------------------------------------------------
+
+segMin : [64]
+segMin = 1024
+segMax : [64]
+segMax = 16777216
+
+segOk : [64] -> Bit
+segOk seg = (segMin <= seg) /\ (seg <= segMax)
+
+segCount : [64] -> [64] -> [64]
+segCount len seg = if len == 0 then 1 else len / seg + (if len % seg == 0 then 0 else 1)
+
+// len + 16·n computed wide: refused if it does not fit in 64 bits or in avail
+bodyWide : [64] -> [64] -> [128]
+bodyWide len seg = zext (segCount len seg) * 16 + zext len
+
+bodyOk : [64] -> [64] -> [64] -> Bit
+bodyOk len seg avail = bodyWide len seg <= zext avail
+
+bodyLen : [64] -> [64] -> [64]
+bodyLen len seg = drop`{64} (bodyWide len seg)
+
+// the last segment holds the rest: len % seg, a whole seg when that is 0,
+// nothing for an empty file
+lastLen : [64] -> [64] -> [64]
+lastLen len seg = if len == 0 then 0 else if len % seg == 0 then seg else len % seg
+
+plainLen : [64] -> [64] -> [64] -> [64] -> [64]
+plainLen i n len seg = if i + 1 < n then seg else lastLen len seg
+
+// The segment facts split in two, because no bit-level solver closes 64-bit
+// division (even len % seg < seg times out): what depends only on the count
+// n is proven with segCount uninterpreted; what depends on division itself
+// is proven over the integers, where division is native, and the bridge
+// says the bitvector definitions compute those integers.
+
+// when the BODY check accepts, len + 16·n neither wraps nor leaves the object
+bodyExactW : ([64] -> [64] -> [64] -> Bit) -> [64] -> [64] -> [64] -> Bit
+bodyExactW fits len seg avail =
+  (segOk seg /\ fits len seg avail) ==>
+    (zext (bodyLen len seg) == bodyWide len seg)
+    /\ (bodyLen len seg <= avail)
+    /\ (len <= bodyLen len seg)
+
+bodyExact : [64] -> [64] -> [64] -> Bit
+property bodyExact = bodyExactW bodyOk
+
+// the same length test in 64-bit arithmetic, where len + 16·n can wrap
+bodyOkWrapping : [64] -> [64] -> [64] -> Bit
+bodyOkWrapping len seg avail = segCount len seg * 16 + len <= avail
+
+segCountI : Integer -> Integer -> Integer
+segCountI l s = if l == 0 then 1 else l / s + (if l % s == 0 then 0 else 1)
+
+lastLenW : (Integer -> Integer -> Integer) -> Integer -> Integer -> Integer
+lastLenW whole l s = if l == 0 then 0 else if l % s == 0 then whole l s else l % s
+
+lastLenI : Integer -> Integer -> Integer
+lastLenI = lastLenW (\_ s -> s)
+
+// the segments tile the plaintext exactly: n ≥ 1, the first n-1 hold seg
+// bytes each and the last holds the rest (1..seg bytes, or 0 for an empty
+// file), adding up to len
+segmentsTileW : (Integer -> Integer -> Integer) -> Integer -> Integer -> Bit
+segmentsTileW lastRule l s =
+  ((0 <= l) /\ (l < 2 ^^ 64) /\ (1024 <= s) /\ (s <= 16777216)) ==>
+    (n >= 1) /\ (f <= s) /\ ((l == 0) \/ (f >= 1)) /\ ((n - 1) * s + f == l)
+  where
+    n = segCountI l s
+    f = lastRule l s
+
+segmentsTile : Integer -> Integer -> Bit
+property segmentsTile = segmentsTileW lastLenI
+
+// the bitvector definitions the Rust is proven equal to compute exactly
+// those integers: plainLen of the last segment is lastLen
+segmentsBridge : [64] -> [64] -> Bit
+property segmentsBridge len seg =
+  segOk seg ==>
+    (toInteger (segCount len seg) == segCountI (toInteger len) (toInteger seg))
+    /\ (toInteger (lastLen len seg) == lastLenI (toInteger len) (toInteger seg))
+
+// ---- binding validators -------------------------------------------------------
+
+type TextCap = 32
+type Text = { len : [32], bytes : [TextCap][8] }
+
+digit : [8] -> Bit
+digit b = ('0' <= b) /\ (b <= '9')
+
+// a character class per position: 'D' a digit, anything else itself
+classMatch : {n} (fin n) => [n][8] -> [n][8] -> Bit
+classMatch pat s = and [ if p == 'D' then digit c else c == p | p <- pat | c <- s ]
+
+// AT_RE = ^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{1,9})?Z$
+atOk : Text -> Bit
+atOk t =
+  classMatch "DDDD-DD-DDTDD:DD:DD" (take`{19} t.bytes)
+  /\ ((t.len == 20 /\ t.bytes @ 19 == 'Z')
+      \/ or [ (t.len == 21 + k) /\ (t.bytes @ 19 == '.')
+              /\ and [ (i >= k) \/ digit (t.bytes @ (20 + i)) | i <- [0 .. 8 : [32]] ]
+              /\ (t.bytes @ (20 + k) == 'Z')
+            | k <- [1 .. 9 : [32]] ])
+
+kindFirst : [8] -> Bit
+kindFirst b = (('a' <= b) /\ (b <= 'z')) \/ digit b
+
+kindRest : [8] -> Bit
+kindRest b = kindFirst b \/ b == '.' \/ b == '_' \/ b == '-'
+
+kindOkW : ([8] -> Bit) -> Text -> Bit
+kindOkW rest t =
+  (t.len >= 1) /\ (t.len <= 32) /\ kindFirst (t.bytes @ 0)
+  /\ and [ (i == 0) \/ (i >= t.len) \/ rest b | b <- t.bytes | i <- [0 .. 31 : [32]] ]
+
+// KIND_RE = ^[a-z0-9][a-z0-9._-]{0,31}$
+kindOk : Text -> Bit
+kindOk = kindOkW kindRest
+
+noNewlineW : (Text -> Bit) -> Text -> Bit
+noNewlineW rule t =
+  rule t ==> and [ (i >= t.len) \/ (b != '\n' /\ b != '\r') | b <- t.bytes | i <- [0 .. 31 : [32]] ]
+
+// no accepted `at` carries a line break, so it cannot end the line early
+atNoNewline : Text -> Bit
+property atNoNewline = noNewlineW atOk
+
+noSeparatorW : (Text -> Bit) -> Text -> Bit
+noSeparatorW rule t =
+  rule t ==> and [ (i >= t.len) \/ (b != '\n' /\ b != '=') | b <- t.bytes | i <- [0 .. 31 : [32]] ]
+
+// no accepted kind carries a line break or '=', so "kind=value" splits once
+kindNoSeparator : Text -> Bit
+property kindNoSeparator = noSeparatorW kindOk
+
+// ---- bindInjective: a bounded model of the signed preimage ----------------------
+
+type IdLen = 63
+type SCap = 8
+type Small = { len : [32], bytes : [SCap][8] }
+type Claim = { kind : Small, value : Small }
+type Bind = { id : [IdLen][8], at : Text, n : [2], claims : [2]Claim }
+type PreCap = 133
+
+bech32 : [8] -> Bit
+bech32 c = c == '0' \/ (('2' <= c) /\ (c <= '9')) \/ c == 'a' \/ (('c' <= c) /\ (c <= 'h'))
+           \/ (('j' <= c) /\ (c <= 'n')) \/ (('p' <= c) /\ (c <= 'z'))
+
+// the wallet's id shape: bzpq1 + 58 bech32m letters
+idOk : [IdLen][8] -> Bit
+idOk id = (take`{5} id == "bzpq1") /\ all bech32 (drop`{5} id)
+
+padded : {cap} (fin cap, cap >= 1, 32 >= width (cap - 1)) => [32] -> [cap][8] -> Bit
+padded len bs = and [ (i < len) \/ (b == 0) | b <- bs | i <- [0 .. cap - 1] ]
+
+// KIND_RE at the model's 8-byte capacity (kindOk is the same pattern at 32,
+// the one the Rust is proven against), with the tail class a parameter
+smallKindOkW : ([8] -> Bit) -> Small -> Bit
+smallKindOkW rest s = (s.len >= 1) /\ (s.len <= 8) /\ padded s.len s.bytes /\ kindFirst (s.bytes @ 0)
+                    /\ and [ (i == 0) \/ (i >= s.len) \/ rest b | b <- s.bytes | i <- [0 .. 7 : [32]] ]
+
+// a claim value: nonempty, no CR or LF (bsigner verify_bind, bpq.js bind;
+// that check is bsigner code, not a proven function)
+valueOkW : ([8] -> Bit) -> Small -> Bit
+valueOkW allowed s = (s.len >= 1) /\ (s.len <= 8) /\ padded s.len s.bytes
+                   /\ and [ (i >= s.len) \/ allowed b | b <- s.bytes | i <- [0 .. 7 : [32]] ]
+
+valueByte : [8] -> Bit
+valueByte b = (b != '\n') /\ (b != '\r')
+
+// The claims are NOT required to be sorted: bsigner sorts them so a claim
+// set has one preimage, but injectivity holds for every order, so leaving
+// the order free makes the theorem stronger.
+bindOkW : (Text -> Bit) -> ([8] -> Bit) -> ([8] -> Bit) -> Bind -> Bit
+bindOkW atRule kindRule valueRule x =
+  idOk x.id /\ atRule x.at /\ padded x.at.len x.at.bytes /\ (x.n <= 2)
+  /\ and [ if j < x.n then smallKindOkW kindRule c.kind /\ valueOkW valueRule c.value else c == zero
+         | c <- x.claims | j <- [0, 1 : [2]] ]
+
+widenP : {n} (fin n, PreCap >= n) => [n][8] -> [PreCap][8]
+widenP xs = xs # zero
+
+lineBytes : Claim -> [PreCap][8]
+lineBytes c = widenP c.kind.bytes || (widenP ['='] >> c.kind.len)
+            || (widenP c.value.bytes >> (c.kind.len + 1))
+            || (widenP ['\n'] >> (c.kind.len + 1 + c.value.len))
+
+lineLen : Claim -> [32]
+lineLen c = c.kind.len + c.value.len + 2
+
+// "id\nat\n" then one "kind=value\n" per claim, zero-padded, and its length
+preimage : Bind -> ([PreCap][8], [32])
+preimage x = (bytes, headLen + l0 + l1)
+  where
+    headLen = 65 + x.at.len
+    hd = widenP x.id || (widenP ['\n'] >> (63 : [32])) || (widenP x.at.bytes >> (64 : [32]))
+         || (widenP ['\n'] >> (64 + x.at.len))
+    c0 = x.claims @ 0
+    c1 = x.claims @ 1
+    l0 = if x.n >= 1 then lineLen c0 else 0
+    l1 = if x.n == 2 then lineLen c1 else 0
+    bytes = hd || (if x.n >= 1 then lineBytes c0 >> headLen else zero)
+                 || (if x.n == 2 then lineBytes c1 >> (headLen + l0) else zero)
+
+bindInjectiveW : (Text -> Bit) -> ([8] -> Bit) -> ([8] -> Bit) -> Bind -> Bind -> Bit
+bindInjectiveW atRule kindRule valueRule x y =
+  (bindOkW atRule kindRule valueRule x /\ bindOkW atRule kindRule valueRule y
+   /\ preimage x == preimage y) ==> x == y
+
+// two accepted bindings with the same signed preimage are the same binding
+// (in the bounded model)
+bindInjective : Bind -> Bind -> Bit
+property bindInjective = bindInjectiveW atOk kindRest valueByte

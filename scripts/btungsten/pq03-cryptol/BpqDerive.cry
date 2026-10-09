@@ -122,14 +122,17 @@ injectiveW tbl lens rule cap l1 c1 k1' l2 c2 k2' =
   ==> ((l1 == l2) /\ (c1 == c2) /\ (k1' == k2'))
 
 // two different admitted (label, context, counter) triples never give the
-// same info string, so never the same HKDF output
+// same info string, so no two derivations share an HKDF input (that their
+// outputs then look independent is HKDF's PRF property, not proven here)
 deriveInjective : [8] -> Context -> [8] -> [8] -> Context -> [8] -> Bit
 property deriveInjective = injectiveW labels labelLens contextOk 31
 
 rootContext : Context
 rootContext = { len = 4, bytes = "root" # zero }
 
-// the phrase-only vault's context is never a wallet persona context
+// the phrase-only vault's context is never a wallet persona context. This is
+// only the byte-0 fact ("r" is not "p"); what keeps the root vault apart is
+// keys() refusing the exact string "root" plus deriveInjective.
 rootIsolated : Context -> Bit
 property rootIsolated c =
   (contextOk c /\ (c.len >= 3) /\ (take`{3} c.bytes == "pq:")) ==> (c != rootContext)
