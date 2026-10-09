@@ -1,0 +1,16 @@
+# bTunGsTeN teeth: the two sabotage templates of SPEC-BTUNGSTEN-PQ-1 §2
+# (T-VACUOUS, T-TRUNCATE) that every PQ lane applies to its own verifiers and
+# hashes. Test code: nothing ships from this crate. No runtime dependencies,
+# so the Vortex reproduction (scripts/btungsten/pq00-teeth-vortex.sh) links
+# it from a build copy outside this workspace.
+[package]
+name = "btungsten-teeth"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+
+[dev-dependencies]
+sha3 = "0.10"

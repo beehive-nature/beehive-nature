@@ -1,0 +1,27 @@
+name: bTunGsTeN PQ
+
+# SPEC-BTUNGSTEN-PQ-1: the post-quantum proof program. One job per lane as
+# each lands; every job prints its own counts and its teeth verdict. A
+# template that fails to convict its planted or real flaw is red.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pq00-teeth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: PQ00 teeth library — positive controls and planted flaws
+        if: always()
+        run: cargo test --locked -p btungsten-teeth
+      - name: PQ00 teeth against the real Vortex defects (both must CONVICT)
+        if: always()
+        run: sh scripts/btungsten/pq00-teeth-vortex.sh
