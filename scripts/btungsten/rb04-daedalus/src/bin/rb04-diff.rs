@@ -13,7 +13,10 @@
 //! over one sampled corpus, interleaved, `reps` times.
 //!
 //! Exit 0 when the run completed (the verdicts are in the summary), 2 on a
-//! usage error. Inputs are written base64url, never as hex.
+//! usage error. Inputs are written base64url in dot-separated groups of 32
+//! characters (`input_b64url_dotted`; remove the dots to decode): an input
+//! with many zero bytes is a long run of `A`, which a hex-shaped scan of a
+//! committed receipt would read as a 48+ character hex run.
 
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -35,6 +38,17 @@ fn b64url(bytes: &[u8]) -> String {
         }
     }
     s
+}
+
+/// base64url in groups of 32 characters joined by `.`: no run of
+/// hex-alphabet characters is longer than 32.
+fn b64url_dotted(bytes: &[u8]) -> String {
+    let s = b64url(bytes);
+    s.as_bytes()
+        .chunks(32)
+        .map(|c| std::str::from_utf8(c).expect("base64url is ASCII"))
+        .collect::<Vec<_>>()
+        .join(".")
 }
 
 /// One digest over the corpus: each input's length (u64 little-endian) and
@@ -154,7 +168,7 @@ fn check(args: &[String]) -> Value {
             if !ok {
                 mismatched += 1;
                 if first_mismatch.is_null() {
-                    first_mismatch = json!({ "index": idx, "kind": case.kind, "input_b64u": b64url(&case.input), "expected": format!("{exp:?}").chars().take(400).collect::<String>(), "bnr": bnr_text(&c.bnr) });
+                    first_mismatch = json!({ "index": idx, "kind": case.kind, "input_b64url_dotted": b64url_dotted(&case.input), "expected": format!("{exp:?}").chars().take(400).collect::<String>(), "bnr": bnr_text(&c.bnr) });
                 }
             }
         }
@@ -168,7 +182,7 @@ fn check(args: &[String]) -> Value {
                     "index": idx,
                     "kind": case.kind,
                     "len": case.input.len(),
-                    "input_b64u": b64url(&case.input),
+                    "input_b64url_dotted": b64url_dotted(&case.input),
                     "bnr": bnr_text(&c.bnr),
                     "exact": ddl_text(&c.exact),
                     "prefix": ddl_text(&c.prefix),
@@ -274,4 +288,22 @@ fn main() {
         _ => usage(),
     };
     println!("{out}");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_dotted_input_has_no_long_hex_shaped_run_and_decodes_back() {
+        let zeros = vec![0u8; 300];
+        let d = b64url_dotted(&zeros);
+        let longest = d
+            .split(|c: char| !c.is_ascii_hexdigit())
+            .map(str::len)
+            .max()
+            .unwrap_or(0);
+        assert!(longest <= 32, "{longest}");
+        assert_eq!(d.replace('.', ""), b64url(&zeros));
+    }
 }
