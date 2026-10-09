@@ -348,6 +348,109 @@
     } catch (e) { return { ok: false, why: e.message }; }
   }
 
+  // ── WB001 intent envelopes and their authorization (SPEC-BPQ-1 §5c) ────────
+  // The canonical WB001 wire (SPEC-BTUNGSTEN-1), as the Rust encoder SAW
+  // proves equal to the Cryptol spec writes it: "bT-WB01" 0x01, then ten
+  // fields in tag order, each a tag byte, a 4-byte big-endian length and the
+  // value. Text is well-formed UTF-8, numbers are big-endian u64 (decimal
+  // strings or BigInt here, since a u64 outgrows a JS number). The pinned
+  // vectors (scripts/btungsten/wb001-vectors.json) hold this codec to the
+  // Rust one byte for byte and refusal code for refusal code.
+  var WB_HEAD = [0x62, 0x54, 0x2d, 0x57, 0x42, 0x30, 0x31, 0x01];
+  var WB_FIELDS = [
+    ['domain', 'text', 1, 64], ['nonce', 'b32', 32, 32], ['epoch', 'u64', 8, 8], ['action', 'b32', 32, 32],
+    ['destination', 'text', 1, 128], ['capability', 'text', 1, 64], ['amount', 'u64', 8, 8],
+    ['expiry', 'u64', 8, 8], ['payer', 'text', 1, 128], ['payload', 'raw', 0, 4096]
+  ];
+  var U64_MAX = BigInt('18446744073709551615');
+  var LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/;
+  // fatal: ill-formed UTF-8 throws; ignoreBOM: a leading U+FEFF stays text
+  var STRICT_UTF8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
+  function WbError(code) { return BpqError('WB001 refusal ' + code, code); }
+  function wbText(v, min, max) {
+    if (typeof v !== 'string') throw WbError('bt-wb01:type');
+    if (LONE_SURROGATE.test(v)) throw WbError('bt-wb01:utf16');
+    var b = utf8(v);
+    if (b.length < min || b.length > max) throw WbError('bt-wb01:bounds');
+    return b;
+  }
+  function wbFixed(v) {
+    if (!(v instanceof Uint8Array) || v.length !== 32) throw WbError('bt-wb01:type');
+    return v;
+  }
+  function wbU64(v) {
+    var t = typeof v === 'bigint' ? v.toString() : (typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? String(v) : v);
+    if (typeof t !== 'string' || !/^(0|[1-9][0-9]*)$/.test(t) || BigInt(t) > U64_MAX) throw WbError('bt-wb01:type');
+    var n = BigInt(t), out = new Uint8Array(8);
+    for (var i = 7; i >= 0; i--) { out[i] = Number(n & BigInt(255)); n = n >> BigInt(8); }
+    return out;
+  }
+  // the envelope of {domain, nonce, epoch, action, destination, capability,
+  // amount, expiry, payer, payload}, refusing in the Rust builder's order
+  function encodeIntent(x) {
+    if (!x || typeof x !== 'object') throw WbError('bt-wb01:type');
+    var v = {};
+    v.domain = wbText(x.domain, 1, 64);
+    v.nonce = wbFixed(x.nonce);
+    v.action = wbFixed(x.action);
+    v.destination = wbText(x.destination, 1, 128);
+    v.capability = wbText(x.capability, 1, 64);
+    v.payer = wbText(x.payer, 1, 128);
+    if (!(x.payload instanceof Uint8Array)) throw WbError('bt-wb01:type');
+    if (x.payload.length > 4096) throw WbError('bt-wb01:bounds');
+    v.payload = x.payload;
+    v.epoch = wbU64(x.epoch); v.amount = wbU64(x.amount); v.expiry = wbU64(x.expiry);
+    var parts = [Uint8Array.from(WB_HEAD)];
+    WB_FIELDS.forEach(function (f, t) { parts.push(Uint8Array.of(t + 1), u32(v[f[0]].length), v[f[0]]); });
+    return concat.apply(null, parts);
+  }
+  // strict decode: magic, version, tags in order, exact bounds, exact
+  // consumption, well-formed UTF-8; the refusal codes are the Rust decoder's
+  function decodeIntent(env) {
+    if (!(env instanceof Uint8Array)) throw WbError('bt-wb01:type');
+    if (env.length < 8) throw WbError('bt-wb01:short');
+    for (var i = 0; i < 7; i++) if (env[i] !== WB_HEAD[i]) throw WbError('bt-wb01:magic');
+    if (env[7] !== WB_HEAD[7]) throw WbError('bt-wb01:version');
+    var at = 8, out = {};
+    WB_FIELDS.forEach(function (f, t) {
+      if (at + 5 > env.length) throw WbError('bt-wb01:short');
+      if (env[at] !== t + 1) throw WbError('bt-wb01:tag-order');
+      var len = readU32(env, at + 1);
+      if (len < f[2] || len > f[3]) throw WbError('bt-wb01:length');
+      if (at + 5 + len > env.length) throw WbError('bt-wb01:short');
+      var val = env.slice(at + 5, at + 5 + len);
+      if (f[1] === 'text') {
+        try { out[f[0]] = STRICT_UTF8.decode(val); } catch (e) { throw WbError('bt-wb01:utf8'); }
+      } else if (f[1] === 'u64') {
+        var n = BigInt(0);
+        for (var k = 0; k < 8; k++) n = (n << BigInt(8)) | BigInt(val[k]);
+        out[f[0]] = n.toString();
+      } else out[f[0]] = val;
+      at += 5 + len;
+    });
+    if (at !== env.length) throw WbError('bt-wb01:trailing');
+    return out;
+  }
+  // The authorization: ML-DSA-65 over "bpq1/intent" then SHA3-256(envelope),
+  // by the owner's bzpq1 key. A rail signer acts on nothing else.
+  function intentMsg(env) { return concat(utf8(DOM.INTENT), H(env)); }
+  function attestIntent(k, env) {
+    decodeIntent(env);
+    return { bpq: 1, kind: 'intent', id: k.id, envelope: b64u(env), dsa: b64u(k.dsa.publicKey), succ: b64u(k.succession.commit), sig: b64u(k.dsa.sign(intentMsg(env))) };
+  }
+  // {ok, id, intent}: ok only when the id matches the key, the envelope is a
+  // canonical WB001 intent and the signature holds over it
+  function verifyIntent(a) {
+    try {
+      if (!a || a.bpq !== 1 || a.kind !== 'intent') return { ok: false, why: 'not a bpq1 intent authorization' };
+      var env = unb64u(a.envelope), intent = decodeIntent(env);
+      var dsa = unb64u(a.dsa), succ = unb64u(a.succ);
+      if (dsa.length !== 1952 || succ.length !== 32 || idFrom(dsa, succ) !== a.id) return { ok: false, why: 'the id does not match the key' };
+      var ok = L.ml_dsa65.verify(unb64u(a.sig), intentMsg(env), dsa);
+      return ok ? { ok: true, id: a.id, intent: intent } : { ok: false, id: a.id, why: 'the signature does not verify' };
+    } catch (e) { return { ok: false, why: e.message }; }
+  }
+
   // ── sealed objects ───────────────────────────────────────────────────────
   // a vault key may be passed bare or inside a keys() result
   function vaultOf(x) { return x instanceof Uint8Array ? x : (x && x.vault ? x.vault.key : (x && x.key)); }
@@ -597,6 +700,7 @@
     bind: bind, verifyBind: verifyBind,
     signFile: signFile, verifyFile: verifyFile, verifyDetachedClaim: verifyDetachedClaim,
     attestNostr: attestNostr, verifyNostr: verifyNostr,
+    encodeIntent: encodeIntent, decodeIntent: decodeIntent, attestIntent: attestIntent, verifyIntent: verifyIntent,
     seal: seal, open: open, opener: opener, inspect: inspect, isSealed: isSealed,
     fingerprint: fingerprint, b64u: b64u, unb64u: unb64u
   });

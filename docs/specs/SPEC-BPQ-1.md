@@ -234,9 +234,13 @@ owner's bzpq1 key authorized: `{bpq:1, kind:"intent", id, envelope, dsa, succ, s
 WB001) in base64url, `sig` = ML-DSA-65 (pure, empty context) over
 `"bpq1/intent" ‖ SHA3-256(envelope)`. A verifier refuses unless `id` recomputes from `dsa` and
 `succ`, the envelope decodes under WB001's strict decoder, and the signature verifies. The
-signer then refuses unless `id` is the authority it pins. Rust `bpq::attest_intent` /
-`bpq::verify_intent`, `bsigner bpq-attest-intent`, `bsigner bpq-verify`; the browser twin is
-not built yet. The label joins the disjoint `bpq1/` set (PQ04 proves it with fourteen).
+signer then refuses unless `id` is the authority it pins. JS `BPQ.attestIntent` /
+`BPQ.verifyIntent` with a WB001 codec (`BPQ.encodeIntent` / `BPQ.decodeIntent`, held to the
+Rust encoder by WB001's 10 pinned envelopes and 9 refusal codes), Rust `bpq::attest_intent` /
+`bpq::verify_intent`, `bsigner bpq-attest-intent`, `bsigner bpq-verify`; each verifies the other's
+(`surfaces/bpq-intent-vector.json` made by bpq.js, `surfaces/bpq-intent-rust.json` made by
+bsigner, reproduced byte for byte). The label joins the disjoint `bpq1/` set (PQ04 proves it with
+fourteen).
 
 **Bitcoin, Taproot key-path spend v1** (`crates/bsigner/src/intent.rs`). The envelope's fields:
 domain `bitcoin:mainnet` or `bitcoin:testnet`; nonce, 32 bytes the wallet chose; epoch, the time

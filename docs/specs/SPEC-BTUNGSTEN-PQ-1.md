@@ -799,9 +799,14 @@ Obligations:
   spent amount, a hash type, one input fewer, no outputs, change to a
   third key), another authority, kind, version, and a clock past expiry.
   `bsigner btc-intent`, `bpq-attest-intent`, `btc-verify-intent`
-  expose it. Not yet: the browser twin of the intent statement (and a JS
-  WB001 encoder), the sighash DIFFERENTIAL against rust-bitcoin and
-  @scure/btc-signer, and chilldkg behind the gate (step 5).
+  expose it. The browser twin: `BPQ.attestIntent` / `verifyIntent` and a
+  WB001 codec in bpq.js, 19 of 19 of WB001's pinned rows (10 envelopes
+  byte for byte both ways, 9 refusal codes); each implementation verifies
+  the other's authorization (`surfaces/bpq-intent-vector.json`,
+  `surfaces/bpq-intent-rust.json`), and both refuse another envelope, a
+  trailing byte, another kind, id or key. Not yet: the sighash
+  DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, the wallet's
+  press that makes an authorization, and chilldkg behind the gate (step 5).
 
 ### PQ13 · Buzz events
 

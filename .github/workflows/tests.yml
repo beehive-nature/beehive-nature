@@ -122,6 +122,7 @@ jobs:
           node scripts/build-bpq-vectors.mjs --check
           node scripts/build-derive-vectors.mjs --check
           node scripts/build-nostr-vector.mjs --check
+          node scripts/build-intent-vector.mjs --check
           node --test e2e/bpq.test.mjs
           node scripts/verify-bpq-signatures.mjs
           node --test e2e/law-signatures.test.mjs

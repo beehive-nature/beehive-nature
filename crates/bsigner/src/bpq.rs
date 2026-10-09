@@ -1085,6 +1085,110 @@ mod tests {
         );
     }
 
+    /// WB001's pinned "base" positive envelope: a public canonical intent.
+    /// Read as text: the file's refusal rows carry lone-surrogate escapes,
+    /// which serde_json refuses to parse.
+    fn wb001_base() -> Vec<u8> {
+        let t = include_str!("../../../scripts/btungsten/wb001-vectors.json");
+        let row = &t[t.find("\"name\":\"base\"").expect("the base positive")..];
+        let at = row.find("\"envelope\":\"").expect("its envelope") + "\"envelope\":\"".len();
+        let end = row[at..].find('"').unwrap();
+        unhex(&row[at..at + end])
+    }
+
+    #[test]
+    fn intent_authorizations_verify_and_their_forgeries_do_not() {
+        let v = vectors();
+        let rows = v["keys"].as_array().unwrap();
+        let row = rows.iter().find(|r| r["name"] == "A").unwrap();
+        let prk = root(row["rootFrom"].as_str().unwrap());
+        let ctx = row["context"].as_str().unwrap();
+        let env = wb001_base();
+        let a = attest_intent(&prk, ctx, &env).unwrap();
+        let round: Value = serde_json::from_str(&a.to_string()).unwrap();
+        assert_eq!(
+            verify_intent(&round),
+            Some((row["id"].as_str().unwrap().to_string(), env.clone()))
+        );
+        let refused = |edit: &dyn Fn(&mut Value)| {
+            let mut x = round.clone();
+            edit(&mut x);
+            verify_intent(&x).is_none()
+        };
+        let mut bent = env.clone();
+        bent[20] ^= 1;
+        assert!(
+            refused(&|x| x["envelope"] = Value::from(b64::b64u(&bent))),
+            "another envelope"
+        );
+        let mut long = env.clone();
+        long.push(0);
+        assert!(
+            refused(&|x| x["envelope"] = Value::from(b64::b64u(&long))),
+            "a trailing byte"
+        );
+        assert!(
+            refused(&|x| x["kind"] = Value::from("nostr-event")),
+            "another kind"
+        );
+        assert!(refused(&|x| x["bpq"] = Value::from(2)), "another version");
+        let b_id = rows.iter().find(|r| r["name"] == "B").unwrap()["id"].clone();
+        assert!(refused(&|x| x["id"] = b_id.clone()), "another id");
+        assert!(refused(&|x| x["sig"] = Value::from("")), "empty signature");
+        let other = attest_intent(&prk, "pq:other", &env).unwrap();
+        assert!(
+            refused(&|x| x["sig"] = other["sig"].clone()),
+            "another key's signature"
+        );
+        assert!(
+            attest_intent(&prk, ctx, &long).is_err(),
+            "not a canonical envelope"
+        );
+        // made by the browser
+        let js: Value =
+            serde_json::from_str(include_str!("../../../surfaces/bpq-intent-vector.json")).unwrap();
+        let (id, e) =
+            verify_intent(&js["authorization"]).expect("the bpq.js authorization verifies");
+        assert_eq!((id.as_str(), e), (row["id"].as_str().unwrap(), env));
+    }
+
+    // An intent authorization made here (surfaces/bpq-intent-rust.json) for
+    // bpq.js to verify. bsigner signs deterministically, so the pinned file
+    // must equal a fresh one byte for byte. BPQ_WRITE_RUST_INTENT=1 rewrites
+    // the file (a mode).
+    #[test]
+    fn the_pinned_rust_intent_authorization_is_reproduced() {
+        let v = vectors();
+        let row = v["keys"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["name"] == "A")
+            .unwrap();
+        let prk = root(row["rootFrom"].as_str().unwrap());
+        let fresh = attest_intent(&prk, row["context"].as_str().unwrap(), &wb001_base()).unwrap();
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../surfaces/bpq-intent-rust.json"
+        );
+        if std::env::var("BPQ_WRITE_RUST_INTENT").is_ok() {
+            let doc = json!({
+                "classification": "PUBLIC-CONSTANT",
+                "about": "An intent authorization (SPEC-BPQ-1 section 5c) made by crates/bsigner with vector key A of bpq-vectors.json over the WB001 base positive of scripts/btungsten/wb001-vectors.json; surfaces/bpq.js verifies it (SPEC-BTUNGSTEN-PQ-1 PQ12).",
+                "key": "A",
+                "envelopeFrom": "wb001-vectors.json positives[name=base]",
+                "authorization": fresh,
+            });
+            std::fs::write(path, doc.to_string() + "\n").unwrap();
+        }
+        let pinned: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        assert_eq!(
+            pinned["authorization"], fresh,
+            "deterministic: the pinned file is a fresh one"
+        );
+        assert!(verify_intent(&pinned["authorization"]).is_some());
+    }
+
     // HKDF-SHA256 as expand_label and hkdf32 call it, on RFC 5869's three
     // SHA-256 cases (A.1-A.3): extract gives the RFC's PRK, and expand from
     // that PRK (the expand_label path) gives its OKM.
