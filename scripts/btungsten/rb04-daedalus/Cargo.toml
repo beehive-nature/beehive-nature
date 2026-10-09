@@ -1,0 +1,26 @@
+# RB04: the WB001 intent envelope parsed by Daedalus-generated Rust and by
+# BNR's own decoder, compared input by input (rbench rb04,
+# crates/btungsten-bench/src/lanes/rb04.rs).
+# Not a member of the beehive-nature workspace: it depends on the Daedalus
+# Rust runtime at the pinned commit (a git dependency) and carries its own
+# lockfile; rbench rb04 checks that every registry package it shares with
+# the workspace Cargo.lock has the same version and checksum.
+# src/generated/*.rs is the output of `daedalus compile-rust` at that pin,
+# from WB001.ddl and its TEETH variants; rbench rb04 regenerates it and
+# requires the committed bytes. It is never edited or formatted by hand:
+# do not run `cargo fmt` in this directory.
+[package]
+name = "rb04-daedalus"
+version = "0.1.0"
+# the generated code's edition: upstream's Rust examples are 2024
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+btungsten-wb001 = { path = "../../../crates/btungsten-wb001" }
+daedalus-rts-rust = { git = "https://github.com/GaloisInc/daedalus", rev = "a4ad7592ef2449fa1da07d2827fc6684293d21ca" }
+serde_json = "1"
+sha2 = "0.10"
+
+[workspace]

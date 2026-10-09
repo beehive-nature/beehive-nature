@@ -1,0 +1,806 @@
+//! RB04: a Daedalus-generated Rust parser against BNR's own Rust parser of
+//! the WB001 intent envelope (`btungsten_wb001::decode`).
+//!
+//! The lane builds the Haskell `daedalus` generator from a pinned checkout,
+//! generates Rust from `scripts/btungsten/rb04-daedalus/WB001.ddl` (a grammar
+//! written from the wire description, not from the decoder), requires the
+//! generated source to equal the committed copy byte for byte, compiles the
+//! harness, and compares the two parsers input by input on four dimensions:
+//! acceptance, decoded values, consumed length and canonical re-encoding
+//! (through the SAW-proven encoder, `btungsten_wb001::canonical`). The
+//! corpora are the pinned WB001 vectors with constructed boundary inputs,
+//! and seeded adversarial samples. Each TEETH variant is the grammar with
+//! one declared substitution; the comparison must convict it on the
+//! dimension it targets. Generator build, code generation, compilation and
+//! parsing are measured separately.
+
+use std::path::{Path, PathBuf};
+use std::time::Duration;
+
+use serde_json::{json, Value};
+
+use crate::digest::{file_tag, os_random, sha256_tag};
+use crate::host::{git_identity, host, loadavg, rust_toolchain};
+use crate::measure::{self, output, Obs, Spec};
+use crate::receipt::{Class, Outcome as O, Receipt, Row};
+use crate::stats::summary;
+use crate::upstream::{build_copy, find, git_commit, identity, read_lock, repo_root, Pin};
+
+pub const DAEDALUS: Pin = Pin {
+    name: "daedalus",
+    url: "https://github.com/GaloisInc/daedalus.git",
+    rev: "a4ad7592ef2449fa1da07d2827fc6684293d21ca",
+};
+/// The versions upstream's CI (`.github/workflows/ci.yml` at the pin) builds with.
+pub const GHC: &str = "9.8.4";
+pub const CABAL: &str = "3.14.2.0";
+/// Hackage index state for the dependency solve: the pin's commit time
+/// (2026-10-01T15:42:03-07:00) in UTC. Upstream has no freeze file; this
+/// makes the solve reproducible, and the resolved plan is recorded.
+pub const INDEX_STATE: &str = "2026-10-01T22:42:03Z";
+pub const HARNESS: &str = "scripts/btungsten/rb04-daedalus";
+pub const DDL_NAME: &str = "WB001.ddl";
+pub const ENTRIES: &[&str] = &["Envelope", "Exact"];
+/// The BNR parser the generated one is compared with.
+pub const BNR_PARSER: &str = "crates/btungsten-wb001/src/lib.rs";
+
+/// A planted fault: the grammar with exactly one textual substitution.
+pub struct Teeth {
+    pub id: &'static str,
+    /// The generated module and the `rb04-diff --variant` name.
+    pub module: &'static str,
+    pub from: &'static str,
+    pub to: &'static str,
+    /// The comparison dimension that must convict it.
+    pub dimension: &'static str,
+    pub claim: &'static str,
+}
+
+pub const TEETH: &[Teeth] = &[
+    Teeth {
+        id: "t1-domain-bound",
+        module: "t1_domain_bound",
+        from: "domain      = Text 0x01 1 64",
+        to: "domain      = Text 0x01 1 65",
+        dimension: "acceptance",
+        claim: "the grammar with the domain's upper bound at 65 instead of 64 must disagree with BNR on acceptance",
+    },
+    Teeth {
+        id: "t2-word-endian",
+        module: "t2_word_endian",
+        from: "    BEUInt64",
+        to: "    LEUInt64",
+        dimension: "values",
+        claim: "the grammar reading the 64-bit words little-endian must disagree with BNR on decoded values (acceptance alone cannot see it)",
+    },
+    Teeth {
+        id: "t3-cesu8-surrogate",
+        module: "t3_cesu8_surrogate",
+        from: "{ @$[0xED]; @$[0x80 .. 0x9F]; @$[$utf8tail] }",
+        to: "{ @$[0xED]; @$[0x80 .. 0xBF]; @$[$utf8tail] }",
+        dimension: "acceptance",
+        claim: "the grammar accepting encoded surrogates (ED A0..BF: CESU-8, the class of WB001's 2026-10-07 boundary defect) must disagree with BNR on acceptance",
+    },
+    Teeth {
+        id: "t4-trailing-bytes",
+        module: "t4_trailing_bytes",
+        from: "def Exact = Only Envelope",
+        to: "def Exact = Envelope",
+        dimension: "consumed",
+        claim: "the grammar whose whole-input entry does not require the end of input must disagree with BNR on consumed length",
+    },
+];
+
+pub const DIMENSIONS: &[&str] = &["acceptance", "values", "consumed", "reencode"];
+
+pub struct Plan {
+    pub codegen_repeat: usize,
+    pub sampled_count: u64,
+    pub bench_count: u64,
+    pub bench_reps: u64,
+}
+
+impl Plan {
+    pub fn quick() -> Plan {
+        Plan {
+            codegen_repeat: 3,
+            sampled_count: 20_000,
+            bench_count: 5_000,
+            bench_reps: 5,
+        }
+    }
+    pub fn full() -> Plan {
+        Plan {
+            codegen_repeat: 10,
+            sampled_count: 200_000,
+            bench_count: 20_000,
+            bench_reps: 20,
+        }
+    }
+}
+
+fn which(name: &str) -> Option<PathBuf> {
+    std::env::var_os("PATH").and_then(|p| {
+        std::env::split_paths(&p)
+            .map(|d| d.join(name))
+            .find(|c| c.is_file())
+    })
+}
+
+/// Packages in a cabal store (every entry of every compiler directory but
+/// the package database and the staging directory).
+fn store_packages(cabal_dir: &Path) -> u64 {
+    let store = cabal_dir.join("store");
+    let mut n = 0;
+    for c in std::fs::read_dir(&store).into_iter().flatten().flatten() {
+        for e in std::fs::read_dir(c.path()).into_iter().flatten().flatten() {
+            let name = e.file_name();
+            if name != "package.db" && name != "incoming" && e.path().is_dir() {
+                n += 1;
+            }
+        }
+    }
+    n
+}
+
+/// The resolved build plan: compiler, and every package with its version
+/// and style (`global` = from Hackage or a source repository, built into
+/// the store; `local`/`inplace` = the project's own packages).
+fn plan_summary(plan_json: &Path) -> Value {
+    let Ok(text) = std::fs::read_to_string(plan_json) else {
+        return json!("unavailable: no dist-newstyle/cache/plan.json");
+    };
+    let Ok(v) = serde_json::from_str::<Value>(&text) else {
+        return json!("unavailable: plan.json does not parse");
+    };
+    let mut global = std::collections::BTreeSet::new();
+    let mut local = std::collections::BTreeSet::new();
+    for p in v["install-plan"].as_array().into_iter().flatten() {
+        let id = format!(
+            "{}-{}",
+            p["pkg-name"].as_str().unwrap_or("?"),
+            p["pkg-version"].as_str().unwrap_or("?")
+        );
+        match p["style"].as_str() {
+            Some("local") | Some("inplace") => local.insert(id),
+            _ => global.insert(id),
+        };
+    }
+    json!({
+        "sha256": file_tag(plan_json).ok().map(|(t, _)| t),
+        "compiler_id": v["compiler-id"],
+        "cabal_version": v["cabal-version"],
+        "global_packages": global.len(),
+        "local_packages": local,
+        "global": global,
+    })
+}
+
+fn count_lines(text: &str, prefix: &str) -> usize {
+    crate::recognize::strip_ansi(text)
+        .lines()
+        .filter(|l| l.trim_start().starts_with(prefix))
+        .count()
+}
+
+/// The last line of `rb04-diff`'s stdout, as JSON.
+fn diff_json(o: &Obs) -> Option<Value> {
+    o.stdout_text()
+        .lines()
+        .rev()
+        .find(|l| l.starts_with('{'))
+        .and_then(|l| serde_json::from_str(l).ok())
+}
+
+pub fn run(
+    work: &Path,
+    out: &Path,
+    tools_dir: &Path,
+    quick: bool,
+) -> Result<(PathBuf, &'static str), String> {
+    let plan = if quick { Plan::quick() } else { Plan::full() };
+    let root = repo_root();
+    std::fs::create_dir_all(work).map_err(|e| format!("work directory {}: {e}", work.display()))?;
+    let logs = out.join("logs");
+    // a receipt describes one run: earlier evidence in this directory goes
+    let _ = std::fs::remove_dir_all(&logs);
+    let _ = std::fs::remove_dir_all(out.join("gen"));
+    std::fs::create_dir_all(&logs).map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(out.join("gen")).map_err(|e| e.to_string())?;
+    let mut n = 0usize;
+    let mut stem = |name: &str| {
+        n += 1;
+        logs.join(format!("{n:03}-{name}"))
+    };
+    let rel = |p: &Path| p.strip_prefix(out).unwrap_or(p).display().to_string();
+    let harness = root.join(HARNESS);
+    let copy = work.join("daedalus");
+    let cabal_dir = tools_dir.join("cabal");
+    let cd = cabal_dir.display().to_string();
+    let index_flag = format!("--index-state={INDEX_STATE}");
+
+    let mut r = Receipt::new("RB04", "daedalus-rust-vs-bnr-wb001-decode", out);
+    r.section("bnr", json!({ "checkout": git_identity(&root), "parser": BNR_PARSER, "parser_sha256": file_tag(&root.join(BNR_PARSER)).ok().map(|(t, _)| t), "provenance_review_commit": "a3419732c0c06d1d24c8bca2d4cb70e5022971cf" }));
+    r.section("host", host());
+    let load_before = loadavg();
+
+    // ---- identities ---------------------------------------------------------------
+    let ghc_path = which("ghc");
+    let cabal_path = which("cabal");
+    let ghc_v = output(&["ghc", "--numeric-version"], work).map(|s| s.trim().to_string());
+    let cabal_v = output(&["cabal", "--numeric-version"], work).map(|s| s.trim().to_string());
+    let canon_tag = |p: &Option<PathBuf>| {
+        p.as_ref()
+            .and_then(|p| p.canonicalize().ok())
+            .map(|c| json!({ "path": c.display().to_string(), "sha256": file_tag(&c).ok().map(|(t, _)| t) }))
+    };
+    let hlock = read_lock(&harness.join("Cargo.lock"))?;
+    let rts = find(&hlock, "daedalus-rts-rust");
+    let rts_rev = rts.first().and_then(|p| git_commit(p)).map(str::to_string);
+    let haskell = json!({
+        "ghc": { "expected": GHC, "observed": ghc_v, "binary": canon_tag(&ghc_path) },
+        "cabal": { "expected": CABAL, "observed": cabal_v, "binary": canon_tag(&cabal_path) },
+        "cabal_dir": cd,
+        "index_state": INDEX_STATE,
+        "source": "the versions upstream's .github/workflows/ci.yml builds with at the pin; installed by haskell-actions/setup (ghcup) in CI",
+    });
+    r.section("haskell_toolchain", haskell.clone());
+
+    // ---- 1. preparation: the pinned generator source ---------------------------------
+    let mut prep = serde_json::Map::new();
+    if !copy.join(".git").exists() {
+        let s = stem("prep-clone");
+        let o = measure::run(&Spec::new(
+            &[
+                "git",
+                "clone",
+                "--quiet",
+                DAEDALUS.url,
+                &copy.display().to_string(),
+            ],
+            work,
+            Duration::from_secs(900),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        prep.insert("clone".into(), o.json(out));
+    } else {
+        prep.insert(
+            "clone".into(),
+            json!("build copy present before this run; clone not measured"),
+        );
+    }
+    build_copy(&DAEDALUS, &copy, &[])?;
+    let copy_id = identity(&DAEDALUS, &copy, &[]);
+    let id_ok = ghc_v.as_deref() == Some(GHC)
+        && cabal_v.as_deref() == Some(CABAL)
+        && copy_id["head"] == DAEDALUS.rev
+        && rts_rev.as_deref() == Some(DAEDALUS.rev);
+    r.row(
+        Row::new(
+            "toolchain-identity",
+            Class::Vector,
+            "GHC and cabal are the versions upstream's CI pins; the generator is built from the daedalus pin, and the harness's rts-rust (Cargo.lock) is the same commit",
+        )
+        .expect(json!({ "ghc": GHC, "cabal": CABAL, "daedalus": DAEDALUS.rev, "rts_rust_lock_commit": DAEDALUS.rev }))
+        .observe(
+            if id_ok { O::Pass } else { O::Fail },
+            json!({ "ghc": ghc_v, "cabal": cabal_v, "daedalus_head": copy_id["head"], "rts_rust": rts.iter().map(|p| crate::upstream::pkg_json(p)).collect::<Vec<_>>() }),
+        ),
+    );
+    r.section("daedalus", copy_id);
+    std::fs::create_dir_all(&cabal_dir).map_err(|e| e.to_string())?;
+    let s = stem("prep-cabal-update");
+    let o = measure::run(
+        &Spec::new(
+            &[
+                "cabal",
+                "update",
+                &format!("hackage.haskell.org,{INDEX_STATE}"),
+            ],
+            &copy,
+            Duration::from_secs(1200),
+            &s,
+        )
+        .env("CABAL_DIR", &cd),
+    )
+    .map_err(|e| e.to_string())?;
+    if !o.ok() {
+        return Err(format!("cabal update failed: {}", o.stderr_text()));
+    }
+    prep.insert("cabal_update".into(), o.json(out));
+    r.measure("preparation", Value::Object(prep));
+
+    // ---- 2. the generator build ---------------------------------------------------------
+    let store_before = store_packages(&cabal_dir);
+    let cabal_build = |stem: &Path, extra: &[&str], budget: u64| -> Result<Obs, String> {
+        let mut argv = vec!["cabal", "build", index_flag.as_str()];
+        argv.extend_from_slice(extra);
+        argv.push("exe:daedalus");
+        measure::run(
+            &Spec::new(&argv, &copy, Duration::from_secs(budget), stem)
+                .env("CABAL_DIR", &cd)
+                .mem_limit_gib(12),
+        )
+        .map_err(|e| e.to_string())
+    };
+    let s_deps = stem("generator-deps");
+    let deps = cabal_build(&s_deps, &["--only-dependencies"], 7200)?;
+    r.evidence_file(&rel(&s_deps.with_extension("stdout")), "ci-artifact");
+    let deps_built = count_lines(&deps.stdout_text(), "Completed");
+    let s_exe = stem("generator-build");
+    let exe = if deps.ok() {
+        Some(cabal_build(&s_exe, &[], 5400)?)
+    } else {
+        None
+    };
+    if exe.is_some() {
+        r.evidence_file(&rel(&s_exe.with_extension("stdout")), "ci-artifact");
+    }
+    let built = exe.as_ref().is_some_and(Obs::ok);
+    let bin = if built {
+        output(
+            &["cabal", "list-bin", "-v0", &index_flag, "exe:daedalus"],
+            &copy,
+        )
+        .map(|s| PathBuf::from(s.trim()))
+    } else {
+        None
+    };
+    let bin_dir = work.join("rb04-bin");
+    std::fs::create_dir_all(&bin_dir).map_err(|e| e.to_string())?;
+    let daedalus = bin_dir.join("daedalus");
+    let installed = bin
+        .as_ref()
+        .is_some_and(|b| std::fs::copy(b, &daedalus).is_ok());
+    let gen_id = json!({
+        "daedalus_binary": file_tag(&daedalus).ok().map(|(t, n)| json!({ "sha256": t, "bytes": n })),
+        "plan": plan_summary(&copy.join("dist-newstyle/cache/plan.json")),
+        "store_packages_before": store_before,
+        "store_packages_after": store_packages(&cabal_dir),
+        "dependencies_built_this_run": deps_built,
+        "local_packages_built_this_run": exe.as_ref().map(|o| count_lines(&o.stdout_text(), "Building")),
+    });
+    r.row(
+        Row::new(
+            "generator-build",
+            Class::Measurement,
+            "the daedalus executable builds from the pin with the pinned GHC and cabal, measured as its dependencies and its own packages",
+        )
+        .observe(
+            if built && installed { O::Pass } else { O::Fail },
+            json!({ "dependencies": deps.json(out), "generator": exe.as_ref().map(|o| o.json(out)), "identity": gen_id.clone() }),
+        )
+        .evidence(&[&rel(&s_deps.with_extension("stdout"))]),
+    );
+    r.section("generator", gen_id);
+    r.measure("generator_build", json!({
+        "dependencies": deps.json(out),
+        "generator": exe.as_ref().map(|o| o.json(out)),
+        "note": "dependencies: the Hackage and source-repository packages into the cabal store (a store restored from the CI cache makes this a no-op: store_packages_before says which); generator: the project's own packages and exe:daedalus, always from a fresh dist-newstyle",
+    }));
+    if !(built && installed) {
+        r.measure("load_average", json!({ "before": load_before, "after": loadavg() }));
+        return r.write().map_err(|e| e.to_string());
+    }
+
+    // ---- 3. code generation ---------------------------------------------------------------
+    let ddl_src = std::fs::read_to_string(harness.join(DDL_NAME))
+        .map_err(|e| format!("{}: {e}", harness.join(DDL_NAME).display()))?;
+    let mut variants: Vec<(&str, String, Value)> = vec![(
+        "honest",
+        ddl_src.clone(),
+        json!({ "ddl_sha256": sha256_tag(ddl_src.as_bytes()) }),
+    )];
+    let mut subst_ok = true;
+    for t in TEETH {
+        let hits = ddl_src.matches(t.from).count();
+        subst_ok &= hits == 1;
+        let v = ddl_src.replacen(t.from, t.to, 1);
+        let meta = json!({ "from": t.from, "to": t.to, "occurrences_of_from": hits, "ddl_sha256": sha256_tag(v.as_bytes()) });
+        variants.push((t.module, v, meta));
+    }
+    r.row(
+        Row::new(
+            "teeth-substitutions",
+            Class::Vector,
+            "each TEETH grammar is the honest grammar with exactly one declared substitution",
+        )
+        .observe(
+            if subst_ok { O::Pass } else { O::Fail },
+            json!(TEETH
+                .iter()
+                .zip(variants.iter().skip(1))
+                .map(|(t, v)| json!({ "id": t.id, "substitution": v.2 }))
+                .collect::<Vec<_>>()),
+        ),
+    );
+    let lib = copy.join("lib");
+    let dbin = daedalus.display().to_string();
+    let mut codegen = serde_json::Map::new();
+    let mut deterministic = true;
+    let mut reproduces = true;
+    let mut gen_detail = Vec::new();
+    for (module, src, meta) in &variants {
+        let dir = work.join("rb04-ddl").join(module);
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        std::fs::write(dir.join(DDL_NAME), src).map_err(|e| e.to_string())?;
+        let mut runs = Vec::new();
+        let mut outputs = Vec::new();
+        for k in 0..plan.codegen_repeat {
+            let gen_out = work.join("rb04-gen").join(format!("{module}-{k}.rs"));
+            let _ = std::fs::remove_file(&gen_out);
+            let mut argv = vec![
+                dbin.clone(),
+                format!("--path={}", lib.display()),
+                "compile-rust".into(),
+                DDL_NAME.into(),
+                "--determinize".into(),
+                format!("--output-file={}", gen_out.display()),
+            ];
+            argv.extend(ENTRIES.iter().map(|e| format!("--entry={e}")));
+            let argv: Vec<&str> = argv.iter().map(String::as_str).collect();
+            let s = stem(&format!("codegen-{module}-{k}"));
+            let o = measure::run(&Spec::new(&argv, &dir, Duration::from_secs(600), &s).mem_limit_gib(4))
+                .map_err(|e| e.to_string())?;
+            if k == 0 {
+                r.evidence_file(&rel(&s.with_extension("stderr")), "ci-artifact");
+            }
+            outputs.push(std::fs::read(&gen_out).ok().filter(|_| o.ok()));
+            runs.push(o);
+        }
+        let first = outputs.first().cloned().flatten();
+        let same = first.is_some() && outputs.iter().all(|x| *x == first);
+        deterministic &= same;
+        let committed = harness.join("src/gen").join(format!("{module}.rs"));
+        let committed_bytes = std::fs::read(&committed).ok();
+        let equal = first.is_some() && first == committed_bytes;
+        reproduces &= equal;
+        if let Some(b) = &first {
+            let keep = out.join("gen").join(format!("{module}.rs"));
+            std::fs::write(&keep, b).map_err(|e| e.to_string())?;
+            r.evidence_file(&rel(&keep), "ci-artifact");
+        }
+        gen_detail.push(json!({
+            "variant": module,
+            "grammar": meta,
+            "generated": first.as_ref().map(|b| json!({ "sha256": sha256_tag(b), "bytes": b.len(), "lines": b.iter().filter(|&&c| c == b'\n').count() })),
+            "committed": committed_bytes.as_ref().map(|b| json!({ "path": format!("{HARNESS}/src/gen/{module}.rs"), "sha256": sha256_tag(b) })),
+            "byte_identical_to_committed": equal,
+            "identical_across_runs": same,
+        }));
+        codegen.insert(
+            module.to_string(),
+            json!({
+                "wall_ns": summary(&runs.iter().map(|o| o.wall_ns).collect::<Vec<_>>()),
+                "user_cpu_us": summary(&runs.iter().filter_map(|o| o.user_us).collect::<Vec<_>>()),
+                "max_rss_kib": measure::rss_summary(&runs),
+                "runs": runs.iter().map(|o| o.json(out)).collect::<Vec<_>>(),
+            }),
+        );
+    }
+    r.row(
+        Row::new(
+            "codegen-deterministic",
+            Class::Vector,
+            "repeated compile-rust runs on one grammar emit byte-identical Rust, for every variant",
+        )
+        .expect(json!({ "runs_per_variant": plan.codegen_repeat }))
+        .observe(if deterministic { O::Pass } else { O::Fail }, json!(gen_detail.clone())),
+    );
+    r.row(
+        Row::new(
+            "codegen-reproduces-committed",
+            Class::Vector,
+            "the pinned generator's output equals the generated Rust committed under scripts/btungsten/rb04-daedalus/src/gen, byte for byte: the code compiled and compared below is the pin's output",
+        )
+        .observe(if reproduces { O::Pass } else { O::Fail }, json!(gen_detail)),
+    );
+    r.measure("codegen", Value::Object(codegen));
+    if !reproduces {
+        r.measure("load_average", json!({ "before": load_before, "after": loadavg() }));
+        return r.write().map_err(|e| e.to_string());
+    }
+
+    // ---- 4. the harness: correspondence and compilation ------------------------------------
+    let manifest = std::fs::read_to_string(harness.join("Cargo.toml")).map_err(|e| e.to_string())?;
+    let dep_line = "btungsten-wb001 = { path = \"../../../crates/btungsten-wb001\" }";
+    let wlock = read_lock(&root.join("Cargo.lock"))?;
+    let mut shared = Vec::new();
+    let mut mismatched = Vec::new();
+    for p in hlock.iter().filter(|p| p.source.is_some()) {
+        let ws: Vec<_> = wlock.iter().filter(|q| q.name == p.name).collect();
+        if ws.is_empty() {
+            continue;
+        }
+        if ws
+            .iter()
+            .any(|q| q.version == p.version && q.checksum == p.checksum)
+        {
+            shared.push(format!("{} {}", p.name, p.version));
+        } else {
+            mismatched.push(json!({ "package": p.name, "harness": p.version, "workspace": ws.iter().map(|q| q.version.clone()).collect::<Vec<_>>() }));
+        }
+    }
+    let corr_ok = manifest.contains(dep_line) && mismatched.is_empty();
+    r.row(
+        Row::new(
+            "correspondence-parser",
+            Class::Vector,
+            "the harness calls BNR's own decode and canonical (crates/btungsten-wb001, by path, no copy), and every registry package its lockfile shares with the workspace Cargo.lock has the same version and checksum",
+        )
+        .expect(json!({ "dependency": dep_line }))
+        .observe(
+            if corr_ok { O::Pass } else { O::Fail },
+            json!({ "path_dependency_present": manifest.contains(dep_line), "same_version_and_checksum": shared, "mismatched": mismatched }),
+        ),
+    );
+    let cargo_home = work.join("cargo-home-rb04");
+    let target = work.join("rb04-target");
+    let _ = std::fs::remove_dir_all(&cargo_home);
+    let _ = std::fs::remove_dir_all(&target);
+    std::fs::create_dir_all(&cargo_home).map_err(|e| e.to_string())?;
+    let ch = cargo_home.display().to_string();
+    let tgt = target.display().to_string();
+    let cargo = |stem: &Path, args: &[&str], budget: u64| -> Result<Obs, String> {
+        let mut argv = vec!["cargo"];
+        argv.extend_from_slice(args);
+        measure::run(
+            &Spec::new(&argv, &harness, Duration::from_secs(budget), stem)
+                .env("CARGO_HOME", &ch)
+                .env("CARGO_TARGET_DIR", &tgt)
+                .mem_limit_gib(8),
+        )
+        .map_err(|e| e.to_string())
+    };
+    let lock_before = file_tag(&harness.join("Cargo.lock")).map(|x| x.0).map_err(|e| e.to_string())?;
+    let fetch = cargo(&stem("compile-fetch"), &["fetch", "--locked"], 1800)?;
+    if !fetch.ok() {
+        return Err(format!("cargo fetch failed: {}", fetch.stderr_text()));
+    }
+    let build = ["build", "--release", "--locked", "--offline"];
+    let mut steps = Vec::new();
+    for (label, extra) in [
+        ("runtime-crate", vec!["-p", "daedalus-rts-rust"]),
+        ("bnr-parser-crate", vec!["-p", "btungsten-wb001"]),
+        ("harness-with-generated-parsers", vec!["--bins"]),
+        ("warm-noop", vec!["--bins"]),
+    ] {
+        let mut args = build.to_vec();
+        args.extend_from_slice(&extra);
+        let s = stem(&format!("compile-{label}"));
+        let o = cargo(&s, &args, 3600)?;
+        if !o.ok() {
+            return Err(format!("cargo build ({label}) failed: {}", o.stderr_text()));
+        }
+        r.evidence_file(&rel(&s.with_extension("stderr")), "ci-artifact");
+        steps.push((label, o));
+    }
+    if file_tag(&harness.join("Cargo.lock")).map(|x| x.0).ok().as_deref() != Some(lock_before.as_str()) {
+        return Err("the harness build changed its Cargo.lock".into());
+    }
+    let diff_bin = target.join("release/rb04-diff");
+    let diff = diff_bin.display().to_string();
+    let toolchain = rust_toolchain(&harness, None);
+    r.row(
+        Row::new(
+            "harness-compile",
+            Class::Measurement,
+            "the generated parsers compile with rts-rust at the pin and the BNR parser into one release binary, measured as the runtime crate, the BNR crate, then the harness crate holding the five generated modules",
+        )
+        .observe(
+            O::Pass,
+            json!({ "steps": steps.iter().map(|(l, o)| json!({ "step": l, "process": o.json(out) })).collect::<Vec<_>>(), "rb04_diff": file_tag(&diff_bin).ok().map(|(t, n)| json!({ "sha256": t, "bytes": n })) }),
+        ),
+    );
+    r.measure("compile", json!({
+        "fetch_network": fetch.json(out),
+        "steps": steps.iter().map(|(l, o)| json!({ "step": l, "process": o.json(out) })).collect::<Vec<_>>(),
+        "toolchain": toolchain,
+        "note": "cold target directory; each step compiles only what the previous ones did not: the last cold step is the harness crate itself (generated parsers plus comparison code)",
+    }));
+    r.section("executables", json!({ "rb04_diff": file_tag(&diff_bin).ok().map(|(t, _)| t), "harness_cargo_lock": lock_before }));
+
+    // ---- 5. the differential --------------------------------------------------------------
+    let seed = os_random(8)
+        .map(|b| u64::from_le_bytes(b.try_into().unwrap_or([0; 8])))
+        .map_err(|e| e.to_string())?;
+    let seed_s = seed.to_string();
+    let count_s = plan.sampled_count.to_string();
+    let mut results = serde_json::Map::new();
+    let mut check = |variant: &str, corpus: &str| -> Result<(Obs, Option<Value>), String> {
+        let mut argv = vec![diff.as_str(), "check", "--variant", variant, "--corpus", corpus];
+        if corpus == "sampled" {
+            argv.extend_from_slice(&["--seed", &seed_s, "--count", &count_s]);
+        }
+        let s = stem(&format!("diff-{variant}-{corpus}"));
+        let o = measure::run(&Spec::new(&argv, &harness, Duration::from_secs(3600), &s).mem_limit_gib(4))
+            .map_err(|e| e.to_string())?;
+        r.evidence_file(&rel(&s.with_extension("stdout")), "committed");
+        let j = diff_json(&o).filter(|_| o.ok());
+        results.insert(format!("{variant}/{corpus}"), json!({ "process": o.json(out), "summary": j.clone() }));
+        Ok((o, j))
+    };
+    let mut honest = Vec::new();
+    for corpus in ["vectors", "sampled"] {
+        honest.push((corpus, check("honest", corpus)?));
+    }
+    let mut teeth_runs = Vec::new();
+    for t in TEETH {
+        let mut per = Vec::new();
+        for corpus in ["vectors", "sampled"] {
+            per.push((corpus, check(t.module, corpus)?));
+        }
+        teeth_runs.push((t, per));
+    }
+    let digest_of = |j: &Option<Value>| j.as_ref().map(|v| v["corpus_sha256"].clone());
+
+    for (corpus, (o, j)) in &honest {
+        let class = if *corpus == "vectors" {
+            Class::Vector
+        } else {
+            Class::SampledAdversarial
+        };
+        for dim in DIMENSIONS {
+            let id = format!("{corpus}-{dim}");
+            let claim = match (*corpus, *dim) {
+                ("vectors", "acceptance") => "on the pinned WB001 vectors and the constructed boundary inputs, the generated parser accepts exactly what BNR's decode accepts, and BNR's answers are the pinned ones",
+                ("vectors", "values") => "where both accept a vector, every decoded field is equal",
+                ("vectors", "consumed") => "consumed length agrees on every vector: the whole input where BNR accepts, and BNR's own envelope end where it refuses trailing bytes",
+                ("vectors", "reencode") => "the canonical encoder re-encodes each parser's decoded values to the input bytes on every accepted vector",
+                (_, "acceptance") => "on seeded adversarial inputs (mutations of random valid envelopes, framed field and UTF-8 boundary cases, random bytes), the two parsers agree on acceptance",
+                (_, "values") => "where both accept a sampled input, every decoded field is equal",
+                (_, "consumed") => "consumed length agrees on every sampled input",
+                _ => "the canonical encoder re-encodes each parser's decoded values to the input bytes on every accepted sampled input",
+            };
+            let mut row = Row::new(&id, class, claim).expect(json!({ "disagree": 0 }));
+            row = match j {
+                Some(v) => {
+                    let d = &v["dims"][dim];
+                    let vectors_ok = *corpus != "vectors"
+                        || *dim != "acceptance"
+                        || v["expected"]["mismatched"] == 0;
+                    let ok = d["disagree"] == 0 && d["compared"].as_u64().unwrap_or(0) > 0 && vectors_ok;
+                    row.observe(if ok { O::Pass } else { O::Fail }, json!({ "dimension": d, "inputs": v["inputs"], "expected_answers": v["expected"], "panics": v["ddl"]["panics"], "seed": v["seed"] }))
+                }
+                None => row.observe(O::Inconclusive, json!({ "exit": o.exit.json(), "note": "rb04-diff produced no summary" })),
+            };
+            r.row(row.evidence(&[&rel(&o.stdout)]));
+        }
+    }
+    let honest_digests: Vec<Value> = honest.iter().map(|(_, (_, j))| digest_of(j).unwrap_or(Value::Null)).collect();
+    for (t, per) in &teeth_runs {
+        let mut convicted = None;
+        let mut same_corpus = true;
+        let mut seen = Vec::new();
+        for (k, (corpus, (o, j))) in per.iter().enumerate() {
+            same_corpus &= digest_of(j).unwrap_or(Value::Null) == honest_digests[k];
+            match j {
+                Some(v) => {
+                    let d = &v["dims"][t.dimension];
+                    seen.push(json!({ "corpus": corpus, "dimension": d, "all_dimensions": v["dims"] }));
+                    if convicted.is_none()
+                        && d["disagree"].as_u64().unwrap_or(0) > 0
+                        && d["witness"]["honest_agrees"] == true
+                    {
+                        convicted = Some(json!({ "corpus": corpus, "witness": d["witness"] }));
+                    }
+                }
+                None => seen.push(json!({ "corpus": corpus, "exit": o.exit.json(), "note": "rb04-diff produced no summary" })),
+            }
+        }
+        let complete = per.iter().all(|(_, (_, j))| j.is_some());
+        let outcome = if !same_corpus {
+            O::Inconclusive
+        } else if convicted.is_some() {
+            O::Pass
+        } else if complete {
+            O::Fail
+        } else {
+            O::Inconclusive
+        };
+        r.row(
+            Row::new(t.id, Class::Teeth, t.claim)
+                .expect(json!({ "dimension": t.dimension, "disagreements": "at least one, on an input where the honest parser agrees with BNR on every dimension" }))
+                .observe(outcome, json!({ "convicted_by": convicted, "runs": seen, "same_corpus_as_honest": same_corpus }))
+                .evidence(&per.iter().map(|(_, (o, _))| rel(&o.stdout)).collect::<Vec<_>>().iter().map(String::as_str).collect::<Vec<_>>()),
+        );
+    }
+    r.measure("differential", Value::Object(results));
+
+    // ---- 6. parsing time ------------------------------------------------------------------
+    let s = stem("bench");
+    let o = measure::run(
+        &Spec::new(
+            &[
+                &diff,
+                "bench",
+                "--seed",
+                &seed_s,
+                "--count",
+                &plan.bench_count.to_string(),
+                "--reps",
+                &plan.bench_reps.to_string(),
+            ],
+            &harness,
+            Duration::from_secs(3600),
+            &s,
+        )
+        .mem_limit_gib(4),
+    )
+    .map_err(|e| e.to_string())?;
+    r.evidence_file(&rel(&s.with_extension("stdout")), "committed");
+    let bench = diff_json(&o).filter(|_| o.ok());
+    r.row(
+        Row::new(
+            "runtime-parse",
+            Class::Measurement,
+            "parse time per input for BNR's decode and the generated parser (whole-input and prefix entries) over one sampled corpus, in one process, repeated",
+        )
+        .observe(
+            if bench.is_some() { O::Pass } else { O::Inconclusive },
+            json!({ "summary": bench, "process": o.json(out) }),
+        )
+        .evidence(&[&rel(&s.with_extension("stdout"))]),
+    );
+
+    r.section("plan", json!({
+        "codegen_repeat": plan.codegen_repeat,
+        "sampled_count": plan.sampled_count,
+        "bench_count": plan.bench_count,
+        "bench_reps": plan.bench_reps,
+        "seed": seed_s,
+        "seed_source": "/dev/urandom, recorded; rb04-diff derives the sampled corpus from it deterministically (corpus_sha256 in each summary)",
+    }));
+    r.assumptions = vec![
+        format!("The grammar ({HARNESS}/{DDL_NAME}) is this lane's reading of the WB001 wire format. Agreement shows the generated parser and BNR's decode accept the same inputs with the same values on the corpora run; it is not a proof over all inputs, and it says nothing about inputs neither corpus contains."),
+        "Consumed length: the generated parser's prefix entry (Envelope) returns the remaining input. BNR's decode has no prefix mode; its consumed length is the input length when it accepts, and where it refuses with bt-wb01:trailing the agreement requires that BNR accepts exactly the prefix the generated parser consumed, with equal values (the tag-length framing admits at most one such prefix).".into(),
+        "Re-encoding uses BNR's encoder (btungsten_wb001::canonical over btungsten_wb001_core::encode), which SAW proves equal to the Cryptol wire for every valid intent (scripts/btungsten/README.md WB001). An input both parsers accept and whose re-encoding is the input is canonical in that sense.".into(),
+        "Refusal reasons are not compared: the generated parser reports a failure position and message, BNR a refusal code. The vector rows check BNR's codes against the pinned ones.".into(),
+        "A panic in either parser is caught per input and counted as a disagreement, never as a refusal.".into(),
+        "Timing is wall time inside one process on a shared CI runner (host section); no ratio between the parsers is a claim of this receipt.".into(),
+    ];
+    r.obligations = vec![
+        "A proof that the grammar and BNR's decode accept the same language with the same values for every input (for example both against BTungstenWB001.cry): not attempted.".into(),
+        "The generated parser's behaviour under memory exhaustion, deep inputs or streaming input: not exercised (inputs are whole byte arrays of at most a few KiB).".into(),
+        "Daedalus's own correctness (its front end, determinization and Rust backend) is assumed only through this comparison; no Daedalus property is claimed.".into(),
+        "Side channels and constant-time behaviour of either parser: not examined.".into(),
+    ];
+    r.measure("load_average", json!({ "before": load_before, "after": loadavg() }));
+    r.write().map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_teeth_substitution_hits_the_grammar_exactly_once() {
+        let ddl = include_str!("../../../../scripts/btungsten/rb04-daedalus/WB001.ddl");
+        for t in TEETH {
+            assert_eq!(ddl.matches(t.from).count(), 1, "{}", t.id);
+            assert!(DIMENSIONS.contains(&t.dimension), "{}", t.id);
+            assert_ne!(ddl.replacen(t.from, t.to, 1), ddl, "{}", t.id);
+        }
+    }
+
+    #[test]
+    fn plan_json_is_summarized_by_style() {
+        let d = std::env::temp_dir().join(format!("rb04-plan-{}", std::process::id()));
+        std::fs::create_dir_all(&d).unwrap();
+        let p = d.join("plan.json");
+        std::fs::write(
+            &p,
+            r#"{"cabal-version":"3.14.2.0","compiler-id":"ghc-9.8.4","install-plan":[
+              {"type":"configured","pkg-name":"text","pkg-version":"2.1.1","style":"global"},
+              {"type":"configured","pkg-name":"daedalus","pkg-version":"0.1.0.0","style":"local"},
+              {"type":"pre-existing","pkg-name":"base","pkg-version":"4.19.2.0"}]}"#,
+        )
+        .unwrap();
+        let s = plan_summary(&p);
+        assert_eq!(s["compiler_id"], "ghc-9.8.4");
+        assert_eq!(s["global_packages"], 2);
+        assert_eq!(s["local_packages"], json!(["daedalus-0.1.0.0"]));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+}
