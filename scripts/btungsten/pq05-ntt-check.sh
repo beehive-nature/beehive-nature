@@ -10,14 +10,19 @@
 #                pq05-ntt-names.py finds ml-kem's NTT and the Elem operators
 #                by name and signature.
 #   SPEC-CHECK   pq05-cryptol/KemNtt.cry on its closed terms: the computed
-#                twiddle table against FIPS 203 Appendix A, 128 * 3303 = 1,
-#                and NTT^-1 undoing NTT on a fixed polynomial.
+#                twiddle and γ tables against FIPS 203 Appendix A,
+#                128 * 3303 = 1, NTT^-1 undoing NTT on a fixed polynomial, and
+#                NTT^-1(NTT f ∘ NTT g) equal to the schoolbook negacyclic
+#                product on a fixed pair.
 #   EQUIVALENCE  pq05-saw/ntt.saw: ml-kem's Elem add, sub and mul equal
 #                Field.cry; then its NTT equals FIPS 203 Algorithm 9 and its
 #                inverse NTT equals Algorithm 10 for every polynomial with
 #                coefficients in the field, those three proofs standing in for
-#                the calls.
-#   TEETH        ntt-teeth.saw (one twiddle factor bent) MUST fail with a
+#                the calls; its Barrett instance, then its base-case multiply
+#                equals Algorithm 12 for every i < 128, then multiply_ntt
+#                equals Algorithm 11, each proof standing in for the next.
+#   TEETH        ntt-teeth.saw (one twiddle factor bent) and
+#                ntt-teeth-gamma.saw (one γ bent) MUST fail with a
 #                counterexample.
 #
 # usage: pq05-ntt-check.sh <saw> <cryptol>
@@ -75,7 +80,7 @@ sed 's/^/  /' "$OUT/names.saw"
 
 # ---- SPEC-CHECK --------------------------------------------------------------------
 say "== SPEC-CHECK PQ05: KemNtt.cry closed terms =="
-for prop in zetasMatchAppendixA inverseOf128 inverseUndoesForward; do
+for prop in zetasMatchAppendixA gammasMatchAppendixA inverseOf128 inverseUndoesForward nttMultipliesPolynomials; do
   _out=$(cd "$CRYDIR" && "$CRYPTOL" -c ":load KemNtt.cry" -c ":prove $prop" 2>&1) || {
     say "SPEC-CHECK $prop: ABORTED. Output:"; say "$_out"; exit 1; }
   if ! say "$_out" | grep -aq 'Q.E.D.'; then
@@ -121,8 +126,10 @@ run_teeth_verify() {
 
 # ---- EQUIVALENCE + TEETH -------------------------------------------------------------
 run_required ntt.saw "ml-kem Elem add" "ml-kem Elem sub" "ml-kem Elem mul" "ml-kem ntt (FIPS 203 Algorithm 9)" \
-  "ml-kem ntt_inverse (FIPS 203 Algorithm 10)"
+  "ml-kem ntt_inverse (FIPS 203 Algorithm 10)" "ml-kem barrett_reduce (sums of two products)" \
+  "ml-kem base_case_multiply (FIPS 203 Algorithm 12)" "ml-kem multiply_ntt (FIPS 203 Algorithm 11)"
 run_teeth_verify ntt-teeth.saw
+run_teeth_verify ntt-teeth-gamma.saw
 
 say "== SAW PQ05 NTT: ladder state =="
-say "PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (3) | EQUIVALENCE: PROVEN (5: Elem add, sub, mul; the NTT and its inverse composed from them) | TEETH: PASS (1)"
+say "PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (8: Elem add, sub, mul; the NTT and its inverse composed from them; Barrett, base case, multiply_ntt) | TEETH: PASS (2)"

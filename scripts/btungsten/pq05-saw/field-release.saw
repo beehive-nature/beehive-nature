@@ -1,0 +1,33 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — ML-DSA's Barrett reduction and multiply,
+// with the harness built as release builds run (overflow checks off: the
+// workspace sets no release override, so that is how bsigner ships). The
+// shipped code IS Field.cry's dsaBarrettAlgo, and multiply is it applied to
+// the product; Field.cry's dsaBarrettRange (z3) carries the algorithm to
+// "the remainder mod q" over the integers.
+//
+// usage (from this directory): saw field-release.saw   with MIR at ../../../target/saw-pq05-field/
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+
+m <- mir_load_module "../../../target/saw-pq05-field/pq05_field_release.linked-mir.json";
+let fn n = str_concat "pq05_field::" n;
+let proven name = print (str_concat "PQ05-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+mir_verify m (fn "dsa_barrett") [] false (do {
+  x <- mir_fresh_var "x" mir_u64;
+  mir_precond {{ x <= 8380416 * 8380416 }};
+  mir_execute_func [mir_term x];
+  mir_return (mir_term {{ dsaBarrettAlgo x }});
+}) bw;
+proven "dsa_barrett (release build) = the Barrett algorithm";
+
+mir_verify m (fn "dsa_mul") [] false (do {
+  a <- mir_fresh_var "a" mir_u32;
+  b <- mir_fresh_var "b" mir_u32;
+  mir_precond {{ a < 8380417 /\ b < 8380417 }};
+  mir_execute_func [mir_term a, mir_term b];
+  mir_return (mir_term {{ dsaBarrettAlgo ((zext a) * (zext b)) }});
+}) bw;
+proven "dsa_mul (release build) = the Barrett algorithm of the product";

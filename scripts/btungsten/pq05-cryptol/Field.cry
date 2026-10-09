@@ -44,13 +44,24 @@ dsaNeg a = if a == 0 then 0 else 8380417 - a
 dsaMul : [32] -> [32] -> [32]
 dsaMul a b = dsaMod ((zext a) * (zext b))
 
-// ---- ML-DSA's Barrett reduction, over the integers ---------------------------
+// ---- ML-DSA's Barrett reduction ------------------------------------------------
 // module-lattice's barrett_reduce for q = 8380417: shift s = 2 (ilog2 q + 1)
 // = 46, multiplier m = floor(2^46 / q) = 8396807, then one conditional
-// subtraction. The shipped code in 128-bit words is not yet proven equal to
-// this: its debug build asserts no underflow at x - t q, which is this very
-// bound, and no bitvector solver closed it in 30 minutes. These two
-// properties prove the algorithm and its constants.
+// subtraction. Three links, each its own kind:
+//   1. SAW (pq05-saw/field-release.saw): the shipped code, built as release
+//      builds run it (no overflow checks), IS this algorithm in 128-bit words.
+//   2. z3 (dsaBarrettRange below): over the integers, for every product of
+//      two elements, the remainder before the subtraction is in [0, 2q).
+//   3. Read: at these magnitudes the 128-bit words are the integers (x m is
+//      below 2^70, and x - t q is not negative by link 2), so nothing wraps.
+// (The debug build's own overflow assertion at x - t q is link 2 in 128-bit
+// words; bitwuzla, ABC and yices each ran 30 minutes on it without closing.)
+dsaBarrettAlgo : [64] -> [32]
+dsaBarrettAlgo x = if r >= 8380417 then r - 8380417 else r
+  where
+    w = zext x : [128]
+    t = (w * 8396807) >> 46
+    r = drop (w - t * 8380417) : [32]
 
 // for every x = c q + d with d < q and x <= (q-1)^2, t = floor(x m / 2^46)
 // leaves x - t q in [0, 2q): one conditional subtraction then gives d,

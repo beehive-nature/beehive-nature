@@ -621,6 +621,13 @@ name = "btungsten-wb002-core"
 version = "0.1.0"
 
 [[package]]
+name = "btungsten-wb003"
+version = "0.1.0"
+dependencies = [
+ "btungsten-wb002",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

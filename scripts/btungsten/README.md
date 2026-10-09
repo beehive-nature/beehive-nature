@@ -75,8 +75,8 @@ inherited, tested; the teeth each gate must catch; lanes PQ00-PQ15). CI:
 | PQ03 SHA-256 | `pq03-cryptol/Sha256.cry` (FIPS 180-4, K and H0 computed from integer roots of the primes) + `pq03-harness/sha256.rs` (sha2 0.10.9 soft.rs and consts.rs compiled verbatim) + `pq03-saw/sha256.saw` + `pq03-sha256-check.sh` (the `.crate` checked against Cargo.lock) | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37932930215, 3 s; locally 5 s): PIN PASS; SPEC-CHECK 5 of 5 (primes, published K and H0, FIPS digests of "", "abc", the two-block example); EQUIVALENCE **PROVEN** 6: K32 and H256_256 = derived constants, two-round function and message schedule = FIPS for every input, the 64-round block function = FIPS compress (composed from those two), one block through `compress` = FIPS; TEETH 2 of 2 (Σ1 rotation 7, one K bit) refuted. The soft path only: x86_64 with SHA extensions runs SHA-NI, not covered |
 | PQ02 Keccak-f[1600] | `pq02-cryptol/KeccakF1600.cry` (FIPS 202, constants derived) + `pq02-harness/harness.rs` + `pq02-saw/shipped.saw` (keccak 0.1.6, under sha3 0.10) + `pq02-harness/harness022.rs` + `pq02-saw/shipped022.saw` (keccak 0.2.2, under ml-dsa, ml-kem and slh-dsa) + `pq02-saw-check.sh` (both `.crate`s fetched and checked against Cargo.lock) | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37919612155; locally 417 s, peak 13.4 GB): PIN PASS; SPEC-CHECK 5 of 5 (zero-state lanes, SHA3-256 "" and "abc", the ρ walk); EQUIVALENCE **PROVEN** the crate's own generic round body equals FIPS 202 `keccakRound k` for every state, all 24 constants (91 s in CI); TEETH 1 of 1 (one ρ offset off by one, refuted). keccak 0.2.2 (CI run 37925287105): its soft backend's round body, compiled verbatim, **PROVEN** equal to `keccakRound k` at all 24 constants (17 s). In both crates the step to 24 rounds is the crate's loop, read, not proven: no 24-round comparison closed (bitwuzla and z3 90 min, ABC, an agreement run) |
 | PQ04 byte layouts | `crates/bpq-core/src/layout.rs` (bsigner calls it for every `bpq1/` label, nonce, segment length and binding validator; `open` and `seal_self` cut segments with it) + `pq04-cryptol/BpqLayout.cry` + `pq04-saw/` + `pq04-saw-check.sh` | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37919612155): EQUIVALENCE **PROVEN** `domain_byte`, `domain_len`, `nonce`, `seg_ok`, `segment_count`, `body_len` (Some, None), `segment_plain_len`, `utc_timestamp`, `claim_kind` (10, 3 s); PROVE-UNIVERSAL **PROVEN** `domainsDisjoint` (13 labels), `nonceInjective`, `bodyExact` (for any segment count), `segmentsTile` (over the integers, z3), `atNoNewline`, `kindNoSeparator`, `bindInjective` (bounded MODEL of verify_bind: 63-byte id, up to two claims in any order, kinds and values up to 8 bytes; the preimage builder in bsigner is not proven equal to it); TEETH 9 of 9 refuted (lowercase z; prefix domain; 64-bit wrapping BODY check, refuted at len 2^64-1 seg 2^24; empty last segment; at validator dropped; '=' in a kind; at, kind and value rules loosened inside bindInjective). Stated, not proven: the step from bitvector to integer division (the bvudiv definition; z3 Unknown after 78 min). No length makes `open` panic: every part is a checked range, parts that do not tile the body are refused |
-| PQ05/PQ06 base fields | `pq05-field/` (module-lattice 0.2.3, checksum-pinned, through cargo-saw-build; ml-kem's and ml-dsa's own `define_field!` arguments, checked) + `pq05-cryptol/Field.cry` + `pq05-saw/field.saw` + `pq05-field-check.sh` | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37935979095, 79 s; locally 224 s): PIN PASS (3 crates + both invocations); EQUIVALENCE **PROVEN** 11: ML-KEM conditional subtraction, Barrett for every product and every sum of two products, add, sub, neg, mul; ML-DSA conditional subtraction, add, sub, neg; TEETH 2 of 2 (each precondition dropped, refuted). ML-DSA Barrett: the algorithm PROVEN over the integers (z3: constants, and the remainder in [0, 2q) for every product); the shipped 128-bit code tied to it is open (30-minute runs of bitwuzla, ABC, yices did not close it) |
-| PQ05 ML-KEM NTT | `pq05-cryptol/KemNtt.cry` (FIPS 203 Alg. 9 and 10, twiddles computed and held to Appendix A) + `pq05-ntt/` (ml-kem 0.3.2 under the workspace's exact lock) + `pq05-ntt-names.py` + `pq05-saw/ntt.saw` + `pq05-ntt-check.sh`; CI job `saw-ntt` | Local receipt 2026-10-09 (WSL): SPEC-CHECK 3 of 3; EQUIVALENCE **PROVEN** ml-kem's `Elem` add, sub, mul, then its NTT = Algorithm 9 (26 min) and inverse NTT = Algorithm 10 (46 min) for every in-field polynomial, all 896 butterflies matched with the field operations uninterpreted; TEETH: a bent twiddle factor |
+| PQ05/PQ06 base fields | `pq05-field/` (module-lattice 0.2.3, checksum-pinned, through cargo-saw-build; ml-kem's and ml-dsa's own `define_field!` arguments, checked) + `pq05-cryptol/Field.cry` + `pq05-saw/field.saw` + `pq05-field-check.sh` | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37935979095, 79 s; locally 224 s): PIN PASS (3 crates + both invocations); EQUIVALENCE **PROVEN** 11: ML-KEM conditional subtraction, Barrett for every product and every sum of two products, add, sub, neg, mul; ML-DSA conditional subtraction, add, sub, neg; TEETH 2 of 2 (each precondition dropped, refuted). ML-DSA Barrett and multiply: the shipped code built as release builds run it IS the Barrett algorithm (SAW, about 1 s each; CI run 37955111771), the algorithm is correct over the integers (z3: constants, and the remainder in [0, 2q) for every product), and that its 128-bit words never wrap at these magnitudes is read; the debug build's underflow assertion in 128-bit words stays open (bitwuzla, ABC, yices, 30 min each) |
+| PQ05 ML-KEM NTT | `pq05-cryptol/KemNtt.cry` (FIPS 203 Alg. 9 and 10, twiddles computed and held to Appendix A) + `pq05-ntt/` (ml-kem 0.3.2 under the workspace's exact lock) + `pq05-ntt-names.py` + `pq05-saw/ntt.saw` + `pq05-ntt-check.sh`; CI job `saw-ntt` | CI receipt 2026-10-09 (bTunGsTeN PQ SAW run 37955111771, job saw-ntt, 44 min): PIN PASS (18 packages = the workspace's); SPEC-CHECK 5 of 5 (twiddle and γ tables vs Appendix A, 128 * 3303 = 1, NTT^-1 undoes NTT, NTT-domain product = schoolbook negacyclic product); EQUIVALENCE **PROVEN** 8: ml-kem's `Elem` add, sub, mul; its NTT = Algorithm 9 and inverse NTT = Algorithm 10 for every in-field polynomial (all 896 butterflies matched, field operations uninterpreted); its Barrett instance for every sum of two products; base-case multiply = Algorithm 12 for every i < 128; multiply_ntt = Algorithm 11 (2,095 s); TEETH 2 of 2 (a bent twiddle, a bent γ, refuted) |
 | PQ05 X-Wing | `scripts/btungsten/pq05-xwing-draft.{json,mjs}` + bsigner `xwing_matches_the_draft_vectors` (ignored locally, run in CI job `pq05-xwing`) | CI receipt (run 37905980541): draft-connolly-cfrg-xwing-kem-11 (2026-09-23, pinned by size and SHA-256) Appendix C: browser (bpq-lib, what bpq.js calls) 3 of 3 vectors pass keygen, encapsulation and decapsulation, TEETH caught one changed shared-secret byte; bsigner 3 of 3 pass keygen and decapsulation, one changed ciphertext refused. The browser also passes draft -06's vectors (local). Settles SPEC §8's revision question: ours is draft -11, label last in the combiner. SAW (`crates/bpq-core/src/xwing.rs`, `pq05-saw/`, CI run 37919612155): EQUIVALENCE **PROVEN** `combiner_input`, `split_seed`; `combinerBinds` **PROVEN**; TEETH 1 of 1 (a combiner without pk_X, refuted) |
 | PQ11 classical + BIP-39 | `crates/btungsten-pq` `classic-kat` + `classic-manifest.json` (bitcoin/bips `200f9b26`, C2SP/wycheproof `12fd3aaf`); `scripts/btungsten/pq11-classic-kat.mjs`; `crates/bpq-core/src/bip39.rs` + `pq11-cryptol/Bip39.cry` + `pq11-saw/`; `crates/bsigner/src/bip39.rs` | CI receipts (runs 37905980541, 37919612155): **1,485 of 1,485** on the Rust implementations: BIP-340 sign 8/8 and verify 19/19 (k256 0.13.4), Wycheproof ECDSA secp256k1 476 plain (404 by result, 72 `valid` high-s refused by k256's low-S policy and listed by tcId) and 464 Bitcoin-variant, Wycheproof X25519 518 (x25519-dalek 2.0.1); BIP-340 on the wallet's noble schnorr 27 of 27. BIP-39 SAW: EQUIVALENCE **PROVEN** `indices`, `indices_ok`, `unpack`, `decode_ok`; PROVE-UNIVERSAL **PROVEN** `mnemonicRoundTrip` both ways and `badChecksumRefused` with the hash left free; TEETH 2 of 2. bsigner now reads the 24 words (`--rec-env` takes the code or the words); the official list equals the browser's word for word; the browser's phrase for the derive-vector root reads back to that root in Rust |
 | PQ12 FROST lane, steps 1 to 5 (authorization, PSBT, sighash, gate, FROST) | `crates/bsigner/src/taproot.rs` + `psbt.rs` + `intent.rs` + `frost.rs` (feature `frost`, chilldkg-rs `=0.5.0`, unaudited) (`bsigner taproot-sighash`, `taproot-address`, `psbt-inspect`, `btc-intent`, `bpq-attest-intent`, `btc-verify-intent`) + `scripts/btungsten/pq12-bip341.json` (BIP-341 `wallet-test-vectors.json`, BIP-174 and BIP-371 texts, all at bitcoin/bips `200f9b26`, fetched, never committed); CI job `pq12-taproot` | Local receipt 2026-10-09 (WSL): BIP-341 7 of 7 script-tree cases (leaf hashes, root, tweak, output key, scriptPubKey, address, control blocks) and 7 of 7 key-path inputs (five shared hashes, SigMsg, sighash, tweak; the expected witness verifies and is reproduced byte for byte), 20 teeth refused; BIP-174 19 of 19 invalid PSBTs refused (each for its own defect), 10 valid + 10 walkthrough + 4 signer-check PSBTs parsed; BIP-371 11 of 11 invalid refused, 6 of 6 valid parsed; the reference signer's key-path signature verifies over bsigner's sighash. Authorization + gate (SPEC-BPQ-1 §5c, `crates/bsigner/src/intent.rs`): the honest spend verifies; refused: 418 of 418 unsigned envelope-byte edits, 15 signed fields the PSBT contradicts, 6 PSBT changes, another authority, kind, version, a clock past expiry. Browser twin: bpq.js WB001 codec 19 of 19 pinned rows, each side verifies the other's authorization; bsigner 81 of 81, bpq e2e 23 of 23. FROST (feature on): a 2-of-3 ChillDKG key signs both inputs of an ML-DSA-authorized PSBT, each a valid key-path witness; 7 refusals (one signer, replayed session id, missing input, another group's share and coordinator, a partial over another input, fewer partials than the threshold); bsigner 82 of 82 with the feature. Audit gate 1 (CI run 37931727642): chilldkg-rs absent from bsigner's default build; chilldkg's own 64 vector tests pass. Audit gate 2 (cargo audit 0.22.2, same run, lock-wide, 529 crates): 2 vulnerabilities and 3 warnings, none in bsigner's graph with or without `frost` (`cargo tree -p bsigner -e normal -i <crate>`, both ways): rsa 0.9.10 RUSTSEC-2023-0071 (wallet-relay, royalreview, atmirror, adapter-arweave; no fixed version; clears when those crates drop RSA or rsa ships a constant-time release), rustls 0.23.42 RUSTSEC-2026-0285 (composition, wallet-relay, royalreview, zano-watcher, atmirror, banchor, bindexer; clears at rustls >= 0.23.45), bincode 1.3.3 RUSTSEC-2025-0141 unmaintained (settle-solana, through the Solana crates; clears when they migrate), proc-macro-error2 2.0.1 RUSTSEC-2026-0173 unmaintained and chacha20 0.10.1 yanked (in Cargo.lock, in no normal or build graph of the workspace on x86_64 Linux; clear at the next lock refresh). Not yet: key ceremony + sealed shares + CLI rounds, sighash differential, the wallet press |
@@ -311,7 +311,70 @@ faithful-port row).
    Local runs may set `WB002_HTTP_PORT` and `WB002_P2P_PORT`; state and
    wallet directories are unique per invocation. Cleanup signals only
    owned child processes; occupied ports fail rather than evict siblings.
-6. **WB003+**: scale and century-transition legs per SPEC §axes 5-6.
+6. ~~WB003+ century leg~~ **DONE 2026-10-09** — the century ladder is its
+   own workbench (§ WB003 below). The SCALE half of axis 5 remains open.
+
+## WB003 — the century ladder (axis 6: repeated century transitions, 2026-10-09)
+
+The millennium question made executable: can a sovereign asset created
+under the 2019 software still be understood, authenticated, reconstructed,
+migrated and EXERCISED in 3019 — through repeated century transitions —
+with the killer invariant holding at every step and every boundary?
+SPEC §axis-6 honesty clause applies: this receipts the MECHANISMS on the
+model, never a thousand-year empirical claim.
+
+The schedule is FIXED and readable (no RNG): one spine born 2019 on the
+Specimen (an NFT credential whose idata is the COMMIT commitment, an NTT
+capability, a composed parent∋child object, a seven-century tenure, and
+sovereign funds), then ten centuries — C1 is THE EXTRACTION (Specimen →
+Adapter; the F-1 authorctrl confiscation seam is exercised once, named,
+and dies at the boundary), then per century: anchored migration with
+tamper refusal, author extinction (F-8 co-signed changeauthor), key and
+algorithm rotation (ed25519 → dilithium2 → sphincs-imp → ml-dsa-3019),
+partition+reorg with post-fork healing checkpoints, marketplace death,
+post-migration births, fragment poverty at every boundary.
+
+| artifact | status |
+|---|---|
+| `crates/btungsten-wb003` — the engine: `Engine::run()` walks the ten-century schedule; every action passes through `drive` (the killer invariant, consent captured before); every boundary re-derives the whole world from the last checkpoint + suffix ONLY and demands it equal canonical truth; receipts per century (steps/refusals/probes/migration/fingerprint/spine) | RUNS — `cargo test -p btungsten-wb003` (7 tests; the ladder prints its 11 receipts, 2019 → 3019) |
+| `crates/btungsten-wb003/tests/wb003.rs` — the ladder + the naive-importer teeth, the dead century (zero actions, fingerprint-stable), and one regression row per repaired seam (below) | RUNS in CI (workspace job, same glob as WB002) |
+
+### §findings — four migration seams, convicted red-first and repaired (2026-10-09)
+
+The ladder's first boundary went RED; the standalone rows convict each
+seam by name (red receipts quoted in
+`docs/dispatches/2026-10-09-btungsten-wb003-century.md`):
+
+- **R-A post-migration mint collision.** `import_state` did not advance
+  the successor's asset counter: the first post-migration mint reused a
+  MIGRATED id, putting one id in two scopes — the newborn resolved to the
+  OLD holder (the upstream #26 mis-assignment class, reproduced at a
+  migration boundary). REPAIR: the counter advances past every migrated
+  id (rows recursively, token ids, delegation asset ids).
+- **R-B live tenure lost from log truth.** A mid-delegation migration
+  re-planted the delegates table but emitted no event: table truth said
+  the lender, the successor's log fold said the borrower. REPAIR: import
+  emits `delegateopen` for each live tenure.
+- **R-C silent value drop.** A bundle FT naming a token the successor
+  has no contract for was silently skipped — funds lost without a
+  refusal. REPAIR: `bt-wb02:migration-unknown-ft` — value continuity or
+  refusal, never a silent drop.
+- **R-D contained structure invisible to the fold.** A composed
+  parent∋child object migrated as table state only; until the first
+  checkpoint the successor's fold could not see the child. REPAIR:
+  import emits the child's spawn + attach events.
+
+The WB002 battery (24 tests) stayed green through all four repairs; the
+46-step wasm corpus is untouched (it never imports).
+
+### §next
+
+1. **Scale half of axis 5** (the 10/100 GB storage ladder) — separate
+   lane, box-gated.
+2. **Live leg** (shared with WB002 §next 4): the century schedule against
+   a deployed contract.
+3. Century-depth variations: a schedule with a migration EVERY century;
+   adversarial fragment sets (corrupted checkpoints presented as truth).
 
 ## WB001 — the intent-binding invariant (LIVE in CI)
 

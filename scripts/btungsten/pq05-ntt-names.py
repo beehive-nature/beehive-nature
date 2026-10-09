@@ -1,7 +1,8 @@
 """SPEC-BTUNGSTEN-PQ-1 PQ05: the MIR names pq05-saw/ntt.saw needs.
 
 Reads the linked MIR JSON of pq05-ntt and prints SAW let-bindings for
-ml-kem's NTT and inverse NTT, the Elem<BaseField> add, sub and mul instances
+ml-kem's NTT and inverse NTT, its Barrett reduction, base-case multiply and
+multiply_ntt, the Elem<BaseField> add, sub and mul instances
 (found by signature: two Elem arguments, an Elem result), and the ADTs
 Elem, Polynomial, NttPolynomial and the hybrid-array Array inside them.
 Refuses (exit 1) unless each name is found exactly once.
@@ -57,3 +58,9 @@ print(f'let sub_name = "{elem_op("sub")}";')
 print(f'let mul_name = "{elem_op("mul")}";')
 print(f'let ntt_name = "{ntt}";')
 print(f'let ntt_inverse_name = "{inv}";')
+bar = one("barrett_reduce", [strip(f["name"]) for f in d["fns"] if re.search(r"^ml_kem/[^:]+::algebra::\{impl#\d+\}::barrett_reduce$", f["name"])])
+bcm = one("base_case_multiply", [strip(f["name"]) for f in d["fns"] if re.search(r"^ml_kem/[^:]+::algebra::base_case_multiply$", f["name"])])
+mul_ntt = one("multiply_ntt", [strip(f["name"]) for f in d["fns"] if re.search(r"^ml_kem/[^:]+::algebra::\{impl#\d+\}::multiply_ntt$", f["name"])])
+print(f'let barrett_name = "{bar}";')
+print(f'let base_case_name = "{bcm}";')
+print(f'let multiply_ntt_name = "{mul_ntt}";')
