@@ -120,6 +120,36 @@ sha3_256 m = take`{32} (fromLanes (absorb (padRate 0x06 m)))
 shake256 : {n, d} (fin n, d <= 136) => [n][8] -> [d][8]
 shake256 m = take`{d} (fromLanes (absorb (padRate 0x1F m)))
 
+// ---- the sponge at any rate, any output length (§4 Algorithm 8) ----
+// r is the rate in bytes: 136 for SHA3-256 and SHAKE256, 72 for SHA3-512,
+// 168 for SHAKE128. The output is trunc_r(S) ‖ trunc_r(f(S)) ‖ ..., cut to d.
+
+padR : {r, n} (fin r, r >= 1, fin n) => [8] -> [n][8] -> [n / r + 1][r][8]
+padR d m = split (padded || (zero # [0x80]))
+  where
+    padded = take`{(n / r + 1) * r} (m # [d] # (zero : [r][8]))
+
+absorbR : {r, k} (fin r, fin k, 200 >= r) => [k][r][8] -> State
+absorbR blocks = foldl (\s b -> keccakF (s ^ toLanes (b # zero))) zero blocks
+
+squeezeR : {r, d} (fin r, r >= 1, 200 >= r, fin d) => State -> [d][8]
+squeezeR s = take`{d} (join [ take`{r} (fromLanes t) | t <- states ])
+  where
+    states = scanl (\t _ -> keccakF t) s (zero : [d / r][0])
+
+spongeR : {r, n, d} (fin r, r >= 1, 200 >= r, fin n, fin d) => [8] -> [n][8] -> [d][8]
+spongeR dom m = squeezeR`{r} (absorbR`{r} (padR`{r} dom m))
+
+sha3_512 : {n} (fin n) => [n][8] -> [64][8]
+sha3_512 = spongeR`{r = 72} 0x06
+
+shake128 : {n, d} (fin n, fin d) => [n][8] -> [d][8]
+shake128 = spongeR`{r = 168} 0x1F
+
+// SHAKE256 with any output length (shake256 above reads one block at most)
+shake256Long : {n, d} (fin n, fin d) => [n][8] -> [d][8]
+shake256Long = spongeR`{r = 136} 0x1F
+
 // ---- closed-term checks (published values; checks, not definitions) ----
 
 // The Keccak team's KeccakF-1600 intermediate values: the permutation of
@@ -166,6 +196,46 @@ property shake256Seed96 = split`{12} (join (shake256`{d = 96} [0 .. 31 : [8]])) 
   [0x69f07c8840ce8002, 0x4db30939882c3d5b, 0xbc9c98b3e31e4513, 0xebd2ca9b4503cdd3,
    0xc9c90742452c7173, 0xd4a75ac49163e14e, 0xe0cc24ef7035b272, 0xd19a7af1099b333f,
    0x617465d69b5f5b78, 0xae914e4a1b1cecc9, 0x21f6d5791830ae3f, 0x914bee9b0292b288]
+
+// The any-rate sponge at the shapes ML-KEM and ML-DSA hash at, on the
+// message pattern byte i = s * i + 7 (computed by Python's hashlib). Each
+// output is checked by its first and last 32 bytes as 64-bit words.
+pattern : {n} (fin n) => [8] -> [n][8]
+pattern s = [ drop`{8} i * s + 7 | i <- take`{n} [(0 : [16]) ...] ]
+
+ends : {d} (fin d, d >= 32) => [d][8] -> [8][64]
+ends z = split (join (take`{32} z # drop`{d - 32} z))
+
+sha3_512Of33 : Bit
+property sha3_512Of33 = split (join (sha3_512 (pattern`{33} 3))) ==
+  [0xeb50562b0c7ee978, 0x9946100ffe4d949f, 0xa8ea874d3d4bb106, 0x84675fd6709183d0,
+   0x4a49b113006c774e, 0xe85d9de3b0cb6fdf, 0xe069e6a9b6c26840, 0x698d8563b47f1bd2]
+
+// SHA3-256 of 1184 bytes (an ML-KEM-768 encapsulation key's length), both
+// sponge definitions
+sha3_256Of1184 : Bit
+property sha3_256Of1184 =
+  (digestWords (sha3_256 m) == [0xe2a77bbd44433906, 0x934a26aa83194e38, 0x35bac9d4f4a0d121, 0xc2acc0e789ec0376])
+  /\ (spongeR`{r = 136} 0x06 m == sha3_256 m)
+  where
+    m = pattern`{1184} 5
+
+// SHAKE128 of 34 bytes, 504 out: three squeezed blocks
+shake128Of34To504 : Bit
+property shake128Of34To504 = ends (shake128`{d = 504} (pattern`{34} 11)) ==
+  [0x0526b054267ba668, 0x528405a391fec370, 0x065a2e3004fd7873, 0x55f7157f29ecd6ca,
+   0x1dd3d78160d85f7a, 0xb84862d1543669f6, 0x9fbf7df0feaf033d, 0xcd4af0ea85157b44]
+
+// SHAKE256 of 1120 bytes (z ‖ c for ML-KEM-768's J), 32 out
+shake256Of1120 : Bit
+property shake256Of1120 = split (join (shake256Long`{d = 32} (pattern`{1120} 13))) ==
+  [0x6b4d32b1b90ebe15, 0xbf29c5423eef89d4, 0x2e76eedfde41c715, 0x9bdbf739c95341b6]
+
+// SHAKE256 of 33 bytes, 128 out (the PRF's shape at eta = 2)
+shake256Of33To128 : Bit
+property shake256Of33To128 = ends (shake256Long`{d = 128} (pattern`{33} 17)) ==
+  [0xe0c56ea069723a28, 0xf21135581418239e, 0xd37d41112a8f76df, 0x31659844ee07b119,
+   0x62671b53b34b2e56, 0xe7c5256241e1a840, 0x08ea8c0ee4e97c66, 0x92cb8b1f112b7eb2]
 
 // The derived offsets are a permutation of the 24 non-zero lanes' needs:
 // lane 0 never rotates, and every other lane gets exactly one walk step.

@@ -3,7 +3,8 @@ name: bTunGsTeN PQ SAW
 # SPEC-BTUNGSTEN-PQ-1 lanes proven by SAW over MIR of the shipped Rust. PQ02:
 # the keccak 0.1.6 and 0.2.2 crates' own round bodies equal to FIPS 202 for every state,
 # at each of the 24 round constants, the 24-round permutations equal to those
-# bodies in order, and sha3 0.10.9's sponge (SHA3-256, SHAKE256) around it. PQ11: the BIP-39 packing of the recovery words. PQ04:
+# bodies in order, and the sponges around them (sha3 0.10.9; sha3 0.11.0 at
+# ML-KEM-768's shapes). PQ11: the BIP-39 packing of the recovery words. PQ04:
 # crates/bpq-core/src/layout.rs (labels, nonce, segment lengths, binding
 # validators) equal to its Cryptol spec, its obligations and teeth. PQ03:
 # crates/bpq-core (the HKDF info string of every bzDiD derivation) equal to
@@ -100,6 +101,10 @@ jobs:
         if: always()
         shell: bash
         run: sh scripts/btungsten/pq02-sponge-check.sh saw "$HOME/saw/bin/cryptol"
+      - name: PQ02 SAW — the SHA-3 sponge in sha3 0.11.0 on keccak 0.2.2 (ML-KEM-768 shapes), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
+        if: always()
+        shell: bash
+        run: sh scripts/btungsten/pq02-sponge022-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ03 SAW — SHA-256 in sha2 0.10.9 (soft path), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
         if: always()
         shell: bash
