@@ -1,0 +1,27 @@
+# bTunGsTeN PQ battery (SPEC-BTUNGSTEN-PQ-1): the official-vector harness
+# (PQ01) and, lane by lane, the differential harnesses. Test code: nothing
+# ships from this crate. The KAT runner is a binary, so `cargo test
+# --workspace` stays hermetic; .github/workflows/btungsten-pq.yml runs it.
+[package]
+name = "btungsten-pq"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+# fips205 takes hedged randomness through a rand_core 0.6 RNG
+rand_core = "0.6"
+# The shipped implementations (crates/bsigner links these exact versions).
+ml-kem = { version = "=0.3.2", features = ["hazmat"] }
+ml-dsa = "=0.1.1"
+# Independent implementations: libcrux (Cryspen; its verification claims are
+# cited per lane, SPEC §PQ05-PQ06; `acvp` exposes the internal interface),
+# and two SLH-DSA implementations, since no Rust SLH-DSA ships yet (§PQ07).
+libcrux-ml-kem = "=0.0.11"
+libcrux-ml-dsa = { version = "=0.0.11", features = ["acvp"] }
+slh-dsa = "=0.2.0-rc.5"
+fips205 = "=0.4.1"

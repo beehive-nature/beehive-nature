@@ -1,0 +1,30 @@
+{
+  "about": "NIST ACVP vector files the PQ01 runner (src/bin/pq-kat.rs) fetches at the pinned commit. A file whose byte length or SHA-256 differs is refused. Digests are base64url without padding (the repository keeps long hex out). The eight files this manifest shares with surfaces/pq-kat.json's source list carry the same digests there (a unit test holds that).",
+  "acvpServer": {
+    "repo": "https://github.com/usnistgov/ACVP-Server",
+    "commit": "975de31eb83d87039ec88934fdc47d8c312b892d",
+    "commitMessage": "RELEASE/v1.1.0.43 including hotfix patches"
+  },
+  "files": [
+    { "dir": "ML-KEM-keyGen-FIPS203", "file": "prompt.json", "bytes": 16066, "sha256": "sha256:P5zjT2yDbHeVi60nKeg3w7IT9ErDbDBll256zKY4lSM" },
+    { "dir": "ML-KEM-keyGen-FIPS203", "file": "expectedResults.json", "bytes": 544032, "sha256": "sha256:olPQrZHJXr6ltAlnPe_vCqSdZdTtcihjmeLnmN3wc6Q" },
+    { "dir": "ML-KEM-encapDecap-FIPS203", "file": "prompt.json", "bytes": 624189, "sha256": "sha256:mY4i37Eu-xTOn9_5EcpjSxNhKBmhgG8l2mmtun4W25E" },
+    { "dir": "ML-KEM-encapDecap-FIPS203", "file": "expectedResults.json", "bytes": 190940, "sha256": "sha256:kInsb_JCTanyeCuJsvgxoymj4o1uXiS4AreP82rGHN8" },
+    { "dir": "ML-KEM-encapDecap-FIPS203-tr1", "file": "prompt.json", "bytes": 700234, "sha256": "sha256:olQw2IaoISoh7Q1AFeuRqjDVVViEZdR9oE_7RSNtJ_0" },
+    { "dir": "ML-KEM-encapDecap-FIPS203-tr1", "file": "expectedResults.json", "bytes": 194889, "sha256": "sha256:qoRgZ9ML68_k6DmwdrHfXN6xQzKRKz4C3-jQDGFAmLQ" },
+    { "dir": "ML-DSA-keyGen-FIPS204", "file": "prompt.json", "bytes": 10062, "sha256": "sha256:Q-ga2CDkldvK0Ib-J8EAg5OowyEAu7_3fFWMPwbc7-8" },
+    { "dir": "ML-DSA-keyGen-FIPS204", "file": "expectedResults.json", "bytes": 873632, "sha256": "sha256:Nh9HyhnVkq3MZv8stZFoateF_qFXspVkhzi-1pIaaN8" },
+    { "dir": "ML-DSA-sigGen-FIPS204", "file": "prompt.json", "bytes": 5044293, "sha256": "sha256:RHdJ1ygXshEWDSQzEc4yMC8wI-WcNVsPcL4r0-nngw0" },
+    { "dir": "ML-DSA-sigGen-FIPS204", "file": "expectedResults.json", "bytes": 2511972, "sha256": "sha256:Io0BG74nSuuT4i7qHg1Xt49DeVz2pk-17x5iZIWgvts" },
+    { "dir": "ML-DSA-sigGen-FIPS204-tr1", "file": "prompt.json", "bytes": 7288994, "sha256": "sha256:CoGiE_tIJfCp2Ik6IERaP-2IpvGDJwNUgSC5WIx0oI4" },
+    { "dir": "ML-DSA-sigGen-FIPS204-tr1", "file": "expectedResults.json", "bytes": 5023936, "sha256": "sha256:jYbRINEo0vLSmvt4Q7c1FnesDxv2SSldhbe_PdUzlJw" },
+    { "dir": "ML-DSA-sigVer-FIPS204", "file": "prompt.json", "bytes": 3125947, "sha256": "sha256:4sukWJOJdW-gvqGn5oNxOL8KgfnRQjTJ7o9tM8qhZU4" },
+    { "dir": "ML-DSA-sigVer-FIPS204", "file": "expectedResults.json", "bytes": 13956, "sha256": "sha256:4dhO8bLzUZYnirCw7WpG7GLMA9LfqSxWQZnhmZv7jqY" },
+    { "dir": "SLH-DSA-keyGen-FIPS205", "file": "prompt.json", "bytes": 32454, "sha256": "sha256:vOFwl28lfuPfyMVOpGcizLVTU5hH2qbYBI8CFswotRw" },
+    { "dir": "SLH-DSA-keyGen-FIPS205", "file": "expectedResults.json", "bytes": 45192, "sha256": "sha256:8190tmdtazach-iMNmmPKMFNWSnTHlB9kQKIxpJYr-4" },
+    { "dir": "SLH-DSA-sigGen-FIPS205", "file": "prompt.json", "bytes": 5512830, "sha256": "sha256:r6Zz6s3wrsU1EqFZFZt2MmhK380NiPhkCn9vV5aqzcg" },
+    { "dir": "SLH-DSA-sigGen-FIPS205", "file": "expectedResults.json", "bytes": 32595492, "sha256": "sha256:cejg9-Swz9F0cxQpkgTZ1NUJaNIApK6HOSHqp6q-qtE" },
+    { "dir": "SLH-DSA-sigVer-FIPS205", "file": "prompt.json", "bytes": 30513796, "sha256": "sha256:TnvrEjPke6oKzdNkF8ZsRYEapApOMv_bGjXZOxOyifs" },
+    { "dir": "SLH-DSA-sigVer-FIPS205", "file": "expectedResults.json", "bytes": 39216, "sha256": "sha256:JZ9eKgZl3grcD--kW12zoqbtE8PETRS9r2SoCu4Sxoc" }
+  ]
+}

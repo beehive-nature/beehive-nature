@@ -46,7 +46,10 @@ fi
 cp "$ROOT/scripts/btungsten/teeth-vortex/pq00_teeth.rs" src/
 printf '\n#[cfg(test)]\n#[path = "pq00_teeth.rs"]\nmod pq00_teeth;\n' >> src/lib.rs
 printf '\n[dev-dependencies]\nbtungsten-teeth = { path = "%s" }\n' "$ROOT/crates/btungsten-teeth" >> Cargo.toml
-say "PQ00: overlay = one appended test module; vortex source otherwise as pinned"
+# its own workspace: the default build copy sits under this repo's target/,
+# and without this table cargo files it under the beehive-nature workspace
+printf '\n[workspace]\n' >> Cargo.toml
+say "PQ00: overlay = one appended test module, the dev-dependency on the templates, an empty [workspace]; vortex source otherwise as pinned"
 git diff --stat
 
 say "== PQ00: run the templates against vortex =="

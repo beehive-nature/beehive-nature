@@ -25,3 +25,23 @@ jobs:
       - name: PQ00 teeth against the real Vortex defects (both must CONVICT)
         if: always()
         run: sh scripts/btungsten/pq00-teeth-vortex.sh
+
+  pq01-vectors:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/pq-vectors
+          key: pq-vectors-${{ hashFiles('crates/btungsten-pq/kat-manifest.json') }}
+      - name: PQ01 battery unit tests (manifest pins, joins, the pq-kat.json agreement)
+        if: always()
+        run: cargo test --locked -p btungsten-pq
+      - name: PQ01 every ACVP case for ML-KEM-512/768/1024, ML-DSA-44/65/87, SLH-DSA-SHAKE-256f on two implementations
+        if: always()
+        run: |
+          cargo build --locked --release -p btungsten-pq --bin pq-kat
+          target/release/pq-kat --cache "$HOME/pq-vectors"

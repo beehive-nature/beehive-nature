@@ -18,6 +18,28 @@ deletes Foundation or SAW disappears, the workbench migrates to whatever
 formal system replaces them — the ≥1000-year clause applies to bTunGsTeN's
 own tooling first.
 
+## PQ — proofs for the post-quantum stack (founder order 2026-10-08)
+
+Design: `docs/specs/SPEC-BTUNGSTEN-PQ-1.md` (every algorithm: what is proven,
+inherited, tested; the teeth each gate must catch; lanes PQ00-PQ15). CI:
+`.github/workflows/btungsten-pq.yml`, one job per lane.
+
+| lane | artifact | status |
+|---|---|---|
+| PQ00 teeth | `crates/btungsten-teeth` — T-VACUOUS and T-TRUNCATE, no dependencies; `pq00-teeth-vortex.sh` + `teeth-vortex/pq00_teeth.rs` run them against distributed-lab/vortex-rs at `3c0affd9320a` in a build copy outside the workspace | RUNS — 9 tests (positive controls on SHA3-256 and SHAKE256-96, planted prefix hash convicted at len 257 pos 256, planted count-free verifier convicted). Against vortex: T-VACUOUS CONVICTS `verify()` twice (zero openings; zero openings with a FALSE evaluation claim), T-TRUNCATE CONVICTS `RSis::hash()` (collision at len 257, pos 256). `cargo tree -i vortex` on the workspace: no such package |
+| PQ01 vectors | `crates/btungsten-pq` — `pq-kat` runs every NIST ACVP case at ACVP-Server `975de31eb83d` (`kat-manifest.json`: 20 files pinned by size and SHA-256, fetched, never committed) for ML-KEM-512/768/1024 (keyGen, encapsulation, decapsulation expanded and seed, both key checks), ML-DSA-44/65/87 (keyGen; sigGen external-pure and internal, deterministic and hedged, expanded and seed keys; sigVer; external μ where exposed) and SLH-DSA-SHAKE-256f (keyGen, sigGen external-pure and internal, deterministic and hedged, sigVer), each on two implementations: RustCrypto ml-kem 0.3.2 / ml-dsa 0.1.1 (what bsigner links) and libcrux 0.0.11; RustCrypto slh-dsa 0.2.0-rc.5 and fips205 0.4.1 | Local receipt 2026-10-08 (WSL x86_64, 57 s, 75 MB): **2,729 executed, 2,729 passed, 0 failed; 86 required (set, function, implementation) rows, 0 missing**; 137 TEETH controls (one input byte flipped per group must change the answer or be refused) all held. NOT RUN, printed with reasons: HashML-DSA / HashSLH-DSA pre-hash groups (unused by the estate), external-μ on libcrux (no μ interface) and hedged μ on RustCrypto (randomness only through an RNG), the eleven SLH-DSA parameter sets the estate does not use. Was 17 cases (ML-DSA-65 + ML-KEM-768 only, `surfaces/pq-kat.json`); the two pins agree on the eight files they share (unit test) |
+
+Audit two gates for PQ01's new crates, read from rustsec/advisory-db
+2026-10-08 (cargo-audit is not installed on this box): RUSTSEC-2026-0076,
+-0077 (libcrux-ml-dsa verify, patched >= 0.0.8), -0125, -0126
+(libcrux-ml-dsa AVX2, patched >= 0.0.9): 0.0.11 resolved. RUSTSEC-2026-0074,
+-0207, -0208 (libcrux-sha3, patched >= 0.0.10): 0.0.11 resolved.
+RUSTSEC-2025-0133 (libcrux-intrinsics aarch64, patched >= 0.0.4): 0.0.9.
+RUSTSEC-2026-0212 (libcrux-secrets aarch64, patched >= 0.0.6): 0.0.6 and
+0.0.7. RUSTSEC-2025-0144 (ml-dsa timing, patched >= 0.1.0-rc.3): 0.1.1. None
+for libcrux-ml-kem, slh-dsa, fips205. The libcrux-ml-dsa verify advisories
+are exactly the class sigVer vectors catch.
+
 ## WB002 — the extinct-infrastructure specimen (CURRENT, founder order 2026-10-07)
 
 **Invariant (the killer one):** no change of implementation, network,
