@@ -45,3 +45,29 @@ jobs:
         run: |
           cargo build --locked --release -p btungsten-pq --bin pq-kat
           target/release/pq-kat --cache "$HOME/pq-vectors"
+
+  # Plonky3 at eab7f0e, its own workspace (crates/btungsten-p3count). The
+  # LEAK experiment is a registered single run (contracts/zkreceipts/leak/
+  # PREREGISTERED-STARK-v2.md) and is not re-run per push.
+  pq10-plonky3:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: crates/btungsten-p3count
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)
+        if: always()
+        run: cargo test --locked --release
+      - name: PQ10 FORGERY battery at n = 64 (the honest control must verify, every mutation must be refused)
+        if: always()
+        run: cargo run --locked --release --bin p3count -- forgery
+      - name: PQ10 SCALE and security figure at n = 64, 1024, 16384
+        if: always()
+        run: |
+          for nm in "64 40" "1024 1000" "16384 10000"; do
+            set -- $nm
+            cargo run --locked --release --bin p3count -- prove "$1" "$2"
+          done
