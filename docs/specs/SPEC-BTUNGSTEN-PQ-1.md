@@ -494,9 +494,16 @@ The estate's own PQ glue, where its review findings lived.
   included) for every polynomial with coefficients in the field: every
   one of the 896 butterflies the same operations on the same operands in
   the same order, with the crate's twiddle table (a const) equal to the
-  computed one. CI run 37945935140 (job `saw-ntt`): five obligations in
-  1,791 s. TEETH: one twiddle factor bent, refuted with a counterexample. Not yet: ML-DSA's NTT (the same method, waiting on its
-  multiply above) and ML-KEM's base-case multiply.
+  computed one. Then ml-kem's Barrett instance (for every sum of two
+  products), its base-case multiply equal to Algorithm 12 for every
+  i < 128 (γ = ζ^(2 BitRev7(i) + 1) computed, held to Appendix A), and
+  multiply_ntt equal to Algorithm 11, each proof standing in for the next;
+  and a closed check that NTT^-1(NTT f ∘ NTT g) is the schoolbook
+  negacyclic product on a fixed pair. CI run 37955111771 (job `saw-ntt`):
+  eight obligations in 2,095 s. TEETH: one twiddle factor bent, and one γ
+  bent, each refuted with a counterexample. All of ML-KEM's NTT-domain
+  arithmetic is now tied to FIPS 203. Not yet: ML-DSA's NTT (the same
+  method).
 
 ### PQ06 · ML-DSA (44/65/87)
 
