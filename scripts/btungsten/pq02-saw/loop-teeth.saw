@@ -1,0 +1,19 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TOOTH for the loop proof (keccak 0.1.6): agree
+// against composed_swapped, the round bodies with rounds 5 and 6 swapped
+// (RC[5] != RC[6]). It MUST fail with a counterexample, or the agree PROVEN
+// line could not tell round orders apart.
+//
+// usage (from this directory): saw <this file>
+
+enable_experimental;
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness.linked-mir.json";
+
+print "PQ02-SAW-TEETH obligation pq02_harness::agree_swapped returns true";
+mir_verify m "pq02_harness::agree_swapped" [] false (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_return (mir_term {{ True }});
+}) (w4_unint_bitwuzla []);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN pq02_harness::agree_swapped returns true";
