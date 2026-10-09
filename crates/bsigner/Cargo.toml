@@ -37,3 +37,6 @@ x25519-dalek = { version = "2", features = ["static_secrets"] }
 # check of a key-path witness. The same pin btungsten-pq's classical KAT runs
 # (1,485 of 1,485 BIP-340 and Wycheproof cases, PQ11).
 k256 = { version = "=0.13.4", features = ["schnorr", "arithmetic"] }
+# intent.rs and bpq::attest_intent (SPEC-BPQ-1 §5c): the WB001 intent envelope,
+# its SAW-proven encoder and strict decoder.
+btungsten-wb001 = { path = "../btungsten-wb001" }

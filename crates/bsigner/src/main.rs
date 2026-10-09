@@ -70,6 +70,17 @@
 //!      each input and output with its address, the hash types, each Taproot
 //!      key-path sighash and whether the internal key tweaks to the spent key,
 //!      the fee; refused unless every spent output is in the PSBT)
+//!   bsigner btc-intent --file REQUEST.json
+//!     ({psbt, network, destination, expirySeconds}: the WB001 intent envelope
+//!      (SPEC-BPQ-1 §5c) that authorizes exactly this PSBT as a payment to
+//!      destination, with change only back to the key every input spends)
+//!   bsigner bpq-attest-intent --rec-env VAR --context CTX --file ENVELOPE.json
+//!     ({envelope}: CTX's bzpq1 key authorizes the envelope with ML-DSA-65)
+//!   bsigner btc-verify-intent --file REQUEST.json
+//!     ({authorization, authority, psbt}: the gate a threshold signer stands
+//!      behind — the authorization must verify under the pinned authority
+//!      and the PSBT must be its spend field for field; prints the sighashes
+//!      it may sign, or refuses)
 //!   bsigner taproot-address --file REQUEST.json
 //!     ({internalKey, merkleRoot}: the BIP-341 tweak, output key and bc1p/tb1p address)
 //!   bsigner selftest
@@ -80,6 +91,7 @@ mod b64;
 mod bip39;
 mod bpq;
 mod envelope;
+mod intent;
 #[cfg(test)]
 mod kat;
 mod keys;
@@ -107,6 +119,9 @@ fn main() {
         Some("taproot-sighash") => cmd_taproot_sighash(&args[1..]),
         Some("taproot-address") => cmd_taproot_address(&args[1..]),
         Some("psbt-inspect") => cmd_psbt_inspect(&args[1..]),
+        Some("btc-intent") => cmd_btc_intent(&args[1..]),
+        Some("bpq-attest-intent") => cmd_bpq_attest_intent(&args[1..]),
+        Some("btc-verify-intent") => cmd_btc_verify_intent(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -646,6 +661,8 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         ("handover", bpq::verify_handover(&doc).is_some())
     } else if doc["kind"] == "nostr-event" {
         ("nostr-event", bpq::verify_nostr(&doc).is_some())
+    } else if doc["kind"] == "intent" {
+        ("intent", bpq::verify_intent(&doc).is_some())
     } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
@@ -856,6 +873,105 @@ fn psbt_inspect(req: &Value) -> Result<Value, String> {
             })
             .collect();
     Ok(json!({ "inputs": inputs, "outputs": outputs, "feeSats": v.fee }))
+}
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
+}
+
+fn cmd_btc_intent(args: &[String]) -> i32 {
+    let made = parse_opts(args)
+        .and_then(|o| {
+            read_json(
+                &o,
+                "btc-intent",
+                "psbt, network, destination, expirySeconds",
+            )
+        })
+        .and_then(|req| {
+            let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+            let psbt_bytes = psbt::from_base64(b64).map_err(|e| e.to_string())?;
+            let network = req["network"].as_str().unwrap_or("mainnet");
+            let destination = req["destination"]
+                .as_str()
+                .ok_or("destination must be an address")?;
+            let ttl = req["expirySeconds"]
+                .as_u64()
+                .ok_or("expirySeconds must be a whole number")?;
+            let mut nonce = [0u8; 32];
+            getrandom::getrandom(&mut nonce).map_err(|e| format!("entropy: {e}"))?;
+            let now = now_secs();
+            let expiry = now.checked_add(ttl).ok_or("expirySeconds is too large")?;
+            intent::envelope_for(&psbt_bytes, network, destination, nonce, now, expiry)
+                .map_err(|e| e.to_string())
+        });
+    match made {
+        Ok(env) => {
+            println!("{}", json!({ "envelope": b64::b64u(&env) }));
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+fn cmd_bpq_attest_intent(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(var), Some(ctx)) = (o.rec_env.as_deref(), o.context.as_deref()) else {
+        return fail(
+            "bpq-attest-intent needs --rec-env VAR --context CTX --file ENVELOPE.json".into(),
+        );
+    };
+    let env = match read_json(&o, "bpq-attest-intent", "envelope").and_then(|v| {
+        v["envelope"]
+            .as_str()
+            .and_then(b64::b64u_decode)
+            .ok_or("envelope must be base64url".to_string())
+    }) {
+        Ok(e) => e,
+        Err(e) => return fail(e),
+    };
+    let code = match std::env::var(var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bip39::master_prk_from_recovery(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e),
+    };
+    match bpq::attest_intent(&prk, ctx, &env) {
+        Ok(a) => {
+            println!("{}", serde_json::to_string_pretty(&a).unwrap());
+            0
+        }
+        Err(e) => fail(e.to_string()),
+    }
+}
+
+fn cmd_btc_verify_intent(args: &[String]) -> i32 {
+    let checked = parse_opts(args)
+        .and_then(|o| read_json(&o, "btc-verify-intent", "authorization, authority, psbt"))
+        .and_then(|req| {
+            let authority = req["authority"]
+                .as_str()
+                .ok_or("authority must be a bzpq1 id")?;
+            let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+            let psbt_bytes = psbt::from_base64(b64).map_err(|e| e.to_string())?;
+            intent::verify_spend(&req["authorization"], authority, &psbt_bytes, now_secs())
+                .map_err(|e| e.to_string())
+        });
+    match checked {
+        Ok(v) => {
+            println!("{}", serde_json::to_string_pretty(&v.summary()).unwrap());
+            0
+        }
+        Err(e) => fail(e),
+    }
 }
 
 fn cmd_taproot_address(args: &[String]) -> i32 {

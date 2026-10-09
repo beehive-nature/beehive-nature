@@ -559,6 +559,59 @@ pub fn verify_nostr(a: &Value) -> Option<(String, String)> {
     dsa_verify(&dsa, &nostr_message(&ev), &sig).then(|| (id.to_string(), event.to_string()))
 }
 
+fn intent_message(envelope: &[u8]) -> Vec<u8> {
+    [dom(layout::INTENT), &sha3(&[envelope])[..]].concat()
+}
+
+/// The intent authorization v1 (SPEC-BPQ-1 §5c): the bzpq1 key of `context`
+/// authorizes one WB001 intent envelope with ML-DSA-65 over "bpq1/intent" ||
+/// SHA3-256(envelope). The envelope must decode under WB001's strict
+/// decoder. A rail signer acts only on what this authorizes, field for field.
+pub fn attest_intent(
+    master_prk: &[u8; 32],
+    context: &str,
+    envelope: &[u8],
+) -> Result<Value, BpqError> {
+    use fips205::traits::SerDes;
+    use ml_dsa::signature::Signer;
+    btungsten_wb001::decode(envelope)
+        .map_err(|_| BpqError::Format("the envelope is not a canonical WB001 intent"))?;
+    let k = keys(master_prk, context)?;
+    let (slh, _) = succession_keys(master_prk, context)?;
+    let succ = succession_commit(&slh.into_bytes());
+    let sig: Signature<MlDsa65> =
+        dsa_signing_key(master_prk, context)?.sign(&intent_message(envelope));
+    Ok(serde_json::json!({
+        "bpq": 1,
+        "kind": "intent",
+        "id": id_from(&k.dsa_public, &succ).expect("lengths are fixed"),
+        "envelope": b64::b64u(envelope),
+        "dsa": b64::b64u(&k.dsa_public),
+        "succ": b64::b64u(&succ),
+        "sig": b64::b64u(&sig.encode()),
+    }))
+}
+
+/// Verify an intent authorization: the id recomputes from `dsa` and `succ`,
+/// the envelope decodes under WB001's strict decoder, and the signature holds
+/// over it. Returns (id, envelope bytes).
+pub fn verify_intent(a: &Value) -> Option<(String, Vec<u8>)> {
+    if whole(&a["bpq"]) != Some(1) || a["kind"] != "intent" {
+        return None;
+    }
+    let id = a["id"].as_str()?;
+    let (env, dsa, succ, sig) = (
+        unb64(&a["envelope"]).ok()?,
+        unb64(&a["dsa"]).ok()?,
+        unb64(&a["succ"]).ok()?,
+        unb64(&a["sig"]).ok()?,
+    );
+    if id_from(&dsa, &succ).as_deref() != Some(id) || btungsten_wb001::decode(&env).is_err() {
+        return None;
+    }
+    dsa_verify(&dsa, &intent_message(&env), &sig).then(|| (id.to_string(), env))
+}
+
 /// A binding statement: the PQ id vouching for classical accounts, signed
 /// over "id\nat\nkind=value\n…" with kinds sorted.
 pub fn verify_bind(b: &Value) -> bool {

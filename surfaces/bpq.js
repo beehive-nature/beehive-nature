@@ -62,7 +62,8 @@
   var DOM = {
     ID: 'bpq1/id', SUCC: 'bpq1/succession', CARD: 'bpq1/card', BIND: 'bpq1/bind', DETACHED: 'bpq1/detached',
     KC: 'bpq1/key-commit', SEAL: 'bpq1/seal', WRAP_SELF: 'bpq1/wrap/self', WRAP_XWING: 'bpq1/wrap/x-wing',
-    NOSTR: 'bpq1/nostr-event'
+    NOSTR: 'bpq1/nostr-event',
+    INTENT: 'bpq1/intent'
   };
   var MAGIC = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];   // "\x89BPQ1\r\n\x1a"
   var ID_HRP = 'bzpq';

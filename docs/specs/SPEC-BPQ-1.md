@@ -226,6 +226,36 @@ bsigner, which signs deterministically and reproduces it byte for byte). How a r
 the upstream ask to block/buzz; the label joins the disjoint `bpq1/` set (SPEC-BTUNGSTEN-PQ-1
 PQ04, PQ13).
 
+## 5c · Intent authorization (2026-10-09)
+
+A rail signer (FROST for Bitcoin first; SPEC-BTUNGSTEN-PQ-1 PQ12) acts only on an intent the
+owner's bzpq1 key authorized: `{bpq:1, kind:"intent", id, envelope, dsa, succ, sig}`,
+`envelope` = a WB001 intent envelope (the SAW-proven canonical encoding, SPEC-BTUNGSTEN-1
+WB001) in base64url, `sig` = ML-DSA-65 (pure, empty context) over
+`"bpq1/intent" ‖ SHA3-256(envelope)`. A verifier refuses unless `id` recomputes from `dsa` and
+`succ`, the envelope decodes under WB001's strict decoder, and the signature verifies. The
+signer then refuses unless `id` is the authority it pins. Rust `bpq::attest_intent` /
+`bpq::verify_intent`, `bsigner bpq-attest-intent`, `bsigner bpq-verify`; the browser twin is
+not built yet. The label joins the disjoint `bpq1/` set (PQ04 proves it with fourteen).
+
+**Bitcoin, Taproot key-path spend v1** (`crates/bsigner/src/intent.rs`). The envelope's fields:
+domain `bitcoin:mainnet` or `bitcoin:testnet`; nonce, 32 bytes the wallet chose; epoch, the time
+of authorization; action, SHA-256 of `bpq1/intent/bitcoin/taproot-key-spend/1`; destination, the
+address paid; capability `bsigner/taproot-key-path`, the backend allowed to act; amount, the
+satoshis paid to the destination in total; expiry, after which it authorizes nothing; payer, the
+address every input spends, the only place change may return; payload, the 109-byte descriptor
+`"bTc1" ‖ hash type (1) ‖ fee (8, little-endian) ‖ txid (32) ‖ sha_amounts (32) ‖
+sha_scriptpubkeys (32)`, the last two exactly BIP-341's. The txid commits to every outpoint,
+sequence and output, the version and the lock time; the two hashes to every spent amount and
+scriptPubKey. `bsigner btc-intent` builds the envelope from a PSBT. The gate
+(`intent::verify_spend`, `bsigner btc-verify-intent`) is the only way to a `VerifiedIntent`: the
+authorization verifies under the pinned authority, the expiry has not passed, the PSBT is read
+by bsigner (`psbt.rs`), every input spends the payer's Taproot output with the authorized hash
+type, the descriptor rebuilt from the PSBT equals the authorized one, and every output pays the
+destination or the payer with the destination's total equal to `amount`. Its sighashes are
+BIP-341's, computed by bsigner. Nonce and epoch bind the authorization, not the PSBT: two
+authorizations of one transaction differ only there, and either releases that one transaction.
+
 ## 6 · Agility rules
 
 - Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot

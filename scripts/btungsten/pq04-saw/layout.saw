@@ -35,7 +35,7 @@ let bw = w4_unint_bitwuzla [];
 let domain_byte_spec = do {
   d <- mir_fresh_var "d" mir_u8;
   k <- mir_fresh_var "k" mir_u32;
-  mir_precond {{ d < 13 }};
+  mir_precond {{ d < 14 }};
   mir_execute_func [mir_term d, mir_term k];
   mir_return (mir_term {{ domainByte d k }});
 };
@@ -44,7 +44,7 @@ proven "domain_byte";
 
 let domain_len_spec = do {
   d <- mir_fresh_var "d" mir_u8;
-  mir_precond {{ d < 13 }};
+  mir_precond {{ d < 14 }};
   mir_execute_func [mir_term d];
   mir_return (mir_term {{ domainLen d }});
 };

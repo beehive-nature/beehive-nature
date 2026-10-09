@@ -352,7 +352,9 @@ The estate's own PQ glue, where its review findings lived.
   calls for every `bpq1/` label, nonce, segment length and binding
   validator; `scripts/btungsten/pq04-cryptol/BpqLayout.cry`, `pq04-saw/`):
   - The label table holds twelve, not ten: the nine of bpq.js, `cosign:`,
-    `bpq1/handover` (PQ07) and `bpq1/words` (bpq.js `words`).
+    `bpq1/handover` (PQ07) and `bpq1/words` (bpq.js `words`). Since
+    2026-10-09 fourteen: `bpq1/nostr-event` (PQ13) and `bpq1/intent`
+    (PQ12, SPEC-BPQ-1 §5c), and every obligation below runs over them.
   - EQUIVALENCE `domain_byte`, `domain_len`, `nonce`, `seg_ok`,
     `segment_count`, `body_len` (Some and None), `segment_plain_len`,
     `utc_timestamp`, `claim_kind`; bsigner's `seal_self` and `open` both
@@ -776,9 +778,30 @@ Obligations:
   one flipped bit does not. `bsigner psbt-inspect` prints what the signer
   reads: each input's outpoint, amount, address, hash type, sighash and
   whether the PSBT's internal key tweaks to the spent key; each output's
-  amount and address; the fee. Not yet: the authorization and
-  `VerifiedIntent` (steps 1 and 4), the sighash DIFFERENTIAL against
-  rust-bitcoin and @scure/btc-signer, and chilldkg behind it.
+  amount and address; the fee.
+- **Built 2026-10-09, steps (1) and (4): the authorization and the gate.**
+  SPEC-BPQ-1 §5c: the owner's bzpq1 key signs a WB001 intent envelope
+  with ML-DSA-65 under the new label `bpq1/intent` (bpq-core's
+  fourteenth; PQ04's `domainsDisjoint` and its tooth move to fourteen),
+  and for a Taproot key-path spend the envelope's payload binds the txid
+  and BIP-341's hashes of the spent amounts and scriptPubKeys.
+  `crates/bsigner/src/intent.rs`: `verify_spend` is the only
+  constructor of `VerifiedIntent` (its fields are private, it has no
+  other constructor) and refuses unless the authorization verifies under
+  the pinned authority, the expiry has not passed, and the PSBT, read by
+  bsigner, equals the authorization field for field. Battery (bsigner
+  test `the_signer_signs_only_the_spend_it_was_authorized`): the honest
+  spend verifies with BIP-341's sighashes; refused: 418 of 418 envelope
+  bytes changed without re-signing, 15 signed fields that contradict the
+  PSBT (domain twice, action, destination, capability, amount, a passed
+  expiry, payer, the descriptor's hash type, fee, txid, spent amounts,
+  spent scripts, length and tag), 6 PSBT changes (an output amount, a
+  spent amount, a hash type, one input fewer, no outputs, change to a
+  third key), another authority, kind, version, and a clock past expiry.
+  `bsigner btc-intent`, `bpq-attest-intent`, `btc-verify-intent`
+  expose it. Not yet: the browser twin of the intent statement (and a JS
+  WB001 encoder), the sighash DIFFERENTIAL against rust-bitcoin and
+  @scure/btc-signer, and chilldkg behind the gate (step 5).
 
 ### PQ13 · Buzz events
 

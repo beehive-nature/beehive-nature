@@ -278,6 +278,27 @@ pub fn parse_tx(bytes: &[u8]) -> Result<Tx, TaprootError> {
     Ok(tx)
 }
 
+/// The txid of an unsigned transaction: double SHA-256 of its legacy
+/// serialization (every scriptSig empty). It commits to every outpoint,
+/// sequence, output, the version and the lock time.
+pub fn txid(tx: &Tx) -> [u8; 32] {
+    let mut s = Vec::new();
+    s.extend_from_slice(&tx.version.to_le_bytes());
+    put_compact(&mut s, tx.inputs.len());
+    for i in &tx.inputs {
+        s.extend_from_slice(&i.prev_txid);
+        s.extend_from_slice(&i.prev_vout.to_le_bytes());
+        s.push(0x00);
+        s.extend_from_slice(&i.sequence.to_le_bytes());
+    }
+    put_compact(&mut s, tx.outputs.len());
+    for o in &tx.outputs {
+        s.extend_from_slice(&serialize_output(o));
+    }
+    s.extend_from_slice(&tx.lock_time.to_le_bytes());
+    Sha256::digest(Sha256::digest(&s)).into()
+}
+
 /// BIP-340's tagged hash: SHA-256(SHA-256(tag) ‖ SHA-256(tag) ‖ parts...).
 pub fn tagged_hash(tag: &str, parts: &[&[u8]]) -> [u8; 32] {
     let t = Sha256::digest(tag.as_bytes());
