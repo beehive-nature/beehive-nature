@@ -249,6 +249,26 @@ pub fn run(
     prep.insert("fetch_cold".into(), o.json(out));
     r.measure("prep", Value::Object(prep));
 
+    // process startup of the verifier itself: saw --version, which loads the
+    // binary and checks its solvers but runs no script
+    let mut st = Vec::new();
+    for k in 0..if quick { 3 } else { 10 } {
+        let s = stem(&format!("startup-saw-{k}"));
+        st.push(
+            measure::run(
+                &Spec::new(
+                    &[&tools.saw.display().to_string(), "--version"],
+                    &copy,
+                    Duration::from_secs(60),
+                    &s,
+                )
+                .env("PATH", &path_env),
+            )
+            .map_err(|e| e.to_string())?,
+        );
+    }
+    r.measure("startup_saw_version", obs_set(&st, out));
+
     // ---- 2. pristine build + upstream driver ----------------------------------
     // cargo-saw-build takes neither --locked nor --offline: offline comes from
     // CARGO_NET_OFFLINE, and the lockfile is required to be byte-identical
@@ -457,6 +477,7 @@ pub fn run(
         "command": format!("cargo {toolchain_arg} saw-build with CARGO_NET_OFFLINE=true, the pinned Cargo.lock byte-identical before and after, and RUSTFLAGS=\"--cfg aes_force_soft\" (cold[0] pristine specimen, cold[1] TEETH specimen)"),
     }));
     r.measure("verification", json!({ "aes_run_upstream_all_sizes": o_rep.json(out), "rb02_aes256_plus_teeth": o256.json(out) }));
+    r.measure("network_bytes", json!("not measured: after preparation (clone, submodule, cargo fetch) every step runs offline (CARGO_NET_OFFLINE=true for cargo; SAW uses no network); the crates.io aes-0.8.4.crate download for the compatibility comparison is the one later fetch"));
 
     // ---- 4. compatibility ------------------------------------------------------
     let compat = compatibility(&root, &copy, &cargo_home, work, &mut r)?;

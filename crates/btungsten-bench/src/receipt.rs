@@ -8,20 +8,19 @@
 //! Result classes (SPEC-BTUNGSTEN-1 §result-classes, extended for the RB
 //! lanes; no class is ever recorded as another):
 //!
-//! - `VECTOR`               a concrete input with a known answer
-//! - `SAMPLED-ADVERSARIAL`  an operational fault or hostile input, sampled;
-//!                          never a proof of malicious security
-//! - `BOUNDED-SYMBOLIC`     symbolic exploration under a stated bound
-//! - `PROVE-UNIVERSAL`      a property proven for every input of a stated
-//!                          domain
-//! - `EQUIVALENCE`          implementation equal to a specification over a
-//!                          stated domain
-//! - `TEETH`                a deliberately false claim the verifier must
-//!                          reject; PASS means it was rejected
-//! - `MEASUREMENT`          an operational measurement; PASS means it was
-//!                          taken and its run produced the expected result
-//! - `CHARACTERIZATION`     upstream behaviour outside the bench's input
-//!                          policy, recorded as observed
+//! - `VECTOR`: a concrete input with a known answer
+//! - `SAMPLED-ADVERSARIAL`: an operational fault or hostile input, sampled;
+//!   never a proof of malicious security
+//! - `BOUNDED-SYMBOLIC`: symbolic exploration under a stated bound
+//! - `PROVE-UNIVERSAL`: a property proven for every input of a stated domain
+//! - `EQUIVALENCE`: implementation equal to a specification over a stated
+//!   domain
+//! - `TEETH`: a deliberately false claim the verifier must reject; PASS
+//!   means it was rejected
+//! - `MEASUREMENT`: an operational measurement; PASS means it was taken and
+//!   its run produced the expected result
+//! - `CHARACTERIZATION`: upstream behaviour outside the bench's input
+//!   policy, recorded as observed
 //!
 //! Outcomes: `PASS`, `FAIL`, `INCONCLUSIVE` (a timeout, an incomplete
 //! exploration or verifier output this harness does not recognize),

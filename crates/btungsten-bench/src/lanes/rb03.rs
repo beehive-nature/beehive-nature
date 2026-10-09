@@ -419,6 +419,26 @@ pub fn run(
     );
     mir_ids.insert("harness_cargo_lock".into(), json!(lock_before));
     r.section("executables", Value::Object(mir_ids));
+
+    // process startup of the verifier itself: crux-mir --version
+    let mut st = Vec::new();
+    for k in 0..if quick { 3 } else { 10 } {
+        let s = stem(&format!("startup-crux-mir-{k}"));
+        st.push(
+            measure::run(
+                &Spec::new(
+                    &[&tools.crux_mir.display().to_string(), "--version"],
+                    &harness,
+                    Duration::from_secs(60),
+                    &s,
+                )
+                .env("PATH", &path_env),
+            )
+            .map_err(|e| e.to_string())?,
+        );
+    }
+    let pick = |f: &dyn Fn(&Obs) -> Option<u64>| st.iter().filter_map(f).collect::<Vec<u64>>();
+    r.measure("startup_crux_mir_version", json!({ "wall_ns": summary(&pick(&|o| Some(o.wall_ns))), "user_cpu_us": summary(&pick(&|o| o.user_us)), "max_rss_kib": summary(&pick(&|o| o.max_rss_kib)), "runs": st.iter().map(|o| o.json(out)).collect::<Vec<_>>() }));
     r.measure("compile", json!({
         "native_test_cold_including_test_run": native.json(out),
         "crux_builds": builds.iter().map(|o| o.json(out)).collect::<Vec<_>>(),
@@ -617,6 +637,7 @@ pub fn run(
         );
     }
     r.measure("verification", Value::Object(ver));
+    r.measure("network_bytes", json!("not measured: after preparation (cargo fetch) every step runs offline (CARGO_NET_OFFLINE=true for cargo; crux-mir and the solvers use no network)"));
     r.section("budgets", json!({
         "required_strategy": { "process_budget_s": plan.property_budget.as_secs(), "goal_timeout_s": plan.goal_timeout_s, "repeats": plan.repeat },
         "cross_check": { "run": plan.cross_check, "process_budget_s": plan.cross_budget.as_secs(), "goal_timeout_s": plan.cross_goal_timeout_s },

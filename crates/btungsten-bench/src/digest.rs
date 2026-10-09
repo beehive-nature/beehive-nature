@@ -52,7 +52,7 @@ pub fn tree_tag(entries: &[(String, String)]) -> String {
         h.update(path.as_bytes());
         h.update([0]);
         h.update(tag.as_bytes());
-        h.update([b'\n']);
+        h.update(b"\n");
     }
     format!("sha256:{}", b64url(&h.finalize()))
 }
