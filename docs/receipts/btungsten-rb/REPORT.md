@@ -25,18 +25,18 @@ build exactly that layout from pinned, digest-checked assets.
 
 ## Where these receipts ran, and what went wrong on the way
 
-The committed receipts, under `ci-37906620036/`, are one full-plan run of
-`.github/workflows/btungsten-rb.yml` (run 37906620036, `workflow_dispatch`,
-`plan=full`) at BNR `f43ffdcd3`, on GitHub-hosted `ubuntu-24.04` runners, one
+The committed receipts, under `ci-37923430005/`, are one full-plan run of
+`.github/workflows/btungsten-rb.yml` (run 37923430005, `workflow_dispatch`,
+`plan=full`) at BNR `073697abb`, on GitHub-hosted `ubuntu-24.04` runners, one
 runner per lane, so no two lanes shared a host. Each receipt's `host` section
 names the CPU, ISA flags, kernel and memory it measured on, and its `bnr`
-section the exact BNR commit. The branch's later commits merge `main`
-(`bheraldry`, dispatches) and add these documents; none touches a lane file
-(`git diff f43ffdcd3 HEAD -- crates/btungsten-bench scripts/btungsten/rb01-psi
+section the exact BNR commit. The branch's later commits add these documents and
+none touches a lane file
+(`git diff 073697abb HEAD -- crates/btungsten-bench scripts/btungsten/rb01-psi
 scripts/btungsten/rb02-aes scripts/btungsten/rb03-budget
 .github/workflows/btungsten-rb.yml ops/ant-extsig` is empty). Logs and
-input files are committed beside each receipt, except 26 RB01 scaling
-fixtures (up to 512 KiB each): the receipt records each one's SHA-256, and
+input files are committed beside each receipt, except 24 RB01 fixture
+files (up to 512 KiB each): the receipt records each one's SHA-256, and
 `rbench` regenerates them byte for byte. The development host (Windows, WSL2 x86_64) ran
 every lane during development but did not produce the committed receipts,
 for the reason in the first item below.
@@ -78,7 +78,9 @@ for the reason in the first item below.
   provider also prints its own `VmHWM`, which starts afresh at exec, in every
   result line, so each role's peak is exact. The verdicts of that run (all
   three PASS) did not depend on memory figures; its receipts were not
-  committed, and the lanes ran again as run 37906620036, the receipts here.
+  committed, and the lanes ran again as run 37906620036; they ran once more
+  as run 37923430005, the receipts here, after RB01 gained its operator
+  notice (`073697abb`).
 
 ## Pins and departures
 
@@ -91,7 +93,9 @@ for the reason in the first item below.
 
 ## RB01 — Swanky circuit PSI
 
-Receipt `ci-37906620036/rb01/receipt-rb01.json`: **PASS** (8 CHARACTERIZATION PASS, 1 MEASUREMENT NOT-RUN, 3 MEASUREMENT PASS, 14 SAMPLED-ADVERSARIAL PASS, 14 VECTOR PASS). BNR `f43ffdcd3`; runner AMD EPYC 9V74 80-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
+**RB01 is an experimental benchmark adapter. Its functional and performance results do not establish suitability for sensitive data or production use.**
+
+Receipt `ci-37923430005/rb01/receipt-rb01.json`: **PASS** (8 CHARACTERIZATION PASS, 1 MEASUREMENT NOT-RUN, 3 MEASUREMENT PASS, 14 SAMPLED-ADVERSARIAL PASS, 14 VECTOR PASS). BNR `073697abb`; runner AMD EPYC 9V45 96-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure. A CHARACTERIZATION PASS means the behaviour was recorded, not that upstream or the provider behaved correctly.
 
 Every session's evaluator output equals the plaintext cardinality and the
 garbler outputs nothing: in the upstream composition (`upstream-example`,
@@ -109,31 +113,31 @@ provider, not evidence of security against an active adversary.
 
 | phase | n | wall, min / median / max | peak RSS |
 |---|---|---|---|
-| prepare: clone at the pin | 1 | 2.4 s | 124.4 MiB |
-| prepare: `cargo fetch`, fresh CARGO_HOME | 1 | 2.4 s | 223.8 MiB |
-| prepare: `cargo fetch`, warm | 1 | 0.1 s | 115.5 MiB |
-| compile: cold, release | 2 | 45.6 / 46.3 / 47.0 s | 676.0 MiB |
-| compile: warm, no change | 3 | 103.7 / 104.4 / 104.5 ms | 58.2 MiB |
-| compile: warm, provider touched | 3 | 8.5 / 8.8 / 9.1 s | 602.3 MiB |
-| process startup | 30 | 0.7 / 0.7 / 1.0 ms | unresolved (30 runs) |
-| upstream example, one process | 10 | 28.2 / 28.9 / 30.8 ms | 7.1 MiB |
-| provider, local threads | 10 | 27.9 / 28.3 / 30.5 ms | 7.2 MiB |
+| prepare: clone at the pin | 1 | 4.8 s | 124.5 MiB |
+| prepare: `cargo fetch`, fresh CARGO_HOME | 1 | 2.5 s | 221.5 MiB |
+| prepare: `cargo fetch`, warm | 1 | 0.1 s | 113.5 MiB |
+| compile: cold, release | 2 | 35.7 / 36.9 / 38.2 s | 706.4 MiB |
+| compile: warm, no change | 3 | 79.5 / 79.8 / 99.1 ms | 58.3 MiB |
+| compile: warm, provider touched | 3 | 7.0 / 7.0 / 7.2 s | 608.7 MiB |
+| process startup | 30 | 0.6 / 0.6 / 0.9 ms | unresolved (30 runs) |
+| upstream example, one process | 10 | 21.7 / 22.2 / 22.6 ms | 7.1 MiB |
+| provider, local threads | 10 | 21.5 / 22.0 / 23.6 ms | 7.4 MiB |
 
 Two processes over loopback TCP (the evaluator's own phase timers; bytes counted by the provider and, independently, by the relay):
 
 | fixture | n | total ms, min / median / max | setup ms | intersect ms | cardinality ms | reveal ms | evaluator received, median bytes | peak RSS garbler / evaluator, median MiB | evaluator output (plaintext) |
 |---|---|---|---|---|---|---|---|---|---|
-| upstream-256 | 10 | 30.2 / 30.8 / 32.2 | 8.1 | 20.3 | 2.3 | 0.0 | 4,597,698 | 5.3 / 4.7 | 255 (255) |
-| disjoint-256 | 3 | 30.2 / 30.4 / 30.7 | 8.1 | 20.0 | 2.3 | 0.0 | 4,599,746 | 5.4 / 4.8 | 0 (0) |
-| identical-256 | 3 | 29.9 / 30.0 / 30.3 | 8.1 | 19.5 | 2.3 | 0.0 | 4,597,698 | 5.3 / 4.8 | 256 (256) |
-| partial-256x256-overlap-128 | 3 | 30.4 / 30.4 / 30.6 | 8.1 | 19.9 | 2.3 | 0.0 | 4,599,746 | 5.3 / 4.8 | 128 (128) |
-| partial-256x1024-overlap-200 | 3 | 64.1 / 64.1 / 65.2 | 8.1 | 47.4 | 8.5 | 0.0 | 18,297,026 | 11.4 / 8.7 | 200 (200) |
-| partial-1024x1024-overlap-512 | 10 | 70.1 / 72.1 / 73.6 | 8.1 | 54.3 | 9.3 | 0.0 | 18,308,290 | 12.7 / 8.5 | 512 (512) |
-| partial-4096x4096-overlap-2048 | 10 | 217.2 / 229.6 / 252.5 | 8.1 | 184.7 | 37.2 | 0.0 | 73,704,282 | 41.8 / 25.1 | 2048 (2048) |
-| partial-16384x16384-overlap-8192 | 5 | 846.7 / 854.2 / 867.8 | 8.1 | 703.5 | 148.5 | 0.0 | 294,358,778 | 135.0 / 86.5 | 8192 (8192) |
-| partial-65536x65536-overlap-32768 | 3 | 3224.5 / 3297.2 / 3319.5 | 8.1 | 2727.8 | 556.4 | 1.4 | 1,189,006,602 | 531.3 / 333.9 | 32768 (32768) |
+| upstream-256 | 10 | 24.1 / 24.7 / 26.9 | 6.1 | 16.6 | 1.9 | 0.0 | 4,598,722 | 5.4 / 4.8 | 255 (255) |
+| disjoint-256 | 3 | 24.3 / 24.5 / 24.6 | 6.1 | 16.4 | 1.9 | 0.0 | 4,597,698 | 5.3 / 4.8 | 0 (0) |
+| identical-256 | 3 | 24.8 / 24.9 / 25.0 | 6.1 | 16.8 | 1.9 | 0.0 | 4,597,698 | 5.4 / 4.7 | 256 (256) |
+| partial-256x256-overlap-128 | 3 | 24.2 / 24.3 / 27.6 | 6.1 | 16.2 | 1.9 | 0.0 | 4,597,698 | 5.4 / 4.7 | 128 (128) |
+| partial-256x1024-overlap-200 | 3 | 51.7 / 51.9 / 61.7 | 6.1 | 38.9 | 7.5 | 0.0 | 18,297,026 | 11.5 / 8.5 | 200 (200) |
+| partial-1024x1024-overlap-512 | 10 | 58.5 / 59.9 / 61.7 | 6.1 | 46.1 | 7.6 | 0.0 | 18,313,410 | 12.7 / 8.5 | 512 (512) |
+| partial-4096x4096-overlap-2048 | 10 | 182.1 / 184.6 / 206.0 | 6.1 | 150.1 | 28.9 | 0.0 | 73,722,714 | 41.9 / 24.0 | 2048 (2048) |
+| partial-16384x16384-overlap-8192 | 5 | 695.8 / 698.7 / 722.7 | 6.0 | 580.6 | 117.7 | 0.0 | 294,342,394 | 134.9 / 87.6 | 8192 (8192) |
+| partial-65536x65536-overlap-32768 | 3 | 2664.2 / 2744.4 / 2792.6 | 6.0 | 2300.8 | 437.8 | 1.1 | 1,189,033,226 | 531.0 / 334.0 | 32768 (32768) |
 
-Receipt serialization, measured on a first pass of the receipt: 365,642 bytes, rendered in 2.5 ms, written and fsynced in 3.3 ms.
+Receipt serialization, measured on a first pass of the receipt: 368,354 bytes, rendered in 1.9 ms, written and fsynced in 2.7 ms.
 
 Phases are the provider's own timers: `setup` is party construction
 (`OpprfPsiGarbler::new` / `OpprfPsiEvaluator::new`), which does not touch
@@ -145,8 +149,10 @@ tree `wait4` reports, shown as unresolved when it does not exceed `rbench`'s
 own peak (see the incident above); in the TCP table it is each role's own
 `VmHWM`. Network bytes: the evaluator's received count here; the garbler's
 counts and the relay's per-direction counts and SHA-256 digests are in each
-session record. The garbler-larger sweep, against an evaluator set of 256:
-it stays correct with 256, 288, 320 and 384 garbler elements and panics the garbler from 448 (448, 512 and 1,024 all abort with `ABORT garbler-thread`).
+session record. The garbler-larger sweep, against an evaluator set of 256, runs one session
+per size: a sample, not a threshold. In this run 256, 288, 320 and 384 garbler elements gave the right cardinality; 448 (ABORT garbler-thread), 512 (ABORT garbler-thread) and 1024 (ABORT garbler-thread) did not. The Swanky re-check lane ran 20 sessions per size
+in each of three runs: 384 panicked in 5, 7 and 6 of 20, 352 in 1, 2 and 2,
+and from 448 every session panicked; up to 320, none did (`docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`)).
 
 **Configuration.** `popsicle::circuit_psi` (PSTY19), `OpprfPsiGarbler` /
 `OpprfPsiEvaluator`: KMPRT OPPRF, cuckoo hashing with three hash functions
@@ -158,25 +164,47 @@ the evaluator; both set sizes through traffic volume and the evaluator's
 cleartext cuckoo bin count.
 
 **Upstream behaviour the bench's input policy now guards** (characterization
-rows, recorded at the pin; none is a claim about our code):
+rows, recorded at the pin; none is a claim about our code). A
+CHARACTERIZATION PASS means the behaviour was recorded, not that upstream or
+the provider behaved correctly. A separate lane re-checked each item at the
+pin, three runs on the development host, none an independent reproduction:
+`docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`), dispatch `docs/dispatches/2026-10-09-rb01-swanky-evidence.md`.
 
 - A garbler set larger than the evaluator's set panics the garbler at
   `swanky-oprf-kmprt` `lib.rs:211` (`assert!(points.len() <= npoints)`); the
   evaluator then aborts with a network error. Neither side outputs. The
-  sweep in `char-garbler-larger` records where it starts.
-- A repeated element in the garbler's set: the garbler does not finish
-  (budget kill), consistent with KMPRT's sample-until-distinct table loop
+  sweep in `char-garbler-larger` samples it, one session per size; how
+  often it fires near the boundary is in the re-check tallies above.
+- A repeated element in the garbler's set: the session did not complete
+  within the 20 s budget (budget kill); in the re-check, not within 60 s in
+  a release build, and a debug build panics at `swanky-oprf-kmprt`
+  `lib.rs:202`. Consistent with KMPRT's sample-until-distinct table loop
   never terminating on a repeated point (the uniqueness check there is a
   `debug_assert`, compiled out in release).
-- A repeated element in the evaluator's set: the cardinality counts it twice
-  (2 where the set answer is 1).
-- An empty evaluator set panics the garbler thread; an empty garbler set
-  gives 0, the right answer.
+- A repeated element in the evaluator's set: the cardinality counts each
+  copy (2 where the set answer is 1, in this row; 3 for three copies in the
+  re-check). With four copies the re-check's session did not complete
+  within 60 s, and every probe sample fell in the key-refresh loop at
+  `popsicle` `receiver.rs:110`.
+- An empty evaluator set panics both parties: the garbler at `popsicle`
+  `cuckoo.rs:133` (remainder by zero) and, on x86_64, the evaluator at
+  `bit-matrix-transpose` `lib.rs:83` (`nrows >= 16`), through the KKRT
+  OPRF with zero inputs; two empty sets panic too (the evaluator at the
+  same line). The re-check's committed logs of runs 2 and 3 show the same
+  locations. This lane's row recorded only
+  `ABORT garbler-thread`, because local mode reports the first thread it
+  joins. An empty garbler set gives 0, the right answer.
 - Elements of at most 16 bytes are zero-padded into one block, so `[0x01]`
   and `[0x01, 0x00]` intersect (1 where the byte-string answer is 0).
-- `PsiGarbler::new` / `PsiEvaluator::new` seed the two-party party and the
-  base-PSI RNG with the same seed, so the two streams are identical. Impact
-  not analyzed: UNVERIFIED.
+- The RNG finding:
+
+  > RB01 is an experimental benchmark adapter. Its functional and performance results do not establish suitability for sensitive data or production use.
+  >
+  > The constructors initialize separate RNG consumers from the same seed. The reporting seat observed overlapping streams within each party and matches between some generated bytes and protocol traffic. The security consequences remain unverified.
+
+  This lane read the constructors at the pin (`PsiGarbler::new` /
+  `PsiEvaluator::new`); the stream observations are the re-check lane's,
+  `docs/upstream/2026-10-09-swanky-popsicle-rb01/` (main `0d88ec248`).
 
 The provider refuses empty inputs, repeated elements, and inputs that are
 not a whole number of 8-byte elements, before any connection.
@@ -191,7 +219,7 @@ adversary.
 
 ## RB02 — the RustCrypto AES-256 proof, and what it covers in BNR
 
-Receipt `ci-37906620036/rb02/receipt-rb02.json`: **PASS** (8 EQUIVALENCE PASS, 3 TEETH PASS, 3 VECTOR PASS). BNR `f43ffdcd3`; runner AMD EPYC 7763 64-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
+Receipt `ci-37923430005/rb02/receipt-rb02.json`: **PASS** (8 EQUIVALENCE PASS, 3 TEETH PASS, 3 VECTOR PASS). BNR `073697abb`; runner AMD EPYC 9V45 96-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
 
 The reproduction rows run upstream's `aes-run.saw` unchanged on the pristine
 specimen: AES-128, AES-192 and AES-256, encrypt and decrypt, each proven
@@ -204,17 +232,17 @@ and the verified fork's `src` tree are byte-identical (19 files identical, none 
 
 | phase | n | wall | CPU (user) | peak RSS (process / sampled group) | exit |
 |---|---|---|---|---|---|
-| prepare: clone | 1 | 0.6 s | 0.0 s | 16.8 MiB | 0 |
-| prepare: cryptol-specs submodule | 1 | 2.5 s | 1.9 s | 123.5 MiB | 0 |
-| prepare: `cargo fetch`, fresh CARGO_HOME | 1 | 1.9 s | 0.5 s | 104.3 MiB | 0 |
-| `saw --version` startup | 10 | 12.0 / 12.2 / 12.8 ms | | 17.9 MiB | |
-| `cargo saw-build`, cold (pristine, then TEETH) | 2 | 2.6, 2.4 s | | 353.6 MiB | |
-| `cargo saw-build`, warm no-op | 3 | 0.85 / 0.89 / 0.94 s | | 356.1 MiB | |
-| upstream `aes-run.saw` (reproduction, all six) | 1 | 583.4 s | 561.3 s | 662.8 / 729.6 MiB | 0 |
-| `rb02-aes256.saw` (AES-256 + TEETH 1, 2) | 1 | 240.2 s | 231.7 s | 780.2 / 846.9 MiB | 0 |
-| `rb02-teeth-sbox.saw` (TEETH 3) | 1 | 2.5 s | 2.3 s | 329.6 / 405.3 MiB | 0 |
+| prepare: clone | 1 | 0.4 s | 0.0 s | 16.9 MiB | 0 |
+| prepare: cryptol-specs submodule | 1 | 2.3 s | 1.3 s | 124.0 MiB | 0 |
+| prepare: `cargo fetch`, fresh CARGO_HOME | 1 | 11.4 s | 0.3 s | 104.4 MiB | 0 |
+| `saw --version` startup | 10 | 11.1 / 11.8 / 12.0 ms | | 24.8 MiB | |
+| `cargo saw-build`, cold (pristine, then TEETH) | 2 | 1.6, 1.5 s | | 355.8 MiB | |
+| `cargo saw-build`, warm no-op | 3 | 0.55 / 0.57 / 0.76 s | | 354.5 MiB | |
+| upstream `aes-run.saw` (reproduction, all six) | 1 | 345.6 s | 321.3 s | 683.4 / 750.8 MiB | 0 |
+| `rb02-aes256.saw` (AES-256 + TEETH 1, 2) | 1 | 144.5 s | 135.6 s | 594.2 / 661.3 MiB | 0 |
+| `rb02-teeth-sbox.saw` (TEETH 3) | 1 | 1.7 s | 1.5 s | 329.8 / 401.2 MiB | 0 |
 
-Receipt serialization, measured on a first pass of the receipt: 47,251 bytes, rendered in 0.6 ms, written and fsynced in 1.3 ms.
+Receipt serialization, measured on a first pass of the receipt: 47,239 bytes, rendered in 0.4 ms, written and fsynced in 1.0 ms.
 
 **What was verified.** The software (fixslice64) backend of `aes 0.8.4` as
 it sits in the RyanGlScott/block-ciphers fork
@@ -248,7 +276,7 @@ SHA-256, and no SHA-2 claim is made here.
 
 ## RB03 — Crux-MIR on the gas budget
 
-Receipt `ci-37906620036/rb03/receipt-rb03.json`: **PASS** (4 PROVE-UNIVERSAL INCONCLUSIVE, 16 PROVE-UNIVERSAL PASS, 6 TEETH PASS, 6 VECTOR PASS). BNR `f43ffdcd3`; runner AMD EPYC 9V74 80-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
+Receipt `ci-37923430005/rb03/receipt-rb03.json`: **PASS** (4 PROVE-UNIVERSAL INCONCLUSIVE, 16 PROVE-UNIVERSAL PASS, 6 TEETH PASS, 6 VECTOR PASS). BNR `073697abb`; runner AMD EPYC 9V74 80-Core Processor, 4 logical CPUs, Ubuntu 24.04.5 LTS, kernel 6.17.0-1022-azure.
 
 All ten properties are proven over their full input domains under the
 required strategy (cvc5 integer blasting through `rb-cvc5-intblast`), three
@@ -264,30 +292,30 @@ INCONCLUSIVE and count for nothing.
 
 | property | required: cvc5 int-blast, wall min / median / max (n) | goals proved | bitwuzla cross-check |
 |---|---|---|---|
-| p1_zero_gas_limit_refuses | PASS, 0.89 / 0.90 / 0.91 s (3) | none reached a solver | PASS, 0.9 s |
-| p2_refuses_iff_network_fee_unaffordable | PASS, 1.44 / 1.45 / 1.46 s (3) | 10/10 | INCONCLUSIVE, 302.3 s (9/10 proved, 1 unknown) |
-| p3_cap_at_least_network_fee | PASS, 1.38 / 1.39 / 1.39 s (3) | 9/9 | PASS, 2.9 s (9/9 proved, 0 unknown) |
-| p4_cap_fits_remaining_budget | PASS, 1.43 / 1.43 / 1.45 s (3) | 11/11 | INCONCLUSIVE, 302.9 s (10/11 proved, 1 unknown) |
-| p5_headroom_never_exceeded | PASS, 2.07 / 2.08 / 2.10 s (3) | 14/14 | INCONCLUSIVE, 302.8 s (13/14 proved, 1 unknown) |
-| p6_headroom_granted_when_it_fits | PASS, 1.59 / 1.60 / 1.61 s (3) | 16/16 | INCONCLUSIVE, 303.7 s (15/16 proved, 1 unknown) |
-| p7_zero_denominator_reads_as_one | PASS, 1.82 / 1.83 / 1.83 s (3) | 26/26 | PASS, 3.2 s (26/26 proved, 0 unknown) |
-| p8_gas_buffer_is_floor_six_fifths | PASS, 1.11 / 1.11 / 1.12 s (3) | 11/11 | PASS, 12.4 s (11/11 proved, 0 unknown) |
-| p9_payment_floor_is_half_product | PASS, 1.07 / 1.08 / 1.08 s (3) | 6/6 | PASS, 1.4 s (6/6 proved, 0 unknown) |
-| p10_refusal_reports_the_need | PASS, 1.44 / 1.44 / 1.44 s (3) | 14/14 | PASS, 2.5 s (14/14 proved, 0 unknown) |
+| p1_zero_gas_limit_refuses | PASS, 0.90 / 0.92 / 0.94 s (3) | none reached a solver | PASS, 0.9 s |
+| p2_refuses_iff_network_fee_unaffordable | PASS, 1.44 / 1.46 / 1.48 s (3) | 10/10 | INCONCLUSIVE, 302.5 s (9/10 proved, 1 unknown) |
+| p3_cap_at_least_network_fee | PASS, 1.40 / 1.44 / 1.46 s (3) | 9/9 | PASS, 2.8 s (9/9 proved, 0 unknown) |
+| p4_cap_fits_remaining_budget | PASS, 1.43 / 1.47 / 1.50 s (3) | 11/11 | INCONCLUSIVE, 302.9 s (10/11 proved, 1 unknown) |
+| p5_headroom_never_exceeded | PASS, 2.14 / 2.16 / 2.17 s (3) | 14/14 | INCONCLUSIVE, 303.0 s (13/14 proved, 1 unknown) |
+| p6_headroom_granted_when_it_fits | PASS, 1.76 / 1.79 / 1.82 s (3) | 16/16 | INCONCLUSIVE, 303.9 s (15/16 proved, 1 unknown) |
+| p7_zero_denominator_reads_as_one | PASS, 1.80 / 1.82 / 1.83 s (3) | 26/26 | PASS, 3.2 s (26/26 proved, 0 unknown) |
+| p8_gas_buffer_is_floor_six_fifths | PASS, 1.09 / 1.12 / 1.16 s (3) | 11/11 | PASS, 12.4 s (11/11 proved, 0 unknown) |
+| p9_payment_floor_is_half_product | PASS, 1.06 / 1.07 / 1.07 s (3) | 6/6 | PASS, 1.4 s (6/6 proved, 0 unknown) |
+| p10_refusal_reports_the_need | PASS, 1.44 / 1.47 / 1.48 s (3) | 14/14 | PASS, 2.5 s (14/14 proved, 0 unknown) |
 
 | TEETH (must be convicted) | cvc5 int-blast | bitwuzla |
 |---|---|---|
 | t1_wrapping_affordability_cap_fits | PASS, 1.4 s | PASS, 3.7 s |
-| t2_ceiling_budget_cap_fits | PASS, 1.4 s | PASS, 6.7 s |
-| t3_ceiling_budget_refuses_iff_unaffordable | PASS, 1.4 s | PASS, 4.4 s |
+| t2_ceiling_budget_cap_fits | PASS, 1.4 s | PASS, 6.4 s |
+| t3_ceiling_budget_refuses_iff_unaffordable | PASS, 1.4 s | PASS, 4.2 s |
 
 Also measured:
 
-- native cold build + test run: 2.2 s, 364.4 MiB; crux builds: crux-test --lib --no-run 3.5 s; crux-test --lib --no-run 0.1 s; crux-test --lib --no-run --features teeth 0.5 s; crux-test --lib --no-run --features teeth 0.1 s
-- startup crux-mir --version: 1.5 / 1.6 / 2.0 ms (n=10)
+- native cold build + test run: 2.4 s, 366.0 MiB; crux builds: crux-test --lib --no-run 3.6 s; crux-test --lib --no-run 0.1 s; crux-test --lib --no-run --features teeth 0.5 s; crux-test --lib --no-run --features teeth 0.1 s
+- startup crux-mir --version: 1.5 / 1.5 / 2.4 ms (n=10)
 - vectors under crux: 1.8 s
 
-Receipt serialization, measured on a first pass of the receipt: 132,193 bytes, rendered in 2.2 ms, written and fsynced in 2.7 ms.
+Receipt serialization, measured on a first pass of the receipt: 132,189 bytes, rendered in 2.1 ms, written and fsynced in 2.8 ms.
 
 **The one change to production code.** `plan_fee_cap` formatted its
 `u128` arguments into its refusal message; under symbolic execution each
