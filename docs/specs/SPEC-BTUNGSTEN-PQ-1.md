@@ -502,8 +502,7 @@ The estate's own PQ glue, where its review findings lived.
   negacyclic product on a fixed pair. CI run 37955111771 (job `saw-ntt`):
   eight obligations in 2,095 s. TEETH: one twiddle factor bent, and one γ
   bent, each refuted with a counterexample. All of ML-KEM's NTT-domain
-  arithmetic is now tied to FIPS 203. Not yet: ML-DSA's NTT (the same
-  method).
+  arithmetic is now tied to FIPS 203. ML-DSA's NTT: see PQ06.
 
 ### PQ06 · ML-DSA (44/65/87)
 
@@ -526,6 +525,34 @@ The estate's own PQ glue, where its review findings lived.
   fields): ML-DSA's conditional subtraction, add, sub and neg PROVEN;
   its Barrett reduction and multiply in three links (release-semantics
   SAW, z3 over the integers, one read no-wrap step), as stated there.
+- **ML-DSA NTT, 2026-10-09** (`scripts/btungsten/pq06-ntt-check.sh`, its
+  own CI job `saw-ntt-dsa`). `pq06-cryptol/DsaNtt.cry` is FIPS 204
+  Algorithms 41, 42 and 45 with the twiddle table COMPUTED (ζ = 1753,
+  ζ^BitRev8(m) mod q with entry 0 left at 0, held to Appendix B's entries)
+  and 256^-1 = 8347681 checked; NTT^-1 undoes NTT on a fixed polynomial,
+  and NTT^-1(NTT f ∘ NTT g) is the schoolbook negacyclic product on a
+  fixed pair. `pq06-ntt/` builds ml-dsa 0.1.1 itself under a lockfile
+  whose every package is the workspace's version and checksum. PROVEN:
+  ml-dsa's `Elem` add, sub and neg equal Field.cry with results below q;
+  then, with `Elem` mul ASSUMED equal to `dsaMul` (this is a debug build,
+  whose Barrett overflow check keeps that proof open; the three links
+  above tie mul for the build bsigner ships) and add, sub and mul
+  uninterpreted, the NTT equals Algorithm 41 for every polynomial with
+  coefficients in the field, all 1,024 butterflies matched against the
+  crate's twiddle table (a const). The inverse in parts, each proof
+  standing in for the next: each of the eight inverse layers equals
+  Algorithm 42's loop at its length (the running index m going in and
+  coming out, the twiddle -zetas[m], results below q), the product by
+  256^-1 equals the spec's, and `ntt_inverse` equals Algorithm 42 with the
+  eight layers held opaque. Then multiply_ntt equals Algorithm 45. CI run
+  37969815052 (job `saw-ntt-dsa`, 34 min): fifteen obligations in
+  1,472 s. TEETH: one twiddle factor bent, and the inverse twiddle's
+  sign dropped, each refuted with a counterexample. Two traps, noted in
+  the SAW file: SAW folds an override's result on constant inputs, so the
+  negation (which only ever meets table constants) stays interpreted
+  (kept uninterpreted, it refutes the true spec); and a spec that stands
+  in for a call must take each coefficient as its own variable. Not yet:
+  the debug build's mul (the open Barrett link above).
 
 ### PQ07 · SLH-DSA-SHAKE-256f + the succession handover
 
