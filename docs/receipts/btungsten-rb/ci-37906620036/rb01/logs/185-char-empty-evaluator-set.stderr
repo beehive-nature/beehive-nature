@@ -1,7 +1,0 @@
-
-thread '<unnamed>' (7130) panicked at edge/bit-matrix-transpose/src/lib.rs:83:5:
-assertion failed: nrows >= 16
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-thread '<unnamed>' (7129) panicked at edge/popsicle/src/cuckoo.rs:133:9:
-attempt to calculate the remainder with a divisor of zero
