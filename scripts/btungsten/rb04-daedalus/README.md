@@ -2,6 +2,8 @@
 
 Order: workerB bench expansion, 2026-10-08 (the subsequent candidate named
 there). Lane: `rbench rb04` (`crates/btungsten-bench/src/lanes/rb04.rs`).
+Receipt: `docs/receipts/btungsten-rb/ci-37923091082/rb04/` (full plan, PASS);
+results and the trials on the way: `docs/receipts/btungsten-rb/REPORT.md`, RB04.
 
 **The comparison.** BNR's parser is `btungsten_wb001::decode`
 (`crates/btungsten-wb001`), the strict decoder of the WB001 intent envelope:

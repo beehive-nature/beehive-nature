@@ -6,7 +6,7 @@ order read BNR at `a3419732c0c06d1d24c8bca2d4cb70e5022971cf`; this work
 started at `2e8d20970fa52109054c829fe9542abbf5fbe876` (one commit later,
 `btungsten PQ01`, which touches no file these lanes read). Code:
 `crates/btungsten-bench` (the `rbench` orchestrator) and
-`scripts/btungsten/rb0{1,2,3}-*`. Receipts: this directory. Every claim below
+`scripts/btungsten/rb0{1,2,3,4}-*`. Receipts: this directory. Every claim below
 points at a receipt row; where a row and this page disagree, the row wins.
 
 ## How to reproduce
@@ -16,12 +16,14 @@ cargo build --locked --release -p btungsten-bench --bins
 target/release/rbench rb01 --work W --out O/rb01
 target/release/rbench rb02 --tools T --work W --out O/rb02
 target/release/rbench rb03 --tools T/crux --work W --out O/rb03
+target/release/rbench rb04 --tools T --work W --out O/rb04
 ```
 
 `--quick` runs the same rows with fewer samples (the CI plan). `T` holds the
 verifier bundles in the layout `scripts/btungsten/README.md` §RB names; the
 `rb02-aes` and `rb03-budget` jobs of `.github/workflows/btungsten-rb.yml`
-build exactly that layout from pinned, digest-checked assets.
+build exactly that layout from pinned, digest-checked assets. RB04 needs GHC
+9.8.4 and cabal 3.14.2.0 on `PATH` and uses `T/cabal` as the cabal home.
 
 ## Where these receipts ran, and what went wrong on the way
 
@@ -80,6 +82,12 @@ for the reason in the first item below.
   three PASS) did not depend on memory figures; its receipts were not
   committed, and the lanes ran again as run 37906620036, the receipts here.
 
+RB04's receipt, under `ci-37923091082/rb04/`, is a later full-plan run of the
+same workflow (run 37923091082, `workflow_dispatch`, `plan=full`,
+`lanes=rb04`) at BNR `c6d2ccefc` on branch `claude-LoVis/rb04-daedalus`,
+which merges the RB01-RB03 branch head (`ecd5e6c6f`) and changes none of
+that branch's lane files; RB04's own trials are in its section below.
+
 ## Pins and departures
 
 | what | pinned | departure, and why |
@@ -87,7 +95,7 @@ for the reason in the first item below.
 | Swanky | `409d1ceb0831e2de11eb8da1b8f961f59a8b5276`, its `Cargo.lock`, its `rust-toolchain` (Rust 1.99.0) and `.cargo/config.toml` (`-C target-cpu=native --cfg vectoreyes_target_cpu_native -C link-args=-flto`) | none. The provider is one added example file (`edge/popsicle/examples/rb01_psi.rs`); no upstream file changes |
 | rustcrypto-verification | `52d36ff4562c9b574f49c8b3133ea63f2a9574d5`, cryptol-specs submodule `8638495a3ba8c1c0bd031f0c5d7f243b5e8617ff` | upstream CI ran `ghcr.io/galoisinc/saw-suite:nightly` (SAW 1.6.0.99, master `345296457`); RB02 runs the SAW 1.6 release bundle WB001/WB002 already run (mir-json `8cbf9af1`, schema 13, nightly-2026-03-21). Docker is unusable on this host, and BNR keeps one coordinated SAW bundle rather than mixing a nightly SAW with its own mir-json. The image digest upstream pulled is recorded in the receipt. `.gitmodules` names an SSH URL; the same commit is fetched over HTTPS |
 | Crux-MIR | crucible `25d0f3698a96cb8f014911146c02fabdb26f66ff`: upstream's own CI build of that commit (run 37835376050, artifact 11575803445, GHC 9.10.3, ubuntu-24.04), mir-json `ece1622caf39c9530873f376caa84a5fa6a3ded3` (crucible's submodule pin), nightly-2026-03-21, what4-solvers `snapshot-20260622` | none in versions: these are exactly the versions `crux-mir-build.yml` pins at that commit. The binary is upstream's CI artifact, digest-checked, not a local rebuild; it expires 2027-01-06, after which the CI job fails at its download step and the bundle must be rebuilt from `25d0f369` |
-| Daedalus | `a4ad7592ef2449fa1da07d2827fc6684293d21ca` (cloned) | not used here: the subsequent-candidate lane continues as RB04 in a separate session (below) |
+| Daedalus | `a4ad7592ef2449fa1da07d2827fc6684293d21ca`, built from source with GHC 9.8.4 and cabal 3.14.2.0 (upstream CI's versions); `daedalus-rts-rust` from the same commit | the Hackage index state fixed at the pin's commit time (upstream has no freeze file); ubuntu-24.04 where upstream CI runs ubuntu-22.04; code generation with the pinned stdlib beside the grammar instead of `--path` (RB04 below) |
 
 ## RB01 — Swanky circuit PSI
 
@@ -328,6 +336,165 @@ saturation reserves less than the true four-attempt worst case;
 `SEND_ATTEMPTS = 4` as a claim about evmlib's retry loop; the `GasLedger`
 methods and `default_ledger_path`.
 
+## RB04 — Daedalus-generated Rust against BNR's WB001 parser
+
+Receipt: `ci-37923091082/rb04/receipt-rb04.json` (full plan, run 37923091082, BNR
+`c6d2ccefc`). Lane: `crates/btungsten-bench/src/lanes/rb04.rs`; harness, grammar
+and generated parsers: `scripts/btungsten/rb04-daedalus/` (its README holds
+the design).
+
+**The parsers.** BNR's is `btungsten_wb001::decode`, chosen after reading it:
+the strict decoder of the WB001 intent envelope (magic, version, ten
+tag-length-value blocks in tag order with per-field length bounds, UTF-8
+through the SAW-proven DFA, exact consumption), whose canonical encoder
+`btungsten_wb001::canonical` SAW proves equal to the Cryptol `wire` for every
+valid intent. The other is the Rust `daedalus compile-rust` generates from
+`WB001.ddl`, a grammar written from the wire description rather than from the
+decoder: its UTF-8 is RFC 3629's UTF8-char grammar over byte ranges, not
+BNR's DFA. The grammar has two entries, `Exact` (the whole input is one
+envelope) and `Envelope` (the envelope as a prefix, so the parser reports how
+much it consumed).
+
+**What is compared.** Per input: acceptance (`Exact` against `decode`);
+decoded values where both accept; consumed length (the whole input where BNR
+accepts; where BNR refuses with `bt-wb01:trailing`, `Envelope` must consume a
+shorter prefix that BNR itself accepts with equal values, and `Exact` must
+fail; under any other refusal neither entry may accept); and canonical
+re-encoding (every accepting parser's values, re-encoded by BNR's SAW-proven
+encoder, equal the input). A panic in either parser counts as a
+disagreement. Corpora: the pinned WB001 vectors (10 positives, 5 envelope
+refusals, 8 bridge terms) and 468 constructed boundary inputs, each with an
+expected BNR answer that is checked too; and 200,000 seeded adversarial
+samples (mutations of random valid envelopes, framed fields at and past their
+bounds, framed malformed and edge-case UTF-8, tag and header faults, splices,
+random bytes). Each TEETH variant is the grammar with one declared
+substitution; it must be convicted on the dimension it targets, on an input
+where the honest grammar agrees with BNR on every dimension.
+
+| phase | wall | CPU (user) | peak RSS (process / sampled group) | what it built |
+|---|---|---|---|---|
+| prepare: clone at the pin | 2.1 s | | | |
+| prepare: `cabal update` to the index state | 20 s | | | |
+| generator build 1 | 374 s | 674 s | 1039.2 MiB / 2080.2 MiB | 46 store packages (store empty before), then the project's 9 components |
+| generator build 2 | 181 s | 179 s | 685.2 MiB / 1204.1 MiB | the project's 9 components (store warm: 46 packages, none rebuilt) |
+| codegen `honest` (n=10) | 374 / 385 / 399 ms | | 63.9 MiB | 9,441 lines of Rust |
+| codegen `t1_domain_bound` (n=10) | 375 / 386 / 398 ms | | 64.0 MiB | 9,441 lines of Rust |
+| codegen `t2_word_endian` (n=10) | 386 / 396 / 420 ms | | 63.9 MiB | 9,441 lines of Rust |
+| codegen `t3_cesu8_surrogate` (n=10) | 378 / 385 / 415 ms | | 64.0 MiB | 9,441 lines of Rust |
+| codegen `t4_trailing_bytes` (n=10) | 376 / 393 / 416 ms | | 64.8 MiB | 9,374 lines of Rust |
+| compile: `cargo fetch` | 4.1 s | | | |
+| compile: runtime-crate | 7.7 s | 19 s | 435.3 MiB | |
+| compile: bnr-parser-crate | 6.7 s | 18 s | 483.5 MiB | |
+| compile: harness-with-generated-parsers | 323 s | 941 s | 2762.2 MiB | |
+| compile: warm-noop | 0.1 s | 0.0 s | 34.5 MiB | |
+
+| comparison | inputs | BNR accepts | acceptance | values | consumed | re-encode | wall |
+|---|---|---|---|---|---|---|---|
+| honest/sampled | 200,000 | 72,374 | 0 / 200,000 | 0 / 72,374 | 0 / 200,000 | 0 / 72,374 | 31 s |
+| honest/vectors | 491 | 73 | 0 / 491 | 0 / 73 | 0 / 491 | 0 / 73 | 0.0 s |
+| t1_domain_bound/sampled | 200,000 | 72,374 | **512** / 200,000 | 0 / 72,374 | **512** / 200,000 | **512** / 72,886 | 30 s |
+| t1_domain_bound/vectors | 491 | 73 | **1** / 491 | 0 / 73 | **1** / 491 | **1** / 74 | 0.0 s |
+| t2_word_endian/sampled | 200,000 | 72,374 | 0 / 200,000 | **69,868** / 72,374 | **17,415** / 200,000 | **69,868** / 72,374 | 31 s |
+| t2_word_endian/vectors | 491 | 73 | 0 / 491 | **73** / 73 | **4** / 491 | **73** / 73 | 0.0 s |
+| t3_cesu8_surrogate/sampled | 200,000 | 72,374 | **1,592** / 200,000 | 0 / 72,374 | **1,592** / 200,000 | **1,592** / 73,966 | 31 s |
+| t3_cesu8_surrogate/vectors | 491 | 73 | **17** / 491 | 0 / 73 | **17** / 491 | **17** / 90 | 0.0 s |
+| t4_trailing_bytes/sampled | 200,000 | 72,374 | **18,020** / 200,000 | 0 / 72,374 | **18,020** / 200,000 | **18,020** / 90,394 | 32 s |
+| t4_trailing_bytes/vectors | 491 | 73 | **4** / 491 | 0 / 73 | **4** / 491 | **4** / 77 | 0.0 s |
+
+Disagreements per dimension over the inputs it applies to (bold: a TEETH variant convicted).
+
+| parser | median per pass of 20,000 inputs (25,001,383 bytes) | median per input | accepted |
+|---|---|---|---|
+| bnr_decode | 26 ms (min 25, max 28, n=20) | 1.3 µs | 7,222 |
+| ddl_exact | 1222 ms (min 1199, max 1234, n=20) | 61.1 µs | 7,222 |
+| ddl_prefix | 1218 ms (min 1204, max 1238, n=20) | 60.9 µs | 9,059 |
+
+| TEETH | convicted on | witness | BNR | generated parser (whole input) |
+|---|---|---|---|---|
+| t1-domain-bound | acceptance | vectors #26 (constructed-bounds, 256 bytes) | refuse bt-wb01:length | accept, consumed 256 |
+| t2-word-endian | values | vectors #0 (pinned-positive, 205 bytes) | accept | accept, consumed 205 |
+| t3-cesu8-surrogate | acceptance | vectors #11 (pinned-refusal, 194 bytes) | refuse bt-wb01:utf8 | accept, consumed 194 |
+| t4-trailing-bytes | consumed | vectors #454 (constructed-trailing, 206 bytes) | refuse bt-wb01:trailing | accept, consumed 205 |
+
+sampled corpus (seed 7362124975341574708, sha256:ykdJaKgR4ECu4P5IdFR-o7QS4WTwBWD2jTUTHuy8zP0): append 11,945, bit-flip 20,198, byte-set 15,895, delete 10,159, field-bounds 19,971, header 5,956, insert 10,028, length-word 19,857, random 7,962, splice 5,997, tags 10,193, truncate 11,978, utf8 19,907, valid 29,954; BNR's answers: accept 72,374, bt-wb01:length 28,623, bt-wb01:magic 9,826, bt-wb01:short 18,674, bt-wb01:tag-order 21,083, bt-wb01:trailing 18,020, bt-wb01:utf8 30,550, bt-wb01:version 850.
+
+vectors (sha256:Q6GvWIVFsauqDaKSqdSQjeZW--RY0P4CY188zmjmJ6U): constructed-base 1, constructed-bounds 29, constructed-length-word 2, constructed-magic 7, constructed-missing-block 1, constructed-tag-order 20, constructed-trailing 4, constructed-truncation 205, constructed-utf8-malformed 152, constructed-utf8-valid 44, constructed-version 3, pinned-bridge-term 8, pinned-positive 10, pinned-refusal 5; BNR's answer equals the pinned or constructed one on 491 of 491.
+
+verdict PASS: 3 MEASUREMENT PASS, 4 SAMPLED-ADVERSARIAL PASS, 4 TEETH PASS, 9 VECTOR PASS; bnr c6d2ccefc8485ec71e012ad716ac447a7b15d615; host AMD EPYC 9V74 80-Core Processor, 4 CPUs, 15.6 GiB, Ubuntu 24.04.5 LTS; 2026-10-09T11:24:52Z to 2026-10-09T11:44:00Z; generator sha256:LpzmRM08nmyE8MuW1Ct3_-39_rD3PtL8-vOgAXeAHCw; rustc 1.98.1 (48a229cea 2026-09-01)
+
+**What the receipt shows.** On the 491 vectors and the 200,000 sampled
+inputs, the generated parser and BNR's decode agree on every dimension, with
+no panic and no Daedalus exception on either side, and BNR's answers equal
+every pinned and constructed one. Each planted fault is convicted on its
+dimension, on a vector and again on the sampled corpus. t3's witness is the
+pinned CESU-8 vector of WB001's 2026-10-07 boundary repair (`ED A0 80` in the
+domain). t2 also disagrees on consumed length on 17,415 sampled inputs: where
+BNR refuses trailing bytes, consumed-length agreement requires BNR's decode
+of the consumed prefix to have equal values, so value faults reach that
+dimension too. Code generation is deterministic (ten runs per grammar,
+byte-identical) and reproduces the committed `src/generated/*.rs` byte for
+byte; t1's generated parser differs from the honest one in one literal
+(`64u64` to `65u64`). The generator, built from an empty cabal store, has the
+same SHA-256 as the one built in run 37909426450.
+
+The per-input times are wall-clock medians inside one process on a shared
+runner; they describe this harness's use of each parser (the generated
+parser builds owned arrays through the Daedalus runtime and keeps an error
+stack, the default), and no ratio between them is a claim of this receipt.
+
+**Pins and departures.** daedalus `a4ad7592` built from source (upstream
+publishes no binaries) with GHC 9.8.4 and cabal 3.14.2.0, upstream CI's
+versions, installed by `haskell-actions/setup` v2.11.0 (pinned by commit).
+Departures, each recorded in the receipt: the Hackage index state is fixed at
+the pin's commit time (`2026-10-01T22:42:03Z`; upstream has no freeze file,
+so its solve follows the live index), and the resolved plan is recorded (181 non-project
+packages, GHC's boot packages included; 46 were built into the empty store for the executable); the runner is
+ubuntu-24.04, upstream's ubuntu-22.04; code generation copies the pinned
+`lib/Daedalus.ddl` beside the grammar instead of passing `--path`, because
+the generated source records each grammar file's path as given (an absolute
+`--path` put the runner's work directory into the bytes). `daedalus-rts-rust`
+comes from the same commit as a git dependency (`Cargo.lock`), and the
+harness depends on `serde` directly because the generated code names it.
+
+**Committed evidence.** The receipt and its logs, except the generated
+parsers (`gen/`, byte-identical to `src/generated/`; the receipt records
+each digest) and three cabal logs that name source-repository checkouts by a
+64-character hex hash, which the repository's secret scan refuses and which
+are never edited: `logs/002-prep-cabal-update.stderr` (371 bytes, sha256:Ru8qnX5rHODGkaNkh1u-MJQi1c6t_SMS-pipM-J1B-k), `logs/003-generator-build-1.stderr` (24,807 bytes, sha256:qvXJT6UHeg--Ky3BEH-CkBZlraFBDdZIJuXfB3lp-Io), `logs/005-generator-build-2.stderr` (24,807 bytes, sha256:qvXJT6UHeg--Ky3BEH-CkBZlraFBDdZIJuXfB3lp-Io). All are in the run's `rb04-receipt` artifact.
+
+**On the way (CI runs on this branch).**
+
+- 37909426450 (`130311901`): the generator built and code generation was
+  deterministic; nothing was committed yet, so `codegen-reproduces-committed`
+  failed by design. The run showed the absolute stdlib path in the generated
+  source, and that `cabal build --only-dependencies exe:daedalus` also builds
+  Daedalus's own libraries (they are dependencies of the executable), so the
+  "dependencies / generator" split measured the wrong thing. Repair: the
+  stdlib beside the grammar; two full builds, store as found and then warm.
+- 37914863699 (`7b5bea50e`): both builds exited 0 but no executable was
+  installed: `cabal list-bin` ran without the build's `CABAL_DIR`, and its
+  output was not kept, so the receipt could not say why. Repair: it runs with
+  the build's cabal home as a measured process with logs.
+- 37917986862 (`433f79706`): quick plan, every row PASS.
+- 37919892361 (`b3d3d4318`): full plan, every row PASS, but the receipt could
+  not be committed: base64url of a zero-heavy witness input is a long run of
+  `A`, which the secret scan reads as key-shaped hex. A receipt is not edited
+  after its run; `rb04-diff` now writes witnesses in dot-separated groups of
+  32 characters, and the full plan ran again (37923091082).
+
+**Development host.** The harness and its tests ran in WSL with the
+generator binary built by CI (copied from run 37909426450's artifact,
+digest-checked); the generator was not built there.
+
+**Remaining obligations.** A proof that the grammar and BNR's decode accept
+the same language with the same values for every input (for example both
+against `BTungstenWB001.cry`): not attempted, and agreement on these corpora
+is not a substitute. Daedalus's own front end, determinization and Rust
+backend are trusted only as far as this comparison exercises them. Refusal
+reasons are not compared (Daedalus reports a position and message, BNR a
+code). Streaming input, very deep or large inputs, allocation failure and
+side channels are not exercised.
+
 ## PQ scope
 
 - RB01's configuration is **not post-quantum**: its OT extension rests on
@@ -340,6 +507,8 @@ methods and `default_ledger_path`.
 - A later Plonky3 comparison must first align the relation, the public
   inputs, the security target and the proof-artifact requirements, and must
   measure proof bytes as well as proving and verification cost. Not started.
+- RB04 compares two parsers of one wire format on finite corpora; it makes
+  no cryptographic or post-quantum claim.
 - RB02 and RB03 are functional-correctness results over stated domains.
   Cryptographic hardness, quantum soundness, side channels, transport and
   settlement are separate obligations, and none of them is claimed.
@@ -353,21 +522,9 @@ authorizes or settles anything.
 ## Not run, not started
 
 - RB01 on independently controlled hosts (NOT-RUN row).
-- Daedalus-generated Rust against an existing BNR Rust parser: not started
-  here; it continues as its own lane (RB04) in a separate session. What the
-  pin (`a4ad7592`) requires, read from its tree: the generator is
-  the Haskell `daedalus` executable (cabal project; its CI builds with GHC
-  9.8.4 and cabal 3.14.2.0 and publishes no binaries; the latest release,
-  v1.0 of 2026-02-10, predates the pin). It emits Rust with
-  `daedalus compile-rust FORMAT.ddl --determinize --output-file=... --entry=...`
-  (backend `daedalus-vm/src/Daedalus/VM/Backend/Rust.hs`) against the
-  `rts-rust` runtime crate; the in-tree Rust examples are
-  `formats/stateful-parser-example-rust` and `formats/pdf/new/rust`. The
-  development host has no GHC, and its WSL VM went down during this work
-  (the RB02 incident above), so the generator was not built here. A candidate format is the WB001 intent envelope, whose Rust
-  encoder and UTF-8 validator are SAW-proven equal to their Cryptol spec; the
-  choice and the comparison (acceptance, decoded values,
-  consumed length, canonical re-encoding) are the next lane's.
+- RB04: a proof that the grammar and BNR's decode agree on every input
+  (agreement on the corpora is not one); the Daedalus interpreter (`daedalus
+  run`) as a third parser of the same grammar.
 - GREASE on a compiled BNR function; zkLean and LibSignal model extraction:
   not started.
 
