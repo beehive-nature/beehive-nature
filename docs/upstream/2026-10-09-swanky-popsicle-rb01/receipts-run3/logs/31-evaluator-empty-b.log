@@ -1,0 +1,90 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: one case per run; a watchdog ends the process after 60 s, and until then a case that does not complete keeps one CPU core busy.
+It deliberately drives upstream into panics or sessions that do not complete.
+Unresolved: results are samples from one host and one target (x86_64); behaviour elsewhere is untested, and no result here establishes a security property of Swanky.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+
+thread '<unnamed>' (69736) panicked at edge/bit-matrix-transpose/src/lib.rs:83:5:
+assertion failed: nrows >= 16
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:150:5
+   3: swanky_bit_matrix_transpose::_transpose
+             at ./edge/bit-matrix-transpose/src/lib.rs:83:5
+   4: swanky_bit_matrix_transpose::transpose
+             at ./edge/bit-matrix-transpose/src/lib.rs:75:9
+   5: <swanky_oprf_kkrt::Receiver as swanky_oprf_traits::Receiver>::receive::<swanky_channel::Channel, swanky_rng::SwankyRng>
+             at ./edge/oprf-kkrt/src/lib.rs:208:19
+   6: <swanky_oprf_kmprt::Receiver>::receive::<swanky_channel::Channel, swanky_rng::SwankyRng>
+             at ./edge/oprf-kmprt/src/lib.rs:378:38
+   7: <popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver as popsicle::psi::circuit_psi::base_psi::BasePsi>::opprf_exchange::<swanky_rng::SwankyRng>
+             at ./edge/popsicle/src/psi/circuit_psi/base_psi/receiver.rs:147:14
+   8: <popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver as popsicle::psi::circuit_psi::base_psi::BasePsi>::base_psi::<swanky_twopac::semihonest::evaluator::Evaluator<swanky_rng::SwankyRng, swanky_ot_alsz_kos::alsz::Receiver, fancy_garbling::wire::mod2::WireMod2>, swanky_rng::SwankyRng>
+             at ./edge/popsicle/src/psi/circuit_psi/base_psi/mod.rs:92:15
+   9: <popsicle::psi::circuit_psi::evaluator::PsiEvaluator<swanky_rng::SwankyRng, popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver> as popsicle::psi::circuit_psi::CircuitPsi>::intersect_with_payloads
+             at ./edge/popsicle/src/psi/circuit_psi/evaluator.rs:85:13
+  10: <popsicle::psi::circuit_psi::evaluator::PsiEvaluator<swanky_rng::SwankyRng, popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver> as popsicle::psi::circuit_psi::CircuitPsi>::intersect
+             at ./edge/popsicle/src/psi/circuit_psi/evaluator.rs:117:14
+  11: repro_evaluator_inputs::main::{closure#2}
+             at ./edge/popsicle/examples/repro_evaluator_inputs.rs:75:24
+  12: <swanky_channel::Channel>::with_sizes::<swanky_channel::local::LocalSocket, u128, repro_evaluator_inputs::main::{closure#2}>
+             at ./core/channel/src/lib.rs:227:17
+  13: <swanky_channel::Channel>::with::<swanky_channel::local::LocalSocket, u128, repro_evaluator_inputs::main::{closure#2}>
+             at ./core/channel/src/lib.rs:178:9
+  14: swanky_channel::local::local_channel_pair::<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}::{closure#0}
+             at ./core/channel/src/local.rs:159:42
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+thread 'main' (69734) panicked at edge/popsicle/src/cuckoo.rs:133:9:
+attempt to calculate the remainder with a divisor of zero
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic_const::panic_const_rem_by_zero
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:175:17
+   3: <popsicle::cuckoo::CuckooHash>::bin
+             at ./edge/popsicle/src/cuckoo.rs:133:9
+   4: <popsicle::psi::circuit_psi::base_psi::sender::OpprfSender as popsicle::psi::circuit_psi::base_psi::BasePsi>::hash_data::<swanky_rng::SwankyRng>
+             at ./edge/popsicle/src/psi/circuit_psi/base_psi/sender.rs:128:27
+   5: <popsicle::psi::circuit_psi::base_psi::sender::OpprfSender as popsicle::psi::circuit_psi::base_psi::BasePsi>::base_psi::<swanky_twopac::semihonest::garbler::Garbler<swanky_rng::SwankyRng, swanky_ot_alsz_kos::alsz::Sender, fancy_garbling::wire::mod2::WireMod2>, swanky_rng::SwankyRng>
+             at ./edge/popsicle/src/psi/circuit_psi/base_psi/mod.rs:90:15
+   6: <popsicle::psi::circuit_psi::garbler::PsiGarbler<swanky_rng::SwankyRng, popsicle::psi::circuit_psi::base_psi::sender::OpprfSender> as popsicle::psi::circuit_psi::CircuitPsi>::intersect_with_payloads
+             at ./edge/popsicle/src/psi/circuit_psi/garbler.rs:83:13
+   7: <popsicle::psi::circuit_psi::garbler::PsiGarbler<swanky_rng::SwankyRng, popsicle::psi::circuit_psi::base_psi::sender::OpprfSender> as popsicle::psi::circuit_psi::CircuitPsi>::intersect
+             at ./edge/popsicle/src/psi/circuit_psi/garbler.rs:114:14
+   8: repro_evaluator_inputs::main::{closure#1}
+             at ./edge/popsicle/examples/repro_evaluator_inputs.rs:67:24
+   9: <swanky_channel::Channel>::with_sizes::<swanky_channel::local::LocalSocket, (), repro_evaluator_inputs::main::{closure#1}>
+             at ./core/channel/src/lib.rs:227:17
+  10: <swanky_channel::Channel>::with::<swanky_channel::local::LocalSocket, (), repro_evaluator_inputs::main::{closure#1}>
+             at ./core/channel/src/lib.rs:178:9
+  11: swanky_channel::local::local_channel_pair::<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}
+             at ./core/channel/src/local.rs:161:24
+  12: std::thread::scoped::scope::<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>::{closure#0}
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/thread/scoped.rs:158:51
+  13: <core::panic::unwind_safe::AssertUnwindSafe<std::thread::scoped::scope<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>::{closure#0}> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panic/unwind_safe.rs:275:9
+  14: std::panicking::catch_unwind::do_call::<core::panic::unwind_safe::AssertUnwindSafe<std::thread::scoped::scope<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>::{closure#0}>, core::result::Result<((), u128), swanky_error::Error>>
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:576:43
+  15: std::panicking::catch_unwind::<core::result::Result<((), u128), swanky_error::Error>, core::panic::unwind_safe::AssertUnwindSafe<std::thread::scoped::scope<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>::{closure#0}>>
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:544:19
+  16: std::panic::catch_unwind::<core::panic::unwind_safe::AssertUnwindSafe<std::thread::scoped::scope<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>::{closure#0}>, core::result::Result<((), u128), swanky_error::Error>>
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panic.rs:359:14
+  17: std::thread::scoped::scope::<swanky_channel::local::local_channel_pair<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>::{closure#0}, core::result::Result<((), u128), swanky_error::Error>>
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/thread/scoped.rs:158:18
+  18: swanky_channel::local::local_channel_pair::<(), u128, repro_evaluator_inputs::main::{closure#1}, repro_evaluator_inputs::main::{closure#2}>
+             at ./core/channel/src/local.rs:157:5
+  19: repro_evaluator_inputs::main
+             at ./edge/popsicle/examples/repro_evaluator_inputs.rs:63:13
+  20: <fn() as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
