@@ -297,6 +297,7 @@ body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-
 #eternal #etDkDial .et-tick.et-lit{fill:var(--sk-biomass)}
 #eternal #etDkDial .et-run{fill:var(--sk-ink-soft)}
 #eternal #etDkDial .et-held{fill:var(--sk-guard-wash);stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:5 4}
+#eternal #etDkDial .et-hit{fill:transparent;stroke:none!important}
 #eternal #etDkDial .et-lane{fill:none;stroke:var(--sk-cat-gap);stroke-width:2}
 #eternal #etDkDial .et-ring{transition:opacity var(--dur,.26s)}
 #eternal #etDkDial.et-picked .et-ring{opacity:.35}
@@ -615,8 +616,8 @@ cargo test -p chain-zano</code></pre>
       h+='</g>';}
     if(hg){var n=Math.max(1,hg.n);
       h+='<g class="et-ring'+sel('gate')+'" data-kind="gate">';
-      for(var j=0;j<n;j++){var b0=TOP+j*2*Math.PI/n+0.05,b1=TOP+(j+1)*2*Math.PI/n-0.05,it=D.held[j];
-        h+='<path class="et-cell et-held'+(R.kind==='gate'&&R.i===j?' et-sel':'')+'" data-kind="gate" data-i="'+j+'" role="button" tabindex="0" aria-pressed="'+(R.kind==='gate'&&R.i===j)+'" aria-label="'+esc(it?it.name+' '+it.why:K('heldOne','a held test'))+'" d="'+arc(102,136,b0,b1)+'"/>';}
+      for(var j=0;j<n;j++){var b0=TOP+j*2*Math.PI/n+0.05,b1=TOP+(j+1)*2*Math.PI/n-0.05,it=D.held[j],bm=(b0+b1)/2;
+        h+='<g data-kind="gate" data-i="'+j+'" role="button" tabindex="0" aria-pressed="'+(R.kind==='gate'&&R.i===j)+'" aria-label="'+esc(it?it.name+' '+it.why:K('heldOne','a held test'))+'"><circle class="et-hit" r="28" cx="'+(119*Math.cos(bm)).toFixed(2)+'" cy="'+(119*Math.sin(bm)).toFixed(2)+'"/><path class="et-cell et-held'+(R.kind==='gate'&&R.i===j?' et-sel':'')+'" d="'+arc(102,136,b0,b1)+'"/></g>';}
       h+='</g>';}
     if(hu){var u=Math.max(1,hu.n);
       h+='<g class="et-ring'+sel('unbuilt')+'" data-kind="unbuilt">';
