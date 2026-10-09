@@ -138,7 +138,7 @@ Lane-specific teeth are named per lane below.
 | A10 | ECDSA secp256k1 | SEC 1, Antelope canonical form | Vaulta K1 (`bnr-keys`), Arweave 2.9 keys, EVM rails, atproto ES256K (low-S, `crates/atmirror/src/commit.rs:5-7`) | sign (RFC 6979), verify, recover | `k256 0.13`; noble/eosjs | none |
 | A10b | ECDSA P-256 | FIPS 186-5 | atproto ES256 (low-S, same file) | verify | `p256 0.13` | none |
 | A11 | BIP-340 Schnorr | BIP-340 | FROST output, Taproot rails, Buzz events (block/buzz `crates/buzz-core/src/verification.rs:11` at upstream `8af2d91f`, as cited by the stack inventory; not checked out here, UNVERIFIED) | sign, verify | `k256`; chilldkg-rs; noble | none |
-| A12 | BIP-39 | BIP-39 | the 24 recovery words = masterPrk | 256-bit entropy <-> 24 words, checksum | browser only: `surfaces/onboarding/bzdid-key.js` (@scure/bip39). No Rust BIP-39 exists; `bpq.rs:426-432` is the bech32m `bdidrec` recovery code, a different encoding | none |
+| A12 | BIP-39 | BIP-39 | the 24 recovery words = masterPrk | 256-bit entropy <-> 24 words, checksum | `surfaces/onboarding/bzdid-key.js` (@scure/bip39); since PQ11 also bsigner (`bip39.rs` over bpq-core's packing). At design time no Rust BIP-39 existed; the bech32m `bdidrec` recovery code is a different encoding | none at design time; PQ11 SAW + browser cross-check |
 | A13 | FROST3 + ChillDKG | BIP-FROST-signing, BIP-FROST-DKG | threshold BIP-340 payload signer behind bSiGner (new) | DKG, nonce, partial sign, aggregate, recovery | `olegfomenko/chilldkg` `afeafbc7f9df` (README: "not been audited"), `olegfomenko/frost-wallet` `20b25cd73a2c` | upstream vectors only |
 | A14 | Poseidon2 | Poseidon2 paper; Plonky3 | in-AIR receipt tree (new) | KoalaBear width 16 | Plonky3 `eab7f0e` | none |
 | A15 | Plonky3 STARK | ethSTARK / FRI / Plonky3 | receipt count statement (replaces PLONK/BN254) | uni-stark, HidingFriPcs | Plonky3 `eab7f0e` (0.8.0) | none |
@@ -221,6 +221,31 @@ same cases (DIFFERENTIAL rides on KAT).
   at every rate boundary of all four functions.
 - **Accept:** `PROVEN keccak_round`, `PROVEN keccak_f1600`, `PROVEN absorb_<n>`
   for each stack length, teeth `Invalid: [`.
+- **Built 2026-10-09** (keccak 0.1.6, the crate under sha3 0.10, so under
+  bsigner's SHA3-256 and SHAKE256: every bzpq1 id, succession commitment,
+  sealed-object hash and the X-Wing seed and combiner):
+  - SPEC-CHECK: `pq02-cryptol/KeccakF1600.cry` derives the ρ offsets and
+    round constants from FIPS 202's algorithms and is held to the Keccak
+    team's zero-state lanes and FIPS 202's SHA3-256 of "" and "abc".
+  - EQUIVALENCE, one round at a time: the crate's OWN generic round body
+    (`keccak::keccak_p`, run once per constant through a harness lane type
+    whose `KECCAK_F_ROUND_COUNT` is k+1 and whose operations are u64's own)
+    equals FIPS 202 `keccakRound k` for every state, for all 24 constants
+    (`pq02-saw/shipped.saw`); tooth: one ρ offset off by one, refuted.
+  - Not machine-checked: that `p1600(s, 24)` (the u64 instantiation) runs
+    those 24 bodies in order. That is the crate's loop
+    (`for &rc in round_consts`, src/lib.rs:248), read. Every attempt to
+    check it whole failed to close: the 24-round comparison against the
+    spec (bitwuzla and z3 90 minutes; two rounds already past 24 minutes,
+    because What4 reorders the Rust term's AND/XOR operands so no structure
+    is shared across rounds), ABC's sweeping checker (memory), and a
+    shipped-against-reference agreement run (bitwuzla in CI, ABC 50
+    minutes). A harness copy of the round, composed by 24 overrides, did
+    prove equal to `keccakF` (574 s locally), which shows the composition
+    is sound for a separate function; it is not the shipped loop.
+  - Not yet: the sponge absorb and squeeze for the stack's lengths, and
+    keccak 0.2.2 (under sha3 0.11, which ml-kem and the SLH-DSA crates use;
+    PQ01's ACVP vectors exercise it as KAT).
 
 ### PQ03 · SHA-2 / HMAC / HKDF + the bzDiD derivation
 
@@ -631,6 +656,22 @@ in its own CI job; the audit two gates run on its tree.
 - X25519: KAT + DIFFERENTIAL; clamping EQUIVALENT to spec.
 - BCH note for the rails table: Bitcoin Cash Schnorr (2019) is not BIP-340;
   any BCH signing path gets its own vectors.
+- **Built 2026-10-09.** BIP-39: `crates/bpq-core/src/bip39.rs` packs and
+  unpacks the 264 bits (SAW: EQUIVALENCE of `indices`, `indices_ok`,
+  `unpack`, `decode_ok`; `mnemonicRoundTrip` both ways and
+  `badChecksumRefused` with the checksum hash a free input; two teeth), and
+  `crates/bsigner/src/bip39.rs` adds SHA-256 and the official English list
+  (bitcoin/bips `ce1862ac6bcf`, equal to the browser's word for word), so
+  `--rec-env` takes the 24 words as well as the `bdidrec1` code; the
+  browser's phrase for the derive-vector root reads back to it in Rust.
+  KAT (`classic-kat`, pins in `crates/btungsten-pq/classic-manifest.json`):
+  BIP-340 sign and verify on k256 and on the wallet's noble schnorr,
+  Wycheproof secp256k1 ECDSA (plain and Bitcoin low-S sets) on k256,
+  Wycheproof X25519 on x25519-dalek, all passing in CI; k256 refuses the 72
+  plain-set `valid` signatures whose s is high, its low-S policy, listed by
+  tcId. Not yet: the BIP-340 Cryptol spec and tagged-hash EQUIVALENCE (no
+  Rust BIP-340 signer exists in the tree until PQ12), the Antelope canonical
+  K1 predicate, X25519 clamping at L4, libsecp256k1 as a third DIFFERENTIAL.
 
 ### PQ12 · FROST / ChillDKG behind bSiGner
 

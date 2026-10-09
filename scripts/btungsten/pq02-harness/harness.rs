@@ -1,153 +1,102 @@
 //! SPEC-BTUNGSTEN-PQ-1 PQ02 — the proof harness for the shipped Keccak-f[1600].
 //!
 //! Not shipped code: SAW compiles this beside the keccak crate (the `.crate`
-//! cargo ships, checked against Cargo.lock) and proves three things:
+//! cargo ships, checked against Cargo.lock) so the crate's OWN round body,
+//! the generic `keccak::keccak_p::<L>`, can be run once per round constant
+//! and proven equal to FIPS 202 `keccakRound k` for every state
+//! (`../pq02-saw/shipped.saw`, k = 0..23).
 //!
-//! 1. `round` (one round, the keccak crate's operation order, a separate
-//!    function) equals FIPS 202 `keccakRound ir` for every state, at each of
-//!    the 24 round indices (`../pq02-saw/round.saw`);
-//! 2. `reference` (24 calls of `round`) equals FIPS 202 `keccakF`, by those 24
-//!    proven round specs as overrides (`round.saw`);
-//! 3. `agree` returns true for every state: the shipped `keccak::p1600(s, 24)`
-//!    and `reference` leave the same 25 lanes (`../pq02-saw/agree.saw`).
+//! How: `keccak_p(state, round_count)` takes the constants
+//! `RC[(L::KECCAK_F_ROUND_COUNT - round_count)..L::KECCAK_F_ROUND_COUNT]`
+//! (keccak 0.1.6 src/lib.rs:243). A lane type with `KECCAK_F_ROUND_COUNT =
+//! K + 1`, called with `round_count = 1`, therefore runs the loop body
+//! exactly once with RC[K]. Its operations are u64's own, as the crate's
+//! `impl LaneSize for u64` is (`truncate_rc` is the identity there too).
 //!
-//! 1 and 2 are each one round deep, which a solver closes in seconds; 3
-//! compares two runs inside one symbolic execution, where the same operations
-//! on the same inputs build the same terms. A 24-round comparison of the
-//! shipped code against the spec in one solver call does not close: two
-//! rounds already ran past 24 minutes.
+//! Why not one 24-round proof: the shipped p1600 against the spec in one
+//! solver call does not close (two rounds ran past 24 minutes), and neither
+//! did a shipped-against-reference agreement run (bitwuzla in CI, ABC 50
+//! minutes locally).
 
 #![no_std]
 #![forbid(unsafe_code)]
 
 extern crate keccak;
 
-/// FIPS 202 §3.2.5 round constants. These are inputs to the proof, not
-/// trusted: `round.saw` proves `round(a, RC[ir])` equal to `keccakRound ir`,
-/// whose constants KeccakF1600.cry derives from the LFSR, so a wrong entry
-/// here fails that proof.
-pub const RC: [u64; 24] = [
-    0x0000000000000001,
-    0x0000000000008082,
-    0x800000000000808a,
-    0x8000000080008000,
-    0x000000000000808b,
-    0x0000000080000001,
-    0x8000000080008081,
-    0x8000000000008009,
-    0x000000000000008a,
-    0x0000000000000088,
-    0x0000000080008009,
-    0x000000008000000a,
-    0x000000008000808b,
-    0x800000000000008b,
-    0x8000000000008089,
-    0x8000000000008003,
-    0x8000000000008002,
-    0x8000000000000080,
-    0x000000000000800a,
-    0x800000008000000a,
-    0x8000000080008081,
-    0x8000000000008080,
-    0x0000000080000001,
-    0x8000000080008008,
-];
+/// A lane that makes `keccak_p(state, 1)` run its body once with RC[K].
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Lane<const K: usize>(pub u64);
 
-const RHO: [u32; 24] = [
-    1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44,
-];
-
-const PI: [usize; 24] = [
-    10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20, 14, 22, 9, 6, 1,
-];
-
-/// One round, in keccak 0.1.6's operation order (src/lib.rs `keccak_p`).
-#[inline(never)]
-pub fn round(state: &mut [u64; 25], rc: u64) {
-    let mut array = [0u64; 5];
-
-    // θ
-    let mut x = 0;
-    while x < 5 {
-        let mut y = 0;
-        while y < 5 {
-            array[x] ^= state[5 * y + x];
-            y += 1;
-        }
-        x += 1;
+impl<const K: usize> core::ops::BitAnd for Lane<K> {
+    type Output = Self;
+    fn bitand(self, o: Self) -> Self {
+        Lane(self.0 & o.0)
     }
-    let mut x = 0;
-    while x < 5 {
-        let mut y = 0;
-        while y < 5 {
-            let t1 = array[(x + 4) % 5];
-            let t2 = array[(x + 1) % 5].rotate_left(1);
-            state[5 * y + x] ^= t1 ^ t2;
-            y += 1;
-        }
-        x += 1;
+}
+impl<const K: usize> core::ops::BitAndAssign for Lane<K> {
+    fn bitand_assign(&mut self, o: Self) {
+        self.0 &= o.0;
     }
-
-    // ρ and π
-    let mut last = state[1];
-    let mut x = 0;
-    while x < 24 {
-        array[0] = state[PI[x]];
-        state[PI[x]] = last.rotate_left(RHO[x]);
-        last = array[0];
-        x += 1;
+}
+impl<const K: usize> core::ops::BitXor for Lane<K> {
+    type Output = Self;
+    fn bitxor(self, o: Self) -> Self {
+        Lane(self.0 ^ o.0)
     }
-
-    // χ
-    let mut y_step = 0;
-    while y_step < 5 {
-        let y = 5 * y_step;
-        let mut x = 0;
-        while x < 5 {
-            array[x] = state[y + x];
-            x += 1;
-        }
-        let mut x = 0;
-        while x < 5 {
-            let t1 = !array[(x + 1) % 5];
-            let t2 = array[(x + 2) % 5];
-            state[y + x] = array[x] ^ (t1 & t2);
-            x += 1;
-        }
-        y_step += 1;
+}
+impl<const K: usize> core::ops::BitXorAssign for Lane<K> {
+    fn bitxor_assign(&mut self, o: Self) {
+        self.0 ^= o.0;
     }
-
-    // ι
-    state[0] ^= rc;
+}
+impl<const K: usize> core::ops::Not for Lane<K> {
+    type Output = Self;
+    fn not(self) -> Self {
+        Lane(!self.0)
+    }
+}
+impl<const K: usize> keccak::LaneSize for Lane<K> {
+    const KECCAK_F_ROUND_COUNT: usize = K + 1;
+    fn truncate_rc(rc: u64) -> Self {
+        Lane(rc)
+    }
+    fn rotate_left(self, n: u32) -> Self {
+        Lane(self.0.rotate_left(n))
+    }
 }
 
-/// Keccak-f[1600] as 24 calls of `round`.
-pub fn reference(state: &mut [u64; 25]) {
+/// The crate's round body, once, with RC[K].
+pub fn shipped_round<const K: usize>(state: &mut [u64; 25]) {
+    let mut lanes = [Lane::<K>(0); 25];
     let mut i = 0;
-    while i < 24 {
-        round(state, RC[i]);
+    while i < 25 {
+        lanes[i] = Lane(state[i]);
+        i += 1;
+    }
+    keccak::keccak_p(&mut lanes, 1);
+    let mut i = 0;
+    while i < 25 {
+        state[i] = lanes[i].0;
         i += 1;
     }
 }
 
-/// The shipped permutation and the reference agree on `s`.
-pub fn agree(s: &[u64; 25]) -> bool {
-    let mut shipped = *s;
-    keccak::p1600(&mut shipped, 24);
-    let mut mine = *s;
-    reference(&mut mine);
-    shipped == mine
+macro_rules! shipped_rounds {
+    ($($name:ident = $k:expr),* $(,)?) => {
+        $(
+            /// The crate's round body with one fixed constant (see [`Lane`]).
+            pub fn $name(state: &mut [u64; 25]) {
+                shipped_round::<$k>(state)
+            }
+        )*
+    };
 }
 
-/// TEETH for `agree`: the same comparison with one output bit of the
-/// reference flipped. `agree-teeth.saw` asks SAW to prove it always true and
-/// must get a counterexample, or the `agree` proof could not tell two
-/// permutations apart.
-pub fn agree_teeth(s: &[u64; 25]) -> bool {
-    let mut shipped = *s;
-    keccak::p1600(&mut shipped, 24);
-    let mut mine = *s;
-    reference(&mut mine);
-    mine[0] ^= 1;
-    shipped == mine
-}
+shipped_rounds!(
+    shipped_round_0 = 0, shipped_round_1 = 1, shipped_round_2 = 2, shipped_round_3 = 3,
+    shipped_round_4 = 4, shipped_round_5 = 5, shipped_round_6 = 6, shipped_round_7 = 7,
+    shipped_round_8 = 8, shipped_round_9 = 9, shipped_round_10 = 10, shipped_round_11 = 11,
+    shipped_round_12 = 12, shipped_round_13 = 13, shipped_round_14 = 14, shipped_round_15 = 15,
+    shipped_round_16 = 16, shipped_round_17 = 17, shipped_round_18 = 18, shipped_round_19 = 19,
+    shipped_round_20 = 20, shipped_round_21 = 21, shipped_round_22 = 22, shipped_round_23 = 23,
+);

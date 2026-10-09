@@ -69,8 +69,7 @@ iota ir A = update A (0 : [5]) (A @ (0 : [5]) ^ RC ir)
 
 // §3.3 Rnd with its round constant as the argument. Two round pairs share a
 // constant (RC 5 = RC 22, RC 6 = RC 20), so a round is a function of the
-// constant, not of the index; round.saw keeps this one uninterpreted when
-// it composes the 24 rounds.
+// constant, not of the index.
 keccakRoundRC : Lane -> State -> State
 keccakRoundRC c A = update B (0 : [5]) (B @ (0 : [5]) ^ c)
   where B = chi (pi (rho (theta A)))

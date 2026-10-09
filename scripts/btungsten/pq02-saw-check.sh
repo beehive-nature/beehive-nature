@@ -11,13 +11,13 @@
 #                and round constants derived, not transcribed) on its closed
 #                terms: the Keccak team's zero-state lanes, FIPS 202 SHA3-256
 #                of "" and "abc", the ρ walk covering every lane once.
-#   EQUIVALENCE  pq02-saw/round.saw: the harness round equals FIPS 202
-#                keccakRound at each of the 24 round indices, and the harness
-#                reference equals keccakF through those 24 specs;
-#                pq02-saw/agree.saw: the shipped keccak::p1600(s, 24) and the
-#                reference agree on every state.
-#   TEETH        round-teeth.saw (one ρ offset off by one) and agree-teeth.saw
-#                (one reference bit flipped) MUST fail with a counterexample.
+#   EQUIVALENCE  pq02-saw/shipped.saw: the crate's own round body (generic
+#                keccak::keccak_p, run once per constant through the harness
+#                lane type) equals FIPS 202 keccakRound k for every state, for
+#                each k = 0..23. Not machine-checked: that p1600(s, 24) runs
+#                those bodies in order (the crate's loop, read).
+#   TEETH        shipped-teeth.saw (one ρ offset off by one) MUST fail with a
+#                counterexample.
 #
 # usage: pq02-saw-check.sh <saw> <saw-rustc> <cryptol>
 set -eu
@@ -82,7 +82,9 @@ run_required() {
   _script=$1; shift
   say "== SAW PQ02: $_script =="
   _t0=$(clock)
-  _log=$(cd "$SAWDIR" && "$SAW" "$_script" 2>&1) && _rc=0 || _rc=$?
+  # each one-round goal over 1600 state bits; the heap cap keeps a CI runner
+  # (16 GB) alive, measured peak 10.7 GB for all 24
+  _log=$(cd "$SAWDIR" && "$SAW" +RTS -M13g -RTS "$_script" 2>&1) && _rc=0 || _rc=$?
   _t1=$(clock)
   say "$_log" | grep -a -E 'PQ02-SAW|Subgoal failed|rror' || true
   for _ob in "$@"; do
@@ -116,12 +118,10 @@ run_teeth_verify() {
 # ---- EQUIVALENCE -------------------------------------------------------------------
 rounds=""
 i=0
-while [ $i -lt 24 ]; do rounds="$rounds round_$i"; i=$((i + 1)); done
+while [ $i -lt 24 ]; do rounds="$rounds shipped_round_$i"; i=$((i + 1)); done
 # shellcheck disable=SC2086
-run_required round.saw $rounds reference
-run_teeth_verify round-teeth.saw
-run_required agree.saw agree
-run_teeth_verify agree-teeth.saw
+run_required shipped.saw $rounds
+run_teeth_verify shipped-teeth.saw
 
 say "== SAW PQ02: ladder state =="
-say "PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (24 rounds + reference + agree: shipped keccak::p1600 == FIPS 202 Keccak-f[1600]) | TEETH: PASS (2)"
+say "PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (the crate's round body == FIPS 202 keccakRound, all 24 constants; the 24-round loop read, not proven) | TEETH: PASS (1)"
