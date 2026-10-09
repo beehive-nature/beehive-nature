@@ -10,12 +10,18 @@ sed 's/  <!--.*//' DIGESTS.md | grep -E '^[0-9a-f]{64}  [^~]' | sha256sum -c
 
 ## Package files
 
+10807640d408a1421d797d4f81619c92c06a4795390a900fc534f39b1b0089b9  FILED.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 37be5a737c45f102d22c8b8419165bd36cb2d9b2e8435cae700ffdd9c01ddaae  ISSUE-1-set-sizes.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 a3917b1fb949640839764ed74c9bddcf236a4b2fb52c433893beb8e3090efb89  ISSUE-2-repeated-elements.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 4a7d96558e08226308172753c76e6374e8bece475908f5b86b1214feaa1ea212  ISSUE-3-empty-evaluator-set.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 805f420cfd33d6a02d0cd73e9a58832ad5af93b4b6ec696eab85ae6999351482  ISSUE-4-input-encoding.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
-cd799c3dbf2d8b1d74a3e20e5d7a8e7e0e08b5f341710508060cde72f27b02bf  README.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+56711c3cdf0c31288b574aeb23319935ffad53216a7f6f301acd2b51118ab172  README.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 9508ac0fdd852bb7933ed5a8f819e9a055122df7a8c6de47a7fe82a83eebc90f  RECEIPTS.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+a5138b24db24efd16952a165205b9c5d3f33e2d91e915c327825de856328b6ed  filed/swanky-47.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+554b6b7678e416e7fb8eb8c81eac42107e82770c9c1b6e5617d8ed16fb087e44  filed/swanky-48.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+fc229987aac598b8e25225d81a8f8e921c7dc7c862f0627a2cd01c0672de4656  filed/swanky-49.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+23ddd93ccafd79685ed16054f215b7090627d2d27afcc32f9bfb9bc6bd0baff5  filed/swanky-50.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
+49956b622e91e918cd672eca1ce585a10e175a1f623fee582d450cc0063d2b8b  filed/swanky-51.md  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 15c03e36bad8cfb46ff197d20657bf6169493f6e305714c2cc2ee9a6f2b4f0eb  receipts-run1/build-debug.log  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 ae45b3bcee6ad94f1c171d46070fd3515b8d1a1b3dc6f69e0424bd6719929c64  receipts-run1/build-release.log  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
 8f02dfd959987b193b329b7e301f5d109dea647e323eed59ec7673a8c8491f8e  receipts-run1/set-sizes.log  <!-- PUBLIC-CONSTANT: sha256 of a public file in this package -->
