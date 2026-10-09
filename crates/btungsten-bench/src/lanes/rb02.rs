@@ -490,6 +490,10 @@ pub fn run(
         "aesverif_bridge_tree": crate::digest::tree_tag(&spec_files(&bridge)),
         "aesverif_bridge_files": spec_files(&bridge).iter().map(|(p, t)| json!({ "path": p, "sha256": t })).collect::<Vec<_>>(),
     }));
+    r.section("trial_history", json!([
+        "2026-10-08/09: TEETH 3 (bitsliced sub_bytes claimed to be shift_rows_2) first ran inside rb02-aes256.saw on the rme solver. Two GitHub runners were shut down at that step (runs 37887662009 and 37889906328, exit 143), and on the development host the kernel OOM killer took the saw process at 28.8 GB resident ('anon-rss:28818984kB'), taking the shared WSL VM down with it. rme normalizes a goal to algebraic normal form, which is small for a true goal and unbounded for a false one. Repair: TEETH 3 runs alone on z3 (rb02-teeth-sbox.saw), and every SAW process runs under a 12 GiB process-group memory budget.",
+        "2026-10-09, CI run 37893420462: with the SBV z3 backend (unint_z3), TEETH 1 and 2 made z3 answer sat, but SBV aborted reading back the model of the uninterpreted `cipher` (a lambda: 'Expected: a function value'). `fails` caught that tool error; the harness did not count it as a refutation, since no counterexample was printed. Repair: rb02-aes256.saw uses the What4 z3 backend (w4_unint_z3) for every obligation, honest and TEETH.",
+    ]));
     r.section("teeth_patch", json!({
         "file": PATCHED,
         "appended": PATCH_TEXT,

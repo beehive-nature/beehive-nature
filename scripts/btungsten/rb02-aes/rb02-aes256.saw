@@ -24,6 +24,13 @@ key_schedule_ov <- size.verify_key_schedule;
 encipher_ov <- size.verify_encipher;
 decipher_ov <- size.verify_decipher;
 
+// Every obligation here, honest and TEETH, goes to z3 through SAW's What4
+// backend (w4_unint_z3), where aes-run.saw uses the SBV backend (unint_z3).
+// With SBV, a FALSE claim made z3 return a model whose uninterpreted
+// `cipher` is a lambda, and SBV aborted reading it back ("Expected: a
+// function value"): `fails` caught a tool error, not a counterexample (CI
+// run 37893420462). What4 reports the first-order counterexample.
+
 // The same top-level spec aes-run.saw uses.
 let crypt_spec (crypt : Term /* KeyBytes -> BlockBytes -> BlockBytes */) = do {
   key <- mir_fresh_cryptol_var "key" {| Aes::KeyBytes |};
@@ -33,24 +40,24 @@ let crypt_spec (crypt : Term /* KeyBytes -> BlockBytes -> BlockBytes */) = do {
 };
 
 mir_verify m "aes_verif::toplevel_encrypt_block_256" [key_schedule_ov, encipher_ov] false
-  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (unint_z3 ["keyExpansion", "cipher"]);
+  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (w4_unint_z3 ["keyExpansion", "cipher"]);
 print "RB02-SAW PROVEN toplevel_encrypt_block_256";
 
 mir_verify m "aes_verif::toplevel_decrypt_block_256" [key_schedule_ov, decipher_ov] false
-  (crypt_spec {{ Aes::toplevel_decrypt_block }}) (unint_z3 ["keyExpansion", "invCipher"]);
+  (crypt_spec {{ Aes::toplevel_decrypt_block }}) (w4_unint_z3 ["keyExpansion", "invCipher"]);
 print "RB02-SAW PROVEN toplevel_decrypt_block_256";
 
 // TEETH 1, planted fault in the specimen: the honest spec, the same
 // overrides and the same solver as the passing proof above.
 fails (mir_verify m "aes_verif::rb02_teeth::teeth_encrypt_block_256" [key_schedule_ov, encipher_ov] false
-  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (unint_z3 ["keyExpansion", "cipher"]));
+  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (w4_unint_z3 ["keyExpansion", "cipher"]));
 print "RB02-SAW-TEETH REFUTED teeth_encrypt_block_256";
 
 // TEETH 2, false claim about the honest function: its output with the low bit
 // of byte 0 flipped.
 fails (mir_verify m "aes_verif::toplevel_encrypt_block_256" [key_schedule_ov, encipher_ov] false
   (crypt_spec {{ \k b -> [((Aes::toplevel_encrypt_block k b) @ 0) ^ 1] # drop`{1} (Aes::toplevel_encrypt_block k b) }})
-  (unint_z3 ["keyExpansion", "cipher"]));
+  (w4_unint_z3 ["keyExpansion", "cipher"]));
 print "RB02-SAW-TEETH REFUTED false-spec-flipped-bit";
 
 // TEETH 3 (no overrides, no uninterpreted functions) runs in its own
