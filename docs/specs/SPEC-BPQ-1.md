@@ -291,7 +291,7 @@ recovery phrase goes onto the device and no wallet key is imported into it.
 - **Signing.** The device builds the bytes it signs from the request (§3 binding or §3b detached
   signature), shows them, and signs only after a hold to confirm. Wire messages `BpqGetCard`,
   `BpqCard`, `BpqSign`, `BpqSignature` (ids 1300 to 1303, `messages-bpq.proto` in the fork).
-- **Proved, emulator only** (`docs/receipts/bpq-safe7-emulator-2026-10-04.json`): the device card
+- **Exercised, emulator only** (`docs/receipts/bpq-safe7-emulator-2026-10-04.json`): the device card
   equals what `bpq.js` and `bsigner` derive for the same PRK and context; its bindings and detached
   signatures verify in both. **Not proved:** fit on hardware (ML-DSA-65 working memory on the
   MicroPython heap, 32 KiB app stack), channel confidentiality (the host link is classical Noise),
