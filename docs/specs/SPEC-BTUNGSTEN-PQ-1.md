@@ -243,9 +243,20 @@ same cases (DIFFERENTIAL rides on KAT).
     minutes). A harness copy of the round, composed by 24 overrides, did
     prove equal to `keccakF` (574 s locally), which shows the composition
     is sound for a separate function; it is not the shipped loop.
-  - Not yet: the sponge absorb and squeeze for the stack's lengths, and
-    keccak 0.2.2 (under sha3 0.11, which ml-kem and the SLH-DSA crates use;
-    PQ01's ACVP vectors exercise it as KAT).
+  - **keccak 0.2.2, 2026-10-09** (the Keccak under shake 0.1 for ml-dsa
+    0.1.1 and under sha3 0.11 for ml-kem 0.3.2 and slh-dsa, per Cargo.lock):
+    its round body (`backends::soft::keccak_p`, the backend
+    `Keccak::with_backend` takes on x86_64 with no `keccak_backend` cfg) is
+    crate-private, so `pq02-harness/harness022.rs` compiles the pinned
+    crate's `consts.rs`, `types.rs` and `backends/soft.rs` verbatim, adding
+    only the `Backend` trait with the one method soft.rs implements, and
+    runs the body once per constant through a lane type whose `RC` is
+    `[RC[k]]`. `pq02-saw/shipped022.saw`: equal to `keccakRound k` for every
+    state, all 24 constants (CI run 37925287105, 17 s). Read, not proven:
+    `keccak_p::<u64, 24>` runs those bodies in order (`for rc in
+    round_consts`, src/backends/soft.rs:68). The aarch64 SHA-3 backend is
+    not covered; it is compiled only on aarch64.
+  - Not yet: the sponge absorb and squeeze for the stack's lengths.
 
 ### PQ03 · SHA-2 / HMAC / HKDF + the bzDiD derivation
 
@@ -307,8 +318,30 @@ same cases (DIFFERENTIAL rides on KAT).
     label, built by `scripts/build-derive-vectors.mjs` from the browser's own
     functions) reproduced by bsigner through bpq-core and the hkdf crate.
   - KAT: HKDF-SHA256 on RFC 5869 A.1 to A.3 (extract PRK, expand OKM).
-  - Not yet: the SHA-256 compression function and the HMAC/HKDF composition
-    at L4 (both are KAT + DIFFERENTIAL today). `deriveRecordKey` and
+  - **SHA-256, 2026-10-09** (sha2 0.10.9, the `.crate` checked against
+    Cargo.lock; `scripts/btungsten/pq03-sha256-check.sh`):
+    `pq03-cryptol/Sha256.cry` is FIPS 180-4 with K and H0 COMPUTED (integer
+    cube and square roots of the primes, mod 2^32; the primes checked prime
+    and consecutive) and is held to FIPS 180-4's digests of "", "abc" and
+    the two-block example. `pq03-harness/sha256.rs` compiles the crate's
+    soft.rs and consts.rs verbatim. PROVEN: the crate's K32 and H256_256
+    tables equal the derived constants; its two-round function
+    (`sha256_digest_round_x2`) and message schedule (`schedule`) equal
+    FIPS 180-4 for every input; its 64-round block function
+    (`sha256_digest_block_u32`) equals FIPS compress for every state and
+    block, composed from the two proofs above as overrides with T1, T2 and
+    the schedule word uninterpreted; one block through its `compress`
+    (bytes to big-endian words) equals FIPS compress. Six obligations in
+    5 s locally. TEETH: Σ1 rotating by 7, and one round constant off by a
+    bit, each refuted with a counterexample. CI run 37932930215 (3 s).
+    Scope: the soft path. On
+    x86_64 with the SHA extensions sha2 runs SHA-NI intrinsics instead,
+    which this does not cover; the spec groups each FIPS sum the way the
+    soft code does (addition mod 2^32 makes every grouping the standard's
+    sum, and the closed checks hold the spec to the published digests).
+  - Not yet: the HMAC/HKDF composition at L4 (KAT + DIFFERENTIAL today),
+    the multi-block `compress` loop (one block is proven), and the digest
+    core's padding and length encoding. `deriveRecordKey` and
     `personaNullifier` keep accepting any string: their labels take no
     counter, so label prefix-freeness alone keeps them apart, but JavaScript's
     UTF-8 encoder maps a lone surrogate to U+FFFD, so two different JS
@@ -341,7 +374,9 @@ The estate's own PQ glue, where its review findings lived.
   calls for every `bpq1/` label, nonce, segment length and binding
   validator; `scripts/btungsten/pq04-cryptol/BpqLayout.cry`, `pq04-saw/`):
   - The label table holds twelve, not ten: the nine of bpq.js, `cosign:`,
-    `bpq1/handover` (PQ07) and `bpq1/words` (bpq.js `words`).
+    `bpq1/handover` (PQ07) and `bpq1/words` (bpq.js `words`). Since
+    2026-10-09 fourteen: `bpq1/nostr-event` (PQ13) and `bpq1/intent`
+    (PQ12, SPEC-BPQ-1 §5c), and every obligation below runs over them.
   - EQUIVALENCE `domain_byte`, `domain_len`, `nonce`, `seg_ok`,
     `segment_count`, `body_len` (Some and None), `segment_plain_len`,
     `utc_timestamp`, `claim_kind`; bsigner's `seal_self` and `open` both
@@ -414,6 +449,50 @@ The estate's own PQ glue, where its review findings lived.
   `pq05-xwing`). Not yet: the libcrux adoption decision (RustCrypto stays;
   three implementations agree on every ACVP vector, PQ01), the NTT and
   reductions at L4, and the implicit-rejection tooth as its own KAT group.
+- **Base field, 2026-10-09** (shared with PQ06; `scripts/btungsten/pq05-field-check.sh`).
+  ml-kem 0.3.2 and ml-dsa 0.1.1 define their fields with module-lattice
+  0.2.3's `define_field!`; `pq05-field/` links the checksum-pinned
+  module-lattice through cargo-saw-build and invokes the macro with the
+  crates' own arguments (the check refuses to run unless the pinned
+  crates still carry exactly those lines). PROVEN against
+  `pq05-cryptol/Field.cry` (arithmetic mod q on words wide enough not to
+  wrap; that this is integer arithmetic mod q rests on the widths, read:
+  a z3 proof of the bridge did not finish in 400 s), for every input in
+  the field: ML-KEM's branchless conditional subtraction (x < 2q), Barrett
+  reduction for every product of two elements (x <= (q-1)^2) and for
+  every sum of two products (x <= 2(q-1)^2, what its base-case multiply
+  hands it), and `Elem` add, sub, neg, mul; ML-DSA's conditional
+  subtraction, add, sub and neg. Eleven obligations (CI run 37935979095,
+  79 s).
+  TEETH: the conditional subtraction claimed for every word, and Barrett
+  claimed for every 32-bit word, each refuted with a counterexample.
+  ML-DSA's Barrett reduction (128-bit words) and multiply: the algorithm
+  is PROVEN over the integers (z3, under 0.1 s each): its multiplier
+  8396807 and shift 46 are the macro's constant expressions, and for every
+  product of two elements x = c q + d the remainder before the one
+  conditional subtraction is in [0, 2q), so the result is d. Tying the
+  shipped code to it is open: its debug build asserts no underflow at
+  x - t q, which is that very bound in 128-bit words, and bitwuzla (on the
+  remainder form and on a division-free form), ABC and yices each ran 30
+  minutes without closing it.
+- **ML-KEM NTT, 2026-10-09** (`scripts/btungsten/pq05-ntt-check.sh`, its
+  own CI job `saw-ntt`). `pq05-cryptol/KemNtt.cry` is FIPS 203 Algorithms
+  9 and 10 with the twiddle table COMPUTED (ζ = 17, ζ^BitRev7(i) mod q,
+  held to Appendix A's entries) and 128^-1 = 3303 checked; NTT^-1 undoes
+  NTT on a fixed polynomial. `pq05-ntt/` builds ml-kem 0.3.2 itself under a
+  lockfile whose every package is the workspace's version and checksum;
+  SAW addresses ml-kem's crate-private `<Polynomial as Ntt>::ntt` and
+  `<NttPolynomial as NttInverse>::ntt_inverse` by MIR name
+  (`pq05-ntt-names.py`). PROVEN: ml-kem's `Elem` add, sub and mul equal
+  Field.cry with results below q; then, those proofs standing in for the
+  calls and the field operations uninterpreted, the NTT equals Algorithm 9
+  and the inverse equals Algorithm 10 (its final scaling by 3303
+  included) for every polynomial with coefficients in the field: every
+  one of the 896 butterflies the same operations on the same operands in
+  the same order, with the crate's twiddle table (a const) equal to the
+  computed one. Locally 26 and 46 minutes. TEETH: one twiddle factor bent
+  must be refuted. Not yet: ML-DSA's NTT (the same method, waiting on its
+  multiply above) and ML-KEM's base-case multiply.
 
 ### PQ06 · ML-DSA (44/65/87)
 
@@ -432,6 +511,9 @@ The estate's own PQ glue, where its review findings lived.
   spec; shipped NTT butterfly and reductions as in PQ05.
 - Teeth: sigVer must refuse every negative ACVP case; a verifier that accepts
   a hint with too many ones (the classic `h` weight bug) must fail sigVer.
+- **Base field, 2026-10-09:** see PQ05's base-field entry (one lane, both
+  fields): ML-DSA's conditional subtraction, add, sub and neg PROVEN;
+  its Barrett reduction and multiply open.
 
 ### PQ07 · SLH-DSA-SHAKE-256f + the succession handover
 
@@ -727,6 +809,100 @@ Obligations:
   under the new key), not a rerun.
 - chilldkg-rs is unaudited and says so; it enters only behind this design,
   through the audit two gates, with its upstream vectors in our CI.
+- **Built 2026-10-09, step (3): the signer computes what it signs.**
+  `crates/bsigner/src/taproot.rs` parses the unsigned transaction itself
+  (refused: zero inputs, zero outputs, a scriptSig, an amount or total over
+  21 million BTC, a non-minimal length, a trailing byte, every truncation),
+  builds BIP-341's signature message for a key-path spend field by field
+  for the seven hash types (others refused, as is SINGLE without its
+  output), and computes the tweak, output key and bech32m address and the
+  check a node makes of a key-path witness. Out of scope and refused, not
+  half-done: tapscript spends and the annex. On BIP-341's
+  `wallet-test-vectors.json` (bitcoin/bips `200f9b26`, pinned by size and
+  SHA-256 in `scripts/btungsten/pq12-bip341.json`, fetched by CI job
+  `pq12-taproot`, never committed): 7 of 7 script-tree cases (leaf hashes,
+  root, tweak, output key, scriptPubKey, address, control blocks) and 7 of
+  7 key-path inputs (the five shared hashes, SigMsg, sighash, tweak; the
+  expected witness verifies, and signing with the vector's tweaked key and
+  zero aux reproduces it byte for byte); 20 teeth refused (the witness on
+  another input, one flipped bit, another hash type). `bsigner
+  taproot-sighash` and `taproot-address` expose it.
+- **Built 2026-10-09, step (2): the signer reads the PSBT itself.**
+  `crates/bsigner/src/psbt.rs` reads BIP-174 version 0 with BIP-371's
+  Taproot fields: every known key type checked for key-data and value
+  length, public keys on the curve, keys unique per map, version 2 fields
+  and versions above 0 refused, a non-witness UTXO refused unless it hashes
+  to its outpoint (and agrees with any witness UTXO), no trailing byte;
+  unknown and proprietary keys allowed, as BIP-174 requires. The signer's
+  reading (`signing_view`) refuses a PSBT missing any spent output, a hash
+  type outside BIP-341's seven, zero inputs or outputs, and outputs that
+  pay more than the inputs spend. Every test PSBT in the pinned BIP-174 and
+  BIP-371 texts (CI job `pq12-taproot`): BIP-174 19 of 19 invalid refused,
+  each for its own stated defect; 10 of 10 valid, 10 of 10 role-walkthrough
+  and 4 of 4 "fails signer checks" PSBTs parsed (those 4 fail P2SH/P2WSH
+  script checks, which are not claimed: a Taproot key-path signer has no
+  such input to sign); BIP-371 11 of 11 invalid refused, 6 of 6 valid
+  parsed. The key-path signature BIP-371's signed PSBT carries (made by the
+  reference implementation) verifies over the sighash bsigner computes, and
+  one flipped bit does not. `bsigner psbt-inspect` prints what the signer
+  reads: each input's outpoint, amount, address, hash type, sighash and
+  whether the PSBT's internal key tweaks to the spent key; each output's
+  amount and address; the fee.
+- **Built 2026-10-09, steps (1) and (4): the authorization and the gate.**
+  SPEC-BPQ-1 §5c: the owner's bzpq1 key signs a WB001 intent envelope
+  with ML-DSA-65 under the new label `bpq1/intent` (bpq-core's
+  fourteenth; PQ04's `domainsDisjoint` and its tooth move to fourteen),
+  and for a Taproot key-path spend the envelope's payload binds the txid
+  and BIP-341's hashes of the spent amounts and scriptPubKeys.
+  `crates/bsigner/src/intent.rs`: `verify_spend` is the only
+  constructor of `VerifiedIntent` (its fields are private, it has no
+  other constructor) and refuses unless the authorization verifies under
+  the pinned authority, the expiry has not passed, and the PSBT, read by
+  bsigner, equals the authorization field for field. Battery (bsigner
+  test `the_signer_signs_only_the_spend_it_was_authorized`): the honest
+  spend verifies with BIP-341's sighashes; refused: 418 of 418 envelope
+  bytes changed without re-signing, 15 signed fields that contradict the
+  PSBT (domain twice, action, destination, capability, amount, a passed
+  expiry, payer, the descriptor's hash type, fee, txid, spent amounts,
+  spent scripts, length and tag), 6 PSBT changes (an output amount, a
+  spent amount, a hash type, one input fewer, no outputs, change to a
+  third key), another authority, kind, version, and a clock past expiry.
+  `bsigner btc-intent`, `bpq-attest-intent`, `btc-verify-intent`
+  expose it. The browser twin: `BPQ.attestIntent` / `verifyIntent` and a
+  WB001 codec in bpq.js, 19 of 19 of WB001's pinned rows (10 envelopes
+  byte for byte both ways, 9 refusal codes); each implementation verifies
+  the other's authorization (`surfaces/bpq-intent-vector.json`,
+  `surfaces/bpq-intent-rust.json`), and both refuse another envelope, a
+  trailing byte, another kind, id or key.
+- **Built 2026-10-09, step (5): FROST behind the gate, feature-gated.**
+  `crates/bsigner/src/frost.rs` over chilldkg-rs `=0.5.0` (crates.io;
+  its `.crate` is byte-identical to the pinned `afeafbc7f9df` but for a
+  stray `.DS_Store`, which is why it reads "dirty"; README line 9: "has not
+  been audited"). Compiled only with the off-by-default `frost` feature,
+  so it is absent from the shipped binary until its key ceremony and its
+  shares at rest (PQ09's sealed format) land; with the feature on and no
+  CLI yet, the toolchain reports its functions unused, as the stub law
+  wants. `open` takes a `VerifiedIntent` and refuses unless its output
+  key is the group's Taproot key (BIP-341 TapTweak of the threshold key,
+  computed by bsigner's own code and equal to chilldkg's tweaked key) and
+  the input exists; the nonce is bound at round 1 to that sighash and
+  tweak (chilldkg's `msg` is always `Some`); a session id opens once;
+  `sign` consumes the session (chilldkg's secret nonce is neither Clone
+  nor Copy); `relay` and `finish` refuse fewer signers or partial
+  signatures than the threshold, and `finish` releases the signature only
+  after bsigner's own BIP-340 check under the output key. Test (local,
+  WSL): a 2-of-3 ChillDKG key signs both inputs of an ML-DSA-authorized
+  PSBT with two different pairs, and each signature passes the node check
+  of a key-path witness (`taproot::verify_key_path`); refused: one
+  signer, a replayed session id, a missing input, another group's share
+  and coordinator, a partial signature over another input's sighash, fewer
+  partials than the threshold. CI job `pq12-taproot` also runs chilldkg's
+  own vector tests from the `.crate` checked against Cargo.lock, audit
+  gate 1 (blocking: `cargo tree -e normal -i chilldkg-rs` finds nothing in
+  bsigner's default build) and gate 2 (`cargo audit` 0.22.2 over the lock,
+  recorded). Not yet: the key ceremony and sealed shares, the CLI rounds,
+  the sighash DIFFERENTIAL against rust-bitcoin and @scure/btc-signer, and
+  the wallet's press that makes an authorization.
 
 ### PQ13 · Buzz events
 

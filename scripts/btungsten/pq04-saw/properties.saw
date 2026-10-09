@@ -5,7 +5,7 @@
 // which builds the signed bytes itself; no Rust function is proven equal to
 // it.
 //
-//   domainsDisjoint   no bpq1/ label is a byte prefix of another (13 labels)
+//   domainsDisjoint   no bpq1/ label is a byte prefix of another (14 labels)
 //   nonceInjective    distinct (flag, index) give distinct nonces
 //   bodyExact         when the BODY check accepts, len + 16·n neither wraps
 //                     nor leaves the object (segCount left uninterpreted: true

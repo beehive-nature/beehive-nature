@@ -33,13 +33,15 @@ pub const COSIGN: u8 = 10;
 pub const WORDS: u8 = 11;
 /// `bpq1/nostr-event`: the Nostr event attestation message (PQ13)
 pub const NOSTR_EVENT: u8 = 12;
+/// `bpq1/intent`: the authorization of a WB001 intent envelope (PQ12)
+pub const INTENT: u8 = 13;
 /// Domain ids are `0 .. DOMAIN_COUNT`.
-pub const DOMAIN_COUNT: u8 = 13;
+pub const DOMAIN_COUNT: u8 = 14;
 pub const DOMAIN_CAP: usize = 20;
 
 /// Every `bpq1/` domain label: the prefix of a signing message, of a hash
 /// preimage or of an HKDF wrap info. Index = domain id.
-pub const DOMAIN_STR: [&str; 13] = [
+pub const DOMAIN_STR: [&str; 14] = [
     "bpq1/id",
     "bpq1/succession",
     "bpq1/card",
@@ -53,6 +55,7 @@ pub const DOMAIN_STR: [&str; 13] = [
     "bpq1/cosign:",
     "bpq1/words",
     "bpq1/nostr-event",
+    "bpq1/intent",
 ];
 
 const fn pad(s: &str) -> [u8; DOMAIN_CAP] {
@@ -67,20 +70,20 @@ const fn pad(s: &str) -> [u8; DOMAIN_CAP] {
     out
 }
 
-const fn pads() -> [[u8; DOMAIN_CAP]; 13] {
-    let mut out = [[0u8; DOMAIN_CAP]; 13];
+const fn pads() -> [[u8; DOMAIN_CAP]; 14] {
+    let mut out = [[0u8; DOMAIN_CAP]; 14];
     let mut d = 0;
-    while d < 13 {
+    while d < 14 {
         out[d] = pad(DOMAIN_STR[d]);
         d += 1;
     }
     out
 }
 
-const fn lens() -> [u32; 13] {
-    let mut out = [0u32; 13];
+const fn lens() -> [u32; 14] {
+    let mut out = [0u32; 14];
     let mut d = 0;
-    while d < 13 {
+    while d < 14 {
         out[d] = DOMAIN_STR[d].len() as u32;
         d += 1;
     }
@@ -88,9 +91,9 @@ const fn lens() -> [u32; 13] {
 }
 
 /// The domain labels, zero-padded to `DOMAIN_CAP`.
-pub const DOMAIN_BYTES: [[u8; DOMAIN_CAP]; 13] = pads();
+pub const DOMAIN_BYTES: [[u8; DOMAIN_CAP]; 14] = pads();
 /// The domain label lengths.
-pub const DOMAIN_LEN: [u32; 13] = lens();
+pub const DOMAIN_LEN: [u32; 14] = lens();
 
 /// Byte `k` of domain `d`'s label, zero past its end: the table SAW proves
 /// equal to the spec's. `d` must be a domain id.

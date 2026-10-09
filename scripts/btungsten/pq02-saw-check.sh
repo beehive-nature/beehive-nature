@@ -1,12 +1,16 @@
 #!/bin/sh
-# pq02-saw-check.sh — SPEC-BTUNGSTEN-PQ-1 PQ02: the shipped Keccak-f[1600]
-# (keccak 0.1.6, under sha3 0.10: bsigner's SHA3-256 and SHAKE256, every
-# bzpq1 id, succession commitment and sealed-object hash). Classes, none
-# standing in for another:
+# pq02-saw-check.sh — SPEC-BTUNGSTEN-PQ-1 PQ02: the shipped Keccak-f[1600],
+# both versions Cargo.lock links: keccak 0.1.6 (under sha3 0.10: bsigner's
+# SHA3-256 and SHAKE256, every bzpq1 id, succession commitment and
+# sealed-object hash; fips205) and keccak 0.2.2 (under shake 0.1 for ml-dsa
+# 0.1.1 and sha3 0.11 for ml-kem 0.3.2 and slh-dsa). Classes, none standing
+# in for another:
 #
-#   PIN          the keccak .crate is fetched and checked against the checksum
+#   PIN          each keccak .crate is fetched and checked against the checksum
 #                Cargo.lock carries for it; the proof is about those bytes.
-#   BUILD        the crate and pq02-harness/harness.rs compile to MIR JSON.
+#   BUILD        keccak 0.1.6 with pq02-harness/harness.rs, and
+#                pq02-harness/harness022.rs (which compiles 0.2.2's round
+#                body files verbatim), compile to MIR JSON.
 #   SPEC-CHECK   pq02-cryptol/KeccakF1600.cry (written from FIPS 202, ρ offsets
 #                and round constants derived, not transcribed) on its closed
 #                terms: the Keccak team's zero-state lanes, FIPS 202 SHA3-256
@@ -14,8 +18,10 @@
 #   EQUIVALENCE  pq02-saw/shipped.saw: the crate's own round body (generic
 #                keccak::keccak_p, run once per constant through the harness
 #                lane type) equals FIPS 202 keccakRound k for every state, for
-#                each k = 0..23. Not machine-checked: that p1600(s, 24) runs
-#                those bodies in order (the crate's loop, read).
+#                each k = 0..23; pq02-saw/shipped022.saw the same for 0.2.2's
+#                soft::keccak_p. Not machine-checked: that the 24-round
+#                permutation runs those bodies in order (each crate's loop,
+#                read).
 #   TEETH        shipped-teeth.saw (one ρ offset off by one) MUST fail with a
 #                counterexample.
 #
@@ -41,31 +47,41 @@ say "== SAW PQ02: toolchain =="
 "$CRYPTOL" --version | head -1
 
 # ---- PIN -----------------------------------------------------------------------
-say "== SAW PQ02: PIN keccak $VERSION to Cargo.lock =="
 rm -rf "$OUT" && mkdir -p "$OUT"
-want=$(awk -v v="$VERSION" '
-  /^\[\[package\]\]/ { n = ""; ver = "" }
-  /^name = /     { n = $3 }
-  /^version = /  { ver = $3 }
-  /^checksum = / { if (n == "\"keccak\"" && ver == "\"" v "\"") { gsub(/"/, "", $3); print $3 } }
-' "$ROOT/Cargo.lock")
-[ -n "$want" ] || { say "SAW-PIN PQ02: FAIL — Cargo.lock has no keccak $VERSION checksum"; exit 1; }
-curl --fail --silent --show-error --location --retry 3 \
-  -o "$OUT/keccak.crate" "https://static.crates.io/crates/keccak/keccak-$VERSION.crate"
-got=$(sha256sum "$OUT/keccak.crate" | cut -d' ' -f1)
-[ "$got" = "$want" ] || { say "SAW-PIN PQ02: FAIL — keccak.crate sha256 does not match Cargo.lock"; exit 1; }
-tar -xzf "$OUT/keccak.crate" -C "$OUT"
-say "SAW-PIN PQ02: PASS (keccak $VERSION, sha256 matches Cargo.lock)"
+pin() {
+  _v=$1
+  say "== SAW PQ02: PIN keccak $_v to Cargo.lock =="
+  _want=$(awk -v v="$_v" '
+    /^\[\[package\]\]/ { n = ""; ver = "" }
+    /^name = /     { n = $3 }
+    /^version = /  { ver = $3 }
+    /^checksum = / { if (n == "\"keccak\"" && ver == "\"" v "\"") { gsub(/"/, "", $3); print $3 } }
+  ' "$ROOT/Cargo.lock")
+  [ -n "$_want" ] || { say "SAW-PIN PQ02: FAIL — Cargo.lock has no keccak $_v checksum"; exit 1; }
+  curl --fail --silent --show-error --location --retry 3 \
+    -o "$OUT/keccak-$_v.crate" "https://static.crates.io/crates/keccak/keccak-$_v.crate"
+  _got=$(sha256sum "$OUT/keccak-$_v.crate" | cut -d' ' -f1)
+  [ "$_got" = "$_want" ] || { say "SAW-PIN PQ02: FAIL — keccak-$_v.crate sha256 does not match Cargo.lock"; exit 1; }
+  tar -xzf "$OUT/keccak-$_v.crate" -C "$OUT"
+  say "SAW-PIN PQ02: PASS (keccak $_v, sha256 matches Cargo.lock)"
+}
+pin "$VERSION"
+pin 0.2.2
 
 # ---- BUILD -----------------------------------------------------------------------
-say "== SAW PQ02: BUILD the crate and the harness to MIR JSON =="
+say "== SAW PQ02: BUILD the crates and the harnesses to MIR JSON =="
 ( cd "$OUT" && "$SAW_RUSTC" "keccak-$VERSION/src/lib.rs" --edition 2018 --crate-type lib \
     --crate-name keccak --out-dir "$OUT" ) || { say "SAW-BUILD PQ02: FAIL — keccak"; exit 1; }
 ( cd "$OUT" && "$SAW_RUSTC" "$HARNESS" --edition 2021 --crate-type lib --crate-name pq02_harness \
     --extern keccak="$OUT/libkeccak.rlib" -L "dependency=$OUT" --out-dir "$OUT" ) || {
   say "SAW-BUILD PQ02: FAIL — harness"; exit 1; }
 [ -s "$MIR" ] || { say "SAW-BUILD PQ02: FAIL — no $MIR"; ls -la "$OUT"; exit 1; }
-say "SAW-BUILD PQ02: PASS ($(wc -c < "$MIR") bytes of linked MIR)"
+# keccak 0.2.2: its soft backend compiled verbatim inside harness022.rs
+( cd "$OUT" && "$SAW_RUSTC" "$ROOT/scripts/btungsten/pq02-harness/harness022.rs" --edition 2024 \
+    --crate-type lib --crate-name pq02_harness022 --out-dir "$OUT" ) || {
+  say "SAW-BUILD PQ02: FAIL — harness022"; exit 1; }
+[ -s "$OUT/pq02_harness022.linked-mir.json" ] || { say "SAW-BUILD PQ02: FAIL — no harness022 MIR"; exit 1; }
+say "SAW-BUILD PQ02: PASS ($(wc -c < "$MIR") + $(wc -c < "$OUT/pq02_harness022.linked-mir.json") bytes of linked MIR)"
 
 # ---- SPEC-CHECK --------------------------------------------------------------------
 say "== SPEC-CHECK PQ02: KeccakF1600.cry closed terms =="
@@ -122,6 +138,11 @@ while [ $i -lt 24 ]; do rounds="$rounds shipped_round_$i"; i=$((i + 1)); done
 # shellcheck disable=SC2086
 run_required shipped.saw $rounds
 run_teeth_verify shipped-teeth.saw
+rounds022=""
+i=0
+while [ $i -lt 24 ]; do rounds022="$rounds022 keccak022.shipped_round_$i"; i=$((i + 1)); done
+# shellcheck disable=SC2086
+run_required shipped022.saw $rounds022
 
 say "== SAW PQ02: ladder state =="
-say "PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (the crate's round body == FIPS 202 keccakRound, all 24 constants; the 24-round loop read, not proven) | TEETH: PASS (1)"
+say "PIN: PASS (2 crates) | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (keccak 0.1.6 and 0.2.2 round bodies == FIPS 202 keccakRound, all 24 constants each; the 24-round loops read, not proven) | TEETH: PASS (1)"

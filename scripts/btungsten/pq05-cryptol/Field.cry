@@ -1,0 +1,70 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — the ML-KEM and ML-DSA base fields:
+// integers mod q (FIPS 203 §2.3: q = 3329; FIPS 204 §2.3: q = 8380417).
+//
+// Stated on words wide enough that nothing wraps (a sum of two elements in
+// one more bit, a product in twice the width), with Cryptol's unsigned
+// remainder: on those widths these ARE integer arithmetic mod q. (A proof
+// of that bridge through Integer terms was attempted with z3 and did not
+// finish in 400 s; it rests on the widths, read.) SAW's bitvector solvers
+// take these goals directly. No reduction trick appears here; the shipped
+// Barrett reduction and conditional subtraction are what SAW holds to them.
+module Field where
+
+// ---- ML-KEM, q = 3329, elements in 16 bits -----------------------------------
+
+kemMod : [32] -> [16]
+kemMod x = drop (x % 3329)
+
+kemAdd : [16] -> [16] -> [16]
+kemAdd a b = drop (((zext a : [17]) + zext b) % 3329)
+
+kemSub : [16] -> [16] -> [16]
+kemSub a b = if a >= b then a - b else (a + 3329) - b
+
+kemNeg : [16] -> [16]
+kemNeg a = if a == 0 then 0 else 3329 - a
+
+kemMul : [16] -> [16] -> [16]
+kemMul a b = kemMod ((zext a) * (zext b))
+
+// ---- ML-DSA, q = 8380417, elements in 32 bits --------------------------------
+
+dsaMod : [64] -> [32]
+dsaMod x = drop (x % 8380417)
+
+dsaAdd : [32] -> [32] -> [32]
+dsaAdd a b = drop (((zext a : [33]) + zext b) % 8380417)
+
+dsaSub : [32] -> [32] -> [32]
+dsaSub a b = if a >= b then a - b else (a + 8380417) - b
+
+dsaNeg : [32] -> [32]
+dsaNeg a = if a == 0 then 0 else 8380417 - a
+
+dsaMul : [32] -> [32] -> [32]
+dsaMul a b = dsaMod ((zext a) * (zext b))
+
+// ---- ML-DSA's Barrett reduction, over the integers ---------------------------
+// module-lattice's barrett_reduce for q = 8380417: shift s = 2 (ilog2 q + 1)
+// = 46, multiplier m = floor(2^46 / q) = 8396807, then one conditional
+// subtraction. The shipped code in 128-bit words is not yet proven equal to
+// this: its debug build asserts no underflow at x - t q, which is this very
+// bound, and no bitvector solver closed it in 30 minutes. These two
+// properties prove the algorithm and its constants.
+
+// for every x = c q + d with d < q and x <= (q-1)^2, t = floor(x m / 2^46)
+// leaves x - t q in [0, 2q): one conditional subtraction then gives d,
+// the remainder (z3, linear integer arithmetic with constants)
+dsaBarrettRange : Integer -> Integer -> Bit
+property dsaBarrettRange c d =
+  (0 <= c /\ c <= 8380415 /\ 0 <= d /\ d < 8380417 /\ c * 8380417 + d <= 8380416 * 8380416) ==>
+    (0 <= r /\ r < 2 * 8380417)
+  where
+    x = c * 8380417 + d
+    t = (x * 8396807) / 2 ^^ 46
+    r = x - t * 8380417
+
+// the multiplier and shift are the macro's own constant expressions
+dsaBarrettConstants : Bit
+property dsaBarrettConstants = (8396807 == (2 ^^ 46) / (8380417 : Integer)) /\ (46 == 2 * (22 + 1 : Integer)) /\
+  (2 ^^ 22 <= (8380417 : Integer)) /\ ((8380417 : Integer) < 2 ^^ 23)

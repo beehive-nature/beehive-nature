@@ -58,6 +58,31 @@
 //!     (a bpq1 public key card, binding, handover or Nostr event attestation;
 //!      or a detached signature, checked
 //!      against the file named by --target)
+//!   bsigner taproot-sighash --file REQUEST.json
+//!     (SPEC-BTUNGSTEN-PQ-1 PQ12: the BIP-341 key-path sighash bsigner computes
+//!      itself from the unsigned transaction and the outputs it spends —
+//!      {tx, prevouts: [{scriptPubKey, amountSats}], input, hashType} — or,
+//!      given a "signature", the check a node makes of that witness. Never
+//!      signs: the threshold signer behind this organ will sign only what
+//!      this computes)
+//!   bsigner psbt-inspect --file REQUEST.json
+//!     ({psbt: base64, network}: what the signer reads from a BIP-174 PSBT —
+//!      each input and output with its address, the hash types, each Taproot
+//!      key-path sighash and whether the internal key tweaks to the spent key,
+//!      the fee; refused unless every spent output is in the PSBT)
+//!   bsigner btc-intent --file REQUEST.json
+//!     ({psbt, network, destination, expirySeconds}: the WB001 intent envelope
+//!      (SPEC-BPQ-1 §5c) that authorizes exactly this PSBT as a payment to
+//!      destination, with change only back to the key every input spends)
+//!   bsigner bpq-attest-intent --rec-env VAR --context CTX --file ENVELOPE.json
+//!     ({envelope}: CTX's bzpq1 key authorizes the envelope with ML-DSA-65)
+//!   bsigner btc-verify-intent --file REQUEST.json
+//!     ({authorization, authority, psbt}: the gate a threshold signer stands
+//!      behind — the authorization must verify under the pinned authority
+//!      and the PSBT must be its spend field for field; prints the sighashes
+//!      it may sign, or refuses)
+//!   bsigner taproot-address --file REQUEST.json
+//!     ({internalKey, merkleRoot}: the BIP-341 tweak, output key and bc1p/tb1p address)
 //!   bsigner selftest
 //!   bsigner version
 
@@ -66,10 +91,15 @@ mod b64;
 mod bip39;
 mod bpq;
 mod envelope;
+#[cfg(feature = "frost")]
+mod frost;
+mod intent;
 #[cfg(test)]
 mod kat;
 mod keys;
 mod pq;
+mod psbt;
+mod taproot;
 mod x402;
 
 use serde_json::{json, Value};
@@ -88,6 +118,12 @@ fn main() {
         Some("bpq-verify") => cmd_bpq_verify(&args[1..]),
         Some("bpq-handover") => cmd_bpq_handover(&args[1..]),
         Some("bpq-attest-nostr") => cmd_bpq_attest_nostr(&args[1..]),
+        Some("taproot-sighash") => cmd_taproot_sighash(&args[1..]),
+        Some("taproot-address") => cmd_taproot_address(&args[1..]),
+        Some("psbt-inspect") => cmd_psbt_inspect(&args[1..]),
+        Some("btc-intent") => cmd_btc_intent(&args[1..]),
+        Some("bpq-attest-intent") => cmd_bpq_attest_intent(&args[1..]),
+        Some("btc-verify-intent") => cmd_btc_verify_intent(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -627,6 +663,8 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         ("handover", bpq::verify_handover(&doc).is_some())
     } else if doc["kind"] == "nostr-event" {
         ("nostr-event", bpq::verify_nostr(&doc).is_some())
+    } else if doc["kind"] == "intent" {
+        ("intent", bpq::verify_intent(&doc).is_some())
     } else if doc["kind"] == "binding" {
         ("binding", bpq::verify_bind(&doc))
     } else {
@@ -640,6 +678,339 @@ fn cmd_bpq_verify(args: &[String]) -> i32 {
         0
     } else {
         1
+    }
+}
+
+fn read_json(o: &Opts, cmd: &str, shape: &str) -> Result<Value, String> {
+    let path = o
+        .file
+        .as_deref()
+        .ok_or(format!("{cmd} needs --file REQUEST.json ({shape})"))?;
+    std::fs::read(path)
+        .map_err(|e| e.to_string())
+        .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
+        .map_err(|e| format!("{path}: {e}"))
+}
+
+fn hex_field(name: &str, v: &Value) -> Result<Vec<u8>, String> {
+    v.as_str()
+        .and_then(taproot::unhex)
+        .ok_or(format!("{name} must be a hex string"))
+}
+
+fn cmd_taproot_sighash(args: &[String]) -> i32 {
+    let req = match parse_opts(args).and_then(|o| {
+        read_json(
+            &o,
+            "taproot-sighash",
+            "tx, prevouts [{scriptPubKey, amountSats}], input, hashType or signature",
+        )
+    }) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    match taproot_sighash(&req) {
+        Ok(v) => {
+            println!("{v}");
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+fn taproot_sighash(req: &Value) -> Result<Value, String> {
+    let tx = taproot::parse_tx(&hex_field("tx", &req["tx"])?).map_err(|e| e.to_string())?;
+    let prevouts = req["prevouts"]
+        .as_array()
+        .ok_or("prevouts must be an array")?
+        .iter()
+        .map(|u| {
+            Ok(taproot::Prevout {
+                amount: u["amountSats"]
+                    .as_u64()
+                    .ok_or("amountSats must be a whole number")?,
+                script_pubkey: hex_field("scriptPubKey", &u["scriptPubKey"])?,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    let input = req["input"]
+        .as_u64()
+        .and_then(|i| usize::try_from(i).ok())
+        .ok_or("input must be a whole number")?;
+    let asked = match &req["hashType"] {
+        Value::Null => None,
+        v => Some(
+            v.as_u64()
+                .and_then(|t| u8::try_from(t).ok())
+                .ok_or("hashType must be a byte")?,
+        ),
+    };
+    // with a signature, the hash type is the one it commits to, and it must verify
+    let (hash_type, verified) = match &req["signature"] {
+        Value::Null => (
+            asked.ok_or("name the hashType (0 is SIGHASH_DEFAULT), or pass the signature")?,
+            None,
+        ),
+        v => {
+            let t = taproot::verify_key_path(&tx, &prevouts, input, &hex_field("signature", v)?)
+                .map_err(|e| e.to_string())?;
+            if asked.is_some_and(|a| a != t) {
+                return Err(format!(
+                    "the signature commits to hash type 0x{t:02x}, not the one asked for"
+                ));
+            }
+            (t, Some(true))
+        }
+    };
+    let pre = taproot::precompute(&tx, &prevouts).map_err(|e| e.to_string())?;
+    let msg =
+        taproot::sig_msg(&tx, &prevouts, &pre, input, hash_type).map_err(|e| e.to_string())?;
+    // sigMsg as BIP-341's vectors print it: epoch 0x00 ‖ SigMsg
+    Ok(json!({
+        "input": input,
+        "hashType": hash_type,
+        "sigMsg": taproot::hex(&[&[0x00][..], &msg].concat()),
+        "sighash": taproot::hex(&taproot::sighash_of(&msg)),
+        "verified": verified,
+    }))
+}
+
+fn cmd_psbt_inspect(args: &[String]) -> i32 {
+    let req = match parse_opts(args).and_then(|o| {
+        read_json(
+            &o,
+            "psbt-inspect",
+            "psbt (base64), network mainnet or testnet",
+        )
+    }) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    match psbt_inspect(&req) {
+        Ok(v) => {
+            println!("{}", serde_json::to_string_pretty(&v).unwrap());
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+/// What the signer reads from a PSBT, in the terms a person checks: each
+/// input's outpoint (txid as explorers print it), amount and address, its
+/// hash type and, for a Taproot key-path input, the sighash and whether the
+/// PSBT's internal key really tweaks to the spent key; each output's
+/// amount and address; the fee.
+fn psbt_inspect(req: &Value) -> Result<Value, String> {
+    let hrp = match req["network"].as_str().unwrap_or("mainnet") {
+        "mainnet" => "bc",
+        "testnet" => "tb",
+        other => return Err(format!("network {other:?} is not mainnet or testnet")),
+    };
+    let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+    let p = psbt::parse(&psbt::from_base64(b64).map_err(|e| e.to_string())?)
+        .map_err(|e| e.to_string())?;
+    let keys: Vec<_> = p
+        .inputs
+        .iter()
+        .map(|i| {
+            (
+                i.tap_internal_key,
+                i.tap_merkle_root,
+                i.tap_key_sig.is_some(),
+            )
+        })
+        .collect();
+    let out_keys: Vec<_> = p.outputs.iter().map(|o| o.tap_internal_key).collect();
+    let v = psbt::signing_view(p).map_err(|e| e.to_string())?;
+    let pre = taproot::precompute(&v.tx, &v.prevouts).map_err(|e| e.to_string())?;
+    let inputs: Vec<Value> =
+        v.tx.inputs
+            .iter()
+            .zip(&v.prevouts)
+            .zip(&keys)
+            .enumerate()
+            .map(|(i, ((txin, prev), &(internal, root, signed)))| {
+                let spk = &prev.script_pubkey;
+                let taproot_key: Option<[u8; 32]> =
+                    (spk.len() == 34 && spk[0] == 0x51 && spk[1] == 0x20)
+                        .then(|| spk[2..].try_into().unwrap());
+                let mut txid = txin.prev_txid;
+                txid.reverse();
+                let mut j = json!({
+                    "txid": taproot::hex(&txid),
+                    "vout": txin.prev_vout,
+                    "amountSats": prev.amount,
+                    "scriptPubKey": taproot::hex(spk),
+                    "address": taproot::address_of(hrp, spk),
+                    "hashType": v.hash_types[i],
+                    "signed": signed,
+                });
+                if let Some(q) = taproot_key {
+                    j["sighash"] =
+                        match taproot::sig_msg(&v.tx, &v.prevouts, &pre, i, v.hash_types[i]) {
+                            Ok(m) => json!(taproot::hex(&taproot::sighash_of(&m))),
+                            Err(e) => json!({ "refused": e.to_string() }),
+                        };
+                    j["internalKeyMatches"] = match internal {
+                        Some(p) => {
+                            json!(taproot::output_key(&p, root.as_ref()).is_ok_and(|k| k.key == q))
+                        }
+                        None => Value::Null,
+                    };
+                }
+                j
+            })
+            .collect();
+    let outputs: Vec<Value> =
+        v.tx.outputs
+            .iter()
+            .zip(&out_keys)
+            .map(|(o, k)| {
+                json!({
+                    "amountSats": o.amount,
+                    "scriptPubKey": taproot::hex(&o.script_pubkey),
+                    "address": taproot::address_of(hrp, &o.script_pubkey),
+                    "internalKey": k.map(|k| taproot::hex(&k)),
+                })
+            })
+            .collect();
+    Ok(json!({ "inputs": inputs, "outputs": outputs, "feeSats": v.fee }))
+}
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
+}
+
+fn cmd_btc_intent(args: &[String]) -> i32 {
+    let made = parse_opts(args)
+        .and_then(|o| {
+            read_json(
+                &o,
+                "btc-intent",
+                "psbt, network, destination, expirySeconds",
+            )
+        })
+        .and_then(|req| {
+            let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+            let psbt_bytes = psbt::from_base64(b64).map_err(|e| e.to_string())?;
+            let network = req["network"].as_str().unwrap_or("mainnet");
+            let destination = req["destination"]
+                .as_str()
+                .ok_or("destination must be an address")?;
+            let ttl = req["expirySeconds"]
+                .as_u64()
+                .ok_or("expirySeconds must be a whole number")?;
+            let mut nonce = [0u8; 32];
+            getrandom::getrandom(&mut nonce).map_err(|e| format!("entropy: {e}"))?;
+            let now = now_secs();
+            let expiry = now.checked_add(ttl).ok_or("expirySeconds is too large")?;
+            intent::envelope_for(&psbt_bytes, network, destination, nonce, now, expiry)
+                .map_err(|e| e.to_string())
+        });
+    match made {
+        Ok(env) => {
+            println!("{}", json!({ "envelope": b64::b64u(&env) }));
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+fn cmd_bpq_attest_intent(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(var), Some(ctx)) = (o.rec_env.as_deref(), o.context.as_deref()) else {
+        return fail(
+            "bpq-attest-intent needs --rec-env VAR --context CTX --file ENVELOPE.json".into(),
+        );
+    };
+    let env = match read_json(&o, "bpq-attest-intent", "envelope").and_then(|v| {
+        v["envelope"]
+            .as_str()
+            .and_then(b64::b64u_decode)
+            .ok_or("envelope must be base64url".to_string())
+    }) {
+        Ok(e) => e,
+        Err(e) => return fail(e),
+    };
+    let code = match std::env::var(var) {
+        Ok(c) => zeroize::Zeroizing::new(c),
+        Err(_) => return fail(format!("environment variable {var} is not set")),
+    };
+    let prk = match bip39::master_prk_from_recovery(&code) {
+        Ok(p) => p,
+        Err(e) => return fail(e),
+    };
+    match bpq::attest_intent(&prk, ctx, &env) {
+        Ok(a) => {
+            println!("{}", serde_json::to_string_pretty(&a).unwrap());
+            0
+        }
+        Err(e) => fail(e.to_string()),
+    }
+}
+
+fn cmd_btc_verify_intent(args: &[String]) -> i32 {
+    let checked = parse_opts(args)
+        .and_then(|o| read_json(&o, "btc-verify-intent", "authorization, authority, psbt"))
+        .and_then(|req| {
+            let authority = req["authority"]
+                .as_str()
+                .ok_or("authority must be a bzpq1 id")?;
+            let b64 = req["psbt"].as_str().ok_or("psbt must be a base64 string")?;
+            let psbt_bytes = psbt::from_base64(b64).map_err(|e| e.to_string())?;
+            intent::verify_spend(&req["authorization"], authority, &psbt_bytes, now_secs())
+                .map_err(|e| e.to_string())
+        });
+    match checked {
+        Ok(v) => {
+            println!("{}", serde_json::to_string_pretty(&v.summary()).unwrap());
+            0
+        }
+        Err(e) => fail(e),
+    }
+}
+
+fn cmd_taproot_address(args: &[String]) -> i32 {
+    let req = match parse_opts(args)
+        .and_then(|o| read_json(&o, "taproot-address", "internalKey, merkleRoot or null"))
+    {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    let key32 = |name: &str, v: &Value| -> Result<[u8; 32], String> {
+        hex_field(name, v)?
+            .try_into()
+            .map_err(|_| format!("{name} must be 32 bytes"))
+    };
+    let made = key32("internalKey", &req["internalKey"]).and_then(|p| {
+        let root = match &req["merkleRoot"] {
+            Value::Null => None,
+            v => Some(key32("merkleRoot", v)?),
+        };
+        taproot::output_key(&p, root.as_ref()).map_err(|e| e.to_string())
+    });
+    match made {
+        Ok(q) => {
+            println!(
+                "{}",
+                json!({
+                    "tweak": taproot::hex(&q.tweak),
+                    "outputKey": taproot::hex(&q.key),
+                    "parity": q.parity,
+                    "scriptPubKey": taproot::hex(&taproot::script_pubkey(&q.key)),
+                    "mainnet": taproot::address_of("bc", &taproot::script_pubkey(&q.key)),
+                    "testnet": taproot::address_of("tb", &taproot::script_pubkey(&q.key)),
+                })
+            );
+            0
+        }
+        Err(e) => fail(e),
     }
 }
 
