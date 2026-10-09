@@ -139,9 +139,8 @@ running beside it):
 - CI: `btungsten-pq.yml` job `pq10-plonky3` runs the tests, the FORGERY
   battery and the three scale points on every push. Not yet done: the SAW
   row-soundness proof of the AIR (SPEC §PQ10 `rowSound`), the on-chain
-  verifier, and audit gate 2 for this workspace (cargo-audit is not installed
-  on this box; gate 1 holds by construction: the crate is its own workspace,
-  outside the default build).
+  verifier, and audit gate 2 for this workspace (gate 1 holds by
+  construction: the crate is its own workspace, outside the default build).
 
 ### PQ07, PQ08 and PQ09 (2026-10-08)
 
@@ -152,7 +151,7 @@ running beside it):
 | PQ09 keys at rest | `crates/bsigner/src/keys.rs` + `bpq::seal_self` | A seed reaches disk only inside a SPEC-BPQ-1 sealed object, one `self` slot under the root vault of the owner's recovery words (`bheart.keyset/2`); commands that touch a seed take `--rec-env VAR`; `verify` reads the public half with no unlock; a plaintext `bheart.keyset/1` file is refused until `bsigner keys-seal` reseals it. Tests: `no_seed_byte_reaches_disk` scans every written file for the seed in raw, base64url and hex form; the wrong words and a tampered body open nothing; bsigner 60 of 60; the nerve test 7 of 7 through sealed keys; selftest PASS. The Rust sealer is checked by the other implementation: `surfaces/bpq-rust-sealed.json` opens in bpq.js (e2e/bpq.test.mjs 19 of 19). Boundary: rewriting a file does not erase the disk blocks the old plaintext sat in |
 
 Audit two gates for PQ01's new crates, read from rustsec/advisory-db
-2026-10-08 (cargo-audit is not installed on this box): RUSTSEC-2026-0076,
+2026-10-08: RUSTSEC-2026-0076,
 -0077 (libcrux-ml-dsa verify, patched >= 0.0.8), -0125, -0126
 (libcrux-ml-dsa AVX2, patched >= 0.0.9): 0.0.11 resolved. RUSTSEC-2026-0074,
 -0207, -0208 (libcrux-sha3, patched >= 0.0.10): 0.0.11 resolved.
