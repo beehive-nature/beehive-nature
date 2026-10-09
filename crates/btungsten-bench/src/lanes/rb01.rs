@@ -1,0 +1,1357 @@
+//! RB01: Swanky popsicle circuit-PSI cardinality, measured.
+//!
+//! 1. Prepare a build copy of GaloisInc/swanky at the reviewed pin, add the
+//!    provider (`scripts/btungsten/rb01-psi/rb01_psi.rs`) as one example
+//!    file, fetch its locked dependencies into a fresh CARGO_HOME.
+//! 2. Measure cold and warm compilation with Swanky's own toolchain file,
+//!    lockfile and native CPU flags.
+//! 3. Reproduce the upstream composition (`circuit_psi_cardinality`), then
+//!    the provider in the same composition, then one role per process over
+//!    loopback TCP with role-local inputs and an explicit session id, on
+//!    bounded fixtures; every output is checked against the plaintext
+//!    answer computed here.
+//! 4. Exercise refusals, aborts and timeouts with hostile inputs, a fake
+//!    peer and a fault-injecting relay; record upstream behaviour outside
+//!    the input policy as characterization.
+
+use std::io::{Read, Write};
+use std::net::{SocketAddr, TcpListener};
+use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
+
+use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
+
+use crate::digest::{file_tag, hex, os_random};
+use crate::host::{git_identity, host, loadavg, rust_toolchain};
+use crate::measure::{self, Obs, Spec};
+use crate::psi::{
+    classify, output_field, plaintext_cardinality, tagged_line, Elem, Fixture, Outcome,
+};
+use crate::receipt::{Class, Outcome as O, Receipt, Row};
+use crate::relay::{self, Fault};
+use crate::stats::summary;
+use crate::upstream::{build_copy, identity, repo_root, Pin};
+
+pub const SWANKY: Pin = Pin {
+    name: "swanky",
+    url: "https://github.com/GaloisInc/swanky",
+    rev: "409d1ceb0831e2de11eb8da1b8f961f59a8b5276",
+};
+pub const OVERLAY: &str = "edge/popsicle/examples/rb01_psi.rs";
+pub const PROVIDER_SRC: &str = "scripts/btungsten/rb01-psi/rb01_psi.rs";
+
+// The provider's handshake constants (rb01_psi.rs); a unit test holds the two
+// copies equal, so a fake peer here speaks exactly the provider's framing.
+pub const MAGIC: &[u8; 8] = b"RB01PSI\x00";
+pub const VERSION: u8 = 1;
+pub const ROLE_GARBLER: u8 = 1;
+pub const ROLE_EVALUATOR: u8 = 2;
+pub const CONFIG: &str = "rb01/popsicle-circuit-psi/OpprfPsiGarbler+OpprfPsiEvaluator/semi-honest/WireMod2/alsz+chou-orlandi/fancy_cardinality/output=evaluator";
+
+pub struct Plan {
+    pub cold_builds: usize,
+    pub warm_builds: usize,
+    pub startup: usize,
+    pub upstream_runs: usize,
+    pub local_runs: usize,
+    /// (fixture, samples, per-process budget)
+    pub tcp: Vec<(Fixture, usize, Duration)>,
+}
+
+impl Plan {
+    /// Budgets: the 2026-10-08 pilot on this lane's host ran 65,536 elements
+    /// per side through the local composition in 8.2 s wall (1.1 GB peak);
+    /// 256 elements in 0.07 s. Each budget is at least 10x the pilot for its
+    /// size and never below 60 s, so a budget kill means something stalled.
+    pub fn full() -> Plan {
+        let mut tcp = vec![
+            (Fixture::upstream(), 10, Duration::from_secs(60)),
+            (Fixture::identical(256), 3, Duration::from_secs(60)),
+            (Fixture::disjoint(256), 3, Duration::from_secs(60)),
+            (Fixture::partial(256, 256, 128), 3, Duration::from_secs(60)),
+            (Fixture::partial(256, 1024, 200), 3, Duration::from_secs(60)),
+        ];
+        for (k, n) in [(10u32, 10usize), (12, 10), (14, 5), (16, 3)] {
+            let size = 1u64 << k;
+            let budget = Duration::from_secs(if k <= 12 {
+                60
+            } else if k == 14 {
+                120
+            } else {
+                300
+            });
+            tcp.push((Fixture::partial(size, size, size / 2), n, budget));
+        }
+        Plan {
+            cold_builds: 2,
+            warm_builds: 3,
+            startup: 30,
+            upstream_runs: 10,
+            local_runs: 10,
+            tcp,
+        }
+    }
+
+    /// The CI plan: same rows, fewer samples, no 2^16 size.
+    pub fn quick() -> Plan {
+        let mut p = Plan::full();
+        p.cold_builds = 1;
+        p.warm_builds = 2;
+        p.startup = 10;
+        p.upstream_runs = 3;
+        p.local_runs = 3;
+        p.tcp.retain(|(f, _, _)| f.a.len() < 1 << 16);
+        for t in &mut p.tcp {
+            t.1 = t.1.min(3);
+        }
+        p
+    }
+}
+
+struct Ctx {
+    out: PathBuf,
+    logs: PathBuf,
+    copy: PathBuf,
+    cargo_home: PathBuf,
+    target: PathBuf,
+    n: usize,
+}
+
+impl Ctx {
+    fn stem(&mut self, name: &str) -> PathBuf {
+        self.n += 1;
+        self.logs.join(format!("{:03}-{name}", self.n))
+    }
+    fn rel(&self, p: &Path) -> String {
+        p.strip_prefix(&self.out).unwrap_or(p).display().to_string()
+    }
+    fn bin(&self, name: &str) -> PathBuf {
+        self.target.join("release/examples").join(name)
+    }
+}
+
+pub fn run(work: &Path, out: &Path, plan: &Plan) -> Result<(PathBuf, &'static str), String> {
+    let root = repo_root();
+    std::fs::create_dir_all(work).map_err(|e| format!("work directory {}: {e}", work.display()))?;
+    std::fs::create_dir_all(out.join("logs")).map_err(|e| e.to_string())?;
+    let mut c = Ctx {
+        out: out.to_path_buf(),
+        logs: out.join("logs"),
+        copy: work.join("swanky"),
+        cargo_home: work.join("cargo-home"),
+        target: work.join("target"),
+        n: 0,
+    };
+    let mut r = Receipt::new("RB01", "swanky-popsicle-circuit-psi-cardinality", out);
+    r.section("bnr", json!({ "checkout": git_identity(&root), "provenance_review_commit": "a3419732c0c06d1d24c8bca2d4cb70e5022971cf" }));
+    r.section("host", host());
+    let load_before = loadavg();
+
+    // ---- 1. preparation ------------------------------------------------------
+    let mut prep = serde_json::Map::new();
+    if !c.copy.join(".git").exists() {
+        let s = c.stem("prep-clone");
+        let o = measure::run(&Spec::new(
+            &[
+                "git",
+                "clone",
+                "--quiet",
+                "--filter=blob:none",
+                SWANKY.url,
+                &c.copy.display().to_string(),
+            ],
+            work,
+            Duration::from_secs(900),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        prep.insert("clone".into(), o.json(&c.out));
+    } else {
+        prep.insert(
+            "clone".into(),
+            json!("build copy present before this run; clone not measured"),
+        );
+    }
+    build_copy(&SWANKY, &c.copy, &[OVERLAY])?;
+    std::fs::copy(root.join(PROVIDER_SRC), c.copy.join(OVERLAY))
+        .map_err(|e| format!("overlay: {e}"))?;
+    build_copy(&SWANKY, &c.copy, &[OVERLAY])?;
+    let toolchain_present = measure::output(&["rustup", "toolchain", "list"], &c.copy)
+        .unwrap_or_default()
+        .contains("1.99.0-");
+    prep.insert(
+        "toolchain".into(),
+        json!(if toolchain_present {
+            "Rust 1.99.0 (Swanky's rust-toolchain file) was installed before this run; install not measured"
+        } else {
+            "Rust 1.99.0 absent: rustup installs it inside the first cargo command below, so that command's time includes the install"
+        }),
+    );
+    let _ = std::fs::remove_dir_all(&c.cargo_home);
+    std::fs::create_dir_all(&c.cargo_home).map_err(|e| e.to_string())?;
+    let ch = c.cargo_home.display().to_string();
+    for (label, budget) in [("fetch-cold", 1800u64), ("fetch-warm", 600)] {
+        let s = c.stem(&format!("prep-{label}"));
+        let o = measure::run(
+            &Spec::new(
+                &["cargo", "fetch", "--locked"],
+                &c.copy,
+                Duration::from_secs(budget),
+                &s,
+            )
+            .env("CARGO_HOME", &ch),
+        )
+        .map_err(|e| e.to_string())?;
+        if !o.ok() {
+            return Err(format!("cargo {label} failed: {}", o.stderr_text()));
+        }
+        prep.insert(label.replace('-', "_"), o.json(&c.out));
+    }
+    prep.insert("fetch_note".into(), json!("fetch-cold starts from an empty CARGO_HOME (every crate and git dependency downloaded over the network); fetch-warm repeats it"));
+    r.measure("prep", Value::Object(prep));
+    r.section("source", json!({ "swanky": identity(&SWANKY, &c.copy, &[OVERLAY]), "provider_source": PROVIDER_SRC }));
+    let toolchain = rust_toolchain(&c.copy, None);
+    let tc_ok = toolchain["release"] == "1.99.0";
+    r.row(
+        Row::new(
+            "toolchain-identity",
+            Class::Vector,
+            "the build copy resolves Swanky's pinned Rust 1.99.0",
+        )
+        .expect(json!("release 1.99.0"))
+        .observe(if tc_ok { O::Pass } else { O::Fail }, toolchain.clone()),
+    );
+    let config_toml =
+        std::fs::read_to_string(c.copy.join(".cargo/config.toml")).unwrap_or_default();
+    r.section("build", json!({
+        "toolchain": toolchain,
+        "command": "cargo build --locked --offline --release -p popsicle --example rb01_psi --example circuit_psi_cardinality",
+        "profile": "release (Swanky's workspace profile)",
+        "features": "popsicle defaults; no --features",
+        "target": "host (x86_64-unknown-linux-gnu)",
+        "rustflags_source": ".cargo/config.toml of the pinned Swanky checkout",
+        "cargo_config_toml": config_toml,
+        "cargo_home": "fresh per run (work/cargo-home)",
+        "target_dir": "work/target (removed before every cold build)",
+    }));
+
+    // Inventory: the classical elliptic-curve dependency under popsicle.
+    let inv = c.stem("inventory-curve25519");
+    let o = measure::run(
+        &Spec::new(
+            &[
+                "cargo",
+                "tree",
+                "--locked",
+                "--offline",
+                "-p",
+                "popsicle",
+                "-e",
+                "normal",
+                "-i",
+                "curve25519-dalek",
+            ],
+            &c.copy,
+            Duration::from_secs(300),
+            &inv,
+        )
+        .env("CARGO_HOME", &ch),
+    )
+    .map_err(|e| e.to_string())?;
+    let tree = o.stdout_text();
+    let chou = tree.contains("swanky-ot-chou-orlandi");
+    r.row(Row::new("inventory-classical-base-ot", Class::Vector, "popsicle's normal dependency graph contains curve25519-dalek through swanky-ot-chou-orlandi (classical EC base OT)")
+        .expect(json!("curve25519-dalek reachable via swanky-ot-chou-orlandi"))
+        .observe(if o.ok() && chou { O::Pass } else { O::Fail }, json!({ "cargo_tree_first_lines": tree.lines().take(12).collect::<Vec<_>>() }))
+        .evidence(&[&c.rel(&inv.with_extension("stdout"))]));
+    r.evidence_file(&c.rel(&inv.with_extension("stdout")), "committed");
+
+    // ---- 2. compilation ------------------------------------------------------
+    let build_argv = [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "-p",
+        "popsicle",
+        "--example",
+        "rb01_psi",
+        "--example",
+        "circuit_psi_cardinality",
+    ];
+    let tgt = c.target.display().to_string();
+    let build = |c: &mut Ctx, label: &str| -> Result<Obs, String> {
+        let s = c.stem(label);
+        let o = measure::run(
+            &Spec::new(&build_argv, &c.copy, Duration::from_secs(3600), &s)
+                .env("CARGO_HOME", &ch)
+                .env("CARGO_TARGET_DIR", &tgt),
+        )
+        .map_err(|e| e.to_string())?;
+        if !o.ok() {
+            return Err(format!(
+                "{label} failed ({:?}): {}",
+                o.exit,
+                tail(&o.stderr_text(), 40)
+            ));
+        }
+        Ok(o)
+    };
+    let mut cold = Vec::new();
+    for k in 0..plan.cold_builds {
+        let _ = std::fs::remove_dir_all(&c.target);
+        cold.push(build(&mut c, &format!("build-cold-{k}"))?);
+    }
+    let mut noop = Vec::new();
+    for k in 0..plan.warm_builds {
+        noop.push(build(&mut c, &format!("build-warm-noop-{k}"))?);
+    }
+    let mut leaf = Vec::new();
+    for k in 0..plan.warm_builds {
+        // rewrite the overlay with the same bytes: a new mtime, the same source
+        let bytes = std::fs::read(c.copy.join(OVERLAY)).map_err(|e| e.to_string())?;
+        std::thread::sleep(Duration::from_millis(1100));
+        std::fs::write(c.copy.join(OVERLAY), bytes).map_err(|e| e.to_string())?;
+        leaf.push(build(&mut c, &format!("build-warm-leaf-{k}"))?);
+    }
+    r.measure("compile", json!({
+        "cold": obs_set(&cold, &c.out),
+        "warm_noop": obs_set(&noop, &c.out),
+        "warm_leaf_rebuild": obs_set(&leaf, &c.out),
+        "note": "cold = empty target dir, dependencies already fetched (--offline); warm_noop = the same command again; warm_leaf_rebuild = the provider example's source rewritten with identical bytes (new mtime), so only that example recompiles and relinks (with Swanky's -flto link args)",
+    }));
+
+    let provider = c.bin("rb01_psi");
+    let upstream_bin = c.bin("circuit_psi_cardinality");
+    let mut exes = serde_json::Map::new();
+    for (name, p) in [
+        ("rb01_psi", &provider),
+        ("circuit_psi_cardinality", &upstream_bin),
+    ] {
+        let (t, n) = file_tag(p).map_err(|e| format!("{}: {e}", p.display()))?;
+        exes.insert(name.into(), json!({ "sha256": t, "bytes": n }));
+    }
+    let (src_tag, _) = file_tag(&root.join(PROVIDER_SRC)).map_err(|e| e.to_string())?;
+    exes.insert("provider_source_sha256".into(), json!(src_tag));
+    r.section("executables", Value::Object(exes));
+
+    // ---- 3a. startup ----------------------------------------------------------
+    let p = provider.display().to_string();
+    let mut st = Vec::new();
+    let mut st_ok = true;
+    for k in 0..plan.startup {
+        let s = c.stem(&format!("startup-{k}"));
+        let o = measure::run(&Spec::new(
+            &[&p, "startup"],
+            &c.copy,
+            Duration::from_secs(10),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        st_ok &= o.ok() && o.stdout_text().trim() == "RB01-STARTUP";
+        st.push(o);
+    }
+    r.measure("startup", obs_set(&st, &c.out));
+    r.row(
+        Row::new(
+            "startup",
+            Class::Measurement,
+            "process startup measured: the provider starts, prints RB01-STARTUP and exits 0",
+        )
+        .observe(
+            if st_ok { O::Pass } else { O::Fail },
+            json!({ "samples": st.len() }),
+        ),
+    );
+
+    // ---- 3b. upstream composition --------------------------------------------
+    let up = Fixture::upstream();
+    let want = up.expected();
+    let mut ups = Vec::new();
+    let mut up_results = Vec::new();
+    for k in 0..plan.upstream_runs {
+        let s = c.stem(&format!("upstream-example-{k}"));
+        let o = measure::run(&Spec::new(
+            &[&upstream_bin.display().to_string()],
+            &c.copy,
+            Duration::from_secs(60),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        up_results.push(parse_upstream_line(&o.stdout_text()));
+        ups.push(o);
+    }
+    let up_ok =
+        ups.iter().all(Obs::ok) && up_results.iter().all(|x| *x == Some((want as u128, 255)));
+    r.row(Row::new("upstream-example", Class::Vector, "the unmodified upstream example (two threads, one process) prints 255 for its fixture, equal to the plaintext answer computed here")
+        .expect(json!({ "result": want, "plaintext": want }))
+        .observe(if up_ok { O::Pass } else { O::Fail }, json!({ "runs": ups.len(), "parsed": up_results.iter().map(|x| x.map(|(a, b)| json!([a.to_string(), b]))).collect::<Vec<_>>() })));
+    r.measure("runtime_upstream_example", obs_set(&ups, &c.out));
+
+    // ---- 3c. the provider, same composition ------------------------------------
+    let fa = c.out.join("logs/fixture-upstream-a.bin");
+    let fb = c.out.join("logs/fixture-upstream-b.bin");
+    std::fs::write(&fa, Fixture::bytes(&up.a)).map_err(|e| e.to_string())?;
+    std::fs::write(&fb, Fixture::bytes(&up.b)).map_err(|e| e.to_string())?;
+    let (fa_s, fb_s) = (fa.display().to_string(), fb.display().to_string());
+    let mut locs = Vec::new();
+    let mut loc_lines = Vec::new();
+    let mut loc_ok = true;
+    for k in 0..plan.local_runs {
+        let s = c.stem(&format!("local-{k}"));
+        let o = measure::run(&Spec::new(
+            &[&p, "local", "--a", &fa_s, "--b", &fb_s],
+            &c.copy,
+            Duration::from_secs(60),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        let out = classify(&o.exit, &o.stdout_text(), |v| {
+            output_field(&v["evaluator"]["output"])
+        });
+        let gout =
+            tagged_line(&o.stdout_text(), "RB01-RESULT").map(|v| v["garbler"]["output"].clone());
+        loc_ok &= out == Outcome::Output(Some(want as u128)) && gout == Some(Value::Null);
+        loc_lines.push(tagged_line(&o.stdout_text(), "RB01-RESULT").unwrap_or(Value::Null));
+        locs.push(o);
+    }
+    r.row(Row::new("provider-local-threads", Class::Vector, "the provider in the upstream composition: the evaluator receives 255, the garbler receives nothing")
+        .expect(json!({ "evaluator": want, "garbler": null }))
+        .observe(if loc_ok { O::Pass } else { O::Fail }, json!({ "runs": locs.len() })));
+    r.measure(
+        "runtime_local_threads",
+        json!({ "processes": obs_set(&locs, &c.out), "provider_lines": loc_lines }),
+    );
+    r.evidence_file("logs/fixture-upstream-a.bin", "committed");
+    r.evidence_file("logs/fixture-upstream-b.bin", "committed");
+
+    // ---- 3d. one role per process --------------------------------------------
+    let mut sessions: Vec<String> = Vec::new();
+    let mut tcp_meas = serde_json::Map::new();
+    let mut fixtures = Vec::new();
+    let mut bytes_by_fixture = serde_json::Map::new();
+    for (fx, samples, budget) in &plan.tcp {
+        let (ga, gb) = write_fixture(&c, fx)?;
+        fixtures.push(fx.describe());
+        let want = fx.expected() as u128;
+        let mut rows_ok = true;
+        let mut per = Vec::new();
+        for k in 0..*samples {
+            let sid = hex(&os_random(16).map_err(|e| e.to_string())?);
+            sessions.push(sid.clone());
+            let run = tcp_session(
+                &mut c,
+                &p,
+                Run::new(&ga, &gb, &sid, *budget, &format!("tcp-{}-{k}", fx.name)),
+            )?;
+            rows_ok &= run.eval == Outcome::Output(Some(want)) && run.garb == Outcome::Output(None);
+            per.push(run.json(&c.out));
+        }
+        let first_bytes: Vec<Value> = per
+            .iter()
+            .map(|x| x["evaluator_line"]["bytes"].clone())
+            .collect();
+        bytes_by_fixture.insert(fx.name.clone(), json!(first_bytes));
+        r.row(Row::new(&format!("tcp-{}", fx.name), Class::Vector, &format!("two processes over loopback TCP, fixture {}: evaluator output equals the plaintext cardinality {want}; garbler receives nothing", fx.name))
+            .expect(json!({ "evaluator": want.to_string(), "garbler": null }))
+            .observe(if rows_ok { O::Pass } else { O::Fail }, json!({ "samples": samples, "outcomes": per.iter().map(|x| json!([x["garbler"]["outcome"], x["evaluator"]["outcome"]])).collect::<Vec<_>>() })));
+        tcp_meas.insert(
+            fx.name.clone(),
+            json!({ "budget_ms": budget.as_millis() as u64, "sessions": per }),
+        );
+    }
+    r.measure("runtime_tcp_processes", Value::Object(tcp_meas));
+    r.section("workload", json!({ "fixtures": fixtures, "element_bytes": 8, "duplicate_policy": "refused at each role's input boundary (input-duplicate) before any connection", "empty_policy": "refused at each role's input boundary (input-empty) before any connection", "width_policy": "the input length must be a whole number of 8-byte elements (input-truncated otherwise)", "size_bound": "at most 2^20 elements per role (input-too-large)" }));
+    let unique = {
+        let mut s = sessions.clone();
+        s.sort();
+        s.dedup();
+        s.len() == sessions.len()
+    };
+    r.row(
+        Row::new(
+            "session-ids-fresh",
+            Class::Vector,
+            "every TCP session ran under its own 128-bit session id from the OS random source",
+        )
+        .observe(
+            if unique { O::Pass } else { O::Fail },
+            json!({ "sessions": sessions.len(), "unique": unique }),
+        ),
+    );
+
+    // Transcript length as a function of set sizes (the leakage the protocol permits).
+    let ev_recv = |name: &str| {
+        bytes_by_fixture
+            .get(name)
+            .and_then(|v| v.as_array())
+            .map(|a| a.iter().map(|b| b["received"].as_u64()).collect::<Vec<_>>())
+    };
+    let small = ev_recv("partial-256x256-overlap-128");
+    let big_b = ev_recv("partial-256x1024-overlap-200");
+    let range = |v: &Option<Vec<Option<u64>>>| {
+        v.as_ref().map(|x| {
+            let y: Vec<u64> = x.iter().flatten().copied().collect();
+            (y.iter().min().copied(), y.iter().max().copied())
+        })
+    };
+    let grows_b = matches!((range(&small), range(&big_b)), (Some((_, Some(smax))), Some((Some(bmin), _))) if bmin > smax);
+    r.row(Row::new("leakage-evaluator-set-size", Class::Characterization, "with |A| = 256, every session with |B| = 1024 moved more bytes to the evaluator than any session with |B| = 256: traffic volume reveals |B| (permitted leakage, observed); counts vary slightly between sessions of one fixture (randomized hashing)")
+        .optional()
+        .observe(if grows_b { O::Pass } else { O::Inconclusive }, json!({ "evaluator_received": { "256x256": small, "256x1024": big_b } })));
+
+    // Independent byte count and fresh randomness, through the pass-through relay.
+    let (ga, gb) = write_fixture(&c, &up)?;
+    let mut relay_runs = Vec::new();
+    for k in 0..2 {
+        let sid = hex(&os_random(16).map_err(|e| e.to_string())?);
+        let run = tcp_session(
+            &mut c,
+            &p,
+            Run::new(
+                &ga,
+                &gb,
+                &sid,
+                Duration::from_secs(60),
+                &format!("relay-pass-{k}"),
+            )
+            .relay(Fault::None),
+        )?;
+        relay_runs.push(run);
+    }
+    let agree = relay_runs.iter().all(|x| {
+        let rep = x.relay.as_ref();
+        let gs = x.garb_line["bytes"]["sent"].as_u64();
+        let er = x.eval_line["bytes"]["received"].as_u64();
+        let es = x.eval_line["bytes"]["sent"].as_u64();
+        let gr = x.garb_line["bytes"]["received"].as_u64();
+        rep.is_some_and(|r| {
+            Some(r.garbler_to_evaluator) == gs
+                && gs == er
+                && Some(r.evaluator_to_garbler) == es
+                && es == gr
+        }) && x.eval == Outcome::Output(Some(want as u128))
+    });
+    r.row(Row::new("bytes-independent-count", Class::Measurement, "provider byte counters equal the relay's independent count in both directions (application bytes; TCP/IP framing not measured)")
+        .observe(if agree { O::Pass } else { O::Fail }, json!(relay_runs.iter().map(|x| x.json(&c.out)).collect::<Vec<_>>())));
+    let differ = relay_runs.len() == 2
+        && relay_runs[0].relay.as_ref().map(|r| &r.g2e_digest)
+            != relay_runs[1].relay.as_ref().map(|r| &r.g2e_digest);
+    r.row(Row::new("fresh-session-randomness", Class::Measurement, "two sessions on identical inputs produced different garbler-to-evaluator transcripts (fresh randomness per session, sampled n=2)")
+        .observe(if differ { O::Pass } else { O::Fail }, json!(relay_runs.iter().map(|x| x.relay.as_ref().map(|r| r.g2e_digest.clone())).collect::<Vec<_>>())));
+
+    // ---- 4. refusals, aborts, timeouts ---------------------------------------
+    adversarial(&mut c, &mut r, &p, &up)?;
+    characterize(&mut c, &mut r, &p)?;
+    r.row(Row::new("independent-hosts", Class::Measurement, "execution on independently controlled hosts")
+        .optional()
+        .observe(O::NotRun, json!("not run: both roles ran on one host under one operator (loopback TCP). Process separation is shown; host independence is not.")));
+
+    r.section("execution_modes", json!({
+        "local-threads": "one process, two threads, Unix socket pair (the upstream composition)",
+        "tcp-process": "two OS processes on one host over loopback TCP, each holding only its own input file, after a session handshake",
+        "independent-hosts": "NOT RUN",
+    }));
+    r.section("protocol_configuration", protocol_configuration());
+    r.section("pq_classification", pq_classification());
+    r.assumptions = vec![
+        "Semi-honest adversaries only: the configuration is popsicle's semi-honest circuit PSI (PsiGarbler/PsiEvaluator implement swanky_adversary::SemiHonest). Nothing here measures or claims malicious security.".into(),
+        "The adversarial rows are operational tests of refusal, abort and timeout handling, sampled; they are not a proof of security against an active adversary.".into(),
+        "Loopback TCP on one host: latency and bandwidth are not those of a network between independently controlled hosts.".into(),
+        "Inputs are synthetic and public; element width is 8 bytes for every fixture.".into(),
+        "Protocol randomness comes from SwankyRng::new() in each role (rand::random, OS entropy); no seed is printed, stored or accepted.".into(),
+        "The host is shared: load averages before and after are recorded; timings measured under load are not idle-machine timings.".into(),
+    ];
+    r.obligations = vec![
+        "Malicious-security PSI: a different protocol configuration and a separate proof obligation.".into(),
+        "Post-quantum base OT: the default ALSZ base OT is Chou-Orlandi over Ristretto (classical); see pq_classification.".into(),
+        "Execution on independently controlled hosts with an authenticated transport (the TCP channel here is plaintext and unauthenticated).".into(),
+        "Size-hiding: both set sizes leak through traffic volume and the cleartext bin count; padding to a public bound is not implemented.".into(),
+        "Statistical correctness: comparisons on 64-bit OPPRF outputs; the false-positive bound is from source inspection, not measured.".into(),
+        "The shared-seed observation in PsiGarbler::new / PsiEvaluator::new (protocol_configuration.observations) is recorded, not analyzed.".into(),
+        "Settlement and authorization: this lane produces computation evidence only; bSiGner and bPay keep their bounded authorization and settlement roles.".into(),
+    ];
+    r.measure(
+        "load_average",
+        json!({ "before": load_before, "after": loadavg() }),
+    );
+    r.write().map_err(|e| e.to_string())
+}
+
+fn tail(s: &str, n: usize) -> String {
+    let lines: Vec<&str> = s.lines().collect();
+    lines[lines.len().saturating_sub(n)..].join("\n")
+}
+
+fn obs_set(v: &[Obs], base: &Path) -> Value {
+    let pick = |f: &dyn Fn(&Obs) -> Option<u64>| v.iter().filter_map(f).collect::<Vec<u64>>();
+    json!({
+        "wall_ns": summary(&pick(&|o| Some(o.wall_ns))),
+        "user_cpu_us": summary(&pick(&|o| o.user_us)),
+        "sys_cpu_us": summary(&pick(&|o| o.sys_us)),
+        "max_rss_kib": summary(&pick(&|o| o.max_rss_kib)),
+        "runs": v.iter().map(|o| o.json(base)).collect::<Vec<_>>(),
+    })
+}
+
+/// `Result is X and should be Y` from the upstream example.
+pub fn parse_upstream_line(stdout: &str) -> Option<(u128, u128)> {
+    let line = stdout.lines().find(|l| l.starts_with("Result is "))?;
+    let rest = line.strip_prefix("Result is ")?;
+    let (x, y) = rest.split_once(" and should be ")?;
+    Some((x.trim().parse().ok()?, y.trim().parse().ok()?))
+}
+
+fn write_fixture(c: &Ctx, fx: &Fixture) -> Result<(String, String), String> {
+    let a = c.logs.join(format!("fixture-{}-a.bin", fx.name));
+    let b = c.logs.join(format!("fixture-{}-b.bin", fx.name));
+    if !a.exists() {
+        std::fs::write(&a, Fixture::bytes(&fx.a)).map_err(|e| e.to_string())?;
+        std::fs::write(&b, Fixture::bytes(&fx.b)).map_err(|e| e.to_string())?;
+    }
+    Ok((a.display().to_string(), b.display().to_string()))
+}
+
+struct Session {
+    garb: Outcome,
+    eval: Outcome,
+    garb_obs: Option<Obs>,
+    eval_obs: Obs,
+    garb_line: Value,
+    eval_line: Value,
+    relay: Option<relay::Report>,
+    session_g: String,
+}
+
+impl Session {
+    fn json(&self, base: &Path) -> Value {
+        json!({
+            "session": self.session_g,
+            "garbler": { "outcome": self.garb.label(), "process": self.garb_obs.as_ref().map(|o| o.json(base)) },
+            "evaluator": { "outcome": self.eval.label(), "process": self.eval_obs.json(base) },
+            "garbler_line": self.garb_line,
+            "evaluator_line": self.eval_line,
+            "relay": self.relay.as_ref().map(|r| json!({ "garbler_to_evaluator": r.garbler_to_evaluator, "evaluator_to_garbler": r.evaluator_to_garbler, "g2e_digest": r.g2e_digest, "e2g_digest": r.e2g_digest, "fault_fired": r.fault_fired, "error": r.error })),
+        })
+    }
+}
+
+fn result_line(o: &Obs) -> Value {
+    let s = o.stdout_text();
+    tagged_line(&s, "RB01-RESULT")
+        .or_else(|| tagged_line(&s, "RB01-ABORT"))
+        .or_else(|| tagged_line(&s, "RB01-REFUSAL"))
+        .unwrap_or(Value::Null)
+}
+
+/// One two-process session: role inputs, the session id each role is given,
+/// extra evaluator options, the per-process budget, and an optional relay.
+struct Run<'a> {
+    ga: &'a str,
+    gb: &'a str,
+    sid_g: &'a str,
+    sid_e: &'a str,
+    extra_e: Vec<&'a str>,
+    budget: Duration,
+    label: String,
+    relay: Option<Fault>,
+}
+
+impl<'a> Run<'a> {
+    fn new(ga: &'a str, gb: &'a str, sid: &'a str, budget: Duration, label: &str) -> Run<'a> {
+        Run {
+            ga,
+            gb,
+            sid_g: sid,
+            sid_e: sid,
+            extra_e: Vec::new(),
+            budget,
+            label: label.to_string(),
+            relay: None,
+        }
+    }
+    fn sessions(mut self, garbler: &'a str, evaluator: &'a str) -> Run<'a> {
+        self.sid_g = garbler;
+        self.sid_e = evaluator;
+        self
+    }
+    fn extra_evaluator(mut self, args: &[&'a str]) -> Run<'a> {
+        self.extra_e.extend_from_slice(args);
+        self
+    }
+    fn relay(mut self, f: Fault) -> Run<'a> {
+        self.relay = Some(f);
+        self
+    }
+}
+
+/// One garbler process and one evaluator process. With a relay, the
+/// evaluator connects through it and it applies the fault; a `NotifyAfter`
+/// fault kills the garbler process when it fires.
+fn tcp_session(c: &mut Ctx, p: &str, run: Run) -> Result<Session, String> {
+    let Run {
+        ga,
+        gb,
+        sid_g,
+        sid_e,
+        extra_e,
+        budget,
+        label,
+        relay,
+    } = run;
+    let ready = c.logs.join(format!("{label}.ready"));
+    let _ = std::fs::remove_file(&ready);
+    let rd = ready.display().to_string();
+    let gargv = vec![
+        p,
+        "garbler",
+        "--listen",
+        "127.0.0.1:0",
+        "--ready-file",
+        &rd,
+        "--input",
+        ga,
+        "--session",
+        sid_g,
+    ];
+    let gs = c.stem(&format!("{label}-garbler"));
+    let mut g =
+        measure::spawn(&Spec::new(&gargv, &c.copy, budget, &gs)).map_err(|e| e.to_string())?;
+    let t0 = Instant::now();
+    let port = loop {
+        if let Ok(s) = std::fs::read_to_string(&ready) {
+            if let Ok(port) = s.trim().parse::<u16>() {
+                break port;
+            }
+        }
+        if t0.elapsed() > Duration::from_secs(10) {
+            g.kill();
+            let go = g.wait();
+            return Err(format!(
+                "{label}: garbler never became ready: {}",
+                go.stdout_text()
+            ));
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    };
+    let garbler_addr: SocketAddr = format!("127.0.0.1:{port}")
+        .parse()
+        .map_err(|e| format!("{e}"))?;
+    let (tx, rx) = std::sync::mpsc::channel();
+    let rl = match &relay {
+        Some(f) => Some(
+            relay::start(garbler_addr, f.clone(), Some(tx), Duration::from_secs(10))
+                .map_err(|e| e.to_string())?,
+        ),
+        None => None,
+    };
+    let connect = format!("127.0.0.1:{}", rl.as_ref().map_or(port, |x| x.port));
+    let mut eargv = vec![
+        p,
+        "evaluator",
+        "--connect",
+        &connect,
+        "--input",
+        gb,
+        "--session",
+        sid_e,
+    ];
+    eargv.extend_from_slice(&extra_e);
+    let es = c.stem(&format!("{label}-evaluator"));
+    let e = measure::spawn(&Spec::new(&eargv, &c.copy, budget, &es)).map_err(|e| e.to_string())?;
+    if matches!(relay, Some(Fault::NotifyAfter(_))) {
+        if rx.recv_timeout(budget).is_ok() {
+            g.kill();
+        }
+    }
+    let eo = e.wait();
+    let go = g.wait();
+    let rep = rl.map(relay::Relay::finish);
+    let out_tcp = |v: &Value| output_field(&v["output"]);
+    Ok(Session {
+        garb: classify(&go.exit, &go.stdout_text(), out_tcp),
+        eval: classify(&eo.exit, &eo.stdout_text(), out_tcp),
+        garb_line: result_line(&go),
+        eval_line: result_line(&eo),
+        garb_obs: Some(go),
+        eval_obs: eo,
+        relay: rep,
+        session_g: sid_g.to_string(),
+    })
+}
+
+/// The provider's handshake frame, built here for the fake peers.
+pub fn frame(role: u8, element_bytes: u64, session: &[u8; 16]) -> Vec<u8> {
+    let mut h = Sha256::new();
+    h.update(CONFIG.as_bytes());
+    h.update([0u8]);
+    h.update(element_bytes.to_le_bytes());
+    let params: [u8; 32] = h.finalize().into();
+    let mut f = Vec::with_capacity(58);
+    f.extend_from_slice(MAGIC);
+    f.push(VERSION);
+    f.push(role);
+    f.extend_from_slice(&params);
+    f.extend_from_slice(session);
+    f
+}
+
+/// A fake garbler: accept the evaluator, send `bytes`, then drain the
+/// connection for up to `hold` and close it.
+fn fake_garbler(
+    bytes: Vec<u8>,
+    hold: Duration,
+) -> Result<(u16, std::thread::JoinHandle<u64>), String> {
+    let l = TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
+    let port = l.local_addr().map_err(|e| e.to_string())?.port();
+    let h = std::thread::spawn(move || {
+        let Ok((mut s, _)) = l.accept() else { return 0 };
+        let _ = s.write_all(&bytes);
+        let _ = s.flush();
+        let _ = s.set_read_timeout(Some(hold));
+        let mut sink = [0u8; 4096];
+        let mut got = 0u64;
+        let t = Instant::now();
+        while t.elapsed() < hold {
+            match s.read(&mut sink) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => got += n as u64,
+            }
+        }
+        got
+    });
+    Ok((port, h))
+}
+
+fn evaluator_alone(
+    c: &mut Ctx,
+    p: &str,
+    input: &str,
+    connect: &str,
+    sid: &str,
+    extra: &[&str],
+    label: &str,
+) -> Result<(Outcome, Obs), String> {
+    let mut argv = vec![
+        p,
+        "evaluator",
+        "--connect",
+        connect,
+        "--input",
+        input,
+        "--session",
+        sid,
+    ];
+    argv.extend_from_slice(extra);
+    let s = c.stem(label);
+    let o = measure::run(&Spec::new(&argv, &c.copy, Duration::from_secs(30), &s))
+        .map_err(|e| e.to_string())?;
+    Ok((
+        classify(&o.exit, &o.stdout_text(), |v| output_field(&v["output"])),
+        o,
+    ))
+}
+
+/// One adversarial row: PASS when the observed outcome is the expected one
+/// (by label prefix or by class), INCONCLUSIVE when it is unrecognized.
+fn adv_row(r: &mut Receipt, id: &str, claim: &str, expect: &str, got: &Outcome, obs: Value) {
+    let pass = got.label().starts_with(expect) || got.class() == expect;
+    let outcome = if matches!(got, Outcome::Unrecognized(_)) {
+        O::Inconclusive
+    } else if pass {
+        O::Pass
+    } else {
+        O::Fail
+    };
+    r.row(
+        Row::new(id, Class::SampledAdversarial, claim)
+            .expect(json!(expect))
+            .observe(
+                outcome,
+                json!({ "observed": got.label(), "class": got.class(), "detail": obs }),
+            ),
+    );
+}
+
+fn adversarial(c: &mut Ctx, r: &mut Receipt, p: &str, up: &Fixture) -> Result<(), String> {
+    let (ga, gb) = write_fixture(c, up)?;
+    let sid = hex(&os_random(16).map_err(|e| e.to_string())?);
+    let sid_bytes: [u8; 16] = os_random(16)
+        .map_err(|e| e.to_string())?
+        .try_into()
+        .unwrap_or([0; 16]);
+    let sid_fake = hex(&sid_bytes);
+    // a port with nothing listening: a role that refuses its input never dials
+    let dead = {
+        let l = TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
+        l.local_addr().map_err(|e| e.to_string())?.port()
+    };
+    let dead = format!("127.0.0.1:{dead}");
+
+    // input boundary
+    let truncated = c.logs.join("fixture-truncated.bin");
+    let mut tb = Fixture::bytes(&up.b);
+    tb.extend_from_slice(&[1, 2, 3]);
+    std::fs::write(&truncated, tb).map_err(|e| e.to_string())?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &truncated.display().to_string(),
+        &dead,
+        &sid,
+        &[],
+        "adv-input-truncated",
+    )?;
+    adv_row(
+        r,
+        "refuse-truncated-input",
+        "an input that is not a whole number of 8-byte elements is refused before connecting",
+        "REFUSAL input-truncated",
+        &o,
+        ob.json(&c.out),
+    );
+
+    let dup = c.logs.join("fixture-duplicate.bin");
+    let mut db = up.b.clone();
+    db.push(up.b[3]);
+    std::fs::write(&dup, Fixture::bytes(&db)).map_err(|e| e.to_string())?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &dup.display().to_string(),
+        &dead,
+        &sid,
+        &[],
+        "adv-input-duplicate",
+    )?;
+    adv_row(
+        r,
+        "refuse-duplicate-element",
+        "an input with a repeated element is refused before connecting",
+        "REFUSAL input-duplicate",
+        &o,
+        ob.json(&c.out),
+    );
+
+    let empty = c.logs.join("fixture-empty.bin");
+    std::fs::write(&empty, b"").map_err(|e| e.to_string())?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &empty.display().to_string(),
+        &dead,
+        &sid,
+        &[],
+        "adv-input-empty",
+    )?;
+    adv_row(
+        r,
+        "refuse-empty-input",
+        "an empty input is refused before connecting",
+        "REFUSAL input-empty",
+        &o,
+        ob.json(&c.out),
+    );
+
+    // handshake
+    let (port, h) = fake_garbler(vec![0xA5; 58], Duration::from_secs(3))?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &gb,
+        &format!("127.0.0.1:{port}"),
+        &sid,
+        &[],
+        "adv-handshake-garbage",
+    )?;
+    let _ = h.join();
+    adv_row(
+        r,
+        "refuse-malformed-frame",
+        "a peer frame with the wrong magic is refused; no protocol byte follows",
+        "REFUSAL handshake-malformed",
+        &o,
+        ob.json(&c.out),
+    );
+
+    let (port, h) = fake_garbler(frame(ROLE_EVALUATOR, 8, &sid_bytes), Duration::from_secs(3))?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &gb,
+        &format!("127.0.0.1:{port}"),
+        &sid_fake,
+        &[],
+        "adv-handshake-role",
+    )?;
+    let _ = h.join();
+    adv_row(
+        r,
+        "refuse-role-conflict",
+        "a peer that claims the evaluator role to an evaluator is refused",
+        "REFUSAL handshake-role",
+        &o,
+        ob.json(&c.out),
+    );
+
+    let (port, h) = fake_garbler(
+        frame(ROLE_GARBLER, 8, &sid_bytes)[..20].to_vec(),
+        Duration::from_millis(200),
+    )?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &gb,
+        &format!("127.0.0.1:{port}"),
+        &sid_fake,
+        &[],
+        "adv-handshake-truncated",
+    )?;
+    let _ = h.join();
+    adv_row(r, "abort-truncated-frame", "a peer that closes after 20 of 58 frame bytes ends the session with an abort (no frame was received)", "ABORT handshake-recv", &o, ob.json(&c.out));
+
+    let sid2 = hex(&os_random(16).map_err(|e| e.to_string())?);
+    let s = tcp_session(
+        c,
+        p,
+        Run::new(
+            &ga,
+            &gb,
+            &sid,
+            Duration::from_secs(30),
+            "adv-session-mismatch",
+        )
+        .sessions(&sid, &sid2),
+    )?;
+    adv_row(
+        r,
+        "refuse-session-mismatch-evaluator",
+        "mismatched session ids: the evaluator refuses",
+        "REFUSAL handshake-session",
+        &s.eval,
+        s.json(&c.out),
+    );
+    adv_row(
+        r,
+        "refuse-session-mismatch-garbler",
+        "mismatched session ids: the garbler refuses",
+        "REFUSAL handshake-session",
+        &s.garb,
+        Value::Null,
+    );
+
+    // element width 16 on the evaluator: its own input re-encoded at 16 bytes
+    let wide = c.logs.join("fixture-wide16.bin");
+    let wb: Vec<u8> =
+        up.b.iter()
+            .flat_map(|e| e.iter().copied().chain([0u8; 8]))
+            .collect();
+    std::fs::write(&wide, wb).map_err(|e| e.to_string())?;
+    let wide_s = wide.display().to_string();
+    let s = tcp_session(
+        c,
+        p,
+        Run::new(
+            &ga,
+            &wide_s,
+            &sid,
+            Duration::from_secs(30),
+            "adv-params-mismatch",
+        )
+        .extra_evaluator(&["--element-bytes", "16"]),
+    )?;
+    adv_row(
+        r,
+        "refuse-params-mismatch-evaluator",
+        "mismatched session parameters (element width 8 vs 16): the evaluator refuses",
+        "REFUSAL handshake-params",
+        &s.eval,
+        s.json(&c.out),
+    );
+    adv_row(
+        r,
+        "refuse-params-mismatch-garbler",
+        "mismatched session parameters: the garbler refuses",
+        "REFUSAL handshake-params",
+        &s.garb,
+        Value::Null,
+    );
+
+    // protocol layer
+    let mut junk = frame(ROLE_GARBLER, 8, &sid_bytes);
+    junk.extend(os_random(65536).map_err(|e| e.to_string())?);
+    let (port, h) = fake_garbler(junk, Duration::from_secs(5))?;
+    let (o, ob) = evaluator_alone(
+        c,
+        p,
+        &gb,
+        &format!("127.0.0.1:{port}"),
+        &sid_fake,
+        &[],
+        "adv-garbage-after-handshake",
+    )?;
+    let _ = h.join();
+    let no_output = !matches!(o, Outcome::Output(_));
+    r.row(Row::new("garbage-after-handshake", Class::SampledAdversarial, "a peer that completes the handshake and then sends 64 KiB of random bytes produces no output at the evaluator (abort, crash or timeout; never a cardinality)")
+        .expect(json!("abort | timeout, never output"))
+        .observe(if matches!(o, Outcome::Unrecognized(_)) { O::Inconclusive } else if no_output { O::Pass } else { O::Fail }, json!({ "observed": o.label(), "class": o.class(), "detail": ob.json(&c.out) })));
+
+    let one_mib = 1 << 20;
+    let s = tcp_session(
+        c,
+        p,
+        Run::new(
+            &ga,
+            &gb,
+            &sid,
+            Duration::from_secs(60),
+            "adv-terminated-peer",
+        )
+        .relay(Fault::NotifyAfter(one_mib)),
+    )?;
+    let fired = s.relay.as_ref().is_some_and(|x| x.fault_fired);
+    r.row(Row::new("terminated-peer", Class::SampledAdversarial, "the garbler process is killed (SIGKILL) after 1 MiB of its 4.6 MB transcript: the evaluator aborts and outputs nothing")
+        .expect(json!("evaluator: abort, never output"))
+        .observe(if !fired { O::Inconclusive } else if s.eval.class() == "abort" { O::Pass } else if matches!(s.eval, Outcome::Output(_)) { O::Fail } else { O::Inconclusive }, json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "detail": s.json(&c.out) })));
+
+    let s = tcp_session(
+        c,
+        p,
+        Run::new(
+            &ga,
+            &gb,
+            &sid,
+            Duration::from_secs(60),
+            "adv-truncated-stream",
+        )
+        .relay(Fault::CloseAfter(one_mib)),
+    )?;
+    r.row(Row::new("truncated-stream", Class::SampledAdversarial, "the connection is cut after 1 MiB garbler-to-evaluator: both roles abort, neither outputs")
+        .expect(json!({ "evaluator": "abort", "garbler": "abort" }))
+        .observe(
+            if s.eval.class() == "abort" && s.garb.class() == "abort" { O::Pass } else if matches!(s.eval, Outcome::Output(Some(_))) { O::Fail } else { O::Inconclusive },
+            json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "detail": s.json(&c.out) }),
+        ));
+
+    let s = tcp_session(
+        c,
+        p,
+        Run::new(&ga, &gb, &sid, Duration::from_secs(60), "adv-stalled-peer")
+            .extra_evaluator(&["--io-timeout-ms", "2000"])
+            .relay(Fault::StallAfter(one_mib, Duration::from_secs(8))),
+    )?;
+    r.row(Row::new("stalled-peer", Class::SampledAdversarial, "the garbler-to-evaluator stream stalls after 1 MiB with the connection held open: the evaluator's 2 s socket timeout fires (timeout class, not a hang, not an output)")
+        .expect(json!("evaluator: timeout"))
+        .observe(if s.eval.class() == "timeout" { O::Pass } else if matches!(s.eval, Outcome::Output(_)) { O::Fail } else { O::Inconclusive }, json!({ "evaluator": s.eval.label(), "garbler": s.garb.label(), "detail": s.json(&c.out) })));
+
+    Ok(())
+}
+
+/// Upstream behaviour outside the bench's input policy, through the local
+/// composition with the policy switched off. Recorded, not judged: these
+/// rows are optional and their expected value is "record".
+fn characterize(c: &mut Ctx, r: &mut Receipt, p: &str) -> Result<(), String> {
+    let x: Elem = 7u64.to_le_bytes();
+    let y: Elem = 9u64.to_le_bytes();
+    let base: Vec<Elem> = (100u64..356).map(u64::to_le_bytes).collect();
+    let cases: Vec<(&str, Vec<Elem>, Vec<Elem>, &str)> = vec![
+        ("empty-garbler-set", vec![], base.clone(), "--allow-empty"),
+        ("empty-evaluator-set", base.clone(), vec![], "--allow-empty"),
+        ("both-sets-empty", vec![], vec![], "--allow-empty"),
+        (
+            "garbler-duplicates",
+            vec![x, x, y],
+            vec![x],
+            "--allow-duplicates",
+        ),
+        (
+            "evaluator-duplicates",
+            vec![x],
+            vec![x, x, y],
+            "--allow-duplicates",
+        ),
+    ];
+    for (name, a, b, switch) in cases {
+        let fa = c.logs.join(format!("char-{name}-a.bin"));
+        let fb = c.logs.join(format!("char-{name}-b.bin"));
+        std::fs::write(&fa, Fixture::bytes(&a)).map_err(|e| e.to_string())?;
+        std::fs::write(&fb, Fixture::bytes(&b)).map_err(|e| e.to_string())?;
+        let s = c.stem(&format!("char-{name}"));
+        let o = measure::run(&Spec::new(
+            &[
+                p,
+                "local",
+                "--a",
+                &fa.display().to_string(),
+                "--b",
+                &fb.display().to_string(),
+                switch,
+            ],
+            &c.copy,
+            Duration::from_secs(20),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        let got = classify(&o.exit, &o.stdout_text(), |v| {
+            output_field(&v["evaluator"]["output"])
+        });
+        let plain = plaintext_cardinality(&a, &b);
+        let agrees = got == Outcome::Output(Some(plain as u128));
+        r.row(Row::new(&format!("char-{name}"), Class::Characterization, &format!("upstream behaviour with {switch} ({name}); plaintext set answer {plain}"))
+            .optional()
+            .expect(json!("record"))
+            .observe(if matches!(got, Outcome::Unrecognized(_)) { O::Inconclusive } else { O::Pass }, json!({ "observed": got.label(), "plaintext_set_answer": plain, "agrees_with_set_semantics": agrees, "process": o.json(&c.out) })));
+    }
+    // A garbler set larger than the evaluator's: |B| = 256, |A| growing.
+    // The 2026-10-08 smoke run found |A| = 1024 panics the garbler inside
+    // swanky-oprf-kmprt (`assert!(points.len() <= npoints)`, lib.rs:211);
+    // this sweep records where, and what the evaluator sees.
+    let mut sweep = Vec::new();
+    for na in [256u64, 288, 320, 384, 448, 512, 1024] {
+        let fx = Fixture::partial(na, 256, 128);
+        let (ga, gb) = write_fixture(c, &fx)?;
+        let s = c.stem(&format!("char-garbler-larger-{na}"));
+        let o = measure::run(&Spec::new(
+            &[p, "local", "--a", &ga, "--b", &gb],
+            &c.copy,
+            Duration::from_secs(30),
+            &s,
+        ))
+        .map_err(|e| e.to_string())?;
+        let got = classify(&o.exit, &o.stdout_text(), |v| {
+            output_field(&v["evaluator"]["output"])
+        });
+        let panic_line = o
+            .stderr_text()
+            .lines()
+            .find(|l| l.contains("panicked at"))
+            .map(str::to_string);
+        let received = tagged_line(&o.stdout_text(), "RB01-RESULT")
+            .and_then(|v| v["evaluator"]["bytes"]["received"].as_u64());
+        sweep.push(json!({
+            "n_garbler": na,
+            "n_evaluator": 256,
+            "plaintext": fx.expected(),
+            "observed": got.label(),
+            "correct": got == Outcome::Output(Some(fx.expected() as u128)),
+            "evaluator_received_bytes": received,
+            "panic": panic_line,
+        }));
+    }
+    let recognized = sweep.iter().all(|x| {
+        !x["observed"]
+            .as_str()
+            .unwrap_or("UNRECOGNIZED")
+            .starts_with("UNRECOGNIZED")
+    });
+    let wrong_output = sweep.iter().any(|x| {
+        x["observed"]
+            .as_str()
+            .is_some_and(|o| o.starts_with("OUTPUT"))
+            && x["correct"] == false
+    });
+    r.row(Row::new("char-garbler-larger", Class::Characterization, "|A| > |B| (|B| = 256): where the upstream composition stops producing the cardinality; an abort is recorded as an upstream limit, a wrong cardinality would be a finding")
+        .optional()
+        .expect(json!("record; never a wrong cardinality"))
+        .observe(if !recognized { O::Inconclusive } else if wrong_output { O::Fail } else { O::Pass }, json!(sweep)));
+
+    let s = c.stem("char-length-ambiguity");
+    let o = measure::run(&Spec::new(
+        &[p, "probe-length-ambiguity"],
+        &c.copy,
+        Duration::from_secs(20),
+        &s,
+    ))
+    .map_err(|e| e.to_string())?;
+    let got = classify(&o.exit, &o.stdout_text(), |v| {
+        output_field(&v["evaluator"]["output"])
+    });
+    r.row(Row::new("char-length-ambiguity", Class::Characterization, "A = {[0x01]}, B = {[0x01, 0x00]}: distinct byte strings (plaintext answer 0) that popsicle's input compression zero-pads to the same block")
+        .optional()
+        .expect(json!("record"))
+        .observe(if matches!(got, Outcome::Unrecognized(_)) { O::Inconclusive } else { O::Pass }, json!({ "observed": got.label(), "plaintext_byte_string_answer": 0, "process": o.json(&c.out) })));
+    Ok(())
+}
+
+fn protocol_configuration() -> Value {
+    json!({
+        "upstream_example": "edge/popsicle/examples/circuit_psi_cardinality.rs (the provider repeats its calls)",
+        "psi": "popsicle::circuit_psi: PSTY19 circuit PSI (eprint 2019/241). OpprfPsiGarbler = PsiGarbler<_, OpprfSender>; OpprfPsiEvaluator = PsiEvaluator<_, OpprfReceiver>",
+        "hashing": "evaluator: cuckoo hashing with NHASHES = 3 (base_psi/mod.rs), retried with a fresh key until placement succeeds; garbler: simple hashing into the same bins",
+        "opprf": "swanky-oprf-kmprt (KMPRT OPPRF) for the primary keys",
+        "garbling": "swanky-twopac::semihonest Garbler/Evaluator over fancy_garbling::WireMod2 (binary garbled circuits)",
+        "ot_extension": "swanky-ot-alsz-kos::alsz Sender/Receiver (ALSZ, semi-honest)",
+        "base_ot": "swanky_ot_chou_orlandi (the alsz default type parameter): Chou-Orlandi OT over Ristretto, curve25519-dalek 5.0.0",
+        "circuit": "fancy_intersection_bit_vector then fancy_cardinality (popsicle::circuit_psi::circuits)",
+        "security_mode": "semi-honest: PsiGarbler and PsiEvaluator implement swanky_adversary::SemiHonest; no malicious-security variant is used",
+        "output_recipient": "the evaluator (outputs() returns Some for the evaluator, None for the garbler)",
+        "permitted_leakage": [
+            "the cardinality |A ∩ B|, to the evaluator",
+            "|B| (approximately): the evaluator sends its cuckoo bin count in the clear (base_psi/receiver.rs hash_data: channel.write(&cuckoo.nbins))",
+            "|B| through traffic volume (row leakage-evaluator-set-size); |A| likewise (char-garbler-larger sweep)",
+        ],
+        "element_encoding": "popsicle::utils::compress_and_hash_inputs: an element of at most 16 bytes is zero-padded into a 128-bit block, a longer one is SHA-256 truncated to 128 bits; then an AES-based correlation-robust hash, low byte masked off. Byte strings that differ only by trailing zero bytes collide (row char-length-ambiguity); the bench fixes the width at 8 bytes",
+        "comparison_width": "PRIMARY_KEY_SIZE = 8 bytes: equality is tested on 64-bit OPPRF outputs inside the circuit",
+        "observations": [
+            "PsiGarbler::new and PsiEvaluator::new seed both the two-party-computation party (Garbler/Evaluator::new(channel, RNG::from_seed(seed))) and the base-PSI rng (RNG::from_seed(seed)) with the same seed, so the two RNG streams are identical (garbler.rs / evaluator.rs at the pin). The security impact is not analyzed here: UNVERIFIED.",
+        ],
+    })
+}
+
+fn pq_classification() -> Value {
+    json!({
+        "configuration": "popsicle circuit PSI as above, at swanky 409d1ceb",
+        "classical_dependencies": [
+            "base OT: Chou-Orlandi over Ristretto/curve25519 (discrete log): broken by a quantum adversary; its OT-extension security reduces to it, so this configuration is NOT post-quantum",
+        ],
+        "symmetric_components": "AES-based correlation-robust hashing, PRG and garbling: quantum attacks are generic (Grover-type); no claim is made here",
+        "schmivitz": "edge/schmivitz is a separate PQ-oriented research candidate (VOLE-in-the-head); a successful PSI run qualifies nothing about it, and a schmivitz run would qualify nothing about this PSI. Not built or run by this lane.",
+        "plonky3_comparison": "not started: a later comparison must align the relation, public inputs, security target and proof-artifact requirements, and measure proof bytes as well as proving and verification cost",
+        "claim_ceiling": "computation evidence under semi-honest, classical assumptions; no quantum soundness, side-channel, transport or settlement claim",
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const PROVIDER: &str = include_str!("../../../../scripts/btungsten/rb01-psi/rb01_psi.rs");
+
+    #[test]
+    fn the_fake_peer_speaks_the_providers_framing() {
+        assert!(PROVIDER.contains(r#"const MAGIC: &[u8; 8] = b"RB01PSI\x00";"#));
+        assert!(PROVIDER.contains("const VERSION: u8 = 1;"));
+        assert!(PROVIDER.contains("const ROLE_GARBLER: u8 = 1;"));
+        assert!(PROVIDER.contains("const ROLE_EVALUATOR: u8 = 2;"));
+        assert!(PROVIDER.contains(&format!("const CONFIG: &str = \"{CONFIG}\";")));
+        assert!(PROVIDER.contains("const FRAME_LEN: usize = 8 + 1 + 1 + 32 + 16;"));
+        assert_eq!(frame(ROLE_GARBLER, 8, &[0; 16]).len(), 58);
+    }
+
+    #[test]
+    fn the_upstream_result_line_is_parsed_exactly() {
+        assert_eq!(
+            parse_upstream_line("Result is 255 and should be 255\n"),
+            Some((255, 255))
+        );
+        assert_eq!(
+            parse_upstream_line("Result is 254 and should be 255"),
+            Some((254, 255))
+        );
+        assert_eq!(parse_upstream_line("Result is x and should be 255"), None);
+        assert_eq!(parse_upstream_line(""), None);
+    }
+
+    #[test]
+    fn plans_are_bounded_and_quick_is_a_subset() {
+        let full = Plan::full();
+        let quick = Plan::quick();
+        assert!(quick.tcp.len() < full.tcp.len());
+        assert!(full
+            .tcp
+            .iter()
+            .all(|(f, n, b)| *n >= 1 && *b >= Duration::from_secs(60) && f.a.len() <= 1 << 16));
+    }
+}

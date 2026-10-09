@@ -1,0 +1,180 @@
+name: bTunGsTeN RB
+
+# The RB lanes (scripts/btungsten/README.md §RB): measured Rust execution and
+# assurance with pinned Galois tools. Fast checks run on every push; each lane
+# is a bounded job that runs when its own sources change, or by hand. Every
+# lane job runs `rbench <lane> --quick` (the same rows with fewer samples),
+# uploads its receipt and evidence, and is green only on a PASS verdict.
+# Timings measured on a shared CI runner are runner timings: the committed
+# receipts under docs/receipts/btungsten-rb/ carry the measured runs.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # SAW 1.6's own deps/mir-json pin, as wb001-saw.yml / wb002-saw.yml
+  MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d # PUBLIC-CONSTANT: GaloisInc/saw-script v1.6 deps/mir-json submodule commit
+  MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+  # crucible 25d0f369's dependencies/mir-json pin, for crux-mir
+  CRUX_MIR_JSON_REV: ece1622caf39c9530873f376caa84a5fa6a3ded3 # PUBLIC-CONSTANT: GaloisInc/crucible 25d0f369 dependencies/mir-json submodule commit
+
+jobs:
+  fast:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: RB harness — receipt, measurement, recognizer and fixture tests
+        run: cargo test --locked -p btungsten-bench
+      - name: RB03 harness, native — budget.rs (compiled by path) with its own unit tests and the boundary vectors
+        run: cargo test --locked --manifest-path scripts/btungsten/rb03-budget/Cargo.toml
+
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      rb01: ${{ steps.f.outputs.rb01 }}
+      rb02: ${{ steps.f.outputs.rb02 }}
+      rb03: ${{ steps.f.outputs.rb03 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
+      - id: f
+        name: Which lanes did this push touch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            for l in rb01 rb02 rb03; do echo "$l=true" >> "$GITHUB_OUTPUT"; done; exit 0
+          fi
+          files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo ALL)
+          hit() { echo "$files" | grep -qE "$1|^ALL$|crates/btungsten-bench/|\.github/workflows/btungsten-rb\.yml" && echo true || echo false; }
+          echo "rb01=$(hit 'scripts/btungsten/rb01-psi/')" >> "$GITHUB_OUTPUT"
+          echo "rb02=$(hit 'scripts/btungsten/rb02-aes/')" >> "$GITHUB_OUTPUT"
+          echo "rb03=$(hit 'scripts/btungsten/rb03-budget/|ops/ant-extsig/src/budget\.rs|ops/ant-extsig/Cargo\.lock')" >> "$GITHUB_OUTPUT"
+
+  rb01-psi:
+    needs: changes
+    if: needs.changes.outputs.rb01 == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: RB01 — Swanky popsicle circuit PSI at 409d1ceb (Rust 1.99.0 from Swanky's toolchain file, native CPU flags)
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          cargo build --locked --release -p btungsten-bench --bins
+          target/release/rbench rb01 --quick --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb01"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rb01-receipt
+          path: ${{ runner.temp }}/rb-out/rb01
+          retention-days: 14
+
+  rb02-aes:
+    needs: changes
+    if: needs.changes.outputs.rb02 == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Install pinned SAW 1.6 (with bundled solvers) into the tools directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          T="$HOME/rbtools"; mkdir -p "$T/saw"
+          curl --fail --location --retry 3 -o "$T/saw.tar.gz" https://github.com/GaloisInc/saw-script/releases/download/v1.6/saw-1.6-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "0b25c8b32db8b4a7ec32d6700024af60bb2a0398ee350b630dd84ff377c938f7  $T/saw.tar.gz" | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          tar -xzf "$T/saw.tar.gz" -C "$T/saw" --strip-components=1
+          rustup toolchain install "$MIR_JSON_TOOLCHAIN" --profile minimal --component rustc-dev,rust-src,llvm-tools-preview
+      - name: Restore mir-json (source checkout, install and translated std; keyed on commit and toolchain)
+        id: mj
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/rbtools/mir-json
+            ~/rbtools/mirjson-root
+          key: rb-mir-json-v1-${{ env.MIR_JSON_REV }}-${{ env.MIR_JSON_TOOLCHAIN }}-ubuntu-24.04
+      - name: Build mir-json at SAW 1.6's pin
+        if: steps.mj.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          T="$HOME/rbtools"
+          git clone --quiet https://github.com/GaloisInc/mir-json.git "$T/mir-json"
+          git -C "$T/mir-json" checkout --quiet "$MIR_JSON_REV"
+          cargo "+$MIR_JSON_TOOLCHAIN" install --path "$T/mir-json" --locked --root "$T/mirjson-root"
+          (cd "$T/mir-json" && PATH="$T/mirjson-root/bin:$PATH" mir-json-translate-libs)
+      - name: RB02 — AES-256 proof reproduction, TEETH, compatibility
+        run: |
+          cargo build --locked --release -p btungsten-bench --bins
+          target/release/rbench rb02 --quick --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb02"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rb02-receipt
+          path: ${{ runner.temp }}/rb-out/rb02
+          retention-days: 14
+
+  rb03-budget:
+    needs: changes
+    if: needs.changes.outputs.rb03 == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Fetch the pinned crux-mir build and solver snapshot (digests checked)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          T="$HOME/rbtools/crux"; mkdir -p "$T/dl" "$T/crux-mir" "$T/solvers"
+          # crucible Actions run 37835376050 (push of 25d0f369), artifact
+          # 11575803445; GitHub expires it 2027-01-06, after which this step
+          # fails here and the bundle must be rebuilt from 25d0f369
+          gh api repos/GaloisInc/crucible/actions/artifacts/11575803445/zip > "$T/dl/crux-mir-ubuntu-24.04-X64-9.10.3.zip"
+          echo "005bbf274cfda4937954ba63d91f8a170306baaea381dda034eb376d6bce3da6  $T/dl/crux-mir-ubuntu-24.04-X64-9.10.3.zip" | sha256sum --check # PUBLIC-CONSTANT: upstream CI artifact digest
+          curl --fail --location --retry 3 -o "$T/dl/ubuntu-24.04-X64-bin.zip" https://github.com/GaloisInc/what4-solvers/releases/download/snapshot-20260622/ubuntu-24.04-X64-bin.zip
+          echo "f4933ce5bc47d1a30d489266b86dfa6038110ab6850c96c42c34ee1327d0b705  $T/dl/ubuntu-24.04-X64-bin.zip" | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          (cd "$T/crux-mir" && unzip -q ../dl/crux-mir-ubuntu-24.04-X64-9.10.3.zip && for f in *.tar.gz; do tar -xzf "$f"; done)
+          (cd "$T/solvers" && unzip -q ../dl/ubuntu-24.04-X64-bin.zip && chmod +x ./*)
+          rustup toolchain install "$MIR_JSON_TOOLCHAIN" --profile minimal --component rustc-dev,rust-src,llvm-tools-preview
+      - name: Restore mir-json for crux (keyed on commit and toolchain)
+        id: cmj
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/rbtools/crux/mir-json
+            ~/rbtools/crux/mir-json-inst
+          key: rb-crux-mir-json-v1-${{ env.CRUX_MIR_JSON_REV }}-${{ env.MIR_JSON_TOOLCHAIN }}-ubuntu-24.04
+      - name: Build mir-json at crucible 25d0f369's pin
+        if: steps.cmj.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          T="$HOME/rbtools/crux"
+          git clone --quiet https://github.com/GaloisInc/mir-json.git "$T/mir-json"
+          git -C "$T/mir-json" checkout --quiet "$CRUX_MIR_JSON_REV"
+          cargo "+$MIR_JSON_TOOLCHAIN" install --path "$T/mir-json" --locked --root "$T/mir-json-inst"
+          (cd "$T/mir-json" && PATH="$T/mir-json-inst/bin:$PATH" mir-json-translate-libs)
+      - name: RB03 — Crux-MIR properties of ops/ant-extsig/src/budget.rs, TEETH, correspondence
+        run: |
+          cargo build --locked --release -p btungsten-bench --bins
+          target/release/rbench rb03 --quick --tools "$HOME/rbtools/crux" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb03"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rb03-receipt
+          path: ${{ runner.temp }}/rb-out/rb03
+          retention-days: 14

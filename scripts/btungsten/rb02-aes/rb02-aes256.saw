@@ -1,0 +1,66 @@
+// RB02 (beehive-nature bTunGsTeN): AES-256 from the upstream proof library,
+// plus three TEETH obligations that must be refuted. `rbench rb02` copies
+// this file into the rustcrypto-verification build copy as
+// aes-verif/rb02-aes256.saw and runs it from aes-verif/ with
+// CRYPTOLPATH=../cryptol-specs, on the MIR of the specimen WITH the TEETH
+// module (target/aes_verif_rb02.linked-mir.json).
+//
+// Every honest obligation prints "RB02-SAW PROVEN <name>" after mir_verify
+// returns. Every TEETH obligation runs under `fails`, which succeeds only if
+// the obligation fails; it then prints "RB02-SAW-TEETH REFUTED <name>". The
+// orchestrator also requires the anticipated failure text to carry a solver
+// counterexample, so a failure for any other reason is not accepted.
+
+include_once "aes-lib.saw";
+
+m <- mir_load_module "../target/aes_verif_rb02.linked-mir.json";
+
+aes <- aes_setup m;
+let size = aes.aes256;
+let Aes = size.Aes;
+
+key_schedule_ov <- size.verify_key_schedule;
+encipher_ov <- size.verify_encipher;
+decipher_ov <- size.verify_decipher;
+
+// The same top-level spec aes-run.saw uses.
+let crypt_spec (crypt : Term /* KeyBytes -> BlockBytes -> BlockBytes */) = do {
+  key <- mir_fresh_cryptol_var "key" {| Aes::KeyBytes |};
+  block <- mir_fresh_cryptol_var "block" {| AesBitslice::BlockBytes |};
+  mir_execute_func [mir_term key, mir_term block];
+  mir_return (mir_term {{ crypt key block }});
+};
+
+mir_verify m "aes_verif::toplevel_encrypt_block_256" [key_schedule_ov, encipher_ov] false
+  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (unint_z3 ["keyExpansion", "cipher"]);
+print "RB02-SAW PROVEN toplevel_encrypt_block_256";
+
+mir_verify m "aes_verif::toplevel_decrypt_block_256" [key_schedule_ov, decipher_ov] false
+  (crypt_spec {{ Aes::toplevel_decrypt_block }}) (unint_z3 ["keyExpansion", "invCipher"]);
+print "RB02-SAW PROVEN toplevel_decrypt_block_256";
+
+// TEETH 1, planted fault in the specimen: the honest spec, the same
+// overrides and the same solver as the passing proof above.
+fails (mir_verify m "aes_verif::rb02_teeth::teeth_encrypt_block_256" [key_schedule_ov, encipher_ov] false
+  (crypt_spec {{ Aes::toplevel_encrypt_block }}) (unint_z3 ["keyExpansion", "cipher"]));
+print "RB02-SAW-TEETH REFUTED teeth_encrypt_block_256";
+
+// TEETH 2, false claim about the honest function: its output with the low bit
+// of byte 0 flipped.
+fails (mir_verify m "aes_verif::toplevel_encrypt_block_256" [key_schedule_ov, encipher_ov] false
+  (crypt_spec {{ \k b -> [((Aes::toplevel_encrypt_block k b) @ 0) ^ 1] # drop`{1} (Aes::toplevel_encrypt_block k b) }})
+  (unint_z3 ["keyExpansion", "cipher"]));
+print "RB02-SAW-TEETH REFUTED false-spec-flipped-bit";
+
+// TEETH 3, a false claim with no overrides and no uninterpreted functions:
+// the bitsliced sub_bytes step claimed to compute shift_rows_2. The
+// counterexample is a concrete fixsliced state.
+let mutate_state_slice_spec (cry_fun : Term /* FSState -> FSState */) = do {
+  state_init <- mir_fresh_cryptol_var "state_init" {| AesBitslice::FSState |};
+  state_ref <- mir_ref_of_mut (mir_term state_init);
+  mir_execute_func [mir_slice_value state_ref];
+  mir_points_to state_ref (mir_term {{ cry_fun state_init }});
+};
+fails (mir_verify m "aes::soft::fixslice::sub_bytes" [] false
+  (mutate_state_slice_spec {{ Aes::shift_rows_2 }}) rme);
+print "RB02-SAW-TEETH REFUTED sub_bytes-as-shift_rows_2";
