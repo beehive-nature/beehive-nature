@@ -343,15 +343,29 @@ pub fn run(
         r.evidence_file(&rel(&s.with_extension("stdout")), "ci-artifact");
         let text = o.stdout_text();
         let ok = o.ok();
-        let bin = ok
-            .then(|| {
-                output(
+        // the built executable's path, from the same cabal home as the build
+        // (CI run 37914863699: built twice, exit 0, but no executable was
+        // installed; this query had run with the default cabal home and its
+        // output was not kept)
+        let bin = if ok {
+            let s = stem(&format!("generator-list-bin-{k}"));
+            let q = measure::run(
+                &Spec::new(
                     &["cabal", "list-bin", "-v0", &index_flag, "exe:daedalus"],
                     &copy,
+                    Duration::from_secs(300),
+                    &s,
                 )
-                .map(|s| PathBuf::from(s.trim()))
-            })
-            .flatten();
+                .env("CABAL_DIR", &cd),
+            )
+            .map_err(|e| e.to_string())?;
+            r.evidence_file(&rel(&s.with_extension("stderr")), "ci-artifact");
+            q.ok()
+                .then(|| PathBuf::from(q.stdout_text().trim()))
+                .filter(|p| p.is_file())
+        } else {
+            None
+        };
         builds.push((
             k,
             o,
@@ -370,10 +384,14 @@ pub fn run(
     let _ = std::fs::remove_file(&daedalus);
     let last = builds.last().and_then(|b| b.5.clone());
     let built = builds.len() == 2 && builds.iter().all(|b| b.1.ok());
-    let installed = built
-        && last
-            .as_ref()
-            .is_some_and(|b| std::fs::copy(b, &daedalus).is_ok());
+    let install = match (&last, built) {
+        (Some(b), true) => std::fs::copy(b, &daedalus)
+            .map(|_| ())
+            .map_err(|e| e.to_string()),
+        (None, true) => Err("cabal list-bin named no executable file".to_string()),
+        _ => Err("not built".to_string()),
+    };
+    let installed = install.is_ok();
     let build_json: Vec<Value> = builds
         .iter()
         .map(|(k, o, before, store_built, project_built, _)| {
@@ -388,6 +406,8 @@ pub fn run(
         .collect();
     let gen_id = json!({
         "daedalus_binary": file_tag(&daedalus).ok().map(|(t, n)| json!({ "sha256": t, "bytes": n })),
+        "built_at": last.as_ref().map(|p| p.strip_prefix(&copy).unwrap_or(p).display().to_string()),
+        "install": install.as_ref().err(),
         "plan": plan_summary(&copy.join("dist-newstyle/cache/plan.json")),
         "store_packages_at_start": store_before,
         "store_packages_at_end": store_packages(&cabal_dir),
