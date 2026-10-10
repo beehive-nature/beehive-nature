@@ -79,3 +79,9 @@ remained in progress: `saw-ntt`, run 38091703868, job 114329277737.
 The requested eternal, bottom-half ratchet, and Engine Room checks have no
 remaining failures. The separately inspected main workflow still had node,
 meter, and wallet running. No merge or deployment is performed by this lane.
+
+Hook installation was attempted through Git-for-Windows bash and refused:
+`install-hooks: REFUSING - C:\Users\travi\beehive-nature\.githooks/pre-commit exists and was not written by this installer.`
+The existing shared hook was preserved. The actual dispatch commit invoked
+that hook successfully: secret-scan diff mode clean and both section-7
+identity checks passed. No hook bypass was used.
