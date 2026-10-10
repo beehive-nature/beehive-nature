@@ -171,6 +171,18 @@ stays null. Aggregate data-channel receive counters are distinct from plaintext
 bytes and full wire traffic. Explicit direct-only startup now allows 30 seconds
 of quiet and 90 seconds total; relay-fallback keeps 12 seconds/30 seconds.
 
+The live runner distinguishes first decoded preview (`ttffMs`) from the first
+sample with an advancing, unpaused playhead (`playbackStartObservedMs`, relative
+to its play mark). Capture video diagnostics include dimensions, duration,
+source changes and current-source decoded/dropped frame counts. These frame
+counts reset when the media source changes; they are not whole-session totals.
+The live receipt summarizes first observed open channel and sampled peak open
+channels, closed versus failed dials, failure stages and endpoint reachability.
+Its payload/file ratio is populated only after full-file integrity passes; it
+measures WebRTC data-channel receive payload, not full wire traffic or duplicate
+plaintext. Sampling can miss short-lived connection peaks. Acceptance also
+checks route provenance, including zero relay requests in direct-only mode.
+
 Recommended provisional acceptance, agreed before runs: retain the browse gain
 on equal workloads; no additional failures; paired median first-frame regression
 no more than 0.5 seconds; paired median stall regression no more than 1 second;

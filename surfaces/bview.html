@@ -1171,7 +1171,15 @@ document.addEventListener('DOMContentLoaded',function(){
       state.previewTried = true;
       state.busy = true;
       let ok = false;
+      const previewAt = performance.now();
       try { ok = await paintBlob(snap(state), BLOB_WAIT, state); } finally { state.busy = false; }
+      // Preview work pauses this consumer. Exclude its known local duration
+      // from short delivery windows, retaining the conservative first-byte average.
+      if (my === job) {
+        const previewMs = performance.now() - previewAt;
+        rateClock.t0 += previewMs;
+        if (rateClock.lastAt) rateClock.lastAt += previewMs;
+      }
       if (my === job && ok && v.videoWidth > 0) {
         state.preview = true;
         state.early = true;
