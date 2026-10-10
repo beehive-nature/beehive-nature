@@ -69,6 +69,14 @@ information a proof may introduce.
 Until all four: this lane publishes nothing upstream and couples with
 nothing (founder ruling 2026-10-06).
 
+The lane's runtime-admission law — **configuration intent is never
+runtime evidence**, the four-receipt boot gate EXPOSURE → IDENTITY →
+PEER → AGREEMENT, and the submission_source → execution block N + ID →
+verification_source triplet on every downstream artifact — is canonized
+standard-side as SPEC-BTUNGSTEN-1 §laws L5 (2026-10-09); this spec
+remains its first receipted instance (the Jungle4 follower, four GREEN
+receipts 2026-10-08, gating the live v4 run).
+
 ## §sequence (this lane)
 
 1. ✓ GENESIS — raid + this spec (research receipts in the raid).
